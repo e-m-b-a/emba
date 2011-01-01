@@ -88,6 +88,8 @@ output_overview() {
       echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
       echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
     fi
+  else
+    echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
   fi
   os_detector
   print_bar
