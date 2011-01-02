@@ -31,6 +31,11 @@ F19_cve_aggregator() {
   mkdir "$LOG_DIR"/aggregator
   KERNELV=0
 
+  CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
+  FW_BASE_VER_CHECK_LOG="p09_firmware_base_version_check.txt"
+  KERNEL_CHECK_LOG="s25_kernel_check.txt"
+  EMUL_LOG="s115_usermode_emulator.txt"
+
   if [[ -f $PATH_CVE_SEARCH ]]; then
     print_output "[*] Aggregate vulnerability details"
 
@@ -47,6 +52,7 @@ F19_cve_aggregator() {
     get_usermode_emulator
     aggregate_versions
     generate_cve_details
+
     FORMAT_LOG="$FORMAT_LOG_BAK"
   else
     print_output "[-] CVE search binary search.py not found."
@@ -56,6 +62,7 @@ F19_cve_aggregator() {
 
 prepare_version_data() {
     # we try to handle as many version strings as possible through these generic rules
+    print_output "$VERSION_lower"
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
@@ -73,17 +80,16 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
     #This is SMTPclient Version
-    VERSION_lower="${VERSION_lower//this\ is\ smtpclient\ version/smtpclient}"
+    VERSION_lower="${VERSION_lower//this\ is\ smtpclient\ /smtpclient}"
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
-    # Ralink\ DOT1X\ daemon,\ version\ = '
-    VERSION_lower="${VERSION_lower//Ralink\ DOT1X\ daemon,\ version\ = \'/ralink-dot1x}"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
     #Wireless-Tools version 29
     VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
+    VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"
     # apt-Version 1.2.3
     VERSION_lower="${VERSION_lower//apt-/apt\ }"
     # remove the v in something like this: "space v[number]"
@@ -96,8 +102,6 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//^gnu\ /}"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
-    # iwconfig\ \ Wireless-Tools\ version\ [0-9][0-9]"
-    VERSION_lower="${VERSION_lower//wireless\-tools/}"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
     VERSION_lower="${VERSION_lower//\:\ ipv6\ neighbor\/router\ discovery\ userland\ tool/}"
     #"ucloud_v2\ ver\.[0-9][0-9][0-9]"
@@ -116,6 +120,12 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//net-snmp\ /net-snmp}"
     #igmpproxy, Version 0.1
     VERSION_lower="${VERSION_lower//,/}"
+    #flash_eraseall $ 1.1 $
+    VERSION_lower="${VERSION_lower//\$/}"
+    #event log utility
+    VERSION_lower="${VERSION_lower//event\ log\ utility/event_log_utility}"
+    #message manager utility
+    VERSION_lower="${VERSION_lower//message\ manager\ utility/message_manager_utility}"
     # BoosterMainFunction:305
     VERSION_lower="${VERSION_lower//boostermainfunction:305/booster}"
     VERSION_lower="${VERSION_lower//:/}"
@@ -134,12 +144,27 @@ prepare_version_data() {
     #VERSION_lower="${VERSION_lower//gnu\ c\ library.*stable\ release/gnu:libc}"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library.*stable\ release/gnu:libc/')"
+    #Roaring Penguin PPPoE Version
+    VERSION_lower="${VERSION_lower//roaring\ penguin\ pppoe/roaring_penguin:pppoe}"
+    #upnp controlpoint 1.0
+    VERSION_lower="${VERSION_lower//upnp\ controlpoint/upnp_controlpoint}"
+    #----welcome to realtek camera tool.
+    VERSION_lower="${VERSION_lower//----welcome\ to\ realtek\ camera\ tool\./realtek_camera_tool}"
     #remove multiple spaces
-    VERSION_lower="${VERSION_lower//\ \+/\ }"
+    #VERSION_lower="${VERSION_lower//\ \+/\ }"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ \+/\ /')"
     #remove '
     VERSION_lower="${VERSION_lower//\'/}"
+    # Ralink\ DOT1X\ daemon,\ version\ = '
+    VERSION_lower="${VERSION_lower//ralink\ dot1x\ daemon\ \=\ /ralink-dot1x\ }"
+    print_output "$VERSION_lower"
+    #his\ is\ WiFiDog\ 
+    VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
+    print_output "$VERSION_lower"
     #our current version detection on strict version includes backslashes:
     #VERSION_lower="${VERSION_lower//\\/}"
+    print_output "$VERSION_lower"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
@@ -148,7 +173,7 @@ prepare_version_data() {
 }
 
 aggregate_versions() {
-  sub_module_title "Aggregate versions."
+  sub_module_title "Software inventory generation."
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
@@ -194,7 +219,6 @@ aggregate_versions() {
       print_output "[-] No Version details found."
   fi
   print_output ""
-
 }
 
 generate_cve_details() {
@@ -255,13 +279,13 @@ generate_cve_details() {
       FORMAT_LOG_BAK="$FORMAT_LOG"
       FORMAT_LOG=0
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
+        printf "${MAGENTA}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       elif (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
-        printf "${RED}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
+        printf "${RED}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       elif (( $(echo "$CVSS_value > 3.9" | bc -l) )); then
-        printf "${ORANGE}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
+        printf "${ORANGE}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       else
-        printf "${GREEN}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
+        printf "${GREEN}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     done
@@ -289,7 +313,8 @@ generate_cve_details() {
   
       VERSION=$(echo "$STATS" | cut -d\| -f3-)
       BIN=$(echo "$VERSION" | cut -d: -f1)
-      VERSION=$(echo "$VERSION" | cut -d: -f2)
+      #VERSION=$(echo "$VERSION" | cut -d: -f2)
+      VERSION=$(echo "$VERSION" | grep -o '[^:]*$')
   
       EXPLOITS=$(echo "$STATS" | cut -d\| -f2 | sed -e 's/\ //g')
       CVEs=$(echo "$STATS" | cut -d\| -f1 | sed -e 's/\ //g')
@@ -299,12 +324,12 @@ generate_cve_details() {
       FORMAT_LOG=0
       if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
         if [[ "$EXPLOITS" -gt 0 ]]; then
-          printf "${MAGENTA}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
+          printf "${MAGENTA}[+] Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         else
-          printf "${ORANGE}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
+          printf "${ORANGE}[+] Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         fi
       else
-        printf "${GREEN}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
+        printf "${GREEN}[+] Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     fi
@@ -320,12 +345,12 @@ generate_cve_details() {
 
 get_firmware_base_version_check() {
   sub_module_title "Collect version details of module p09_firmware_base_version_check."
-  if [[ -f "$LOG_DIR"/p09_firmware_base_version_check.txt ]]; then
+  if [[ -f "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
-      readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/p09_firmware_base_version_check.txt | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel")
+      readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel")
     else
-      readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/p09_firmware_base_version_check.txt | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
+      readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
     fi
   fi
 }
@@ -337,16 +362,16 @@ get_version_vulnerability_check() {
 
 get_kernel_check() {
   sub_module_title "Collect version details of module s25_kernel_check."
-  if [[ -f "$LOG_DIR"/s25_kernel_check.txt ]]; then
-    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/s25_kernel_check.txt | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
+  if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
+    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
     ## do a bit of sed modifications to have the same output as from the pre checker
-    readarray -t VERSIONS_KERNEL < <(grep "Kernel version:\ " "$LOG_DIR"/s25_kernel_check.txt | sed -e 's/Kernel\ version\:/Linux\ kernel\ version/' | sort -u)
+    readarray -t VERSIONS_KERNEL < <(grep "Kernel version:\ " "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/Kernel\ version\:/Linux\ kernel\ version/' | sort -u)
   fi
 }
 
 get_usermode_emulator() {
   sub_module_title "Collect version details of module s115_usermode_emulator."
-  if [[ -f "$LOG_DIR"/s115_usermode_emulator.txt ]]; then
-    readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/s115_usermode_emulator.txt | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (.*$//' | sort -u)
+  if [[ -f "$LOG_DIR"/"$EMUL_LOG" ]]; then
+    readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (.*$//' | sort -u)
   fi
 }

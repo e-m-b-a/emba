@@ -173,14 +173,14 @@ detect_root_dir() {
     # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
     #EMULATION_PATH=$EMULATION_PATH_BASE
     print_output "[*] Root directory detection via path pattern ... part 1"
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; | head -1)
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null | head -1)
   fi
   # if the new root directory does not include the current working directory we fall back to the search for something like "*root/bin/* and take this:
   if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
     # this could happen if the interpreter path from the first check is broken and results in something like this: "/" or "."
     # if this happens we have to handle this and try to fix the path:
     print_output "[*] Root directory detection via path pattern ... part 2"
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; | head -1)
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null | head -1)
   fi
   # now we have to include a final check and fix the root path to the firmware path (as last resort)
   if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then

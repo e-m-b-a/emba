@@ -21,21 +21,26 @@ F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final aggregator"
 
-  print_output "[+] Tested firmware:""$NC"" ""$FIRMWARE_PATH"""
+  CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
+  BIN_CHECK_LOG="s10_binaries_check.txt"
+  KERNEL_CHECK_LOG="s25_kernel_check.txt"
+
+  print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"""
+  print_output "[+] Emba start command:""$ORANGE"" ""$EMBACOMMAND"""
   if [[ -n "$D_ARCH" ]]; then
-    print_output "[+] Found architecture:""$NC"" ""$D_ARCH"""
+    print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
   fi
-  KERNELV=$(grep "Kernel version:\ " "$LOG_DIR"/s25_kernel_check.txt 2>/dev/null | sed -e 's/Kernel\ version\:/Linux\ kernel\ version/' | sort -u | head -1)
+  print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
+  KERNELV=$(grep "Kernel version:\ " "$LOG_DIR"/"$KERNEL_CHECK_LOG" 2>/dev/null | sed -e 's/Kernel\ version\:/Linux\ kernel\ version/' | sort -u | head -1)
   if [[ -n "$KERNELV" ]]; then
     print_output "[+] Detected kernel version:""$ORANGE"" ""$KERNELV"""
   fi
   if [[ "${#MOD_DATA[@]}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""${#MOD_DATA[@]}""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
   fi
-  print_output "[+] Emba start command:""$NC"" ""$EMBACOMMAND"""
-  print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" ""$GREEN""directories detected."
-  if [[ -f "$LOG_DIR/*_entropy.png" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is available in log directory:""$NC"" ""$LOG_DIR"""
+  ENTROPY=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
+  if [[ -n "$ENTROPY" ]]; then
+    print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY"""
   fi
   print_output ""
 
@@ -44,9 +49,6 @@ F50_base_aggregator() {
   fi
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries (without version checking).""$NC"""
-  fi
-  if [[ "$STRCPY_CNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$GREEN"" usages of strcpy in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries.""$NC"""
   fi
   if [[ "$CERT_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$CERT_OUT_CNT""""$GREEN"" outdated certificates in ""$ORANGE""""$CERT_CNT""""$GREEN"" certificates.""$NC"""
@@ -57,18 +59,18 @@ F50_base_aggregator() {
   if [[ -n "$FILE_COUNTER" ]]; then
     print_output "[+] Found ""$ORANGE""""$FILE_COUNTER""""$GREEN"" not common Linux files with ""$ORANGE""""$FILE_COUNTER_ALL""""$GREEN"" files at all.""$NC"""
   fi
-  EMUL=$(find "$LOG_DIR"/qemu_emulator -type f -iname "qemu_*" 2>/dev/null | wc -l)
+  EMUL=$(find "$LOG_DIR"/qemu_emulator -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
-    print_output "[+] Found ""$EMUL"" successful emulated processes."
+    print_output "[+] Found ""$ORANGE""""$EMUL""""$GREEN"" successful emulated processes.""$NC"""
   fi
 
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
     print_output ""
-    if [[ -f "$LOG_DIR"/s10_binaries_check.txt ]]; then
-      CANARY=$(grep -c "No canary" "$LOG_DIR"/s10_binaries_check.txt)
-      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/s10_binaries_check.txt)
-      NX=$(grep -c "NX disabled" "$LOG_DIR"/s10_binaries_check.txt)
-      PIE=$(grep -c "No PIE" "$LOG_DIR"/s10_binaries_check.txt)
+    if [[ -f "$LOG_DIR"/"$BIN_CHECK_LOG" ]]; then
+      CANARY=$(grep -c "No canary" "$LOG_DIR"/"$BIN_CHECK_LOG")
+      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$BIN_CHECK_LOG")
+      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$BIN_CHECK_LOG")
+      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$BIN_CHECK_LOG")
     fi
   
     if [[ -n "$CANARY" ]]; then
@@ -91,17 +93,46 @@ F50_base_aggregator() {
     fi
   fi
 
+  if [[ "$STRCPY_CNT" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$GREEN"" usages of strcpy in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries.""$NC"""
+  fi
+
+  FUNCTION="strcpy"
+  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+    local SEARCH_TERM
+    local RESULTS
+    readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+
+    if [[ "${#RESULTS[@]}" -gt 0 ]]; then
+      print_output ""
+      print_output "[+] ""$FUNCTION"" - top 10 results:"
+      for LINE in "${RESULTS[@]}" ; do
+        SEARCH_TERM=$(echo "$LINE" | cut -d\  -f3)
+        if [[ -f "$BASE_LINUX_FILES" ]]; then
+          if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+            LINE=$(echo $LINE | sed -e 's/\ \+/\t/g')
+            print_output "$(indent "$(green "$LINE"" - common linux file: yes")")"
+          else
+            LINE=$(echo $LINE | sed -e 's/\ \+/\t/g')
+            print_output "$(indent "$(orange "$LINE"" - common linux file: no")")"
+          fi
+        else
+          print_output "$(indent "$(orange "$LINE")")"
+        fi
+      done
+    fi
+  fi
+
   print_output ""
-  if [[ -f "$LOG_DIR"/f19_cve_aggregator.txt ]]; then
+  if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
     print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-    print_output "$(cat "$LOG_DIR"/f19_cve_aggregator.txt | grep "\[+\] Found version details" 2>/dev/null)"
+    print_output "$(grep "\[+\] Found version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
     print_output "${NC}"
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-      print_output "[+] Found $S30_VUL_COUNTER CVE entries for all binaries from S30_version_vulnerability_check.sh."
+      print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE entries for all binaries from S30_version_vulnerability_check.sh."
     fi
-    print_output "[+] Confirmed $CVE_COUNTER CVE entries."
-    print_output "[+] $EXPLOIT_COUNTER possible exploits available.\\n"
-
+    print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
+    print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available.\\n"
   fi
 }
