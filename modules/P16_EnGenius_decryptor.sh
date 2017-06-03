@@ -23,7 +23,7 @@ P16_EnGenius_decryptor() {
   module_log_init "${FUNCNAME[0]}"
   NEG_LOG=0
 
-  if [[ "$EnGenius_ENC_DETECTED" -ne 0 ]]; then
+  if [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
     module_title "EnGenius encrypted firmware extractor"
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_engenius_dec.bin
 
