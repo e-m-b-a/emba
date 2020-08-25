@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# emba - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020 Siemens AG
+#
+# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# emba is licensed under GPLv3
+#
+# Author(s): Michael Messner, Pascal Eckmann
+
+# Description:  This module is for including simple user commands that should get executed.
+#               Access:
+#                 firmware root path via $FIRMWARE_PATH
+#                 binary array via ${BINARIES[@]}
+
+
+S150_user_check()
+{
+  module_log_init "user_check_commands_log"
+  module_title "Custom check commands"
+
+  print_output "[*] Your own check commands"
+  print_output "[*] Testing firmware in ""$FIRMWARE_PATH"
+
+  for LINE in "${BINARIES[@]}" ; do
+	  print_output "$LINE"
+  done
+}
