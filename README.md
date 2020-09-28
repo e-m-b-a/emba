@@ -33,8 +33,8 @@ __Before starting, check that all dependencies are met and use the installer.sh 
 ##### Arguments:  
 ```
 Test firmware / live system
--a [MIPS]         Architecture of the linux firmware [MIPS, ARM, x86, x64]
--A [MIPS]         Force Architecture of the linux firmware [MIPS, ARM, x86, x64] (disable architecture check)
+-a [MIPS]         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]
+-A [MIPS]         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)
 -l [./path]       Log path
 -f [./path]       Firmware path
 -e [./path]       Exclude paths from testing (multiple usage possible)
@@ -94,7 +94,7 @@ the firmware
 
 __Good to know:__
 - `sudo` is necessary for some modules to run properly
-- Currently only tested on [Kali Linux](https://kali.org/downloads)(2020.2)
+- Currently only tested on [Kali Linux](https://kali.org/downloads)(2020.3)
 - _emba_ needs some free disk space for logging
 - _emba_ uses well known tools like objdump, [LinEnum](https://github.com/rebootuser/LinEnum), [checksec](https://github.com/slimm609/checksec.sh), [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester), [cwe-checker](https://github.com/fkie-cad/cwe_checker)
 - _emba_ includes multiple modules of the well known Linux analyser [Lynis](https://cisofy.com/lynis/)

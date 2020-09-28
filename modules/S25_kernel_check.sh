@@ -43,6 +43,7 @@ S25_kernel_check()
       print_output "[-] No check for kernel configuration"
 
       get_kernel_vulns
+      analyze_kernel_module
       check_modprobe
     else
       print_output "[-] No kernel found"
@@ -70,7 +71,7 @@ S25_kernel_check()
       print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
 
       get_kernel_vulns
-      analyze_kernel_module
+      #analyze_kernel_module
       check_modprobe
     else
       print_output "[-] No kernel found"

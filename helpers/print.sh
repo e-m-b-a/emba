@@ -263,8 +263,8 @@ print_help()
 
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "\\nTest firmware / live system"
-  echo -e "$CYAN""-a [MIPS]""$NC""         Architecture of the linux firmware [MIPS, ARM, x86, x64]"
-  echo -e "$CYAN""-A [MIPS]""$NC""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64] (disable architecture check)"
+  echo -e "$CYAN""-a [MIPS]""$NC""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]"
+  echo -e "$CYAN""-A [MIPS]""$NC""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)"
   echo -e "$CYAN""-l [./path]""$NC""       Log path"
   echo -e "$CYAN""-f [./path]""$NC""       Firmware path"
   echo -e "$CYAN""-e [./path]""$NC""       Exclude paths from testing (multiple usage possible)"
