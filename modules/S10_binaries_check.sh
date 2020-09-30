@@ -141,7 +141,7 @@ objdump_disassembly()
               fi
             done
 
-          elif ( file "$LINE" | grep -q "ARM" ) ; then
+          elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               FUNC_ADDR=$("$READELF" -r "$LINE" 2>/dev/null| grep -E -m1 \ "$FUNCTION" | awk '{print $4}' | sed s/^0*//  2> /dev/null)
               STRLEN_ADDR=$("$READELF" -r "$LINE" 2>/dev/null | grep -E \ "strlen" | awk '{print $4}' | sed s/^0*//  2> /dev/null)
@@ -173,6 +173,36 @@ objdump_disassembly()
                   fi
                   output_function_details
                 fi
+              fi
+            done
+
+          # ARM 64 code is in alpha state and nearly not tested!
+          elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
+            for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
+              NAME=$(basename "$LINE" 2> /dev/null)
+              local OBJ_DUMPS_OUT
+              if [[ "$FUNCTION" == "mmap" ]] ; then
+                OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+              else
+                OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+              fi
+              if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
+                readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
+                unset OBJ_DUMPS_OUT
+                FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+                for E in "${OBJ_DUMPS_ARR[@]}" ; do
+                  echo "$E" >> "$FUNC_LOG"
+                done
+                COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+                if [[ "$FUNCTION" == "strcpy" ]] ; then
+                  COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null)
+                elif [[ "$FUNCTION" == "mmap" ]] ; then
+                  # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
+                  # Test not implemented on ARM64
+                  #COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
+                  COUNT_MMAP_OK="NA"
+                fi
+                output_function_details
               fi
             done
 
@@ -287,13 +317,13 @@ output_function_details()
       write_log "$OUTPUT"
       LOG_FILE="$LOG_FILE_O"
     fi
-  else
-    OUTPUT="[*] ""$(print_path "$LINE")"": Vulnerable function: ""$FUNCTION"" / Function count: ""$COUNT_FUNC""\\n"
-    print_output "$OUTPUT"
-    LOG_FILE_O="$LOG_FILE"
-    LOG_FILE="$LOG_FILE_LOC"
-    write_log "$OUTPUT"
-    LOG_FILE="$LOG_FILE_O"
+#  else
+#    OUTPUT="[*] ""$(print_path "$LINE")"": Vulnerable function: ""$FUNCTION"" / Function count: ""$COUNT_FUNC""\\n"
+#    print_output "$OUTPUT"
+#    LOG_FILE_O="$LOG_FILE"
+#    LOG_FILE="$LOG_FILE_LOC"
+#    write_log "$OUTPUT"
+#    LOG_FILE="$LOG_FILE_O"
   fi
 
   mv "$LOG_FILE_LOC" "$LOG_DIR""/vul_func_checker/vul_func_""$COUNT_FUNC""_""$FUNCTION""-""$NAME"".txt" 2> /dev/null
