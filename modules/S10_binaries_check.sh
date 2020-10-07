@@ -47,12 +47,12 @@ vul_func_basic_check()
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
         VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}")"
-        if [[ ${#VUL_FUNC_RESULT[@]} -gt 0 ]] ; then
+        if [[ -n "$VUL_FUNC_RESULT" ]] ; then
           print_output "[+] Vulnerable function in ""$(print_path "$LINE")"":"
           print_output "$(indent "$VUL_FUNC_RESULT")""\\n"
           COUNTER=$((COUNTER+1))
-        else
-          print_output "[-] No vulnerable function in ""$(print_path "$LINE")""\\n"
+        #else
+        #  print_output "[-] No vulnerable function in ""$(print_path "$LINE")""\\n"
         fi
       fi
     done
@@ -208,8 +208,8 @@ objdump_disassembly()
 
           elif ( file "$LINE" | grep -q "MIPS" ) ; then
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-              FUNC_ADDR=$("$READELF" -A "$LINE" | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
-              STRLEN_ADDR=$("$READELF" -A "$LINE" | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+              FUNC_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+              STRLEN_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
               if [[ -n "$FUNC_ADDR" ]] ; then
                 NAME=$(basename "$LINE" 2> /dev/null)
                 local OBJ_DUMPS_OUT
@@ -294,23 +294,35 @@ output_function_details()
   local LOG_FILE_LOC
   LOG_FILE_LOC="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
 
+  #check if this is common linux file:
+  local common_files_found
+  if [[ -f "$BASE_LINUX_FILES" ]]; then
+    common_files_found="${RED} - common linux file: no -"
+    search_term=$(basename "$LINE")
+    if grep -q "^$search_term\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+      common_files_found="${CYAN} - common linux file: yes - "
+    fi
+  else
+    common_files_found=" -"
+  fi
+  
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""${NC}"": Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$common_files_found""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"
       write_log "$OUTPUT"
       LOG_FILE="$LOG_FILE_O"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""${NC}"": Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$common_files_found""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"
       write_log "$OUTPUT"
       LOG_FILE="$LOG_FILE_O"
     else
-      OUTPUT="[+] ""$(print_path "$LINE")""${NC}"": Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$common_files_found""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"

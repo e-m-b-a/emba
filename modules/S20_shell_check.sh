@@ -34,10 +34,21 @@ S20_shell_check()
         shellcheck "$LINE" > "$SHELL_LOG" 2> /dev/null
         VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
         if [[ "$VULNS" -ne 0 ]] ; then
-          if [[ "$VULNS" -gt 20 ]] ; then
-            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script:""$NC"" ""$(print_path "$LINE")"
+          #check if this is common linux file:
+          local common_files_found
+          if [[ -f "$BASE_LINUX_FILES" ]]; then
+            common_files_found="(${RED}common linux file: no${NC})"
+            if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+              common_files_found="(${CYAN}common linux file: yes${NC})"
+            fi
           else
-            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script:""$NC"" ""$(print_path "$LINE")"
+            common_files_found=""
+          fi
+
+          if [[ "$VULNS" -gt 20 ]] ; then
+            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script $common_files_found:""$NC"" ""$(print_path "$LINE")"
+          else
+            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script $common_files_found:""$NC"" ""$(print_path "$LINE")"
           fi
         fi
       fi
