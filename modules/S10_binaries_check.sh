@@ -295,34 +295,34 @@ output_function_details()
   LOG_FILE_LOC="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
 
   #check if this is common linux file:
-  local common_files_found
+  local COMMON_FILES_FOUND
   if [[ -f "$BASE_LINUX_FILES" ]]; then
-    common_files_found="${RED} - common linux file: no -"
-    search_term=$(basename "$LINE")
-    if grep -q "^$search_term\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-      common_files_found="${CYAN} - common linux file: yes - "
+    COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
+    SEARCH_TERM=$(basename "$LINE")
+    if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+      COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
     fi
   else
-    common_files_found=" -"
+    COMMON_FILES_FOUND=" -"
   fi
   
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$common_files_found""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"
       write_log "$OUTPUT"
       LOG_FILE="$LOG_FILE_O"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$common_files_found""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"
       write_log "$OUTPUT"
       LOG_FILE="$LOG_FILE_O"
     else
-      OUTPUT="[+] ""$(print_path "$LINE")""$common_files_found""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"

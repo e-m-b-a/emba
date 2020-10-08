@@ -35,20 +35,20 @@ S20_shell_check()
         VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
         if [[ "$VULNS" -ne 0 ]] ; then
           #check if this is common linux file:
-          local common_files_found
+          local COMMON_FILES_FOUND
           if [[ -f "$BASE_LINUX_FILES" ]]; then
-            common_files_found="(${RED}common linux file: no${NC})"
+            COMMON_FILES_FOUND="(""${RED}""common linux file: no""${NC}"")"
             if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              common_files_found="(${CYAN}common linux file: yes${NC})"
+              COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${NC}"")"
             fi
           else
-            common_files_found=""
+            COMMON_FILES_FOUND=""
           fi
 
           if [[ "$VULNS" -gt 20 ]] ; then
-            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script $common_files_found:""$NC"" ""$(print_path "$LINE")"
+            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
           else
-            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script $common_files_found:""$NC"" ""$(print_path "$LINE")"
+            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
           fi
         fi
       fi

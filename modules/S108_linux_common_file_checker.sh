@@ -28,9 +28,9 @@ S108_linux_common_file_checker() {
     local COUNTER_ALL
     COUNTER_ALL=0
     for FILE in "${ALL_FIRMWARE_FILES[@]}" ; do
-      search_term=$(basename "$FILE")
-      if ! grep -q "$search_term" "$BASE_LINUX_FILES" 2>/dev/null; then
-        print_output "[+] Firmware file ""$ORANGE""""$search_term""""$NC""""$GREEN"" not found in dictionary -> Looks as it is not a default Linux file""$NC"""
+      SEARCH_TERM=$(basename "$FILE")
+      if ! grep -q "$SEARCH_TERM" "$BASE_LINUX_FILES" 2>/dev/null; then
+        print_output "[+] Firmware file ""$ORANGE""$SEARCH_TERM""$NC""$GREEN"" not found in dictionary -> Looks as it is not a default Linux file""$NC"
         COUNTER=$((COUNTER+1))
       fi
       COUNTER_ALL=$((COUNTER_ALL+1))

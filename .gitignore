@@ -3,3 +3,4 @@ logs/
 dir-combined.yara
 external/
 !external/.keep
+log/
