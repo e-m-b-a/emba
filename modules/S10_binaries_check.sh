@@ -282,9 +282,22 @@ objdump_disassembly()
       for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
         print_output "\\n"
         print_output "[*] ""$FUNCTION"" - top 10 results:"
+        local SEARCH_TERM
         local RESULTS
-        RESULTS="$( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)"
-        print_output "$(indent "$(orange "$RESULTS")")"
+        readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed     "s/\.txt//" 2> /dev/null)
+
+        for LINE in "${RESULTS[@]}" ; do
+          SEARCH_TERM=$(echo "$LINE" | cut -d\  -f3)
+          if [[ -f "$BASE_LINUX_FILES" ]]; then
+            if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+              print_output "$(indent "$(green "$LINE"" - common linux file: yes")")"
+            else
+              print_output "$(indent "$(orange "$LINE"" - common linux file: no")")"
+            fi
+          else
+            print_output "$(indent "$(orange "$LINE")")"
+          fi
+        done
       done
       echo
 }
@@ -296,6 +309,7 @@ output_function_details()
 
   #check if this is common linux file:
   local COMMON_FILES_FOUND
+  local SEARCH_TERM
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
     SEARCH_TERM=$(basename "$LINE")
