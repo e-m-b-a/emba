@@ -21,7 +21,7 @@
 
 S25_kernel_check()
 {
-  module_log_init "kernel_check"
+  module_log_init "S25_kernel_check"
   module_title "Check kernel"
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
@@ -39,6 +39,7 @@ S25_kernel_check()
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
         done
+        generate_html_file "$LOG_FILE"
       fi
       print_output "[-] No check for kernel configuration"
 

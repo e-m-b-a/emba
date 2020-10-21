@@ -23,7 +23,7 @@
 # This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication
 
 S50_authentication_check() {
-  module_log_init "user_group_authentication_CHECK"
+  module_log_init "S50_user_group_authentication_CHECK"
   module_title "Check users, groups and authentication"
 
   user_zero
@@ -107,6 +107,7 @@ non_unique_group_id() {
       else
         print_output "[+] Found the same group ID multiple times"
         print_output "$(indent "$(orange "Non-unique group id: ""$FIND")")"
+        generate_html_file "$LOG_FILE"
       fi
     fi
   done
@@ -132,6 +133,7 @@ non_unique_group_name() {
       else
         print_output "[+] Found the same group name multiple times"
         print_output "$(indent "$(orange "Non-unique group name: ""$FIND")")"
+        generate_html_file "$LOG_FILE"
       fi
     fi
   done
@@ -170,6 +172,7 @@ query_user_acc() {
       else
         print_output "[+] Query system user"
         print_output "$(indent "$(orange "$FIND")")"
+        generate_html_file "$LOG_FILE"
       fi
     fi
   done
@@ -214,6 +217,8 @@ query_nis_plus_auth_supp() {
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/nsswitch.conf not available"
+  else
+    generate_html_file "$LOG_FILE"
   fi
 }
 
@@ -234,6 +239,7 @@ check_sudoers() {
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
       done
     fi
+    generate_html_file "$LOG_FILE"
   else
     print_output "[-] No sudoers files found"
   fi
@@ -402,6 +408,8 @@ scan_pam_conf() {
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/pam.conf not available"
+  else
+    generate_html_file "$LOG_FILE"
   fi
 }
 
@@ -474,6 +482,8 @@ search_pam_files() {
     done
     if [[ $CHECK -eq 0 ]] ; then
       print_output "[-] Nothing interesting found"
+    else
+      generate_html_file "$LOG_FILE"
     fi
   else
     print_output "[-] Nothing found"

@@ -20,7 +20,7 @@
 
 S85_ssh_check()
 {
-  module_log_init "ssh_check"
+  module_log_init "S85_ssh_check"
   module_title "Check SSH"
 
   search_ssh_files
