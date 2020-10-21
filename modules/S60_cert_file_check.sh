@@ -20,7 +20,7 @@
 
 S60_cert_file_check()
 {
-  module_log_init "certification_etc_search"
+  module_log_init "S60_certification_etc_search"
   module_title "Search certification files and other critical interesting stuff"
 
   local CERT_FILES_ARR
@@ -34,6 +34,7 @@ S60_cert_file_check()
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       fi
     done
+    generate_html_file "$LOG_FILE"
   else
     print_output "[-] No certification files found"
   fi

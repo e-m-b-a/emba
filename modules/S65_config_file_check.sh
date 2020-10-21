@@ -20,7 +20,7 @@
 
 S65_config_file_check()
 {
-  module_log_init "config_file_check"
+  module_log_init "S65_config_file_check"
   module_title "Search/scan config files"
 
   scan_config
@@ -42,6 +42,7 @@ scan_config()
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       fi
     done
+    generate_html_file "$LOG_FILE"
   else
     print_output "[-] No configuration files found"
   fi
@@ -63,6 +64,7 @@ check_fstab()
     for LINE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No fstab files with user details found"
@@ -73,6 +75,7 @@ check_fstab()
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No fstab files with passwords found"

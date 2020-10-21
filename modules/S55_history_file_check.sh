@@ -20,7 +20,7 @@
 
 S55_history_file_check()
 {
-  module_log_init "history_file_search"
+  module_log_init "S55_history_file_search"
   module_title "Search history files"
 
   local HIST_FILES
@@ -32,6 +32,7 @@ S55_history_file_check()
       for LINE in $HIST_FILES ; do
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       done
+      generate_html_file "$LOG_FILE"
   else
     print_output "[-] No history files found"
   fi

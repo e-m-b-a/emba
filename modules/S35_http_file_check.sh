@@ -20,7 +20,7 @@
 
 S35_http_file_check()
 {
-  module_log_init "http_file_check"
+  module_log_init "S35_http_file_check"
   module_title "Check HTTP files"
 
   http_file_search
@@ -41,6 +41,7 @@ http_file_search()
     for LINE in $HTTP_STUFF ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
   else
     print_output "[!] No http related files found"
   fi

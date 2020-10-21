@@ -19,7 +19,7 @@
 
 
 S40_weak_perm_check() {
-  module_log_init "weak_permissions_check"
+  module_log_init "S40_weak_permissions_check"
   module_title "Search files with weak permissions"
 
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
@@ -43,6 +43,7 @@ S40_weak_perm_check() {
     for LINE in "${SETUID_FILES[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No setuid files found"
@@ -53,6 +54,7 @@ S40_weak_perm_check() {
     for LINE in "${SETGID_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No setgid files found"
@@ -63,6 +65,7 @@ S40_weak_perm_check() {
     for LINE in "${WORLD_WRITE_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No world writable files found"
@@ -73,6 +76,7 @@ S40_weak_perm_check() {
     for LINE in "${WEAK_SHADOW_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No shadow files found"
@@ -83,6 +87,7 @@ S40_weak_perm_check() {
     for LINE in "${WEAK_RC_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No rc.d files with weak permissions found"
@@ -93,6 +98,7 @@ S40_weak_perm_check() {
     for LINE in "${WEAK_INIT_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    generate_html_file "$LOG_FILE"
     echo
   else
     print_output "[-] No init.d files with weak permissions found"

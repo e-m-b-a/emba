@@ -22,7 +22,7 @@
 
 S15_bootloader_check()
 {
-  module_log_init "bootloader_system_startup_check"
+  module_log_init "S15_bootloader_system_startup_check"
   module_title "Check bootloader and system startup"
 
   check_dtb
@@ -323,6 +323,7 @@ find_runlevel()
         print_output "[-] No default run level ""$(print_path "$INIT_TAB_F")"" found"
       else
         print_output "[+] Found default run level: ""$(orange "$FIND")"
+        #generate_html_file "$LOG_FILE"
       fi
     done
   else

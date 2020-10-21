@@ -20,7 +20,7 @@
 
 S20_shell_check()
 {
-  module_log_init "shell_check"
+  module_log_init "S20_shell_check"
   module_title "Check scripts (shellchecker)"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
@@ -34,25 +34,15 @@ S20_shell_check()
         shellcheck "$LINE" > "$SHELL_LOG" 2> /dev/null
         VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
         if [[ "$VULNS" -ne 0 ]] ; then
-          #check if this is common linux file:
-          local COMMON_FILES_FOUND
-          if [[ -f "$BASE_LINUX_FILES" ]]; then
-            COMMON_FILES_FOUND="(""${RED}""common linux file: no""${NC}"")"
-            if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${NC}"")"
-            fi
-          else
-            COMMON_FILES_FOUND=""
-          fi
-
           if [[ "$VULNS" -gt 20 ]] ; then
-            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script:""$NC"" ""$(print_path "$LINE")"
           else
-            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script:""$NC"" ""$(print_path "$LINE")"
           fi
         fi
       fi
     done
+    #generate_html_file "$LOG_FILE"
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi

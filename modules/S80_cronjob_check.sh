@@ -20,7 +20,7 @@
 
 S80_cronjob_check()
 {
-  module_log_init "cronjob_check"
+  module_log_init "S80_cronjob_check"
   module_title "Check cronjobs"
 
   local RESULTS

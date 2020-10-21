@@ -21,7 +21,7 @@
 
 S10_binaries_check()
 {
-  module_log_init "binary_check"
+  module_log_init "S10_binary_check"
   module_title "Check binaries"
 
   vul_func_basic_check
@@ -47,12 +47,12 @@ vul_func_basic_check()
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
         VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}")"
-        if [[ -n "$VUL_FUNC_RESULT" ]] ; then
+        if [[ ${#VUL_FUNC_RESULT[@]} -gt 0 ]] ; then
           print_output "[+] Vulnerable function in ""$(print_path "$LINE")"":"
           print_output "$(indent "$VUL_FUNC_RESULT")""\\n"
           COUNTER=$((COUNTER+1))
-        #else
-        #  print_output "[-] No vulnerable function in ""$(print_path "$LINE")""\\n"
+        else
+          print_output "[-] No vulnerable function in ""$(print_path "$LINE")""\\n"
         fi
       fi
     done
@@ -208,8 +208,8 @@ objdump_disassembly()
 
           elif ( file "$LINE" | grep -q "MIPS" ) ; then
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-              FUNC_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
-              STRLEN_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+              FUNC_ADDR=$("$READELF" -A "$LINE" | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+              STRLEN_ADDR=$("$READELF" -A "$LINE" | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
               if [[ -n "$FUNC_ADDR" ]] ; then
                 NAME=$(basename "$LINE" 2> /dev/null)
                 local OBJ_DUMPS_OUT
@@ -282,22 +282,9 @@ objdump_disassembly()
       for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
         print_output "\\n"
         print_output "[*] ""$FUNCTION"" - top 10 results:"
-        local SEARCH_TERM
         local RESULTS
-        readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed     "s/\.txt//" 2> /dev/null)
-
-        for LINE in "${RESULTS[@]}" ; do
-          SEARCH_TERM=$(echo "$LINE" | cut -d\  -f3)
-          if [[ -f "$BASE_LINUX_FILES" ]]; then
-            if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              print_output "$(indent "$(green "$LINE"" - common linux file: yes")")"
-            else
-              print_output "$(indent "$(orange "$LINE"" - common linux file: no")")"
-            fi
-          else
-            print_output "$(indent "$(orange "$LINE")")"
-          fi
-        done
+        RESULTS="$( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)"
+        print_output "$(indent "$(orange "$RESULTS")")"
       done
       echo
 }
@@ -307,36 +294,23 @@ output_function_details()
   local LOG_FILE_LOC
   LOG_FILE_LOC="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
 
-  #check if this is common linux file:
-  local COMMON_FILES_FOUND
-  local SEARCH_TERM
-  if [[ -f "$BASE_LINUX_FILES" ]]; then
-    COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
-    SEARCH_TERM=$(basename "$LINE")
-    if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-      COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
-    fi
-  else
-    COMMON_FILES_FOUND=" -"
-  fi
-  
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""${NC}"": Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"
       write_log "$OUTPUT"
       LOG_FILE="$LOG_FILE_O"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""${NC}"": Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"
       write_log "$OUTPUT"
       LOG_FILE="$LOG_FILE_O"
     else
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""${NC}"": Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
       print_output "$OUTPUT"
       LOG_FILE_O="$LOG_FILE"
       LOG_FILE="$LOG_FILE_LOC"
@@ -353,6 +327,7 @@ output_function_details()
   fi
 
   mv "$LOG_FILE_LOC" "$LOG_DIR""/vul_func_checker/vul_func_""$COUNT_FUNC""_""$FUNCTION""-""$NAME"".txt" 2> /dev/null
+  #generate_html_file "$LOG_FILE"
 }
 
 binary_protection()
