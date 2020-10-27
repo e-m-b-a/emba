@@ -23,7 +23,7 @@
 # This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication
 
 S50_authentication_check() {
-  module_log_init "user_group_authentication_CHECK"
+  module_log_init "S50_user_group_authentication_CHECK"
   module_title "Check users, groups and authentication"
 
   user_zero

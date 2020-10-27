@@ -174,6 +174,10 @@ mod_path_array() {
   echo "${RET_PATHS[@]}"
 }
 
+create_grep_log() {
+  GREP_LOG_FILE="$LOG_DIR""/fw_grep_log.log"
+}
+
 config_list() {
   if [[ -f "$1" ]] ;  then
     if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then

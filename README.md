@@ -7,7 +7,7 @@ emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 welcome to redistribute it under the terms of the GNU General Public License.
 See LICENSE file for usage of this software.
 
-Emba is licensed under GPLv3
+emba is licensed under GPLv3
 
 Author(s): Michael Messner, Pascal Eckmann
 -->
@@ -40,6 +40,7 @@ Test firmware / live system
 -e [./path]       Exclude paths from testing (multiple usage possible)
 -m [MODULE_NO.]   Test only with set modules [e.g. -m 05 -m 10 ... ] (multiple usage possible)
 -c                Enable cwe-checker
+-g                Create grep-able log file in [log_path]/fw_grep.log
 
 Dependency check
 -d                Only check dependencies

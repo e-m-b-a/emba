@@ -20,7 +20,7 @@
 
 S150_user_check()
 {
-  module_log_init "user_check_commands_log"
+  module_log_init "X150_user_check_commands_log"
   module_title "Custom check commands"
 
   print_output "[*] Your own check commands"

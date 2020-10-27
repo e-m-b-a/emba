@@ -20,7 +20,7 @@
 
 S45_pass_file_check()
 {
-  module_log_init "pass_file_check"
+  module_log_init "S45_pass_file_check"
   module_title "Search password files"
 
   local PASSWD_STUFF

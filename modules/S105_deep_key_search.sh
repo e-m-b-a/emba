@@ -20,7 +20,7 @@
 
 S105_deep_key_search()
 {
-  module_log_init "deep_analysis_keys"
+  module_log_init "S105_deep_analysis_keys"
   module_title "Deep analysis of files for private keys"
 
   local QUERY_L

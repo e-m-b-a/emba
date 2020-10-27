@@ -20,7 +20,7 @@
 
 S90_mail_check()
 {
-  module_log_init "mail_check"
+  module_log_init "S90_mail_check"
   module_title "Search Mail files"
 
   local MAILS

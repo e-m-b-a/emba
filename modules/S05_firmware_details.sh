@@ -20,7 +20,7 @@
 
 S05_firmware_details()
 {
-  module_log_init "firmware_testing_details"
+  module_log_init "S05_firmware_testing_details"
   module_title "Firmware and testing details"
 
   print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" directories detected."

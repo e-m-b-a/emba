@@ -8,7 +8,7 @@
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# Emba is licensed under GPLv3
+# emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -63,6 +63,7 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
+  export LOG_GREP=0
 
   export LOG_DIR="./logs"
   export CONFIG_DIR="./config"
@@ -84,7 +85,7 @@ main()
     exit 1
   fi
 
-  while getopts a:A:cde:f:Fhk:l:m:psvz OPT ; do
+  while getopts a:A:cde:f:Fghk:l:m:psvz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -109,6 +110,9 @@ main()
         ;;
       F)
         export FORCE=1
+        ;;
+      g)
+        export LOG_GREP=1
         ;;
       h)
         print_help
@@ -149,6 +153,10 @@ main()
   if [[ $ONLY_DEP -eq 0 ]] ; then
     # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
     log_folder
+
+    if [[ $LOG_GREP -eq 1 ]] ; then
+      create_grep_log
+    fi
 
     set_exclude
 

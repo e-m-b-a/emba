@@ -20,7 +20,7 @@
 
 S35_http_file_check()
 {
-  module_log_init "http_file_check"
+  module_log_init "S35_http_file_check"
   module_title "Check HTTP files"
 
   http_file_search

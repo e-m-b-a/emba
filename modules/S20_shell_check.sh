@@ -20,7 +20,7 @@
 
 S20_shell_check()
 {
-  module_log_init "shell_check"
+  module_log_init "S20_shell_check"
   module_title "Check scripts (shellchecker)"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then

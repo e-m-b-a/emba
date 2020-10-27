@@ -21,7 +21,7 @@
 
 S10_binaries_check()
 {
-  module_log_init "binary_check"
+  module_log_init "S10_binary_check"
   module_title "Check binaries"
 
   vul_func_basic_check
