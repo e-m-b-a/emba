@@ -323,9 +323,6 @@ format_grep_log()
   )"
 }
 
-#      | sed -z "s/\n/ -- /g" \
-#      | sed -e 's/\( -- \)*$//g' \
-
 print_help()
 {
   ## help and command line parsing
