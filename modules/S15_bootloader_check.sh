@@ -42,12 +42,7 @@ check_dtb()
     for DTB_FILE in "${DTB_ARR[@]}" ; do
       print_output "$(indent "$DTB_FILE")"
       if [[ $DTBDUMP -eq 1 ]] ; then
-        local LOG_FILE_LOC
-        LOG_FILE_LOC="$LOG_DIR""/dtb_dump/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt"
-        LOG_FILE_O="$LOG_FILE"
-        LOG_FILE="$LOG_FILE_LOC"
-        write_log "$(fdtdump "$DTB_FILE" 2> /dev/null)"
-        LOG_FILE="$LOG_FILE_O"
+        write_log "$(fdtdump "$DTB_FILE" 2> /dev/null)" "$LOG_DIR""/dtb_dump/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt" "g"
       fi
     done
   else

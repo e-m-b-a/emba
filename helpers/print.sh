@@ -123,47 +123,52 @@ write_log()
     if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
       local COLOR_OUTPUT_STRING
       COLOR_OUTPUT_STRING="$(color_output "$E")"
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null
+      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$2" >/dev/null
     else
-      echo -e "$(format_log "$E")" | tee -a "$LOG_FILE" >/dev/null
+      echo -e "$(format_log "$E")" | tee -a "$2" >/dev/null
     fi
-    write_grep_log "$E"
   done
+  if [[ "$3" == "g" ]] ; then
+    write_grep_log "$1"
+  fi
 }
 
 write_grep_log()
 {
   if [[ $LOG_GREP -eq 1 ]] ; then
     local CUT_TYPE=0
-    if [[ -n "${1}" ]] && [[ -n "$(echo "$1" | tr -d "/n")" ]] ; then
-      TYPE_CHECK="$( echo "$1" | cut -c1-3 )"
-      if [[ "$TYPE_CHECK" == "[-]" ]] ; then
-        MESSAGE_TYPE="FALSE"
-        CUT_TYPE=1
-      elif [[ "$TYPE_CHECK" == "[*]" ]] ; then
+    TYPE_CHECK="$( echo "$1" | cut -c1-3 )"
+    if [[ "$TYPE_CHECK" == "[-]" ]] ; then
+      MESSAGE_TYPE="FALSE"
+      CUT_TYPE=1
+    elif [[ "$TYPE_CHECK" == "[*]" ]] ; then
+      MESSAGE_TYPE="MESSAGE"
+      CUT_TYPE=1
+    elif [[ "$TYPE_CHECK" == "[!]" ]] ; then
+      MESSAGE_TYPE="WARNING"
+      CUT_TYPE=1
+    elif [[ "$TYPE_CHECK" == "[+]" ]] ; then
+      MESSAGE_TYPE="POSITIVE"
+      CUT_TYPE=1
+    else
+      if [[ "$MESSAGE_TYPE" == "POSITIVE"* ]] ; then
+        MESSAGE_TYPE="POSITIVE_INFO"
+      elif [[ "$MESSAGE_TYPE" == "NEGATIVE"* ]] ; then
+        MESSAGE_TYPE="NEGATIVE_INFO"
+      else
         MESSAGE_TYPE="MESSAGE"
-        CUT_TYPE=1
-      elif [[ "$TYPE_CHECK" == "[!]" ]] ; then
-        MESSAGE_TYPE="WARNING"
-        CUT_TYPE=1
-      elif [[ "$TYPE_CHECK" == "[+]" ]] ; then
-        MESSAGE_TYPE="POSITIVE"
-        CUT_TYPE=1
-      else
-        if [[ "$MESSAGE_TYPE" == "POSITIVE"* ]] ; then
-          MESSAGE_TYPE="POSITIVE_INFO"
-        elif [[ "$MESSAGE_TYPE" == "NEGATIVE"* ]] ; then
-          MESSAGE_TYPE="NEGATIVE_INFO"
-        else
-          MESSAGE_TYPE="MESSAGE"
-        fi
-      fi
-      if [[ $CUT_TYPE -eq 1 ]] ; then
-        echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$(echo "$1" | cut -c4- )")")" | tee -a "$GREP_LOG_FILE" >/dev/null
-      else
-        echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$1")")" | tee -a "$GREP_LOG_FILE" >/dev/null
       fi
     fi
+    readarray -t OUTPUT_ARR <<< "$1"
+    for E in "${OUTPUT_ARR[@]}" ; do
+      if [[ -n "${E//[[:blank:]]/}" ]] && [[ "$E" != "\\n" ]] && [[ -n "$E" ]] ; then
+        if [[ $CUT_TYPE -eq 1 ]] ; then
+          echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$(echo "$E" | cut -c4- )")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        else
+          echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$E")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        fi
+      fi
+    done
   fi
 }
 
@@ -314,11 +319,12 @@ format_grep_log()
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
       | sed -e "s/^ *//" \
       | sed -e "s/\\\\n/\n/g" \
-      | sed -z "s/\n/ -- /g" \
-      | sed -e 's/\( -- \)*$//g' \
       | sed -e "s/$GREP_LOG_DELIMITER/,/g"
   )"
 }
+
+#      | sed -z "s/\n/ -- /g" \
+#      | sed -e 's/\( -- \)*$//g' \
 
 print_help()
 {

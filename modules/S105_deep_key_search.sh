@@ -33,7 +33,7 @@ S105_deep_key_search()
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
       if [[ -e "$DEEP_S_FILE" ]] ; then
         local S_OUTPUT
-        S_OUTPUT="$(grep -a -h "$QUERY" -A 2 -D skip "$DEEP_S_FILE" | tr -d "\0" | cut -c-200 )"
+        S_OUTPUT="$(grep -a -h "$QUERY" -A 2 -D skip "$DEEP_S_FILE" | tr "\000-\011\013-\037\177-\377" "." | cut -c-200 )"
         if [[ -n "$S_OUTPUT" ]] ; then
           print_output "[+] ""$(print_path "$DEEP_S_FILE")"
           print_output "$( indent "$(echo "$S_OUTPUT" | tr -dc '\11\12\15\40-\176' )")"
