@@ -347,6 +347,8 @@ print_help()
   echo -e "$CYAN""-m [MODULE_NO.]""$NC""   Test only with set modules [e.g. -m 05 -m 10 ... ]] (multiple usage possible)"
   echo -e "$CYAN""-c""$NC""                Enable cwe-checker"
   echo -e "$CYAN""-g""$NC""                Create grep-able log file in [log_path]/fw_grep.log"
+  echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
+
   echo -e "\\nDependency check"
   echo -e "$CYAN""-d""$NC""                Only check dependencies"
   echo -e "$CYAN""-F""$NC""                Check dependencies but ignore errors"

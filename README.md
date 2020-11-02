@@ -41,6 +41,7 @@ Test firmware / live system
 -m [MODULE_NO.]   Test only with set modules [e.g. -m 05 -m 10 ... ] (multiple usage possible)
 -c                Enable cwe-checker
 -g                Create grep-able log file in [log_path]/fw_grep.log
+                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE
 
 Dependency check
 -d                Only check dependencies
