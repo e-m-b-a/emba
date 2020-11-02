@@ -28,7 +28,7 @@ NC="\033[0m"  # no color
 BOLD="\033[1m"
 ITALIC="\033[3m"
 
-MODULE_NUMBER=""
+MODULE_NUMBER="00"
 SUB_MODULE_COUNT=0
 GREP_LOG_DELIMITER=";"
 MESSAGE_TYPE=""
@@ -131,6 +131,14 @@ write_log()
   if [[ "$3" == "g" ]] ; then
     write_grep_log "$1"
   fi
+}
+
+write_command_grep_log()
+{
+    if [[ $LOG_GREP -eq 1 ]] ; then
+      MESSAGE_TYPE="COMMAND"
+      echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$1")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+    fi
 }
 
 write_grep_log()

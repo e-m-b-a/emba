@@ -175,7 +175,9 @@ mod_path_array() {
 }
 
 create_grep_log() {
+  export GREP_LOG_FILE
   GREP_LOG_FILE="$LOG_DIR""/fw_grep_log.log"
+  print_output "[*] grep-able log file will be generated:""$NC""\\n    ""$ORANGE""$GREP_LOG_FILE""$NC" "no_log"
 }
 
 config_list() {

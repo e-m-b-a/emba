@@ -14,6 +14,7 @@
 
 # Description:  Main script for load all necessary files and call main function of modules
 
+INVOCATION_PATH="."
 
 import_helper()
 {
@@ -49,6 +50,7 @@ import_module()
 
 main()
 {
+  INVOCATION_PATH="$(dirname "$0")"
 
   set -a 
 
@@ -65,11 +67,11 @@ main()
   export FORCE=0
   export LOG_GREP=0
 
-  export LOG_DIR="./logs"
-  export CONFIG_DIR="./config"
-  export EXT_DIR="./external"
-  export HELP_DIR="./helpers"
-  export MOD_DIR="./modules"
+  export LOG_DIR="$INVOCATION_PATH""/logs"
+  export CONFIG_DIR="$INVOCATION_PATH""/config"
+  export EXT_DIR="$INVOCATION_PATH""/external"
+  export HELP_DIR="$INVOCATION_PATH""/helpers"
+  export MOD_DIR="$INVOCATION_PATH""/modules"
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
 
@@ -156,6 +158,7 @@ main()
 
     if [[ $LOG_GREP -eq 1 ]] ; then
       create_grep_log
+      write_command_grep_log "sudo ""$INVOCATION_PATH""/emba.sh ""$*"
     fi
 
     set_exclude
