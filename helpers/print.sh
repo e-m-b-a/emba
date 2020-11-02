@@ -28,7 +28,7 @@ NC="\033[0m"  # no color
 BOLD="\033[1m"
 ITALIC="\033[3m"
 
-MODULE_NUMBER="00"
+MODULE_NUMBER="--"
 SUB_MODULE_COUNT=0
 GREP_LOG_DELIMITER=";"
 MESSAGE_TYPE=""
@@ -133,38 +133,34 @@ write_log()
   fi
 }
 
-write_command_grep_log()
-{
-    if [[ $LOG_GREP -eq 1 ]] ; then
-      MESSAGE_TYPE="COMMAND"
-      echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$1")")" | tee -a "$GREP_LOG_FILE" >/dev/null
-    fi
-}
-
 write_grep_log()
 {
   if [[ $LOG_GREP -eq 1 ]] ; then
     local CUT_TYPE=0
-    TYPE_CHECK="$( echo "$1" | cut -c1-3 )"
-    if [[ "$TYPE_CHECK" == "[-]" ]] ; then
-      MESSAGE_TYPE="FALSE"
-      CUT_TYPE=1
-    elif [[ "$TYPE_CHECK" == "[*]" ]] ; then
-      MESSAGE_TYPE="MESSAGE"
-      CUT_TYPE=1
-    elif [[ "$TYPE_CHECK" == "[!]" ]] ; then
-      MESSAGE_TYPE="WARNING"
-      CUT_TYPE=1
-    elif [[ "$TYPE_CHECK" == "[+]" ]] ; then
-      MESSAGE_TYPE="POSITIVE"
-      CUT_TYPE=1
+    if [[ -n "$2" ]] ; then
+      MESSAGE_TYPE="$2"
     else
-      if [[ "$MESSAGE_TYPE" == "POSITIVE"* ]] ; then
-        MESSAGE_TYPE="POSITIVE_INFO"
-      elif [[ "$MESSAGE_TYPE" == "NEGATIVE"* ]] ; then
-        MESSAGE_TYPE="NEGATIVE_INFO"
-      else
+      TYPE_CHECK="$( echo "$1" | cut -c1-3 )"
+      if [[ "$TYPE_CHECK" == "[-]" ]] ; then
+        MESSAGE_TYPE="FALSE"
+        CUT_TYPE=1
+      elif [[ "$TYPE_CHECK" == "[*]" ]] ; then
         MESSAGE_TYPE="MESSAGE"
+        CUT_TYPE=1
+      elif [[ "$TYPE_CHECK" == "[!]" ]] ; then
+        MESSAGE_TYPE="WARNING"
+        CUT_TYPE=1
+      elif [[ "$TYPE_CHECK" == "[+]" ]] ; then
+        MESSAGE_TYPE="POSITIVE"
+        CUT_TYPE=1
+      else
+        if [[ "$MESSAGE_TYPE" == "POSITIVE"* ]] ; then
+          MESSAGE_TYPE="POSITIVE_INFO"
+        elif [[ "$MESSAGE_TYPE" == "NEGATIVE"* ]] ; then
+          MESSAGE_TYPE="NEGATIVE_INFO"
+        else
+          MESSAGE_TYPE="MESSAGE"
+        fi
       fi
     fi
     readarray -t OUTPUT_ARR <<< "$1"
@@ -178,6 +174,12 @@ write_grep_log()
       fi
     done
   fi
+}
+
+reset_module_count()
+{
+  MODULE_NUMBER="--"
+  SUB_MODULE_COUNT=0
 }
 
 color_output()
