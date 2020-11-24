@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  installs needed stuff:
 #                 Yara rules
@@ -113,3 +113,20 @@ if ! [[ -f "external/objdump" ]] ; then
 else
   echo -e "$ORANGE""objdump is already downloaded and compiled""$NC"
 fi
+
+# aha for html generation
+echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
+if ! [[ -f "aha-master" ]] ; then
+  cd ./external || exit 1
+  apt-get install make
+  apt-get install unzip
+  wget https://github.com/theZiz/aha/archive/master.zip
+  unzip ./aha-master.zip
+  cd ./aha-master || exit 1
+  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
+  make
+  cd ../.. || exit 1
+else
+  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
+fi
+
