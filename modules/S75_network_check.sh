@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check resolv config, iptables and snmp
 #               Access:
@@ -20,13 +20,18 @@
 
 S75_network_check()
 {
-  module_log_init "S75_network_check"
+  module_log_init "s75_search_network_configs"
   module_title "Search network configs"
+  CONTENT_AVAILABLE=0
 
   check_resolv
   check_iptables
   check_snmp
   check_network_configs
+  
+  if [[ $HTML == 1 ]]; then
+    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 check_resolv()
@@ -50,6 +55,8 @@ check_resolv()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No or empty network configuration found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -69,6 +76,8 @@ check_iptables()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No iptables configuration found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -96,6 +105,8 @@ check_snmp()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No SNMP configuration found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -114,6 +125,7 @@ check_network_configs()
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       #fi
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No network configs found"
   fi

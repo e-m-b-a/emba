@@ -1,0 +1,30 @@
+  401604:	00000000 	nop
+  401608:	8f84801c 	lw	a0,-32740(gp)
+  40160c:	8f85801c 	lw	a1,-32740(gp)
+  401610:	8f998080 	lw	t9,-32640(gp)
+  401614:	248435fc 	addiu	a0,a0,13820
+  401618:	0320f809 	jalr	t9
+  40161c:	24a53614 	addiu	a1,a1,13844
+  401620:	8fbc0018 	lw	gp,24(sp)
+  401624:	14400009 	bnez	v0,40164c <main+0x45c>
+  401628:	00408821 	move	s1,v0
+  40162c:	8f84801c 	lw	a0,-32740(gp)
+  401630:	8f9980d4 	lw	t9,-32556(gp)
+  401634:	24843618 	addiu	a0,a0,13848
+  401638:	0320f809 	jalr	t9
+  40163c:	00000000 	nop
+  401640:	8fbc0018 	lw	gp,24(sp)
+  401644:	100004c3 	b	402954 <main+0x1764>
+  401648:	2403ffff 	li	v1,-1
+  40164c:	8f9980f8 	lw	t9,-32520(gp)
+  401650:	00000000 	nop
+  401654:	0320f809 	jalr	t9
+  401658:	27b00138 	addiu	s0,sp,312
+  40165c:	8fbc0018 	lw	gp,24(sp)
+  401660:	00403021 	move	a2,v0
+  401664:	8f85801c 	lw	a1,-32740(gp)
+  401668:	8f9980a0 	lw	t9,fprintf
+  40166c:	24a538fc 	addiu	a1,a1,14588
+  401670:	0320f809 	jalr	t9
+[[0;32m+[0m][0;32m /home/test/Desktop/MIPS-dir810_FW202B01-03/sbin/bulkagent (-rwxr-xr-x test test) -[0m Vulnerable function: [0;36mfprintf [0m/ [0;31mFunction count: 1 [0m
+[0m

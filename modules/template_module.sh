@@ -30,8 +30,8 @@
 
 
 empty_module() {
-  # Initialize module and creates a log file "ModuleNr_empty_module_log.txt" in your log folder
-  module_log_init "ModuleNr_empty_module_log"
+  # Initialize module and creates a log file "empty_module_log.txt" in your log folder
+  module_log_init "empty_module_log"
   # Prints title to CLI and into log
   module_title "Empty module"
 

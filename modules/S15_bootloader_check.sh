@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Dump device tree blob into log, check for various bootloaders, boot files and valid runlevel
 #               Access:
@@ -22,19 +22,23 @@
 
 S15_bootloader_check()
 {
-  module_log_init "S15_bootloader_system_startup_check"
+  module_log_init "s15_check_bootloader_and_system_startup"
   module_title "Check bootloader and system startup"
+  CONTENT_AVAILABLE=0
 
   check_dtb
   check_bootloader
   find_boot_files
   find_runlevel
+  
+  if [[ $HTML == 1 ]]; then
+     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 check_dtb()
 {
   sub_module_title "Scan for device tree blobs"
-
   readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.dtb" )
 
   if [[ ${#DTB_ARR[@]} -gt 0 ]] ; then
@@ -50,6 +54,7 @@ check_dtb()
         LOG_FILE="$LOG_FILE_O"
       fi
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No device tree blobs found"
   fi
@@ -61,13 +66,14 @@ check_bootloader()
 
   local BOOTLOADER
   local CHECK
-
   # Syslinux
   CHECK=0
   SYSLINUX_PATHS="$(mod_path "$FIRMWARE_PATH""/boot/syslinux/syslinux.cfg")"
   for SYSLINUX_FILE in $SYSLINUX_PATHS ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
       CHECK=1
+      CONTENT_AVAILABLE
+      =1
       print_output "[+] Found Syslinux config: ""$(print_path "$SYSLINUX_FILE")"
       BOOTLOADER="Syslinux"
     fi
@@ -91,6 +97,7 @@ check_bootloader()
   for GRUB_FILE in $GRUB_PATHS ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
+      CONTENT_AVAILABLE=1
       print_output "[+] Found Grub config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub"
@@ -106,6 +113,7 @@ check_bootloader()
   for GRUB_FILE in $GRUB_PATHS ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
+      CONTENT_AVAILABLE=1
       print_output "[+] Found Grub2 config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub2"
@@ -115,6 +123,7 @@ check_bootloader()
   for GRUB_FILE in $GRUB_PATHS ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
+      CONTENT_AVAILABLE=1
       print_output "[+] Found Grub2 config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub2"
@@ -143,6 +152,7 @@ check_bootloader()
       fi
     fi
     if [[ $FOUND -eq 1 ]] ; then
+      CONTENT_AVAILABLE=1
       print_output "[+] GRUB has password protection"
     else
       print_output "[-] No hashed password line in GRUB boot file"
@@ -170,6 +180,8 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No FreeBSD or DragonFly bootloader files found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 
   # LILO
@@ -188,6 +200,8 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No LILO configuration file found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 
   # SILO
@@ -202,6 +216,8 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No SILO configuration file found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 
   # YABOOT
@@ -216,6 +232,8 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No YABOOT configuration file found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 
   # OpenBSD
@@ -234,6 +252,8 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No OpenBSD/bootstrap files found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 
   # OpenBSD boot configuration
@@ -261,10 +281,14 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No OpenBSD configuration file found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 
   if [[ -z "$BOOTLOADER" ]] ; then
     print_output "[-] No bootloader found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -286,6 +310,7 @@ find_boot_files()
         INITTAB_V=("${INITTAB_V[@]}" "$LINE")
       fi
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No startup files found"
   fi
@@ -294,7 +319,6 @@ find_boot_files()
 find_runlevel()
 {
   sub_module_title "Check default run level"
-
   local SYSTEMD_PATH
   SYSTEMD_PATH="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/systemd")"
   for SYSTEMD_P in $SYSTEMD_PATH ; do
@@ -306,6 +330,7 @@ find_runlevel()
         if [[ -z "$FIND" ]] ; then
           print_output "[+] systemd run level information:"
           print_output "$(indent "$FIND")"
+          CONTENT_AVAILABLE=1
         else
           print_output "[-] No run level in ""$(print_path "$DEFAULT_TARGET_PATH")"" found"
         fi
@@ -323,9 +348,9 @@ find_runlevel()
         print_output "[-] No default run level ""$(print_path "$INIT_TAB_F")"" found"
       else
         print_output "[+] Found default run level: ""$(orange "$FIND")"
-        #generate_html_file "$LOG_FILE"
       fi
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No default run level found"
   fi

@@ -10,7 +10,7 @@
 #
 # Emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Main script for load all necessary files and call main function of modules
 
@@ -63,6 +63,8 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
+  export HTML=0
+  export GHIDRA=1
 
   export LOG_DIR="./logs"
   export CONFIG_DIR="./config"
@@ -71,6 +73,9 @@ main()
   export MOD_DIR="./modules"
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
+  export HTML_PATH="./html/html-files"         # directory for html path
+  export HTML_DIR="./html"                     # directory for css and pictures
+  export AHA_PATH="$EXT_DIR""/aha-master/aha"
 
   echo
 
@@ -83,8 +88,10 @@ main()
     print_help
     exit 1
   fi
+  
+  export EMBACOMMAND="sudo ""$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cde:f:Fhk:l:m:psvz OPT ; do
+  while getopts a:A:cde:f:Fhk:l:mW:n:gpsvz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -110,6 +117,9 @@ main()
       F)
         export FORCE=1
         ;;
+      g)
+        export GHIDRA=1
+        ;;
       h)
         print_help
         exit 0
@@ -124,8 +134,17 @@ main()
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
         ;;
+      n)
+        export HTML_HEADLINE="$OPTARG"
+        ;;
       s)
         export SHORT_PATH=1
+        ;;
+      W)
+        export HTML=1
+        ARG_ARRAY=($OPTARG)
+        export HTML_PATH="${ARG_ARRAY[0]}"
+        export HTML_HEADLINE="${ARG_ARRAY[1]}"
         ;;
       z)
         export FORMAT_LOG=1
@@ -137,8 +156,9 @@ main()
         ;;
     esac
   done
-
   LOG_DIR="$(abs_path "$LOG_DIR")"
+  HTML_PATH="$(abs_path "$HTML_PATH")"
+  HTML_STYLE_PATH="$(abs_path "./html")"
 
   if [[ $KERNEL -eq 1 ]] ; then
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
@@ -147,8 +167,9 @@ main()
   FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
-    # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
+    # check if LOG_DIR and HTML_PATH exists and prompt to terminal to delete its content (y/n)
     log_folder
+    html_folder
 
     set_exclude
 
@@ -205,11 +226,11 @@ main()
           fi
         done
       fi
-
       # Add your personal checks to X150_user_checks.sh (change starting 'X' in filename to 'S') or write a new module, add it to ./modules
 
       echo
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      DURATIONTIME="$(date -d@$SECONDS -u +%H:%M:%S)"
+      print_output "[!] Test ended on ""$(date)"" and took about ""$DURATIONTIME"" \\n" "no_log"
 
     else
       print_output "\\n" "no_log"

@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check binaries with cwe-checker and bap (binary analysis platform)
 #               Access:
@@ -20,8 +20,9 @@
 
 S120_cwe_checker()
 {
-  module_log_init "S120_cwe_bap_check"
+  module_log_init "s120_check_bap_and_cwe"
   module_title "Check binaries with bap and cwe-checker"
+  CONTENT_AVAILABLE=0
 
   if [[ $BAP -eq 1 ]] ; then
     for LINE in "${BINARIES[@]}" ; do
@@ -53,10 +54,15 @@ S120_cwe_checker()
     else
       print_output "[+] cwe-checker found a total of $SUM_FCW_FIND of the following security issues:"
       print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
+      CONTENT_AVAILABLE=1
     fi
     
   else
     print_output "[!] Check with bap and cwe-checker is disabled!"
+  fi
+  
+  if [[ $HTML == 1 ]]; then
+    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

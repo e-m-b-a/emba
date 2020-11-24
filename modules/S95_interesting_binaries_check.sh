@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check for interesting executables and possible post exploitation
 #               Access:
@@ -20,11 +20,16 @@
 
 S95_interesting_binaries_check()
 {
-  module_log_init "S95_interesting_binaries_check"
+  module_log_init "s95_check_interesting_binaries"
   module_title "Check interesting binaries"
+  CONTENT_AVAILABLE=0
 
   interesting_binaries
   post_exploitation
+  
+  if [[ $HTML == 1 ]]; then
+    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 interesting_binaries()
@@ -49,6 +54,8 @@ interesting_binaries()
   fi
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -74,6 +81,8 @@ post_exploitation()
   fi
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries for post exploitation found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 

@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check directories/files, used for web, for section to inject commands
 #               Access:
@@ -20,8 +20,9 @@
 
 S100_command_inj_check()
 {
-  module_log_init "S100_command_inj_check"
+  module_log_init "s100_check_command_inj"
   module_title "Search areas for command injections"
+  CONTENT_AVAILABLE=0
 
   local CMD_INJ_DIRS
   CMD_INJ_DIRS="$(config_find "$CONFIG_DIR""/check_command_inj_dirs.cfg" "")"
@@ -52,8 +53,13 @@ S100_command_inj_check()
         done
       fi
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No directories or files used for web scripts found"
+  fi
+  
+  if [[ $HTML == 1 ]]; then
+    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

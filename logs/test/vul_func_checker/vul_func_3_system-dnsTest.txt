@@ -1,0 +1,88 @@
+  40080c:	00000000 	nop
+
+00400810 <ping_test>:
+  400810:	3c1c0005 	lui	gp,0x5
+  400814:	279c84c0 	addiu	gp,gp,-31552
+  400818:	0399e021 	addu	gp,gp,t9
+  40081c:	27bdfe88 	addiu	sp,sp,-376
+  400820:	afbf0170 	sw	ra,368(sp)
+  400824:	afb5016c 	sw	s5,364(sp)
+  400828:	afb40168 	sw	s4,360(sp)
+  40082c:	afb30164 	sw	s3,356(sp)
+  400830:	afb20160 	sw	s2,352(sp)
+  400834:	afb1015c 	sw	s1,348(sp)
+  400838:	afb00158 	sw	s0,344(sp)
+  40083c:	afbc0010 	sw	gp,16(sp)
+  400840:	8f85801c 	lw	a1,-32740(gp)
+  400844:	8f998040 	lw	t9,-32704(gp)
+  400848:	27b50058 	addiu	s5,sp,88
+  40084c:	00803021 	move	a2,a0
+  400850:	24a50bc8 	addiu	a1,a1,3016
+  400854:	02a02021 	move	a0,s5
+  400858:	0320f809 	jalr	t9
+  40085c:	00009821 	move	s3,zero
+  400860:	8fbc0010 	lw	gp,16(sp)
+  400864:	02609021 	move	s2,s3
+  400868:	8f99806c 	lw	t9,system
+  40086c:	00000000 	nop
+  400870:	0320f809 	jalr	t9
+--
+  40090c:	02002021 	move	a0,s0
+  400910:	8fbc0010 	lw	gp,16(sp)
+  400914:	26840c04 	addiu	a0,s4,3076
+  400918:	8f998054 	lw	t9,-32684(gp)
+  40091c:	00000000 	nop
+  400920:	0320f809 	jalr	t9
+  400924:	24130001 	li	s3,1
+  400928:	8fbc0010 	lw	gp,16(sp)
+  40092c:	1000001f 	b	4009ac <ping_test+0x19c>
+  400930:	02601021 	move	v0,s3
+  400934:	8f998048 	lw	t9,-32696(gp)
+  400938:	00000000 	nop
+  40093c:	0320f809 	jalr	t9
+  400940:	02002021 	move	a0,s0
+  400944:	8fbc0010 	lw	gp,16(sp)
+  400948:	00000000 	nop
+  40094c:	8f998064 	lw	t9,-32668(gp)
+  400950:	00000000 	nop
+  400954:	0320f809 	jalr	t9
+  400958:	24040001 	li	a0,1
+  40095c:	2a22000a 	slti	v0,s1,10
+  400960:	8fbc0010 	lw	gp,16(sp)
+  400964:	1440ffc6 	bnez	v0,400880 <ping_test+0x70>
+  400968:	00000000 	nop
+  40096c:	8f84801c 	lw	a0,-32740(gp)
+  400970:	8f99806c 	lw	t9,system
+  400974:	00000000 	nop
+  400978:	0320f809 	jalr	t9
+--
+  4009ac:	8fbf0170 	lw	ra,368(sp)
+  4009b0:	8fb5016c 	lw	s5,364(sp)
+  4009b4:	8fb40168 	lw	s4,360(sp)
+  4009b8:	8fb30164 	lw	s3,356(sp)
+  4009bc:	8fb20160 	lw	s2,352(sp)
+  4009c0:	8fb1015c 	lw	s1,348(sp)
+  4009c4:	8fb00158 	lw	s0,344(sp)
+  4009c8:	03e00008 	jr	ra
+  4009cc:	27bd0178 	addiu	sp,sp,376
+
+004009d0 <main>:
+  4009d0:	3c1c0005 	lui	gp,0x5
+  4009d4:	279c8300 	addiu	gp,gp,-32000
+  4009d8:	0399e021 	addu	gp,gp,t9
+  4009dc:	27bdffe0 	addiu	sp,sp,-32
+  4009e0:	afbf0018 	sw	ra,24(sp)
+  4009e4:	afbc0010 	sw	gp,16(sp)
+  4009e8:	8f84801c 	lw	a0,-32740(gp)
+  4009ec:	8f99803c 	lw	t9,-32708(gp)
+  4009f0:	00000000 	nop
+  4009f4:	0320f809 	jalr	t9
+  4009f8:	24840c34 	addiu	a0,a0,3124
+  4009fc:	8fbc0010 	lw	gp,16(sp)
+  400a00:	00000000 	nop
+  400a04:	8f84801c 	lw	a0,-32740(gp)
+  400a08:	8f99806c 	lw	t9,system
+  400a0c:	14400004 	bnez	v0,400a20 <main+0x50>
+  400a10:	24840c44 	addiu	a0,a0,3140
+[[0;32m+[0m][0;32m /home/test/Desktop/MIPS-dir810_FW202B01-03/sbin/dnsTest (-rwxr-xr-x test test) -[0m Vulnerable function: [0;36msystem [0m/ [0;31mFunction count: 3 [0m
+[0m

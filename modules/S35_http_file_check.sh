@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check for web server related files, web server and php.ini
 #               Access:
@@ -20,12 +20,17 @@
 
 S35_http_file_check()
 {
-  module_log_init "S35_http_file_check"
+  module_log_init "s35_check_http_file"
   module_title "Check HTTP files"
-
+  CONTENT_AVAILABLE=0
+  
   http_file_search
   webserver_check
   php_check
+  
+  if [[ $HTML == 1 ]]; then
+     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 http_file_search()
@@ -41,7 +46,7 @@ http_file_search()
     for LINE in $HTTP_STUFF ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    generate_html_file "$LOG_FILE"
+    CONTENT_AVAILABLE=1
   else
     print_output "[!] No http related files found"
   fi
@@ -62,6 +67,7 @@ webserver_check()
     for LINE in "${APACHE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[!] No Apache related files found"
   fi
@@ -71,6 +77,7 @@ webserver_check()
     for LINE in "${NGINX_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[!] No nginx related files found"
   fi
@@ -80,6 +87,7 @@ webserver_check()
     for LINE in "${LIGHTTP_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[!] No Lighttpd related files found"
   fi
@@ -89,6 +97,7 @@ webserver_check()
     for LINE in "${CHEROKEE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[!] No Cherokee related files found"
   fi
@@ -98,6 +107,7 @@ webserver_check()
     for LINE in "${HTTPD_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[!] No HTTPd related files found"
   fi
@@ -115,6 +125,7 @@ php_check()
     for LINE in "${PHP_INI_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[!] No php.ini found"
   fi

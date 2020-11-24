@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Scan for config files and check fstab
 #               Access:
@@ -20,11 +20,16 @@
 
 S65_config_file_check()
 {
-  module_log_init "S65_config_file_check"
+  module_log_init "s65_scan_config_file"
   module_title "Search/scan config files"
+  CONTENT_AVAILABLE=0
 
   scan_config
   check_fstab
+  
+  if [[ $HTML == 1 ]]; then
+     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 scan_config()
@@ -42,7 +47,7 @@ scan_config()
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       fi
     done
-    generate_html_file "$LOG_FILE"
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No configuration files found"
   fi
@@ -64,8 +69,8 @@ check_fstab()
     for LINE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    generate_html_file "$LOG_FILE"
     echo
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No fstab files with user details found"
   fi
@@ -75,8 +80,8 @@ check_fstab()
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    generate_html_file "$LOG_FILE"
     echo
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No fstab files with passwords found"
   fi

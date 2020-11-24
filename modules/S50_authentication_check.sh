@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check user authentication:
 #                 Users with UID 0, non unique accounts, non unique group id, non unique group name, user accounts,
@@ -23,9 +23,10 @@
 # This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication
 
 S50_authentication_check() {
-  module_log_init "S50_user_group_authentication_CHECK"
+  module_log_init "s50_check_user_group_and_authentication"
   module_title "Check users, groups and authentication"
-
+  CONTENT_AVAILABLE=0
+  
   user_zero
   non_unique_acc
   non_unique_group_id
@@ -38,6 +39,10 @@ S50_authentication_check() {
   scan_pam_conf
   search_pam_configs
   search_pam_files
+  
+  if [[ $HTML == 1 ]]; then
+     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 user_zero() {
@@ -62,6 +67,8 @@ user_zero() {
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -87,6 +94,8 @@ non_unique_acc() {
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -107,12 +116,13 @@ non_unique_group_id() {
       else
         print_output "[+] Found the same group ID multiple times"
         print_output "$(indent "$(orange "Non-unique group id: ""$FIND")")"
-        generate_html_file "$LOG_FILE"
       fi
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/group not available"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -133,12 +143,13 @@ non_unique_group_name() {
       else
         print_output "[+] Found the same group name multiple times"
         print_output "$(indent "$(orange "Non-unique group name: ""$FIND")")"
-        generate_html_file "$LOG_FILE"
       fi
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/group not available"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -172,12 +183,13 @@ query_user_acc() {
       else
         print_output "[+] Query system user"
         print_output "$(indent "$(orange "$FIND")")"
-        generate_html_file "$LOG_FILE"
       fi
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -218,7 +230,7 @@ query_nis_plus_auth_supp() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/nsswitch.conf not available"
   else
-    generate_html_file "$LOG_FILE"
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -239,7 +251,7 @@ check_sudoers() {
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
       done
     fi
-    generate_html_file "$LOG_FILE"
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No sudoers files found"
   fi
@@ -297,6 +309,7 @@ check_owner_perm_sudo_config() {
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
+          CONTENT_AVAILABLE=1
         fi
         ;;
       *)
@@ -305,6 +318,7 @@ check_owner_perm_sudo_config() {
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
+          CONTENT_AVAILABLE=1
         fi
         ;;
       esac
@@ -354,6 +368,7 @@ search_pam_testing_libs() {
     # Cracklib
     if [[ $FOUND_CRACKLIB -eq 1 ]] ; then
       print_output "[+] pam_cracklib.so found"
+      CONTENT_AVAILABLE=1
     else
       print_output "[-] pam_cracklib.so not found"
     fi
@@ -361,6 +376,7 @@ search_pam_testing_libs() {
     # Password quality control
     if [[ $FOUND_PASSWDQC -eq 1 ]] ; then
       print_output "[+] pam_passwdqc.so found"
+      CONTENT_AVAILABLE=1
     else
       print_output "[-] pam_passwdqc.so not found"
     fi
@@ -368,6 +384,7 @@ search_pam_testing_libs() {
     # pwquality module
     if [[ $FOUND_PWQUALITY -eq 1 ]] ; then
       print_output "[+] pam_pwquality.so found"
+      CONTENT_AVAILABLE=1
     else
       print_output "[-] pam_pwquality.so not found"
     fi
@@ -400,6 +417,7 @@ scan_pam_conf() {
         print_output "[-] File has no configuration options defined (empty, or only filled with comments and empty lines)"
       else
         print_output "[+] Found one or more configuration lines"
+        CONTENT_AVAILABLE=1
         local LINE
         LINE=$(echo "$FIND" | ${SEDBINARY} 's/:space:/ /g')
         print_output "$(indent "$(orange "$LINE")")"
@@ -408,8 +426,6 @@ scan_pam_conf() {
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/pam.conf not available"
-  else
-    generate_html_file "$LOG_FILE"
   fi
 }
 
@@ -441,6 +457,7 @@ search_pam_configs() {
           if [[ -n "$FIND2" ]] ; then
             print_output "[+] LDAP module present"
             print_output "$(indent "$(orange "$FIND2")")"
+            CONTENT_AVAILABLE=1
           else
             print_output "[-] LDAP module not found"
           fi
@@ -483,7 +500,7 @@ search_pam_files() {
     if [[ $CHECK -eq 0 ]] ; then
       print_output "[-] Nothing interesting found"
     else
-      generate_html_file "$LOG_FILE"
+      CONTENT_AVAILABLE=1
     fi
   else
     print_output "[-] Nothing found"

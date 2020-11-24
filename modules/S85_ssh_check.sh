@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Search ssh related files and check squid proxy server
 #               Access:
@@ -20,11 +20,16 @@
 
 S85_ssh_check()
 {
-  module_log_init "S85_ssh_check"
+  module_log_init "s85_check_ssh"
   module_title "Check SSH"
+  CONTENT_AVAILABLE=0
 
   search_ssh_files
   check_squid
+  
+  if [[ $HTML == 1 ]]; then
+    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 search_ssh_files()
@@ -44,6 +49,7 @@ search_ssh_files()
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       fi
     done
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No ssh configuration files found"
   fi
@@ -64,6 +70,8 @@ check_squid()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No possible squid executable found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 
   CHECK=0
@@ -90,5 +98,7 @@ check_squid()
   fi
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No squid configuration found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }

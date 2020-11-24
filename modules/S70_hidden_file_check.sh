@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Search hidden files
 #               Access:
@@ -20,8 +20,9 @@
 
 S70_hidden_file_check()
 {
-  module_log_init "S70_hidden_file_search"
+  module_log_init "s70_search_hidden_file"
   module_title "Search hidden files"
+  CONTENT_AVAILABLE=0
 
   local HIDDEN_FILES
   IFS=" " read -r -a HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -name ".*" -type f | tr '\r\n' ' ')
@@ -31,9 +32,13 @@ S70_hidden_file_check()
     for LINE in "${HIDDEN_FILES[@]}" ; do
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
     done
-    generate_html_file "$LOG_FILE"
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No hidden files found!"
+  fi
+  
+  if [[ $HTML == 1 ]]; then
+    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

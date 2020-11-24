@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check for information (release/version) about firmware and dump directory tree into log
 #               Access:
@@ -20,10 +20,15 @@
 
 S05_firmware_details()
 {
-  module_log_init "S05_firmware_testing_details"
+  CONTENT_AVAILABLE=0
+  module_log_init "s05_firmware_and_testing_details"
   module_title "Firmware and testing details"
 
   print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" directories detected."
+  
+  if [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l)" > 0 ]] || [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)" > 0 ]];then
+     CONTENT_AVAILABLE=1
+  fi
 
   LOG_FILE="$( get_log_file )"
 
@@ -42,6 +47,10 @@ S05_firmware_details()
     fi
   fi
   release_info
+  
+  if [[ $HTML == 1 ]]; then
+     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
 # Test source: http://linuxmafia.com/faq/Admin/release-files.html
@@ -67,9 +76,8 @@ release_info()
         print_output "\\n""$(magenta "Directory:")"" ""$( print_path "$R_INFO")""\\n"
       fi
     done
-    #generate_html_file $LOG_FILE
+    CONTENT_AVAILABLE=1
   else
     print_output "[-] No release/version information of target found"
   fi
-
 }

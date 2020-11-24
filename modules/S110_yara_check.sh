@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  Check all files for predefined code patterns with yara
 #               Access:
@@ -20,8 +20,9 @@
 
 S110_yara_check()
 {
-  module_log_init "S110_yara_check"
+  module_log_init "s110_yara_checker"
   module_title "Check for code patterns with yara"
+  CONTENT_AVAILABLE=0
 
   if [[ $YARA -eq 1 ]] ; then
     find "$EXT_DIR""/yara" -iname '*.yar*' -printf 'include "./%p"\n' | sort -n > "./dir-combined.yara"
@@ -37,6 +38,7 @@ S110_yara_check()
           print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
           echo
           CHECK=1
+          CONTENT_AVAILABLE=1
         fi
       fi
     done
@@ -47,5 +49,8 @@ S110_yara_check()
     print_output "[!] Check with yara not possible, because it isn't installed!"
   fi
 
+  if [[ $HTML == 2 ]]; then
+    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+  fi
 }
 
