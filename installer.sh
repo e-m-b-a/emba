@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
 
 # Description:  installs needed stuff:
 #                 Yara rules
@@ -99,6 +99,8 @@ fi
 echo -e "\\n""$ORANGE""$BOLD""Downloading objdump""$NC"
 if ! [[ -f "external/objdump" ]] ; then
   apt-get install texinfo
+  apt-get install gcc
+  apt-get install build-essential
   wget https://ftp.gnu.org/gnu/binutils/binutils-2.34.tar.gz -O external/binutils-2.34.tar.gz
   tar -zxf external/binutils-2.34.tar.gz -C external
   cd external/binutils-2.34/ || exit 1
@@ -110,4 +112,22 @@ if ! [[ -f "external/objdump" ]] ; then
   rm -R external/binutils-2.34
 else
   echo -e "$ORANGE""objdump is already downloaded and compiled""$NC"
+fi
+
+# aha for html generation
+echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
+if ! [[ -f "external/aha-master" ]] ; then
+  apt-get install make
+  apt-get install unzip
+  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
+  unzip ./external/aha-master.zip -d ./external
+  rm external/aha-master.zip
+  cd ./external/aha-master || exit 1
+  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
+  make
+  cd ../.. || exit 1
+  mv "external/aha-master/aha" "external/aha"
+  rm -R external/aha-master
+else
+  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
 fi
