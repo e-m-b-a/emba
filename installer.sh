@@ -116,17 +116,18 @@ fi
 
 # aha for html generation
 echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
-if ! [[ -f "aha-master" ]] ; then
-  cd ./external || exit 1
+if ! [[ -f "external/aha-master" ]] ; then
   apt-get install make
   apt-get install unzip
-  wget https://github.com/theZiz/aha/archive/master.zip
-  unzip ./aha-master.zip
-  cd ./aha-master || exit 1
+  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
+  unzip ./external/aha-master.zip -d ./external
+  rm external/aha-master.zip
+  cd ./external/aha-master || exit 1
   echo -e "$ORANGE""$BOLD""Compile aha""$NC"
   make
   cd ../.. || exit 1
+  mv "external/aha-master/aha" "external/aha"
+  rm -R external/aha-master
 else
   echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
 fi
-
