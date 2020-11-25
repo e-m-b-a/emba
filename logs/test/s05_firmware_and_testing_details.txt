@@ -1,7 +1,0 @@
-[[0;34m+[0m] [0;36m[1mFirmware and testing details[0m
-[1m=================================================================[0m
-[[0;33m*[0m] 757 files and 62 directories detected.
-
-[0;34m==>[0m [0;36mRelease/Version information[0m
------------------------------------------------------------------
-[[0;31m-[0m] No release/version information of target found
