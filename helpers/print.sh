@@ -31,7 +31,9 @@ ITALIC="\033[3m"
 MODULE_NUMBER="--"
 SUB_MODULE_COUNT=0
 GREP_LOG_DELIMITER=";"
+GREP_LOG_LINEBREAK=" || "
 MESSAGE_TYPE=""
+OLD_MESSAGE_TYPE=""
 
 welcome()
 {
@@ -62,8 +64,7 @@ module_title()
   if [[ "$2" != "no_log" ]] ; then
     echo -e "$(format_log "$MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
     if [[ $LOG_GREP -eq 1 ]] ; then
-      MESSAGE_TYPE="MODULE_TITLE"
-      echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$MODULE_TITLE")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+      write_grep_log "$MODULE_TITLE" "MODULE_TITLE"
     fi
   fi
   SUB_MODULE_COUNT=0
@@ -84,8 +85,7 @@ sub_module_title()
   echo -e "$(format_log "$SUB_MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
   if [[ $LOG_GREP -eq 1 ]] ; then
     SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
-    MESSAGE_TYPE="SUB_MODULE_TITLE"
-    echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$SUB_MODULE_TITLE")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+    write_grep_log "$SUB_MODULE_TITLE" "SUB_MODULE_TITLE"
   fi
 }
 
@@ -135,41 +135,45 @@ write_log()
 
 write_grep_log()
 {
+  OLD_MESSAGE_TYPE=""
   if [[ $LOG_GREP -eq 1 ]] ; then
-    local CUT_TYPE=0
-    if [[ -n "$2" ]] ; then
-      MESSAGE_TYPE="$2"
-    else
-      TYPE_CHECK="$( echo "$1" | cut -c1-3 )"
-      if [[ "$TYPE_CHECK" == "[-]" ]] ; then
-        MESSAGE_TYPE="FALSE"
-        CUT_TYPE=1
-      elif [[ "$TYPE_CHECK" == "[*]" ]] ; then
-        MESSAGE_TYPE="MESSAGE"
-        CUT_TYPE=1
-      elif [[ "$TYPE_CHECK" == "[!]" ]] ; then
-        MESSAGE_TYPE="WARNING"
-        CUT_TYPE=1
-      elif [[ "$TYPE_CHECK" == "[+]" ]] ; then
-        MESSAGE_TYPE="POSITIVE"
-        CUT_TYPE=1
-      else
-        if [[ "$MESSAGE_TYPE" == "POSITIVE"* ]] ; then
-          MESSAGE_TYPE="POSITIVE_INFO"
-        elif [[ "$MESSAGE_TYPE" == "NEGATIVE"* ]] ; then
-          MESSAGE_TYPE="NEGATIVE_INFO"
-        else
-          MESSAGE_TYPE="MESSAGE"
-        fi
-      fi
-    fi
     readarray -t OUTPUT_ARR <<< "$1"
     for E in "${OUTPUT_ARR[@]}" ; do
       if [[ -n "${E//[[:blank:]]/}" ]] && [[ "$E" != "\\n" ]] && [[ -n "$E" ]] ; then
-        if [[ $CUT_TYPE -eq 1 ]] ; then
-          echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$(echo "$E" | cut -c4- )")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        if [[ -n "$2" ]] ; then
+          MESSAGE_TYPE="$2"
+          OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+          TYPE=2
         else
-          echo "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(format_grep_log "$E")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+          TYPE_CHECK="$( echo "$E" | cut -c1-3 )"
+          if [[ "$TYPE_CHECK" == "[-]" ]] ; then
+            MESSAGE_TYPE="FALSE"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          elif [[ "$TYPE_CHECK" == "[*]" ]] ; then
+            MESSAGE_TYPE="MESSAGE"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          elif [[ "$TYPE_CHECK" == "[!]" ]] ; then
+            MESSAGE_TYPE="WARNING"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          elif [[ "$TYPE_CHECK" == "[+]" ]] ; then
+            MESSAGE_TYPE="POSITIVE"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          else
+            MESSAGE_TYPE="$OLD_MESSAGE_TYPE"
+            TYPE=3
+          fi
+        fi
+        if [[ $TYPE -eq 1 ]] ; then
+          echo -e "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "$(echo "$E" | cut -c4- )")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        elif [[ $TYPE -eq 2 ]] ; then
+          echo -e "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "$E")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        elif [[ $TYPE -eq 3 ]] ; then
+          truncate -s -1 "$GREP_LOG_FILE"
+          echo -e "$GREP_LOG_LINEBREAK""$(echo -e "$(format_grep_log "$E")")" | tee -a "$GREP_LOG_FILE" >/dev/null
         fi
       fi
     done
@@ -324,13 +328,17 @@ format_log()
 
 format_grep_log()
 {
-  echo "$MODULE_NUMBER""$GREP_LOG_DELIMITER""$SUB_MODULE_COUNT""$GREP_LOG_DELIMITER""$(echo "$1" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+  echo "$1" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
       | sed -e "s/^ *//" \
       | sed -e "s/\\\\n/\n/g" \
       | sed -e "s/$GREP_LOG_DELIMITER/,/g"
-  )"
+}
+
+add_info_grep_log()
+{
+  echo "$MODULE_NUMBER""$GREP_LOG_DELIMITER""$SUB_MODULE_COUNT""$GREP_LOG_DELIMITER"
 }
 
 print_help()
