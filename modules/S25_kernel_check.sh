@@ -119,14 +119,16 @@ analyze_kernel_module()
   sub_module_title "Analyze kernel modules"
 
   local MOD_DATA
-  MOD_DATA="$(find "$FIRMWARE_PATH" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
-  sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' 2> /dev/null)"
+  mapfile -t MOD_DATA < <(find "$FIRMWARE_PATH" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
+  sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' 2> /dev/null)
+
   local MOD_COUNT
   MOD_COUNT=$(echo "$MOD_DATA" | wc -l)
   print_output "[*] Found ""$MOD_COUNT"" kernel modules"
 
   for LINE in $MOD_DATA ; do
     local M_PATH
+    echo $LINE
     M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
     local LICENSE
     LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
