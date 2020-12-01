@@ -48,7 +48,7 @@ vul_func_basic_check()
         BIN_COUNT=$((BIN_COUNT+1))
         VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}" | grep -v "file format")"
         if [[ -n "$VUL_FUNC_RESULT" ]] ; then
-          print_output "[+] Vulnerable function in ""$(print_path "$LINE")"":"
+          print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
           print_output "$(indent "$VUL_FUNC_RESULT")""\\n"
           COUNTER=$((COUNTER+1))
         #else
