@@ -29,21 +29,54 @@ fi
 
 echo -e "\\n""$ORANGE""$BOLD""Install needed packages""$NC"
 apt-get update
-apt-get install tree
-apt-get install yara
-apt-get install shellcheck
-apt-get install device-tree-compiler
-apt-get install docker.io
+apt-get install tree -y
+apt-get install yara -y
+apt-get install shellcheck -y
+apt-get install device-tree-compiler -y
+apt-get install docker.io -y
+apt-get install unzip -y
+
 
 if ! [[ -d "external" ]] ; then
   mkdir external
 fi
-echo -e "\\n""$ORANGE""$BOLD""Downloading vulnerability database""$NC"
+
+echo -e "\\n""$ORANGE""$BOLD""Downloading vulnerability database from cve.mitre.org""$NC"
 if ! [[ -f "external/allitems.csv" ]] ; then
   wget https://cve.mitre.org/data/downloads/allitems.csv -O external/allitems.csv
 else
   echo -e "$ORANGE""Vulnerability database is already downloaded""$NC"
 fi
+
+echo -e "\\n""$ORANGE""$BOLD""Downloading vulnerability databases from nvd.nist.gov""$NC"
+if ! [[ -f "external/allitemscvss.csv" ]] ; then
+  if ! [[ -d "external/nvd" ]] ; then
+    mkdir external/nvd
+  fi
+  NVD_URL="https://nvd.nist.gov/feeds/json/cve/1.1/"
+  apt-get install jq -y
+  for YEAR in $(seq 2002 $(($(date +%Y)))); do
+    echo -e "$YEAR"
+    NVD_FILE="nvdcve-1.1-""$YEAR"".json"
+    if ! [[ -f "external/nvd/""$NVD_FILE"".zip" ]] ; then
+      wget "$NVD_URL""$NVD_FILE"".zip" -O "external/nvd/""$NVD_FILE"".zip"
+    else
+      echo -e "$ORANGE""$NVD_FILE"".zip is already downloaded""$NC"
+    fi
+    if [[ -f "external/nvd/""$NVD_FILE"".zip" ]] ; then
+      unzip -o "./external/nvd/""$NVD_FILE"".zip" -d "./external/nvd"
+      jq -r '. | .CVE_Items[] | [.cve.CVE_data_meta.ID, (.impact.baseMetricV2.cvssV2.baseScore|tostring), (.impact.baseMetricV3.cvssV3.baseScore|tostring)] | @csv' "./external/nvd/""$NVD_FILE" -c | sed -e 's/"//g' >> "./external/allitemscvss.csv"
+      rm "external/nvd/""$NVD_FILE"".zip"
+      rm "external/nvd/""$NVD_FILE"
+    else
+      echo -e "$ORANGE""$NVD_FILE"" is not available or a valid zip archive""$NC"
+    fi
+  done
+  rmdir "external/nvd/"
+else
+  echo -e "$ORANGE""Vulnerability database is already downloaded and created""$NC"
+fi
+
 
 echo -e "\\n""$ORANGE""$BOLD""Downloading linux-exploit-suggester""$NC"
 if ! [[ -f "external/linux-exploit-suggester.sh" ]] ; then
@@ -120,9 +153,8 @@ fi
 
 # aha for html generation
 echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
-if ! [[ -f "external/aha-master" ]] ; then
+if ! [[ -f "external/aha" ]] ; then
   apt-get install make
-  apt-get install unzip
   wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
   unzip ./external/aha-master.zip -d ./external
   rm external/aha-master.zip
