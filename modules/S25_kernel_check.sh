@@ -97,6 +97,7 @@ get_kernel_vulns()
       local KV
       KV=$(echo "$VER" | tr "-" " ")
       KV=$(echo "$KV" | tr "+" " ")
+      KV=$(echo "$KV" | tr "_" " ")
       KV=$(echo "$KV" | cut -d\  -f1)
 
       while echo "$KV" | grep -q '[a-zA-Z]'; do
