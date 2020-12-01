@@ -108,8 +108,12 @@ if ! [[ -f "external/objdump" ]] ; then
   ./configure --enable-targets=all
   make
   cd ../.. || exit 1
-  mv "external/binutils-2.34/binutils/objdump" "external/objdump"
-  rm -R external/binutils-2.34
+  if [[ -f "external/binutils-2.34/binutils/objdump" ]] ; then
+    mv "external/binutils-2.34/binutils/objdump" "external/objdump"
+    rm -R external/binutils-2.34
+  else
+    echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
+  fi
 else
   echo -e "$ORANGE""objdump is already downloaded and compiled""$NC"
 fi

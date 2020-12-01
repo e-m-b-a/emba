@@ -94,7 +94,7 @@ the firmware
 
 __Good to know:__
 - `sudo` is necessary for some modules to run properly
-- Currently only tested on [Kali Linux](https://kali.org/downloads)(2020.3)
+- Currently only tested on [Kali Linux](https://kali.org/downloads)(2020.4)
 - _emba_ needs some free disk space for logging
 - _emba_ uses well known tools like objdump, [LinEnum](https://github.com/rebootuser/LinEnum), [checksec](https://github.com/slimm609/checksec.sh), [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester), [cwe-checker](https://github.com/fkie-cad/cwe_checker)
 - _emba_ includes multiple modules of the well known Linux analyser [Lynis](https://cisofy.com/lynis/)
