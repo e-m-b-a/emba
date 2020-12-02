@@ -208,7 +208,7 @@ config_find() {
           fi
         done
       done
-      if [[ ! -z "$FILES" ]]; then
+      if [[ -n "$FILES" ]]; then
         echo -e "$FILES"
       fi
     fi
