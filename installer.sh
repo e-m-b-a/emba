@@ -56,7 +56,6 @@ if ! [[ -f "external/allitemscvss.csv" ]] ; then
   NVD_URL="https://nvd.nist.gov/feeds/json/cve/1.1/"
   apt-get install jq -y
   for YEAR in $(seq 2002 $(($(date +%Y)))); do
-    echo -e "$YEAR"
     NVD_FILE="nvdcve-1.1-""$YEAR"".json"
     if ! [[ -f "external/nvd/""$NVD_FILE"".zip" ]] ; then
       wget "$NVD_URL""$NVD_FILE"".zip" -O "external/nvd/""$NVD_FILE"".zip"
@@ -65,7 +64,7 @@ if ! [[ -f "external/allitemscvss.csv" ]] ; then
     fi
     if [[ -f "external/nvd/""$NVD_FILE"".zip" ]] ; then
       unzip -o "./external/nvd/""$NVD_FILE"".zip" -d "./external/nvd"
-      jq -r '. | .CVE_Items[] | [.cve.CVE_data_meta.ID, (.impact.baseMetricV2.cvssV2.baseScore|tostring), (.impact.baseMetricV3.cvssV3.baseScore|tostring)] | @csv' "./external/nvd/""$NVD_FILE" -c | sed -e 's/"//g' >> "./external/allitemscvss.csv"
+      jq -r '. | .CVE_Items[] | [.cve.CVE_data_meta.ID, (.impact.baseMetricV2.cvssV2.baseScore|tostring), (.impact.baseMetricV3.cvssV3.baseScore|tostring)] | @csv' "./external/nvd/""$NVD_FILE" -c | sed -e 's/\"//g' >> "./external/allitemscvss.csv"
       rm "external/nvd/""$NVD_FILE"".zip"
       rm "external/nvd/""$NVD_FILE"
     else
