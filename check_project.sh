@@ -8,7 +8,7 @@
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# Emba is licensed under GPLv3
+# emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
