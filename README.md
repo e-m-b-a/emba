@@ -13,7 +13,12 @@ Author(s): Michael Messner, Pascal Eckmann
 -->
 # emba, an analyzer for Linux-based firmware of embedded devices
 
-![Logo emba](./helpers/emba.png)
+<p align="center">
+  <img src="./helpers/emba.png" />
+</p>
+<p align="center">
+  <img src="https://github.com/e-m-b-a/emba/workflows/ShellCheck/badge.svg?branch=master" />
+</p>
 
 
 ### Why?
