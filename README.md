@@ -45,6 +45,8 @@ Test firmware / live system
 -e [./path]       Exclude paths from testing (multiple usage possible)
 -m [MODULE_NO.]   Test only with set modules [e.g. -m 05 -m 10 ... ] (multiple usage possible)
 -c                Enable cwe-checker
+-E                Enable automated qemu emulation tests (WARNING this module could harm your host!)
+
 
 Dependency check
 -d                Only check dependencies
@@ -123,6 +125,7 @@ For using _emba_ with all features, you will need following tools on your __Kali
 - `Option: shellcheck`
 - `Option: docker`
 - `Option: yara`
+- `Option: qemu static user mode emulators`
 
 To check these dependencies, only run `sudo ./emba.sh -d`
 
