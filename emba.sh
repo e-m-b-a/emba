@@ -8,7 +8,7 @@
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# Emba is licensed under GPLv3
+# emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -71,6 +71,7 @@ main()
   export HELP_DIR="./helpers"
   export MOD_DIR="./modules"
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
+  export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
 
   echo

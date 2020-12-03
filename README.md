@@ -7,13 +7,18 @@ emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 welcome to redistribute it under the terms of the GNU General Public License.
 See LICENSE file for usage of this software.
 
-Emba is licensed under GPLv3
+emba is licensed under GPLv3
 
 Author(s): Michael Messner, Pascal Eckmann
 -->
 # emba, an analyzer for Linux-based firmware of embedded devices
 
-![Logo emba](./helpers/emba.png)
+<p align="center">
+  <img src="./helpers/emba.png" />
+</p>
+<p align="center">
+  <img src="https://github.com/e-m-b-a/emba/workflows/ShellCheck/badge.svg?branch=master" />
+</p>
 
 
 ### Why?
