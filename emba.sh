@@ -63,7 +63,7 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
-  export EMULATION=0
+  export QEMULATION=0
 
   export LOG_DIR="./logs"
   export CONFIG_DIR="./config"
@@ -106,7 +106,7 @@ main()
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
         ;;
       E)
-        export EMULATION=1
+        export QEMULATION=1
         ;;
       f)
         export FIRMWARE=1
