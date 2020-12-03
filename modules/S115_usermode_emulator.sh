@@ -54,12 +54,15 @@ S115_usermode_emulator() {
   done
 
   cleanup
+
+  print_output "[*] Checking running processes for qemu processes:"
+  ps aux | grep qemu
 }
 
 cleanup() {
-  print_output "[*] killall qemu processes - check it with ps"
+  print_output "[*] Terminating qemu processes - check it with ps"
   for PID in "${PIDs[@]}"; do
-    #print_output "[*] terminating process $PID"
+    print_output "[*] terminating process $PID"
     kill "$PID" 2> /dev/null
   done
 
@@ -69,6 +72,11 @@ cleanup() {
     rm "$FIRMWARE_PATH"/qemu*static
   fi
 
+  umount "$FIRMWARE_PATH"/proc
+  umount "$FIRMWARE_PATH"/sys
+  umount "$FIRMWARE_PATH"/run
+  umount "$FIRMWARE_PATH"/dev
+
   SHORT_PATH=$SHORT_PATH_BAK
 }
 
@@ -76,20 +84,42 @@ prepare_emulator() {
   if [[ ! -f $FIRMWARE_PATH/$EMULATOR ]]; then
     print_output "[*] preparing the environment for usermode emulation"
     cp "$(which $EMULATOR)" "$FIRMWARE_PATH"
+
+    if ! [[ -d "$FIRMWARE_PATH"/proc ]] ; then
+      mkdir "$FIRMWARE_PATH"/proc
+    fi
+
+    if ! [[ -d "$FIRMWARE_PATH"/sys ]] ; then
+      mkdir "$FIRMWARE_PATH"/sys
+    fi
+
+    if ! [[ -d "$FIRMWARE_PATH"/run ]] ; then
+      mkdir "$FIRMWARE_PATH"/run
+    fi
+
+    if ! [[ -d "$FIRMWARE_PATH"/dev/pts ]] ; then
+      mkdir -p "$FIRMWARE_PATH"/dev/pts
+    fi
+
+    mount proc "$FIRMWARE_PATH"/proc -t proc
+    mount -o bind /run "$FIRMWARE_PATH"/run
+    mount -o bind /dev "$FIRMWARE_PATH"/dev
+    mount -o bind /sys "$FIRMWARE_PATH"/sys
+    mount
   fi
 }
 
 emulate_binary() {
   print_output "\n[*] trying to emulate binary $LINE"
   BIN_EMU="$(cut_path "$LINE")"
-  chroot "$FIRMWARE_PATH" ./"$EMULATOR" "$BIN_EMU" 2> /dev/null &
-  echo "1"
-  PID=$! 2> /dev/null
-  echo "2"
-  PIDs+=("$PID")
-  echo "3"
-  #echo "pid: $PID"
-  #print_output "\n[*] emulating $BIN_EMU with PID $PID"
-  #print_output "\n[*] emulating $BIN_EMU."
-  echo "4"
+  chroot "$FIRMWARE_PATH" ./"$EMULATOR" "$BIN_EMU" &
+  PID=$!
+  re='^[0-9]+$'
+  if ! [[ $PID =~ $re ]] ; then
+    echo "error: PID Not a number" >&2; exit 1
+    echo $PID
+  else
+    PIDs+=("$PID")
+    print_output "\n[*] Emulating $BIN_EMU with PID $PID"
+  fi
 }
