@@ -63,6 +63,7 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
+  export EMULATION=0
 
   export LOG_DIR="./logs"
   export CONFIG_DIR="./config"
@@ -84,7 +85,7 @@ main()
     exit 1
   fi
 
-  while getopts a:A:cde:f:Fhk:l:m:psvz OPT ; do
+  while getopts a:A:cde:Ef:Fhk:l:m:psvz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -102,6 +103,9 @@ main()
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
+        ;;
+      E)
+        export EMULATION=1
         ;;
       f)
         export FIRMWARE=1

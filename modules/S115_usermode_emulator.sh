@@ -21,42 +21,49 @@ S115_usermode_emulator() {
   module_log_init "usermode_emulator"
   module_title "Trying to emulate binaries via qemu usermode emulator"
 
-  SHORT_PATH_BAK=$SHORT_PATH
-  SHORT_PATH=1
-  declare -a PIDs
+  print_output "[-] This module is experimental and could harm your host environment."
 
-  for LINE in "${BINARIES[@]}" ; do
-    if ( file "$LINE" | grep -q ELF ) ; then
-      if ( file "$LINE" | grep -q "x86-64" ) ; then
-        EMULATOR="qemu-x86_64-static"
-      elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-        EMULATOR="qemu-i386-static"
-      elif ( file "$LINE" | grep -q "32-bit LSB.*ARM" ) ; then
-        EMULATOR="qemu-arm-static"
-      elif ( file "$LINE" | grep -q "32-bit MSB.*ARM" ) ; then
-        EMULATOR="qemu-armeb-static"
-      elif ( file "$LINE" | grep -q "32-bit LSB.*MIPS32" ) ; then
-        EMULATOR="qemu-mipsel-static"
-      elif ( file "$LINE" | grep -q "32-bit MSB.*MIPS32" ) ; then
-        EMULATOR="qemu-mips-static"
-      elif ( file "$LINE" | grep -q "32-bit MSB.*PowerPC" ) ; then
-        EMULATOR="qemu-ppc-static"
-      else
-        print_output "[-] no working emulator found for $LINE"
-        EMULATOR="NA"
+  if [[ "$EMULATION" -eq 1 ]]; then
+    SHORT_PATH_BAK=$SHORT_PATH
+    SHORT_PATH=1
+    declare -a PIDs
+
+    for LINE in "${BINARIES[@]}" ; do
+      if ( file "$LINE" | grep -q ELF ) ; then
+        if ( file "$LINE" | grep -q "x86-64" ) ; then
+          EMULATOR="qemu-x86_64-static"
+        elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
+          EMULATOR="qemu-i386-static"
+        elif ( file "$LINE" | grep -q "32-bit LSB.*ARM" ) ; then
+          EMULATOR="qemu-arm-static"
+        elif ( file "$LINE" | grep -q "32-bit MSB.*ARM" ) ; then
+          EMULATOR="qemu-armeb-static"
+        elif ( file "$LINE" | grep -q "32-bit LSB.*MIPS32" ) ; then
+          EMULATOR="qemu-mipsel-static"
+        elif ( file "$LINE" | grep -q "32-bit MSB.*MIPS32" ) ; then
+          EMULATOR="qemu-mips-static"
+        elif ( file "$LINE" | grep -q "32-bit MSB.*PowerPC" ) ; then
+          EMULATOR="qemu-ppc-static"
+        else
+          print_output "[-] no working emulator found for $LINE"
+          EMULATOR="NA"
+        fi
+
+        if [[ $EMULATOR != "NA" ]]; then
+          prepare_emulator
+          emulate_binary
+        fi
       fi
+    done
 
-      if [[ $EMULATOR != "NA" ]]; then
-        prepare_emulator
-        emulate_binary
-      fi
-    fi
-  done
+    cleanup
 
-  cleanup
-
-  print_output "[*] Checking running processes for qemu processes:"
-  ps aux | grep qemu
+    print_output "[*] Checking running processes for qemu processes:"
+    ps aux | grep qemu
+  else
+    print_output "[-] Automated emulation is disabled."
+    print_output "[-] Enable it with the parameter -E."
+  fi
 }
 
 cleanup() {
@@ -72,6 +79,7 @@ cleanup() {
     rm "$FIRMWARE_PATH"/qemu*static
   fi
 
+  print_output "[*] Umounting proc, sys, run and dev"
   umount "$FIRMWARE_PATH"/proc
   umount "$FIRMWARE_PATH"/sys
   umount "$FIRMWARE_PATH"/run
@@ -114,12 +122,7 @@ emulate_binary() {
   BIN_EMU="$(cut_path "$LINE")"
   chroot "$FIRMWARE_PATH" ./"$EMULATOR" "$BIN_EMU" &
   PID=$!
-  re='^[0-9]+$'
-  if ! [[ $PID =~ $re ]] ; then
-    echo "error: PID Not a number" >&2; exit 1
-    echo $PID
-  else
-    PIDs+=("$PID")
-    print_output "\n[*] Emulating $BIN_EMU with PID $PID"
-  fi
+  echo $PID
+  PIDs+=("$PID")
+  print_output "\n[*] Emulating $BIN_EMU with PID $PID"
 }
