@@ -270,6 +270,7 @@ print_help()
   echo -e "$CYAN""-e [./path]""$NC""       Exclude paths from testing (multiple usage possible)"
   echo -e "$CYAN""-m [MODULE_NO.]""$NC""   Test only with set modules [e.g. -m 05 -m 10 ... ]] (multiple usage possible)"
   echo -e "$CYAN""-c""$NC""                Enable cwe-checker"
+  echo -e "$CYAN""-E""$NC""                Enable automated qemu emulation tests (WARNING this module could harm your host!)"
   echo -e "\\nDependency check"
   echo -e "$CYAN""-d""$NC""                Only check dependencies"
   echo -e "$CYAN""-F""$NC""                Check dependencies but ignore errors"
