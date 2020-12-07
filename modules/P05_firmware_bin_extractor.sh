@@ -44,7 +44,8 @@ binwalking() {
   print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
   mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
 
-  print_output "\n[*] Architecture testing with binwalk ... could take a while"
+  # This test takes a long time and so I have removed it
+  #print_output "\n[*] Architecture testing with binwalk ... could take a while"
   #binwalk -Y "$FIRMWARE_BIN_PATH"
 
   OUTPUT_DIR=$(basename "$FIRMWARE_PATH")
