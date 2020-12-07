@@ -88,11 +88,7 @@ main()
     exit 1
   fi
 
-<<<<<<< HEAD
   while getopts a:A:cde:f:Fhk:l:m:svz OPT ; do
-=======
-  while getopts a:A:cde:Ef:Fhk:l:m:psvz OPT ; do
->>>>>>> upstream/master
     case $OPT in
       a)
         export ARCH="$OPTARG"
