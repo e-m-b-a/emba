@@ -275,7 +275,6 @@ print_help()
   echo -e "$CYAN""-F""$NC""                Check dependencies but ignore errors"
   echo -e "\\nSpecial tests"
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
-  echo -e "$CYAN""-p [./path]""$NC""       Firmware binary path"
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Print only relative paths"
   echo -e "$CYAN""-z""$NC""                Add ANSI color codes to log"
