@@ -154,10 +154,14 @@ main()
     PRE_CHECK=0
     print_output "[*] Firmware directory detected." "no_log"
     print_output "[*] Emba starts with testing the environment." "no_log"
-  else
+  elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
     print_output "[*] Emba starts with some basic tests on it." "no_log"
+  else
+    print_output "[-] Invalid firmware file" "no_log"
+    print_help
+    exit 1
   fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
