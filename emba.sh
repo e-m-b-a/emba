@@ -63,6 +63,7 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
+  export QEMULATION=0
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
 
@@ -87,7 +88,11 @@ main()
     exit 1
   fi
 
+<<<<<<< HEAD
   while getopts a:A:cde:f:Fhk:l:m:svz OPT ; do
+=======
+  while getopts a:A:cde:Ef:Fhk:l:m:psvz OPT ; do
+>>>>>>> upstream/master
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -105,6 +110,9 @@ main()
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
+        ;;
+      E)
+        export QEMULATION=1
         ;;
       f)
         export FIRMWARE=1
