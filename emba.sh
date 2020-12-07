@@ -88,7 +88,7 @@ main()
     exit 1
   fi
 
-  while getopts a:A:cde:Ef:Fhk:l:m:psvz OPT ; do
+  while getopts a:A:cde:Ef:Fhk:l:m:sz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
