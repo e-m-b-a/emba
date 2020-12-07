@@ -63,6 +63,8 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
+  export PRE_CHECK=0            # test and extract binary files with binwalk
+                                # afterwards do a default emba scan
 
   export LOG_DIR="./logs"
   export CONFIG_DIR="./config"
@@ -85,7 +87,7 @@ main()
     exit 1
   fi
 
-  while getopts a:A:cde:f:Fhk:l:m:psvz OPT ; do
+  while getopts a:A:cde:f:Fhk:l:m:svz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -147,13 +149,24 @@ main()
 
   FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
 
+  echo
+  if [[ -d "$FIRMWARE_PATH" ]]; then
+    PRE_CHECK=0
+    print_output "[*] Firmware directory detected." "no_log"
+    print_output "[*] Emba starts with testing the environment." "no_log"
+  else
+    PRE_CHECK=1
+    print_output "[*] Firmware binary detected." "no_log"
+    print_output "[*] Emba starts with some basic tests on it." "no_log"
+  fi
+
   if [[ $ONLY_DEP -eq 0 ]] ; then
     # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
     log_folder
 
     set_exclude
 
-    if [[ $KERNEL -eq 0 ]] ; then
+    if [[ $KERNEL -eq 0 && $PRE_CHECK -eq 0 ]] ; then
       architecture_check
     fi
   fi
@@ -172,6 +185,37 @@ main()
     fi
   fi
  
+  if [[ $PRE_CHECK -eq 1 ]] ; then
+    if [[ -f "$FIRMWARE_PATH" ]]; then
+
+      print_output "[!] Test started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
+
+       # 'main' functions of imported modules
+
+      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
+        local MODULES
+        MODULES=$(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
+        for MODULE_FILE in $MODULES ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+            MODULE_BN=$(basename "$MODULE_FILE")
+            MODULE_MAIN=${MODULE_BN%.*}
+            $MODULE_MAIN
+          fi
+        done
+      else
+        for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
+          local MODULE
+          MODULE=$(find "$MOD_DIR" -name "P""$SELECT_NUM""_*.sh" | sort -V 2> /dev/null)
+          if ( file "$MODULE" | grep -q "shell script" ) ; then
+            MODULE_BN=$(basename "$MODULE")
+            MODULE_MAIN=${MODULE_BN%.*}
+            $MODULE_MAIN
+          fi
+        done
+      fi
+    fi
+  fi
+
   if [[ $FIRMWARE -eq 1 ]] ; then
     if [[ -d "$FIRMWARE_PATH" ]]; then
 

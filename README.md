@@ -50,8 +50,9 @@ Dependency check
 -d                Only check dependencies
 -F                Check dependencies but ignore errors
 
-Test kernel config
+Special tests
 -k [./config]     Kernel config path
+-p [./path]       Firmware binary path (binwalk is needed)
 
 Modify output
 -s                Print only relative paths
@@ -123,6 +124,7 @@ For using _emba_ with all features, you will need following tools on your __Kali
 - `Option: shellcheck`
 - `Option: docker`
 - `Option: yara`
+- `Option: binwalk`
 
 To check these dependencies, only run `sudo ./emba.sh -d`
 

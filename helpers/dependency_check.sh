@@ -38,7 +38,7 @@ dependency_check()
     echo -e "$RED""    This script is only tested on KALI linux""$NC" 1>&2
   fi
 
-  if [[ $ONLY_DEP -eq 1 ]] && [[ -z "$ARCH" ]] ; then
+  if [[ $ONLY_DEP -eq 1 ]] && [[ -z "$ARCH" ]] || [[ "$PRE_CHECK" -eq 1 ]]; then
     print_output "    architecture - ""$ORANGE""not checked""$NC" "no_log"
   elif [[ $FIRMWARE -eq 1 ]] || { [[ $ONLY_DEP -eq 1 ]] && [[ -n "$ARCH" ]] ; } ; then
     print_output "    architecture - \\c" "no_log"

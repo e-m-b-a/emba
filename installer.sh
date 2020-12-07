@@ -35,6 +35,7 @@ apt-get install shellcheck -y
 apt-get install device-tree-compiler -y
 apt-get install docker.io -y
 apt-get install unzip -y
+apt-get install binwalk -y
 
 
 if ! [[ -d "external" ]] ; then
