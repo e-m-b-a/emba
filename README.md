@@ -52,7 +52,6 @@ Dependency check
 
 Special tests
 -k [./config]     Kernel config path
--p [./path]       Firmware binary path (binwalk is needed)
 
 Modify output
 -s                Print only relative paths
