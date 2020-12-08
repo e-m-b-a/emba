@@ -21,11 +21,15 @@ S115_usermode_emulator() {
   module_log_init "usermode_emulator"
   module_title "Trying to emulate binaries via qemu usermode emulator"
 
-  print_output "[!] This module is experimental and could harm your host environment.\\n"
+  print_output "[!] This module is experimental and could harm your host environment."
+  print_output "[!] This module sets up a copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
   if [[ "$QEMULATION" -eq 1 ]]; then
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
+
+    # as we modify the firmware we copy it to the log directory and do stuff in this area
+    copy_firmware
 
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q ELF ) && [[ "$LINE" != './qemu-'*'-static' ]]; then
@@ -65,6 +69,13 @@ S115_usermode_emulator() {
   fi
 }
 
+copy_firmware() {
+  print_output "[*] Copy firmware to log directory for emulation ..."
+  cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/
+  EMULATION_DIR=$(basename "$FIRMWARE_PATH")
+  EMULATION_PATH="$LOG_DIR"/"$EMULATION_DIR"
+}
+
 running_jobs() {
   CJOBS=$(pgrep -a "$EMULATOR")
   if [[ -n "$CJOBS" ]] ; then
@@ -78,7 +89,7 @@ running_jobs() {
 
 cleanup() {
   print_output "[*] Terminating qemu processes - check it with ps"
-  mapfile -t CJOBS < <(pgrep qemu-)
+  mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
   for PID in "${CJOBS[@]}"; do
     print_output "[*] Terminating process ""$PID"
     kill "$PID" 2> /dev/null
@@ -93,14 +104,14 @@ cleanup() {
   EMULATORS_=( qemu*static )
   if (( ${#EMULATORS_[@]} )) ; then
     print_output "[*] Cleaning the emulation environment\\n"
-    rm "$FIRMWARE_PATH"/qemu*static 2> /dev/null
+    rm "$EMULATION_PATH"/qemu*static 2> /dev/null
   fi
 
   echo
   print_output "[*] Umounting proc, sys and run"
-  umount -l "$FIRMWARE_PATH""/proc"
-  umount "$FIRMWARE_PATH""/sys"
-  umount "$FIRMWARE_PATH""/run"
+  umount -l "$EMULATION_PATH""/proc"
+  umount "$EMULATION_PATH""/sys"
+  umount "$EMULATION_PATH""/run"
 
   FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*")
   if [[ -n "$FILES" ]] ; then
@@ -119,70 +130,71 @@ cleanup() {
 }
 
 prepare_emulator() {
-  if [[ ! -f "$FIRMWARE_PATH""/""$EMULATOR" ]]; then
+
+  if [[ ! -f "$EMULATION_PATH""/""$EMULATOR" ]]; then
     print_output "[*] Preparing the environment for usermode emulation"
-    cp "$(which $EMULATOR)" "$FIRMWARE_PATH"
+    cp "$(which $EMULATOR)" "$EMULATION_PATH"/
 
-    if ! [[ -d "$FIRMWARE_PATH""/proc" ]] ; then
-      mkdir "$FIRMWARE_PATH""/proc" 2> /dev/null
+    if ! [[ -d "$EMULATION_PATH""/proc" ]] ; then
+      mkdir "$EMULATION_PATH""/proc" 2> /dev/null
     fi
 
-    if ! [[ -d "$FIRMWARE_PATH""/sys" ]] ; then
-      mkdir "$FIRMWARE_PATH""/sys" 2> /dev/null
+    if ! [[ -d "$EMULATION_PATH""/sys" ]] ; then
+      mkdir "$EMULATION_PATH""/sys" 2> /dev/null
     fi
 
-    if ! [[ -d "$FIRMWARE_PATH""/run" ]] ; then
-      mkdir "$FIRMWARE_PATH""/run" 2> /dev/null
+    if ! [[ -d "$EMULATION_PATH""/run" ]] ; then
+      mkdir "$EMULATION_PATH""/run" 2> /dev/null
     fi
 
-    if ! [[ -d "$FIRMWARE_PATH""/dev/" ]] ; then
-      mkdir "$FIRMWARE_PATH""/dev/" 2> /dev/null
+    if ! [[ -d "$EMULATION_PATH""/dev/" ]] ; then
+      mkdir "$EMULATION_PATH""/dev/" 2> /dev/null
     fi
 
-    mount proc "$FIRMWARE_PATH""/proc" -t proc 2> /dev/null
-    mount -o bind /run "$FIRMWARE_PATH""/run" 2> /dev/null
-    mount -o bind /sys "$FIRMWARE_PATH""/sys" 2> /dev/null
+    mount proc "$EMULATION_PATH""/proc" -t proc 2> /dev/null
+    mount -o bind /run "$EMULATION_PATH""/run" 2> /dev/null
+    mount -o bind /sys "$EMULATION_PATH""/sys" 2> /dev/null
 
-    if [[ -e "$FIRMWARE_PATH""/dev/console" ]] ; then
-      rm "$FIRMWARE_PATH""/dev/console" 2> /dev/null
+    if [[ -e "$EMULATION_PATH""/dev/console" ]] ; then
+      rm "$EMULATION_PATH""/dev/console" 2> /dev/null
     fi
-    mknod -m 622 "$FIRMWARE_PATH""/dev/console" c 5 1 2> /dev/null
+    mknod -m 622 "$EMULATION_PATH""/dev/console" c 5 1 2> /dev/null
 
-    if [[ -e "$FIRMWARE_PATH""/dev/null" ]] ; then
-      rm "$FIRMWARE_PATH""/dev/null" 2> /dev/null
+    if [[ -e "$EMULATION_PATH""/dev/null" ]] ; then
+      rm "$EMULATION_PATH""/dev/null" 2> /dev/null
     fi
-    mknod -m 666 "$FIRMWARE_PATH""/dev/null" c 1 3 2> /dev/null
+    mknod -m 666 "$EMULATION_PATH""/dev/null" c 1 3 2> /dev/null
 
-    if [[ -e "$FIRMWARE_PATH""/dev/zero" ]] ; then
-      rm "$FIRMWARE_PATH""/dev/zero" 2> /dev/null
+    if [[ -e "$EMULATION_PATH""/dev/zero" ]] ; then
+      rm "$EMULATION_PATH""/dev/zero" 2> /dev/null
     fi
-    mknod -m 666 "$FIRMWARE_PATH""/dev/zero" c 1 5 2> /dev/null
+    mknod -m 666 "$EMULATION_PATH""/dev/zero" c 1 5 2> /dev/null
 
-    if [[ -e "$FIRMWARE_PATH""/dev/ptmx" ]] ; then
-      rm "$FIRMWARE_PATH""/dev/ptmx" 2> /dev/null
+    if [[ -e "$EMULATION_PATH""/dev/ptmx" ]] ; then
+      rm "$EMULATION_PATH""/dev/ptmx" 2> /dev/null
     fi
-    mknod -m 666 "$FIRMWARE_PATH""/dev/ptmx" c 5 2 2> /dev/null
+    mknod -m 666 "$EMULATION_PATH""/dev/ptmx" c 5 2 2> /dev/null
 
-    if [[ -e "$FIRMWARE_PATH""/dev/tty" ]] ; then
-      rm "$FIRMWARE_PATH""/dev/tty" 2> /dev/null
+    if [[ -e "$EMULATION_PATH""/dev/tty" ]] ; then
+      rm "$EMULATION_PATH""/dev/tty" 2> /dev/null
     fi
-    mknod -m 666 "$FIRMWARE_PATH""/dev/tty" c 5 0 2> /dev/null
+    mknod -m 666 "$EMULATION_PATH""/dev/tty" c 5 0 2> /dev/null
 
-    if [[ -e "$FIRMWARE_PATH""/dev/random" ]] ; then
-      rm "$FIRMWARE_PATH""/dev/random" 2> /dev/null
+    if [[ -e "$EMULATION_PATH""/dev/random" ]] ; then
+      rm "$EMULATION_PATH""/dev/random" 2> /dev/null
     fi
-    mknod -m 444 "$FIRMWARE_PATH""/dev/random" c 1 8 2> /dev/null
+    mknod -m 444 "$EMULATION_PATH""/dev/random" c 1 8 2> /dev/null
 
-    if [[ -e "$FIRMWARE_PATH""/dev/urandom" ]] ; then
-      rm "$FIRMWARE_PATH""/dev/urandom" 2> /dev/null
+    if [[ -e "$EMULATION_PATH""/dev/urandom" ]] ; then
+      rm "$EMULATION_PATH""/dev/urandom" 2> /dev/null
     fi
-    mknod -m 444 "$FIRMWARE_PATH""/dev/urandom" c 1 9 2> /dev/null
+    mknod -m 444 "$EMULATION_PATH""/dev/urandom" c 1 9 2> /dev/null
 
-    chown -v root:tty "$FIRMWARE_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
+    chown -v root:tty "$EMULATION_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
 
     print_output ""
     print_output "[*] Currently mounted areas:"
-    print_output "$(indent "$(mount | grep "$FIRMWARE_PATH" 2> /dev/null )")""\\n"
+    print_output "$(indent "$(mount | grep "$EMULATION_PATH" 2> /dev/null )")""\\n"
 
   fi
   if ! [[ -d "$LOG_DIR""/qemu_emulator" ]] ; then
@@ -191,11 +203,16 @@ prepare_emulator() {
 }
 
 emulate_binary() {
-  print_output "[*] Trying to emulate binary ""$(print_path "$LINE")""$LINE"
   BIN_EMU="$(cut_path "$LINE")"
   BIN_EMU_NAME="$(basename "$LINE")"
-  chroot "$FIRMWARE_PATH" ./"$EMULATOR" "$BIN_EMU" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
-  print_output ""
-  print_output "[*] Emulating ""$BIN_EMU"" ... \\n"
+  
+  # emulate binary with different command line parameters:
+  EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version")
+  for PARAM in "${EMULATION_PARAMS[@]}"; do
+    print_output "[*] Trying to emulate binary ""$(print_path "$BIN_EMU")"" with parameter ""$PARAM"""
+
+    chroot "$EMULATION_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
+    print_output ""
+  done
 }
 
