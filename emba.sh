@@ -199,6 +199,7 @@ main()
       print_output "[!] Test started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
 
        # 'main' functions of imported modules
+       # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
