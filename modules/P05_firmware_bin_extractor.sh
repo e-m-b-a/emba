@@ -17,6 +17,7 @@ P05_firmware_bin_extractor() {
   module_title "Binary firmware extractor"
 
   binwalking
+  # probably we can do something more in the future
 }
 
 binwalking() {
@@ -33,6 +34,7 @@ binwalking() {
   mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
 
   # This test takes a long time and so I have removed it
+  # we come back to this topic later on - leave it here for the future
   #print_output "\n[*] Architecture testing with binwalk ... could take a while"
   #binwalk -Y "$FIRMWARE_BIN_PATH"
 

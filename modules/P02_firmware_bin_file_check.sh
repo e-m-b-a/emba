@@ -24,4 +24,6 @@ P02_firmware_bin_file_check() {
   print_output "[*] Details of the binary file:"
   print_output "[*] $FILE_LS_OUT"
   print_output "[*] $FILE_BIN_OUT"
+
+  # probably we can do a lot more stuff in the future ...
 }

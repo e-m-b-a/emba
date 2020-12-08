@@ -35,8 +35,14 @@ apt-get install shellcheck -y
 apt-get install device-tree-compiler -y
 apt-get install docker.io -y
 apt-get install unzip -y
-apt-get install qemu-user-static -y
-apt-get install binwalk -y
+if ! command -v qemu-mips-static > /dev/null ; then
+  echo -e "\\n""$ORANGE""$BOLD""Install qemu package""$NC"
+  apt-get install qemu-user-static -y
+fi
+if ! command -v binwalk > /dev/null ; then
+  echo -e "\\n""$ORANGE""$BOLD""Install binwalk package""$NC"
+  apt-get install binwalk -y
+fi
 
 
 if ! [[ -d "external" ]] ; then
@@ -145,6 +151,9 @@ if ! [[ -f "external/objdump" ]] ; then
   if [[ -f "external/binutils-2.34/binutils/objdump" ]] ; then
     mv "external/binutils-2.34/binutils/objdump" "external/objdump"
     rm -R external/binutils-2.34
+    if [[ -f "external/objdump" ]] ; then
+      echo -e "$GREEN""objdump installed successfully""$NC"
+    fi
   else
     echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
   fi
@@ -152,19 +161,19 @@ else
   echo -e "$ORANGE""objdump is already downloaded and compiled""$NC"
 fi
 
-# aha for html generation
-echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
-if ! [[ -f "external/aha" ]] ; then
-  apt-get install make
-  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
-  unzip ./external/aha-master.zip -d ./external
-  rm external/aha-master.zip
-  cd ./external/aha-master || exit 1
-  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
-  make
-  cd ../.. || exit 1
-  mv "external/aha-master/aha" "external/aha"
-  rm -R external/aha-master
-else
-  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
-fi
+# aha for html generation - future extension of emba
+#echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
+#if ! [[ -f "external/aha" ]] ; then
+#  apt-get install make
+#  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
+#  unzip ./external/aha-master.zip -d ./external
+#  rm external/aha-master.zip
+#  cd ./external/aha-master || exit 1
+#  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
+#  make
+#  cd ../.. || exit 1
+#  mv "external/aha-master/aha" "external/aha"
+#  rm -R external/aha-master
+#else
+#  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
+#fi

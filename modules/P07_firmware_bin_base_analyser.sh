@@ -16,10 +16,12 @@ P07_firmware_bin_base_analyser() {
   module_log_init "firmware_bin_base_analyser_log"
   module_title "Binary firmware OS detection"
 
-  string_analyse
+  os_identification
 }
 
-string_analyse() {
+os_identification() {
+
+  # We can improve this search stuff a lot in the future:
   COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c Linux 2> /dev/null)"
   COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" | grep -c Linux 2> /dev/null)"
   COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW))
