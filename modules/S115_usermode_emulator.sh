@@ -22,7 +22,16 @@ S115_usermode_emulator() {
   module_title "Trying to emulate binaries via qemu usermode emulator"
 
   print_output "[!] This module is experimental and could harm your host environment."
-  print_output "[!] This module sets up a copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+  print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+
+  print_output "[*] Should we proceed?\\n"
+  read -p "(y/n)  " -r ANSWER
+  case ${ANSWER:0:1} in
+    n|N|"" )
+      echo -e "\\n${RED}Terminating emba${NC}\\n"
+      exit 1
+    ;;
+  esac
 
   if [[ "$QEMULATION" -eq 1 ]]; then
     SHORT_PATH_BAK=$SHORT_PATH
