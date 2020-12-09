@@ -71,11 +71,16 @@ S115_usermode_emulator() {
 
     cleanup
     running_jobs
+    version_detection
 
   else
     print_output "[-] Automated emulation is disabled."
     print_output "$(indent "Enable it with the parameter -E.")"
   fi
+}
+
+version_detection() {
+  echo "upcoming version detection"
 }
 
 copy_firmware() {
