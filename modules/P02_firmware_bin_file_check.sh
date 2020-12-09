@@ -14,7 +14,7 @@
 
 P02_firmware_bin_file_check() {
   module_log_init "firmware_bin_file_log"
-  module_title "Binary firmware file analyser"
+  module_title "Binary firmware file analyzer"
 
   local FILE_BIN_OUT
   FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
@@ -22,8 +22,8 @@ P02_firmware_bin_file_check() {
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
   print_output "[*] Details of the binary file:"
-  print_output "[*] $FILE_LS_OUT"
-  print_output "[*] $FILE_BIN_OUT"
+  print_output "$(indent "$FILE_LS_OUT")"
+  print_output "$(indent "$FILE_BIN_OUT")"
 
   # probably we can do a lot more stuff in the future ...
 }

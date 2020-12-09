@@ -21,7 +21,7 @@ P05_firmware_bin_extractor() {
 }
 
 binwalking() {
-  sub_module_title "Analyse binary firmware blob with binwalk"
+  sub_module_title "Analyze binary firmware blob with binwalk"
 
   local MAIN_BINWALK
   print_output "[*] basic analysis with binwalk"
