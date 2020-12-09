@@ -173,10 +173,6 @@ main()
     log_folder
 
     set_exclude
-
-    if [[ $KERNEL -eq 0 && $PRE_CHECK -eq 0 ]] ; then
-      architecture_check
-    fi
   fi
 
   dependency_check
@@ -196,7 +192,8 @@ main()
   if [[ $PRE_CHECK -eq 1 ]] ; then
     if [[ -f "$FIRMWARE_PATH" ]]; then
 
-      print_output "[!] Test started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
+      echo
+      print_output "[!] Extraction started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
 
        # 'main' functions of imported modules
        # in the pre-check phase we execute all modules with P[Number]_Name.sh
@@ -222,11 +219,22 @@ main()
           fi
         done
       fi
+
+      echo
+      print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+
     fi
   fi
 
   if [[ $FIRMWARE -eq 1 ]] ; then
     if [[ -d "$FIRMWARE_PATH" ]]; then
+
+      echo
+      print_output "=================================================================\n" "no_log"
+
+      if [[ $KERNEL -eq 0 ]] ; then
+        architecture_check
+      fi
 
       check_firmware
 
