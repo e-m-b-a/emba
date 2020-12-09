@@ -46,9 +46,9 @@ vul_func_basic_check()
       if ( file "$LINE" | grep -q "ELF" ) ; then
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
-        VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}")"
+        VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}" | grep -v "file format")"
         if [[ -n "$VUL_FUNC_RESULT" ]] ; then
-          print_output "[+] Vulnerable function in ""$(print_path "$LINE")"":"
+          print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
           print_output "$(indent "$VUL_FUNC_RESULT")""\\n"
           COUNTER=$((COUNTER+1))
         #else
@@ -279,27 +279,31 @@ objdump_disassembly()
         fi
       done
   
-      for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-        print_output "\\n"
-        print_output "[*] ""$FUNCTION"" - top 10 results:"
-        local SEARCH_TERM
-        local RESULTS
-        readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed     "s/\.txt//" 2> /dev/null)
-
-        for LINE in "${RESULTS[@]}" ; do
-          SEARCH_TERM=$(echo "$LINE" | cut -d\  -f3)
-          if [[ -f "$BASE_LINUX_FILES" ]]; then
-            if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              print_output "$(indent "$(green "$LINE"" - common linux file: yes")")"
+      if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then 
+        for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
+          print_output "\\n"
+          print_output "[*] ""$FUNCTION"" - top 10 results:"
+          local SEARCH_TERM
+          local RESULTS
+          readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed     "s/\.txt//" 2> /dev/null)
+  
+          for LINE in "${RESULTS[@]}" ; do
+            SEARCH_TERM=$(echo "$LINE" | cut -d\  -f3)
+            if [[ -f "$BASE_LINUX_FILES" ]]; then
+              if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+                print_output "$(indent "$(green "$LINE"" - common linux file: yes")")"
+              else
+                print_output "$(indent "$(orange "$LINE"" - common linux file: no")")"
+              fi
             else
-              print_output "$(indent "$(orange "$LINE"" - common linux file: no")")"
+              print_output "$(indent "$(orange "$LINE")")"
             fi
-          else
-            print_output "$(indent "$(orange "$LINE")")"
-          fi
+          done
         done
-      done
-      echo
+        echo
+      else
+        print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
+      fi
 }
 
 output_function_details()

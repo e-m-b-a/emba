@@ -66,6 +66,7 @@ main()
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
   export LOG_GREP=0
+  export QEMULATION=0
 
   export LOG_DIR="$INVOCATION_PATH""/logs"
   export CONFIG_DIR="$INVOCATION_PATH""/config"
@@ -73,6 +74,7 @@ main()
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
+  export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
 
   echo
@@ -87,7 +89,7 @@ main()
     exit 1
   fi
 
-  while getopts a:A:cde:f:Fghk:l:m:psvz OPT ; do
+  while getopts a:A:cde:Ef:Fghk:l:m:psvz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -105,6 +107,9 @@ main()
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
+        ;;
+      E)
+        export QEMULATION=1
         ;;
       f)
         export FIRMWARE=1

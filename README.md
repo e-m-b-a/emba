@@ -13,7 +13,12 @@ Author(s): Michael Messner, Pascal Eckmann
 -->
 # emba, an analyzer for Linux-based firmware of embedded devices
 
-![Logo emba](./helpers/emba.png)
+<p align="center">
+  <img src="./helpers/emba.png" />
+</p>
+<p align="center">
+  <img src="https://github.com/e-m-b-a/emba/workflows/ShellCheck/badge.svg?branch=master" />
+</p>
 
 
 ### Why?
@@ -42,6 +47,7 @@ Test firmware / live system
 -c                Enable cwe-checker
 -g                Create grep-able log file in [log_path]/fw_grep.log
                   Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE
+-E                Enable automated qemu emulation tests (WARNING this module could harm your host!)
 
 Dependency check
 -d                Only check dependencies
@@ -96,7 +102,7 @@ the firmware
 
 __Good to know:__
 - `sudo` is necessary for some modules to run properly
-- Currently only tested on [Kali Linux](https://kali.org/downloads)(2020.3)
+- Currently only tested on [Kali Linux](https://kali.org/downloads)(2020.4)
 - _emba_ needs some free disk space for logging
 - _emba_ uses well known tools like objdump, [LinEnum](https://github.com/rebootuser/LinEnum), [checksec](https://github.com/slimm609/checksec.sh), [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester), [cwe-checker](https://github.com/fkie-cad/cwe_checker)
 - _emba_ includes multiple modules of the well known Linux analyser [Lynis](https://cisofy.com/lynis/)
@@ -120,6 +126,7 @@ For using _emba_ with all features, you will need following tools on your __Kali
 - `Option: shellcheck`
 - `Option: docker`
 - `Option: yara`
+- `Option: qemu static user mode emulators`
 
 To check these dependencies, only run `sudo ./emba.sh -d`
 

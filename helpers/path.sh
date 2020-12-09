@@ -208,13 +208,15 @@ config_find() {
         FIND_O="$(find "$S_LOC" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")"
         for LINE in $FIND_O; do
           if [[ -L "$LINE" ]] ; then
-              FILES="$FILES""$FIRMWARE_PATH""$(realpath "$LINE" 2>/dev/null )""\n"
+            FILES="$FILES""$FIRMWARE_PATH""$(realpath "$LINE" 2>/dev/null )""\n"
           else
             FILES="$FILES""$LINE""\n"
           fi
         done
       done
-      echo -e "$FILES"
+      if [[ -n "$FILES" ]]; then
+        echo -e "$FILES"
+      fi
     fi
   else
     echo "C_N_F"
