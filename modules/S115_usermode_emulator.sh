@@ -25,7 +25,7 @@ S115_usermode_emulator() {
   print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
   print_output "[*] Should we proceed?\\n"
-  read -p "(y/n)  " -r ANSWER
+  read -p "(y/N)  " -r ANSWER
   case ${ANSWER:0:1} in
     n|N|"" )
       echo -e "\\n${RED}Terminating emba${NC}\\n"
@@ -74,17 +74,36 @@ S115_usermode_emulator() {
     version_detection
 
   else
-    print_output "[-] Automated emulation is disabled."
+    print_output "[!] Automated emulation is disabled."
     print_output "$(indent "Enable it with the parameter -E.")"
   fi
 }
 
 version_detection() {
-  echo "upcoming version detection"
+  sub_module_title "Version detection started"
+
+  while read -r VERSION_LINE; do 
+    BINARY=$(echo "$VERSION_LINE" | cut -d: -f1)
+    VERSION_IDENTIFIER=$(echo "$VERSION_LINE" | cut -d: -f2 | sed s/^\"// | sed s/\"$//)
+    readarray -t VERSIONS_DETECTED < <(grep -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
+
+    if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
+      for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
+        # if we have multiple detection of the same version details:
+        if [ "$VERSION_DETECTED" != "$VERS_DET_OLD" ]; then
+          VERS_DET_OLD=$VERSION_DETECTED
+          VERSIONS_BIN=$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")
+          VERSION_DETECTED=$(echo "$VERSION_DETECTED" | cut -d: -f2-)
+          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} (from binary $BINARY) used in $VERSIONS_BIN."
+        fi
+      done
+    fi
+  done < "$CONFIG_DIR"/bin_version_strings.cfg 
+  echo
 }
 
 copy_firmware() {
-  print_output "[*] Copy firmware to log directory for emulation ..."
+  print_output "[*] Create a firmware backup for emulation ..."
   cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/
   EMULATION_DIR=$(basename "$FIRMWARE_PATH")
   EMULATION_PATH="$LOG_DIR"/"$EMULATION_DIR"
@@ -102,6 +121,9 @@ running_jobs() {
 }
 
 cleanup() {
+  # reset the terminal after all the uncontrolled emulation it is typically broken!
+  reset
+
   print_output "[*] Terminating qemu processes - check it with ps"
   mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
   for PID in "${CJOBS[@]}"; do
@@ -228,5 +250,7 @@ emulate_binary() {
     chroot "$EMULATION_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
     print_output ""
   done
+  # reset the terminal after all the uncontrolled emulation it is typically broken!
+  reset
 }
 
