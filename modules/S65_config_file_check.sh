@@ -20,7 +20,7 @@
 
 S65_config_file_check()
 {
-  module_log_init "config_file_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search/scan config files"
 
   scan_config

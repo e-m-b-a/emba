@@ -22,7 +22,7 @@
 
 S15_bootloader_check()
 {
-  module_log_init "bootloader_system_startup_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check bootloader and system startup"
 
   check_dtb

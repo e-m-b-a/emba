@@ -20,7 +20,7 @@
 
 S120_cwe_checker()
 {
-  module_log_init "cwe_bap_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries with bap and cwe-checker"
 
   if [[ $BAP -eq 1 ]] ; then
