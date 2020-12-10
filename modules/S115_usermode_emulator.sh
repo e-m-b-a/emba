@@ -28,7 +28,8 @@ S115_usermode_emulator() {
   read -p "(y/N)  " -r ANSWER
   case ${ANSWER:0:1} in
     n|N|"" )
-      echo -e "\\n${RED}Terminating emba${NC}\\n"
+      echo
+      print_output "[!] Terminating emba now.\\n"
       exit 1
     ;;
   esac
