@@ -38,34 +38,6 @@ dependency_check()
     echo -e "$RED""    This script is only tested on KALI linux""$NC" 1>&2
   fi
 
-  if [[ $ONLY_DEP -eq 1 ]] && [[ -z "$ARCH" ]] || [[ "$PRE_CHECK" -eq 1 ]]; then
-    print_output "    architecture - ""$ORANGE""not checked""$NC" "no_log"
-  elif [[ $FIRMWARE -eq 1 ]] || { [[ $ONLY_DEP -eq 1 ]] && [[ -n "$ARCH" ]] ; } ; then
-    print_output "    architecture - \\c" "no_log"
-    if [[ "$ARCH" == "MIPS" ]] ; then
-      ARCH_STR="mips"
-    elif [[ "$ARCH" == "ARM" ]] ; then
-      ARCH_STR="arm"
-    elif [[ "$ARCH" == "x86" ]] ; then
-      ARCH_STR="i386"
-    elif [[ "$ARCH" == "x64" ]] ; then
-      #ARCH_STR="i386:x86-64"
-      ARCH_STR="x86-64"
-    elif [[ "$ARCH" == "PPC" ]] ; then
-      #ARCH_STR="powerpc:common"
-      ARCH_STR="powerpc"
-    fi
-    if [[ -z "$ARCH_STR" ]] ; then
-      echo -e "$RED""not ok""$NC"
-      echo -e "$RED""    wrong architecture""$NC"
-      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-        exit 1
-      fi
-    else
-      echo -e "$GREEN""ok""$NC"
-    fi
-  fi
-
   print_output "    configuration directory - \\c" "no_log"
   if ! [[ -d "$CONFIG_DIR" ]] ; then
     echo -e "$RED""not ok""$NC"
@@ -377,5 +349,28 @@ dependency_check()
     echo
     print_help
     exit
+  fi
+}
+
+architecture_dep_check() {
+  echo
+  if [[ "$ARCH" == "MIPS" ]] ; then
+    ARCH_STR="mips"
+  elif [[ "$ARCH" == "ARM" ]] ; then
+    ARCH_STR="arm"
+  elif [[ "$ARCH" == "x86" ]] ; then
+    ARCH_STR="i386"
+  elif [[ "$ARCH" == "x64" ]] ; then
+    #ARCH_STR="i386:x86-64"
+    ARCH_STR="x86-64"
+  elif [[ "$ARCH" == "PPC" ]] ; then
+    #ARCH_STR="powerpc:common"
+    ARCH_STR="powerpc"
+  fi
+  if [[ -z "$ARCH_STR" ]] ; then
+    print_output "[-] ""$ARCH"" isn't a valid architecture - exit emba\\n" "no_log"
+    exit 1
+  else
+    print_output "[+] ""$ARCH"" is a valid architecture\\n" "no_log"
   fi
 }

@@ -14,6 +14,7 @@
 
 # Description:  Main script for load all necessary files and call main function of modules
 
+INVOCATION_PATH="."
 
 import_helper()
 {
@@ -50,6 +51,8 @@ import_module()
 main()
 {
 
+  INVOCATION_PATH="$(dirname "$0")"
+
   set -a 
 
   export ARCH_CHECK=1
@@ -67,11 +70,11 @@ main()
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
 
-  export LOG_DIR="./logs"
-  export CONFIG_DIR="./config"
-  export EXT_DIR="./external"
-  export HELP_DIR="./helpers"
-  export MOD_DIR="./modules"
+  export LOG_DIR="$INVOCATION_PATH""/logs"
+  export CONFIG_DIR="$INVOCATION_PATH""/config"
+  export EXT_DIR="$INVOCATION_PATH""/external"
+  export HELP_DIR="$INVOCATION_PATH""/helpers"
+  export MOD_DIR="$INVOCATION_PATH""/modules"
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
   export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
@@ -243,6 +246,7 @@ main()
 
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
+        architecture_dep_check
       fi
 
       check_firmware

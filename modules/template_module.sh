@@ -31,7 +31,7 @@
 
 empty_module() {
   # Initialize module and creates a log file "empty_module_log.txt" in your log folder
-  module_log_init "empty_module_log"
+  module_log_init "${FUNCNAME[0]}"
   # Prints title to CLI and into log
   module_title "Empty module"
 

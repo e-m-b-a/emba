@@ -20,7 +20,7 @@
 
 S100_command_inj_check()
 {
-  module_log_init "command_inj_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search areas for command injections"
 
   local CMD_INJ_DIRS
