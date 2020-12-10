@@ -14,7 +14,6 @@
 
 P07_firmware_bin_base_analyzer() {
   module_log_init "${FUNCNAME[0]}"
-  #module_log_init "firmware_bin_base_analyser_log"
   module_title "Binary firmware OS detection"
 
   os_identification
