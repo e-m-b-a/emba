@@ -20,7 +20,7 @@
 
 S110_yara_check()
 {
-  module_log_init "S110_yara_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check for code patterns with yara"
 
   if [[ $YARA -eq 1 ]] ; then

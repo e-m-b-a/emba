@@ -13,7 +13,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 P05_firmware_bin_extractor() {
-  module_log_init "firmware_bin_extractor_log"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
 
   binwalking

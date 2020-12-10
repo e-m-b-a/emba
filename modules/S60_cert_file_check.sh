@@ -20,7 +20,7 @@
 
 S60_cert_file_check()
 {
-  module_log_init "S60_certification_etc_search"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search certification files and other critical interesting stuff"
 
   local CERT_FILES_ARR

@@ -21,7 +21,7 @@
 
 S25_kernel_check()
 {
-  module_log_init "S25_kernel_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check kernel"
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel

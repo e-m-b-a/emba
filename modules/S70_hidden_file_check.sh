@@ -20,7 +20,7 @@
 
 S70_hidden_file_check()
 {
-  module_log_init "S70_hidden_file_search"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search hidden files"
 
   local HIDDEN_FILES

@@ -20,7 +20,7 @@
 
 S75_network_check()
 {
-  module_log_init "S75_network_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search network configs"
 
   check_resolv

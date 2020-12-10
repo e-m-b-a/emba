@@ -20,7 +20,7 @@
 
 S95_interesting_binaries_check()
 {
-  module_log_init "S95_interesting_binaries_check"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check interesting binaries"
 
   interesting_binaries
