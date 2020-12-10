@@ -18,7 +18,7 @@
 #                 binary array via ${BINARIES[@]}
 
 S115_usermode_emulator() {
-  module_log_init "usermode_emulator"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Trying to emulate binaries via qemu usermode emulator"
 
   print_output "[!] This module is experimental and could harm your host environment."
@@ -94,7 +94,7 @@ version_detection() {
           VERS_DET_OLD=$VERSION_DETECTED
           VERSIONS_BIN=$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")
           VERSION_DETECTED=$(echo "$VERSION_DETECTED" | cut -d: -f2-)
-          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} (from binary $BINARY) used in $VERSIONS_BIN."
+          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} (from binary $BINARY) found in $VERSIONS_BIN."
         fi
       done
     fi
