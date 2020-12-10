@@ -18,7 +18,7 @@
 #                 binary array via ${BINARIES[@]}
 
 S115_usermode_emulator() {
-  module_log_init "usermode_emulator"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Trying to emulate binaries via qemu usermode emulator"
 
   print_output "[!] This module is experimental and could harm your host environment.\\n"
