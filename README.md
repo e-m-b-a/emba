@@ -53,7 +53,7 @@ Dependency check
 -d                Only check dependencies
 -F                Check dependencies but ignore errors
 
-Test kernel config
+Special tests
 -k [./config]     Kernel config path
 
 Modify output
@@ -127,6 +127,7 @@ For using _emba_ with all features, you will need following tools on your __Kali
 - `Option: docker`
 - `Option: yara`
 - `Option: qemu static user mode emulators`
+- `Option: binwalk`
 
 To check these dependencies, only run `sudo ./emba.sh -d`
 
