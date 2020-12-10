@@ -52,8 +52,6 @@ main()
 {
   INVOCATION_PATH="$(dirname "$0")"
 
-  INVOCATION_PATH="$(dirname "$0")"
-
   set -a 
 
   export ARCH_CHECK=1
