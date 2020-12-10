@@ -234,6 +234,7 @@ main()
 
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
+        architecture_dep_check
       fi
 
       check_firmware
