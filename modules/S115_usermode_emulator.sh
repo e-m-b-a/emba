@@ -109,9 +109,7 @@ detect_root_dir() {
   if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
-    #EMULATION_PATH=$(find "$EMULATION_PATH" -wholename "*$INTERPRETER_FULL_PATH" | sort -u | sed -e 's/$INTERPRETER//')
     EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -wholename "*$INTERPRETER_FULL_PATH" | sort -u)
-    #EMULATION_PATH=$(echo "$EMULATION_PATH" | sed -e s/"$INTERPRETER"//)
     EMULATION_PATH=$(echo "${EMULATION_PATH//$INTERPRETER/}")
   else
     # if we can't find the interpreter we fall back to the original root directory
@@ -257,7 +255,6 @@ prepare_emulator() {
 }
 
 emulate_binary() {
-  BIN_EMU="$(cut_path "$LINE")"
   BIN_EMU_NAME="$(basename "$LINE")"
 
   ## as we currently do not have the right path of our binary we have to find it now:
