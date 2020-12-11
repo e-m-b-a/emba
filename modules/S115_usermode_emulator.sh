@@ -19,7 +19,7 @@
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Trying to emulate binaries via qemu usermode emulator"
+  module_title "Software component and version detection started via emulation with qemu usermode emulation"
 
   print_output "[!] This module is experimental and could harm your host environment."
   print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
@@ -63,6 +63,7 @@ S115_usermode_emulator() {
         fi
 
         if [[ "$EMULATOR" != "NA" ]]; then
+          detect_root_dir
           prepare_emulator
           emulate_binary
         fi
@@ -81,20 +82,20 @@ S115_usermode_emulator() {
 }
 
 version_detection() {
-  sub_module_title "Version detection started"
+  sub_module_title "Software component and version detection started"
 
   while read -r VERSION_LINE; do 
-    BINARY=$(echo "$VERSION_LINE" | cut -d: -f1)
-    VERSION_IDENTIFIER=$(echo "$VERSION_LINE" | cut -d: -f2 | sed s/^\"// | sed s/\"$//)
+    BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f2 | sed s/^\"// | sed s/\"$//)"
     readarray -t VERSIONS_DETECTED < <(grep -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
       for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
         # if we have multiple detection of the same version details:
         if [ "$VERSION_DETECTED" != "$VERS_DET_OLD" ]; then
-          VERS_DET_OLD=$VERSION_DETECTED
-          VERSIONS_BIN=$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")
-          VERSION_DETECTED=$(echo "$VERSION_DETECTED" | cut -d: -f2-)
+          VERS_DET_OLD="$VERSION_DETECTED"
+          VERSIONS_BIN="$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
+          VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
           print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} (from binary $BINARY) found in $VERSIONS_BIN."
         fi
       done
@@ -103,11 +104,32 @@ version_detection() {
   echo
 }
 
+detect_root_dir() {
+  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -type f -executable -exec file {} \; | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  #echo "0: $INTERPRETER_FULL_PATH"
+  if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
+    #echo "1: $INTERPRETER_FULL_PATH"
+    # now we have a result like this "/lib/ld-uClibc.so.0"
+    INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
+    #echo "2: $INTERPRETER"
+    #EMULATION_PATH=$(find "$EMULATION_PATH" -wholename "*$INTERPRETER_FULL_PATH" | sort -u | sed -e 's/$INTERPRETER//')
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -wholename "*$INTERPRETER_FULL_PATH" | sort -u)
+    #echo "3: $EMULATION_PATH"
+    #EMULATION_PATH=$(echo "$EMULATION_PATH" | sed -e s/"$INTERPRETER"//)
+    EMULATION_PATH=$(echo "${EMULATION_PATH//$INTERPRETER/}")
+    #echo "4: $EMULATION_PATH"
+  else
+    # if we can't find the interpreter we fall back to the original root directory
+    EMULATION_PATH=$EMULATION_PATH_BASE
+  fi
+  print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
+}
+
 copy_firmware() {
   print_output "[*] Create a firmware backup for emulation ..."
-  cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/
+  cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/ 2> /dev/null
   EMULATION_DIR=$(basename "$FIRMWARE_PATH")
-  EMULATION_PATH="$LOG_DIR"/"$EMULATION_DIR"
+  EMULATION_PATH_BASE="$LOG_DIR"/"$EMULATION_DIR"
 }
 
 running_jobs() {
@@ -242,11 +264,16 @@ prepare_emulator() {
 emulate_binary() {
   BIN_EMU="$(cut_path "$LINE")"
   BIN_EMU_NAME="$(basename "$LINE")"
+
+  ## oh my god this module is a dirty hack ;)
+  ## as we currently do not have the right path of our binary we have to find it now:
+  DIR=$(pwd)
+  BIN_EMU="$(cd "$EMULATION_PATH" && find . -type f -executable -name "$BIN_EMU_NAME" && cd "$DIR" || exit)"
   
   # emulate binary with different command line parameters:
-  EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version")
+  EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
   for PARAM in "${EMULATION_PARAMS[@]}"; do
-    print_output "[*] Trying to emulate binary ""$(print_path "$BIN_EMU")"" with parameter ""$PARAM"""
+    print_output "[*] Trying to emulate binary ""$BIN_EMU"" with parameter ""$PARAM"""
 
     chroot "$EMULATION_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
     print_output ""
