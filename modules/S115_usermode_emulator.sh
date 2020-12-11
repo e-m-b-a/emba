@@ -106,18 +106,13 @@ version_detection() {
 
 detect_root_dir() {
   INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -type f -executable -exec file {} \; | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
-  #echo "0: $INTERPRETER_FULL_PATH"
   if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
-    #echo "1: $INTERPRETER_FULL_PATH"
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
-    #echo "2: $INTERPRETER"
     #EMULATION_PATH=$(find "$EMULATION_PATH" -wholename "*$INTERPRETER_FULL_PATH" | sort -u | sed -e 's/$INTERPRETER//')
     EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -wholename "*$INTERPRETER_FULL_PATH" | sort -u)
-    #echo "3: $EMULATION_PATH"
     #EMULATION_PATH=$(echo "$EMULATION_PATH" | sed -e s/"$INTERPRETER"//)
     EMULATION_PATH=$(echo "${EMULATION_PATH//$INTERPRETER/}")
-    #echo "4: $EMULATION_PATH"
   else
     # if we can't find the interpreter we fall back to the original root directory
     EMULATION_PATH=$EMULATION_PATH_BASE
@@ -265,7 +260,6 @@ emulate_binary() {
   BIN_EMU="$(cut_path "$LINE")"
   BIN_EMU_NAME="$(basename "$LINE")"
 
-  ## oh my god this module is a dirty hack ;)
   ## as we currently do not have the right path of our binary we have to find it now:
   DIR=$(pwd)
   BIN_EMU="$(cd "$EMULATION_PATH" && find . -type f -executable -name "$BIN_EMU_NAME" && cd "$DIR" || exit)"
