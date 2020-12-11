@@ -12,7 +12,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-P07_firmware_bin_base_analyser() {
+P07_firmware_bin_base_analyzer() {
+
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware OS detection"
 
