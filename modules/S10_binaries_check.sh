@@ -326,34 +326,18 @@ output_function_details()
   
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
       print_output "$OUTPUT"
-      LOG_FILE_O="$LOG_FILE"
-      LOG_FILE="$LOG_FILE_LOC"
-      write_log "$OUTPUT"
-      LOG_FILE="$LOG_FILE_O"
+      write_log "$OUTPUT" "$LOG_FILE_LOC"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function Count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
       print_output "$OUTPUT"
-      LOG_FILE_O="$LOG_FILE"
-      LOG_FILE="$LOG_FILE_LOC"
-      write_log "$OUTPUT"
-      LOG_FILE="$LOG_FILE_O"
+      write_log "$OUTPUT" "$LOG_FILE_LOC"
     else
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
       print_output "$OUTPUT"
-      LOG_FILE_O="$LOG_FILE"
-      LOG_FILE="$LOG_FILE_LOC"
-      write_log "$OUTPUT"
-      LOG_FILE="$LOG_FILE_O"
+      write_log "$OUTPUT" "$LOG_FILE_LOC"
     fi
-#  else
-#    OUTPUT="[*] ""$(print_path "$LINE")"": Vulnerable function: ""$FUNCTION"" / Function count: ""$COUNT_FUNC""\\n"
-#    print_output "$OUTPUT"
-#    LOG_FILE_O="$LOG_FILE"
-#    LOG_FILE="$LOG_FILE_LOC"
-#    write_log "$OUTPUT"
-#    LOG_FILE="$LOG_FILE_O"
   fi
 
   mv "$LOG_FILE_LOC" "$LOG_DIR""/vul_func_checker/vul_func_""$COUNT_FUNC""_""$FUNCTION""-""$NAME"".txt" 2> /dev/null
