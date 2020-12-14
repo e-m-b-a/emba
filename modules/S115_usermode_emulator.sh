@@ -188,8 +188,8 @@ prepare_emulator() {
     if ! command -v "$EMULATOR" > /dev/null ; then
       echo
       print_output "[!] Is the qemu package installed?"
-      print_output "[!] We can't find it!"
-      print_output "[!] Terminating emba now.\\n"
+      print_output "$(indent "We can't find it!")"
+      print_output "$(indent "$(red "Terminating emba now.\\n")")"
       exit 1
     fi
     cp "$(which $EMULATOR)" "$EMULATION_PATH"/
