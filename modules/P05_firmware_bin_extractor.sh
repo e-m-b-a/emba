@@ -26,7 +26,7 @@ binwalking() {
   local MAIN_BINWALK
   print_output "[*] basic analysis with binwalk"
   MAIN_BINWALK=$(binwalk "$FIRMWARE_PATH")
-  echo "$MAIN_BINWALK"
+  print_output "[*] $MAIN_BINWALK"
 
   echo
   print_output "[*] Entropy testing with binwalk ... "
