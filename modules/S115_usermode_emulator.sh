@@ -110,7 +110,7 @@ detect_root_dir() {
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
     EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -wholename "*$INTERPRETER_FULL_PATH" | sort -u)
-    EMULATION_PATH=$(echo "${EMULATION_PATH//$INTERPRETER/}")
+    EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
   else
     # if we can't find the interpreter we fall back to the original root directory
     EMULATION_PATH=$EMULATION_PATH_BASE
