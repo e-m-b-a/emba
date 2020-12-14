@@ -28,6 +28,13 @@ NC="\033[0m"  # no color
 BOLD="\033[1m"
 ITALIC="\033[3m"
 
+MODULE_NUMBER="--"
+SUB_MODULE_COUNT=0
+GREP_LOG_DELIMITER=";"
+GREP_LOG_LINEBREAK=" || "
+MESSAGE_TYPE=""
+OLD_MESSAGE_TYPE=""
+
 welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
@@ -42,6 +49,7 @@ module_log_init()
   local LOG_FILE_NAME
   LOG_FILE_NAME="$1"
   local FILE_NAME
+  MODULE_NUMBER="$(echo "$LOG_FILE_NAME" | cut -d "_" -f1 | cut -c2- )"
   FILE_NAME=$(echo "$LOG_FILE_NAME" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
   LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
 }
@@ -55,7 +63,11 @@ module_title()
   echo -e "\\n\\n""$MODULE_TITLE_FORMAT"
   if [[ "$2" != "no_log" ]] ; then
     echo -e "$(format_log "$MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
+    if [[ $LOG_GREP -eq 1 ]] ; then
+      write_grep_log "$MODULE_TITLE" "MODULE_TITLE"
+    fi
   fi
+  SUB_MODULE_COUNT=0
 }
 
 get_log_file()
@@ -71,6 +83,10 @@ sub_module_title()
   SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""$SUB_MODULE_TITLE""${NC}""\\n-----------------------------------------------------------------"
   echo -e "$SUB_MODULE_TITLE_FORMAT"
   echo -e "$(format_log "$SUB_MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
+  if [[ $LOG_GREP -eq 1 ]] ; then
+    SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
+    write_grep_log "$SUB_MODULE_TITLE" "SUB_MODULE_TITLE"
+  fi
 }
 
 print_output()
@@ -92,6 +108,9 @@ print_output()
       echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null
     fi
   fi
+  if [[ "$2" != "no_log" ]] ; then
+    write_grep_log "$OUTPUT"
+  fi
 }
 
 write_log()
@@ -104,16 +123,67 @@ write_log()
     if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
       local COLOR_OUTPUT_STRING
       COLOR_OUTPUT_STRING="$(color_output "$E")"
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null
+      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$2" >/dev/null
     else
-      echo -e "$(format_log "$E")" | tee -a "$LOG_FILE" >/dev/null
+      echo -e "$(format_log "$E")" | tee -a "$2" >/dev/null
     fi
   done
+  if [[ "$3" == "g" ]] ; then
+    write_grep_log "$1"
+  fi
 }
 
-warning()
+write_grep_log()
 {
-  echo -e "\\n[""$RED""-""$NC""] ""$ORANGE""$1""$NC"
+  OLD_MESSAGE_TYPE=""
+  if [[ $LOG_GREP -eq 1 ]] ; then
+    readarray -t OUTPUT_ARR <<< "$1"
+    for E in "${OUTPUT_ARR[@]}" ; do
+      if [[ -n "${E//[[:blank:]]/}" ]] && [[ "$E" != "\\n" ]] && [[ -n "$E" ]] ; then
+        if [[ -n "$2" ]] ; then
+          MESSAGE_TYPE="$2"
+          OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+          TYPE=2
+        else
+          TYPE_CHECK="$( echo "$E" | cut -c1-3 )"
+          if [[ "$TYPE_CHECK" == "[-]" ]] ; then
+            MESSAGE_TYPE="FALSE"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          elif [[ "$TYPE_CHECK" == "[*]" ]] ; then
+            MESSAGE_TYPE="MESSAGE"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          elif [[ "$TYPE_CHECK" == "[!]" ]] ; then
+            MESSAGE_TYPE="WARNING"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          elif [[ "$TYPE_CHECK" == "[+]" ]] ; then
+            MESSAGE_TYPE="POSITIVE"
+            OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
+            TYPE=1
+          else
+            MESSAGE_TYPE="$OLD_MESSAGE_TYPE"
+            TYPE=3
+          fi
+        fi
+        if [[ $TYPE -eq 1 ]] ; then
+          echo -e "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "$(echo "$E" | cut -c4- )")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        elif [[ $TYPE -eq 2 ]] ; then
+          echo -e "$MESSAGE_TYPE""$GREP_LOG_DELIMITER""$(echo -e "$(add_info_grep_log)")""$(echo -e "$(format_grep_log "$E")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        elif [[ $TYPE -eq 3 ]] ; then
+          truncate -s -1 "$GREP_LOG_FILE"
+          echo -e "$GREP_LOG_LINEBREAK""$(echo -e "$(format_grep_log "$E")")" | tee -a "$GREP_LOG_FILE" >/dev/null
+        fi
+      fi
+    done
+  fi
+}
+
+reset_module_count()
+{
+  MODULE_NUMBER="--"
+  SUB_MODULE_COUNT=0
 }
 
 color_output()
@@ -256,6 +326,20 @@ format_log()
   fi
 }
 
+format_grep_log()
+{
+  echo "$1" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+      | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+      | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
+      | sed -e "s/^ *//" \
+      | sed -e "s/\\\\n/\n/g" \
+      | sed -e "s/$GREP_LOG_DELIMITER/,/g"
+}
+
+add_info_grep_log()
+{
+  echo "$MODULE_NUMBER""$GREP_LOG_DELIMITER""$SUB_MODULE_COUNT""$GREP_LOG_DELIMITER"
+}
 
 print_help()
 {
@@ -270,6 +354,8 @@ print_help()
   echo -e "$CYAN""-e [./path]""$NC""       Exclude paths from testing (multiple usage possible)"
   echo -e "$CYAN""-m [MODULE_NO.]""$NC""   Test only with set modules [e.g. -m 05 -m 10 ... ]] (multiple usage possible)"
   echo -e "$CYAN""-c""$NC""                Enable cwe-checker"
+  echo -e "$CYAN""-g""$NC""                Create grep-able log file in [log_path]/fw_grep.log"
+  echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
   echo -e "$CYAN""-E""$NC""                Enable automated qemu emulation tests (WARNING this module could harm your host!)"
   echo -e "\\nDependency check"
   echo -e "$CYAN""-d""$NC""                Only check dependencies"

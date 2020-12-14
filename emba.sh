@@ -50,7 +50,6 @@ import_module()
 
 main()
 {
-
   INVOCATION_PATH="$(dirname "$0")"
 
   set -a 
@@ -66,6 +65,7 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
+  export LOG_GREP=0
   export QEMULATION=0
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
@@ -91,7 +91,7 @@ main()
     exit 1
   fi
 
-  while getopts a:A:cde:Ef:Fhk:l:m:sz OPT ; do
+  while getopts a:A:cde:Ef:Fghk:l:m:sz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -119,6 +119,9 @@ main()
         ;;
       F)
         export FORCE=1
+        ;;
+      g)
+        export LOG_GREP=1
         ;;
       h)
         print_help
@@ -183,6 +186,11 @@ main()
   if [[ $ONLY_DEP -eq 0 ]] ; then
     # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
     log_folder
+
+    if [[ $LOG_GREP -eq 1 ]] ; then
+      create_grep_log
+      write_grep_log "sudo ""$INVOCATION_PATH""/emba.sh ""$*" "COMMAND"
+    fi
 
     set_exclude
   fi
@@ -256,6 +264,7 @@ main()
       echo
 
       print_output "[!] Test started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
+      write_grep_log "$(date)" "TIMESTAMP"
 
       # 'main' functions of imported modules
 
@@ -267,6 +276,7 @@ main()
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
+            reset_module_count
           fi
         done
       else
@@ -277,6 +287,7 @@ main()
             MODULE_BN=$(basename "$MODULE")
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
+            reset_module_count
           fi
         done
       fi
@@ -285,7 +296,8 @@ main()
 
       echo
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-
+      write_grep_log "$(date)" "TIMESTAMP"
+      write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
     else
       print_output "\\n" "no_log"
       print_output "[!] No extracted firmware found" "no_log"

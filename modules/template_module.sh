@@ -109,6 +109,10 @@ print_examples() {
   print_output "$(indent "$(orange "indented orange text example")")"
 
   # Good to know: All these functions are also working with text with line breaks
+
+  # If you only want to print stuff into an own log file
+  print_log "log text" "[path to log file]" "g"
+  # "g" is optional for printing line into grep-able log file (emba.sh -g)
 }
 
 path_handling() {
