@@ -105,7 +105,7 @@ version_detection() {
 }
 
 detect_root_dir() {
-  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -type f -executable -exec file {} \; | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
   if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
