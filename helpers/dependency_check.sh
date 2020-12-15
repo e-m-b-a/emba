@@ -297,6 +297,15 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
+  print_output "    openssl - \\c" "no_log"
+  if ! command -v openssl > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install openssl via apt-get install openssl""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+
+
   print_output "    binwalk - \\c" "no_log"
   if ! command -v binwalk > /dev/null ; then
     echo -e "$ORANGE""not ok""$NC"

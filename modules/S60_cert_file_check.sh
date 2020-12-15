@@ -29,9 +29,20 @@ S60_cert_file_check()
   if [[ "${CERT_FILES_ARR[0]}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then
     print_output "[+] Found ""${#CERT_FILES_ARR[@]}"" certification files:"
+    CURRENT_DATE=$(date +%s)
     for LINE in "${CERT_FILES_ARR[@]}" ; do
       if [[ -f "$LINE" ]]; then
-        print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        if command -v openssl > /dev/null ; then
+          CERT_DATE=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601)
+          CERT_DATE_=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s)
+          if [[ $CERT_DATE_ -lt $CURRENT_DATE ]]; then
+            print_output "  ${RED}""$CERT_DATE"" - ""$(print_path "$LINE")""${NC}"
+          else
+            print_output "  ${GREEN}""$CERT_DATE"" - ""$(print_path "$LINE")""${NC}"
+          fi
+        else
+          print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        fi
       fi
     done
   else
