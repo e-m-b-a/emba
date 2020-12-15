@@ -19,7 +19,7 @@ P09_firmware_base_version_chech() {
 
   declare -a VERSIONS_DETECTED
 
-  print_output "[*] Version detection running " | tr -d "\n"
+  print_output "[*] Initial version detection running " | tr -d "\n"
   while read -r VERSION_LINE; do
     print_output "." | tr -d "\n"
 
