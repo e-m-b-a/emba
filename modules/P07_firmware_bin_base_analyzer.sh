@@ -53,8 +53,10 @@ os_identification() {
   # emba is able to handle the rest
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR" "${EXCL_FIND[@]}" -type d -iname bin -o -type d -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
   if [[ $LINUX_PATH_COUNTER -gt 0 ]] ; then
-    print_output "[+] Found possible Linux system in $OUTPUT_DIR"
+    print_output "[+] Found possible Linux system in $OUTPUT_DIR."
     export FIRMWARE=1
     export FIRMWARE_PATH="$OUTPUT_DIR"
+  else
+    print_output "[!] No Linux root filesystem found."
   fi
 }

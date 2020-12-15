@@ -293,22 +293,22 @@ main()
       fi
 
       # Add your personal checks to X150_user_checks.sh (change starting 'X' in filename to 'S') or write a new module, add it to ./modules
+      TESTING_DONE=1
+    fi
 
+    if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       write_grep_log "$(date)" "TIMESTAMP"
       write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
     else
-      print_output "\\n" "no_log"
+      #print_output "\\n" "no_log"
       print_output "[!] No extracted firmware found" "no_log"
       print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")" "no_log"
-
-      exit 1
+      #exit 1
     fi
   fi
-
   exit 1
-
 }
 
 main "$@"
