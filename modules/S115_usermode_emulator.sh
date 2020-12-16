@@ -292,22 +292,31 @@ emulate_strace_run() {
       MISSING+=("$MISSING_AREA")
       if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
         print_output "[*] Found missing area: $MISSING_AREA"
-        print_output "[*] Trying to create this ..."
   
         FILENAME_MISSING=$(basename "$MISSING_AREA")
-        print_output "[*] Missing file: $FILENAME_MISSING"
+        print_output "[*] Trying to create this missing file: $FILENAME_MISSING"
         PATH_MISSING=$(dirname "$MISSING_AREA")
         if [[ ! -d "$EMULATION_PATH""$PATH_MISSING" ]]; then
-          print_output "[*] Missing path: $PATH_MISSING"
+          if [[ -L "$EMULATION_PATH""$PATH_MISSING" ]]; then
+            if [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
+              print_output "[*] Good symlink: $PATH_MISSING"
+            else
+              print_output "[!] Broken symlink: $PATH_MISSING"
+            fi
+          elif [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
+            print_output "[!] Not a symlink: $PATH_MISSING"
+          else
+            print_output "[*] Missing path: $PATH_MISSING"
+          fi
         fi
 
         FILENAME_FOUND=$(find "$EMULATION_PATH" -ignore_readdir_race -path "$EMULATION_PATH"/sys -prune -false -o -path "$EMULATION_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING")
         if [[ -n "$FILENAME_FOUND" ]]; then
-          print_output "[*] Filename found: $FILENAME_FOUND"
+          print_output "[*] Possible matching file found: $FILENAME_FOUND"
         fi
     
         if [[ ! -d "$EMULATION_PATH""$PATH_MISSING" ]]; then
-          print_output "[*] Creating directory ..."
+          print_output "[*] Creating directory $EMULATION_PATH$PATH_MISSING"
           mkdir -p "$EMULATION_PATH""$PATH_MISSING" 2> /dev/null
         fi
         if [[ -n "$FILENAME_FOUND" ]]; then
@@ -333,6 +342,7 @@ emulate_binary() {
   
   # emulate binary with different command line parameters:
   EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+  echo
   for PARAM in "${EMULATION_PARAMS[@]}"; do
     print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
 

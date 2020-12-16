@@ -42,7 +42,7 @@ http_file_search()
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
-    print_output "[!] No http related files found"
+    print_output "[-] No http related files found"
   fi
 }
 
@@ -62,7 +62,7 @@ webserver_check()
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
-    print_output "[!] No Apache related files found"
+    print_output "[-] No Apache related files found"
   fi
 
   if [[ ${#NGINX_FILE_ARR[@]} -gt 0 ]] ; then
@@ -71,7 +71,7 @@ webserver_check()
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
-    print_output "[!] No nginx related files found"
+    print_output "[-] No nginx related files found"
   fi
 
   if [[ ${#LIGHTTP_FILE_ARR[@]} -gt 0 ]] ; then
@@ -80,7 +80,7 @@ webserver_check()
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
-    print_output "[!] No Lighttpd related files found"
+    print_output "[-] No Lighttpd related files found"
   fi
 
   if [[ ${#CHEROKEE_FILE_ARR[@]} -gt 0 ]] ; then
@@ -89,7 +89,7 @@ webserver_check()
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
-    print_output "[!] No Cherokee related files found"
+    print_output "[-] No Cherokee related files found"
   fi
 
   if [[ ${#HTTPD_FILE_ARR[@]} -gt 0 ]] ; then
@@ -98,7 +98,7 @@ webserver_check()
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
-    print_output "[!] No HTTPd related files found"
+    print_output "[-] No HTTPd related files found"
   fi
 
 }
@@ -115,6 +115,6 @@ php_check()
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
-    print_output "[!] No php.ini found"
+    print_output "[-] No php.ini found"
   fi
 }
