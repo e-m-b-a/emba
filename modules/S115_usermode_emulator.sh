@@ -87,7 +87,7 @@ version_detection() {
   while read -r VERSION_LINE; do 
     BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f2 | sed s/^\"// | sed s/\"$//)"
-    readarray -t VERSIONS_DETECTED < <(grep -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
+    readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
       for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
@@ -105,11 +105,11 @@ version_detection() {
 }
 
 detect_root_dir() {
-  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
   if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -wholename "*$INTERPRETER_FULL_PATH" | sort -u)
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -wholename "*$INTERPRETER_FULL_PATH" 2>/dev/null | sort -u)
     EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
   else
     # if we can't find the interpreter we fall back to the original root directory
@@ -165,7 +165,7 @@ cleanup() {
   umount "$EMULATION_PATH""/sys"
   umount "$EMULATION_PATH""/run"
 
-  FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*")
+  FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
   if [[ -n "$FILES" ]] ; then
     print_output "[*] Cleanup empty log files.\\n"
     for FILE in $FILES ; do
@@ -266,7 +266,7 @@ emulate_binary() {
 
   ## as we currently do not have the right path of our binary we have to find it now:
   DIR=$(pwd)
-  BIN_EMU="$(cd "$EMULATION_PATH" && find . -type f -executable -name "$BIN_EMU_NAME" && cd "$DIR" || exit)"
+  BIN_EMU="$(cd "$EMULATION_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)"
   
   # emulate binary with different command line parameters:
   EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")

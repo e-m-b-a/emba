@@ -60,8 +60,6 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
-
-
   echo
   print_output "[*] Necessary utils on system checks:" "no_log"
 
@@ -190,8 +188,6 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
-
-
   echo
   print_output "[*] Optional utils checks:" "no_log"
 
@@ -297,6 +293,31 @@ dependency_check()
     echo -e "$ORANGE""not ok""$NC"
     echo -e "$ORANGE""    install tree as alternative to ls for file overview in log""$NC"
     echo -e "$ORANGE""    install tree via apt-get install tree""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+
+  print_output "    openssl - \\c" "no_log"
+  if ! command -v openssl > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install openssl via apt-get install openssl""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+
+
+  print_output "    binwalk - \\c" "no_log"
+  if ! command -v binwalk > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install binwalk from github: https://github.com/ReFirmLabs/binwalk""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+
+  print_output "    qemu-ARCH-static - \\c" "no_log"
+  if ! command -v qemu-mips-static > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install qemu static emulators via apt-get install qemu-user-static""$NC"
   else
     echo -e "$GREEN""ok""$NC"
   fi

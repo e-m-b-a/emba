@@ -23,10 +23,8 @@ P05_firmware_bin_extractor() {
 binwalking() {
   sub_module_title "Analyze binary firmware blob with binwalk"
 
-  local MAIN_BINWALK
   print_output "[*] basic analysis with binwalk"
-  MAIN_BINWALK=$(binwalk "$FIRMWARE_PATH")
-  print_output "[*] $MAIN_BINWALK"
+  print_output "$(binwalk "$FIRMWARE_PATH")"
 
   echo
   print_output "[*] Entropy testing with binwalk ... "
