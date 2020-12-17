@@ -100,7 +100,7 @@ version_detection() {
   while read -r VERSION_LINE; do 
     BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3 | sed s/^\"// | sed s/\"$//)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
 
     # if we have the key strict this version identifier only works for the defined binary and is not generic!
     if [[ $STRICT == "strict" ]]; then
