@@ -23,23 +23,29 @@ P09_firmware_base_version_check() {
   while read -r VERSION_LINE; do
     print_output "." | tr -d "\n"
 
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f2- | sed s/^\"// | sed s/\"$//)"
-    print_output "." | tr -d "\n"
+    BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
+    STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
 
-    # currently we only have binwalk files but sometimes we can find kernel version information or something else in it
-    VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -e "$VERSION_IDENTIFIER" {} \;| head -1 2> /dev/null)
-    VERSIONS_DETECTED+=("$VERSION_FINDER")
-    print_output "." | tr -d "\n"
+    # as we do not have a typical linux executable we can't use strict version details
+    if [[ $STRICT != "strict" ]]; then
+      VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
+      print_output "." | tr -d "\n"
 
-    VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-    VERSIONS_DETECTED+=("$VERSION_FINDER")
-    print_output "." | tr -d "\n"
+      # currently we only have binwalk files but sometimes we can find kernel version information or something else in it
+      VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -e "$VERSION_IDENTIFIER" {} \;| head -1 2> /dev/null)
+      VERSIONS_DETECTED+=("$VERSION_FINDER")
+      print_output "." | tr -d "\n"
 
-    VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-    VERSIONS_DETECTED+=("$VERSION_FINDER")
-    # leave it here for backup reasons:
-    #VERSION_STRINGER=$(strings "$FIRMWARE_PATH" | grep -H -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-    print_output "." | tr -d "\n"
+      VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      VERSIONS_DETECTED+=("$VERSION_FINDER")
+      print_output "." | tr -d "\n"
+
+      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      VERSIONS_DETECTED+=("$VERSION_FINDER")
+      # leave it here for backup reasons:
+      #VERSION_STRINGER=$(strings "$FIRMWARE_PATH" | grep -H -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      print_output "." | tr -d "\n"
+    fi
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
   print_output "." | tr -d "\n"
