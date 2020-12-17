@@ -301,10 +301,10 @@ emulate_strace_run() {
             if [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
               print_output "[*] Good symlink: $PATH_MISSING"
             else
-              print_output "[!] Broken symlink: $PATH_MISSING"
+              print_output "[-] Broken symlink: $PATH_MISSING"
             fi
           elif [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
-            print_output "[!] Not a symlink: $PATH_MISSING"
+            print_output "[-] Not a symlink: $PATH_MISSING"
           else
             print_output "[*] Missing path: $PATH_MISSING"
           fi
