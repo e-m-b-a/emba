@@ -23,7 +23,6 @@ P09_firmware_base_version_check() {
   while read -r VERSION_LINE; do
     print_output "." | tr -d "\n"
 
-    BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
 
     # as we do not have a typical linux executable we can't use strict version details
