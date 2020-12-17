@@ -153,15 +153,6 @@ main()
 
   LOG_DIR="$(abs_path "$LOG_DIR")"
 
-  if mount | grep "$LOG_DIR" > /dev/null; then
-    echo
-    print_output "[!] We found unmounted areas from a former emulation process." "no_log"
-    print_output "[!] You should unmount this stuff manually:\\n" "no_log"
-    mount | grep "$LOG_DIR"
-    exit 1
-  fi
-
-
   if [[ $KERNEL -eq 1 ]] ; then
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
   fi

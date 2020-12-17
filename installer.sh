@@ -138,9 +138,9 @@ fi
 # objdump from binutils
 echo -e "\\n""$ORANGE""$BOLD""Downloading objdump""$NC"
 if ! [[ -f "external/objdump" ]] ; then
-  apt-get install texinfo
-  apt-get install gcc
-  apt-get install build-essential
+  apt-get install texinfo -y
+  apt-get install gcc -y
+  apt-get install build-essential -y
   wget https://ftp.gnu.org/gnu/binutils/binutils-2.34.tar.gz -O external/binutils-2.34.tar.gz
   tar -zxf external/binutils-2.34.tar.gz -C external
   cd external/binutils-2.34/ || exit 1
