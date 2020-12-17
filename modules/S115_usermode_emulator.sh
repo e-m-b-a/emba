@@ -37,6 +37,7 @@ S115_usermode_emulator() {
   if [[ "$QEMULATION" -eq 1 ]]; then
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
+    declare -a MISSING
 
     # as we modify the firmware we copy it to the log directory and do stuff in this area
     copy_firmware
@@ -73,11 +74,23 @@ S115_usermode_emulator() {
 
     cleanup
     running_jobs
+    filesystem_fixes
     version_detection
 
   else
     print_output "[!] Automated emulation is disabled."
     print_output "$(indent "Enable it with the parameter -E.")"
+  fi
+}
+
+filesystem_fixes() {
+  if [[ "${#MISSING[@]}" -ne 0 ]]; then
+    sub_module_title "Filesystem fixes"
+    print_output "[*] Emba has auto-generated the files during runtime."
+    print_output "[*] For persistence you could generate it manually in your filesystem.\\n"
+    for MISSING_FILE in "${MISSING[@]}"; do
+      print_output "[*] Missing file: $MISSING_FILE"
+    done
   fi
 }
 
@@ -87,7 +100,7 @@ version_detection() {
   while read -r VERSION_LINE; do 
     BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f2 | sed s/^\"// | sed s/\"$//)"
-    readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
+    readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu*)
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
       for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
@@ -167,7 +180,7 @@ cleanup() {
 
   FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
   if [[ -n "$FILES" ]] ; then
-    print_output "[*] Cleanup empty log files.\\n"
+    print_output "[*] Cleanup empty log files.\\n\\n"
     for FILE in $FILES ; do
       if [[ ! -s "$FILE" ]] ; then
         rm "$FILE" 2> /dev/null
@@ -261,17 +274,77 @@ prepare_emulator() {
   fi
 }
 
+emulate_strace_run() {
+    echo
+    print_output "[*] Initial strace run on command ${GREEN}$BIN_EMU_NAME${NC} for identifying missing areas"
+
+    # currently we only look for file errors (errno=2) and try to fix this
+    chroot "$EMULATION_PATH" ./"$EMULATOR" --strace "$BIN_EMU" > "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" 2>&1 &
+    PID=$!
+
+    # wait a second and then kill it
+    sleep 1
+    kill -0 -9 "$PID" 2> /dev/null
+
+    mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u)
+
+    for MISSING_AREA in "${MISSING_AREAS[@]}"; do
+      MISSING+=("$MISSING_AREA")
+      if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
+        print_output "[*] Found missing area: $MISSING_AREA"
+  
+        FILENAME_MISSING=$(basename "$MISSING_AREA")
+        print_output "[*] Trying to create this missing file: $FILENAME_MISSING"
+        PATH_MISSING=$(dirname "$MISSING_AREA")
+        if [[ ! -d "$EMULATION_PATH""$PATH_MISSING" ]]; then
+          if [[ -L "$EMULATION_PATH""$PATH_MISSING" ]]; then
+            if [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
+              print_output "[*] Good symlink: $PATH_MISSING"
+            else
+              print_output "[-] Broken symlink: $PATH_MISSING"
+            fi
+          elif [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
+            print_output "[-] Not a symlink: $PATH_MISSING"
+          else
+            print_output "[*] Missing path: $PATH_MISSING"
+          fi
+        fi
+
+        FILENAME_FOUND=$(find "$EMULATION_PATH" -ignore_readdir_race -path "$EMULATION_PATH"/sys -prune -false -o -path "$EMULATION_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING")
+        if [[ -n "$FILENAME_FOUND" ]]; then
+          print_output "[*] Possible matching file found: $FILENAME_FOUND"
+        fi
+    
+        if [[ ! -d "$EMULATION_PATH""$PATH_MISSING" ]]; then
+          print_output "[*] Creating directory $EMULATION_PATH$PATH_MISSING"
+          mkdir -p "$EMULATION_PATH""$PATH_MISSING" 2> /dev/null
+        fi
+        if [[ -n "$FILENAME_FOUND" ]]; then
+          print_output "[*] Copy file $FILENAME_FOUND to $EMULATION_PATH$PATH_MISSING/"
+          cp "$FILENAME_FOUND" "$EMULATION_PATH""$PATH_MISSING"/ 2> /dev/null
+        else
+          print_output "[*] Creating empty file $EMULATION_PATH$PATH_MISSING/$FILENAME_MISSING"
+          touch "$EMULATION_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
+        fi
+      fi
+    done
+    rm "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt"
+}
+
 emulate_binary() {
   BIN_EMU_NAME="$(basename "$LINE")"
 
   ## as we currently do not have the right path of our binary we have to find it now:
   DIR=$(pwd)
   BIN_EMU="$(cd "$EMULATION_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)"
+
+  emulate_strace_run
   
   # emulate binary with different command line parameters:
   EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+  echo
   for PARAM in "${EMULATION_PARAMS[@]}"; do
-    print_output "[*] Trying to emulate binary ""$BIN_EMU"" with parameter ""$PARAM"""
+    print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
 
     chroot "$EMULATION_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
     print_output ""
