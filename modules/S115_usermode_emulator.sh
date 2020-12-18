@@ -19,22 +19,22 @@
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Software component and version detection started via emulation with qemu usermode emulation"
-
-  print_output "[!] This module is experimental and could harm your host environment."
-  print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
-
-  print_output "[*] Should we proceed?\\n"
-  read -p "(y/N)  " -r ANSWER
-  case ${ANSWER:0:1} in
-    n|N|"" )
-      echo
-      print_output "[!] Terminating emba now.\\n"
-      exit 1
-    ;;
-  esac
-
   if [[ "$QEMULATION" -eq 1 ]]; then
+    module_title "Software component and version detection started via emulation with qemu usermode emulation"
+
+    print_output "[!] This module is experimental and could harm your host environment."
+    print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+
+    print_output "[*] Should we proceed?\\n"
+    read -p "(y/N)  " -r ANSWER
+    case ${ANSWER:0:1} in
+      n|N|"" )
+        echo
+        print_output "[!] Terminating emba now.\\n"
+        exit 1
+      ;;
+    esac
+
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
     declare -a MISSING
@@ -78,6 +78,7 @@ S115_usermode_emulator() {
     version_detection
 
   else
+    echo
     print_output "[!] Automated emulation is disabled."
     print_output "$(indent "Enable it with the parameter -E.")"
   fi
