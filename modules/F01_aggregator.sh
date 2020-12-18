@@ -58,7 +58,7 @@ generate_cve_details() {
 
     # we try to handle as many version strings as possible through these generic rules
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
-    echo "$VERSION_lower"
+    #echo "$VERSION_lower"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/version\ //' | sed 's/\ v[0-9]//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ version\://')"
@@ -133,11 +133,11 @@ generate_cve_details() {
 
       CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_search""/" | sed -e 's/\ \+/\t/g')
       if (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
-        print_output "$(indent ${RED}$CVE_OUTPUT\t:\t$EXPLOIT${NC})"
+        print_output "${RED}$CVE_OUTPUT\t:\t$EXPLOIT${NC}"
       elif (( $(echo "$CVSS_value > 3.9" | bc -l) )); then
-        print_output "$(indent ${ORANGE}$CVE_OUTPUT\t:\t$EXPLOIT${NC})"
+        print_output "${ORANGE}$CVE_OUTPUT\t:\t$EXPLOIT${NC}"
       else
-        print_output "$(indent ${GREEN}$CVE_OUTPUT\t:\t$EXPLOIT${NC})"
+        print_output "${GREEN}$CVE_OUTPUT\t:\t$EXPLOIT${NC}"
       fi
     done
   done

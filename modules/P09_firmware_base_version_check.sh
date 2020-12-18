@@ -61,6 +61,4 @@ P09_firmware_base_version_check() {
     fi
   done
   export TESTING_DONE=1
-  ## rmeove this!!!!
-  #export FIRMWARE=0
 }

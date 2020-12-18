@@ -289,7 +289,6 @@ main()
   fi
 
   # 'main' functions of imported finishing modules
-
   local MODULES
   MODULES=$(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
   for MODULE_FILE in $MODULES ; do
