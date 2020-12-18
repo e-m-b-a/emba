@@ -99,8 +99,15 @@ version_detection() {
 
   while read -r VERSION_LINE; do 
     BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f2 | sed s/^\"// | sed s/\"$//)"
-    readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu*)
+    STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
+
+    # if we have the key strict this version identifier only works for the defined binary and is not generic!
+    if [[ $STRICT == "strict" ]]; then
+      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY"* 2>/dev/null)
+    else
+      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
+    fi
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
       for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
