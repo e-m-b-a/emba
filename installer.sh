@@ -38,7 +38,7 @@ print_tool_info(){
   else
     COMMAND_="$1"
   fi
-  if (! command -v "$COMMAND_" > /dev/null) || [[ ! -z "$(dpkg -s "${1}" | grep "Status: install ok installed")" ]] ; then
+  if (! command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" | grep -q "Status: install ok installed" ) ; then
     if [[ $2 -eq 0 ]] ; then
       echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
     else
@@ -60,18 +60,18 @@ print_tool_info(){
 print_file_info()
 {
   echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
-  if [[ ! -z "${2}" ]] ; then
+  if [[ -n "${2}" ]] ; then
     echo -e "Description: ""${2}"
   fi
   #echo "$(wget "${3}" --spider --server-response -O -)"
   FILE_SIZE=$(($(wget "${3}" --spider --server-response -O - 2>&1 | sed -ne '/Content-Length/{s/.*: //;p}')))
-  if (( $FILE_SIZE == 0 )) ; then
+  if (( FILE_SIZE == 0 )) ; then
     FILE_SIZE=$(($(wget "${3}" --spider --server-response -O - 2>&1 | sed -ne '/content-length/{s/.*: //;p}')))
   fi 
-  if (( $FILE_SIZE > 1048576 )) ; then
-    echo -e "Download-Size: ""$(( $FILE_SIZE / 1048576 ))"" MB"
-  elif (( $FILE_SIZE > 1024 )) ; then
-    echo -e "Download-Size: ""$(( $FILE_SIZE / 1024 ))"" KB"
+  if (( FILE_SIZE > 1048576 )) ; then
+    echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
+  elif (( FILE_SIZE > 1024 )) ; then
+    echo -e "Download-Size: ""$(( FILE_SIZE / 1024 ))"" KB"
   else
     echo -e "Download-Size: ""$FILE_SIZE"" B"
   fi
@@ -138,8 +138,7 @@ case ${ANSWER:0:1} in
   y|Y )
     echo
     for APP in "${INSTALL_APP_LIST[@]}" ; do
-      echo "install ""$APP"
-      # apt-get install "$APP" -y
+      apt-get install "$APP" -y
     done
   ;;
 esac
@@ -156,11 +155,11 @@ echo -e "\\nWith emba you can automatically find vulnerable pattern in binary ex
 INSTALL_APP_LIST=()
 print_tool_info "docker.io" 0 "docker"
 
-if ! command -v docker > /dev/null ; then
+if command -v docker > /dev/null ; then
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
   export DOCKER_CLI_EXPERIMENTAL=enabled
   f="$(docker manifest inspect fkiecad/cwe_checker:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-  echo "Download-Size: ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
+  echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
   export DOCKER_CLI_EXPERIMENTAL=disabled
 else
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
@@ -177,12 +176,10 @@ read -p "(y/Y)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
-      echo "install ""$APP"
-      # apt-get install "$APP" -y
+      apt-get install "$APP" -y
     done
     if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
-      # docker pull fkiecad/cwe_checker:latest
-      echo "image download bums"
+      docker pull fkiecad/cwe_checker:latest
     fi
   ;;
 esac
@@ -235,7 +232,7 @@ BINUTIL_VERSION_NAME="binutils-2.35.1"
 echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
 INSTALL_APP_LIST=()
 
-print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/"$BINUTIL_VERSION_NAME".tar.gz" "external/"$BINUTIL_VERSION_NAME".tar.gz"
+print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
 
 print_tool_info "texinfo" 1
 print_tool_info "gcc" 1
@@ -246,18 +243,17 @@ read -p "(y/Y)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
-      echo "install ""$APP"
-      # apt-get install "$APP" -y
+      apt-get install "$APP" -y
     done
-    download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/"$BINUTIL_VERSION_NAME".tar.gz" "external/"$BINUTIL_VERSION_NAME".tar.gz"
+    download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
     tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
     cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
     echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
     ./configure --enable-targets=all
     make
     cd ../.. || exit 1
-    if [[ -f "external/"$BINUTIL_VERSION_NAME"/binutils/objdump" ]] ; then
-      mv "external/"$BINUTIL_VERSION_NAME"/binutils/objdump" "external/objdump"
+    if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
+      mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
       rm -R external/"$BINUTIL_VERSION_NAME"
       if [[ -f "external/objdump" ]] ; then
         echo -e "$GREEN""objdump installed successfully""$NC"
@@ -290,6 +286,9 @@ case ${ANSWER:0:1} in
     if ! [[ -d "external/nvd" ]] ; then
       mkdir external/nvd
     fi
+    for APP in "${INSTALL_APP_LIST[@]}" ; do
+      apt-get install "$APP" -y
+    done
     for YEAR in $(seq 2002 $(($(date +%Y)))); do
       NVD_FILE="nvdcve-1.1-""$YEAR"".json"
       download_file "$NVD_FILE" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
