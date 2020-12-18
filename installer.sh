@@ -38,7 +38,7 @@ print_tool_info(){
   else
     COMMAND_="$1"
   fi
-  if (! command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+  if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
     if [[ $2 -eq 0 ]] ; then
       echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
     else
