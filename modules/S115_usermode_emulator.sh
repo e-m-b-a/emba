@@ -26,14 +26,14 @@ S115_usermode_emulator() {
     print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
     print_output "[*] Should we proceed?\\n"
-    read -p "(y/N)  " -r ANSWER
-    case ${ANSWER:0:1} in
-      n|N|"" )
-        echo
-        print_output "[!] Terminating emba now.\\n"
-        exit 1
-      ;;
-    esac
+#    read -p "(y/N)  " -r ANSWER
+#    case ${ANSWER:0:1} in
+#      n|N|"" )
+#        echo
+#        print_output "[!] Terminating emba now.\\n"
+#        exit 1
+#      ;;
+#    esac
 
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
@@ -105,7 +105,12 @@ version_detection() {
 
     # if we have the key strict this version identifier only works for the defined binary and is not generic!
     if [[ $STRICT == "strict" ]]; then
-      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY"* 2>/dev/null)
+      VERSION_STRICT=$(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY"* | sort -u | head 1 2>/dev/null)
+      if [[ "$BINARY" == "smbd" ]]; then
+        BINARY="samba"
+      fi
+      VERSION_STRICT="$BINARY $VERSION_STRICT"
+      VERSIONS_DETECTED+=( "$VERSION_STRICT" )
     else
       readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
     fi
@@ -135,6 +140,11 @@ detect_root_dir() {
   else
     # if we can't find the interpreter we fall back to the original root directory
     EMULATION_PATH=$EMULATION_PATH_BASE
+  fi
+  # if the new root directory does not include the current working directory we fall back to the original root directory
+  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \;)
+    #EMULATION_PATH=$EMULATION_PATH_BASE
   fi
   print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
 }
