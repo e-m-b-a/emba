@@ -27,7 +27,7 @@ F01_aggregator() {
   # https://github.com/cve-search/cve-search
 
   # set it up
-  PATH_CVE_SEARCH="../cve-search/bin/search.py"
+  PATH_CVE_SEARCH="/home/m1k3/git-repos/cve-search/bin/search.py"
   mkdir "$LOG_DIR"/aggregator
   KERNELV=0
 
@@ -39,11 +39,11 @@ F01_aggregator() {
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
     # [+] Found Version details (kernel): Linux kernel version 2.6.33.2
-    if [[ " ${VERSIONS_KERNEL[@]} " =~ "Linux kernel" ]]; then
+    if [[ "${VERSIONS_KERNEL[*]}" =~ "Linux kernel" ]]; then
       KERNELV=1
     fi
+
     get_firmware_base_version_check
-    #get_version_vulnerability_check
     get_usermode_emulator
     generate_cve_details
   else
@@ -52,90 +52,122 @@ F01_aggregator() {
   fi
 }
 
-generate_cve_details() {
-  sub_module_title "Collect CVE details."
-
-  for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
-    echo -e "[+] Found Version details (base check): ""$VERSION"""
-  done
-  for VERSION in "${VERSIONS_EMULATOR[@]}"; do
-    echo -e "[+] Found Version details (emulator): ""$VERSION"""
-  done
-  for VERSION in "${VERSIONS_KERNEL[@]}"; do
-    echo -e "[+] Found Version details (kernel): ""$VERSION"""
-  done
-  echo
-  for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
-    echo -e "[+] Found Kernel exploit: ""$KERNEL_CVE_EXPLOIT"""
-  done
-
-  VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}")
-  # sorting and unique our versions array:
-  for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+prepare_version_data() {
     # we try to handle as many version strings as possible through these generic rules
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
     #echo "$VERSION_lower"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ version\://')"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/version\ //')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ version\://')"
+    VERSION_lower="${VERSION_lower//\ version\:/}"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/version\ //')"
+    VERSION_lower="${VERSION_lower//version\ /}"
     # remove the v in something like this: "space v[number]"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')"
     # "mkfs\.jffs2\ revision\ [0-9]\.[0-9]\.[0-9]\.[0-9]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/revision//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/revision//')"
+    VERSION_lower="${VERSION_lower//revision/}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/sshd//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/sshd//')"
+    VERSION_lower="${VERSION_lower//sshd/}"
     # iwconfig\ \ Wireless-Tools\ version\ [0-9][0-9]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/wireless\-tools//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/wireless\-tools//')"
+    VERSION_lower="${VERSION_lower//wireless\-tools/}"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\:\ ipv6\ neighbor\/router\ discovery\ userland\ tool//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\:\ ipv6\ neighbor\/router\ discovery\ userland\ tool//')"
+    VERSION_lower="${VERSION_lower//\:\ ipv6\ neighbor\/router\ discovery\ userland\ tool/}"
     # "ucloud_v2\ ver\.[0-9][0-9][0-9]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/ver\.//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/ver\.//')"
+    VERSION_lower="${VERSION_lower//ver\./}"
     # rdnssd\:\ IPv6\ Recursive\ DNS\ Server\ discovery\ Daemon\
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\:\ ipv6\ recursive\ dns\ server\ discovery\ daemon//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\:\ ipv6\ recursive\ dns\ server\ discovery\ daemon//')"
+    VERSION_lower="${VERSION_lower//\:\ ipv6\ recursive\ dns\ server\ discovery\ daemon/}"
     #NETIO\ -\ Network\ Throughput\ Benchmark,\ Version
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\-\ network\ throughput\ benchmark\,\ //')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\-\ network\ throughput\ benchmark\,\ //')"
+    VERSION_lower="${VERSION_lower//\-\ network\ throughput\ benchmark\,\ /}"
     #ntpq\ -\ standard\ NTP\ query\ program\ -\ Ver\.
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\-\ standard\ ntp\ query\ program\ \-//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\-\ standard\ ntp\ query\ program\ \-//')"
+    VERSION_lower="${VERSION_lower//\-\ standard\ ntp\ query\ program\ \-/}"
     #ntpd\ -\ NTP\ daemon\ program\ -\ Ver\.
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\-\ ntp\ daemon\ program\ \-//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\-\ ntp\ daemon\ program\ \-//')"
+    VERSION_lower="${VERSION_lower//\-\ ntp\ daemon\ program\ \-/}"
     #igmpproxy, Version 0.1
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/,//')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/,//')"
+    VERSION_lower="${VERSION_lower//,/}"
+    # BoosterMainFunction:305
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/BoosterMainFunction\:305/booster/')"
+    VERSION_lower="${VERSION_lower//BoosterMainFunction\:305/booster}"
     #"ez-ipupdate:\ -\ [0-9]\.[0-9]\.[0-9][0-9]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/://')"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/-\ //')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/://')"
+    VERSION_lower="${VERSION_lower//:/}"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/-\ //')"
+    VERSION_lower="${VERSION_lower//-\ /}"
+    #${variable//search/replace} 
     #mini_httpd/1.19
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\//\ /')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\//\ /')"
+    VERSION_lower="${VERSION_lower/\//\ }"
+    #Beceem\ CM\ Server\
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/beceem\ cm\ server/beceem/')"
+    VERSION_lower="${VERSION_lower//beceem\ cm\ server/beceem}"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/beceem\ cscm\ command\ line\ client/beceem/')"
+    VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
     #remove multiple spaces
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ \+/\ /')"
+    #VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ \+/\ /')"
+    VERSION_lower="${VERSION_lower//\ \+/\ }"
     #echo "$VERSION_lower"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
       VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f2-3)"
     fi
+}
 
+generate_cve_details() {
+  sub_module_title "Collect CVE details."
+
+  # initial output - probably we will remove it in the future
+  # currently it is very helpful
+  print_output ""
+  for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
+    print_output "[+] Found Version details (base check): ""$VERSION"""
+  done
+  for VERSION in "${VERSIONS_EMULATOR[@]}"; do
+    print_output "[+] Found Version details (emulator): ""$VERSION"""
+  done
+  for VERSION in "${VERSIONS_KERNEL[@]}"; do
+    print_output "[+] Found Version details (kernel): ""$VERSION"""
+  done
+  print_output ""
+  for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
+    print_output "[+] Found Kernel exploit: ""$KERNEL_CVE_EXPLOIT"""
+  done
+  print_output ""
+
+  VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}")
+  for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+    prepare_version_data
     # now we should have the name an the version in the first two coloumns:
     VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"
     VERSIONS_CLEANED+=( "$VERSION_lower" )
   done
 
-  eval VERSIONS_CLEANED=($(for i in  "${VERSIONS_CLEANED[@]}" ; do  echo "\"$i\"" ; done | sort -u))
+  # sorting and unique our versions array:
+  eval "VERSIONS_CLEANED=($(for i in  "${VERSIONS_CLEANED[@]}" ; do  echo "\"$i\"" ; done | sort -u))"
 
-  echo
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
-    echo -e "[+] Found Version details (aggregated): ""$VERSION"""
+    print_output "[+] Found Version details (aggregated): ""$VERSION"""
   done
+  print_output ""
 
-  echo
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     CVE_COUNTER_VERSION=0
     EXPLOIT_COUNTER_VERSION=0
-    VERSION_search="$(echo "$VERSION" | sed 's/\ /:/')"
-    VERSION_path="$(echo "$VERSION" | sed 's/\ /_/')"
-    echo -e "[*] CVE database lookup with version information: ${GREEN}$VERSION_search${NC}"
+    VERSION_search="${VERSION//\ /:}"
+    VERSION_path="${VERSION//\ /_}"
+    print_output ""
+    print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_search${NC}"
 
     $PATH_CVE_SEARCH -p "$VERSION_search" > "$LOG_DIR"/aggregator/"$VERSION_path".txt
 
@@ -177,61 +209,61 @@ generate_cve_details() {
       BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-8.8s\t:\t%-8.8s\t:\t%-15.15s\t:\t%-8.8s:\t%s\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT"
+        printf "${MAGENTA}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
       elif (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
-        printf "${RED}\t%-8.8s\t:\t%-8.8s\t:\t%-15.15s\t:\t%-8.8s:\t%s\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT"
+        printf "${RED}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
       elif (( $(echo "$CVSS_value > 3.9" | bc -l) )); then
-        printf "${ORANGE}\t%-8.8s\t:\t%-8.8s\t:\t%-15.15s\t:\t%-8.8s:\t%s\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT"
+        printf "${ORANGE}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
       else
-        printf "${GREEN}\t%-8.8s\t:\t%-8.8s\t:\t%-15.15s\t:\t%-8.8s:\t%s\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT"
+        printf "${GREEN}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
       fi
     done
-    echo
-    echo "" >> "$LOG_DIR"/aggregator/"$VERSION_path".txt
-    echo "[*] Statistics:CVE_COUNTER|EXPLOIT_COUNTER|BINARY VERSION" >> "$LOG_DIR"/aggregator/"$VERSION_path".txt
-    echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_search" >> "$LOG_DIR"/aggregator/"$VERSION_path".txt
 
+    { echo ""
+      echo "[*] Statistics:CVE_COUNTER|EXPLOIT_COUNTER|BINARY VERSION"
+      echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_search"
+    } >> "$LOG_DIR"/aggregator/"$VERSION_path".txt
+
+    print_output ""
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
-      echo -e "${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
+      print_output "${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
     elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]];then
-      echo -e "${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
+      print_output "${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
     else
-      echo -e "Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search."
+      print_output "Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search."
     fi
-    echo
   done
 
-  echo
-  echo -e "[*] Identified the following version details, vulnerabilities and exploits:"
+  print_output ""
+  print_output "[*] Identified the following version details, vulnerabilities and exploits:"
   for FILE_AGGR in "$LOG_DIR"/aggregator/*; do
-    STATS=$(grep "\[+\]\ Statistics\:" $FILE_AGGR | cut -d\: -f2-)
-    #echo "$STATS"
-
-    VERSION=$(echo $STATS | cut -d\| -f3-)
-    BIN=$(echo $VERSION | cut -d\: -f1)
-    #echo "binary: $BIN"
-    VERSION=$(echo $VERSION | cut -d\: -f2)
-    #echo "version: $VERSION"
-
-    EXPLOITS=$(echo $STATS | cut -d\| -f2 | sed -e 's/\ //g')
-    CVEs=$(echo $STATS | cut -d\| -f1 | sed -e 's/\ //g')
-
-    if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
-      if [[ "$EXPLOITS" -gt 0 ]]; then
-        printf "${MAGENTA}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS"
+    if [[ -f $FILE_AGGR ]]; then
+      STATS=$(grep "\[+\]\ Statistics\:" "$FILE_AGGR" | cut -d: -f2- 2>/dev/null)
+  
+      VERSION=$(echo "$STATS" | cut -d\| -f3-)
+      BIN=$(echo "$VERSION" | cut -d: -f1)
+      VERSION=$(echo "$VERSION" | cut -d: -f2)
+  
+      EXPLOITS=$(echo "$STATS" | cut -d\| -f2 | sed -e 's/\ //g')
+      CVEs=$(echo "$STATS" | cut -d\| -f1 | sed -e 's/\ //g')
+  
+      if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
+        if [[ "$EXPLOITS" -gt 0 ]]; then
+          printf "${MAGENTA}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f01_aggregator.txt
+        else
+          printf "${ORANGE}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f01_aggregator.txt
+        fi
       else
-        #echo -e "${ORANGE}[*] Found version details: $BIN\t:\t$VERSION\t:\tCVEs: $CVEs\t:\tExploits: $EXPLOITS${NC}"
-        printf "${ORANGE}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS"
+        printf "${GREEN}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f01_aggregator.txt
       fi
-    else
-      #echo -e "${GREEN}[*] Found version details: $BIN\t:\t$VERSION\t:\tCVEs: $CVEs\t:\tExploits: $EXPLOITS${NC}"
-      printf "${GREEN}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS"
     fi
   done
-  echo
-  echo -e "[+] Found $CVE_COUNTER CVE entries."
-  echo -e "[+] Found $EXPLOIT_COUNTER exploits."
-  echo
+
+  print_output ""
+  print_output "[+] Found $S30_VUL_COUNTER CVE entries for all binaries from S30_version_vulnerability_check.sh."
+  print_output "[+] Confirmed $CVE_COUNTER CVE entries."
+  print_output "[+] $EXPLOIT_COUNTER possible exploits available.\\n"
+  print_output ""
 }
 
 get_firmware_base_version_check() {
@@ -248,7 +280,7 @@ get_firmware_base_version_check() {
 
 get_version_vulnerability_check() {
   sub_module_title "Collect version details of module s30_version_vulnerability_check."
-  echo -e "[*] Currently nothing todo here ..."
+  print_output "[*] Currently nothing todo here ..."
 }
 
 get_kernel_check() {
@@ -263,7 +295,6 @@ get_kernel_check() {
 get_usermode_emulator() {
   sub_module_title "Collect version details of module s115_usermode_emulator."
   if [[ -f "$LOG_DIR"/s115_usermode_emulator.txt ]]; then
-    #VERSIONS_AGGREGATED+=("$(grep "Version information found" "$LOG_DIR"/s115_usermode_emulator.txt | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (.*$//')")
     readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/s115_usermode_emulator.txt | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (.*$//' | sort -u)
   fi
 }
