@@ -38,35 +38,43 @@ S115_usermode_emulator() {
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
     declare -a MISSING
+    declare -a BIN_BLACKLIST
 
-    # as we modify the firmware we copy it to the log directory and do stuff in this area
+    ## blacklist of binaries that cause troubles during emulation:
+    BIN_BLACKLIST=("kill" "killall" "killall5" "halt" "reboot" "shutdown" "dash" "su" "hostname")
+
+    # as we modify the firmware we copy it to the log directory and do the modifications in this area
     copy_firmware
 
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q ELF ) && [[ "$LINE" != './qemu-'*'-static' ]]; then
-        if ( file "$LINE" | grep -q "x86-64" ) ; then
-          EMULATOR="qemu-x86_64-static"
-        elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-          EMULATOR="qemu-i386-static"
-        elif ( file "$LINE" | grep -q "32-bit LSB.*ARM" ) ; then
-          EMULATOR="qemu-arm-static"
-        elif ( file "$LINE" | grep -q "32-bit MSB.*ARM" ) ; then
-          EMULATOR="qemu-armeb-static"
-        elif ( file "$LINE" | grep -q "32-bit LSB.*MIPS" ) ; then
-          EMULATOR="qemu-mipsel-static"
-        elif ( file "$LINE" | grep -q "32-bit MSB.*MIPS" ) ; then
-          EMULATOR="qemu-mips-static"
-        elif ( file "$LINE" | grep -q "32-bit MSB.*PowerPC" ) ; then
-          EMULATOR="qemu-ppc-static"
+        if ! [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$LINE")"* ]]; then
+          if ( file "$LINE" | grep -q "x86-64" ) ; then
+            EMULATOR="qemu-x86_64-static"
+          elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
+            EMULATOR="qemu-i386-static"
+          elif ( file "$LINE" | grep -q "32-bit LSB.*ARM" ) ; then
+            EMULATOR="qemu-arm-static"
+          elif ( file "$LINE" | grep -q "32-bit MSB.*ARM" ) ; then
+            EMULATOR="qemu-armeb-static"
+          elif ( file "$LINE" | grep -q "32-bit LSB.*MIPS" ) ; then
+            EMULATOR="qemu-mipsel-static"
+          elif ( file "$LINE" | grep -q "32-bit MSB.*MIPS" ) ; then
+            EMULATOR="qemu-mips-static"
+          elif ( file "$LINE" | grep -q "32-bit MSB.*PowerPC" ) ; then
+            EMULATOR="qemu-ppc-static"
+          else
+            print_output "[-] No working emulator found for ""$LINE"
+            EMULATOR="NA"
+          fi
+  
+          if [[ "$EMULATOR" != "NA" ]]; then
+            detect_root_dir
+            prepare_emulator
+            emulate_binary
+          fi
         else
-          print_output "[-] No working emulator found for ""$LINE"
-          EMULATOR="NA"
-        fi
-
-        if [[ "$EMULATOR" != "NA" ]]; then
-          detect_root_dir
-          prepare_emulator
-          emulate_binary
+          print_output "[!] Blacklist triggered ... $LINE"
         fi
         running_jobs
       fi
@@ -143,7 +151,7 @@ version_detection() {
 }
 
 detect_root_dir() {
-  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u | head -1 2>/dev/null)
   if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
@@ -151,13 +159,13 @@ detect_root_dir() {
     EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
   else
     # if we can't find the interpreter we fall back to the original root directory
-    EMULATION_PATH=$EMULATION_PATH_BASE
+    #EMULATION_PATH=$EMULATION_PATH_BASE
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \;)
   fi
   # if the new root directory does not include the current working directory we fall back to the original root directory
-  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \;)
+  #if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
     #EMULATION_PATH=$EMULATION_PATH_BASE
-  fi
+  #fi
   print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
 }
 
@@ -371,7 +379,12 @@ emulate_binary() {
   emulate_strace_run
   
   # emulate binary with different command line parameters:
-  EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+  if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
+    EMULATION_PARAMS=("--help" "--version")
+  else
+    EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+  fi
+
   echo
   for PARAM in "${EMULATION_PARAMS[@]}"; do
     print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""

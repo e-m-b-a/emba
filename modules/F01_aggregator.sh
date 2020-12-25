@@ -169,6 +169,7 @@ generate_cve_details() {
     print_output ""
     print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_search${NC}"
 
+    # CVE search:
     $PATH_CVE_SEARCH -p "$VERSION_search" > "$LOG_DIR"/aggregator/"$VERSION_path".txt
 
     # extract the CVE numbers and the CVSS values and sort it:
@@ -259,11 +260,12 @@ generate_cve_details() {
     fi
   done
 
-  print_output ""
-  print_output "[+] Found $S30_VUL_COUNTER CVE entries for all binaries from S30_version_vulnerability_check.sh."
+  print_output "${NC}"
+  if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
+    print_output "[+] Found $S30_VUL_COUNTER CVE entries for all binaries from S30_version_vulnerability_check.sh."
+  fi
   print_output "[+] Confirmed $CVE_COUNTER CVE entries."
   print_output "[+] $EXPLOIT_COUNTER possible exploits available.\\n"
-  print_output ""
 }
 
 get_firmware_base_version_check() {

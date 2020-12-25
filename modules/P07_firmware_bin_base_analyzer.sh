@@ -43,7 +43,7 @@ os_identification() {
     print_output "$(indent "$(orange "Operating system detection:")")" "no_log"
     if [[ $COUNTER_VxWorks -gt 0 ]] ; then print_output "$(indent "$(orange "VxWorks          ""$COUNTER_VxWorks")")" "no_log" ; fi
     if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS          ""$COUNTER_FreeRTOS")")" "no_log" ; fi
-    if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos          ""$COUNTER_eCos")")" "no_log" ; fi
+    if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos             ""$COUNTER_eCos")")" "no_log" ; fi
     if [[ $COUNTER_Linux -gt 0 ]] ; then print_output "$(indent "$(orange "Linux            ""$COUNTER_Linux")")" "no_log"; fi
   fi
 
