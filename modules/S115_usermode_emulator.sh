@@ -37,11 +37,16 @@ S115_usermode_emulator() {
 
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
+    # some processes are running long and logging a lot
+    # to protect the host we are going to kill them on a KILL_SIZE limit
+    KILL_SIZE="100M"
+    # to get rid of all the running stuff we are going to kill it after RUNTIME
+    RUNTIME="1h"
     declare -a MISSING
     declare -a BIN_BLACKLIST
 
     ## blacklist of binaries that cause troubles during emulation:
-    BIN_BLACKLIST=("kill" "killall" "killall5" "halt" "reboot" "shutdown" "dash" "su" "hostname")
+    BIN_BLACKLIST=("kill" "killall" "killall5" "halt" "reboot" "shutdown" "dash" "su" "hostname" "poweroff" "sulogin" "sulogin.util-linux" "su.shadow")
 
     # as we modify the firmware we copy it to the log directory and do the modifications in this area
     copy_firmware
@@ -127,7 +132,8 @@ version_detection() {
             VERSIONS_DETECTED+=("$VERSION_")
             BINARY="samba"
           fi
-          VERSION_="$BINARY $VERSION_STRICT"
+          VERSION_="$BINARY::$BINARY\ $VERSION_STRICT"
+          print_output "[*] version strict output: $VERSION_"
           VERSIONS_DETECTED+=("$VERSION_")
         fi
       fi
@@ -324,7 +330,8 @@ emulate_strace_run() {
     sleep 1
     kill -0 -9 "$PID" 2> /dev/null
 
-    mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u)
+    # extract missing files but do list *.so files:
+    mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u | grep -v ".*\.so")
 
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
       MISSING+=("$MISSING_AREA")
@@ -369,6 +376,17 @@ emulate_strace_run() {
     rm "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt"
 }
 
+check_disk_space() {
+
+  #CRITICAL_FILES=($(find "$LOG_DIR"/qemu_emulator/ -type f -size +"$KILL_SIZE" -exec basename {} \; | cut -d\. -f1 | cut -d_ -f2))
+  mapfile -t CRITICAL_FILES < <(find "$LOG_DIR"/qemu_emulator/ -type f -size +"$KILL_SIZE" -exec basename {} \; | cut -d\. -f1 | cut -d_ -f2)
+  for KILLER in "${CRITICAL_FILES[@]}"; do
+    print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
+    print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
+    pkill -f "$EMULATOR.*$KILLER.*"
+  done
+}
+
 emulate_binary() {
   BIN_EMU_NAME="$(basename "$LINE")"
 
@@ -391,8 +409,12 @@ emulate_binary() {
 
     chroot "$EMULATION_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
     print_output ""
+    check_disk_space
   done
+
+  # now we kill all older qemu-processes:
+  killall --quiet --older-than "$RUNTIME" -r .*$EMULATOR.*
+
   # reset the terminal after all the uncontrolled emulation it is typically broken!
   reset
 }
-
