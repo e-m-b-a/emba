@@ -74,6 +74,7 @@ S115_usermode_emulator() {
           fi
   
           if [[ "$EMULATOR" != "NA" ]]; then
+            print_output "[*] Emulator used: $EMULATOR"
             detect_root_dir
             prepare_emulator
             emulate_binary
@@ -383,7 +384,9 @@ check_disk_space() {
   for KILLER in "${CRITICAL_FILES[@]}"; do
     print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
     print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
-    pkill -f "$EMULATOR.*$KILLER.*"
+    if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
+      pkill -f "$EMULATOR.*$KILLER.*"
+    fi
   done
 }
 
@@ -414,7 +417,7 @@ emulate_binary() {
 
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
-  killall --older-than "$RUNTIME" -r .*qemu.*sta.*
+  killall --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
 
   # reset the terminal after all the uncontrolled emulation it is typically broken!
   reset

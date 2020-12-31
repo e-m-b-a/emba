@@ -96,6 +96,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//BoosterMainFunction\:305/booster}"
     VERSION_lower="${VERSION_lower//:/}"
     VERSION_lower="${VERSION_lower//-\ /}"
+    VERSION_lower="${VERSION_lower//-\ /}"
     #mini_httpd/1.19
     VERSION_lower="${VERSION_lower/\//\ }"
     #Beceem\ CM\ Server\
@@ -103,6 +104,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
     # loadkeys von kbd
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/loadkeys}"
+    # GNU bash, 4.3.39
+    VERSION_lower="${VERSION_lower//gnu\ bash,\ /bash\ }"
     #remove multiple spaces
     VERSION_lower="${VERSION_lower//\ \+/\ }"
     #our current version detection on strict version includes backslashes:
@@ -129,10 +132,10 @@ generate_cve_details() {
   for VERSION in "${VERSIONS_KERNEL[@]}"; do
     print_output "[+] Found Version details (kernel): ""$VERSION"""
   done
-  print_output ""
-  for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
-    print_output "[+] Found Kernel exploit: ""$KERNEL_CVE_EXPLOIT"""
-  done
+  #print_output ""
+  #for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
+  #  print_output "[+] Found Kernel exploit: ""$KERNEL_CVE_EXPLOIT"""
+  #done
   print_output ""
 
   VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}")
