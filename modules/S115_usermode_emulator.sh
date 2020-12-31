@@ -41,12 +41,12 @@ S115_usermode_emulator() {
     # to protect the host we are going to kill them on a KILL_SIZE limit
     KILL_SIZE="100M"
     # to get rid of all the running stuff we are going to kill it after RUNTIME
-    RUNTIME="1h"
+    RUNTIME="10m"
     declare -a MISSING
     declare -a BIN_BLACKLIST
 
     ## blacklist of binaries that cause troubles during emulation:
-    BIN_BLACKLIST=("kill" "killall" "killall5" "halt" "reboot" "shutdown" "dash" "su" "hostname" "poweroff" "sulogin" "sulogin.util-linux" "su.shadow")
+    BIN_BLACKLIST=("skill" "pkill.procps" "script" "kill" "killall" "killall5" "halt" "reboot" "shutdown" "dash" "su" "hostname" "poweroff" "sulogin" "sulogin.util-linux" "su.shadow")
 
     # as we modify the firmware we copy it to the log directory and do the modifications in this area
     copy_firmware
@@ -132,7 +132,7 @@ version_detection() {
             VERSIONS_DETECTED+=("$VERSION_")
             BINARY="samba"
           fi
-          VERSION_="$BINARY::$BINARY\ $VERSION_STRICT"
+          VERSION_="$BINARY:$BINARY $VERSION_STRICT"
           print_output "[*] version strict output: $VERSION_"
           VERSIONS_DETECTED+=("$VERSION_")
         fi
@@ -413,7 +413,8 @@ emulate_binary() {
   done
 
   # now we kill all older qemu-processes:
-  killall --quiet --older-than "$RUNTIME" -r .*$EMULATOR.*
+  # if we use the correct identifier $EMULATOR it will not work ...
+  killall --older-than "$RUNTIME" -r .*qemu.*sta.*
 
   # reset the terminal after all the uncontrolled emulation it is typically broken!
   reset

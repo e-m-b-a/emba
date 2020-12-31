@@ -17,9 +17,9 @@
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
 
-F01_aggregator() {
+F19_cve_aggregator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Final result aggregator"
+  module_title "Final CVE aggregator"
   
   # we need:
   # apt-get install bc
@@ -55,9 +55,13 @@ F01_aggregator() {
 prepare_version_data() {
     # we try to handle as many version strings as possible through these generic rules
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
-    # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
+    #This is perl 5, version 20, subversion 0 (v5.20.0) built
+    VERSION_lower="${VERSION_lower//This\ is\ perl\ .*\ \(v/}"
+    VERSION_lower="${VERSION_lower//\)\ built/}"
     #xl2tpd version:  xl2tpd-1.3.6
-    VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ \ xl2tpd- /xl2tpd\ }"
+    VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ \ xl2tpd-/xl2tpd\ }"
+    VERSION_lower="${VERSION_lower//xl2tpd-/}"
+    # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
     # apt-Version 1.2.3
@@ -101,6 +105,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/loadkeys}"
     #remove multiple spaces
     VERSION_lower="${VERSION_lower//\ \+/\ }"
+    #our current version detection on strict version includes backslashes:
+    #VERSION_lower="${VERSION_lower//\\/}"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
@@ -200,13 +206,13 @@ generate_cve_details() {
       BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
+        printf "${MAGENTA}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
       elif (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
-        printf "${RED}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
+        printf "${RED}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
       elif (( $(echo "$CVSS_value > 3.9" | bc -l) )); then
-        printf "${ORANGE}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
+        printf "${ORANGE}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
       else
-        printf "${GREEN}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f01_aggregator.txt
+        printf "${GREEN}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
       fi
     done
 
@@ -240,12 +246,12 @@ generate_cve_details() {
   
       if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
         if [[ "$EXPLOITS" -gt 0 ]]; then
-          printf "${MAGENTA}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f01_aggregator.txt
+          printf "${MAGENTA}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
         else
-          printf "${ORANGE}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f01_aggregator.txt
+          printf "${ORANGE}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
         fi
       else
-        printf "${GREEN}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f01_aggregator.txt
+        printf "${GREEN}[+] Found version details: \t%-15.15s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
       fi
     fi
   done
