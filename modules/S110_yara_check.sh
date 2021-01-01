@@ -32,6 +32,7 @@ S110_yara_check()
 
     local CHECK=0
     local FILE_ARR
+    YARA_CNT=0
     readarray -t FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f)
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
       if [[ -e "$YARA_S_FILE" ]] ; then
@@ -40,9 +41,11 @@ S110_yara_check()
         if [[ -n "$S_OUTPUT" ]] ; then
           print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
           CHECK=1
+          (( YARA_CNT++ ))
         fi
       fi
     done
+    print_output "[*] Found $YARA_CNT yara rule matches."
 
     if [[ $CHECK -eq 0 ]] ; then print_output "[-] No code patterns found with yara." ; fi
     # do not remove this to run multiple instances of emba

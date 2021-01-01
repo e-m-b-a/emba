@@ -91,6 +91,9 @@ main()
     exit 1
   fi
 
+  EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
+  export EMBACOMMAND
+
   while getopts a:A:cde:Ef:Fghk:l:m:sz OPT ; do
     case $OPT in
       a)

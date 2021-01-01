@@ -43,10 +43,9 @@ S115_usermode_emulator() {
     # to get rid of all the running stuff we are going to kill it after RUNTIME
     RUNTIME="10m"
     declare -a MISSING
-    declare -a BIN_BLACKLIST
 
-    ## blacklist of binaries that cause troubles during emulation:
-    BIN_BLACKLIST=("skill" "pkill.procps" "script" "kill" "killall" "killall5" "halt" "reboot" "shutdown" "dash" "su" "hostname" "poweroff" "sulogin" "sulogin.util-linux" "su.shadow")
+    ## load blacklist of binaries that could cause troubles during emulation:
+    readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
 
     # as we modify the firmware we copy it to the log directory and do the modifications in this area
     copy_firmware
@@ -74,8 +73,8 @@ S115_usermode_emulator() {
           fi
   
           if [[ "$EMULATOR" != "NA" ]]; then
-            print_output "[*] Emulator used: $EMULATOR"
             detect_root_dir
+            print_output "[*] Emulator used: $EMULATOR"
             prepare_emulator
             emulate_binary
           fi

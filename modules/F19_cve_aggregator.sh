@@ -66,6 +66,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd-/}"
     #ntpd\ -\ standard\ NTP\ query\ program\ -\ Ver\.
     VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
+    VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
     # Ralink\ DOT1X\ daemon,\ version\ = '
     VERSION_lower="${VERSION_lower//Ralink\ DOT1X\ daemon,\ version\ = \'/ralink-dot1x}"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
@@ -100,7 +101,7 @@ prepare_version_data() {
     #igmpproxy, Version 0.1
     VERSION_lower="${VERSION_lower//,/}"
     # BoosterMainFunction:305
-    VERSION_lower="${VERSION_lower//BoosterMainFunction\:305/booster}"
+    VERSION_lower="${VERSION_lower//boostermainfunction:305/booster}"
     VERSION_lower="${VERSION_lower//:/}"
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
@@ -160,9 +161,13 @@ aggregate_versions() {
   # sorting and unique our versions array:
   eval "VERSIONS_CLEANED=($(for i in  "${VERSIONS_CLEANED[@]}" ; do  echo "\"$i\"" ; done | sort -u))"
 
-  for VERSION in "${VERSIONS_CLEANED[@]}"; do
-    print_output "[+] Found Version details (aggregated): ""$VERSION"""
-  done
+  if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
+    for VERSION in "${VERSIONS_CLEANED[@]}"; do
+      print_output "[+] Found Version details (aggregated): ""$VERSION"""
+    done
+  else
+      print_output "[-] No Version details found."
+  fi
   print_output ""
 
 }
