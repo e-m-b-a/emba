@@ -24,19 +24,36 @@ F10_base_aggregator() {
   print_output "[+] Tested firmware:""$NC"" ""$FIRMWARE_PATH"""
   print_output "[+] Found architecture:""$NC"" ""$D_ARCH"""
   print_output ""
-  print_output "[+] Found ""$ORANGE""""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$S20_SCRIPTS"" scripts.""$NC"""
-  print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$NC"" CVE vulnerabilities in all binaries (without version checking)."
-  print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$NC"" usages of strcpy in all binaries."
-  print_output "[+] Found ""$ORANGE""""$CERT_OUT_CNT""""$NC"" outdated certificates in ""$CERT_CNT"" certificates."
+
+  if [[ -n "$S20_SHELL_VULNS" ]]; then
+    print_output "[+] Found ""$ORANGE""""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$S20_SCRIPTS"" scripts.""$NC"""
+  fi
+  if [[ -n "$S30_VUL_COUNTER" ]]; then
+    print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in all binaries (without version checking).""$NC"""
+  fi
+  if [[ -n "$STRCPY_CNT" ]]; then
+    print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$GREEN"" usages of strcpy in all binaries.""$NC"""
+  fi
+  if [[ -n "$CERT_OUT_CNT" ]]; then
+    print_output "[+] Found ""$ORANGE""""$CERT_OUT_CNT""""$GREEN"" outdated certificates in ""$CERT_CNT"" certificates.""$NC"""
+  fi
 
   CANARY=$(grep -c "No canary" "$LOG_DIR"/s10_binaries_check.txt)
   RELRO=$(grep -c "No RELRO" "$LOG_DIR"/s10_binaries_check.txt)
   NX=$(grep -c "NX disabled" "$LOG_DIR"/s10_binaries_check.txt)
   PIE=$(grep -c "No PIE" "$LOG_DIR"/s10_binaries_check.txt)
 
-  print_output "[+] Found ""$ORANGE""""$CANARY""""$NC"" binaries without enabled stack canaries"
-  print_output "[+] Found ""$ORANGE""""$RELRO""""$NC"" binaries without enabled RELRO"
-  print_output "[+] Found ""$ORANGE""""$NX""""$NC"" binaries without enabled NX"
-  print_output "[+] Found ""$ORANGE""""$PIE""""$NC"" binaries without enabled PIE"
+  if [[ -n "$CANARY" ]]; then
+    print_output "[+] Found ""$ORANGE""""$CANARY""""$GREEN"" binaries without enabled stack canaries""$NC"""
+  fi
+  if [[ -n "$RELRO" ]]; then
+    print_output "[+] Found ""$ORANGE""""$RELRO""""$GREEN"" binaries without enabled RELRO""$NC"""
+  fi
+  if [[ -n "$NX" ]]; then
+    print_output "[+] Found ""$ORANGE""""$NX""""$GREEN"" binaries without enabled NX""$NC"""
+  fi
+  if [[ -n "$PIE" ]]; then
+    print_output "[+] Found ""$ORANGE""""$PIE""""$GREEN"" binaries without enabled PIE""$NC"""
+  fi
 
 }

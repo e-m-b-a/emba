@@ -139,7 +139,7 @@ version_detection() {
         fi
       fi
     else
-      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
+      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/* 2>/dev/null)
     fi
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
@@ -382,10 +382,10 @@ check_disk_space() {
   #CRITICAL_FILES=($(find "$LOG_DIR"/qemu_emulator/ -type f -size +"$KILL_SIZE" -exec basename {} \; | cut -d\. -f1 | cut -d_ -f2))
   mapfile -t CRITICAL_FILES < <(find "$LOG_DIR"/qemu_emulator/ -type f -size +"$KILL_SIZE" -exec basename {} \; | cut -d\. -f1 | cut -d_ -f2)
   for KILLER in "${CRITICAL_FILES[@]}"; do
-    print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
-    print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
     if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
-      pkill -f "$EMULATOR.*$KILLER.*"
+      print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
+      print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
+        pkill -f "$EMULATOR.*$KILLER.*"
     fi
   done
 }

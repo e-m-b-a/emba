@@ -45,6 +45,7 @@ F19_cve_aggregator() {
 
     get_firmware_base_version_check
     get_usermode_emulator
+    aggregate_versions
     generate_cve_details
   else
     print_output "[-] CVE search binary search.py not found."
@@ -58,9 +59,15 @@ prepare_version_data() {
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     VERSION_lower="${VERSION_lower//This\ is\ perl\ .*\ \(v/}"
     VERSION_lower="${VERSION_lower//\)\ built/}"
+    #jQuery JavaScript Library v1.4.3
+    VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
     #xl2tpd version:  xl2tpd-1.3.6
     VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ \ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//xl2tpd-/}"
+    #ntpd\ -\ standard\ NTP\ query\ program\ -\ Ver\.
+    VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
+    # Ralink\ DOT1X\ daemon,\ version\ = '
+    VERSION_lower="${VERSION_lower//Ralink\ DOT1X\ daemon,\ version\ = \'/ralink-dot1x}"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
@@ -85,17 +92,17 @@ prepare_version_data() {
     # rdnssd\:\ IPv6\ Recursive\ DNS\ Server\ discovery\ Daemon\
     VERSION_lower="${VERSION_lower//\:\ ipv6\ recursive\ dns\ server\ discovery\ daemon/}"
     #NETIO\ -\ Network\ Throughput\ Benchmark,\ Version
-    VERSION_lower="${VERSION_lower//\-\ network\ throughput\ benchmark\,\ /}"
-    #ntpq\ -\ standard\ NTP\ query\ program\ -\ Ver\.
-    VERSION_lower="${VERSION_lower//\-\ standard\ ntp\ query\ program\ \-/}"
+    VERSION_lower="${VERSION_lower//-\ network\ throughput\ benchmark\,\ /}"
     #ntpd\ -\ NTP\ daemon\ program\ -\ Ver\.
-    VERSION_lower="${VERSION_lower//\-\ ntp\ daemon\ program\ \-/}"
+    VERSION_lower="${VERSION_lower//-\ ntp\ daemon\ program\ -/}"
+    # GNU bash, 4.3.39
+    VERSION_lower="${VERSION_lower//gnu\ bash,\ /bash\ }"
     #igmpproxy, Version 0.1
     VERSION_lower="${VERSION_lower//,/}"
     # BoosterMainFunction:305
     VERSION_lower="${VERSION_lower//BoosterMainFunction\:305/booster}"
     VERSION_lower="${VERSION_lower//:/}"
-    VERSION_lower="${VERSION_lower//-\ /}"
+    VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
     #mini_httpd/1.19
     VERSION_lower="${VERSION_lower/\//\ }"
@@ -104,10 +111,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
     # loadkeys von kbd
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/loadkeys}"
-    # GNU bash, 4.3.39
-    VERSION_lower="${VERSION_lower//gnu\ bash,\ /bash\ }"
     #remove multiple spaces
     VERSION_lower="${VERSION_lower//\ \+/\ }"
+    #remove '
+    VERSION_lower="${VERSION_lower//\'/}"
     #our current version detection on strict version includes backslashes:
     #VERSION_lower="${VERSION_lower//\\/}"
 
@@ -117,8 +124,8 @@ prepare_version_data() {
     fi
 }
 
-generate_cve_details() {
-  sub_module_title "Collect CVE details."
+aggregate_versions() {
+  sub_module_title "Aggregate versions."
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
@@ -132,12 +139,13 @@ generate_cve_details() {
   for VERSION in "${VERSIONS_KERNEL[@]}"; do
     print_output "[+] Found Version details (kernel): ""$VERSION"""
   done
+
   #print_output ""
   #for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
   #  print_output "[+] Found Kernel exploit: ""$KERNEL_CVE_EXPLOIT"""
   #done
-  print_output ""
 
+  print_output ""
   VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}")
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     prepare_version_data
@@ -157,6 +165,11 @@ generate_cve_details() {
   done
   print_output ""
 
+}
+
+generate_cve_details() {
+  sub_module_title "Collect CVE details."
+
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
 
@@ -172,7 +185,7 @@ generate_cve_details() {
     $PATH_CVE_SEARCH -p "$VERSION_search" > "$LOG_DIR"/aggregator/"$VERSION_path".txt
 
     # extract the CVE numbers and the CVSS values and sort it:
-    readarray -t CVEs_OUTPUT < <(grep -A2 -e ":\ CVE-" "$LOG_DIR"/aggregator/"$VERSION_path".txt | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r)
+    readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_DIR"/aggregator/"$VERSION_path".txt | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r)
 
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       ((CVE_COUNTER++))

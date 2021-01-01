@@ -102,7 +102,7 @@ objdump_disassembly()
                 COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                 if [[ "$FUNCTION" == "strcpy"  ]] ; then
                   COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null)
-                  ((STRCPY_CNT++))
+                  (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                 elif [[ "$FUNCTION" == "mmap"  ]] ; then
                   # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                   COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null)
@@ -134,7 +134,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null)
-                    ((STRCPY_CNT++))
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "$FUNC_LOG"  2> /dev/null)
@@ -169,7 +169,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]]$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]]strlen" "$FUNC_LOG"  2> /dev/null)
-                    ((STRCPY_CNT++))
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     # Check this testcase. Not sure if it works in all cases! 
@@ -200,7 +200,7 @@ objdump_disassembly()
                 COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                 if [[ "$FUNCTION" == "strcpy" ]] ; then
                   COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null)
-                  ((STRCPY_CNT++))
+                  (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                 elif [[ "$FUNCTION" == "mmap" ]] ; then
                   # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                   # Test not implemented on ARM64
@@ -236,7 +236,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG"  2> /dev/null)
-                    ((STRCPY_CNT++))
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     # Check this. This test is very rough:
@@ -270,7 +270,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null)
-                    ((STRCPY_CNT++))
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null)
