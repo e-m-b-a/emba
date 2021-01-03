@@ -57,7 +57,7 @@ prepare_version_data() {
     # we try to handle as many version strings as possible through these generic rules
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
-    VERSION_lower="${VERSION_lower//This\ is\ perl\ .*\ \(v/}"
+    VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
     VERSION_lower="${VERSION_lower//\)\ built/}"
     #jQuery JavaScript Library v1.4.3
     VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
@@ -67,11 +67,15 @@ prepare_version_data() {
     #ntpd\ -\ standard\ NTP\ query\ program\ -\ Ver\.
     VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
+    #This is SMTPclient Version
+    VERSION_lower="${VERSION_lower//this\ is\ smtpclient\ version/smtpclient}"
     # Ralink\ DOT1X\ daemon,\ version\ = '
     VERSION_lower="${VERSION_lower//Ralink\ DOT1X\ daemon,\ version\ = \'/ralink-dot1x}"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
+    #Wireless-Tools version 29
+    VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
     # apt-Version 1.2.3
     VERSION_lower="${VERSION_lower//apt-/apt\ }"
     # remove the v in something like this: "space v[number]"
@@ -105,6 +109,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//:/}"
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
+    #GNU\ C\ Library\ \(.*\)\ stable\ release\ version\ 
+    VERSION_lower="${VERSION_lower//gnu\ c\ library\ \(.*\)\ stable\ release\ /gnu:libc}"
     #mini_httpd/1.19
     VERSION_lower="${VERSION_lower/\//\ }"
     #Beceem\ CM\ Server\

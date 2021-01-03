@@ -27,6 +27,7 @@ P09_firmware_base_version_check() {
 
     # as we do not have a typical linux executable we can't use strict version details
     if [[ $STRICT != "strict" ]]; then
+      #print_output "[*] $VERSION_LINE"
       VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
       print_output "." | tr -d "\n"
 
@@ -35,11 +36,13 @@ P09_firmware_base_version_check() {
       VERSIONS_DETECTED+=("$VERSION_FINDER")
       print_output "." | tr -d "\n"
 
-      VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      #VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
       VERSIONS_DETECTED+=("$VERSION_FINDER")
       print_output "." | tr -d "\n"
 
-      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      #VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -exec strings {} \; | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
       VERSIONS_DETECTED+=("$VERSION_FINDER")
       # leave it here for backup reasons:
       #VERSION_STRINGER=$(strings "$FIRMWARE_PATH" | grep -H -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)

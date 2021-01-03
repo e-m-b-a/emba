@@ -161,17 +161,21 @@ detect_root_dir() {
   if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -wholename "*$INTERPRETER_FULL_PATH" 2>/dev/null | sort -u)
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -wholename "*$INTERPRETER_FULL_PATH" 2>/dev/null | sort -u | head -1)
     EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
+    print_output "[*] Root directory detection via interpreter ... $EMULATION_PATH"
   else
     # if we can't find the interpreter we fall back to the original root directory
     #EMULATION_PATH=$EMULATION_PATH_BASE
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \;)
+    print_output "[*] Root directory detection via path pattern ..."
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; | head -1)
   fi
   # if the new root directory does not include the current working directory we fall back to the original root directory
-  #if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
     #EMULATION_PATH=$EMULATION_PATH_BASE
-  #fi
+    print_output "[*] Root directory detection via path pattern ..."
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; | head -1)
+  fi
   print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
 }
 

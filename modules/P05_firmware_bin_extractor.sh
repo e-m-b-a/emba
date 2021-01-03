@@ -44,5 +44,11 @@ binwalking() {
 
   echo
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR"
-  print_output "$(binwalk -e -M -C "$OUTPUT_DIR" "$FIRMWARE_PATH")"
+  #print_output "$(binwalk -e -M -C "$OUTPUT_DIR" "$FIRMWARE_PATH")"
+  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR" "$FIRMWARE_PATH")
+  if [[ ${#BINWALK_EXTRACT[@]} -ne 0 ]] ; then
+    for LINE in "${BINWALK_EXTRACT[@]}" ; do
+      print_output "$LINE"
+    done
+  fi
 }
