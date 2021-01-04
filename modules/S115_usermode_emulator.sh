@@ -119,21 +119,21 @@ version_detection() {
     # if we have the key strict this version identifier only works for the defined binary and is not generic!
     if [[ $STRICT == "strict" ]]; then
       if [[ -f "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt ]]; then
-        print_output "[*] version strict reached"
-        print_output "[*] version strict binary: $BINARY"
-        print_output "[*] version strict identifier: $VERSION_IDENTIFIER"
+        #print_output "[*] version strict reached"
+        #print_output "[*] version strict binary: $BINARY"
+        #print_output "[*] version strict identifier: $VERSION_IDENTIFIER"
         VERSION_STRICT=$(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
-        print_output "[*] version strict reached: $VERSION_STRICT"
+        #print_output "[*] version strict reached: $VERSION_STRICT"
         if [[ -n "$VERSION_STRICT" ]]; then
           if [[ "$BINARY" == "smbd" ]]; then
-            print_output "[*] strict smbd reached"
+            #print_output "[*] strict smbd reached"
             # we log it as the original binary and the samba binary name
             VERSION_="$BINARY $VERSION_STRICT"
             VERSIONS_DETECTED+=("$VERSION_")
             BINARY="samba"
           fi
           VERSION_="$BINARY:$BINARY $VERSION_STRICT"
-          print_output "[*] version strict output: $VERSION_"
+          #print_output "[*] version strict output: $VERSION_"
           VERSIONS_DETECTED+=("$VERSION_")
         fi
       fi
@@ -165,16 +165,22 @@ detect_root_dir() {
     EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
     print_output "[*] Root directory detection via interpreter ... $EMULATION_PATH"
   else
-    # if we can't find the interpreter we fall back to the original root directory
+    # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
     #EMULATION_PATH=$EMULATION_PATH_BASE
-    print_output "[*] Root directory detection via path pattern ..."
+    print_output "[*] Root directory detection via path pattern ... part 1"
     EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; | head -1)
   fi
-  # if the new root directory does not include the current working directory we fall back to the original root directory
+  # if the new root directory does not include the current working directory we fall back to the search for something like "*root/bin/* and take this:
   if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
-    #EMULATION_PATH=$EMULATION_PATH_BASE
-    print_output "[*] Root directory detection via path pattern ..."
+    # this could happen if the interpreter path from the first check is broken and results in something like this: "/" or "."
+    # if this happens we have to handle this and try to fix the path:
+    print_output "[*] Root directory detection via path pattern ... part 2"
     EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; | head -1)
+  fi
+  # now we have to include a final check and fix the root path to the firmware path (as last resort)
+  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+    print_output "[*] Root directory set to firmware path"
+    EMULATION_PATH="$EMULATION_PATH_BASE"
   fi
   print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
 }

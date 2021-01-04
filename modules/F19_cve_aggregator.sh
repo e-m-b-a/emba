@@ -59,6 +59,8 @@ prepare_version_data() {
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
     VERSION_lower="${VERSION_lower//\)\ built/}"
+    #D-Bus Message Bus Daemon 1.6.8
+    VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/:dbus\ }"
     #jQuery JavaScript Library v1.4.3
     VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
     #xl2tpd version:  xl2tpd-1.3.6
@@ -69,6 +71,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
     #This is SMTPclient Version
     VERSION_lower="${VERSION_lower//this\ is\ smtpclient\ version/smtpclient}"
+    # iputils-sss
+    VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
+    VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
     # Ralink\ DOT1X\ daemon,\ version\ = '
     VERSION_lower="${VERSION_lower//Ralink\ DOT1X\ daemon,\ version\ = \'/ralink-dot1x}"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
@@ -102,6 +107,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//-\ ntp\ daemon\ program\ -/}"
     # GNU bash, 4.3.39
     VERSION_lower="${VERSION_lower//gnu\ bash,\ /bash\ }"
+    # FUSE library version: 2.9.4
+    VERSION_lower="${VERSION_lower//fuse\ library/fuse}"
+    # NET-SNMP\ version:\ \ 
+    VERSION_lower="${VERSION_lower//net-snmp\ /net-snmp}"
     #igmpproxy, Version 0.1
     VERSION_lower="${VERSION_lower//,/}"
     # BoosterMainFunction:305
@@ -109,8 +118,6 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//:/}"
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
-    #GNU\ C\ Library\ \(.*\)\ stable\ release\ version\ 
-    VERSION_lower="${VERSION_lower//gnu\ c\ library\ \(.*\)\ stable\ release\ /gnu:libc}"
     #mini_httpd/1.19
     VERSION_lower="${VERSION_lower/\//\ }"
     #Beceem\ CM\ Server\
@@ -118,6 +125,12 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
     # loadkeys von kbd
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/loadkeys}"
+    # CLIENT\ libcurl\
+    VERSION_lower="${VERSION_lower//client\ libcurl/libcurl }"
+    # GNU C Library (AuDis-V04.56) stable release version 2.23
+    #VERSION_lower="${VERSION_lower//gnu\ c\ library.*stable\ release/gnu:libc}"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library.*stable\ release/gnu:libc/')"
     #remove multiple spaces
     VERSION_lower="${VERSION_lower//\ \+/\ }"
     #remove '
@@ -157,7 +170,9 @@ aggregate_versions() {
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     prepare_version_data
     # now we should have the name and the version in the first two coloumns:
+    echo "$VERSION_lower"
     VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"
+    echo "$VERSION_lower"
     # check if we have some number in it ... without a number we have no version info and we can drop this entry ...
     if [[ $VERSION_lower =~ [0-9] ]]; then
       VERSIONS_CLEANED+=( "$VERSION_lower" )
