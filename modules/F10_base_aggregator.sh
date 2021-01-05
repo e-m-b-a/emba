@@ -42,27 +42,29 @@ F10_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$YARA_CNT""""$GREEN"" yara rule matches.""$NC"""
   fi
 
-  if [[ -f "$LOG_DIR"/s10_binaries_check.txt ]]; then
-    CANARY=$(grep -c "No canary" "$LOG_DIR"/s10_binaries_check.txt)
-    RELRO=$(grep -c "No RELRO" "$LOG_DIR"/s10_binaries_check.txt)
-    NX=$(grep -c "NX disabled" "$LOG_DIR"/s10_binaries_check.txt)
-    PIE=$(grep -c "No PIE" "$LOG_DIR"/s10_binaries_check.txt)
-  fi
-
-  if [[ -n "$CANARY" ]]; then
-    CAN_PER=$(( CANARY/(${#BINARIES[@]}/100) ))
-    print_output "[+] Found ""$ORANGE""""$CANARY""""$GREEN"" binaries without enabled stack canaries in ${#BINARIES[@]} binaries - ""$ORANGE""""$CAN_PER""% ""$GREEN""without stack canaries enabled""$NC"""
-  fi
-  if [[ -n "$RELRO" ]]; then
-    RELRO_PER=$(( RELRO/(${#BINARIES[@]}/100) ))
-    print_output "[+] Found ""$ORANGE""""$RELRO""""$GREEN"" binaries without enabled RELRO in ${#BINARIES[@]} binaries - ""$ORANGE""""$RELRO_PER""% ""$GREEN""without RELRO enabled""$NC"""
-  fi
-  if [[ -n "$NX" ]]; then
-    NX_PER=$(( NX/(${#BINARIES[@]}/100) ))
-    print_output "[+] Found ""$ORANGE""""$NX""""$GREEN"" binaries without enabled NX in ${#BINARIES[@]} binaries - ""$ORANGE""""$NX_PER""% ""$GREEN""without NX enabled""$NC"""
-  fi
-  if [[ -n "$PIE" ]]; then
-    PIE_PER=$(( PIE/(${#BINARIES[@]}/100) ))
-    print_output "[+] Found ""$ORANGE""""$PIE""""$GREEN"" binaries without enabled PIE in ${#BINARIES[@]} binaries - ""$ORANGE""""$PIE_PER""% ""$GREEN""without PIE enabled""$NC"""
+  if [[ "${#BINARIES[@]}" -gt 0 ]]; then
+    if [[ -f "$LOG_DIR"/s10_binaries_check.txt ]]; then
+      CANARY=$(grep -c "No canary" "$LOG_DIR"/s10_binaries_check.txt)
+      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/s10_binaries_check.txt)
+      NX=$(grep -c "NX disabled" "$LOG_DIR"/s10_binaries_check.txt)
+      PIE=$(grep -c "No PIE" "$LOG_DIR"/s10_binaries_check.txt)
+    fi
+  
+    if [[ -n "$CANARY" ]]; then
+      CAN_PER=$(( CANARY/(${#BINARIES[@]}/100) ))
+      print_output "[+] Found ""$ORANGE""""$CANARY""""$GREEN"" binaries without enabled stack canaries in ${#BINARIES[@]} binaries - ""$ORANGE""""$CAN_PER""% ""$GREEN""without stack canaries enabled""$NC"""
+    fi
+    if [[ -n "$RELRO" ]]; then
+      RELRO_PER=$(( RELRO/(${#BINARIES[@]}/100) ))
+      print_output "[+] Found ""$ORANGE""""$RELRO""""$GREEN"" binaries without enabled RELRO in ${#BINARIES[@]} binaries - ""$ORANGE""""$RELRO_PER""% ""$GREEN""without RELRO enabled""$NC"""
+    fi
+    if [[ -n "$NX" ]]; then
+      NX_PER=$(( NX/(${#BINARIES[@]}/100) ))
+      print_output "[+] Found ""$ORANGE""""$NX""""$GREEN"" binaries without enabled NX in ${#BINARIES[@]} binaries - ""$ORANGE""""$NX_PER""% ""$GREEN""without NX enabled""$NC"""
+    fi
+    if [[ -n "$PIE" ]]; then
+      PIE_PER=$(( PIE/(${#BINARIES[@]}/100) ))
+      print_output "[+] Found ""$ORANGE""""$PIE""""$GREEN"" binaries without enabled PIE in ${#BINARIES[@]} binaries - ""$ORANGE""""$PIE_PER""% ""$GREEN""without PIE enabled""$NC"""
+    fi
   fi
 }

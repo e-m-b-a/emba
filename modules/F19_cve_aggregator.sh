@@ -47,6 +47,7 @@ F19_cve_aggregator() {
     get_usermode_emulator
     aggregate_versions
     generate_cve_details
+    FORMAT_LOG="$FORMAT_LOG_BAK"
   else
     print_output "[-] CVE search binary search.py not found."
     print_output "[-] Install it from here: https://github.com/cve-search/cve-search."
@@ -65,7 +66,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
     #xl2tpd version:  xl2tpd-1.3.6
     VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ \ xl2tpd-/xl2tpd\ }"
+    VERSION_lower="${VERSION_lower//xl2tpd\ server\ version\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//xl2tpd-/}"
+    VERSION_lower="${VERSION_lower//goahead\ \ /goahead\ }"
     #ntpd\ -\ standard\ NTP\ query\ program\ -\ Ver\.
     VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
@@ -168,11 +171,12 @@ aggregate_versions() {
   print_output ""
   VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}")
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+    #print_output "[+] $VERSION_lower"
     prepare_version_data
     # now we should have the name and the version in the first two coloumns:
-    echo "$VERSION_lower"
+    #print_output "[+] $VERSION_lower"
     VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"
-    echo "$VERSION_lower"
+    #print_output "[+] $VERSION_lower"
     # check if we have some number in it ... without a number we have no version info and we can drop this entry ...
     if [[ $VERSION_lower =~ [0-9] ]]; then
       VERSIONS_CLEANED+=( "$VERSION_lower" )
@@ -198,6 +202,9 @@ generate_cve_details() {
 
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
+  # we do not deal with output formatting the usual way -> we use printf
+  FORMAT_LOG_BAK="$FORMAT_LOG"
+  FORMAT_LOG=0
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     CVE_COUNTER_VERSION=0
@@ -246,7 +253,7 @@ generate_cve_details() {
 
       CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_search""/" | sed -e 's/\ \+/\t/g')
       BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-      VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+      VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       if [[ "$EXPLOIT" == *Source* ]]; then
         printf "${MAGENTA}\t%-10.10s\t:\t%-10.10s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/f19_cve_aggregator.txt
       elif (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
