@@ -148,7 +148,12 @@ version_detection() {
           VERS_DET_OLD="$VERSION_DETECTED"
           VERSIONS_BIN="$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
           VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
+          # we do not deal with output formatting the usual way -> it destroys our current aggregator
+          # we have to deal with it in the future
+          FORMAT_LOG_BAK="$FORMAT_LOG"
+          FORMAT_LOG=0
           print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} (from binary $BINARY) found in $VERSIONS_BIN."
+          FORMAT_LOG="$FORMAT_LOG_BAK"
         fi
       done
     fi

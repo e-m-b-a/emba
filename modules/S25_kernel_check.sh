@@ -119,7 +119,8 @@ analyze_kernel_module()
 {
   sub_module_title "Analyze kernel modules"
 
-  local MOD_DATA
+  KMOD_BAD=0
+  #local MOD_DATA
   mapfile -t MOD_DATA < <(find "$FIRMWARE_PATH" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
   sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' 2> /dev/null)
 
@@ -139,6 +140,7 @@ analyze_kernel_module()
       else
         # kernel module is NOT GPL license then not stripped is bad!
         print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+        KMOD_BAD=$((KMOD_BAD+1))
       fi
     else
       print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"

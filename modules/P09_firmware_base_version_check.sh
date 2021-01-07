@@ -59,7 +59,13 @@ P09_firmware_base_version_check() {
         VERS_LINE_OLD="$VERSION_LINE"
         #future extension:
         #BINARY="$(basename $(echo "$VERSION_LINE" | cut -d: -f1))"
+
+        # we do not deal with output formatting the usual way -> it destroys our current aggregator
+        # we have to deal with it in the future
+        FORMAT_LOG_BAK="$FORMAT_LOG"
+        FORMAT_LOG=0
         print_output "[+] Version information found ${RED}""$VERSION_LINE""${NC}${GREEN} in firmware blob."
+        FORMAT_LOG="$FORMAT_LOG_BAK"
       fi
     fi
   done
