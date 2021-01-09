@@ -110,10 +110,10 @@ F50_base_aggregator() {
         SEARCH_TERM=$(echo "$LINE" | cut -d\  -f3)
         if [[ -f "$BASE_LINUX_FILES" ]]; then
           if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-            LINE=$(echo $LINE | sed -e 's/\ \+/\t/g')
+            #LINE=$(echo "$LINE" | sed -e 's/\ \+/\t/g')
             print_output "$(indent "$(green "$LINE"" - common linux file: yes")")"
           else
-            LINE=$(echo $LINE | sed -e 's/\ \+/\t/g')
+            #LINE=$(echo "$LINE" | sed -e 's/\ \+/\t/g')
             print_output "$(indent "$(orange "$LINE"" - common linux file: no")")"
           fi
         else
@@ -128,7 +128,7 @@ F50_base_aggregator() {
     print_output "[*] Identified the following version details, vulnerabilities and exploits:"
     print_output "$(grep "\[+\] Found version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
-    print_output "${NC}"
+    print_output ""
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE entries for all binaries from S30_version_vulnerability_check.sh."
     fi
