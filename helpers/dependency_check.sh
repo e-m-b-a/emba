@@ -24,8 +24,16 @@ dependency_check()
 
   print_output "    user permission - \\c" "no_log"
   # currently we only need root privileges for emulation
-  # but we are running into issues if we have run a emulation run with root privs
-  # and try to run an non emulation test afterwards on the same log file
+  # but we are running into issues if we have already run an emulation test with root privs
+  # and try to run an non emulation test afterwards on the same log directory
+  if [[ $QEMULATION -eq 1 && $EUID -ne 0 ]]; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""WARNING: With emulation enabled this script needs root privileges""$NC"
+    echo -e "$RED""WARNING: Exit now""$NC"
+    echo -e "$RED""HINT: Run emba with sudo""$NC"
+    exit 1
+  fi
+
   if [[ $EUID -eq 0 ]] ; then
     echo -e "$GREEN""ok""$NC"
   else
