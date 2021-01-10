@@ -51,8 +51,13 @@ F19_cve_aggregator() {
     get_firmware_base_version_check
     get_usermode_emulator
     aggregate_versions
-    generate_cve_details
-
+    
+    if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
+      generate_cve_details
+    else
+      print_output "[-] MongoDB not running on port 27017."
+      print_output "[-] CVE checks not possible!"
+    fi
     FORMAT_LOG="$FORMAT_LOG_BAK"
   else
     print_output "[-] CVE search binary search.py not found."

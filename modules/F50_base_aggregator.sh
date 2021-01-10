@@ -132,7 +132,11 @@ F50_base_aggregator() {
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE entries for all binaries from S30_version_vulnerability_check.sh."
     fi
-    print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
-    print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available.\\n"
+    if [[ "$CVE_COUNTER" -gt 0 ]]; then
+      print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
+    fi
+    if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
+      print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available.\\n"
+    fi
   fi
 }

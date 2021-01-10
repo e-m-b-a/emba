@@ -203,7 +203,7 @@ running_jobs() {
 }
 
 cleanup() {
-  # reset the terminal after all the uncontrolled emulation it is typically broken!
+  # reset the terminal - after all the uncontrolled emulation it is typically broken!
   reset
 
   print_output "[*] Terminating qemu processes - check it with ps"
@@ -225,11 +225,14 @@ cleanup() {
     rm "$EMULATION_PATH"/qemu*static 2> /dev/null
   fi
 
-  echo
+  print_output ""
   print_output "[*] Umounting proc, sys and run"
-  umount -l "$EMULATION_PATH""/proc"
-  umount "$EMULATION_PATH""/sys"
-  umount "$EMULATION_PATH""/run"
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH")
+  for MOUNT in "${CHECK_MOUNTS[@]}"; do
+    print_output "[*] Unmounting $MOUNT"
+    MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
+    umount -l "$MOUNT"
+  done
 
   FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
   if [[ -n "$FILES" ]] ; then
