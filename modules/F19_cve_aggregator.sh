@@ -27,7 +27,7 @@ F19_cve_aggregator() {
   # https://github.com/cve-search/cve-search
 
   # set it up
-  PATH_CVE_SEARCH="/home/m1k3/git-repos/cve-search/bin/search.py"
+  PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
   mkdir "$LOG_DIR"/aggregator
   KERNELV=0
 
