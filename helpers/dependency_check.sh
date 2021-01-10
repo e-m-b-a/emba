@@ -23,6 +23,9 @@ dependency_check()
   print_output "[*] Elementary checks:" "no_log"
 
   print_output "    user permission - \\c" "no_log"
+  # currently we only need root privileges for emulation
+  # but we are running into issues if we have run a emulation run with root privs
+  # and try to run an non emulation test afterwards on the same log file
   if [[ $EUID -eq 0 ]] ; then
     echo -e "$GREEN""ok""$NC"
   else
