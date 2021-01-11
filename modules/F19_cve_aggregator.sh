@@ -44,7 +44,6 @@ F19_cve_aggregator() {
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
     # [+] Found Version details (kernel): Linux kernel version 2.6.33.2
-    #if [[ "${VERSIONS_KERNEL[*]}" =~ "Linux kernel" ]]; then
     if [[ ${#VERSIONS_KERNEL[@]} -ne 0 ]]; then
       # then we have found a kernel in our s25 kernel module
       KERNELV=1
@@ -54,6 +53,7 @@ F19_cve_aggregator() {
     get_usermode_emulator
     aggregate_versions
     
+    # Mongo DB is running on Port 27017. If not we can't check CVEs
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
       generate_cve_details
     else
@@ -69,8 +69,8 @@ F19_cve_aggregator() {
 
 prepare_version_data() {
     # we try to handle as many version strings as possible through these generic rules
-    print_output "$VERSION_lower"
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
+
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
     VERSION_lower="${VERSION_lower//\)\ built/}"
@@ -165,13 +165,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\'/}"
     # Ralink\ DOT1X\ daemon,\ version\ = '
     VERSION_lower="${VERSION_lower//ralink\ dot1x\ daemon\ \=\ /ralink-dot1x\ }"
-    print_output "$VERSION_lower"
     #his\ is\ WiFiDog\ 
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
-    print_output "$VERSION_lower"
-    #our current version detection on strict version includes backslashes:
-    #VERSION_lower="${VERSION_lower//\\/}"
-    print_output "$VERSION_lower"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
@@ -195,20 +190,12 @@ aggregate_versions() {
     print_output "[+] Found Version details (kernel): ""$VERSION"""
   done
 
-  #print_output ""
-  #for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
-  #  print_output "[+] Found Kernel exploit: ""$KERNEL_CVE_EXPLOIT"""
-  #done
-
   print_output ""
   VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}")
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
-    #print_output "[+] $VERSION_lower"
     prepare_version_data
     # now we should have the name and the version in the first two coloumns:
-    #print_output "[+] $VERSION_lower"
     VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"
-    #print_output "[+] $VERSION_lower"
     # check if we have some number in it ... without a number we have no version info and we can drop this entry ...
     if [[ $VERSION_lower =~ [0-9] ]]; then
       VERSIONS_CLEANED+=( "$VERSION_lower" )

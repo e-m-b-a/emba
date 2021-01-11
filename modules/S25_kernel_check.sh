@@ -83,7 +83,7 @@ S25_kernel_check()
   if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
     LOG_FILE="$( get_log_file )"
     for LINE in "${KV_C_ARR[@]}" ; do
-      echo "[*] Statistics:$LINE" >> $LOG_FILE
+      echo "[*] Statistics:$LINE" >> "$LOG_FILE"
     done
   fi
 }

@@ -12,10 +12,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Module with all available functions and patterns to use
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Final aggregator - generates an overview of the results
 
 F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
@@ -31,9 +28,11 @@ F50_base_aggregator() {
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
   fi
   print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
-  KERNELV=$(grep "Kernel version:\ " "$LOG_DIR"/"$KERNEL_CHECK_LOG" 2>/dev/null | sed -e 's/Kernel\ version\:/Linux\ kernel\ version/' | sort -u | head -1)
-  if [[ -n "$KERNELV" ]]; then
-    print_output "[+] Detected kernel version:""$ORANGE"" ""$KERNELV"""
+  mapfile -t KERNELV < <(grep "Statistics" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d: -f2 | sort -u)
+  if [[ "${#KERNELV[@]}" -ne 0 ]]; then
+    for KV in "${KERNELV[@]}"; do
+      print_output "[+] Detected kernel version:""$ORANGE"" ""$KV"""
+    done
   fi
   if [[ "${#MOD_DATA[@]}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""${#MOD_DATA[@]}""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
@@ -74,22 +73,20 @@ F50_base_aggregator() {
     fi
   
     if [[ -n "$CANARY" ]]; then
-      CAN_PER=$(bc -l <<< "scale=0;$CANARY/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$CANARY""""$GREEN"" binaries without enabled stack canaries in ${#BINARIES[@]} binaries - ""$ORANGE""""$CAN_PER""% ""$GREEN""without stack canaries enabled""$NC"""
+      CAN_PER=$(bc -l <<< "scale=1;$CANARY/(${#BINARIES[@]}/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in ${#BINARIES[@]} binaries."
     fi
     if [[ -n "$RELRO" ]]; then
-      RELRO_PER=$(bc -l <<< "scale=0;$RELRO/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$RELRO""""$GREEN"" binaries without enabled RELRO in ${#BINARIES[@]} binaries - ""$ORANGE""""$RELRO_PER""% ""$GREEN""without RELRO enabled""$NC"""
+      RELRO_PER=$(bc -l <<< "scale=1;$RELRO/(${#BINARIES[@]}/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in ${#BINARIES[@]} binaries."
     fi
     if [[ -n "$NX" ]]; then
-      #NX_PER=$(( NX/(${#BINARIES[@]}/100) ))
-      NX_PER=$(bc -l <<< "scale=0;$NX/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$NX""""$GREEN"" binaries without enabled NX in ${#BINARIES[@]} binaries - ""$ORANGE""""$NX_PER""% ""$GREEN""without NX enabled""$NC"""
+      NX_PER=$(bc -l <<< "scale=1;$NX/(${#BINARIES[@]}/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in ${#BINARIES[@]} binaries."
     fi
     if [[ -n "$PIE" ]]; then
-      #PIE_PER=$(( PIE/(${#BINARIES[@]}/100) ))
-      PIE_PER=$(bc -l <<< "scale=0;$PIE/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$PIE""""$GREEN"" binaries without enabled PIE in ${#BINARIES[@]} binaries - ""$ORANGE""""$PIE_PER""% ""$GREEN""without PIE enabled""$NC"""
+      PIE_PER=$(bc -l <<< "scale=1;$PIE/(${#BINARIES[@]}/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in ${#BINARIES[@]} binaries."
     fi
   fi
 
