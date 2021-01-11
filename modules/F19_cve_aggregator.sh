@@ -44,7 +44,9 @@ F19_cve_aggregator() {
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
     # [+] Found Version details (kernel): Linux kernel version 2.6.33.2
-    if [[ "${VERSIONS_KERNEL[*]}" =~ "Linux kernel" ]]; then
+    #if [[ "${VERSIONS_KERNEL[*]}" =~ "Linux kernel" ]]; then
+    if [[ ${#VERSIONS_KERNEL[@]} -ne 0 ]]; then
+      # then we have found a kernel in our s25 kernel module
       KERNELV=1
     fi
 
@@ -370,7 +372,7 @@ get_kernel_check() {
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
     readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
     ## do a bit of sed modifications to have the same output as from the pre checker
-    readarray -t VERSIONS_KERNEL < <(grep "Kernel version:\ " "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/Kernel\ version\:/Linux\ kernel\ version/' | sort -u)
+    readarray -t VERSIONS_KERNEL < <(grep "Statistics:" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel\ /' | sort -u)
   fi
 }
 

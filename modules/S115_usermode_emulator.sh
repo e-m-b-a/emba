@@ -25,16 +25,6 @@ S115_usermode_emulator() {
     print_output "[!] This module is experimental and could harm your host environment."
     print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
-    print_output "[*] Should we proceed?\\n"
-#    read -p "(y/N)  " -r ANSWER
-#    case ${ANSWER:0:1} in
-#      n|N|"" )
-#        echo
-#        print_output "[!] Terminating emba now.\\n"
-#        exit 1
-#      ;;
-#    esac
-
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
     # some processes are running long and logging a lot

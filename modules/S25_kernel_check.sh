@@ -73,9 +73,18 @@ S25_kernel_check()
       get_kernel_vulns
       #analyze_kernel_module
       check_modprobe
+
     else
       print_output "[-] No kernel found"
     fi
+  fi
+
+  # we log the found kernel versions without formatting -> used later in the aggregator
+  if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
+    LOG_FILE="$( get_log_file )"
+    for LINE in "${KV_C_ARR[@]}" ; do
+      echo "[*] Statistics:$LINE" >> $LOG_FILE
+    done
   fi
 }
 
