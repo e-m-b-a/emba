@@ -411,10 +411,10 @@ emulate_binary() {
 
   echo
   for PARAM in "${EMULATION_PARAMS[@]}"; do
-    print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
 
     # if we find multiple binaries with the same name we have to take care of it
     for BINARY_EMU in "${BIN_EMU[@]}"; do
+      print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
       chroot "$EMULATION_PATH" ./"$EMULATOR" "$BINARY_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
       print_output ""
       check_disk_space
