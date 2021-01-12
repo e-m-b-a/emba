@@ -78,6 +78,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/:dbus\ }"
     #jQuery JavaScript Library v1.4.3
     VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
+    # GNU Midnight Commander 
+    VERSION_lower="${VERSION_lower//gnu\ midnight\ commander/midnight_commander}"
     #xl2tpd version:  xl2tpd-1.3.6
     VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ \ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ version\ xl2tpd-/xl2tpd\ }"

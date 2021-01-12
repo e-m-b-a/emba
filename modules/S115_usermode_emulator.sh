@@ -171,6 +171,8 @@ detect_root_dir() {
     print_output "[*] Root directory set to firmware path ... last resort"
     EMULATION_PATH="$EMULATION_PATH_BASE"
   fi
+  # This is for quick testing here - if emba fails to detect the root directory you can poke with it here (we have to find a better way for the future):
+  #EMULATION_PATH="$EMULATION_PATH_BASE"
   print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
 }
 
@@ -395,7 +397,8 @@ emulate_binary() {
 
   ## as we currently do not have the right path of our binary we have to find it now:
   DIR=$(pwd)
-  BIN_EMU="$(cd "$EMULATION_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)"
+  # if we find multiple binaries with the same name we have to take care of it
+  mapfile -t BIN_EMU < <(cd "$EMULATION_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)
 
   emulate_strace_run
   
@@ -410,9 +413,12 @@ emulate_binary() {
   for PARAM in "${EMULATION_PARAMS[@]}"; do
     print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
 
-    chroot "$EMULATION_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
-    print_output ""
-    check_disk_space
+    # if we find multiple binaries with the same name we have to take care of it
+    for BINARY_EMU in "${BIN_EMU[@]}"; do
+      chroot "$EMULATION_PATH" ./"$EMULATOR" "$BINARY_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
+      print_output ""
+      check_disk_space
+    done
   done
 
   # now we kill all older qemu-processes:
