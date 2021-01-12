@@ -33,6 +33,7 @@ F19_cve_aggregator() {
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_BASE_VER_CHECK_LOG="p09_firmware_base_version_check.txt"
+  FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
 
@@ -73,7 +74,9 @@ prepare_version_data() {
 
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
-    VERSION_lower="${VERSION_lower//\)\ built/}"
+    VERSION_lower="${VERSION_lower//)\ built/}"
+    # GNU gdbserver (GDB)
+    VERSION_lower="${VERSION_lower//gnu\ gdbserver\ (gdb)/gdb}"
     #D-Bus Message Bus Daemon 1.6.8
     VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/:dbus\ }"
     #jQuery JavaScript Library v1.4.3
@@ -96,6 +99,8 @@ prepare_version_data() {
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
+    # expat_1.1.1 -> expat 1.1.1
+    VERSION_lower="${VERSION_lower//expat_/expat\ }"
     #Wireless-Tools version 29
     VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
     VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"
@@ -106,7 +111,7 @@ prepare_version_data() {
     # "mkfs\.jffs2\ revision\ [0-9]\.[0-9]\.[0-9]\.[0-9]"
     VERSION_lower="${VERSION_lower//revision/}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
-    VERSION_lower="${VERSION_lower//sshd/}"
+    VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
     # GNU grep 2.6.3
     VERSION_lower="${VERSION_lower//^gnu\ /}"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
@@ -185,6 +190,9 @@ aggregate_versions() {
   for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
     print_output "[+] Found Version details (base check): ""$VERSION"""
   done
+  for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
+    print_output "[+] Found Version details (statical check): ""$VERSION"""
+  done
   for VERSION in "${VERSIONS_EMULATOR[@]}"; do
     print_output "[+] Found Version details (emulator): ""$VERSION"""
   done
@@ -193,7 +201,7 @@ aggregate_versions() {
   done
 
   print_output ""
-  VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}")
+  VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     prepare_version_data
     # now we should have the name and the version in the first two coloumns:
@@ -340,13 +348,22 @@ generate_cve_details() {
 }
 
 get_firmware_base_version_check() {
-  sub_module_title "Collect version details of module p09_firmware_base_version_check."
+  sub_module_title "Collect version details of module p09 and s09 - firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
       readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel")
     else
       readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
+    fi
+  fi
+  # 
+  if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
+    # if we have already kernel information:
+    if [[ "$KERNELV" -eq 1 ]]; then
+      readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel")
+    else
+      readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
     fi
   fi
 }
@@ -368,6 +385,6 @@ get_kernel_check() {
 get_usermode_emulator() {
   sub_module_title "Collect version details of module s115_usermode_emulator."
   if [[ -f "$LOG_DIR"/"$EMUL_LOG" ]]; then
-    readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (.*$//' | sort -u)
+    readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (from.*$//' | sort -u)
   fi
 }
