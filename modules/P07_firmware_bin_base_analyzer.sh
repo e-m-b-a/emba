@@ -40,11 +40,11 @@ os_identification() {
   COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW))
 
   if [[ $((COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos)) -gt 0 ]] ; then
-    print_output "$(indent "$(orange "Operating system detection:")")" "no_log"
-    if [[ $COUNTER_VxWorks -gt 0 ]] ; then print_output "$(indent "$(orange "VxWorks          ""$COUNTER_VxWorks")")" "no_log" ; fi
-    if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS          ""$COUNTER_FreeRTOS")")" "no_log" ; fi
-    if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos          ""$COUNTER_eCos")")" "no_log" ; fi
-    if [[ $COUNTER_Linux -gt 0 ]] ; then print_output "$(indent "$(orange "Linux            ""$COUNTER_Linux")")" "no_log"; fi
+    print_output "$(indent "$(orange "Operating system detection:")")"
+    if [[ $COUNTER_VxWorks -gt 0 ]] ; then print_output "$(indent "$(orange "VxWorks          ""$COUNTER_VxWorks")")"; fi
+    if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS          ""$COUNTER_FreeRTOS")")"; fi
+    if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos             ""$COUNTER_eCos")")"; fi
+    if [[ $COUNTER_Linux -gt 0 ]] ; then print_output "$(indent "$(orange "Linux            ""$COUNTER_Linux")")"; fi
   fi
 
   echo

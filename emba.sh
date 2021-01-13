@@ -91,6 +91,9 @@ main()
     exit 1
   fi
 
+  EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
+  export EMBACOMMAND
+
   while getopts a:A:cde:Ef:Fghk:l:m:sz OPT ; do
     case $OPT in
       a)
@@ -286,18 +289,30 @@ main()
       # Add your personal checks to X150_user_checks.sh (change starting 'X' in filename to 'S') or write a new module, add it to ./modules
       TESTING_DONE=1
     fi
+  fi
 
-    if [[ "$TESTING_DONE" -eq 1 ]]; then
+  # 'main' functions of imported finishing modules
+  local MODULES
+  MODULES=$(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
+  for MODULE_FILE in $MODULES ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+      MODULE_BN=$(basename "$MODULE_FILE")
+      MODULE_MAIN=${MODULE_BN%.*}
+      $MODULE_MAIN
+      reset_module_count
+    fi
+  done
+
+  if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       write_grep_log "$(date)" "TIMESTAMP"
       write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
-    else
+  else
       #print_output "\\n" "no_log"
       print_output "[!] No extracted firmware found" "no_log"
       print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")" "no_log"
       #exit 1
-    fi
   fi
   exit 1
 }

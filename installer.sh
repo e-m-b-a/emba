@@ -109,12 +109,13 @@ download_file()
 
 ORANGE='\033[0;33m'
 BOLD='\033[1m'
+MAGENTA='\033[0;35m'
 NC='\033[0m'  # no color
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
 if ! [[ $EUID -eq 0 ]] ; then
-  echo -e "\\n""$ORANGE""Run script with root permissions!""$NC\\n"
+  echo -e "\\n""$ORANGE""Run emba installation script with root permissions!""$NC\\n"
   exit 1
 fi
 
@@ -306,6 +307,30 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+# aggregator
+
+INSTALL_APP_LIST=()
+echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database. CVE-searchsploit will be installed via pip3."
+print_tool_info "python3-pip" 1
+print_tool_info "bc" 1
+
+echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install bc, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+read -p "(y/Y)" -r ANSWER
+case ${ANSWER:0:1} in
+  y|Y )
+    for APP in "${INSTALL_APP_LIST[@]}" ; do
+      apt-get install "$APP" -y
+    done
+    pip3 install cve_searchsploit
+    if [[ -d external/cve-search ]]; then
+      echo -e "Found cve-search directory. Skipping installation."
+    else
+      git clone https://github.com/cve-search/cve-search.git external/cve-search
+    fi
+    echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
+    echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
+  ;;
+esac
 
 # aha for html generation - future extension of emba
 #echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"

@@ -19,54 +19,57 @@
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Software component and version detection started via emulation with qemu usermode emulation"
-
-  print_output "[!] This module is experimental and could harm your host environment."
-  print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
-
-  print_output "[*] Should we proceed?\\n"
-  read -p "(y/N)  " -r ANSWER
-  case ${ANSWER:0:1} in
-    n|N|"" )
-      echo
-      print_output "[!] Terminating emba now.\\n"
-      exit 1
-    ;;
-  esac
-
   if [[ "$QEMULATION" -eq 1 ]]; then
+    module_title "Software component and version detection started via emulation with qemu usermode emulation"
+
+    print_output "[!] This module is experimental and could harm your host environment."
+    print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+
     SHORT_PATH_BAK=$SHORT_PATH
     SHORT_PATH=1
+    # some processes are running long and logging a lot
+    # to protect the host we are going to kill them on a KILL_SIZE limit
+    KILL_SIZE="100M"
+    # to get rid of all the running stuff we are going to kill it after RUNTIME
+    RUNTIME="10m"
     declare -a MISSING
 
-    # as we modify the firmware we copy it to the log directory and do stuff in this area
+    ## load blacklist of binaries that could cause troubles during emulation:
+    readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
+
+    # as we modify the firmware we copy it to the log directory and do the modifications in this area
     copy_firmware
 
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q ELF ) && [[ "$LINE" != './qemu-'*'-static' ]]; then
-        if ( file "$LINE" | grep -q "x86-64" ) ; then
-          EMULATOR="qemu-x86_64-static"
-        elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-          EMULATOR="qemu-i386-static"
-        elif ( file "$LINE" | grep -q "32-bit LSB.*ARM" ) ; then
-          EMULATOR="qemu-arm-static"
-        elif ( file "$LINE" | grep -q "32-bit MSB.*ARM" ) ; then
-          EMULATOR="qemu-armeb-static"
-        elif ( file "$LINE" | grep -q "32-bit LSB.*MIPS" ) ; then
-          EMULATOR="qemu-mipsel-static"
-        elif ( file "$LINE" | grep -q "32-bit MSB.*MIPS" ) ; then
-          EMULATOR="qemu-mips-static"
-        elif ( file "$LINE" | grep -q "32-bit MSB.*PowerPC" ) ; then
-          EMULATOR="qemu-ppc-static"
+        if ! [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$LINE")"* ]]; then
+          if ( file "$LINE" | grep -q "x86-64" ) ; then
+            EMULATOR="qemu-x86_64-static"
+          elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
+            EMULATOR="qemu-i386-static"
+          elif ( file "$LINE" | grep -q "32-bit LSB.*ARM" ) ; then
+            EMULATOR="qemu-arm-static"
+          elif ( file "$LINE" | grep -q "32-bit MSB.*ARM" ) ; then
+            EMULATOR="qemu-armeb-static"
+          elif ( file "$LINE" | grep -q "32-bit LSB.*MIPS" ) ; then
+            EMULATOR="qemu-mipsel-static"
+          elif ( file "$LINE" | grep -q "32-bit MSB.*MIPS" ) ; then
+            EMULATOR="qemu-mips-static"
+          elif ( file "$LINE" | grep -q "32-bit MSB.*PowerPC" ) ; then
+            EMULATOR="qemu-ppc-static"
+          else
+            print_output "[-] No working emulator found for ""$LINE"
+            EMULATOR="NA"
+          fi
+  
+          if [[ "$EMULATOR" != "NA" ]]; then
+            detect_root_dir
+            print_output "[*] Emulator used: $EMULATOR"
+            prepare_emulator
+            emulate_binary
+          fi
         else
-          print_output "[-] No working emulator found for ""$LINE"
-          EMULATOR="NA"
-        fi
-
-        if [[ "$EMULATOR" != "NA" ]]; then
-          detect_root_dir
-          prepare_emulator
-          emulate_binary
+          print_output "[!] Blacklist triggered ... $LINE"
         fi
         running_jobs
       fi
@@ -78,6 +81,7 @@ S115_usermode_emulator() {
     version_detection
 
   else
+    echo
     print_output "[!] Automated emulation is disabled."
     print_output "$(indent "Enable it with the parameter -E.")"
   fi
@@ -104,9 +108,21 @@ version_detection() {
 
     # if we have the key strict this version identifier only works for the defined binary and is not generic!
     if [[ $STRICT == "strict" ]]; then
-      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY"* 2>/dev/null)
+      if [[ -f "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt ]]; then
+        VERSION_STRICT=$(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
+        if [[ -n "$VERSION_STRICT" ]]; then
+          if [[ "$BINARY" == "smbd" ]]; then
+            # we log it as the original binary and the samba binary name
+            VERSION_="$BINARY $VERSION_STRICT"
+            VERSIONS_DETECTED+=("$VERSION_")
+            BINARY="samba"
+          fi
+          VERSION_="$BINARY:$BINARY $VERSION_STRICT"
+          VERSIONS_DETECTED+=("$VERSION_")
+        fi
+      fi
     else
-      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/*)
+      readarray -t VERSIONS_DETECTED < <(grep -o -e "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/* 2>/dev/null)
     fi
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
@@ -116,7 +132,12 @@ version_detection() {
           VERS_DET_OLD="$VERSION_DETECTED"
           VERSIONS_BIN="$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
           VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
+          # we do not deal with output formatting the usual way -> it destroys our current aggregator
+          # we have to deal with it in the future
+          FORMAT_LOG_BAK="$FORMAT_LOG"
+          FORMAT_LOG=0
           print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} (from binary $BINARY) found in $VERSIONS_BIN."
+          FORMAT_LOG="$FORMAT_LOG_BAK"
         fi
       done
     fi
@@ -125,16 +146,33 @@ version_detection() {
 }
 
 detect_root_dir() {
-  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u | head -1 2>/dev/null)
   if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -wholename "*$INTERPRETER_FULL_PATH" 2>/dev/null | sort -u)
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -wholename "*$INTERPRETER_FULL_PATH" 2>/dev/null | sort -u | head -1)
     EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
+    print_output "[*] Root directory detection via interpreter ... $EMULATION_PATH"
   else
-    # if we can't find the interpreter we fall back to the original root directory
-    EMULATION_PATH=$EMULATION_PATH_BASE
+    # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
+    print_output "[*] Root directory detection via path pattern ... "
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null | head -1)
   fi
+
+  # if the new root directory does not include the current working directory we fall back to the search for something like "*root/bin/* and take this:
+  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+    # this could happen if the interpreter path from the first check is broken and results in something like this: "/" or "."
+    # if this happens we have to handle this and try to fix the path:
+    print_output "[*] Root directory detection via path pattern ... failed interpreter detection"
+    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null | head -1)
+  fi
+  # now we have to include a final check and fix the root path to the firmware path (as last resort)
+  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+    print_output "[*] Root directory set to firmware path ... last resort"
+    EMULATION_PATH="$EMULATION_PATH_BASE"
+  fi
+  # This is for quick testing here - if emba fails to detect the root directory you can poke with it here (we have to find a better way for the future):
+  #EMULATION_PATH="$EMULATION_PATH_BASE"
   print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
 }
 
@@ -157,7 +195,7 @@ running_jobs() {
 }
 
 cleanup() {
-  # reset the terminal after all the uncontrolled emulation it is typically broken!
+  # reset the terminal - after all the uncontrolled emulation it is typically broken!
   reset
 
   print_output "[*] Terminating qemu processes - check it with ps"
@@ -179,11 +217,14 @@ cleanup() {
     rm "$EMULATION_PATH"/qemu*static 2> /dev/null
   fi
 
-  echo
+  print_output ""
   print_output "[*] Umounting proc, sys and run"
-  umount -l "$EMULATION_PATH""/proc"
-  umount "$EMULATION_PATH""/sys"
-  umount "$EMULATION_PATH""/run"
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH")
+  for MOUNT in "${CHECK_MOUNTS[@]}"; do
+    print_output "[*] Unmounting $MOUNT"
+    MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
+    umount -l "$MOUNT"
+  done
 
   FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
   if [[ -n "$FILES" ]] ; then
@@ -293,7 +334,8 @@ emulate_strace_run() {
     sleep 1
     kill -0 -9 "$PID" 2> /dev/null
 
-    mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u)
+    # extract missing files but do list *.so files:
+    mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u | grep -v ".*\.so")
 
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
       MISSING+=("$MISSING_AREA")
@@ -338,25 +380,51 @@ emulate_strace_run() {
     rm "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt"
 }
 
+check_disk_space() {
+
+  mapfile -t CRITICAL_FILES < <(find "$LOG_DIR"/qemu_emulator/ -type f -size +"$KILL_SIZE" -exec basename {} \; | cut -d\. -f1 | cut -d_ -f2)
+  for KILLER in "${CRITICAL_FILES[@]}"; do
+    if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
+      print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
+      print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
+        pkill -f "$EMULATOR.*$KILLER.*"
+    fi
+  done
+}
+
 emulate_binary() {
   BIN_EMU_NAME="$(basename "$LINE")"
 
   ## as we currently do not have the right path of our binary we have to find it now:
   DIR=$(pwd)
-  BIN_EMU="$(cd "$EMULATION_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)"
+  # if we find multiple binaries with the same name we have to take care of it
+  mapfile -t BIN_EMU < <(cd "$EMULATION_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)
 
   emulate_strace_run
   
   # emulate binary with different command line parameters:
-  EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+  if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
+    EMULATION_PARAMS=("--help" "--version")
+  else
+    EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+  fi
+
   echo
   for PARAM in "${EMULATION_PARAMS[@]}"; do
-    print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
 
-    chroot "$EMULATION_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" 2>&1 &
-    print_output ""
+    # if we find multiple binaries with the same name we have to take care of it
+    for BINARY_EMU in "${BIN_EMU[@]}"; do
+      print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
+      chroot "$EMULATION_PATH" ./"$EMULATOR" "$BINARY_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
+      print_output ""
+      check_disk_space
+    done
   done
+
+  # now we kill all older qemu-processes:
+  # if we use the correct identifier $EMULATOR it will not work ...
+  killall --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
+
   # reset the terminal after all the uncontrolled emulation it is typically broken!
   reset
 }
-

@@ -31,13 +31,13 @@ S10_binaries_check()
 
 vul_func_basic_check()
 {
-  sub_module_title "Searching vulnerable functions"
+  sub_module_title "Searching interesting functions"
 
   local COUNTER=0
   local BIN_COUNT=0
   local VULNERABLE_FUNCTIONS
   VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
-  print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
+  print_output "[*] Interesting functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
   IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ -e /g' )"
 
   if [[ "$VULNERABLE_FUNCTIONS" == "C_N_F" ]] ; then print_output "[!] Config not found"
@@ -46,17 +46,18 @@ vul_func_basic_check()
       if ( file "$LINE" | grep -q "ELF" ) ; then
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
-        VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}" | grep -v "file format")"
-        if [[ -n "$VUL_FUNC_RESULT" ]] ; then
+        #VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}" | grep -v "file format")"
+        mapfile -t VUL_FUNC_RESULT < <("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}" | grep -v "file format")
+        if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
           print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
-          print_output "$(indent "$VUL_FUNC_RESULT")""\\n"
+          for VUL_FUNC in "${VUL_FUNC_RESULT[@]}" ; do
+            print_output "$(indent "$VUL_FUNC")"
+          done
           COUNTER=$((COUNTER+1))
-        #else
-        #  print_output "[-] No vulnerable function in ""$(print_path "$LINE")""\\n"
         fi
       fi
     done
-    print_output "[*] Found ""$COUNTER"" binaries with weak functions in ""$BIN_COUNT"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
+    print_output "[*] Found ""$COUNTER"" binaries with interesting functions in ""$BIN_COUNT"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
 }
 
@@ -72,6 +73,7 @@ objdump_disassembly()
   print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
   IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"
 
+  STRCPY_CNT=0
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
@@ -85,10 +87,8 @@ objdump_disassembly()
               local OBJ_DUMPS_OUT
               if [[ "$FUNCTION" == "mmap" ]] ; then
                 # For the mmap check we need the disasm after the call
-                #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
                 OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
               else
-                #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
                 OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
               fi
               if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
@@ -101,6 +101,7 @@ objdump_disassembly()
                 COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                 if [[ "$FUNCTION" == "strcpy"  ]] ; then
                   COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null)
+                  (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                 elif [[ "$FUNCTION" == "mmap"  ]] ; then
                   # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                   COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null)
@@ -116,10 +117,8 @@ objdump_disassembly()
                 local OBJ_DUMPS_OUT
                 if [[ "$FUNCTION" == "mmap" ]] ; then
                   # For the mmap check we need the disasm after the call
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
                 else
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
                 fi
                 if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
@@ -132,6 +131,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null)
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "$FUNC_LOG"  2> /dev/null)
@@ -150,10 +150,8 @@ objdump_disassembly()
                 local OBJ_DUMPS_OUT
                 if [[ "$FUNCTION" == "mmap" ]] ; then
                   # For the mmap check we need the disasm after the call
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]]$FUNC_ADDR <" | sed s/"$FUNC_ADDR"\ \</"$FUNCTION"" <"/ 2> /dev/null)
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]]$FUNC_ADDR <" | sed s/"$FUNC_ADDR"\ \</"$FUNCTION"" <"/ 2> /dev/null)
                 else
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]]$FUNC_ADDR <" | sed s/"$FUNC_ADDR"\ \</"$FUNCTION"" <"/ 2> /dev/null)
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]]$FUNC_ADDR <" | sed s/"$FUNC_ADDR"\ \</"$FUNCTION"" <"/ 2> /dev/null)
                 fi
                 if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
@@ -166,6 +164,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]]$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]]strlen" "$FUNC_LOG"  2> /dev/null)
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     # Check this testcase. Not sure if it works in all cases! 
@@ -196,6 +195,7 @@ objdump_disassembly()
                 COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                 if [[ "$FUNCTION" == "strcpy" ]] ; then
                   COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null)
+                  (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                 elif [[ "$FUNCTION" == "mmap" ]] ; then
                   # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                   # Test not implemented on ARM64
@@ -215,10 +215,8 @@ objdump_disassembly()
                 local OBJ_DUMPS_OUT
                 if [[ "$FUNCTION" == "mmap" ]] ; then
                   # For the mmap check we need the disasm after the call
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ )
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ )
                 else
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ )
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ )
                 fi
                 if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
@@ -231,6 +229,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG"  2> /dev/null)
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     # Check this. This test is very rough:
@@ -248,10 +247,8 @@ objdump_disassembly()
                 local OBJ_DUMPS_OUT
                 if [[ "$FUNCTION" == "mmap" ]] ; then
                   # For the mmap check we need the disasm after the call
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null)
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null)
                 else
-                  #OBJ_DUMPS_OUT=$("$OBJDUMP" "$OBJDMP_ARCH" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null)
                   OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null)
                 fi
                 if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
@@ -264,6 +261,7 @@ objdump_disassembly()
                   COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
                   if [[ "$FUNCTION" == "strcpy" ]] ; then
                     COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null)
+                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
                   elif [[ "$FUNCTION" == "mmap" ]] ; then
                     # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
                     COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null)
@@ -356,6 +354,4 @@ binary_protection()
     fi
   done
 }
-
-
 
