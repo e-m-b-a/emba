@@ -12,7 +12,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for files which could contain passwords
+# Description:  Check for files which could contain asswords
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
@@ -25,6 +25,7 @@ S45_pass_file_check()
 
   local PASSWD_STUFF
   PASSWD_STUFF="$(config_find "$CONFIG_DIR""/pass_files.cfg" "")"
+  PASS_FILES_FOUND=0
 
   if [[ "$PASSWD_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$PASSWD_STUFF" ]] ; then
@@ -70,6 +71,8 @@ S45_pass_file_check()
 
 	        if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_PASSWD" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_HASH" | wc -w)" -gt 0 ]] ; then
 	          print_output "$(indent "$(green "Found passwords or weak configuration:")")"
+            PASS_FILES_FOUND=1
+            export PASS_FILES_FOUND
             if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] ; then
               print_output "$(indent "$(indent "$(orange "$POSSIBLE_SHADOWS")")")"
             fi

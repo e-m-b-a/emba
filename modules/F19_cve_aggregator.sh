@@ -60,11 +60,14 @@ F19_cve_aggregator() {
     else
       print_output "[-] MongoDB not running on port 27017."
       print_output "[-] CVE checks not possible!"
+      print_output "[-] Have you installed all the needed dependencies?"
+      print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
     fi
     FORMAT_LOG="$FORMAT_LOG_BAK"
   else
     print_output "[-] CVE search binary search.py not found."
-    print_output "[-] Install it from here: https://github.com/cve-search/cve-search."
+    print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
+    print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
 }
 
@@ -76,7 +79,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
     VERSION_lower="${VERSION_lower//)\ built/}"
     # GNU gdbserver (GDB)
-    VERSION_lower="${VERSION_lower//gnu\ gdbserver\ (gdb)/gdb}"
+    VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
+    VERSION_lower="${VERSION_lower//(gdb)/}"
     #D-Bus Message Bus Daemon 1.6.8
     VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/:dbus\ }"
     #jQuery JavaScript Library v1.4.3
@@ -157,7 +161,7 @@ prepare_version_data() {
     # GNU C Library (AuDis-V04.56) stable release version 2.23
     #VERSION_lower="${VERSION_lower//gnu\ c\ library.*stable\ release/gnu:libc}"
     # shellcheck disable=SC2001
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library.*stable\ release/gnu:libc/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/gnu:libc/')"
     #Roaring Penguin PPPoE Version
     VERSION_lower="${VERSION_lower//roaring\ penguin\ pppoe/roaring_penguin:pppoe}"
     #upnp controlpoint 1.0

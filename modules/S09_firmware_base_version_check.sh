@@ -34,7 +34,7 @@ S09_firmware_base_version_check() {
         VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
         print_output "." | tr -d "\n"
   
-        VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -executable -print0 | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
         VERSIONS_DETECTED+=("$VERSION_FINDER")
         print_output "." | tr -d "\n"
       fi

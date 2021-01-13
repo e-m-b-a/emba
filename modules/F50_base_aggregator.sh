@@ -28,11 +28,13 @@ F50_base_aggregator() {
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
   fi
   print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
-  mapfile -t KERNELV < <(grep "Statistics" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d: -f2 | sort -u)
-  if [[ "${#KERNELV[@]}" -ne 0 ]]; then
-    for KV in "${KERNELV[@]}"; do
-      print_output "[+] Detected kernel version:""$ORANGE"" ""$KV"""
-    done
+  if [[ -f "$LOG_DIR"/"$BIN_CHECK_LOG" ]]; then
+    mapfile -t KERNELV < <(grep "Statistics" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d: -f2 | sort -u)
+    if [[ "${#KERNELV[@]}" -ne 0 ]]; then
+      for KV in "${KERNELV[@]}"; do
+        print_output "[+] Detected kernel version:""$ORANGE"" ""$KV"""
+      done
+    fi
   fi
   if [[ "${#MOD_DATA[@]}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""${#MOD_DATA[@]}""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
@@ -58,6 +60,10 @@ F50_base_aggregator() {
   if [[ -n "$FILE_COUNTER" ]]; then
     print_output "[+] Found ""$ORANGE""""$FILE_COUNTER""""$GREEN"" not common Linux files with ""$ORANGE""""$FILE_COUNTER_ALL""""$GREEN"" files at all.""$NC"""
   fi
+  if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
+    print_output "[+] Found passwords or weak credential configuration - check log file for details"
+  fi
+
   EMUL=$(find "$LOG_DIR"/qemu_emulator -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$EMUL""""$GREEN"" successful emulated processes.""$NC"""
