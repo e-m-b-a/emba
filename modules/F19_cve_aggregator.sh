@@ -162,6 +162,8 @@ prepare_version_data() {
     #VERSION_lower="${VERSION_lower//gnu\ c\ library.*stable\ release/gnu:libc}"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/gnu:libc/')"
+    #vxworks 7 sr0530 -> vxworks 7:sr0530
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
     #Roaring Penguin PPPoE Version
     VERSION_lower="${VERSION_lower//roaring\ penguin\ pppoe/roaring_penguin:pppoe}"
     #upnp controlpoint 1.0
@@ -287,13 +289,13 @@ generate_cve_details() {
       FORMAT_LOG_BAK="$FORMAT_LOG"
       FORMAT_LOG=0
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       elif (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
-        printf "${RED}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       elif (( $(echo "$CVSS_value > 3.9" | bc -l) )); then
-        printf "${ORANGE}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       else
-        printf "${GREEN}\t%-10.10s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     done
