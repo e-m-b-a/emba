@@ -12,7 +12,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for files which could contain asswords
+# Description:  Check for files which could contain passwords
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
