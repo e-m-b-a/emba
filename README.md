@@ -41,9 +41,10 @@ Test firmware / live system
 -a [MIPS]         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]
 -A [MIPS]         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)
 -l [./path]       Log path
--f [./path]       Firmware path
+-f [./path]       Extracted firmware root directory path
 -e [./path]       Exclude paths from testing (multiple usage possible)
--m [MODULE_NO.]   Test only with set modules [e.g. -m 05 -m 10 ... ] (multiple usage possible)
+-m [MODULE_NO.]   Test only with set modules [e.g. -m p05 -m s10 ... ]]
+                  (multiple usage possible, case insensitive, final modules aren't selectable, if firmware isn't a binary, the p modules won't run)
 -c                Enable cwe-checker
 -g                Create grep-able log file in [log_path]/fw_grep.log
                   Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE
@@ -62,7 +63,6 @@ Modify output
 
 Help
 -h                Print this help message
-
 ```
 
 #### Examples
