@@ -309,12 +309,10 @@ main()
       write_grep_log "$(date)" "TIMESTAMP"
       write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
-      #print_output "\\n" "no_log"
       print_output "[!] No extracted firmware found" "no_log"
       print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")" "no_log"
-      #exit 1
+      exit 1
   fi
-  exit 1
 }
 
 main "$@"
