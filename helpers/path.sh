@@ -38,9 +38,9 @@ cut_path() {
     SHORT="${C_PATH#"$FIRMWARE_PATH"}"
     FIRST="${SHORT:0:1}"
     if [[ "$FIRST" == "/" ]] ;  then
-      echo -e ".""$SHORT"
+      echo -e "$SHORT"
     else
-      echo -e "./""$SHORT"
+      echo -e "/""$SHORT"
     fi
   else
     local FIRST

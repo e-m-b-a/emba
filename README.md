@@ -41,7 +41,7 @@ Test firmware / live system
 -a [MIPS]         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]
 -A [MIPS]         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)
 -l [./path]       Log path
--f [./path]       Extracted firmware root directory path
+-f [./path]       Firmware path
 -e [./path]       Exclude paths from testing (multiple usage possible)
 -m [MODULE_NO.]   Test only with set modules [e.g. -m p05 -m s10 ... ]]
                   (multiple usage possible, case insensitive, final modules aren't selectable, if firmware isn't a binary, the p modules won't run)

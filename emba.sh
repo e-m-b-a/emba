@@ -198,6 +198,7 @@ main()
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
         mkdir -p "$LOG_DIR" 2> /dev/null
+        chmod 777 "$LOG_DIR" 2> /dev/null
       fi
       S25_kernel_check
     fi

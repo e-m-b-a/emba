@@ -19,8 +19,9 @@
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
+  module_title "Software component and version detection started via emulation with qemu usermode emulation"
+
   if [[ "$QEMULATION" -eq 1 ]]; then
-    module_title "Software component and version detection started via emulation with qemu usermode emulation"
 
     print_output "[!] This module is experimental and could harm your host environment."
     print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"

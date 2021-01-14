@@ -28,7 +28,7 @@ S108_linux_common_file_checker() {
     for FILE in "${ALL_FIRMWARE_FILES[@]}" ; do
       SEARCH_TERM=$(basename "$FILE")
       if ! grep -q "$SEARCH_TERM" "$BASE_LINUX_FILES" 2>/dev/null; then
-        print_output "[+] Firmware file ""$ORANGE""$SEARCH_TERM""$NC""$GREEN"" not found in dictionary -> Looks as it is not a default Linux file""$NC"
+        print_output "[+] ""$ORANGE""$(print_path "$FILE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC"
         FILE_COUNTER=$((FILE_COUNTER+1))
       fi
       FILE_COUNTER_ALL=$((FILE_COUNTER_ALL+1))

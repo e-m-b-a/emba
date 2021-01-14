@@ -350,7 +350,7 @@ print_help()
   echo -e "$CYAN""-a [MIPS]""$NC""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]"
   echo -e "$CYAN""-A [MIPS]""$NC""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)"
   echo -e "$CYAN""-l [./path]""$NC""       Log path"
-  echo -e "$CYAN""-f [./path]""$NC""       Extracted firmware root directory path"
+  echo -e "$CYAN""-f [./path]""$NC""       Firmware path"
   echo -e "$CYAN""-e [./path]""$NC""       Exclude paths from testing (multiple usage possible)"
   echo -e "$CYAN""-m [MODULE_NO.]""$NC""   Test only with set modules [e.g. -m p05 -m s10 ... ]]"
   echo -e "                  (multiple usage possible, case insensitive, final modules aren't selectable, if firmware isn't a binary, the p modules won't run)"
