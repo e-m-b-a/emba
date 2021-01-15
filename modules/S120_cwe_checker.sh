@@ -36,13 +36,20 @@ S120_cwe_checker()
             print_output "$(indent "$ENTRY")"
           fi
         done
-        local CHECK_COUNT
-        CHECK_COUNT="$( awk '{print $1}' "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log | sort -u | grep -o "^\[.*\]" | wc -l )"
-        local CHECK
-        CHECK="$( awk '{print $1}' "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log | grep -o "^\[.*\]" | sort -u )"
-        if ! [[ $CHECK_COUNT -eq 0 ]] ; then
-          print_output "[+] Found ""$CHECK_COUNT"" different security issues in ""$NAME"":"
-          print_output "$( indent "$( orange "$CHECK")")"
+
+        #local CHECK_COUNT
+        #CHECK_COUNT="$( awk '{print $1}' "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log | sort -u | grep -o "^\[.*\]" | wc -l )"
+
+        #local CHECK
+        #CHECK="$( awk '{print $1}' "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log | grep -o "^\[.*\]" | sort -u )"
+        mapfile -t CHECK < <( grep -v "ERROR" "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '(' )
+
+        #if [[ $CHECK_COUNT -ne 0 ]] ; then
+        if [[ ${#CHECK[@]} -ne 0 ]] ; then
+          print_output "[+] Found ""${#CHECK[@]}"" different security issues in ""$NAME"":"
+          for CHECKER in "${CHECK[@]}"; do
+            print_output "$( indent "$( orange "$CHECKER")")"
+          done
         fi
         if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then echo ; fi
       fi
@@ -52,8 +59,8 @@ S120_cwe_checker()
       print_output "[-] cwe-checker found 0 security issues."
     else
       print_output "[+] cwe-checker found a total of $SUM_FCW_FIND of the following security issues:"
-#      print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
-      print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '(' )"
+      #print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
+      print_output "$( indent "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '(' )")"
     fi
     
   else

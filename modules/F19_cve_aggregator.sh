@@ -81,6 +81,8 @@ prepare_version_data() {
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
     VERSION_lower="${VERSION_lower//(gdb)/}"
+    #gpg (GnuPG) 2.2.17
+    VERSION_lower="${VERSION_lower//gpg\ (gnupg)/gnupg}"
     #D-Bus Message Bus Daemon 1.6.8
     VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/:dbus\ }"
     #jQuery JavaScript Library v1.4.3
@@ -107,6 +109,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//version\ /}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
+    #pinentry-curses (pinentry)
+    VERSION_lower="${VERSION_lower//pinentry-curses (pinentry)/pinentry}"
     #Wireless-Tools version 29
     VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
     VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"

@@ -104,9 +104,10 @@ F50_base_aggregator() {
 
   if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
     SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | awk '{print $1}' | grep -c -v "ERROR")
-    if [[ $SUM_FCW_FIND -ne 0 ]] ; then
+    if [[ $SUM_FCW_FIND -gt 0 ]] ; then
 	    print_output "[+] cwe-checker found a total of $ORANGE$SUM_FCW_FIND$GREEN of the following security issues:"
-      print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
+      #print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
+      print_output "$( indent "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '(' )")"
     fi
   fi
 
