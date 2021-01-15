@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -198,6 +198,7 @@ main()
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
         mkdir -p "$LOG_DIR" 2> /dev/null
+        chmod 777 "$LOG_DIR" 2> /dev/null
       fi
       S25_kernel_check
     fi
@@ -224,12 +225,14 @@ main()
         done
       else
         for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-          local MODULE
-          MODULE=$(find "$MOD_DIR" -name "P""$SELECT_NUM""_*.sh" | sort -V 2> /dev/null)
-          if ( file "$MODULE" | grep -q "shell script" ) ; then
-            MODULE_BN=$(basename "$MODULE")
-            MODULE_MAIN=${MODULE_BN%.*}
-            $MODULE_MAIN
+          if [[ "$SELECT_NUM" =~ ^[p,P]{1}[0-9]+ ]]; then
+            local MODULE
+            MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+            if ( file "$MODULE" | grep -q "shell script" ) ; then
+              MODULE_BN=$(basename "$MODULE")
+              MODULE_MAIN=${MODULE_BN%.*}
+              $MODULE_MAIN
+            fi
           fi
         done
       fi
@@ -275,13 +278,14 @@ main()
         done
       else
         for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-          local MODULE
-          MODULE=$(find "$MOD_DIR" -name "S""$SELECT_NUM""_*.sh" | sort -V 2> /dev/null)
-          if ( file "$MODULE" | grep -q "shell script" ) ; then
-            MODULE_BN=$(basename "$MODULE")
-            MODULE_MAIN=${MODULE_BN%.*}
-            $MODULE_MAIN
-            reset_module_count
+          if [[ "$SELECT_NUM" =~ ^[s,S]{1}[0-9]+ ]]; then
+            local MODULE
+            MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+            if ( file "$MODULE" | grep -q "shell script" ) ; then
+              MODULE_BN=$(basename "$MODULE")
+              MODULE_MAIN=${MODULE_BN%.*}
+              $MODULE_MAIN
+            fi
           fi
         done
       fi

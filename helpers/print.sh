@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -350,9 +350,10 @@ print_help()
   echo -e "$CYAN""-a [MIPS]""$NC""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]"
   echo -e "$CYAN""-A [MIPS]""$NC""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)"
   echo -e "$CYAN""-l [./path]""$NC""       Log path"
-  echo -e "$CYAN""-f [./path]""$NC""       Extracted firmware root directory path"
+  echo -e "$CYAN""-f [./path]""$NC""       Firmware path"
   echo -e "$CYAN""-e [./path]""$NC""       Exclude paths from testing (multiple usage possible)"
-  echo -e "$CYAN""-m [MODULE_NO.]""$NC""   Test only with set modules [e.g. -m 05 -m 10 ... ]] (multiple usage possible)"
+  echo -e "$CYAN""-m [MODULE_NO.]""$NC""   Test only with set modules [e.g. -m p05 -m s10 ... ]]"
+  echo -e "                  (multiple usage possible, case insensitive, final modules aren't selectable, if firmware isn't a binary, the p modules won't run)"
   echo -e "$CYAN""-c""$NC""                Enable cwe-checker"
   echo -e "$CYAN""-g""$NC""                Create grep-able log file in [log_path]/fw_grep.log"
   echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"

@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -349,7 +349,7 @@ binary_protection()
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       if [[ -f "$EXT_DIR"/checksec ]] ; then
-        print_output "$( "$EXT_DIR"/checksec --file="$LINE" | grep -v "CANARY" )"
+        print_output "$( "$EXT_DIR"/checksec --file="$LINE" | grep -v "CANARY" | rev | cut -f 2- | rev )""\\t""$NC""$(print_path "$LINE")"
       fi
     fi
   done

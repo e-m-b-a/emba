@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -38,9 +38,9 @@ cut_path() {
     SHORT="${C_PATH#"$FIRMWARE_PATH"}"
     FIRST="${SHORT:0:1}"
     if [[ "$FIRST" == "/" ]] ;  then
-      echo -e ".""$SHORT"
+      echo -e "$SHORT"
     else
-      echo -e "./""$SHORT"
+      echo -e "/""$SHORT"
     fi
   else
     local FIRST

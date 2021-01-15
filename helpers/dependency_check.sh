@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -28,9 +28,9 @@ dependency_check()
   # and try to run an non emulation test afterwards on the same log directory
   if [[ $QEMULATION -eq 1 && $EUID -ne 0 ]]; then
     echo -e "$RED""not ok""$NC"
-    echo -e "$RED""WARNING: With emulation enabled this script needs root privileges""$NC"
-    echo -e "$RED""WARNING: Exit now""$NC"
-    echo -e "$RED""HINT: Run emba with sudo""$NC"
+    echo -e "$RED""    WARNING: With emulation enabled this script needs root privileges""$NC"
+    echo -e "$RED""    WARNING: Exit now""$NC"
+    echo -e "$RED""    HINT: Run emba with sudo""$NC"
     exit 1
   fi
 
@@ -38,7 +38,7 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   else
     echo -e "$RED""not ok""$NC"
-    echo -e "$RED""This script should be used as root user""$NC"
+    echo -e "$RED""    This script should be used as root user""$NC"
   fi
 
   print_output "    host distribution - \\c" "no_log"
