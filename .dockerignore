@@ -1,0 +1,9 @@
+Dockerfile
+docker-compose.yml
+.dockerignore
+.git
+.github
+documentation
+CONTRIBUTING.md
+LICENSE
+README.md
