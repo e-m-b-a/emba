@@ -92,6 +92,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ version\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//xl2tpd-/}"
     VERSION_lower="${VERSION_lower//goahead\ \ /goahead\ }"
+    #tcpdump.4.6.2 version
+    VERSION_lower="${VERSION_lower//tcpdump\./tcpdump\ }"
     #ntpd\ -\ standard\ NTP\ query\ program\ -\ Ver\.
     VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
@@ -164,6 +166,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/gnu:libc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
+    #OpenSSH_7.8p1 -> openssh 7.8:p1 
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/openssh_([0-9])\.([0-9])([a-z][0-9])/openssh\ \1\.\2:\3/g')"
+    #socat 2.0.0-b4 -> socat 2.0.0:b4 
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/socat\ ([0-9]\.[0-9]\.[0-9])-([a-z][0-9])/socat\ \1:\2/g')"
     #Roaring Penguin PPPoE Version
     VERSION_lower="${VERSION_lower//roaring\ penguin\ pppoe/roaring_penguin:pppoe}"
     #upnp controlpoint 1.0

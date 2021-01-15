@@ -49,7 +49,7 @@ F50_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S20_SCRIPTS""""$GREEN"" shell scripts.""$NC"""
   fi
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries (without version checking).""$NC"""
+    print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" executables (without version checking).""$NC"""
   fi
   if [[ "$CERT_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$CERT_OUT_CNT""""$GREEN"" outdated certificates in ""$ORANGE""""$CERT_CNT""""$GREEN"" certificates.""$NC"""
@@ -76,23 +76,37 @@ F50_base_aggregator() {
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$BIN_CHECK_LOG")
       NX=$(grep -c "NX disabled" "$LOG_DIR"/"$BIN_CHECK_LOG")
       PIE=$(grep -c "No PIE" "$LOG_DIR"/"$BIN_CHECK_LOG")
+      STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$BIN_CHECK_LOG")
+      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$BIN_CHECK_LOG")
     fi
   
     if [[ -n "$CANARY" ]]; then
-      CAN_PER=$(bc -l <<< "scale=1;$CANARY/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in ${#BINARIES[@]} binaries."
+      CAN_PER=$(bc -l <<< "scale=1;$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in ""$BINS_CHECKED"" binaries."
     fi
     if [[ -n "$RELRO" ]]; then
-      RELRO_PER=$(bc -l <<< "scale=1;$RELRO/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in ${#BINARIES[@]} binaries."
+      RELRO_PER=$(bc -l <<< "scale=1;$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in ""$BINS_CHECKED"" binaries."
     fi
     if [[ -n "$NX" ]]; then
-      NX_PER=$(bc -l <<< "scale=1;$NX/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in ${#BINARIES[@]} binaries."
+      NX_PER=$(bc -l <<< "scale=1;$NX/($BINS_CHECKED/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in ""$BINS_CHECKED"" binaries."
     fi
     if [[ -n "$PIE" ]]; then
-      PIE_PER=$(bc -l <<< "scale=1;$PIE/(${#BINARIES[@]}/100)" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in ${#BINARIES[@]} binaries."
+      PIE_PER=$(bc -l <<< "scale=1;$PIE/($BINS_CHECKED/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in ""$BINS_CHECKED"" binaries."
+    fi
+    if [[ -n "$STRIPPED" ]]; then
+      STRIPPED_PER=$(bc -l <<< "scale=1;$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
+      print_output "[+] Found ""$ORANGE""""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in ""$BINS_CHECKED"" binaries."
+    fi
+  fi
+
+  if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
+    SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | awk '{print $1}' | grep -c -v "ERROR")
+    if [[ $SUM_FCW_FIND -ne 0 ]] ; then
+	    print_output "[+] cwe-checker found a total of $ORANGE$SUM_FCW_FIND$GREEN of the following security issues:"
+      print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
     fi
   fi
 

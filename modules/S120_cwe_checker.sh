@@ -47,12 +47,13 @@ S120_cwe_checker()
         if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then echo ; fi
       fi
     done
-    SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | awk '{print $1}' | wc -l)
+    SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | awk '{print $1}' | grep -c -v "ERROR")
     if [[ $SUM_FCW_FIND -eq 0 ]] ; then
-      print_output "[-] cwe-checker found 0 security issues:"
+      print_output "[-] cwe-checker found 0 security issues."
     else
       print_output "[+] cwe-checker found a total of $SUM_FCW_FIND of the following security issues:"
-      print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
+#      print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -i '^\[' | sort -u | tr -d '[' | sed 's/].*/,/g' | tr -d '\n'  | sed 's/.$//g' | sed 's/,/, /g' )"
+      print_output "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '(' )"
     fi
     
   else
