@@ -134,7 +134,7 @@ print_tool_info "qemu-user-static" 0 "qemu-mips-static"
 print_tool_info "binwalk" 0
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
-read -p "(y/Y)" -r ANSWER
+read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     echo
@@ -173,7 +173,7 @@ else
 fi
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
-read -p "(y/Y)" -r ANSWER
+read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
@@ -193,7 +193,7 @@ print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing t
 print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
-read -p "(y/Y)" -r ANSWER
+read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
@@ -212,7 +212,7 @@ print_file_info "ahhh/YARA/crypto_signatures.yar" "" "https://raw.githubusercont
 print_file_info "Yara-Rules/rules/packer_compiler_signatures.yar" "" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
-read -p "(y/Y)" -r ANSWER
+read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     if ! [[ -d "external/yara/" ]] ; then
@@ -240,7 +240,7 @@ print_tool_info "gcc" 1
 print_tool_info "build-essential" 1
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
-read -p "(y/Y)" -r ANSWER
+read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
@@ -280,7 +280,7 @@ for YEAR in $(seq 2002 $(($(date +%Y)))); do
 done
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
-read -p "(y/Y)" -r ANSWER
+read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     download_file "cve.mitre.org database" "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
@@ -315,7 +315,7 @@ print_tool_info "python3-pip" 1
 print_tool_info "bc" 1
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install bc, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
-read -p "(y/Y)" -r ANSWER
+read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
