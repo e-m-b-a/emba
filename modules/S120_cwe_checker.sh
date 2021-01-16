@@ -41,7 +41,7 @@ S120_cwe_checker()
 
         if [[ ${#BAP_OUT[@]} -ne 0 ]] ; then
           print_output ""
-          print_output "[+] Found ""${#BAP_OUT[@]}"" different security issues in ""$NAME"":"
+          print_output "[+] cwe-checker found ""${#BAP_OUT[@]}"" different security issues in ""$NAME"":"
           for BAP_LINE in "${BAP_OUT[@]}"; do
             CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
             CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
@@ -53,17 +53,25 @@ S120_cwe_checker()
       fi
     done
 
-    SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | awk '{print $1}' | grep -c -v "ERROR")
-    print_output ""
-    if [[ $SUM_FCW_FIND -eq 0 ]] ; then
-      print_output "[-] cwe-checker found 0 security issues."
-    else
-      print_output "[+] cwe-checker found a total of $SUM_FCW_FIND of the following security issues:"
-      print_output "$( indent "$( orange "$( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '(' )")")"
+    if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
+      #SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | awk '{print $1}' | grep -c -v "ERROR")
+      mapfile -t BAP_OUT < <( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )")"
+      print_output ""
+      if [[ ${#BAP_OUT[@]} -eq 0 ]] ; then
+        print_output "[-] cwe-checker found 0 security issues."
+      else
+        print_output "[+] cwe-checker found a total of $ORANGE$SUM_FCW_FIND$GREEN of the following security issues:"
+        for BAP_LINE in "${BAP_OUT[@]}"; do
+          CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
+          CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
+          CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/bap_cwe_checker/bap_*.log)"
+          print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
+        done
+      fi
     fi
-    
   else
     print_output "[!] Check with bap and cwe-checker is disabled!"
+    print_output "[!] Enable it with the -c switch."
   fi
 }
 

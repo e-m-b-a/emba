@@ -60,6 +60,9 @@ F50_base_aggregator() {
   if [[ -n "$FILE_COUNTER" ]]; then
     print_output "[+] Found ""$ORANGE""""$FILE_COUNTER""""$GREEN"" not common Linux files with ""$ORANGE""""$FILE_COUNTER_ALL""""$GREEN"" files at all.""$NC"""
   fi
+  if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""""$INT_COUNT""""$GREEN"" interesting files and ""$ORANGE""""$POST_COUNT""""$GREEN"" files that could be usefull for post-exploitation.""$NC"""
+  fi
   if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
     print_output "[+] Found passwords or weak credential configuration - check log file for details"
   fi

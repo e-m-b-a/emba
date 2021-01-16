@@ -34,6 +34,7 @@ interesting_binaries()
   local INT_BIN
   INT_BIN="$(config_find "$CONFIG_DIR""/interesting_binaries.cfg" "")"
   local COUNT=0
+  INT_COUNT=0
 
   if [[ "$INT_BIN" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$INT_BIN" ]] ; then
@@ -44,6 +45,7 @@ interesting_binaries()
           COUNT=1
         fi
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        ((INT_COUNT++))
       fi
     done
   fi
@@ -59,6 +61,7 @@ post_exploitation()
   local INT_BIN_PE
   INT_BIN_PE="$(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg" "")"
   local COUNT=0
+  POST_COUNT=0
 
   if [[ "$INT_BIN_PE" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$INT_BIN_PE" ]] ; then
@@ -69,6 +72,7 @@ post_exploitation()
           COUNT=1
         fi
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        ((POST_COUNT++))
       fi
     done
   fi
