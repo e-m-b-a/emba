@@ -204,7 +204,7 @@ config_find() {
       local FIND_COMMAND
       IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "$1" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
       local FILES
-      for S_LOC in $SEARCH_LOC ; do
+      for S_LOC in "$SEARCH_LOC" ; do
         FIND_O="$(find "$S_LOC" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")"
         for LINE in $FIND_O; do
           if [[ -L "$LINE" ]] ; then
