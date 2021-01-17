@@ -94,6 +94,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ version\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//xl2tpd-/}"
     VERSION_lower="${VERSION_lower//goahead\ \ /goahead\ }"
+    # Compiled\ with\ U-Boot -> u-boot
+    VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
     VERSION_lower="${VERSION_lower//tcpdump\./tcpdump\ }"
     #ntpd\ -\ standard\ NTP\ query\ program\ -\ Ver\.
@@ -104,6 +106,8 @@ prepare_version_data() {
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
+    #nettle-hash\ (nettle\ -> nettle
+    VERSION_lower="${VERSION_lower//nettle-hash\ ./}"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"

@@ -45,7 +45,7 @@ S120_cwe_checker()
           for BAP_LINE in "${BAP_OUT[@]}"; do
             CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
             CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
-            CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log)"
+            CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log 2>/dev/null)"
             print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
           done
         fi
@@ -55,7 +55,7 @@ S120_cwe_checker()
 
     if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
       #SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | awk '{print $1}' | grep -c -v "ERROR")
-      mapfile -t BAP_OUT < <( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )")"
+      mapfile -t BAP_OUT < <( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )")"
       print_output ""
       if [[ ${#BAP_OUT[@]} -eq 0 ]] ; then
         print_output "[-] cwe-checker found 0 security issues."
@@ -64,7 +64,7 @@ S120_cwe_checker()
         for BAP_LINE in "${BAP_OUT[@]}"; do
           CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
           CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
-          CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/bap_cwe_checker/bap_*.log)"
+          CWE_CNT="$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -c "$CWE")"
           print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
         done
       fi

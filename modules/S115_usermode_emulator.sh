@@ -154,6 +154,7 @@ detect_root_dir() {
   print_output "[*] Bin_emu_name: $BIN_EMU_NAME"
   print_output "[*] Interpreter: $INTERPRETER_FULL_PATH"
 
+  PATH_OK=0
   if [[ -n "$INTERPRETER_FULL_PATH" ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
@@ -173,19 +174,40 @@ detect_root_dir() {
   fi
 
   # if the new root directory does not include the current working directory we fall back to the search for something like "*root/bin/* and take this:
-  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
-    # this could happen if the interpreter path from the first check is broken and results in something like this: "/" or "."
-    # if this happens we have to handle this and try to fix the path:
+  for E_PATH in "${EMULATION_PATH[@]}"; do
+    if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+      PATH_OK=1
+    else
+      ## Todo: if we have an entry that does not matches the basic path we have to remove it!
+      print_output "[!] We found a path that should not be handled! $E_PATH"
+    fi
+  done
+
+  # this could happen if the interpreter path from the first check is broken and results in something like this: "/" or "."
+  # if this happens we have to handle this and try to fix the path:
+  if [[ "$PATH_OK" -ne 1 ]]; then
     print_output "[*] Root directory detection via path pattern ... failed interpreter detection"
     mapfile -t EMULATION_PATH < <(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
   fi
-  # now we have to include a final check and fix the root path to the firmware path (as last resort)
-  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+
+  for E_PATH in "${EMULATION_PATH[@]}"; do
+    # now we have to include a final check and fix the root path to the firmware path (as last resort)
+    if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+      PATH_OK=1
+    else
+      ## Todo: if we have an entry that does not matches the basic path we have to remove it!
+      print_output "[!] We found a path that should not be handled! $E_PATH"
+    fi
+  done
+
+  if [[ $PATH_OK -ne 1 ]]; then
     print_output "[*] Root directory set to firmware path ... last resort"
     EMULATION_PATH+=( "$EMULATION_PATH_BASE" )
   fi
+
   # This is for quick testing here - if emba fails to detect the root directory you can poke with it here (we have to find a better way for the future):
   #EMULATION_PATH="$EMULATION_PATH_BASE"
+
   for E_PATH in "${EMULATION_PATH[@]}"; do
     print_output "[*] Using the following path as emulation root path: $E_PATH"
   done
@@ -242,10 +264,10 @@ cleanup() {
     umount -l "$MOUNT"
   done
 
-  FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
-  if [[ -n "$FILES" ]] ; then
+  mapfile -t FILES < <(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
+  if [[ "${#FILES[@]}" -gt 0 ]] ; then
     print_output "[*] Cleanup empty log files.\\n\\n"
-    for FILE in $FILES ; do
+    for FILE in "${FILES[@]}" ; do
       if [[ ! -s "$FILE" ]] ; then
         rm "$FILE" 2> /dev/null
       else
