@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens Energy AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -177,9 +177,6 @@ detect_root_dir() {
   for E_PATH in "${EMULATION_PATH[@]}"; do
     if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
       PATH_OK=1
-    else
-      ## Todo: if we have an entry that does not matches the basic path we have to remove it!
-      print_output "[!] We found a path that should not be handled! $E_PATH"
     fi
   done
 
@@ -194,9 +191,6 @@ detect_root_dir() {
     # now we have to include a final check and fix the root path to the firmware path (as last resort)
     if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
       PATH_OK=1
-    else
-      ## Todo: if we have an entry that does not matches the basic path we have to remove it!
-      print_output "[!] We found a path that should not be handled! $E_PATH"
     fi
   done
 
@@ -321,37 +315,30 @@ prepare_emulator() {
     fi
 
     if ! [[ -e "$E_PATH""/dev/console" ]] ; then
-      #rm "$E_PATH""/dev/console" 2> /dev/null
       mknod -m 622 "$E_PATH""/dev/console" c 5 1 2> /dev/null
     fi
 
     if ! [[ -e "$E_PATH""/dev/null" ]] ; then
-      #rm "$E_PATH""/dev/null" 2> /dev/null
       mknod -m 666 "$E_PATH""/dev/null" c 1 3 2> /dev/null
     fi
 
     if ! [[ -e "$E_PATH""/dev/zero" ]] ; then
-      #rm "$E_PATH""/dev/zero" 2> /dev/null
       mknod -m 666 "$E_PATH""/dev/zero" c 1 5 2> /dev/null
     fi
 
     if ! [[ -e "$E_PATH""/dev/ptmx" ]] ; then
-      #rm "$E_PATH""/dev/ptmx" 2> /dev/null
       mknod -m 666 "$E_PATH""/dev/ptmx" c 5 2 2> /dev/null
     fi
 
     if ! [[ -e "$E_PATH""/dev/tty" ]] ; then
-      #rm "$E_PATH""/dev/tty" 2> /dev/null
       mknod -m 666 "$E_PATH""/dev/tty" c 5 0 2> /dev/null
     fi
 
     if ! [[ -e "$E_PATH""/dev/random" ]] ; then
-      #rm "$E_PATH""/dev/random" 2> /dev/null
       mknod -m 444 "$E_PATH""/dev/random" c 1 8 2> /dev/null
     fi
 
     if ! [[ -e "$E_PATH""/dev/urandom" ]] ; then
-      #rm "$E_PATH""/dev/urandom" 2> /dev/null
       mknod -m 444 "$E_PATH""/dev/urandom" c 1 9 2> /dev/null
     fi
 
@@ -379,7 +366,7 @@ emulate_strace_run() {
     sleep 1
     kill -0 -9 "$PID" 2> /dev/null
 
-    # extract missing files but do list *.so files:
+    # extract missing files, exclude *.so files:
     mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u | grep -v ".*\.so")
 
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
@@ -390,19 +377,6 @@ emulate_strace_run() {
         FILENAME_MISSING=$(basename "$MISSING_AREA")
         print_output "[*] Trying to create this missing file: $FILENAME_MISSING"
         PATH_MISSING=$(dirname "$MISSING_AREA")
-        if [[ ! -d "$E_PATH""$PATH_MISSING" ]]; then
-          if [[ -L "$E_PATH""$PATH_MISSING" ]]; then
-            if [[ -e "$E_PATH""$PATH_MISSING" ]]; then
-              print_output "[*] Good symlink: $PATH_MISSING"
-            else
-              print_output "[-] Broken symlink: $PATH_MISSING"
-            fi
-          elif [[ -e "$E_PATH""$PATH_MISSING" ]]; then
-            print_output "[-] Not a symlink: $PATH_MISSING"
-          else
-            print_output "[*] Missing path: $PATH_MISSING"
-          fi
-        fi
 
         FILENAME_FOUND=$(find "$E_PATH" -ignore_readdir_race -path "$E_PATH"/sys -prune -false -o -path "$E_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING")
         if [[ -n "$FILENAME_FOUND" ]]; then
@@ -454,39 +428,43 @@ emulate_binary() {
     # use every root directory we found for the binary name and try to emulate it
     # possibility for improvement!
     for E_PATH in "${EMULATION_PATH[@]}"; do
-
-      # now we know the root directory and so we can search the file we would like to emulate
-      # if we find multiple binaries with the same name we have to care about it ...
-      mapfile -t BINS < <(cd "$E_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null | sort -u | head -1 && cd "$DIR" || exit)
-
-      prepare_emulator
-      for BIN_EMU in "${BINS[@]}"; do
-        emulate_strace_run
+      # just use this path if it includes the base path
+      if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
   
-        # emulate binary with different command line parameters:
-        if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
-          EMULATION_PARAMS=("--help" "--version")
-        else
-          EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
-        fi
+        # now we know the root directory and so we can search the file we would like to emulate
+        # if we find multiple binaries with the same name we have to care about it ...
+        mapfile -t BINS < <(cd "$E_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null | sort -u | head -1 && cd "$DIR" || exit)
   
-        for PARAM in "${EMULATION_PARAMS[@]}"; do
-          #print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
-          print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
-          print_output "[*] Using root directory: $E_PATH"
-          #chroot "$EMULATION_PATH" ./"$EMULATOR" "$BINARY_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
-          chroot "$E_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
-          print_output ""
-          check_disk_space
+        prepare_emulator
+        for BIN_EMU in "${BINS[@]}"; do
+          emulate_strace_run
+    
+          # emulate binary with different command line parameters:
+          if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
+            EMULATION_PARAMS=("--help" "--version")
+          else
+            EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+          fi
+    
+          for PARAM in "${EMULATION_PARAMS[@]}"; do
+            #print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
+            print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
+            print_output "[*] Using root directory: $E_PATH"
+            chroot "$E_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
+            print_output ""
+            check_disk_space
+          done
         done
-      done
+      else
+        print_output "[!] We found a path that should not be handled! $E_PATH"
+      fi
     done
   
     # now we kill all older qemu-processes:
     # if we use the correct identifier $EMULATOR it will not work ...
     killall --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
   
-    # reset the terminal after all the uncontrolled emulation it is typically broken!
+    # reset the terminal - after all the uncontrolled emulation it is typically broken!
     reset
   done
 }

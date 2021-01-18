@@ -34,10 +34,8 @@ log_folder()
           elif mount | grep "$LOG_DIR" > /dev/null; then
             echo
             print_output "[!] We found unmounted areas in your log directory $LOG_DIR." "no_log"
-            print_output "[!] You should unmount this stuff manually:\\n" "no_log"
+            print_output "[!] If emba is failing check this manually:\\n" "no_log"
             mount | grep "$LOG_DIR"
-            echo -e "\\n${RED}Terminate emba${NC}\\n"
-            exit 1
           else
             rm -R "${LOG_DIR:?}/"*
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
