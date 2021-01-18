@@ -11,7 +11,7 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Stefan Haboeck
+# Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
 # Description:  installs needed stuff:
 #                 Yara rules

@@ -1,0 +1,7 @@
+version: "3"
+services:
+  emba:
+    build: .
+    volumes:
+        - ${FIRMWARE}:/firmware
+        - ${LOG}:/log

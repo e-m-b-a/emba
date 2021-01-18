@@ -65,6 +65,28 @@ Help
 -h                Print this help message
 ```
 
+#### Docker Container
+There is a simple docker-compose setup added which allows you to do everything outside use the cwe-checker
+
+To run it simply do the following:
+
+Build it:
+```
+docker-compose build emba
+```
+
+Run it:
+```
+FIRMWARE=/absolute/path/to/firmware LOG=/home/n/firmware_log/ docker-compose run emba
+```
+
+This will drop you a shell in the folder where emba has been added. 
+The firmware is located at `/firmware/` and the log directory at `/log/`
+
+```
+./emba.sh -l /log/ -f /firmware/
+```
+
 #### Examples
 
 ##### Static firmware testing:
