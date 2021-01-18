@@ -114,7 +114,11 @@ prepare_version_data() {
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
     #pinentry-curses (pinentry)
-    VERSION_lower="${VERSION_lower//pinentry-curses (pinentry)/pinentry}"
+    VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
+    #tar (GNU tar) 1.23
+    VERSION_lower="${VERSION_lower//tar\ (gnu\ tar)/gnu:tar}"
+    # lsusb (usbutils)
+    VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
     #Wireless-Tools version 29
     VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
     VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"

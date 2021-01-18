@@ -82,7 +82,7 @@ S115_usermode_emulator() {
   else
     echo
     print_output "[!] Automated emulation is disabled."
-    print_output "$(indent "Enable it with the parameter -E.")"
+    print_output "[!] Enable it with the -E switch."
   fi
 }
 

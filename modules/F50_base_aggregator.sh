@@ -132,31 +132,43 @@ F50_base_aggregator() {
   fi
 
   FUNCTION="strcpy"
+  FUNCTION1="system"
+  
   if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
-    local SEARCH_TERM
-    local RESULTS
-    local F_COUNTER
     readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS1 < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
 
     if [[ "${#RESULTS[@]}" -gt 0 ]]; then
       print_output ""
-      print_output "[+] ""$FUNCTION"" - top 10 results:"
+      print_output "[+] ""$FUNCTION""/""$FUNCTION1"" - top 10 results:"
+      i=0 
       for LINE in "${RESULTS[@]}" ; do
         SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
         F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
+        SEARCH_TERM1="$(echo "${RESULTS1[$i]}" | cut -d\  -f3)"
+        F_COUNTER1="$(echo "${RESULTS1[$i]}" | cut -d\  -f1)"
         if [[ -f "$BASE_LINUX_FILES" ]]; then
           # if we have the base linux config file we are checking it:
           if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-            printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
+            if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+              printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+            else
+              printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+            fi  
           else
-            printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
-          fi
+            if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+              printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+            else
+              printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+            fi  
+          fi  
         else
-          print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM""")")"
-        fi
+          printf "${ORANGE}\t%-5.5s : %-15.15s${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+        fi  
+        (( i++ ))
       done
-    fi
-  fi
+    fi  
+  fi 
 
   print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
@@ -171,7 +183,7 @@ F50_base_aggregator() {
       print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
     fi
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
-      print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available.\\n"
+      print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available."
     fi
   fi
 }
