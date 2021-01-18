@@ -82,6 +82,8 @@ F50_base_aggregator() {
       PIE=$(grep -c "No PIE" "$LOG_DIR"/"$BIN_CHECK_LOG")
       STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$BIN_CHECK_LOG")
       BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$BIN_CHECK_LOG")
+      # we have to remove the first line of the original output:
+      (( BINS_CHECKED-- ))
     fi
   
     if [[ -n "$CANARY" ]]; then
