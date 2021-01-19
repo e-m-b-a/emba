@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Search ssh related files and check squid proxy server
 #               Access:
@@ -22,14 +23,9 @@ S85_ssh_check()
 {
   module_log_init "s85_check_ssh"
   module_title "Check SSH"
-  CONTENT_AVAILABLE=0
 
   search_ssh_files
   check_squid
-  
-  if [[ $HTML == 1 ]]; then
-    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 search_ssh_files()

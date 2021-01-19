@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check for vulnerable functions in binary array, dump objdump output in log and look for binary
 #               protection with checksec.sh
@@ -23,15 +24,10 @@ S10_binaries_check()
 {
   module_log_init "s10_check_binaries"
   module_title "Check binaries"
-  CONTENT_AVAILABLE=0
 
   vul_func_basic_check
   objdump_disassembly
   binary_protection
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 vul_func_basic_check()
@@ -41,6 +37,7 @@ vul_func_basic_check()
   local COUNTER=0
   local BIN_COUNT=0
   local VULNERABLE_FUNCTIONS
+  
   VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
   print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
   IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ -e /g' )"

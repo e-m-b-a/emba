@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -23,11 +23,22 @@ dependency_check()
   print_output "[*] Elementary checks:" "no_log"
 
   print_output "    user permission - \\c" "no_log"
+  # currently we only need root privileges for emulation
+  # but we are running into issues if we have already run an emulation test with root privs
+  # and try to run an non emulation test afterwards on the same log directory
+  if [[ $QEMULATION -eq 1 && $EUID -ne 0 ]]; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    WARNING: With emulation enabled this script needs root privileges""$NC"
+    echo -e "$RED""    WARNING: Exit now""$NC"
+    echo -e "$RED""    HINT: Run emba with sudo""$NC"
+    exit 1
+  fi
+
   if [[ $EUID -eq 0 ]] ; then
     echo -e "$GREEN""ok""$NC"
   else
     echo -e "$RED""not ok""$NC"
-    echo -e "$RED""This script should be used as root user""$NC"
+    echo -e "$RED""    This script should be used as root user""$NC"
   fi
 
   print_output "    host distribution - \\c" "no_log"
@@ -36,34 +47,6 @@ dependency_check()
   else
     echo -e "$RED""not ok""$NC"
     echo -e "$RED""    This script is only tested on KALI linux""$NC" 1>&2
-  fi
-
-  if [[ $ONLY_DEP -eq 1 ]] && [[ -z "$ARCH" ]] ; then
-    print_output "    architecture - ""$ORANGE""not checked""$NC" "no_log"
-  elif [[ $FIRMWARE -eq 1 ]] || { [[ $ONLY_DEP -eq 1 ]] && [[ -n "$ARCH" ]] ; } ; then
-    print_output "    architecture - \\c" "no_log"
-    if [[ "$ARCH" == "MIPS" ]] ; then
-      ARCH_STR="mips"
-    elif [[ "$ARCH" == "ARM" ]] ; then
-      ARCH_STR="arm"
-    elif [[ "$ARCH" == "x86" ]] ; then
-      ARCH_STR="i386"
-    elif [[ "$ARCH" == "x64" ]] ; then
-      #ARCH_STR="i386:x86-64"
-      ARCH_STR="x86-64"
-    elif [[ "$ARCH" == "PPC" ]] ; then
-      #ARCH_STR="powerpc:common"
-      ARCH_STR="powerpc"
-    fi
-    if [[ -z "$ARCH_STR" ]] ; then
-      echo -e "$RED""not ok""$NC"
-      echo -e "$RED""    wrong architecture""$NC"
-      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-        exit 1
-      fi
-    else
-      echo -e "$GREEN""ok""$NC"
-    fi
   fi
 
   print_output "    configuration directory - \\c" "no_log"
@@ -87,8 +70,6 @@ dependency_check()
   else
     echo -e "$GREEN""ok""$NC"
   fi
-
-
 
   echo
   print_output "[*] Necessary utils on system checks:" "no_log"
@@ -218,8 +199,6 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
-
-
   echo
   print_output "[*] Optional utils checks:" "no_log"
 
@@ -329,6 +308,31 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
+  print_output "    openssl - \\c" "no_log"
+  if ! command -v openssl > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install openssl via apt-get install openssl""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+
+
+  print_output "    binwalk - \\c" "no_log"
+  if ! command -v binwalk > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install binwalk from github: https://github.com/ReFirmLabs/binwalk""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+
+  print_output "    qemu-ARCH-static - \\c" "no_log"
+  if ! command -v qemu-mips-static > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install qemu static emulators via apt-get install qemu-user-static""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+
   print_output "    vulnerability database - \\c" "no_log"
   if ! [[ -f "$EXT_DIR""/allitems.csv" ]] ; then
     echo -e "$RED""not ok""$NC"
@@ -377,5 +381,28 @@ dependency_check()
     echo
     print_help
     exit
+  fi
+}
+
+architecture_dep_check() {
+  echo
+  if [[ "$ARCH" == "MIPS" ]] ; then
+    ARCH_STR="mips"
+  elif [[ "$ARCH" == "ARM" ]] ; then
+    ARCH_STR="arm"
+  elif [[ "$ARCH" == "x86" ]] ; then
+    ARCH_STR="i386"
+  elif [[ "$ARCH" == "x64" ]] ; then
+    #ARCH_STR="i386:x86-64"
+    ARCH_STR="x86-64"
+  elif [[ "$ARCH" == "PPC" ]] ; then
+    #ARCH_STR="powerpc:common"
+    ARCH_STR="powerpc"
+  fi
+  if [[ -z "$ARCH_STR" ]] ; then
+    print_output "[-] ""$ARCH"" isn't a valid architecture - exit emba\\n" "no_log"
+    exit 1
+  else
+    print_output "[+] ""$ARCH"" is a valid architecture\\n" "no_log"
   fi
 }

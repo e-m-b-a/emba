@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Module that checks all files of the firmware against a dictionary
 #               with common Linux files.
@@ -18,7 +19,6 @@
 S108_linux_common_file_checker() {
   module_log_init "s108_linux_common_file_checker_log"
   module_title "Module to check the firmware files against a common dictionary of common linux files"
-  CONTENT_AVAILABLE=0
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     print_output "\n[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
@@ -40,9 +40,5 @@ S108_linux_common_file_checker() {
     CONTENT_AVAILABLE=1
   else
     print_output "[-] No common Linux files dictionary (""$BASE_LINUX_FILES"") found in config directory"
-  fi
-  
-  if [[ $HTML == 1 ]]; then
-    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }

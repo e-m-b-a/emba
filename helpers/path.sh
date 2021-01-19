@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -38,9 +38,9 @@ cut_path() {
     SHORT="${C_PATH#"$FIRMWARE_PATH"}"
     FIRST="${SHORT:0:1}"
     if [[ "$FIRST" == "/" ]] ;  then
-      echo -e ".""$SHORT"
+      echo -e "$SHORT"
     else
-      echo -e "./""$SHORT"
+      echo -e "/""$SHORT"
     fi
   else
     local FIRST
@@ -174,6 +174,12 @@ mod_path_array() {
   echo "${RET_PATHS[@]}"
 }
 
+create_grep_log() {
+  export GREP_LOG_FILE
+  GREP_LOG_FILE="$LOG_DIR""/fw_grep_log.log"
+  print_output "[*] grep-able log file will be generated:""$NC""\\n    ""$ORANGE""$GREP_LOG_FILE""$NC" "no_log"
+}
+
 config_list() {
   if [[ -f "$1" ]] ;  then
     if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
@@ -202,13 +208,15 @@ config_find() {
         FIND_O="$(find "$S_LOC" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")"
         for LINE in $FIND_O; do
           if [[ -L "$LINE" ]] ; then
-              FILES="$FILES""$FIRMWARE_PATH""$(realpath "$LINE" 2>/dev/null )""\n"
+            FILES="$FILES""$FIRMWARE_PATH""$(realpath "$LINE" 2>/dev/null )""\n"
           else
             FILES="$FILES""$LINE""\n"
           fi
         done
       done
-      echo -e "$FILES"
+      if [[ -n "$FILES" ]]; then
+        echo -e "$FILES"
+      fi
     fi
   else
     echo "C_N_F"

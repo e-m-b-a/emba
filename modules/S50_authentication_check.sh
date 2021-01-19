@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check user authentication:
 #                 Users with UID 0, non unique accounts, non unique group id, non unique group name, user accounts,
@@ -25,7 +26,6 @@
 S50_authentication_check() {
   module_log_init "s50_check_user_group_and_authentication"
   module_title "Check users, groups and authentication"
-  CONTENT_AVAILABLE=0
   
   user_zero
   non_unique_acc
@@ -39,10 +39,6 @@ S50_authentication_check() {
   scan_pam_conf
   search_pam_configs
   search_pam_files
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 user_zero() {

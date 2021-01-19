@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check shell scripts with shellchecker
 #               Access:
@@ -22,7 +23,6 @@ S20_shell_check()
 {
   module_log_init "s20_check_scripts"
   module_title "Check scripts (shellchecker)"
-  CONTENT_AVAILABLE=0
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
     if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
@@ -57,8 +57,5 @@ S20_shell_check()
     CONTENT_AVAILABLE=1
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
-  fi
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }

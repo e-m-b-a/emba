@@ -25,8 +25,17 @@ build_index_file(){
     HTML_HEADLINE="EMBA Report Manager"
  fi
  
- echo "${FILENAME%.txt}"
  if [[ ${FILENAME%.txt} == "s05"* ]] || [[ ${FILENAME%.txt} == "s25"* ]]; then
+    if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+       readarray -t STRING_LIST <"$FILE"
+       INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
+    fi
+ elif [[ ${FILENAME%.txt} == "f50"* ]]; then
+    if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+       readarray -t STRING_LIST <"$FILE"
+       INDEX_CONTENT_ARR=("${STRING_LIST[@]}")
+    fi
+ elif [[ ${FILENAME%.txt} == "f19"* ]]; then
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
        INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
@@ -43,7 +52,7 @@ build_index_file(){
 
  echo "<header>
       <div class=\"pictureleft\">
-        <img src=\"$HTML_STYLE_PATH/emba.png\">
+        <img src=\"$CONFIG_DIR/emba.png\">
       </div>
       
       <div class=\"headline\">
@@ -51,16 +60,16 @@ build_index_file(){
       </div>
 
       <div class=\"pictureright\">
-         <img src=\"$HTML_STYLE_PATH/emba.png\">
+         <img src=\"$CONFIG_DIR/emba.png\">
       </div>
     </header>
     <div>
       <ul>" | tee -a "$HTML_PATH""/index.txt" >/dev/null
+
       	
-      	if [[ -n ${MENU_LIST[*]} ]]; then
+ if [[ -n ${MENU_LIST[*]} ]]; then
    for OUTPUT in "${MENU_LIST[@]}"; do
-	  echo -e "$OUTPUT" | tee -a "$HTML_PATH""/index.txt" >/dev/null
-	
+	  echo -e "$OUTPUT" | tee -a "$HTML_PATH""/index.txt" >/dev/null	
    done
  fi
       	 
@@ -69,14 +78,16 @@ build_index_file(){
         fi
       echo "</ul>
       	 </div>
-      	  <div class=\"main\">
-     	  <h2>[[0;34m+[0m] [0;36m[1mGerneral Information[0m[1m[0m</h2>
+      	  <div class=\"main\">"| tee -a "$HTML_PATH""/index.txt" >/dev/null
+      if [[ ${FILENAME%.txt} != "f"* ]]; then
+     	  echo "<h2>[[0;34m+[0m] [0;36m[1mGerneral Information[0m[1m[0m</h2>
      	  File: $(basename "$FIRMWARE_PATH")<br>
      	  Architecture: $ARCH<br>
      	  Date: $(date) <br>
      	  Duration time: $(date -d@$SECONDS -u +%H:%M:%S) <br>
      	  EMBA Command: $EMBACOMMAND <br>
      " | tee -a "$HTML_PATH""/index.txt" >/dev/null
+     fi
      	
  i=0
  if [[ -n ${INDEX_CONTENT_ARR[*]} ]]; then
@@ -101,8 +112,8 @@ build_index_file(){
  sed -i 's/&gt;/>/g' "$HTML_PATH""/index.html"
  sed -i 's/<pre>//g' "$HTML_PATH""/index.html"
  sed -i 's/<\/pre>//g' "$HTML_PATH""/index.html"
- SED_HTML_STYLE_PATH="${HTML_STYLE_PATH//\//\\\/}"
- sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$SED_HTML_STYLE_PATH\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/index.html"
+ ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< $CONFIG_DIR)
+ sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/index.html"
 }
 
 
@@ -128,7 +139,7 @@ build_collection_file(){
 
  echo "<header>
       <div class=\"pictureleft\">
-        <img src=\"$HTML_STYLE_PATH/emba.png\">
+        <img src=\"$CONFIG_DIR/emba.png\">
       </div>
       
       <div class=\"headline\">
@@ -136,7 +147,7 @@ build_collection_file(){
       </div>
 
       <div class=\"pictureright\">
-         <img src=\"$HTML_STYLE_PATH/emba.png\">
+         <img src=\"$CONFIG_DIR/emba.png\">
       </div>
     </header>
     <div>
@@ -165,8 +176,8 @@ build_collection_file(){
  sed -i 's/&gt;/>/g' "$HTML_PATH""/collection.html"
  sed -i 's/<pre>//g' "$HTML_PATH""/collection.html"
  sed -i 's/<\/pre>//g' "$HTML_PATH""/collection.html"
- SED_HTML_STYLE_PATH="${HTML_STYLE_PATH//\//\\\/}"
- sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$SED_HTML_STYLE_PATH\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/collection.html"
+ ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< $CONFIG_DIR)
+ sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/collection.html"
 }
 
 build_report_files(){
@@ -174,41 +185,54 @@ build_report_files(){
  local FILE_CONTENT
  local SUB_MENU_LIST
  local FILE=$1
+ local FILENAME=$(basename "$FILE")
  local HTML_FILE
  local LINES
  local SED_HTML_STYLE_PATH
+ local REPORT_ARRAY
  HTML_FILE="$(basename "${FILE%.txt}".html)"
  LINES="$(cat "$FILE" | wc -l)"
  LINE_COUNTER=1
  HEADLINE=$(head -n 1 "$FILE" | tail -n 1 | cut -c27-)
-
- while [ $LINE_COUNTER -le "$LINES" ]
- do
-   local FILE_LINE
-   FILE_LINE=$(head -n $LINE_COUNTER "$FILE" | tail -n 1)
-   if [[ $FILE_LINE == *"0;34m"* ]]; then
- 		if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
- 			COULORLESS_FILE_LINE=$(head -n $LINE_COUNTER "$FILE" | tail -n 1 | cut -c27-)		
- 			FILE_LINE="<h2 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>"
- 		elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
- 			COULORLESS_FILE_LINE=$(head -n $LINE_COUNTER "$FILE" | tail -n 1 | cut -c23-)
-			FILE_LINE="<h4 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>"
- 		fi
-  		SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COULORLESS_FILE_LINE// /_}\">$COULORLESS_FILE_LINE</a></li>"
-   fi
-   FILE_CONTENT+="<br> $FILE_LINE"
-   LINE_COUNTER=$(( LINE_COUNTER + 1 ))
- done
  
-  echo "<h1>$HEADLINE</h1><div><ul>$SUB_MENU_LIST</ul></div> <div class=\"main\">$FILE_CONTENT</div>" | $AHA_PATH > "$HTML_PATH""/$HTML_FILE"
+ if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+       readarray -t STRING_LIST <"$FILE"
+       REPORT_ARRAY+=("${STRING_LIST[@]}")
+ fi
+ 
+ echo "<h1>$HEADLINE</h1><div><ul>$SUB_MENU_LIST</ul></div><div class=\"main\">" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+ 
+  if [[ -n ${REPORT_ARRAY[*]} ]]; then
+   for FILE_LINE in "${REPORT_ARRAY[@]}"; do
+        if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
+ 	   COULORLESS_FILE_LINE=$(echo $FILE_LINE | tail -n 1 | cut -c27-)
+ 	   COULORLESS_FILE_LINE=${COULORLESS_FILE_LINE%[0m}		
+ 	   echo "<h2 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+ 	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COULORLESS_FILE_LINE// /_}\">$COULORLESS_FILE_LINE</a></li>"
+ 	elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
+ 	   COULORLESS_FILE_LINE=$(echo $FILE_LINE | tail -n 1 | cut -c23-)
+ 	   COULORLESS_FILE_LINE=${COULORLESS_FILE_LINE%[0m}	
+	   echo "<h4 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COULORLESS_FILE_LINE// /_}\">$COULORLESS_FILE_LINE</a></li>"
+	else
+	   echo "<br> $FILE_LINE" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+ 	fi
+   done
+ fi
+  echo "</div>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+  cat "$HTML_PATH""/$FILENAME" | $AHA_PATH > "$HTML_PATH""/$HTML_FILE"
+  rm "$HTML_PATH""/$FILENAME"
   sed -i 's/&lt;/</g' "$HTML_PATH""/$HTML_FILE"
   sed -i 's/&gt;/>/g' "$HTML_PATH""/$HTML_FILE"
   sed -i 's/&quot;/"/g' "$HTML_PATH""/$HTML_FILE"
-  SED_HTML_STYLE_PATH="${HTML_STYLE_PATH//\//\\\/}"
-  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$SED_HTML_STYLE_PATH\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/$HTML_FILE"
+  ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< $CONFIG_DIR)
+  ESCAPED_SUB_MENU_LIST=$(sed 's|/|\\/|g' <<< $SUB_MENU_LIST)
+  sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$HTML_PATH""/$HTML_FILE"
+  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/$HTML_FILE"
 }
 
 generate_html_file(){
+
   if [[ $2 == 1 ]]; then
      build_report_files "$1"
      build_index_file "$1"

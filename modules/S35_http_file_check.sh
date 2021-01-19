@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check for web server related files, web server and php.ini
 #               Access:
@@ -22,15 +23,10 @@ S35_http_file_check()
 {
   module_log_init "s35_check_http_file"
   module_title "Check HTTP files"
-  CONTENT_AVAILABLE=0
   
   http_file_search
   webserver_check
   php_check
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 http_file_search()

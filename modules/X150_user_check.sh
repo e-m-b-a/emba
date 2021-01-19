@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -20,7 +20,7 @@
 
 S150_user_check()
 {
-  module_log_init "user_check_commands_log"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Custom check commands"
 
   print_output "[*] Your own check commands"

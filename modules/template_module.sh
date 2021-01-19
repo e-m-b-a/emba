@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -31,7 +31,7 @@
 
 empty_module() {
   # Initialize module and creates a log file "empty_module_log.txt" in your log folder
-  module_log_init "empty_module_log"
+  module_log_init "${FUNCNAME[0]}"
   # Prints title to CLI and into log
   module_title "Empty module"
 
@@ -109,6 +109,10 @@ print_examples() {
   print_output "$(indent "$(orange "indented orange text example")")"
 
   # Good to know: All these functions are also working with text with line breaks
+
+  # If you only want to print stuff into an own log file
+  print_log "log text" "[path to log file]" "g"
+  # "g" is optional for printing line into grep-able log file (emba.sh -g)
 }
 
 path_handling() {

@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check kernel configuration file, look for vulnerabilities with linux-exploit-suggester, analyze kernel
 #               modules and check modprobe directory for loadable kernel modules
@@ -23,7 +24,6 @@ S25_kernel_check()
 {
   module_log_init "s25_check_kernel"
   module_title "Check kernel"
-  CONTENT_AVAILABLE=0
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
@@ -80,11 +80,6 @@ S25_kernel_check()
     else
       print_output "[-] No kernel found"
     fi
-  fi
-  
-    
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

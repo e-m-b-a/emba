@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check for history files
 #               Access:
@@ -23,7 +24,6 @@ S55_history_file_check()
   module_log_init "s55_search_history_file"
   module_title "Search history files"
 
-  CONTENT_AVAILABLE=0
   local HIST_FILES
   HIST_FILES="$(config_find "$CONFIG_DIR""/history_files.cfg")"
 
@@ -36,10 +36,6 @@ S55_history_file_check()
       CONTENT_AVAILABLE=1
   else
     print_output "[-] No history files found"
-  fi
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check resolv config, iptables and snmp
 #               Access:
@@ -22,16 +23,11 @@ S75_network_check()
 {
   module_log_init "s75_search_network_configs"
   module_title "Search network configs"
-  CONTENT_AVAILABLE=0
 
   check_resolv
   check_iptables
   check_snmp
   check_network_configs
-  
-  if [[ $HTML == 1 ]]; then
-    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 check_resolv()

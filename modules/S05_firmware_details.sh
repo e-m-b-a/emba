@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check for information (release/version) about firmware and dump directory tree into log
 #               Access:
@@ -20,7 +21,6 @@
 
 S05_firmware_details()
 {
-  CONTENT_AVAILABLE=0
   module_log_init "s05_firmware_and_testing_details"
   module_title "Firmware and testing details"
 
@@ -47,10 +47,6 @@ S05_firmware_details()
     fi
   fi
   release_info
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 # Test source: http://linuxmafia.com/faq/Admin/release-files.html

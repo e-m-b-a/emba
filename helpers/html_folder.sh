@@ -21,7 +21,7 @@ html_folder()
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    There are files in the specified directory: ""$HTML_PATH""\\n    You can now delete the content here or start the tool again and specify a different directory."
     echo -e "\\n${ORANGE}Delete content of log directory: $HTML_PATH ?${NC}\\n"
-    #read -p "(y/n)  " -r ANSWER
+    read -p "(y/n)  " -r ANSWER
     ANSWER=""
     case ${ANSWER:0:1} in
         y|Y|"" )

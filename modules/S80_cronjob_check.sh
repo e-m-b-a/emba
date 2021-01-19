@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check for cronjobs
 #               Access:
@@ -22,7 +23,6 @@ S80_cronjob_check()
 {
   module_log_init "s80_check_cronjob"
   module_title "Check cronjobs"
-  CONTENT_AVAILABLE=0
 
   local RESULTS
   RESULTS=0
@@ -114,10 +114,6 @@ S80_cronjob_check()
     print_output "[-] Nothing found!"
   else
     CONTENT_AVAILABLE=1
-  fi
-  
-  if [[ $HTML == 1 ]]; then
-    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

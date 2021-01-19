@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Search for mail related files
 #               Access:
@@ -22,7 +23,6 @@ S90_mail_check()
 {
   module_log_init "s90_search_mail_files"
   module_title "Search Mail files"
-  CONTENT_AVAILABLE=0
 
   local MAILS
   local MAILS_PATH
@@ -53,10 +53,6 @@ S90_mail_check()
     CONTENT_AVAILABLE=1
   else
     print_output "[-] No mail files found!"
-  fi
-  
-  if [[ $HTML == 1 ]]; then
-    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

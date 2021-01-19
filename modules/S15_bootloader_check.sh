@@ -24,16 +24,11 @@ S15_bootloader_check()
 {
   module_log_init "s15_check_bootloader_and_system_startup"
   module_title "Check bootloader and system startup"
-  CONTENT_AVAILABLE=0
 
   check_dtb
   check_bootloader
   find_boot_files
   find_runlevel
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 check_dtb()

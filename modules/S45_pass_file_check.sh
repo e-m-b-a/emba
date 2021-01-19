@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Check for files which could contain passwords
 #               Access:
@@ -23,7 +24,6 @@ S45_pass_file_check()
   module_log_init "s45_search_password_files"
   module_title "Search password files"
 
-  CONTENT_AVAILABLE=0
   local PASSWD_STUFF
   PASSWD_STUFF="$(config_find "$CONFIG_DIR""/pass_files.cfg" "")"
 
@@ -96,10 +96,6 @@ S45_pass_file_check()
     CONTENT_AVAILABLE=1
   else
     print_output "[-] No password files found"
-  fi
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }
 

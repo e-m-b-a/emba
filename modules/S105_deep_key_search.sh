@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Run trough all files and check for private keys
 #               Access:
@@ -22,7 +23,6 @@ S105_deep_key_search()
 {
   module_log_init "s105_deep_private_keys_analysis"
   module_title "Deep analysis of files for private keys"
-  CONTENT_AVAILABLE=0
 
   local QUERY_L
   QUERY_L="$(config_list "$CONFIG_DIR""/deep_search.cfg" "")"
@@ -45,9 +45,5 @@ S105_deep_key_search()
     done
     echo
   done
-  
-  if [[ $HTML == 1 ]]; then
-    generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 

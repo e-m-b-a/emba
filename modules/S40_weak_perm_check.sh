@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Search files with setuid, setgid, world writeable flags and weak shadow files
 #               Access:
@@ -23,7 +24,6 @@ S40_weak_perm_check() {
   module_title "Search files with weak permissions"
 
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
-  CONTENT_AVAILABLE=0
 
   local ETC_ARR
   ETC_ARR=("$(mod_path "$FIRMWARE_PATH""/ETC_PATHS")")
@@ -103,9 +103,5 @@ S40_weak_perm_check() {
     echo
   else
     print_output "[-] No init.d files with weak permissions found"
-  fi
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
   fi
 }

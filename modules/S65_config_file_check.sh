@@ -10,7 +10,8 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haböck
 
 # Description:  Scan for config files and check fstab
 #               Access:
@@ -22,14 +23,9 @@ S65_config_file_check()
 {
   module_log_init "s65_scan_config_file"
   module_title "Search/scan config files"
-  CONTENT_AVAILABLE=0
 
   scan_config
   check_fstab
-  
-  if [[ $HTML == 1 ]]; then
-     generate_html_file $LOG_FILE $CONTENT_AVAILABLE
-  fi
 }
 
 scan_config()
