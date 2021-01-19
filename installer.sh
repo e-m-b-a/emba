@@ -313,8 +313,9 @@ INSTALL_APP_LIST=()
 echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database. CVE-searchsploit will be installed via pip3."
 print_tool_info "python3-pip" 1
 print_tool_info "bc" 1
+print_tool_info "net-tools" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install bc, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install bc, net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
 read -p "(y/N)" -r ANSWER
 case ${ANSWER:0:1} in
   y|Y )
