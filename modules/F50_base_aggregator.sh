@@ -62,7 +62,7 @@ F50_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$FILE_COUNTER""""$GREEN"" not common Linux files with ""$ORANGE""""$FILE_COUNTER_ALL""""$GREEN"" files at all.""$NC"""
   fi
   if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$INT_COUNT""""$GREEN"" interesting files and ""$ORANGE""""$POST_COUNT""""$GREEN"" files that could be usefull for post-exploitation.""$NC"""
+    print_output "[+] Found ""$ORANGE""""$INT_COUNT""""$GREEN"" interesting files and ""$ORANGE""""$POST_COUNT""""$GREEN"" files that could be useful for post-exploitation.""$NC"""
   fi
   if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
     print_output "[+] Found passwords or weak credential configuration - check log file for details"
@@ -175,7 +175,7 @@ F50_base_aggregator() {
   print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
     print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-    print_output "$(grep "\[+\] Found version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
+    print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
     print_output ""
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
