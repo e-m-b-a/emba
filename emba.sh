@@ -64,6 +64,8 @@ main()
   export YARA=1
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
+  export DOCKER=0
+  export IGNORE_LOG_DEL=0
   export FORCE=0
   export LOG_GREP=0
   export QEMULATION=0
@@ -94,7 +96,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cde:Ef:Fghk:l:m:sz OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -109,6 +111,9 @@ main()
       d)
         export ONLY_DEP=1
         export BAP=1
+        ;;
+      D)
+        export DOCKER=1
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
@@ -129,6 +134,9 @@ main()
       h)
         print_help
         exit 0
+        ;;
+      i)
+        export IGNORE_LOG_DEL=1
         ;;
       k)
         export KERNEL=1
@@ -178,8 +186,10 @@ main()
   fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
-    # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
-    log_folder
+    if [[ $IGNORE_LOG_DEL -eq 0 ]] ; then
+      # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
+      log_folder
+    fi
 
     if [[ $LOG_GREP -eq 1 ]] ; then
       create_grep_log
@@ -187,6 +197,31 @@ main()
     fi
 
     set_exclude
+  fi
+
+  if [[ $DOCKER -eq 1 ]] ; then
+    OPTIND=1
+    ARGS="-i"
+    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+      case $OPT in
+        D)
+          ;;
+        f)
+          ;;
+        i)
+          ;;
+        l)
+          ;;
+        *)
+          export ARGS="$ARGS -$OPT"
+          ;;
+      esac
+    done
+
+    print_output "[*] Emba initializes kali docker container." "no_log"
+    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba ./emba.sh -l /log/ -f /firmware/ "$ARGS"
+
+    exit
   fi
 
   dependency_check
