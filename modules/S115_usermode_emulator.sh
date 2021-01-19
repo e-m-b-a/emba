@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens Energy AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -64,7 +64,6 @@ S115_usermode_emulator() {
           fi
   
           if [[ "$EMULATOR" != "NA" ]]; then
-            detect_root_dir
             print_output "[*] Emulator used: $EMULATOR"
             prepare_emulator
             emulate_binary
@@ -84,7 +83,7 @@ S115_usermode_emulator() {
   else
     echo
     print_output "[!] Automated emulation is disabled."
-    print_output "$(indent "Enable it with the parameter -E.")"
+    print_output "[!] Enable it with the -E switch."
   fi
 }
 
@@ -147,34 +146,66 @@ version_detection() {
 }
 
 detect_root_dir() {
-  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u | head -1 2>/dev/null)
-  if [[ $(echo "$INTERPRETER_FULL_PATH" | wc -l) -gt 0 ]]; then
+  EMULATION_PATH=()
+
+  INTERPRETER_FULL_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u | head -1 2>/dev/null)
+
+  # sometimes it is complicated to debug the chosen root directory. Lets output some helpers
+  print_output "[*] Emulation_path_base: $EMULATION_PATH_BASE"
+  print_output "[*] Bin_emu_name: $BIN_EMU_NAME"
+  print_output "[*] Interpreter: $INTERPRETER_FULL_PATH"
+
+  PATH_OK=0
+  if [[ -n "$INTERPRETER_FULL_PATH" ]]; then
     # now we have a result like this "/lib/ld-uClibc.so.0"
     INTERPRETER=$(echo "$INTERPRETER_FULL_PATH" | sed -e 's/\//\\\//g')
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -ignore_readdir_race -wholename "*$INTERPRETER_FULL_PATH" 2>/dev/null | sort -u | head -1)
-    EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
-    print_output "[*] Root directory detection via interpreter ... $EMULATION_PATH"
+    # in some cases we have multiple extracted root directories and currently we do not know in which sits our binary for emulation
+    # quick and dirty: just try to emulate our binary in every detected root directory
+    mapfile -t EMULATION_PATH_TMP < <(find "$EMULATION_PATH_BASE" -ignore_readdir_race -wholename "*$INTERPRETER_FULL_PATH" 2>/dev/null | sort -u)
+    #EMULATION_PATH="${EMULATION_PATH//$INTERPRETER/}"
+    for E_PATH in "${EMULATION_PATH_TMP[@]}"; do
+      E_PATH="${E_PATH//$INTERPRETER/}"
+      EMULATION_PATH+=( "$E_PATH" )
+      print_output "[*] Root directory detection via interpreter ... $E_PATH"
+    done
   else
     # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
     print_output "[*] Root directory detection via path pattern ... "
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null | head -1)
+    mapfile -t EMULATION_PATH < <(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
   fi
 
   # if the new root directory does not include the current working directory we fall back to the search for something like "*root/bin/* and take this:
-  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
-    # this could happen if the interpreter path from the first check is broken and results in something like this: "/" or "."
-    # if this happens we have to handle this and try to fix the path:
+  for E_PATH in "${EMULATION_PATH[@]}"; do
+    if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+      PATH_OK=1
+    fi
+  done
+
+  # this could happen if the interpreter path from the first check is broken and results in something like this: "/" or "."
+  # if this happens we have to handle this and try to fix the path:
+  if [[ "$PATH_OK" -ne 1 ]]; then
     print_output "[*] Root directory detection via path pattern ... failed interpreter detection"
-    EMULATION_PATH=$(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null | head -1)
+    mapfile -t EMULATION_PATH < <(find "$EMULATION_PATH_BASE" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
   fi
-  # now we have to include a final check and fix the root path to the firmware path (as last resort)
-  if [[ ! "$EMULATION_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+
+  for E_PATH in "${EMULATION_PATH[@]}"; do
+    # now we have to include a final check and fix the root path to the firmware path (as last resort)
+    if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
+      PATH_OK=1
+    fi
+  done
+
+  if [[ $PATH_OK -ne 1 ]]; then
     print_output "[*] Root directory set to firmware path ... last resort"
-    EMULATION_PATH="$EMULATION_PATH_BASE"
+    EMULATION_PATH+=( "$EMULATION_PATH_BASE" )
   fi
+
   # This is for quick testing here - if emba fails to detect the root directory you can poke with it here (we have to find a better way for the future):
   #EMULATION_PATH="$EMULATION_PATH_BASE"
-  print_output "[*] Using the following path as emulation root path: $EMULATION_PATH"
+
+  for E_PATH in "${EMULATION_PATH[@]}"; do
+    print_output "[*] Using the following path as emulation root path: $E_PATH"
+  done
 }
 
 copy_firmware() {
@@ -212,25 +243,26 @@ cleanup() {
     killall -9 "$EMULATOR" 2> /dev/null
   fi
 
-  EMULATORS_=( qemu*static )
-  if (( ${#EMULATORS_[@]} )) ; then
-    print_output "[*] Cleaning the emulation environment\\n"
-    rm "$EMULATION_PATH"/qemu*static 2> /dev/null
-  fi
+  #EMULATORS_=( qemu*static )
+  #if (( ${#EMULATORS_[@]} )) ; then
+  print_output "[*] Cleaning the emulation environment\\n"
+  find "$EMULATION_PATH_BASE" -iname "qemu*static" -exec rm {} \;
+  #  rm "$EMULATION_PATH"/qemu*static 2> /dev/null
+  #fi
 
   print_output ""
   print_output "[*] Umounting proc, sys and run"
-  mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH")
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH_BASE")
   for MOUNT in "${CHECK_MOUNTS[@]}"; do
     print_output "[*] Unmounting $MOUNT"
     MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
     umount -l "$MOUNT"
   done
 
-  FILES=$(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
-  if [[ -n "$FILES" ]] ; then
+  mapfile -t FILES < <(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
+  if [[ "${#FILES[@]}" -gt 0 ]] ; then
     print_output "[*] Cleanup empty log files.\\n\\n"
-    for FILE in $FILES ; do
+    for FILE in "${FILES[@]}" ; do
       if [[ ! -s "$FILE" ]] ; then
         rm "$FILE" 2> /dev/null
       else
@@ -245,7 +277,7 @@ cleanup() {
 
 prepare_emulator() {
 
-  if [[ ! -f "$EMULATION_PATH""/""$EMULATOR" ]]; then
+  if [[ ! -e "$E_PATH""/""$EMULATOR" ]]; then
     print_output "[*] Preparing the environment for usermode emulation"
     if ! command -v "$EMULATOR" > /dev/null ; then
       echo
@@ -253,69 +285,69 @@ prepare_emulator() {
       print_output "$(indent "We can't find it!")"
       print_output "$(indent "$(red "Terminating emba now.\\n")")"
       exit 1
-    fi
-    cp "$(which $EMULATOR)" "$EMULATION_PATH"/
-
-    if ! [[ -d "$EMULATION_PATH""/proc" ]] ; then
-      mkdir "$EMULATION_PATH""/proc" 2> /dev/null
+    else
+      cp "$(which $EMULATOR)" "$E_PATH"/
     fi
 
-    if ! [[ -d "$EMULATION_PATH""/sys" ]] ; then
-      mkdir "$EMULATION_PATH""/sys" 2> /dev/null
+    if ! [[ -d "$E_PATH""/proc" ]] ; then
+      mkdir "$E_PATH""/proc" 2> /dev/null
     fi
 
-    if ! [[ -d "$EMULATION_PATH""/run" ]] ; then
-      mkdir "$EMULATION_PATH""/run" 2> /dev/null
+    if ! [[ -d "$E_PATH""/sys" ]] ; then
+      mkdir "$E_PATH""/sys" 2> /dev/null
     fi
 
-    if ! [[ -d "$EMULATION_PATH""/dev/" ]] ; then
-      mkdir "$EMULATION_PATH""/dev/" 2> /dev/null
+    if ! [[ -d "$E_PATH""/run" ]] ; then
+      mkdir "$E_PATH""/run" 2> /dev/null
     fi
 
-    mount proc "$EMULATION_PATH""/proc" -t proc 2> /dev/null
-    mount -o bind /run "$EMULATION_PATH""/run" 2> /dev/null
-    mount -o bind /sys "$EMULATION_PATH""/sys" 2> /dev/null
-
-    if [[ -e "$EMULATION_PATH""/dev/console" ]] ; then
-      rm "$EMULATION_PATH""/dev/console" 2> /dev/null
+    if ! [[ -d "$E_PATH""/dev/" ]] ; then
+      mkdir "$E_PATH""/dev/" 2> /dev/null
     fi
-    mknod -m 622 "$EMULATION_PATH""/dev/console" c 5 1 2> /dev/null
 
-    if [[ -e "$EMULATION_PATH""/dev/null" ]] ; then
-      rm "$EMULATION_PATH""/dev/null" 2> /dev/null
+    if ! mount | grep "$E_PATH"/proc > /dev/null ; then
+      mount proc "$E_PATH""/proc" -t proc 2> /dev/null
     fi
-    mknod -m 666 "$EMULATION_PATH""/dev/null" c 1 3 2> /dev/null
-
-    if [[ -e "$EMULATION_PATH""/dev/zero" ]] ; then
-      rm "$EMULATION_PATH""/dev/zero" 2> /dev/null
+    if ! mount | grep "$E_PATH/run" > /dev/null ; then
+      mount -o bind /run "$E_PATH""/run" 2> /dev/null
     fi
-    mknod -m 666 "$EMULATION_PATH""/dev/zero" c 1 5 2> /dev/null
-
-    if [[ -e "$EMULATION_PATH""/dev/ptmx" ]] ; then
-      rm "$EMULATION_PATH""/dev/ptmx" 2> /dev/null
+    if ! mount | grep "$E_PATH/sys" > /dev/null ; then
+      mount -o bind /sys "$E_PATH""/sys" 2> /dev/null
     fi
-    mknod -m 666 "$EMULATION_PATH""/dev/ptmx" c 5 2 2> /dev/null
 
-    if [[ -e "$EMULATION_PATH""/dev/tty" ]] ; then
-      rm "$EMULATION_PATH""/dev/tty" 2> /dev/null
+    if ! [[ -e "$E_PATH""/dev/console" ]] ; then
+      mknod -m 622 "$E_PATH""/dev/console" c 5 1 2> /dev/null
     fi
-    mknod -m 666 "$EMULATION_PATH""/dev/tty" c 5 0 2> /dev/null
 
-    if [[ -e "$EMULATION_PATH""/dev/random" ]] ; then
-      rm "$EMULATION_PATH""/dev/random" 2> /dev/null
+    if ! [[ -e "$E_PATH""/dev/null" ]] ; then
+      mknod -m 666 "$E_PATH""/dev/null" c 1 3 2> /dev/null
     fi
-    mknod -m 444 "$EMULATION_PATH""/dev/random" c 1 8 2> /dev/null
 
-    if [[ -e "$EMULATION_PATH""/dev/urandom" ]] ; then
-      rm "$EMULATION_PATH""/dev/urandom" 2> /dev/null
+    if ! [[ -e "$E_PATH""/dev/zero" ]] ; then
+      mknod -m 666 "$E_PATH""/dev/zero" c 1 5 2> /dev/null
     fi
-    mknod -m 444 "$EMULATION_PATH""/dev/urandom" c 1 9 2> /dev/null
 
-    chown -v root:tty "$EMULATION_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
+    if ! [[ -e "$E_PATH""/dev/ptmx" ]] ; then
+      mknod -m 666 "$E_PATH""/dev/ptmx" c 5 2 2> /dev/null
+    fi
+
+    if ! [[ -e "$E_PATH""/dev/tty" ]] ; then
+      mknod -m 666 "$E_PATH""/dev/tty" c 5 0 2> /dev/null
+    fi
+
+    if ! [[ -e "$E_PATH""/dev/random" ]] ; then
+      mknod -m 444 "$E_PATH""/dev/random" c 1 8 2> /dev/null
+    fi
+
+    if ! [[ -e "$E_PATH""/dev/urandom" ]] ; then
+      mknod -m 444 "$E_PATH""/dev/urandom" c 1 9 2> /dev/null
+    fi
+
+    chown -v root:tty "$E_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
 
     print_output ""
     print_output "[*] Currently mounted areas:"
-    print_output "$(indent "$(mount | grep "$EMULATION_PATH" 2> /dev/null )")""\\n"
+    print_output "$(indent "$(mount | grep "$E_PATH" 2> /dev/null )")""\\n"
 
   fi
   if ! [[ -d "$LOG_DIR""/qemu_emulator" ]] ; then
@@ -325,17 +357,17 @@ prepare_emulator() {
 
 emulate_strace_run() {
     echo
-    print_output "[*] Initial strace run on command ${GREEN}$BIN_EMU_NAME${NC} for identifying missing areas"
+    print_output "[*] Initial strace run on command ${GREEN}$BIN_EMU_NAME / $BIN_EMU${NC} for identifying missing areas"
 
     # currently we only look for file errors (errno=2) and try to fix this
-    chroot "$EMULATION_PATH" ./"$EMULATOR" --strace "$BIN_EMU" > "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" 2>&1 &
+    chroot "$E_PATH" ./"$EMULATOR" --strace "$BIN_EMU" > "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" 2>&1 &
     PID=$!
 
     # wait a second and then kill it
     sleep 1
     kill -0 -9 "$PID" 2> /dev/null
 
-    # extract missing files but do list *.so files:
+    # extract missing files, exclude *.so files:
     mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u | grep -v ".*\.so")
 
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
@@ -346,35 +378,22 @@ emulate_strace_run() {
         FILENAME_MISSING=$(basename "$MISSING_AREA")
         print_output "[*] Trying to create this missing file: $FILENAME_MISSING"
         PATH_MISSING=$(dirname "$MISSING_AREA")
-        if [[ ! -d "$EMULATION_PATH""$PATH_MISSING" ]]; then
-          if [[ -L "$EMULATION_PATH""$PATH_MISSING" ]]; then
-            if [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
-              print_output "[*] Good symlink: $PATH_MISSING"
-            else
-              print_output "[-] Broken symlink: $PATH_MISSING"
-            fi
-          elif [[ -e "$EMULATION_PATH""$PATH_MISSING" ]]; then
-            print_output "[-] Not a symlink: $PATH_MISSING"
-          else
-            print_output "[*] Missing path: $PATH_MISSING"
-          fi
-        fi
 
-        FILENAME_FOUND=$(find "$EMULATION_PATH" -ignore_readdir_race -path "$EMULATION_PATH"/sys -prune -false -o -path "$EMULATION_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING")
+        FILENAME_FOUND=$(find "$E_PATH" -ignore_readdir_race -path "$E_PATH"/sys -prune -false -o -path "$E_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING")
         if [[ -n "$FILENAME_FOUND" ]]; then
           print_output "[*] Possible matching file found: $FILENAME_FOUND"
         fi
     
-        if [[ ! -d "$EMULATION_PATH""$PATH_MISSING" ]]; then
-          print_output "[*] Creating directory $EMULATION_PATH$PATH_MISSING"
-          mkdir -p "$EMULATION_PATH""$PATH_MISSING" 2> /dev/null
+        if [[ ! -d "$E_PATH""$PATH_MISSING" ]]; then
+          print_output "[*] Creating directory $E_PATH$PATH_MISSING"
+          mkdir -p "$E_PATH""$PATH_MISSING" 2> /dev/null
         fi
         if [[ -n "$FILENAME_FOUND" ]]; then
-          print_output "[*] Copy file $FILENAME_FOUND to $EMULATION_PATH$PATH_MISSING/"
-          cp "$FILENAME_FOUND" "$EMULATION_PATH""$PATH_MISSING"/ 2> /dev/null
+          print_output "[*] Copy file $FILENAME_FOUND to $E_PATH$PATH_MISSING/"
+          cp "$FILENAME_FOUND" "$E_PATH""$PATH_MISSING"/ 2> /dev/null
         else
-          print_output "[*] Creating empty file $EMULATION_PATH$PATH_MISSING/$FILENAME_MISSING"
-          touch "$EMULATION_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
+          print_output "[*] Creating empty file $E_PATH$PATH_MISSING/$FILENAME_MISSING"
+          touch "$E_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
         fi
       fi
     done
@@ -395,37 +414,58 @@ check_disk_space() {
 
 emulate_binary() {
   BIN_EMU_NAME="$(basename "$LINE")"
+  print_output "[*] Binary LINE: $LINE"
 
   ## as we currently do not have the right path of our binary we have to find it now:
   DIR=$(pwd)
   # if we find multiple binaries with the same name we have to take care of it
-  mapfile -t BIN_EMU < <(cd "$EMULATION_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)
+  mapfile -t BIN_EMU < <(cd "$EMULATION_PATH_BASE" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null && cd "$DIR" || exit)
 
-  emulate_strace_run
+  # if we find multiple binaries with the same name we have to take care of it
+  for BINARY_EMU in "${BIN_EMU[@]}"; do
+    print_output "[*] BINARY_EMU: $BINARY_EMU"
+    detect_root_dir
+
+    # use every root directory we found for the binary name and try to emulate it
+    # possibility for improvement!
+    for E_PATH in "${EMULATION_PATH[@]}"; do
+      # just use this path if it includes the base path
+      if [[ "$E_PATH" == *"$EMULATION_PATH_BASE"* ]]; then
   
-  # emulate binary with different command line parameters:
-  if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
-    EMULATION_PARAMS=("--help" "--version")
-  else
-    EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
-  fi
-
-  echo
-  for PARAM in "${EMULATION_PARAMS[@]}"; do
-
-    # if we find multiple binaries with the same name we have to take care of it
-    for BINARY_EMU in "${BIN_EMU[@]}"; do
-      print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
-      chroot "$EMULATION_PATH" ./"$EMULATOR" "$BINARY_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
-      print_output ""
-      check_disk_space
+        # now we know the root directory and so we can search the file we would like to emulate
+        # if we find multiple binaries with the same name we have to care about it ...
+        mapfile -t BINS < <(cd "$E_PATH" && find . -ignore_readdir_race -type f -executable -name "$BIN_EMU_NAME" 2>/dev/null | sort -u | head -1 && cd "$DIR" || exit)
+  
+        prepare_emulator
+        for BIN_EMU in "${BINS[@]}"; do
+          emulate_strace_run
+    
+          # emulate binary with different command line parameters:
+          if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
+            EMULATION_PARAMS=("--help" "--version")
+          else
+            EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+          fi
+    
+          for PARAM in "${EMULATION_PARAMS[@]}"; do
+            #print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
+            print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
+            print_output "[*] Using root directory: $E_PATH"
+            chroot "$E_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
+            print_output ""
+            check_disk_space
+          done
+        done
+      else
+        print_output "[!] We found a path that should not be handled! $E_PATH"
+      fi
     done
+  
+    # now we kill all older qemu-processes:
+    # if we use the correct identifier $EMULATOR it will not work ...
+    killall --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
+  
+    # reset the terminal - after all the uncontrolled emulation it is typically broken!
+    reset
   done
-
-  # now we kill all older qemu-processes:
-  # if we use the correct identifier $EMULATOR it will not work ...
-  killall --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
-
-  # reset the terminal after all the uncontrolled emulation it is typically broken!
-  reset
 }

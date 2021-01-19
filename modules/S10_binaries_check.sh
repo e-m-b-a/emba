@@ -143,36 +143,33 @@ objdump_disassembly()
 
           elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-              FUNC_ADDR=$("$READELF" -r "$LINE" 2>/dev/null| grep -E -m1 \ "$FUNCTION" | awk '{print $4}' | sed s/^0*//  2> /dev/null)
-              STRLEN_ADDR=$("$READELF" -r "$LINE" 2>/dev/null | grep -E \ "strlen" | awk '{print $4}' | sed s/^0*//  2> /dev/null)
-              if [[ -n "$FUNC_ADDR" ]] && ! [[ "$FUNC_ADDR" =~ ^0000.*  ]] && [[ "$FUNC_ADDR" != "00000000"*  ]] ; then
-                NAME=$(basename "$LINE" 2> /dev/null)
-                local OBJ_DUMPS_OUT
-                if [[ "$FUNCTION" == "mmap" ]] ; then
-                  # For the mmap check we need the disasm after the call
-                  OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]]$FUNC_ADDR <" | sed s/"$FUNC_ADDR"\ \</"$FUNCTION"" <"/ 2> /dev/null)
-                else
-                  OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]]$FUNC_ADDR <" | sed s/"$FUNC_ADDR"\ \</"$FUNCTION"" <"/ 2> /dev/null)
-                fi
-                if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
-                  readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT//$STRLEN_ADDR\ \</strlen\ \<}"
-                  unset OBJ_DUMPS_OUT
-                  FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
-                  for E in "${OBJ_DUMPS_ARR[@]}" ; do
-                    echo "$E" >> "$FUNC_LOG"
-                  done
-                  COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]]$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
-                  if [[ "$FUNCTION" == "strcpy" ]] ; then
-                    COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]]strlen" "$FUNC_LOG"  2> /dev/null)
-                    (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
-                  elif [[ "$FUNCTION" == "mmap" ]] ; then
-                    # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
-                    # Check this testcase. Not sure if it works in all cases! 
-                    COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
-                  fi
-                  output_function_details
-                fi
+              NAME=$(basename "$LINE" 2> /dev/null)
+              local OBJ_DUMPS_OUT
+              if [[ "$FUNCTION" == "mmap" ]] ; then
+                OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+              else
+                OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
               fi
+              if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
+                readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
+                unset OBJ_DUMPS_OUT
+                FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+                for E in "${OBJ_DUMPS_ARR[@]}" ; do
+                  echo "$E" >> "$FUNC_LOG"
+                done
+                COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+                if [[ "$FUNCTION" == "strcpy" ]] ; then
+                  COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null)
+                  (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+                elif [[ "$FUNCTION" == "mmap" ]] ; then
+                  # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
+                  # Check this testcase. Not sure if it works in all cases! 
+                  COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
+                fi
+                output_function_details
+              fi
+ 
+
             done
 
           # ARM 64 code is in alpha state and nearly not tested!
@@ -276,29 +273,33 @@ objdump_disassembly()
           fi
         fi
       done
-  
-      if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then 
+
+      if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
         for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-          print_output "\\n"
-          print_output "[*] ""$FUNCTION"" - top 10 results:"
           local SEARCH_TERM
           local RESULTS
-          readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed     "s/\.txt//" 2> /dev/null)
+          local F_COUNTER
+          readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
-          for LINE in "${RESULTS[@]}" ; do
-            SEARCH_TERM=$(echo "$LINE" | cut -d\  -f3)
-            if [[ -f "$BASE_LINUX_FILES" ]]; then
-              if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-                print_output "$(indent "$(green "$LINE"" - common linux file: yes")")"
+          if [[ "${#RESULTS[@]}" -gt 0 ]]; then
+            print_output ""
+            print_output "[+] ""$FUNCTION"" - top 10 results:"
+            for LINE in "${RESULTS[@]}" ; do
+              SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
+              F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
+              if [[ -f "$BASE_LINUX_FILES" ]]; then
+                # if we have the base linux config file we are checking it:
+                if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+                  printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
+                else
+                  printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
+                fi  
               else
-                print_output "$(indent "$(orange "$LINE"" - common linux file: no")")"
-              fi
-            else
-              print_output "$(indent "$(orange "$LINE")")"
-            fi
-          done
+                print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM""")")"
+              fi  
+            done
+          fi  
         done
-        echo
       else
         print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
       fi
