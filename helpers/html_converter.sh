@@ -23,7 +23,6 @@ build_index_file(){
  if [[ -z "$HTML_HEADLINE" ]]; then
     HTML_HEADLINE="EMBA Report Manager"
  fi
- echo "Filename: $FILENAME"
  if [[ ${FILENAME%.txt} == "s05"* ]] || [[ ${FILENAME%.txt} == "s25"* ]]; then
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
@@ -113,7 +112,6 @@ build_index_file(){
  sed -i 's/&gt;/>/g' "$HTML_PATH""/index.html"
  sed -i 's/<pre>//g' "$HTML_PATH""/index.html"
  sed -i 's/<\/pre>//g' "$HTML_PATH""/index.html"
- #ESCAPED_CONFIG_DIR=$(echo $CONFIG_DIR | sed 's|/|\\/|g'}
  ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< "$CONFIG_DIR")
  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/index.html"
 }
@@ -178,7 +176,6 @@ build_collection_file(){
  sed -i 's/&gt;/>/g' "$HTML_PATH""/collection.html"
  sed -i 's/<pre>//g' "$HTML_PATH""/collection.html"
  sed -i 's/<\/pre>//g' "$HTML_PATH""/collection.html"
- #ESCAPED_CONFIG_DIR=${CONFIG_DIR sed 's|/|\\/|g'}
  ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< "$CONFIG_DIR")
  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/collection.html"
 }
@@ -226,9 +223,7 @@ build_report_files(){
   sed -i 's/&lt;/</g' "$HTML_PATH""/$HTML_FILE"
   sed -i 's/&gt;/>/g' "$HTML_PATH""/$HTML_FILE"
   sed -i 's/&quot;/"/g' "$HTML_PATH""/$HTML_FILE"
-  #ESCAPED_CONFIG_DIR=${CONFIG_DIR sed 's|/|\\/|g'}
   ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< "$CONFIG_DIR")
-  #ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST sed 's|/|\\/|g'}
   ESCAPED_SUB_MENU_LIST=$(sed 's|/|\\/|g' <<< "$SUB_MENU_LIST")
   sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$HTML_PATH""/$HTML_FILE"
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/$HTML_FILE"
