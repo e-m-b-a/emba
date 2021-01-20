@@ -193,6 +193,7 @@ main()
   if [[ $ONLY_DEP -eq 0 ]] ; then
     # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
     log_folder
+    html_folder
 
     if [[ $LOG_GREP -eq 1 ]] ; then
       create_grep_log
