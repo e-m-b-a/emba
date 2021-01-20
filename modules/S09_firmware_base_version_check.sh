@@ -11,6 +11,7 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+export CONTENT_AVAILABLE
 
 S09_firmware_base_version_check() {
 

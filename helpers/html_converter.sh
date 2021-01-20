@@ -23,7 +23,6 @@ build_index_file(){
  if [[ -z "$HTML_HEADLINE" ]]; then
     HTML_HEADLINE="EMBA Report Manager"
  fi
- echo "Filename: $FILENAME"
  if [[ ${FILENAME%.txt} == "s05"* ]] || [[ ${FILENAME%.txt} == "s25"* ]]; then
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
@@ -189,11 +188,9 @@ build_report_files(){
  local FILE=$1
  local FILENAME
  local HTML_FILE
- local LINES
  local REPORT_ARRAY
  FILENAME=$(basename "$FILE")
  HTML_FILE="$(basename "${FILE%.txt}".html)"
- LINES="$(cat "$FILE" | wc -l)"
  HEADLINE=$(head -n 1 "$FILE" | tail -n 1 | cut -c27-)
  
  if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
