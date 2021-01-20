@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export CONTENT_AVAILABLE
 
 S70_hidden_file_check()
 {
@@ -27,6 +27,7 @@ S70_hidden_file_check()
   IFS=" " read -r -a HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -name ".*" -type f | tr '\r\n' ' ')
 
   if [[ ${#HIDDEN_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#HIDDEN_FILES[@]}"" hidden files:"
     for LINE in "${HIDDEN_FILES[@]}" ; do
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"

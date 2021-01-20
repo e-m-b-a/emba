@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export CONTENT_AVAILABLE
 
 S95_interesting_binaries_check()
 {
@@ -51,6 +51,8 @@ interesting_binaries()
   fi
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 
@@ -78,6 +80,8 @@ post_exploitation()
   fi
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries for post exploitation found"
+  else
+    CONTENT_AVAILABLE=1
   fi
 }
 

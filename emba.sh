@@ -150,7 +150,7 @@ main()
         ;;
       W)
         export HTML=1
-        ARG_ARRAY=($OPTARG)
+        ARG_ARRAY=("$OPTARG")
         export HTML_PATH="${ARG_ARRAY[0]}"
         export HTML_HEADLINE="${ARG_ARRAY[1]}"
         ;;
@@ -288,7 +288,7 @@ main()
             CONTENT_AVAILABLE=0
             $MODULE_MAIN
             if [[ $HTML == 1 ]]; then
-               generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+               generate_html_file "$LOG_FILE" "$CONTENT_AVAILABLE"
             fi
             reset_module_count
           fi
@@ -304,7 +304,7 @@ main()
               CONTENT_AVAILABLE=0
               $MODULE_MAIN
               if [[ $HTML == 1 ]]; then
-                 generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+                 generate_html_file "$LOG_FILE" "$CONTENT_AVAILABLE"
               fi
             fi
           fi
@@ -326,7 +326,7 @@ main()
       CONTENT_AVAILABLE=1
       $MODULE_MAIN
       if [[ $HTML == 1 ]]; then
-           generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+           generate_html_file "$LOG_FILE" "$CONTENT_AVAILABLE"
       fi
       reset_module_count
     fi

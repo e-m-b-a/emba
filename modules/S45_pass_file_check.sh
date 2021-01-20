@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export CONTENT_AVAILABLE
 
 S45_pass_file_check()
 {
@@ -31,6 +31,7 @@ S45_pass_file_check()
   elif [[ -n "$PASSWD_STUFF" ]] ; then
     local PASSWD_COUNT
     PASSWD_COUNT=$(echo "$PASSWD_STUFF" | wc -w)
+    CONTENT_AVAILABLE=1
 
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
