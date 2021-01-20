@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check for interesting executables and possible post exploitation
 #               Access:
@@ -21,7 +20,7 @@
 
 S95_interesting_binaries_check()
 {
-  module_log_init "s95_check_interesting_binaries"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check interesting binaries"
 
   interesting_binaries
@@ -35,6 +34,7 @@ interesting_binaries()
   local INT_BIN
   INT_BIN="$(config_find "$CONFIG_DIR""/interesting_binaries.cfg" "")"
   local COUNT=0
+  INT_COUNT=0
 
   if [[ "$INT_BIN" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$INT_BIN" ]] ; then
@@ -45,6 +45,7 @@ interesting_binaries()
           COUNT=1
         fi
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        ((INT_COUNT++))
       fi
     done
   fi
@@ -62,6 +63,7 @@ post_exploitation()
   local INT_BIN_PE
   INT_BIN_PE="$(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg" "")"
   local COUNT=0
+  POST_COUNT=0
 
   if [[ "$INT_BIN_PE" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$INT_BIN_PE" ]] ; then
@@ -72,6 +74,7 @@ post_exploitation()
           COUNT=1
         fi
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        ((POST_COUNT++))
       fi
     done
   fi

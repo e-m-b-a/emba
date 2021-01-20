@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check directories/files, used for web, for section to inject commands
 #               Access:
@@ -21,7 +20,7 @@
 
 S100_command_inj_check()
 {
-  module_log_init "s100_check_command_inj"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search areas for command injections"
 
   local CMD_INJ_DIRS

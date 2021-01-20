@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check shell scripts with shellchecker
 #               Access:
@@ -21,19 +20,24 @@
 
 S20_shell_check()
 {
-  module_log_init "s20_check_scripts"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check scripts (shellchecker)"
 
+  S20_SHELL_VULNS=0
+  S20_SCRIPTS=0
   if [[ $SHELLCHECK -eq 1 ]] ; then
+    CONTENT_AVAILABLE=1
     if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
       mkdir "$LOG_DIR""/shellchecker/" 2> /dev/null
     fi
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q "shell script" ) ; then
+        ((S20_SCRIPTS++))
         NAME=$(basename "$LINE" 2> /dev/null)
         SHELL_LOG="$LOG_DIR""/shellchecker/shellchecker_""$NAME"".txt"
         shellcheck "$LINE" > "$SHELL_LOG" 2> /dev/null
         VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
+        (( S20_SHELL_VULNS="$S20_SHELL_VULNS"+"$VULNS" ))
         if [[ "$VULNS" -ne 0 ]] ; then
           #check if this is common linux file:
           local COMMON_FILES_FOUND
@@ -54,7 +58,8 @@ S20_shell_check()
         fi
       fi
     done
-    CONTENT_AVAILABLE=1
+    print_output ""
+    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$S20_SCRIPTS"" scripts.""$NC"""
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi

@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check user authentication:
 #                 Users with UID 0, non unique accounts, non unique group id, non unique group name, user accounts,
@@ -24,9 +23,9 @@
 # This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication
 
 S50_authentication_check() {
-  module_log_init "s50_check_user_group_and_authentication"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check users, groups and authentication"
-  
+
   user_zero
   non_unique_acc
   non_unique_group_id
@@ -238,6 +237,7 @@ check_sudoers() {
   if [[ "$SUDOERS_FILES" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
   elif ! [[ "$SUDOERS_FILES" == "" ]] ; then
+    CONTENT_AVAILABLE=1
     SUDOERS_FILES_COUNT="$(echo "$SUDOERS_FILES" | wc -w)"
 
     if [[ "$SUDOERS_FILES_COUNT" != "0" ]] ; then
@@ -247,7 +247,6 @@ check_sudoers() {
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
       done
     fi
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No sudoers files found"
   fi
@@ -279,6 +278,7 @@ check_owner_perm_sudo_config() {
           if [[ "$FIND2" = "0:0" ]] ; then
             print_output "[-] ""$(print_path "$SUDOERS_D")"" ownership OK"
           else
+            CONTENT_AVAILABLE=1
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
           fi
           ;;
@@ -287,6 +287,7 @@ check_owner_perm_sudo_config() {
           if [[ "$FIND2" = "0:0" ]] ; then
             print_output "[-] ""$(print_path "$SUDOERS_D")"" ownership OK"
           else
+            CONTENT_AVAILABLE=1
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
           fi
           ;;
@@ -304,8 +305,8 @@ check_owner_perm_sudo_config() {
         if [[ "$FIND4" = "0:0" ]] ; then
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
-          print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
           CONTENT_AVAILABLE=1
+          print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
         fi
         ;;
       *)
@@ -313,8 +314,8 @@ check_owner_perm_sudo_config() {
         if [[ "$FIND4" = "0:0" ]] ; then
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
-          print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
           CONTENT_AVAILABLE=1
+          print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
         fi
         ;;
       esac
@@ -363,24 +364,24 @@ search_pam_testing_libs() {
 
     # Cracklib
     if [[ $FOUND_CRACKLIB -eq 1 ]] ; then
-      print_output "[+] pam_cracklib.so found"
       CONTENT_AVAILABLE=1
+      print_output "[+] pam_cracklib.so found"
     else
       print_output "[-] pam_cracklib.so not found"
     fi
 
     # Password quality control
     if [[ $FOUND_PASSWDQC -eq 1 ]] ; then
-      print_output "[+] pam_passwdqc.so found"
       CONTENT_AVAILABLE=1
+      print_output "[+] pam_passwdqc.so found"
     else
       print_output "[-] pam_passwdqc.so not found"
     fi
 
     # pwquality module
     if [[ $FOUND_PWQUALITY -eq 1 ]] ; then
-      print_output "[+] pam_pwquality.so found"
       CONTENT_AVAILABLE=1
+      print_output "[+] pam_pwquality.so found"
     else
       print_output "[-] pam_pwquality.so not found"
     fi
@@ -412,8 +413,8 @@ scan_pam_conf() {
       if [[ -z "$FIND" ]] ; then
         print_output "[-] File has no configuration options defined (empty, or only filled with comments and empty lines)"
       else
-        print_output "[+] Found one or more configuration lines"
         CONTENT_AVAILABLE=1
+        print_output "[+] Found one or more configuration lines"
         local LINE
         LINE=$(echo "$FIND" | ${SEDBINARY} 's/:space:/ /g')
         print_output "$(indent "$(orange "$LINE")")"
@@ -451,9 +452,9 @@ search_pam_configs() {
           local FIND2
           FIND2=$(grep "^auth.*ldap" "$FILE")
           if [[ -n "$FIND2" ]] ; then
+            CONTENT_AVAILABLE=1
             print_output "[+] LDAP module present"
             print_output "$(indent "$(orange "$FIND2")")"
-            CONTENT_AVAILABLE=1
           else
             print_output "[-] LDAP module not found"
           fi

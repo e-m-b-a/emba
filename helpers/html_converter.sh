@@ -33,13 +33,13 @@ build_index_file(){
     echo "Execute f50"
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
-       INDEX_CONTENT_ARR=("${STRING_LIST[@]}")
+       INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
     fi
  elif [[ ${FILENAME%.txt} == "f19"* ]]; then
     echo "Execute f19"
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
-       INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
+       INDEX_CONTENT_ARR=("${STRING_LIST[@]}")
     fi
  fi
  

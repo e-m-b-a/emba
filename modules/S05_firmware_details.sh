@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check for information (release/version) about firmware and dump directory tree into log
 #               Access:
@@ -21,12 +20,12 @@
 
 S05_firmware_details()
 {
-  module_log_init "s05_firmware_and_testing_details"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Firmware and testing details"
 
   print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" directories detected."
-  
-  if [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l)" > 0 ]] || [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)" > 0 ]];then
+
+ if [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l)" > 0 ]] || [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)" > 0 ]];then
      CONTENT_AVAILABLE=1
   fi
 
@@ -59,6 +58,7 @@ release_info()
 
   if [[ "$RELEASE_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$RELEASE_STUFF" ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Specific release/version information of target:"
     for R_INFO in $RELEASE_STUFF ; do
       if [[ -f "$R_INFO" ]] ; then
@@ -72,8 +72,8 @@ release_info()
         print_output "\\n""$(magenta "Directory:")"" ""$( print_path "$R_INFO")""\\n"
       fi
     done
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No release/version information of target found"
   fi
+
 }

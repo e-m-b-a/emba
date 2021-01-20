@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Search files with setuid, setgid, world writeable flags and weak shadow files
 #               Access:
@@ -20,7 +19,7 @@
 
 
 S40_weak_perm_check() {
-  module_log_init "s40_search_files_with_weak_permissions"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search files with weak permissions"
 
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
@@ -40,66 +39,66 @@ S40_weak_perm_check() {
   readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" \! -uid 0 -type f 2>/dev/null)
 
   if [[ ${#SETUID_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#SETUID_FILES[@]}"" setuid files:"
     for LINE in "${SETUID_FILES[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    CONTENT_AVAILABLE=1
     echo
   else
     print_output "[-] No setuid files found"
   fi
 
   if [[ ${#SETGID_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#SETGID_FILES[@]}"" setgid files:"
     for LINE in "${SETGID_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    CONTENT_AVAILABLE=1
     echo
   else
     print_output "[-] No setgid files found"
   fi
 
   if [[ ${#WORLD_WRITE_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#WORLD_WRITE_FILES[@]}"" world writeable files:"
     for LINE in "${WORLD_WRITE_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    CONTENT_AVAILABLE=1
     echo
   else
     print_output "[-] No world writable files found"
   fi
 
   if [[ ${#WEAK_SHADOW_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#WEAK_SHADOW_FILES[@]}"" weak shadow files:"
     for LINE in "${WEAK_SHADOW_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    CONTENT_AVAILABLE=1
     echo
   else
     print_output "[-] No shadow files found"
   fi
 
   if [[ ${#WEAK_RC_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#WEAK_RC_FILES[@]}"" rc.d files not belonging to root:"
     for LINE in "${WEAK_RC_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    CONTENT_AVAILABLE=1
     echo
   else
     print_output "[-] No rc.d files with weak permissions found"
   fi
 
   if [[ ${#WEAK_INIT_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#WEAK_INIT_FILES[@]}"" init.d files not belonging to root:"
     for LINE in "${WEAK_INIT_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    CONTENT_AVAILABLE=1
     echo
   else
     print_output "[-] No init.d files with weak permissions found"

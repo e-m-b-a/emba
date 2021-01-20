@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check for files which could contain passwords
 #               Access:
@@ -21,16 +20,18 @@
 
 S45_pass_file_check()
 {
-  module_log_init "s45_search_password_files"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search password files"
 
   local PASSWD_STUFF
   PASSWD_STUFF="$(config_find "$CONFIG_DIR""/pass_files.cfg" "")"
+  PASS_FILES_FOUND=0
 
   if [[ "$PASSWD_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$PASSWD_STUFF" ]] ; then
     local PASSWD_COUNT
     PASSWD_COUNT=$(echo "$PASSWD_STUFF" | wc -w)
+    CONTENT_AVAILABLE=1
 
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
@@ -71,6 +72,8 @@ S45_pass_file_check()
 
 	        if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_PASSWD" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_HASH" | wc -w)" -gt 0 ]] ; then
 	          print_output "$(indent "$(green "Found passwords or weak configuration:")")"
+            PASS_FILES_FOUND=1
+            export PASS_FILES_FOUND
             if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] ; then
               print_output "$(indent "$(indent "$(orange "$POSSIBLE_SHADOWS")")")"
             fi
@@ -93,7 +96,6 @@ S45_pass_file_check()
         print_output "$(indent "$(orange "$WHO_HAS_BEEN_SUDO")")"
       fi
     fi
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No password files found"
   fi

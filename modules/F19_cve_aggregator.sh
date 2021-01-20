@@ -81,6 +81,8 @@ prepare_version_data() {
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
     VERSION_lower="${VERSION_lower//(gdb)/}"
+    #gpg (GnuPG) 2.2.17
+    VERSION_lower="${VERSION_lower//gpg\ (gnupg)/gnupg}"
     #D-Bus Message Bus Daemon 1.6.8
     VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/:dbus\ }"
     #jQuery JavaScript Library v1.4.3
@@ -92,6 +94,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ version\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//xl2tpd-/}"
     VERSION_lower="${VERSION_lower//goahead\ \ /goahead\ }"
+    # Compiled\ with\ U-Boot -> u-boot
+    VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
+    #tcpdump.4.6.2 version
+    VERSION_lower="${VERSION_lower//tcpdump\./tcpdump\ }"
     #ntpd\ -\ standard\ NTP\ query\ program\ -\ Ver\.
     VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
@@ -100,11 +106,19 @@ prepare_version_data() {
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
+    #nettle-hash\ (nettle\ -> nettle
+    VERSION_lower="${VERSION_lower//nettle-hash\ ./}"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
+    #pinentry-curses (pinentry)
+    VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
+    #tar (GNU tar) 1.23
+    VERSION_lower="${VERSION_lower//tar\ (gnu\ tar)/gnu:tar}"
+    # lsusb (usbutils)
+    VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
     #Wireless-Tools version 29
     VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
     VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"
@@ -161,9 +175,15 @@ prepare_version_data() {
     # GNU C Library (AuDis-V04.56) stable release version 2.23
     #VERSION_lower="${VERSION_lower//gnu\ c\ library.*stable\ release/gnu:libc}"
     # shellcheck disable=SC2001
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/gnu:libc/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/glibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
+    #OpenSSH_7.8p1 -> openssh 7.8:p1 
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/openssh_([0-9])\.([0-9])([a-z][0-9])/openssh\ \1\.\2:\3/g')"
+    #socat 2.0.0-b4 -> socat 2.0.0:b4 
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/socat\ ([0-9]\.[0-9]\.[0-9])-([a-z][0-9])/socat\ \1:\2/g')"
+    # ntpd 4.2.8p13 -> ntp 4.2.8:p13
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpd\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9][0-9])/ntp\ \1:\2/g')"
     #Roaring Penguin PPPoE Version
     VERSION_lower="${VERSION_lower//roaring\ penguin\ pppoe/roaring_penguin:pppoe}"
     #upnp controlpoint 1.0
@@ -334,12 +354,12 @@ generate_cve_details() {
       FORMAT_LOG=0
       if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
         if [[ "$EXPLOITS" -gt 0 ]]; then
-          printf "${MAGENTA}[+] Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+          printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         else
-          printf "${ORANGE}[+] Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+          printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         fi
       else
-        printf "${GREEN}[+] Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     fi

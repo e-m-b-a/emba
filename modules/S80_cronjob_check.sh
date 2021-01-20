@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check for cronjobs
 #               Access:
@@ -21,7 +20,7 @@
 
 S80_cronjob_check()
 {
-  module_log_init "s80_check_cronjob"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check cronjobs"
 
   local RESULTS

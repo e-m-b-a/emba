@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Scan for config files and check fstab
 #               Access:
@@ -21,7 +20,7 @@
 
 S65_config_file_check()
 {
-  module_log_init "s65_scan_config_file"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search/scan config files"
 
   scan_config
@@ -37,13 +36,13 @@ scan_config()
 
   if [[ "${CONF_FILES_ARR[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#CONF_FILES_ARR[@]} -ne 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" configuration files:"
     for LINE in "${CONF_FILES_ARR[@]}" ; do
       if [[ -f "$LINE" ]] ; then
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       fi
     done
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No configuration files found"
   fi
@@ -61,23 +60,23 @@ check_fstab()
   fi
 
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#FSTAB_USER_FILES[@]}"" fstab files with user details included:"
     for LINE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
     echo
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No fstab files with user details found"
   fi
 
   if [[ ${#FSTAB_PASS_FILES[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#FSTAB_PASS_FILES[@]}"" fstab files with password credentials included:"
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
     echo
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No fstab files with passwords found"
   fi

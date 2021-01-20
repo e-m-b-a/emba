@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check resolv config, iptables and snmp
 #               Access:
@@ -21,7 +20,7 @@
 
 S75_network_check()
 {
-  module_log_init "s75_search_network_configs"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Search network configs"
 
   check_resolv
@@ -115,13 +114,13 @@ check_network_configs()
 
   if [[ "${NETWORK_CONFS[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#NETWORK_CONFS[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""${#NETWORK_CONFS[@]}"" possible network configs:"
     for LINE in "${NETWORK_CONFS[@]}" ; do
       #if [[ -f "$LINE" ]] ; then
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       #fi
     done
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No network configs found"
   fi

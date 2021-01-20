@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haböck
 
 # Description:  Check kernel configuration file, look for vulnerabilities with linux-exploit-suggester, analyze kernel
 #               modules and check modprobe directory for loadable kernel modules
@@ -22,7 +21,7 @@
 
 S25_kernel_check()
 {
-  module_log_init "s25_check_kernel"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check kernel"
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
@@ -36,11 +35,11 @@ S25_kernel_check()
         print_output "$(indent "$LINE")"
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
+        CONTENT_AVAILABLE=1
         print_output "Kernel description:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
         done
-        CONTENT_AVAILABLE=1
       fi
       print_output "[-] No check for kernel configuration"
 
@@ -52,9 +51,9 @@ S25_kernel_check()
     fi
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]]  ; then
+    CONTENT_AVAILABLE=1
     print_output "[*] Check kernel configuration ""$(print_path "$KERNEL_CONFIG" )"" via checksec.sh"
     print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
-    CONTENT_AVAILABLE=1
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 1 ]] ; then
     mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
@@ -69,7 +68,6 @@ S25_kernel_check()
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
         done
-        CONTENT_AVAILABLE=1
       fi
       print_output "[*] Check kernel configuration ""$(print_path "$KERNEL_CONFIG" )"" via checksec.sh"
       print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
@@ -77,9 +75,18 @@ S25_kernel_check()
       get_kernel_vulns
       #analyze_kernel_module
       check_modprobe
+
     else
       print_output "[-] No kernel found"
     fi
+  fi
+
+  # we log the found kernel versions without formatting -> used later in the aggregator
+  if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
+    LOG_FILE="$( get_log_file )"
+    for LINE in "${KV_C_ARR[@]}" ; do
+      echo "[*] Statistics:$LINE" >> "$LOG_FILE"
+    done
   fi
 }
 
@@ -93,6 +100,7 @@ get_kernel_vulns()
   done
 
   if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"
     print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
     # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
@@ -101,6 +109,7 @@ get_kernel_vulns()
       local KV
       KV=$(echo "$VER" | tr "-" " ")
       KV=$(echo "$KV" | tr "+" " ")
+      KV=$(echo "$KV" | tr "_" " ")
       KV=$(echo "$KV" | cut -d\  -f1)
 
       while echo "$KV" | grep -q '[a-zA-Z]'; do
@@ -112,7 +121,6 @@ get_kernel_vulns()
     for V in "${KV_C_ARR[@]}" ; do
       print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" -f -d -k "$V")"
     done
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] linux-exploit-suggester.sh is not installed"
     print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
@@ -123,14 +131,13 @@ analyze_kernel_module()
 {
   sub_module_title "Analyze kernel modules"
 
-  local MOD_DATA
-  MOD_DATA="$(find "$FIRMWARE_PATH" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
-  sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' 2> /dev/null)"
-  local MOD_COUNT
-  MOD_COUNT=$(echo "$MOD_DATA" | wc -l)
-  print_output "[*] Found ""$MOD_COUNT"" kernel modules"
+  KMOD_BAD=0
+  mapfile -t MOD_DATA < <(find "$FIRMWARE_PATH" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
+  sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' 2> /dev/null)
 
-  for LINE in $MOD_DATA ; do
+  print_output "[*] Found ""${#MOD_DATA[@]}"" kernel modules"
+
+  for LINE in "${MOD_DATA[@]}" ; do
     local M_PATH
     M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
     local LICENSE
@@ -140,12 +147,13 @@ analyze_kernel_module()
         # kernel module is GPL/BSD license then not stripped is fine
         print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
       elif ! [[ $LICENSE =~ "License:" ]] ; then
-        print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
         CONTENT_AVAILABLE=1
+        print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
       else
+        CONTENT_AVAILABLE=1
         # kernel module is NOT GPL license then not stripped is bad!
         print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
-        CONTENT_AVAILABLE=1
+        KMOD_BAD=$((KMOD_BAD+1))
       fi
     else
       print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
@@ -182,7 +190,9 @@ check_modprobe()
   if [[ $MP_CHECK -eq 0 ]] ; then
     print_output "[-] No modprobe.d directory found"
   else
-    CONTENT_AVAILABLE=1
+        CONTENT_AVAILABLE=1
   fi
+
+
 }
 

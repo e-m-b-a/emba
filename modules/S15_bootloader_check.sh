@@ -2,7 +2,7 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haböck
+# Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Dump device tree blob into log, check for various bootloaders, boot files and valid runlevel
 #               Access:
@@ -22,7 +22,7 @@
 
 S15_bootloader_check()
 {
-  module_log_init "s15_check_bootloader_and_system_startup"
+  module_log_init "${FUNCNAME[0]}"
   module_title "Check bootloader and system startup"
 
   check_dtb
@@ -34,22 +34,18 @@ S15_bootloader_check()
 check_dtb()
 {
   sub_module_title "Scan for device tree blobs"
+
   readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.dtb" )
 
   if [[ ${#DTB_ARR[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     print_output "[+] Device tree blobs found - output of fdtdump into log, could take a moment"
     for DTB_FILE in "${DTB_ARR[@]}" ; do
       print_output "$(indent "$DTB_FILE")"
       if [[ $DTBDUMP -eq 1 ]] ; then
-        local LOG_FILE_LOC
-        LOG_FILE_LOC="$LOG_DIR""/dtb_dump/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt"
-        LOG_FILE_O="$LOG_FILE"
-        LOG_FILE="$LOG_FILE_LOC"
-        write_log "$(fdtdump "$DTB_FILE" 2> /dev/null)"
-        LOG_FILE="$LOG_FILE_O"
+        write_log "$(fdtdump "$DTB_FILE" 2> /dev/null)" "$LOG_DIR""/dtb_dump/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt" "g"
       fi
     done
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No device tree blobs found"
   fi
@@ -61,14 +57,14 @@ check_bootloader()
 
   local BOOTLOADER
   local CHECK
+
   # Syslinux
   CHECK=0
   SYSLINUX_PATHS="$(mod_path "$FIRMWARE_PATH""/boot/syslinux/syslinux.cfg")"
   for SYSLINUX_FILE in $SYSLINUX_PATHS ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
       CHECK=1
-      CONTENT_AVAILABLE
-      =1
+      CONTENT_AVAILABLE=1
       print_output "[+] Found Syslinux config: ""$(print_path "$SYSLINUX_FILE")"
       BOOTLOADER="Syslinux"
     fi
@@ -83,6 +79,7 @@ check_bootloader()
   for GRUB_FILE in $GRUB_PATHS ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
+      CONTENT_AVAILABLE=1
       print_output "[+] Found Grub config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub"
@@ -175,8 +172,6 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No FreeBSD or DragonFly bootloader files found"
-  else
-    CONTENT_AVAILABLE=1
   fi
 
   # LILO
@@ -185,6 +180,7 @@ check_bootloader()
   for LILO_FILE in $LILO_PATH ; do
   if [[ -f "$LILO_FILE" ]] ; then
     CHECK=1
+    CONTENT_AVAILABLE=1
     print_output "[+] Found lilo.conf: ""$(print_path "$LILO_FILE")"" (LILO)"
     FIND=$(grep 'password[[:space:]]?=' "$LILO_FILE" | grep -v "^#")
       if [[ -z "${FIND}" ]] ; then
@@ -195,8 +191,6 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No LILO configuration file found"
-  else
-    CONTENT_AVAILABLE=1
   fi
 
   # SILO
@@ -205,14 +199,13 @@ check_bootloader()
   for SILO_FILE in $SILO_PATH ; do
   if [[ -f "$SILO_FILE" ]] ; then
     CHECK=1
+    CONTENT_AVAILABLE=1
     print_output "[+] Found silo.conf: ""$(print_path "$SILO_FILE")"" (SILO)"
     BOOTLOADER="SILO"
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No SILO configuration file found"
-  else
-    CONTENT_AVAILABLE=1
   fi
 
   # YABOOT
@@ -221,14 +214,13 @@ check_bootloader()
   for YABOOT_FILE in $YABOOT_PATH ; do
     if [[ -f "$YABOOT_FILE" ]] ; then
       CHECK=1
+      CONTENT_AVAILABLE=1
       print_output "[+] Found yaboot.conf: ""$(print_path "$YABOOT_FILE")"" (YABOOT)"
       BOOTLOADER="Yaboot"
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No YABOOT configuration file found"
-  else
-    CONTENT_AVAILABLE=1
   fi
 
   # OpenBSD
@@ -276,7 +268,7 @@ check_bootloader()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No OpenBSD configuration file found"
-  else
+ else
     CONTENT_AVAILABLE=1
   fi
 
@@ -298,6 +290,7 @@ find_boot_files()
   elif [[ -n "$BOOT_FILES" ]] ; then
     local KEY_COUNT
     KEY_COUNT="$(echo "$BOOT_FILES" | wc -w)"
+    CONTENT_AVAILABLE=1
     print_output "[+] Found ""$KEY_COUNT"" startup files:"
     for LINE in $BOOT_FILES ; do
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
@@ -305,7 +298,6 @@ find_boot_files()
         INITTAB_V=("${INITTAB_V[@]}" "$LINE")
       fi
     done
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No startup files found"
   fi
@@ -314,6 +306,7 @@ find_boot_files()
 find_runlevel()
 {
   sub_module_title "Check default run level"
+
   local SYSTEMD_PATH
   SYSTEMD_PATH="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/systemd")"
   for SYSTEMD_P in $SYSTEMD_PATH ; do
@@ -323,9 +316,9 @@ find_runlevel()
       if [[ -L "$DEFAULT_TARGET_PATH" ]] ; then
         FIND="$( read -r "$DEFAULT_TARGET_PATH"'' | grep "runlevel")"
         if [[ -z "$FIND" ]] ; then
+          CONTENT_AVAILABLE=1
           print_output "[+] systemd run level information:"
           print_output "$(indent "$FIND")"
-          CONTENT_AVAILABLE=1
         else
           print_output "[-] No run level in ""$(print_path "$DEFAULT_TARGET_PATH")"" found"
         fi
@@ -336,6 +329,7 @@ find_runlevel()
   done
 
   if [[ ${#INITTAB_V[@]} -gt 0 ]] ; then
+    CONTENT_AVAILABLE=1
     for INIT_TAB_F in "${INITTAB_V[@]}" ; do
       print_output "[*] Check runlevel in ""$(print_path "$INIT_TAB_F")"
       FIND=$(awk -F: '/^id/ { print $2; }' "$INIT_TAB_F" | head -n 1)
@@ -345,7 +339,6 @@ find_runlevel()
         print_output "[+] Found default run level: ""$(orange "$FIND")"
       fi
     done
-    CONTENT_AVAILABLE=1
   else
     print_output "[-] No default run level found"
   fi
