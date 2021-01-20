@@ -334,20 +334,19 @@ case ${ANSWER:0:1} in
 esac
 
 # aha for html generation - future extension of emba
-mkdir html-files
-echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
-if ! [[ -f "external/aha" ]] ; then
-  apt-get install make
-  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
-  unzip ./external/aha-master.zip -d ./external
-  rm external/aha-master.zip
-  cd ./external/aha-master || exit 1
-  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
-  make
-  cd ../.. || exit 1
-  mv "external/aha-master/aha" "external/aha"
-  rm -R external/aha-master
-else
-  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
-fi
+#echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
+#if ! [[ -f "external/aha" ]] ; then
+#  apt-get install make
+#  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
+#  unzip ./external/aha-master.zip -d ./external
+#  rm external/aha-master.zip
+#  cd ./external/aha-master || exit 1
+#  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
+#  make
+#  cd ../.. || exit 1
+#  mv "external/aha-master/aha" "external/aha"
+#  rm -R external/aha-master
+#else
+#  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
+#fi
 

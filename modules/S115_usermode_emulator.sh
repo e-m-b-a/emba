@@ -79,7 +79,6 @@ S115_usermode_emulator() {
     running_jobs
     filesystem_fixes
     version_detection
-    CONTENT_AVAILABLE=1
 
   else
     echo

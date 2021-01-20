@@ -41,7 +41,6 @@ S110_yara_check()
         if [[ -n "$S_OUTPUT" ]] ; then
           print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
           CHECK=1
-          CONTENT_AVAILABLE=1
           (( YARA_CNT++ ))
         fi
       fi

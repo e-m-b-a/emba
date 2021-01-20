@@ -46,7 +46,6 @@ S09_firmware_base_version_check() {
     for VERSION_LINE in "${VERSIONS_DETECTED[@]}"; do
       if [[ -n $VERSION_LINE ]]; then
         if [ "$VERSION_LINE" != "$VERS_LINE_OLD" ]; then
-          CONTENT_AVAILABLE=1
           VERS_LINE_OLD="$VERSION_LINE"
   
           # we do not deal with output formatting the usual way -> it destroys our current aggregator
