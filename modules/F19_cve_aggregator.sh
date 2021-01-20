@@ -57,7 +57,6 @@ F19_cve_aggregator() {
     # Mongo DB is running on Port 27017. If not we can't check CVEs
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
       generate_cve_details
-      CONTENT_AVAILABLE=1
     else
       print_output "[-] MongoDB not running on port 27017."
       print_output "[-] CVE checks not possible!"

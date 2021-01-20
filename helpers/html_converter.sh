@@ -18,24 +18,25 @@ build_index_file(){
  FILE=$1
  FILENAME=$(basename "$FILE")
  local HTML_FILE
- local SED_HTML_STYLE_PATH
  HTML_FILE="$(basename "${FILE%.txt}"".html")"
  COULORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
  if [[ -z "$HTML_HEADLINE" ]]; then
     HTML_HEADLINE="EMBA Report Manager"
  fi
- 
+ echo "Filename: $FILENAME"
  if [[ ${FILENAME%.txt} == "s05"* ]] || [[ ${FILENAME%.txt} == "s25"* ]]; then
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
        INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
     fi
  elif [[ ${FILENAME%.txt} == "f50"* ]]; then
+    echo "Execute f50"
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
        INDEX_CONTENT_ARR=("${STRING_LIST[@]}")
     fi
  elif [[ ${FILENAME%.txt} == "f19"* ]]; then
+    echo "Execute f19"
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
        INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
@@ -112,15 +113,16 @@ build_index_file(){
  sed -i 's/&gt;/>/g' "$HTML_PATH""/index.html"
  sed -i 's/<pre>//g' "$HTML_PATH""/index.html"
  sed -i 's/<\/pre>//g' "$HTML_PATH""/index.html"
- ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< $CONFIG_DIR)
+ #ESCAPED_CONFIG_DIR=$(echo $CONFIG_DIR | sed 's|/|\\/|g'}
+ ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< "$CONFIG_DIR")
  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/index.html"
 }
 
 
 build_collection_file(){
  FILE=$1
+ local FILENAME
  FILENAME=$(basename "$FILE")
- local SED_HTML_STYLE_PATH
  if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
     readarray -t STRING_LIST <"$FILE"
     NOT_FINDINGS_CONTENT_ARR+=("${STRING_LIST[@]}")
@@ -176,23 +178,22 @@ build_collection_file(){
  sed -i 's/&gt;/>/g' "$HTML_PATH""/collection.html"
  sed -i 's/<pre>//g' "$HTML_PATH""/collection.html"
  sed -i 's/<\/pre>//g' "$HTML_PATH""/collection.html"
- ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< $CONFIG_DIR)
+ #ESCAPED_CONFIG_DIR=${CONFIG_DIR sed 's|/|\\/|g'}
+ ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< "$CONFIG_DIR")
  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/collection.html"
 }
 
 build_report_files(){
  
- local FILE_CONTENT
  local SUB_MENU_LIST
  local FILE=$1
- local FILENAME=$(basename "$FILE")
+ local FILENAME
  local HTML_FILE
  local LINES
- local SED_HTML_STYLE_PATH
  local REPORT_ARRAY
+ FILENAME=$(basename "$FILE")
  HTML_FILE="$(basename "${FILE%.txt}".html)"
  LINES="$(cat "$FILE" | wc -l)"
- LINE_COUNTER=1
  HEADLINE=$(head -n 1 "$FILE" | tail -n 1 | cut -c27-)
  
  if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
@@ -205,12 +206,12 @@ build_report_files(){
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
    for FILE_LINE in "${REPORT_ARRAY[@]}"; do
         if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
- 	   COULORLESS_FILE_LINE=$(echo $FILE_LINE | tail -n 1 | cut -c27-)
+ 	   COULORLESS_FILE_LINE=$(echo "$FILE_LINE" | tail -n 1 | cut -c27-)
  	   COULORLESS_FILE_LINE=${COULORLESS_FILE_LINE%[0m}		
  	   echo "<h2 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
  	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COULORLESS_FILE_LINE// /_}\">$COULORLESS_FILE_LINE</a></li>"
  	elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
- 	   COULORLESS_FILE_LINE=$(echo $FILE_LINE | tail -n 1 | cut -c23-)
+ 	   COULORLESS_FILE_LINE=$(echo "$FILE_LINE" | tail -n 1 | cut -c23-)
  	   COULORLESS_FILE_LINE=${COULORLESS_FILE_LINE%[0m}	
 	   echo "<h4 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
 	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COULORLESS_FILE_LINE// /_}\">$COULORLESS_FILE_LINE</a></li>"
@@ -225,8 +226,10 @@ build_report_files(){
   sed -i 's/&lt;/</g' "$HTML_PATH""/$HTML_FILE"
   sed -i 's/&gt;/>/g' "$HTML_PATH""/$HTML_FILE"
   sed -i 's/&quot;/"/g' "$HTML_PATH""/$HTML_FILE"
-  ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< $CONFIG_DIR)
-  ESCAPED_SUB_MENU_LIST=$(sed 's|/|\\/|g' <<< $SUB_MENU_LIST)
+  #ESCAPED_CONFIG_DIR=${CONFIG_DIR sed 's|/|\\/|g'}
+  ESCAPED_CONFIG_DIR=$(sed 's|/|\\/|g' <<< "$CONFIG_DIR")
+  #ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST sed 's|/|\\/|g'}
+  ESCAPED_SUB_MENU_LIST=$(sed 's|/|\\/|g' <<< "$SUB_MENU_LIST")
   sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$HTML_PATH""/$HTML_FILE"
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/$HTML_FILE"
 }

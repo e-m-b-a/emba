@@ -336,6 +336,7 @@ esac
 echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
 if ! [[ -f "external/aha" ]] ; then
   apt-get install make
+  mkdir html-files
   wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
   unzip ./external/aha-master.zip -d ./external
   rm external/aha-master.zip

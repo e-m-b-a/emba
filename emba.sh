@@ -327,7 +327,7 @@ main()
     if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
-      CONTENT_AVAILABLE=0
+      CONTENT_AVAILABLE=1
       $MODULE_MAIN
       if [[ $HTML == 1 ]]; then
            generate_html_file $LOG_FILE $CONTENT_AVAILABLE
