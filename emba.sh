@@ -11,6 +11,7 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributors: Stefan Haboeck
 
 # Description:  Main script for load all necessary files and call main function of modules
 
@@ -66,6 +67,8 @@ main()
   export ONLY_DEP=0             # test only dependency
   export FORCE=0
   export LOG_GREP=0
+  export HTML=0
+  export CONTENT_AVAILABLE
   export QEMULATION=0
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
@@ -78,6 +81,8 @@ main()
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
   export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
+  export HTML_PATH="./html-files"
+  export AHA_PATH="$EXT_DIR""/aha"
 
   echo
 
@@ -94,7 +99,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cde:Ef:Fghk:l:m:sz OPT ; do
+  while getopts a:A:cde:Ef:Fghk:l:mW:sz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -143,6 +148,12 @@ main()
       s)
         export SHORT_PATH=1
         ;;
+      W)
+        export HTML=1
+        ARG_ARRAY=($OPTARG)
+        export HTML_PATH="${ARG_ARRAY[0]}"
+        export HTML_HEADLINE="${ARG_ARRAY[1]}"
+        ;;
       z)
         export FORMAT_LOG=1
         ;;
@@ -155,6 +166,8 @@ main()
   done
 
   LOG_DIR="$(abs_path "$LOG_DIR")"
+  CONFIG_DIR="$(abs_path "$CONFIG_DIR")"
+  HTML_PATH="$(abs_path "$HTML_PATH")"
 
   if [[ $KERNEL -eq 1 ]] ; then
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
@@ -272,7 +285,11 @@ main()
           if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
+            CONTENT_AVAILABLE=0
             $MODULE_MAIN
+            if [[ $HTML == 1 ]]; then
+               generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+            fi
             reset_module_count
           fi
         done
@@ -284,7 +301,11 @@ main()
             if ( file "$MODULE" | grep -q "shell script" ) ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
+              CONTENT_AVAILABLE=0
               $MODULE_MAIN
+              if [[ $HTML == 1 ]]; then
+                 generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+              fi
             fi
           fi
         done
@@ -302,7 +323,11 @@ main()
     if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
+      CONTENT_AVAILABLE=1
       $MODULE_MAIN
+      if [[ $HTML == 1 ]]; then
+           generate_html_file $LOG_FILE $CONTENT_AVAILABLE
+      fi
       reset_module_count
     fi
   done
