@@ -332,6 +332,15 @@ dependency_check()
   else
     echo -e "$GREEN""ok""$NC"
   fi
+  
+  print_output "    docker-compose - \\c" "no_log"
+  if ! command -v docker-compose > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install docker-compose to use emba in docker container""$NC"
+    echo -e "$ORANGE""    install docker-compose via apt-get install docker-compose""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
 
   print_output "    vulnerability database - \\c" "no_log"
   if ! [[ -f "$EXT_DIR""/allitems.csv" ]] ; then
