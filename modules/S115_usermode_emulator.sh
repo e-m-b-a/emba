@@ -216,13 +216,16 @@ copy_firmware() {
 }
 
 running_jobs() {
-  CJOBS=$(pgrep -a "$EMULATOR")
-  if [[ -n "$CJOBS" ]] ; then
-    echo
-    print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)"
-    print_output "$(indent "$CJOBS")""\\n"
-  else
-    CJOBS="NA"
+  # if no emulation at all was possible the $EMULATOR variable is not defined
+  if [[ -n "$EMULATOR" ]]; then
+    CJOBS=$(pgrep -a "$EMULATOR")
+    if [[ -n "$CJOBS" ]] ; then
+      echo
+      print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)"
+      print_output "$(indent "$CJOBS")""\\n"
+    else
+      CJOBS="NA"
+    fi
   fi
 }
 
@@ -230,12 +233,15 @@ cleanup() {
   # reset the terminal - after all the uncontrolled emulation it is typically broken!
   reset
 
-  print_output "[*] Terminating qemu processes - check it with ps"
-  mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
-  for PID in "${CJOBS[@]}"; do
-    print_output "[*] Terminating process ""$PID"
-    kill "$PID" 2> /dev/null
-  done
+  # if no emulation at all was possible the $EMULATOR variable is not defined
+  if [[ -n "$EMULATOR" ]]; then
+    print_output "[*] Terminating qemu processes - check it with ps"
+    mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
+    for PID in "${CJOBS[@]}"; do
+      print_output "[*] Terminating process ""$PID"
+      kill "$PID" 2> /dev/null
+    done
+  fi
 
   CJOBS_=$(pgrep qemu-)
   if [[ -n "$CJOBS_" ]] ; then
@@ -243,12 +249,8 @@ cleanup() {
     killall -9 "$EMULATOR" 2> /dev/null
   fi
 
-  #EMULATORS_=( qemu*static )
-  #if (( ${#EMULATORS_[@]} )) ; then
   print_output "[*] Cleaning the emulation environment\\n"
   find "$EMULATION_PATH_BASE" -iname "qemu*static" -exec rm {} \;
-  #  rm "$EMULATION_PATH"/qemu*static 2> /dev/null
-  #fi
 
   print_output ""
   print_output "[*] Umounting proc, sys and run"
