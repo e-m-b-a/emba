@@ -19,33 +19,33 @@ INVOCATION_PATH="."
 import_helper()
 {
   local HELPERS
-  HELPERS=$(find "$HELP_DIR" -iname "*.sh" 2> /dev/null)
-  local HELPERS_COUNT
-  HELPERS_COUNT=$(echo "$HELPERS" | wc -l)
-  for HELPER_FILE in $HELPERS ; do
-    if ( file "$HELPER_FILE" | grep -q "shell script" ) ; then
+  local HELPER_COUNT
+  mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "*.sh" -print0 2> /dev/null)
+  for HELPER_FILE in "${HELPERS[@]}" ; do
+    if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "$HELPER_FILE"
+      (( HELPER_COUNT+=1 ))
     fi
   done
-  print_output "==> ""$GREEN""Imported ""$HELPERS_COUNT"" necessary files""$NC" "no_log"
+  print_output "==> ""$GREEN""Imported ""$HELPER_COUNT"" necessary files""$NC" "no_log"
 }
 
 import_module()
 {
   local MODULES
-  MODULES=$(find "$MOD_DIR" -iname "*.sh" 2> /dev/null)
-  local MODULES_COUNT
-  MODULES_COUNT=$(echo "$MODULES" | wc -l)
-  for MODULE_FILE in $MODULES ; do
-    if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+  local MODULE_COUNT
+  mapfile -d '' MODULES < <(find "$MOD_DIR" -iname "*.sh" -print0 2> /dev/null)
+  for MODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "$MODULE_FILE"
+      (( MODULE_COUNT+=1 ))
     fi
   done
-  print_output "==> ""$GREEN""Imported ""$MODULES_COUNT"" module/s""$NC" "no_log"
+  print_output "==> ""$GREEN""Imported ""$MODULE_COUNT"" module/s""$NC" "no_log"
 }
 
 main()
@@ -215,9 +215,9 @@ main()
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        MODULES=$(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
-        for MODULE_FILE in $MODULES ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
+        for MODULE_FILE in "${MODULES[@]}" ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
@@ -228,7 +228,7 @@ main()
           if [[ "$SELECT_NUM" =~ ^[p,P]{1}[0-9]+ ]]; then
             local MODULE
             MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            if ( file "$MODULE" | grep -q "shell script" ) ; then
+            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
@@ -267,9 +267,9 @@ main()
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        MODULES=$(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
-        for MODULE_FILE in $MODULES ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+        mapfile -d '' MODULES < <(find "$MOD_DIR" -name "S*_*.sh" -print0 | sort -V 2> /dev/null)
+        for MODULE_FILE in "${MODULES[@]}" ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
@@ -281,7 +281,7 @@ main()
           if [[ "$SELECT_NUM" =~ ^[s,S]{1}[0-9]+ ]]; then
             local MODULE
             MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            if ( file "$MODULE" | grep -q "shell script" ) ; then
+            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
@@ -297,9 +297,9 @@ main()
 
   # 'main' functions of imported finishing modules
   local MODULES
-  MODULES=$(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
-  for MODULE_FILE in $MODULES ; do
-    if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+  mapfile -d '' MODULES < <(find "$MOD_DIR" -name "F*_*.sh" -print0 | sort -V 2> /dev/null)
+  for MODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
       $MODULE_MAIN

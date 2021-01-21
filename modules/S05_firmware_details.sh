@@ -20,7 +20,7 @@
 
 S05_firmware_details()
 {
-  module_log_init "${FUNCNAME[0]}"
+  mod ule_log_init "${FUNCNAME[0]}"
   module_title "Firmware and testing details"
 
   print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" directories detected."
@@ -50,12 +50,12 @@ release_info()
   sub_module_title "Release/Version information"
 
   local RELEASE_STUFF
-  RELEASE_STUFF="$(config_find "$CONFIG_DIR""/release_files.cfg" "/etc")"
+  mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg" "/etc")
 
-  if [[ "$RELEASE_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "$RELEASE_STUFF" ]] ; then
+  if [[ "${RELEASE_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#RELEASE_STUFF[@]}" -ne 0 ]] ; then
     print_output "[+] Specific release/version information of target:"
-    for R_INFO in $RELEASE_STUFF ; do
+    for R_INFO in "${RELEASE_STUFF[@]}" ; do
       if [[ -f "$R_INFO" ]] ; then
         print_output "\\n""$( print_path "$R_INFO")"
         RELEASE="$( cat "$R_INFO" )"

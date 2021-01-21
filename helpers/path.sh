@@ -189,7 +189,7 @@ config_list() {
       for STRING in "${STRING_LIST[@]}"; do
         LIST="$LIST""$STRING""\\n"
       done
-      echo -e "$LIST"
+      echo -e "$LIST" | sed -z '$ s/\n$//' | sort -u
     fi
   else
     echo "C_N_F"
@@ -198,24 +198,24 @@ config_list() {
 
 config_find() {
   local SEARCH_LOC
-  SEARCH_LOC="$(mod_path "$FIRMWARE_PATH""$2")"
-  if [[ -f "$1" ]] ;  then
-    if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+  mapfile -t SEARCH_LOC < <(mod_path "$FIRMWARE_PATH""$2")
+  if [[ -f "$1" ]] ; then
+    if [[ "$( wc -l "$1" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
       local FIND_COMMAND
       IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "$1" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
       local FILES
-      for S_LOC in $SEARCH_LOC ; do
-        FIND_O="$(find "$S_LOC" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")"
-        for LINE in $FIND_O; do
+      for S_LOC in "${SEARCH_LOC[@]}" ; do
+        mapfile -t FIND_O < <(find "$S_LOC" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")
+        for LINE in "${FIND_O[@]}"; do
           if [[ -L "$LINE" ]] ; then
-            FILES="$FILES""$FIRMWARE_PATH""$(realpath "$LINE" 2>/dev/null )""\n"
+            FILES="$FILES""$FIRMWARE_PATH""$(realpath "$LINE" 2>/dev/null )""\\n"
           else
-            FILES="$FILES""$LINE""\n"
+            FILES="$FILES""$LINE""\\n"
           fi
         done
       done
       if [[ -n "$FILES" ]]; then
-        echo -e "$FILES"
+        echo -e "$FILES" | sed -z '$ s/\n$//' | sort | uniq -u
       fi
     fi
   else
@@ -225,12 +225,13 @@ config_find() {
 
 config_grep() {
   local GREP_FILE
-  GREP_FILE="$(mod_path "$2")"
+  mapfile -t GREP_FILE < <(mod_path "$2")
+
   if [[ -f "$1" ]] ;  then
     if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
       local GREP_COMMAND
       IFS=" " read -r -a GREP_COMMAND <<<"$(sed 's/^/-Eo /g' "$1" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
-      for G_LOC in $GREP_FILE; do
+      for G_LOC in "${GREP_FILE[@]}"; do
         GREP_O=("${GREP_O[@]}" "$(strings "$G_LOC" | grep -a -D skip "${GREP_COMMAND[@]}" 2>/dev/null)")
       done
       echo "${GREP_O[@]}"
