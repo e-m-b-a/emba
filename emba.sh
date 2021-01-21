@@ -269,10 +269,10 @@ main()
 
     print_output "[*] Emba initializes kali docker container.\\n" "no_log"
 
-    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba ./emba.sh -l /log/ -f /firmware/ -i $ARGS
+    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware/ -i $ARGS"
 
     exit
-  fi  
+  fi
 
   if [[ $FIRMWARE -eq 1 ]] ; then
     if [[ -d "$FIRMWARE_PATH" ]]; then
