@@ -199,30 +199,6 @@ main()
     set_exclude
   fi
 
-  if [[ $DOCKER -eq 1 ]] ; then
-    OPTIND=1
-    ARGS="-i"
-    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
-      case $OPT in
-        D)
-          ;;
-        f)
-          ;;
-        i)
-          ;;
-        l)
-          ;;
-        *)
-          export ARGS="$ARGS -$OPT"
-          ;;
-      esac
-    done
-
-    print_output "[*] Emba initializes kali docker container." "no_log"
-    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba ./emba.sh -l /log/ -f /firmware/ "$ARGS"
-
-    exit
-  fi
 
   dependency_check
 
@@ -238,7 +214,7 @@ main()
       S25_kernel_check
     fi
   fi
- 
+
   if [[ $PRE_CHECK -eq 1 ]] ; then
     if [[ -f "$FIRMWARE_PATH" ]]; then
 
@@ -277,6 +253,26 @@ main()
 
     fi
   fi
+  
+  if [[ $DOCKER -eq 1 ]] ; then
+    OPTIND=1
+    ARGS=""
+    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+      case $OPT in
+        D|f|i|l)
+          ;;
+        *)
+          export ARGS="$ARGS -$OPT"
+          ;;
+      esac
+    done
+
+    print_output "[*] Emba initializes kali docker container.\\n" "no_log"
+
+    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba ./emba.sh -l /log/ -f /firmware/ -i $ARGS
+
+    exit
+  fi  
 
   if [[ $FIRMWARE -eq 1 ]] ; then
     if [[ -d "$FIRMWARE_PATH" ]]; then
