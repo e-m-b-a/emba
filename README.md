@@ -114,34 +114,7 @@ __Good to know:__
 
 ### Dependencies
 
-_emba_ uses multiple other tools and components.
-
-For using _emba_ with all features, you will need following tools on your __Kali Linux__:
-- `readelf`
-- `find`
-- `grep`
-- `modinfo`
-- `realpath`
-- `sed`
-- `cut`
-- `sort`
-- `basename`
-- `strings`
-- `bc`
-- `netstat`
-- `Option: tree`
-- `Option: shellcheck`
-- `Option: docker`
-- `Option: docker-compose`
-- `Option: yara`
-- `Option: qemu static user mode emulators`
-- `Option: binwalk`
-- `Option: cve-search`
-- `Option: cve-searchsploit`
-
-To check these dependencies, only run `sudo ./emba.sh -d`
-
-For installation of all needed dependencies, run `sudo ./installer.sh`
+_emba_ uses multiple other tools and components - [see the wiki for more details](https://github.com/e-m-b-a/emba/wiki/Dependencies)
 
 ### Structure
 
