@@ -34,6 +34,14 @@ dependency_check()
     exit 1
   fi
 
+  if [[ $DOCKER -eq 1 && $EUID -ne 0 ]]; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    WARNING: With docker enabled this script needs root privileges""$NC"
+    echo -e "$RED""    WARNING: Exit now""$NC"
+    echo -e "$RED""    HINT: Run emba with sudo""$NC"
+    exit 1
+  fi
+
   if [[ $EUID -eq 0 ]] ; then
     echo -e "$GREEN""ok""$NC"
   else

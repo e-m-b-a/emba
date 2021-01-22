@@ -32,17 +32,21 @@ P09_firmware_base_version_check() {
       print_output "." | tr -d "\n"
 
       # currently we only have binwalk files but sometimes we can find kernel version information or something else in it
-      VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -e "$VERSION_IDENTIFIER" {} \;| head -1 2> /dev/null)
+      VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -e "$VERSION_IDENTIFIER" {} \; 2> /dev/null | head -1 2> /dev/null)
       VERSIONS_DETECTED+=("$VERSION_FINDER")
       print_output "." | tr -d "\n"
 
-      VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
       VERSIONS_DETECTED+=("$VERSION_FINDER")
       print_output "." | tr -d "\n"
 
-      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-      VERSIONS_DETECTED+=("$VERSION_FINDER")
-      print_output "." | tr -d "\n"
+      # if we are using docker the module s09 will do the check within the dockered environment
+      if [[ $DOCKER -ne 1 ]] ; then
+        VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        VERSIONS_DETECTED+=("$VERSION_FINDER")
+        print_output "." | tr -d "\n"
+      fi
+
     fi
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
