@@ -151,12 +151,17 @@ For using _emba_ with all features, you will need following tools on your __Kali
 - `sort`
 - `basename`
 - `strings`
+- `bc`
+- `netstat`
 - `Option: tree`
 - `Option: shellcheck`
 - `Option: docker`
+- `Option: docker-compose`
 - `Option: yara`
 - `Option: qemu static user mode emulators`
 - `Option: binwalk`
+- `Option: cve-search`
+- `Option: cve-searchsploit`
 
 To check these dependencies, only run `sudo ./emba.sh -d`
 
