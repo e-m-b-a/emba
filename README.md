@@ -63,6 +63,12 @@ Modify output
 -s                Print only relative paths
 -z                Add ANSI color codes to log
 
+Firmware details
+-X [version]      Firmware version
+-Y [vendor]       Firmware vendor
+-Z [device]       Device
+-N [notes]        Testing notes
+
 Help
 -h                Print this help message
 ```
