@@ -100,7 +100,7 @@ non_unique_group_id() {
   local GROUP_PATHS
   mapfile -t GROUP_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/group")
 
-  for GROUP_PATHS in "${GROUP_PATHS[@]}"; do
+  for GROUP_PATH in "${GROUP_PATHS[@]}"; do
     if [[ -f "$GROUP_PATH" ]] ; then
       CHECK=1
       local FIND

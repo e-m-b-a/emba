@@ -43,7 +43,6 @@ import_module()
       # shellcheck source=/dev/null
       source "$MODULE_FILE"
       (( MODULE_COUNT+=1 ))
-      echo "$MODULE_FILE"
     fi
   done
   print_output "==> ""$GREEN""Imported ""$MODULE_COUNT"" module/s""$NC" "no_log"
