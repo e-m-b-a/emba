@@ -36,13 +36,14 @@ import_module()
 {
   local MODULES
   local MODULE_COUNT
-  mapfile -d '' MODULES < <(find "$MOD_DIR" -iname "*.sh" -print0 2> /dev/null)
+  mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "$MODULE_FILE"
       (( MODULE_COUNT+=1 ))
+      echo "$MODULE_FILE"
     fi
   done
   print_output "==> ""$GREEN""Imported ""$MODULE_COUNT"" module/s""$NC" "no_log"
@@ -267,7 +268,7 @@ main()
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        mapfile -d '' MODULES < <(find "$MOD_DIR" -name "S*_*.sh" -print0 | sort -V 2> /dev/null)
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
@@ -297,7 +298,7 @@ main()
 
   # 'main' functions of imported finishing modules
   local MODULES
-  mapfile -d '' MODULES < <(find "$MOD_DIR" -name "F*_*.sh" -print0 | sort -V 2> /dev/null)
+  mapfile -t MODULES < <(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")

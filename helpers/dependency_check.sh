@@ -87,8 +87,7 @@ dependency_check()
 
   # using bash higher than v4 ...
   print_output "    bash (version) - \\c" "no_log"
-  BASH_VERSION="$(config_grep_string "$CONFIG_DIR""/version_strings.cfg" "$(bash --version)")"
-  if ! [[ "${BASH_VERSINFO[0]}" -gt 3 ]] ; then
+  if ! [[ "${BASH_VERSINFO:-0}" -gt 3 ]] ; then
     echo -e "$RED""not ok""$NC"
     echo -e "$RED""    upgrade your bash to version 4 or higher""$NC"
     if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then

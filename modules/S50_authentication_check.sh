@@ -46,8 +46,9 @@ user_zero() {
   print_output "[*] Searching accounts with UID 0"
   local CHECK=0
   local PASSWD_FILE_PATHS
-  PASSWD_FILE_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/passwd")"
-  for PASSWD_FILE in $PASSWD_FILE_PATHS; do
+  mapfile -t PASSWD_FILE_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/passwd")
+
+  for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
     if [[ -f "$PASSWD_FILE" ]] ; then
       CHECK=1
       local FIND
@@ -71,8 +72,9 @@ non_unique_acc() {
   print_output "[*] Searching non-unique accounts"
   local CHECK=0
   local PASSWD_FILE_PATHS
-  PASSWD_FILE_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/passwd")"
-  for PASSWD_FILE in $PASSWD_FILE_PATHS; do
+  mapfile -t PASSWD_FILE_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/passwd")
+
+  for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
     if [[ -f "$PASSWD_FILE" ]] ; then
       CHECK=1
       local FIND
@@ -96,8 +98,9 @@ non_unique_group_id() {
   print_output "[*] Searching non-unique group ID's"
   local CHECK=0
   local GROUP_PATHS
-  GROUP_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/group")"
-  for GROUP_PATH in $GROUP_PATHS; do
+  mapfile -t GROUP_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/group")
+
+  for GROUP_PATHS in "${GROUP_PATHS[@]}"; do
     if [[ -f "$GROUP_PATH" ]] ; then
       CHECK=1
       local FIND
@@ -121,8 +124,9 @@ non_unique_group_name() {
   print_output "[*] Searching non-unique group names"
   local CHECK=0
   local GROUP_PATHS
-  GROUP_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/group")"
-  for GROUP_PATH in $GROUP_PATHS; do
+  mapfile -t GROUP_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/group")
+
+  for GROUP_PATHS in "${GROUP_PATHS[@]}"; do
     if [[ -f "$GROUP_PATH" ]] ; then
       CHECK=1
       local FIND
@@ -146,14 +150,15 @@ query_user_acc() {
   print_output "[*] Reading system users"
   local CHECK=0
   local PASSWD_FILE_PATHS
-  PASSWD_FILE_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/passwd")"
-  for PASSWD_FILE in $PASSWD_FILE_PATHS; do
+  mapfile -t PASSWD_FILE_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/passwd")
+
+  for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
     if [[ -f "$PASSWD_FILE" ]] ; then
       CHECK=1
       local UID_MIN LOGIN_DEFS_PATH
       UID_MIN=""
-      LOGIN_DEFS_PATH="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/login.defs")"
-      for LOGIN_DEF in $LOGIN_DEFS_PATH; do
+      mapfile -t LOGIN_DEFS_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/login.defs")
+      for LOGIN_DEF in "${LOGIN_DEFS_PATH[@]}"; do
         if [[ -f "$LOGIN_DEF" ]] ; then
           UID_MIN=$(grep "^UID_MIN" "$LOGIN_DEF" | awk '{print $2}')
           print_output "[*] Found minimal user id specified: ""$UID_MIN"
@@ -184,8 +189,8 @@ query_nis_plus_auth_supp() {
   print_output "[*] Check nsswitch.conf"
   local CHECK=0
   local NSS_PATH_L
-  NSS_PATH_L="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/nsswitch.conf")"
-  for NSS_PATH in $NSS_PATH_L; do
+  mapfile -t NSS_PATH_L < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/nsswitch.conf")
+  for NSS_PATH in "${NSS_PATH_L[@]}"; do
     if [[ -f "$NSS_PATH" ]] ; then
       CHECK=1
       print_output "[+] ""$(print_path "$NSS_PATH")"" exist"
@@ -312,17 +317,17 @@ search_pam_testing_libs() {
   print_output "[*] Searching PAM password testing modules (cracklib, passwdqc, pwquality)"
 
   local FILE_PATH FOUND FOUND_CRACKLIB FOUND_PASSWDQC FOUND_PWQUALITY
-  FILE_PATH="$(mod_path_array "$(config_list "$CONFIG_DIR""/pam_files.cfg" "")")"
+  mapfile -t FILE_PATH < <(mod_path_array "$(config_list "$CONFIG_DIR""/pam_files.cfg" "")")
 
-  if [[ "$FILE_PATH" == "C_N_F" ]] ; then
+  if [[ "${FILE_PATH[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif ! [[ "$FILE_PATH" == "" ]] ; then
+  elif ! [[ "${#FILE_PATH[@]}" -eq 0 ]] ; then
     local FOUND=0
     FOUND_CRACKLIB=0
     FOUND_PASSWDQC=0
     FOUND_PWQUALITY=0
 
-    for PATH_F in $FILE_PATH; do
+    for PATH_F in "${FILE_PATH[@]}"; do
       local FULL_PATH
       FULL_PATH="$FIRMWARE_PATH""/""$PATH_F"
 
@@ -383,8 +388,8 @@ scan_pam_conf() {
 
   local CHECK=0
   local PAM_PATH_L
-  PAM_PATH_L="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/pam.conf")"
-  for PAM_PATH in $PAM_PATH_L; do
+  mapfile -t PAM_PATH_L < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/pam.conf")
+  for PAM_PATH in "${PAM_PATH_L[@]}"; do
     if [[ -f "$PAM_PATH" ]] ; then
       CHECK=1
       print_output "[+] ""$(print_path "$PAM_PATH")"" exist"
@@ -411,8 +416,8 @@ search_pam_configs() {
   local CHECK
   CHECK=0
   local PAM_PATH_L
-  PAM_PATH_L="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/pam.d")"
-  for PAM_PATH in $PAM_PATH_L; do
+  mapfile -t PAM_PATH_L < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/pam.d")
+  for PAM_PATH in "${PAM_PATH_L[@]}"; do
     if [[ -d "$PAM_PATH" ]] ; then
       CHECK=1
       print_output "[+] ""$(print_path "${PAM_PATH}")"" exist"
@@ -465,8 +470,8 @@ search_pam_files() {
       if [[ -d "$LINE" ]] && [[ ! -L "$LINE" ]] ; then
         print_output "$(indent "$(print_path "$LINE")")"
         local FIND
-        FIND=$(find "$LINE" -maxdepth 1 -type f -name "pam_*.so" -print | sort)
-        for FIND_FILE in $FIND; do
+        mapfile -t FIND < <(find "$LINE" -maxdepth 1 -type f -name "pam_*.so" -print | sort)
+        for FIND_FILE in "${FIND[@]}"; do
           CHECK=1
           print_output "$(indent "$(orange "$FIND_FILE")")"
         done

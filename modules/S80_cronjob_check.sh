@@ -27,9 +27,8 @@ S80_cronjob_check()
   RESULTS=0
 
   local CJ_FILE_PATH
-  CJ_FILE_PATH="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/cron")"
-
-  for CJ_FILE in $CJ_FILE_PATH ; do
+  mapfile -t CJ_FILE_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/cron")
+  for CJ_FILE in "${CJ_FILE_PATH[@]}"; do
     if [[ -e "$CJ_FILE" ]] ; then
       local CRONJOBS
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
@@ -42,7 +41,7 @@ S80_cronjob_check()
     fi
   done
 
-  for CJ_FILE in $CJ_FILE_PATH ; do
+  for CJ_FILE in "${CJ_FILE_PATH[@]}" ; do
     if [[ -e "$CJ_FILE" ]] ; then
       local CRONJOBWWPERMS
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
@@ -55,9 +54,8 @@ S80_cronjob_check()
     fi
   done
 
-  CJ_FILE_PATH="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/crontab")"
-
-  for CJ_FILE in $CJ_FILE_PATH ; do
+  mapfile -t CJ_FILE_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/crontab")
+  for CJ_FILE in "${CJ_FILE_PATH[@]}"; do
     if [[ -e "$CJ_FILE" ]] ; then
       local CRONTABVALUE
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
@@ -70,9 +68,8 @@ S80_cronjob_check()
     fi
   done
 
-
-  CJ_FILE_PATH="$(mod_path "$FIRMWARE_PATH""/var/spool/cron/crontabs")"
-  for CT_VAR in $CJ_FILE_PATH ; do
+  mapfile -t CJ_FILE_PATH < <(mod_path "$FIRMWARE_PATH""/var/spool/cron/crontabs")
+  for CT_VAR in "${CJ_FILE_PATH[@]}"; do
     local CRONTABVAR
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     CRONTABVAR=$(ls -la "$CT_VAR" 2>/dev/null)
@@ -83,8 +80,8 @@ S80_cronjob_check()
     fi
   done
 
-  CJ_FILE_PATH="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/anacrontab")"
-  for CJ_FILE in $CJ_FILE_PATH ; do
+  mapfile -t CJ_FILE_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/anacrontab")
+  for CJ_FILE in "${CJ_FILE_PATH[@]}"; do
     if [[ -e "$CJ_FILE" ]] ; then
       local ANACRONJOBS
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
@@ -97,8 +94,8 @@ S80_cronjob_check()
     fi
   done
 
-  CJ_FILE_PATH="$(mod_path "$FIRMWARE_PATH""/var/spool/anacron")"
-  for CT_VAR in $CJ_FILE_PATH ; do
+  mapfile -t CJ_FILE_PATH < <(mod_path "$FIRMWARE_PATH""/var/spool/anacron")
+  for CT_VAR in "${CJ_FILE_PATH[@]}"; do
     local ANACRONTAB
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     ANACRONTAB=$(ls -la "$CT_VAR" 2>/dev/null)
