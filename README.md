@@ -64,10 +64,10 @@ Modify output
 -z                Add ANSI color codes to log
 
 Firmware details
--X [version]      Firmware version
--Y [vendor]       Firmware vendor
--Z [device]       Device
--N [notes]        Testing notes
+-X [version]      Firmware version (double quote your input)
+-Y [vendor]       Firmware vendor (double quote your input)
+-Z [device]       Device (double quote your input)
+-N [notes]        Testing notes (double quote your input)
 
 Help
 -h                Print this help message
