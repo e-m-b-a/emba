@@ -165,7 +165,4 @@ _emba_ uses multiple other tools and components - [see the wiki for more details
     - Use the CSV formated vulnerability list from Mitre: https://cve.mitre.org/data/downloads/
 
 ### How to write own modules?
-
-[Look here](/modules/template_module.sh) - read this file, copy and modify it. Add your _main_ function, where `module_log_init` 
-and `module_title` are been called to the [_emba_](/emba.sh) script. That's it. Or if you only want to run a single command:
-Add your command to [_user\_check_](/modules/user_check.sh) and uncomment `user_check` in the [_emba_](/emba.sh) script.
+[Wee the wiki for more details](https://github.com/e-m-b-a/emba/wiki/How-to-write-own-modules)
