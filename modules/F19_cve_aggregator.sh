@@ -28,7 +28,9 @@ F19_cve_aggregator() {
 
   # set it up
   PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
-  mkdir "$LOG_DIR"/aggregator
+  if ! [[ -d "$LOG_DIR"/aggregator ]] ; then
+    mkdir "$LOG_DIR"/aggregator
+  fi
   KERNELV=0
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
