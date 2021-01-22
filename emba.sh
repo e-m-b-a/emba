@@ -218,58 +218,44 @@ main()
   if [[ $PRE_CHECK -eq 1 ]] ; then
     if [[ -f "$FIRMWARE_PATH" ]]; then
     
-      PRE_CHECK_OUTSIDE_DOCKER=1
+      # we have to fix this, so that also the pre-checker modules are running inside the docker
       if [[ $DOCKER -eq 1 ]] ; then
-        echo -e "\\n""$MAGENTA""$BOLD""Do you want to run pre checker modules outside of docker environment for preparation?""$NC"
-        read -p "(y/N)" -r ANSWER
-        case ${ANSWER:0:1} in
-          y|Y )
-            PRE_CHECK_OUTSIDE_DOCKER=1
-            print_output "\\n[*] Running pre checker modules outside of the docker environment for preparation" "no_log"
-            ;;
-          n|N )
-            PRE_CHECK_OUTSIDE_DOCKER=0
-            ;;
-        esac
+        print_output "" "no_log"
+        print_output "[!] Running pre checker modules outside of the docker environment for preparation" "no_log"
       fi
       
-      if [[ $PRE_CHECK_OUTSIDE_DOCKER -eq 1 ]] ; then
+      echo
+      print_output "[!] Extraction started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
 
-        echo
-        print_output "[!] Extraction started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
+      # 'main' functions of imported modules
+      # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
-        # 'main' functions of imported modules
-        # in the pre-check phase we execute all modules with P[Number]_Name.sh
-
-        if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
-          local MODULES
-          MODULES=$(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
-          for MODULE_FILE in $MODULES ; do
-            if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
-              MODULE_BN=$(basename "$MODULE_FILE")
+      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
+        local MODULES
+        MODULES=$(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
+        for MODULE_FILE in $MODULES ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+            MODULE_BN=$(basename "$MODULE_FILE")
+            MODULE_MAIN=${MODULE_BN%.*}
+            $MODULE_MAIN
+          fi
+        done
+      else
+        for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
+          if [[ "$SELECT_NUM" =~ ^[p,P]{1}[0-9]+ ]]; then
+            local MODULE
+            MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+            if ( file "$MODULE" | grep -q "shell script" ) ; then
+              MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
             fi
-          done
-        else
-          for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-            if [[ "$SELECT_NUM" =~ ^[p,P]{1}[0-9]+ ]]; then
-              local MODULE
-              MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-              if ( file "$MODULE" | grep -q "shell script" ) ; then
-                MODULE_BN=$(basename "$MODULE")
-                MODULE_MAIN=${MODULE_BN%.*}
-                $MODULE_MAIN
-              fi
-            fi
-          done
-        fi
+          fi
+        done
 
         echo
         print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-
       fi
-      
     fi
   fi
   
@@ -292,10 +278,14 @@ main()
       esac
     done
 
-    print_output "[*] Emba initializes kali docker container.\\n" "no_log"
+    print_output "" "no_log"
+    print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
     FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware/ -i $ARGS"
 
+    print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+    print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
+    print_output "[*] Log directory: $LOG_DIR" "no_log"
     exit
   fi
 
@@ -365,12 +355,12 @@ main()
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n"
       write_grep_log "$(date)" "TIMESTAMP"
       write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
       print_output "[!] No extracted firmware found" "no_log"
-      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")" "no_log"
+      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
       exit 1
   fi
 }
