@@ -368,6 +368,11 @@ print_help()
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Print only relative paths"
   echo -e "$CYAN""-z""$NC""                Add ANSI color codes to log"
+  echo -e "\\nFirmware details"
+  echo -e "$CYAN""-X [version]""$NC""      Firmware version"
+  echo -e "$CYAN""-Y [vendor]""$NC""       Firmware vendor"
+  echo -e "$CYAN""-Z [device]""$NC""       Device"
+  echo -e "$CYAN""-N [notes]""$NC""        Testing notes"
   echo -e "\\nHelp"
   echo -e "$CYAN""-h""$NC""                Print this help message"
 
