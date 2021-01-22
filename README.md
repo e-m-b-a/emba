@@ -117,52 +117,7 @@ __Good to know:__
 _emba_ uses multiple other tools and components - [see the wiki for more details](https://github.com/e-m-b-a/emba/wiki/Dependencies)
 
 ### Structure
-
-```
-├── installer.sh
-```
-    
--> Tries to install all needed dependencies. Internet access for downloading is required.
-  - Afterwards no Internet access is needed
-```
-├── check_project.sh
-```
-    
--> Check full project with all subdirectories with [shellchecker](https://github.com/koalaman/shellcheck)   
-   - Install it on your system (Kali) with `apt-get install shellcheck`
-```
-├── emba.sh
-```
--> Main script of this project
-```
-├── config
-```
--> Configuration files for different modules with file names, regular expressions or paths. These files are very handy,
-   easy to use and they also keep the modules clean.
-```
-├── external
-```
--> All tools and files which are from other projects and necessary for _emba_
-```
-├── helpers
-```
--> Some scripts for stuff like pretty formatting on your terminal or path handling
-```
-└── modules
-```
--> The stars of the project - every module is an own file and will be called by [_emba_](/emba.sh). 
-
-### External tools in directory 'external'
-- ./yara
-    - yara rule files - add your own rules here
-- ./checksec
-    - https://github.com/slimm609/checksec.sh
-- ./linux-exploit-suggester.sh
-    - https://github.com/mzet-/linux-exploit-suggester
-- ./objdump with all architectures enabled
-    - https://www.gnu.org/software/binutils/
-- ./allitems.csv
-    - Use the CSV formated vulnerability list from Mitre: https://cve.mitre.org/data/downloads/
+[See the wiki for more details](https://github.com/e-m-b-a/emba/wiki/Structure-of-the-emba-directory)
 
 ### How to write own modules?
 [See the wiki for more details](https://github.com/e-m-b-a/emba/wiki/How-to-write-own-modules)
