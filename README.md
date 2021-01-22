@@ -165,4 +165,4 @@ _emba_ uses multiple other tools and components - [see the wiki for more details
     - Use the CSV formated vulnerability list from Mitre: https://cve.mitre.org/data/downloads/
 
 ### How to write own modules?
-[Wee the wiki for more details](https://github.com/e-m-b-a/emba/wiki/How-to-write-own-modules)
+[See the wiki for more details](https://github.com/e-m-b-a/emba/wiki/How-to-write-own-modules)
