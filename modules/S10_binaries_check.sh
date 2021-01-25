@@ -51,6 +51,7 @@ vul_func_basic_check()
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
           print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
           for VUL_FUNC in "${VUL_FUNC_RESULT[@]}" ; do
+            VUL_FUNC="$(echo "$VUL_FUNC" | sed -e 's/[[:space:]]\+/\t/g')"
             print_output "$(indent "$VUL_FUNC")"
           done
           COUNTER=$((COUNTER+1))

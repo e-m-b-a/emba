@@ -42,9 +42,7 @@ F50_base_aggregator() {
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
   fi
 
-  print_output ""
-  print_output "-----------------------------------------------------------------"
-  print_output ""
+  print_output "\\n-----------------------------------------------------------------\\n"
 
   print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
@@ -93,9 +91,7 @@ F50_base_aggregator() {
 
 
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
-    print_output ""
-    print_output "-----------------------------------------------------------------"
-    print_output ""
+    print_output "\\n-----------------------------------------------------------------\\n"
     if [[ -f "$LOG_DIR"/"$BIN_CHECK_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$BIN_CHECK_LOG")
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$BIN_CHECK_LOG")
@@ -135,9 +131,7 @@ F50_base_aggregator() {
   fi
 
   if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
-    print_output ""
-    print_output "-----------------------------------------------------------------"
-    print_output ""
+    print_output "\\n-----------------------------------------------------------------\\n"
     SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | awk '{print $1}' | grep -c -v "ERROR")
     if [[ "$SUM_FCW_FIND" -gt 0 ]] ; then
 	    print_output "[+] cwe-checker found a total of ""$ORANGE""""$SUM_FCW_FIND""""$GREEN"" of the following security issues:"
@@ -153,9 +147,7 @@ F50_base_aggregator() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
 
-    print_output ""
-    print_output "-----------------------------------------------------------------"
-    print_output ""
+    print_output "\\n-----------------------------------------------------------------\\n"
 
     print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$GREEN"" usages of strcpy in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries.""$NC"""
   fi
@@ -201,9 +193,7 @@ F50_base_aggregator() {
 
   print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
-    print_output ""
-    print_output "-----------------------------------------------------------------"
-    print_output ""
+    print_output "\\n-----------------------------------------------------------------\\n"
 
     print_output "[*] Identified the following version details, vulnerabilities and exploits:"
     print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
@@ -219,6 +209,5 @@ F50_base_aggregator() {
       print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available."
     fi
   fi
-  print_output ""
-  print_output "-----------------------------------------------------------------"
+  print_output "\\n-----------------------------------------------------------------"
 }

@@ -178,28 +178,22 @@ main()
   print_output "" "no_log"
 
   if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then
-    print_output "" "no_log"
-    print_output "-----------------------------------------------------------------" "no_log"
-    print_output "" "no_log"
-  fi
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
 
-  if [[ -n "$FW_VENDOR" ]]; then
-    print_output "[*] Testing Firmware from vendor: ""$ORANGE""""$FW_VENDOR""""$NC""" "no_log"
-  fi
-  if [[ -n "$FW_VERSION" ]]; then
-    print_output "[*] Testing Firmware version: ""$ORANGE""""$FW_VERSION""""$NC""" "no_log"
-  fi
-  if [[ -n "$FW_DEVICE" ]]; then
-    print_output "[*] Testing Firmware from device: ""$ORANGE""""$FW_DEVICE""""$NC""" "no_log"
-  fi
-  if [[ -n "$FW_NOTES" ]]; then
-    print_output "[*] Additional notes: ""$ORANGE""""$FW_NOTES""""$NC""" "no_log"
-  fi
+    if [[ -n "$FW_VENDOR" ]]; then
+      print_output "[*] Testing Firmware from vendor: ""$ORANGE""""$FW_VENDOR""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_VERSION" ]]; then
+      print_output "[*] Testing Firmware version: ""$ORANGE""""$FW_VERSION""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_DEVICE" ]]; then
+      print_output "[*] Testing Firmware from device: ""$ORANGE""""$FW_DEVICE""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_NOTES" ]]; then
+      print_output "[*] Additional notes: ""$ORANGE""""$FW_NOTES""""$NC""" "no_log"
+    fi
 
-  if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then
-    print_output "" "no_log"
-    print_output "-----------------------------------------------------------------" "no_log"
-    print_output "" "no_log"
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
   fi
 
   if [[ $KERNEL -eq 1 ]] ; then
