@@ -34,7 +34,7 @@ interesting_binaries()
   local COUNT=0
   INT_COUNT=0
 
-  mapfile -t INT_BIN < <(config_find "$CONFIG_DIR""/interesting_binaries.cfg" "")
+  mapfile -t INT_BIN < <(config_find "$CONFIG_DIR""/interesting_binaries.cfg")
   if [[ "${INT_BIN[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#INT_BIN[@]}" -ne 0 ]] ; then
     for LINE in "${INT_BIN[@]}" ; do
@@ -60,7 +60,7 @@ post_exploitation()
   local COUNT=0
   POST_COUNT=0
 
-  mapfile -t INT_BIN_PE < <(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg" "")
+  mapfile -t INT_BIN_PE < <(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg")
   if [[ "${INT_BIN_PE[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#INT_BIN_PE[@]}" -ne 0 ]] ; then
     for LINE in "${INT_BIN_PE[@]}" ; do

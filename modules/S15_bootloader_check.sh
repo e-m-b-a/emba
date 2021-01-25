@@ -59,7 +59,7 @@ check_bootloader()
 
   # Syslinux
   CHECK=0
-  mapfile -t SYSLINUX_PATHS < <(mod_path "$FIRMWARE_PATH""/boot/syslinux/syslinux.cfg")
+  mapfile -t SYSLINUX_PATHS < <(mod_path "/boot/syslinux/syslinux.cfg")
   for SYSLINUX_FILE in "${SYSLINUX_PATHS[@]}" ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
       CHECK=1
@@ -73,7 +73,7 @@ check_bootloader()
 
   # Grub
   CHECK=0
-  mapfile -t GRUB_PATHS < <(mod_path "$FIRMWARE_PATH""/boot/grub/grub.conf")
+  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -82,7 +82,7 @@ check_bootloader()
       BOOTLOADER="Grub"
     fi
   done
-  mapfile -t GRUB_PATHS < <(mod_path "$FIRMWARE_PATH""/boot/grub/menu.lst")
+  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/menu.lst")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -97,7 +97,7 @@ check_bootloader()
 
   # Grub2
   CHECK=0
-  mapfile -t GRUB_PATHS < <(mod_path "$FIRMWARE_PATH""/boot/grub/grub.cfg")
+  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.cfg")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -106,7 +106,7 @@ check_bootloader()
       BOOTLOADER="Grub2"
     fi
   done
-  mapfile -t GRUB_PATHS < <(mod_path "$FIRMWARE_PATH""/boot/grub2/grub.conf")
+  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub2/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -149,9 +149,9 @@ check_bootloader()
   # FreeBSD or DragonFly
   CHECK=0
   local BOOT1 BOOT2 BOOTL
-  mapfile -t BOOT1 < <(mod_path "$FIRMWARE_PATH""/boot/boot1")
-  mapfile -t BOOT2 < <(mod_path "$FIRMWARE_PATH""/boot/boot2")
-  mapfile -t BOOTL < <(mod_path "$FIRMWARE_PATH""/boot/loader")
+  mapfile -t BOOT1 < <(mod_path "/boot/boot1")
+  mapfile -t BOOT2 < <(mod_path "/boot/boot2")
+  mapfile -t BOOTL < <(mod_path "/boot/loader")
 
   for B1 in "${BOOT1[@]}" ; do
     for B2 in "${BOOT2[@]}" ; do
@@ -170,7 +170,7 @@ check_bootloader()
 
   # LILO
   CHECK=0
-  mapfile -t LILO_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/lilo.conf")
+  mapfile -t LILO_PATH < <(mod_path "/ETC_PATHS/lilo.conf")
   for LILO_FILE in "${LILO_PATH[@]}" ; do
     if [[ -f "$LILO_FILE" ]] ; then
       CHECK=1
@@ -188,7 +188,7 @@ check_bootloader()
 
   # SILO
   CHECK=0
-  mapfile -t SILO_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/silo.conf")
+  mapfile -t SILO_PATH < <(mod_path "/ETC_PATHS/silo.conf")
   for SILO_FILE in "${SILO_PATH[@]}" ; do
     if [[ -f "$SILO_FILE" ]] ; then
       CHECK=1
@@ -202,7 +202,7 @@ check_bootloader()
 
   # YABOOT
   CHECK=0
-  mapfile -t YABOOT_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/yaboot.conf")
+  mapfile -t YABOOT_PATH < <(mod_path "/ETC_PATHS/yaboot.conf")
   for YABOOT_FILE in "${YABOOT_PATH[@]}" ; do
     if [[ -f "$YABOOT_FILE" ]] ; then
       CHECK=1
@@ -217,8 +217,8 @@ check_bootloader()
   # OpenBSD
   CHECK=0
   local OBSD_PATH1 OBSD_PATH2
-  mapfile -t OBSD_PATH1 < <(mod_path "$FIRMWARE_PATH""/usr/mdec/biosboot")
-  mapfile -t OBSD_PATH2 < <(mod_path "$FIRMWARE_PATH""/boot")
+  mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")
+  mapfile -t OBSD_PATH2 < <(mod_path "/boot")
   for OBSD_FILE1 in "${OBSD_PATH1[@]}" ; do
     for OBSD_FILE2 in "${OBSD_PATH2[@]}" ; do
       if [[ -f "$OBSD_FILE2" ]] && [[ -f "OBSD_FILE2" ]] ; then
@@ -234,7 +234,7 @@ check_bootloader()
 
   # OpenBSD boot configuration
   CHECK=0
-  mapfile -t OPENBSD_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/boot.conf")
+  mapfile -t OPENBSD_PATH < <(mod_path "/ETC_PATHS/boot.conf")
   for OPENBSD in "${OPENBSD_PATH[@]}" ; do
     if [[ -f "$OPENBSD" ]] ; then
       CHECK=1
@@ -243,7 +243,7 @@ check_bootloader()
       if [[ -z "${FIND}" ]] ; then
         print_output "[+] System can be booted into single user mode without password"
       fi
-      mapfile -t OPENBSD_PATH2 < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/rc.conf")
+      mapfile -t OPENBSD_PATH2 < <(mod_path "/ETC_PATHS/rc.conf")
       for OPENBSD2 in "${OPENBSD_PATH2[@]}" ; do
         if [[ -e "$OPENBSD2" ]] ; then
           FIND=$(grep -v -i '^#|none' "$OPENBSD2" | grep-i '_enable.*(yes|on|1)' | sort | awk -F= '{ print $1 }' | sed 's/_enable//')
@@ -269,7 +269,7 @@ find_boot_files()
   sub_module_title "Scan for startup files"
 
   local BOOT_FILES
-  mapfile -t BOOT_FILES < <(config_find "$CONFIG_DIR""/boot_files.cfg" "")
+  mapfile -t BOOT_FILES < <(config_find "$CONFIG_DIR""/boot_files.cfg")
 
   if [[ "${BOOT_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#BOOT_FILES[@]}" -ne 0 ]] ; then
@@ -290,7 +290,7 @@ find_runlevel()
   sub_module_title "Check default run level"
 
   local SYSTEMD_PATH
-  mapfile -t SYSTEMD_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/systemd")
+  mapfile -t SYSTEMD_PATH < <(mod_path "/ETC_PATHS/systemd")
   for SYSTEMD_P in "${SYSTEMD_PATH[@]}" ; do
     if [[ -d "$SYSTEMD_P" ]] ; then
       print_output "[*] Check runlevel in systemd directory: ""$(print_path "$SYSTEMD_P")"

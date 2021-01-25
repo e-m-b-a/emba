@@ -50,8 +50,7 @@ release_info()
   sub_module_title "Release/Version information"
 
   local RELEASE_STUFF
-  mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg" "/etc")
-
+  mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg")
   if [[ "${RELEASE_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#RELEASE_STUFF[@]}" -ne 0 ]] ; then
     print_output "[+] Specific release/version information of target:"

@@ -24,7 +24,7 @@ S100_command_inj_check()
   module_title "Search areas for command injections"
 
   local CMD_INJ_DIRS
-  mapfile -t CMD_INJ_DIRS < <(config_find "$CONFIG_DIR""/check_command_inj_dirs.cfg" "")
+  mapfile -t CMD_INJ_DIRS < <(config_find "$CONFIG_DIR""/check_command_inj_dirs.cfg")
 
   if [[ "${CMD_INJ_DIRS[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#CMD_INJ_DIRS[@]}" -ne 0 ]] ; then

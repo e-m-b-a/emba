@@ -35,7 +35,7 @@ check_resolv()
 
   local CHECK=0
   local RES_CONF_PATHS
-  mapfile -t RES_CONF_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/resolv.conf")
+  mapfile -t RES_CONF_PATHS < <(mod_path "/ETC_PATHS/resolv.conf")
   for RES_INFO_P in "${RES_CONF_PATHS[@]}"; do
     if [[ -e "$RES_INFO_P" ]] ; then
       CHECK=1
@@ -58,7 +58,7 @@ check_iptables()
 
   local CHECK=0
   local IPT_CONF_PATHS
-  mapfile -t IPT_CONF_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/iptables")
+  mapfile -t IPT_CONF_PATHS < <(mod_path "/ETC_PATHS/iptables")
   for IPT_INFO_P in "${IPT_CONF_PATHS[@]}"; do
     if [[ -e "$IPT_INFO_P" ]] ; then
       CHECK=1
@@ -77,7 +77,7 @@ check_snmp()
 
   local CHECK=0
   local SNMP_CONF_PATHS
-  mapfile -t SNMP_CONF_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/snmp/snmpd.conf")
+  mapfile -t SNMP_CONF_PATHS < <(mod_path "/ETC_PATHS/snmp/snmpd.conf")
   for SNMP_CONF_P in "${SNMP_CONF_PATHS[@]}"; do
     if [[ -e "$SNMP_CONF_P" ]] ; then
       CHECK=1

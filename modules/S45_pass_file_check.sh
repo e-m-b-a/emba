@@ -26,7 +26,7 @@ S45_pass_file_check()
   local PASSWD_STUFF
   PASS_FILES_FOUND=0
 
-  mapfile -t PASSWD_STUFF < <(config_find "$CONFIG_DIR""/pass_files.cfg" "")
+  mapfile -t PASSWD_STUFF < <(config_find "$CONFIG_DIR""/pass_files.cfg")
 
   if [[ "${PASSWD_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#PASSWD_STUFF[@]}" -ne 0 ]] ; then
@@ -35,7 +35,7 @@ S45_pass_file_check()
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     local SUDOERS
     SUDOERS=""
-    mapfile -t SUDOERS_FILE_PATH < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/sudoers")
+    mapfile -t SUDOERS_FILE_PATH < <(mod_path "/ETC_PATHS/sudoers")
 
     for SUDOERS_FILE in "${SUDOERS_FILE_PATH[@]}" ; do
       if [[ -e "$SUDOERS_FILE" ]] ; then

@@ -32,7 +32,7 @@ search_ssh_files()
   sub_module_title "Search ssh files"
 
   local SSH_FILES
-  mapfile -t SSH_FILES < <(config_find "$CONFIG_DIR""/ssh_files.cfg" "")
+  mapfile -t SSH_FILES < <(config_find "$CONFIG_DIR""/ssh_files.cfg")
 
   if [[ "${SSH_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#SSH_FILES[@]}" -ne 0 ]] ; then
@@ -65,7 +65,7 @@ check_squid()
   fi
 
   CHECK=0
-  SQUID_DAEMON_CONFIG_LOCS=("$FIRMWARE_PATH""/ETC_PATHS/" "$FIRMWARE_PATH""/ETC_PATHS/squid" "$FIRMWARE_PATH""/ETC_PATHS/squid3" "$FIRMWARE_PATH""/usr/local/etc/squid" "$FIRMWARE_PATH""/usr/local/squid/etc")
+  SQUID_DAEMON_CONFIG_LOCS=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
   mapfile -t SQUID_PATHS_ARR < <(mod_path_array "${SQUID_DAEMON_CONFIG_LOCS[@]}")
   if [[ "${SQUID_PATHS_ARR[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"

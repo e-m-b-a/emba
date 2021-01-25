@@ -151,7 +151,7 @@ path_handling() {
   # locations will be added there
   # Add placeholder "ETC_PATHS" instead of path "etc"
   CHECK=0
-  mapfile -t TEST_PATHS < <(mod_path "$FIRMWARE_PATH""/ETC_PATHS/xy.cfg")
+  mapfile -t TEST_PATHS < <(mod_path "/ETC_PATHS/xy.cfg")
 
   for TEST_E in "${TEST_PATHS[@]}" ; do
     if [[ -f "$TEST_E" ]] ; then
