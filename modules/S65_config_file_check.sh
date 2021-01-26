@@ -32,15 +32,15 @@ scan_config()
   sub_module_title "Search for config file"
 
   local CONF_FILES_ARR
-  readarray -t CONF_FILES_ARR < <(printf '%s' "$(config_find "$CONFIG_DIR""/config_files.cfg" "")")
+  readarray -t CONF_FILES_ARR < <(config_find "$CONFIG_DIR""/config_files.cfg")
 
   if [[ "${CONF_FILES_ARR[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#CONF_FILES_ARR[@]} -ne 0 ]] ; then
-    print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" configuration files:"
+    print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
     for LINE in "${CONF_FILES_ARR[@]}" ; do
-      if [[ -f "$LINE" ]] ; then
-        print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-      fi
+      #if [[ -f "$LINE" ]] ; then
+      print_output "$(indent "$(orange "$LINE")")" # "$(print_path "$LINE")"
+      #fi
     done
   else
     print_output "[-] No configuration files found"
@@ -51,7 +51,7 @@ check_fstab()
 {
   sub_module_title "Scan fstab"
 
-  IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/fstab")")
+  IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
 
   if [[ ${#FSTAB_ARR[@]} -ne 0 ]] ; then
     readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -exec grep "username" {} \;)")

@@ -31,14 +31,13 @@ interesting_binaries()
 {
   sub_module_title "Interesting binaries"
 
-  local INT_BIN
-  INT_BIN="$(config_find "$CONFIG_DIR""/interesting_binaries.cfg" "")"
   local COUNT=0
   INT_COUNT=0
 
-  if [[ "$INT_BIN" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "$INT_BIN" ]] ; then
-    for LINE in $INT_BIN ; do
+  mapfile -t INT_BIN < <(config_find "$CONFIG_DIR""/interesting_binaries.cfg")
+  if [[ "${INT_BIN[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#INT_BIN[@]}" -ne 0 ]] ; then
+    for LINE in "${INT_BIN[@]}" ; do
       if [[ -f "$LINE" ]] && file "$LINE" | grep -q "executable" ; then
         if [[ $COUNT -eq 0 ]] ; then
           print_output "[+] Found interesting binaries:"
@@ -58,14 +57,13 @@ post_exploitation()
 {
   sub_module_title "Interesting binaries for post exploitation"
 
-  local INT_BIN_PE
-  INT_BIN_PE="$(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg" "")"
   local COUNT=0
   POST_COUNT=0
 
-  if [[ "$INT_BIN_PE" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "$INT_BIN_PE" ]] ; then
-    for LINE in $INT_BIN_PE ; do
+  mapfile -t INT_BIN_PE < <(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg")
+  if [[ "${INT_BIN_PE[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#INT_BIN_PE[@]}" -ne 0 ]] ; then
+    for LINE in "${INT_BIN_PE[@]}" ; do
       if [[ -f "$LINE" ]] && file "$LINE" | grep -q "executable" ; then
         if [[ $COUNT -eq 0 ]] ; then
           print_output "[+] Found interesting binaries for post exploitation:"

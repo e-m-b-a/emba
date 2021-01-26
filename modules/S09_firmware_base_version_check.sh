@@ -14,12 +14,12 @@
 
 S09_firmware_base_version_check() {
 
-  module_log_init "${FUNCNAME[0]}"
-  module_title "Binary firmware versions detection"
-
   # this module check for version details statically.
   # we only execute it if we have not done it already via P09
   if [[ "$TESTING_DONE" -ne 1 ]]; then
+    module_log_init "${FUNCNAME[0]}"
+    module_title "Binary firmware versions detection"
+
     declare -a VERSIONS_DETECTED
   
     print_output "[*] Initial version detection running " | tr -d "\n"

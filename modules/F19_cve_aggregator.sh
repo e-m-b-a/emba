@@ -241,7 +241,7 @@ aggregate_versions() {
   done
 
   # sorting and unique our versions array:
-  eval "VERSIONS_CLEANED=($(for i in  "${VERSIONS_CLEANED[@]}" ; do  echo "\"$i\"" ; done | sort -u))"
+  eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
 
   if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
     for VERSION in "${VERSIONS_CLEANED[@]}"; do
@@ -339,7 +339,8 @@ generate_cve_details() {
 
   print_output ""
   print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-  for FILE_AGGR in "$LOG_DIR"/aggregator/*; do
+  mapfile -d '' LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -name "*" -print0 2> /dev/null)
+  for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
     if [[ -f $FILE_AGGR ]]; then
       STATS=$(grep "\[+\]\ Statistics\:" "$FILE_AGGR" | cut -d: -f2- 2>/dev/null)
   

@@ -24,20 +24,20 @@ S45_pass_file_check()
   module_title "Search password files"
 
   local PASSWD_STUFF
-  PASSWD_STUFF="$(config_find "$CONFIG_DIR""/pass_files.cfg" "")"
   PASS_FILES_FOUND=0
 
-  if [[ "$PASSWD_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "$PASSWD_STUFF" ]] ; then
-    local PASSWD_COUNT
-    PASSWD_COUNT=$(echo "$PASSWD_STUFF" | wc -w)
+  mapfile -t PASSWD_STUFF < <(config_find "$CONFIG_DIR""/pass_files.cfg")
+
+  if [[ "${PASSWD_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#PASSWD_STUFF[@]}" -ne 0 ]] ; then
 
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     local SUDOERS
     SUDOERS=""
-    SUDOERS_FILE_PATH="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/sudoers")"
-    for SUDOERS_FILE in $SUDOERS_FILE_PATH ; do
+    mapfile -t SUDOERS_FILE_PATH < <(mod_path "/ETC_PATHS/sudoers")
+
+    for SUDOERS_FILE in "${SUDOERS_FILE_PATH[@]}" ; do
       if [[ -e "$SUDOERS_FILE" ]] ; then
         SUDOERS="$SUDOERS""\\n""$(grep -v -e '^$' "$SUDOERS_FILE" 2>/dev/null | grep -v "#" 2>/dev/null)"
       fi
@@ -46,9 +46,9 @@ S45_pass_file_check()
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     WHO_HAS_BEEN_SUDO=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -name .sudo_as_admin_successful 2>/dev/null)
 
-    if [[ "$PASSWD_COUNT" -gt 0 ]] || [[ -n "$SUDOERS" ]] || [[ -n "$WHO_HAS_BEEN_SUDO" ]] ; then
-      print_output "[+] Found ""$PASSWD_COUNT"" password related files:"
-      for LINE in $PASSWD_STUFF ; do
+    if [[ "${#PASSWD_STUFF[@]}" -gt 0 ]] || [[ -n "$SUDOERS" ]] || [[ -n "$WHO_HAS_BEEN_SUDO" ]] ; then
+      print_output "[+] Found ""${#PASSWD_STUFF[@]}"" password related files:"
+      for LINE in "${PASSWD_STUFF[@]}" ; do
         print_output "$(indent "$(print_path "$LINE")")"
         if [[ -f "$LINE" ]] && ! [[ -x "$LINE" ]] ; then
 	        local POSSIBLE_PASSWD
@@ -60,7 +60,7 @@ S45_pass_file_check()
 
           local ROOT_ACCOUNTS
           # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-          ROOT_ACCOUNTS=$(grep -v -E "^#" "$LINE" 2>/dev/null| awk -F: '$3 == 0 { print $1}' 2>/dev/null 2> /dev/null)
+          ROOT_ACCOUNTS=$(grep -v -E "^#" "$LINE" 2>/dev/null| awk -F: '$3 == 0 { print $1}' 2> /dev/null 2> /dev/null)
 
           local L_BREAK=0
           if [[ "$(echo "$ROOT_ACCOUNTS" | wc -w)" -gt 0 ]] ; then
