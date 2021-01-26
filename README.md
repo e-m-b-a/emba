@@ -49,6 +49,8 @@ Test firmware / live system
 -g                Create grep-able log file in [log_path]/fw_grep.log
                   Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE
 -E                Enable automated qemu emulation tests (WARNING this module could harm your host!)
+-D                Run emba in docker container
+-i                Ignore log path check
 
 Dependency check
 -d                Only check dependencies
@@ -66,26 +68,7 @@ Help
 ```
 
 #### Docker Container
-There is a simple docker-compose setup added which allows you to do everything outside use the cwe-checker
-
-To run it simply do the following:
-
-Build it:
-```
-docker-compose build emba
-```
-
-Run it:
-```
-FIRMWARE=/absolute/path/to/firmware LOG=/home/n/firmware_log/ docker-compose run emba
-```
-
-This will drop you a shell in the folder where emba has been added. 
-The firmware is located at `/firmware/` and the log directory at `/log/`
-
-```
-./emba.sh -l /log/ -f /firmware/
-```
+There is a simple docker-compose setup added which allows you to use emba in a docker container - [see the wiki for more details](https://github.com/e-m-b-a/emba/wiki/Docker-Container)
 
 #### Examples
 
@@ -131,81 +114,10 @@ __Good to know:__
 
 ### Dependencies
 
-_emba_ uses multiple other tools and components.
-
-For using _emba_ with all features, you will need following tools on your __Kali Linux__:
-- `readelf`
-- `find`
-- `grep`
-- `modinfo`
-- `realpath`
-- `sed`
-- `cut`
-- `sort`
-- `basename`
-- `strings`
-- `Option: tree`
-- `Option: shellcheck`
-- `Option: docker`
-- `Option: yara`
-- `Option: qemu static user mode emulators`
-- `Option: binwalk`
-
-To check these dependencies, only run `sudo ./emba.sh -d`
-
-For installation of all needed dependencies, run `sudo ./installer.sh`
+_emba_ uses multiple other tools and components - [see the wiki for more details](https://github.com/e-m-b-a/emba/wiki/Dependencies)
 
 ### Structure
-
-```
-├── installer.sh
-```
-    
--> Tries to install all needed dependencies. Internet access for downloading is required.
-  - Afterwards no Internet access is needed
-```
-├── check_project.sh
-```
-    
--> Check full project with all subdirectories with [shellchecker](https://github.com/koalaman/shellcheck)   
-   - Install it on your system (Kali) with `apt-get install shellcheck`
-```
-├── emba.sh
-```
--> Main script of this project
-```
-├── config
-```
--> Configuration files for different modules with file names, regular expressions or paths. These files are very handy,
-   easy to use and they also keep the modules clean.
-```
-├── external
-```
--> All tools and files which are from other projects and necessary for _emba_
-```
-├── helpers
-```
--> Some scripts for stuff like pretty formatting on your terminal or path handling
-```
-└── modules
-```
--> The stars of the project - every module is an own file and will be called by [_emba_](/emba.sh). 
-
-### External tools in directory 'external'
-- ./yara
-    - yara rule files - add your own rules here
-- ./checksec
-    - https://github.com/slimm609/checksec.sh
-- ./linux-exploit-suggester.sh
-    - https://github.com/mzet-/linux-exploit-suggester
-- ./objdump with all architectures enabled
-    - https://www.gnu.org/software/binutils/
-- ./allitems.csv
-    - Use the CSV formated vulnerability list from Mitre: https://cve.mitre.org/data/downloads/
+[See the wiki for more details](https://github.com/e-m-b-a/emba/wiki/Structure-of-the-emba-directory)
 
 ### How to write own modules?
-
-[Look here](/modules/template_module.sh) - read this file, copy and modify it. Add your _main_ function, where `module_log_init` 
-and `module_title` are been called to the [_emba_](/emba.sh) script. That's it. Or if you only want to run a single command:
-Add your command to [_user\_check_](/modules/user_check.sh) and uncomment `user_check` in the [_emba_](/emba.sh) script.
-
+[See the wiki for more details](https://github.com/e-m-b-a/emba/wiki/How-to-write-own-modules)

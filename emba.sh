@@ -64,6 +64,8 @@ main()
   export YARA=1
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
+  export DOCKER=0
+  export IGNORE_LOG_DEL=0
   export FORCE=0
   export LOG_GREP=0
   export QEMULATION=0
@@ -94,7 +96,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cde:Ef:Fghk:l:m:sz OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -109,6 +111,9 @@ main()
       d)
         export ONLY_DEP=1
         export BAP=1
+        ;;
+      D)
+        export DOCKER=1
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
@@ -129,6 +134,9 @@ main()
       h)
         print_help
         exit 0
+        ;;
+      i)
+        export IGNORE_LOG_DEL=1
         ;;
       k)
         export KERNEL=1
@@ -178,8 +186,10 @@ main()
   fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
-    # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
-    log_folder
+    if [[ $IGNORE_LOG_DEL -eq 0 ]] ; then
+      # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
+      log_folder
+    fi
 
     if [[ $LOG_GREP -eq 1 ]] ; then
       create_grep_log
@@ -188,6 +198,7 @@ main()
 
     set_exclude
   fi
+
 
   dependency_check
 
@@ -203,15 +214,21 @@ main()
       S25_kernel_check
     fi
   fi
- 
+
   if [[ $PRE_CHECK -eq 1 ]] ; then
     if [[ -f "$FIRMWARE_PATH" ]]; then
-
+    
+      # we have to fix this, so that also the pre-checker modules are running inside the docker
+      if [[ $DOCKER -eq 1 ]] ; then
+        print_output "" "no_log"
+        print_output "[!] Running pre checker modules outside of the docker environment for preparation" "no_log"
+      fi
+      
       echo
       print_output "[!] Extraction started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
 
-       # 'main' functions of imported modules
-       # in the pre-check phase we execute all modules with P[Number]_Name.sh
+      # 'main' functions of imported modules
+      # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
@@ -235,12 +252,41 @@ main()
             fi
           fi
         done
+
+        echo
+        print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       fi
-
-      echo
-      print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-
     fi
+  fi
+  
+  if [[ $DOCKER -eq 1 ]] ; then
+    if ! command -v docker-compose > /dev/null ; then
+      print_output "[!] No docker-compose found" "no_log"
+      print_output "$(indent "Install docker-compose via apt-get install docker-compose to use emba with docker")" "no_log"
+      exit 1
+    fi
+
+    OPTIND=1
+    ARGS=""
+    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+      case $OPT in
+        D|f|i|l)
+          ;;
+        *)
+          export ARGS="$ARGS -$OPT"
+          ;;
+      esac
+    done
+
+    print_output "" "no_log"
+    print_output "[!] Emba initializes kali docker container.\\n" "no_log"
+
+    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware/ -i $ARGS"
+
+    print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+    print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
+    print_output "[*] Log directory: $LOG_DIR" "no_log"
+    exit
   fi
 
   if [[ $FIRMWARE -eq 1 ]] ; then
@@ -309,12 +355,12 @@ main()
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n"
       write_grep_log "$(date)" "TIMESTAMP"
       write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
       print_output "[!] No extracted firmware found" "no_log"
-      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")" "no_log"
+      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
       exit 1
   fi
 }

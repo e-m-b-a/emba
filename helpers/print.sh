@@ -358,6 +358,8 @@ print_help()
   echo -e "$CYAN""-g""$NC""                Create grep-able log file in [log_path]/fw_grep.log"
   echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
   echo -e "$CYAN""-E""$NC""                Enable automated qemu emulation tests (WARNING this module could harm your host!)"
+  echo -e "$CYAN""-D""$NC""                Run emba in docker container"
+  echo -e "$CYAN""-i""$NC""                Ignore log path check"
   echo -e "\\nDependency check"
   echo -e "$CYAN""-d""$NC""                Only check dependencies"
   echo -e "$CYAN""-F""$NC""                Check dependencies but ignore errors"

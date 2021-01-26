@@ -34,6 +34,14 @@ dependency_check()
     exit 1
   fi
 
+  if [[ $DOCKER -eq 1 && $EUID -ne 0 ]]; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    WARNING: With docker enabled this script needs root privileges""$NC"
+    echo -e "$RED""    WARNING: Exit now""$NC"
+    echo -e "$RED""    HINT: Run emba with sudo""$NC"
+    exit 1
+  fi
+
   if [[ $EUID -eq 0 ]] ; then
     echo -e "$GREEN""ok""$NC"
   else
@@ -329,6 +337,15 @@ dependency_check()
   if ! command -v qemu-mips-static > /dev/null ; then
     echo -e "$ORANGE""not ok""$NC"
     echo -e "$ORANGE""    install qemu static emulators via apt-get install qemu-user-static""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+  
+  print_output "    docker-compose - \\c" "no_log"
+  if ! command -v docker-compose > /dev/null ; then
+    echo -e "$ORANGE""not ok""$NC"
+    echo -e "$ORANGE""    install docker-compose to use emba in docker container""$NC"
+    echo -e "$ORANGE""    install docker-compose via apt-get install docker-compose""$NC"
   else
     echo -e "$GREEN""ok""$NC"
   fi
