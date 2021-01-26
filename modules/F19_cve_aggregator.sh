@@ -82,14 +82,11 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
 
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
-    VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
-    VERSION_lower="${VERSION_lower//)\ built/}"
+    VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ .v/perl\ }"
+    VERSION_lower="${VERSION_lower//.\ built.*/}"
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
     VERSION_lower="${VERSION_lower//(gdb)/}"
-    # unzip .... info-zip -> info-zip
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/unzip\ ([0-9]\.[0-9][0-9])\ of\ .*\ by\ info-zip/info-zip:unzip \1/g')"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipinfo\ ([0-9]\.[0-9][0-9])\ of\ .*\ info-zip/info-zip:zip \1/g')"
     #zic.c
     VERSION_lower="${VERSION_lower//zic\.c/zic}"
     #bzip2, a block-sorting file compressor.  Version 1.0.6, 
@@ -104,8 +101,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//gnu\ midnight\ commander/midnight_commander}"
     #xl2tpd version:  xl2tpd-1.3.6
     VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ xl2tpd-/xl2tp\ }"
-    VERSION_lower="${VERSION_lower//xl2tpd\ server.*/xl2tpd\ }"
-    VERSION_lower="${VERSION_lower//xl2tpd-/}"
+    VERSION_lower="${VERSION_lower//xl2tpd\ server.*\ xl2tpd-/xl2tpd\ }"
+    #VERSION_lower="${VERSION_lower//xl2tpd-/}"
     VERSION_lower="${VERSION_lower//goahead\ /goahead\ }"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
@@ -141,8 +138,6 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//revision\ /}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
     VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
-    # GNU grep 2.6.3
-    VERSION_lower="${VERSION_lower//^gnu\ /}"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
@@ -198,14 +193,25 @@ prepare_version_data() {
     #socat 2.0.0-b4 -> socat 2.0.0:b4 
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/socat\ ([0-9]\.[0-9]\.[0-9])-([a-z][0-9])/socat\ \1:\2/g')"
     # ntpd 4.2.8p13 -> ntp 4.2.8:p13
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpd\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntp[dq]\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
     # ntpdate 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdate\ ([0-9]\.[0-9]\.[0-9])([a-z]([0-9]))/ntp\ \1:\2/g')"
+    # unzip .... info-zip -> info-zip
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipinfo\ ([0-9]\.[0-9][0-9])\ .*\ info-zip.*/info-zip:zip\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/unzip\ ([0-9]\.[0-9][0-9])\ .*\ by\ info-zip.*/info-zip:unzip\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zip\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zip\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
     #tar (GNU tar) 1.23
-    VERSION_lower="${VERSION_lower//(gnu\ tar)/gnu:tar}"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ tar)/gnu:tar/')"
     VERSION_lower="${VERSION_lower//gnu\ sed/gnu:sed}"
     VERSION_lower="${VERSION_lower//gnu\ make/gnu:make}"
-    VERSION_lower="${VERSION_lower//(gnu\ binutils)/gnu:binutils}"
+    #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ binutils.*)/gnu:binutils/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ grep.*)/gnu:grep/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ diffutils.*)/gnu:diffutils/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ coreutils.*)/gnu:coreutils/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ sharutils.*)/gnu:sharutils/')"
     #Roaring Penguin PPPoE Version
     VERSION_lower="${VERSION_lower//roaring\ penguin\ pppoe/roaring_penguin:pppoe}"
     #upnp controlpoint 1.0
@@ -232,6 +238,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^\ //')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ $//')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\.$//')"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
@@ -401,7 +409,7 @@ generate_cve_details() {
           VERSION="$VERSION $FIELD"
         elif [[ "$F_COUNTER" -gt 2 ]];then
           # if we reach this and our counter is above 2 it is probably a version field
-          VERSION="$VERSION $FIELD"
+          VERSION="$VERSION-$FIELD"
         fi
         # sometimes we start with a space
         # shellcheck disable=SC2001
