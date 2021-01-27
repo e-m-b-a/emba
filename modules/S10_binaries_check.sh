@@ -38,7 +38,7 @@ vul_func_basic_check()
   local VULNERABLE_FUNCTIONS
   VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
   print_output "[*] Interesting functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-  IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ -e /g' )"
+  IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ -e /g')"
 
   if [[ "$VULNERABLE_FUNCTIONS" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$VULNERABLE_FUNCTIONS" ]] ; then
@@ -51,6 +51,8 @@ vul_func_basic_check()
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
           print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
           for VUL_FUNC in "${VUL_FUNC_RESULT[@]}" ; do
+            # shellcheck disable=SC2001
+            VUL_FUNC="$(echo "$VUL_FUNC" | sed -e 's/[[:space:]]\+/\t/g')"
             print_output "$(indent "$VUL_FUNC")"
           done
           COUNTER=$((COUNTER+1))

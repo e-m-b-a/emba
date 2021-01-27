@@ -96,7 +96,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:zZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -148,11 +148,23 @@ main()
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
         ;;
+      N)
+        export FW_NOTES="$OPTARG"
+        ;;
       s)
         export SHORT_PATH=1
         ;;
+      X)
+        export FW_VERSION="$OPTARG"
+        ;;
+      Y)
+        export FW_VENDOR="$OPTARG"
+        ;;
       z)
         export FORMAT_LOG=1
+        ;;
+      Z)
+        export FW_DEVICE="$OPTARG"
         ;;
       *)
         print_output "[-] Invalid option" "no_log"
@@ -163,6 +175,26 @@ main()
   done
 
   LOG_DIR="$(abs_path "$LOG_DIR")"
+  print_output "" "no_log"
+
+  if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+
+    if [[ -n "$FW_VENDOR" ]]; then
+      print_output "[*] Testing Firmware from vendor: ""$ORANGE""""$FW_VENDOR""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_VERSION" ]]; then
+      print_output "[*] Testing Firmware version: ""$ORANGE""""$FW_VERSION""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_DEVICE" ]]; then
+      print_output "[*] Testing Firmware from device: ""$ORANGE""""$FW_DEVICE""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_NOTES" ]]; then
+      print_output "[*] Additional notes: ""$ORANGE""""$FW_NOTES""""$NC""" "no_log"
+    fi
+
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+  fi
 
   if [[ $KERNEL -eq 1 ]] ; then
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
@@ -178,7 +210,7 @@ main()
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
-    print_output "[*] Emba starts with some basic tests on it." "no_log"
+    print_output "[*] Emba starts with the pre-testing phase." "no_log"
   else
     print_output "[-] Invalid firmware file" "no_log"
     print_help
