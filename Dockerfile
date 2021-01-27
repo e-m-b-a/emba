@@ -9,4 +9,8 @@ ADD . /app
 
 RUN yes | ./installer.sh
 
+RUN cd ./external/cve-search/ && \
+    pip3 install -r requirements.txt && \
+    xargs sudo apt-get install -y < requirements.system
+
 ENTRYPOINT [ "/bin/bash" ]
