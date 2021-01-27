@@ -5,3 +5,4 @@ services:
     volumes:
         - ${FIRMWARE}:/firmware
         - ${LOG}:/log
+    network_mode: "host"
