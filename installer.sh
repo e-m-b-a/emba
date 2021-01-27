@@ -334,6 +334,95 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+# binwalk
+
+INSTALL_APP_LIST=()
+print_tool_info "python3-pip" 1
+print_tool_info "python3-crypto" 1
+print_tool_info "python3-opengl" 1
+print_tool_info "python3-pyqt5" 1
+print_tool_info "python3-pyqt5.qtopengl" 1
+print_tool_info "python3-numpy" 1
+print_tool_info "python3-scipy" 1
+print_tool_info "mtd-utils" 1
+print_tool_info "gzip" 1
+print_tool_info "bzip2" 1
+print_tool_info "tar" 1
+print_tool_info "arj" 1
+print_tool_info "lhasa" 1
+print_tool_info "p7zip" 1
+print_tool_info "p7zip-full" 1
+print_tool_info "cabextract" 1
+print_tool_info "cramfsswap" 1
+print_tool_info "squashfs-tools" 1
+print_tool_info "sleuthkit" 1
+print_tool_info "default-jdk" 1
+print_tool_info "lzop" 1
+print_tool_info "srecord" 1
+print_tool_info "zlib1g-dev" 1
+print_tool_info "liblzma-dev" 1
+print_tool_info "liblzo2-dev" 1
+
+echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
+read -p "(y/N)" -r ANSWER
+case ${ANSWER:0:1} in
+  y|Y )
+
+    for APP in "${INSTALL_APP_LIST[@]}" ; do
+      apt-get install "$APP" -y
+    done
+    pip3 install nose 
+    pip3 install coverage
+    pip3 install pyqtgraph
+    pip3 install capstone
+    pip3 install cstruct
+
+    if [[ -f "/usr/local/bin/binwalk" ]]; then
+      echo -e "Found binwalk. Skipping installation."
+    else
+
+      git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+
+      git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
+      sudo python3 ./external/binwalk/yaffshiv/setup.py install
+
+      git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+      sudo CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+
+      git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
+      sudo pip3 install -r ./external/binwalk/jefferson/requirements.txt
+      sudo python3 ./external/binwalk/jefferson/setup.py install
+
+      mkdir ./external/binwalk/unstuff
+      wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+      tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
+      sudo cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+
+      git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
+      make -C ./external/binwalk/cramfs-tools/
+      install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
+      sudo install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
+
+      git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
+      cd ./external/binwalk/ubi_reader
+      git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
+      sudo python2 setup.py install
+      cd ..
+
+      sudo python3 setup.py install
+      cd ../..
+
+      rm -rf ./external/binwalk
+
+      if [[ -f "/usr/local/bin/binwalk" ]] ; then
+        echo -e "$GREEN""binwalk installed successfully""$NC"
+      else
+        echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
+      fi
+    fi
+  ;;
+esac
+
 # aha for html generation - future extension of emba
 #echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
 #if ! [[ -f "external/aha" ]] ; then
