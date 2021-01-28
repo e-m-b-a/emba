@@ -28,7 +28,7 @@ S05_firmware_details()
   if [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l)" -gt 0 ]] || [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)" -gt 0 ]];then
      HTML_REPORT=1
   fi
-  
+
   LOG_FILE="$( get_log_file )"
 
   # excluded paths will be also printed

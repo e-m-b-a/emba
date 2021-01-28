@@ -145,7 +145,6 @@ check_bootloader()
       fi
     fi
     if [[ $FOUND -eq 1 ]] ; then
-      HTML_REPORT=1
       print_output "[+] GRUB has password protection"
     else
       print_output "[-] No hashed password line in GRUB boot file"
@@ -325,13 +324,13 @@ find_runlevel()
   done
 
   if [[ ${#INITTAB_V[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     for INIT_TAB_F in "${INITTAB_V[@]}" ; do
       print_output "[*] Check runlevel in ""$(print_path "$INIT_TAB_F")"
       FIND=$(awk -F: '/^id/ { print $2; }' "$INIT_TAB_F" | head -n 1)
       if [[ -z "$FIND" ]] ; then
         print_output "[-] No default run level ""$(print_path "$INIT_TAB_F")"" found"
       else
+        HTML_REPORT=1
         print_output "[+] Found default run level: ""$(orange "$FIND")"
       fi
     done

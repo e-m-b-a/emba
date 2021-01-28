@@ -185,7 +185,7 @@ main()
      FORMAT_LOG=1
      print_output "[!] Activate format log for HTML converter" "no_log"
   fi
-  
+
   LOG_DIR="$(abs_path "$LOG_DIR")"
   CONFIG_DIR="$(abs_path "$CONFIG_DIR")"
   HTML_PATH="$(abs_path "$HTML_PATH")"
@@ -244,11 +244,10 @@ main()
 
     set_exclude
   fi
-  
-  if [[ $HTML -eq 1 ]]; then
-     mkdir $HTML_PATH
-  fi
 
+  if [[ "$HTML" -eq 1 ]]; then
+     mkdir "$HTML_PATH"
+  fi
 
   dependency_check
 
@@ -406,7 +405,7 @@ main()
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
-       HTML_REPORT=1
+      HTML_REPORT=1
       $MODULE_MAIN
       if [[ $HTML == 1 ]]; then
            generate_html_file "$LOG_FILE" "$HTML_REPORT"
