@@ -11,7 +11,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributors: Stefan Haboeck
 
 # Description:  Main script for load all necessary files and call main function of modules
 
@@ -20,33 +19,33 @@ INVOCATION_PATH="."
 import_helper()
 {
   local HELPERS
-  HELPERS=$(find "$HELP_DIR" -iname "*.sh" 2> /dev/null)
-  local HELPERS_COUNT
-  HELPERS_COUNT=$(echo "$HELPERS" | wc -l)
-  for HELPER_FILE in $HELPERS ; do
-    if ( file "$HELPER_FILE" | grep -q "shell script" ) ; then
+  local HELPER_COUNT
+  mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "*.sh" -print0 2> /dev/null)
+  for HELPER_FILE in "${HELPERS[@]}" ; do
+    if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "$HELPER_FILE"
+      (( HELPER_COUNT+=1 ))
     fi
   done
-  print_output "==> ""$GREEN""Imported ""$HELPERS_COUNT"" necessary files""$NC" "no_log"
+  print_output "==> ""$GREEN""Imported ""$HELPER_COUNT"" necessary files""$NC" "no_log"
 }
 
 import_module()
 {
   local MODULES
-  MODULES=$(find "$MOD_DIR" -iname "*.sh" 2> /dev/null)
-  local MODULES_COUNT
-  MODULES_COUNT=$(echo "$MODULES" | wc -l)
-  for MODULE_FILE in $MODULES ; do
-    if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+  local MODULE_COUNT
+  mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
+  for MODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "$MODULE_FILE"
+      (( MODULE_COUNT+=1 ))
     fi
   done
-  print_output "==> ""$GREEN""Imported ""$MODULES_COUNT"" module/s""$NC" "no_log"
+  print_output "==> ""$GREEN""Imported ""$MODULE_COUNT"" module/s""$NC" "no_log"
 }
 
 main()
@@ -65,6 +64,8 @@ main()
   export YARA=1
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
+  export DOCKER=0
+  export IGNORE_LOG_DEL=0
   export FORCE=0
   export LOG_GREP=0
   export HTML=0
@@ -99,7 +100,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cde:Ef:Fghk:l:m:sWz OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -114,6 +115,9 @@ main()
       d)
         export ONLY_DEP=1
         export BAP=1
+        ;;
+      D)
+        export DOCKER=1
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
@@ -135,6 +139,9 @@ main()
         print_help
         exit 0
         ;;
+      i)
+        export IGNORE_LOG_DEL=1
+        ;;
       k)
         export KERNEL=1
         export KERNEL_CONFIG="$OPTARG"
@@ -145,14 +152,26 @@ main()
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
         ;;
+      N)
+        export FW_NOTES="$OPTARG"
+        ;;
       s)
         export SHORT_PATH=1
         ;;
       W)
         export HTML=1
         ;;
+      X)
+        export FW_VERSION="$OPTARG"
+        ;;
+      Y)
+        export FW_VENDOR="$OPTARG"
+        ;;
       z)
         export FORMAT_LOG=1
+        ;;
+      Z)
+        export FW_DEVICE="$OPTARG"
         ;;
       *)
         print_output "[-] Invalid option" "no_log"
@@ -161,7 +180,7 @@ main()
         ;;
     esac
   done
-  
+
   if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
      FORMAT_LOG=1
      print_output "[!] Activate format log for HTML converter" "no_log"
@@ -170,6 +189,26 @@ main()
   LOG_DIR="$(abs_path "$LOG_DIR")"
   CONFIG_DIR="$(abs_path "$CONFIG_DIR")"
   HTML_PATH="$(abs_path "$HTML_PATH")"
+  print_output "" "no_log"
+
+  if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+
+    if [[ -n "$FW_VENDOR" ]]; then
+      print_output "[*] Testing Firmware from vendor: ""$ORANGE""""$FW_VENDOR""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_VERSION" ]]; then
+      print_output "[*] Testing Firmware version: ""$ORANGE""""$FW_VERSION""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_DEVICE" ]]; then
+      print_output "[*] Testing Firmware from device: ""$ORANGE""""$FW_DEVICE""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_NOTES" ]]; then
+      print_output "[*] Additional notes: ""$ORANGE""""$FW_NOTES""""$NC""" "no_log"
+    fi
+
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+  fi
 
   if [[ $KERNEL -eq 1 ]] ; then
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
@@ -185,7 +224,7 @@ main()
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
-    print_output "[*] Emba starts with some basic tests on it." "no_log"
+    print_output "[*] Emba starts with the pre-testing phase." "no_log"
   else
     print_output "[-] Invalid firmware file" "no_log"
     print_help
@@ -193,8 +232,10 @@ main()
   fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
-    # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
-    log_folder
+    if [[ $IGNORE_LOG_DEL -eq 0 ]] ; then
+      # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
+      log_folder
+    fi
 
     if [[ $LOG_GREP -eq 1 ]] ; then
       create_grep_log
@@ -207,6 +248,7 @@ main()
   if [[ $HTML -eq 1 ]]; then
      mkdir $HTML_PATH
   fi
+
 
   dependency_check
 
@@ -222,21 +264,27 @@ main()
       S25_kernel_check
     fi
   fi
- 
+
   if [[ $PRE_CHECK -eq 1 ]] ; then
     if [[ -f "$FIRMWARE_PATH" ]]; then
-
+    
+      # we have to fix this, so that also the pre-checker modules are running inside the docker
+      if [[ $DOCKER -eq 1 ]] ; then
+        print_output "" "no_log"
+        print_output "[!] Running pre checker modules outside of the docker environment for preparation" "no_log"
+      fi
+      
       echo
       print_output "[!] Extraction started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
 
-       # 'main' functions of imported modules
-       # in the pre-check phase we execute all modules with P[Number]_Name.sh
+      # 'main' functions of imported modules
+      # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        MODULES=$(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
-        for MODULE_FILE in $MODULES ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
+        for MODULE_FILE in "${MODULES[@]}" ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
@@ -247,19 +295,48 @@ main()
           if [[ "$SELECT_NUM" =~ ^[p,P]{1}[0-9]+ ]]; then
             local MODULE
             MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            if ( file "$MODULE" | grep -q "shell script" ) ; then
+            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
             fi
           fi
         done
+
+        echo
+        print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       fi
-
-      echo
-      print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-
     fi
+  fi
+  
+  if [[ $DOCKER -eq 1 ]] ; then
+    if ! command -v docker-compose > /dev/null ; then
+      print_output "[!] No docker-compose found" "no_log"
+      print_output "$(indent "Install docker-compose via apt-get install docker-compose to use emba with docker")" "no_log"
+      exit 1
+    fi
+
+    OPTIND=1
+    ARGS=""
+    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+      case $OPT in
+        D|f|i|l)
+          ;;
+        *)
+          export ARGS="$ARGS -$OPT"
+          ;;
+      esac
+    done
+
+    print_output "" "no_log"
+    print_output "[!] Emba initializes kali docker container.\\n" "no_log"
+
+    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware/ -i $ARGS"
+
+    print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+    print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
+    print_output "[*] Log directory: $LOG_DIR" "no_log"
+    exit
   fi
 
   if [[ $FIRMWARE -eq 1 ]] ; then
@@ -286,9 +363,9 @@ main()
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        MODULES=$(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
-        for MODULE_FILE in $MODULES ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
+        for MODULE_FILE in "${MODULES[@]}" ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             HTML_REPORT=0
@@ -304,7 +381,7 @@ main()
           if [[ "$SELECT_NUM" =~ ^[s,S]{1}[0-9]+ ]]; then
             local MODULE
             MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            if ( file "$MODULE" | grep -q "shell script" ) ; then
+            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               HTML_REPORT=0
@@ -324,12 +401,12 @@ main()
 
   # 'main' functions of imported finishing modules
   local MODULES
-  MODULES=$(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
-  for MODULE_FILE in $MODULES ; do
-    if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+  mapfile -t MODULES < <(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
+  for MODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
-      HTML_REPORT=1
+       HTML_REPORT=1
       $MODULE_MAIN
       if [[ $HTML == 1 ]]; then
            generate_html_file "$LOG_FILE" "$HTML_REPORT"
@@ -340,12 +417,12 @@ main()
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n"
       write_grep_log "$(date)" "TIMESTAMP"
       write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
       print_output "[!] No extracted firmware found" "no_log"
-      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")" "no_log"
+      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
       exit 1
   fi
 }

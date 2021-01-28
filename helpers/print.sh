@@ -344,7 +344,7 @@ add_info_grep_log()
 print_help()
 {
   ## help and command line parsing
-
+  
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "\\nTest firmware / live system"
   echo -e "$CYAN""-a [MIPS]""$NC""                      Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]"
@@ -358,6 +358,8 @@ print_help()
   echo -e "$CYAN""-g""$NC""                             Create grep-able log file in [log_path]/fw_grep.log"
   echo -e "                               Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
   echo -e "$CYAN""-E""$NC""                             Enable automated qemu emulation tests (WARNING this module could harm your host!)"
+  echo -e "$CYAN""-D""$NC""                             Run emba in docker container"
+  echo -e "$CYAN""-i""$NC""                             Ignore log path check"
   echo -e "\\nDependency check"
   echo -e "$CYAN""-d""$NC""                             Only check dependencies"
   echo -e "$CYAN""-F""$NC""                             Check dependencies but ignore errors"
@@ -367,6 +369,10 @@ print_help()
   echo -e "$CYAN""-s""$NC""                             Print only relative paths"
   echo -e "$CYAN""-W \"[./path] [./headline]\"""$NC""     Generate HTML output"
   echo -e "$CYAN""-z""$NC""                             Add ANSI color codes to log"
+  echo -e "$CYAN""-X [version]""$NC""                   Firmware version (double quote your input)"
+  echo -e "$CYAN""-Y [vendor]""$NC""                    Firmware vendor (double quote your input)"
+  echo -e "$CYAN""-Z [device]""$NC""                    Device (double quote your input)"
+  echo -e "$CYAN""-N [notes]""$NC""                     Testing notes (double quote your input)"
   echo -e "\\nHelp"
   echo -e "$CYAN""-h""$NC""                             Print this help message"
 

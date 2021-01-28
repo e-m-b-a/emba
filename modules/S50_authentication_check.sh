@@ -21,7 +21,7 @@
 
 
 # This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S50_authentication_check() {
   module_log_init "${FUNCNAME[0]}"

@@ -33,13 +33,13 @@ http_file_search()
   sub_module_title "Search http files"
 
   local HTTP_STUFF
-  HTTP_STUFF="$(config_find "$CONFIG_DIR""/http_files.cfg" "")"
+  mapfile -t HTTP_STUFF < <(config_find "$CONFIG_DIR""/http_files.cfg")
 
-  if [[ "$HTTP_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -z "$HTTP_STUFF" ]] ; then
+  if [[ "${HTTP_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#HTTP_STUFF[@]}" -ne 0 ]] ; then
     HTML_REPORT=1
     print_output "[+] Found http related files:"
-    for LINE in $HTTP_STUFF ; do
+    for LINE in "${HTTP_STUFF[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
   else
