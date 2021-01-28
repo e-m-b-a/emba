@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S80_cronjob_check()
 {
@@ -112,7 +112,7 @@ S80_cronjob_check()
   if [[ $RESULTS -eq 0 ]] ; then
     print_output "[-] Nothing found!"
   else
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   fi
 }
 

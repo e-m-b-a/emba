@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S40_weak_perm_check() {
   module_log_init "${FUNCNAME[0]}"
@@ -39,7 +39,7 @@ S40_weak_perm_check() {
   readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" \! -uid 0 -type f 2>/dev/null)
 
   if [[ ${#SETUID_FILES[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found ""${#SETUID_FILES[@]}"" setuid files:"
     for LINE in "${SETUID_FILES[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -50,7 +50,7 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#SETGID_FILES[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found ""${#SETGID_FILES[@]}"" setgid files:"
     for LINE in "${SETGID_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -61,7 +61,7 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WORLD_WRITE_FILES[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found ""${#WORLD_WRITE_FILES[@]}"" world writeable files:"
     for LINE in "${WORLD_WRITE_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -72,7 +72,7 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WEAK_SHADOW_FILES[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found ""${#WEAK_SHADOW_FILES[@]}"" weak shadow files:"
     for LINE in "${WEAK_SHADOW_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -83,7 +83,7 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WEAK_RC_FILES[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found ""${#WEAK_RC_FILES[@]}"" rc.d files not belonging to root:"
     for LINE in "${WEAK_RC_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -94,7 +94,7 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WEAK_INIT_FILES[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found ""${#WEAK_INIT_FILES[@]}"" init.d files not belonging to root:"
     for LINE in "${WEAK_INIT_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"

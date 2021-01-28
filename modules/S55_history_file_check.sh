@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S55_history_file_check()
 {
@@ -28,7 +28,7 @@ S55_history_file_check()
 
   if [[ "$HIST_FILES" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$HIST_FILES" ]] ; then
-      CONTENT_AVAILABLE=1
+      HTML_REPORT=1
       print_output "[+] Found history files:"
       for LINE in $HIST_FILES ; do
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"

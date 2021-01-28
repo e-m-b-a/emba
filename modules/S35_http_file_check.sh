@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S35_http_file_check()
 {
@@ -37,7 +37,7 @@ http_file_search()
 
   if [[ "$HTTP_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -z "$HTTP_STUFF" ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found http related files:"
     for LINE in $HTTP_STUFF ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -58,7 +58,7 @@ webserver_check()
   readarray -t HTTPD_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' )
 
   if [[ ${#APACHE_FILE_ARR[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found Apache related files:"
     for LINE in "${APACHE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -68,7 +68,7 @@ webserver_check()
   fi
 
   if [[ ${#NGINX_FILE_ARR[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found nginx related files:"
     for LINE in "${NGINX_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -78,7 +78,7 @@ webserver_check()
   fi
 
   if [[ ${#LIGHTTP_FILE_ARR[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found Lighttpd related files:"
     for LINE in "${LIGHTTP_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -88,7 +88,7 @@ webserver_check()
   fi
 
   if [[ ${#CHEROKEE_FILE_ARR[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found Cherokee related files:"
     for LINE in "${CHEROKEE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -98,7 +98,7 @@ webserver_check()
   fi
 
   if [[ ${#HTTPD_FILE_ARR[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found HTTPd related files:"
     for LINE in "${HTTPD_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -116,7 +116,7 @@ php_check()
   readarray -t PHP_INI_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' )
 
   if [[ ${#PHP_INI_ARR[@]} -gt 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found php.ini:"
     for LINE in "${PHP_INI_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"

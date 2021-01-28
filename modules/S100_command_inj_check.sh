@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S100_command_inj_check()
 {
@@ -52,7 +52,7 @@ S100_command_inj_check()
         done
       fi
     done
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   else
     print_output "[-] No directories or files used for web scripts found"
   fi

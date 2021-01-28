@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S05_firmware_details()
 {
@@ -26,7 +26,7 @@ S05_firmware_details()
   print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" directories detected."
 
  if [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l)" -gt 0 ]] || [[ "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)" -gt 0 ]];then
-     CONTENT_AVAILABLE=1
+     HTML_REPORT=1
   fi
 
   LOG_FILE="$( get_log_file )"
@@ -58,7 +58,7 @@ release_info()
 
   if [[ "$RELEASE_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$RELEASE_STUFF" ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Specific release/version information of target:"
     for R_INFO in $RELEASE_STUFF ; do
       if [[ -f "$R_INFO" ]] ; then

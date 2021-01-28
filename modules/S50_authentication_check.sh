@@ -64,7 +64,7 @@ user_zero() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
   else
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   fi
 }
 
@@ -91,7 +91,7 @@ non_unique_acc() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
   else
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   fi
 }
 
@@ -118,7 +118,7 @@ non_unique_group_id() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/group not available"
   else
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   fi
 }
 
@@ -145,7 +145,7 @@ non_unique_group_name() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/group not available"
   else
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   fi
 }
 
@@ -185,7 +185,7 @@ query_user_acc() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
   else
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   fi
 }
 
@@ -226,7 +226,7 @@ query_nis_plus_auth_supp() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/nsswitch.conf not available"
   else
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   fi
 }
 
@@ -238,7 +238,7 @@ check_sudoers() {
   if [[ "$SUDOERS_FILES" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
   elif ! [[ "$SUDOERS_FILES" == "" ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     SUDOERS_FILES_COUNT="$(echo "$SUDOERS_FILES" | wc -w)"
 
     if [[ "$SUDOERS_FILES_COUNT" != "0" ]] ; then
@@ -279,7 +279,7 @@ check_owner_perm_sudo_config() {
           if [[ "$FIND2" = "0:0" ]] ; then
             print_output "[-] ""$(print_path "$SUDOERS_D")"" ownership OK"
           else
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
           fi
           ;;
@@ -288,7 +288,7 @@ check_owner_perm_sudo_config() {
           if [[ "$FIND2" = "0:0" ]] ; then
             print_output "[-] ""$(print_path "$SUDOERS_D")"" ownership OK"
           else
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
           fi
           ;;
@@ -306,7 +306,7 @@ check_owner_perm_sudo_config() {
         if [[ "$FIND4" = "0:0" ]] ; then
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
-          CONTENT_AVAILABLE=1
+          HTML_REPORT=1
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
         fi
         ;;
@@ -315,7 +315,7 @@ check_owner_perm_sudo_config() {
         if [[ "$FIND4" = "0:0" ]] ; then
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
-          CONTENT_AVAILABLE=1
+          HTML_REPORT=1
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
         fi
         ;;
@@ -365,7 +365,7 @@ search_pam_testing_libs() {
 
     # Cracklib
     if [[ $FOUND_CRACKLIB -eq 1 ]] ; then
-      CONTENT_AVAILABLE=1
+      HTML_REPORT=1
       print_output "[+] pam_cracklib.so found"
     else
       print_output "[-] pam_cracklib.so not found"
@@ -373,7 +373,7 @@ search_pam_testing_libs() {
 
     # Password quality control
     if [[ $FOUND_PASSWDQC -eq 1 ]] ; then
-      CONTENT_AVAILABLE=1
+      HTML_REPORT=1
       print_output "[+] pam_passwdqc.so found"
     else
       print_output "[-] pam_passwdqc.so not found"
@@ -381,7 +381,7 @@ search_pam_testing_libs() {
 
     # pwquality module
     if [[ $FOUND_PWQUALITY -eq 1 ]] ; then
-      CONTENT_AVAILABLE=1
+      HTML_REPORT=1
       print_output "[+] pam_pwquality.so found"
     else
       print_output "[-] pam_pwquality.so not found"
@@ -414,7 +414,7 @@ scan_pam_conf() {
       if [[ -z "$FIND" ]] ; then
         print_output "[-] File has no configuration options defined (empty, or only filled with comments and empty lines)"
       else
-        CONTENT_AVAILABLE=1
+        HTML_REPORT=1
         print_output "[+] Found one or more configuration lines"
         local LINE
         LINE=$(echo "$FIND" | ${SEDBINARY} 's/:space:/ /g')
@@ -453,7 +453,7 @@ search_pam_configs() {
           local FIND2
           FIND2=$(grep "^auth.*ldap" "$FILE")
           if [[ -n "$FIND2" ]] ; then
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             print_output "[+] LDAP module present"
             print_output "$(indent "$(orange "$FIND2")")"
           else
@@ -498,7 +498,7 @@ search_pam_files() {
     if [[ $CHECK -eq 0 ]] ; then
       print_output "[-] Nothing interesting found"
     else
-      CONTENT_AVAILABLE=1
+      HTML_REPORT=1
     fi
   else
     print_output "[-] Nothing found"

@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S90_mail_check()
 {
@@ -49,7 +49,7 @@ S90_mail_check()
       print_output "[+] Content of ""$(print_path "$MAILS_PATH_ROOT")"":"
       print_output "$(indent "$(orange "$MAILS_ROOT")")"
     fi
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
   else
     print_output "[-] No mail files found!"
   fi

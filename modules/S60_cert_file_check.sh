@@ -16,7 +16,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S60_cert_file_check()
 {
@@ -31,7 +31,7 @@ S60_cert_file_check()
 
   if [[ "${CERT_FILES_ARR[0]}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     print_output "[+] Found ""${#CERT_FILES_ARR[@]}"" certification files:"
     CURRENT_DATE=$(date +%s)
     for LINE in "${CERT_FILES_ARR[@]}" ; do

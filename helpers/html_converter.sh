@@ -10,7 +10,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Stefan Haböck
+# Author(s): Stefan Haboeck
 
 declare -a MENU_LIST
 
@@ -20,22 +20,12 @@ build_index_file(){
  local HTML_FILE
  HTML_FILE="$(basename "${FILE%.txt}"".html")"
  COULORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
- if [[ -z "$HTML_HEADLINE" ]]; then
-    HTML_HEADLINE="EMBA Report Manager"
- fi
  if [[ ${FILENAME%.txt} == "s05"* ]] || [[ ${FILENAME%.txt} == "s25"* ]]; then
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
        INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
     fi
  elif [[ ${FILENAME%.txt} == "f50"* ]]; then
-    echo "Execute f50"
-    if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-       readarray -t STRING_LIST <"$FILE"
-       INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
-    fi
- elif [[ ${FILENAME%.txt} == "f19"* ]]; then
-    echo "Execute f19"
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
        INDEX_CONTENT_ARR=("${STRING_LIST[@]}")
@@ -50,22 +40,8 @@ build_index_file(){
    FILENAMES[0]="${FILENAME%.txt}"
  fi
 
- echo "<header>
-      <div class=\"pictureleft\">
-        <img src=\"$CONFIG_DIR/emba.png\">
-      </div>
-      
-      <div class=\"headline\">
-        <h1>$HTML_HEADLINE</h1>
-      </div>
-
-      <div class=\"pictureright\">
-         <img src=\"$CONFIG_DIR/emba.png\">
-      </div>
-    </header>
-    <div>
+ echo "$HTML_FILE_HEADER  <div>
       <ul>" | tee -a "$HTML_PATH""/index.txt" >/dev/null
-
       	
  if [[ -n ${MENU_LIST[*]} ]]; then
    for OUTPUT in "${MENU_LIST[@]}"; do
@@ -76,9 +52,7 @@ build_index_file(){
       	 if test -f "$HTML_PATH""/collection.html"; then
       	   echo "<li><a href=""$HTML_PATH""/collection.html"">""Nothing found""</a></li>" | tee -a "$HTML_PATH""/index.txt" >/dev/null
         fi
-      echo "</ul>
-      	 </div>
-      	  <div class=\"main\">"| tee -a "$HTML_PATH""/index.txt" >/dev/null
+      echo "</ul></div><div class=\"main\">"| tee -a "$HTML_PATH""/index.txt" >/dev/null
       if [[ ${FILENAME%.txt} != "f"* ]]; then
      	  echo "<h2>[[0;34m+[0m] [0;36m[1mGerneral Information[0m[1m[0m</h2>
      	  File: $(basename "$FIRMWARE_PATH")<br>
@@ -92,6 +66,10 @@ build_index_file(){
  i=0
  if [[ -n ${INDEX_CONTENT_ARR[*]} ]]; then
    for OUTPUT in "${INDEX_CONTENT_ARR[@]}"; do
+	if [[ "$OUTPUT" == *".png"* ]]; then
+	   OUTPUT=${OUTPUT//"33m"/"33m <br> <img src=\""}
+	   OUTPUT="${OUTPUT:0:${#OUTPUT}-3}"" \">"
+	fi
 	if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
 	   break
 	fi
@@ -107,12 +85,7 @@ build_index_file(){
  $AHA_PATH > "$HTML_PATH""/index.html" < "$HTML_PATH""/index.txt"
  rm "$HTML_PATH""/index.txt"
 
- sed -i 's/&lt;/</g' "$HTML_PATH""/index.html"
- sed -i 's/&quot;/"/g' "$HTML_PATH""/index.html"
- sed -i 's/&gt;/>/g' "$HTML_PATH""/index.html"
- sed -i 's/<pre>//g' "$HTML_PATH""/index.html"
- sed -i 's/<\/pre>//g' "$HTML_PATH""/index.html"
- #ESCAPED_CONFIG_DIR=$(echo $CONFIG_DIR | sed 's|/|\\/|g'}
+ sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$HTML_PATH""/index.html"
  ESCAPED_CONFIG_DIR=${CONFIG_DIR//\//\\\/}
  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/index.html"
 }
@@ -138,20 +111,7 @@ build_collection_file(){
    NOT_FINDINGS_FILENAMES[0]="$LINKNAME"
  fi
 
- echo "<header>
-      <div class=\"pictureleft\">
-        <img src=\"$CONFIG_DIR/emba.png\">
-      </div>
-      
-      <div class=\"headline\">
-        <h1>$HTML_HEADLINE</h1>
-      </div>
-
-      <div class=\"pictureright\">
-         <img src=\"$CONFIG_DIR/emba.png\">
-      </div>
-    </header>
-    <div>
+ echo "$HTML_FILE_HEADER
       <ul>
       	 $NOT_FINDINGS_MENU_LIST
       </ul>
@@ -172,12 +132,7 @@ build_collection_file(){
  $AHA_PATH > "$HTML_PATH""/collection.html" < "$HTML_PATH""/collection.txt" 
  rm "$HTML_PATH""/collection.txt"
 
- sed -i 's/&lt;/</g' "$HTML_PATH""/collection.html"
- sed -i 's/&quot;/"/g' "$HTML_PATH""/collection.html"
- sed -i 's/&gt;/>/g' "$HTML_PATH""/collection.html"
- sed -i 's/<pre>//g' "$HTML_PATH""/collection.html"
- sed -i 's/<\/pre>//g' "$HTML_PATH""/collection.html"
- #ESCAPED_CONFIG_DIR=${CONFIG_DIR sed 's|/|\\/|g'}
+ sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$HTML_PATH""/collection.html"
  ESCAPED_CONFIG_DIR=${CONFIG_DIR//\//\\\/}
  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/collection.html"
 }
@@ -189,9 +144,10 @@ build_report_files(){
  local FILENAME
  local HTML_FILE
  local REPORT_ARRAY
+ local HEADLINE
  FILENAME=$(basename "$FILE")
  HTML_FILE="$(basename "${FILE%.txt}".html)"
- HEADLINE=$(head -n 1 "$FILE" | tail -n 1 | cut -c27-)
+ HEADLINE=${FILENAME%.txt}
  
  if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
        readarray -t STRING_LIST <"$FILE"
@@ -202,16 +158,18 @@ build_report_files(){
  
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
    for FILE_LINE in "${REPORT_ARRAY[@]}"; do
+        if [[ "$FILE_LINE" == *".png"* ]]; then
+	   FILE_LINE=${FILE_LINE//"33m"/"33m <br> <img src=\""}
+	   FILE_LINE="${FILE_LINE:0:${#FILE_LINE}-3}"" \">"
+	fi
         if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
- 	   COULORLESS_FILE_LINE=$(echo "$FILE_LINE" | tail -n 1 | cut -c27-)
- 	   COULORLESS_FILE_LINE=${COULORLESS_FILE_LINE%[0m}		
- 	   echo "<h2 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
- 	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COULORLESS_FILE_LINE// /_}\">$COULORLESS_FILE_LINE</a></li>"
+ 	   COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
+ 	   echo "<h2 id=""$HTML_FILE#${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+ 	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
  	elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
- 	   COULORLESS_FILE_LINE=$(echo "$FILE_LINE" | tail -n 1 | cut -c23-)
- 	   COULORLESS_FILE_LINE=${COULORLESS_FILE_LINE%[0m}	
-	   echo "<h4 id=""${COULORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
-	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COULORLESS_FILE_LINE// /_}\">$COULORLESS_FILE_LINE</a></li>"
+ 	   COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
+	   echo "<h4 id=""$HTML_FILE#${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+	   SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
 	else
 	   echo "<br> $FILE_LINE" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
  	fi
@@ -220,18 +178,23 @@ build_report_files(){
   echo "</div>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
   $AHA_PATH > "$HTML_PATH""/$HTML_FILE" <"$HTML_PATH""/$FILENAME"
   rm "$HTML_PATH""/$FILENAME"
-  sed -i 's/&lt;/</g' "$HTML_PATH""/$HTML_FILE"
-  sed -i 's/&gt;/>/g' "$HTML_PATH""/$HTML_FILE"
-  sed -i 's/&quot;/"/g' "$HTML_PATH""/$HTML_FILE"
-  #ESCAPED_CONFIG_DIR=${CONFIG_DIR sed 's|/|\\/|g'}
+  sed -i 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g' "$HTML_PATH""/$HTML_FILE"
   ESCAPED_CONFIG_DIR=${CONFIG_DIR//\//\\\/}
-  #ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST sed 's|/|\\/|g'}
   ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST//\//\\\/}
   sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$HTML_PATH""/$HTML_FILE"
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/$HTML_FILE"
 }
 
 generate_html_file(){
+   
+   HTML_FILE_HEADER="<header><div class=\"pictureleft\"><img src=\"$CONFIG_DIR/emba.png\"></div>
+      <div class=\"headline\">
+        <h1>EMBA Report Manager</h1>
+      </div>
+      <div class=\"pictureright\">
+         <img src=\"$CONFIG_DIR/emba.png\">
+      </div>
+    </header>"
 
   if [[ $2 == 1 ]]; then
      build_report_files "$1"

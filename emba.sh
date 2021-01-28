@@ -68,7 +68,7 @@ main()
   export FORCE=0
   export LOG_GREP=0
   export HTML=0
-  export CONTENT_AVAILABLE
+  export HTML_REPORT
   export QEMULATION=0
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
@@ -81,7 +81,7 @@ main()
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
   export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
-  export HTML_PATH="./html-files"
+  export HTML_PATH="$LOG_DIR""/html-files"
   export AHA_PATH="$EXT_DIR""/aha"
 
   echo
@@ -99,7 +99,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cde:Ef:Fghk:l:mW:sz OPT ; do
+  while getopts a:A:cde:Ef:Fghk:l:m:sWz OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -150,9 +150,6 @@ main()
         ;;
       W)
         export HTML=1
-        ARG_ARRAY=("$OPTARG")
-        export HTML_PATH="${ARG_ARRAY[0]}"
-        export HTML_HEADLINE="${ARG_ARRAY[1]}"
         ;;
       z)
         export FORMAT_LOG=1
@@ -164,7 +161,12 @@ main()
         ;;
     esac
   done
-
+  
+  if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
+     FORMAT_LOG=1
+     print_output "[!] Activate format log for HTML converter" "no_log"
+  fi
+  
   LOG_DIR="$(abs_path "$LOG_DIR")"
   CONFIG_DIR="$(abs_path "$CONFIG_DIR")"
   HTML_PATH="$(abs_path "$HTML_PATH")"
@@ -193,7 +195,6 @@ main()
   if [[ $ONLY_DEP -eq 0 ]] ; then
     # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
     log_folder
-    html_folder
 
     if [[ $LOG_GREP -eq 1 ]] ; then
       create_grep_log
@@ -201,6 +202,10 @@ main()
     fi
 
     set_exclude
+  fi
+  
+  if [[ $HTML -eq 1 ]]; then
+     mkdir $HTML_PATH
   fi
 
   dependency_check
@@ -286,10 +291,10 @@ main()
           if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
-            CONTENT_AVAILABLE=0
+            HTML_REPORT=0
             $MODULE_MAIN
             if [[ $HTML == 1 ]]; then
-               generate_html_file "$LOG_FILE" "$CONTENT_AVAILABLE"
+               generate_html_file "$LOG_FILE" "$HTML_REPORT"
             fi
             reset_module_count
           fi
@@ -302,10 +307,10 @@ main()
             if ( file "$MODULE" | grep -q "shell script" ) ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
-              CONTENT_AVAILABLE=0
+              HTML_REPORT=0
               $MODULE_MAIN
               if [[ $HTML == 1 ]]; then
-                 generate_html_file "$LOG_FILE" "$CONTENT_AVAILABLE"
+                 generate_html_file "$LOG_FILE" "$HTML_REPORT"
               fi
             fi
           fi
@@ -324,10 +329,10 @@ main()
     if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
-      CONTENT_AVAILABLE=1
+      HTML_REPORT=1
       $MODULE_MAIN
       if [[ $HTML == 1 ]]; then
-           generate_html_file "$LOG_FILE" "$CONTENT_AVAILABLE"
+           generate_html_file "$LOG_FILE" "$HTML_REPORT"
       fi
       reset_module_count
     fi

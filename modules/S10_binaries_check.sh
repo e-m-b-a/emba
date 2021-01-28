@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-export CONTENT_AVAILABLE
+export HTML_REPORT
 
 S10_binaries_check()
 {
@@ -42,7 +42,7 @@ vul_func_basic_check()
 
   if [[ "$VULNERABLE_FUNCTIONS" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$VULNERABLE_FUNCTIONS" ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q "ELF" ) ; then
         local VUL_FUNC_RESULT
@@ -83,7 +83,7 @@ objdump_disassembly()
       "$OBJDUMP" -d "$LINE" > "$OBJDUMP_LOG"
 
         if ( file "$LINE" | grep -q "x86-64" ) ; then
-          CONTENT_AVAILABLE=1
+          HTML_REPORT=1
           for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
             if ( "$READELF" -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
               local OBJ_DUMPS_OUT
@@ -114,7 +114,7 @@ objdump_disassembly()
           done
 
           elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               if ( "$READELF" -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
                 local OBJ_DUMPS_OUT
@@ -145,7 +145,7 @@ objdump_disassembly()
             done
 
           elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               NAME=$(basename "$LINE" 2> /dev/null)
               local OBJ_DUMPS_OUT
@@ -178,7 +178,7 @@ objdump_disassembly()
 
           # ARM 64 code is in alpha state and nearly not tested!
           elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               NAME=$(basename "$LINE" 2> /dev/null)
               local OBJ_DUMPS_OUT
@@ -209,7 +209,7 @@ objdump_disassembly()
             done
 
           elif ( file "$LINE" | grep -q "MIPS" ) ; then
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               FUNC_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
               STRLEN_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
@@ -244,7 +244,7 @@ objdump_disassembly()
             done
 
           elif ( file "$LINE" | grep -q "PowerPC" ) ; then
-            CONTENT_AVAILABLE=1
+            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               if ( "$READELF" -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
                 NAME=$(basename "$LINE" 2> /dev/null)
@@ -331,7 +331,7 @@ output_function_details()
   fi
   
   if [[ $COUNT_FUNC -ne 0 ]] ; then
-    CONTENT_AVAILABLE=1
+    HTML_REPORT=1
     if [[ "$FUNCTION" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
       print_output "$OUTPUT"
@@ -358,7 +358,7 @@ binary_protection()
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       if [[ -f "$EXT_DIR"/checksec ]] ; then
-        CONTENT_AVAILABLE=1
+        HTML_REPORT=1
         print_output "$( "$EXT_DIR"/checksec --file="$LINE" | grep -v "CANARY" | rev | cut -f 2- | rev )""\\t""$NC""$(print_path "$LINE")"
       fi
     fi
