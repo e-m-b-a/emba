@@ -29,7 +29,7 @@ S09_firmware_base_version_check() {
       STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
   
       # as we do not have a typical linux executable we can't use strict version details
-      if [[ $STRICT != "strict" ]]; then
+      if [[ $STRICT == "binary" ]]; then
         #print_output "[*] $VERSION_LINE"
         VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
         print_output "." | tr -d "\n"
