@@ -362,6 +362,7 @@ print_tool_info "srecord" 1
 print_tool_info "zlib1g-dev" 1
 print_tool_info "liblzma-dev" 1
 print_tool_info "liblzo2-dev" 1
+print_tool_info "firmware-mod-kit" 1
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
 read -p "(y/N)" -r ANSWER
@@ -397,6 +398,8 @@ case ${ANSWER:0:1} in
       wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
       tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
       sudo cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+      
+      sudo ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
 
       git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
       make -C ./external/binwalk/cramfs-tools/
