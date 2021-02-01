@@ -106,6 +106,14 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
     #This is SMTPclient Version
     VERSION_lower="${VERSION_lower//this\ is\ smtpclient/smtpclient}"
+    #btconfig - BTCONFIG Tool ver
+    VERSION_lower="${VERSION_lower//-\ btconfig\ tool\ ver/}"
+    # hciemu - HCI emulator ver 
+    VERSION_lower="${VERSION_lower//-\ hci\ emulator\ ver/}"
+    # hcitool - HCI Tool ver 
+    VERSION_lower="${VERSION_lower//-\ hci\ tool\ ver/}"
+    # sdptool - SDP tool 
+    VERSION_lower="${VERSION_lower//-\ sdp\ tool/}"
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
@@ -114,6 +122,26 @@ prepare_version_data() {
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
+    # ubiXYZ -> mtd-utils
+    VERSION_lower="${VERSION_lower//ubinfo/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiattach/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubidetach/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubimkvol/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubirmvol/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiblock/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiupdatevol/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubicrc32/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubinize/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiformat/mtd-utils}"
+    VERSION_lower="${VERSION_lower//mtdinfo/mtd-utils}"
+    VERSION_lower="${VERSION_lower//nandwrite/mtd-utils}"
+    VERSION_lower="${VERSION_lower//nanddump/mtd-utils}"
+    VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
+    #i2cXYZ -> i2c-tools
+    VERSION_lower="${VERSION_lower//i2cdetect/i2c-tools}"
+    VERSION_lower="${VERSION_lower//i2cdump/i2c-tools}"
+    VERSION_lower="${VERSION_lower//i2cget/i2c-tools}"
+    VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
     #pinentry-curses (pinentry)
@@ -143,6 +171,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')"
     # "mkfs\.jffs2\ revision\ [0-9]\.[0-9]\.[0-9]\.[0-9]"
     VERSION_lower="${VERSION_lower//revision\ /}"
+    # mkfs.jffs2: error!: revision 1.60
+    VERSION_lower="${VERSION_lower//:\ error!:/}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
     VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
@@ -199,6 +229,8 @@ prepare_version_data() {
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/glibc/')"
     # (Debian EGLIBC 2.13-38+deb7u11) 2.13
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(eglibc)/eglibc/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(.*\ eglibc\ .*)/eglibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
