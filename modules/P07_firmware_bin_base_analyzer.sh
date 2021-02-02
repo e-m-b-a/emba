@@ -29,52 +29,52 @@ os_identification() {
   sub_module_title "OS detection"
 
   print_output "[*] Initial OS detection running " | tr -d "\n"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 
   # We can improve this search stuff a lot in the future:
   COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c Linux 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" | grep -c Linux 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW))
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 
   COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c VxWorks 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" | grep -c VxWorks 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW))
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 
   COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c FreeRTOS 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" | grep -c FreeRTOS 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW))
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 
   COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" | grep -c eCos 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW))
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 
   # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
   COUNTER_ADONIS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c ADONIS 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_ADONIS_FW="$(strings "$FIRMWARE_PATH" | grep -c ADONIS 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_ADONIS=$((COUNTER_ADONIS+COUNTER_ADONIS_FW))
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 
   # Siemens SIPROTEC devices
   COUNTER_SIPROTEC="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c siprotec 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_SIPROTEC_FW="$(strings "$FIRMWARE_PATH" | grep -i -c siprotec 2> /dev/null)"
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
   COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_FW))
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 
   print_output ""
   print_output "[*] Trying to identify a Linux root path in $(print_path "$OUTPUT_DIR")"
