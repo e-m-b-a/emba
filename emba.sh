@@ -64,8 +64,8 @@ main()
   export YARA=1
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
-  export DOCKER=0
-  export IGNORE_LOG_DEL=0
+  export USE_DOCKER=0
+  export IN_DOCKER=0
   export FORCE=0
   export LOG_GREP=0
   export QEMULATION=0
@@ -113,7 +113,7 @@ main()
         export BAP=1
         ;;
       D)
-        export DOCKER=1
+        export USE_DOCKER=1
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
@@ -136,7 +136,7 @@ main()
         exit 0
         ;;
       i)
-        export IGNORE_LOG_DEL=1
+        export IN_DOCKER=1
         ;;
       k)
         export KERNEL=1
@@ -186,7 +186,7 @@ main()
   fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
-    if [[ $IGNORE_LOG_DEL -eq 0 ]] ; then
+    if [[ $IN_DOCKER -eq 0 ]] ; then
       # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
       log_folder
     fi
@@ -214,7 +214,7 @@ main()
     fi
   fi
 
-  if [[ $DOCKER -eq 1 ]] ; then
+  if [[ $USE_DOCKER -eq 1 ]] ; then
     if ! command -v docker-compose > /dev/null ; then
       print_output "[!] No docker-compose found" "no_log"
       print_output "$(indent "Install docker-compose via apt-get install docker-compose to use emba with docker")" "no_log"
@@ -238,9 +238,11 @@ main()
 
     FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
 
-    print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-    print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
-    print_output "[*] Log directory: $LOG_DIR" "no_log"
+    if [[ $ONLY_DEP -eq 0 ]] ; then
+      print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+      print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
+      print_output "[*] Log directory: $LOG_DIR" "no_log"
+    fi
     exit
   fi
 
