@@ -33,7 +33,9 @@ S120_cwe_checker()
         fi
         for ENTRY in "${TEST_OUTPUT[@]}" ; do
           if [[ -n "$ENTRY" ]] ; then
-            print_output "$(indent "$ENTRY")"
+            if ! [[ "$ENTRY" == *"ERROR:"* ]] ; then
+              print_output "$(indent "$ENTRY")"
+            fi
           fi
         done
 
@@ -54,7 +56,7 @@ S120_cwe_checker()
     done
 
     if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
-      mapfile -t BAP_OUT < <( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )")"
+      mapfile -t BAP_OUT < <( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -v "ERROR" | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )
       print_output ""
       if [[ ${#BAP_OUT[@]} -eq 0 ]] ; then
         print_output "[-] cwe-checker found 0 security issues."
