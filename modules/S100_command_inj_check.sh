@@ -43,10 +43,14 @@ S100_command_inj_check()
             for QUERY in "${QUERY_L[@]}" ; do
               # without this check we always have an empty search string and get every file as result
               if [[ -n "$QUERY" ]]; then
-                CHECK="$(grep -H -h "$QUERY" "$FILE_S")"
+                mapfile -t CHECK < <(grep -H -h "$QUERY" "$FILE_S" | sort -u)
                 if [[ -n "$CHECK" ]] ; then
-                  print_output "$(indent "$(indent "$(green "Found ""$QUERY"" in ""$(print_path "$FILE_S")")")")"
-                  print_output "$CHECK"
+                  print_output ""
+                  print_output "$(indent "$(green "[+] Found ""$QUERY"" in ""$(print_path "$FILE_S")")")"
+                  for CHECK_ in "${CHECK[@]}" ; do
+                    print_output "$(indent "$(green "[+] $CHECK_")")"
+                  done
+                  print_output ""
                 fi
               fi
             done
