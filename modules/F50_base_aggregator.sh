@@ -44,7 +44,9 @@ F50_base_aggregator() {
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
   elif [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
     PRE_ARCH="$(grep "Possible architecture details found:" "$LOG_DIR"/"$OS_DETECT_LOG" | cut -d: -f2)"
-    print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"""
+    if [[ -n "$PRE_ARCH" ]]; then
+      print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"""
+    fi
   fi
 
   if [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
