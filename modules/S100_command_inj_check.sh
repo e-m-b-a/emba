@@ -45,7 +45,7 @@ S100_command_inj_check()
               if [[ -n "$QUERY" ]]; then
                 CHECK="$(grep -H -h "$QUERY" "$FILE_S")"
                 if [[ -n "$CHECK" ]] ; then
-                  print_output "$(indent "$(indent "$(green "$QUERY"" in ""$(print_path "$FILE_S")")")")"
+                  print_output "$(indent "$(indent "$(green "Found ""$QUERY"" in ""$(print_path "$FILE_S")")")")"
                   print_output "$CHECK"
                 fi
               fi
