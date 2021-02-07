@@ -315,7 +315,6 @@ dependency_check()
     export PYTHON_CHECK
   else
     echo -e "$GREEN""ok""$NC"
-    PYTHON_CHECK=1
   fi
 
 
