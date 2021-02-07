@@ -92,6 +92,9 @@ F50_base_aggregator() {
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S20_SCRIPTS""""$GREEN"" shell scripts.""$NC"""
   fi
+  if [[ "$S21_PY_VULNS" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S21_PY_SCRIPTS""""$GREEN"" python files.""$NC"""
+  fi
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" executables (without version checking).""$NC"""
   fi

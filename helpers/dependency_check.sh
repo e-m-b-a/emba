@@ -306,6 +306,19 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
+  print_output "    pylint - \\c" "no_log"
+  if ! command -v pylint > /dev/null ; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    pylint not found ... disabling tests""$NC"
+    echo -e "$RED""    install pylint via apt-get install pylint""$NC"
+    PYTHON_CHECK=0
+    export PYTHON_CHECK
+  else
+    echo -e "$GREEN""ok""$NC"
+    PYTHON_CHECK=1
+  fi
+
+
   print_output "    tree - \\c" "no_log"
   if ! command -v tree > /dev/null ; then
     echo -e "$ORANGE""not ok""$NC"
