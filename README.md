@@ -32,8 +32,10 @@ _emba_ is designed to assist a penetration tester. It is not designed as a stand
 ### How to use it?
 
 
-__Before starting, check that all dependencies are met and use the installer.sh script:
-`./emba.sh -d` or `./emba.sh -d -F`__
+__Before starting, check that all dependencies are met and use the installer.sh script:__
+`sudo ./installer.sh` 
+
+Afterwards it is possible to run emba with `sudo ./emba.sh`
 
 ##### Arguments:  
 ```
