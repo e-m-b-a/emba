@@ -19,26 +19,27 @@
 #                 binary array via ${BINARIES[@]}
 
 
-S20_shell_check()
+S21_python_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check scripts (shellchecker)"
+  module_title "Check python scripts with pylint"
 
-  S20_SHELL_VULNS=0
-  S20_SCRIPTS=0
+  S21_PY_VULNS=0
+  S21_PY_SCRIPTS=0
 
-  if [[ $SHELLCHECK -eq 1 ]] ; then
-    if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
-      mkdir "$LOG_DIR""/shellchecker/" 2> /dev/null
+  if [[ $PYTHON_CHECK -eq 1 ]] ; then
+    if ! [[ -d "$LOG_DIR""/pylint_checker/" ]] ; then
+      mkdir "$LOG_DIR""/pylint_checker/" 2> /dev/null
     fi
-    for LINE in "${BINARIES[@]}" ; do
-      if ( file "$LINE" | grep -q "shell script" ) ; then
-        ((S20_SCRIPTS++))
+    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -iname "*.py")
+    for LINE in "${PYTHON_SCRIPTS[@]}" ; do
+      if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
+        ((S21_PY_SCRIPTS++))
         NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-        SHELL_LOG="$LOG_DIR""/shellchecker/shellchecker_""$NAME"".txt"
-        shellcheck "$LINE" > "$SHELL_LOG" 2> /dev/null
-        VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
-        (( S20_SHELL_VULNS="$S20_SHELL_VULNS"+"$VULNS" ))
+        PY_LOG="$LOG_DIR""/pylint_checker/pylint_""$NAME"".txt"
+        pylint "$LINE" > "$PY_LOG" 2> /dev/null
+        VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
+        (( S21_PY_VULNS="$S21_PY_VULNS"+"$VULNS" ))
         if [[ "$VULNS" -ne 0 ]] ; then
           #check if this is common linux file:
           local COMMON_FILES_FOUND
@@ -59,16 +60,20 @@ S20_shell_check()
         fi
       fi
     done
-
     print_output ""
-    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S20_SCRIPTS""""$GREEN"" shell scripts:""$NC""\\n"
+    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S21_PY_SCRIPTS""""$GREEN"" python files:""$NC""\\n"
 
-    mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "$LOG_DIR"/shellchecker/shellchecker_* | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1)
-    for VTYPE in "${S20_VULN_TYPES[@]}" ; do
-      print_output "$(indent """$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""""$NC""")"
+    # we just print one issue per issue type:
+    # W1505: Using deprecated method assert_() (deprecated-method)
+    # W1505: Using deprecated method gcd() (deprecated-method)
+    # W1505: Using deprecated method splitunc() (deprecated-method)
+    # -> we only print one W1505
+
+    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "$LOG_DIR"/pylint_checker/pylint_* 2>/dev/null | cut -d: -f5- | sort -u -t: -k1,1)
+    for VTYPE in "${S21_VULN_TYPES[@]}" ; do
+      print_output "$(indent """$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""""$GREEN""")"
     done
-
   else
-    print_output "[-] Shellchecker is disabled ... no tests performed"
+    print_output "[-] Pylint check is disabled ... no tests performed"
   fi
 }

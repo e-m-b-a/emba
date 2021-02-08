@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2021 Siemens Energy AG
+# Copyright 2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -44,7 +45,9 @@ F50_base_aggregator() {
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
   elif [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
     PRE_ARCH="$(grep "Possible architecture details found:" "$LOG_DIR"/"$OS_DETECT_LOG" | cut -d: -f2)"
-    print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"""
+    if [[ -n "$PRE_ARCH" ]]; then
+      print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"""
+    fi
   fi
 
   if [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
@@ -89,6 +92,9 @@ F50_base_aggregator() {
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S20_SCRIPTS""""$GREEN"" shell scripts.""$NC"""
+  fi
+  if [[ "$S21_PY_VULNS" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S21_PY_SCRIPTS""""$GREEN"" python files.""$NC"""
   fi
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" executables (without version checking).""$NC"""

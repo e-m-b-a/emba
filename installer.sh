@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -128,6 +129,7 @@ echo -e "\\n""$ORANGE""$BOLD""These applications will be installed/updated:""$NC
 print_tool_info "tree" 1
 print_tool_info "yara" 1
 print_tool_info "shellcheck" 1
+print_tool_info "pylint" 1
 print_tool_info "device-tree-compiler" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
