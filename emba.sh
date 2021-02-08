@@ -236,14 +236,17 @@ main()
     print_output "" "no_log"
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
-
-    if [[ $ONLY_DEP -eq 0 ]] ; then
-      print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-      print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
-      print_output "[*] Log directory: $LOG_DIR" "no_log"
+    if FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS" ; then
+      if [[ $ONLY_DEP -eq 0 ]] ; then
+        print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+        print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
+        print_output "[*] Log directory: $LOG_DIR" "no_log"
+        exit
+      fi
+    else
+      print_output "[-] Emba docker failed!" "no_log"
+      exit 1
     fi
-    exit
   fi
 
   if [[ $PRE_CHECK -eq 1 ]] ; then
