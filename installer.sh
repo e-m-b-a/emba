@@ -315,6 +315,7 @@ echo -e "\\nTo use the aggregator and check if exploits are available, we need a
 print_tool_info "python3-pip" 1
 print_tool_info "bc" 1
 print_tool_info "net-tools" 1
+print_tool_info "git" 1
 
 echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install bc, net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
 read -p "(y/N)" -r ANSWER
@@ -329,6 +330,9 @@ case ${ANSWER:0:1} in
     else
       git clone https://github.com/cve-search/cve-search.git external/cve-search
     fi
+    cd ./external/cve-search/
+    pip3 install -r requirements.txt
+    xargs sudo apt-get install -y < requirements.system
     echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
     echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
   ;;
@@ -346,6 +350,7 @@ print_tool_info "python3-numpy" 1
 print_tool_info "python3-scipy" 1
 print_tool_info "mtd-utils" 1
 print_tool_info "gzip" 1
+print_tool_info "git" 1
 print_tool_info "bzip2" 1
 print_tool_info "tar" 1
 print_tool_info "arj" 1
@@ -359,6 +364,7 @@ print_tool_info "sleuthkit" 1
 print_tool_info "default-jdk" 1
 print_tool_info "lzop" 1
 print_tool_info "srecord" 1
+print_tool_info "build-essential" 1
 print_tool_info "zlib1g-dev" 1
 print_tool_info "liblzma-dev" 1
 print_tool_info "liblzo2-dev" 1
@@ -372,7 +378,8 @@ case ${ANSWER:0:1} in
     for APP in "${INSTALL_APP_LIST[@]}" ; do
       apt-get install "$APP" -y
     done
-    pip3 install nose 
+
+    pip3 install nose
     pip3 install coverage
     pip3 install pyqtgraph
     pip3 install capstone
