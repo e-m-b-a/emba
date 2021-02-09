@@ -93,18 +93,6 @@ There is a simple docker-compose setup added which allows you to use emba in a d
 - Use `-A [ARCH]` if you don't want to use auto detection for architecture
 - _emba_ currently supports the following architectures: MIPS, ARM, PPC, x86 and x64
 
-##### Live testing:
-For testing live system with _emba_ run it as if you were testing static firmware, but with `/` as firmware path:
-
-`sudo ./emba.sh -l ./logs/local_test -f /`
-
-- Path for logs and firmware path are necessary for testing successfully
-- Architecture will be detected automatically; you can overwrite it with `-a [ARCH]`
-- Use `-A [ARCH]` if you don't want to use auto detection for architecture
-- The paths `/proc` and `/sys` will be automatically excluded
-- It improves output and performance, if you exclude docker    
-`-e /var/lib/docker`
-
 ##### Test kernel config:
 Test only a kernel configuration with the kernel checker of [checksec](https://github.com/slimm609/checksec.sh):
 
