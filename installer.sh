@@ -125,6 +125,7 @@ print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
+  echo -e "$CYAN""-h""$NC""         Print this help message"
 }
 
 
@@ -135,11 +136,15 @@ if ! [[ $EUID -eq 0 ]] ; then
   exit 1
 fi
 
-while getopts F OPT ; do
+while getopts Fh OPT ; do
   case $OPT in
     F)
       export FORCE=1
       echo -e "$GREEN""$BOLD""Install all dependecies""$NC"
+      ;;
+    h)
+      print_help
+      exit 0
       ;;
     *)
       echo -e "$RED""$BOLD""Invalid option""$NC"
