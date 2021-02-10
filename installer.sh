@@ -401,7 +401,7 @@ case ${ANSWER:0:1} in
     else
       git clone https://github.com/cve-search/cve-search.git external/cve-search
     fi
-    cd ./external/cve-search/
+    cd ./external/cve-search/ || exit 1
     pip3 install -r requirements.txt
     xargs sudo apt-get install -y < requirements.system
     echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
@@ -485,13 +485,13 @@ case ${ANSWER:0:1} in
       sudo install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
 
       git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
-      cd ./external/binwalk/ubi_reader
+      cd ./external/binwalk/ubi_reader || exit 1
       git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
       sudo python2 setup.py install
-      cd ..
+      cd .. || exit 1
 
       sudo python3 setup.py install
-      cd ../..
+      cd ../.. || exit 1
 
       rm -rf ./external/binwalk
 
