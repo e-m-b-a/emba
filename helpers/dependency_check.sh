@@ -81,7 +81,6 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
-
   echo
   print_output "[*] Necessary utils on system checks:" "no_log"
 
@@ -125,8 +124,7 @@ dependency_check()
 
     # using bash higher than v4 ...
     print_output "    bash (version) - \\c" "no_log"
-    BASH_VERSION="$(config_grep_string "$CONFIG_DIR""/version_strings.cfg" "$(bash --version)")"
-    if ! [[ "${BASH_VERSINFO[0]}" -gt 3 ]] ; then
+    if ! [[ "${BASH_VERSINFO:-0}" -gt 3 ]] ; then
       echo -e "$RED""not ok""$NC"
       echo -e "$RED""    upgrade your bash to version 4 or higher""$NC"
       if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
@@ -241,7 +239,7 @@ dependency_check()
   if [[ $USE_DOCKER -eq 0 ]] ; then
     echo
     print_output "[*] Optional utils checks:" "no_log"
-  
+
     print_output "    checksec script - \\c" "no_log"
     if ! [[ -f "$EXT_DIR""/checksec" ]] ; then
       echo -e "$RED""not ok""$NC"
@@ -335,6 +333,17 @@ dependency_check()
       echo -e "$RED""    install shellcheck via apt-get install shellcheck""$NC"
       SHELLCHECK=0
       export SHELLCHECK
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    pylint - \\c" "no_log"
+    if ! command -v pylint > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    pylint not found ... disabling tests""$NC"
+      echo -e "$RED""    install pylint via apt-get install pylint""$NC"
+      PYTHON_CHECK=0
+      export PYTHON_CHECK
     else
       echo -e "$GREEN""ok""$NC"
     fi
