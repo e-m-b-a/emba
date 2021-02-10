@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -24,12 +25,12 @@ S55_history_file_check()
   module_title "Search history files"
 
   local HIST_FILES
-  HIST_FILES="$(config_find "$CONFIG_DIR""/history_files.cfg")"
+  mapfile -t HIST_FILES < <(config_find "$CONFIG_DIR""/history_files.cfg")
 
-  if [[ "$HIST_FILES" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "$HIST_FILES" ]] ; then
+  if [[ "${HIST_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#HIST_FILES[@]}" -ne 0 ]] ; then
       print_output "[+] Found history files:"
-      for LINE in $HIST_FILES ; do
+      for LINE in "${HIST_FILES[@]}" ; do
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       done
   else

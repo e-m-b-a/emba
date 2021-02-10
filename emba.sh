@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -19,33 +20,33 @@ INVOCATION_PATH="."
 import_helper()
 {
   local HELPERS
-  HELPERS=$(find "$HELP_DIR" -iname "*.sh" 2> /dev/null)
-  local HELPERS_COUNT
-  HELPERS_COUNT=$(echo "$HELPERS" | wc -l)
-  for HELPER_FILE in $HELPERS ; do
-    if ( file "$HELPER_FILE" | grep -q "shell script" ) ; then
+  local HELPER_COUNT
+  mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "*.sh" -print0 2> /dev/null)
+  for HELPER_FILE in "${HELPERS[@]}" ; do
+    if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "$HELPER_FILE"
+      (( HELPER_COUNT+=1 ))
     fi
   done
-  print_output "==> ""$GREEN""Imported ""$HELPERS_COUNT"" necessary files""$NC" "no_log"
+  print_output "==> ""$GREEN""Imported ""$HELPER_COUNT"" necessary files""$NC" "no_log"
 }
 
 import_module()
 {
   local MODULES
-  MODULES=$(find "$MOD_DIR" -iname "*.sh" 2> /dev/null)
-  local MODULES_COUNT
-  MODULES_COUNT=$(echo "$MODULES" | wc -l)
-  for MODULE_FILE in $MODULES ; do
-    if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+  local MODULE_COUNT
+  mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
+  for MODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
       source "$MODULE_FILE"
+      (( MODULE_COUNT+=1 ))
     fi
   done
-  print_output "==> ""$GREEN""Imported ""$MODULES_COUNT"" module/s""$NC" "no_log"
+  print_output "==> ""$GREEN""Imported ""$MODULE_COUNT"" module/s""$NC" "no_log"
 }
 
 main()
@@ -59,6 +60,7 @@ main()
   export FIRMWARE=0
   export KERNEL=0
   export SHELLCHECK=1
+  export PYTHON_CHECK=1
   export V_FEED=1
   export BAP=0
   export YARA=1
@@ -96,7 +98,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:zZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -148,11 +150,23 @@ main()
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
         ;;
+      N)
+        export FW_NOTES="$OPTARG"
+        ;;
       s)
         export SHORT_PATH=1
         ;;
+      X)
+        export FW_VERSION="$OPTARG"
+        ;;
+      Y)
+        export FW_VENDOR="$OPTARG"
+        ;;
       z)
         export FORMAT_LOG=1
+        ;;
+      Z)
+        export FW_DEVICE="$OPTARG"
         ;;
       *)
         print_output "[-] Invalid option" "no_log"
@@ -163,6 +177,26 @@ main()
   done
 
   LOG_DIR="$(abs_path "$LOG_DIR")"
+  print_output "" "no_log"
+
+  if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+
+    if [[ -n "$FW_VENDOR" ]]; then
+      print_output "[*] Testing Firmware from vendor: ""$ORANGE""""$FW_VENDOR""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_VERSION" ]]; then
+      print_output "[*] Testing Firmware version: ""$ORANGE""""$FW_VERSION""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_DEVICE" ]]; then
+      print_output "[*] Testing Firmware from device: ""$ORANGE""""$FW_DEVICE""""$NC""" "no_log"
+    fi
+    if [[ -n "$FW_NOTES" ]]; then
+      print_output "[*] Additional notes: ""$ORANGE""""$FW_NOTES""""$NC""" "no_log"
+    fi
+
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+  fi
 
   if [[ $KERNEL -eq 1 ]] ; then
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
@@ -178,7 +212,7 @@ main()
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
-    print_output "[*] Emba starts with some basic tests on it." "no_log"
+    print_output "[*] Emba starts with the pre-testing phase." "no_log"
   else
     print_output "[-] Invalid firmware file" "no_log"
     print_help
@@ -263,9 +297,9 @@ main()
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        MODULES=$(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
-        for MODULE_FILE in $MODULES ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
+        for MODULE_FILE in "${MODULES[@]}" ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
@@ -276,7 +310,7 @@ main()
           if [[ "$SELECT_NUM" =~ ^[p,P]{1}[0-9]+ ]]; then
             local MODULE
             MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            if ( file "$MODULE" | grep -q "shell script" ) ; then
+            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
@@ -314,9 +348,9 @@ main()
 
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        MODULES=$(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
-        for MODULE_FILE in $MODULES ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
+        for MODULE_FILE in "${MODULES[@]}" ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
@@ -328,7 +362,7 @@ main()
           if [[ "$SELECT_NUM" =~ ^[s,S]{1}[0-9]+ ]]; then
             local MODULE
             MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            if ( file "$MODULE" | grep -q "shell script" ) ; then
+            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
@@ -344,9 +378,9 @@ main()
 
   # 'main' functions of imported finishing modules
   local MODULES
-  MODULES=$(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
-  for MODULE_FILE in $MODULES ; do
-    if ( file "$MODULE_FILE" | grep -q "shell script" ) ; then
+  mapfile -t MODULES < <(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
+  for MODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
       $MODULE_MAIN

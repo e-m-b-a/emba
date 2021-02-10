@@ -151,8 +151,9 @@ path_handling() {
   # locations will be added there
   # Add placeholder "ETC_PATHS" instead of path "etc"
   CHECK=0
-  TEST_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/xy.cfg")"
-  for TEST_E in $TEST_PATHS ; do
+  mapfile -t TEST_PATHS < <(mod_path "/ETC_PATHS/xy.cfg")
+
+  for TEST_E in "${TEST_PATHS[@]}" ; do
     if [[ -f "$TEST_E" ]] ; then
       CHECK=1
       print_output "[+] Found xy config: ""$(print_path "$TEST_E")"
@@ -163,11 +164,12 @@ path_handling() {
   fi
 
   # Using multiple paths as array:
-  TEST_PATHS_ARR="$(mod_path_array "$(config_list "$CONFIG_DIR""/test_files.cfg")")"
-  if [[ "$TEST_PATHS_ARR" == "C_N_F" ]] ; then
+  mapfile -t TEST_PATHS_ARR < <(mod_path_array "$(config_list "$CONFIG_DIR""/test_files.cfg" "")")
+
+  if [[ "${TEST_PATHS_ARR[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif [[ -n "$TEST_PATHS_ARR" ]] ; then
-    for TEST_E in $TEST_PATHS_ARR; do
+  elif [[ "${#TEST_PATHS_ARR[@]}" -ne 0 ]] ; then
+    for TEST_E in "${TEST_PATHS_ARR[@]}"; do
       if [[ -f "$TEST_E" ]] ; then
         print_output "[+] Found: ""$(print_path "$TEST_E")"
       fi
@@ -185,28 +187,16 @@ iterate_binary() {
 }
 
 load_from_config() {
-  # Load statements from file into a grep command and get output
-  # Option 1: Test beforehand, if cfg file exists and print statement
-  if [[ "$(wc -l "$CONFIG_DIR""/config_grep.cfg" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ; then
-    local OUTPUT_LINES
-    # config_grep [config_file_path] [file to grep content]
-    OUTPUT_LINES="$(config_grep "$CONFIG_DIR""/config_grep.cfg" "$FILE_PATH")"
-    print_output "$OUTPUT_LINES"
-  fi
+  # config_grep.cfg contains grep statements, these will be all used for grepping "$FILE_PATH"
+  mapfile -t OUTPUT_LINES < <(config_grep "$CONFIG_DIR""/config_grep.cfg" "$FILE_PATH")
 
-  # Option 2: Regular test with cfg file
-  local OUTPUT_LINES
-  OUTPUT_LINES="$(config_grep "$CONFIG_DIR""/config_grep.cfg" "$FILE_PATH")"
-
-  if [[ "$OUTPUT_LINES" == "C_N_F" ]] ; then
+  if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif [[ -n "$OUTPUT_LINES" ]] ; then
+  elif [[ "${#OUTPUT_LINES[@]}" -ne 0 ]] ; then
     # count of results
-    local OUTPUT_COUNT
-    OUTPUT_COUNT="$(echo "$OUTPUT_LINES" | wc -w)"
-    print_output "[+] Found ""$OUTPUT_COUNT"" files:"
+    print_output "[+] Found ""${#OUTPUT_LINES[@]}"" files:"
 
-    for OUTPUT in $OUTPUT_LINES; do
+    for OUTPUT in "${OUTPUT_LINES[@]}"; do
       if [[ -f "$OUTPUT" ]] ; then
         print_output "$(print_path "$OUTPUT")"
       fi
@@ -215,25 +205,25 @@ load_from_config() {
     print_output "[-] Nothing found"
   fi
 
-  # Load list of text inside a config file (without check, what's inside
-  local OUTPUT_LINES
-  # config_list [config_file_path]
-  OUTPUT_LINES="$(config_list "$CONFIG_DIR""/config_list.cfg")"
 
-  if [[ "$OUTPUT_LINES" == "C_N_F" ]] ; then
+  # config_list.cfg contains text, you get an array
+  mapfile -t OUTPUT_LINES < <(config_list "$CONFIG_DIR""/config_list.cfg")
+
+  if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif [[ -n "$OUTPUT_LINES" ]] ; then
+  elif [[ "${#OUTPUT_LINES[@]}" -ne 0 ]] ; then
     # count of results
-    local OUTPUT_COUNT
-    OUTPUT_COUNT="$(echo "$OUTPUT_LINES" | wc -w)"
-    print_output "[+] Found ""$OUTPUT_COUNT"" lines:"
+    print_output "[+] Found ""${#OUTPUT_LINES[@]}"" files:"
 
-    for OUTPUT in $OUTPUT_LINES; do
-      print_output "$OUTPUT"
+    for OUTPUT in "${OUTPUT_LINES[@]}"; do
+      if [[ -f "$OUTPUT" ]] ; then
+        print_output "$(print_path "$OUTPUT")"
+      fi
     done
   else
     print_output "[-] Nothing found"
   fi
+
 
   # Find files with search parameters (wildcard * is allowed)
   local OUTPUT_LINES

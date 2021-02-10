@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020 Siemens Energy AG
+# Copyright 2020 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -74,28 +75,29 @@ F19_cve_aggregator() {
 }
 
 prepare_version_data() {
+    #print_output "$VERSION_lower"
     # we try to handle as many version strings as possible through these generic rules
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
+    # tab -> space
+    # remove multiple spaces
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
 
-    #This is perl 5, version 20, subversion 0 (v5.20.0) built
-    VERSION_lower="${VERSION_lower//this\ is\ perl\ .*\ \(v/}"
-    VERSION_lower="${VERSION_lower//)\ built/}"
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
     VERSION_lower="${VERSION_lower//(gdb)/}"
-    #gpg (GnuPG) 2.2.17
-    VERSION_lower="${VERSION_lower//gpg\ (gnupg)/gnupg}"
-    #D-Bus Message Bus Daemon 1.6.8
-    VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/:dbus\ }"
+    #zic.c
+    VERSION_lower="${VERSION_lower//zic\.c/zic}"
+    #bzip2, a block-sorting file compressor.  Version 1.0.6, 
+    VERSION_lower="${VERSION_lower//bzip2,\ a\ block-sorting\ file\ compressor\.\ version/bzip2}"
     #jQuery JavaScript Library v1.4.3
     VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
     # GNU Midnight Commander 
     VERSION_lower="${VERSION_lower//gnu\ midnight\ commander/midnight_commander}"
     #xl2tpd version:  xl2tpd-1.3.6
-    VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ \ xl2tpd-/xl2tpd\ }"
-    VERSION_lower="${VERSION_lower//xl2tpd\ server\ version\ xl2tpd-/xl2tpd\ }"
-    VERSION_lower="${VERSION_lower//xl2tpd-/}"
-    VERSION_lower="${VERSION_lower//goahead\ \ /goahead\ }"
+    VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ xl2tpd-/xl2tp\ }"
+    VERSION_lower="${VERSION_lower//xl2tpd\ server\ xl2tpd-/xl2tpd\ }"
+    VERSION_lower="${VERSION_lower//goahead\ /goahead\ }"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
@@ -104,7 +106,15 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ntpd\ -\ ntp\ daemon\ program\ -\ ver\.\ /ntpd\ }"
     VERSION_lower="${VERSION_lower//ntpq\ -\ standard\ ntp\ query\ program\ -\ ver\.\ /ntpq\ }"
     #This is SMTPclient Version
-    VERSION_lower="${VERSION_lower//this\ is\ smtpclient\ /smtpclient}"
+    VERSION_lower="${VERSION_lower//this\ is\ smtpclient/smtpclient}"
+    #btconfig - BTCONFIG Tool ver
+    VERSION_lower="${VERSION_lower//-\ btconfig\ tool\ ver/}"
+    # hciemu - HCI emulator ver 
+    VERSION_lower="${VERSION_lower//-\ hci\ emulator\ ver/}"
+    # hcitool - HCI Tool ver 
+    VERSION_lower="${VERSION_lower//-\ hci\ tool\ ver/}"
+    # sdptool - SDP tool 
+    VERSION_lower="${VERSION_lower//-\ sdp\ tool/}"
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
@@ -113,14 +123,46 @@ prepare_version_data() {
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"
+    # ubiXYZ -> mtd-utils
+    VERSION_lower="${VERSION_lower//ubinfo/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiattach/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubidetach/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubimkvol/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubirmvol/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiblock/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiupdatevol/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubicrc32/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubinize/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ubiformat/mtd-utils}"
+    VERSION_lower="${VERSION_lower//mtdinfo/mtd-utils}"
+    VERSION_lower="${VERSION_lower//nandwrite/mtd-utils}"
+    VERSION_lower="${VERSION_lower//nanddump/mtd-utils}"
+    VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
+    #i2cXYZ -> i2c-tools
+    VERSION_lower="${VERSION_lower//i2cdetect/i2c-tools}"
+    VERSION_lower="${VERSION_lower//i2cdump/i2c-tools}"
+    VERSION_lower="${VERSION_lower//i2cget/i2c-tools}"
+    VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
-    #tar (GNU tar) 1.23
-    VERSION_lower="${VERSION_lower//tar\ (gnu\ tar)/gnu:tar}"
     # lsusb (usbutils)
     VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/getconf\ (.*)/getconf/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/localedef\ (.*)/localedef/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/pt_chown\ (.*)/pt_chown/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/rpcinfo\ (.*)/rpcinfo/')"
+    #This is perl 5, version 20, subversion 0 (v5.20.0) built
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
+    #gpg (GnuPG) 2.2.17
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
     #Wireless-Tools version 29
     VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
     VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"
@@ -129,11 +171,11 @@ prepare_version_data() {
     # remove the v in something like this: "space v[number]"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')"
     # "mkfs\.jffs2\ revision\ [0-9]\.[0-9]\.[0-9]\.[0-9]"
-    VERSION_lower="${VERSION_lower//revision/}"
+    VERSION_lower="${VERSION_lower//revision\ /}"
+    # mkfs.jffs2: error!: revision 1.60
+    VERSION_lower="${VERSION_lower//:\ error!:/}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
     VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
-    # GNU grep 2.6.3
-    VERSION_lower="${VERSION_lower//^gnu\ /}"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
@@ -150,12 +192,16 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//gnu\ bash,\ /bash\ }"
     # FUSE library version: 2.9.4
     VERSION_lower="${VERSION_lower//fuse\ library/fuse}"
+    #Linux strongSwan 5.2.2 
+    VERSION_lower="${VERSION_lower//linux\ strongswan/strongswan}"
     # NET-SNMP\ version:\ \ 
-    VERSION_lower="${VERSION_lower//net-snmp\ /net-snmp}"
+    #VERSION_lower="${VERSION_lower//net-snmp/net-snmp}"
     #igmpproxy, Version 0.1
     VERSION_lower="${VERSION_lower//,/}"
     #flash_eraseall $ 1.1 $
     VERSION_lower="${VERSION_lower//\$/}"
+    #radlogin.cv
+    VERSION_lower="${VERSION_lower//radlogin\.cv/radlogin}"
     #event log utility
     VERSION_lower="${VERSION_lower//event\ log\ utility/event_log_utility}"
     #message manager utility
@@ -167,6 +213,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//-\ /}"
     #mini_httpd/1.19
     VERSION_lower="${VERSION_lower/\//\ }"
+    #OpenLDAP:\ ldapsearch
+    VERSION_lower="${VERSION_lower/openldap\ ldapsearch/openldap}"
     #Beceem\ CM\ Server\
     VERSION_lower="${VERSION_lower//beceem\ cm\ server/beceem}"
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
@@ -174,34 +222,112 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/loadkeys}"
     # CLIENT\ libcurl\
     VERSION_lower="${VERSION_lower//client\ libcurl/libcurl }"
+    #Intel SDK for UPnP devices /1.2
+    VERSION_lower="${VERSION_lower//intel\ sdk\ for\ upnp\ devices\ \ /portable_sdk_for_upnp\ }"
+    # busybox 1.00-pre2 -> we ignore the pre
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/busybox\ ([0-9]\.[0-9][0-9])-pre[0-9]/busybox\ \1/g')"
     # GNU C Library (AuDis-V04.56) stable release version 2.23
-    #VERSION_lower="${VERSION_lower//gnu\ c\ library.*stable\ release/gnu:libc}"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/glibc/')"
+    # (Debian EGLIBC 2.13-38+deb7u11) 2.13
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(eglibc)/eglibc/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(.*\ eglibc\ .*)/eglibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
     #OpenSSH_7.8p1 -> openssh 7.8:p1 
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/openssh_([0-9])\.([0-9])([a-z][0-9])/openssh\ \1\.\2:\3/g')"
     #socat 2.0.0-b4 -> socat 2.0.0:b4 
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/socat\ ([0-9]\.[0-9]\.[0-9])-([a-z][0-9])/socat\ \1:\2/g')"
+    # pppd 2.4.2b3
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/pppd\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9])/pppd\ \1:\2/g')"
     # ntpd 4.2.8p13 -> ntp 4.2.8:p13
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpd\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9][0-9])/ntp\ \1:\2/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntp[dq]\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*query.*([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
+    # ntpdate 4.2.8p13 -> ntp 4.2.8:p13
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdate\ ([0-9]\.[0-9]\.[0-9])([a-z]([0-9]))/ntp\ \1:\2/g')"
+    # unzip .... info-zip -> info-zip
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipinfo\ ([0-9]\.[0-9][0-9])\ .*\ info-zip.*/info-zip:zip\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/unzip\ ([0-9]\.[0-9][0-9])\ .*\ by\ info-zip.*/info-zip:unzip\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zip\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zip\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
+    #mdns repeater (1.10)
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/mdns\ repeater\ \(([0-9]\.[0-9][0-9])\)/mdnsrepeater\ \1/g')"
+    #management console agent 1.5 (c) ubiquiti networks inc
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/management\ console\ agent\ ([0-9]\.[0-9]).*ubiquiti\ networks/ubiquiti:console_agent\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/multipurpose.*control\ daemon\ ([0-9]\.[0-9]).*ubiquiti/ubiquiti:control_daemon\ \1/g')"
+    #avahi::"avahi-.*[0-9]\.[0-9]\.[0-9][0-9]$"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/avahi-.*\ ([0-9]\.[0-9]\.[0-9][0-9])/avahi\ \1/g')"
+    #server debian wheezy upnp/1.1 miniupnpd/2.1
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/server.*upnp.*miniupnpd\/([0-9]\.[0-9])/miniupnpd\ \1/g')"
+    # Siprotec 5 firmware has a version identifier like FWAOS_V01.11.01.123
+    VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
+    #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
+    VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
+    #jq commandline json processor [5a49c82-dirty]
+    VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
+    #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
+    VERSION_lower="${VERSION_lower//squid\ cache:/squid-cache:squid}"
+    #tar (GNU tar) 1.23
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ tar)/gnu:tar/')"
+    VERSION_lower="${VERSION_lower//gnu\ sed/gnu:sed}"
+    VERSION_lower="${VERSION_lower//gnu\ make/gnu:make}"
+    # ncurses -> gnu:ncurses
+    VERSION_lower="${VERSION_lower//ncurses/gnu:ncurses}"
+    #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ binutils.*)/gnu:binutils/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ grep.*)/gnu:grep/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ diffutils.*)/gnu:diffutils/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ coreutils.*)/gnu:coreutils/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sharutils.*)/gnu:sharutils/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(xz\ utils.*)/xz-utils/')"
+    #zend engine 2.4.0 copyright (c) 1998-2014 zend technologies
+    VERSION_lower="${VERSION_lower//zend\ engine/zend:engine}"
+    #D-Bus Message Bus Daemon 1.6.8
+    VERSION_lower="${VERSION_lower//d-bus\ message\ bus\ daemon/freedesktop:dbus}"
+    VERSION_lower="${VERSION_lower//d-bus\ socket\ cleanup\ utility/freedesktop:dbus}"
+    VERSION_lower="${VERSION_lower//d-bus\ uuid\ generator/freedesktop:dbus}"
     #Roaring Penguin PPPoE Version
     VERSION_lower="${VERSION_lower//roaring\ penguin\ pppoe/roaring_penguin:pppoe}"
     #upnp controlpoint 1.0
     VERSION_lower="${VERSION_lower//upnp\ controlpoint/upnp_controlpoint}"
     #----welcome to realtek camera tool.
     VERSION_lower="${VERSION_lower//----welcome\ to\ realtek\ camera\ tool\./realtek_camera_tool}"
-    #remove multiple spaces
-    #VERSION_lower="${VERSION_lower//\ \+/\ }"
-    # shellcheck disable=SC2001
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ \+/\ /')"
     #remove '
     VERSION_lower="${VERSION_lower//\'/}"
     # Ralink\ DOT1X\ daemon,\ version\ = '
     VERSION_lower="${VERSION_lower//ralink\ dot1x\ daemon\ \=\ /ralink-dot1x\ }"
     #his\ is\ WiFiDog\ 
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
+
+    # final cleanup of start and ending
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^-//')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^_//')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-$//')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/_$//')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^\ //')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ $//')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\.$//')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\]$//')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/[)$]//')"
+    #print_output "$VERSION_lower"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
@@ -214,7 +340,7 @@ aggregate_versions() {
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
-  print_output ""
+  print_output "[*] Software inventory initial overview:"
   for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
     print_output "[+] Found Version details (base check): ""$VERSION"""
   done
@@ -241,9 +367,10 @@ aggregate_versions() {
   done
 
   # sorting and unique our versions array:
-  eval "VERSIONS_CLEANED=($(for i in  "${VERSIONS_CLEANED[@]}" ; do  echo "\"$i\"" ; done | sort -u))"
+  eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
 
   if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
+    print_output "[*] Software inventory aggregated:"
     for VERSION in "${VERSIONS_CLEANED[@]}"; do
       print_output "[+] Found Version details (aggregated): ""$VERSION"""
     done
@@ -327,26 +454,67 @@ generate_cve_details() {
       echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_search"
     } >> "$LOG_DIR"/aggregator/"$VERSION_path".txt
 
-    print_output ""
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
-      print_output "${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
+      print_output ""
+      print_output "[+] ${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
     elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]];then
-      print_output "${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
+      print_output ""
+      print_output "[+] ${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
     else
-      print_output "Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search."
+      print_output "[-] Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search."
     fi
   done
 
   print_output ""
   print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-  for FILE_AGGR in "$LOG_DIR"/aggregator/*; do
+  mapfile -d '' LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -name "*" -print0 2> /dev/null)
+  for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
     if [[ -f $FILE_AGGR ]]; then
+      BIN=""
+      VERSION=""
       STATS=$(grep "\[+\]\ Statistics\:" "$FILE_AGGR" | cut -d: -f2- 2>/dev/null)
+      #26|0|gnu:binutils:2.21:p12
   
-      VERSION=$(echo "$STATS" | cut -d\| -f3-)
-      BIN=$(echo "$VERSION" | cut -d: -f1)
-      #VERSION=$(echo "$VERSION" | cut -d: -f2)
-      VERSION=$(echo "$VERSION" | grep -o '[^:]*$')
+      BIN_VERSION=$(echo "$STATS" | cut -d\| -f3-)
+      # shellcheck disable=SC2001
+      BIN_VERSION=$(echo "$BIN_VERSION" | sed -e 's/:/\ /g')
+      #gnu:binutils:2.21:p12
+
+      F_COUNTER=0
+      for FIELD in $BIN_VERSION; do
+
+        if [[ "$F_COUNTER" -eq 0 ]];then
+          # the initial field is always the binary name
+          BIN="$FIELD"
+        elif echo "$FIELD" | grep -q "^p[0-9]"; then
+          # something like "binary 1.23 p13"
+          VERSION="$VERSION-$FIELD"
+        elif echo "$FIELD" | grep -q "^r[0-9]"; then
+          # something like "binary 1.23 r13"
+          VERSION="$VERSION-$FIELD"
+        elif echo "$FIELD" | grep -q "^b[0-9]"; then
+          # something like "binary 1.23 b13"
+          VERSION="$VERSION-$FIELD"
+        elif echo "$FIELD" | grep -q "^sr[0-9][0-9][0-9][0-9]"; then
+          #VxWorks:sr0530
+          VERSION="$VERSION-$FIELD"
+        elif echo "$FIELD" | grep -q "^[a-z]"; then
+          # if FIELD starts with a letter it is a binary name
+          # cases like r12 and p12 are already handled as versions
+          BIN="$BIN $FIELD"
+        elif echo "$FIELD" | grep -q "^[0-9]"; then
+          VERSION="$VERSION $FIELD"
+        elif [[ "$F_COUNTER" -gt 2 ]];then
+          # if we reach this and our counter is above 2 it is probably a version field
+          VERSION="$VERSION-$FIELD"
+        fi
+        # sometimes we start with a space
+        # shellcheck disable=SC2001
+        VERSION=$(echo "$VERSION" | sed -e 's/^\ //')
+        # shellcheck disable=SC2001
+        BIN=$(echo "$BIN" | sed -e 's/^\ //')
+        (( F_COUNTER++ ))
+      done
   
       EXPLOITS=$(echo "$STATS" | cut -d\| -f2 | sed -e 's/\ //g')
       CVEs=$(echo "$STATS" | cut -d\| -f1 | sed -e 's/\ //g')
@@ -356,12 +524,12 @@ generate_cve_details() {
       FORMAT_LOG=0
       if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
         if [[ "$EXPLOITS" -gt 0 ]]; then
-          printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+          printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         else
-          printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+          printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         fi
       else
-        printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s\t:\t%-8.8s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     fi
@@ -371,6 +539,7 @@ generate_cve_details() {
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
     print_output "[+] Found $S30_VUL_COUNTER CVE entries for all binaries from S30_version_vulnerability_check.sh."
   fi
+  print_output "[+] Identified ${#VERSIONS_CLEANED[@]} software components with version details."
   print_output "[+] Confirmed $CVE_COUNTER CVE entries."
   print_output "[+] $EXPLOIT_COUNTER possible exploits available.\\n"
 }

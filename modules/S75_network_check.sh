@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -35,9 +36,8 @@ check_resolv()
 
   local CHECK=0
   local RES_CONF_PATHS
-  RES_CONF_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/resolv.conf")"
-
-  for RES_INFO_P in $RES_CONF_PATHS ; do
+  mapfile -t RES_CONF_PATHS < <(mod_path "/ETC_PATHS/resolv.conf")
+  for RES_INFO_P in "${RES_CONF_PATHS[@]}"; do
     if [[ -e "$RES_INFO_P" ]] ; then
       CHECK=1
       print_output "[+] DNS config ""$(print_path "$RES_INFO_P")"
@@ -59,9 +59,8 @@ check_iptables()
 
   local CHECK=0
   local IPT_CONF_PATHS
-  IPT_CONF_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/iptables")"
-
-  for IPT_INFO_P in $IPT_CONF_PATHS ; do
+  mapfile -t IPT_CONF_PATHS < <(mod_path "/ETC_PATHS/iptables")
+  for IPT_INFO_P in "${IPT_CONF_PATHS[@]}"; do
     if [[ -e "$IPT_INFO_P" ]] ; then
       CHECK=1
       print_output "[+] iptables config ""$(print_path "$IPT_INFO_P")"
@@ -79,16 +78,15 @@ check_snmp()
 
   local CHECK=0
   local SNMP_CONF_PATHS
-  SNMP_CONF_PATHS="$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/snmp/snmpd.conf")"
-
-  for SNMP_CONF_P in $SNMP_CONF_PATHS ; do
+  mapfile -t SNMP_CONF_PATHS < <(mod_path "/ETC_PATHS/snmp/snmpd.conf")
+  for SNMP_CONF_P in "${SNMP_CONF_PATHS[@]}"; do
     if [[ -e "$SNMP_CONF_P" ]] ; then
       CHECK=1
       print_output "[+] SNMP config ""$(print_path "$SNMP_CONF_P")"
-      FIND="$(awk '/^com2sec/ { print $4 }' "$SNMP_CONF_P")"
-      if [[ -n "$FIND" ]] ; then
+      mapfile -t FIND < <(awk '/^com2sec/ { print $4 }' "$SNMP_CONF_P")
+      if [[ "${#FIND[@]}" -ne 0 ]] ; then
         print_output "[*] com2sec line/s:"
-        for I in $FIND; do
+        for I in "${FIND[@]}"; do
           print_output "$(indent "$(orange "$I")")"
         done
       fi

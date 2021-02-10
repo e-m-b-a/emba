@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2021 Siemens Energy AG
+# Copyright 2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -21,22 +22,66 @@ F50_base_aggregator() {
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   BIN_CHECK_LOG="s10_binaries_check.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
+  OS_DETECT_LOG="p07_firmware_bin_base_analyzer.txt"
   LOG_FILE="$( get_log_file )"
+
+  if [[ -n "$FW_VENDOR" ]]; then
+    print_output "[+] Tested Firmware vendor: ""$ORANGE""""$FW_VENDOR"""
+  fi  
+  if [[ -n "$FW_VERSION" ]]; then
+    print_output "[+] Tested Firmware version: ""$ORANGE""""$FW_VERSION"""
+  fi  
+  if [[ -n "$FW_DEVICE" ]]; then
+    print_output "[+] Tested Firmware from device: ""$ORANGE""""$FW_DEVICE"""
+  fi  
+  if [[ -n "$FW_NOTES" ]]; then
+    print_output "[+] Additional notes: ""$ORANGE""""$FW_NOTES"""
+  fi  
 
   print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"""
   print_output "[+] Emba start command:""$ORANGE"" ""$EMBACOMMAND"""
+
   if [[ -n "$D_ARCH" ]]; then
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
+  elif [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
+    PRE_ARCH="$(grep "Possible architecture details found:" "$LOG_DIR"/"$OS_DETECT_LOG" | cut -d: -f2)"
+    if [[ -n "$PRE_ARCH" ]]; then
+      print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"""
+    fi
   fi
-  print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
+
+  if [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
+    OS_VERIFIED=$(grep "verified.*system\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    if [[ -n "$OS_VERIFIED" ]]; then
+      print_output "[+] Detected operating system: ""$ORANGE""""$OS_VERIFIED"""
+    else
+      mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+      if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
+        for OS in "${OS_DETECT[@]}"; do
+          print_output "[+] Possible operating system detected (unverified): ""$ORANGE""""$OS"""
+        done
+      fi
+    fi
+  fi
+
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
     mapfile -t KERNELV < <(grep "Statistics" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d: -f2 | sort -u)
     if [[ "${#KERNELV[@]}" -ne 0 ]]; then
+      if [[ -z "$OS_VERIFIED" ]]; then
+        # if we have found a kernel it is a Linux system:
+        # we only print this here if we have not set OS_VERIFIED already
+        OS_VERIFIED="Linux"
+        print_output "[+] Detected operating system: ""$ORANGE""""$OS_VERIFIED"""
+      fi
       for KV in "${KERNELV[@]}"; do
         print_output "[+] Detected kernel version:""$ORANGE"" ""$KV"""
       done
     fi
   fi
+
+  print_output "\\n-----------------------------------------------------------------\\n"
+
+  print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
   if [[ "${#MOD_DATA[@]}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""${#MOD_DATA[@]}""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
   fi
@@ -44,10 +89,12 @@ F50_base_aggregator() {
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY"""
   fi
-  print_output ""
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S20_SCRIPTS""""$GREEN"" shell scripts.""$NC"""
+  fi
+  if [[ "$S21_PY_VULNS" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S21_PY_SCRIPTS""""$GREEN"" python files.""$NC"""
   fi
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" executables (without version checking).""$NC"""
@@ -73,8 +120,9 @@ F50_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$EMUL""""$GREEN"" successful emulated processes.""$NC"""
   fi
 
+
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
-    print_output ""
+    print_output "\\n-----------------------------------------------------------------\\n"
     if [[ -f "$LOG_DIR"/"$BIN_CHECK_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$BIN_CHECK_LOG")
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$BIN_CHECK_LOG")
@@ -114,9 +162,9 @@ F50_base_aggregator() {
   fi
 
   if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n"
     SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | awk '{print $1}' | grep -c -v "ERROR")
     if [[ "$SUM_FCW_FIND" -gt 0 ]] ; then
-      print_output ""
 	    print_output "[+] cwe-checker found a total of ""$ORANGE""""$SUM_FCW_FIND""""$GREEN"" of the following security issues:"
       mapfile -t BAP_OUT < <( find "$LOG_DIR"/bap_cwe_checker/ -type f -exec grep -v "ERROR" {} \; | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )
       for BAP_LINE in "${BAP_OUT[@]}"; do
@@ -129,7 +177,9 @@ F50_base_aggregator() {
   fi
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
-    print_output ""
+
+    print_output "\\n-----------------------------------------------------------------\\n"
+
     print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$GREEN"" usages of strcpy in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries.""$NC"""
   fi
 
@@ -174,10 +224,15 @@ F50_base_aggregator() {
 
   print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n"
+
     print_output "[*] Identified the following version details, vulnerabilities and exploits:"
     print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
     print_output ""
+    if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
+      print_output "[+] Identified ""$ORANGE""""${#VERSIONS_CLEANED[@]}""""$GREEN"" software components with version details.\\n"
+    fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE entries for all binaries from S30_version_vulnerability_check.sh."
     fi
@@ -188,4 +243,5 @@ F50_base_aggregator() {
       print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available."
     fi
   fi
+  print_output "\\n-----------------------------------------------------------------"
 }

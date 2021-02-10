@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -32,14 +33,12 @@ search_ssh_files()
   sub_module_title "Search ssh files"
 
   local SSH_FILES
-  SSH_FILES="$(config_find "$CONFIG_DIR""/ssh_files.cfg" "")"
+  mapfile -t SSH_FILES < <(config_find "$CONFIG_DIR""/ssh_files.cfg")
 
-  if [[ "$SSH_FILES" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "$SSH_FILES" ]] ; then
-    local KEY_COUNT
-    KEY_COUNT="$(echo "$SSH_FILES" | wc -w)"
-    print_output "[+] Found ""$KEY_COUNT"" ssh configuration files:"
-    for LINE in $SSH_FILES ; do
+  if [[ "${SSH_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#SSH_FILES[@]}" -ne 0 ]] ; then
+    print_output "[+] Found ""${#SSH_FILES[@]}"" ssh configuration files:"
+    for LINE in "${SSH_FILES[@]}" ; do
       if [[ -f "$LINE" ]] ; then
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       fi
@@ -67,12 +66,12 @@ check_squid()
   fi
 
   CHECK=0
-  SQUID_DAEMON_CONFIG_LOCS=("$FIRMWARE_PATH""/ETC_PATHS/" "$FIRMWARE_PATH""/ETC_PATHS/squid" "$FIRMWARE_PATH""/ETC_PATHS/squid3" "$FIRMWARE_PATH""/usr/local/etc/squid" "$FIRMWARE_PATH""/usr/local/squid/etc")
-  SQUID_PATHS_ARR="$(mod_path_array "${SQUID_DAEMON_CONFIG_LOCS[@]}")"
-  if [[ "$SQUID_PATHS_ARR" == "C_N_F" ]] ; then
+  SQUID_DAEMON_CONFIG_LOCS=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
+  mapfile -t SQUID_PATHS_ARR < <(mod_path_array "${SQUID_DAEMON_CONFIG_LOCS[@]}")
+  if [[ "${SQUID_PATHS_ARR[0]}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
-  elif [[ -n "$SQUID_PATHS_ARR" ]] ; then
-    for SQUID_E in $SQUID_PATHS_ARR; do
+  elif [[ "${#SQUID_PATHS_ARR[@]}" -ne 0 ]] ; then
+    for SQUID_E in "${SQUID_PATHS_ARR[@]}"; do
       if [[ -f "$SQUID_E""/squid.conf" ]] ; then
         CHECK=1
         print_output "[+] Found squid config: ""$(print_path "$SQUID_E")"

@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -50,12 +51,11 @@ release_info()
   sub_module_title "Release/Version information"
 
   local RELEASE_STUFF
-  RELEASE_STUFF="$(config_find "$CONFIG_DIR""/release_files.cfg" "/etc")"
-
-  if [[ "$RELEASE_STUFF" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ -n "$RELEASE_STUFF" ]] ; then
+  mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg")
+  if [[ "${RELEASE_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  elif [[ "${#RELEASE_STUFF[@]}" -ne 0 ]] ; then
     print_output "[+] Specific release/version information of target:"
-    for R_INFO in $RELEASE_STUFF ; do
+    for R_INFO in "${RELEASE_STUFF[@]}" ; do
       if [[ -f "$R_INFO" ]] ; then
         print_output "\\n""$( print_path "$R_INFO")"
         RELEASE="$( cat "$R_INFO" )"

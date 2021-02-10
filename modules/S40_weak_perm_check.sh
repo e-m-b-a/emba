@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -25,16 +26,16 @@ S40_weak_perm_check() {
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
 
   local ETC_ARR
-  ETC_ARR=("$(mod_path "$FIRMWARE_PATH""/ETC_PATHS")")
+  ETC_ARR=("$(mod_path "/ETC_PATHS")")
   readarray -t SETUID_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -user root -perm -4000 2>/dev/null)
   readarray -t SETGID_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -user root -perm -2000 2>/dev/null)
   readarray -t WORLD_WRITE_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f -perm -o+w 2>/dev/null)
   readarray -t WEAK_SHADOW_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev -type f -iname "shadow*" -perm -600 2>/dev/null)
 
-  ETC_ARR=("$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/rc.d")")
+  ETC_ARR=("$(mod_path "/ETC_PATHS/rc.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
   readarray -t WEAK_RC_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" \! -uid 0 -type f 2>/dev/null)
-  ETC_ARR=("$(mod_path "$FIRMWARE_PATH""/ETC_PATHS/init.d")")
+  ETC_ARR=("$(mod_path "/ETC_PATHS/init.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
   readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" \! -uid 0 -type f 2>/dev/null)
 
