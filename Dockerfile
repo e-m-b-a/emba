@@ -10,3 +10,4 @@ ADD . /app
 RUN yes | sudo ./installer.sh
 
 ENTRYPOINT [ "/bin/bash" ]
+
