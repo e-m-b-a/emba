@@ -22,6 +22,20 @@
 INSTALL_APP_LIST=()
 DOWNLOAD_FILE_LIST=()
 
+# force install everything
+FORCE=0
+
+## Color definition
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+ORANGE="\033[0;33m"
+MAGENTA="\033[0;35m"
+CYAN="\033[0;36m"
+NC="\033[0m"  # no color
+
+## Attribute definition
+BOLD="\033[1m"
+
 # print_tool_info a b c
 # a = application name (by apt) 
 # b = no update, if already installed -> 0
@@ -107,11 +121,13 @@ download_file()
   fi
 }
 
+print_help()
+{
+  echo -e "\\n""$CYAN""USAGE""$NC"
+  echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
+  echo -e "$CYAN""-h""$NC""         Print this help message"
+}
 
-ORANGE='\033[0;33m'
-BOLD='\033[1m'
-MAGENTA='\033[0;35m'
-NC='\033[0m'  # no color
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
@@ -119,6 +135,24 @@ if ! [[ $EUID -eq 0 ]] ; then
   echo -e "\\n""$ORANGE""Run emba installation script with root permissions!""$NC\\n"
   exit 1
 fi
+
+while getopts Fh OPT ; do
+  case $OPT in
+    F)
+      export FORCE=1
+      echo -e "$GREEN""$BOLD""Install all dependecies""$NC"
+      ;;
+    h)
+      print_help
+      exit 0
+      ;;
+    *)
+      echo -e "$RED""$BOLD""Invalid option""$NC"
+      print_help
+      exit 1
+      ;;
+  esac
+done
 
 
 
@@ -137,8 +171,13 @@ print_tool_info "qemu-user-static" 0 "qemu-mips-static"
 print_tool_info "binwalk" 0
 print_tool_info "bc" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     echo
@@ -176,8 +215,13 @@ else
   echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
 fi
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
@@ -196,8 +240,13 @@ echo -e "\\nWe use a few well-known open source tools in emba, for example check
 print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
 print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
@@ -215,8 +264,13 @@ print_file_info "DiabloHorn/yara4pentesters/juicy_files.txt" "" "https://raw.git
 print_file_info "ahhh/YARA/crypto_signatures.yar" "" "https://raw.githubusercontent.com/ahhh/YARA/master/crypto_signatures.yar" "external/yara/crypto_signatures.yar"
 print_file_info "Yara-Rules/rules/packer_compiler_signatures.yar" "" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     if ! [[ -d "external/yara/" ]] ; then
@@ -243,8 +297,13 @@ print_tool_info "texinfo" 1
 print_tool_info "gcc" 1
 print_tool_info "build-essential" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
@@ -283,8 +342,13 @@ for YEAR in $(seq 2002 $(($(date +%Y)))); do
   print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
 done
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and jq be installed (if not already on the system)!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     download_file "cve.mitre.org database" "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
@@ -318,8 +382,13 @@ echo -e "\\nTo use the aggregator and check if exploits are available, we need a
 print_tool_info "python3-pip" 1
 print_tool_info "net-tools" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
