@@ -49,12 +49,14 @@ dependency_check()
     echo -e "$RED""    This script should be used as root user""$NC"
   fi
 
-  print_output "    host distribution - \\c" "no_log"
-  if grep -q "kali" /etc/debian_version 2>/dev/null ; then
-    echo -e "$GREEN""ok""$NC"
-  else
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    This script is only tested on KALI linux""$NC" 1>&2
+  if [[ $USE_DOCKER -eq 0 ]] ; then
+    print_output "    host distribution - \\c" "no_log"
+    if grep -q "kali" /etc/debian_version 2>/dev/null ; then
+      echo -e "$GREEN""ok""$NC"
+    else
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    This script is only tested on KALI linux""$NC" 1>&2
+    fi
   fi
 
   print_output "    configuration directory - \\c" "no_log"
@@ -79,312 +81,331 @@ dependency_check()
     echo -e "$GREEN""ok""$NC"
   fi
 
+
   echo
   print_output "[*] Necessary utils on system checks:" "no_log"
 
-  print_output "    basename - \\c" "no_log"
-  if ! command -v basename > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing basename binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  # using bash higher than v4 ...
-  print_output "    bash (version) - \\c" "no_log"
-  if ! [[ "${BASH_VERSINFO:-0}" -gt 3 ]] ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    upgrade your bash to version 4 or higher""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    cut - \\c" "no_log"
-  if ! command -v cut > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing cut binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    find - \\c" "no_log"
-  if ! command -v find > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing find binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    grep - \\c" "no_log"
-  if ! command -v grep > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing grep binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    modinfo - \\c" "no_log"
-  if ! command -v  modinfo > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing modinfo binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    readelf - \\c" "no_log"
-  READELF=$(command -v readelf)
-  # check for needed dependencies:
-  if ! [[ -x "$READELF" ]] ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing readelf binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    realpath - \\c" "no_log"
-  if ! command -v  realpath > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing realpath binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    sed - \\c" "no_log"
-  if ! command -v sed > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing sed binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    sort - \\c" "no_log"
-  if ! command -v sort > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing sort binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    strings - \\c" "no_log"
-  if ! command -v strings > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing strings binary""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  echo
-  print_output "[*] Optional utils checks:" "no_log"
-
-  print_output "    checksec script - \\c" "no_log"
-  if ! [[ -f "$EXT_DIR""/checksec" ]] ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing checksec ... check your installation""$NC"
-    echo -e "$RED""    you can run the installer.sh script or download it manually:""$NC"
-    echo -e "$RED""      https://github.com/slimm609/checksec.sh""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
-    fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  if [[ $BAP -eq 1 ]] ; then
+  if [[ $USE_DOCKER -eq 1 ]] ; then
     print_output "    docker - \\c" "no_log"
     if ! command -v docker > /dev/null ; then
       echo -e "$RED""not ok""$NC"
       echo -e "$RED""    missing docker ... check your installation""$NC"
       echo -e "$RED""    you can run the installer.sh script or install it manually""$NC"
-      BAP=0
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
     else
       echo -e "$GREEN""ok""$NC"
-      print_output "    cwe-checker - \\c" "no_log"
-      if docker images | grep -q cwe_checker ; then
-        echo -e "$GREEN""ok""$NC"
-      else
-        echo -e "$RED""not ok""$NC"
-        echo -e "$RED""    missing docker image cwe-checker ... check your installation""$NC"
-        echo -e "$RED""      https://github.com/fkie-cad/cwe_checker""$NC"
-        echo -e "$RED""    you can run the installer.sh script or pull it manually:""$NC"
-        echo -e "$RED""      docker pull fkiecad/cwe_checker:latest""$NC"
-        BAP=0
+    fi
+    
+    print_output "    docker-compose - \\c" "no_log"
+    if ! command -v docker-compose > /dev/null ; then
+      echo -e "$ORANGE""not ok""$NC"
+      echo -e "$ORANGE""    install docker-compose to use emba in docker container""$NC"
+      echo -e "$ORANGE""    install docker-compose via apt-get install docker-compose""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
       fi
+    else
+      echo -e "$GREEN""ok""$NC"
     fi
-  else
-    print_output "    docker and cwe-checker - \\c" "no_log"
-    echo -e "$ORANGE""not checked (disabled)""$NC"
   fi
 
-  print_output "    fdtdump - \\c" "no_log"
-  if ! command -v fdtdump > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    fdtdump not found ... disabling tests""$NC"
-    echo -e "$RED""    install fdtdump via apt-get install device-tree-compiler""$NC"
-    DTBDUMP=0
-  else
-    echo -e "$GREEN""ok""$NC"
-    DTBDUMP=1
-  fi
-  export DTBDUMP
-
-  print_output "    linux-exploit-suggester.sh script - \\c" "no_log"
-  if ! [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing linux-exploit-suggester.sh ... check your installation""$NC"
-    echo -e "$RED""    you can run the installer.sh script or download it manually:""$NC"
-    echo -e "$RED""      https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh ""$NC"
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
+  if [[ $USE_DOCKER -eq 0 ]] ; then
+    print_output "    basename - \\c" "no_log"
+    if ! command -v basename > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing basename binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
     fi
-  else
-    echo -e "$GREEN""ok""$NC"
+
+    # using bash higher than v4 ...
+    print_output "    bash (version) - \\c" "no_log"
+    BASH_VERSION="$(config_grep_string "$CONFIG_DIR""/version_strings.cfg" "$(bash --version)")"
+    if ! [[ "${BASH_VERSINFO[0]}" -gt 3 ]] ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    upgrade your bash to version 4 or higher""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    cut - \\c" "no_log"
+    if ! command -v cut > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing cut binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    find - \\c" "no_log"
+    if ! command -v find > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing find binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    grep - \\c" "no_log"
+    if ! command -v grep > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing grep binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    modinfo - \\c" "no_log"
+    if ! command -v  modinfo > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing modinfo binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    readelf - \\c" "no_log"
+    READELF=$(command -v readelf)
+    # check for needed dependencies:
+    if ! [[ -x "$READELF" ]] ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing readelf binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    realpath - \\c" "no_log"
+    if ! command -v  realpath > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing realpath binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    sed - \\c" "no_log"
+    if ! command -v sed > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing sed binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    sort - \\c" "no_log"
+    if ! command -v sort > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing sort binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    strings - \\c" "no_log"
+    if ! command -v strings > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing strings binary""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
   fi
 
-  OBJDUMP="$EXT_DIR""/objdump"
+  if [[ $USE_DOCKER -eq 0 ]] ; then
+    echo
+    print_output "[*] Optional utils checks:" "no_log"
+  
+    print_output "    checksec script - \\c" "no_log"
+    if ! [[ -f "$EXT_DIR""/checksec" ]] ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing checksec ... check your installation""$NC"
+      echo -e "$RED""    you can run the installer.sh script or download it manually:""$NC"
+      echo -e "$RED""      https://github.com/slimm609/checksec.sh""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
 
-  print_output "    objdump - \\c" "no_log"
-  if [[ -f "$OBJDUMP" ]] && ( file "$OBJDUMP" | grep -q ELF ) ; then
-    echo -e "$GREEN""ok""$NC"
-    if [[ -n $ARCH_STR ]] ; then
-      if ! "$OBJDUMP" --help | grep -q -e "$ARCH_STR" 2> /dev/null ; then
-        #OBJDMP_ARCH="--architecture=""$ARCH_STR"
-        #export OBJDMP_ARCH
-      #else
-        echo -e "$RED""    objdump does not support the used architecture""$NC"
-        if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-          exit 1
+    if [[ $BAP -eq 1 ]] ; then
+      print_output "    docker - \\c" "no_log"
+      if ! command -v docker > /dev/null ; then
+        echo -e "$RED""not ok""$NC"
+        echo -e "$RED""    missing docker ... check your installation""$NC"
+        echo -e "$RED""    you can run the installer.sh script or install it manually""$NC"
+        BAP=0
+      else
+        echo -e "$GREEN""ok""$NC"
+        print_output "    cwe-checker - \\c" "no_log"
+        if docker images | grep -q cwe_checker ; then
+          echo -e "$GREEN""ok""$NC"
+        else
+          echo -e "$RED""not ok""$NC"
+          echo -e "$RED""    missing docker image cwe-checker ... check your installation""$NC"
+          echo -e "$RED""      https://github.com/fkie-cad/cwe_checker""$NC"
+          echo -e "$RED""    you can run the installer.sh script or pull it manually:""$NC"
+          echo -e "$RED""      docker pull fkiecad/cwe_checker:latest""$NC"
+          BAP=0
         fi
       fi
+    else
+      print_output "    docker and cwe-checker - \\c" "no_log"
+      echo -e "$ORANGE""not checked (disabled)""$NC"
     fi
-  else
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing objdump binary""$NC"
-    echo -e "$RED""    you can run the installer.sh script or compile it manually""$NC"
-  fi
 
-  print_output "    shellcheck - \\c" "no_log"
-  if ! command -v shellcheck > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    shellcheck not found ... disabling tests""$NC"
-    echo -e "$RED""    install shellcheck via apt-get install shellcheck""$NC"
-    SHELLCHECK=0
-    export SHELLCHECK
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
+    print_output "    fdtdump - \\c" "no_log"
+    if ! command -v fdtdump > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    fdtdump not found ... disabling tests""$NC"
+      echo -e "$RED""    install fdtdump via apt-get install device-tree-compiler""$NC"
+      DTBDUMP=0
+    else
+      echo -e "$GREEN""ok""$NC"
+      DTBDUMP=1
+    fi
+    export DTBDUMP
 
-  print_output "    pylint - \\c" "no_log"
-  if ! command -v pylint > /dev/null ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    pylint not found ... disabling tests""$NC"
-    echo -e "$RED""    install pylint via apt-get install pylint""$NC"
-    PYTHON_CHECK=0
-    export PYTHON_CHECK
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
+    print_output "    linux-exploit-suggester.sh script - \\c" "no_log"
+    if ! [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing linux-exploit-suggester.sh ... check your installation""$NC"
+      echo -e "$RED""    you can run the installer.sh script or download it manually:""$NC"
+      echo -e "$RED""      https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh ""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
 
+    OBJDUMP="$EXT_DIR""/objdump"
 
-  print_output "    tree - \\c" "no_log"
-  if ! command -v tree > /dev/null ; then
-    echo -e "$ORANGE""not ok""$NC"
-    echo -e "$ORANGE""    install tree as alternative to ls for file overview in log""$NC"
-    echo -e "$ORANGE""    install tree via apt-get install tree""$NC"
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
+    print_output "    objdump - \\c" "no_log"
+    if [[ -f "$OBJDUMP" ]] && ( file "$OBJDUMP" | grep -q ELF ) ; then
+      echo -e "$GREEN""ok""$NC"
+      if [[ -n $ARCH_STR ]] ; then
+        if ! "$OBJDUMP" --help | grep -q -e "$ARCH_STR" 2> /dev/null ; then
+          #OBJDMP_ARCH="--architecture=""$ARCH_STR"
+          #export OBJDMP_ARCH
+        #else
+          echo -e "$RED""    objdump does not support the used architecture""$NC"
+          if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+            exit 1
+          fi
+        fi
+      fi
+    else
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing objdump binary""$NC"
+      echo -e "$RED""    you can run the installer.sh script or compile it manually""$NC"
+    fi
 
-  print_output "    openssl - \\c" "no_log"
-  if ! command -v openssl > /dev/null ; then
-    echo -e "$ORANGE""not ok""$NC"
-    echo -e "$ORANGE""    install openssl via apt-get install openssl""$NC"
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
+    print_output "    shellcheck - \\c" "no_log"
+    if ! command -v shellcheck > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    shellcheck not found ... disabling tests""$NC"
+      echo -e "$RED""    install shellcheck via apt-get install shellcheck""$NC"
+      SHELLCHECK=0
+      export SHELLCHECK
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
 
+    print_output "    tree - \\c" "no_log"
+    if ! command -v tree > /dev/null ; then
+      echo -e "$ORANGE""not ok""$NC"
+      echo -e "$ORANGE""    install tree as alternative to ls for file overview in log""$NC"
+      echo -e "$ORANGE""    install tree via apt-get install tree""$NC"
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
 
-  print_output "    binwalk - \\c" "no_log"
-  if ! command -v binwalk > /dev/null ; then
-    echo -e "$ORANGE""not ok""$NC"
-    echo -e "$ORANGE""    install binwalk from github: https://github.com/ReFirmLabs/binwalk""$NC"
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
+    print_output "    openssl - \\c" "no_log"
+    if ! command -v openssl > /dev/null ; then
+      echo -e "$ORANGE""not ok""$NC"
+      echo -e "$ORANGE""    install openssl via apt-get install openssl""$NC"
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
 
-  print_output "    qemu-ARCH-static - \\c" "no_log"
-  if ! command -v qemu-mips-static > /dev/null ; then
-    echo -e "$ORANGE""not ok""$NC"
-    echo -e "$ORANGE""    install qemu static emulators via apt-get install qemu-user-static""$NC"
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
+    print_output "    binwalk - \\c" "no_log"
+    if ! command -v binwalk > /dev/null ; then
+      echo -e "$ORANGE""not ok""$NC"
+      echo -e "$ORANGE""    install binwalk from github: https://github.com/ReFirmLabs/binwalk""$NC"
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    qemu-ARCH-static - \\c" "no_log"
+    if ! command -v qemu-mips-static > /dev/null ; then
+      echo -e "$ORANGE""not ok""$NC"
+      echo -e "$ORANGE""    install qemu static emulators via apt-get install qemu-user-static""$NC"
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
   
-  print_output "    docker-compose - \\c" "no_log"
-  if ! command -v docker-compose > /dev/null ; then
-    echo -e "$ORANGE""not ok""$NC"
-    echo -e "$ORANGE""    install docker-compose to use emba in docker container""$NC"
-    echo -e "$ORANGE""    install docker-compose via apt-get install docker-compose""$NC"
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-
-  print_output "    vulnerability database - \\c" "no_log"
-  if ! [[ -f "$EXT_DIR""/allitems.csv" ]] ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    missing vulnerability database ...disable tests ""$NC"
-    echo -e "$RED""    you can run the installer.sh script or download it manually:""$NC"
-    echo -e "$RED""    check https://cve.mitre.org/data/downloads/index.html for the database in CSV format""$NC"
-    V_FEED=0
-    export V_FEED
-    if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
-      exit 1
+    print_output "    docker-compose - \\c" "no_log"
+    if ! command -v docker-compose > /dev/null ; then
+      echo -e "$ORANGE""not ok""$NC"
+      echo -e "$ORANGE""    install docker-compose to use emba in docker container""$NC"
+      echo -e "$ORANGE""    install docker-compose via apt-get install docker-compose""$NC"
+    else
+      echo -e "$GREEN""ok""$NC"
     fi
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
 
-  print_output "    yara - \\c" "no_log"
-  YARA_BIN=$(command -v yara)
-  # check for needed dependencies:
-  if ! [[ -x "$YARA_BIN" ]] ; then
-    echo -e "$ORANGE""not ok""$NC"
-    echo -e "$ORANGE""    missing yara binary""$NC"
-    export YARA=0
-  else
-    echo -e "$GREEN""ok""$NC"
+    print_output "    vulnerability database - \\c" "no_log"
+    if ! [[ -f "$EXT_DIR""/allitems.csv" ]] ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing vulnerability database ...disable tests ""$NC"
+      echo -e "$RED""    you can run the installer.sh script or download it manually:""$NC"
+      echo -e "$RED""    check https://cve.mitre.org/data/downloads/index.html for the database in CSV format""$NC"
+      V_FEED=0
+      export V_FEED
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    yara - \\c" "no_log"
+    YARA_BIN=$(command -v yara)
+    # check for needed dependencies:
+    if ! [[ -x "$YARA_BIN" ]] ; then
+      echo -e "$ORANGE""not ok""$NC"
+      echo -e "$ORANGE""    missing yara binary""$NC"
+      export YARA=0
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
   fi
   
   if [[ $ONLY_DEP -eq 0 ]] ; then
@@ -406,9 +427,11 @@ dependency_check()
       fi
     fi
   else
-    echo
-    print_help
-    exit
+    if [[ $USE_DOCKER -eq 0 ]] ; then
+      echo
+      print_help
+      exit
+    fi
   fi
 }
 
