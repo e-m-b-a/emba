@@ -249,6 +249,11 @@ main()
   fi
 
   if [[ $USE_DOCKER -eq 1 ]] ; then
+    if ! [[ $EUID -eq 0 ]] ; then
+      print_output "[!] Using emba with docker-compose requires root permissions" "no_log"
+      print_output "$(indent "Run emba with root permissions to use docker")" "no_log"
+      exit 1
+    fi
     if ! command -v docker-compose > /dev/null ; then
       print_output "[!] No docker-compose found" "no_log"
       print_output "$(indent "Install docker-compose via apt-get install docker-compose to use emba with docker")" "no_log"
