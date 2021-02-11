@@ -406,19 +406,38 @@ case ${ANSWER:0:1} in
 esac
 
 # aha for html generation - future extension of emba
-#echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
-#if ! [[ -f "external/aha" ]] ; then
-#  apt-get install make
-#  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
-#  unzip ./external/aha-master.zip -d ./external
-#  rm external/aha-master.zip
-#  cd ./external/aha-master || exit 1
-#  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
-#  make
-#  cd ../.. || exit 1
-#  mv "external/aha-master/aha" "external/aha"
-#  rm -R external/aha-master
-#else
-#  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
-#fi
+
+INSTALL_APP_LIST=()
+echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database. CVE-searchsploit will be installed via pip3."
+print_tool_info "python3-pip" 1
+print_tool_info "bc" 1
+
+echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install bc, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+read -p "(y/N)" -r ANSWER
+case ${ANSWER:0:1} in
+  y|Y )
+    echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
+    if ! [[ -f "external/aha" ]] ; then
+       apt-get install make
+      mkdir html-files
+      wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
+      unzip ./external/aha-master.zip -d ./external
+      rm external/aha-master.zip
+      cd ./external/aha-master || exit 1
+      echo -e "$ORANGE""$BOLD""Compile aha""$NC"
+      make
+      cd ../.. || exit 1
+      mv "external/aha-master/aha" "external/aha"
+      rm -R external/aha-master
+      
+      if ! [[ -f "external/aha" ]] ; then
+         echo -e "$MAGENTA""$BOLD""aha installation failed! You can not use the emba report manager""$NC"
+      else
+         echo -e "$GREEN""aha has been installed""$NC"
+      fi
+    else
+      echo -e "$ORANGE""aha is already installed""$NC"
+    fi      
+  ;;
+esac
 
