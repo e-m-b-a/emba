@@ -101,7 +101,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:W:zZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -149,7 +149,7 @@ main()
         ;;
       l)
         export LOG_DIR="$OPTARG"
-        export HTML_PATH="$LOG_DIR"
+        export HTML_PATH="$LOG_DIR""/html-files"
         ;;
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
@@ -249,6 +249,7 @@ main()
   
   if [[ "$HTML" -eq 1 ]]; then
      mkdir "$HTML_PATH"
+     echo 
   fi
 
   dependency_check
