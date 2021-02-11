@@ -138,10 +138,10 @@ mod_path() {
   local RET_PATHS
   RET_PATHS=()
 
-  if [[ "$1" == "$FIRMWARE_PATH""/ETC_PATHS"* ]] ; then
+
+  if [[ "$1" == "/ETC_PATHS"* ]] ; then
     for ETC_PATH_I in "${ETC_PATHS[@]}"; do
-      ORIG_ETC_PATH="$FIRMWARE_PATH""/ETC_PATHS"
-      NEW_ETC_PATH="$(echo -e "$1" | sed -e 's!'"$ORIG_ETC_PATH"'!'"$ETC_PATH_I"'!g')"
+      NEW_ETC_PATH="$(echo -e "$1" | sed -e 's!/ETC_PATHS!'"$ETC_PATH_I"'!g')"
       RET_PATHS=("${RET_PATHS[@]}" "$NEW_ETC_PATH")
     done
   else
@@ -159,9 +159,12 @@ mod_path() {
   local NEW_RET_PATHS
 
   for RET_PATHS_I in "${RET_PATHS[@]}"; do
-    if [[ -e "$RET_PATHS_I" ]] || [[ -d "$RET_PATHS_I" ]] ;  then
-      NEW_RET_PATHS=("${NEW_RET_PATHS[@]}" "$RET_PATHS_I")
-    fi
+    mapfile -t NEW_RET_PATHS < <(find "$FIRMWARE_PATH" -path "$RET_PATHS_I")
+    for I in "${!NEW_RET_PATHS[@]}"; do
+      if ! [[ -e "${NEW_RET_PATHS[I]}" ]] || ! [[ -d "${NEW_RET_PATHS[I]}" ]] ;  then
+        unset 'NEW_RET_PATHS[I]'
+      fi
+    done
   done
 
   echo "${NEW_RET_PATHS[@]}"
@@ -187,9 +190,9 @@ config_list() {
       readarray -t STRING_LIST <"$1"
       local LIST
       for STRING in "${STRING_LIST[@]}"; do
-        LIST="$LIST""$STRING""\\n"
+        LIST="$LIST""$STRING""\n"
       done
-      echo -e "$LIST"
+      echo -e "$LIST" | sed -z '$ s/\n$//' | sort -u
     fi
   else
     echo "C_N_F"
@@ -197,26 +200,23 @@ config_list() {
 }
 
 config_find() {
-  local SEARCH_LOC
-  SEARCH_LOC="$(mod_path "$FIRMWARE_PATH""$2")"
-  if [[ -f "$1" ]] ;  then
-    if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+  if [[ -f "$1" ]] ; then
+    if [[ "$( wc -l "$1" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
       local FIND_COMMAND
       IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "$1" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
-      local FILES
-      for S_LOC in $SEARCH_LOC ; do
-        FIND_O="$(find "$S_LOC" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")"
-        for LINE in $FIND_O; do
-          if [[ -L "$LINE" ]] ; then
-            FILES="$FILES""$FIRMWARE_PATH""$(realpath "$LINE" 2>/dev/null )""\n"
-          else
-            FILES="$FILES""$LINE""\n"
+      mapfile -t FIND_O < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")
+      for LINE in "${FIND_O[@]}"; do
+        if [[ -L "$LINE" ]] ; then
+          local REAL_PATH
+          REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
+          if [[ -f  "$REAL_PATH" ]] ; then
+            FILES="$FILES""$REAL_PATH""\n"
           fi
-        done
+        else
+          FILES="$FILES""$LINE""\n"
+        fi
       done
-      if [[ -n "$FILES" ]]; then
-        echo -e "$FILES"
-      fi
+      echo -e "$FILES" | sed -z '$ s/\n$//' | sort -u
     fi
   else
     echo "C_N_F"
@@ -225,12 +225,13 @@ config_find() {
 
 config_grep() {
   local GREP_FILE
-  GREP_FILE="$(mod_path "$2")"
+  mapfile -t GREP_FILE < <(mod_path "$2")
+
   if [[ -f "$1" ]] ;  then
     if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
       local GREP_COMMAND
       IFS=" " read -r -a GREP_COMMAND <<<"$(sed 's/^/-Eo /g' "$1" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
-      for G_LOC in $GREP_FILE; do
+      for G_LOC in "${GREP_FILE[@]}"; do
         GREP_O=("${GREP_O[@]}" "$(strings "$G_LOC" | grep -a -D skip "${GREP_COMMAND[@]}" 2>/dev/null)")
       done
       echo "${GREP_O[@]}"

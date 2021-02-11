@@ -23,11 +23,27 @@ F50_base_aggregator() {
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   LOG_FILE="$( get_log_file )"
 
+  if [[ -n "$FW_VENDOR" ]]; then
+    print_output "[+] Tested Firmware vendor: ""$ORANGE""""$FW_VENDOR"""
+  fi  
+  if [[ -n "$FW_VERSION" ]]; then
+    print_output "[+] Tested Firmware version: ""$ORANGE""""$FW_VERSION"""
+  fi  
+  if [[ -n "$FW_DEVICE" ]]; then
+    print_output "[+] Tested Firmware from device: ""$ORANGE""""$FW_DEVICE"""
+  fi  
+  if [[ -n "$FW_NOTES" ]]; then
+    print_output "[+] Additional notes: ""$ORANGE""""$FW_NOTES"""
+  fi  
+
   print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"""
   print_output "[+] Emba start command:""$ORANGE"" ""$EMBACOMMAND"""
   if [[ -n "$D_ARCH" ]]; then
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
   fi
+
+  print_output "\\n-----------------------------------------------------------------\\n"
+
   print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
     mapfile -t KERNELV < <(grep "Statistics" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d: -f2 | sort -u)
@@ -73,8 +89,9 @@ F50_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$EMUL""""$GREEN"" successful emulated processes.""$NC"""
   fi
 
+
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
-    print_output ""
+    print_output "\\n-----------------------------------------------------------------\\n"
     if [[ -f "$LOG_DIR"/"$BIN_CHECK_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$BIN_CHECK_LOG")
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$BIN_CHECK_LOG")
@@ -114,9 +131,9 @@ F50_base_aggregator() {
   fi
 
   if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n"
     SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | awk '{print $1}' | grep -c -v "ERROR")
     if [[ "$SUM_FCW_FIND" -gt 0 ]] ; then
-      print_output ""
 	    print_output "[+] cwe-checker found a total of ""$ORANGE""""$SUM_FCW_FIND""""$GREEN"" of the following security issues:"
       mapfile -t BAP_OUT < <( find "$LOG_DIR"/bap_cwe_checker/ -type f -exec grep -v "ERROR" {} \; | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )
       for BAP_LINE in "${BAP_OUT[@]}"; do
@@ -129,7 +146,9 @@ F50_base_aggregator() {
   fi
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
-    print_output ""
+
+    print_output "\\n-----------------------------------------------------------------\\n"
+
     print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$GREEN"" usages of strcpy in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries.""$NC"""
   fi
 
@@ -174,6 +193,8 @@ F50_base_aggregator() {
 
   print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n"
+
     print_output "[*] Identified the following version details, vulnerabilities and exploits:"
     print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
@@ -188,4 +209,5 @@ F50_base_aggregator() {
       print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available."
     fi
   fi
+  print_output "\\n-----------------------------------------------------------------"
 }

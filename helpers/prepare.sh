@@ -45,7 +45,7 @@ architecture_check()
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
     local DETECT_ARCH ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
-    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec file {} \; | grep "executable" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
+    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec file {} \; | grep "executable\|shared\ object" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
     for D_ARCH in "${DETECT_ARCH[@]}" ; do
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))

@@ -359,9 +359,12 @@ case ${ANSWER:0:1} in
       
       if ! [[ -f "external/aha" ]] ; then
          echo -e "$MAGENTA""$BOLD""aha installation failed! You can not use the emba report manager""$NC"
-   else
-      echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
-   fi
+      else
+         echo -e "$GREEN""aha has been installed""$NC"
+      fi
+    else
+      echo -e "$ORANGE""aha is already installed""$NC"
+    fi      
   ;;
 esac
 

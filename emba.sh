@@ -11,6 +11,7 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Stefan Haboeck
 
 # Description:  Main script for load all necessary files and call main function of modules
 
@@ -100,7 +101,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:W:zZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -148,6 +149,7 @@ main()
         ;;
       l)
         export LOG_DIR="$OPTARG"
+        export HTML_PATH="$LOG_DIR"
         ;;
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
@@ -180,11 +182,6 @@ main()
         ;;
     esac
   done
-
-  if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
-     FORMAT_LOG=1
-     print_output "[!] Activate format log for HTML converter" "no_log"
-  fi
 
   LOG_DIR="$(abs_path "$LOG_DIR")"
   CONFIG_DIR="$(abs_path "$CONFIG_DIR")"
@@ -230,6 +227,11 @@ main()
     print_help
     exit 1
   fi
+  
+  if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
+     FORMAT_LOG=1
+     print_output "[!] Activate format log for HTML converter" "no_log"
+  fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
     if [[ $IGNORE_LOG_DEL -eq 0 ]] ; then
@@ -244,10 +246,11 @@ main()
 
     set_exclude
   fi
-
+  
   if [[ "$HTML" -eq 1 ]]; then
      mkdir "$HTML_PATH"
   fi
+
 
   dependency_check
 
@@ -367,7 +370,6 @@ main()
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
-            HTML_REPORT=0
             $MODULE_MAIN
             if [[ $HTML == 1 ]]; then
                generate_html_file "$LOG_FILE" "$HTML_REPORT"
@@ -383,7 +385,6 @@ main()
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
-              HTML_REPORT=0
               $MODULE_MAIN
               if [[ $HTML == 1 ]]; then
                  generate_html_file "$LOG_FILE" "$HTML_REPORT"
@@ -405,11 +406,7 @@ main()
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
-      HTML_REPORT=1
       $MODULE_MAIN
-      if [[ $HTML == 1 ]]; then
-           generate_html_file "$LOG_FILE" "$HTML_REPORT"
-      fi
       reset_module_count
     fi
   done
