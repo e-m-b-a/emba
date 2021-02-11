@@ -15,12 +15,12 @@ export HTML_REPORT
 
 S09_firmware_base_version_check() {
 
-  module_log_init "${FUNCNAME[0]}"
-  module_title "Binary firmware versions detection"
-
   # this module check for version details statically.
   # we only execute it if we have not done it already via P09
   if [[ "$TESTING_DONE" -ne 1 ]]; then
+    module_log_init "${FUNCNAME[0]}"
+    module_title "Binary firmware versions detection"
+
     declare -a VERSIONS_DETECTED
   
     print_output "[*] Initial version detection running " | tr -d "\n"
@@ -30,7 +30,7 @@ S09_firmware_base_version_check() {
       STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
   
       # as we do not have a typical linux executable we can't use strict version details
-      if [[ $STRICT != "strict" ]]; then
+      if [[ $STRICT == "binary" ]]; then
         #print_output "[*] $VERSION_LINE"
         VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
         print_output "." | tr -d "\n"

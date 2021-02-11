@@ -20,7 +20,7 @@ S108_linux_common_file_checker() {
   module_title "Module to check the firmware files against a common dictionary of common linux files"
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
-    print_output "\n[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
+    print_output "[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
     readarray -t ALL_FIRMWARE_FILES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -iname "*" )
     HTML_REPORT=1
     FILE_COUNTER=0
