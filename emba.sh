@@ -251,7 +251,6 @@ main()
      mkdir "$HTML_PATH"
   fi
 
-
   dependency_check
 
   if [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]] ; then
@@ -370,6 +369,7 @@ main()
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
+            HTML_REPORT=0
             $MODULE_MAIN
             if [[ $HTML == 1 ]]; then
                generate_html_file "$LOG_FILE" "$HTML_REPORT"
@@ -385,9 +385,10 @@ main()
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
+              HTML_REPORT=0
               $MODULE_MAIN
               if [[ $HTML == 1 ]]; then
-                 generate_html_file "$LOG_FILE" "$HTML_REPORT"
+                generate_html_file "$LOG_FILE" "$HTML_REPORT"
               fi
             fi
           fi
@@ -406,7 +407,11 @@ main()
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
+      HTML_REPORT=1
       $MODULE_MAIN
+      if [[ $HTML == 1 ]]; then
+        generate_html_file "$LOG_FILE" "$HTML_REPORT"
+      fi
       reset_module_count
     fi
   done

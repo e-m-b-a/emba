@@ -4,4 +4,3 @@ dir-combined.yara
 external/
 !external/.keep
 log/
-html-files/
