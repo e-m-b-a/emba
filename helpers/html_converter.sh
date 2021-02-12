@@ -188,13 +188,13 @@ build_report_files(){
 	   FILE_LINE="${FILE_LINE:0:${#FILE_LINE}-3}"" \">"
 	fi
 	
-	if [[ "$OUTPUT" == *"top 10"* ]]; then
+	if [[ "$FILE_LINE" == *"top 10"* ]]; then
 	    TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
 	elif [ "$TOP10_FORMAT_COUNTER" -gt 10 ]; then
 	    TOP10_FORMAT_COUNTER=0
 	elif [ "$TOP10_FORMAT_COUNTER" -ne 0 ]; then
 	    TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-	    OUTPUT="<span  style=\"white-space: pre\">""$OUTPUT""</span>"
+	    FILE_LINE="<span  style=\"white-space: pre\">""$FILE_LINE""</span>"
 	fi
 	
         if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
