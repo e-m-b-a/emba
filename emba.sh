@@ -232,7 +232,7 @@ main()
   
   if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
      FORMAT_LOG=1
-     print_output "[!] Activate format log for HTML converter" "no_log"
+     print_output "[*] Activate format log for HTML converter" "no_log"
   fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
