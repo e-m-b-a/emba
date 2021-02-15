@@ -197,7 +197,7 @@ build_report_files(){
       if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
         echo "<h2 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
- 	      SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
+        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
         echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
