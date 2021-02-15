@@ -550,7 +550,6 @@ case ${ANSWER:0:1} in
       for APP in "${INSTALL_APP_LIST[@]}" ; do
         apt-get install "$APP" -y
       done
-      mkdir html-files
       wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
       unzip ./external/aha-master.zip -d ./external
       rm external/aha-master.zip

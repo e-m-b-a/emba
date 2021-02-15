@@ -57,12 +57,12 @@ build_index_file(){
   
   echo "</ul></div><div class=\"main\">"| tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   if [[ ${FILENAME%.txt} != "f"* ]]; then
-    echo "<h2>[[0;34m+[0m] [0;36m[1mGerneral Information[0m[1m[0m</h2>
+    echo "<h2>[[0;34m+[0m] [0;36m[1mGeneral information[0m[1m[0m</h2>
       File: $(basename "$FIRMWARE_PATH")<br>
       Architecture: $ARCH<br>
       Date: $(date) <br>
       Duration time: $(date -d@$SECONDS -u +%H:%M:%S) <br>
-      EMBA Command: $EMBACOMMAND <br>
+      emba Command: $EMBACOMMAND <br>
       " | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   fi
      	
@@ -71,7 +71,7 @@ build_index_file(){
   if [[ -n ${INDEX_CONTENT_ARR[*]} ]]; then
     for OUTPUT in "${INDEX_CONTENT_ARR[@]}"; do
       if [[ "$OUTPUT" == *"entropy.png"* ]]; then
-        OUTPUT=${OUTPUT//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
+        OUTPUT=${OUTPUT//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\" "}
         OUTPUT="${OUTPUT:0:${#OUTPUT}-3}"" \">"
       fi
      
@@ -96,7 +96,7 @@ build_index_file(){
     done
   fi
 
-  $AHA_PATH > "$ABS_HTML_PATH""/index.html" < "$ABS_HTML_PATH""/index.txt"
+  $AHA_PATH --title "emba Report Manager" > "$ABS_HTML_PATH""/index.html" < "$ABS_HTML_PATH""/index.txt"
   rm "$ABS_HTML_PATH""/index.txt"
 
   sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/index.html"
@@ -117,6 +117,7 @@ build_collection_file(){
   HTML_FILE="${FILE%.txt}.html"
   COLORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
   LINKNAME="${COLORLESS_FILE_LINE// /_}"
+  NOT_FINDINGS_MENU_LIST+="<li><a href=\"./index.html\">Go back</a></li>"
   NOT_FINDINGS_MENU_LIST+="<li><a href=\"collection.html#$LINKNAME\">$COLORLESS_FILE_LINE</a></li>"
   if [ ${#NOT_FINDINGS_FILENAMES[@]} -ne 0 ]; then
     NOT_FINDINGS_FILENAMES[${#NOT_FINDINGS_FILENAMES[@]}]="$LINKNAME"
@@ -143,7 +144,7 @@ build_collection_file(){
     done
   fi
   
-  $AHA_PATH > "$ABS_HTML_PATH""/collection.html" < "$ABS_HTML_PATH""/collection.txt" 
+  $AHA_PATH --title "emba Report Manager" > "$ABS_HTML_PATH""/collection.html" < "$ABS_HTML_PATH""/collection.txt" 
   rm "$ABS_HTML_PATH""/collection.txt"
 
   sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/collection.html"
@@ -153,7 +154,7 @@ build_collection_file(){
 
 build_report_files(){
  
-  local SUB_MENU_LIST
+  local SUB_MENU_LIST="<li><a href=\"./index.html\">Go back</a></li>"
   local FILE=$1
   local FILENAME
   local HTML_FILE
@@ -190,7 +191,7 @@ build_report_files(){
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
       if [[ "$FILE_LINE" == *"entropy.png"* ]]; then
-        FILE_LINE=${FILE_LINE//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
+        FILE_LINE=${FILE_LINE//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\" "}
         FILE_LINE="${FILE_LINE:0:${#FILE_LINE}-3}"" \">"
       fi
 	
@@ -208,7 +209,7 @@ build_report_files(){
     done
   fi
   echo "</div>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-  $AHA_PATH > "$ABS_HTML_PATH""/$HTML_FILE" <"$ABS_HTML_PATH""/$FILENAME"
+  $AHA_PATH --title "emba Report Manager" > "$ABS_HTML_PATH""/$HTML_FILE" <"$ABS_HTML_PATH""/$FILENAME"
   rm "$ABS_HTML_PATH""/$FILENAME"
   
   sed -i 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/$HTML_FILE"
@@ -226,7 +227,7 @@ generate_html_file(){
   HTML_FILE_HEADER="<header>
     <div class=\"pictureleft\"><img src=\"$ABS_CONFIG_DIR_PATH/emba.png\"></div>
     <div class=\"headline\">
-    <h1>EMBA Report Manager</h1> 
+    <h1>emba Report Manager</h1> 
     </div>
     <div class=\"pictureright\">
     <img src=\"$ABS_CONFIG_DIR_PATH/emba.png\">

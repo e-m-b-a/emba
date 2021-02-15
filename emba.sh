@@ -184,7 +184,6 @@ main()
   done
 
   export HTML_PATH="$LOG_DIR""/html-report"
-
   print_output "" "no_log"
 
   if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then
@@ -245,11 +244,6 @@ main()
 
     set_exclude
   fi
-  
-  if [[ "$HTML" -eq 1 ]]; then
-     mkdir "$HTML_PATH"
-     echo 
-  fi
 
   dependency_check
 
@@ -264,6 +258,11 @@ main()
       fi
       S25_kernel_check
     fi
+  fi
+
+  if [[ "$HTML" -eq 1 ]]; then
+     mkdir "$HTML_PATH"
+     echo 
   fi
 
   if [[ $USE_DOCKER -eq 1 ]] ; then
