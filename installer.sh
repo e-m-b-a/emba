@@ -25,6 +25,9 @@ DOWNLOAD_FILE_LIST=()
 # force install everything
 FORCE=0
 
+# install docker emba
+IN_DOCKER=0
+
 ## Color definition
 RED="\033[0;31m"
 GREEN="\033[0;32m"
@@ -136,8 +139,12 @@ if ! [[ $EUID -eq 0 ]] ; then
   exit 1
 fi
 
-while getopts Fh OPT ; do
+while getopts DFh OPT ; do
   case $OPT in
+    D)
+      export IN_DOCKER=1
+      echo -e "$GREEN""$BOLD""Install emba on docker""$NC"
+      ;;
     F)
       export FORCE=1
       echo -e "$GREEN""$BOLD""Install all dependecies""$NC"
@@ -404,6 +411,20 @@ case ${ANSWER:0:1} in
     cd ./external/cve-search/ || exit 1
     pip3 install -r requirements.txt
     xargs sudo apt-get install -y < requirements.system
+    if [[ "$IN_DOCKER" -eq 1 ]] ; then
+      if [[ "$FORCE" -eq 0 ]] ; then
+        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
+        read -p "(y/N)" -r ANSWER
+      else
+        echo -e "\\n""$MAGENTA""$BOLD""Updating cve-search database on docker.""$NC"
+        ANSWER=("y")
+      fi
+      case ${ANSWER:0:1} in
+        y|Y )
+          sudo cve_searchsploit -u
+        ;;
+      esac
+    fi
     echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
     echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
   ;;
@@ -441,8 +462,13 @@ print_tool_info "liblzma-dev" 1
 print_tool_info "liblzo2-dev" 1
 print_tool_info "firmware-mod-kit" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
 
