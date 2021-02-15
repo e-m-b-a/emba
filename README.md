@@ -63,6 +63,7 @@ Special tests
 
 Modify output
 -s                Print only relative paths
+-W                Generate HTML output
 -z                Add ANSI color codes to log
 
 Firmware details
