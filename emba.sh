@@ -66,8 +66,8 @@ main()
   export YARA=1
   export SHORT_PATH=0           # short paths in cli output
   export ONLY_DEP=0             # test only dependency
-  export DOCKER=0
-  export IGNORE_LOG_DEL=0
+  export USE_DOCKER=0
+  export IN_DOCKER=0
   export FORCE=0
   export LOG_GREP=0
   export QEMULATION=0
@@ -115,7 +115,7 @@ main()
         export BAP=1
         ;;
       D)
-        export DOCKER=1
+        export USE_DOCKER=1
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
@@ -138,7 +138,7 @@ main()
         exit 0
         ;;
       i)
-        export IGNORE_LOG_DEL=1
+        export IN_DOCKER=1
         ;;
       k)
         export KERNEL=1
@@ -220,7 +220,7 @@ main()
   fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
-    if [[ $IGNORE_LOG_DEL -eq 0 ]] ; then
+    if [[ $IN_DOCKER -eq 0 ]] ; then
       # check if LOG_DIR exists and prompt to terminal to delete its content (y/n)
       log_folder
     fi
@@ -232,7 +232,6 @@ main()
 
     set_exclude
   fi
-
 
   dependency_check
 
@@ -249,15 +248,56 @@ main()
     fi
   fi
 
+  if [[ $USE_DOCKER -eq 1 ]] ; then
+    if ! [[ $EUID -eq 0 ]] ; then
+      print_output "[!] Using emba with docker-compose requires root permissions" "no_log"
+      print_output "$(indent "Run emba with root permissions to use docker")" "no_log"
+      exit 1
+    fi
+    if ! command -v docker-compose > /dev/null ; then
+      print_output "[!] No docker-compose found" "no_log"
+      print_output "$(indent "Install docker-compose via apt-get install docker-compose to use emba with docker")" "no_log"
+      exit 1
+    fi
+
+    OPTIND=1
+    ARGS=""
+    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+      case $OPT in
+        D|f|i|l)
+          ;;
+        c)
+          print_output "" "no_log"
+          print_output "[-] Current docker version of emba does not support cwe-checker!" "no_log"
+          ;;
+        *)
+          export ARGS="$ARGS -$OPT"
+          ;;
+      esac
+    done
+
+    print_output "" "no_log"
+    print_output "[!] Emba initializes kali docker container.\\n" "no_log"
+
+    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
+    D_RETURN=$?
+
+    if [[ $D_RETURN -eq 0 ]] ; then
+      if [[ $ONLY_DEP -eq 0 ]] ; then
+        print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+        print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
+        print_output "[*] Log directory: $LOG_DIR" "no_log"
+        exit
+      fi
+    else
+      print_output "[-] Emba docker failed!" "no_log"
+      exit 1
+    fi
+  fi
+
   if [[ $PRE_CHECK -eq 1 ]] ; then
     if [[ -f "$FIRMWARE_PATH" ]]; then
-    
-      # we have to fix this, so that also the pre-checker modules are running inside the docker
-      if [[ $DOCKER -eq 1 ]] ; then
-        print_output "" "no_log"
-        print_output "[!] Running pre checker modules outside of the docker environment for preparation" "no_log"
-      fi
-      
+
       echo
       print_output "[!] Extraction started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
 
@@ -291,36 +331,6 @@ main()
         print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       fi
     fi
-  fi
-  
-  if [[ $DOCKER -eq 1 ]] ; then
-    if ! command -v docker-compose > /dev/null ; then
-      print_output "[!] No docker-compose found" "no_log"
-      print_output "$(indent "Install docker-compose via apt-get install docker-compose to use emba with docker")" "no_log"
-      exit 1
-    fi
-
-    OPTIND=1
-    ARGS=""
-    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
-      case $OPT in
-        D|f|i|l)
-          ;;
-        *)
-          export ARGS="$ARGS -$OPT"
-          ;;
-      esac
-    done
-
-    print_output "" "no_log"
-    print_output "[!] Emba initializes kali docker container.\\n" "no_log"
-
-    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run emba -c "./emba.sh -l /log/ -f /firmware/ -i $ARGS"
-
-    print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-    print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
-    print_output "[*] Log directory: $LOG_DIR" "no_log"
-    exit
   fi
 
   if [[ $FIRMWARE -eq 1 ]] ; then

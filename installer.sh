@@ -25,6 +25,9 @@ DOWNLOAD_FILE_LIST=()
 # force install everything
 FORCE=0
 
+# install docker emba
+IN_DOCKER=0
+
 ## Color definition
 RED="\033[0;31m"
 GREEN="\033[0;32m"
@@ -136,8 +139,12 @@ if ! [[ $EUID -eq 0 ]] ; then
   exit 1
 fi
 
-while getopts Fh OPT ; do
+while getopts DFh OPT ; do
   case $OPT in
+    D)
+      export IN_DOCKER=1
+      echo -e "$GREEN""$BOLD""Install emba on docker""$NC"
+      ;;
     F)
       export FORCE=1
       echo -e "$GREEN""$BOLD""Install all dependecies""$NC"
@@ -381,6 +388,7 @@ INSTALL_APP_LIST=()
 echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database. CVE-searchsploit will be installed via pip3."
 print_tool_info "python3-pip" 1
 print_tool_info "net-tools" 1
+print_tool_info "git" 1
 
 if [[ "$FORCE" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
@@ -400,8 +408,125 @@ case ${ANSWER:0:1} in
     else
       git clone https://github.com/cve-search/cve-search.git external/cve-search
     fi
+    cd ./external/cve-search/ || exit 1
+    pip3 install -r requirements.txt
+    xargs sudo apt-get install -y < requirements.system
+    if [[ "$IN_DOCKER" -eq 1 ]] ; then
+      if [[ "$FORCE" -eq 0 ]] ; then
+        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
+        read -p "(y/N)" -r ANSWER
+      else
+        echo -e "\\n""$MAGENTA""$BOLD""Updating cve-search database on docker.""$NC"
+        ANSWER=("y")
+      fi
+      case ${ANSWER:0:1} in
+        y|Y )
+          sudo cve_searchsploit -u
+        ;;
+      esac
+    fi
     echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
     echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
+  ;;
+esac
+
+# binwalk
+
+INSTALL_APP_LIST=()
+print_tool_info "python3-pip" 1
+print_tool_info "python3-crypto" 1
+print_tool_info "python3-opengl" 1
+print_tool_info "python3-pyqt5" 1
+print_tool_info "python3-pyqt5.qtopengl" 1
+print_tool_info "python3-numpy" 1
+print_tool_info "python3-scipy" 1
+print_tool_info "mtd-utils" 1
+print_tool_info "gzip" 1
+print_tool_info "git" 1
+print_tool_info "bzip2" 1
+print_tool_info "tar" 1
+print_tool_info "arj" 1
+print_tool_info "lhasa" 1
+print_tool_info "p7zip" 1
+print_tool_info "p7zip-full" 1
+print_tool_info "cabextract" 1
+print_tool_info "cramfsswap" 1
+print_tool_info "squashfs-tools" 1
+print_tool_info "sleuthkit" 1
+print_tool_info "default-jdk" 1
+print_tool_info "lzop" 1
+print_tool_info "srecord" 1
+print_tool_info "build-essential" 1
+print_tool_info "zlib1g-dev" 1
+print_tool_info "liblzma-dev" 1
+print_tool_info "liblzo2-dev" 1
+print_tool_info "firmware-mod-kit" 1
+
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+
+    for APP in "${INSTALL_APP_LIST[@]}" ; do
+      apt-get install "$APP" -y
+    done
+
+    pip3 install nose
+    pip3 install coverage
+    pip3 install pyqtgraph
+    pip3 install capstone
+    pip3 install cstruct
+
+    if [[ -f "/usr/local/bin/binwalk" ]]; then
+      echo -e "Found binwalk. Skipping installation."
+    else
+
+      git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+
+      git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
+      sudo python3 ./external/binwalk/yaffshiv/setup.py install
+
+      git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+      sudo CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+
+      git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
+      sudo pip3 install -r ./external/binwalk/jefferson/requirements.txt
+      sudo python3 ./external/binwalk/jefferson/setup.py install
+
+      mkdir ./external/binwalk/unstuff
+      wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+      tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
+      sudo cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+      
+      sudo ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
+
+      git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
+      make -C ./external/binwalk/cramfs-tools/
+      install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
+      sudo install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
+
+      git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
+      cd ./external/binwalk/ubi_reader || exit 1
+      git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
+      sudo python2 setup.py install
+      cd .. || exit 1
+
+      sudo python3 setup.py install
+      cd ../.. || exit 1
+
+      rm -rf ./external/binwalk
+
+      if [[ -f "/usr/local/bin/binwalk" ]] ; then
+        echo -e "$GREEN""binwalk installed successfully""$NC"
+      else
+        echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
+      fi
+    fi
   ;;
 esac
 
