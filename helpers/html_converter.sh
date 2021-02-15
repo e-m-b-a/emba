@@ -71,8 +71,8 @@ build_index_file(){
   if [[ -n ${INDEX_CONTENT_ARR[*]} ]]; then
     for OUTPUT in "${INDEX_CONTENT_ARR[@]}"; do
       if [[ "$OUTPUT" == *"entropy.png"* ]]; then
-	      OUTPUT=${OUTPUT//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
-	      OUTPUT="${OUTPUT:0:${#OUTPUT}-3}"" \">"
+        OUTPUT=${OUTPUT//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
+        OUTPUT="${OUTPUT:0:${#OUTPUT}-3}"" \">"
       fi
      
       if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
@@ -81,17 +81,17 @@ build_index_file(){
       if [[ "$OUTPUT" == *"top 10"* ]]; then
         TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
       elif [ "$TOP10_FORMAT_COUNTER" -gt 10 ]; then
-	      TOP10_FORMAT_COUNTER=0
+        TOP10_FORMAT_COUNTER=0
       elif [ "$TOP10_FORMAT_COUNTER" -ne 0 ]; then
-	      TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-	      OUTPUT="<span  style=\"white-space: pre\">""$OUTPUT""</span>"
+        TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
+        OUTPUT="<span  style=\"white-space: pre\">""$OUTPUT""</span>"
       fi
 	
       if [[ "$OUTPUT" == *"0;34m+"*"0;36m"* ]] && [[ "$OUTPUT" != *"h2 id"* ]]; then
         echo -e "<h2 id=""${FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
         i=$(( i+1 ))
       else
-	      echo -e "$OUTPUT""<br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
+        echo -e "$OUTPUT""<br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
       fi
     done
   fi
@@ -173,8 +173,8 @@ build_report_files(){
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
       if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
- 	      COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
- 	      SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
+        COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
+        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
         SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
@@ -190,20 +190,20 @@ build_report_files(){
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
       if [[ "$FILE_LINE" == *"entropy.png"* ]]; then
-	      FILE_LINE=${FILE_LINE//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
-	      FILE_LINE="${FILE_LINE:0:${#FILE_LINE}-3}"" \">"
+        FILE_LINE=${FILE_LINE//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
+        FILE_LINE="${FILE_LINE:0:${#FILE_LINE}-3}"" \">"
       fi
 	
       if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
- 	      COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
- 	      echo "<h2 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
+        COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
+        echo "<h2 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
  	      SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
- 	      COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
-	      echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-	      SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
+        COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
+        echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
+        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
       else
-	      echo "<br> <span  style=\"white-space: pre\">$FILE_LINE</span>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
+        echo "<br> <span  style=\"white-space: pre\">$FILE_LINE</span>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
       fi
     done
   fi
