@@ -7,7 +7,7 @@ RUN apt-get update && \
 WORKDIR /app
 ADD . /app
 
-RUN yes | sudo ./installer.sh -D
+RUN yes | sudo ./installer.sh -D -F
 
 ENTRYPOINT [ "/bin/bash" ]
 
