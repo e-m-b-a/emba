@@ -72,7 +72,7 @@ main()
   export FORCE=0
   export LOG_GREP=0
   export HTML=0
-  export HTML_REPORT
+  export HTML_REPORT=0
   export QEMULATION=0
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
@@ -85,7 +85,6 @@ main()
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
   export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
-  export HTML_PATH="$LOG_DIR""/html-files"
   export AHA_PATH="$EXT_DIR""/aha"
 
   echo
@@ -151,7 +150,6 @@ main()
         ;;
       l)
         export LOG_DIR="$OPTARG"
-        export HTML_PATH="$LOG_DIR""/html-files"
         ;;
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
@@ -185,9 +183,8 @@ main()
     esac
   done
 
-  LOG_DIR="$(abs_path "$LOG_DIR")"
-  CONFIG_DIR="$(abs_path "$CONFIG_DIR")"
-  HTML_PATH="$(abs_path "$HTML_PATH")"
+  export HTML_PATH="$LOG_DIR""/html-report"
+
   print_output "" "no_log"
 
   if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then

@@ -21,7 +21,7 @@ build_index_file(){
   FILE=$1
   FILENAME=$(basename "$FILE")
   HTML_FILE="$(basename "${FILE%.txt}"".html")"
-  COULORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
+  COLORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
   
   if [[ ${FILENAME%.txt} == "s05"* ]] || [[ ${FILENAME%.txt} == "s25"* ]]; then
     if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
@@ -35,7 +35,7 @@ build_index_file(){
     fi
   fi
  
-  MENU_LIST+=("<li><a href=\"$HTML_FILE\">$COULORLESS_FILE_LINE</a></li>")
+  MENU_LIST+=("<li><a href=\"$HTML_FILE\">$COLORLESS_FILE_LINE</a></li>")
 
   if [ ${#FILENAMES[@]} -ne 0 ]; then
     FILENAMES[${#FILENAMES[@]}]="${FILENAME%.txt}"
@@ -43,19 +43,19 @@ build_index_file(){
     FILENAMES[0]="${FILENAME%.txt}"
   fi
 
-  echo "$HTML_FILE_HEADER<div><ul>" | tee -a "$HTML_PATH""/index.txt" >/dev/null
+  echo "$HTML_FILE_HEADER<div><ul>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
       	
   if [[ -n ${MENU_LIST[*]} ]]; then
     for OUTPUT in "${MENU_LIST[@]}"; do
-      echo -e "$OUTPUT" | tee -a "$HTML_PATH""/index.txt" >/dev/null	
+      echo -e "$OUTPUT" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null	
     done
   fi
   
-  if test -f "$HTML_PATH""/collection.html"; then
-    echo "<li><a href=""$HTML_PATH""/collection.html"">""Nothing found""</a></li>" | tee -a "$HTML_PATH""/index.txt" >/dev/null
+  if test -f "$ABS_HTML_PATH""/collection.html"; then
+    echo "<li><a href=""$ABS_HTML_PATH""/collection.html"">""Nothing found""</a></li>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   fi
   
-  echo "</ul></div><div class=\"main\">"| tee -a "$HTML_PATH""/index.txt" >/dev/null
+  echo "</ul></div><div class=\"main\">"| tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   if [[ ${FILENAME%.txt} != "f"* ]]; then
     echo "<h2>[[0;34m+[0m] [0;36m[1mGerneral Information[0m[1m[0m</h2>
       File: $(basename "$FIRMWARE_PATH")<br>
@@ -63,7 +63,7 @@ build_index_file(){
       Date: $(date) <br>
       Duration time: $(date -d@$SECONDS -u +%H:%M:%S) <br>
       EMBA Command: $EMBACOMMAND <br>
-      " | tee -a "$HTML_PATH""/index.txt" >/dev/null
+      " | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   fi
      	
   i=0
@@ -71,9 +71,8 @@ build_index_file(){
   if [[ -n ${INDEX_CONTENT_ARR[*]} ]]; then
     for OUTPUT in "${INDEX_CONTENT_ARR[@]}"; do
       if [[ "$OUTPUT" == *"entropy.png"* ]]; then
-        #heigth=\"300px\" width=\"300px\"
-	OUTPUT=${OUTPUT//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
-	OUTPUT="${OUTPUT:0:${#OUTPUT}-3}"" \">"
+	      OUTPUT=${OUTPUT//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
+	      OUTPUT="${OUTPUT:0:${#OUTPUT}-3}"" \">"
       fi
      
       if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
@@ -82,27 +81,27 @@ build_index_file(){
       if [[ "$OUTPUT" == *"top 10"* ]]; then
         TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
       elif [ "$TOP10_FORMAT_COUNTER" -gt 10 ]; then
-	TOP10_FORMAT_COUNTER=0
+	      TOP10_FORMAT_COUNTER=0
       elif [ "$TOP10_FORMAT_COUNTER" -ne 0 ]; then
-	TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-	OUTPUT="<span  style=\"white-space: pre\">""$OUTPUT""</span>"
+	      TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
+	      OUTPUT="<span  style=\"white-space: pre\">""$OUTPUT""</span>"
       fi
 	
       if [[ "$OUTPUT" == *"0;34m+"*"0;36m"* ]] && [[ "$OUTPUT" != *"h2 id"* ]]; then
-        echo -e "<h2 id=""${FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$HTML_PATH""/index.txt" >/dev/null
+        echo -e "<h2 id=""${FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
         i=$(( i+1 ))
       else
-	echo -e "$OUTPUT""<br>" | tee -a "$HTML_PATH""/index.txt" >/dev/null
+	      echo -e "$OUTPUT""<br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
       fi
     done
   fi
 
-  $AHA_PATH > "$HTML_PATH""/index.html" < "$HTML_PATH""/index.txt"
-  rm "$HTML_PATH""/index.txt"
+  $AHA_PATH > "$ABS_HTML_PATH""/index.html" < "$ABS_HTML_PATH""/index.txt"
+  rm "$ABS_HTML_PATH""/index.txt"
 
-  sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$HTML_PATH""/index.html"
-  ESCAPED_CONFIG_DIR=${CONFIG_DIR//\//\\\/}
-  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/index.html"
+  sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/index.html"
+  ESCAPED_CONFIG_DIR=${ABS_CONFIG_DIR_PATH//\//\\\/}
+  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/index.html"
 }
 
 
@@ -116,9 +115,9 @@ build_collection_file(){
   fi
 
   HTML_FILE="${FILE%.txt}.html"
-  COULORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
-  LINKNAME="${COULORLESS_FILE_LINE// /_}"
-  NOT_FINDINGS_MENU_LIST+="<li><a href=\"collection.html#$LINKNAME\">$COULORLESS_FILE_LINE</a></li>"
+  COLORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
+  LINKNAME="${COLORLESS_FILE_LINE// /_}"
+  NOT_FINDINGS_MENU_LIST+="<li><a href=\"collection.html#$LINKNAME\">$COLORLESS_FILE_LINE</a></li>"
   if [ ${#NOT_FINDINGS_FILENAMES[@]} -ne 0 ]; then
     NOT_FINDINGS_FILENAMES[${#NOT_FINDINGS_FILENAMES[@]}]="$LINKNAME"
   else
@@ -130,26 +129,26 @@ build_collection_file(){
     $NOT_FINDINGS_MENU_LIST
     </ul>
     </div>
-    <div class=\"main\">" | tee -a "$HTML_PATH""/collection.txt" >/dev/null
+    <div class=\"main\">" | tee -a "$ABS_HTML_PATH""/collection.txt" >/dev/null
      	
   i=0
   if [[ -n ${NOT_FINDINGS_CONTENT_ARR[*]} ]]; then
     for OUTPUT in "${NOT_FINDINGS_CONTENT_ARR[@]}"; do
       if [[ "$OUTPUT" == *"0;34m+"*"0;36m"* ]] && [[ "$OUTPUT" != *"h2 id"* ]]; then
-        echo -e "<h2 id=""${NOT_FINDINGS_FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$HTML_PATH""/collection.txt" >/dev/null
+        echo -e "<h2 id=""${NOT_FINDINGS_FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$ABS_HTML_PATH""/collection.txt" >/dev/null
         i=$(( i+1 ))
       else
-        echo -e "$OUTPUT""<br>" | tee -a "$HTML_PATH""/collection.txt" >/dev/null
+        echo -e "$OUTPUT""<br>" | tee -a "$ABS_HTML_PATH""/collection.txt" >/dev/null
       fi
     done
   fi
   
-  $AHA_PATH > "$HTML_PATH""/collection.html" < "$HTML_PATH""/collection.txt" 
-  rm "$HTML_PATH""/collection.txt"
+  $AHA_PATH > "$ABS_HTML_PATH""/collection.html" < "$ABS_HTML_PATH""/collection.txt" 
+  rm "$ABS_HTML_PATH""/collection.txt"
 
-  sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$HTML_PATH""/collection.html"
-  ESCAPED_CONFIG_DIR=${CONFIG_DIR//\//\\\/}
-  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/collection.html"
+  sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/collection.html"
+  ESCAPED_CONFIG_DIR=${ABS_CONFIG_DIR_PATH//\//\\\/}
+  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/collection.html"
 }
 
 build_report_files(){
@@ -174,8 +173,8 @@ build_report_files(){
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
       if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
- 	COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
- 	SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
+ 	      COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
+ 	      SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
         SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
@@ -183,59 +182,53 @@ build_report_files(){
     done
   fi
  
-  echo "<header><div class=\"pictureleft\"><img src=\"$CONFIG_DIR/emba.png\"></div>
-    <div class=\"headline\"><h1>$HEADLINE</h1></div><div class=\"pictureright\"><img src=\"$CONFIG_DIR/emba.png\">
-    </div></header><div><ul>$SUB_MENU_LIST</ul></div><div class=\"main\">" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+  echo "<header><div class=\"pictureleft\"><img src=\"$ABS_CONFIG_DIR_PATH/emba.png\"></div>
+    <div class=\"headline\"><h1>$HEADLINE</h1></div><div class=\"pictureright\"><img src=\"$ABS_CONFIG_DIR_PATH/emba.png\">
+    </div></header><div><ul>$SUB_MENU_LIST</ul></div><div class=\"main\">" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
  
   TOP10_FORMAT_COUNTER=0
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
       if [[ "$FILE_LINE" == *"entropy.png"* ]]; then
-	FILE_LINE=${FILE_LINE//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
-	FILE_LINE="${FILE_LINE:0:${#FILE_LINE}-3}"" \">"
-      fi
-	
-      if [[ "$FILE_LINE" == *"top 10"* ]]; then
-	TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-      elif [ "$TOP10_FORMAT_COUNTER" -gt 10 ]; then
-	TOP10_FORMAT_COUNTER=0
-      elif [ "$TOP10_FORMAT_COUNTER" -ne 0 ]; then
-	TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-	FILE_LINE="<span  style=\"white-space: pre\">""$FILE_LINE""</span>"
+	      FILE_LINE=${FILE_LINE//"33m"/"33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\""}
+	      FILE_LINE="${FILE_LINE:0:${#FILE_LINE}-3}"" \">"
       fi
 	
       if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
- 	COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
- 	echo "<h2 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
- 	SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
+ 	      COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
+ 	      echo "<h2 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
+ 	      SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
- 	COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
-	echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
-	SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
+ 	      COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
+	      echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
+	      SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
       else
-	echo "<br> $FILE_LINE" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
+	      echo "<br> <span  style=\"white-space: pre\">$FILE_LINE</span>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
       fi
     done
   fi
-  echo "</div>" | tee -a "$HTML_PATH""/$FILENAME" >/dev/null
-  $AHA_PATH > "$HTML_PATH""/$HTML_FILE" <"$HTML_PATH""/$FILENAME"
-  rm "$HTML_PATH""/$FILENAME"
-  sed -i 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/<pre>//g; s/<\/pre>//g' "$HTML_PATH""/$HTML_FILE"
-  ESCAPED_CONFIG_DIR=${CONFIG_DIR//\//\\\/}
+  echo "</div>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
+  $AHA_PATH > "$ABS_HTML_PATH""/$HTML_FILE" <"$ABS_HTML_PATH""/$FILENAME"
+  rm "$ABS_HTML_PATH""/$FILENAME"
+  sed -i 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/$HTML_FILE"
+  ESCAPED_CONFIG_DIR=${ABS_CONFIG_DIR_PATH//\//\\\/}
   ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST//\//\\\/}
-  sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$HTML_PATH""/$HTML_FILE"
-  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$HTML_PATH""/$HTML_FILE"
+  sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$ABS_HTML_PATH""/$HTML_FILE"
+  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\"$ESCAPED_CONFIG_DIR\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/$HTML_FILE"
 }
 
 generate_html_file(){
-   
+  
+  ABS_CONFIG_DIR_PATH="$(abs_path "$CONFIG_DIR")"
+  ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
+  
   HTML_FILE_HEADER="<header>
-    <div class=\"pictureleft\"><img src=\"$CONFIG_DIR/emba.png\"></div>
+    <div class=\"pictureleft\"><img src=\"$ABS_CONFIG_DIR_PATH/emba.png\"></div>
     <div class=\"headline\">
     <h1>EMBA Report Manager</h1> 
     </div>
     <div class=\"pictureright\">
-    <img src=\"$CONFIG_DIR/emba.png\">
+    <img src=\"$ABS_CONFIG_DIR_PATH/emba.png\">
     </div>
     </header>"
 
