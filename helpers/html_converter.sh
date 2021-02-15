@@ -210,6 +210,7 @@ build_report_files(){
   echo "</div>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
   $AHA_PATH > "$ABS_HTML_PATH""/$HTML_FILE" <"$ABS_HTML_PATH""/$FILENAME"
   rm "$ABS_HTML_PATH""/$FILENAME"
+  
   sed -i 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/$HTML_FILE"
   ESCAPED_CONFIG_DIR=${ABS_CONFIG_DIR_PATH//\//\\\/}
   ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST//\//\\\/}
