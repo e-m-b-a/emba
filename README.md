@@ -64,9 +64,11 @@ _emba_ is designed to assist penetration testers and is not designed as a standa
 
 There is a wide variety of different software to analyze Linux firmware, but none it could fulfill our expectiations. Therefore we combined all the good tools in one simple application. The main focus of emba is that it is easy to use, easy to customize and yet find and display all possible weak points. At the start of this project, we decided, that emba should be able to run with only two parameters: path to your firmware (as binary or already extracted) and path to a directory for the generated log files. Using emba should improve your workflow and not take hours to learn to use. During the development, we added a bunch of new features, without dispensing the simplicity. This is also the cause why we stick with bash and have no further plans to rewrite emba in another language. As pentester you are using your terminal on a daily basis and most of us are quite skilled with it. 
 
-## Usage
+## Installation
 
 Before running *emba* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation#docker-installation) all dependencies.
+
+## Usage
 
 ---
 ### Classic:
