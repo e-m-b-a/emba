@@ -5,3 +5,6 @@ services:
     volumes:
         - ${FIRMWARE}:/firmware
         - ${LOG}:/log
+        - /var/run/docker.sock:/var/run/docker.sock
+    network_mode: "host"
+    

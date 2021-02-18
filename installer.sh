@@ -22,6 +22,23 @@
 INSTALL_APP_LIST=()
 DOWNLOAD_FILE_LIST=()
 
+# force install everything
+FORCE=0
+
+# install docker emba
+IN_DOCKER=0
+
+## Color definition
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+ORANGE="\033[0;33m"
+MAGENTA="\033[0;35m"
+CYAN="\033[0;36m"
+NC="\033[0m"  # no color
+
+## Attribute definition
+BOLD="\033[1m"
+
 # print_tool_info a b c
 # a = application name (by apt) 
 # b = no update, if already installed -> 0
@@ -107,11 +124,13 @@ download_file()
   fi
 }
 
+print_help()
+{
+  echo -e "\\n""$CYAN""USAGE""$NC"
+  echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
+  echo -e "$CYAN""-h""$NC""         Print this help message"
+}
 
-ORANGE='\033[0;33m'
-BOLD='\033[1m'
-MAGENTA='\033[0;35m'
-NC='\033[0m'  # no color
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
@@ -119,6 +138,28 @@ if ! [[ $EUID -eq 0 ]] ; then
   echo -e "\\n""$ORANGE""Run emba installation script with root permissions!""$NC\\n"
   exit 1
 fi
+
+while getopts DFh OPT ; do
+  case $OPT in
+    D)
+      export IN_DOCKER=1
+      echo -e "$GREEN""$BOLD""Install emba on docker""$NC"
+      ;;
+    F)
+      export FORCE=1
+      echo -e "$GREEN""$BOLD""Install all dependecies""$NC"
+      ;;
+    h)
+      print_help
+      exit 0
+      ;;
+    *)
+      echo -e "$RED""$BOLD""Invalid option""$NC"
+      print_help
+      exit 1
+      ;;
+  esac
+done
 
 
 
@@ -137,8 +178,13 @@ print_tool_info "qemu-user-static" 0 "qemu-mips-static"
 print_tool_info "binwalk" 0
 print_tool_info "bc" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     echo
@@ -176,8 +222,13 @@ else
   echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
 fi
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
@@ -196,8 +247,13 @@ echo -e "\\nWe use a few well-known open source tools in emba, for example check
 print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
 print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
@@ -215,8 +271,13 @@ print_file_info "DiabloHorn/yara4pentesters/juicy_files.txt" "" "https://raw.git
 print_file_info "ahhh/YARA/crypto_signatures.yar" "" "https://raw.githubusercontent.com/ahhh/YARA/master/crypto_signatures.yar" "external/yara/crypto_signatures.yar"
 print_file_info "Yara-Rules/rules/packer_compiler_signatures.yar" "" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     if ! [[ -d "external/yara/" ]] ; then
@@ -243,8 +304,13 @@ print_tool_info "texinfo" 1
 print_tool_info "gcc" 1
 print_tool_info "build-essential" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
@@ -283,8 +349,13 @@ for YEAR in $(seq 2002 $(($(date +%Y)))); do
   print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
 done
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and jq be installed (if not already on the system)!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     download_file "cve.mitre.org database" "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
@@ -317,9 +388,15 @@ INSTALL_APP_LIST=()
 echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database. CVE-searchsploit will be installed via pip3."
 print_tool_info "python3-pip" 1
 print_tool_info "net-tools" 1
+print_tool_info "git" 1
 
-echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
-read -p "(y/N)" -r ANSWER
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+  ANSWER=("y")
+fi
 case ${ANSWER:0:1} in
   y|Y )
     for APP in "${INSTALL_APP_LIST[@]}" ; do
@@ -331,8 +408,125 @@ case ${ANSWER:0:1} in
     else
       git clone https://github.com/cve-search/cve-search.git external/cve-search
     fi
+    cd ./external/cve-search/ || exit 1
+    pip3 install -r requirements.txt
+    xargs sudo apt-get install -y < requirements.system
+    if [[ "$IN_DOCKER" -eq 1 ]] ; then
+      if [[ "$FORCE" -eq 0 ]] ; then
+        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
+        read -p "(y/N)" -r ANSWER
+      else
+        echo -e "\\n""$MAGENTA""$BOLD""Updating cve-search database on docker.""$NC"
+        ANSWER=("y")
+      fi
+      case ${ANSWER:0:1} in
+        y|Y )
+          sudo cve_searchsploit -u
+        ;;
+      esac
+    fi
     echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
     echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
+  ;;
+esac
+
+# binwalk
+
+INSTALL_APP_LIST=()
+print_tool_info "python3-pip" 1
+print_tool_info "python3-crypto" 1
+print_tool_info "python3-opengl" 1
+print_tool_info "python3-pyqt5" 1
+print_tool_info "python3-pyqt5.qtopengl" 1
+print_tool_info "python3-numpy" 1
+print_tool_info "python3-scipy" 1
+print_tool_info "mtd-utils" 1
+print_tool_info "gzip" 1
+print_tool_info "git" 1
+print_tool_info "bzip2" 1
+print_tool_info "tar" 1
+print_tool_info "arj" 1
+print_tool_info "lhasa" 1
+print_tool_info "p7zip" 1
+print_tool_info "p7zip-full" 1
+print_tool_info "cabextract" 1
+print_tool_info "cramfsswap" 1
+print_tool_info "squashfs-tools" 1
+print_tool_info "sleuthkit" 1
+print_tool_info "default-jdk" 1
+print_tool_info "lzop" 1
+print_tool_info "srecord" 1
+print_tool_info "build-essential" 1
+print_tool_info "zlib1g-dev" 1
+print_tool_info "liblzma-dev" 1
+print_tool_info "liblzo2-dev" 1
+print_tool_info "firmware-mod-kit" 1
+
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+
+    for APP in "${INSTALL_APP_LIST[@]}" ; do
+      apt-get install "$APP" -y
+    done
+
+    pip3 install nose
+    pip3 install coverage
+    pip3 install pyqtgraph
+    pip3 install capstone
+    pip3 install cstruct
+
+    if [[ -f "/usr/local/bin/binwalk" ]]; then
+      echo -e "Found binwalk. Skipping installation."
+    else
+
+      git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+
+      git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
+      sudo python3 ./external/binwalk/yaffshiv/setup.py install
+
+      git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+      sudo CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+
+      git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
+      sudo pip3 install -r ./external/binwalk/jefferson/requirements.txt
+      sudo python3 ./external/binwalk/jefferson/setup.py install
+
+      mkdir ./external/binwalk/unstuff
+      wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+      tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
+      sudo cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+      
+      sudo ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
+
+      git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
+      make -C ./external/binwalk/cramfs-tools/
+      install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
+      sudo install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
+
+      git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
+      cd ./external/binwalk/ubi_reader || exit 1
+      git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
+      sudo python2 setup.py install
+      cd .. || exit 1
+
+      sudo python3 setup.py install
+      cd ../.. || exit 1
+
+      rm -rf ./external/binwalk
+
+      if [[ -f "/usr/local/bin/binwalk" ]] ; then
+        echo -e "$GREEN""binwalk installed successfully""$NC"
+      else
+        echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
+      fi
+    fi
   ;;
 esac
 
