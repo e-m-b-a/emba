@@ -38,7 +38,7 @@ S22_php_check()
         NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
         PHP_LOG="$LOG_DIR""/php_checker/php_""$NAME"".txt"
         php -l "$LINE" > "$PHP_LOG" 2>&1
-        VULNS=$(grep -c "syntax error" "$PHP_LOG" 2> /dev/null)
+        VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null)
         (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
         if [[ "$VULNS" -ne 0 ]] ; then
           #check if this is common linux file:
