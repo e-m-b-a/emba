@@ -61,6 +61,7 @@ main()
   export KERNEL=0
   export SHELLCHECK=1
   export PYTHON_CHECK=1
+  export PHP_CHECK=1
   export V_FEED=1
   export BAP=0
   export YARA=1
