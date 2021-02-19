@@ -324,6 +324,16 @@ main()
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
             fi
+          elif [[ "$SELECT_NUM" =~ ^[p,P]{1} ]]; then
+            local MODULES
+            mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
+            for MODULE_FILE in "${MODULES[@]}" ; do
+              if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+                MODULE_BN=$(basename "$MODULE_FILE")
+                MODULE_MAIN=${MODULE_BN%.*}
+                $MODULE_MAIN
+              fi
+            done
           fi
         done
 
@@ -376,6 +386,16 @@ main()
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
             fi
+          elif [[ "$SELECT_NUM" =~ ^[s,S]{1} ]]; then
+            local MODULES
+            mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
+            for MODULE_FILE in "${MODULES[@]}" ; do
+              if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+                MODULE_BN=$(basename "$MODULE_FILE")
+                MODULE_MAIN=${MODULE_BN%.*}
+                $MODULE_MAIN
+              fi
+            done
           fi
         done
       fi
