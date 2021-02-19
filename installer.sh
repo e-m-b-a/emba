@@ -257,7 +257,7 @@ else
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
   echo "Download-Size: ~1500 MB"
 fi
-if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
+if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
   echo -e "$ORANGE""fkiecad/fact_extractor docker image will be downloaded""$NC"
 else
   echo -e "$ORANGE""fkiecad/fact_extractor docker image is already downloaded""$NC"
@@ -275,8 +275,8 @@ case ${ANSWER:0:1} in
     for APP in "${INSTALL_APP_LIST[@]}" ; do
       apt-get install "$APP" -y
     done
-    if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
-      docker pull fkiecad/cwe_checker:latest
+    if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
+      docker pull fkiecad/fact_extractor:latest
     fi
   ;;
 esac
