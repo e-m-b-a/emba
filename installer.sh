@@ -171,6 +171,7 @@ print_tool_info "tree" 1
 print_tool_info "yara" 1
 print_tool_info "shellcheck" 1
 print_tool_info "pylint" 1
+print_tool_info "php" 1
 print_tool_info "device-tree-compiler" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
