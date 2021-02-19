@@ -281,6 +281,29 @@ dependency_check()
       echo -e "$ORANGE""not checked (disabled)""$NC"
     fi
 
+    print_output "    docker - \\c" "no_log"
+    if ! command -v docker > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing docker ... check your installation""$NC"
+      echo -e "$RED""    you can run the installer.sh script or install it manually""$NC"
+      FACT_EXTRACTOR=0
+    else
+      echo -e "$GREEN""ok""$NC"
+      print_output "    fact-extractor - \\c" "no_log"
+      if docker images | grep -q fact_extractor ; then
+        echo -e "$GREEN""ok""$NC"
+        FACT_EXTRACTOR=1
+      else
+        echo -e "$RED""not ok""$NC"
+        echo -e "$RED""    missing docker image fact-extractor ... check your installation""$NC"
+        echo -e "$RED""      https://github.com/fkie-cad/fact_extractor""$NC"
+        echo -e "$RED""    you can run the installer.sh script or pull it manually:""$NC"
+        echo -e "$RED""      docker pull fkiecad/fact_extractor""$NC"
+        FACT_EXTRACTOR=0
+      fi
+    fi
+    export FACT_EXTRACTOR
+ 
     print_output "    fdtdump - \\c" "no_log"
     if ! command -v fdtdump > /dev/null ; then
       echo -e "$RED""not ok""$NC"

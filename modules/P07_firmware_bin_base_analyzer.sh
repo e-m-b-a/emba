@@ -18,7 +18,10 @@ P07_firmware_bin_base_analyzer() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
 
-  os_identification
+  if [[ -d "$LOG_DIR"/extractor/ ]] ; then
+    OUTPUT_DIR="$LOG_DIR"/extractor/
+    os_identification
+  fi
 
   # we only do this if we have not found a LInux filesystem
   if ! [[ -d "$FIRMWARE_PATH" ]]; then
