@@ -63,13 +63,17 @@ S103_deep_search()
 
   local OCC_LIST
   for I in "${!PATTERN_LIST[@]}"; do
-    OCC_LIST=("${PATTERN_COUNT[$I]}"": ""${PATTERN_LIST[$I]}" "${OCC_LIST[@]}")
+    if [[ "${PATTERN_COUNT[$I]}" -gt 0 ]] ; then
+      OCC_LIST=("${PATTERN_COUNT[$I]}"": ""${PATTERN_LIST[$I]}" "${OCC_LIST[@]}")
+    fi
   done
 
-  print_output "[*] Occurences of pattern:"
-  SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
-  for OCC in "${SORTED_OCC_LIST[@]}"; do
-    print_output "$( indent "$(orange "$OCC" )")"
-  done
+  if [[ "${#PATTERN_LIST[@]}" -gt 0 ]] ; then
+    print_output "[*] Occurences of pattern:"
+    SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
+    for OCC in "${SORTED_OCC_LIST[@]}"; do
+      print_output "$( indent "$(orange "$OCC" )")"
+    done
+  fi
 
 }
