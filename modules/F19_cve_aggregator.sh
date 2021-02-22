@@ -369,7 +369,7 @@ aggregate_versions() {
   VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # remove color codes:
-    VERSION=$(echo $VERSION | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
     prepare_version_data
     # now we should have the name and the version in the first two coloumns:
     VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"

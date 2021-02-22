@@ -35,6 +35,7 @@ S115_usermode_emulator() {
     # to get rid of all the running stuff we are going to kill it after RUNTIME
     RUNTIME="10m"
     declare -a MISSING
+    declare -a MD5_DONE
 
     ## load blacklist of binaries that could cause troubles during emulation:
     readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
@@ -444,23 +445,30 @@ emulate_binary() {
   
         prepare_emulator
         for BIN_EMU in "${BINS[@]}"; do
-          emulate_strace_run
+          # we check every binary only once. So calculate the checksum and store it for checking
+          BIN_MD5=$(md5sum "$E_PATH"/"$BIN_EMU" | cut -d\  -f1)
+          if [[ ! " ${MD5_DONE[@]} " =~ " ${BIN_MD5} " ]]; then
+            emulate_strace_run
     
-          # emulate binary with different command line parameters:
-          if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
-            EMULATION_PARAMS=("--help" "--version")
+            # emulate binary with different command line parameters:
+            if [[ "$BIN_EMU_NAME" == *"bash"* ]]; then
+              EMULATION_PARAMS=("--help" "--version")
+            else
+              EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+            fi
+    
+            for PARAM in "${EMULATION_PARAMS[@]}"; do
+              #print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
+              print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
+              print_output "[*] Using root directory: $E_PATH"
+              chroot "$E_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
+              print_output ""
+              check_disk_space
+            done
+            MD5_DONE+=( "$BIN_MD5" )
           else
-            EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
+            print_output "[*] Binary $BIN_EMU was already tested."
           fi
-    
-          for PARAM in "${EMULATION_PARAMS[@]}"; do
-            #print_output "[*] Trying to emulate binary ${GREEN}""$BINARY_EMU""${NC} with parameter ""$PARAM"""
-            print_output "[*] Trying to emulate binary ${GREEN}""$BIN_EMU""${NC} with parameter ""$PARAM"""
-            print_output "[*] Using root directory: $E_PATH"
-            chroot "$E_PATH" ./"$EMULATOR" "$BIN_EMU" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
-            print_output ""
-            check_disk_space
-          done
         done
       else
         print_output "[!] We found a path that should not be handled! $E_PATH"
