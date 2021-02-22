@@ -45,7 +45,7 @@ Test firmware / live system
 -l [./path]       Log path
 -f [./path]       Firmware path
 -e [./path]       Exclude paths from testing (multiple usage possible)
--m [MODULE_NO.]   Test only with set modules [e.g. -m p05 -m s10 ... ]]
+-m [MODULE_NO.]   Test only with set modules [e.g. -m p05 -m s10 ... Test only with set modules [e.g. -m p05 -m s10 ... or -m p to run all p modules]
                   (multiple usage possible, case insensitive, final modules aren't selectable, if firmware isn't a binary, the p modules won't run)
 -c                Enable cwe-checker
 -g                Create grep-able log file in [log_path]/fw_grep.log
