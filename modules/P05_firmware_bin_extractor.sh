@@ -17,8 +17,30 @@ P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
 
+  mkdir "$LOG_DIR"/extractor/ 2>/dev/null
+
+  # we love binwalk ... this is our first chance for extracting everything
   binwalking
+
+  LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+
+  # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
+  if [[ $LINUX_PATH_COUNTER -lt 2 && $FACT_EXTRACTOR -eq 1 ]] ; then
+    fact_extractor
+  fi
   # probably we can do something more in the future
+}
+
+fact_extractor() {
+  sub_module_title "Extracting binary firmware blob with FACT-extractor"
+
+  export OUTPUT_DIR_fact
+  OUTPUT_DIR_fact=$(basename "$FIRMWARE_PATH")
+  OUTPUT_DIR_fact="$LOG_DIR"/extractor/"$OUTPUT_DIR_fact"_fact_emba
+
+  print_output "[*] Extracting firmware to directory $OUTPUT_DIR_fact"
+
+  print_output "$(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null)"
 }
 
 binwalking() {
@@ -40,12 +62,13 @@ binwalking() {
   #print_output "\n[*] Architecture testing with binwalk ... could take a while"
   #binwalk -Y "$FIRMWARE_BIN_PATH"
 
-  OUTPUT_DIR=$(basename "$FIRMWARE_PATH")
-  OUTPUT_DIR="$LOG_DIR"/"$OUTPUT_DIR"_binwalk_emba
+  export OUTPUT_DIR_binwalk
+  OUTPUT_DIR_binwalk=$(basename "$FIRMWARE_PATH")
+  OUTPUT_DIR_binwalk="$LOG_DIR"/extractor/"$OUTPUT_DIR_binwalk"_binwalk_emba
 
   echo
-  print_output "[*] Extracting firmware to directory $OUTPUT_DIR"
-  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR" "$FIRMWARE_PATH")
+  print_output "[*] Extracting firmware to directory $OUTPUT_DIR_binwalk"
+  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH")
   if [[ ${#BINWALK_EXTRACT[@]} -ne 0 ]] ; then
     for LINE in "${BINWALK_EXTRACT[@]}" ; do
       print_output "$LINE"

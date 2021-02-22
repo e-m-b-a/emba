@@ -69,6 +69,7 @@ main()
   export ONLY_DEP=0             # test only dependency
   export USE_DOCKER=0
   export IN_DOCKER=0
+  export FACT_EXTRACTOR=0
   export FORCE=0
   export LOG_GREP=0
   export QEMULATION=0
