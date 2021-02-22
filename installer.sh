@@ -60,8 +60,12 @@ print_tool_info(){
     if [[ $2 -eq 0 ]] ; then
       echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
     else
-      echo -e "$ORANGE""$1"" will be updated.""$NC"
-      INSTALL_APP_LIST+=("$1")
+      if [[ $COMPLEMENT -eq 0 ]] ; then
+        echo -e "$ORANGE""$1"" will be updated.""$NC"
+        INSTALL_APP_LIST+=("$1")
+      else
+        echo -e "$ORANGE""$1"" won't be updated.""$NC"
+      fi
     fi
   else
     echo -e "$ORANGE""$1"" will be newly installed.""$NC"
@@ -69,11 +73,12 @@ print_tool_info(){
   fi
 }
 
-# print_file_info a b c
+# print_file_info a b c d e
 # a = file name
 # b = description of file
 # c = file url
 # d = path on system
+# e = if given: check this path or application is on the system instead of d
 
 print_file_info()
 {
@@ -94,10 +99,19 @@ print_file_info()
     echo -e "Download-Size: ""$FILE_SIZE"" B"
   fi
   if ! [[ -f "${4}" ]] ; then
-    echo -e "$ORANGE""${1}"" will be downloaded.""$NC"
-    DOWNLOAD_FILE_LIST+=("${1}")
+    if [[ -n "${5}" ]] ; then
+      if [[ -f "${5}" ]] || ( command -v "${5}" > /dev/null) || ( dpkg -s "${5}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+        echo -e "$ORANGE""$1"" won't be downloaded.""$NC"
+      else
+        echo -e "$ORANGE""$1"" will be downloaded.""$NC"
+        DOWNLOAD_FILE_LIST+=("$1")
+      fi
+    else
+      echo -e "$ORANGE""${1}"" will be downloaded.""$NC"
+      DOWNLOAD_FILE_LIST+=("${1}")
+    fi
   else
-    echo -e "$ORANGE""${1}"" is already downloaded.""$NC"
+    echo -e "$ORANGE""${1}"" is already been downloaded.""$NC"
   fi
 }
 
@@ -109,7 +123,6 @@ print_file_info()
 download_file()
 {
   for D_FILE in "${DOWNLOAD_FILE_LIST[@]}" ; do
-    echo "$D_FILE"
     if [[ "$D_FILE" == "${1}" ]] ; then
       echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1}""$NC"
       if ! [[ -f "${3}" ]] ; then
@@ -127,6 +140,7 @@ download_file()
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
+  echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
   echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
   echo -e "$CYAN""-h""$NC""         Print this help message"
 }
@@ -139,8 +153,13 @@ if ! [[ $EUID -eq 0 ]] ; then
   exit 1
 fi
 
-while getopts DFh OPT ; do
+while getopts cDFh OPT ; do
   case $OPT in
+    c)
+      export COMPLEMENT=1
+      export FORCE=1
+      echo -e "$GREEN""$BOLD""Complement emba dependecies""$NC"
+      ;;
     D)
       export IN_DOCKER=1
       echo -e "$GREEN""$BOLD""Install emba on docker""$NC"
@@ -298,7 +317,7 @@ BINUTIL_VERSION_NAME="binutils-2.35.1"
 echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
 INSTALL_APP_LIST=()
 
-print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
+print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
 
 print_tool_info "texinfo" 1
 print_tool_info "gcc" 1
@@ -317,15 +336,18 @@ case ${ANSWER:0:1} in
       apt-get install "$APP" -y
     done
     download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
-    tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
-    cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
-    echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
-    ./configure --enable-targets=all
-    make
-    cd ../.. || exit 1
+    if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
+      tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
+      cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
+      echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
+      ./configure --enable-targets=all
+      make
+      cd ../.. || exit 1
+    fi
     if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
       mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
-      rm -R external/"$BINUTIL_VERSION_NAME"
+      rm -R "external/""$BINUTIL_VERSION_NAME"
+      rm "external/"$BINUTIL_VERSION_NAME".tar.gz"
       if [[ -f "external/objdump" ]] ; then
         echo -e "$GREEN""objdump installed successfully""$NC"
       fi
@@ -346,7 +368,7 @@ print_file_info "cve.mitre.org database" "CVE® is a list of records—each cont
 print_tool_info "jq" 1
 for YEAR in $(seq 2002 $(($(date +%Y)))); do
   NVD_FILE="nvdcve-1.1-""$YEAR"".json"
-  print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
+  print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip" "./external/allitemscvss.csv"
 done
 
 if [[ "$FORCE" -eq 0 ]] ; then
@@ -402,15 +424,16 @@ case ${ANSWER:0:1} in
     for APP in "${INSTALL_APP_LIST[@]}" ; do
       apt-get install "$APP" -y
     done
-    pip3 install cve_searchsploit
     if [[ -d external/cve-search ]]; then
       echo -e "Found cve-search directory. Skipping installation."
     else
+      pip3 install cve_searchsploit
       git clone https://github.com/cve-search/cve-search.git external/cve-search
+      cd ./external/cve-search/ || exit 1
+      pip3 install -r requirements.txt
+      xargs sudo apt-get install -y < requirements.system
     fi
-    cd ./external/cve-search/ || exit 1
-    pip3 install -r requirements.txt
-    xargs sudo apt-get install -y < requirements.system
+
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
       if [[ "$FORCE" -eq 0 ]] ; then
         echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
@@ -460,7 +483,8 @@ print_tool_info "build-essential" 1
 print_tool_info "zlib1g-dev" 1
 print_tool_info "liblzma-dev" 1
 print_tool_info "liblzo2-dev" 1
-print_tool_info "firmware-mod-kit" 1
+# print_tool_info "firmware-mod-kit" 1
+# This is no valid packet, couldn't be found
 
 if [[ "$FORCE" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
@@ -472,19 +496,19 @@ fi
 case ${ANSWER:0:1} in
   y|Y )
 
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
-
-    pip3 install nose
-    pip3 install coverage
-    pip3 install pyqtgraph
-    pip3 install capstone
-    pip3 install cstruct
-
     if [[ -f "/usr/local/bin/binwalk" ]]; then
       echo -e "Found binwalk. Skipping installation."
     else
+
+      for APP in "${INSTALL_APP_LIST[@]}" ; do
+        apt-get install "$APP" -y
+      done
+
+      pip3 install nose
+      pip3 install coverage
+      pip3 install pyqtgraph
+      pip3 install capstone
+      pip3 install cstruct
 
       git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
 
