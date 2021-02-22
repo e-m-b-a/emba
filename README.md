@@ -12,10 +12,11 @@ emba is licensed under GPLv3
 Author(s): Michael Messner, Pascal Eckmann
 -->
 
-# emba - an analyzer for Linux-based firmware of embedded devices
+# emba
+### An analyzer for Linux-based firmware of embedded devices
 
 <p align="center">
-  <img src="./helpers/emba.png" width="200"/>
+  <img src="./helpers/emba.png" width="200" style="margin: 30px;"/>
 </p>
 <p align="center">
   <a href="https://github.com/koalaman/shellcheck"><img src="https://github.com/e-m-b-a/emba/workflows/ShellCheck/badge.svg?branch=master" /></a>
@@ -26,13 +27,13 @@ Author(s): Michael Messner, Pascal Eckmann
 </p>
 
 - [About](#About)
-- [Motivation](#Motivation)
 - [Installation](#Installation)
 - [Usage](#Usage)
 
 #### Links to the wiki (more detailed information)
 
 - [Home](https://github.com/e-m-b-a/emba/wiki)
+  - [Motivation](https://github.com/e-m-b-a/emba/wiki#motivation)
 - [Feature overview](https://github.com/e-m-b-a/emba/wiki/Feature-overview)
   - [Emulator](https://github.com/e-m-b-a/emba/wiki/Emulator)
   - [Aggregator](https://github.com/e-m-b-a/emba/wiki/Aggregator)
@@ -40,7 +41,7 @@ Author(s): Michael Messner, Pascal Eckmann
 - [Installation](https://github.com/e-m-b-a/emba/wiki/Installation)
   - [Classic](https://github.com/e-m-b-a/emba/wiki/Installation#classic-installation)
   - [Docker](https://github.com/e-m-b-a/emba/wiki/Installation#docker-installation)
-  - [cve-search](https://github.com/e-m-b-a/emba/wiki/Installation#cve-search-installation)
+  - [CVE-Search](https://github.com/e-m-b-a/emba/wiki/Installation#cve-search-installation)
   - [Dependencies](https://github.com/e-m-b-a/emba/wiki/Installation#dependencies)
   - [System tools](https://github.com/e-m-b-a/emba/wiki/Installation#system-tools)
 - [Usage](https://github.com/e-m-b-a/emba/wiki/Usage)
@@ -55,14 +56,10 @@ Author(s): Michael Messner, Pascal Eckmann
 
 ## About
 
-_emba_ is being developed as a firmware scanner that analyzes Linux-based firmware images, regardless of whether the firmware is a single file or already been extracted. It should help you to identify and focus on the interesting areas of a huge firmware image.
+*Emba* is being developed as a firmware scanner that analyzes Linux-based firmware images, regardless of whether the firmware is a single file or has already been extracted. It should help you identify and focus on interesting areas of firmware images.
 
-Although _emba_ is optimized for offline firmware images, it can test both, live systems and extracted images. Additionally, it can also analyze kernel configurations.
-_emba_ is designed to assist penetration testers and is not designed as a standalone tool without human interaction. _emba_ should give as much information as possible about the firmware. The tester can then decide on the areas to focus on and is always responsible for verifying and interpreting the results. 
-
-## Motivation
-
-There is a wide variety of different software to analyze Linux firmware, but none it could fulfill our expectiations. Therefore we combined all the good tools in one simple application. The main focus of emba is that it is easy to use, easy to customize and yet find and display all possible weak points. At the start of this project, we decided, that emba should be able to run with only two parameters: path to your firmware (as binary or already extracted) and path to a directory for the generated log files. Using emba should improve your workflow and not take hours to learn to use. During the development, we added a bunch of new features, without dispensing the simplicity. This is also the cause why we stick with bash and have no further plans to rewrite emba in another language. As pentester you are using your terminal on a daily basis and most of us are quite skilled with it. 
+Although *emba* is optimized for offline firmware images, it can test both, live systems and extracted images. Additionally, it can also analyze kernel configurations.
+*Emba* is designed to assist penetration testers and not as a standalone tool without human interaction. *Emba* should provide as much information as possible about the firmware, the the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
 
 ## Installation
 
@@ -72,12 +69,15 @@ Before running *emba* make sure, that you have [installed](https://github.com/e-
 
 ---
 ### Classic:
-### `sudo ./emba.sh -l ./log -f ./firmware`   
+```console
+./emba.sh -l ./log -f ./firmware
+``` 
 
 ---   
 ### Docker:
-### `sudo ./emba.sh -l ./log -f /firmware -D`
-
+```console
+sudo ./emba.sh -l ./log -f /firmware -D
+```
 ---
-You can specify some [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments) and get more [information about usage of emba in the wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
+You can specify some [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments) and get more [information about usage of *emba* in the wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
 
