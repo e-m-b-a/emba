@@ -278,6 +278,10 @@ case ${ANSWER:0:1} in
     if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
       docker pull fkiecad/fact_extractor:latest
     fi
+    if ! [[ -f "./external/extract.py" ]]; then
+      download_file "FACT-extract" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
+      chmod +x ./external/extract.py
+    fi
   ;;
 esac
 
