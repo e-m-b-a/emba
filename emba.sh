@@ -304,7 +304,15 @@ main()
       # 'main' functions of imported modules
       # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
-      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
+      local SELECT_PRE_MODULES_COUNT=0
+
+      for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
+        if [[ "$SELECT_NUM" =~ ^[p,P]{1} ]]; then
+          (( SELECT_PRE_MODULES_COUNT+=1 ))
+        fi
+      done
+
+      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
         local MODULES
         mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
         for MODULE_FILE in "${MODULES[@]}" ; do
