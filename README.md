@@ -63,7 +63,7 @@ Although *emba* is optimized for offline firmware images, it can test both, live
 
 ## Installation
 
-Before running *emba* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation#docker-installation) all dependencies.
+Before running *emba* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation) all dependencies.
 
 ## Usage
 
