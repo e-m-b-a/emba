@@ -112,9 +112,13 @@ architecture_check()
 
 prepare_binary_arr()
 {
+  # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
-  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -iname "*" )
+  export CHECKSUMS
+  #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -iname "*" )
+  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3)
+  readarray -t CHECKSUMS < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f1)
 
   # remove ./proc/* executables (for live testing)
   rm_proc_binary "${BINARIES[@]}"

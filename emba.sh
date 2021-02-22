@@ -70,6 +70,7 @@ main()
   export USE_DOCKER=0
   export IN_DOCKER=0
   export FACT_EXTRACTOR=0
+  export DEEP_EXTRACTOR=0
   export FORCE=0
   export LOG_GREP=0
   export QEMULATION=0
@@ -100,7 +101,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:zZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sxX:Y:zZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -157,6 +158,9 @@ main()
         ;;
       s)
         export SHORT_PATH=1
+        ;;
+      x)
+        export DEEP_EXTRACTOR=1
         ;;
       X)
         export FW_VERSION="$OPTARG"
