@@ -15,7 +15,7 @@
 
 # Description:  Module with all available functions and patterns to use
 #               Access:
-#                 firmware root path via $FIRMWARR_PATH
+#                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
 
 S115_usermode_emulator() {
@@ -166,7 +166,7 @@ version_detection() {
 copy_firmware() {
   print_output "[*] Create a firmware backup for emulation ..."
   cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/ 2> /dev/null
-  EMULATION_DIR=$(basename "$FIRMWARR_PATH")
+  EMULATION_DIR=$(basename "$FIRMWARE_PATH")
   EMULATION_PATH_BASE="$LOG_DIR"/"$EMULATION_DIR"
   print_output "[*] Firmware backup for emulation created in $EMULATION_PATH_BASE"
 }
