@@ -84,8 +84,7 @@ fact_extractor() {
 binwalking() {
   sub_module_title "Analyze binary firmware blob with binwalk"
 
-  print_output "[*] basic analysis with binwalk"
-  #print_output "$(binwalk "$FIRMWARE_PATH")"
+  print_output "[*] Basic analysis with binwalk"
   mapfile -t BINWALK_OUTPUT < <(binwalk "$FIRMWARE_PATH")
   if [[ ${#BINWALK_OUTPUT[@]} -ne 0 ]] ; then
     for LINE in "${BINWALK_OUTPUT[@]}" ; do
@@ -100,11 +99,6 @@ binwalking() {
   if command -v xdg-open > /dev/null; then
     xdg-open "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
   fi
-
-  # This test takes a long time and so I have removed it
-  # we come back to this topic later on - leave it here for the future
-  #print_output "\n[*] Architecture testing with binwalk ... could take a while"
-  #binwalk -Y "$FIRMWARE_BIN_PATH"
 
   export OUTPUT_DIR_binwalk
   OUTPUT_DIR_binwalk=$(basename "$FIRMWARE_PATH")

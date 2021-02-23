@@ -17,7 +17,7 @@
 
 S108_linux_common_file_checker() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Module to check the firmware files against a common dictionary of common linux files"
+  module_title "Module to check for common linux files"
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     print_output "[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
