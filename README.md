@@ -78,6 +78,8 @@ Before running *emba* make sure, that you have [installed](https://github.com/e-
 ```console
 sudo ./emba.sh -l ./log -f /firmware -D
 ```
+
 ---
 You can specify some [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments) and get more [information about usage of *emba* in the wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
+
 
