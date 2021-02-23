@@ -281,6 +281,29 @@ dependency_check()
       echo -e "$ORANGE""not checked (disabled)""$NC"
     fi
 
+    print_output "    docker - \\c" "no_log"
+    if ! command -v docker > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing docker ... check your installation""$NC"
+      echo -e "$RED""    you can run the installer.sh script or install it manually""$NC"
+      FACT_EXTRACTOR=0
+    else
+      echo -e "$GREEN""ok""$NC"
+      print_output "    fact-extractor - \\c" "no_log"
+      if docker images | grep -q fact_extractor ; then
+        echo -e "$GREEN""ok""$NC"
+        FACT_EXTRACTOR=1
+      else
+        echo -e "$RED""not ok""$NC"
+        echo -e "$RED""    missing docker image fact-extractor ... check your installation""$NC"
+        echo -e "$RED""      https://github.com/fkie-cad/fact_extractor""$NC"
+        echo -e "$RED""    you can run the installer.sh script or pull it manually:""$NC"
+        echo -e "$RED""      docker pull fkiecad/fact_extractor""$NC"
+        FACT_EXTRACTOR=0
+      fi
+    fi
+    export FACT_EXTRACTOR
+ 
     print_output "    fdtdump - \\c" "no_log"
     if ! command -v fdtdump > /dev/null ; then
       echo -e "$RED""not ok""$NC"
@@ -335,6 +358,28 @@ dependency_check()
       echo -e "$RED""    install shellcheck via apt-get install shellcheck""$NC"
       SHELLCHECK=0
       export SHELLCHECK
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    pylint - \\c" "no_log"
+    if ! command -v pylint > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    pylint not found ... disabling tests""$NC"
+      echo -e "$RED""    install pylint via apt-get install pylint""$NC"
+      PYTHON_CHECK=0
+      export PYTHON_CHECK
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+
+    print_output "    php - \\c" "no_log"
+    if ! command -v php > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    php not found ... disabling tests""$NC"
+      echo -e "$RED""    install php via apt-get install php""$NC"
+      PHP_CHECK=0
+      export PHP_CHECK
     else
       echo -e "$GREEN""ok""$NC"
     fi
