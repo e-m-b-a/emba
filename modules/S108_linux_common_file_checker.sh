@@ -33,7 +33,8 @@ S108_linux_common_file_checker() {
       fi
       FILE_COUNTER_ALL=$((FILE_COUNTER_ALL+1))
     done
-    print_output "\n[*] Found ""$FILE_COUNTER"" not common Linux files in firmware ""$FIRMWARE_PATH"" with ""$FILE_COUNTER_ALL"" files at all."
+    print_output ""
+    print_output "[*] Found $ORANGE""$FILE_COUNTER""$NC not common Linux files in firmware ""$FIRMWARE_PATH"" with $ORANGE""$FILE_COUNTER_ALL""$NC files at all."
   else
     print_output "[-] No common Linux files dictionary (""$BASE_LINUX_FILES"") found in config directory"
   fi

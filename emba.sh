@@ -350,6 +350,10 @@ main()
         architecture_dep_check
       fi
 
+      if [[ -n "${#ROOT_PATH[@]}" ]]; then
+        detect_root_dir_helper "$FIRMWARE_PATH"
+      fi
+
       check_firmware
 
       prepare_binary_arr

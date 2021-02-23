@@ -25,7 +25,7 @@ P05_firmware_bin_extractor() {
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
-  if [[ $LINUX_PATH_COUNTER -lt 2 && $FACT_EXTRACTOR -eq 1 ]] ; then
+  if [[ "$FACT_EXTRACTOR " -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
     fact_extractor
   fi
 
@@ -34,11 +34,11 @@ P05_firmware_bin_extractor() {
     FILES_FACT=$(find "$OUTPUT_DIR_fact" -type f | wc -l )
   fi
 
-  LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  print_output ""
+  print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
 
-  print_output "[*] Default binwalk extractor extracted $FILES_BINWALK files."
   if [[ -n $FILES_FACT ]]; then
-    print_output "[*] Default FACT-extractor extracted $FILES_FACT files."
+    print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
   fi
 
   # if we have not found a linux filesystem we try to do a binwalk -e -M on every file
@@ -46,10 +46,13 @@ P05_firmware_bin_extractor() {
     deep_extractor
   fi
 
+  detect_root_dir_helper "$LOG_DIR"/extractor/
+
   BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable | wc -l )
   UNIQUE_BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | wc -l )
-  print_output "[*] Found $BINS executables."
-  print_output "[*] Using $UNIQUE_BINS unique executables."
+  if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
+    print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
+  fi
 }
 
 deep_extractor() {
@@ -63,7 +66,7 @@ deep_extractor() {
   find "$LOG_DIR"/extractor/ -type f -exec binwalk -e -M {} \;
   FILES_AFTER_DEEP=$(find "$LOG_DIR"/extractor/ -type f | wc -l )
 
-  print_output "[*] Before deep extraction we had $FILES_BEFORE_DEEP files, after deep extraction we have now $FILES_AFTER_DEEP files extracted."
+  print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."
 }
 
 fact_extractor() {

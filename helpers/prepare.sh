@@ -45,7 +45,7 @@ architecture_check()
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
     local DETECT_ARCH ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
-    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec file {} \; | grep "executable\|shared\ object" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
+    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec file {} \; 2>/dev/null | grep "executable\|shared\ object" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
     for D_ARCH in "${DETECT_ARCH[@]}" ; do
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
@@ -84,7 +84,7 @@ architecture_check()
           print_output "[!] Your set architecture (""$ARCH"") is different from the automatically detected one. The set architecture will be used." "no_log"
         fi
       else
-        print_output "[*] No architecture was set, so the automatically detected one is used." "no_log"
+        print_output "[*] No architecture was enforced, so the automatically detected one is used." "no_log"
         ARCH="$D_ARCH"
         export ARCH
       fi
@@ -112,13 +112,16 @@ architecture_check()
 
 prepare_binary_arr()
 {
+  echo ""
+  print_output "[*] Unique binary auto detection (could take some time)\\n" "no_log"
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
   export CHECKSUMS
   #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -iname "*" )
-  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f3)
-  readarray -t CHECKSUMS < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | cut -d\  -f1)
+  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  readarray -t CHECKSUMS < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f1)
+  print_output "[*] Found ${#BINARIES[@]} unique executables." "no_log"
 
   # remove ./proc/* executables (for live testing)
   rm_proc_binary "${BINARIES[@]}"
@@ -196,4 +199,44 @@ check_firmware()
     echo
     print_output "[!] Your firmware looks strange, sure that you have entered the correct path?" "no_log"
   fi
+}
+
+detect_root_dir_helper() {
+  SEARCH_PATH="$1"
+  print_output "[*] Root directory auto detection (could take some time)\\n" "no_log"
+  ROOT_PATH=()
+  export ROOT_PATH
+  local R_PATH
+
+  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+
+  if [[ "${#INTERPRETER_FULL_PATH[@]}" -ne 0 ]]; then
+    for INTERPRETER_PATH in "${INTERPRETER_FULL_PATH[@]}"; do
+      # now we have a result like this "/lib/ld-uClibc.so.0"
+      # lets escape it
+      INTERPRETER_ESCAPED=$(echo "$INTERPRETER_PATH" | sed -e 's/\//\\\//g')
+      mapfile -t INTERPRETER_FULL_RPATH < <(find "$SEARCH_PATH" -ignore_readdir_race -wholename "*$INTERPRETER_PATH" 2>/dev/null | sort -u)
+      for R_PATH in "${INTERPRETER_FULL_RPATH[@]}"; do
+        # remove the interpreter path from the full path:
+        R_PATH="${R_PATH//$INTERPRETER_ESCAPED/}"
+        ROOT_PATH+=( "$R_PATH" )
+      done
+    done
+  else
+    # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
+    mapfile -t ROOT_PATH < <(find "$SEARCH_PATH" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
+  fi
+
+  if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
+    print_output "[*] Root directory set to firmware path ... last resort" "no_log"
+    ROOT_PATH+=( "$SEARCH_PATH" )
+  fi
+
+  eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+  if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
+    print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "no_log"
+  fi
+  for R_PATH in "${ROOT_PATH[@]}"; do
+    print_output "[+] Found the following root directory: $R_PATH" "no_log"
+  done
 }

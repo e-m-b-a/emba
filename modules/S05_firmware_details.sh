@@ -24,7 +24,7 @@ S05_firmware_details()
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware and testing details"
 
-  print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" directories detected."
+  print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" directories detected."
 
   LOG_FILE="$( get_log_file )"
 
