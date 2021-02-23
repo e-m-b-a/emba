@@ -190,6 +190,7 @@ print_tool_info "tree" 1
 print_tool_info "yara" 1
 print_tool_info "shellcheck" 1
 print_tool_info "pylint" 1
+print_tool_info "php" 1
 print_tool_info "device-tree-compiler" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
@@ -258,6 +259,51 @@ case ${ANSWER:0:1} in
     fi
   ;;
 esac
+
+# FACT-extractor docker
+
+echo -e "\\nWith emba you can automatically use FACT-extractor as a second extraction tool. Docker and the fact_extractor from fkiecad are required for this."
+INSTALL_APP_LIST=()
+print_tool_info "docker.io" 0 "docker"
+
+if command -v docker > /dev/null ; then
+  echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
+  export DOCKER_CLI_EXPERIMENTAL=enabled
+  f="$(docker manifest inspect fkiecad/fact_extractor:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
+  echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
+  export DOCKER_CLI_EXPERIMENTAL=disabled
+else
+  echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
+  echo "Download-Size: ~1500 MB"
+fi
+if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
+  echo -e "$ORANGE""fkiecad/fact_extractor docker image will be downloaded""$NC"
+else
+  echo -e "$ORANGE""fkiecad/fact_extractor docker image is already downloaded""$NC"
+fi
+
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    for APP in "${INSTALL_APP_LIST[@]}" ; do
+      apt-get install "$APP" -y
+    done
+    if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
+      docker pull fkiecad/fact_extractor:latest
+    fi
+    if ! [[ -f "./external/extract.py" ]]; then
+      download_file "FACT-extract" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
+      chmod +x ./external/extract.py
+    fi
+  ;;
+esac
+
 
 # open source tools from github
 

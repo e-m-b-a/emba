@@ -423,7 +423,7 @@ generate_cve_details() {
       if command -v cve_searchsploit > /dev/null ; then
         # if no exploit was found lets talk to exploitdb:
         if [[ "$EXPLOIT" == "No exploit available" ]]; then
-          if cve_searchsploit "$CVE_value" | grep -q "Exploit DB Id:" 2>/dev/null ; then
+          if cve_searchsploit "$CVE_value" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
             EXPLOIT="Exploit available (Source: Exploit database)"
             ((EXPLOIT_COUNTER++))
             ((EXPLOIT_COUNTER_VERSION++))

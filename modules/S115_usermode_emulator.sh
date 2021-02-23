@@ -360,7 +360,7 @@ prepare_emulator() {
 
 emulate_strace_run() {
     echo
-    print_output "[*] Initial strace run on command ${GREEN}$BIN_EMU_NAME / $BIN_EMU${NC} for identifying missing areas"
+    print_output "[*] Initial strace run on the command ${GREEN}$BIN_EMU_NAME / $BIN_EMU${NC} to identify missing areas"
 
     # currently we only look for file errors (errno=2) and try to fix this
     chroot "$E_PATH" ./"$EMULATOR" --strace "$BIN_EMU" > "$LOG_DIR""/qemu_emulator/stracer_""$BIN_EMU_NAME"".txt" 2>&1 &
