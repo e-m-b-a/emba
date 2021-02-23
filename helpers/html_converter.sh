@@ -103,7 +103,6 @@ build_index_file(){
   rm "$ABS_HTML_PATH""/index.txt"
 
   sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/index.html"
-  ESCAPED_HTML_PATH=${ABS_HTML_PATH//\//\\\/}
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/index.html"
 }
 
@@ -151,7 +150,6 @@ build_collection_file(){
   rm "$ABS_HTML_PATH""/collection.txt"
 
   sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/collection.html"
-  ESCAPED_HTML_PATH=${ABS_HTML_PATH//\//\\\/}
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/collection.html"
 }
 
@@ -191,7 +189,6 @@ build_report_files(){
     </div></header><div><ul>$SUB_MENU_LIST</ul></div><div class=\"main\">" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
  
   TOP10_FORMAT_COUNTER=0
-  ESCAPED_HTML_PATH=${ABS_HTML_PATH//\//\\\/}
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
       if [[ "$FILE_LINE" == *"entropy.png"* ]]; then
