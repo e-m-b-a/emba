@@ -268,7 +268,7 @@ main()
 
     OPTIND=1
     ARGS=""
-    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:sxz OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
