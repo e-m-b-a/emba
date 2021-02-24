@@ -18,6 +18,7 @@
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
 
+export HTML_REPORT
 
 S22_php_check()
 {
@@ -51,7 +52,7 @@ S22_php_check()
           else
             COMMON_FILES_FOUND=""
           fi
-
+          HTML_REPORT=1
           print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
         fi
       fi

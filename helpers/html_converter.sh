@@ -58,11 +58,11 @@ build_index_file(){
   echo "</ul></div><div class=\"main\">"| tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   if [[ ${FILENAME%.txt} != "f"* ]]; then
     echo "<h2>[[0;34m+[0m] [0;36m[1mGeneral information[0m[1m[0m</h2>
-      File: $(basename "$FIRMWARE_PATH")<br>
-      Architecture: $ARCH<br>
+      File: ""$(echo -e "$(basename "$FIRMWARE_PATH")" | sed "s/</\&lt;/g")""<br>
+      Architecture: ""$(echo -e "$ARCH" | sed "s/</\&lt;/g")""<br>
       Date: $(date) <br>
       Duration time: $(date -d@$SECONDS -u +%H:%M:%S) <br>
-      emba Command: $EMBACOMMAND <br>
+      emba Command: ""$(echo -e "$EMBACOMMAND" | sed "s/</\&lt;/g")""<br>
       " | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   fi
      	
@@ -70,6 +70,7 @@ build_index_file(){
   TOP10_FORMAT_COUNTER=0
   if [[ -n ${INDEX_CONTENT_ARR[*]} ]]; then
     for OUTPUT in "${INDEX_CONTENT_ARR[@]}"; do
+      OUTPUT="$(echo -e "$OUTPUT" | sed "s/</\&lt;/g")"
       if [[ "$OUTPUT" == *"entropy.png"* ]]; then
         IFS=':' read -r -a "FILE_LINE_ARR" <<< "$OUTPUT"
         OUTPUT="${FILE_LINE_ARR[0]}""33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\"./style/entropy.png\">"
@@ -103,6 +104,7 @@ build_index_file(){
   rm "$ABS_HTML_PATH""/index.txt"
 
   sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/index.html"
+  sed -i 's/\&amp;lt;/\&lt;/g' "$ABS_HTML_PATH""/index.html"
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/index.html"
 }
 
@@ -137,6 +139,7 @@ build_collection_file(){
   i=0
   if [[ -n ${NOT_FINDINGS_CONTENT_ARR[*]} ]]; then
     for OUTPUT in "${NOT_FINDINGS_CONTENT_ARR[@]}"; do
+      OUTPUT="$(echo -e "$OUTPUT" | sed "s/</\&lt;/g")"
       if [[ "$OUTPUT" == *"0;34m+"*"0;36m"* ]] && [[ "$OUTPUT" != *"h2 id"* ]]; then
         echo -e "<h2 id=""${NOT_FINDINGS_FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$ABS_HTML_PATH""/collection.txt" >/dev/null
         i=$(( i+1 ))
@@ -150,6 +153,7 @@ build_collection_file(){
   rm "$ABS_HTML_PATH""/collection.txt"
 
   sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/collection.html"
+  sed -i 's/\&amp;lt;/\&lt;/g' "$ABS_HTML_PATH""/collection.html"
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/collection.html"
 }
 
@@ -174,6 +178,7 @@ build_report_files(){
   
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
+      FILE_LINE="$(echo -e "$FILE_LINE" | sed "s/</\&lt;/g")"
       if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
         SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
@@ -207,6 +212,7 @@ build_report_files(){
         SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
       else
         if [[ "$FILE_LINE" != *"entropy.png"* ]]; then
+          FILE_LINE="$(echo -e "$FILE_LINE" | sed "s/</\&lt;/g")"
           FILE_LINE="<span  style=\"white-space: pre\">$FILE_LINE</span>"
         fi
         echo "<br>$FILE_LINE" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
@@ -218,6 +224,7 @@ build_report_files(){
   rm "$ABS_HTML_PATH""/$FILENAME"
   
   sed -i 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/$HTML_FILE"
+  sed -i 's/\&amp;lt;/\&lt;/g' "$ABS_HTML_PATH""/$HTML_FILE"
   ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST//\//\\\/}
   sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$ABS_HTML_PATH""/$HTML_FILE"
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/$HTML_FILE"
