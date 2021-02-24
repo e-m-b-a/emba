@@ -52,7 +52,7 @@ build_index_file(){
   fi
   
   if test -f "$ABS_HTML_PATH""/collection.html"; then
-    echo "<li><a href=""$ABS_HTML_PATH""/collection.html"">""Nothing found""</a></li>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
+    echo "<li><a href=""collection.html"">""Nothing found""</a></li>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   fi
   
   echo "</ul></div><div class=\"main\">"| tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
@@ -166,7 +166,10 @@ build_report_files(){
   
   FILENAME=$(basename "$FILE")
   HTML_FILE="$(basename "${FILE%.txt}".html)"
-  HEADLINE=${FILENAME%.txt}
+  
+  HEADLINE="$( head -n 1 "$FILE" | sed 's/[+] //' )"
+  HEADLINE=${HEADLINE:26}
+  HEADLINE_SUB=${FILENAME%.txt}
  
   if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
     readarray -t STRING_LIST <"$FILE"
@@ -187,7 +190,7 @@ build_report_files(){
   fi
  
   echo "<header><div class=\"pictureleft\"><img width=\"100px\" heigth=\"100px\" src=\"./style/emba.svg\"></div>
-    <div class=\"headline\"><h1>$HEADLINE</h1></div><div class=\"pictureright\"><img width=\"100px\" heigth=\"100px\" src=\"./style/emba.svg\">
+    <div class=\"headline\"><h1>$HEADLINE</h1><h3>$HEADLINE_SUB</h3></div><div class=\"pictureright\"><img width=\"100px\" heigth=\"100px\" src=\"./style/emba.svg\">
     </div></header><div><ul>$SUB_MENU_LIST</ul></div><div class=\"main\">" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
  
   TOP10_FORMAT_COUNTER=0
