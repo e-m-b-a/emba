@@ -18,7 +18,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S25_kernel_check()
 {
@@ -36,6 +36,7 @@ S25_kernel_check()
         print_output "$(indent "$LINE")"
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
+        HTML_REPORT=1
         print_output "Kernel description:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
@@ -51,6 +52,7 @@ S25_kernel_check()
     fi
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]]  ; then
+    HTML_REPORT=1
     print_output "[*] Check kernel configuration ""$(print_path "$KERNEL_CONFIG" )"" via checksec.sh"
     print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
 
@@ -99,6 +101,7 @@ get_kernel_vulns()
   done
 
   if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
+    HTML_REPORT=1
     print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"
     print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
     # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
@@ -145,8 +148,10 @@ analyze_kernel_module()
         # kernel module is GPL/BSD license then not stripped is fine
         print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
       elif ! [[ $LICENSE =~ "License:" ]] ; then
+        HTML_REPORT=1
         print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
       else
+        HTML_REPORT=1
         # kernel module is NOT GPL license then not stripped is bad!
         print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
         KMOD_BAD=$((KMOD_BAD+1))
@@ -178,11 +183,15 @@ check_modprobe()
       done
       if [[ $MP_F_CHECK -eq 0 ]] ; then
         print_output "[-] No config files in modprobe.d directory found"
+      else
+        HTML_REPORT=1
       fi
     fi
   done
   if [[ $MP_CHECK -eq 0 ]] ; then
     print_output "[-] No modprobe.d directory found"
+  else
+    HTML_REPORT=1
   fi
 
 

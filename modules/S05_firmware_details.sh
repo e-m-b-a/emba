@@ -17,15 +17,25 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S05_firmware_details()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware and testing details"
 
-  print_output "[*] ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )"" files and ""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)"" directories detected."
+  local DETECTED_FILES
+  local DETECTED_DIR
+  
+  DETECTED_FILES=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )
+  DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)
+  
+  print_output "[*] ""$DETECTED_FILES"" files and ""$DETECTED_DIR"" directories detected."
 
+  if [[ "$DETECTED_FILES" -gt 0 ]] || [[ "$DETECTED_DIR" -gt 0 ]];then
+     HTML_REPORT=1
+  fi
+  
   LOG_FILE="$( get_log_file )"
 
   # excluded paths will be also printed

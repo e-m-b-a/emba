@@ -1,0 +1,99 @@
+/*
+
+emba - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2021 Siemens AG
+
+emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+emba is licensed under GPLv3
+
+Author(s): Stefan Haboeck
+
+*/
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+}
+
+body > header {
+  display:flex;
+  flex-flow:row nowrap;
+  background-color:#FAF9F4;
+}
+
+h1 {
+  text-align:center;
+}
+
+h3 {
+  text-align:center;
+}
+
+header {
+  align-items:center;
+}
+
+html {
+  height:100%;
+  font:16px "Courier New", Courier, monospace;
+}
+
+li {
+  text-align:center;
+  border-bottom:1px solid #555;
+}
+
+li a {
+  display:block;
+  color:#999;
+  text-decoration:none;
+  padding:8px 16px;
+}
+
+li a:hover {
+  background-color:#555;
+  color:#FFF;
+}
+
+ul {
+  list-style-type:none;
+  width:20%;
+  background-color:#333;
+  height:100%;
+  position:fixed;
+  overflow:auto;
+  border:1px solid #555;
+  font-size:13px;
+  margin:0;
+  padding:0;
+}
+
+.headline {
+  padding-left:5%;
+  padding-right:15%;
+  flex:3;
+}
+
+.main {
+  margin-left:20%;
+  margin-bottom:5%;
+  font-size:13px;
+  padding:1px 15px;
+}
+
+.pictureleft {
+  flex:2;
+  padding:.5% 5%;
+}
+
+.pictureright {
+  padding-left:5%;
+  flex:1;
+}
