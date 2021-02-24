@@ -14,86 +14,82 @@ Author(s): Stefan Haboeck
 
 */
 
-*{
-  box-sizing: border-box;
-}
-
-html {
-  height: 100%;
-  font: 16px "Courier New", Courier, monospace
+* {
+  box-sizing:border-box;
 }
 
 body {
-  margin: 0px;
+  margin:0;
 }
 
 body > header {
-  display: flex;
-  flex-flow: row nowrap;
-  background-color: #FAF9F4;
+  display:flex;
+  flex-flow:row nowrap;
+  background-color:#FAF9F4;
 }
-header{align-items:center;}
 
 h1 {
-  text-align: center
+  text-align:center;
 }
 
-.pictureleft {
-  padding: 0.5% 5%;
-  flex: 2;
+header {
+  align-items:center;
 }
 
-.headline {
-  padding-left: 5%;
-  padding-right: 15%;
-  flex: 3;
-}
-
-.pictureright {
-  padding-left: 5%;
-  flex: 1;
-}
-
-#entropypic:hover {
-  width: 740px;
-  height: 580px;
-}
-
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  width: 20%;
-  background-color: #333;
-  height: 100%;
-  position: fixed;
-  overflow: auto;
-  border: 1px solid #555;
-  font-size: 13px;
+html {
+  height:100%;
+  font:16px "Courier New", Courier, monospace;
 }
 
 li {
-  text-align: center;
-  border-bottom: 1px solid #555;
+  text-align:center;
+  border-bottom:1px solid #555;
 }
 
-
 li a {
-  display: block;
-  color: #999;
-  padding: 8px 16px;
-  text-decoration: none;
+  display:block;
+  color:#999;
+  text-decoration:none;
+  padding:8px 16px;
 }
 
 li a:hover {
-  background-color: #555;
-  color: white;
+  background-color:#555;
+  color:#FFF;
 }
 
+ul {
+  list-style-type:none;
+  width:20%;
+  background-color:#333;
+  height:100%;
+  position:fixed;
+  overflow:auto;
+  border:1px solid #555;
+  font-size:13px;
+  margin:0;
+  padding:0;
+}
+
+.headline {
+  padding-left:5%;
+  padding-right:15%;
+  flex:3;
+}
 
 .main {
   margin-left:20%;
-  margin-bottom: 5%;
+  margin-bottom:5%;
+  font-size:13px;
   padding:1px 15px;
-  font-size: 13px;
+}
+
+.pictureleft {
+  flex:2;
+  padding:.5% 5%;
+}
+
+.pictureright {
+  padding-left:5%;
+  flex:1;
 }
