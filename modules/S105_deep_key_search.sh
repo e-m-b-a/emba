@@ -24,7 +24,7 @@ S105_deep_key_search()
   module_title "Deep analysis of files for private keys"
 
   local QUERY_L
-  QUERY_L="$(config_list "$CONFIG_DIR""/deep_search.cfg" "")"
+  QUERY_L="$(config_list "$CONFIG_DIR""/deep_key_search.cfg" "")"
   readarray -t STRING_LIST < <(printf '%s' "$QUERY_L")
   for QUERY in "${STRING_LIST[@]}" ; do
     print_output "[*] Searching all files for '""$QUERY""' ... this may take a while!"
