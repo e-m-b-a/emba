@@ -16,7 +16,7 @@ Author(s): Michael Messner, Pascal Eckmann
 ### An analyzer for Linux-based firmware of embedded devices
 
 <p align="center">
-  <img src="./helpers/emba.png" width="200"/>
+  <img src="./helpers/emba.svg" width="200"/>
 </p>
 <p align="center">
   <a href="https://github.com/koalaman/shellcheck"><img src="https://github.com/e-m-b-a/emba/workflows/ShellCheck/badge.svg?branch=master" /></a>
