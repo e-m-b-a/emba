@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S85_ssh_check()
 {
@@ -43,6 +43,7 @@ search_ssh_files()
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       fi
     done
+    HTML_REPORT=1
   else
     print_output "[-] No ssh configuration files found"
   fi
@@ -63,6 +64,8 @@ check_squid()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No possible squid executable found"
+  else
+    HTML_REPORT=1
   fi
 
   CHECK=0
@@ -89,5 +92,7 @@ check_squid()
   fi
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No squid configuration found"
+  else
+    HTML_REPORT=1
   fi
 }

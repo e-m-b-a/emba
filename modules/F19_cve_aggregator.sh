@@ -93,6 +93,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//(gdb)/}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
+    # alsactl, amixer -> alsa
+    VERSION_lower="${VERSION_lower//alsactl/alsa}"
+    VERSION_lower="${VERSION_lower//amixer/alsa}"
     #zic.c
     VERSION_lower="${VERSION_lower//zic\.c/zic}"
     #bzip2, a block-sorting file compressor.  Version 1.0.6, 
@@ -152,6 +155,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
+    #libpcre.1.2.3
+    VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
+    VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)

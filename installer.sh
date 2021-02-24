@@ -499,6 +499,7 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+
 # binwalk
 
 INSTALL_APP_LIST=()
@@ -600,20 +601,42 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
-# aha for html generation - future extension of emba
-#echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
-#if ! [[ -f "external/aha" ]] ; then
-#  apt-get install make
-#  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
-#  unzip ./external/aha-master.zip -d ./external
-#  rm external/aha-master.zip
-#  cd ./external/aha-master || exit 1
-#  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
-#  make
-#  cd ../.. || exit 1
-#  mv "external/aha-master/aha" "external/aha"
-#  rm -R external/aha-master
-#else
-#  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
-#fi
 
+# aha for html generation
+INSTALL_APP_LIST=()
+echo -e "\\nTo use the emba report generator, we need a html file generator. make will be needed to compile aha."
+print_tool_info "make" 0
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and compile aha (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""aha (if not already on the system) will be downloaded and be compiled!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
+    if ! [[ -f "external/aha" ]] ; then
+      for APP in "${INSTALL_APP_LIST[@]}" ; do
+        apt-get install "$APP" -y
+      done
+      wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
+      unzip ./external/aha-master.zip -d ./external
+      rm external/aha-master.zip
+      cd ./external/aha-master || exit 1
+      echo -e "$ORANGE""$BOLD""Compile aha""$NC"
+      make
+      cd ../.. || exit 1
+      mv "external/aha-master/aha" "external/aha"
+      rm -R external/aha-master
+      
+      if ! [[ -f "external/aha" ]] ; then
+         echo -e "$MAGENTA""$BOLD""aha installation failed! You can not use the emba report manager""$NC"
+      else
+         echo -e "$GREEN""aha has been installed""$NC"
+      fi
+    else
+      echo -e "$ORANGE""aha is already installed""$NC"
+    fi      
+  ;;
+esac

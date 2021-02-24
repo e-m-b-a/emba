@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S75_network_check()
 {
@@ -50,6 +50,8 @@ check_resolv()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No or empty network configuration found"
+  else
+    HTML_REPORT=1
   fi
 }
 
@@ -68,6 +70,8 @@ check_iptables()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No iptables configuration found"
+  else
+    HTML_REPORT=1
   fi
 }
 
@@ -94,6 +98,8 @@ check_snmp()
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No SNMP configuration found"
+  else
+    HTML_REPORT=1
   fi
 }
 
@@ -106,6 +112,7 @@ check_network_configs()
 
   if [[ "${NETWORK_CONFS[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#NETWORK_CONFS[@]} -gt 0 ]] ; then
+    HTML_REPORT=1
     print_output "[+] Found ""${#NETWORK_CONFS[@]}"" possible network configs:"
     for LINE in "${NETWORK_CONFS[@]}" ; do
       #if [[ -f "$LINE" ]] ; then

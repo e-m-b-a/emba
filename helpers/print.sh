@@ -360,6 +360,8 @@ print_help()
   echo -e "$CYAN""-E""$NC""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
   echo -e "$CYAN""-D""$NC""                Runs emba in docker container"
   echo -e "$CYAN""-i""$NC""                Ignores log path check"
+  echo -e "\\nWeb reporter"
+  echo -e "$CYAN""-W""$NC""                Activates web report creation in log path (overwrites -z)"
   echo -e "\\nDependency check"
   echo -e "$CYAN""-d""$NC""                Only checks dependencies"
   echo -e "$CYAN""-F""$NC""                Checks dependencies but ignore errors"

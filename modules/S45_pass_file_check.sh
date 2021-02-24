@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S45_pass_file_check()
 {
@@ -31,7 +31,7 @@ S45_pass_file_check()
 
   if [[ "${PASSWD_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#PASSWD_STUFF[@]}" -ne 0 ]] ; then
-
+    HTML_REPORT=1
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     local SUDOERS

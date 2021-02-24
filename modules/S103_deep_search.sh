@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S103_deep_search()
 {
@@ -60,6 +60,8 @@ S103_deep_search()
     fi
     echo
   done
+
+  HTML_REPORT=1
 
   local OCC_LIST
   for I in "${!PATTERN_LIST[@]}"; do
