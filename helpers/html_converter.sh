@@ -57,13 +57,10 @@ build_index_file(){
   
   echo "</ul></div><div class=\"main\">"| tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   if [[ ${FILENAME%.txt} != "f"* ]]; then
-    echo "<h2>[[0;34m+[0m] [0;36m[1mGeneral information[0m[1m[0m</h2>
-      File: ""$(echo -e "$(basename "$FIRMWARE_PATH")" | sed "s/</\&lt;/g")""<br>
-      Architecture: ""$(echo -e "$ARCH" | sed "s/</\&lt;/g")""<br>
-      Date: $(date) <br>
-      Duration time: $(date -d@$SECONDS -u +%H:%M:%S) <br>
-      emba Command: ""$(echo -e "$EMBACOMMAND" | sed "s/</\&lt;/g")""<br>
-      " | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
+    FW_PATH_PRINT="$(echo -e "$(basename "$FIRMWARE_PATH" )" | sed 's/</\&lt;/g' )"
+    ARCH_PRINT="$(echo -e "$ARCH" | sed 's/</\&lt;/g' )"
+    EMBACOMMAND_PRINT="$(echo -e "$EMBACOMMAND" | sed 's/</\&lt;/g' )"
+    echo "<h2>[[0;34m+[0m] [0;36m[1mGeneral information[0m[1m[0m</h2>File: ""$FW_PATH_PRINT""<br>Architecture: ""$ARCH_PRINT""<br>""Date: $(date) <br>""Duration time: ""$(date -d@$SECONDS -u +%H:%M:%S)"" <br>emba Command: ""$EMBACOMMAND_PRINT"" <br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   fi
      	
   i=0
