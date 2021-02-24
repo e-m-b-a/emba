@@ -234,7 +234,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//beceem\ cm\ server/beceem}"
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
     # CLIENT\ libcurl\
-    VERSION_lower="${VERSION_lower//client\ libcurl/libcurl }"
+    VERSION_lower="${VERSION_lower//client\ libcurl/libcurl}"
     #Intel SDK for UPnP devices /1.2
     VERSION_lower="${VERSION_lower//intel\ sdk\ for\ upnp\ devices\ \ /portable_sdk_for_upnp\ }"
     # busybox 1.00-pre2 -> we ignore the pre
