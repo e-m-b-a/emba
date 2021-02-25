@@ -403,16 +403,16 @@ aggregate_versions() {
 generate_special_log() {
   sub_module_title "Generate special log files."
 
-  readarray -t FILES < <(find "$LOG"/aggregator/* -type f)
+  readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
   for FILE in "${FILES[@]}"; do
-    NAME=$(echo "$FILE" | cut -d/ -f3 | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
+    NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
     print_output "[*] CVE details for ${GREEN}$NAME${NC}:"
-    echo -e "[*] CVE details for ${GREEN}$NAME${NC}:" >> "$LOG"/aggregator/CVE_minimal.txt
-    grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | tee -a "$LOG"/aggregator/CVE_minimal.txt
+    echo -e "[*] CVE details for ${GREEN}$NAME${NC}:" >> "$LOG_DIR"/aggregator/CVE_minimal.txt
+    grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | tee -a "$LOG_DIR"/aggregator/CVE_minimal.txt
   done
 
   print_output "[*] Generate minimal exploit log file in $LOG/aggregator/exploits-overview.txt"
-  grep "Exploit\ available" "$LOG"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | tee -a "$LOG"/aggregator/exploits-overview.txt
+  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | tee -a "$LOG_DIR"/aggregator/exploits-overview.txt
 }
 
 generate_cve_details() {
