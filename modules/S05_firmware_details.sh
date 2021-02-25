@@ -27,8 +27,8 @@ S05_firmware_details()
   local DETECTED_FILES
   local DETECTED_DIR
   
-  DETECTED_FILES=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l )
-  DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d | wc -l)
+  DETECTED_FILES=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )
+  DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)
   
   print_output "[*] ""$DETECTED_FILES"" files and ""$DETECTED_DIR"" directories detected."
 

@@ -47,7 +47,8 @@ S110_yara_check()
         fi
       fi
     done
-    print_output "[*] Found $YARA_CNT yara rule matches."
+    print_output ""
+    print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches."
 
     if [[ $CHECK -eq 0 ]] ; then print_output "[-] No code patterns found with yara." ; fi
     # do not remove this to run multiple instances of emba

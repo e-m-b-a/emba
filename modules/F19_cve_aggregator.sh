@@ -58,6 +58,11 @@ F19_cve_aggregator() {
     aggregate_versions
     
     # Mongo DB is running on Port 27017. If not we can't check CVEs
+    if [[ $(netstat -ant | grep -c 27017) -eq 0 ]]; then
+      print_output "[*] Trying to start the vulnerability database"
+      systemctl start mongod
+    fi
+
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
       generate_cve_details
     else
@@ -86,6 +91,11 @@ prepare_version_data() {
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
     VERSION_lower="${VERSION_lower//(gdb)/}"
+    #udevadm -> systemd
+    VERSION_lower="${VERSION_lower//udevadm/systemd}"
+    # alsactl, amixer -> alsa
+    VERSION_lower="${VERSION_lower//alsactl/alsa}"
+    VERSION_lower="${VERSION_lower//amixer/alsa}"
     #zic.c
     VERSION_lower="${VERSION_lower//zic\.c/zic}"
     #bzip2, a block-sorting file compressor.  Version 1.0.6, 
@@ -145,6 +155,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
+    #libpcre.1.2.3
+    VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
+    VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
@@ -158,6 +171,8 @@ prepare_version_data() {
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/rpcinfo\ (.*)/rpcinfo/')"
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ perl\ ([0-9]),\ ([0-9][0-9]),\ sub([0-9])/perl\ \1\.\2\.\3/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
@@ -218,10 +233,8 @@ prepare_version_data() {
     #Beceem\ CM\ Server\
     VERSION_lower="${VERSION_lower//beceem\ cm\ server/beceem}"
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
-    # loadkeys von kbd
-    VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/loadkeys}"
     # CLIENT\ libcurl\
-    VERSION_lower="${VERSION_lower//client\ libcurl/libcurl }"
+    VERSION_lower="${VERSION_lower//client\ libcurl/libcurl}"
     #Intel SDK for UPnP devices /1.2
     VERSION_lower="${VERSION_lower//intel\ sdk\ for\ upnp\ devices\ \ /portable_sdk_for_upnp\ }"
     # busybox 1.00-pre2 -> we ignore the pre
@@ -275,6 +288,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ tar)/gnu:tar/')"
     VERSION_lower="${VERSION_lower//gnu\ sed/gnu:sed}"
     VERSION_lower="${VERSION_lower//gnu\ make/gnu:make}"
+    VERSION_lower="${VERSION_lower//gnu\ nano/gnu:nano}"
+    VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/kbd-project:kbd}"
+    VERSION_lower="${VERSION_lower//loadkeys\ from\ kbd/kbd-project:kbd}"
+    VERSION_lower="${VERSION_lower//kbd_mode\ from\ kbd/kbd-project:kbd}"
     # ncurses -> gnu:ncurses
     VERSION_lower="${VERSION_lower//ncurses/gnu:ncurses}"
     #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
@@ -357,6 +374,8 @@ aggregate_versions() {
   print_output ""
   VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+    # remove color codes:
+    VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
     prepare_version_data
     # now we should have the name and the version in the first two coloumns:
     VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"

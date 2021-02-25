@@ -291,8 +291,18 @@ dependency_check()
       echo -e "$GREEN""ok""$NC"
       print_output "    fact-extractor - \\c" "no_log"
       if docker images | grep -q fact_extractor ; then
-        echo -e "$GREEN""ok""$NC"
-        FACT_EXTRACTOR=1
+        if [[ -f "./external/extract.py" ]] ; then
+          echo -e "$GREEN""ok""$NC"
+          FACT_EXTRACTOR=1
+        else
+          echo -e "$RED""not ok""$NC"
+          echo -e "$RED""    missing fact-extractor startup script ... check your installation""$NC"
+          echo -e "$RED""      https://github.com/fkie-cad/fact_extractor""$NC"
+          echo -e "$RED""    you can run the installer.sh script or pull it manually:""$NC"
+          echo -e "$RED""      cd ./external""$NC"
+          echo -e "$RED""      wget https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py""$NC"
+          echo -e "$RED""      chmod +x extract.py""$NC"
+        fi
       else
         echo -e "$RED""not ok""$NC"
         echo -e "$RED""    missing docker image fact-extractor ... check your installation""$NC"

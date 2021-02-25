@@ -71,6 +71,7 @@ main()
   export USE_DOCKER=0
   export IN_DOCKER=0
   export FACT_EXTRACTOR=0
+  export DEEP_EXTRACTOR=0
   export FORCE=0
   export LOG_GREP=0
   export HTML=0
@@ -104,7 +105,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -161,6 +162,9 @@ main()
         ;;
       s)
         export SHORT_PATH=1
+        ;;
+      x)
+        export DEEP_EXTRACTOR=1
         ;;
       W)
         export HTML=1
@@ -280,8 +284,8 @@ main()
     fi
 
     OPTIND=1
-    ARGS="" 
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WzZ: OPT ; do
+    ARGS=""
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -379,6 +383,10 @@ main()
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
         architecture_dep_check
+      fi
+
+      if [[ -n "${#ROOT_PATH[@]}" ]]; then
+        detect_root_dir_helper "$FIRMWARE_PATH"
       fi
 
       check_firmware
