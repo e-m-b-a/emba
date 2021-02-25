@@ -47,6 +47,7 @@ os_identification() {
     COUNTER_VxWorks_tmp="$(strings "$UFILE" 2>/dev/null | grep -c VxWorks)"
     COUNTER_FreeRTOS_tmp="$(strings "$UFILE" 2>/dev/null | grep -c FreeRTOS)"
     COUNTER_eCos_tmp="$(strings "$UFILE" 2>/dev/null | grep -c eCos)"
+    # Siemens SIPROTEC devices
     COUNTER_SIPROTEC_tmp="$(strings "$UFILE" 2>/dev/null | grep -i -c siprotec)"
     # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
     COUNTER_ADONIS_tmp="$(strings "$UFILE" 2>/dev/null | grep -c ADONIS)"
@@ -71,30 +72,23 @@ os_identification() {
   COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW))
   echo "." | tr -d "\n"
 
-  #COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c FreeRTOS 2> /dev/null)"
-  #echo "." | tr -d "\n"
   COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeRTOS)"
   echo "." | tr -d "\n"
   COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW))
   echo "." | tr -d "\n"
 
-  #COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
-  #echo "." | tr -d "\n"
   COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c eCos)"
   echo "." | tr -d "\n"
   COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW))
   echo "." | tr -d "\n"
 
-  #COUNTER_ADONIS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c ADONIS 2> /dev/null)"
-  #echo "." | tr -d "\n"
+  # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
   COUNTER_ADONIS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c ADONIS)"
   echo "." | tr -d "\n"
   COUNTER_ADONIS=$((COUNTER_ADONIS+COUNTER_ADONIS_FW))
   echo "." | tr -d "\n"
 
   # Siemens SIPROTEC devices
-  #COUNTER_SIPROTEC="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c siprotec 2> /dev/null)"
-  #echo "." | tr -d "\n"
   COUNTER_SIPROTEC_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c siprotec)"
   echo "." | tr -d "\n"
   COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_FW))
