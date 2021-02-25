@@ -32,55 +32,75 @@ P07_firmware_bin_base_analyzer() {
 os_identification() {
   sub_module_title "OS detection"
 
+
   print_output "[*] Initial OS detection running " | tr -d "\n"
   echo "." | tr -d "\n"
 
-  # We can improve this search stuff a lot in the future:
-  COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c Linux 2> /dev/null)"
+  export UNIQUE_FILES
+  # to speed up things we generate a unique file array to only test a file once
+  mapfile -t UNIQUE_FILES < <(find "$OUTPUT_DIR" -type f -exec md5sum {} \; | sort -k1,1 -u | cut -d\  -f3)
   echo "." | tr -d "\n"
-  COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" | grep -c Linux 2> /dev/null)"
+
+  # We can improve this search stuff a lot in the future:
+  for UFILE in "${UNIQUE_FILES[@]}"; do
+    COUNTER_Linux_tmp="$(strings "$UFILE" 2>/dev/null | grep -c Linux)"
+    COUNTER_VxWorks_tmp="$(strings "$UFILE" 2>/dev/null | grep -c VxWorks)"
+    COUNTER_FreeRTOS_tmp="$(strings "$UFILE" 2>/dev/null | grep -c FreeRTOS)"
+    COUNTER_eCos_tmp="$(strings "$UFILE" 2>/dev/null | grep -c eCos)"
+    COUNTER_SIPROTEC_tmp="$(strings "$UFILE" 2>/dev/null | grep -i -c siprotec)"
+    # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
+    COUNTER_ADONIS_tmp="$(strings "$UFILE" 2>/dev/null | grep -c ADONIS)"
+
+    COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_tmp))
+    COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_tmp))
+    COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_tmp))
+    COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_tmp))
+    COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_tmp))
+    COUNTER_ADONIS=$((COUNTER_ADONIS+COUNTER_ADONIS_tmp))
+    echo "." | tr -d "\n"
+  done
+
+  echo "." | tr -d "\n"
+  COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c Linux)"
   echo "." | tr -d "\n"
   COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW))
   echo "." | tr -d "\n"
 
-  COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c VxWorks 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" | grep -c VxWorks 2> /dev/null)"
+  COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c VxWorks)"
   echo "." | tr -d "\n"
   COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW))
   echo "." | tr -d "\n"
 
-  COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c FreeRTOS 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" | grep -c FreeRTOS 2> /dev/null)"
+  #COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c FreeRTOS 2> /dev/null)"
+  #echo "." | tr -d "\n"
+  COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeRTOS)"
   echo "." | tr -d "\n"
   COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW))
   echo "." | tr -d "\n"
 
-  COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" | grep -c eCos 2> /dev/null)"
+  #COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
+  #echo "." | tr -d "\n"
+  COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c eCos)"
   echo "." | tr -d "\n"
   COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW))
   echo "." | tr -d "\n"
 
-  # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
-  COUNTER_ADONIS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c ADONIS 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_ADONIS_FW="$(strings "$FIRMWARE_PATH" | grep -c ADONIS 2> /dev/null)"
+  #COUNTER_ADONIS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c ADONIS 2> /dev/null)"
+  #echo "." | tr -d "\n"
+  COUNTER_ADONIS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c ADONIS)"
   echo "." | tr -d "\n"
   COUNTER_ADONIS=$((COUNTER_ADONIS+COUNTER_ADONIS_FW))
   echo "." | tr -d "\n"
 
   # Siemens SIPROTEC devices
-  COUNTER_SIPROTEC="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c siprotec 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_SIPROTEC_FW="$(strings "$FIRMWARE_PATH" | grep -i -c siprotec 2> /dev/null)"
+  #COUNTER_SIPROTEC="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c siprotec 2> /dev/null)"
+  #echo "." | tr -d "\n"
+  COUNTER_SIPROTEC_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c siprotec)"
   echo "." | tr -d "\n"
   COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_FW))
   echo "." | tr -d "\n"
 
-  print_output ""
+  print_output "\\n"
   print_output "[*] Trying to identify a Linux root path in $(print_path "$OUTPUT_DIR")"
   # just to check if there is somewhere a linux filesystem in the extracted stuff
   # emba is able to handle the rest
@@ -90,7 +110,7 @@ os_identification() {
   if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC)) -gt 0 ]] ; then
     print_output ""
     print_output "$(indent "$(orange "Operating system detection:")")"
-    if [[ $COUNTER_VxWorks -gt 10 ]] ; then print_output "$(indent "$(orange "VxWorks detected         ""$COUNTER_VxWorks")")"; fi
+    if [[ $COUNTER_VxWorks -gt 10 ]] ; then print_output "$(indent "$(orange "VxWorks detected          ""$COUNTER_VxWorks")")"; fi
     if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected         ""$COUNTER_FreeRTOS")")"; fi
     if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected             ""$COUNTER_eCos")")"; fi
     if [[ $COUNTER_Linux -gt 5 && $LINUX_PATH_COUNTER -gt 1 ]] ; then 

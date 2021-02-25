@@ -58,13 +58,14 @@ F19_cve_aggregator() {
     aggregate_versions
     
     # Mongo DB is running on Port 27017. If not we can't check CVEs
-    if [[ $(netstat -ant | grep -c 27017) -eq 0 ]]; then
+    if [[ $(netstat -ant | grep -c 27017) -eq 0 && $IN_DOCKER -eq 0 ]]; then
       print_output "[*] Trying to start the vulnerability database"
       systemctl start mongod
     fi
 
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
       generate_cve_details
+      generate_special_log
     else
       print_output "[-] MongoDB not running on port 27017."
       print_output "[-] CVE checks not possible!"
@@ -397,6 +398,21 @@ aggregate_versions() {
       print_output "[-] No Version details found."
   fi
   print_output ""
+}
+
+generate_special_log() {
+  sub_module_title "Generate special log files."
+
+  readarray -t FILES < <(find "$LOG"/aggregator/* -type f)
+  for FILE in "${FILES[@]}"; do
+    NAME=$(echo "$FILE" | cut -d/ -f3 | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
+    print_output "[*] CVE details for ${GREEN}$NAME${NC}:"
+    echo -e "[*] CVE details for ${GREEN}$NAME${NC}:" >> "$LOG"/aggregator/CVE_minimal.txt
+    grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | tee -a "$LOG"/aggregator/CVE_minimal.txt
+  done
+
+  print_output "[*] Generate minimal exploit log file in $LOG/aggregator/exploits-overview.txt"
+  grep "Exploit\ available" "$LOG"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | tee -a "$LOG"/aggregator/exploits-overview.txt
 }
 
 generate_cve_details() {

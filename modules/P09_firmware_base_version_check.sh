@@ -20,7 +20,7 @@ P09_firmware_base_version_check() {
 
   declare -a VERSIONS_DETECTED
 
-  print_output "[*] Initial version detection running " | tr -d "\n"
+  print_output "[*] Initial version detection running on $ORANGE${#UNIQUE_FILES[@]}$NC files ..." | tr -d "\n"
   while read -r VERSION_LINE; do
     echo "." | tr -d "\n"
 
@@ -41,32 +41,20 @@ P09_firmware_base_version_check() {
       VERSIONS_DETECTED+=("$VERSION_FINDER")
       echo "." | tr -d "\n"
 
-      # if we are using docker the module s09 will do the check within the dockered environment
-      if [[ $DOCKER -ne 1 ]] ; then
-        VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      for UFILE in "${UNIQUE_FILES[@]}"; do
+        VERSION_FINDER=$(strings "$UFILE" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          UFILE_NAME=$(basename "$UFILE")
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in firmware file $ORANGE$UFILE_NAME$GREEN."
+        fi
         VERSIONS_DETECTED+=("$VERSION_FINDER")
-        echo "." | tr -d "\n"
-      fi
-
+      done
+      echo "." | tr -d "\n"
     fi
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
   echo "." | tr -d "\n"
 
-  echo
-  for VERSION_LINE in "${VERSIONS_DETECTED[@]}"; do
-    if [[ -n $VERSION_LINE ]]; then
-      if [ "$VERSION_LINE" != "$VERS_LINE_OLD" ]; then
-        VERS_LINE_OLD="$VERSION_LINE"
-
-        # we do not deal with output formatting the usual way -> it destroys our current aggregator
-        # we have to deal with it in the future
-        FORMAT_LOG_BAK="$FORMAT_LOG"
-        FORMAT_LOG=0
-        print_output "[+] Version information found ${RED}""$VERSION_LINE""${NC}${GREEN} in firmware blob."
-        FORMAT_LOG="$FORMAT_LOG_BAK"
-      fi
-    fi
-  done
   export TESTING_DONE=1
 }
