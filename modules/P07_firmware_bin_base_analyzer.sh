@@ -32,63 +32,49 @@ P07_firmware_bin_base_analyzer() {
 os_identification() {
   sub_module_title "OS detection"
 
-
   print_output "[*] Initial OS detection running " | tr -d "\n"
   echo "." | tr -d "\n"
 
-  export UNIQUE_FILES
-  # to speed up things we generate a unique file array to only test a file once
-  mapfile -t UNIQUE_FILES < <(find "$OUTPUT_DIR" -type f -exec md5sum {} \; | sort -k1,1 -u | cut -d\  -f3)
   echo "." | tr -d "\n"
-
-  # We can improve this search stuff a lot in the future:
-  for UFILE in "${UNIQUE_FILES[@]}"; do
-    COUNTER_Linux_tmp="$(strings "$UFILE" 2>/dev/null | grep -c Linux)"
-    COUNTER_VxWorks_tmp="$(strings "$UFILE" 2>/dev/null | grep -c VxWorks)"
-    COUNTER_FreeRTOS_tmp="$(strings "$UFILE" 2>/dev/null | grep -c FreeRTOS)"
-    COUNTER_eCos_tmp="$(strings "$UFILE" 2>/dev/null | grep -c eCos)"
-    # Siemens SIPROTEC devices
-    COUNTER_SIPROTEC_tmp="$(strings "$UFILE" 2>/dev/null | grep -i -c siprotec)"
-    # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
-    COUNTER_ADONIS_tmp="$(strings "$UFILE" 2>/dev/null | grep -c ADONIS)"
-
-    COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_tmp))
-    COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_tmp))
-    COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_tmp))
-    COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_tmp))
-    COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_tmp))
-    COUNTER_ADONIS=$((COUNTER_ADONIS+COUNTER_ADONIS_tmp))
-    echo "." | tr -d "\n"
-  done
-
+  COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c Linux 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c Linux)"
   echo "." | tr -d "\n"
   COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW))
   echo "." | tr -d "\n"
 
+  COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c VxWorks 2> /dev/null)"
+  echo "." | tr -d "\n"
   COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c VxWorks)"
   echo "." | tr -d "\n"
   COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW))
   echo "." | tr -d "\n"
 
+  COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeRTOS 2> /dev/null)"
+  echo "." | tr -d "\n"
   COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeRTOS)"
   echo "." | tr -d "\n"
   COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW))
   echo "." | tr -d "\n"
 
+  COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c eCos 2> /dev/null)"
+  echo "." | tr -d "\n"
   COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c eCos)"
   echo "." | tr -d "\n"
   COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW))
   echo "." | tr -d "\n"
 
   # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
+  COUNTER_ADONIS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c ADONIS 2> /dev/null)"
+  echo "." | tr -d "\n"
   COUNTER_ADONIS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c ADONIS)"
   echo "." | tr -d "\n"
   COUNTER_ADONIS=$((COUNTER_ADONIS+COUNTER_ADONIS_FW))
   echo "." | tr -d "\n"
 
   # Siemens SIPROTEC devices
+  COUNTER_SIPROTEC="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c siprotec 2> /dev/null)"
+  echo "." | tr -d "\n"
   COUNTER_SIPROTEC_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c siprotec)"
   echo "." | tr -d "\n"
   COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_FW))

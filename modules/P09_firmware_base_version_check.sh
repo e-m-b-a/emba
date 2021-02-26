@@ -33,23 +33,34 @@ P09_firmware_base_version_check() {
       echo "." | tr -d "\n"
 
       # currently we only have binwalk files but sometimes we can find kernel version information or something else in it
-      VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -E "$VERSION_IDENTIFIER" {} \; 2> /dev/null | head -1 2> /dev/null)
-      VERSIONS_DETECTED+=("$VERSION_FINDER")
-      echo "." | tr -d "\n"
+      #VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -E "$VERSION_IDENTIFIER" {} \; 2>/dev/null | head -1 2>/dev/null)
+      VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$LOG_DIR"/p05_firmware_bin_extractor.txt 2>/dev/null | head -1 2>/dev/null)
 
-      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-      VERSIONS_DETECTED+=("$VERSION_FINDER")
-      echo "." | tr -d "\n"
-
-      for UFILE in "${UNIQUE_FILES[@]}"; do
-        VERSION_FINDER=$(strings "$UFILE" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-        if [[ -n $VERSION_FINDER ]]; then
-          echo ""
-          UFILE_NAME=$(basename "$UFILE")
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in firmware file $ORANGE$UFILE_NAME$GREEN."
-        fi
+      if [[ -n $VERSION_FINDER ]]; then
+        echo ""
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extraction logs."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
-      done
+      fi
+
+      echo "." | tr -d "\n"
+
+      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
+
+      if [[ -n $VERSION_FINDER ]]; then
+        echo ""
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
+        VERSIONS_DETECTED+=("$VERSION_FINDER")
+      fi
+
+      echo "." | tr -d "\n"
+
+      VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+
+      if [[ -n $VERSION_FINDER ]]; then
+        echo ""
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files."
+        VERSIONS_DETECTED+=("$VERSION_FINDER")
+      fi
       echo "." | tr -d "\n"
     fi
 
