@@ -20,7 +20,7 @@ P09_firmware_base_version_check() {
 
   declare -a VERSIONS_DETECTED
 
-  print_output "[*] Initial version detection running on $ORANGE${#UNIQUE_FILES[@]}$NC files ..." | tr -d "\n"
+  print_output "[*] Initial version detection running on all firmware files ..." | tr -d "\n"
   while read -r VERSION_LINE; do
     echo "." | tr -d "\n"
 
