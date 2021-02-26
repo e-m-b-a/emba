@@ -411,16 +411,21 @@ generate_special_log() {
     CVEs=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
     if [[ -n $CVEs ]]; then
       print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
+      print_output "$CVEs"
       echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$LOG_DIR"/aggregator/CVE_minimal.txt
-      echo "$CVEs" | tee -a "$LOG_DIR"/aggregator/CVE_minimal.txt
+      echo "$CVEs" >> "$LOG_DIR"/aggregator/CVE_minimal.txt
       print_output ""
     fi
   done
 
   print_output ""
   print_output "[*] Generate minimal exploit summary file in $LOG_DIR/aggregator/exploits-overview.txt:\\n"
+  mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
+  for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
+    print_output "$EXPLOIT_"
+  done
   echo -e "\n[*] Exploit summary:" >> "$LOG_DIR"/aggregator/exploits-overview.txt
-  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | tee -a "$LOG_DIR"/aggregator/exploits-overview.txt
+  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$LOG_DIR"/aggregator/exploits-overview.txt
 }
 
 generate_cve_details() {
