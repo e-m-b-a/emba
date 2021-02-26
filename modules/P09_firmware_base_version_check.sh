@@ -44,15 +44,17 @@ P09_firmware_base_version_check() {
 
       echo "." | tr -d "\n"
 
-      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
+      if [[ $FIRMWARE -eq 0 ]]; then
+        VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
 
-      if [[ -n $VERSION_FINDER ]]; then
-        echo ""
-        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
-        VERSIONS_DETECTED+=("$VERSION_FINDER")
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
+          VERSIONS_DETECTED+=("$VERSION_FINDER")
+        fi
+        echo "." | tr -d "\n"
       fi
 
-      echo "." | tr -d "\n"
 
       VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
 
