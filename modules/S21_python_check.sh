@@ -24,6 +24,8 @@ S21_python_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check python scripts with pylint"
 
+  LOG_FILE="$( get_log_file )"
+
   S21_PY_VULNS=0
   S21_PY_SCRIPTS=0
 
@@ -62,6 +64,7 @@ S21_python_check()
     done
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S21_PY_SCRIPTS""""$GREEN"" python files:""$NC""\\n"
+    echo -e "\\n[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS" >> "$LOG_FILE"
 
     # we just print one issue per issue type:
     # W1505: Using deprecated method assert_() (deprecated-method)

@@ -23,8 +23,24 @@ F50_base_aggregator() {
   BIN_CHECK_LOG="s10_binaries_check.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   OS_DETECT_LOG="p07_firmware_bin_base_analyzer.txt"
+  S20_LOG="s20_shell_check.txt"
+  S21_LOG="s21_python_check.txt"
+  S30_LOG="s30_version_vulnerability_check.txt"
+  S45_LOG="s45_pass_file_check.txt"
+  S60_LOG="s60_cert_file_check.txt"
+  S95_LOG="s95_interesting_binaries_check.txt"
+  S108_LOG="s108_linux_common_file_checker.txt"
+  S110_LOG="s110_yara_check.txt"
   LOG_FILE="$( get_log_file )"
 
+  get_data
+  output_overview
+  output_details
+  output_binaries
+  output_cve_exploits
+}
+
+output_overview() {
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""""$FW_VENDOR"""
   fi  
@@ -81,6 +97,10 @@ F50_base_aggregator() {
 
   print_output "\\n-----------------------------------------------------------------\\n"
 
+}
+
+output_details() {
+
   print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
   if [[ "${#MOD_DATA[@]}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""${#MOD_DATA[@]}""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
@@ -120,6 +140,9 @@ F50_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$EMUL""""$GREEN"" successful emulated processes.""$NC"""
   fi
 
+}
+
+output_binaries() {
 
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
     print_output "\\n-----------------------------------------------------------------\\n"
@@ -222,6 +245,10 @@ F50_base_aggregator() {
     fi  
   fi 
 
+}
+
+output_cve_exploits() {
+
   print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
     print_output "\\n-----------------------------------------------------------------\\n"
@@ -245,3 +272,36 @@ F50_base_aggregator() {
   fi
   print_output "\\n-----------------------------------------------------------------"
 }
+
+get_data() {
+  if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
+    S30_VUL_COUNTER=$(grep "[*] Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
+    S20_SHELL_VULNS=$(grep "[*] Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
+    S20_SCRIPTS=$(grep "[*] Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S21_LOG" ]]; then
+    S21_PY_VULNS=$(grep "[*] Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f2)
+    S21_PY_SCRIPTS=$(grep "[*] Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S60_LOG" ]]; then
+    CERT_CNT=$(grep "[*] Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2)
+    CERT_OUT_CNT=$(grep "[*] Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
+    YARA_CNT=$(grep "[*] Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
+    PASS_FILES_FOUND=$(grep "[*] Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
+    FILE_COUNTER=$(grep "[*] Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)
+    FILE_COUNTER_ALL=$(grep "[*] Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
+    INT_COUNT=$(grep "[*] Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
+    POST_COUNT=$(grep "[*] Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
+  fi
+}
+

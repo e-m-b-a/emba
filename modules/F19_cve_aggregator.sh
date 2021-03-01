@@ -55,16 +55,8 @@ F19_cve_aggregator() {
       KERNELV=1
     fi
 
-    if [[ $THREADED -eq 1 ]]; then
-      get_firmware_base_version_check &
-      WAIT_PIDS+=( "$!" )
-      get_usermode_emulator &
-      WAIT_PIDS+=( "$!" )
-      wait_for_pid
-    else
-      get_firmware_base_version_check
-      get_usermode_emulator
-    fi
+    get_firmware_base_version_check
+    get_usermode_emulator
 
     aggregate_versions
     
@@ -75,16 +67,8 @@ F19_cve_aggregator() {
     fi
 
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
-      if [[ $THREADED -eq 1 ]]; then
-        generate_cve_details &
-        WAIT_PIDS+=( "$!" )
-        generate_special_log &
-        WAIT_PIDS+=( "$!" )
-        wait_for_pid
-      else
-        generate_cve_details
-        generate_special_log
-      fi
+      generate_cve_details
+      generate_special_log
     else
       print_output "[-] MongoDB not running on port 27017."
       print_output "[-] CVE checks not possible!"
@@ -432,7 +416,7 @@ generate_special_log() {
     CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
     if [[ -n $CVE_VALUES ]]; then
       print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
-      print_output "$CVEs"
+      print_output "$CVE_VALUES"
       echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
       echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
       print_output ""

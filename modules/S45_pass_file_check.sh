@@ -24,6 +24,8 @@ S45_pass_file_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Search password files"
 
+  LOG_FILE="$( get_log_file )"
+
   local PASSWD_STUFF
   PASS_FILES_FOUND=0
 
@@ -96,6 +98,7 @@ S45_pass_file_check()
         print_output "$(indent "$(orange "$WHO_HAS_BEEN_SUDO")")"
       fi
     fi
+    echo -e "\\n[*] Statistics:$PASS_FILES_FOUND" >> "$LOG_FILE"
   else
     print_output "[-] No password files found"
   fi

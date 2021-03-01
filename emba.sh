@@ -385,7 +385,7 @@ main()
         wait_for_pid
       fi
 
-      if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 0 ]] ; then
+      if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
         FIRMWARE=1
         FIRMWARE_PATH="$OUTPUT_DIR"
       fi
@@ -396,6 +396,7 @@ main()
       print_output "[!] Firmware path: $FIRMWARE_PATH"
       print_output "[!] Output dir: $OUTPUT_DIR"
       print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
+      print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
       PRE_TESTING_DONE=1
     fi
   fi
@@ -411,7 +412,7 @@ main()
         architecture_dep_check
       fi
 
-      if [[ -n "${#ROOT_PATH[@]}" ]]; then
+      if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
         detect_root_dir_helper "$FIRMWARE_PATH"
       fi
 
@@ -525,7 +526,6 @@ main()
       fi
 
       # Add your personal checks to X150_user_checks.sh (change starting 'X' in filename to 'S') or write a new module, add it to ./modules
-      TESTING_DONE=1
 
     else
       # here we can deal with other non linux things like RTOS specific checks
@@ -555,7 +555,8 @@ main()
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid
       fi
-   fi
+    fi
+    TESTING_DONE=1
     print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
   fi
 

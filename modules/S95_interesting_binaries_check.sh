@@ -24,8 +24,12 @@ S95_interesting_binaries_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check interesting binaries"
 
+  LOG_FILE="$( get_log_file )"
+
   interesting_binaries
   post_exploitation
+
+  echo -e "\\n[*] Statistics:$INT_COUNT:$POST_COUNT" >> "$LOG_FILE"
 }
 
 interesting_binaries()

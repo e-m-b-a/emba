@@ -19,6 +19,8 @@ S108_linux_common_file_checker() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Module to check for common linux files"
 
+  LOG_FILE="$( get_log_file )"
+
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     print_output "[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
     readarray -t ALL_FIRMWARE_FILES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f )
@@ -35,6 +37,7 @@ S108_linux_common_file_checker() {
     done
     print_output ""
     print_output "[*] Found $ORANGE""$FILE_COUNTER""$NC not common Linux files in firmware ""$FIRMWARE_PATH"" with $ORANGE""$FILE_COUNTER_ALL""$NC files at all."
+    echo -e "\\n[*] Statistics:$FILE_COUNTER:$FILE_COUNTER_ALL" >> "$LOG_FILE"
   else
     print_output "[-] No common Linux files dictionary (""$BASE_LINUX_FILES"") found in config directory"
   fi

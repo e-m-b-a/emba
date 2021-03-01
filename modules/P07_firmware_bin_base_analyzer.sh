@@ -27,7 +27,6 @@ P07_firmware_bin_base_analyzer() {
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
       WAIT_PIDS+=( "$!" )
-      #xterm -e bash -c "$(declare -f os_identification); os_identification &; bash"
     else
       os_identification
     fi
@@ -113,15 +112,15 @@ os_identification() {
     if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected         ""$COUNTER_FreeRTOS")")"; fi
     if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected             ""$COUNTER_eCos")")"; fi
     if [[ $COUNTER_Linux -gt 5 && $LINUX_PATH_COUNTER -gt 1 ]] ; then 
-      print_output "$(indent "$(green "Linux detected            ""$COUNTER_Linux""\t- verified Linux operating system detected")")"
+      print_output "$(indent "$(green "Linux detected             ""$COUNTER_Linux""\t- verified Linux operating system detected")")"
     elif [[ $COUNTER_Linux -gt 5 ]] ; then 
-      print_output "$(indent "$(orange "Linux detected           ""$COUNTER_Linux")")"
+      print_output "$(indent "$(orange "Linux detected            ""$COUNTER_Linux")")"
     fi
     if [[ $COUNTER_ADONIS -gt 10 ]] ; then print_output "$(indent "$(orange "Adonis detected          ""$COUNTER_ADONIS")")"; fi
     if [[ $COUNTER_SIPROTEC -gt 100 && $COUNTER_VxWorks -gt 20 ]] ; then
-      print_output "$(indent "$(green "SIPROTEC detected        ""$COUNTER_SIPROTEC""\t- verified SIPROTEC system detected")")";
+      print_output "$(indent "$(green "SIPROTEC detected         ""$COUNTER_SIPROTEC""\t- verified SIPROTEC system detected")")";
     elif [[ $COUNTER_SIPROTEC -gt 10 ]] ; then
-      print_output "$(indent "$(orange "SIPROTEC detected         ""$COUNTER_SIPROTEC")")";
+      print_output "$(indent "$(orange "SIPROTEC detected          ""$COUNTER_SIPROTEC")")";
     fi
   fi
 
