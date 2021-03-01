@@ -21,7 +21,7 @@ S108_linux_common_file_checker() {
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     print_output "[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
-    readarray -t ALL_FIRMWARE_FILES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -iname "*" )
+    readarray -t ALL_FIRMWARE_FILES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f )
     HTML_REPORT=1
     FILE_COUNTER=0
     FILE_COUNTER_ALL=0

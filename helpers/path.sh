@@ -55,27 +55,27 @@ cut_path() {
 
 path_attr() {
   if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
-    echo -e " ""$(find "$1" -maxdepth 0 -printf "(%M %u %g)")"
+    echo -e " ""$(find "$1" -xdev -maxdepth 0 -printf "(%M %u %g)")"
   elif [[ -L "$1" ]] ;  then
-    echo -e " ""$(find "$1" -maxdepth 0 -printf "(%M %u %g) -> %l")"
+    echo -e " ""$(find "$1" -xdev -maxdepth 0 -printf "(%M %u %g) -> %l")"
   fi
 }
 
 permission_clean() {
   if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
-    echo -e "$(find "$1" -maxdepth 0 -printf "%M")"
+    echo -e "$(find "$1" -xdev -maxdepth 0 -printf "%M")"
   fi
 }
 
 owner_clean() {
   if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
-    echo -e "$(find "$1" -maxdepth 0 -printf "%U")"
+    echo -e "$(find "$1" -xdev -maxdepth 0 -printf "%U")"
   fi
 }
 
 group_clean() {
   if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
-    echo -e "$(find "$1" -maxdepth 0 -printf "%G")"
+    echo -e "$(find "$1" -xdev -maxdepth 0 -printf "%G")"
   fi
 }
 
@@ -83,7 +83,7 @@ set_etc_path() {
   export ETC_PATHS
   IFS=" " read -r -a ETC_COMMAND <<<"( -type d  ( -iwholename */etc -o ( -iwholename */etc* -a ! -iwholename */etc*/* ) -o -iwholename */*etc ) )"
 
-  readarray -t ETC_PATHS < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" "${ETC_COMMAND[@]}")
+  readarray -t ETC_PATHS < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev "${ETC_COMMAND[@]}")
 }
 
 set_excluded_path() {
@@ -159,7 +159,7 @@ mod_path() {
   local NEW_RET_PATHS
 
   for RET_PATHS_I in "${RET_PATHS[@]}"; do
-    mapfile -t NEW_RET_PATHS < <(find "$FIRMWARE_PATH" -path "$RET_PATHS_I")
+    mapfile -t NEW_RET_PATHS < <(find "$FIRMWARE_PATH" -xdev -path "$RET_PATHS_I")
     for I in "${!NEW_RET_PATHS[@]}"; do
       if ! [[ -e "${NEW_RET_PATHS[I]}" ]] || ! [[ -d "${NEW_RET_PATHS[I]}" ]] ;  then
         unset 'NEW_RET_PATHS[I]'
@@ -204,7 +204,7 @@ config_find() {
     if [[ "$( wc -l "$1" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
       local FIND_COMMAND
       IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "$1" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
-      mapfile -t FIND_O < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")
+      mapfile -t FIND_O < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev "${FIND_COMMAND[@]}")
       for LINE in "${FIND_O[@]}"; do
         if [[ -L "$LINE" ]] ; then
           local REAL_PATH

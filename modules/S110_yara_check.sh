@@ -28,7 +28,7 @@ S110_yara_check()
     # if multiple instances are running we can't overwrite it
     # after updating yara rules we should remove this file and it gets regenerated
     if [[ ! -f "./dir-combined.yara" ]]; then
-      find "$EXT_DIR""/yara" -iname '*.yar*' -printf 'include "./%p"\n' | sort -n > "./dir-combined.yara"
+      find "$EXT_DIR""/yara" -xdev -iname '*.yar*' -printf 'include "./%p"\n' | sort -n > "./dir-combined.yara"
     fi
 
     local CHECK=0

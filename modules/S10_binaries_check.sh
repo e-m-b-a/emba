@@ -284,12 +284,12 @@ objdump_disassembly()
         fi
       done
 
-      if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+      if [[ "$(find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
         for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
           local SEARCH_TERM
           local RESULTS
           local F_COUNTER
-          readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+          readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
           if [[ "${#RESULTS[@]}" -gt 0 ]]; then
             print_output ""

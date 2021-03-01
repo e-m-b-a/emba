@@ -445,7 +445,7 @@ search_pam_configs() {
       CHECK=1
       print_output "[+] ""$(print_path "${PAM_PATH}")"" exist"
       local FIND
-      FIND=$(find "${PAM_PATH}" -not -name "*.pam-old" -type f -print | sort)
+      FIND=$(find "${PAM_PATH}" -xdev -not -name "*.pam-old" -type f -print | sort)
       readarray -t FILES_ARR < <(printf '%s' "$FIND")
       for FILE in "${FILES_ARR[@]}"; do
         print_output "$(indent "$(orange "$(print_path "$FILE")")")"
@@ -494,7 +494,7 @@ search_pam_files() {
       if [[ -d "$LINE" ]] && [[ ! -L "$LINE" ]] ; then
         print_output "$(indent "$(print_path "$LINE")")"
         local FIND
-        mapfile -t FIND < <(find "$LINE" -maxdepth 1 -type f -name "pam_*.so" -print | sort)
+        mapfile -t FIND < <(find "$LINE" -xdev -maxdepth 1 -type f -name "pam_*.so" -print | sort)
         for FIND_FILE in "${FIND[@]}"; do
           CHECK=1
           print_output "$(indent "$(orange "$FIND_FILE")")"

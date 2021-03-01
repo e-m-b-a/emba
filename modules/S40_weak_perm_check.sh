@@ -34,10 +34,10 @@ S40_weak_perm_check() {
 
   ETC_ARR=("$(mod_path "/ETC_PATHS/rc.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
-  readarray -t WEAK_RC_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" \! -uid 0 -type f 2>/dev/null)
+  readarray -t WEAK_RC_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f 2>/dev/null)
   ETC_ARR=("$(mod_path "/ETC_PATHS/init.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
-  readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" \! -uid 0 -type f 2>/dev/null)
+  readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f 2>/dev/null)
 
   if [[ ${#SETUID_FILES[@]} -gt 0 ]] ; then
     HTML_REPORT=1

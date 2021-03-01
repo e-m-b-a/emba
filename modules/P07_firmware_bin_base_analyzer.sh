@@ -15,24 +15,42 @@
 
 P07_firmware_bin_base_analyzer() {
 
+  export PRE_PIDS
+  PRE_PIDS=()
+
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
 
   if [[ -d "$LOG_DIR"/extractor/ ]] ; then
+    export OUTPUT_DIR
     OUTPUT_DIR="$LOG_DIR"/extractor/
-    os_identification
+    if [[ $THREADED -eq 1 ]]; then
+      os_identification &
+      WAIT_PIDS+=( "$!" )
+      #xterm -e bash -c "$(declare -f os_identification); os_identification &; bash"
+    else
+      os_identification
+    fi
+
   fi
 
   # we only do this if we have not found a LInux filesystem
   if ! [[ -d "$FIRMWARE_PATH" ]]; then
-    binary_architecture_detection
+    if [[ $LINUX_PATH_COUNTER -eq 0 ]] ; then
+      if [[ $THREADED -eq 1 ]]; then
+        binary_architecture_detection &
+        WAIT_PIDS+=( "$!" )
+      else
+        binary_architecture_detection
+      fi
+    fi
   fi
 }
 
 os_identification() {
   sub_module_title "OS detection"
 
-  print_output "[*] Initial OS detection running " | tr -d "\n"
+  print_output "[*] Initial OS detection running ..." | tr -d "\n"
   echo "." | tr -d "\n"
 
   echo "." | tr -d "\n"
@@ -84,6 +102,7 @@ os_identification() {
   print_output "[*] Trying to identify a Linux root path in $(print_path "$OUTPUT_DIR")"
   # just to check if there is somewhere a linux filesystem in the extracted stuff
   # emba is able to handle the rest
+  export LINUX_PATH_COUNTER
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   # gt 10 to avoid false positives
@@ -109,8 +128,8 @@ os_identification() {
   echo
   if [[ $LINUX_PATH_COUNTER -gt 0 ]] ; then
     print_output "[+] Found possible Linux operating system in $(print_path "$OUTPUT_DIR")"
-    export FIRMWARE=1
-    export FIRMWARE_PATH="$OUTPUT_DIR"
+    #export FIRMWARE=1
+    #export FIRMWARE_PATH="$OUTPUT_DIR"
   fi
 }
 

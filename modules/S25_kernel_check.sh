@@ -28,8 +28,8 @@ S25_kernel_check()
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
-    mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
-    mapfile -t KERNEL_DESC < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')
+    mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
+    mapfile -t KERNEL_DESC < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')
     if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
       print_output "Kernel version:"
       for LINE in "${KERNEL_VERSION[@]}" ; do
@@ -57,8 +57,8 @@ S25_kernel_check()
     print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 1 ]] ; then
-    mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
-    mapfile -t KERNEL_DESC < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')
+    mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
+    mapfile -t KERNEL_DESC < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')
     if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
       print_output "Kernel version:"
       for LINE in "${KERNEL_VERSION[@]}" ; do
@@ -133,7 +133,7 @@ analyze_kernel_module()
   sub_module_title "Analyze kernel modules"
 
   KMOD_BAD=0
-  mapfile -t MOD_DATA < <(find "$FIRMWARE_PATH" -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
+  mapfile -t MOD_DATA < <(find "$FIRMWARE_PATH" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
   sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' 2> /dev/null)
 
   print_output "[*] Found ""${#MOD_DATA[@]}"" kernel modules"

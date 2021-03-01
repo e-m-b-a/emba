@@ -25,7 +25,7 @@ S70_hidden_file_check()
   module_title "Search hidden files"
 
   local HIDDEN_FILES
-  IFS=" " read -r -a HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -name ".*" -type f | tr '\r\n' ' ')
+  IFS=" " read -r -a HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -name ".*" -type f | tr '\r\n' ' ')
 
   if [[ ${#HIDDEN_FILES[@]} -gt 0 ]] ; then
     HTML_REPORT=1

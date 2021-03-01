@@ -79,6 +79,9 @@ main()
   export QEMULATION=0
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
+  export PRE_TESTING_DONE=0     # finished pre-testing phase
+  export THREADED=0             # 0 -> single thread
+                                # 1 -> multi threaded (currently only in pre-checking phase)
 
   export LOG_DIR="$INVOCATION_PATH""/logs"
   export CONFIG_DIR="$INVOCATION_PATH""/config"
@@ -105,7 +108,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:stxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -133,6 +136,8 @@ main()
       f)
         export FIRMWARE=1
         export FIRMWARE_PATH="$OPTARG"
+        export FIRMWARE_PATH_bak="$FIRMWARE_PATH"   #as we rewrite the firmware path variable in the pre-checker phase
+                                                    #we store the original firmware path variable
         ;;
       F)
         export FORCE=1
@@ -162,6 +167,9 @@ main()
         ;;
       s)
         export SHORT_PATH=1
+        ;;
+      t)
+        export THREADED=1
         ;;
       x)
         export DEEP_EXTRACTOR=1
@@ -285,7 +293,7 @@ main()
 
     OPTIND=1
     ARGS=""
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:stX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -322,7 +330,7 @@ main()
     if [[ -f "$FIRMWARE_PATH" ]]; then
 
       echo
-      print_output "[!] Extraction started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
+      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
 
       # 'main' functions of imported modules
       # in the pre-check phase we execute all modules with P[Number]_Name.sh
@@ -367,10 +375,25 @@ main()
             done
           fi
         done
-
-        echo
-        print_output "[!] Extraction ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       fi
+
+      # if we running threaded we ware going to wait for the slow guys here
+      if [[ $THREADED -eq 1 ]]; then
+        wait_for_pid
+      fi
+
+      if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 0 ]] ; then
+        FIRMWARE=1
+        FIRMWARE_PATH="$OUTPUT_DIR"
+      fi
+
+      echo
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Firmware value: $FIRMWARE"
+      print_output "[!] Firmware path: $FIRMWARE_PATH"
+      print_output "[!] Output dir: $OUTPUT_DIR"
+      print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
+      PRE_TESTING_DONE=1
     fi
   fi
 
@@ -400,15 +423,52 @@ main()
 
       # 'main' functions of imported modules
 
+      # in threaded mode we start the long running modules first 
+      if [[ $THREADED -eq 1 ]]; then
+        if [[ $BAP -eq 1 ]]; then
+          MODULE_FILE="$MOD_DIR"/S120_cwe_checker.sh
+
+          MODULE_BN=$(basename "$MODULE_FILE")
+          MODULE_MAIN=${MODULE_BN%.*}
+          HTML_REPORT=0
+          $MODULE_MAIN &
+          WAIT_PIDS+=( "$!" )
+        fi
+
+        if [[ $QEMULATION -eq 1 ]]; then
+          MODULE_FILE="$MOD_DIR"/S115_usermode_emulator.sh
+          MODULE_BN=$(basename "$MODULE_FILE")
+          MODULE_MAIN=${MODULE_BN%.*}
+          HTML_REPORT=0
+          $MODULE_MAIN &
+          WAIT_PIDS+=( "$!" )
+        fi
+      fi
+
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
         local MODULES
-        mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
+        if [[ $THREADED -eq 1 ]]; then
+          mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | grep -v "emulator\|cwe" | sort -V 2> /dev/null)
+        else
+          mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
+        fi
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             HTML_REPORT=0
-            $MODULE_MAIN
+
+            if [[ $THREADED -eq 1 ]]; then
+              $MODULE_MAIN &
+              WAIT_PIDS+=( "$!" )
+            else
+              $MODULE_MAIN
+            fi
+
+            if [[ $THREADED -eq 1 ]]; then
+              max_pids_protection
+            fi
+
             if [[ $HTML == 1 ]]; then
                generate_html_file "$LOG_FILE" "$HTML_REPORT"
             fi
@@ -419,7 +479,11 @@ main()
         for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
           if [[ "$SELECT_NUM" =~ ^[s,S]{1}[0-9]+ ]]; then
             local MODULE
-            MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+            if [[ $THREADED -eq 1 ]]; then
+              MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | grep -v "emulator\|cwe" | sort -V 2> /dev/null)
+            else
+              MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+            fi
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
@@ -436,16 +500,52 @@ main()
               if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
                 MODULE_BN=$(basename "$MODULE_FILE")
                 MODULE_MAIN=${MODULE_BN%.*}
-                $MODULE_MAIN
+                if [[ $THREADED -eq 1 ]]; then
+                  $MODULE_MAIN &
+                  WAIT_PIDS+=( "$!" )
+                else
+                  $MODULE_MAIN
+                fi
+
+                max_pids_protection
+
               fi
             done
           fi
         done
       fi
 
+      if [[ $THREADED -eq 1 ]]; then
+        wait_for_pid
+      fi
+
       # Add your personal checks to X150_user_checks.sh (change starting 'X' in filename to 'S') or write a new module, add it to ./modules
       TESTING_DONE=1
-    fi
+
+    else
+      # here we can deal with other non linux things like RTOS specific checks
+      # lets call it R* modules
+      # 'main' functions of imported finishing modules
+      local MODULES
+      mapfile -t MODULES < <(find "$MOD_DIR" -name "R*_*.sh" | sort -V 2> /dev/null)
+      for MODULE_FILE in "${MODULES[@]}" ; do
+        if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+          MODULE_BN=$(basename "$MODULE_FILE")
+          MODULE_MAIN=${MODULE_BN%.*}
+          HTML_REPORT=1
+          $MODULE_MAIN
+          if [[ $HTML == 1 ]]; then
+            generate_html_file "$LOG_FILE" "$HTML_REPORT"
+          fi
+          reset_module_count
+        fi
+      done
+
+      if [[ $THREADED -eq 1 ]]; then
+        wait_for_pid
+      fi
+   fi
+    print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
   fi
 
   # 'main' functions of imported finishing modules
