@@ -55,8 +55,17 @@ F19_cve_aggregator() {
       KERNELV=1
     fi
 
-    get_firmware_base_version_check
-    get_usermode_emulator
+    if [[ $THREADED -eq 1 ]]; then
+      get_firmware_base_version_check &
+      WAIT_PIDS+=( "$!" )
+      get_usermode_emulator &
+      WAIT_PIDS+=( "$!" )
+      wait_for_pid
+    else
+      get_firmware_base_version_check
+      get_usermode_emulator
+    fi
+
     aggregate_versions
     
     # Mongo DB is running on Port 27017. If not we can't check CVEs
@@ -66,8 +75,16 @@ F19_cve_aggregator() {
     fi
 
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
-      generate_cve_details
-      generate_special_log
+      if [[ $THREADED -eq 1 ]]; then
+        generate_cve_details &
+        WAIT_PIDS+=( "$!" )
+        generate_special_log &
+        WAIT_PIDS+=( "$!" )
+        wait_for_pid
+      else
+        generate_cve_details
+        generate_special_log
+      fi
     else
       print_output "[-] MongoDB not running on port 27017."
       print_output "[-] CVE checks not possible!"

@@ -343,6 +343,9 @@ main()
         fi
       done
 
+      ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules
+      ## as there are internal dependencies it is easier to handle it in the modules
+
       if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
         local MODULES
         mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
@@ -461,12 +464,9 @@ main()
             if [[ $THREADED -eq 1 ]]; then
               $MODULE_MAIN &
               WAIT_PIDS+=( "$!" )
+              max_pids_protection
             else
               $MODULE_MAIN
-            fi
-
-            if [[ $THREADED -eq 1 ]]; then
-              max_pids_protection
             fi
 
             if [[ $HTML == 1 ]]; then
@@ -488,7 +488,14 @@ main()
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
               HTML_REPORT=0
-              $MODULE_MAIN
+              if [[ $THREADED -eq 1 ]]; then
+                $MODULE_MAIN &
+                WAIT_PIDS+=( "$!" )
+                max_pids_protection
+              else
+                $MODULE_MAIN
+              fi
+
               if [[ $HTML == 1 ]]; then
                 generate_html_file "$LOG_FILE" "$HTML_REPORT"
               fi
@@ -503,12 +510,10 @@ main()
                 if [[ $THREADED -eq 1 ]]; then
                   $MODULE_MAIN &
                   WAIT_PIDS+=( "$!" )
+                  max_pids_protection
                 else
                   $MODULE_MAIN
                 fi
-
-                max_pids_protection
-
               fi
             done
           fi
@@ -533,7 +538,13 @@ main()
           MODULE_BN=$(basename "$MODULE_FILE")
           MODULE_MAIN=${MODULE_BN%.*}
           HTML_REPORT=1
-          $MODULE_MAIN
+          if [[ $THREADED -eq 1 ]]; then
+            $MODULE_MAIN &
+            WAIT_PIDS+=( "$!" )
+            max_pids_protection
+          else
+            $MODULE_MAIN
+          fi
           if [[ $HTML == 1 ]]; then
             generate_html_file "$LOG_FILE" "$HTML_REPORT"
           fi

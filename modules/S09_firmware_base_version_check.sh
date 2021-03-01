@@ -2,7 +2,8 @@
 
 # emba - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens Energy AG
+# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2021 Siemens AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -26,16 +27,18 @@ S09_firmware_base_version_check() {
 
   declare -a VERSIONS_DETECTED
 
-  print_output "[*] Initial version detection running " | tr -d "\n"
+  print_output "[*] Initial version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
-    print_output "." | tr -d "\n"
+    echo "." | tr -d "\n"
 
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
 
     # as we do not have a typical linux executable we can't use strict version details
+    # but to not exhaust the run time we only search for stuff that we know is possible to detect
+
     if [[ $STRICT == "binary" ]]; then
       VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
-      print_output "." | tr -d "\n"
+      echo "." | tr -d "\n"
 
       # check binwalk files sometimes we can find kernel version information or something else in it
       VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null)
@@ -43,21 +46,32 @@ S09_firmware_base_version_check() {
         echo ""
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
-        print_output "." | tr -d "\n"
+        echo "." | tr -d "\n"
       fi
       
-      print_output "." | tr -d "\n"
+      echo "." | tr -d "\n"
 
-      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -executable -print0 | xargs -0 strings | grep -o -a -e "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      if [[ $FIRMWARE -eq 0 ]]; then
+        VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
+
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
+          VERSIONS_DETECTED+=("$VERSION_FINDER")
+        fi  
+        echo "." | tr -d "\n"
+      fi  
+
+      VERSION_FINDER=$(find "$OUTPUT_DIR" -xdev -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
-        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware executables."
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
-        print_output "." | tr -d "\n"
-      fi
-      print_output "." | tr -d "\n"
+      fi  
+      echo "." | tr -d "\n"
     fi
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
-  print_output "." | tr -d "\n"
+  echo "." | tr -d "\n"
 }

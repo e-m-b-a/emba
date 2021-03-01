@@ -255,7 +255,7 @@ wait_for_pid() {
 }
 
 max_pids_protection() {
-  while ${#WAIT_PIDS[@]} -gt 5; do
+  while [[ ${#WAIT_PIDS[@]} -gt 5 ]]; do
     TEMP_PIDS=()
     # check for really running PIDs and re-create the array
     for PID in ${WAIT_PIDS[*]}; do
@@ -264,8 +264,9 @@ max_pids_protection() {
       fi
     done
 
-    if ${#TEMP_PIDS[@]} -gt 5; then
+    if [[ ${#TEMP_PIDS[@]} -gt 5 ]]; then
       echo "." | tr -d "\n"
+      echo "[*] Waiting for processess ... ${#TEMP_PIDS[@]}"
       sleep 1
     fi
     # recreate the arry with the current running PIDS
