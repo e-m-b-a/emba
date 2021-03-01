@@ -50,9 +50,6 @@ P05_firmware_bin_extractor() {
 
   if [[ $DEEP_EXTRACTOR -eq 1 ]] ; then
     deb_extractor
-  fi
-
-  if [[ $DEEP_EXTRACTOR -eq 1 ]] ; then
     ipk_extractor
   fi
 

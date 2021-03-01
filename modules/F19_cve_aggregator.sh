@@ -39,6 +39,8 @@ F19_cve_aggregator() {
   FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
+  CVE_MINIMAL_LOG="$LOG_DIR"/aggregator/CVE_minimal.txt
+  EXPLOIT_OVERVIEW_LOG="$LOG_DIR"/aggregator/exploits-overview.txt
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
     print_output "[*] Aggregate vulnerability details"
@@ -408,12 +410,12 @@ generate_special_log() {
   print_output "[*] Generate CVE log file in $LOG_DIR/aggregator/CVE_minimal.txt:\\n"
   for FILE in "${FILES[@]}"; do
     NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
-    CVEs=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
+    CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
     if [[ -n $CVEs ]]; then
       print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
-      print_output "$CVEs"
-      echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$LOG_DIR"/aggregator/CVE_minimal.txt
-      echo "$CVEs" >> "$LOG_DIR"/aggregator/CVE_minimal.txt
+      print_output "$CVE_VALUES"
+      echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
+      echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
       print_output ""
     fi
   done
@@ -424,8 +426,8 @@ generate_special_log() {
   for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
     print_output "$EXPLOIT_"
   done
-  echo -e "\n[*] Exploit summary:" >> "$LOG_DIR"/aggregator/exploits-overview.txt
-  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$LOG_DIR"/aggregator/exploits-overview.txt
+  echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
+  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"
 }
 
 generate_cve_details() {
