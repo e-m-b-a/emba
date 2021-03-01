@@ -85,6 +85,7 @@ F19_cve_aggregator() {
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 prepare_version_data() {

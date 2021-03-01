@@ -38,6 +38,7 @@ F50_base_aggregator() {
   output_details
   output_binaries
   output_cve_exploits
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 output_overview() {
