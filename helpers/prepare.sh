@@ -114,11 +114,11 @@ prepare_binary_arr()
 {
   echo ""
   print_output "[*] Unique binary auto detection (could take some time)\\n" "no_log"
+
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
   export CHECKSUMS
-  #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -iname "*" )
   readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
   readarray -t CHECKSUMS < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f1)
   print_output "[*] Found ${#BINARIES[@]} unique executables." "no_log"

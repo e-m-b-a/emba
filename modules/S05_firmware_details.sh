@@ -53,6 +53,8 @@ S05_firmware_details()
     fi
   fi
   release_info
+
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 # Test source: http://linuxmafia.com/faq/Admin/release-files.html

@@ -74,4 +74,5 @@ S09_firmware_base_version_check() {
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
   echo "." | tr -d "\n"
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }

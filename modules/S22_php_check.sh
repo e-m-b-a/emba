@@ -63,4 +63,5 @@ S22_php_check()
   else
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }

@@ -75,5 +75,6 @@ S120_cwe_checker()
     print_output "[!] Check with bap and cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
   fi
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 

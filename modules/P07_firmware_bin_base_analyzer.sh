@@ -44,6 +44,8 @@ P07_firmware_bin_base_analyzer() {
       fi
     fi
   fi
+
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 os_identification() {

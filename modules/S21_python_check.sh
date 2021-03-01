@@ -79,4 +79,5 @@ S21_python_check()
   else
     print_output "[-] Pylint check is disabled ... no tests performed"
   fi
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }

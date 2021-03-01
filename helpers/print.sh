@@ -99,12 +99,16 @@ print_output()
     local COLOR_OUTPUT_STRING
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
     echo -e "$COLOR_OUTPUT_STRING"
-    if [[ "$2" != "no_log" ]] ; then
+    if [[ "$2" == "main" ]] ; then
+      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
+    elif [[ "$2" != "no_log" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null
     fi
   else
     echo -e "$OUTPUT"
-    if [[ "$2" != "no_log" ]] ; then
+    if [[ "$2" == "main" ]] ; then
+      echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_FILE" >/dev/null
+    elif [[ "$2" != "no_log" ]] ; then
       echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null
     fi
   fi

@@ -89,6 +89,7 @@ S25_kernel_check()
       echo "[*] Statistics:$LINE" >> "$LOG_FILE"
     done
   fi
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 get_kernel_vulns()

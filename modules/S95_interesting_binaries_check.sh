@@ -30,6 +30,7 @@ S95_interesting_binaries_check()
   post_exploitation
 
   echo -e "\\n[*] Statistics:$INT_COUNT:$POST_COUNT" >> "$LOG_FILE"
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 interesting_binaries()

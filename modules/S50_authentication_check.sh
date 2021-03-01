@@ -40,6 +40,7 @@ S50_authentication_check() {
   scan_pam_conf
   search_pam_configs
   search_pam_files
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 user_zero() {

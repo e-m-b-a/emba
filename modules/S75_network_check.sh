@@ -28,6 +28,7 @@ S75_network_check()
   check_iptables
   check_snmp
   check_network_configs
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 check_resolv()

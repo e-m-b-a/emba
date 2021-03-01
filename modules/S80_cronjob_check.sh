@@ -112,5 +112,6 @@ S80_cronjob_check()
   else
     HTML_REPORT=1
   fi
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 

@@ -28,6 +28,8 @@ S10_binaries_check()
   vul_func_basic_check
   objdump_disassembly
   binary_protection
+
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 vul_func_basic_check()

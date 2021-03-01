@@ -26,6 +26,7 @@ S65_config_file_check()
 
   scan_config
   check_fstab
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 scan_config()

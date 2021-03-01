@@ -36,7 +36,11 @@ F19_cve_aggregator() {
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_BASE_VER_CHECK_LOG="p09_firmware_base_version_check.txt"
-  FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
+  if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
+    FW_VER_CHECK_LOG="r09_firmware_base_version_check.txt"
+  else
+    FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
+  fi
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
   CVE_MINIMAL_LOG="$LOG_DIR"/aggregator/CVE_minimal.txt

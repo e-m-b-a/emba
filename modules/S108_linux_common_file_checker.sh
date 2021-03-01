@@ -41,4 +41,5 @@ S108_linux_common_file_checker() {
   else
     print_output "[-] No common Linux files dictionary (""$BASE_LINUX_FILES"") found in config directory"
   fi
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }

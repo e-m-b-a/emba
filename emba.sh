@@ -84,6 +84,7 @@ main()
                                 # 1 -> multi threaded (currently only in pre-checking phase)
 
   export LOG_DIR="$INVOCATION_PATH""/logs"
+  export MAIN_LOG=emba.log
   export CONFIG_DIR="$INVOCATION_PATH""/config"
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"
@@ -261,6 +262,8 @@ main()
 
   dependency_check
 
+  MAIN_LOG="$LOG_DIR"/"$MAIN_LOG"
+
   if [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]] ; then
     if ! [[ -f "$KERNEL_CONFIG" ]] ; then
       print_output "[-] Invalid kernel configuration file: $KERNEL_CONFIG" "no_log"
@@ -330,7 +333,12 @@ main()
     if [[ -f "$FIRMWARE_PATH" ]]; then
 
       echo
-      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
+
+      if [[ -d "$LOG_DIR" ]]; then
+        print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
+      else
+        print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
+      fi
 
       # 'main' functions of imported modules
       # in the pre-check phase we execute all modules with P[Number]_Name.sh
@@ -352,6 +360,7 @@ main()
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
+            print_output "[*] $(date) - $MODULE_BN starting ... " "main"
             MODULE_MAIN=${MODULE_BN%.*}
             $MODULE_MAIN
           fi
@@ -363,6 +372,7 @@ main()
             MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
+              print_output "[*] $(date) - $MODULE_BN starting ... " "main"
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
             fi
@@ -372,6 +382,7 @@ main()
             for MODULE_FILE in "${MODULES[@]}" ; do
               if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
                 MODULE_BN=$(basename "$MODULE_FILE")
+                print_output "[*] $(date) - $MODULE_BN starting ... " "main"
                 MODULE_MAIN=${MODULE_BN%.*}
                 $MODULE_MAIN
               fi
@@ -391,7 +402,12 @@ main()
       fi
 
       echo
-      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      if [[ -d "$LOG_DIR" ]]; then
+        print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+      else
+        print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      fi
+
       print_output "[!] Firmware value: $FIRMWARE"
       print_output "[!] Firmware path: $FIRMWARE_PATH"
       print_output "[!] Output dir: $OUTPUT_DIR"
@@ -422,7 +438,11 @@ main()
       set_etc_paths
       echo
 
-      print_output "[!] Test started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
+      if [[ -d "$LOG_DIR" ]]; then
+        print_output "[!] Test started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
+      else
+        print_output "[!] Test started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
+      fi
       write_grep_log "$(date)" "TIMESTAMP"
 
       # 'main' functions of imported modules
@@ -433,6 +453,7 @@ main()
           MODULE_FILE="$MOD_DIR"/S120_cwe_checker.sh
 
           MODULE_BN=$(basename "$MODULE_FILE")
+          print_output "[*] $(date) - $MODULE_BN starting ... " "main"
           MODULE_MAIN=${MODULE_BN%.*}
           HTML_REPORT=0
           $MODULE_MAIN &
@@ -442,6 +463,7 @@ main()
         if [[ $QEMULATION -eq 1 ]]; then
           MODULE_FILE="$MOD_DIR"/S115_usermode_emulator.sh
           MODULE_BN=$(basename "$MODULE_FILE")
+          print_output "[*] $(date) - $MODULE_BN starting ... " "main"
           MODULE_MAIN=${MODULE_BN%.*}
           HTML_REPORT=0
           $MODULE_MAIN &
@@ -459,6 +481,7 @@ main()
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
+            print_output "[*] $(date) - $MODULE_BN starting ... " "main"
             MODULE_MAIN=${MODULE_BN%.*}
             HTML_REPORT=0
 
@@ -487,6 +510,7 @@ main()
             fi
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
+              print_output "[*] $(date) - $MODULE_BN starting ... " "main"
               MODULE_MAIN=${MODULE_BN%.*}
               HTML_REPORT=0
               if [[ $THREADED -eq 1 ]]; then
@@ -507,6 +531,7 @@ main()
             for MODULE_FILE in "${MODULES[@]}" ; do
               if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
                 MODULE_BN=$(basename "$MODULE_FILE")
+                print_output "[*] $(date) - $MODULE_BN starting ... " "main"
                 MODULE_MAIN=${MODULE_BN%.*}
                 if [[ $THREADED -eq 1 ]]; then
                   $MODULE_MAIN &
@@ -536,6 +561,7 @@ main()
       for MODULE_FILE in "${MODULES[@]}" ; do
         if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
           MODULE_BN=$(basename "$MODULE_FILE")
+          print_output "[*] $(date) - $MODULE_BN starting ... " "main"
           MODULE_MAIN=${MODULE_BN%.*}
           HTML_REPORT=1
           if [[ $THREADED -eq 1 ]]; then
@@ -556,8 +582,13 @@ main()
         wait_for_pid
       fi
     fi
+
     TESTING_DONE=1
-    print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
+    else
+      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
   fi
 
   # 'main' functions of imported finishing modules
@@ -566,6 +597,7 @@ main()
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
+      print_output "[*] $(date) - $MODULE_BN starting ... " "main"
       MODULE_MAIN=${MODULE_BN%.*}
       HTML_REPORT=1
       $MODULE_MAIN
@@ -578,7 +610,11 @@ main()
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n"
+      if [[ -d "$LOG_DIR" ]]; then
+        print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+      else
+        print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n"
+      fi
       write_grep_log "$(date)" "TIMESTAMP"
       write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
