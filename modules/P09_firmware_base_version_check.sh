@@ -20,7 +20,7 @@ P09_firmware_base_version_check() {
 
   declare -a VERSIONS_DETECTED
 
-  print_output "[*] Initial version detection running " | tr -d "\n"
+  print_output "[*] Initial version detection running on all firmware files ..." | tr -d "\n"
   while read -r VERSION_LINE; do
     echo "." | tr -d "\n"
 
@@ -33,40 +33,41 @@ P09_firmware_base_version_check() {
       echo "." | tr -d "\n"
 
       # currently we only have binwalk files but sometimes we can find kernel version information or something else in it
-      VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -E "$VERSION_IDENTIFIER" {} \; 2> /dev/null | head -1 2> /dev/null)
-      VERSIONS_DETECTED+=("$VERSION_FINDER")
-      echo "." | tr -d "\n"
+      #VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -E "$VERSION_IDENTIFIER" {} \; 2>/dev/null | head -1 2>/dev/null)
+      VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$LOG_DIR"/p05_firmware_bin_extractor.txt 2>/dev/null | head -1 2>/dev/null)
 
-      VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-      VERSIONS_DETECTED+=("$VERSION_FINDER")
-      echo "." | tr -d "\n"
-
-      # if we are using docker the module s09 will do the check within the dockered environment
-      if [[ $DOCKER -ne 1 ]] ; then
-        VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      if [[ -n $VERSION_FINDER ]]; then
+        echo ""
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extraction logs."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
+      fi
+
+      echo "." | tr -d "\n"
+
+      if [[ $FIRMWARE -eq 0 ]]; then
+        VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
+
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
+          VERSIONS_DETECTED+=("$VERSION_FINDER")
+        fi
         echo "." | tr -d "\n"
       fi
 
+
+      VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+
+      if [[ -n $VERSION_FINDER ]]; then
+        echo ""
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files."
+        VERSIONS_DETECTED+=("$VERSION_FINDER")
+      fi
+      echo "." | tr -d "\n"
     fi
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
   echo "." | tr -d "\n"
 
-  echo
-  for VERSION_LINE in "${VERSIONS_DETECTED[@]}"; do
-    if [[ -n $VERSION_LINE ]]; then
-      if [ "$VERSION_LINE" != "$VERS_LINE_OLD" ]; then
-        VERS_LINE_OLD="$VERSION_LINE"
-
-        # we do not deal with output formatting the usual way -> it destroys our current aggregator
-        # we have to deal with it in the future
-        FORMAT_LOG_BAK="$FORMAT_LOG"
-        FORMAT_LOG=0
-        print_output "[+] Version information found ${RED}""$VERSION_LINE""${NC}${GREEN} in firmware blob."
-        FORMAT_LOG="$FORMAT_LOG_BAK"
-      fi
-    fi
-  done
   export TESTING_DONE=1
 }

@@ -48,11 +48,53 @@ P05_firmware_bin_extractor() {
 
   detect_root_dir_helper "$LOG_DIR"/extractor/
 
+  if [[ $DEEP_EXTRACTOR -eq 1 ]] ; then
+    deb_extractor
+    ipk_extractor
+  fi
+
   BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable | wc -l )
   UNIQUE_BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | wc -l )
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
+  fi
+}
+
+ipk_extractor() {
+  print_output ""
+  print_output "[*] Identify ipk archives and extracting it to the root directories ..."
+  mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
+
+  if [[ ${#IPK_DB[@]} -ne 0 ]] ; then
+    print_output "[*] Found ${#IPK_DB[@]} IPK archives - extracting them to the root directories ..."
+    mkdir "$LOG_DIR"/ipk_tmp
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      for IPK in "${IPK_DB[@]}"; do
+        IPK_NAME=$(basename "$IPK")
+        print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
+        tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp
+        tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH"
+        rm -r "$LOG_DIR"/ipk_tmp/*
+      done
+    done
+  fi
+}
+
+deb_extractor() {
+  print_output ""
+  print_output "[*] Identify debian archives and extracting it to the root directories ..."
+  mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb")
+
+  if [[ ${#DEB_DB[@]} -ne 0 ]] ; then
+    print_output "[*] Found ${#DEB_DB[@]} debian archives - extracting them to the root directories ..."
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      for DEB in "${DEB_DB[@]}"; do
+        DEB_NAME=$(basename "$DEB")
+        print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
+        dpkg-deb --extract "$DEB" "$R_PATH"
+      done
+    done
   fi
 }
 

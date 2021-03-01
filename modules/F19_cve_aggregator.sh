@@ -39,6 +39,8 @@ F19_cve_aggregator() {
   FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
+  CVE_MINIMAL_LOG="$LOG_DIR"/aggregator/CVE_minimal.txt
+  EXPLOIT_OVERVIEW_LOG="$LOG_DIR"/aggregator/exploits-overview.txt
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
     print_output "[*] Aggregate vulnerability details"
@@ -58,13 +60,14 @@ F19_cve_aggregator() {
     aggregate_versions
     
     # Mongo DB is running on Port 27017. If not we can't check CVEs
-    if [[ $(netstat -ant | grep -c 27017) -eq 0 ]]; then
+    if [[ $(netstat -ant | grep -c 27017) -eq 0 && $IN_DOCKER -eq 0 ]]; then
       print_output "[*] Trying to start the vulnerability database"
       systemctl start mongod
     fi
 
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
       generate_cve_details
+      generate_special_log
     else
       print_output "[-] MongoDB not running on port 27017."
       print_output "[-] CVE checks not possible!"
@@ -397,6 +400,34 @@ aggregate_versions() {
       print_output "[-] No Version details found."
   fi
   print_output ""
+}
+
+generate_special_log() {
+  sub_module_title "Generate special log files."
+
+  readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
+  print_output ""
+  print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
+  for FILE in "${FILES[@]}"; do
+    NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
+    CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
+    if [[ -n $CVEs ]]; then
+      print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
+      print_output "$CVE_VALUES"
+      echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
+      echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
+      print_output ""
+    fi
+  done
+
+  print_output ""
+  print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
+  mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
+  for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
+    print_output "$EXPLOIT_"
+  done
+  echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
+  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"
 }
 
 generate_cve_details() {
