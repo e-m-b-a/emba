@@ -89,6 +89,7 @@ S25_kernel_check()
       echo "[*] Statistics:$LINE" >> "$LOG_FILE"
     done
   fi
+  echo "[*] Statistics1:${#MOD_DATA[@]}:$KMOD_BAD" >> "$LOG_FILE"
   print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 

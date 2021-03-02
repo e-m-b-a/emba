@@ -33,9 +33,9 @@ S110_yara_check()
     fi
 
     local CHECK=0
-    local FILE_ARR
+#    local FILE_ARR
     YARA_CNT=0
-    readarray -t FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f)
+#    readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
       if [[ -e "$YARA_S_FILE" ]] ; then
         local S_OUTPUT

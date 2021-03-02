@@ -417,6 +417,8 @@ main()
     fi
   fi
 
+
+
   if [[ $FIRMWARE -eq 1 ]] ; then
     if [[ -d "$FIRMWARE_PATH" ]]; then
 
@@ -428,15 +430,6 @@ main()
         architecture_dep_check
       fi
 
-      if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
-        detect_root_dir_helper "$FIRMWARE_PATH"
-      fi
-
-      check_firmware
-
-      prepare_binary_arr
-      set_etc_paths
-      echo
 
       if [[ -d "$LOG_DIR" ]]; then
         print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
@@ -444,6 +437,16 @@ main()
         print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
       fi
       write_grep_log "$(date)" "TIMESTAMP"
+
+      if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
+        detect_root_dir_helper "$FIRMWARE_PATH"
+      fi
+
+      check_firmware
+      prepare_binary_arr
+      prepare_file_arr
+      set_etc_paths
+      echo
 
       # 'main' functions of imported modules
 

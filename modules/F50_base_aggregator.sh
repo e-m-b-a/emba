@@ -21,8 +21,9 @@ F50_base_aggregator() {
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   BIN_CHECK_LOG="s10_binaries_check.txt"
-  KERNEL_CHECK_LOG="s25_kernel_check.txt"
+  S25_LOG="s25_kernel_check.txt"
   OS_DETECT_LOG="p07_firmware_bin_base_analyzer.txt"
+  S05_LOG="s05_firmware_details.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
@@ -81,8 +82,8 @@ output_overview() {
     fi
   fi
 
-  if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
-    mapfile -t KERNELV < <(grep "Statistics" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d: -f2 | sort -u)
+  if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
+    mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u)
     if [[ "${#KERNELV[@]}" -ne 0 ]]; then
       if [[ -z "$OS_VERIFIED" ]]; then
         # if we have found a kernel it is a Linux system:
@@ -102,9 +103,9 @@ output_overview() {
 
 output_details() {
 
-  print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
-  if [[ "${#MOD_DATA[@]}" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""${#MOD_DATA[@]}""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
+  print_output "[+] ""$ORANGE""""$FILE_ARR_COUNT""""$GREEN"" files and ""$ORANGE""""$DETECTED_DIR"" ""$GREEN""directories detected."
+  if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""""$MOD_DATA_COUNTER""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
   fi
   ENTROPY=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
@@ -275,6 +276,14 @@ output_cve_exploits() {
 }
 
 get_data() {
+  if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
+    FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
+    DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
+    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
+    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3)
+  fi
   if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
     S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2)
   fi

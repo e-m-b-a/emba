@@ -23,11 +23,11 @@ S108_linux_common_file_checker() {
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     print_output "[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
-    readarray -t ALL_FIRMWARE_FILES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f )
+#    readarray -t ALL_FIRMWARE_FILES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
     HTML_REPORT=1
     FILE_COUNTER=0
     FILE_COUNTER_ALL=0
-    for FILE in "${ALL_FIRMWARE_FILES[@]}" ; do
+    for FILE in "${FILE_ARR[@]}" ; do
       SEARCH_TERM=$(basename "$FILE")
       if ! grep -q "$SEARCH_TERM" "$BASE_LINUX_FILES" 2>/dev/null; then
         print_output "[+] ""$ORANGE""$(print_path "$FILE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC"
