@@ -12,6 +12,7 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Stefan Haboeck
 
 # Description:  Main script for load all necessary files and call main function of modules
 
@@ -61,6 +62,7 @@ main()
   export KERNEL=0
   export SHELLCHECK=1
   export PYTHON_CHECK=1
+  export PHP_CHECK=1
   export V_FEED=1
   export BAP=0
   export YARA=1
@@ -68,8 +70,12 @@ main()
   export ONLY_DEP=0             # test only dependency
   export USE_DOCKER=0
   export IN_DOCKER=0
+  export FACT_EXTRACTOR=0
+  export DEEP_EXTRACTOR=0
   export FORCE=0
   export LOG_GREP=0
+  export HTML=0
+  export HTML_REPORT=0
   export QEMULATION=0
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
@@ -82,6 +88,7 @@ main()
   export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
   export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
+  export AHA_PATH="$EXT_DIR""/aha"
 
   echo
 
@@ -98,7 +105,7 @@ main()
   EMBACOMMAND="$(dirname "$0")""/emba.sh ""$*"
   export EMBACOMMAND
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:zZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:sxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -156,6 +163,12 @@ main()
       s)
         export SHORT_PATH=1
         ;;
+      x)
+        export DEEP_EXTRACTOR=1
+        ;;
+      W)
+        export HTML=1
+        ;;
       X)
         export FW_VERSION="$OPTARG"
         ;;
@@ -176,7 +189,7 @@ main()
     esac
   done
 
-  LOG_DIR="$(abs_path "$LOG_DIR")"
+  export HTML_PATH="$LOG_DIR""/html-report"
   print_output "" "no_log"
 
   if [[ -n "$FW_VENDOR" || -n "$FW_VERSION" || -n "$FW_DEVICE" || -n "$FW_NOTES" ]]; then
@@ -218,6 +231,11 @@ main()
     print_help
     exit 1
   fi
+  
+  if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
+     FORMAT_LOG=1
+     print_output "[*] Activate format log for HTML converter" "no_log"
+  fi
 
   if [[ $ONLY_DEP -eq 0 ]] ; then
     if [[ $IN_DOCKER -eq 0 ]] ; then
@@ -248,6 +266,11 @@ main()
     fi
   fi
 
+  if [[ "$HTML" -eq 1 ]]; then
+     mkdir "$HTML_PATH"
+     echo 
+  fi
+
   if [[ $USE_DOCKER -eq 1 ]] ; then
     if ! [[ $EUID -eq 0 ]] ; then
       print_output "[!] Using emba with docker-compose requires root permissions" "no_log"
@@ -262,7 +285,7 @@ main()
 
     OPTIND=1
     ARGS=""
-    while getopts a:A:cdDe:Ef:Fghik:l:m:sz OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:sX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -304,7 +327,15 @@ main()
       # 'main' functions of imported modules
       # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
-      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
+      local SELECT_PRE_MODULES_COUNT=0
+
+      for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
+        if [[ "$SELECT_NUM" =~ ^[p,P]{1} ]]; then
+          (( SELECT_PRE_MODULES_COUNT+=1 ))
+        fi
+      done
+
+      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
         local MODULES
         mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
         for MODULE_FILE in "${MODULES[@]}" ; do
@@ -324,6 +355,16 @@ main()
               MODULE_MAIN=${MODULE_BN%.*}
               $MODULE_MAIN
             fi
+          elif [[ "$SELECT_NUM" =~ ^[p,P]{1} ]]; then
+            local MODULES
+            mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
+            for MODULE_FILE in "${MODULES[@]}" ; do
+              if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+                MODULE_BN=$(basename "$MODULE_FILE")
+                MODULE_MAIN=${MODULE_BN%.*}
+                $MODULE_MAIN
+              fi
+            done
           fi
         done
 
@@ -344,6 +385,10 @@ main()
         architecture_dep_check
       fi
 
+      if [[ -n "${#ROOT_PATH[@]}" ]]; then
+        detect_root_dir_helper "$FIRMWARE_PATH"
+      fi
+
       check_firmware
 
       prepare_binary_arr
@@ -362,7 +407,11 @@ main()
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
+            HTML_REPORT=0
             $MODULE_MAIN
+            if [[ $HTML == 1 ]]; then
+               generate_html_file "$LOG_FILE" "$HTML_REPORT"
+            fi
             reset_module_count
           fi
         done
@@ -374,8 +423,22 @@ main()
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
               MODULE_MAIN=${MODULE_BN%.*}
+              HTML_REPORT=0
               $MODULE_MAIN
+              if [[ $HTML == 1 ]]; then
+                generate_html_file "$LOG_FILE" "$HTML_REPORT"
+              fi
             fi
+          elif [[ "$SELECT_NUM" =~ ^[s,S]{1} ]]; then
+            local MODULES
+            mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
+            for MODULE_FILE in "${MODULES[@]}" ; do
+              if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+                MODULE_BN=$(basename "$MODULE_FILE")
+                MODULE_MAIN=${MODULE_BN%.*}
+                $MODULE_MAIN
+              fi
+            done
           fi
         done
       fi
@@ -392,7 +455,11 @@ main()
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
       MODULE_MAIN=${MODULE_BN%.*}
+      HTML_REPORT=1
       $MODULE_MAIN
+      if [[ $HTML == 1 ]]; then
+        generate_html_file "$LOG_FILE" "$HTML_REPORT"
+      fi
       reset_module_count
     fi
   done

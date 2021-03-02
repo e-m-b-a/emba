@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S20_shell_check()
 {
@@ -28,6 +28,7 @@ S20_shell_check()
   S20_SCRIPTS=0
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
+    HTML_REPORT=1
     if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
       mkdir "$LOG_DIR""/shellchecker/" 2> /dev/null
     fi

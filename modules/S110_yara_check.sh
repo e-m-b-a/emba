@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S110_yara_check()
 {
@@ -42,11 +42,13 @@ S110_yara_check()
         if [[ -n "$S_OUTPUT" ]] ; then
           print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
           CHECK=1
+          HTML_REPORT=1
           (( YARA_CNT++ ))
         fi
       fi
     done
-    print_output "[*] Found $YARA_CNT yara rule matches."
+    print_output ""
+    print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches."
 
     if [[ $CHECK -eq 0 ]] ; then print_output "[-] No code patterns found with yara." ; fi
     # do not remove this to run multiple instances of emba

@@ -60,8 +60,12 @@ print_tool_info(){
     if [[ $2 -eq 0 ]] ; then
       echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
     else
-      echo -e "$ORANGE""$1"" will be updated.""$NC"
-      INSTALL_APP_LIST+=("$1")
+      if [[ $COMPLEMENT -eq 0 ]] ; then
+        echo -e "$ORANGE""$1"" will be updated.""$NC"
+        INSTALL_APP_LIST+=("$1")
+      else
+        echo -e "$ORANGE""$1"" won't be updated.""$NC"
+      fi
     fi
   else
     echo -e "$ORANGE""$1"" will be newly installed.""$NC"
@@ -69,11 +73,12 @@ print_tool_info(){
   fi
 }
 
-# print_file_info a b c
+# print_file_info a b c d e
 # a = file name
 # b = description of file
 # c = file url
 # d = path on system
+# e = if given: check this path or application is on the system instead of d
 
 print_file_info()
 {
@@ -94,10 +99,19 @@ print_file_info()
     echo -e "Download-Size: ""$FILE_SIZE"" B"
   fi
   if ! [[ -f "${4}" ]] ; then
-    echo -e "$ORANGE""${1}"" will be downloaded.""$NC"
-    DOWNLOAD_FILE_LIST+=("${1}")
+    if [[ -n "${5}" ]] ; then
+      if [[ -f "${5}" ]] || ( command -v "${5}" > /dev/null) || ( dpkg -s "${5}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+        echo -e "$ORANGE""$1"" won't be downloaded.""$NC"
+      else
+        echo -e "$ORANGE""$1"" will be downloaded.""$NC"
+        DOWNLOAD_FILE_LIST+=("$1")
+      fi
+    else
+      echo -e "$ORANGE""${1}"" will be downloaded.""$NC"
+      DOWNLOAD_FILE_LIST+=("${1}")
+    fi
   else
-    echo -e "$ORANGE""${1}"" is already downloaded.""$NC"
+    echo -e "$ORANGE""${1}"" is already been downloaded.""$NC"
   fi
 }
 
@@ -109,7 +123,6 @@ print_file_info()
 download_file()
 {
   for D_FILE in "${DOWNLOAD_FILE_LIST[@]}" ; do
-    echo "$D_FILE"
     if [[ "$D_FILE" == "${1}" ]] ; then
       echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1}""$NC"
       if ! [[ -f "${3}" ]] ; then
@@ -127,6 +140,7 @@ download_file()
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
+  echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
   echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
   echo -e "$CYAN""-h""$NC""         Print this help message"
 }
@@ -139,8 +153,13 @@ if ! [[ $EUID -eq 0 ]] ; then
   exit 1
 fi
 
-while getopts DFh OPT ; do
+while getopts cDFh OPT ; do
   case $OPT in
+    c)
+      export COMPLEMENT=1
+      export FORCE=1
+      echo -e "$GREEN""$BOLD""Complement emba dependecies""$NC"
+      ;;
     D)
       export IN_DOCKER=1
       echo -e "$GREEN""$BOLD""Install emba on docker""$NC"
@@ -171,12 +190,14 @@ print_tool_info "tree" 1
 print_tool_info "yara" 1
 print_tool_info "shellcheck" 1
 print_tool_info "pylint" 1
+print_tool_info "php" 1
 print_tool_info "device-tree-compiler" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
 print_tool_info "qemu-user-static" 0 "qemu-mips-static"
 print_tool_info "binwalk" 0
 print_tool_info "bc" 1
+print_tool_info "coreutils" 1
 
 if [[ "$FORCE" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -240,6 +261,51 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+# FACT-extractor docker
+
+echo -e "\\nWith emba you can automatically use FACT-extractor as a second extraction tool. Docker and the fact_extractor from fkiecad are required for this."
+INSTALL_APP_LIST=()
+print_tool_info "docker.io" 0 "docker"
+
+if command -v docker > /dev/null ; then
+  echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
+  export DOCKER_CLI_EXPERIMENTAL=enabled
+  f="$(docker manifest inspect fkiecad/fact_extractor:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
+  echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
+  export DOCKER_CLI_EXPERIMENTAL=disabled
+else
+  echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
+  echo "Download-Size: ~1500 MB"
+fi
+if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
+  echo -e "$ORANGE""fkiecad/fact_extractor docker image will be downloaded""$NC"
+else
+  echo -e "$ORANGE""fkiecad/fact_extractor docker image is already downloaded""$NC"
+fi
+
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    for APP in "${INSTALL_APP_LIST[@]}" ; do
+      apt-get install "$APP" -y
+    done
+    if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
+      docker pull fkiecad/fact_extractor:latest
+    fi
+    if ! [[ -f "./external/extract.py" ]]; then
+      download_file "FACT-extract" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
+      chmod +x ./external/extract.py
+    fi
+  ;;
+esac
+
+
 # open source tools from github
 
 echo -e "\\nWe use a few well-known open source tools in emba, for example checksec."
@@ -298,7 +364,7 @@ BINUTIL_VERSION_NAME="binutils-2.35.1"
 echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
 INSTALL_APP_LIST=()
 
-print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
+print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
 
 print_tool_info "texinfo" 1
 print_tool_info "gcc" 1
@@ -317,15 +383,18 @@ case ${ANSWER:0:1} in
       apt-get install "$APP" -y
     done
     download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
-    tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
-    cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
-    echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
-    ./configure --enable-targets=all
-    make
-    cd ../.. || exit 1
+    if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
+      tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
+      cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
+      echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
+      ./configure --enable-targets=all
+      make
+      cd ../.. || exit 1
+    fi
     if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
       mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
-      rm -R external/"$BINUTIL_VERSION_NAME"
+      rm -R "external/""$BINUTIL_VERSION_NAME"
+      rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
       if [[ -f "external/objdump" ]] ; then
         echo -e "$GREEN""objdump installed successfully""$NC"
       fi
@@ -346,7 +415,7 @@ print_file_info "cve.mitre.org database" "CVE® is a list of records—each cont
 print_tool_info "jq" 1
 for YEAR in $(seq 2002 $(($(date +%Y)))); do
   NVD_FILE="nvdcve-1.1-""$YEAR"".json"
-  print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
+  print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip" "./external/allitemscvss.csv"
 done
 
 if [[ "$FORCE" -eq 0 ]] ; then
@@ -402,15 +471,16 @@ case ${ANSWER:0:1} in
     for APP in "${INSTALL_APP_LIST[@]}" ; do
       apt-get install "$APP" -y
     done
-    pip3 install cve_searchsploit
     if [[ -d external/cve-search ]]; then
       echo -e "Found cve-search directory. Skipping installation."
     else
+      pip3 install cve_searchsploit
       git clone https://github.com/cve-search/cve-search.git external/cve-search
+      cd ./external/cve-search/ || exit 1
+      pip3 install -r requirements.txt
+      xargs sudo apt-get install -y < requirements.system
     fi
-    cd ./external/cve-search/ || exit 1
-    pip3 install -r requirements.txt
-    xargs sudo apt-get install -y < requirements.system
+
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
       if [[ "$FORCE" -eq 0 ]] ; then
         echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
@@ -429,6 +499,7 @@ case ${ANSWER:0:1} in
     echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
   ;;
 esac
+
 
 # binwalk
 
@@ -460,7 +531,8 @@ print_tool_info "build-essential" 1
 print_tool_info "zlib1g-dev" 1
 print_tool_info "liblzma-dev" 1
 print_tool_info "liblzo2-dev" 1
-print_tool_info "firmware-mod-kit" 1
+# print_tool_info "firmware-mod-kit" 1
+# This is no valid packet, couldn't be found
 
 if [[ "$FORCE" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
@@ -472,19 +544,19 @@ fi
 case ${ANSWER:0:1} in
   y|Y )
 
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
-
-    pip3 install nose
-    pip3 install coverage
-    pip3 install pyqtgraph
-    pip3 install capstone
-    pip3 install cstruct
-
     if [[ -f "/usr/local/bin/binwalk" ]]; then
       echo -e "Found binwalk. Skipping installation."
     else
+
+      for APP in "${INSTALL_APP_LIST[@]}" ; do
+        apt-get install "$APP" -y
+      done
+
+      pip3 install nose
+      pip3 install coverage
+      pip3 install pyqtgraph
+      pip3 install capstone
+      pip3 install cstruct
 
       git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
 
@@ -530,20 +602,42 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
-# aha for html generation - future extension of emba
-#echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
-#if ! [[ -f "external/aha" ]] ; then
-#  apt-get install make
-#  wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
-#  unzip ./external/aha-master.zip -d ./external
-#  rm external/aha-master.zip
-#  cd ./external/aha-master || exit 1
-#  echo -e "$ORANGE""$BOLD""Compile aha""$NC"
-#  make
-#  cd ../.. || exit 1
-#  mv "external/aha-master/aha" "external/aha"
-#  rm -R external/aha-master
-#else
-#  echo -e "$ORANGE""aha is already downloaded and compiled""$NC"
-#fi
 
+# aha for html generation
+INSTALL_APP_LIST=()
+echo -e "\\nTo use the emba report generator, we need a html file generator. make will be needed to compile aha."
+print_tool_info "make" 0
+if [[ "$FORCE" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and compile aha (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+else
+  echo -e "\\n""$MAGENTA""$BOLD""aha (if not already on the system) will be downloaded and be compiled!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
+    if ! [[ -f "external/aha" ]] ; then
+      for APP in "${INSTALL_APP_LIST[@]}" ; do
+        apt-get install "$APP" -y
+      done
+      wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
+      unzip ./external/aha-master.zip -d ./external
+      rm external/aha-master.zip
+      cd ./external/aha-master || exit 1
+      echo -e "$ORANGE""$BOLD""Compile aha""$NC"
+      make
+      cd ../.. || exit 1
+      mv "external/aha-master/aha" "external/aha"
+      rm -R external/aha-master
+      
+      if ! [[ -f "external/aha" ]] ; then
+         echo -e "$MAGENTA""$BOLD""aha installation failed! You can not use the emba report manager""$NC"
+      else
+         echo -e "$GREEN""aha has been installed""$NC"
+      fi
+    else
+      echo -e "$ORANGE""aha is already installed""$NC"
+    fi      
+  ;;
+esac

@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S65_config_file_check()
 {
@@ -37,6 +37,7 @@ scan_config()
 
   if [[ "${CONF_FILES_ARR[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#CONF_FILES_ARR[@]} -ne 0 ]] ; then
+    HTML_REPORT=1
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
     for LINE in "${CONF_FILES_ARR[@]}" ; do
       #if [[ -f "$LINE" ]] ; then
@@ -60,6 +61,7 @@ check_fstab()
   fi
 
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then
+    HTML_REPORT=1
     print_output "[+] Found ""${#FSTAB_USER_FILES[@]}"" fstab files with user details included:"
     for LINE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -70,6 +72,7 @@ check_fstab()
   fi
 
   if [[ ${#FSTAB_PASS_FILES[@]} -gt 0 ]] ; then
+    HTML_REPORT=1
     print_output "[+] Found ""${#FSTAB_PASS_FILES[@]}"" fstab files with password credentials included:"
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"

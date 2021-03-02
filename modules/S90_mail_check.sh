@@ -17,7 +17,7 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
-
+export HTML_REPORT
 
 S90_mail_check()
 {
@@ -36,6 +36,7 @@ S90_mail_check()
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS")")"
         FINDING=1
+        HTML_REPORT=1
       fi
     fi
   done
@@ -50,6 +51,7 @@ S90_mail_check()
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS_ROOT")")"
         FINDING=1
+        HTML_REPORT=1
       fi
     fi
   done
