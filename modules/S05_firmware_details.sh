@@ -65,6 +65,7 @@ S05_firmware_details()
 release_info()
 {
   sub_module_title "Release/Version information"
+  print_output "[*] $(date) - Sub module ${FUNCNAME[0]} starting ... " "main"
 
   local RELEASE_STUFF
   mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg")
@@ -86,5 +87,6 @@ release_info()
   else
     print_output "[-] No release/version information of target found"
   fi
+  print_output "[*] $(date) - Sub module ${FUNCNAME[0]} finished ... " "main"
 
 }

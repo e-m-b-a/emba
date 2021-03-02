@@ -84,7 +84,7 @@ main()
                                 # 1 -> multi threaded (currently only in pre-checking phase)
 
   export LOG_DIR="$INVOCATION_PATH""/logs"
-  export MAIN_LOG=emba.log
+  export MAIN_LOG="emba.log"
   export CONFIG_DIR="$INVOCATION_PATH""/config"
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"
@@ -360,8 +360,8 @@ main()
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
-            print_output "[*] $(date) - $MODULE_BN starting ... " "main"
             MODULE_MAIN=${MODULE_BN%.*}
+            print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
             $MODULE_MAIN
           fi
         done
@@ -372,8 +372,8 @@ main()
             MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
-              print_output "[*] $(date) - $MODULE_BN starting ... " "main"
               MODULE_MAIN=${MODULE_BN%.*}
+              print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
               $MODULE_MAIN
             fi
           elif [[ "$SELECT_NUM" =~ ^[p,P]{1} ]]; then
@@ -382,8 +382,8 @@ main()
             for MODULE_FILE in "${MODULES[@]}" ; do
               if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
                 MODULE_BN=$(basename "$MODULE_FILE")
-                print_output "[*] $(date) - $MODULE_BN starting ... " "main"
                 MODULE_MAIN=${MODULE_BN%.*}
+                print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
                 $MODULE_MAIN
               fi
             done
@@ -456,8 +456,8 @@ main()
           MODULE_FILE="$MOD_DIR"/S120_cwe_checker.sh
 
           MODULE_BN=$(basename "$MODULE_FILE")
-          print_output "[*] $(date) - $MODULE_BN starting ... " "main"
           MODULE_MAIN=${MODULE_BN%.*}
+          print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
           HTML_REPORT=0
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
@@ -466,8 +466,8 @@ main()
         if [[ $QEMULATION -eq 1 ]]; then
           MODULE_FILE="$MOD_DIR"/S115_usermode_emulator.sh
           MODULE_BN=$(basename "$MODULE_FILE")
-          print_output "[*] $(date) - $MODULE_BN starting ... " "main"
           MODULE_MAIN=${MODULE_BN%.*}
+          print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
           HTML_REPORT=0
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
@@ -484,8 +484,8 @@ main()
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             MODULE_BN=$(basename "$MODULE_FILE")
-            print_output "[*] $(date) - $MODULE_BN starting ... " "main"
             MODULE_MAIN=${MODULE_BN%.*}
+            print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
             HTML_REPORT=0
 
             if [[ $THREADED -eq 1 ]]; then
@@ -513,8 +513,8 @@ main()
             fi
             if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
               MODULE_BN=$(basename "$MODULE")
-              print_output "[*] $(date) - $MODULE_BN starting ... " "main"
               MODULE_MAIN=${MODULE_BN%.*}
+              print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
               HTML_REPORT=0
               if [[ $THREADED -eq 1 ]]; then
                 $MODULE_MAIN &
@@ -534,8 +534,8 @@ main()
             for MODULE_FILE in "${MODULES[@]}" ; do
               if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
                 MODULE_BN=$(basename "$MODULE_FILE")
-                print_output "[*] $(date) - $MODULE_BN starting ... " "main"
                 MODULE_MAIN=${MODULE_BN%.*}
+                print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
                 if [[ $THREADED -eq 1 ]]; then
                   $MODULE_MAIN &
                   WAIT_PIDS+=( "$!" )
@@ -564,8 +564,8 @@ main()
       for MODULE_FILE in "${MODULES[@]}" ; do
         if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
           MODULE_BN=$(basename "$MODULE_FILE")
-          print_output "[*] $(date) - $MODULE_BN starting ... " "main"
           MODULE_MAIN=${MODULE_BN%.*}
+          print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
           HTML_REPORT=1
           if [[ $THREADED -eq 1 ]]; then
             $MODULE_MAIN &
@@ -600,8 +600,8 @@ main()
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       MODULE_BN=$(basename "$MODULE_FILE")
-      print_output "[*] $(date) - $MODULE_BN starting ... " "main"
       MODULE_MAIN=${MODULE_BN%.*}
+      print_output "[*] $(date) - $MODULE_MAIN starting ... " "main"
       HTML_REPORT=1
       $MODULE_MAIN
       if [[ $HTML == 1 ]]; then

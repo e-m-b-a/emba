@@ -113,10 +113,11 @@ architecture_check()
 prepare_file_arr()
 {
   echo ""
-  print_output "[*] Unique binary auto detection (could take some time)\\n" "no_log"
+  print_output "[*] Unique files auto detection (could take some time)\\n" "main"
 
   export FILE_ARR
-  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
+  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
 
   # remove ./proc/* executables (for live testing)
   rm_proc_binary "${BINARIES[@]}"
@@ -125,13 +126,13 @@ prepare_file_arr()
 prepare_binary_arr()
 {
   echo ""
-  print_output "[*] Unique binary auto detection (could take some time)\\n" "no_log"
+  print_output "[*] Unique binary auto detection (could take some time)\\n" "main"
 
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
   readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-  print_output "[*] Found ${#BINARIES[@]} unique executables." "no_log"
+  print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables." "main"
 
   # remove ./proc/* executables (for live testing)
   rm_proc_binary "${BINARIES[@]}"

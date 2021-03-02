@@ -24,6 +24,7 @@ S110_yara_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check for code patterns with yara"
   LOG_FILE="$( get_log_file )"
+  print_output "[!] FILE_ARR: ${#FILE_ARR[@]}"
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it
