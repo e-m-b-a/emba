@@ -36,7 +36,8 @@ S103_deep_search()
     local COUNT=0
     print_output "[*] Searching all files for '""$PATTERN""' ... this may take a while!"
     echo
-    readarray -t FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f)
+    # FILE_ARR is known from the helper modules
+    #readarray -t FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f)
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
       if [[ -e "$DEEP_S_FILE" ]] ; then
         local S_OUTPUT

@@ -415,7 +415,7 @@ generate_special_log() {
 
   readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
   print_output ""
-  print_output "[*] Generate CVE log file in $LOG_DIR/aggregator/CVE_minimal.txt:\\n"
+  print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
   for FILE in "${FILES[@]}"; do
     NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
     CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
@@ -429,7 +429,7 @@ generate_special_log() {
   done
 
   print_output ""
-  print_output "[*] Generate minimal exploit summary file in $LOG_DIR/aggregator/exploits-overview.txt:\\n"
+  print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
   mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
   for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
     print_output "$EXPLOIT_"
