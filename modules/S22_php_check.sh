@@ -32,7 +32,7 @@ S22_php_check()
     if ! [[ -d "$LOG_DIR""/php_checker/" ]] ; then
       mkdir "$LOG_DIR""/php_checker/" 2> /dev/null
     fi
-    mapfile -t PHP_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -iname "*.php")
+    mapfile -t PHP_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
     for LINE in "${PHP_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "PHP script" ) ; then
         ((S22_PHP_SCRIPTS++))

@@ -33,7 +33,7 @@ S21_python_check()
     if ! [[ -d "$LOG_DIR""/pylint_checker/" ]] ; then
       mkdir "$LOG_DIR""/pylint_checker/" 2> /dev/null
     fi
-    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -iname "*.py")
+    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
         ((S21_PY_SCRIPTS++))

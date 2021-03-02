@@ -33,7 +33,8 @@ S20_shell_check()
     if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
       mkdir "$LOG_DIR""/shellchecker/" 2> /dev/null
     fi
-    for LINE in "${BINARIES[@]}" ; do
+    mapfile -t SH_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
+    for LINE in "${SH_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "shell script" ) ; then
         ((S20_SCRIPTS++))
         NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
