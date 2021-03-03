@@ -33,7 +33,7 @@ S20_shell_check()
     if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
       mkdir "$LOG_DIR""/shellchecker/" 2> /dev/null
     fi
-    mapfile -t SH_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
+    mapfile -t SH_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
     for LINE in "${SH_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "shell script" ) ; then
         ((S20_SCRIPTS++))
@@ -75,5 +75,5 @@ S20_shell_check()
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }

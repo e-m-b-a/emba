@@ -14,7 +14,9 @@
 
 # Description:  Module that checks all files of the firmware against a dictionary
 #               with common Linux files.
+
 export HTML_REPORT
+
 S108_linux_common_file_checker() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Module to check for common linux files"
@@ -23,7 +25,6 @@ S108_linux_common_file_checker() {
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     print_output "[*] Using ""$BASE_LINUX_FILES"" as dictionary for common Linux files\n"
-#    readarray -t ALL_FIRMWARE_FILES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
     HTML_REPORT=1
     FILE_COUNTER=0
     FILE_COUNTER_ALL=0
@@ -41,5 +42,5 @@ S108_linux_common_file_checker() {
   else
     print_output "[-] No common Linux files dictionary (""$BASE_LINUX_FILES"") found in config directory"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }

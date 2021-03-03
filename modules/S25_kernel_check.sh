@@ -94,7 +94,8 @@ S25_kernel_check()
     done
   fi
   echo "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD" >> "$LOG_FILE"
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 get_kernel_vulns()

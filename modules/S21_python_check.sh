@@ -33,7 +33,7 @@ S21_python_check()
     if ! [[ -d "$LOG_DIR""/pylint_checker/" ]] ; then
       mkdir "$LOG_DIR""/pylint_checker/" 2> /dev/null
     fi
-    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
+    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
         ((S21_PY_SCRIPTS++))
@@ -79,5 +79,5 @@ S21_python_check()
   else
     print_output "[-] Pylint check is disabled ... no tests performed"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }

@@ -103,7 +103,8 @@ S115_usermode_emulator() {
     print_output "[!] Automated emulation is disabled."
     print_output "[!] Enable it with the -E switch."
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 print_filesystem_fixes() {

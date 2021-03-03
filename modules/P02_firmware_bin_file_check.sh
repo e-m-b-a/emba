@@ -27,5 +27,5 @@ P02_firmware_bin_file_check() {
   print_output "$(indent "$FILE_BIN_OUT")"
 
   # probably we can do a lot more stuff in the future ...
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }

@@ -56,6 +56,7 @@ S110_yara_check()
   else
     print_output "[!] Check with yara not possible, because it isn't installed!"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 

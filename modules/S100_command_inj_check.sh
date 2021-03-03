@@ -63,5 +63,5 @@ S100_command_inj_check()
   else
     print_output "[-] No directories or files used for web scripts found"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }

@@ -78,5 +78,5 @@ S103_deep_search()
       print_output "$( indent "$(orange "$OCC" )")"
     done
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }

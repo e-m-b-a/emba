@@ -27,7 +27,8 @@ S35_http_file_check()
   http_file_search
   webserver_check
   php_check
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 http_file_search()

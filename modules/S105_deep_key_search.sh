@@ -45,6 +45,6 @@ S105_deep_key_search()
     done
     echo
   done
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }
 

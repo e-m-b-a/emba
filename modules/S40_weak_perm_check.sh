@@ -104,5 +104,6 @@ S40_weak_perm_check() {
   else
     print_output "[-] No init.d files with weak permissions found"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}"
 }

@@ -168,6 +168,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
+    #file-
+    VERSION_lower="${VERSION_lower//file-/file\ }"
     #libpcre.1.2.3
     VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
     VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
@@ -186,6 +188,8 @@ prepare_version_data() {
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ perl\ ([0-9]),\ ([0-9][0-9]),\ sub([0-9])/perl\ \1\.\2\.\3/')"
+    #"GNU\ gdb\ \(Debian\ [0-9]\.[0-9]+-[0-9]\)\ "
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/gnu\ gdb\ \(debian\ ([0-9]\.[0-9]+-[0-9]+\))\ /gdb\ \1/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
@@ -299,12 +303,24 @@ prepare_version_data() {
     #tar (GNU tar) 1.23
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ tar)/gnu:tar/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ findutils)/gnu:findutils/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ groff)/gnu:groff/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ sed)/gnu:sed/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ mtools)/gnu:mtools/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ cpio)/gnu:cpio/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(grub)/grub/')"
     VERSION_lower="${VERSION_lower//gnu\ sed/gnu:sed}"
     VERSION_lower="${VERSION_lower//gnu\ make/gnu:make}"
     VERSION_lower="${VERSION_lower//gnu\ nano/gnu:nano}"
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//loadkeys\ from\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//kbd_mode\ from\ kbd/kbd-project:kbd}"
+    #dpkg-ABC -> dpkg
+    VERSION_lower="${VERSION_lower//dpkg-divert/debian:dpkg}"
+    VERSION_lower="${VERSION_lower//dpkg-split/debian:dpkg}"
+    VERSION_lower="${VERSION_lower//dpkg-deb/debian:dpkg}"
+    VERSION_lower="${VERSION_lower//dpkg-trigger/debian:dpkg}"
     # ncurses -> gnu:ncurses
     VERSION_lower="${VERSION_lower//ncurses/gnu:ncurses}"
     #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
@@ -434,7 +450,16 @@ generate_special_log() {
   print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
   mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
   for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
-    print_output "$EXPLOIT_"
+    # remove color codes:
+    EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    CVSS_value=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+    if (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
+      print_output "$RED$EXPLOIT_$NC"
+    elif (( $(echo "$CVSS_value > 3.9" | bc -l) )); then
+      print_output "$ORANGE$EXPLOIT_$NC"
+    else
+      print_output "$GREEN$EXPLOIT_$NC"
+    fi
   done
   echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
   grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"

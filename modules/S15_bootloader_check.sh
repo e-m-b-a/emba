@@ -32,7 +32,7 @@ S15_bootloader_check()
   find_boot_files
   find_runlevel
 
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }
 
 check_dtb()

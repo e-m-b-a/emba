@@ -36,6 +36,7 @@ S70_hidden_file_check()
   else
     print_output "[-] No hidden files found!"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 

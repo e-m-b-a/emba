@@ -25,11 +25,15 @@ S10_binaries_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries"
 
+  LOG_FILE="$( get_log_file )"
+
   vul_func_basic_check
   objdump_disassembly
   binary_protection
 
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 vul_func_basic_check()
@@ -65,6 +69,7 @@ vul_func_basic_check()
     done
     print_output "[*] Found ""$COUNTER"" binaries with interesting functions in ""$BIN_COUNT"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
+
 }
 
 objdump_disassembly()

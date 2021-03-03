@@ -26,7 +26,8 @@ S85_ssh_check()
 
   search_ssh_files
   check_squid
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 search_ssh_files()
