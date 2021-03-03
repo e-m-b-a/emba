@@ -594,6 +594,12 @@ main()
     fi
   fi
 
+  if [[ -d "$LOG_DIR" ]]; then
+    print_output "[!] Reporting phase started on ""$(date)""\\n" "main" 
+  else
+    print_output "[!] Reporting phase started on ""$(date)""\\n" "no_log" 
+  fi
+ 
   # 'main' functions of imported finishing modules
   local MODULES
   mapfile -t MODULES < <(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)

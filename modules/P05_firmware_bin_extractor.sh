@@ -105,10 +105,10 @@ deep_extractor() {
   print_output "[*] Deep extraction with binwalk - 1st round"
 
   FILES_BEFORE_DEEP=$(find "$LOG_DIR"/extractor/ -type f | wc -l )
-  find "$LOG_DIR"/extractor/ -type f -exec binwalk -e -M {} \;
+  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \;
 
   print_output "[*] Deep extraction with binwalk - 2nd round"
-  find "$LOG_DIR"/extractor/ -type f -exec binwalk -e -M {} \;
+  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \;
   FILES_AFTER_DEEP=$(find "$LOG_DIR"/extractor/ -type f | wc -l )
 
   print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."

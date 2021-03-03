@@ -24,7 +24,6 @@ S110_yara_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check for code patterns with yara"
   LOG_FILE="$( get_log_file )"
-  print_output "[!] FILE_ARR: ${#FILE_ARR[@]}"
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it
@@ -34,9 +33,7 @@ S110_yara_check()
     fi
 
     local CHECK=0
-#    local FILE_ARR
     YARA_CNT=0
-#    readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1)
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
       if [[ -e "$YARA_S_FILE" ]] ; then
         local S_OUTPUT
@@ -50,7 +47,7 @@ S110_yara_check()
       fi
     done
     print_output ""
-    print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches."
+    print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches in $ORANGE${#FILE_ARR[@]}$NC files."
     echo -e "\\n[*] Statistics:$YARA_CNT" >> "$LOG_FILE"
 
     if [[ $CHECK -eq 0 ]] ; then print_output "[-] No code patterns found with yara." ; fi

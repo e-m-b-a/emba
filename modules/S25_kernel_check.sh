@@ -28,8 +28,10 @@ S25_kernel_check()
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
+    mapfile -t KERNEL_MODULES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
     mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
     mapfile -t KERNEL_DESC < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')
+
     if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
       print_output "Kernel version:"
       for LINE in "${KERNEL_VERSION[@]}" ; do
@@ -82,14 +84,13 @@ S25_kernel_check()
     fi
   fi
 
-  # we log the found kernel versions without formatting -> used later in the aggregator
   if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
     LOG_FILE="$( get_log_file )"
     for LINE in "${KV_C_ARR[@]}" ; do
       echo "[*] Statistics:$LINE" >> "$LOG_FILE"
     done
   fi
-  echo "[*] Statistics1:${#MOD_DATA[@]}:$KMOD_BAD" >> "$LOG_FILE"
+  echo "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD" >> "$LOG_FILE"
   print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
@@ -195,7 +196,6 @@ check_modprobe()
   else
     HTML_REPORT=1
   fi
-
 
 }
 
