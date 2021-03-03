@@ -162,27 +162,27 @@ output_binaries() {
     if [[ -n "$CANARY" ]]; then
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$RELRO" ]]; then
       RELRO_PER=$(bc -l <<< "$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
       RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$NX" ]]; then
       NX_PER=$(bc -l <<< "$NX/($BINS_CHECKED/100)" 2>/dev/null)
       NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$PIE" ]]; then
       PIE_PER=$(bc -l <<< "$PIE/($BINS_CHECKED/100)" 2>/dev/null)
       PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$STRIPPED" ]]; then
       STRIPPED_PER=$(bc -l <<< "$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
   fi
 

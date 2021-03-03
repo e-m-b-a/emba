@@ -117,6 +117,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ xl2tpd-/xl2tp\ }"
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//goahead\ /goahead\ }"
+    # sqlite3 -> sqlite
+    VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
