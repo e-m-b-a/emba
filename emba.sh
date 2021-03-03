@@ -81,7 +81,7 @@ main()
                                 # afterwards do a default emba scan
   export PRE_TESTING_DONE=0     # finished pre-testing phase
   export THREADED=0             # 0 -> single thread
-                                # 1 -> multi threaded (currently only in pre-checking phase)
+                                # 1 -> multi threaded
   export MOD_RUNNING=0          # for tracking how many modules currently running
 
   export LOG_DIR="$INVOCATION_PATH""/logs"
