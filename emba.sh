@@ -409,11 +409,12 @@ main()
         print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       fi
 
-      print_output "[!] Firmware value: $FIRMWARE"
-      print_output "[!] Firmware path: $FIRMWARE_PATH"
-      print_output "[!] Output dir: $OUTPUT_DIR"
-      print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
-      print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
+      # usefull prints for debuggin:
+      #print_output "[!] Firmware value: $FIRMWARE"
+      #print_output "[!] Firmware path: $FIRMWARE_PATH"
+      #print_output "[!] Output dir: $OUTPUT_DIR"
+      #print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
+      #print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
       PRE_TESTING_DONE=1
     fi
   fi
