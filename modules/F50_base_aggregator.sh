@@ -150,9 +150,9 @@ output_binaries() {
     print_output "\\n-----------------------------------------------------------------\\n"
     if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S10_LOG")
-      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S10_LOG_LOG")
-      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$S10_LOG_LOG")
-      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S10_LOG_LOG")
+      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S10_LOG")
+      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$S10_LOG")
+      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S10_LOG")
       STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$S10_LOG")
       BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$S10_LOG")
       # we have to remove the first line of the original output:
