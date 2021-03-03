@@ -38,6 +38,7 @@ interesting_binaries()
   sub_module_title "Interesting binaries"
 
   local COUNT=0
+  declare -a MD5_DONE_INT
   INT_COUNT=0
 
   mapfile -t INT_BIN < <(config_find "$CONFIG_DIR""/interesting_binaries.cfg")
@@ -45,12 +46,17 @@ interesting_binaries()
   elif [[ "${#INT_BIN[@]}" -ne 0 ]] ; then
     for LINE in "${INT_BIN[@]}" ; do
       if [[ -f "$LINE" ]] && file "$LINE" | grep -q "executable" ; then
-        if [[ $COUNT -eq 0 ]] ; then
-          print_output "[+] Found interesting binaries:"
-          COUNT=1
+        # we need every binary only once. So calculate the checksum and store it for checking
+        BIN_MD5=$(md5sum "$LINE" | cut -d\  -f1)
+        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
+          if [[ $COUNT -eq 0 ]] ; then
+            print_output "[+] Found interesting binaries:"
+            COUNT=1
+          fi
+          print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+          ((INT_COUNT++))
+          MD5_DONE_INT+=( "$BIN_MD5" )
         fi
-        print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-        ((INT_COUNT++))
       fi
     done
   fi
@@ -66,6 +72,7 @@ post_exploitation()
   sub_module_title "Interesting binaries for post exploitation"
 
   local COUNT=0
+  declare -a MD5_DONE_POST
   POST_COUNT=0
 
   mapfile -t INT_BIN_PE < <(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg")
@@ -73,12 +80,17 @@ post_exploitation()
   elif [[ "${#INT_BIN_PE[@]}" -ne 0 ]] ; then
     for LINE in "${INT_BIN_PE[@]}" ; do
       if [[ -f "$LINE" ]] && file "$LINE" | grep -q "executable" ; then
-        if [[ $COUNT -eq 0 ]] ; then
-          print_output "[+] Found interesting binaries for post exploitation:"
-          COUNT=1
+        # we need every binary only once. So calculate the checksum and store it for checking
+        BIN_MD5=$(md5sum "$LINE" | cut -d\  -f1)
+        if [[ ! " ${MD5_DONE_POST[*]} " =~ ${BIN_MD5} ]]; then
+          if [[ $COUNT -eq 0 ]] ; then
+            print_output "[+] Found interesting binaries for post exploitation:"
+            COUNT=1
+          fi
+          print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+          ((POST_COUNT++))
+          MD5_DONE_POST+=( "$BIN_MD5" )
         fi
-        print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-        ((POST_COUNT++))
       fi
     done
   fi

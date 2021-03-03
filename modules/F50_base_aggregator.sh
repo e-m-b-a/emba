@@ -125,7 +125,7 @@ output_details() {
     print_output "[+] Found ""$ORANGE""""$CERT_OUT_CNT""""$GREEN"" outdated certificates in ""$ORANGE""""$CERT_CNT""""$GREEN"" certificates.""$NC"""
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$YARA_CNT""""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$NC files.""$NC"""
+    print_output "[+] Found ""$ORANGE""""$YARA_CNT""""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"""
   fi
   if [[ -n "$FILE_COUNTER" ]]; then
     print_output "[+] Found ""$ORANGE""""$FILE_COUNTER""""$GREEN"" not common Linux files with ""$ORANGE""""$FILE_COUNTER_ALL""""$GREEN"" files at all.""$NC"""
