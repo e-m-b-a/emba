@@ -200,20 +200,27 @@ config_list() {
 }
 
 config_find() {
+  MD5_DONE_INT=()
   if [[ -f "$1" ]] ; then
     if [[ "$( wc -l "$1" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
       local FIND_COMMAND
       IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "$1" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
+      # sort and unique via md5 checksums
       mapfile -t FIND_O < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev "${FIND_COMMAND[@]}")
       for LINE in "${FIND_O[@]}"; do
-        if [[ -L "$LINE" ]] ; then
-          local REAL_PATH
-          REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
-          if [[ -f  "$REAL_PATH" ]] ; then
-            FILES="$FILES""$REAL_PATH""\n"
+        # make our results unique:
+        BIN_MD5=$(md5sum "$LINE" 2>/dev/null | cut -d\  -f1)
+        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
+          if [[ -L "$LINE" ]] ; then
+            local REAL_PATH
+            REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
+            if [[ -f  "$REAL_PATH" ]] ; then
+              FILES="$FILES""$REAL_PATH""\n"
+            fi
+          else
+            FILES="$FILES""$LINE""\n"
           fi
-        else
-          FILES="$FILES""$LINE""\n"
+          MD5_DONE_INT+=( "$BIN_MD5" )
         fi
       done
       echo -e "$FILES" | sed -z '$ s/\n$//' | sort -u
