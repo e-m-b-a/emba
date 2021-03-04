@@ -85,7 +85,7 @@ F19_cve_aggregator() {
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}"
 }
 
 prepare_version_data() {
@@ -532,6 +532,8 @@ generate_cve_details() {
         if [[ "$EXPLOIT" == "No exploit available" ]]; then
           if cve_searchsploit "$CVE_value" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
             EXPLOIT="Exploit available (Source: Exploit database)"
+            echo -e "\\n[+] Exploit for $CVE_value:\\n" >> "$LOG_DIR"/aggregator/exploit-details.txt
+            cve_searchsploit "$CVE_value" >> "$LOG_DIR"/aggregator/exploit-details.txt
             ((EXPLOIT_COUNTER++))
             ((EXPLOIT_COUNTER_VERSION++))
           fi

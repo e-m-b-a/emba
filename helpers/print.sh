@@ -416,13 +416,13 @@ print_excluded()
 
 module_start_log() {
   MODULE_MAIN_NAME="$1"
-  print_output "[*] $(date) - $MODULE_MAIN_NAME starting ... " "main"
+  print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   ((MOD_RUNNING++))
 }
 
 module_end_log() {
   MODULE_MAIN_NAME="$1"
-  print_output "[*] $(date) - $MODULE_MAIN_NAME finished ... " "main"
+  print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
   ((MOD_RUNNING--))
   #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }
