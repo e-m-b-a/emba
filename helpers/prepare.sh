@@ -119,8 +119,9 @@ prepare_file_arr()
   readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
   print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
 
+  # I xdev will to the trick for us:
   # remove ./proc/* executables (for live testing)
-  rm_proc_binary "${BINARIES[@]}"
+  #rm_proc_binary "${FILE_ARR[@]}"
 }
 
 prepare_binary_arr()
@@ -135,7 +136,7 @@ prepare_binary_arr()
   print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables." "main"
 
   # remove ./proc/* executables (for live testing)
-  rm_proc_binary "${BINARIES[@]}"
+  #rm_proc_binary "${BINARIES[@]}"
 }
 
 set_etc_paths()
