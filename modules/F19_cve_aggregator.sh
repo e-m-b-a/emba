@@ -111,6 +111,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//zic\.c/zic}"
     #bzip2, a block-sorting file compressor.  Version 1.0.6, 
     VERSION_lower="${VERSION_lower//bzip2,\ a\ block-sorting\ file\ compressor\.\ version/bzip2}"
+    # gnutls
+    VERSION_lower="${VERSION_lower//enabled\ gnutls/gnutls}"
+    VERSION_lower="${VERSION_lower//project-id-version:\ gnutls/gnutls}"
     #jQuery JavaScript Library v1.4.3
     VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
     # GNU Midnight Commander 
@@ -163,6 +166,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nandwrite/mtd-utils}"
     VERSION_lower="${VERSION_lower//nanddump/mtd-utils}"
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
+    # zlib:binary:"deflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark\ Adler"
+    # zlib:binary:"inflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark Adler"
+    VERSION_lower="${VERSION_lower//deflate/zlib}"
+    VERSION_lower="${VERSION_lower//inflate/zlib}"
     #ntfslabel -> ntfs-3g
     VERSION_lower="${VERSION_lower//ntfslabel/ntfs-3g}"
     #i2cXYZ -> i2c-tools

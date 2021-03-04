@@ -142,7 +142,7 @@ version_detection() {
         fi
       fi
     else
-      readarray -t VERSIONS_DETECTED < <(grep -o -E "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/* 2>/dev/null)
+      readarray -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/* 2>/dev/null)
     fi
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
