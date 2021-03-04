@@ -105,6 +105,8 @@ prepare_version_data() {
     # alsactl, amixer -> alsa
     VERSION_lower="${VERSION_lower//alsactl/alsa}"
     VERSION_lower="${VERSION_lower//amixer/alsa}"
+    # VIM - Vi IMproved 1.2
+    VERSION_lower="${VERSION_lower//vim\ -\ vi\ improved/vim}"
     #zic.c
     VERSION_lower="${VERSION_lower//zic\.c/zic}"
     #bzip2, a block-sorting file compressor.  Version 1.0.6, 
@@ -117,6 +119,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ xl2tpd-/xl2tp\ }"
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//goahead\ /goahead\ }"
+    # nc.traditional:strict:"\[v[0-9]\.[0-9]+-[0-9]+\]$"
+    VERSION_lower="${VERSION_lower//nc.traditional\ \[v\ /nc.traditional\ }"
     # sqlite3 -> sqlite
     VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
     # Compiled\ with\ U-Boot -> u-boot
@@ -177,6 +181,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
     VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/nc\.traditional\ \[v\ /nc.traditional\ /g')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/getconf\ (.*)/getconf/')"
     # shellcheck disable=SC2001
@@ -361,6 +367,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ralink\ dot1x\ daemon\ \=\ /ralink-dot1x\ }"
     #his\ is\ WiFiDog\ 
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
+    # letz try to handle something like 1p2 -> 1:p2
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
 
     # final cleanup of start and ending
     # shellcheck disable=SC2001
