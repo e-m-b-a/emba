@@ -45,6 +45,10 @@ P07_firmware_bin_base_analyzer() {
     fi
   fi
 
+  if [[ $THREADED -eq 1 ]]; then
+    wait_for_pid
+  fi
+
   module_end_log "${FUNCNAME[0]}"
 }
 
