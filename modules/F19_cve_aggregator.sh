@@ -123,7 +123,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//goahead\ /goahead\ }"
     # nc.traditional:strict:"\[v[0-9]\.[0-9]+-[0-9]+\]$"
-    VERSION_lower="${VERSION_lower//nc.traditional\ \[v\ /nc.traditional\ }"
+    VERSION_lower="${VERSION_lower//nc.traditional\ \[v/nc.traditional\ }"
     # sqlite3 -> sqlite
     VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
     # Compiled\ with\ U-Boot -> u-boot
