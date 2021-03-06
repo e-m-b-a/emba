@@ -37,5 +37,7 @@ S55_history_file_check()
   else
     print_output "[-] No history files found"
   fi
+
+  module_end_log "${FUNCNAME[0]}"
 }
 

@@ -33,9 +33,9 @@ S100_command_inj_check()
     for DIR in "${CMD_INJ_DIRS[@]}" ; do
       if [[ -d "$DIR" ]] ; then
         print_output "$(indent "$(print_path "$DIR")")"
-        mapfile -t FILE_ARR < <( find "$DIR" -type f)
+        mapfile -t FILE_ARRX < <( find "$DIR" -xdev -type f)
 
-        for FILE_S in "${FILE_ARR[@]}" ; do
+        for FILE_S in "${FILE_ARRX[@]}" ; do
           if file "$FILE_S" | grep -q -E "script.*executable" ; then
             print_output "$( indent "$(orange "$(print_path "$FILE_S")"" -> Executable")")"
 
@@ -63,4 +63,5 @@ S100_command_inj_check()
   else
     print_output "[-] No directories or files used for web scripts found"
   fi
+  module_end_log "${FUNCNAME[0]}"
 }

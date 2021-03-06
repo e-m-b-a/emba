@@ -50,10 +50,10 @@ S115_usermode_emulator() {
 
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_output "[*] Running emulation processes in $R_PATH root path ..."
-      readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -ignore_readdir_race -type f -executable 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f -executable 2>/dev/null && cd "$DIR" || exit)
 
       print_output "[*] Found ${#R_BINARIES[@]} unique executables in root dirctory: $R_PATH."
 
@@ -103,6 +103,8 @@ S115_usermode_emulator() {
     print_output "[!] Automated emulation is disabled."
     print_output "[!] Enable it with the -E switch."
   fi
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 print_filesystem_fixes() {
@@ -127,7 +129,7 @@ version_detection() {
     # if we have the key strict this version identifier only works for the defined binary and is not generic!
     if [[ $STRICT == "strict" ]]; then
       if [[ -f "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt ]]; then
-        VERSION_STRICT=$(grep -o -E "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
+        VERSION_STRICT=$(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
         if [[ -n "$VERSION_STRICT" ]]; then
           if [[ "$BINARY" == "smbd" ]]; then
             # we log it as the original binary and the samba binary name
@@ -140,7 +142,7 @@ version_detection() {
         fi
       fi
     else
-      readarray -t VERSIONS_DETECTED < <(grep -o -E "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/* 2>/dev/null)
+      readarray -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_DIR"/qemu_emulator/* 2>/dev/null)
     fi
 
     if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
@@ -159,11 +161,22 @@ version_detection() {
 }
 
 copy_firmware() {
-  print_output "[*] Create a firmware backup for emulation ..."
-  cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/ 2> /dev/null
-  EMULATION_DIR=$(basename "$FIRMWARE_PATH")
-  EMULATION_PATH_BASE="$LOG_DIR"/"$EMULATION_DIR"
-  print_output "[*] Firmware backup for emulation created in $EMULATION_PATH_BASE"
+  # we just create a backup if the original firmware path was a root directory
+  # if it was a binary file we already have extracted it and it is already messed up
+  # so we can mess it up a bit more ;)
+  # shellcheck disable=SC2154
+  if [[ -d "$FIRMWARE_PATH_bak" ]]; then
+    print_output "[*] Create a firmware backup for emulation ..."
+    mkdir "$LOG_DIR""/qemu_emulator" 2>/dev/null
+    cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/qemu_emulator/ 2> /dev/null
+    EMULATION_DIR=$(basename "$FIRMWARE_PATH")
+    EMULATION_PATH_BASE="$LOG_DIR"/qemu_emulator/"$EMULATION_DIR"
+    print_output "[*] Firmware backup for emulation created in $EMULATION_PATH_BASE"
+  else
+    EMULATION_DIR=$(basename "$FIRMWARE_PATH")
+    EMULATION_PATH_BASE="$LOG_DIR"/"$EMULATION_DIR"
+    print_output "[*] Firmware used for emulation in $EMULATION_PATH_BASE"
+  fi
 }
 
 running_jobs() {
@@ -201,7 +214,7 @@ cleanup() {
   fi
 
   print_output "[*] Cleaning the emulation environment\\n"
-  find "$EMULATION_PATH_BASE" -iname "qemu*static" -exec rm {} \; 2>/dev/null
+  find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
 
   print_output ""
   print_output "[*] Umounting proc, sys and run"
@@ -212,7 +225,7 @@ cleanup() {
     umount -l "$MOUNT"
   done
 
-  mapfile -t FILES < <(find "$LOG_DIR""/qemu_emulator/" -type f -name "qemu_*" 2>/dev/null)
+  mapfile -t FILES < <(find "$LOG_DIR""/qemu_emulator/" -xdev -type f -name "qemu_*" 2>/dev/null)
   if [[ "${#FILES[@]}" -gt 0 ]] ; then
     print_output "[*] Cleanup empty log files.\\n\\n"
     for FILE in "${FILES[@]}" ; do
@@ -331,7 +344,7 @@ emulate_strace_run() {
         print_output "[*] Trying to create this missing file: $FILENAME_MISSING"
         PATH_MISSING=$(dirname "$MISSING_AREA")
 
-        FILENAME_FOUND=$(find "$R_PATH" -ignore_readdir_race -path "$R_PATH"/sys -prune -false -o -path "$R_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING")
+        FILENAME_FOUND=$(find "$R_PATH" -xdev -ignore_readdir_race -path "$R_PATH"/sys -prune -false -o -path "$R_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING" 2>/dev/null)
         if [[ -n "$FILENAME_FOUND" ]]; then
           print_output "[*] Possible matching file found: $FILENAME_FOUND"
         fi
@@ -354,7 +367,7 @@ emulate_strace_run() {
 
 check_disk_space() {
 
-  mapfile -t CRITICAL_FILES < <(find "$LOG_DIR"/qemu_emulator/ -type f -size +"$KILL_SIZE" -exec basename {} \; | cut -d\. -f1 | cut -d_ -f2)
+  mapfile -t CRITICAL_FILES < <(find "$LOG_DIR"/qemu_emulator/ -xdev -type f -size +"$KILL_SIZE" -exec basename {} \; 2>/dev/null| cut -d\. -f1 | cut -d_ -f2)
   for KILLER in "${CRITICAL_FILES[@]}"; do
     if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it"

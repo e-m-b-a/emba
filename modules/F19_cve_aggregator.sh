@@ -36,7 +36,11 @@ F19_cve_aggregator() {
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_BASE_VER_CHECK_LOG="p09_firmware_base_version_check.txt"
-  FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
+  if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
+    FW_VER_CHECK_LOG="r09_firmware_base_version_check.txt"
+  else
+    FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
+  fi
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
   CVE_MINIMAL_LOG="$LOG_DIR"/aggregator/CVE_minimal.txt
@@ -57,6 +61,7 @@ F19_cve_aggregator() {
 
     get_firmware_base_version_check
     get_usermode_emulator
+
     aggregate_versions
     
     # Mongo DB is running on Port 27017. If not we can't check CVEs
@@ -80,6 +85,7 @@ F19_cve_aggregator() {
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
+  module_end_log "${FUNCNAME[0]}"
 }
 
 prepare_version_data() {
@@ -99,10 +105,15 @@ prepare_version_data() {
     # alsactl, amixer -> alsa
     VERSION_lower="${VERSION_lower//alsactl/alsa}"
     VERSION_lower="${VERSION_lower//amixer/alsa}"
+    # VIM - Vi IMproved 1.2
+    VERSION_lower="${VERSION_lower//vim\ -\ vi\ improved/vim}"
     #zic.c
     VERSION_lower="${VERSION_lower//zic\.c/zic}"
     #bzip2, a block-sorting file compressor.  Version 1.0.6, 
     VERSION_lower="${VERSION_lower//bzip2,\ a\ block-sorting\ file\ compressor\.\ version/bzip2}"
+    # gnutls
+    VERSION_lower="${VERSION_lower//enabled\ gnutls/gnutls}"
+    VERSION_lower="${VERSION_lower//project-id-version:\ gnutls/gnutls}"
     #jQuery JavaScript Library v1.4.3
     VERSION_lower="${VERSION_lower//jquery\ javascript\ library\ v/jquery\ }"
     # GNU Midnight Commander 
@@ -111,6 +122,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//xl2tpd\ version\:\ xl2tpd-/xl2tp\ }"
     VERSION_lower="${VERSION_lower//xl2tpd\ server\ xl2tpd-/xl2tpd\ }"
     VERSION_lower="${VERSION_lower//goahead\ /goahead\ }"
+    # nc.traditional:strict:"\[v[0-9]\.[0-9]+-[0-9]+\]$"
+    VERSION_lower="${VERSION_lower//nc.traditional\ \[v/nc.traditional\ }"
+    # sqlite3 -> sqlite
+    VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
@@ -151,6 +166,12 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nandwrite/mtd-utils}"
     VERSION_lower="${VERSION_lower//nanddump/mtd-utils}"
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
+    # zlib:binary:"deflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark\ Adler"
+    # zlib:binary:"inflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark Adler"
+    VERSION_lower="${VERSION_lower//deflate/zlib}"
+    VERSION_lower="${VERSION_lower//inflate/zlib}"
+    #ntfslabel -> ntfs-3g
+    VERSION_lower="${VERSION_lower//ntfslabel/ntfs-3g}"
     #i2cXYZ -> i2c-tools
     VERSION_lower="${VERSION_lower//i2cdetect/i2c-tools}"
     VERSION_lower="${VERSION_lower//i2cdump/i2c-tools}"
@@ -158,6 +179,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
+    #file-
+    VERSION_lower="${VERSION_lower//file-/file\ }"
     #libpcre.1.2.3
     VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
     VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
@@ -165,6 +188,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
     VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/nc\.traditional\ \[v\ /nc.traditional\ /g')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/getconf\ (.*)/getconf/')"
     # shellcheck disable=SC2001
@@ -176,6 +201,8 @@ prepare_version_data() {
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ perl\ ([0-9]),\ ([0-9][0-9]),\ sub([0-9])/perl\ \1\.\2\.\3/')"
+    #"GNU\ gdb\ \(Debian\ [0-9]\.[0-9]+-[0-9]\)\ "
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/gnu\ gdb\ \(debian\ ([0-9]\.[0-9]+-[0-9]+\))\ /gdb\ \1/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
@@ -288,13 +315,35 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//squid\ cache:/squid-cache:squid}"
     #tar (GNU tar) 1.23
     # shellcheck disable=SC2001
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(gnu\ tar)/gnu:tar/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ tar)/gnu:tar/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ findutils)/gnu:findutils/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ groff)/gnu:groff/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sed)/gnu:sed/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ mtools)/gnu:mtools/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
+    # handle grub version 2:
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)/grub/')"
     VERSION_lower="${VERSION_lower//gnu\ sed/gnu:sed}"
     VERSION_lower="${VERSION_lower//gnu\ make/gnu:make}"
     VERSION_lower="${VERSION_lower//gnu\ nano/gnu:nano}"
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//loadkeys\ from\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//kbd_mode\ from\ kbd/kbd-project:kbd}"
+    #dpkg-ABC -> dpkg
+    VERSION_lower="${VERSION_lower//dpkg-divert/debian:dpkg}"
+    VERSION_lower="${VERSION_lower//dpkg-split/debian:dpkg}"
+    VERSION_lower="${VERSION_lower//dpkg-deb/debian:dpkg}"
+    VERSION_lower="${VERSION_lower//dpkg-trigger/debian:dpkg}"
     # ncurses -> gnu:ncurses
     VERSION_lower="${VERSION_lower//ncurses/gnu:ncurses}"
     #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
@@ -328,6 +377,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ralink\ dot1x\ daemon\ \=\ /ralink-dot1x\ }"
     #his\ is\ WiFiDog\ 
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
+    # letz try to handle something like 1p2 -> 1:p2
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
 
     # final cleanup of start and ending
     # shellcheck disable=SC2001
@@ -411,7 +462,7 @@ generate_special_log() {
   for FILE in "${FILES[@]}"; do
     NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
     CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
-    if [[ -n $CVEs ]]; then
+    if [[ -n $CVE_VALUES ]]; then
       print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
       print_output "$CVE_VALUES"
       echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
@@ -424,7 +475,16 @@ generate_special_log() {
   print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
   mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
   for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
-    print_output "$EXPLOIT_"
+    # remove color codes:
+    EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+    if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
+      print_output "$RED$EXPLOIT_$NC"
+    elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
+      print_output "$ORANGE$EXPLOIT_$NC"
+    else
+      print_output "$GREEN$EXPLOIT_$NC"
+    fi
   done
   echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
   grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"
@@ -454,7 +514,7 @@ generate_cve_details() {
       ((CVE_COUNTER++))
       ((CVE_COUNTER_VERSION++))
       #extract the CVSS and CVE value (remove all spaces and tabs)
-      CVSS_value=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+      CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       CVE_value=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
 
       EXPLOIT="No exploit available"
@@ -475,6 +535,8 @@ generate_cve_details() {
         if [[ "$EXPLOIT" == "No exploit available" ]]; then
           if cve_searchsploit "$CVE_value" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
             EXPLOIT="Exploit available (Source: Exploit database)"
+            echo -e "\\n[+] Exploit for $CVE_value:\\n" >> "$LOG_DIR"/aggregator/exploit-details.txt
+            cve_searchsploit "$CVE_value" >> "$LOG_DIR"/aggregator/exploit-details.txt
             ((EXPLOIT_COUNTER++))
             ((EXPLOIT_COUNTER_VERSION++))
           fi
@@ -488,13 +550,13 @@ generate_cve_details() {
       FORMAT_LOG_BAK="$FORMAT_LOG"
       FORMAT_LOG=0
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
-      elif (( $(echo "$CVSS_value > 6.9" | bc -l) )); then
-        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
-      elif (( $(echo "$CVSS_value > 3.9" | bc -l) )); then
-        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      elif (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
+        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
+        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       else
-        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_value" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     done

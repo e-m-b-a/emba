@@ -99,12 +99,16 @@ print_output()
     local COLOR_OUTPUT_STRING
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
     echo -e "$COLOR_OUTPUT_STRING"
-    if [[ "$2" != "no_log" ]] ; then
+    if [[ "$2" == "main" ]] ; then
+      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
+    elif [[ "$2" != "no_log" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null
     fi
   else
     echo -e "$OUTPUT"
-    if [[ "$2" != "no_log" ]] ; then
+    if [[ "$2" == "main" ]] ; then
+      echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_FILE" >/dev/null
+    elif [[ "$2" != "no_log" ]] ; then
       echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null
     fi
   fi
@@ -368,6 +372,7 @@ print_help()
   echo -e "\\nSpecial tests"
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
+  echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"
@@ -407,4 +412,17 @@ print_excluded()
     done
     echo
   fi
+}
+
+module_start_log() {
+  MODULE_MAIN_NAME="$1"
+  print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
+  ((MOD_RUNNING++))
+}
+
+module_end_log() {
+  MODULE_MAIN_NAME="$1"
+  print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
+  ((MOD_RUNNING--))
+  #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }

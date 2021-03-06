@@ -110,21 +110,33 @@ architecture_check()
   fi
 }
 
+prepare_file_arr()
+{
+  echo ""
+  print_output "[*] Unique files auto detection (could take some time)\\n" "main"
+
+  export FILE_ARR
+  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
+
+  # xdev will to the trick for us:
+  # remove ./proc/* executables (for live testing)
+  #rm_proc_binary "${FILE_ARR[@]}"
+}
+
 prepare_binary_arr()
 {
   echo ""
-  print_output "[*] Unique binary auto detection (could take some time)\\n" "no_log"
+  print_output "[*] Unique binary auto detection (could take some time)\\n" "main"
+
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
-  export CHECKSUMS
-  #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -iname "*" )
   readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-  readarray -t CHECKSUMS < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f1)
-  print_output "[*] Found ${#BINARIES[@]} unique executables." "no_log"
+  print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables." "main"
 
   # remove ./proc/* executables (for live testing)
-  rm_proc_binary "${BINARIES[@]}"
+  #rm_proc_binary "${BINARIES[@]}"
 }
 
 set_etc_paths()
@@ -238,5 +250,38 @@ detect_root_dir_helper() {
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $R_PATH" "no_log"
+  done
+}
+
+wait_for_pid() {
+  for PID in ${WAIT_PIDS[*]}; do
+    running=1
+    while [[ $running -eq 1 ]]; do
+      echo "." | tr -d "\n"
+      if ! pgrep -v grep | grep -q "$PID"; then
+        running=0
+      fi
+      sleep 1
+    done
+  done
+}
+
+max_pids_protection() {
+  while [[ ${#WAIT_PIDS[@]} -gt 5 ]]; do
+    TEMP_PIDS=()
+    # check for really running PIDs and re-create the array
+    for PID in ${WAIT_PIDS[*]}; do
+      if pgrep -v grep | grep -q "$PID"; then
+        TEMP_PIDS+=( "$PID" )
+      fi
+    done
+
+    if [[ ${#TEMP_PIDS[@]} -gt 5 ]]; then
+      echo "." | tr -d "\n"
+      echo "[*] Waiting for processess ... ${#TEMP_PIDS[@]}"
+      sleep 1
+    fi
+    # recreate the arry with the current running PIDS
+    WAIT_PIDS=("${TEMP_PIDS[@]}")
   done
 }

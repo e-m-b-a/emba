@@ -24,6 +24,8 @@ S21_python_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check python scripts with pylint"
 
+  LOG_FILE="$( get_log_file )"
+
   S21_PY_VULNS=0
   S21_PY_SCRIPTS=0
 
@@ -31,7 +33,7 @@ S21_python_check()
     if ! [[ -d "$LOG_DIR""/pylint_checker/" ]] ; then
       mkdir "$LOG_DIR""/pylint_checker/" 2> /dev/null
     fi
-    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -iname "*.py")
+    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
         ((S21_PY_SCRIPTS++))
@@ -62,6 +64,7 @@ S21_python_check()
     done
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S21_PY_SCRIPTS""""$GREEN"" python files:""$NC""\\n"
+    echo -e "\\n[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS" >> "$LOG_FILE"
 
     # we just print one issue per issue type:
     # W1505: Using deprecated method assert_() (deprecated-method)
@@ -76,4 +79,5 @@ S21_python_check()
   else
     print_output "[-] Pylint check is disabled ... no tests performed"
   fi
+  module_end_log "${FUNCNAME[0]}"
 }

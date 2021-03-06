@@ -26,6 +26,8 @@ S65_config_file_check()
 
   scan_config
   check_fstab
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 scan_config()
@@ -56,8 +58,8 @@ check_fstab()
   IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
 
   if [[ ${#FSTAB_ARR[@]} -ne 0 ]] ; then
-    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -exec grep "username" {} \;)")
-    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -exec grep "password" {} \;)")
+    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "username" {} \;)")
+    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "password" {} \;)")
   fi
 
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then
