@@ -50,7 +50,7 @@ detect_binary_versions() {
 
       echo "." | tr -d "\n"
 
-      if [[ $FIRMWARE -eq 0 ]]; then
+      if [[ -f $FIRMWARE_PATH ]]; then
         VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
 
         if [[ -n $VERSION_FINDER ]]; then
