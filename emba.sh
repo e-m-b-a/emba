@@ -55,18 +55,18 @@ sort_modules()
   local SORTED_MODULES
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+      THREAD_PRIO=0
       # https://github.com/koalaman/shellcheck/wiki/SC1090
       # shellcheck source=/dev/null
-      THREAD_PRIO=0
       source "$MODULE_FILE"
       if [[ $THREAD_PRIO -eq 1 ]] ; then
-        SORTED_MODULES=( "$MODULE_FILE" ${SORTED_MODULES[@]} )
+        SORTED_MODULES=( "$MODULE_FILE" "${SORTED_MODULES[@]}" )
       else
-        SORTED_MODULES=( ${SORTED_MODULES[@]} "$MODULE_FILE" )
+        SORTED_MODULES=( "${SORTED_MODULES[@]}" "$MODULE_FILE" )
       fi
     fi
   done
-  MODULES=( ${SORTED_MODULES[@]} )
+  MODULES=( "${SORTED_MODULES[@]}" )
 }
 
 # $1: module letter [P, S, R, F]
@@ -76,7 +76,9 @@ sort_modules()
 run_modules()
 {
   local SELECT_PRE_MODULES_COUNT=0
-  for SELECT_NUM in "($2)" ; do
+  mapfile -t SELECTION < <( echo "$2")
+
+  for SELECT_NUM in "${SELECTION[@]}" ; do
     if [[ "$SELECT_NUM" =~ ^["${1,,}","${1^^}"]{1} ]]; then
       (( SELECT_PRE_MODULES_COUNT+=1 ))
     fi
@@ -212,7 +214,8 @@ main()
     exit 1
   fi
 
-  export EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
+  export EMBA_COMMAND
+  EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
   while getopts a:A:cdDe:Ef:Fghik:l:m:N:stxX:Y:WzZ: OPT ; do
     case $OPT in
@@ -310,7 +313,7 @@ main()
 
   # Now we have the firmware and log path, lets set some additional paths
   FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
-  MAIN_LOG="$LOG_DIR""/""$MAIN_LOG_FILE"
+  export MAIN_LOG="$LOG_DIR""/""$MAIN_LOG_FILE"
 
   if [[ $KERNEL -eq 1 ]] ; then
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
