@@ -50,10 +50,10 @@ S115_usermode_emulator() {
 
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_output "[*] Running emulation processes in $R_PATH root path ..."
-      readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f -executable 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f 2>/dev/null && cd "$DIR" || exit)
 
       print_output "[*] Found ${#R_BINARIES[@]} unique executables in root dirctory: $R_PATH."
 
@@ -386,6 +386,12 @@ emulate_binary() {
   # we check every binary only once. So calculate the checksum and store it for checking
   BIN_MD5=$(md5sum "$FULL_BIN_PATH" | cut -d\  -f1)
   if [[ ! " ${MD5_DONE[*]} " =~ ${BIN_MD5} ]]; then
+    # letz assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
+    # we are going to give all ELF files exec permissions to execute it in the emulator
+    if ! [[ -x "$FULL_BIN_PATH" ]]; then
+      print_output "[*] Change permissions +x to $FULL_BIN_PATH"
+      chmod +x "$FULL_BIN_PATH"
+    fi
     emulate_strace_run
   
     # emulate binary with different command line parameters:
