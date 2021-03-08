@@ -73,11 +73,13 @@ release_info()
     print_output "[+] Specific release/version information of target:"
     for R_INFO in "${RELEASE_STUFF[@]}" ; do
       if [[ -f "$R_INFO" ]] ; then
-        print_output "\\n""$( print_path "$R_INFO")"
-        RELEASE="$( cat "$R_INFO" )"
-        if [[ "$RELEASE" ]] ; then
-          print_output ""
-          print_output "$(indent "$(magenta "$RELEASE")")"
+        if file "$R_INFO" | grep -a -q text; then
+          print_output "\\n""$( print_path "$R_INFO")"
+          RELEASE="$( cat "$R_INFO" )"
+          if [[ "$RELEASE" ]] ; then
+            print_output ""
+            print_output "$(indent "$(magenta "$RELEASE")")"
+          fi
         fi
       else
         print_output "\\n""$(magenta "Directory:")"" ""$( print_path "$R_INFO")""\\n"
