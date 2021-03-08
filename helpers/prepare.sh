@@ -143,7 +143,6 @@ prepare_binary_arr()
       BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
       if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
         BINARIES+=( "$BINARY" )
-        chmod +x "$BINARY"
         MD5_DONE_INT+=( "$BIN_MD5" )
       fi
     done
