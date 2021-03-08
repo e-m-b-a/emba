@@ -165,7 +165,7 @@ copy_firmware() {
   # if it was a binary file we already have extracted it and it is already messed up
   # so we can mess it up a bit more ;)
   # shellcheck disable=SC2154
-  if [[ -d "$FIRMWARE_PATH_bak" ]]; then
+  if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
     mkdir "$LOG_DIR""/qemu_emulator" 2>/dev/null
     cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/qemu_emulator/ 2> /dev/null

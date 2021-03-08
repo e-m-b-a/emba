@@ -57,7 +57,7 @@ output_overview() {
   fi  
 
   print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"""
-  print_output "[+] Emba start command:""$ORANGE"" ""$EMBACOMMAND"""
+  print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND"""
 
   if [[ -n "$D_ARCH" ]]; then
     print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""

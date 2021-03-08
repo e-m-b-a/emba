@@ -21,21 +21,21 @@ log_folder()
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    There are files in the specified directory: ""$LOG_DIR""\\n    You can now delete the content here or start the tool again and specify a different directory."
     echo -e "\\n${ORANGE}Delete content of log directory: $LOG_DIR ?${NC}\\n"
-    read -p "(y/n)  " -r ANSWER
+    read -p "(Y/n)  " -r ANSWER
     case ${ANSWER:0:1} in
         y|Y|"" )
           if mount | grep "$LOG_DIR" | grep -e "proc\|sys\|run" > /dev/null; then
             echo
             print_output "[!] We found unmounted areas from a former emulation process in your log directory $LOG_DIR." "no_log"
             print_output "[!] You should unmount this stuff manually:\\n" "no_log"
-            mount | grep "$LOG_DIR"
+            print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
             echo -e "\\n${RED}Terminate emba${NC}\\n"
             exit 1
           elif mount | grep "$LOG_DIR" > /dev/null; then
             echo
             print_output "[!] We found unmounted areas in your log directory $LOG_DIR." "no_log"
             print_output "[!] If emba is failing check this manually:\\n" "no_log"
-            mount | grep "$LOG_DIR"
+            print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
             rm -R "${LOG_DIR:?}/"*
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"

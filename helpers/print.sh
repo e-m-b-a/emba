@@ -35,13 +35,19 @@ GREP_LOG_LINEBREAK=" || "
 MESSAGE_TYPE=""
 OLD_MESSAGE_TYPE=""
 
+warning()
+{
+  echo -e "\\n""$RED""$BOLD""Warning:""$NC""$RED"" This script is in an early alpha state - use it on your own risk.""$NC"
+}
+
 welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
   echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            e m b a                            ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""║                    EMBEDDED LINUX ANALYZER                    ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""╚═══════════════════════════════════════════════════════════════╝""$NC"
-  echo -e "\\n""$RED""Warning: This script is in an early alpha state - use it on your own risk.""$NC"
+
+  warning
 }
 
 module_log_init()
@@ -384,8 +390,28 @@ print_help()
   echo -e "\\nHelp"
   echo -e "$CYAN""-h""$NC""                Prints this help message"
 
+  warning
+}
 
-  echo -e "\\n""$RED""Warning: This script is in an early alpha state - use it on your own risk ...""$NC"
+print_firmware_info()
+{
+  if [[ -n "$1" || -n "$2" || -n "$3" || -n "$4" ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+    print_output "[*] Firmware information:" "no_log"
+    if [[ -n "$1" ]]; then
+      print_output "$(indent "$BOLD""Vendor: ""$NC""$ORANGE""$1""$NC")" "no_log"
+    fi
+    if [[ -n "$2" ]]; then
+      print_output "$(indent "$BOLD""Version: ""$NC""$ORANGE""$2""$NC")" "no_log"
+    fi
+    if [[ -n "$3" ]]; then
+      print_output "$(indent "$BOLD""Device: ""$NC""$ORANGE""$3""$NC")" "no_log"
+    fi
+    if [[ -n "$4" ]]; then
+      print_output "$(indent "$BOLD""Additional notes: ""$NC""$ORANGE""$4""$NC")" "no_log"
+    fi
+    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+  fi
 }
 
 print_etc()
