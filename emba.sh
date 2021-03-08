@@ -50,10 +50,109 @@ import_module()
   print_output "==> ""$GREEN""Imported ""$MODULE_COUNT"" module/s""$NC" "no_log"
 }
 
-run_module()
+sort_modules()
 {
+  local SORTED_MODULES
+  for MODULE_FILE in "${MODULES[@]}" ; do
+    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+      # https://github.com/koalaman/shellcheck/wiki/SC1090
+      # shellcheck source=/dev/null
+      THREAD_PRIO=0
+      source "$MODULE_FILE"
+      if [[ $THREAD_PRIO -eq 1 ]] ; then
+        SORTED_MODULES=( "$MODULE_FILE" ${SORTED_MODULES[@]} )
+      else
+        SORTED_MODULES=( ${SORTED_MODULES[@]} "$MODULE_FILE" )
+      fi
+    fi
+  done
+  MODULES=( ${SORTED_MODULES[@]} )
+}
 
+# $1: module letter [P, S, R, F]
+# $2: SELECT_MODULE_ARRAY
+# $3: 0=single thread 1=multithread
+# $4: HTML=1 - generate html file
+run_modules()
+{
+  local SELECT_PRE_MODULES_COUNT=0
+  for SELECT_NUM in "($2)" ; do
+    if [[ "$SELECT_NUM" =~ ^["${1,,}","${1^^}"]{1} ]]; then
+      (( SELECT_PRE_MODULES_COUNT+=1 ))
+    fi
+  done
 
+  if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
+    local MODULES
+    mapfile -t MODULES < <(find "$MOD_DIR" -name "${1^^}""*_*.sh" | sort -V 2> /dev/null)
+    sort_modules
+    for MODULE_FILE in "${MODULES[@]}" ; do
+      if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+        HTML_REPORT=0
+        MODULE_BN=$(basename "$MODULE_FILE")
+        MODULE_MAIN=${MODULE_BN%.*}
+        module_start_log "$MODULE_MAIN"
+        if [[ $2 -eq 1 ]]; then
+          $MODULE_MAIN &
+          WAIT_PIDS+=( "$!" )
+          max_pids_protection
+        else
+          $MODULE_MAIN
+        fi
+        if [[ $4 == 1 ]]; then
+          generate_html_file "$LOG_FILE" "$HTML_REPORT"
+        fi
+        reset_module_count
+      fi
+    done
+  else
+    for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
+      if [[ "$SELECT_NUM" =~ ^["${1,,}","${1^^}"]{1}[0-9]+ ]]; then
+        local MODULE
+        MODULE=$(find "$MOD_DIR" -name "${1^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+        if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
+          HTML_REPORT=0
+          MODULE_BN=$(basename "$MODULE")
+          MODULE_MAIN=${MODULE_BN%.*}
+          module_start_log "$MODULE_MAIN"
+          if [[ $2 -eq 1 ]]; then
+            $MODULE_MAIN &
+            WAIT_PIDS+=( "$!" )
+            max_pids_protection
+          else
+            $MODULE_MAIN
+          fi
+          if [[ $4 == 1 ]]; then
+            generate_html_file "$LOG_FILE" "$HTML_REPORT"
+          fi
+          reset_module_count
+        fi
+      elif [[ "$SELECT_NUM" =~ ^["${1,,}","${1^^}"]{1} ]]; then
+        local MODULES
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "${1^^}""*_*.sh" | sort -V 2> /dev/null)
+        sort_modules
+        for MODULE_FILE in "${MODULES[@]}" ; do
+          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+            HTML_REPORT=0
+            MODULE_BN=$(basename "$MODULE_FILE")
+            MODULE_MAIN=${MODULE_BN%.*}
+            module_start_log "$MODULE_MAIN"
+            if [[ $2 -eq 1 ]]; then
+              $MODULE_MAIN &
+              WAIT_PIDS+=( "$!" )
+              max_pids_protection
+            else
+              $MODULE_MAIN
+            fi
+            if [[ $4 == 1 ]]; then
+              generate_html_file "$LOG_FILE" "$HTML_REPORT"
+            fi
+            reset_module_count
+          fi
+        done
+      fi
+    done
+  fi
 }
 
 main()
@@ -79,7 +178,6 @@ main()
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
-  export PRE_TESTING_DONE=0     # finished pre-testing phase
   export PYTHON_CHECK=1
   export QEMULATION=0
   export SHELLCHECK=1
@@ -226,7 +324,7 @@ main()
   # Check all dependencies of emba
   dependency_check
   # If only dependency check, then exit emba after it
-  if [[ $ONLY_DEP -eq 0 ]] ; then
+  if [[ $ONLY_DEP -eq 1 ]] ; then
       exit 0
   fi
 
@@ -265,8 +363,9 @@ main()
   # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
   set_exclude
 
-  # ----------------------------------------------------------------------------------
+  #######################################################################################
   # Kernel configuration check
+  #######################################################################################
   if [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]] ; then
     if ! [[ -f "$KERNEL_CONFIG" ]] ; then
       print_output "[-] Invalid kernel configuration file: $KERNEL_CONFIG" "no_log"
@@ -279,8 +378,9 @@ main()
     fi
   fi
 
-  # ----------------------------------------------------------------------------------
+  #######################################################################################
   # Docker
+  #######################################################################################
   if [[ $USE_DOCKER -eq 1 ]] ; then
     if ! [[ $EUID -eq 0 ]] ; then
       print_output "[!] Using emba with docker-compose requires root permissions" "no_log"
@@ -300,7 +400,7 @@ main()
         D|f|i|l)
           ;;
         c)
-          print_output "" "no_log"
+          echo
           print_output "[-] Current docker version of emba does not support cwe-checker!" "no_log"
           ;;
         *)
@@ -309,7 +409,7 @@ main()
       esac
     done
 
-    print_output "" "no_log"
+    echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
     FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
@@ -328,11 +428,14 @@ main()
     fi
   fi
 
+
+  #######################################################################################
+  # Pre-Check (P-modules)
+  #######################################################################################
   if [[ $PRE_CHECK -eq 1 ]] ; then
     if [[ -f "$FIRMWARE_PATH" ]]; then
 
       echo
-
       if [[ -d "$LOG_DIR" ]]; then
         print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
       else
@@ -342,53 +445,9 @@ main()
       # 'main' functions of imported modules
       # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
-      local SELECT_PRE_MODULES_COUNT=0
-
-      for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-        if [[ "$SELECT_NUM" =~ ^[p,P]{1} ]]; then
-          (( SELECT_PRE_MODULES_COUNT+=1 ))
-        fi
-      done
-
-      ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules
+      ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules, therefore overwriting $THREADED as 0
       ## as there are internal dependencies it is easier to handle it in the modules
-
-      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
-        local MODULES
-        mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
-        for MODULE_FILE in "${MODULES[@]}" ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-            MODULE_BN=$(basename "$MODULE_FILE")
-            MODULE_MAIN=${MODULE_BN%.*}
-            module_start_log "$MODULE_MAIN"
-            $MODULE_MAIN
-          fi
-        done
-      else
-        for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-          if [[ "$SELECT_NUM" =~ ^[p,P]{1}[0-9]+ ]]; then
-            local MODULE
-            MODULE=$(find "$MOD_DIR" -name "P""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
-              MODULE_BN=$(basename "$MODULE")
-              MODULE_MAIN=${MODULE_BN%.*}
-              module_start_log "$MODULE_MAIN"
-              $MODULE_MAIN
-            fi
-          elif [[ "$SELECT_NUM" =~ ^[p,P]{1} ]]; then
-            local MODULES
-            mapfile -t MODULES < <(find "$MOD_DIR" -name "P*_*.sh" | sort -V 2> /dev/null)
-            for MODULE_FILE in "${MODULES[@]}" ; do
-              if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-                MODULE_BN=$(basename "$MODULE_FILE")
-                MODULE_MAIN=${MODULE_BN%.*}
-                module_start_log "$MODULE_MAIN"
-                $MODULE_MAIN
-              fi
-            done
-          fi
-        done
-      fi
+      run_modules "P" "${SELECT_MODULES[@]}" 0 0
 
       # if we running threaded we ware going to wait for the slow guys here
       if [[ $THREADED -eq 1 ]]; then
@@ -413,23 +472,21 @@ main()
       # print_output "[!] Output dir: $OUTPUT_DIR"
       # print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
       # print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
-      PRE_TESTING_DONE=1
     fi
   fi
 
-
-
+  #######################################################################################
+  # Firmware-Check (S- and R-modules)
+  #######################################################################################
   if [[ $FIRMWARE -eq 1 ]] ; then
     if [[ -d "$FIRMWARE_PATH" ]]; then
 
-      echo
-      print_output "=================================================================\n" "no_log"
+      print_output "\n=================================================================\n" "no_log"
 
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
         architecture_dep_check
       fi
-
 
       if [[ -d "$LOG_DIR" ]]; then
         print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
@@ -448,173 +505,42 @@ main()
       set_etc_paths
       echo
 
-      # 'main' functions of imported modules
-
-      # in threaded mode we start the long running modules first 
-      if [[ $THREADED -eq 1 ]]; then
-        if [[ $BAP -eq 1 ]]; then
-          MODULE_FILE="$MOD_DIR"/S120_cwe_checker.sh
-
-          MODULE_BN=$(basename "$MODULE_FILE")
-          MODULE_MAIN=${MODULE_BN%.*}
-          module_start_log "$MODULE_MAIN"
-          HTML_REPORT=0
-          $MODULE_MAIN &
-          WAIT_PIDS+=( "$!" )
-        fi
-
-        if [[ $QEMULATION -eq 1 ]]; then
-          MODULE_FILE="$MOD_DIR"/S115_usermode_emulator.sh
-          MODULE_BN=$(basename "$MODULE_FILE")
-          MODULE_MAIN=${MODULE_BN%.*}
-          module_start_log "$MODULE_MAIN"
-          HTML_REPORT=0
-          $MODULE_MAIN &
-          WAIT_PIDS+=( "$!" )
-        fi
-      fi
-
-      if [[ ${#SELECT_MODULES[@]} -eq 0 ]] ; then
-        local MODULES
-        if [[ $THREADED -eq 1 ]]; then
-          mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | grep -v "emulator\|cwe" | sort -V 2> /dev/null)
-        else
-          mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
-        fi
-        for MODULE_FILE in "${MODULES[@]}" ; do
-          if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-            MODULE_BN=$(basename "$MODULE_FILE")
-            MODULE_MAIN=${MODULE_BN%.*}
-            module_start_log "$MODULE_MAIN"
-            HTML_REPORT=0
-
-            if [[ $THREADED -eq 1 ]]; then
-              $MODULE_MAIN &
-              WAIT_PIDS+=( "$!" )
-              max_pids_protection
-            else
-              $MODULE_MAIN
-            fi
-
-            if [[ $HTML == 1 ]]; then
-               generate_html_file "$LOG_FILE" "$HTML_REPORT"
-            fi
-            reset_module_count
-          fi
-        done
-      else
-        for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-          if [[ "$SELECT_NUM" =~ ^[s,S]{1}[0-9]+ ]]; then
-            local MODULE
-            if [[ $THREADED -eq 1 ]]; then
-              MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | grep -v "emulator\|cwe" | sort -V 2> /dev/null)
-            else
-              MODULE=$(find "$MOD_DIR" -name "S""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
-            fi
-            if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
-              MODULE_BN=$(basename "$MODULE")
-              MODULE_MAIN=${MODULE_BN%.*}
-              module_start_log "$MODULE_MAIN"
-              HTML_REPORT=0
-              if [[ $THREADED -eq 1 ]]; then
-                $MODULE_MAIN &
-                WAIT_PIDS+=( "$!" )
-                max_pids_protection
-              else
-                $MODULE_MAIN
-              fi
-
-              if [[ $HTML == 1 ]]; then
-                generate_html_file "$LOG_FILE" "$HTML_REPORT"
-              fi
-            fi
-          elif [[ "$SELECT_NUM" =~ ^[s,S]{1} ]]; then
-            local MODULES
-            mapfile -t MODULES < <(find "$MOD_DIR" -name "S*_*.sh" | sort -V 2> /dev/null)
-            for MODULE_FILE in "${MODULES[@]}" ; do
-              if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-                MODULE_BN=$(basename "$MODULE_FILE")
-                MODULE_MAIN=${MODULE_BN%.*}
-                module_start_log "$MODULE_MAIN"
-                if [[ $THREADED -eq 1 ]]; then
-                  $MODULE_MAIN &
-                  WAIT_PIDS+=( "$!" )
-                  max_pids_protection
-                else
-                  $MODULE_MAIN
-                fi
-              fi
-            done
-          fi
-        done
-      fi
+      run_modules "S" "${SELECT_MODULES[@]}" $THREADED $HTML
 
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid
       fi
-
-
     else
       # here we can deal with other non linux things like RTOS specific checks
       # lets call it R* modules
       # 'main' functions of imported finishing modules
-      local MODULES
-      mapfile -t MODULES < <(find "$MOD_DIR" -name "R*_*.sh" | sort -V 2> /dev/null)
-      for MODULE_FILE in "${MODULES[@]}" ; do
-        if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-          MODULE_BN=$(basename "$MODULE_FILE")
-          MODULE_MAIN=${MODULE_BN%.*}
-          module_start_log "$MODULE_MAIN"
-          HTML_REPORT=1
-          if [[ $THREADED -eq 1 ]]; then
-            $MODULE_MAIN &
-            WAIT_PIDS+=( "$!" )
-            max_pids_protection
-          else
-            $MODULE_MAIN
-          fi
-          if [[ $HTML == 1 ]]; then
-            generate_html_file "$LOG_FILE" "$HTML_REPORT"
-          fi
-          reset_module_count
-        fi
-      done
+      run_modules "R" "${SELECT_MODULES[@]}" $THREADED $HTML
 
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid
       fi
     fi
 
-    TESTING_DONE=1
+    echo
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
     else
       print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
     fi
+
+    TESTING_DONE=1
   fi
 
+  #######################################################################################
+  # Reporting (F-modules)
+  #######################################################################################
   if [[ -d "$LOG_DIR" ]]; then
     print_output "[!] Reporting phase started on ""$(date)""\\n" "main" 
   else
     print_output "[!] Reporting phase started on ""$(date)""\\n" "no_log" 
   fi
  
-  # 'main' functions of imported finishing modules
-  local MODULES
-  mapfile -t MODULES < <(find "$MOD_DIR" -name "F*_*.sh" | sort -V 2> /dev/null)
-  for MODULE_FILE in "${MODULES[@]}" ; do
-    if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-      MODULE_BN=$(basename "$MODULE_FILE")
-      MODULE_MAIN=${MODULE_BN%.*}
-      module_start_log "$MODULE_MAIN"
-      HTML_REPORT=1
-      $MODULE_MAIN
-      if [[ $HTML == 1 ]]; then
-        generate_html_file "$LOG_FILE" "$HTML_REPORT"
-      fi
-      reset_module_count
-    fi
-  done
+  run_modules "F" "" 0 $HTML
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo
