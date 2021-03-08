@@ -245,6 +245,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//,/}"
     #flash_eraseall $ 1.1 $
     VERSION_lower="${VERSION_lower//\$/}"
+    VERSION_lower="${VERSION_lower//\"/}"
     #radlogin.cv
     VERSION_lower="${VERSION_lower//radlogin\.cv/radlogin}"
     #event log utility
@@ -279,6 +280,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(.*\ eglibc\ .*)/eglibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
+    #vxworks5.5.1 -> no space
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks([0-9]\.[0-9]+\.[0-9]+)/vxworks\ \1/g')"
+    #VxWorks operating system version "5.5.1"
+    VERSION_lower="${VERSION_lower//vxworks\ operating\ system/vxworks}"
     #OpenSSH_7.8p1 -> openssh 7.8:p1 
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/openssh_([0-9])\.([0-9])([a-z][0-9])/openssh\ \1\.\2:\3/g')"
     #socat 2.0.0-b4 -> socat 2.0.0:b4 

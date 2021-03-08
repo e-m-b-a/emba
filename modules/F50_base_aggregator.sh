@@ -69,14 +69,37 @@ output_overview() {
   fi
 
   if [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
+    # currently verified OS detection is only able to detect Siprotec and Linux systems
     OS_VERIFIED=$(grep "verified.*system\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+
     if [[ -n "$OS_VERIFIED" ]]; then
-      print_output "[+] Detected operating system: ""$ORANGE""""$OS_VERIFIED"""
+      print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""""$OS_VERIFIED"""
     else
-      mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+      # no find OS that was not verified in the first step (but we can try to verify it now)
+      mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+
       if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
         for OS in "${OS_DETECT[@]}"; do
-          print_output "[+] Possible operating system detected (unverified): ""$ORANGE""""$OS"""
+          UNVERIFIED=0
+          if [[ "$OS" == *VxWorks* ]]; then
+            # vxworks based OS we can try to verify quite easily with the already done version detection module
+            # if we have a vxworks version already detected we can ensure we really have a vxworks system and nothing else:
+            mapfile -t VXWORKS_VERSION < <(grep -i "Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep "vxworks" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+            if [[ "${#VXWORKS_VERSION[@]}" -gt 0 ]]; then
+              # version detected -> verified vxworks
+              for VX_VER in "${VXWORKS_VERSION[@]}"; do
+                print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""VxWorks - v$VX_VER"
+              done
+            else
+              UNVERIFIED=1
+            fi
+          else
+            UNVERIFIED=1
+          fi
+
+          if [[ $UNVERIFIED == 1 ]]; then
+            print_output "[+] Possible operating system detected (""$ORANGE""unverified""$GREEN""): ""$ORANGE""""$OS"""
+          fi
         done
       fi
     fi
@@ -103,7 +126,9 @@ output_overview() {
 
 output_details() {
 
-  print_output "[+] ""$ORANGE""""$FILE_ARR_COUNT""""$GREEN"" files and ""$ORANGE""""$DETECTED_DIR"" ""$GREEN""directories detected."
+  if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
+    print_output "[+] ""$ORANGE""""$FILE_ARR_COUNT""""$GREEN"" files and ""$ORANGE""""$DETECTED_DIR"" ""$GREEN""directories detected."
+  fi
   if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$MOD_DATA_COUNTER""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
   fi

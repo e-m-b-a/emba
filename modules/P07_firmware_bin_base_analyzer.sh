@@ -61,30 +61,38 @@ os_identification() {
   echo "." | tr -d "\n"
   COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c Linux 2> /dev/null)"
   echo "." | tr -d "\n"
+  COUNTER_Linux_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c Linux {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
   COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c Linux)"
   echo "." | tr -d "\n"
-  COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW))
+  COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW+COUNTER_Linux_EXT))
   echo "." | tr -d "\n"
 
-  COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c VxWorks 2> /dev/null)"
+  COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "VxWorks\|Wind" 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c VxWorks)"
+  COUNTER_VxWorks_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW))
+  COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c -i "VxWorks\|Wind")"
+  echo "." | tr -d "\n"
+  COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW+COUNTER_VxWorks_EXT))
   echo "." | tr -d "\n"
 
   COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeRTOS 2> /dev/null)"
   echo "." | tr -d "\n"
+  COUNTER_FreeRTOS_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
   COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeRTOS)"
   echo "." | tr -d "\n"
-  COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW))
+  COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW+COUNTER_FreeRTOS_EXT))
   echo "." | tr -d "\n"
 
-  COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c eCos 2> /dev/null)"
+  COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_eCos_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -c eCos {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c eCos)"
   echo "." | tr -d "\n"
-  COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW))
+  COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW+COUNTER_eCos_EXT))
   echo "." | tr -d "\n"
 
   # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
@@ -114,7 +122,7 @@ os_identification() {
   if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC)) -gt 0 ]] ; then
     print_output ""
     print_output "$(indent "$(orange "Operating system detection:")")"
-    if [[ $COUNTER_VxWorks -gt 10 ]] ; then print_output "$(indent "$(orange "VxWorks detected          ""$COUNTER_VxWorks")")"; fi
+    if [[ $COUNTER_VxWorks -gt 5 ]] ; then print_output "$(indent "$(orange "VxWorks detected          ""$COUNTER_VxWorks")")"; fi
     if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected         ""$COUNTER_FreeRTOS")")"; fi
     if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected             ""$COUNTER_eCos")")"; fi
     if [[ $COUNTER_Linux -gt 5 && $LINUX_PATH_COUNTER -gt 1 ]] ; then 
