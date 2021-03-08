@@ -481,6 +481,16 @@ case ${ANSWER:0:1} in
       cd ./external/cve-search/ || exit 1
       pip3 install -r requirements.txt
       xargs sudo apt-get install -y < requirements.system
+      wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+      echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+      sudo apt-get update
+      sudo apt-get install -y mongodb-org
+      sudo systemctl daemon-reload
+      sudo systemctl start mongod
+      sudo systemctl enable mongod
+      sudo ./sbin/db_mgmt_cpe_dictionary.py -p
+      sudo ./sbin/db_mgmt_json.py -p
+      sudo ./sbin/db_updater.py -c
     fi
 
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
