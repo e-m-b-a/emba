@@ -299,7 +299,7 @@ case ${ANSWER:0:1} in
       docker pull fkiecad/fact_extractor:latest
     fi
     if ! [[ -f "./external/extract.py" ]]; then
-      download_file "FACT-extract" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
+      wget https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py -O ./external/extract.py
       chmod +x ./external/extract.py
     fi
   ;;
@@ -488,6 +488,7 @@ case ${ANSWER:0:1} in
       sudo systemctl daemon-reload
       sudo systemctl start mongod
       sudo systemctl enable mongod
+      /etc/init.d/redis-server start
       sudo ./sbin/db_mgmt_cpe_dictionary.py -p
       sudo ./sbin/db_mgmt_json.py -p
       sudo ./sbin/db_updater.py -c
