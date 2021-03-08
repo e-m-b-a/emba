@@ -68,43 +68,10 @@ output_overview() {
     fi
   fi
 
+
   if [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
-    # currently verified OS detection is only able to detect Siprotec and Linux systems
-    OS_VERIFIED=$(grep "verified.*system\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
-
-    if [[ -n "$OS_VERIFIED" ]]; then
-      print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""""$OS_VERIFIED"""
-    else
-      # no find OS that was not verified in the first step (but we can try to verify it now)
-      mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
-
-      if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
-        for OS in "${OS_DETECT[@]}"; do
-          UNVERIFIED=0
-          if [[ "$OS" == *VxWorks* ]]; then
-            # vxworks based OS we can try to verify quite easily with the already done version detection module
-            # if we have a vxworks version already detected we can ensure we really have a vxworks system and nothing else:
-            mapfile -t VXWORKS_VERSION < <(grep -i "Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep "vxworks" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
-            if [[ "${#VXWORKS_VERSION[@]}" -gt 0 ]]; then
-              # version detected -> verified vxworks
-              for VX_VER in "${VXWORKS_VERSION[@]}"; do
-                print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""VxWorks - v$VX_VER"
-              done
-            else
-              UNVERIFIED=1
-            fi
-          else
-            UNVERIFIED=1
-          fi
-
-          if [[ $UNVERIFIED == 1 ]]; then
-            print_output "[+] Possible operating system detected (""$ORANGE""unverified""$GREEN""): ""$ORANGE""""$OS"""
-          fi
-        done
-      fi
-    fi
+    os_detector
   fi
-
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u)
     if [[ "${#KERNELV[@]}" -ne 0 ]]; then
@@ -343,3 +310,49 @@ get_data() {
   fi
 }
 
+os_detector() {
+  # currently verified OS detection is based on the pre-checkers and is only able to detect Siprotec and Linux systems
+  OS_VERIFIED=$(grep "verified.*system\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+
+  if [[ -n "$OS_VERIFIED" ]]; then
+    print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""""$OS_VERIFIED"""
+  else
+    # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+
+    if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
+      for OS in "${OS_DETECT[@]}"; do
+        UNVERIFIED=0
+        if [[ "$OS" == *VxWorks* ]]; then
+          # vxworks based OS we can try to verify quite easily with the already done version detection module
+          # if we have a vxworks version already detected we can ensure we really have a vxworks system and nothing else:
+          mapfile -t VXWORKS_VERSION < <(grep -i "Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep "vxworks" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+          if [[ "${#VXWORKS_VERSION[@]}" -gt 0 ]]; then
+            # version detected -> verified vxworks
+            for VX_VER in "${VXWORKS_VERSION[@]}"; do
+              print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""VxWorks - v$VX_VER"
+            done
+          else
+            UNVERIFIED=1
+          fi
+        elif [[ "$OS" == *Linux* ]]; then
+          # we need this in the case the pre-checkers are not able to identify a root filesystem
+          # in this case the R* modules are jumping in and are probably able to identify the linux kernel version
+          mapfile -t LINUX_VERSION < <(grep -i "Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep "kernel" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+          if [[ "${#LINUX_VERSION[@]}" -gt 0 ]]; then
+            # version detected -> verified linux
+            for LINUX_VER in "${LINUX_VERSION[@]}"; do
+              print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""Linux - v$LINUX_VER"
+            done
+          fi
+        else
+          UNVERIFIED=1
+        fi
+
+        if [[ $UNVERIFIED == 1 ]]; then
+          print_output "[+] Possible operating system detected (""$ORANGE""unverified""$GREEN""): ""$ORANGE""""$OS"""
+        fi
+      done
+    fi
+  fi
+}
