@@ -22,6 +22,7 @@ F50_base_aggregator() {
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   S25_LOG="s25_kernel_check.txt"
   OS_DETECT_LOG="p07_firmware_bin_base_analyzer.txt"
+  P02_LOG="p02_firmware_bin_file_check.txt"
   S05_LOG="s05_firmware_details.txt"
   S10_LOG="s10_binaries_check.txt"
   S20_LOG="s20_shell_check.txt"
@@ -99,9 +100,12 @@ output_details() {
   if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""""$MOD_DATA_COUNTER""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
   fi
-  ENTROPY=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
+  ENTROPY_PIC=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY"""
+  fi
+  if [[ -n "$ENTROPY_PIC" ]]; then
+    print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"""
   fi
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
@@ -268,6 +272,9 @@ output_cve_exploits() {
 }
 
 get_data() {
+  if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
+    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2)
+  fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
     DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f3)
