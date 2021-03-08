@@ -141,9 +141,10 @@ binwalking() {
   print_output "[*] Entropy testing with binwalk ... "
   print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
   mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
-  if command -v xdg-open > /dev/null; then
-    xdg-open "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
-  fi
+  # we have to think about this thing. I like it for testing only one firmware but it drives me cracy in massive testing
+  #if command -v xdg-open > /dev/null; then
+  #  xdg-open "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
+  #fi
 
   export OUTPUT_DIR_binwalk
   OUTPUT_DIR_binwalk=$(basename "$FIRMWARE_PATH")

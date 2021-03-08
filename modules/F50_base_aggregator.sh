@@ -102,7 +102,7 @@ output_details() {
   fi
   ENTROPY_PIC=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY"""
+    print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""""$ENTROPY"""
   fi
   if [[ -n "$ENTROPY_PIC" ]]; then
     print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"""
