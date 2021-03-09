@@ -508,6 +508,10 @@ case ${ANSWER:0:1} in
     fi
 
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
+      pip3 install cve_searchsploit
+      cd ./external/cve-search/ || exit 1
+      pip3 install -r requirements.txt
+      xargs sudo apt-get install -y < requirements.system
       if [[ "$FORCE" -eq 0 ]] ; then
         echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
         read -p "(y/N)" -r ANSWER
