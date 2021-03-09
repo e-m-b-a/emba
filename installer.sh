@@ -462,10 +462,10 @@ print_tool_info "net-tools" 1
 print_tool_info "git" 1
 
 if [[ "$FORCE" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, mongodb, cve-search and cve_searchsploit (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
 else
-  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, mongodb, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
@@ -483,15 +483,27 @@ case ${ANSWER:0:1} in
       xargs sudo apt-get install -y < requirements.system
       wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
       echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-      sudo apt-get update
-      sudo apt-get install -y mongodb-org
+      print_tool_info "mongodb-org" 1
       sudo systemctl daemon-reload
       sudo systemctl start mongod
       sudo systemctl enable mongod
-      /etc/init.d/redis-server start
-      sudo ./sbin/db_mgmt_cpe_dictionary.py -p
-      sudo ./sbin/db_mgmt_json.py -p
-      sudo ./sbin/db_updater.py -c
+      
+      if [[ "$FORCE" -eq 0 ]] ; then
+        echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
+        read -p "(y/N)" -r ANSWER
+      else
+        echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated (if not already on the system)!""$NC"
+        ANSWER=("y")
+      fi
+      case ${ANSWER:0:1} in
+        y|Y )
+          /etc/init.d/redis-server start
+          sudo ./sbin/db_mgmt_cpe_dictionary.py -p
+          sudo ./sbin/db_mgmt_json.py -p
+          sudo ./sbin/db_updater.py -c
+        ;;
+      esac
+      cd ../.. || exit 1
     fi
 
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
@@ -506,10 +518,10 @@ case ${ANSWER:0:1} in
         y|Y )
           sudo cve_searchsploit -u
         ;;
-      esac
+      esac    
     fi
-    echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
-    echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
+    # echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
+    # echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
   ;;
 esac
 
