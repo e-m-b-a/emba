@@ -178,7 +178,7 @@ dependency_check()
     # CVE-search
     check_dep_file "cve-search" "$EXT_DIR""/cve-search/bin/search.py"
     if [[ IN_DOCKER -eq 0 ]]; then 
-      # really basic check, if cve-search database is running - no check, if populated
+      # really basic check, if cve-search database is running - no check, if populated and also no check, if emba in docker
       check_dep_tool "mongoDB" "mongod"
     fi
 
