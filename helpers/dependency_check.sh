@@ -15,8 +15,8 @@
 # Description:  Check all dependencies for emba
 
 
-local DEP_ERROR=0 # exit emba after dependency check, if ONLY_DEP and FORCE both zero
-local DEP_EXIT=0  # exit emba after dependency check, regardless of which parameters have been set
+DEP_ERROR=0 # exit emba after dependency check, if ONLY_DEP and FORCE both zero
+DEP_EXIT=0  # exit emba after dependency check, regardless of which parameters have been set
 
 # $1=File name
 # $2=File path
@@ -152,9 +152,9 @@ dependency_check()
     done 
 
 
-  #######################################################################################
-  # Check external tools
-  #######################################################################################
+    #######################################################################################
+    # Check external tools
+    #######################################################################################
 
     echo
     print_output "[*] External utils:" "no_log"
@@ -250,7 +250,7 @@ dependency_check()
     # fdtdump (device tree compiler)
     export DTBDUMP
     DTBDUMP_M="$(check_dep_tool "fdtdump" "fdtdump")"
-    if [[ -z $(echo "$DTBDUMP_M" | grep "not ok") ]] ; then
+    if echo "$DTBDUMP_M" | grep -q "not ok" ; then
       DTBDUMP=0
     else
       DTBDUMP=1
@@ -272,7 +272,7 @@ dependency_check()
     # qemu
     check_dep_tool "qemu-[ARCH]-static" "qemu-mips-static"
 
-    # shellcheck
+    # sh3llcheck - I know it's a typo, but this particular tool nags about it
     check_dep_tool "shellcheck"
 
     # tree
@@ -288,7 +288,7 @@ dependency_check()
   
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
     print_output "$ORANGE""Some dependencies are missing - please check your installation" "no_log"
-    if ( [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ) || [[ $DEP_EXIT -gt 0 ]] ; then
+    if { [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ;} || [[ $DEP_EXIT -gt 0 ]] ; then
       exit 1
     fi
   fi
