@@ -69,24 +69,28 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
-# $1: module letter [P, S, R, F]
+# $1: module group letter [P, S, R, F]
 # $2: SELECT_MODULE_ARRAY
 # $3: 0=single thread 1=multithread
 # $4: HTML=1 - generate html file
 run_modules()
 {
+  MODULE_GROUP="$1"
+  THREADING_SET=$3
+  HTML_SET=$4
+
   local SELECT_PRE_MODULES_COUNT=0
   mapfile -t SELECTION < <( echo "$2")
 
   for SELECT_NUM in "${SELECTION[@]}" ; do
-    if [[ "$SELECT_NUM" =~ ^["${1,,}","${1^^}"]{1} ]]; then
+    if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
       (( SELECT_PRE_MODULES_COUNT+=1 ))
     fi
   done
 
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
     local MODULES
-    mapfile -t MODULES < <(find "$MOD_DIR" -name "${1^^}""*_*.sh" | sort -V 2> /dev/null)
+    mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
     sort_modules
     for MODULE_FILE in "${MODULES[@]}" ; do
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
@@ -94,14 +98,14 @@ run_modules()
         MODULE_BN=$(basename "$MODULE_FILE")
         MODULE_MAIN=${MODULE_BN%.*}
         module_start_log "$MODULE_MAIN"
-        if [[ $2 -eq 1 ]]; then
+        if [[ $THREADING_SET -eq 1 ]]; then
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
           max_pids_protection
         else
           $MODULE_MAIN
         fi
-        if [[ $4 == 1 ]]; then
+        if [[ $HTML_SET == 1 ]]; then
           generate_html_file "$LOG_FILE" "$HTML_REPORT"
         fi
         reset_module_count
@@ -109,29 +113,29 @@ run_modules()
     done
   else
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
-      if [[ "$SELECT_NUM" =~ ^["${1,,}","${1^^}"]{1}[0-9]+ ]]; then
+      if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
         local MODULE
-        MODULE=$(find "$MOD_DIR" -name "${1^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+        MODULE=$(find "$MOD_DIR" -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
         if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
           HTML_REPORT=0
           MODULE_BN=$(basename "$MODULE")
           MODULE_MAIN=${MODULE_BN%.*}
           module_start_log "$MODULE_MAIN"
-          if [[ $2 -eq 1 ]]; then
+          if [[ $THREADING_SET -eq 1 ]]; then
             $MODULE_MAIN &
             WAIT_PIDS+=( "$!" )
             max_pids_protection
           else
             $MODULE_MAIN
           fi
-          if [[ $4 == 1 ]]; then
+          if [[ $HTML_SET == 1 ]]; then
             generate_html_file "$LOG_FILE" "$HTML_REPORT"
           fi
           reset_module_count
         fi
-      elif [[ "$SELECT_NUM" =~ ^["${1,,}","${1^^}"]{1} ]]; then
+      elif [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
         local MODULES
-        mapfile -t MODULES < <(find "$MOD_DIR" -name "${1^^}""*_*.sh" | sort -V 2> /dev/null)
+        mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
         sort_modules
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
@@ -139,14 +143,14 @@ run_modules()
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             module_start_log "$MODULE_MAIN"
-            if [[ $2 -eq 1 ]]; then
+            if [[ $THREADING_SET -eq 1 ]]; then
               $MODULE_MAIN &
               WAIT_PIDS+=( "$!" )
               max_pids_protection
             else
               $MODULE_MAIN
             fi
-            if [[ $4 == 1 ]]; then
+            if [[ $HTML_SET == 1 ]]; then
               generate_html_file "$LOG_FILE" "$HTML_REPORT"
             fi
             reset_module_count
