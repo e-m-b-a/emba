@@ -235,7 +235,6 @@ main()
         ;;
       d)
         export ONLY_DEP=1
-        export BAP=1
         ;;
       D)
         export USE_DOCKER=1

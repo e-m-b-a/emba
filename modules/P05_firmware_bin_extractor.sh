@@ -25,7 +25,7 @@ P05_firmware_bin_extractor() {
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
-  if [[ "$FACT_EXTRACTOR " -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
+  if [[ "$FACT_EXTRACTOR" -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
     fact_extractor
   fi
 
