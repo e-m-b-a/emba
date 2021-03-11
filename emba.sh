@@ -84,6 +84,7 @@ main()
                                 # 1 -> multi threaded
   export MOD_RUNNING=0          # for tracking how many modules currently running
 
+  export MAX_EXT_SPACE=6000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
   export MAIN_LOG="emba.log"
   export CONFIG_DIR="$INVOCATION_PATH""/config"
