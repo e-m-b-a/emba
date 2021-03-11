@@ -211,6 +211,7 @@ print_tool_info "qemu-user-static" 0 "qemu-mips-static"
 print_tool_info "binwalk" 0
 print_tool_info "bc" 1
 print_tool_info "coreutils" 1
+print_tool_info "ent" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
