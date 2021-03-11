@@ -184,7 +184,7 @@ build_report_files(){
         SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
+        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
       fi
     done
   fi
@@ -209,7 +209,7 @@ build_report_files(){
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
         echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
+        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
       else
         if [[ "$FILE_LINE" != *"entropy.png"* ]]; then
           FILE_LINE="$(echo -e "$FILE_LINE" | sed "s/</\&lt;/g")"
@@ -230,8 +230,7 @@ build_report_files(){
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/$HTML_FILE"
 }
 
-generate_html_file(){
-  
+generate_html_file(){  
   ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
   
   if [ ! -d "$ABS_HTML_PATH/style" ] ; then

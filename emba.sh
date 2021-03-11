@@ -70,28 +70,29 @@ sort_modules()
 }
 
 # $1: module group letter [P, S, R, F]
-# $2: SELECT_MODULE_ARRAY
-# $3: 0=single thread 1=multithread
-# $4: HTML=1 - generate html file
+# $2: 0=single thread 1=multithread
+# $3: HTML=1 - generate html file
 run_modules()
 {
   MODULE_GROUP="$1"
-  THREADING_SET=$3
-  HTML_SET=$4
+  printf -v THREADING_SET '%d\n' "$2" 2>/dev/null
+  printf -v HTML_SET '%d\n' "$3" 2>/dev/null
 
   local SELECT_PRE_MODULES_COUNT=0
-  mapfile -t SELECTION < <( echo "$2")
 
-  for SELECT_NUM in "${SELECTION[@]}" ; do
+  for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
     if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
       (( SELECT_PRE_MODULES_COUNT+=1 ))
     fi
   done
 
+  if [[ $THREADING_SET -eq 1 ]] ; then
+    sort_modules
+  fi
+
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
     local MODULES
     mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-    sort_modules
     for MODULE_FILE in "${MODULES[@]}" ; do
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
         HTML_REPORT=0
@@ -105,7 +106,7 @@ run_modules()
         else
           $MODULE_MAIN
         fi
-        if [[ $HTML_SET == 1 ]]; then
+        if [[ $HTML_SET -eq 1 ]]; then
           generate_html_file "$LOG_FILE" "$HTML_REPORT"
         fi
         reset_module_count
@@ -128,7 +129,7 @@ run_modules()
           else
             $MODULE_MAIN
           fi
-          if [[ $HTML_SET == 1 ]]; then
+          if [[ $HTML_SET -eq 1 ]]; then
             generate_html_file "$LOG_FILE" "$HTML_REPORT"
           fi
           reset_module_count
@@ -150,7 +151,7 @@ run_modules()
             else
               $MODULE_MAIN
             fi
-            if [[ $HTML_SET == 1 ]]; then
+            if [[ $HTML_SET -eq 1 ]]; then
               generate_html_file "$LOG_FILE" "$HTML_REPORT"
             fi
             reset_module_count
@@ -312,6 +313,17 @@ main()
 
   echo
 
+  # Check all dependencies of emba
+  dependency_check
+
+  if [[ $IN_DOCKER -eq 0 ]] ; then
+    # check if LOG_DIR exists and prompt to terminal to delete its content (Y/n)
+    log_folder
+  fi
+
+  # create log directory, if not exists and needed subdirectories
+  create_log_dir
+
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
 
@@ -325,14 +337,8 @@ main()
 
   # Create path in log directory for web report
   if [[ "$HTML" -eq 1 ]]; then
+    export HTML_PATH="$LOG_DIR""/html-report"
     mkdir "$HTML_PATH"
-  fi
-
-  # Check all dependencies of emba
-  dependency_check
-  # If only dependency check, then exit emba after it
-  if [[ $ONLY_DEP -eq 1 ]] ; then
-      exit 0
   fi
 
   # Check firmware type (file/directory)
@@ -354,11 +360,6 @@ main()
   if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
     FORMAT_LOG=1
     print_output "[*] Activate colored log for webreporter" "no_log"
-  fi
-
-  if [[ $IN_DOCKER -eq 0 ]] ; then
-    # check if LOG_DIR exists and prompt to terminal to delete its content (Y/n)
-    log_folder
   fi
 
   if [[ $LOG_GREP -eq 1 ]] ; then
@@ -454,7 +455,7 @@ main()
 
       ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules, therefore overwriting $THREADED as 0
       ## as there are internal dependencies it is easier to handle it in the modules
-      run_modules "P" "${SELECT_MODULES[@]}" 0 0
+      run_modules "P" "0" "0"
 
       # if we running threaded we ware going to wait for the slow guys here
       if [[ $THREADED -eq 1 ]]; then
@@ -512,7 +513,7 @@ main()
       set_etc_paths
       echo
 
-      run_modules "S" "${SELECT_MODULES[@]}" $THREADED $HTML
+      run_modules "S" "$THREADED" "$HTML"
 
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid
@@ -521,7 +522,7 @@ main()
       # here we can deal with other non linux things like RTOS specific checks
       # lets call it R* modules
       # 'main' functions of imported finishing modules
-      run_modules "R" "${SELECT_MODULES[@]}" $THREADED $HTML
+      run_modules "R" "$THREADED" "$HTML"
 
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid
@@ -547,7 +548,7 @@ main()
     print_output "[!] Reporting phase started on ""$(date)""\\n" "no_log" 
   fi
  
-  run_modules "F" "" 0 $HTML
+  run_modules "F" "0" "$HTML"
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo

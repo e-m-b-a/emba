@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,11 +12,6 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-
-# Description:  Module with all available functions and patterns to use
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
 
 # Code Guidelines:
 # -----------------------------
@@ -27,7 +23,6 @@
 # Use 'local' for variables if possible for better resource management
 # Use 'export' for variables which aren't only used in one file - it isn't necessary, but helps for readability
 # Boolean: 0=False 1=True, e.g. [[ $VAR -eq 0 ]]
-
 
 empty_module() {
   # Initialize module and creates a log file "empty_module_log.txt" in your log folder

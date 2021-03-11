@@ -14,7 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
-# Description:  installs needed stuff for emba
+# Description:  Installs needed stuff for emba
 
 INSTALL_APP_LIST=()
 DOWNLOAD_FILE_LIST=()

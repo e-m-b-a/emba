@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check various certification files
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Scrapes firmware for certification files and their end date.
+
 export HTML_REPORT
 
 S60_cert_file_check()

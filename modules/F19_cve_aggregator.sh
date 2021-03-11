@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Module with all available functions and patterns to use
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Aggregates all found version numbers together from P09, S09, S25 and S115 and searches with cve-search for all CVEs, 
+#               then it lists exploits that could possible be used for the firmware.
 
 F19_cve_aggregator() {
   module_log_init "${FUNCNAME[0]}"
@@ -418,16 +416,16 @@ aggregate_versions() {
   # currently it is very helpful
   print_output "[*] Software inventory initial overview:"
   for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
-    print_output "[+] Found Version details (base check): ""$VERSION"""
+    print_output "[+] Found Version details (base check): ""$VERSION"
   done
   for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
-    print_output "[+] Found Version details (statical check): ""$VERSION"""
+    print_output "[+] Found Version details (statical check): ""$VERSION"
   done
   for VERSION in "${VERSIONS_EMULATOR[@]}"; do
-    print_output "[+] Found Version details (emulator): ""$VERSION"""
+    print_output "[+] Found Version details (emulator): ""$VERSION"
   done
   for VERSION in "${VERSIONS_KERNEL[@]}"; do
-    print_output "[+] Found Version details (kernel): ""$VERSION"""
+    print_output "[+] Found Version details (kernel): ""$VERSION"
   done
 
   print_output ""
@@ -450,7 +448,7 @@ aggregate_versions() {
   if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
     print_output "[*] Software inventory aggregated:"
     for VERSION in "${VERSIONS_CLEANED[@]}"; do
-      print_output "[+] Found Version details (aggregated): ""$VERSION"""
+      print_output "[+] Found Version details (aggregated): ""$VERSION"
     done
   else
       print_output "[-] No Version details found."

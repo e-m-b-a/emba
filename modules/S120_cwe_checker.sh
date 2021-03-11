@@ -13,10 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check binaries with cwe-checker and bap (binary analysis platform)
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Runs a Docker container with cwe-checker on bap (cwe_checker is built on top of Binary Analysis Platform) to check binary for 
+#               common bug classes such as vicious functions or integer overflows. 
+#               As the runtime is quite long, it needs to be activated separately via -c switch.
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
@@ -46,7 +45,7 @@ S120_cwe_checker()
 
         if [[ ${#BAP_OUT[@]} -ne 0 ]] ; then
           print_output ""
-          print_output "[+] cwe-checker found ""$ORANGE""""${#BAP_OUT[@]}""""$GREEN"" different security issues in ""$ORANGE""""$NAME""""$GREEN"":"
+          print_output "[+] cwe-checker found ""$ORANGE""${#BAP_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":"
           for BAP_LINE in "${BAP_OUT[@]}"; do
             CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
             CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
@@ -64,7 +63,7 @@ S120_cwe_checker()
       if [[ ${#BAP_OUT[@]} -eq 0 ]] ; then
         print_output "[-] cwe-checker found 0 security issues."
       else
-        print_output "[+] cwe-checker found a total of ""$ORANGE""""$SUM_FCW_FIND""""$GREEN"" of the following security issues:"
+        print_output "[+] cwe-checker found a total of ""$ORANGE""$SUM_FCW_FIND""$GREEN"" of the following security issues:"
         for BAP_LINE in "${BAP_OUT[@]}"; do
           CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
           CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"

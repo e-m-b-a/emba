@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -13,7 +14,6 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Check all dependencies for emba
-
 
 DEP_ERROR=0 # exit emba after dependency check, if ONLY_DEP and FORCE both zero
 DEP_EXIT=0  # exit emba after dependency check, regardless of which parameters have been set
@@ -261,7 +261,8 @@ dependency_check()
     check_dep_file "linux-exploit-suggester.sh script" "$EXT_DIR""/linux-exploit-suggester.sh"
 
     # objdump
-    check_dep_file "objdump" "$EXT_DIR""/objdump"
+    OBJDUMP="$EXT_DIR""/objdump"
+    check_dep_file "objdump" "$OBJDUMP"
 
     # php
     check_dep_tool "php"
@@ -283,41 +284,22 @@ dependency_check()
 
     # yara
     check_dep_tool "yara"
-
   fi
   
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
-    print_output "$ORANGE""Some dependencies are missing - please check your installation" "no_log"
+    print_output "\\n""$ORANGE""Some dependencies are missing - please check your installation\\n" "no_log"
     if { [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ;} || [[ $DEP_EXIT -gt 0 ]] ; then
       exit 1
     fi
+  else
+    print_output "\\n" "no_log"
+  fi
+
+  # If only dependency check, then exit emba after it
+  if [[ $ONLY_DEP -eq 1 ]] ; then
+    exit 0
   fi
   
-  if [[ $ONLY_DEP -eq 0 ]] ; then
-    if ! [[ -d "$LOG_DIR" ]] ; then
-      mkdir "$LOG_DIR" 2> /dev/null
-    fi
-    if [[ $FIRMWARE -eq 1 ]] ; then
-      if ! [[ -d "$LOG_DIR""/vul_func_chcker" ]] ; then
-        mkdir -p "$LOG_DIR""/vul_func_checker" 2> /dev/null
-      fi
-      if ! [[ -d "$LOG_DIR""/objdumps" ]] ; then
-        mkdir -p "$LOG_DIR""/objdumps" 2> /dev/null
-      fi
-      if ! [[ -d "$LOG_DIR""/dtb_dump" ]] && [[ $DTBDUMP -eq 1 ]] ; then
-        mkdir -p "$LOG_DIR""/dtb_dump" 2> /dev/null
-      fi
-      if ! [[ -d "$LOG_DIR""/bap_cwe_checker" ]] && [[ $BAP -eq 1 ]] ; then
-        mkdir "$LOG_DIR""/bap_cwe_checker" 2> /dev/null
-      fi
-    fi
-  else
-    if [[ $USE_DOCKER -eq 0 ]] ; then
-      echo
-      print_help
-      exit 0
-    fi
-  fi
 }
 
 architecture_dep_check() {

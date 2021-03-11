@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -13,7 +14,6 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  All functions for colorizing terminal output and handling logging
-
 
 ## Color definition
 RED="\033[0;31m"

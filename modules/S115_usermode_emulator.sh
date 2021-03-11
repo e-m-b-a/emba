@@ -13,10 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Module with all available functions and patterns to use
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Emulates executables from the firmware with qemu to get version information. 
+#               Currently this is an experimental module and needs to be activated separately via the -E switch. 
+#               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
@@ -405,7 +404,7 @@ emulate_binary() {
     fi
   
     for PARAM in "${EMULATION_PARAMS[@]}"; do
-      print_output "[*] Trying to emulate binary ${GREEN}""$BIN_""${NC} with parameter ""$PARAM"""
+      print_output "[*] Trying to emulate binary ${GREEN}""$BIN_""${NC} with parameter ""$PARAM"
       chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
       print_output ""
       check_disk_space
