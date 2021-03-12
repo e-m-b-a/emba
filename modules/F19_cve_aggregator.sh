@@ -501,30 +501,30 @@ generate_cve_details() {
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     CVE_COUNTER_VERSION=0
     EXPLOIT_COUNTER_VERSION=0
-    VERSION_search="${VERSION//\ /:}"
-    VERSION_path="${VERSION//\ /_}"
+    VERSION_SEARCH="${VERSION//\ /:}"
+    VERSION_PATH="${VERSION//\ /_}"
     print_output ""
-    print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_search${NC}"
+    print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}"
 
     # CVE search:
-    $PATH_CVE_SEARCH -p "$VERSION_search" > "$LOG_DIR"/aggregator/"$VERSION_path".txt
+    $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_DIR"/aggregator/"$VERSION_PATH".txt
 
     # extract the CVE numbers and the CVSS values and sort it:
-    readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_DIR"/aggregator/"$VERSION_path".txt | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r)
+    readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_DIR"/aggregator/"$VERSION_PATH".txt | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r)
 
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       ((CVE_COUNTER++))
       ((CVE_COUNTER_VERSION++))
       #extract the CVSS and CVE value (remove all spaces and tabs)
       CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-      CVE_value=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+      CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
 
       EXPLOIT="No exploit available"
 
       # as we already know about a buch of kernel exploits - lets search them
       if [[ "$VERSION" == *kernel* ]]; then
         for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
-          if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_value" ]]; then
+          if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
             EXPLOIT="Exploit available (Source: linux-exploit-suggester)"
             ((EXPLOIT_COUNTER++))
             ((EXPLOIT_COUNTER_VERSION++))
@@ -535,47 +535,47 @@ generate_cve_details() {
       if command -v cve_searchsploit > /dev/null ; then
         # if no exploit was found lets talk to exploitdb:
         if [[ "$EXPLOIT" == "No exploit available" ]]; then
-          if cve_searchsploit "$CVE_value" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
+          if cve_searchsploit "$CVE_VALUE" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
             EXPLOIT="Exploit available (Source: Exploit database)"
-            echo -e "\\n[+] Exploit for $CVE_value:\\n" >> "$LOG_DIR"/aggregator/exploit-details.txt
-            cve_searchsploit "$CVE_value" >> "$LOG_DIR"/aggregator/exploit-details.txt
+            echo -e "\\n[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR"/aggregator/exploit-details.txt
+            cve_searchsploit "$CVE_VALUE" >> "$LOG_DIR"/aggregator/exploit-details.txt
             ((EXPLOIT_COUNTER++))
             ((EXPLOIT_COUNTER_VERSION++))
           fi
         fi
       fi
 
-      CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_search""/" | sed -e 's/\ \+/\t/g')
+      CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
       BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
       # we do not deal with output formatting the usual way -> we use printf
       FORMAT_LOG_BAK="$FORMAT_LOG"
       FORMAT_LOG=0
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       elif (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       else
-        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_value" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     done
 
     { echo ""
       echo "[*] Statistics:CVE_COUNTER|EXPLOIT_COUNTER|BINARY VERSION"
-      echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_search"
-    } >> "$LOG_DIR"/aggregator/"$VERSION_path".txt
+      echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
+    } >> "$LOG_DIR"/aggregator/"$VERSION_PATH".txt
 
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
       print_output ""
-      print_output "[+] ${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
+      print_output "[+] ${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH.${NC}"
     elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]];then
       print_output ""
-      print_output "[+] ${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search.${NC}"
+      print_output "[+] ${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH.${NC}"
     else
-      print_output "[-] Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_search."
+      print_output "[-] Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH."
     fi
   done
 

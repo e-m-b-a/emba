@@ -138,6 +138,7 @@ print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
+  echo -e "$CYAN""-d""$NC""         Force install of all dependencies needed for emba in Docker mode (-D)"
   echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of emba"
@@ -147,12 +148,17 @@ print_help()
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
-while getopts cDFhl OPT ; do
+while getopts cdDFhl OPT ; do
   case $OPT in
     c)
       export COMPLEMENT=1
       export FORCE=1
       echo -e "$GREEN""$BOLD""Complement emba dependecies""$NC"
+      ;;
+    d)
+      export DOCKER_SETUP=1
+      export FORCE=1
+      echo -e "$GREEN""$BOLD""Install all dependecies for emba in Docker mode (-D)""$NC"
       ;;
     D)
       export IN_DOCKER=1
@@ -213,10 +219,10 @@ print_tool_info "bc" 1
 print_tool_info "coreutils" 1
 print_tool_info "ent" 1
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
@@ -246,10 +252,10 @@ else
   echo "Download-Size: ~1500 MB"
 fi
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
@@ -286,10 +292,10 @@ else
 fi
 
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
@@ -320,7 +326,7 @@ print_file_info "checksec" "Check the properties of executables (like PIE, RELRO
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
@@ -346,7 +352,7 @@ print_file_info "Yara-Rules/rules/packer_compiler_signatures.yar" "" "https://ra
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
@@ -382,7 +388,7 @@ print_tool_info "bison" 1
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
@@ -431,7 +437,7 @@ done
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and jq be installed (if not already on the system)!""$NC"
@@ -461,66 +467,86 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
-# aggregator
+# cve-search database for host 
 
-echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database. CVE-searchsploit will be installed via pip3."
+echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database."
+
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install cve-search and mongodb and populate it?""$NC"
+  read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
+  ANSWER=("n")
+else
+  echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+    apt-get update -y
+    apt-get install mongodb-org -y
+    systemctl daemon-reload
+    systemctl start mongod
+    systemctl enable mongod
+    
+    if [[ "$FORCE" -eq 0 ]] ; then
+      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
+      read -p "(y/N)" -r ANSWER
+    else
+      echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
+      ANSWER=("y")
+    fi
+    case ${ANSWER:0:1} in
+      y|Y )
+        
+        git clone https://github.com/cve-search/cve-search.git external/cve-search
+        cd ./external/cve-search/ || exit 1
+        pip3 install -r requirements.txt
+        xargs sudo apt-get install -y < requirements.system
+        /etc/init.d/redis-server start
+        ./sbin/db_mgmt_cpe_dictionary.py -p
+        ./sbin/db_mgmt_json.py -p
+        ./sbin/db_updater.py -c
+        cd ../.. || exit 1
+      ;;
+    esac
+  ;;
+esac
+
+# aggregator tools to 
+
+echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
 INSTALL_APP_LIST=()
 print_tool_info "python3-pip" 1
 print_tool_info "net-tools" 1
 print_tool_info "git" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, mongodb, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
-  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, mongodb, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
     apt-get install "${INSTALL_APP_LIST[@]}" -y
-    if [[ -d external/cve-search ]]; then
-      echo -e "Found cve-search directory. Skipping installation."
-    else
-      pip3 install cve_searchsploit
-      git clone https://github.com/cve-search/cve-search.git external/cve-search
-      cd ./external/cve-search/ || exit 1
-      pip3 install -r requirements.txt
-      xargs sudo apt-get install -y < requirements.system
-      wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-      echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-      sudo apt-get update -y
-      apt-get install mongodb-org -y
-      sudo systemctl daemon-reload
-      sudo systemctl start mongod
-      sudo systemctl enable mongod
-      
-      if [[ "$FORCE" -eq 0 ]] ; then
-        echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
-        read -p "(y/N)" -r ANSWER
-      else
-        echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated (if not already on the system)!""$NC"
-        ANSWER=("y")
-      fi
-      case ${ANSWER:0:1} in
-        y|Y )
-          /etc/init.d/redis-server start
-          sudo ./sbin/db_mgmt_cpe_dictionary.py -p
-          sudo ./sbin/db_mgmt_json.py -p
-          sudo ./sbin/db_updater.py -c
-        ;;
-      esac
-      cd ../.. || exit 1
-    fi
+    pip3 install cve_searchsploit
+    git clone https://github.com/cve-search/cve-search.git external/cve-search
+    cd ./external/cve-search/ || exit 1
+    pip3 install -r requirements.txt
+    xargs sudo apt-get install -y < requirements.system
+    cd ../.. || exit 1
 
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
       if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
+        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database on docker emba?""$NC"
         read -p "(y/N)" -r ANSWER
       else
-        echo -e "\\n""$MAGENTA""$BOLD""Updating cve-search database on docker.""$NC"
+        echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database on docker.""$NC"
         ANSWER=("y")
       fi
       case ${ANSWER:0:1} in
@@ -569,7 +595,7 @@ print_tool_info "liblzo2-dev" 1
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
@@ -641,7 +667,7 @@ print_tool_info "make" 0
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and compile aha (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""aha (if not already on the system) will be downloaded and be compiled!""$NC"
