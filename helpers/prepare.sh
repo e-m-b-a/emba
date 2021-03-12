@@ -234,7 +234,7 @@ detect_root_dir_helper() {
   export ROOT_PATH
   local R_PATH
 
-  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -executable -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
 
   if [[ "${#INTERPRETER_FULL_PATH[@]}" -ne 0 ]]; then
     for INTERPRETER_PATH in "${INTERPRETER_FULL_PATH[@]}"; do
