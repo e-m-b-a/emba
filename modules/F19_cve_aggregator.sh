@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Aggregates all found version numbers together from P09, S09, S25 and S115 and searches with cve-search for all CVEs, 
+# Description:  Aggregates all found version numbers together from R09, S09, S25 and S115 and searches with cve-search for all CVEs, 
 #               then it lists exploits that could possible be used for the firmware.
 
 F19_cve_aggregator() {
@@ -33,7 +33,6 @@ F19_cve_aggregator() {
   KERNELV=0
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
-  FW_BASE_VER_CHECK_LOG="p09_firmware_base_version_check.txt"
   if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
     FW_VER_CHECK_LOG="r09_firmware_base_version_check.txt"
   else
@@ -660,16 +659,7 @@ generate_cve_details() {
 }
 
 get_firmware_base_version_check() {
-  sub_module_title "Collect version details of module p09 and s09 - firmware_base_version_check."
-  if [[ -f "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" ]]; then
-    # if we have already kernel information:
-    if [[ "$KERNELV" -eq 1 ]]; then
-      readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel")
-    else
-      readarray -t VERSIONS_BASE_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_BASE_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
-    fi
-  fi
-  # 
+  sub_module_title "Collect version details of module r09 or s09 - firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then

@@ -16,7 +16,6 @@
 # Description:  Iterates through a static list with version details layout 
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and 
 #               checks if these fit on a binary in the firmware. 
-#               It is similar to module P09. However, it will only be executed, if the firmware isn't provided as a file.
 
 export HTML_REPORT
 

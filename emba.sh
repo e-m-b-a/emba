@@ -335,12 +335,6 @@ main()
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
   fi
 
-  # Create path in log directory for web report
-  if [[ "$HTML" -eq 1 ]]; then
-    export HTML_PATH="$LOG_DIR""/html-report"
-    mkdir "$HTML_PATH"
-  fi
-
   # Check firmware type (file/directory)
   if [[ -d "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=0

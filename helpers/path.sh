@@ -194,6 +194,10 @@ create_log_dir() {
     if ! [[ -d "$LOG_DIR""/bap_cwe_checker" ]] && [[ $BAP -eq 1 ]] ; then
       mkdir "$LOG_DIR""/bap_cwe_checker" 2> /dev/null
     fi
+    export HTML_PATH="$LOG_DIR""/html-report"
+    if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then
+      mkdir "$HTML_PATH"
+    fi
   fi
 }
 
