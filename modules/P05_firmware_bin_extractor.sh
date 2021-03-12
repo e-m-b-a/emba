@@ -25,7 +25,8 @@ P05_firmware_bin_extractor() {
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
-  if [[ "$FACT_EXTRACTOR " -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
+  # shellcheck disable=SC2153
+  if [[ $FACT_EXTRACTOR -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
     fact_extractor
   fi
 
@@ -76,8 +77,8 @@ wait_for_extractor() {
       DISK_SPACE=$(du -hm "$OUTPUT_DIR"/ --max-depth=1 --exclude="proc"| awk '{ print $1 }' | sort -hr | head -1)
       if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
     	  print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-	      print_output "[!] $(date) - Ending extraction process with PID $PID" "main"
-	      kill -9 $PID 2>/dev/null
+        print_output "[!] $(date) - Ending extraction process with PID $PID" "main"
+        kill -9 "$PID" 2>/dev/null
         running=0
       fi
       sleep 1
