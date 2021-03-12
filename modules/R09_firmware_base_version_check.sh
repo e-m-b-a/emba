@@ -13,14 +13,21 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-P09_firmware_base_version_check() {
+R09_firmware_base_version_check() {
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware versions detection"
 
+  detect_binary_versions
+}
+
+detect_binary_versions() { 
+  echo -e "\n"
+  print_output "[*] Initial version detection running on all firmware files ..." | tr -d "\n"
+
+  EXTRACTOR_LOG="$LOG_DIR"/p05_firmware_bin_extractor.txt
   declare -a VERSIONS_DETECTED
 
-  print_output "[*] Initial version detection running on all firmware files ..." | tr -d "\n"
   while read -r VERSION_LINE; do
     echo "." | tr -d "\n"
 
@@ -33,8 +40,7 @@ P09_firmware_base_version_check() {
       echo "." | tr -d "\n"
 
       # currently we only have binwalk files but sometimes we can find kernel version information or something else in it
-      #VERSION_FINDER=$(find "$LOG_DIR"/*.txt -type f -exec grep -o -a -E "$VERSION_IDENTIFIER" {} \; 2>/dev/null | head -1 2>/dev/null)
-      VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$LOG_DIR"/p05_firmware_bin_extractor.txt 2>/dev/null | head -1 2>/dev/null)
+      VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null)
 
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
@@ -44,7 +50,7 @@ P09_firmware_base_version_check() {
 
       echo "." | tr -d "\n"
 
-      if [[ $FIRMWARE -eq 0 ]]; then
+      if [[ -f $FIRMWARE_PATH ]]; then
         VERSION_FINDER=$(find "$FIRMWARE_PATH" -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
 
         if [[ -n $VERSION_FINDER ]]; then
@@ -68,6 +74,4 @@ P09_firmware_base_version_check() {
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
   echo "." | tr -d "\n"
-
-  export TESTING_DONE=1
 }

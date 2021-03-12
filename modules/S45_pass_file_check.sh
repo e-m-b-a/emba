@@ -24,6 +24,8 @@ S45_pass_file_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Search password files"
 
+  LOG_FILE="$( get_log_file )"
+
   local PASSWD_STUFF
   PASS_FILES_FOUND=0
 
@@ -45,7 +47,7 @@ S45_pass_file_check()
     done
     # who has sudoed in the past
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-    WHO_HAS_BEEN_SUDO=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -name .sudo_as_admin_successful 2>/dev/null)
+    WHO_HAS_BEEN_SUDO=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -name .sudo_as_admin_successful 2>/dev/null)
 
     if [[ "${#PASSWD_STUFF[@]}" -gt 0 ]] || [[ -n "$SUDOERS" ]] || [[ -n "$WHO_HAS_BEEN_SUDO" ]] ; then
       print_output "[+] Found ""${#PASSWD_STUFF[@]}"" password related files:"
@@ -96,8 +98,11 @@ S45_pass_file_check()
         print_output "$(indent "$(orange "$WHO_HAS_BEEN_SUDO")")"
       fi
     fi
+    echo -e "\\n[*] Statistics:$PASS_FILES_FOUND" >> "$LOG_FILE"
   else
     print_output "[-] No password files found"
   fi
+
+  module_end_log "${FUNCNAME[0]}"
 }
 

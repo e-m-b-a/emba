@@ -59,5 +59,7 @@ S90_mail_check()
   if [[ "$FINDING" -eq 0 ]] ; then
     print_output "[-] No mail files found!"
   fi
+
+  module_end_log "${FUNCNAME[0]}"
 }
 

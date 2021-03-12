@@ -45,7 +45,8 @@ architecture_check()
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
     local DETECT_ARCH ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
-    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec file {} \; 2>/dev/null | grep "executable\|shared\ object" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
+    # do not use -executable here. Not all firmware updates have exec permissions set
+    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -xdev -exec file {} \; 2>/dev/null | grep "executable\|shared\ object" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
     for D_ARCH in "${DETECT_ARCH[@]}" ; do
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
@@ -110,21 +111,46 @@ architecture_check()
   fi
 }
 
+prepare_file_arr()
+{
+  echo ""
+  print_output "[*] Unique files auto detection (could take some time)\\n" "main"
+
+  export FILE_ARR
+  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
+
+  # xdev will to the trick for us:
+  # remove ./proc/* executables (for live testing)
+  #rm_proc_binary "${FILE_ARR[@]}"
+}
+
 prepare_binary_arr()
 {
   echo ""
-  print_output "[*] Unique binary auto detection (could take some time)\\n" "no_log"
+  print_output "[*] Unique binary auto detection (could take some time)\\n" "main"
+
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
-  export CHECKSUMS
-  #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -iname "*" )
   readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-  readarray -t CHECKSUMS < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f1)
-  print_output "[*] Found ${#BINARIES[@]} unique executables." "no_log"
+
+  # in some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
+  # this is a slow fallback solution just to have something we can work with
+  if [[ "${#BINARIES[@]}" -eq 0 ]]; then
+    readarray -t BINARIES_TMP < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
+    for BINARY in "${BINARIES_TMP[@]}"; do
+      BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
+      if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
+        BINARIES+=( "$BINARY" )
+        MD5_DONE_INT+=( "$BIN_MD5" )
+      fi
+    done
+  fi
+  print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables." "main"
 
   # remove ./proc/* executables (for live testing)
-  rm_proc_binary "${BINARIES[@]}"
+  #rm_proc_binary "${BINARIES[@]}"
 }
 
 set_etc_paths()
@@ -238,5 +264,38 @@ detect_root_dir_helper() {
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $R_PATH" "no_log"
+  done
+}
+
+wait_for_pid() {
+  for PID in ${WAIT_PIDS[*]}; do
+    running=1
+    while [[ $running -eq 1 ]]; do
+      echo "." | tr -d "\n"
+      if ! pgrep -v grep | grep -q "$PID"; then
+        running=0
+      fi
+      sleep 1
+    done
+  done
+}
+
+max_pids_protection() {
+  while [[ ${#WAIT_PIDS[@]} -gt 5 ]]; do
+    TEMP_PIDS=()
+    # check for really running PIDs and re-create the array
+    for PID in ${WAIT_PIDS[*]}; do
+      if pgrep -v grep | grep -q "$PID"; then
+        TEMP_PIDS+=( "$PID" )
+      fi
+    done
+
+    if [[ ${#TEMP_PIDS[@]} -gt 5 ]]; then
+      echo "." | tr -d "\n"
+      echo "[*] Waiting for processess ... ${#TEMP_PIDS[@]}"
+      sleep 1
+    fi
+    # recreate the arry with the current running PIDS
+    WAIT_PIDS=("${TEMP_PIDS[@]}")
   done
 }

@@ -24,19 +24,21 @@ S05_firmware_details()
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware and testing details"
 
-  local DETECTED_FILES
+  LOG_FILE="$( get_log_file )"
+
+  #local DETECTED_FILES
   local DETECTED_DIR
   
-  DETECTED_FILES=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )
-  DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)
+  # we use the file FILE_ARR from helpers module
+  #DETECTED_FILES=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f 2>/dev/null | wc -l )
+  DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
   
-  print_output "[*] ""$DETECTED_FILES"" files and ""$DETECTED_DIR"" directories detected."
+  print_output "[*] ""${#FILE_ARR[@]}"" files and ""$DETECTED_DIR"" directories detected."
 
-  if [[ "$DETECTED_FILES" -gt 0 ]] || [[ "$DETECTED_DIR" -gt 0 ]];then
+  if [[ "${#FILE_ARR[@]}" -gt 0 ]] || [[ "$DETECTED_DIR" -gt 0 ]];then
      HTML_REPORT=1
   fi
   
-  LOG_FILE="$( get_log_file )"
 
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
@@ -53,6 +55,10 @@ S05_firmware_details()
     fi
   fi
   release_info
+
+  echo -e "\\n[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR" >> "$LOG_FILE"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 # Test source: http://linuxmafia.com/faq/Admin/release-files.html
@@ -67,11 +73,13 @@ release_info()
     print_output "[+] Specific release/version information of target:"
     for R_INFO in "${RELEASE_STUFF[@]}" ; do
       if [[ -f "$R_INFO" ]] ; then
-        print_output "\\n""$( print_path "$R_INFO")"
-        RELEASE="$( cat "$R_INFO" )"
-        if [[ "$RELEASE" ]] ; then
-          print_output ""
-          print_output "$(indent "$(magenta "$RELEASE")")"
+        if file "$R_INFO" | grep -a -q text; then
+          print_output "\\n""$( print_path "$R_INFO")"
+          RELEASE="$( cat "$R_INFO" )"
+          if [[ "$RELEASE" ]] ; then
+            print_output ""
+            print_output "$(indent "$(magenta "$RELEASE")")"
+          fi
         fi
       else
         print_output "\\n""$(magenta "Directory:")"" ""$( print_path "$R_INFO")""\\n"
@@ -80,5 +88,4 @@ release_info()
   else
     print_output "[-] No release/version information of target found"
   fi
-
 }

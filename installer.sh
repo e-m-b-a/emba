@@ -198,6 +198,7 @@ print_tool_info "qemu-user-static" 0 "qemu-mips-static"
 print_tool_info "binwalk" 0
 print_tool_info "bc" 1
 print_tool_info "coreutils" 1
+print_tool_info "ent" 1
 
 if [[ "$FORCE" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -509,6 +510,7 @@ case ${ANSWER:0:1} in
 
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
       pip3 install cve_searchsploit
+      git clone https://github.com/cve-search/cve-search.git external/cve-search
       cd ./external/cve-search/ || exit 1
       pip3 install -r requirements.txt
       xargs sudo apt-get install -y < requirements.system

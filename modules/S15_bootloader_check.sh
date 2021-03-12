@@ -31,13 +31,15 @@ S15_bootloader_check()
   check_bootloader
   find_boot_files
   find_runlevel
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 check_dtb()
 {
   sub_module_title "Scan for device tree blobs"
 
-  readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -iname "*.dtb" )
+  readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" )
 
   if [[ ${#DTB_ARR[@]} -gt 0 ]] ; then
     HTML_REPORT=1

@@ -28,6 +28,8 @@ S75_network_check()
   check_iptables
   check_snmp
   check_network_configs
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 check_resolv()

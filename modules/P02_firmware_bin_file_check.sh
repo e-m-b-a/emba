@@ -21,10 +21,17 @@ P02_firmware_bin_file_check() {
   FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
   local FILE_LS_OUT
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
+
+  # entropy checking on binary file
+  ENTROPY=$(ent "$FIRMWARE_PATH" | grep Entropy)
   
   print_output "[*] Details of the binary file:"
   print_output "$(indent "$FILE_LS_OUT")"
+  echo
   print_output "$(indent "$FILE_BIN_OUT")"
+  echo
+  print_output "$(indent "$ENTROPY")"
 
   # probably we can do a lot more stuff in the future ...
+  module_end_log "${FUNCNAME[0]}"
 }

@@ -26,6 +26,8 @@ S85_ssh_check()
 
   search_ssh_files
   check_squid
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 search_ssh_files()

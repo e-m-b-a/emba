@@ -25,9 +25,15 @@ S10_binaries_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries"
 
+  LOG_FILE="$( get_log_file )"
+
   vul_func_basic_check
   objdump_disassembly
   binary_protection
+
+  echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
 vul_func_basic_check()
@@ -63,6 +69,7 @@ vul_func_basic_check()
     done
     print_output "[*] Found ""$COUNTER"" binaries with interesting functions in ""$BIN_COUNT"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
+
 }
 
 objdump_disassembly()
@@ -284,12 +291,12 @@ objdump_disassembly()
         fi
       done
 
-      if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+      if [[ "$(find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
         for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
           local SEARCH_TERM
           local RESULTS
           local F_COUNTER
-          readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+          readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
           if [[ "${#RESULTS[@]}" -gt 0 ]]; then
             print_output ""

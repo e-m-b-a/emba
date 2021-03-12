@@ -20,11 +20,30 @@ F50_base_aggregator() {
   module_title "Final aggregator"
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
-  BIN_CHECK_LOG="s10_binaries_check.txt"
-  KERNEL_CHECK_LOG="s25_kernel_check.txt"
+  S25_LOG="s25_kernel_check.txt"
   OS_DETECT_LOG="p07_firmware_bin_base_analyzer.txt"
+  P02_LOG="p02_firmware_bin_file_check.txt"
+  S05_LOG="s05_firmware_details.txt"
+  S10_LOG="s10_binaries_check.txt"
+  S20_LOG="s20_shell_check.txt"
+  S21_LOG="s21_python_check.txt"
+  S30_LOG="s30_version_vulnerability_check.txt"
+  S45_LOG="s45_pass_file_check.txt"
+  S60_LOG="s60_cert_file_check.txt"
+  S95_LOG="s95_interesting_binaries_check.txt"
+  S108_LOG="s108_linux_common_file_checker.txt"
+  S110_LOG="s110_yara_check.txt"
   LOG_FILE="$( get_log_file )"
 
+  get_data
+  output_overview
+  output_details
+  output_binaries
+  output_cve_exploits
+  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+}
+
+output_overview() {
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""""$FW_VENDOR"""
   fi  
@@ -50,22 +69,12 @@ F50_base_aggregator() {
     fi
   fi
 
-  if [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
-    OS_VERIFIED=$(grep "verified.*system\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
-    if [[ -n "$OS_VERIFIED" ]]; then
-      print_output "[+] Detected operating system: ""$ORANGE""""$OS_VERIFIED"""
-    else
-      mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
-      if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
-        for OS in "${OS_DETECT[@]}"; do
-          print_output "[+] Possible operating system detected (unverified): ""$ORANGE""""$OS"""
-        done
-      fi
-    fi
-  fi
 
-  if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
-    mapfile -t KERNELV < <(grep "Statistics" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d: -f2 | sort -u)
+  if [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
+    os_detector
+  fi
+  if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
+    mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u)
     if [[ "${#KERNELV[@]}" -ne 0 ]]; then
       if [[ -z "$OS_VERIFIED" ]]; then
         # if we have found a kernel it is a Linux system:
@@ -81,13 +90,22 @@ F50_base_aggregator() {
 
   print_output "\\n-----------------------------------------------------------------\\n"
 
-  print_output "[+] ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f 2>/dev/null | wc -l )""""$GREEN"" files and ""$ORANGE""""$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type d 2>/dev/null | wc -l)"" ""$GREEN""directories detected."
-  if [[ "${#MOD_DATA[@]}" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""${#MOD_DATA[@]}""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
+}
+
+output_details() {
+
+  if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
+    print_output "[+] ""$ORANGE""""$FILE_ARR_COUNT""""$GREEN"" files and ""$ORANGE""""$DETECTED_DIR"" ""$GREEN""directories detected."
   fi
-  ENTROPY=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
+  if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""""$MOD_DATA_COUNTER""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
+  fi
+  ENTROPY_PIC=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY"""
+    print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""""$ENTROPY"""
+  fi
+  if [[ -n "$ENTROPY_PIC" ]]; then
+    print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"""
   fi
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
@@ -103,7 +121,7 @@ F50_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$CERT_OUT_CNT""""$GREEN"" outdated certificates in ""$ORANGE""""$CERT_CNT""""$GREEN"" certificates.""$NC"""
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$YARA_CNT""""$GREEN"" yara rule matches.""$NC"""
+    print_output "[+] Found ""$ORANGE""""$YARA_CNT""""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"""
   fi
   if [[ -n "$FILE_COUNTER" ]]; then
     print_output "[+] Found ""$ORANGE""""$FILE_COUNTER""""$GREEN"" not common Linux files with ""$ORANGE""""$FILE_COUNTER_ALL""""$GREEN"" files at all.""$NC"""
@@ -120,16 +138,19 @@ F50_base_aggregator() {
     print_output "[+] Found ""$ORANGE""""$EMUL""""$GREEN"" successful emulated processes.""$NC"""
   fi
 
+}
+
+output_binaries() {
 
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
     print_output "\\n-----------------------------------------------------------------\\n"
-    if [[ -f "$LOG_DIR"/"$BIN_CHECK_LOG" ]]; then
-      CANARY=$(grep -c "No canary" "$LOG_DIR"/"$BIN_CHECK_LOG")
-      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$BIN_CHECK_LOG")
-      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$BIN_CHECK_LOG")
-      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$BIN_CHECK_LOG")
-      STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$BIN_CHECK_LOG")
-      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$BIN_CHECK_LOG")
+    if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
+      CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S10_LOG")
+      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S10_LOG")
+      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$S10_LOG")
+      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S10_LOG")
+      STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$S10_LOG")
+      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$S10_LOG")
       # we have to remove the first line of the original output:
       (( BINS_CHECKED-- ))
     fi
@@ -137,27 +158,27 @@ F50_base_aggregator() {
     if [[ -n "$CANARY" ]]; then
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$RELRO" ]]; then
       RELRO_PER=$(bc -l <<< "$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
       RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$NX" ]]; then
       NX_PER=$(bc -l <<< "$NX/($BINS_CHECKED/100)" 2>/dev/null)
       NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$PIE" ]]; then
       PIE_PER=$(bc -l <<< "$PIE/($BINS_CHECKED/100)" 2>/dev/null)
       PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$STRIPPED" ]]; then
       STRIPPED_PER=$(bc -l <<< "$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in ""$BINS_CHECKED"" binaries."
+      print_output "[+] Found ""$ORANGE""""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
   fi
 
@@ -222,6 +243,10 @@ F50_base_aggregator() {
     fi  
   fi 
 
+}
+
+output_cve_exploits() {
+
   print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
     print_output "\\n-----------------------------------------------------------------\\n"
@@ -244,4 +269,97 @@ F50_base_aggregator() {
     fi
   fi
   print_output "\\n-----------------------------------------------------------------"
+}
+
+get_data() {
+  if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
+    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
+    FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
+    DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
+    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
+    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
+    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
+    S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
+    S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
+    S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S21_LOG" ]]; then
+    S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f2)
+    S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S60_LOG" ]]; then
+    CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2)
+    CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
+    YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
+    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
+    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)
+    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
+    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
+    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
+  fi
+}
+
+os_detector() {
+  # currently verified OS detection is based on the pre-checkers and is only able to detect Siprotec and Linux systems
+  OS_VERIFIED=$(grep "verified.*system\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+
+  if [[ -n "$OS_VERIFIED" ]]; then
+    print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""""$OS_VERIFIED"""
+  else
+    # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+
+    if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
+      for OS in "${OS_DETECT[@]}"; do
+        UNVERIFIED=0
+        if [[ "$OS" == *VxWorks* ]]; then
+          # vxworks based OS we can try to verify quite easily with the already done version detection module
+          # if we have a vxworks version already detected we can ensure we really have a vxworks system and nothing else:
+          mapfile -t VXWORKS_VERSION < <(grep -i "Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep "vxworks" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+          if [[ "${#VXWORKS_VERSION[@]}" -gt 0 ]]; then
+            # version detected -> verified vxworks
+            for VX_VER in "${VXWORKS_VERSION[@]}"; do
+              print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""VxWorks - v$VX_VER"
+            done
+          else
+            UNVERIFIED=1
+          fi
+        elif [[ "$OS" == *Linux* ]]; then
+          # we need this in the case the pre-checkers are not able to identify a root filesystem
+          # in this case the R* modules are jumping in and are probably able to identify the linux kernel version
+          mapfile -t LINUX_VERSION < <(grep -i "Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep "kernel" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+          if [[ "${#LINUX_VERSION[@]}" -gt 0 ]]; then
+            # version detected -> verified linux
+            for LINUX_VER in "${LINUX_VERSION[@]}"; do
+              print_output "[+] Detected operating system (""$ORANGE""verified""$GREEN""): ""$ORANGE""Linux - v$LINUX_VER"
+            done
+          fi
+        else
+          UNVERIFIED=1
+        fi
+
+        if [[ $UNVERIFIED == 1 ]]; then
+          print_output "[+] Possible operating system detected (""$ORANGE""unverified""$GREEN""): ""$ORANGE""""$OS"""
+        fi
+      done
+    fi
+  fi
 }

@@ -46,7 +46,7 @@ S80_cronjob_check()
     if [[ -e "$CJ_FILE" ]] ; then
       local CRONJOBWWPERMS
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-      CRONJOBWWPERMS=$(find "$CJ_FILE"* -perm -0002 -type f -exec ls -la {} \; -exec cat {} \; 2>/dev/null)
+      CRONJOBWWPERMS=$(find "$CJ_FILE"* -xdev -perm -0002 -type f -exec ls -la {} \; -exec cat {} \; 2>/dev/null)
       if [[ "$CRONJOBWWPERMS" ]] ; then
         print_output "[+] World-writable cron jobs and file contents:"
         print_output "$(indent "$CRONJOBWWPERMS")"
@@ -112,5 +112,7 @@ S80_cronjob_check()
   else
     HTML_REPORT=1
   fi
+
+  module_end_log "${FUNCNAME[0]}"
 }
 

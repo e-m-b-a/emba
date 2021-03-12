@@ -236,7 +236,21 @@ dependency_check()
     else
       echo -e "$GREEN""ok""$NC"
     fi
+
+    print_output "    md5sum - \\c" "no_log"
+    if ! command -v md5sum > /dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    missing md5sum binary ... check your installation""$NC"
+      echo -e "$RED""    you can run the installer.sh script or install it manually:""$NC"
+      echo -e "$RED""    apt-get install coreutils""$NC"
+      if [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ; then
+        exit 1
+      fi
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
   fi
+
 
   if [[ $USE_DOCKER -eq 0 ]] ; then
     echo

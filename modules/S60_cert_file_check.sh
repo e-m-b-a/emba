@@ -24,6 +24,8 @@ S60_cert_file_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Search certification files and other critical interesting stuff"
 
+  LOG_FILE="$( get_log_file )"
+
   local CERT_FILES_ARR
   readarray -t CERT_FILES_ARR < <(config_find "$CONFIG_DIR""/cert_files.cfg")
 
@@ -52,8 +54,11 @@ S60_cert_file_check()
         fi
       fi
     done
+    echo -e "\\n[*] Statistics:$CERT_CNT:$CERT_OUT_CNT" >> "$LOG_FILE"
   else
     print_output "[-] No certification files found"
   fi
+
+  module_end_log "${FUNCNAME[0]}"
 }
 
