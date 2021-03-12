@@ -83,7 +83,7 @@ set_etc_path() {
   export ETC_PATHS
   IFS=" " read -r -a ETC_COMMAND <<<"( -type d  ( -iwholename */etc -o ( -iwholename */etc* -a ! -iwholename */etc*/* ) -o -iwholename */*etc ) )"
 
-  readarray -t ETC_PATHS < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev "${ETC_COMMAND[@]}")
+  readarray -t ETC_PATHS < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" "${ETC_COMMAND[@]}")
 }
 
 set_excluded_path() {
@@ -200,27 +200,21 @@ config_list() {
 }
 
 config_find() {
-  MD5_DONE_INT=()
+  # $1 -> config file
   if [[ -f "$1" ]] ; then
     if [[ "$( wc -l "$1" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
       local FIND_COMMAND
       IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "$1" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
-      # sort and unique via md5 checksums
-      mapfile -t FIND_O < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev "${FIND_COMMAND[@]}")
+      mapfile -t FIND_O < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")
       for LINE in "${FIND_O[@]}"; do
-        # make our results unique:
-        BIN_MD5=$(md5sum "$LINE" 2>/dev/null | cut -d\  -f1)
-        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
-          if [[ -L "$LINE" ]] ; then
-            local REAL_PATH
-            REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
-            if [[ -f  "$REAL_PATH" ]] ; then
-              FILES="$FILES""$REAL_PATH""\n"
-            fi
-          else
-            FILES="$FILES""$LINE""\n"
+        if [[ -L "$LINE" ]] ; then
+          local REAL_PATH
+          REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
+          if [[ -f  "$REAL_PATH" ]] ; then
+            FILES="$FILES""$REAL_PATH""\n"
           fi
-          MD5_DONE_INT+=( "$BIN_MD5" )
+        else
+          FILES="$FILES""$LINE""\n"
         fi
       done
       echo -e "$FILES" | sed -z '$ s/\n$//' | sort -u
