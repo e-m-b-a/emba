@@ -1,6 +1,5 @@
 .idea/
-logs/
+log*/
 dir-combined.yara
 external/
 !external/.keep
-log/
