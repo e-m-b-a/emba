@@ -525,12 +525,10 @@ case ${ANSWER:0:1} in
       fi
       case ${ANSWER:0:1} in
         y|Y )
-          sudo cve_searchsploit -u
+          cve_searchsploit -u
         ;;
       esac    
     fi
-    # echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
-    # echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
   ;;
 esac
 
