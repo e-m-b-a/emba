@@ -63,10 +63,35 @@ P05_firmware_bin_extractor() {
   module_end_log "${FUNCNAME[0]}"
 }
 
+wait_for_extractor() {
+  OUTPUT_DIR="$LOG_DIR"/extractor/
+
+  for PID in ${WAIT_PIDS[*]}; do
+    running=1
+    while [[ $running -eq 1 ]]; do
+      echo "." | tr -d "\n"
+      if ! pgrep -v grep | grep -q "$PID"; then
+        running=0
+      fi
+      DISK_SPACE=$(du -hm "$OUTPUT_DIR"/ --max-depth=1 --exclude="proc"| awk '{ print $1 }' | sort -hr | head -1)
+      if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+    	  print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+	      print_output "[!] $(date) - Ending extraction process with PID $PID" "main"
+	      kill -9 $PID 2>/dev/null
+        running=0
+      fi
+      sleep 1
+    done
+  done
+}
+
 ipk_extractor() {
   print_output ""
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
-  mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
+  mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk" &)
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
 
   if [[ ${#IPK_DB[@]} -ne 0 ]] ; then
     print_output "[*] Found ${#IPK_DB[@]} IPK archives - extracting them to the root directories ..."
@@ -86,7 +111,10 @@ ipk_extractor() {
 deb_extractor() {
   print_output ""
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
-  mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb")
+  mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb" &)
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
 
   if [[ ${#DEB_DB[@]} -ne 0 ]] ; then
     print_output "[*] Found ${#DEB_DB[@]} debian archives - extracting them to the root directories ..."
@@ -105,10 +133,17 @@ deep_extractor() {
   print_output "[*] Deep extraction with binwalk - 1st round"
 
   FILES_BEFORE_DEEP=$(find "$LOG_DIR"/extractor/ -type f | wc -l )
-  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \;
+  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
 
   print_output "[*] Deep extraction with binwalk - 2nd round"
-  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \;
+  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
+
   FILES_AFTER_DEEP=$(find "$LOG_DIR"/extractor/ -type f | wc -l )
 
   print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."
@@ -123,7 +158,16 @@ fact_extractor() {
 
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR_fact"
 
-  print_output "$(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null)"
+  mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null &)
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
+
+  if [[ ${#FACT_EXTRACT[@]} -ne 0 ]] ; then
+    for LINE in "${FACT_EXTRACT[@]}" ; do
+      print_output "$LINE"
+    done
+  fi
 }
 
 binwalking() {
@@ -141,7 +185,7 @@ binwalking() {
   print_output "[*] Entropy testing with binwalk ... "
   print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
   mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
-  # we have to think about this thing. I like it for testing only one firmware but it drives me cracy in massive testing
+  # we have to think about this thing. I like it for testing only one firmware but it drives me crazy in massive testing
   #if command -v xdg-open > /dev/null; then
   #  xdg-open "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
   #fi
@@ -152,7 +196,11 @@ binwalking() {
 
   echo
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR_binwalk"
-  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH")
+  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" &)
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
+
   if [[ ${#BINWALK_EXTRACT[@]} -ne 0 ]] ; then
     for LINE in "${BINWALK_EXTRACT[@]}" ; do
       print_output "$LINE"
