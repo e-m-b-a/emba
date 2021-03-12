@@ -302,10 +302,6 @@ main()
       case $OPT in
         D|f|i|l)
           ;;
-        c)
-          print_output "" "no_log"
-          print_output "[-] Current docker version of emba does not support cwe-checker!" "no_log"
-          ;;
         *)
           export ARGS="$ARGS -$OPT"
           ;;
