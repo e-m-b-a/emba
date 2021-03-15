@@ -288,6 +288,9 @@ dependency_check()
   
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
     print_output "\\n""$ORANGE""Some dependencies are missing - please check your installation\\n" "no_log"
+    print_output "$ORANGE""To install all needed dependencies, run '""$NC""sudo ./installer.sh""$ORANGE""'." "no_log"
+    print_output "$ORANGE""Learn more about the installation on the emba wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
+
     if { [[ $ONLY_DEP -eq 0 ]] && [[ $FORCE -eq 0 ]] ;} || [[ $DEP_EXIT -gt 0 ]] ; then
       exit 1
     fi

@@ -16,6 +16,8 @@
 
 # Description:  Installs needed stuff for emba
 
+export DEBIAN_FRONTEND=noninteractive
+
 INSTALL_APP_LIST=()
 DOWNLOAD_FILE_LIST=()
 
@@ -186,6 +188,7 @@ done
 
 if ! [[ $EUID -eq 0 ]] && [[ $LIST_DEP -eq 0 ]] ; then
   echo -e "\\n""$RED""Run emba installation script with root permissions!""$NC\\n"
+  print_help
   exit 1
 fi
 

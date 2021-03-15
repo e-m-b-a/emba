@@ -86,13 +86,12 @@ run_modules()
     fi
   done
 
-  if [[ $THREADING_SET -eq 1 ]] ; then
-    sort_modules
-  fi
-
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
     local MODULES
     mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+    if [[ $THREADING_SET -eq 1 ]] ; then
+      sort_modules
+    fi
     for MODULE_FILE in "${MODULES[@]}" ; do
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
         HTML_REPORT=0
@@ -137,7 +136,9 @@ run_modules()
       elif [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
         local MODULES
         mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-        sort_modules
+        if [[ $THREADING_SET -eq 1 ]] ; then
+          sort_modules
+        fi
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             HTML_REPORT=0
