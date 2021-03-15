@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for files which could contain passwords
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Searches for password related files and tries to extract passwords and root accounts.
+
 export HTML_REPORT
 
 S45_pass_file_check()

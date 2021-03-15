@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for web server related files, web server and php.ini
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Searches for http and webserver (Apache, nginx, Lighttpd, etc.) related files and checks for php.ini.
+
 export HTML_REPORT
 
 S35_http_file_check()

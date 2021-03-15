@@ -13,6 +13,10 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
+# Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware in the log directory. 
+#               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
+
+
 P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"

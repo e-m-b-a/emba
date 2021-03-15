@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Scan for config files and check fstab
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Scans system for typical config files, e.g. *.cfg or fstab and analyzes fstab for user details.
+
 export HTML_REPORT
 
 S65_config_file_check()

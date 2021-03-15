@@ -13,10 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for information (release/version) about firmware and dump directory tree into log
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Counts the number of files and executables in firmware and prints firmware tree in the log files. 
+#               It also searches through possible release files config/release_files.cfg for strings.
+
 export HTML_REPORT
 
 S05_firmware_details()

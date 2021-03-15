@@ -13,15 +13,11 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Dump device tree blob into log, check for various bootloaders, boot files and valid runlevel
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Scans for device tree blobs, bootloader and startup files and checks for the default runlevel.
 
-
-# This module is based on source code from lynis: https://raw.githubusercontent.com/CISOfy/lynis/master/include/tests_boot_services
 export HTML_REPORT
 
+# This module is based on source code from lynis: https://raw.githubusercontent.com/CISOfy/lynis/master/include/tests_boot_services
 S15_bootloader_check()
 {
   module_log_init "${FUNCNAME[0]}"

@@ -12,6 +12,11 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+
+# Description:  Iterates through a static list with version details layout 
+#               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and 
+#               checks if these fit on a binary in the firmware. 
+
 export HTML_REPORT
 
 S09_firmware_base_version_check() {

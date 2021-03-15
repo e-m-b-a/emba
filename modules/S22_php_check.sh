@@ -13,10 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check php scripts with php -l for syntax errors
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Checks for bugs, stylistic errors, etc. in php scripts, then it lists the found error types.
 
 export HTML_REPORT
 
@@ -58,7 +55,7 @@ S22_php_check()
       fi
     done
     print_output ""
-    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S22_PHP_SCRIPTS""""$GREEN"" php files.""$NC""\\n"
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"

@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Search ssh related files and check squid proxy server
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Looks for ssh-related files and checks squid configuration.
+
 export HTML_REPORT
 
 S85_ssh_check()

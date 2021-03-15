@@ -13,6 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
+# Description:  Searches for version strings in the extracted firmware, but this time without the strict version detail database, 
+#               because these aren't Linux executables.
+
 R09_firmware_base_version_check() {
 
   module_log_init "${FUNCNAME[0]}"

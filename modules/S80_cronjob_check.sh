@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for cronjobs
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Examine all files for cronjob configuration, e.g. cron or crontab and lists their jobs and other possible intriguing details.
+
 export HTML_REPORT
 
 S80_cronjob_check()
