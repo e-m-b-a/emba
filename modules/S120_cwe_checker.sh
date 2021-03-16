@@ -13,11 +13,12 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check binaries with cwe-checker and bap (binary analysis platform)
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Runs a Docker container with cwe-checker on bap (cwe_checker is built on top of Binary Analysis Platform) to check binary for 
+#               common bug classes such as vicious functions or integer overflows. 
+#               As the runtime is quite long, it needs to be activated separately via -c switch.
 
+# Threading priority - if set to 1, these modules will be executed first
+export THREAD_PRIO=1
 
 S120_cwe_checker()
 {

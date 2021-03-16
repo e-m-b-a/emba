@@ -13,10 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Search files with setuid, setgid, world writeable flags and weak shadow files
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Scans everything for setuid, setgid, world writable and shadow files and checks if all rc.d and init.d files 
+#               have weak permissions.
+
 export HTML_REPORT
 
 S40_weak_perm_check() {

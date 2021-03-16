@@ -13,6 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
+# Description:  Gives some very basic information about the provided firmware binary.
+
+
 P02_firmware_bin_file_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware file analyzer"

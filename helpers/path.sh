@@ -3,6 +3,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -17,10 +18,9 @@
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
 
-
 abs_path() {
   if [[ -e "$1" ]] ; then
-    echo "$(realpath -s "$1")"""
+    echo -e "$(realpath -s "$1")"
   else
     echo "$1"
   fi
@@ -175,6 +175,30 @@ mod_path_array() {
     RET_PATHS=("${RET_PATHS[@]}" "$(mod_path "$M_PATH")")
   done
   echo "${RET_PATHS[@]}"
+}
+
+create_log_dir() {
+  if ! [[ -d "$LOG_DIR" ]] ; then
+      mkdir "$LOG_DIR" 2> /dev/null
+  fi
+  if [[ $FIRMWARE -eq 1 ]] ; then
+    if ! [[ -d "$LOG_DIR""/vul_func_checker" ]] ; then
+      mkdir -p "$LOG_DIR""/vul_func_checker" #2> /dev/null
+    fi
+    if ! [[ -d "$LOG_DIR""/objdumps" ]] ; then
+      mkdir -p "$LOG_DIR""/objdumps" #2> /dev/null
+    fi
+    if ! [[ -d "$LOG_DIR""/dtb_dump" ]] && [[ $DTBDUMP -eq 1 ]] ; then
+      mkdir -p "$LOG_DIR""/dtb_dump" 2> /dev/null
+    fi
+    if ! [[ -d "$LOG_DIR""/bap_cwe_checker" ]] && [[ $BAP -eq 1 ]] ; then
+      mkdir "$LOG_DIR""/bap_cwe_checker" 2> /dev/null
+    fi
+    export HTML_PATH="$LOG_DIR""/html-report"
+    if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then
+      mkdir "$HTML_PATH"
+    fi
+  fi
 }
 
 create_grep_log() {

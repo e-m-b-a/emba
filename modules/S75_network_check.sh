@@ -13,10 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check resolv config, iptables and snmp
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  A more exceptional search for files like resolv.conf, iptables.conf and snmpf.conf and analyzes their content. 
+#               Checks systemd network configuration files.
+
 export HTML_REPORT
 
 S75_network_check()

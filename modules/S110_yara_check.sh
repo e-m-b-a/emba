@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check all files for predefined code patterns with yara
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Checks files with yara for suspicious patterns.
+
 export HTML_REPORT
 
 S110_yara_check()

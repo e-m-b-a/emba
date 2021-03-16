@@ -14,19 +14,19 @@
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
-# Description:  installs needed stuff:
-#                 Yara rules
-#                 checksec
-#                 linux-exploit-suggester.sh
+# Description:  Installs needed stuff for emba
+
+export DEBIAN_FRONTEND=noninteractive
 
 INSTALL_APP_LIST=()
 DOWNLOAD_FILE_LIST=()
 
 # force install everything
 FORCE=0
-
 # install docker emba
 IN_DOCKER=0
+# list dependencies
+LIST_DEP=0
 
 ## Color definition
 RED="\033[0;31m"
@@ -49,7 +49,6 @@ print_tool_info(){
   echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
   TOOL_INFO="$(apt show "${1}" 2> /dev/null)"
   echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
-  echo -e "$(echo "$TOOL_INFO" | grep "Download-Size:")"" | ""$(echo "$TOOL_INFO" | grep "Installed-Size:")"
   COMMAND_=""
   if [[ -z "$3" ]] ; then
     COMMAND_="$3"
@@ -141,24 +140,27 @@ print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
+  echo -e "$CYAN""-d""$NC""         Force install of all dependencies needed for emba in Docker mode (-D)"
   echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
   echo -e "$CYAN""-h""$NC""         Print this help message"
+  echo -e "$CYAN""-l""$NC""         List all dependencies of emba"
+  echo
 }
 
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
-if ! [[ $EUID -eq 0 ]] ; then
-  echo -e "\\n""$ORANGE""Run emba installation script with root permissions!""$NC\\n"
-  exit 1
-fi
-
-while getopts cDFh OPT ; do
+while getopts cdDFhl OPT ; do
   case $OPT in
     c)
       export COMPLEMENT=1
       export FORCE=1
       echo -e "$GREEN""$BOLD""Complement emba dependecies""$NC"
+      ;;
+    d)
+      export DOCKER_SETUP=1
+      export FORCE=1
+      echo -e "$GREEN""$BOLD""Install all dependecies for emba in Docker mode (-D)""$NC"
       ;;
     D)
       export IN_DOCKER=1
@@ -172,6 +174,10 @@ while getopts cDFh OPT ; do
       print_help
       exit 0
       ;;
+    l)
+      export LIST_DEP=1
+      echo -e "$GREEN""$BOLD""List all dependecies (except pip packages)""$NC"
+      ;;
     *)
       echo -e "$RED""$BOLD""Invalid option""$NC"
       print_help
@@ -180,7 +186,23 @@ while getopts cDFh OPT ; do
   esac
 done
 
+if ! [[ $EUID -eq 0 ]] && [[ $LIST_DEP -eq 0 ]] ; then
+  echo -e "\\n""$RED""Run emba installation script with root permissions!""$NC\\n"
+  print_help
+  exit 1
+fi
 
+# standard stuff before installation run
+
+if [[ $LIST_DEP -eq 0 ]] ; then
+  if ! [[ -d "external" ]] ; then
+    echo -e "\\n""$ORANGE""Created ./external""$NC"
+    mkdir external
+  fi
+
+  echo -e "\\n""$ORANGE""Update package lists.""$NC"
+  apt-get update
+fi
 
 # applications needed for emba to run
 
@@ -200,9 +222,11 @@ print_tool_info "bc" 1
 print_tool_info "coreutils" 1
 print_tool_info "ent" 1
 
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
   ANSWER=("y")
@@ -210,17 +234,9 @@ fi
 case ${ANSWER:0:1} in
   y|Y )
     echo
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
   ;;
 esac
-
-if ! [[ -d "external" ]] ; then
-  mkdir external
-fi
-
-
 
 # cwe checker docker
 
@@ -238,26 +254,24 @@ else
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
   echo "Download-Size: ~1500 MB"
 fi
-if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
-  echo -e "$ORANGE""fkiecad/cwe_checker docker image will be downloaded""$NC"
-else
-  echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
-fi
 
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
     if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
+      echo -e "$ORANGE""fkiecad/cwe_checker docker image will be downloaded""$NC"
       docker pull fkiecad/cwe_checker:latest
+    else
+      echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
     fi
   ;;
 esac
@@ -267,6 +281,7 @@ esac
 echo -e "\\nWith emba you can automatically use FACT-extractor as a second extraction tool. Docker and the fact_extractor from fkiecad are required for this."
 INSTALL_APP_LIST=()
 print_tool_info "docker.io" 0 "docker"
+print_file_info "FACT-extract" "Extractor for most of the common container formats" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
 
 if command -v docker > /dev/null ; then
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
@@ -278,31 +293,28 @@ else
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
   echo "Download-Size: ~1500 MB"
 fi
-if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
-  echo -e "$ORANGE""fkiecad/fact_extractor docker image will be downloaded""$NC"
-else
-  echo -e "$ORANGE""fkiecad/fact_extractor docker image is already downloaded""$NC"
-fi
 
-if [[ "$FORCE" -eq 0 ]] ; then
+
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
     if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
+      echo -e "$ORANGE""fkiecad/fact_extractor docker image will be downloaded""$NC"
       docker pull fkiecad/fact_extractor:latest
+    else
+      echo -e "$ORANGE""fkiecad/fact_extractor docker image is already downloaded""$NC"
     fi
-    if ! [[ -f "./external/extract.py" ]]; then
-      wget https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py -O ./external/extract.py
-      chmod +x ./external/extract.py
-    fi
+    download_file "FACT-extract" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
+    chmod +x ./external/extract.py
   ;;
 esac
 
@@ -314,9 +326,11 @@ echo -e "\\nWe use a few well-known open source tools in emba, for example check
 print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
 print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
 
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
   ANSWER=("y")
@@ -338,9 +352,11 @@ print_file_info "DiabloHorn/yara4pentesters/juicy_files.txt" "" "https://raw.git
 print_file_info "ahhh/YARA/crypto_signatures.yar" "" "https://raw.githubusercontent.com/ahhh/YARA/master/crypto_signatures.yar" "external/yara/crypto_signatures.yar"
 print_file_info "Yara-Rules/rules/packer_compiler_signatures.yar" "" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
 
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
   ANSWER=("y")
@@ -366,25 +382,24 @@ echo -e "\\nWe are using objdump in emba to get more information from object fil
 INSTALL_APP_LIST=()
 
 print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
-
 print_tool_info "texinfo" 1
 print_tool_info "gcc" 1
 print_tool_info "build-essential" 1
 print_tool_info "gawk" 1
 print_tool_info "bison" 1
 
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
     download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
     if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
       tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
@@ -411,6 +426,7 @@ esac
 # CSV and CVSS databases
 
 echo -e "\\nTo check binaries to known CSV entries and CVSS values, we need a vulnerability database. Additional we have to parse data and need jq as tool for it, if it's missing, it will be installed."
+
 NVD_URL="https://nvd.nist.gov/feeds/json/cve/1.1/"
 INSTALL_APP_LIST=()
 
@@ -421,22 +437,22 @@ for YEAR in $(seq 2002 $(($(date +%Y)))); do
   print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip" "./external/allitemscvss.csv"
 done
 
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and jq be installed (if not already on the system)!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
     download_file "cve.mitre.org database" "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
     if ! [[ -d "external/nvd" ]] ; then
       mkdir external/nvd
     fi
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
     for YEAR in $(seq 2002 $(($(date +%Y)))); do
       NVD_FILE="nvdcve-1.1-""$YEAR"".json"
       download_file "$NVD_FILE" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
@@ -454,76 +470,94 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
-# aggregator
+# cve-search database for host 
 
-INSTALL_APP_LIST=()
-echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database. CVE-searchsploit will be installed via pip3."
-print_tool_info "python3-pip" 1
-print_tool_info "net-tools" 1
-print_tool_info "git" 1
+echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database."
 
-if [[ "$FORCE" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, mongodb, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install cve-search and mongodb and populate it?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
+  ANSWER=("n")
 else
-  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, mongodb, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    for APP in "${INSTALL_APP_LIST[@]}" ; do
-      apt-get install "$APP" -y
-    done
-    if [[ -d external/cve-search ]]; then
-      echo -e "Found cve-search directory. Skipping installation."
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+    apt-get update -y
+    apt-get install mongodb-org -y
+    systemctl daemon-reload
+    systemctl start mongod
+    systemctl enable mongod
+    
+    if [[ "$FORCE" -eq 0 ]] ; then
+      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
+      read -p "(y/N)" -r ANSWER
     else
-      pip3 install cve_searchsploit
-      git clone https://github.com/cve-search/cve-search.git external/cve-search
-      cd ./external/cve-search/ || exit 1
-      pip3 install -r requirements.txt
-      xargs sudo apt-get install -y < requirements.system
-      wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-      echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-      sudo apt-get update -y
-      apt-get install mongodb-org -y
-      sudo systemctl daemon-reload
-      sudo systemctl start mongod
-      sudo systemctl enable mongod
-      
-      if [[ "$FORCE" -eq 0 ]] ; then
-        echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
-        read -p "(y/N)" -r ANSWER
-      else
-        echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated (if not already on the system)!""$NC"
-        ANSWER=("y")
-      fi
-      case ${ANSWER:0:1} in
-        y|Y )
-          /etc/init.d/redis-server start
-          sudo ./sbin/db_mgmt_cpe_dictionary.py -p
-          sudo ./sbin/db_mgmt_json.py -p
-          sudo ./sbin/db_updater.py -c
-        ;;
-      esac
-      cd ../.. || exit 1
+      echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
+      ANSWER=("y")
     fi
+    case ${ANSWER:0:1} in
+      y|Y )
+        
+        git clone https://github.com/cve-search/cve-search.git external/cve-search
+        cd ./external/cve-search/ || exit 1
+        pip3 install -r requirements.txt
+        xargs sudo apt-get install -y < requirements.system
+        /etc/init.d/redis-server start
+        ./sbin/db_mgmt_cpe_dictionary.py -p
+        ./sbin/db_mgmt_json.py -p
+        ./sbin/db_updater.py -c
+        cd ../.. || exit 1
+      ;;
+    esac
+  ;;
+esac
+
+# aggregator tools to 
+
+echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
+INSTALL_APP_LIST=()
+print_tool_info "python3-pip" 1
+print_tool_info "net-tools" 1
+print_tool_info "git" 1
+
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
+else
+  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
+    pip3 install cve_searchsploit
+    git clone https://github.com/cve-search/cve-search.git external/cve-search
+    cd ./external/cve-search/ || exit 1
+    pip3 install -r requirements.txt
+    xargs sudo apt-get install -y < requirements.system
+    cd ../.. || exit 1
 
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
-      if [[ "$FORCE" -eq 0 ]] ; then
-        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve-search database on docker emba?""$NC"
+      if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database on docker emba?""$NC"
         read -p "(y/N)" -r ANSWER
       else
-        echo -e "\\n""$MAGENTA""$BOLD""Updating cve-search database on docker.""$NC"
+        echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database on docker.""$NC"
         ANSWER=("y")
       fi
       case ${ANSWER:0:1} in
         y|Y )
-          sudo cve_searchsploit -u
+          cve_searchsploit -u
         ;;
       esac    
     fi
-    # echo -e "\\n""$MAGENTA""$BOLD""For using CVE-search you have to install all the requirements and the needed database.""$NC"
-    # echo -e "$MAGENTA""$BOLD""Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation""$NC"
   ;;
 esac
 
@@ -561,23 +595,22 @@ print_tool_info "liblzo2-dev" 1
 # print_tool_info "firmware-mod-kit" 1
 # This is no valid packet, couldn't be found
 
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-
     if [[ -f "/usr/local/bin/binwalk" ]]; then
       echo -e "Found binwalk. Skipping installation."
     else
 
-      for APP in "${INSTALL_APP_LIST[@]}" ; do
-        apt-get install "$APP" -y
-      done
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
 
       pip3 install nose
       pip3 install coverage
@@ -634,20 +667,19 @@ esac
 INSTALL_APP_LIST=()
 echo -e "\\nTo use the emba report generator, we need a html file generator. make will be needed to compile aha."
 print_tool_info "make" 0
-if [[ "$FORCE" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and compile aha (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""aha (if not already on the system) will be downloaded and be compiled!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    echo -e "\\n""$ORANGE""$BOLD""Downloading aha""$NC"
     if ! [[ -f "external/aha" ]] ; then
-      for APP in "${INSTALL_APP_LIST[@]}" ; do
-        apt-get install "$APP" -y
-      done
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
       wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
       unzip ./external/aha-master.zip -d ./external
       rm external/aha-master.zip

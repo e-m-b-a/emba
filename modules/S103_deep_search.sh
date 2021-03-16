@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Run trough all files and check for patterns
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Searches for files with a specified string pattern inside.
+
 export HTML_REPORT
 
 S103_deep_search()

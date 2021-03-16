@@ -13,6 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
+# Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, and Linux. 
+#               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
+
 P07_firmware_bin_base_analyzer() {
 
   export PRE_PIDS
@@ -149,7 +152,7 @@ os_identification() {
 binary_architecture_detection()
 {
   sub_module_title "Architecture detection"
-  print_output "[*] Architecture detection running on ""$FIRMWARE_PATH"""
+  print_output "[*] Architecture detection running on ""$FIRMWARE_PATH"
 
   mapfile -t PRE_ARCH < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | awk '{print $3}' | sort -u)
   for PRE_ARCH_ in "${PRE_ARCH[@]}"; do
