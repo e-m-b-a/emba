@@ -29,7 +29,7 @@ S120_cwe_checker()
 
   if [[ $BAP -eq 1 ]] ; then
     cwe_check
-    final_cwe_log
+    final_cwe_log "$TOTAL_CWE_CNT"
 
     echo -e "\\n[*] Statistics:$TOTAL_CWE_CNT" >> "$LOG_FILE"
   else
@@ -79,6 +79,8 @@ cwe_check() {
 }
 
 final_cwe_log() {
+  TOTAL_CWE_CNT="$1"
+
   if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
     mapfile -t BAP_OUT < <( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
     print_output ""

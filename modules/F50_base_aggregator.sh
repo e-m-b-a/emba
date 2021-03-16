@@ -33,7 +33,8 @@ F50_base_aggregator() {
   S95_LOG="s95_interesting_binaries_check.txt"
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
-  S120_LOG="s120_cwe_checker"
+  S120_LOG="s120_cwe_checker.txt"
+
   LOG_FILE="$( get_log_file )"
 
   get_data
@@ -184,7 +185,7 @@ output_binaries() {
   fi
 
   # we use the logger from the s120 cwe checker module again:
-  final_cwe_log
+  final_cwe_log "$TOTAL_CWE_CNT"
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
 
@@ -294,6 +295,7 @@ get_data() {
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
+    export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
