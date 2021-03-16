@@ -33,6 +33,7 @@ F50_base_aggregator() {
   S95_LOG="s95_interesting_binaries_check.txt"
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
+  S120_LOG="s120_cwe_checker"
   LOG_FILE="$( get_log_file )"
 
   get_data
@@ -182,20 +183,24 @@ output_binaries() {
     fi
   fi
 
-  if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
-    print_output "\\n-----------------------------------------------------------------\\n"
-    SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | awk '{print $1}' | grep -c -v "ERROR")
-    if [[ "$SUM_FCW_FIND" -gt 0 ]] ; then
-	    print_output "[+] cwe-checker found a total of ""$ORANGE""""$SUM_FCW_FIND""""$GREEN"" of the following security issues:"
-      mapfile -t BAP_OUT < <( find "$LOG_DIR"/bap_cwe_checker/ -type f -exec grep -v "ERROR" {} \; | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )
-      for BAP_LINE in "${BAP_OUT[@]}"; do
-        CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
-        CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -c "$CWE")"
-        print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
-      done
-    fi
-  fi
+  # we use the logger from the s120 cwe checker module again:
+  final_cwe_log
+
+#  if [[ -d "$LOG_DIR"/bap_cwe_checker/ ]]; then
+#    mapfile -t BAP_OUT < <( cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+#    print_output ""
+#    if [[ ${#BAP_OUT[@]} -eq 0 ]] ; then
+#      print_output "[-] cwe-checker found 0 security issues."
+#    else
+#      print_output "[+] cwe-checker found a total of ""$ORANGE""""$SUM_FCW_FIND""""$GREEN"" of the following security issues:"
+#      for BAP_LINE in "${BAP_OUT[@]}"; do
+#        CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
+#        CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
+#        CWE_CNT="$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | grep -c "$CWE")"
+#        print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
+#      done
+#    fi
+#  fi
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
 
@@ -303,6 +308,9 @@ get_data() {
   fi
   if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
+    TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
     PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
