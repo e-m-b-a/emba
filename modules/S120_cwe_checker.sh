@@ -64,7 +64,7 @@ cwe_check() {
       # this is the logging after every tested file
       if [[ ${#BAP_OUT[@]} -ne 0 ]] ; then
         print_output ""
-        print_output "[+] cwe-checker found ""$ORANGE""""${#BAP_OUT[@]}""""$GREEN"" different security issues in ""$ORANGE""""$NAME""""$GREEN"":"
+        print_output "[+] cwe-checker found ""$ORANGE""${#BAP_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":"
         for BAP_LINE in "${BAP_OUT[@]}"; do
           CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
           CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
@@ -87,7 +87,7 @@ final_cwe_log() {
     if [[ ${#BAP_OUT[@]} -eq 0 ]] ; then
       print_output "[-] cwe-checker found 0 security issues."
     else
-      print_output "[+] cwe-checker found a total of ""$ORANGE""""$TOTAL_CWE_CNT""""$GREEN"" of the following security issues:"
+      print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       for BAP_LINE in "${BAP_OUT[@]}"; do
         CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
         CWE_DESC="$(echo "$BAP_LINE" | cut -d\  -f2-)"
