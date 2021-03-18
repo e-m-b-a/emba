@@ -46,7 +46,7 @@ cwe_check() {
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       NAME=$(basename "$LINE")
-	    LINE=$(readlink -f "$LINE")
+      LINE=$(readlink -f "$LINE")
       readarray -t TEST_OUTPUT < <( docker run --rm -v "$LINE":/tmp/input fkiecad/cwe_checker /tmp/input | tee -a "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log )
       if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then
         print_output "[*] ""$(print_path "$LINE")"
@@ -59,7 +59,7 @@ cwe_check() {
         fi
       done
 
-	    mapfile -t BAP_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+      mapfile -t BAP_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_DIR"/bap_cwe_checker/bap_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
 
       # this is the logging after every tested file
       if [[ ${#BAP_OUT[@]} -ne 0 ]] ; then
