@@ -314,7 +314,6 @@ case ${ANSWER:0:1} in
       echo -e "$ORANGE""fkiecad/fact_extractor docker image is already downloaded""$NC"
     fi
     download_file "FACT-extract" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
-    chmod +x ./external/extract.py
   ;;
 esac
 
