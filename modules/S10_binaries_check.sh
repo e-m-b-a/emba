@@ -13,11 +13,11 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for vulnerable functions in binary array, dump objdump output in log and look for binary
-#               protection with checksec.sh
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  This module was the first module that existed in emba. The main idea was to identify the binaries that were using weak 
+#               functions and to establish a ranking of areas to look at first.
+#               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg). 
+#               It also looks for protection mechanisms in the binaries via checksec.
+
 export HTML_REPORT
 
 S10_binaries_check()
@@ -55,7 +55,7 @@ vul_func_basic_check()
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
         #VUL_FUNC_RESULT="$("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}" | grep -v "file format")"
-        mapfile -t VUL_FUNC_RESULT < <("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -e "${VUL_FUNC_GREP[@]}" | grep -v "file format")
+        mapfile -t VUL_FUNC_RESULT < <("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format")
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
           print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
           for VUL_FUNC in "${VUL_FUNC_RESULT[@]}" ; do
@@ -312,7 +312,7 @@ objdump_disassembly()
                   printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
                 fi  
               else
-                print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM""")")"
+                print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM")")"
               fi  
             done
           fi  

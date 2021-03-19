@@ -13,17 +13,13 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check user authentication:
-#                 Users with UID 0, non unique accounts, non unique group id, non unique group name, user accounts,
-#                 NIS(+) authentication, sudoers, permissions for sudo config, pam related files and configs
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Checks for users with UID 0; for non-unique accounts, group IDs, group names; scans all available user accounts 
+#               and possible NIS(+) authentication support. It looks up sudoers file and analyzes it for possible vulnerabilities. 
+#               It also searches for PAM authentication files and analyze their usage.
 
-
-# This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication
 export HTML_REPORT
 
+# This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication
 S50_authentication_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check users, groups and authentication"

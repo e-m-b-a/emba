@@ -59,8 +59,8 @@ build_index_file(){
   if [[ ${FILENAME%.txt} != "f"* ]]; then
     FW_PATH_PRINT="$(echo -e "$(basename "$FIRMWARE_PATH" )" | sed 's/</\&lt;/g' )"
     ARCH_PRINT="$(echo -e "$ARCH" | sed 's/</\&lt;/g' )"
-    EMBACOMMAND_PRINT="$(echo -e "$EMBACOMMAND" | sed 's/</\&lt;/g' )"
-    echo "<h2>[[0;34m+[0m] [0;36m[1mGeneral information[0m[1m[0m</h2>File: ""$FW_PATH_PRINT""<br>Architecture: ""$ARCH_PRINT""<br>""Date: $(date) <br>""Duration time: ""$(date -d@$SECONDS -u +%H:%M:%S)"" <br>emba Command: ""$EMBACOMMAND_PRINT"" <br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
+    EMBA_COMMAND_PRINT="$(echo -e "$EMBA_COMMAND" | sed 's/</\&lt;/g' )"
+    echo "<h2>[[0;34m+[0m] [0;36m[1mGeneral information[0m[1m[0m</h2>File: ""$FW_PATH_PRINT""<br>Architecture: ""$ARCH_PRINT""<br>""Date: $(date) <br>""Duration time: ""$(date -d@$SECONDS -u +%H:%M:%S)"" <br>emba Command: ""$EMBA_COMMAND_PRINT"" <br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
   fi
      	
   i=0
@@ -184,7 +184,7 @@ build_report_files(){
         SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
+        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
       fi
     done
   fi
@@ -209,7 +209,7 @@ build_report_files(){
       elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
         COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
         echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"""$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
+        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
       else
         if [[ "$FILE_LINE" != *"entropy.png"* ]]; then
           FILE_LINE="$(echo -e "$FILE_LINE" | sed "s/</\&lt;/g")"
@@ -230,8 +230,7 @@ build_report_files(){
   sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/$HTML_FILE"
 }
 
-generate_html_file(){
-  
+generate_html_file(){  
   ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
   
   if [ ! -d "$ABS_HTML_PATH/style" ] ; then

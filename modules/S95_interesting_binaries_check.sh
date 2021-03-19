@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check for interesting executables and possible post exploitation
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Searches explicitly for binaries like gcc or gdb and also binaries for post exploitation like wget or ftp.
+
 export HTML_REPORT
 
 S95_interesting_binaries_check()

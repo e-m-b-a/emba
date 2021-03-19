@@ -13,11 +13,11 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check kernel configuration file, look for vulnerabilities with linux-exploit-suggester, analyze kernel
-#               modules and check modprobe directory for loadable kernel modules
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Determines kernel version and description and checks for kernel configuration. 
+#               It uses linux-exploit-suggester to check for possible kernel exploits and analyzes kernel modules to find which 
+#               license they have and if they are stripped. 
+#               It also looks for the modprobe.d directory and lists its content.
+
 export HTML_REPORT
 
 S25_kernel_check()

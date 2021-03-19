@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Final aggregator - generates an overview of the results
+# Description:  Generates an overview over all modules.
 
 F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
@@ -46,27 +46,27 @@ F50_base_aggregator() {
 
 output_overview() {
   if [[ -n "$FW_VENDOR" ]]; then
-    print_output "[+] Tested Firmware vendor: ""$ORANGE""""$FW_VENDOR"""
+    print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR"
   fi  
   if [[ -n "$FW_VERSION" ]]; then
-    print_output "[+] Tested Firmware version: ""$ORANGE""""$FW_VERSION"""
+    print_output "[+] Tested Firmware version: ""$ORANGE""$FW_VERSION"
   fi  
   if [[ -n "$FW_DEVICE" ]]; then
-    print_output "[+] Tested Firmware from device: ""$ORANGE""""$FW_DEVICE"""
+    print_output "[+] Tested Firmware from device: ""$ORANGE""$FW_DEVICE"
   fi  
   if [[ -n "$FW_NOTES" ]]; then
-    print_output "[+] Additional notes: ""$ORANGE""""$FW_NOTES"""
+    print_output "[+] Additional notes: ""$ORANGE""$FW_NOTES"
   fi  
 
-  print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"""
-  print_output "[+] Emba start command:""$ORANGE"" ""$EMBACOMMAND"""
+  print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"
+  print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND"
 
   if [[ -n "$D_ARCH" ]]; then
-    print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"""
+    print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"
   elif [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
     PRE_ARCH="$(grep "Possible architecture details found:" "$LOG_DIR"/"$OS_DETECT_LOG" | cut -d: -f2)"
     if [[ -n "$PRE_ARCH" ]]; then
-      print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"""
+      print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
     fi
   fi
 
@@ -77,39 +77,39 @@ output_overview() {
 output_details() {
 
   if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
-    print_output "[+] ""$ORANGE""""$FILE_ARR_COUNT""""$GREEN"" files and ""$ORANGE""""$DETECTED_DIR"" ""$GREEN""directories detected."
+    print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
   fi
   if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$MOD_DATA_COUNTER""""$GREEN"" kernel modules with ""$ORANGE""""$KMOD_BAD""""$GREEN"" licensing issues."
+    print_output "[+] Found ""$ORANGE""$MOD_DATA_COUNTER""$GREEN"" kernel modules with ""$ORANGE""$KMOD_BAD""$GREEN"" licensing issues."
   fi
   ENTROPY_PIC=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""""$ENTROPY"""
+    print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
   fi
   if [[ -n "$ENTROPY_PIC" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"""
+    print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"
   fi
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S20_SCRIPTS""""$GREEN"" shell scripts.""$NC"""
+    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts.""$NC"
   fi
   if [[ "$S21_PY_VULNS" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""""$S21_PY_SCRIPTS""""$GREEN"" python files.""$NC"""
+    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
   fi
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$S30_VUL_COUNTER""""$GREEN"" CVE vulnerabilities in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" executables (without version checking).""$NC"""
+    print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
   fi
   if [[ "$CERT_CNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$CERT_OUT_CNT""""$GREEN"" outdated certificates in ""$ORANGE""""$CERT_CNT""""$GREEN"" certificates.""$NC"""
+    print_output "[+] Found ""$ORANGE""$CERT_OUT_CNT""$GREEN"" outdated certificates in ""$ORANGE""$CERT_CNT""$GREEN"" certificates.""$NC"
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$YARA_CNT""""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"""
+    print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
   fi
   if [[ -n "$FILE_COUNTER" ]]; then
-    print_output "[+] Found ""$ORANGE""""$FILE_COUNTER""""$GREEN"" not common Linux files with ""$ORANGE""""$FILE_COUNTER_ALL""""$GREEN"" files at all.""$NC"""
+    print_output "[+] Found ""$ORANGE""$FILE_COUNTER""$GREEN"" not common Linux files with ""$ORANGE""$FILE_COUNTER_ALL""$GREEN"" files at all.""$NC"
   fi
   if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$INT_COUNT""""$GREEN"" interesting files and ""$ORANGE""""$POST_COUNT""""$GREEN"" files that could be useful for post-exploitation.""$NC"""
+    print_output "[+] Found ""$ORANGE""$INT_COUNT""$GREEN"" interesting files and ""$ORANGE""$POST_COUNT""$GREEN"" files that could be useful for post-exploitation.""$NC"
   fi
   if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
     print_output "[+] Found passwords or weak credential configuration - check log file for details"
@@ -117,7 +117,7 @@ output_details() {
 
   EMUL=$(find "$LOG_DIR"/qemu_emulator -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""""$EMUL""""$GREEN"" successful emulated processes.""$NC"""
+    print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
   fi
 
 }
@@ -140,27 +140,27 @@ output_binaries() {
     if [[ -n "$CANARY" ]]; then
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      print_output "[+] Found ""$ORANGE""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$RELRO" ]]; then
       RELRO_PER=$(bc -l <<< "$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
       RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      print_output "[+] Found ""$ORANGE""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$NX" ]]; then
       NX_PER=$(bc -l <<< "$NX/($BINS_CHECKED/100)" 2>/dev/null)
       NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      print_output "[+] Found ""$ORANGE""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$PIE" ]]; then
       PIE_PER=$(bc -l <<< "$PIE/($BINS_CHECKED/100)" 2>/dev/null)
       PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      print_output "[+] Found ""$ORANGE""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
     if [[ -n "$STRIPPED" ]]; then
       STRIPPED_PER=$(bc -l <<< "$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
-      print_output "[+] Found ""$ORANGE""""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
   fi
 
@@ -168,7 +168,7 @@ output_binaries() {
     print_output "\\n-----------------------------------------------------------------\\n"
     SUM_FCW_FIND=$(cat "$LOG_DIR"/bap_cwe_checker/bap_*.log 2>/dev/null | awk '{print $1}' | grep -c -v "ERROR")
     if [[ "$SUM_FCW_FIND" -gt 0 ]] ; then
-	    print_output "[+] cwe-checker found a total of ""$ORANGE""""$SUM_FCW_FIND""""$GREEN"" of the following security issues:"
+	    print_output "[+] cwe-checker found a total of ""$ORANGE""$SUM_FCW_FIND""$GREEN"" of the following security issues:"
       mapfile -t BAP_OUT < <( find "$LOG_DIR"/bap_cwe_checker/ -type f -exec grep -v "ERROR" {} \; | sed -z 's/\ ([0-9]\.[0-9]).\n//g' | cut -d\) -f1 | sort -u | tr -d '[' | tr -d ']' | tr -d '(' )
       for BAP_LINE in "${BAP_OUT[@]}"; do
         CWE="$(echo "$BAP_LINE" | cut -d\  -f1)"
@@ -183,7 +183,7 @@ output_binaries() {
 
     print_output "\\n-----------------------------------------------------------------\\n"
 
-    print_output "[+] Found ""$ORANGE""""$STRCPY_CNT""""$GREEN"" usages of strcpy in ""$ORANGE""""${#BINARIES[@]}""""$GREEN"" binaries.""$NC"""
+    print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
   fi
 
   FUNCTION="strcpy"
@@ -238,7 +238,7 @@ output_cve_exploits() {
 
     print_output ""
     if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
-      print_output "[+] Identified ""$ORANGE""""${#VERSIONS_CLEANED[@]}""""$GREEN"" software components with version details.\\n"
+      print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
     fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE entries for all binaries from S30_version_vulnerability_check.sh."

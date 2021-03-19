@@ -13,10 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check directories/files, used for web, for section to inject commands
-#               Access:
-#                 firmware root path via $FIRMWARE_PATH
-#                 binary array via ${BINARIES[@]}
+# Description:  Looks for web-based files in folders like www and searches for code executions inside of them.
+
 export HTML_REPORT
 
 S100_command_inj_check()
