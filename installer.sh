@@ -491,28 +491,16 @@ case ${ANSWER:0:1} in
     systemctl daemon-reload
     systemctl start mongod
     systemctl enable mongod
-    
-    if [[ "$FORCE" -eq 0 ]] ; then
-      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
-      read -p "(y/N)" -r ANSWER
-    else
-      echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
-      ANSWER=("y")
-    fi
-    case ${ANSWER:0:1} in
-      y|Y )
         
-        git clone https://github.com/cve-search/cve-search.git external/cve-search
-        cd ./external/cve-search/ || exit 1
-        pip3 install -r requirements.txt
-        xargs sudo apt-get install -y < requirements.system
-        /etc/init.d/redis-server start
-        ./sbin/db_mgmt_cpe_dictionary.py -p
-        ./sbin/db_mgmt_json.py -p
-        ./sbin/db_updater.py -c
-        cd ../.. || exit 1
-      ;;
-    esac
+    git clone https://github.com/cve-search/cve-search.git external/cve-search
+    cd ./external/cve-search/ || exit 1
+    pip3 install -r requirements.txt
+    xargs sudo apt-get install -y < requirements.system
+    /etc/init.d/redis-server start
+    ./sbin/db_mgmt_cpe_dictionary.py -p
+    ./sbin/db_mgmt_json.py -p
+    ./sbin/db_updater.py -c
+    cd ../.. || exit 1
   ;;
 esac
 
