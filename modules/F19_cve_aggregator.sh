@@ -31,6 +31,9 @@ F19_cve_aggregator() {
     mkdir "$LOG_DIR"/aggregator
   fi
   KERNELV=0
+  HIGH_CVE_COUNTER=0
+  MEDIUM_CVE_COUNTER=0
+  LOW_CVE_COUNTER=0
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
@@ -553,14 +556,27 @@ generate_cve_details() {
       # we do not deal with output formatting the usual way -> we use printf
       FORMAT_LOG_BAK="$FORMAT_LOG"
       FORMAT_LOG=0
-      if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
-      elif (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
+        if [[ "$EXPLOIT" == *Source* ]]; then
+          printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        else
+          printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        fi
+        ((HIGH_CVE_COUNTER++))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        if [[ "$EXPLOIT" == *Source* ]]; then
+          printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        else
+          printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        fi
+        ((MEDIUM_CVE_COUNTER++))
       else
-        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        if [[ "$EXPLOIT" == *Source* ]]; then
+          printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        else
+          printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        fi
+        ((LOW_CVE_COUNTER++))
       fi
       FORMAT_LOG="$FORMAT_LOG_BAK"
     done
@@ -653,11 +669,14 @@ generate_cve_details() {
 
   print_output "${NC}"
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found $S30_VUL_COUNTER CVE entries for all binaries from S30_version_vulnerability_check.sh."
+    print_output "[+] Found $ORANGE$S30_VUL_COUNTER$GREEN CVE entries for all binaries from S30_version_vulnerability_check.sh."
   fi
-  print_output "[+] Identified ${#VERSIONS_CLEANED[@]} software components with version details."
-  print_output "[+] Confirmed $CVE_COUNTER CVE entries."
-  print_output "[+] $EXPLOIT_COUNTER possible exploits available.\\n"
+  print_output "[+] Identified $ORANGE${#VERSIONS_CLEANED[@]}$GREEN software components with version details."
+  print_output "[+] Confirmed $ORANGE$CVE_COUNTER$GREEN CVE entries."
+  print_output "[+] Confirmed $ORANGE$HIGH_CVE_COUNTER$GREEN High rated CVE entries."
+  print_output "[+] Confirmed $ORANGE$MEDIUM_CVE_COUNTER$GREEN Medium rated CVE entries."
+  print_output "[+] Confirmed $ORANGE$LOW_CVE_COUNTER$GREEN Low rated CVE entries."
+  print_output "[+] $ORANGE$EXPLOIT_COUNTER$GREEN possible exploits available.\\n"
 }
 
 get_firmware_base_version_check() {

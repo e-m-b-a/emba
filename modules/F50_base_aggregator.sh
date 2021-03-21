@@ -245,6 +245,9 @@ output_cve_exploits() {
     fi
     if [[ "$CVE_COUNTER" -gt 0 ]]; then
       print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
+      print_output "[+] Confirmed ""$ORANGE""$HIGH_CVE_COUNTER""$GREEN"" High rated CVE entries."
+      print_output "[+] Confirmed ""$ORANGE""$MEDIUM_CVE_COUNTER""$GREEN"" Medium rated CVE entries."
+      print_output "[+] Confirmed ""$ORANGE""$LOW_CVE_COUNTER""$GREEN"" Low rated CVE entries."
     fi
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
       print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available."
@@ -343,7 +346,7 @@ os_detector() {
 
     mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
 
-    if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
+    if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED=0
         print_os
