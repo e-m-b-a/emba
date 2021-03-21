@@ -307,6 +307,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/avahi-.*\ ([0-9]\.[0-9]\.[0-9][0-9])/avahi\ \1/g')"
     #server debian wheezy upnp/1.1 miniupnpd/2.1
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/server.*upnp.*miniupnpd\/([0-9]\.[0-9])/miniupnpd\ \1/g')"
+    # linux -> kernel (we find the CVEs in the database with kernel as search string)
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/linux\ ([0-9])/kernel\ \1/')"
     # Siprotec 5 firmware has a version identifier like FWAOS_V01.11.01.123
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
