@@ -35,7 +35,11 @@ cut_path() {
   if [[ $SHORT_PATH -eq 1 ]] ;  then
     local SHORT
     local FIRST
-    SHORT="${C_PATH#"$FIRMWARE_PATH"}"
+    if [[ $PRE_CHECK -eq 1 ]] ; then
+      SHORT="${C_PATH#"$(dirname "$(abs_path "$LOG_DIR")")"}"
+    else
+      SHORT="${C_PATH#"$FIRMWARE_PATH"}"
+    fi
     FIRST="${SHORT:0:1}"
     if [[ "$FIRST" == "/" ]] ;  then
       echo -e "$SHORT"
