@@ -171,6 +171,9 @@ dependency_check()
     # checksec
     check_dep_file "checksec script" "$EXT_DIR""/checksec"
 
+    # sshdcc
+    check_dep_file "sshdcc script" "$EXT_DIR""/sshdcc"
+
     # sudo-parser.pl
     check_dep_file "sudo-parser script" "$EXT_DIR""/sudo-parser.pl"
 
