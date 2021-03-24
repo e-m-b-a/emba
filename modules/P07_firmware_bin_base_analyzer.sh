@@ -24,9 +24,9 @@ P07_firmware_bin_base_analyzer() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
 
-  if [[ -d "$LOG_DIR"/extractor/ ]] ; then
+  if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
     export OUTPUT_DIR
-    OUTPUT_DIR="$LOG_DIR"/extractor/
+    OUTPUT_DIR="$FIRMWARE_PATH_CP"
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
       WAIT_PIDS+=( "$!" )
