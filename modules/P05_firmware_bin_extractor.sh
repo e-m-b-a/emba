@@ -232,8 +232,8 @@ extract_fact_helper() {
   mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH")
 }
 extract_ipk_helper() {
-  mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
+  mapfile -t IPK_DB < <(find "$FIRMWARE_PATH_CP" -type f -name "*.ipk")
 }
 extract_deb_helper() {
-  mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb")
+  mapfile -t DEB_DB < <(find "$FIRMWARE_PATH_CP" -type f -name "*.deb")
 }
