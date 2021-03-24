@@ -27,13 +27,12 @@ S25_kernel_check()
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
-  # TODO: currently this module does not use a unique kernel module list for its testing
-  #       we should move on using the KERNEL_MODULES array which is unique
+  KERNEL_VERSION=()
+  KERNEL_DESC=()
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
-    mapfile -t KERNEL_MODULES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-    mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
-    mapfile -t KERNEL_DESC < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')
+
+    populate_karrays
 
     if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
       print_output "Kernel version:"
@@ -62,8 +61,9 @@ S25_kernel_check()
     print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 1 ]] ; then
-    mapfile -t KERNEL_VERSION < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "vermagic" | cut -d: -f2 | sort -u | sed 's/^ *//g' 2> /dev/null)
-    mapfile -t KERNEL_DESC < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')
+
+    populate_karrays
+
     if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
       print_output "Kernel version:"
       for LINE in "${KERNEL_VERSION[@]}" ; do
@@ -79,7 +79,6 @@ S25_kernel_check()
       print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
 
       get_kernel_vulns
-      #analyze_kernel_module
       check_modprobe
 
     else
@@ -96,6 +95,19 @@ S25_kernel_check()
   echo "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
+}
+
+populate_karrays() {
+  mapfile -t KERNEL_MODULES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+
+  for K_MODULE in "${KERNEL_MODULES[@]}"; do
+    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
+    KERNEL_DESC+=( "$(modinfo "$K_MODULE" | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')" )
+  done
+
+  # unique our results
+  eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+  eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
 }
 
 get_kernel_vulns()

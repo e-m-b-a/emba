@@ -95,7 +95,7 @@ objdump_disassembly()
         if ( file "$LINE" | grep -q "x86-64" ) ; then
           HTML_REPORT=1
           for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-            if ( "$READELF" -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+            if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
               local OBJ_DUMPS_OUT
               if [[ "$FUNCTION" == "mmap" ]] ; then
                 # For the mmap check we need the disasm after the call
@@ -126,7 +126,7 @@ objdump_disassembly()
           elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
             HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-              if ( "$READELF" -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+              if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
                 local OBJ_DUMPS_OUT
                 if [[ "$FUNCTION" == "mmap" ]] ; then
                   # For the mmap check we need the disasm after the call
@@ -221,8 +221,8 @@ objdump_disassembly()
           elif ( file "$LINE" | grep -q "MIPS" ) ; then
             HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-              FUNC_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
-              STRLEN_ADDR=$("$READELF" -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+              FUNC_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+              STRLEN_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
               if [[ -n "$FUNC_ADDR" ]] ; then
                 NAME=$(basename "$LINE" 2> /dev/null)
                 local OBJ_DUMPS_OUT
@@ -256,7 +256,7 @@ objdump_disassembly()
           elif ( file "$LINE" | grep -q "PowerPC" ) ; then
             HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-              if ( "$READELF" -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+              if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
                 NAME=$(basename "$LINE" 2> /dev/null)
                 local OBJ_DUMPS_OUT
                 if [[ "$FUNCTION" == "mmap" ]] ; then
