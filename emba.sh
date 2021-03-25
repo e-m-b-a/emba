@@ -341,6 +341,10 @@ main()
     PRE_CHECK=0
     print_output "[*] Firmware directory detected." "no_log"
     print_output "    Emba starts with testing the environment." "no_log"
+    print_output "    The provided firmware will be copied to ""$FIRMWARE_PATH_CP" "no_log"
+    cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
+    FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
+    OUTPUT_DIR="$FIRMWARE_PATH_CP"
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
@@ -455,7 +459,7 @@ main()
 
       if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
         FIRMWARE=1
-        FIRMWARE_PATH="$OUTPUT_DIR"
+        FIRMWARE_PATH="$(abs_path "$OUTPUT_DIR")"
       fi
 
       echo

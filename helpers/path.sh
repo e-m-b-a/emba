@@ -35,12 +35,14 @@ cut_path() {
   if [[ $SHORT_PATH -eq 1 ]] ;  then
     local SHORT
     local FIRST
-    SHORT="${C_PATH#"$FIRMWARE_PATH"}"
+    local PREFIX_PRE_CHECK
+    SHORT="${C_PATH#"$(dirname "$(abs_path "$LOG_DIR")")"}"
+    PREFIX_PRE_CHECK="."
     FIRST="${SHORT:0:1}"
     if [[ "$FIRST" == "/" ]] ;  then
-      echo -e "$SHORT"
+      echo -e "$PREFIX_PRE_CHECK""$SHORT"
     else
-      echo -e "/""$SHORT"
+      echo -e "$PREFIX_PRE_CHECK""/""$SHORT"
     fi
   else
     local FIRST
@@ -183,10 +185,10 @@ create_log_dir() {
   fi
   if [[ $FIRMWARE -eq 1 ]] ; then
     if ! [[ -d "$LOG_DIR""/vul_func_checker" ]] ; then
-      mkdir -p "$LOG_DIR""/vul_func_checker" #2> /dev/null
+      mkdir -p "$LOG_DIR""/vul_func_checker" 2> /dev/null
     fi
     if ! [[ -d "$LOG_DIR""/objdumps" ]] ; then
-      mkdir -p "$LOG_DIR""/objdumps" #2> /dev/null
+      mkdir -p "$LOG_DIR""/objdumps" 2> /dev/null
     fi
     if ! [[ -d "$LOG_DIR""/dtb_dump" ]] && [[ $DTBDUMP -eq 1 ]] ; then
       mkdir -p "$LOG_DIR""/dtb_dump" 2> /dev/null
@@ -196,8 +198,10 @@ create_log_dir() {
     fi
     export HTML_PATH="$LOG_DIR""/html-report"
     if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then
-      mkdir "$HTML_PATH"
+      mkdir "$HTML_PATH" 2> /dev/null
     fi
+    export FIRMWARE_PATH_CP="$LOG_DIR""/firmware"
+    mkdir "$FIRMWARE_PATH_CP" 2> /dev/null
   fi
 }
 

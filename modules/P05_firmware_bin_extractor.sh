@@ -21,8 +21,6 @@ P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
 
-  mkdir "$LOG_DIR"/extractor/ 2>/dev/null
-
   # we love binwalk ... this is our first chance for extracting everything
   binwalking
 
@@ -51,13 +49,13 @@ P05_firmware_bin_extractor() {
     deep_extractor
   fi
 
-  detect_root_dir_helper "$LOG_DIR"/extractor/
+  detect_root_dir_helper "$FIRMWARE_PATH_CP"
 
   deb_extractor
   ipk_extractor
 
-  BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable | wc -l )
-  UNIQUE_BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | wc -l )
+  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -type f -executable | wc -l )
+  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | wc -l )
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
@@ -67,7 +65,7 @@ P05_firmware_bin_extractor() {
 }
 
 wait_for_extractor() {
-  OUTPUT_DIR="$LOG_DIR"/extractor/
+  OUTPUT_DIR="$FIRMWARE_PATH_CP"
   SEARCHER=$(basename "$FIRMWARE_PATH")
 
   # this is not solid and we have to probably adjust it in the future
@@ -145,19 +143,19 @@ deep_extractor() {
   sub_module_title "Walking through all files and try to extract what ever possible"
   print_output "[*] Deep extraction with binwalk - 1st round"
 
-  FILES_BEFORE_DEEP=$(find "$LOG_DIR"/extractor/ -type f | wc -l )
-  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
+  FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -type f | wc -l )
+  find "$FIRMWARE_PATH_CP" -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
 
   print_output "[*] Deep extraction with binwalk - 2nd round"
-  find "$LOG_DIR"/extractor/ -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
+  find "$FIRMWARE_PATH_CP" -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
 
-  FILES_AFTER_DEEP=$(find "$LOG_DIR"/extractor/ -type f | wc -l )
+  FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -type f | wc -l )
 
   print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."
 }
@@ -167,7 +165,7 @@ fact_extractor() {
 
   export OUTPUT_DIR_fact
   OUTPUT_DIR_fact=$(basename "$FIRMWARE_PATH")
-  OUTPUT_DIR_fact="$LOG_DIR"/extractor/"$OUTPUT_DIR_fact"_fact_emba
+  OUTPUT_DIR_fact="$FIRMWARE_PATH_CP""/""$OUTPUT_DIR_fact"_fact_emba
 
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR_fact"
 
@@ -208,7 +206,7 @@ binwalking() {
 
   export OUTPUT_DIR_binwalk
   OUTPUT_DIR_binwalk=$(basename "$FIRMWARE_PATH")
-  OUTPUT_DIR_binwalk="$LOG_DIR"/extractor/"$OUTPUT_DIR_binwalk"_binwalk_emba
+  OUTPUT_DIR_binwalk="$FIRMWARE_PATH_CP""/""$OUTPUT_DIR_binwalk"_binwalk_emba
 
   echo
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR_binwalk"
@@ -234,8 +232,8 @@ extract_fact_helper() {
   mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH")
 }
 extract_ipk_helper() {
-  mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
+  mapfile -t IPK_DB < <(find "$FIRMWARE_PATH_CP" -type f -name "*.ipk")
 }
 extract_deb_helper() {
-  mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb")
+  mapfile -t DEB_DB < <(find "$FIRMWARE_PATH_CP" -type f -name "*.deb")
 }
