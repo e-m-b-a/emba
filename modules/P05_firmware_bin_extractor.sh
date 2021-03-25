@@ -22,6 +22,7 @@ P05_firmware_bin_extractor() {
   module_title "Binary firmware extractor"
 
   mkdir "$LOG_DIR"/extractor/ 2>/dev/null
+  WAIT_PIDS=( )
 
   # we love binwalk ... this is our first chance for extracting everything
   binwalking
@@ -53,10 +54,8 @@ P05_firmware_bin_extractor() {
 
   detect_root_dir_helper "$LOG_DIR"/extractor/
 
-  if [[ $DEEP_EXTRACTOR -eq 1 ]] ; then
-    deb_extractor
-    ipk_extractor
-  fi
+  deb_extractor
+  ipk_extractor
 
   BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable | wc -l )
   UNIQUE_BINS=$(find "$LOG_DIR"/extractor/ "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | wc -l )
@@ -80,9 +79,17 @@ wait_for_extractor() {
       fi
       DISK_SPACE=$(du -hm "$OUTPUT_DIR"/ --max-depth=1 --exclude="proc"| awk '{ print $1 }' | sort -hr | head -1)
       if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+        echo -e "\n"
     	  print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
         print_output "[!] $(date) - Ending extraction process with PID $PID" "main"
         kill -9 "$PID" 2>/dev/null
+        mapfile -t KILL_PIDS < <(pgrep "binwalk\|fact" | grep "$OUTPUT_DIR")
+        if [[ "${#KILL_PIDS[@]}" -gt 0 ]]; then
+          for KILL_PID in ${KILL_PIDS[*]}; do
+            print_output "[!] $(date) - Ending extraction process with PID $KILL_PID" "main"
+            kill -9 "$KILL_PID" 2>/dev/null
+          done
+        fi
         running=0
       fi
       sleep 1
@@ -93,7 +100,8 @@ wait_for_extractor() {
 ipk_extractor() {
   print_output ""
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
-  mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk" &)
+  #mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
+  extract_ipk_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
@@ -116,7 +124,8 @@ ipk_extractor() {
 deb_extractor() {
   print_output ""
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
-  mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb" &)
+  #mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb")
+  extract_deb_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
@@ -163,7 +172,10 @@ fact_extractor() {
 
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR_fact"
 
-  mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null &)
+  # this is not working in background. I have created a new function that gets executed in the background
+  # probably there is a more elegant way
+  #mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null &)
+  extract_fact_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
@@ -201,7 +213,10 @@ binwalking() {
 
   echo
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR_binwalk"
-  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" &)
+  # this is not working in background. I have created a new function that gets executed in the background
+  # probably there is a more elegant way
+  #mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" &)
+  extract_binwalk_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
@@ -211,4 +226,17 @@ binwalking() {
       print_output "$LINE"
     done
   fi
+}
+
+extract_binwalk_helper() {
+  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH")
+}
+extract_fact_helper() {
+  mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null)
+}
+extract_ipk_helper() {
+  mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
+}
+extract_deb_helper() {
+  mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb")
 }
