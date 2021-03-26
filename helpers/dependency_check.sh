@@ -260,6 +260,9 @@ dependency_check()
     # linux-exploit-suggester.sh script
     check_dep_file "linux-exploit-suggester.sh script" "$EXT_DIR""/linux-exploit-suggester.sh"
 
+    # readelf
+    READELF="readelf"
+
     # objdump
     OBJDUMP="$EXT_DIR""/objdump"
     check_dep_file "objdump" "$OBJDUMP"
