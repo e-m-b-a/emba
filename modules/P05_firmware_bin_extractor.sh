@@ -22,7 +22,6 @@ P05_firmware_bin_extractor() {
   module_title "Binary firmware extractor"
 
   mkdir "$LOG_DIR"/extractor/ 2>/dev/null
-  WAIT_PIDS=( )
 
   # we love binwalk ... this is our first chance for extracting everything
   binwalking
@@ -69,6 +68,7 @@ P05_firmware_bin_extractor() {
 
 wait_for_extractor() {
   OUTPUT_DIR="$LOG_DIR"/extractor/
+  SEARCHER=$(basename "$FIRMWARE_PATH")
 
   for PID in ${WAIT_PIDS[*]}; do
     running=1
@@ -79,18 +79,12 @@ wait_for_extractor() {
       fi
       DISK_SPACE=$(du -hm "$OUTPUT_DIR"/ --max-depth=1 --exclude="proc"| awk '{ print $1 }' | sort -hr | head -1)
       if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
-        echo -e "\n"
+        echo ""
     	  print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-        print_output "[!] $(date) - Ending extraction process with PID $PID" "main"
+        print_output "[!] $(date) - Ending extraction processes" "main"
+        pkill -f "binwalk.*$SEARCHER"
+        pkill -f "extract\.py.*$SEARCHER"
         kill -9 "$PID" 2>/dev/null
-        mapfile -t KILL_PIDS < <(pgrep "binwalk\|fact" | grep "$OUTPUT_DIR")
-        if [[ "${#KILL_PIDS[@]}" -gt 0 ]]; then
-          for KILL_PID in ${KILL_PIDS[*]}; do
-            print_output "[!] $(date) - Ending extraction process with PID $KILL_PID" "main"
-            kill -9 "$KILL_PID" 2>/dev/null
-          done
-        fi
-        running=0
       fi
       sleep 1
     done
@@ -232,7 +226,7 @@ extract_binwalk_helper() {
   mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH")
 }
 extract_fact_helper() {
-  mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null)
+  mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH")
 }
 extract_ipk_helper() {
   mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
