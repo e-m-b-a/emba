@@ -455,8 +455,7 @@ main()
 
       if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
         FIRMWARE=1
-        #FIRMWARE_PATH="$OUTPUT_DIR"
-        FIRMWARE_PATH="$(abs_path "$OUTPUT_DIR")"
+        FIRMWARE_PATH="$OUTPUT_DIR"
       fi
 
       echo
