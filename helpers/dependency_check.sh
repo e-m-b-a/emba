@@ -261,6 +261,7 @@ dependency_check()
     check_dep_file "linux-exploit-suggester.sh script" "$EXT_DIR""/linux-exploit-suggester.sh"
 
     # readelf
+    export READELF
     READELF="readelf"
 
     # objdump
