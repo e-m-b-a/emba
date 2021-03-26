@@ -240,6 +240,8 @@ cleanup() {
       fi
     done
   fi
+  print_output "[*] Remove firmware copy from emulation directory.\\n\\n"
+  rm -r "$EMULATION_PATH_BASE"
 }
 
 prepare_emulator() {

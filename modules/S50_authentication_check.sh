@@ -235,44 +235,34 @@ query_nis_plus_auth_supp() {
 }
 
 check_sudoers() {
-  sub_module_title "Scan for sudoers files"
-  SUDOERS_FILES_COUNT="0"
-  SUDOERS_FILES="$(config_find "$CONFIG_DIR""/sudoers_files.cfg")"
+  sub_module_title "Scan and test sudoers files"
   local SUDOERS_ISSUES
+  local S_ISSUE
 
-  if [[ "$SUDOERS_FILES" == "C_N_F" ]] ; then
-    print_output "[!] Config not found"
-  elif ! [[ "$SUDOERS_FILES" == "" ]] ; then
-    HTML_REPORT=1
-    SUDOERS_FILES_COUNT="$(echo "$SUDOERS_FILES" | wc -w)"
-
-    if [[ "$SUDOERS_FILES_COUNT" != "0" ]] ; then
-      print_output "[+] ""$SUDOERS_FILES_COUNT"" sudoers files found"
-      readarray -t SUDOERS_FILES_ARR < <(printf '%s' "$SUDOERS_FILES")
+  for R_PATH in "${ROOT_PATH[@]}"; do
+    # as we only have one search term we can handle it like this:
+    readarray -t SUDOERS_FILES_ARR < <(find "$R_PATH" -xdev -type f -name sudoers 2>/dev/null)
+    if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
       for SUDOERS_FILE in "${SUDOERS_FILES_ARR[@]}"; do
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
-        if [[ -f "$EXT_DIR"/sudo-parser.pl && $EUID -eq 0 ]]; then
+        if [[ -f "$EXT_DIR"/sudo-parser.pl ]]; then
           print_output "[*] Testing sudoers file with sudo-parse.pl:"
-          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl "$SUDOERS_FILE" | grep -E "^E:\ ")
+          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE" -r "$R_PATH" | grep -E "^E:\ ")
           for S_ISSUE in "${SUDOERS_ISSUES[@]}"; do
             print_output "[+] $S_ISSUE"
           done
         fi
       done
+    else
+      print_output "[-] No sudoers files found in $R_PATH"
     fi
-  else
-    print_output "[-] No sudoers files found"
-  fi
+  done
 }
 
 check_owner_perm_sudo_config() {
   sub_module_title "Ownership and permissions for sudo configuration files"
 
-  if [[ "$SUDOERS_FILES_COUNT" == "0" ]] ; then
-    print_output "[-] No sudoers files found - no check possible"
-  else
-    local SUDOERS_FILES_ARR
-    readarray -t SUDOERS_FILES_ARR < <(printf '%s' "$SUDOERS_FILES")
+  if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
     for FILE in "${SUDOERS_FILES_ARR[@]}"; do
       local SUDOERS_D
       SUDOERS_D="$FILE"".d"
@@ -333,6 +323,8 @@ check_owner_perm_sudo_config() {
         ;;
       esac
     done
+  else
+    print_output "[-] No sudoers files found - no check possible"
   fi
 }
 
