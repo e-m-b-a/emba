@@ -238,6 +238,7 @@ check_sudoers() {
   sub_module_title "Scan for sudoers files"
   SUDOERS_FILES_COUNT="0"
   SUDOERS_FILES="$(config_find "$CONFIG_DIR""/sudoers_files.cfg")"
+  local SUDOERS_ISSUES
 
   if [[ "$SUDOERS_FILES" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
@@ -250,6 +251,13 @@ check_sudoers() {
       readarray -t SUDOERS_FILES_ARR < <(printf '%s' "$SUDOERS_FILES")
       for SUDOERS_FILE in "${SUDOERS_FILES_ARR[@]}"; do
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
+        if [[ -f "$EXT_DIR"/sudo-parser.pl ]]; then
+          print_output "[*] Testing sudoers file with sudo-parse.pl:"
+          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl "$SUDOERS_FILE" | grep -E "^E:\ ")
+          for S_ISSUE in "${SUDOERS_ISSUES[@]}"; do
+            print_output "[+] $S_ISSUE"
+          done
+        fi
       done
     fi
   else
