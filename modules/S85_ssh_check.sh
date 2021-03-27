@@ -54,6 +54,7 @@ search_ssh_files()
                 # print everything else (except RESULTS and done) as usual output
                 elif ! [[ "$S_ISSUE" == *RESULTS* || "$S_ISSUE" == *done* ]]; then
                   print_output "[*] $S_ISSUE"
+                  #print_output "$(indent "$(orange "$S_ISSUE")")"
                 fi
                 PRINTER=1
               fi
