@@ -70,6 +70,10 @@ wait_for_extractor() {
   OUTPUT_DIR="$LOG_DIR"/extractor/
   SEARCHER=$(basename "$FIRMWARE_PATH")
 
+  # this is not solid and we have to probably adjust it in the future
+  # but for now it works
+  SEARCHER="$(echo "$SEARCHER" | tr "(" "." | tr ")" ".")"
+
   for PID in ${WAIT_PIDS[*]}; do
     running=1
     while [[ $running -eq 1 ]]; do
@@ -77,13 +81,14 @@ wait_for_extractor() {
       if ! pgrep -v grep | grep -q "$PID"; then
         running=0
       fi
-      DISK_SPACE=$(du -hm "$OUTPUT_DIR"/ --max-depth=1 --exclude="proc"| awk '{ print $1 }' | sort -hr | head -1)
+      DISK_SPACE=$(du -hm "$OUTPUT_DIR"/ --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
       if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
         echo ""
     	  print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
         print_output "[!] $(date) - Ending extraction processes" "main"
-        pkill -f "binwalk.*$SEARCHER"
-        pkill -f "extract\.py.*$SEARCHER"
+        pgrep -a -f "binwalk.*$SEARCHER.*"
+        pkill -f ".*binwalk.*$SEARCHER.*"
+        pkill -f ".*extract\.py.*$SEARCHER.*"
         kill -9 "$PID" 2>/dev/null
       fi
       sleep 1

@@ -96,6 +96,7 @@ prepare_version_data() {
     # remove multiple spaces
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
+    VERSION_lower="${VERSION_lower//in\ extracted\ firmware\ files\./}"
 
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
