@@ -41,6 +41,25 @@ search_ssh_files()
     for LINE in "${SSH_FILES[@]}" ; do
       if [[ -f "$LINE" ]] ; then
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        if [[ -f "$EXT_DIR"/sshdcc ]]; then
+          local PRINTER=0
+          if [[ "$(basename "$LINE")" == "sshd_config"  ]]; then
+            print_output "[*] Testing sshd configuration file with sshdcc"
+            readarray SSHD_ISSUES < <("$EXT_DIR"/sshdcc -ns -nc -f "$LINE")
+            for S_ISSUE in "${SSHD_ISSUES[@]}"; do
+              if [[ "$S_ISSUE" == *RESULTS* || "$PRINTER" -eq 1 ]]; then
+                # print finding title as emba finding:
+                if [[ "$S_ISSUE" =~ ^\([0-9+]\)\ \[[A-Z]+\]\  ]]; then
+                  print_output "[+] $S_ISSUE"
+                # print everything else (except RESULTS and done) as usual output
+                elif ! [[ "$S_ISSUE" == *RESULTS* || "$S_ISSUE" == *done* ]]; then
+                  print_output "[*] $S_ISSUE"
+                fi
+                PRINTER=1
+              fi
+            done
+          fi
+        fi
       fi
     done
     HTML_REPORT=1
