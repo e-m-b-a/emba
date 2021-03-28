@@ -235,34 +235,29 @@ query_nis_plus_auth_supp() {
 }
 
 check_sudoers() {
-  sub_module_title "Scan for sudoers files"
-  SUDOERS_FILES_COUNT="0"
-  SUDOERS_FILES="$(config_find "$CONFIG_DIR""/sudoers_files.cfg")"
+  sub_module_title "Scan and test sudoers files"
   local SUDOERS_ISSUES
 
-  if [[ "$SUDOERS_FILES" == "C_N_F" ]] ; then
-    print_output "[!] Config not found"
-  elif ! [[ "$SUDOERS_FILES" == "" ]] ; then
-    HTML_REPORT=1
-    SUDOERS_FILES_COUNT="$(echo "$SUDOERS_FILES" | wc -w)"
-
-    if [[ "$SUDOERS_FILES_COUNT" != "0" ]] ; then
-      print_output "[+] ""$SUDOERS_FILES_COUNT"" sudoers files found"
-      readarray -t SUDOERS_FILES_ARR < <(printf '%s' "$SUDOERS_FILES")
-      for SUDOERS_FILE in "${SUDOERS_FILES_ARR[@]}"; do
+  for R_PATH in "${ROOT_PATH[@]}"; do
+    readarray -t SUDOERS_FILES < <(find "$R_PATH" -xdev -type f -name sudoers 2>/dev/null)
+    if [[ "${#SUDOERS_FILES[@]}" -gt 0 ]]; then
+      for SUDOERS_FILE in "${SUDOERS_FILES[@]}"; do
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
-        if [[ -f "$EXT_DIR"/sudo-parser.pl && $EUID -eq 0 ]]; then
+        if [[ -f "$EXT_DIR"/sudo-parser.pl ]]; then
           print_output "[*] Testing sudoers file with sudo-parse.pl:"
-          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl "$SUDOERS_FILE" | grep -E "^E:\ ")
+          SUDOERS_FILE_TMP="$SUDOERS_FILE"_tmp
+          sed -e "s#includedir #includedir $R_PATH#" "$SUDOERS_FILE" > "$SUDOERS_FILE_TMP"
+          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE_TMP" | grep -E "^E:\ ")
+          rm "$SUDOERS_FILE_TMP" 2>/dev/null
           for S_ISSUE in "${SUDOERS_ISSUES[@]}"; do
             print_output "[+] $S_ISSUE"
           done
         fi
       done
+    else
+      print_output "[-] No sudoers files found in $R_PATH"
     fi
-  else
-    print_output "[-] No sudoers files found"
-  fi
+  done
 }
 
 check_owner_perm_sudo_config() {
