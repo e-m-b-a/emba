@@ -237,11 +237,14 @@ query_nis_plus_auth_supp() {
 check_sudoers() {
   sub_module_title "Scan and test sudoers files"
   local SUDOERS_ISSUES
+  local S_ISSUE
+  local SUDOERS_FILE_TMP
 
   for R_PATH in "${ROOT_PATH[@]}"; do
-    readarray -t SUDOERS_FILES < <(find "$R_PATH" -xdev -type f -name sudoers 2>/dev/null)
-    if [[ "${#SUDOERS_FILES[@]}" -gt 0 ]]; then
-      for SUDOERS_FILE in "${SUDOERS_FILES[@]}"; do
+    # as we only have one search term we can handle it like this:
+    readarray -t SUDOERS_FILES_ARR < <(find "$R_PATH" -xdev -type f -name sudoers 2>/dev/null)
+    if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
+      for SUDOERS_FILE in "${SUDOERS_FILES_ARR[@]}"; do
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
         if [[ -f "$EXT_DIR"/sudo-parser.pl ]]; then
           print_output "[*] Testing sudoers file with sudo-parse.pl:"
@@ -263,11 +266,7 @@ check_sudoers() {
 check_owner_perm_sudo_config() {
   sub_module_title "Ownership and permissions for sudo configuration files"
 
-  if [[ "$SUDOERS_FILES_COUNT" == "0" ]] ; then
-    print_output "[-] No sudoers files found - no check possible"
-  else
-    local SUDOERS_FILES_ARR
-    readarray -t SUDOERS_FILES_ARR < <(printf '%s' "$SUDOERS_FILES")
+  if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
     for FILE in "${SUDOERS_FILES_ARR[@]}"; do
       local SUDOERS_D
       SUDOERS_D="$FILE"".d"
@@ -328,6 +327,8 @@ check_owner_perm_sudo_config() {
         ;;
       esac
     done
+  else
+    print_output "[-] No sudoers files found - no check possible"
   fi
 }
 
