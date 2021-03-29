@@ -238,7 +238,6 @@ check_sudoers() {
   sub_module_title "Scan and test sudoers files"
   local SUDOERS_ISSUES
   local S_ISSUE
-  local SUDOERS_FILE_TMP
 
   for R_PATH in "${ROOT_PATH[@]}"; do
     # as we only have one search term we can handle it like this:
