@@ -248,10 +248,7 @@ check_sudoers() {
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
         if [[ -f "$EXT_DIR"/sudo-parser.pl ]]; then
           print_output "[*] Testing sudoers file with sudo-parse.pl:"
-          SUDOERS_FILE_TMP="$SUDOERS_FILE"_tmp
-          sed -e "s#includedir #includedir $R_PATH#" "$SUDOERS_FILE" > "$SUDOERS_FILE_TMP"
-          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE_TMP" | grep -E "^E:\ ")
-          rm "$SUDOERS_FILE_TMP" 2>/dev/null
+          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE" -r "$R_PATH" | grep -E "^E:\ ")
           for S_ISSUE in "${SUDOERS_ISSUES[@]}"; do
             print_output "[+] $S_ISSUE"
           done
