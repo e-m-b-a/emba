@@ -139,9 +139,9 @@ download_file()
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
+  echo -e "$CYAN""-F""$NC""         Installation of emba with all dependencies (typical initial installation)"
   echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
   echo -e "$CYAN""-d""$NC""         Force install of all dependencies needed for emba in Docker mode (-D)"
-  echo -e "$CYAN""-F""$NC""         Force install of all dependencies"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of emba"
   echo
@@ -223,6 +223,8 @@ print_tool_info "coreutils" 1
 print_tool_info "ent" 1
 # needed for sshdcc:
 print_tool_info "tcllib" 1
+# as we need it for multiple tools we can install it by default
+print_tool_info "git" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -528,7 +530,6 @@ echo -e "\\nTo use the aggregator and check if exploits are available, we need c
 INSTALL_APP_LIST=()
 print_tool_info "python3-pip" 1
 print_tool_info "net-tools" 1
-print_tool_info "git" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
@@ -579,7 +580,6 @@ print_tool_info "python3-numpy" 1
 print_tool_info "python3-scipy" 1
 print_tool_info "mtd-utils" 1
 print_tool_info "gzip" 1
-print_tool_info "git" 1
 print_tool_info "bzip2" 1
 print_tool_info "tar" 1
 print_tool_info "arj" 1
