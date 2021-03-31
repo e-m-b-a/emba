@@ -464,38 +464,42 @@ aggregate_versions() {
 generate_special_log() {
   sub_module_title "Generate special log files."
 
-  readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
-  print_output ""
-  print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
-  for FILE in "${FILES[@]}"; do
-    NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
-    CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
-    if [[ -n $CVE_VALUES ]]; then
-      print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
-      print_output "$CVE_VALUES"
-      echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
-      echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
-      print_output ""
-    fi
-  done
+  if [[ "$CVE_COUNTER" -gt 0 ]]; then
+    readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
+    print_output ""
+    print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
+    for FILE in "${FILES[@]}"; do
+      NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
+      CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
+      if [[ -n $CVE_VALUES ]]; then
+        print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
+        print_output "$CVE_VALUES"
+        echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
+        echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
+        print_output ""
+      fi
+    done
+  fi
 
-  print_output ""
-  print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
-  mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
-  for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
-    # remove color codes:
-    EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-    CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
-    if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-      print_output "$RED$EXPLOIT_$NC"
-    elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-      print_output "$ORANGE$EXPLOIT_$NC"
-    else
-      print_output "$GREEN$EXPLOIT_$NC"
-    fi
-  done
-  echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
-  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"
+  if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
+    print_output ""
+    print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
+    mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
+    for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
+      # remove color codes:
+      EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+      if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
+        print_output "$RED$EXPLOIT_$NC"
+      elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
+        print_output "$ORANGE$EXPLOIT_$NC"
+      else
+        print_output "$GREEN$EXPLOIT_$NC"
+      fi
+    done
+    echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
+    grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"
+  fi
 }
 
 generate_cve_details() {

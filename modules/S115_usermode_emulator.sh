@@ -52,10 +52,10 @@ S115_usermode_emulator() {
 
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_output "[*] Running emulation processes in $R_PATH root path ..."
-      readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f "$FIND_UNIQUE_EXEC" )
+      readarray -t R_BINARIES < <( eval find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f "${FIND_UNIQUE_EXEC[@]}" )
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f "$FIND_UNIQUE_EXEC" 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU < <(cd "$R_PATH" && eval find . -xdev -ignore_readdir_race -type f "${FIND_UNIQUE_EXEC[@]}" 2>/dev/null && cd "$DIR" || exit)
 
       print_output "[*] Found ${#R_BINARIES[@]} unique executables in root dirctory: $R_PATH."
 

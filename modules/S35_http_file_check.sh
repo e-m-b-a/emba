@@ -52,11 +52,11 @@ webserver_check()
 {
   sub_module_title "Check for apache or nginx related files"
 
-  readarray -t APACHE_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*apache*' "$FIND_UNIQUE_EXEC" )
-  readarray -t NGINX_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' "$FIND_UNIQUE_EXEC" )
-  readarray -t LIGHTTP_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' "$FIND_UNIQUE_EXEC" )
-  readarray -t CHEROKEE_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' "$FIND_UNIQUE_EXEC" )
-  readarray -t HTTPD_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' "$FIND_UNIQUE_EXEC" )
+  readarray -t APACHE_FILE_ARR < <( eval find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*apache*' "${FIND_UNIQUE_EXEC[@]}" )
+  readarray -t NGINX_FILE_ARR < <( eval find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' "${FIND_UNIQUE_EXEC[@]}" )
+  readarray -t LIGHTTP_FILE_ARR < <( eval find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*lighttp*' "${FIND_UNIQUE_EXEC[@]}" )
+  readarray -t CHEROKEE_FILE_ARR < <( eval find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*cheroke*' "${FIND_UNIQUE_EXEC[@]}" )
+  readarray -t HTTPD_FILE_ARR < <( eval find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*httpd*' "${FIND_UNIQUE_EXEC[@]}" )
 
   if [[ ${#APACHE_FILE_ARR[@]} -gt 0 ]] ; then
     HTML_REPORT=1
@@ -114,7 +114,7 @@ php_check()
 {
   sub_module_title "Check for php.ini"
 
-  readarray -t PHP_INI_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' "$FIND_UNIQUE_EXEC" )
+  readarray -t PHP_INI_ARR < <( eval find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' "${FIND_UNIQUE_EXEC[@]}" )
 
   if [[ ${#PHP_INI_ARR[@]} -gt 0 ]] ; then
     HTML_REPORT=1

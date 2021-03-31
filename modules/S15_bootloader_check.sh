@@ -35,7 +35,7 @@ check_dtb()
 {
   sub_module_title "Scan for device tree blobs"
 
-  readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" "$FIND_UNIQUE_EXEC" )
+  readarray -t DTB_ARR < <( eval find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" "${FIND_UNIQUE_EXEC[@]}" )
 
   if [[ ${#DTB_ARR[@]} -gt 0 ]] ; then
     HTML_REPORT=1

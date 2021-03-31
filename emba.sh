@@ -207,7 +207,8 @@ main()
   export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export AHA_PATH="$EXT_DIR""/aha"
-  export FIND_UNIQUE_EXEC="-exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3"
+  export FIND_UNIQUE_EXEC
+  FIND_UNIQUE_EXEC="-exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3"
 
   echo
 
