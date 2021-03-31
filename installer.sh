@@ -519,12 +519,12 @@ case ${ANSWER:0:1} in
         ./sbin/db_mgmt_json.py -p
         ./sbin/db_updater.py -c
         cd ../.. || exit 1
-        cat config/cve_database_updater.init | sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" > config/cve_database_updater
+        sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
         chmod +x config/cve_database_updater
+        echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+        echo -e "$MAGENTA$BOLD"For automatic updates it should be copied to /etc/cron.daily/"$NC"""
+        echo -e "$MAGENTA$BOLD"For manual updates just start it via sudo ./config/cve_database_updater"$NC"""
       ;;
-      echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
-      echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
-      echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
     esac
   ;;
 esac

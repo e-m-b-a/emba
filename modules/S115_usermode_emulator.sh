@@ -55,7 +55,7 @@ S115_usermode_emulator() {
       readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null && cd "$DIR" || exit)
 
       print_output "[*] Found ${#R_BINARIES[@]} unique executables in root dirctory: $R_PATH."
 

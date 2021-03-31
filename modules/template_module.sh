@@ -49,7 +49,7 @@ empty_module() {
   load_from_config
 
   # - Usage of `find`: add "${EXCL_FIND[@]}" to exclude all paths (added with '-e' parameter)
-  print_output "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f | wc -l)"
+  print_output "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l)"
 }
 
 sub_module() {
@@ -131,7 +131,7 @@ path_handling() {
   # Option 1: Search with find and loop trough results / don't use mod_path!
   # Insert "${EXCL_FIND[@]}" in your search-command to automatically remove excluded paths
   CHECK=0
-  readarray -t TEST < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*xy*' )
+  readarray -t TEST < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*xy*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for TEST_E in "${TEST[@]}"; do
     if [[ -f "$MP_DIR" ]] ; then
       CHECK=1

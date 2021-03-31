@@ -61,6 +61,7 @@ S21_python_check()
         fi
       fi
     done
+
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
     echo -e "\\n[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS" >> "$LOG_FILE"
