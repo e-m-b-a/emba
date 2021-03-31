@@ -1,0 +1,10 @@
+#!/bin/sh
+# /etc/cron.daily/cve_database_updater: CVE database daily maintenance script
+# Written by Michael Messner and Pascal Eckmann for emba https://github.com/e-m-b-a/emba
+
+[ -x EMBA_INSTALL_PATH/external/cve-search/sbin/db_updater.py ] || exit 0
+[ -x /etc/init.d/redis-server ] || exit 0
+
+/etc/init.d/redis-server start
+
+EMBA_INSTALL_PATH/external/cve-search/sbin/db_updater.py -v
