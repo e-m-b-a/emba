@@ -98,7 +98,7 @@ S25_kernel_check()
 }
 
 populate_karrays() {
-  mapfile -t KERNEL_MODULES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  mapfile -t KERNEL_MODULES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f "$FIND_UNIQUE_EXEC" )
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     KERNEL_VERSION+=( "$(modinfo "$K_MODULE" | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
@@ -188,12 +188,12 @@ check_modprobe()
   sub_module_title "Check modprobe.d directory and content (loadable kernel module config)"
 
   local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0
-  readarray -t MODPROBE_D_DIRS < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t MODPROBE_D_DIRS < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' "$FIND_UNIQUE_EXEC" )
   for MP_DIR in "${MODPROBE_D_DIRS[@]}"; do
     if [[ -d "$MP_DIR" ]] ; then
       MP_CHECK=1
       print_output "[+] Found ""$(print_path "$MP_DIR")"
-      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "$MP_DIR" -xdev -iname '*.conf' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )"
+      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "$MP_DIR" -xdev -iname '*.conf' "$FIND_UNIQUE_EXEC" )"
       for MP_CONF in "${MODPROBE_D_DIR_CONTENT[@]}"; do
         if [[ -e "$MP_CONF" ]] ; then
           MP_F_CHECK=1
