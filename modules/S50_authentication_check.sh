@@ -24,6 +24,9 @@ S50_authentication_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check users, groups and authentication"
 
+  LOG_FILE="$( get_log_file )"
+  AUTH_ISSUES=0
+
   user_zero
   non_unique_acc
   non_unique_group_id
@@ -36,6 +39,8 @@ S50_authentication_check() {
   scan_pam_conf
   search_pam_configs
   search_pam_files
+
+  echo -e "\\n[*] Statistics:$AUTH_ISSUES" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }
@@ -56,6 +61,7 @@ user_zero() {
       if [[ -n "$FIND" ]] ; then
         print_output "[+] Found administrator account/s with UID 0 in ""$(print_path "$PASSWD_FILE")"
         print_output "$(indent "$(orange "Administrator account: $FIND")")"
+        ((AUTH_ISSUES++))
       else
         print_output "[-] Found no administrator account (root) with UID 0"
       fi
@@ -86,6 +92,7 @@ non_unique_acc() {
       else
         print_output "[+] Non-unique accounts found in ""$(print_path "$PASSWD_FILE")"
         print_output "$(indent "$(orange "$FIND")")"
+        ((AUTH_ISSUES++))
       fi
     fi
   done
@@ -114,6 +121,7 @@ non_unique_group_id() {
       else
         print_output "[+] Found the same group ID multiple times"
         print_output "$(indent "$(orange "Non-unique group id: ""$FIND")")"
+        ((AUTH_ISSUES++))
       fi
     fi
   done
@@ -142,6 +150,7 @@ non_unique_group_name() {
       else
         print_output "[+] Found the same group name multiple times"
         print_output "$(indent "$(orange "Non-unique group name: ""$FIND")")"
+        ((AUTH_ISSUES++))
       fi
     fi
   done
@@ -250,6 +259,7 @@ check_sudoers() {
           readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE" -r "$R_PATH" | grep -E "^E:\ ")
           for S_ISSUE in "${SUDOERS_ISSUES[@]}"; do
             print_output "[+] $S_ISSUE"
+            ((AUTH_ISSUES++))
           done
         fi
       done
@@ -283,6 +293,7 @@ check_owner_perm_sudo_config() {
           else
             HTML_REPORT=1
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
+            ((AUTH_ISSUES++))
           fi
           ;;
         *)
@@ -292,6 +303,7 @@ check_owner_perm_sudo_config() {
           else
             HTML_REPORT=1
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
+            ((AUTH_ISSUES++))
           fi
           ;;
         esac
@@ -310,6 +322,7 @@ check_owner_perm_sudo_config() {
         else
           HTML_REPORT=1
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
+          ((AUTH_ISSUES++))
         fi
         ;;
       *)
@@ -319,6 +332,7 @@ check_owner_perm_sudo_config() {
         else
           HTML_REPORT=1
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
+          ((AUTH_ISSUES++))
         fi
         ;;
       esac

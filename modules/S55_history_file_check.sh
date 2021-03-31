@@ -24,6 +24,7 @@ S55_history_file_check()
 
   local HIST_FILES
   mapfile -t HIST_FILES < <(config_find "$CONFIG_DIR""/history_files.cfg")
+  LOG_FILE="$( get_log_file )"
 
   if [[ "${HIST_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#HIST_FILES[@]}" -ne 0 ]] ; then
@@ -35,6 +36,8 @@ S55_history_file_check()
   else
     print_output "[-] No history files found"
   fi
+
+  echo -e "\\n[*] Statistics:${#HIST_FILES[@]}" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

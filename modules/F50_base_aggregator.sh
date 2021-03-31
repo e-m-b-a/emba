@@ -28,7 +28,10 @@ F50_base_aggregator() {
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
+  S40_LOG="s40_weak_perm_check.txt"
   S45_LOG="s45_pass_file_check.txt"
+  S50_LOG="s50_authentication_check.txt"
+  S55_LOG="s55_history_file_check.txt"
   S60_LOG="s60_cert_file_check.txt"
   S95_LOG="s95_interesting_binaries_check.txt"
   S108_LOG="s108_linux_common_file_checker.txt"
@@ -41,12 +44,15 @@ F50_base_aggregator() {
   output_overview
   os_detector
   output_details
+  output_config_issues
   output_binaries
   output_cve_exploits
+
   print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }
 
 output_overview() {
+
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR"
   fi  
@@ -81,9 +87,6 @@ output_details() {
   if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
   fi
-  if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$MOD_DATA_COUNTER""$GREEN"" kernel modules with ""$ORANGE""$KMOD_BAD""$GREEN"" licensing issues."
-  fi
   ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
@@ -101,20 +104,8 @@ output_details() {
   if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
   fi
-  if [[ "$CERT_CNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$CERT_OUT_CNT""$GREEN"" outdated certificates in ""$ORANGE""$CERT_CNT""$GREEN"" certificates.""$NC"
-  fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
-  fi
-  if [[ -n "$FILE_COUNTER" ]]; then
-    print_output "[+] Found ""$ORANGE""$FILE_COUNTER""$GREEN"" not common Linux files with ""$ORANGE""$FILE_COUNTER_ALL""$GREEN"" files at all.""$NC"
-  fi
-  if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$INT_COUNT""$GREEN"" interesting files and ""$ORANGE""$POST_COUNT""$GREEN"" files that could be useful for post-exploitation.""$NC"
-  fi
-  if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
-    print_output "[+] Found passwords or weak credential configuration - check log file for details"
   fi
 
   EMUL=$(find "$LOG_DIR"/qemu_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
@@ -122,6 +113,40 @@ output_details() {
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
   fi
 
+  print_output "\\n-----------------------------------------------------------------\\n"
+}
+
+output_config_issues() {
+
+  if [[ "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
+    print_output "[+] Found the following configuration issues:"
+    if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Weak permissions: $ORANGE$S40_WEAK_PERM_COUNTER")")"
+    fi
+    if [[ "$S55_HISTORY_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "History files: $ORANGE$S55_HISTORY_COUNTER")")"
+    fi
+    if [[ "$S50_AUTH_ISSUES" -gt 0 ]]; then
+      print_output "$(indent "$(green "Authentication issues: $ORANGE$S50_AUTH_ISSUES")")"
+    fi
+    if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
+      print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details")")"
+    fi
+    if [[ "$CERT_CNT" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
+    fi
+    if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$MOD_DATA_COUNTER$GREEN kernel modules with $ORANGE$KMOD_BAD$GREEN licensing issues.")")"
+    fi
+    if [[ "$FILE_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
+    fi
+    if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
+    fi
+  fi
+
+  print_output "\\n-----------------------------------------------------------------\\n"
 }
 
 output_binaries() {
@@ -235,12 +260,12 @@ output_cve_exploits() {
     fi
     if [[ "$CVE_COUNTER" -gt 0 ]]; then
       print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
-      print_output "[+] Confirmed ""$ORANGE""$HIGH_CVE_COUNTER""$GREEN"" High rated CVE entries."
-      print_output "[+] Confirmed ""$ORANGE""$MEDIUM_CVE_COUNTER""$GREEN"" Medium rated CVE entries."
-      print_output "[+] Confirmed ""$ORANGE""$LOW_CVE_COUNTER""$GREEN"" Low rated CVE entries."
+      print_output "$(indent "$(green "Confirmed ""$ORANGE""$HIGH_CVE_COUNTER""$GREEN"" High rated CVE entries.")")"
+      print_output "$(indent "$(green "Confirmed ""$ORANGE""$MEDIUM_CVE_COUNTER""$GREEN"" Medium rated CVE entries.")")"
+      print_output "$(indent "$(green "Confirmed ""$ORANGE""$LOW_CVE_COUNTER""$GREEN"" Low rated CVE entries.")")"
     fi
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
-      print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available."
+      print_output "$(indent "$(green "$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available.")")"
     fi
   fi
   print_output "\\n-----------------------------------------------------------------"
@@ -263,6 +288,15 @@ get_data() {
   fi
   if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
     S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S40_LOG" ]]; then
+    S40_WEAK_PERM_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S40_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S50_LOG" ]]; then
+    S50_AUTH_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S50_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S55_LOG" ]]; then
+    S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S55_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)

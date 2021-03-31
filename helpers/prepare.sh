@@ -117,11 +117,10 @@ prepare_file_arr()
   print_output "[*] Unique files auto detection (could take some time)\\n" "main"
 
   export FILE_ARR
-  readarray -t FILE_ARR < <(eval find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f "$FIND_UNIQUE_EXEC" )
+  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
 
-
-  # xdev will to the trick for us:
+  # xdev will do the trick for us:
   # remove ./proc/* executables (for live testing)
   #rm_proc_binary "${FILE_ARR[@]}"
 }
@@ -134,7 +133,7 @@ prepare_binary_arr()
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
-  readarray -t BINARIES < <( eval find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable "$FIND_UNIQUE_EXEC" )
+  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # in some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   # this is a slow fallback solution just to have something we can work with
@@ -169,58 +168,61 @@ set_etc_paths()
 check_firmware()
 {
   # Check if firmware got normal linux directory structure and warn if not
+  # as we already have done some root directory detection we are going to use it now
   local DIR_COUNT=0
-  if [[ -d "$FIRMWARE_PATH""/bin" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/boot" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/dev" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/etc" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/home" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/lib" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/media" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/mnt" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/opt" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/proc" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/root" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/run" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/sbin" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/srv" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/tmp" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/usr" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/var" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
+  for R_PATH in "${ROOT_PATH[@]}"; do
+    if [[ -d "$R_PATH""/bin" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/boot" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/dev" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/etc" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/home" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/lib" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/media" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/mnt" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/opt" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/proc" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/root" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/run" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/sbin" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/srv" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/tmp" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/usr" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+    if [[ -d "$R_PATH""/var" ]] ; then
+      DIR_COUNT=$((DIR_COUNT + 1))
+    fi
+  done
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
     echo

@@ -22,27 +22,31 @@ S40_weak_perm_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search files with weak permissions"
 
+  LOG_FILE="$( get_log_file )"
+
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
+  local WEAK_PERM_COUNTER=0
 
   local ETC_ARR
   ETC_ARR=("$(mod_path "/ETC_PATHS")")
-  readarray -t SETUID_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -user root -perm -4000 2>/dev/null)
-  readarray -t SETGID_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -user root -perm -2000 2>/dev/null)
-  readarray -t WORLD_WRITE_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f -perm -o+w 2>/dev/null)
-  readarray -t WEAK_SHADOW_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev -type f -iname "shadow*" -perm -600 2>/dev/null)
+  readarray -t SETUID_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -user root -perm -4000 -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null)
+  readarray -t SETGID_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -user root -perm -2000 -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null)
+  readarray -t WORLD_WRITE_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f -perm -o+w -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null)
+  readarray -t WEAK_SHADOW_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev -type f -iname "shadow*" -perm -600 -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null)
 
   ETC_ARR=("$(mod_path "/ETC_PATHS/rc.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
-  readarray -t WEAK_RC_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f 2>/dev/null)
+  readarray -t WEAK_RC_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null)
   ETC_ARR=("$(mod_path "/ETC_PATHS/init.d")")
   # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.s
-  readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f 2>/dev/null)
+  readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null)
 
   if [[ ${#SETUID_FILES[@]} -gt 0 ]] ; then
     HTML_REPORT=1
     print_output "[+] Found ""${#SETUID_FILES[@]}"" setuid files:"
     for LINE in "${SETUID_FILES[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      ((WEAK_PERM_COUNTER++))
     done
     echo
   else
@@ -54,6 +58,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ""${#SETGID_FILES[@]}"" setgid files:"
     for LINE in "${SETGID_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
+      ((WEAK_PERM_COUNTER++))
     done
     echo
   else
@@ -65,6 +70,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ""${#WORLD_WRITE_FILES[@]}"" world writeable files:"
     for LINE in "${WORLD_WRITE_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
+      ((WEAK_PERM_COUNTER++))
     done
     echo
   else
@@ -76,6 +82,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ""${#WEAK_SHADOW_FILES[@]}"" weak shadow files:"
     for LINE in "${WEAK_SHADOW_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
+      ((WEAK_PERM_COUNTER++))
     done
     echo
   else
@@ -87,6 +94,7 @@ S40_weak_perm_check() {
     print_output "[+] Found ""${#WEAK_RC_FILES[@]}"" rc.d files not belonging to root:"
     for LINE in "${WEAK_RC_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
+      ((WEAK_PERM_COUNTER++))
     done
     echo
   else
@@ -98,11 +106,14 @@ S40_weak_perm_check() {
     print_output "[+] Found ""${#WEAK_INIT_FILES[@]}"" init.d files not belonging to root:"
     for LINE in "${WEAK_INIT_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
+      ((WEAK_PERM_COUNTER++))
     done
     echo
   else
     print_output "[-] No init.d files with weak permissions found"
   fi
+
+  echo -e "\\n[*] Statistics:$WEAK_PERM_COUNTER" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

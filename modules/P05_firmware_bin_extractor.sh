@@ -55,7 +55,7 @@ P05_firmware_bin_extractor() {
   ipk_extractor
 
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
-  UNIQUE_BINS=$(eval find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable "${FIND_UNIQUE_EXEC[@]}" | wc -l )
+  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
