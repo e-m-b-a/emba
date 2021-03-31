@@ -84,7 +84,7 @@ output_details() {
   if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$MOD_DATA_COUNTER""$GREEN"" kernel modules with ""$ORANGE""$KMOD_BAD""$GREEN"" licensing issues."
   fi
-  ENTROPY_PIC=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
+  ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
   fi
@@ -117,7 +117,7 @@ output_details() {
     print_output "[+] Found passwords or weak credential configuration - check log file for details"
   fi
 
-  EMUL=$(find "$LOG_DIR"/qemu_emulator -type f -iname "qemu_*" 2>/dev/null | wc -l) 
+  EMUL=$(find "$LOG_DIR"/qemu_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
   fi
@@ -179,9 +179,9 @@ output_binaries() {
   FUNCTION="strcpy"
   FUNCTION1="system"
   
-  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
-    readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
-    readarray -t RESULTS1 < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
+  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+    readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS1 < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
 
     if [[ "${#RESULTS[@]}" -gt 0 ]]; then
       print_output ""
