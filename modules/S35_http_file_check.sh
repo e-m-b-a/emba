@@ -33,7 +33,7 @@ http_file_search()
 {
   sub_module_title "Search http files"
 
-  HTTP_STUFF
+  HTTP_STUFF=0
   mapfile -t HTTP_STUFF < <(config_find "$CONFIG_DIR""/http_files.cfg")
 
   if [[ "${HTTP_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"

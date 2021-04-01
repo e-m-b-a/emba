@@ -240,8 +240,12 @@ cleanup() {
       fi
     done
   fi
-  print_output "[*] Remove firmware copy from emulation directory.\\n\\n"
-  rm -r "$EMULATION_PATH_BASE"
+  # if we got a firmware directory then we have created a backup for emulation
+  # lets delete it now
+  if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
+    print_output "[*] Remove firmware copy from emulation directory.\\n\\n"
+    rm -r "$EMULATION_PATH_BASE"
+  fi
 }
 
 prepare_emulator() {
