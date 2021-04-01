@@ -15,8 +15,6 @@
 
 # Description:  Checks for bugs, stylistic errors, etc. in shell scripts, then it lists the found error types.
 
-export HTML_REPORT
-
 S20_shell_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -27,11 +25,10 @@ S20_shell_check()
   LOG_FILE="$( get_log_file )"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
-    HTML_REPORT=1
     if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
       mkdir "$LOG_DIR""/shellchecker/" 2> /dev/null
     fi
-    mapfile -t SH_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+    mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${SH_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "shell script" ) ; then
         ((S20_SCRIPTS++))
@@ -73,5 +70,5 @@ S20_shell_check()
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$S20_SHELL_VULNS"
 }

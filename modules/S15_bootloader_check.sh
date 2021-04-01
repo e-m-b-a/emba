@@ -15,35 +15,35 @@
 
 # Description:  Scans for device tree blobs, bootloader and startup files and checks for the default runlevel.
 
-export HTML_REPORT
-
 # This module is based on source code from lynis: https://raw.githubusercontent.com/CISOfy/lynis/master/include/tests_boot_services
 S15_bootloader_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check bootloader and system startup"
 
+  STARTUP_FINDS=0
+
   check_dtb
   check_bootloader
   find_boot_files
   find_runlevel
 
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$STARTUP_FINDS"
 }
 
 check_dtb()
 {
   sub_module_title "Scan for device tree blobs"
 
-  readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" )
+  readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   if [[ ${#DTB_ARR[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Device tree blobs found - output of fdtdump into log, could take a moment"
     for DTB_FILE in "${DTB_ARR[@]}" ; do
       print_output "$(indent "$DTB_FILE")"
       if [[ $DTBDUMP -eq 1 ]] ; then
         write_log "$(fdtdump "$DTB_FILE" 2> /dev/null)" "$LOG_DIR""/dtb_dump/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt" "g"
+        ((STARTUP_FINDS++))
       fi
     done
   else
@@ -64,9 +64,9 @@ check_bootloader()
   for SYSLINUX_FILE in "${SYSLINUX_PATHS[@]}" ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found Syslinux config: ""$(print_path "$SYSLINUX_FILE")"
       BOOTLOADER="Syslinux"
+      ((STARTUP_FINDS++))
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
@@ -79,20 +79,20 @@ check_bootloader()
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found Grub config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub"
+      ((STARTUP_FINDS++))
     fi
   done
   mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/menu.lst")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found Grub config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub"
+      ((STARTUP_FINDS++))
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
@@ -105,20 +105,20 @@ check_bootloader()
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found Grub2 config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub2"
+      ((STARTUP_FINDS++))
     fi
   done
   mapfile -t GRUB_PATHS < <(mod_path "/boot/grub2/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found Grub2 config: ""$(print_path "$GRUB_FILE")"
       GRUB="$GRUB_FILE"
       BOOTLOADER="Grub2"
+      ((STARTUP_FINDS++))
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
@@ -141,10 +141,10 @@ check_bootloader()
     elif [[ -n "${FIND3}" ]] ; then
       if [[ -n "${FIND4}" ]] || [[ -n "${FIND5}" ]] ; then 
         FOUND=1;
+        ((STARTUP_FINDS++))
       fi
     fi
     if [[ $FOUND -eq 1 ]] ; then
-      HTML_REPORT=1
       print_output "[+] GRUB has password protection"
     else
       print_output "[-] No hashed password line in GRUB boot file"
@@ -165,9 +165,9 @@ check_bootloader()
       for BL in "${BOOTL[@]}" ; do
         if [[ -f "$B1" ]] && [[ -f "$B2" ]] && [[ -f "$BL" ]] ; then
           CHECK=1
-          HTML_REPORT=1
           print_output "[+] Found ""$(print_path "$B1")"", ""$(print_path "$B2")"" and ""$(print_path "$BL")"" (FreeBSD or DragonFly)"
           BOOTLOADER="FreeBSD / DragonFly"
+          ((STARTUP_FINDS++))
         fi
       done
     done
@@ -182,11 +182,11 @@ check_bootloader()
   for LILO_FILE in "${LILO_PATH[@]}" ; do
     if [[ -f "$LILO_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found lilo.conf: ""$(print_path "$LILO_FILE")"" (LILO)"
       FIND=$(grep 'password[[:space:]]?=' "$LILO_FILE" | grep -v "^#")
         if [[ -z "${FIND}" ]] ; then
           print_output "[+] LILO has password protection"
+          ((STARTUP_FINDS++))
         fi
       BOOTLOADER="LILO"
     fi
@@ -201,9 +201,9 @@ check_bootloader()
   for SILO_FILE in "${SILO_PATH[@]}" ; do
     if [[ -f "$SILO_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found silo.conf: ""$(print_path "$SILO_FILE")"" (SILO)"
       BOOTLOADER="SILO"
+      ((STARTUP_FINDS++))
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
@@ -216,9 +216,9 @@ check_bootloader()
   for YABOOT_FILE in "${YABOOT_PATH[@]}" ; do
     if [[ -f "$YABOOT_FILE" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found yaboot.conf: ""$(print_path "$YABOOT_FILE")"" (YABOOT)"
       BOOTLOADER="Yaboot"
+      ((STARTUP_FINDS++))
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
@@ -234,9 +234,9 @@ check_bootloader()
     for OBSD_FILE2 in "${OBSD_PATH2[@]}" ; do
       if [[ -f "$OBSD_FILE2" ]] && [[ -f "OBSD_FILE2" ]] ; then
         CHECK=1
-        HTML_REPORT=1
         print_output "[+] Found first and second stage bootstrap in ""$(print_path "$OBSD_FILE1")"" and ""$(print_path "$OBSD_FILE2")"" (OpenBSD)"
         BOOTLOADER="OpenBSD"
+        ((STARTUP_FINDS++))
       fi
     done
   done
@@ -250,11 +250,11 @@ check_bootloader()
   for OPENBSD in "${OPENBSD_PATH[@]}" ; do
     if [[ -f "$OPENBSD" ]] ; then
       CHECK=1
-      HTML_REPORT=1
       print_output "[+] Found ""$(print_path "$OPENBSD")"" (OpenBSD)"
       FIND=$(grep '^boot' "$OPENBSD")
       if [[ -z "${FIND}" ]] ; then
         print_output "[+] System can be booted into single user mode without password"
+        ((STARTUP_FINDS++))
       fi
       mapfile -t OPENBSD_PATH2 < <(mod_path "/ETC_PATHS/rc.conf")
       for OPENBSD2 in "${OPENBSD_PATH2[@]}" ; do
@@ -263,6 +263,7 @@ check_bootloader()
           print_output "[+] Found OpenBSD boot services ""$(print_path "$OPENBSD2")"
           if [[ -z "$FIND" ]] ; then
             print_output "$(indent "$(orange "$FIND")")"
+            ((STARTUP_FINDS++))
           fi
         fi
       done
@@ -286,12 +287,12 @@ find_boot_files()
 
   if [[ "${BOOT_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#BOOT_FILES[@]}" -ne 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#BOOT_FILES[@]}"" startup files:"
     for LINE in "${BOOT_FILES[@]}" ; do
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       if [[ "$(basename "$LINE")" == "inittab" ]]  ; then
         INITTAB_V=("${INITTAB_V[@]}" "$LINE")
+        ((STARTUP_FINDS++))
       fi
     done
   else
@@ -314,6 +315,7 @@ find_runlevel()
         if [[ -z "$FIND" ]] ; then
           print_output "[+] systemd run level information:"
           print_output "$(indent "$FIND")"
+          ((STARTUP_FINDS++))
         else
           print_output "[-] No run level in ""$(print_path "$DEFAULT_TARGET_PATH")"" found"
         fi
@@ -324,7 +326,6 @@ find_runlevel()
   done
 
   if [[ ${#INITTAB_V[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     for INIT_TAB_F in "${INITTAB_V[@]}" ; do
       print_output "[*] Check runlevel in ""$(print_path "$INIT_TAB_F")"
       FIND=$(awk -F: '/^id/ { print $2; }' "$INIT_TAB_F" | head -n 1)
@@ -332,6 +333,7 @@ find_runlevel()
         print_output "[-] No default run level ""$(print_path "$INIT_TAB_F")"" found"
       else
         print_output "[+] Found default run level: ""$(orange "$FIND")"
+        ((STARTUP_FINDS++))
       fi
     done
   else

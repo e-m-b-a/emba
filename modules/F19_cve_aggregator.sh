@@ -85,7 +85,8 @@ F19_cve_aggregator() {
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
-  module_end_log "${FUNCNAME[0]}"
+
+  module_end_log "${FUNCNAME[0]}" "$CVE_COUNTER"
 }
 
 prepare_version_data() {
@@ -103,9 +104,14 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//(gdb)/}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
+    VERSION_lower="${VERSION_lower//acpid-/acpid\ }"
     # alsactl, amixer -> alsa
     VERSION_lower="${VERSION_lower//alsactl/alsa}"
     VERSION_lower="${VERSION_lower//amixer/alsa}"
+    #sudoreplay -> sudo
+    VERSION_lower="${VERSION_lower//sudoreplay/sudo}"
+    #visudo -> sudo
+    VERSION_lower="${VERSION_lower//visudo/sudo}"
     # VIM - Vi IMproved 1.2
     VERSION_lower="${VERSION_lower//vim\ -\ vi\ improved/vim}"
     #zic.c
@@ -178,6 +184,15 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//i2cdump/i2c-tools}"
     VERSION_lower="${VERSION_lower//i2cget/i2c-tools}"
     VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
+    #manxyz -> man-db
+    VERSION_lower="${VERSION_lower//mandb/man-db}"
+    VERSION_lower="${VERSION_lower//manpath/man-db}"
+    VERSION_lower="${VERSION_lower//catman/man-db}"
+    VERSION_lower="${VERSION_lower//globbing/man-db}"
+    VERSION_lower="${VERSION_lower//lexgrog/man-db}"
+    #jfsxyz -> jfsutils
+    VERSION_lower="${VERSION_lower//jfs_fscklog/jfsutils}"
+    VERSION_lower="${VERSION_lower//jfs_tune/jfsutils}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
     #file-
@@ -279,6 +294,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(eglibc)/eglibc/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(.*\ eglibc\ .*)/eglibc/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(debian\ glibc.*)/glibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
     #vxworks5.5.1 -> no space
@@ -302,6 +319,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zip\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zip\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/([a-z]\ UnZip),/info-zip:zip/')"
     #mdns repeater (1.10)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/mdns\ repeater\ \(([0-9]\.[0-9][0-9])\)/mdnsrepeater\ \1/g')"
     #management console agent 1.5 (c) ubiquiti networks inc
@@ -317,6 +336,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
+    VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"
     #jq commandline json processor [5a49c82-dirty]
     VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
@@ -334,6 +354,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ mtools)/gnu:mtools/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
     # handle grub version 2:
@@ -389,6 +411,9 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
 
     # final cleanup of start and ending
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-beta$//')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^-//')"
     # shellcheck disable=SC2001
@@ -464,38 +489,42 @@ aggregate_versions() {
 generate_special_log() {
   sub_module_title "Generate special log files."
 
-  readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
-  print_output ""
-  print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
-  for FILE in "${FILES[@]}"; do
-    NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
-    CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
-    if [[ -n $CVE_VALUES ]]; then
-      print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
-      print_output "$CVE_VALUES"
-      echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
-      echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
-      print_output ""
-    fi
-  done
+  if [[ "$CVE_COUNTER" -gt 0 ]]; then
+    readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
+    print_output ""
+    print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
+    for FILE in "${FILES[@]}"; do
+      NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
+      CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
+      if [[ -n $CVE_VALUES ]]; then
+        print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
+        print_output "$CVE_VALUES"
+        echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
+        echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
+        print_output ""
+      fi
+    done
+  fi
 
-  print_output ""
-  print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
-  mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
-  for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
-    # remove color codes:
-    EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-    CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
-    if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-      print_output "$RED$EXPLOIT_$NC"
-    elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-      print_output "$ORANGE$EXPLOIT_$NC"
-    else
-      print_output "$GREEN$EXPLOIT_$NC"
-    fi
-  done
-  echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
-  grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"
+  if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
+    print_output ""
+    print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
+    mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
+    for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
+      # remove color codes:
+      EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+      if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
+        print_output "$RED$EXPLOIT_$NC"
+      elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
+        print_output "$ORANGE$EXPLOIT_$NC"
+      else
+        print_output "$GREEN$EXPLOIT_$NC"
+      fi
+    done
+    echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
+    grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r >> "$EXPLOIT_OVERVIEW_LOG"
+  fi
 }
 
 generate_cve_details() {
@@ -589,10 +618,10 @@ generate_cve_details() {
 
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
       print_output ""
-      print_output "[+] ${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH.${NC}"
+      print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$VERSION_SEARCH.${NC}"
     elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]];then
       print_output ""
-      print_output "[+] ${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH.${NC}"
+      print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$VERSION_SEARCH.${NC}"
     else
       print_output "[-] Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH."
     fi
@@ -600,7 +629,7 @@ generate_cve_details() {
 
   print_output ""
   print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-  mapfile -d '' LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -name "*" -print0 2> /dev/null)
+  mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -type f -name "*.txt" | sort 2> /dev/null)
   for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
     if [[ -f $FILE_AGGR ]]; then
       BIN=""
@@ -672,17 +701,7 @@ generate_cve_details() {
       FORMAT_LOG="$FORMAT_LOG_BAK"
     fi
   done
-
   print_output "${NC}"
-  if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found $ORANGE$S30_VUL_COUNTER$GREEN CVE entries for all binaries from S30_version_vulnerability_check.sh."
-  fi
-  print_output "[+] Identified $ORANGE${#VERSIONS_CLEANED[@]}$GREEN software components with version details."
-  print_output "[+] Confirmed $ORANGE$CVE_COUNTER$GREEN CVE entries."
-  print_output "[+] Confirmed $ORANGE$HIGH_CVE_COUNTER$GREEN High rated CVE entries."
-  print_output "[+] Confirmed $ORANGE$MEDIUM_CVE_COUNTER$GREEN Medium rated CVE entries."
-  print_output "[+] Confirmed $ORANGE$LOW_CVE_COUNTER$GREEN Low rated CVE entries."
-  print_output "[+] $ORANGE$EXPLOIT_COUNTER$GREEN possible exploits available.\\n"
 }
 
 get_firmware_base_version_check() {

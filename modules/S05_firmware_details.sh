@@ -16,8 +16,6 @@
 # Description:  Counts the number of files and executables in firmware and prints firmware tree in the log files. 
 #               It also searches through possible release files config/release_files.cfg for strings.
 
-export HTML_REPORT
-
 S05_firmware_details()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -33,11 +31,6 @@ S05_firmware_details()
   DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
   
   print_output "[*] ""${#FILE_ARR[@]}"" files and ""$DETECTED_DIR"" directories detected."
-
-  if [[ "${#FILE_ARR[@]}" -gt 0 ]] || [[ "$DETECTED_DIR" -gt 0 ]];then
-     HTML_REPORT=1
-  fi
-  
 
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
@@ -57,7 +50,7 @@ S05_firmware_details()
 
   echo -e "\\n[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR" >> "$LOG_FILE"
 
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "${#FILE_ARR[@]}"
 }
 
 # Test source: http://linuxmafia.com/faq/Admin/release-files.html

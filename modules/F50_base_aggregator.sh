@@ -21,15 +21,20 @@ F50_base_aggregator() {
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   S25_LOG="s25_kernel_check.txt"
-  OS_DETECT_LOG="p07_firmware_bin_base_analyzer.txt"
   P02_LOG="p02_firmware_bin_file_check.txt"
+  P07_LOG="p07_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
   S10_LOG="s10_binaries_check.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
+  S22_LOG="s22_php_check.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
+  S40_LOG="s40_weak_perm_check.txt"
   S45_LOG="s45_pass_file_check.txt"
+  S50_LOG="s50_authentication_check.txt"
+  S55_LOG="s55_history_file_check.txt"
   S60_LOG="s60_cert_file_check.txt"
+  S85_LOG="s85_ssh_check.txt"
   S95_LOG="s95_interesting_binaries_check.txt"
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
@@ -39,14 +44,16 @@ F50_base_aggregator() {
 
   get_data
   output_overview
-  os_detector
   output_details
+  output_config_issues
   output_binaries
   output_cve_exploits
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}" 1 
 }
 
 output_overview() {
+
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR"
   fi  
@@ -63,17 +70,15 @@ output_overview() {
   print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"
   print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND"
 
-  if [[ -n "$D_ARCH" ]]; then
-    print_output "[+] Detected architecture:""$ORANGE"" ""$D_ARCH"
-  elif [[ -f "$LOG_DIR"/"$OS_DETECT_LOG" ]]; then
-    PRE_ARCH="$(grep "Possible architecture details found:" "$LOG_DIR"/"$OS_DETECT_LOG" | cut -d: -f2)"
+  if [[ -n "$ARCH" ]]; then
+    print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
+  elif [[ -f "$LOG_DIR"/"$P07_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
     fi
   fi
-
-  print_output "\\n-----------------------------------------------------------------\\n"
-
+  os_detector
+  print_bar
 }
 
 output_details() {
@@ -81,10 +86,7 @@ output_details() {
   if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
   fi
-  if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$MOD_DATA_COUNTER""$GREEN"" kernel modules with ""$ORANGE""$KMOD_BAD""$GREEN"" licensing issues."
-  fi
-  ENTROPY_PIC=$(find "$LOG_DIR" -type f -iname "*_entropy.png" 2> /dev/null)
+  ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
   fi
@@ -98,36 +100,58 @@ output_details() {
   if [[ "$S21_PY_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
   fi
-  if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
-  fi
-  if [[ "$CERT_CNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$CERT_OUT_CNT""$GREEN"" outdated certificates in ""$ORANGE""$CERT_CNT""$GREEN"" certificates.""$NC"
+  if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
   fi
-  if [[ -n "$FILE_COUNTER" ]]; then
-    print_output "[+] Found ""$ORANGE""$FILE_COUNTER""$GREEN"" not common Linux files with ""$ORANGE""$FILE_COUNTER_ALL""$GREEN"" files at all.""$NC"
-  fi
-  if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$INT_COUNT""$GREEN"" interesting files and ""$ORANGE""$POST_COUNT""$GREEN"" files that could be useful for post-exploitation.""$NC"
-  fi
-  if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
-    print_output "[+] Found passwords or weak credential configuration - check log file for details"
-  fi
-
-  EMUL=$(find "$LOG_DIR"/qemu_emulator -type f -iname "qemu_*" 2>/dev/null | wc -l) 
+  EMUL=$(find "$LOG_DIR"/qemu_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
   fi
 
+  print_bar
+}
+
+output_config_issues() {
+
+  if [[ "$S85_SSH_VUL_CNT" -gt 0 || "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
+    print_output "[+] Found the following configuration issues:"
+    if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
+    fi
+    if [[ "$S55_HISTORY_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$S55_HISTORY_COUNTER$GREEN history files.")")"
+    fi
+    if [[ "$S50_AUTH_ISSUES" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$S50_AUTH_ISSUES$GREEN authentication issues.")")"
+    fi
+    if [[ "$S85_SSH_VUL_CNT" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$S85_SSH_VUL_CNT$GREEN SSHd issues.")")"
+    fi
+    if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
+      print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details.")")"
+    fi
+    if [[ "$CERT_CNT" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
+    fi
+    if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$MOD_DATA_COUNTER$GREEN kernel modules with $ORANGE$KMOD_BAD$GREEN licensing issues.")")"
+    fi
+    if [[ "$FILE_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
+    fi
+    if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
+    fi
+    print_bar
+  fi
 }
 
 output_binaries() {
 
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
-    print_output "\\n-----------------------------------------------------------------\\n"
     if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S10_LOG")
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S10_LOG")
@@ -164,6 +188,7 @@ output_binaries() {
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
+    print_bar
   fi
 
   # we use the logger from the s120 cwe checker module again:
@@ -171,17 +196,15 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
 
-    print_output "\\n-----------------------------------------------------------------\\n"
-
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
   fi
 
   FUNCTION="strcpy"
   FUNCTION1="system"
   
-  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
-    readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
-    readarray -t RESULTS1 < <( find "$LOG_DIR""/vul_func_checker/" -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
+  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+    readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS1 < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
 
     if [[ "${#RESULTS[@]}" -gt 0 ]]; then
       print_output ""
@@ -213,17 +236,16 @@ output_binaries() {
         (( i++ ))
       done
     fi  
+    print_bar
   fi 
 
 }
 
 output_cve_exploits() {
 
-  print_output ""
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
-    print_output "\\n-----------------------------------------------------------------\\n"
 
-    print_output "[*] Identified the following version details, vulnerabilities and exploits:"
+    print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
     print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
     print_output ""
@@ -231,24 +253,27 @@ output_cve_exploits() {
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
     fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-      print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE entries for all binaries from S30_version_vulnerability_check.sh."
+      print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
     fi
     if [[ "$CVE_COUNTER" -gt 0 ]]; then
       print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
-      print_output "[+] Confirmed ""$ORANGE""$HIGH_CVE_COUNTER""$GREEN"" High rated CVE entries."
-      print_output "[+] Confirmed ""$ORANGE""$MEDIUM_CVE_COUNTER""$GREEN"" Medium rated CVE entries."
-      print_output "[+] Confirmed ""$ORANGE""$LOW_CVE_COUNTER""$GREEN"" Low rated CVE entries."
+      print_output "$(indent "$(green "Confirmed $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
+      print_output "$(indent "$(green "Confirmed $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries.")")"
+      print_output "$(indent "$(green "Confirmed $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries.")")"
     fi
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
-      print_output "[+] ""$ORANGE""$EXPLOIT_COUNTER""$GREEN"" possible exploits available."
+      print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
     fi
+    print_bar
   fi
-  print_output "\\n-----------------------------------------------------------------"
 }
 
 get_data() {
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$P07_LOG" ]]; then
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P07_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
@@ -256,13 +281,7 @@ get_data() {
   fi
   if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
     STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
-  fi
-  if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
-    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
-    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3)
-  fi
-  if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
-    S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
@@ -272,9 +291,43 @@ get_data() {
     S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f2)
     S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f3)
   fi
+  if [[ -f "$LOG_DIR"/"$S22_LOG" ]]; then
+    S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f2)
+    S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
+    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
+    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
+    S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S40_LOG" ]]; then
+    S40_WEAK_PERM_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S40_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
+    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S50_LOG" ]]; then
+    S50_AUTH_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S50_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S55_LOG" ]]; then
+    S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S55_LOG" | cut -d: -f2)
+  fi
   if [[ -f "$LOG_DIR"/"$S60_LOG" ]]; then
     CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2)
     CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S85_LOG" ]]; then
+    S85_SSH_VUL_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S85_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
+    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
+    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
+    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)
+    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3)
   fi
   if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2)
@@ -282,17 +335,6 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
     export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
-  fi
-  if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
-    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
-  fi
-  if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
-    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)
-    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3)
-  fi
-  if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
-    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
-    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
   fi
 }
 
@@ -330,7 +372,7 @@ os_detector() {
   #### The following check is needed if the aggreagator has failed till now
   if [[ $VERIFIED -eq 0 ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
-    mapfile -t OS_DETECT < <(grep "\ verified.*operating\ system\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "\ verified.*operating\ system\ detected" "$LOG_DIR"/"$P07_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED=1
@@ -338,7 +380,7 @@ os_detector() {
       done
     fi
 
-    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$OS_DETECT_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P07_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
@@ -357,6 +399,7 @@ os_detector() {
       print_os
     fi
   fi
+
 }
 
 os_kernel_module_detect() {

@@ -15,8 +15,6 @@
 
 # Description:  Looks for web-based files in folders like www and searches for code executions inside of them.
 
-export HTML_REPORT
-
 S100_command_inj_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -31,7 +29,7 @@ S100_command_inj_check()
     for DIR in "${CMD_INJ_DIRS[@]}" ; do
       if [[ -d "$DIR" ]] ; then
         print_output "$(indent "$(print_path "$DIR")")"
-        mapfile -t FILE_ARRX < <( find "$DIR" -xdev -type f)
+        mapfile -t FILE_ARRX < <( find "$DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
         for FILE_S in "${FILE_ARRX[@]}" ; do
           if file "$FILE_S" | grep -q -E "script.*executable" ; then
@@ -57,9 +55,8 @@ S100_command_inj_check()
         done
       fi
     done
-    HTML_REPORT=1
   else
     print_output "[-] No directories or files used for web scripts found"
   fi
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "${#CMD_INJ_DIRS[@]}"
 }

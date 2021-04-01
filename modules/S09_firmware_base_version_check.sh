@@ -17,8 +17,6 @@
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and 
 #               checks if these fit on a binary in the firmware. 
 
-export HTML_REPORT
-
 S09_firmware_base_version_check() {
 
   # this module check for version details statically.
@@ -78,6 +76,8 @@ S09_firmware_base_version_check() {
     fi
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
+
   echo "." | tr -d "\n"
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+
+  module_end_log "${FUNCNAME[0]}" "${#VERSIONS_DETECTED[@]}"
 }

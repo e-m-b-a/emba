@@ -15,12 +15,12 @@
 
 # Description:  Checks for bugs, stylistic errors, etc. in php scripts, then it lists the found error types.
 
-export HTML_REPORT
-
 S22_php_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check php scripts for syntax errors"
+
+  LOG_FILE="$( get_log_file )"
 
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
@@ -29,7 +29,7 @@ S22_php_check()
     if ! [[ -d "$LOG_DIR""/php_checker/" ]] ; then
       mkdir "$LOG_DIR""/php_checker/" 2> /dev/null
     fi
-    mapfile -t PHP_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+    mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PHP_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "PHP script" ) ; then
         ((S22_PHP_SCRIPTS++))
@@ -49,16 +49,16 @@ S22_php_check()
           else
             COMMON_FILES_FOUND=""
           fi
-          HTML_REPORT=1
           print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
         fi
       fi
     done
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
+    echo -e "\\n[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS" >> "$LOG_FILE"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$S22_PHP_VULNS"
 }

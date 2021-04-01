@@ -15,14 +15,12 @@
 
 # Description:  Searches in /var/mail for mail files.
 
-export HTML_REPORT
-
 S90_mail_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search Mail files"
 
-  local FINDING
+  local FINDING=0
 
   local MAILS
   local MAILS_PATH
@@ -33,8 +31,7 @@ S90_mail_check()
       if [[ -n "$MAILS" ]] ; then
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS")")"
-        FINDING=1
-        HTML_REPORT=1
+        ((FINDING++))
       fi
     fi
   done
@@ -48,16 +45,11 @@ S90_mail_check()
       if [[ -n "$MAILS_ROOT" ]] ; then
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS_ROOT")")"
-        FINDING=1
-        HTML_REPORT=1
+        ((FINDING++))
       fi
     fi
   done
 
-  if [[ "$FINDING" -eq 0 ]] ; then
-    print_output "[-] No mail files found!"
-  fi
-
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$FINDING"
 }
 

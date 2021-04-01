@@ -16,19 +16,19 @@
 # Description:  A more exceptional search for files like resolv.conf, iptables.conf and snmpf.conf and analyzes their content. 
 #               Checks systemd network configuration files.
 
-export HTML_REPORT
-
 S75_network_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search network configs"
+
+  NET_CFG_FOUND=0
 
   check_resolv
   check_iptables
   check_snmp
   check_network_configs
 
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$NET_CFG_FOUND"
 }
 
 check_resolv()
@@ -46,13 +46,12 @@ check_resolv()
       DNS_INFO=$(grep "nameserver" "$RES_INFO_P" 2>/dev/null)
       if [[ "$DNS_INFO" ]] ; then
           print_output "$(indent "$DNS_INFO")"
+          ((NET_CFG_FOUND++))
       fi
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No or empty network configuration found"
-  else
-    HTML_REPORT=1
   fi
 }
 
@@ -67,12 +66,11 @@ check_iptables()
     if [[ -e "$IPT_INFO_P" ]] ; then
       CHECK=1
       print_output "[+] iptables config ""$(print_path "$IPT_INFO_P")"
+      ((NET_CFG_FOUND++))
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No iptables configuration found"
-  else
-    HTML_REPORT=1
   fi
 }
 
@@ -93,14 +91,13 @@ check_snmp()
         print_output "[*] com2sec line/s:"
         for I in "${FIND[@]}"; do
           print_output "$(indent "$(orange "$I")")"
+          ((NET_CFG_FOUND++))
         done
       fi
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No SNMP configuration found"
-  else
-    HTML_REPORT=1
   fi
 }
 
@@ -113,12 +110,10 @@ check_network_configs()
 
   if [[ "${NETWORK_CONFS[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#NETWORK_CONFS[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#NETWORK_CONFS[@]}"" possible network configs:"
     for LINE in "${NETWORK_CONFS[@]}" ; do
-      #if [[ -f "$LINE" ]] ; then
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-      #fi
+      ((NET_CFG_FOUND++))
     done
   else
     print_output "[-] No network configs found"

@@ -15,8 +15,6 @@
 
 # Description:  Examine all files for cronjob configuration, e.g. cron or crontab and lists their jobs and other possible intriguing details.
 
-export HTML_REPORT
-
 S80_cronjob_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -35,7 +33,7 @@ S80_cronjob_check()
       if [[ "$CRONJOBS" ]] ; then
         print_output "[+] Cronjobs:"
         print_output "$(indent "$CRONJOBS")"
-        RESULTS=1
+        ((RESULTS++))
       fi
     fi
   done
@@ -48,7 +46,7 @@ S80_cronjob_check()
       if [[ "$CRONJOBWWPERMS" ]] ; then
         print_output "[+] World-writable cron jobs and file contents:"
         print_output "$(indent "$CRONJOBWWPERMS")"
-        RESULTS=1
+        ((RESULTS++))
       fi
     fi
   done
@@ -62,7 +60,7 @@ S80_cronjob_check()
       if [[ "$CRONTABVALUE" ]] ; then
         print_output "[+] Crontab content:"
         print_output "$(indent "$CRONTABVALUE")"
-        RESULTS=1
+        ((RESULTS++))
       fi
     fi
   done
@@ -75,7 +73,7 @@ S80_cronjob_check()
     if [[ "$CRONTABVAR" ]] ; then
       print_output "[+] Anything interesting in ""$(print_path "$CT_VAR")"
       print_output "$(indent "$CRONTABVAR")"
-      RESULTS=1
+      ((RESULTS++))
     fi
   done
 
@@ -88,7 +86,7 @@ S80_cronjob_check()
       if [[ "$ANACRONJOBS" ]] ; then
         print_output "[+] Anacron jobs and associated file permissions:"
         print_output "$(indent "$ANACRONJOBS")"
-        RESULTS=1
+        ((RESULTS++))
       fi
     fi
   done
@@ -101,16 +99,10 @@ S80_cronjob_check()
     if [[ "$ANACRONTAB" ]] ; then
       print_output "[+] When were jobs last executed (""$(print_path "$CT_VAR")"")"
       print_output "$(indent "$ANACRONTAB")"
-      RESULTS=1
+      ((RESULTS++))
     fi
   done
 
-  if [[ $RESULTS -eq 0 ]] ; then
-    print_output "[-] Nothing found!"
-  else
-    HTML_REPORT=1
-  fi
-
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$RESULTS"
 }
 

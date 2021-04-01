@@ -77,4 +77,6 @@ detect_binary_versions() {
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
   echo "." | tr -d "\n"
+
+  module_end_log "${FUNCNAME[0]}" "${#VERSIONS_DETECTED[@]}"
 }

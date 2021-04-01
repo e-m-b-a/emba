@@ -15,8 +15,6 @@
 
 # Description:  Scans system for typical config files, e.g. *.cfg or fstab and analyzes fstab for user details.
 
-export HTML_REPORT
-
 S65_config_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -25,7 +23,11 @@ S65_config_file_check()
   scan_config
   check_fstab
 
-  module_end_log "${FUNCNAME[0]}"
+  if [[ "${#CONF_FILES_ARR[@]}" -gt 0 || "${#FSTAB_ARR[@]}" -ne 0 ]]; then
+    NEG_LOG=1
+  fi
+
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 scan_config()
@@ -37,12 +39,9 @@ scan_config()
 
   if [[ "${CONF_FILES_ARR[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#CONF_FILES_ARR[@]} -ne 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
     for LINE in "${CONF_FILES_ARR[@]}" ; do
-      #if [[ -f "$LINE" ]] ; then
       print_output "$(indent "$(orange "$LINE")")" # "$(print_path "$LINE")"
-      #fi
     done
   else
     print_output "[-] No configuration files found"
@@ -61,7 +60,6 @@ check_fstab()
   fi
 
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#FSTAB_USER_FILES[@]}"" fstab files with user details included:"
     for LINE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -72,7 +70,6 @@ check_fstab()
   fi
 
   if [[ ${#FSTAB_PASS_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#FSTAB_PASS_FILES[@]}"" fstab files with password credentials included:"
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"

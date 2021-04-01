@@ -23,6 +23,7 @@ P07_firmware_bin_base_analyzer() {
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
+  local NEG_LOG
 
   if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
     export OUTPUT_DIR
@@ -33,10 +34,9 @@ P07_firmware_bin_base_analyzer() {
     else
       os_identification
     fi
-
   fi
 
-  # we only do this if we have not found a LInux filesystem
+  # we only do this if we have not found a Linux filesystem
   if ! [[ -d "$FIRMWARE_PATH" ]]; then
     if [[ $LINUX_PATH_COUNTER -eq 0 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
@@ -52,7 +52,11 @@ P07_firmware_bin_base_analyzer() {
     wait_for_pid
   fi
 
-  module_end_log "${FUNCNAME[0]}"
+  if [[ $LINUX_PATH_COUNTER -gt 0 || "$OS_DETECTED" -eq 1 || "${#PRE_ARCH[@]}" -gt 0 ]] ; then
+    NEG_LOG=1
+  fi
+
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 os_identification() {
@@ -121,31 +125,29 @@ os_identification() {
   export LINUX_PATH_COUNTER
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
-  # gt 10 to avoid false positives
   if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC)) -gt 0 ]] ; then
     print_output ""
     print_output "$(indent "$(orange "Operating system detection:")")"
-    if [[ $COUNTER_VxWorks -gt 5 ]] ; then print_output "$(indent "$(orange "VxWorks detected          ""$COUNTER_VxWorks")")"; fi
-    if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected         ""$COUNTER_FreeRTOS")")"; fi
-    if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected             ""$COUNTER_eCos")")"; fi
+    if [[ $COUNTER_VxWorks -gt 5 ]] ; then print_output "$(indent "$(orange "VxWorks detected\t\t""$COUNTER_VxWorks")")"; fi
+    if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected\t\t""$COUNTER_FreeRTOS")")"; fi
+    if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected\t\t""$COUNTER_eCos")")"; fi
     if [[ $COUNTER_Linux -gt 5 && $LINUX_PATH_COUNTER -gt 1 ]] ; then 
-      print_output "$(indent "$(green "Linux detected             ""$COUNTER_Linux""\t- verified Linux operating system detected")")"
+      print_output "$(indent "$(green "Linux detected\t\t""$COUNTER_Linux""\t-\tverified Linux operating system detected")")"
     elif [[ $COUNTER_Linux -gt 5 ]] ; then 
-      print_output "$(indent "$(orange "Linux detected            ""$COUNTER_Linux")")"
+      print_output "$(indent "$(orange "Linux detected\t\t""$COUNTER_Linux")")"
     fi
-    if [[ $COUNTER_ADONIS -gt 10 ]] ; then print_output "$(indent "$(orange "Adonis detected          ""$COUNTER_ADONIS")")"; fi
+    if [[ $COUNTER_ADONIS -gt 10 ]] ; then print_output "$(indent "$(orange "Adonis detected\t\t""$COUNTER_ADONIS")")"; fi
     if [[ $COUNTER_SIPROTEC -gt 100 && $COUNTER_VxWorks -gt 20 ]] ; then
-      print_output "$(indent "$(green "SIPROTEC detected         ""$COUNTER_SIPROTEC""\t- verified SIPROTEC system detected")")";
+      print_output "$(indent "$(green "SIPROTEC detected\t\t""$COUNTER_SIPROTEC""\t-\tverified SIPROTEC system detected")")";
     elif [[ $COUNTER_SIPROTEC -gt 10 ]] ; then
-      print_output "$(indent "$(orange "SIPROTEC detected          ""$COUNTER_SIPROTEC")")";
+      print_output "$(indent "$(orange "SIPROTEC detected\t\t""$COUNTER_SIPROTEC")")";
     fi
+    OS_DETECTED=1
   fi
 
   echo
   if [[ $LINUX_PATH_COUNTER -gt 0 ]] ; then
     print_output "[+] Found possible Linux operating system in $(print_path "$OUTPUT_DIR")"
-    #export FIRMWARE=1
-    #export FIRMWARE_PATH="$OUTPUT_DIR"
   fi
 }
 

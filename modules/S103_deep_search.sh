@@ -15,8 +15,6 @@
 
 # Description:  Searches for files with a specified string pattern inside.
 
-export HTML_REPORT
-
 S103_deep_search()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -28,14 +26,20 @@ S103_deep_search()
 
   print_output "[*] Patterns: ""$( echo -e "$PATTERNS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
   print_output "[*] Special characters are replaced by a '.' for better readability.\\n"
-
+  
   readarray -t PATTERN_LIST < <(printf '%s' "$PATTERNS")
+
+  deep_pattern_search
+  deep_pattern_reporter
+
+  module_end_log "${FUNCNAME[0]}" "$PATTERN_COUNT"
+}
+
+deep_pattern_search() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     local COUNT=0
     print_output "[*] Searching all files for '""$PATTERN""' ... this may take a while!"
     echo
-    # FILE_ARR is known from the helper modules
-    #readarray -t FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f)
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
       if [[ -e "$DEEP_S_FILE" ]] ; then
         local S_OUTPUT
@@ -59,8 +63,9 @@ S103_deep_search()
     fi
     echo
   done
+}
 
-  HTML_REPORT=1
+deep_pattern_reporter() {
 
   local OCC_LIST
   for I in "${!PATTERN_LIST[@]}"; do
@@ -76,5 +81,4 @@ S103_deep_search()
       print_output "$( indent "$(orange "$OCC" )")"
     done
   fi
-  module_end_log "${FUNCNAME[0]}"
 }

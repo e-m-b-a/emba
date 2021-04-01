@@ -76,7 +76,6 @@ run_modules()
 {
   MODULE_GROUP="$1"
   printf -v THREADING_SET '%d\n' "$2" 2>/dev/null
-  printf -v HTML_SET '%d\n' "$3" 2>/dev/null
 
   local SELECT_PRE_MODULES_COUNT=0
 
@@ -94,7 +93,6 @@ run_modules()
     fi
     for MODULE_FILE in "${MODULES[@]}" ; do
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-        HTML_REPORT=0
         MODULE_BN=$(basename "$MODULE_FILE")
         MODULE_MAIN=${MODULE_BN%.*}
         module_start_log "$MODULE_MAIN"
@@ -105,9 +103,6 @@ run_modules()
         else
           $MODULE_MAIN
         fi
-        if [[ $HTML_SET -eq 1 ]]; then
-          generate_html_file "$LOG_FILE" "$HTML_REPORT"
-        fi
         reset_module_count
       fi
     done
@@ -117,7 +112,6 @@ run_modules()
         local MODULE
         MODULE=$(find "$MOD_DIR" -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
         if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
-          HTML_REPORT=0
           MODULE_BN=$(basename "$MODULE")
           MODULE_MAIN=${MODULE_BN%.*}
           module_start_log "$MODULE_MAIN"
@@ -127,9 +121,6 @@ run_modules()
             max_pids_protection
           else
             $MODULE_MAIN
-          fi
-          if [[ $HTML_SET -eq 1 ]]; then
-            generate_html_file "$LOG_FILE" "$HTML_REPORT"
           fi
           reset_module_count
         fi
@@ -141,7 +132,6 @@ run_modules()
         fi
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-            HTML_REPORT=0
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             module_start_log "$MODULE_MAIN"
@@ -151,9 +141,6 @@ run_modules()
               max_pids_protection
             else
               $MODULE_MAIN
-            fi
-            if [[ $HTML_SET -eq 1 ]]; then
-              generate_html_file "$LOG_FILE" "$HTML_REPORT"
             fi
             reset_module_count
           fi
@@ -177,7 +164,6 @@ main()
   export FORCE=0
   export FORMAT_LOG=0
   export HTML=0
-  export HTML_REPORT=0
   export IN_DOCKER=0
   export KERNEL=0
   export LOG_GREP=0
@@ -469,7 +455,7 @@ main()
         print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       fi
 
-      # useful prints for debuggin:
+      # useful prints for debugging:
       # print_output "[!] Firmware value: $FIRMWARE"
       # print_output "[!] Firmware path: $FIRMWARE_PATH"
       # print_output "[!] Output dir: $OUTPUT_DIR"
@@ -545,19 +531,41 @@ main()
  
   run_modules "F" "0" "$HTML"
 
+  if [[ $HTML -eq 1 ]]; then
+    module_start_log "Web reporter"
+    LOG_INDICATORS=( p s f )
+    for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
+      mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
+      for LOG_FILE in "${LOG_FILES[@]}"; do
+        XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
+        if [[ "$XREPORT" -gt 0 ]]; then
+          #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
+          generate_html_file "$LOG_FILE" 0
+        else
+          #print_output "[+] generating log file with content $LOG_FILE" "no_log"
+          generate_html_file "$LOG_FILE" 1
+        fi
+      done
+    done
+    module_end_log "Web reporter" 1
+  fi
+
   if [[ "$TESTING_DONE" -eq 1 ]]; then
-      echo
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
-      else
-        print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-      fi
-      write_grep_log "$(date)" "TIMESTAMP"
-      write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
+    if [[ -f "$HTML_PATH"/index.html ]]; then
+      print_output "[*] Web report created HTML report in $LOG_DIR/html-report\\n" "main" 
+    fi
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+    else
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
+    write_grep_log "$(date)" "TIMESTAMP"
+    write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
-      print_output "[!] No extracted firmware found" "no_log"
-      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
-      exit 1
+    print_output "[!] No extracted firmware found" "no_log"
+    print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
+    exit 1
   fi
 }
 

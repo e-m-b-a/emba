@@ -46,7 +46,7 @@ architecture_check()
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
     local DETECT_ARCH ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
     # do not use -executable here. Not all firmware updates have exec permissions set
-    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -xdev -exec file {} \; 2>/dev/null | grep "executable\|shared\ object" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
+    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -xdev -exec file {} \; 2>/dev/null | grep ELF | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
     for D_ARCH in "${DETECT_ARCH[@]}" ; do
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
@@ -117,10 +117,10 @@ prepare_file_arr()
   print_output "[*] Unique files auto detection (could take some time)\\n" "main"
 
   export FILE_ARR
-  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
 
-  # xdev will to the trick for us:
+  # xdev will do the trick for us:
   # remove ./proc/* executables (for live testing)
   #rm_proc_binary "${FILE_ARR[@]}"
 }
@@ -133,7 +133,7 @@ prepare_binary_arr()
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
-  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # in some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   # this is a slow fallback solution just to have something we can work with
@@ -168,62 +168,20 @@ set_etc_paths()
 check_firmware()
 {
   # Check if firmware got normal linux directory structure and warn if not
+  # as we already have done some root directory detection we are going to use it now
   local DIR_COUNT=0
-  if [[ -d "$FIRMWARE_PATH""/bin" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/boot" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/dev" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/etc" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/home" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/lib" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/media" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/mnt" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/opt" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/proc" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/root" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/run" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/sbin" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/srv" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/tmp" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/usr" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
-  if [[ -d "$FIRMWARE_PATH""/var" ]] ; then
-    DIR_COUNT=$((DIR_COUNT + 1))
-  fi
+  local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
+  for R_PATH in "${ROOT_PATH[@]}"; do
+    for L_PATH in "${LINUX_PATHS[@]}"; do
+      if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+        ((DIR_COUNT++))
+      fi
+    done
+  done
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
     echo
-    print_output "[!] Your firmware looks strange, sure that you have entered the correct path?" "no_log"
+    print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?" "no_log"
   fi
 }
 

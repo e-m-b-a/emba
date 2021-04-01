@@ -16,7 +16,6 @@
 # Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware in the log directory. 
 #               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
 
-
 P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
@@ -24,7 +23,7 @@ P05_firmware_bin_extractor() {
   # we love binwalk ... this is our first chance for extracting everything
   binwalking
 
-  LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
   # shellcheck disable=SC2153
@@ -32,9 +31,9 @@ P05_firmware_bin_extractor() {
     fact_extractor
   fi
 
-  FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -type f | wc -l )
+  FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
   if [[ -n "$OUTPUT_DIR_fact" ]]; then
-    FILES_FACT=$(find "$OUTPUT_DIR_fact" -type f | wc -l )
+    FILES_FACT=$(find "$OUTPUT_DIR_fact" -xdev -type f | wc -l )
   fi
 
   print_output ""
@@ -54,14 +53,15 @@ P05_firmware_bin_extractor() {
   deb_extractor
   ipk_extractor
 
-  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -type f -executable | wc -l )
-  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; | sort -u -k1,1 | wc -l )
+  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
+  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
   fi
 
-  module_end_log "${FUNCNAME[0]}"
+  # we can use $BINS as parameter -> it is usually gt 0
+  module_end_log "${FUNCNAME[0]}" "$BINS"
 }
 
 wait_for_extractor() {
@@ -72,7 +72,7 @@ wait_for_extractor() {
   # but for now it works
   SEARCHER="$(echo "$SEARCHER" | tr "(" "." | tr ")" ".")"
 
-  for PID in ${WAIT_PIDS[*]}; do
+  for PID in "${WAIT_PIDS[@]}"; do
     running=1
     while [[ $running -eq 1 ]]; do
       echo "." | tr -d "\n"
@@ -97,13 +97,13 @@ wait_for_extractor() {
 ipk_extractor() {
   print_output ""
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
-  #mapfile -t IPK_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.ipk")
-  extract_ipk_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
+  extract_ipk_helper
+  # this does not work as expected -> we have to check it again
+  #WAIT_PIDS+=( "$!" )
+  #wait_for_extractor
+  #WAIT_PIDS=( )
 
-  if [[ ${#IPK_DB[@]} -ne 0 ]] ; then
+  if [[ ${#IPK_DB[@]} -gt 0 ]] ; then
     print_output "[*] Found ${#IPK_DB[@]} IPK archives - extracting them to the root directories ..."
     mkdir "$LOG_DIR"/ipk_tmp
     for R_PATH in "${ROOT_PATH[@]}"; do
@@ -115,19 +115,22 @@ ipk_extractor() {
         rm -r "$LOG_DIR"/ipk_tmp/*
       done
     done
+    FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    echo ""
+    print_output "[*] Before ipk extraction we had $ORANGE$FILES_AFTER_DEB$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
   fi
 }
 
 deb_extractor() {
   print_output ""
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
-  #mapfile -t DEB_DB < <(find "$LOG_DIR"/extractor/ -type f -name "*.deb")
-  extract_deb_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
+  extract_deb_helper
+  # this does not work as expected -> we have to check it again
+  #WAIT_PIDS+=( "$!" )
+  #wait_for_extractor
+  #WAIT_PIDS=( )
 
-  if [[ ${#DEB_DB[@]} -ne 0 ]] ; then
+  if [[ ${#DEB_DB[@]} -gt 0 ]] ; then
     print_output "[*] Found ${#DEB_DB[@]} debian archives - extracting them to the root directories ..."
     for R_PATH in "${ROOT_PATH[@]}"; do
       for DEB in "${DEB_DB[@]}"; do
@@ -136,6 +139,9 @@ deb_extractor() {
         dpkg-deb --extract "$DEB" "$R_PATH"
       done
     done
+    FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    echo ""
+    print_output "[*] Before deb extraction we had $ORANGE$FILES_AFTER_DEEP$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
   fi
 }
 
@@ -143,19 +149,19 @@ deep_extractor() {
   sub_module_title "Walking through all files and try to extract what ever possible"
   print_output "[*] Deep extraction with binwalk - 1st round"
 
-  FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -type f | wc -l )
-  find "$FIRMWARE_PATH_CP" -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
+  FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  find "$FIRMWARE_PATH_CP" -xdev -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
 
   print_output "[*] Deep extraction with binwalk - 2nd round"
-  find "$FIRMWARE_PATH_CP" -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
+  find "$FIRMWARE_PATH_CP" -xdev -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
 
-  FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -type f | wc -l )
+  FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
   print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."
 }
@@ -232,8 +238,8 @@ extract_fact_helper() {
   mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH")
 }
 extract_ipk_helper() {
-  mapfile -t IPK_DB < <(find "$FIRMWARE_PATH_CP" -type f -name "*.ipk")
+  mapfile -t IPK_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 }
 extract_deb_helper() {
-  mapfile -t DEB_DB < <(find "$FIRMWARE_PATH_CP" -type f -name "*.deb")
+  mapfile -t DEB_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.deb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 }

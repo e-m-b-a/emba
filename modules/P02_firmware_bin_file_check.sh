@@ -15,7 +15,6 @@
 
 # Description:  Gives some very basic information about the provided firmware binary.
 
-
 P02_firmware_bin_file_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware file analyzer"
@@ -35,6 +34,5 @@ P02_firmware_bin_file_check() {
   echo
   print_output "$(indent "$ENTROPY")"
 
-  # probably we can do a lot more stuff in the future ...
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" 1
 }

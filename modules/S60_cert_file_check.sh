@@ -15,8 +15,6 @@
 
 # Description:  Scrapes firmware for certification files and their end date.
 
-export HTML_REPORT
-
 S60_cert_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -32,7 +30,6 @@ S60_cert_file_check()
 
   if [[ "${CERT_FILES_ARR[0]}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#CERT_FILES_ARR[@]}"" certification files:"
     CURRENT_DATE=$(date +%s)
     for LINE in "${CERT_FILES_ARR[@]}" ; do
@@ -57,6 +54,6 @@ S60_cert_file_check()
     print_output "[-] No certification files found"
   fi
 
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$CERT_CNT"
 }
 

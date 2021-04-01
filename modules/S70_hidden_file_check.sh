@@ -15,8 +15,6 @@
 
 # Description:  Searches for all hidden files in the firmware.
 
-export HTML_REPORT
-
 S70_hidden_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -26,7 +24,6 @@ S70_hidden_file_check()
   IFS=" " read -r -a HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -name ".*" -type f | tr '\r\n' ' ')
 
   if [[ ${#HIDDEN_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#HIDDEN_FILES[@]}"" hidden files:"
     for LINE in "${HIDDEN_FILES[@]}" ; do
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
@@ -35,6 +32,6 @@ S70_hidden_file_check()
     print_output "[-] No hidden files found!"
   fi
 
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "${#HIDDEN_FILES[@]}"
 }
 

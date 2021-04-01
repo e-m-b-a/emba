@@ -15,8 +15,6 @@
 
 # Description:  Checks for bugs, stylistic errors, etc. in python scripts, then it lists the found error types.
 
-export HTML_REPORT
-
 S21_python_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -28,11 +26,10 @@ S21_python_check()
   S21_PY_SCRIPTS=0
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
-    HTML_REPORT=1
     if ! [[ -d "$LOG_DIR""/pylint_checker/" ]] ; then
       mkdir "$LOG_DIR""/pylint_checker/" 2> /dev/null
     fi
-    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+    mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
         ((S21_PY_SCRIPTS++))
@@ -61,6 +58,7 @@ S21_python_check()
         fi
       fi
     done
+
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
     echo -e "\\n[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS" >> "$LOG_FILE"
@@ -78,5 +76,5 @@ S21_python_check()
   else
     print_output "[-] Pylint check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$S21_PY_VULNS"
 }
