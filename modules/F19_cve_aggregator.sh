@@ -676,17 +676,18 @@ generate_cve_details() {
       FORMAT_LOG="$FORMAT_LOG_BAK"
     fi
   done
-
   print_output "${NC}"
-  if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found $ORANGE$S30_VUL_COUNTER$GREEN CVE entries for all binaries from S30_version_vulnerability_check.sh."
-  fi
-  print_output "[+] Identified $ORANGE${#VERSIONS_CLEANED[@]}$GREEN software components with version details."
-  print_output "[+] Confirmed $ORANGE$CVE_COUNTER$GREEN CVE entries."
-  print_output "[+] Confirmed $ORANGE$HIGH_CVE_COUNTER$GREEN High rated CVE entries."
-  print_output "[+] Confirmed $ORANGE$MEDIUM_CVE_COUNTER$GREEN Medium rated CVE entries."
-  print_output "[+] Confirmed $ORANGE$LOW_CVE_COUNTER$GREEN Low rated CVE entries."
-  print_output "[+] $ORANGE$EXPLOIT_COUNTER$GREEN possible exploits available.\\n"
+
+# we do this in f50 again
+#  if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
+#    print_output "[+] Found $ORANGE$S30_VUL_COUNTER$GREEN CVE entries for all binaries from S30_version_vulnerability_check.sh."
+#  fi
+#  print_output "[+] Identified $ORANGE${#VERSIONS_CLEANED[@]}$GREEN software components with version details."
+#  print_output "[+] Confirmed $ORANGE$CVE_COUNTER$GREEN CVE entries."
+#  print_output "[+] Confirmed $ORANGE$HIGH_CVE_COUNTER$GREEN High rated CVE entries."
+#  print_output "[+] Confirmed $ORANGE$MEDIUM_CVE_COUNTER$GREEN Medium rated CVE entries."
+#  print_output "[+] Confirmed $ORANGE$LOW_CVE_COUNTER$GREEN Low rated CVE entries."
+#  print_output "[+] $ORANGE$EXPLOIT_COUNTER$GREEN possible exploits available.\\n"
 }
 
 get_firmware_base_version_check() {

@@ -43,6 +43,7 @@ F50_base_aggregator() {
   get_data
   output_overview
   os_detector
+  print_output "\\n-----------------------------------------------------------------\\n"
   output_details
   output_config_issues
   output_binaries
@@ -77,9 +78,6 @@ output_overview() {
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
     fi
   fi
-
-  print_output "\\n-----------------------------------------------------------------\\n"
-
 }
 
 output_details() {
@@ -101,13 +99,9 @@ output_details() {
   if [[ "$S21_PY_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
   fi
-  if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
-  fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
   fi
-
   EMUL=$(find "$LOG_DIR"/qemu_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
@@ -121,16 +115,16 @@ output_config_issues() {
   if [[ "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
-      print_output "$(indent "$(green "Weak permissions: $ORANGE$S40_WEAK_PERM_COUNTER")")"
+      print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
     fi
     if [[ "$S55_HISTORY_COUNTER" -gt 0 ]]; then
-      print_output "$(indent "$(green "History files: $ORANGE$S55_HISTORY_COUNTER")")"
+      print_output "$(indent "$(green "Found $ORANGE$S55_HISTORY_COUNTER$GREEN history files.")")"
     fi
     if [[ "$S50_AUTH_ISSUES" -gt 0 ]]; then
-      print_output "$(indent "$(green "Authentication issues: $ORANGE$S50_AUTH_ISSUES")")"
+      print_output "$(indent "$(green "Found $ORANGE$S50_AUTH_ISSUES$GREEN authentication issues.")")"
     fi
     if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
-      print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details")")"
+      print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details.")")"
     fi
     if [[ "$CERT_CNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
@@ -145,8 +139,6 @@ output_config_issues() {
       print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
     fi
   fi
-
-  print_output "\\n-----------------------------------------------------------------\\n"
 }
 
 output_binaries() {
@@ -256,7 +248,7 @@ output_cve_exploits() {
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
     fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
-      print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE entries for all binaries from S30_version_vulnerability_check.sh."
+      print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
     fi
     if [[ "$CVE_COUNTER" -gt 0 ]]; then
       print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."

@@ -229,6 +229,10 @@ config_list() {
 
 config_find() {
   # $1 -> config file
+
+  local FIND_RESULTS
+  FIND_RESULTS=()
+
   if [[ -f "$1" ]] ; then
     if [[ "$( wc -l "$1" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
       local FIND_COMMAND
@@ -239,13 +243,20 @@ config_find() {
           local REAL_PATH
           REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
           if [[ -f  "$REAL_PATH" ]] ; then
-            FILES="$FILES""$REAL_PATH""\n"
+            #FILES="$FILES""$REAL_PATH""\n"
+            FIND_RESULTS+=( "$REAL_PATH" )
           fi
         else
-          FILES="$FILES""$LINE""\n"
+          #FILES="$FILES""$LINE""\n"
+          FIND_RESULTS+=( "$LINE" )
         fi
       done
-      echo -e "$FILES" | sed -z '$ s/\n$//' | sort -u
+      #echo -e "$FILES" | sed -z '$ s/\n$//' | sort -u
+
+      eval "FIND_RESULTS=($(for i in "${FIND_RESULTS[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+      for LINE in "${FIND_RESULTS[@]}"; do
+        echo -e "$LINE"
+      done
     fi
   else
     echo "C_N_F"

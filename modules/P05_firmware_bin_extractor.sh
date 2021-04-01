@@ -72,7 +72,7 @@ wait_for_extractor() {
   # but for now it works
   SEARCHER="$(echo "$SEARCHER" | tr "(" "." | tr ")" ".")"
 
-  for PID in ${WAIT_PIDS[*]}; do
+  for PID in "${WAIT_PIDS[@]}"; do
     running=1
     while [[ $running -eq 1 ]]; do
       echo "." | tr -d "\n"
@@ -97,12 +97,13 @@ wait_for_extractor() {
 ipk_extractor() {
   print_output ""
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
-  extract_ipk_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
+  extract_ipk_helper
+  # this does not work as expected -> we have to check it again
+  #WAIT_PIDS+=( "$!" )
+  #wait_for_extractor
+  #WAIT_PIDS=( )
 
-  if [[ ${#IPK_DB[@]} -ne 0 ]] ; then
+  if [[ ${#IPK_DB[@]} -gt 0 ]] ; then
     print_output "[*] Found ${#IPK_DB[@]} IPK archives - extracting them to the root directories ..."
     mkdir "$LOG_DIR"/ipk_tmp
     for R_PATH in "${ROOT_PATH[@]}"; do
@@ -114,18 +115,22 @@ ipk_extractor() {
         rm -r "$LOG_DIR"/ipk_tmp/*
       done
     done
+    FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    echo ""
+    print_output "[*] Before ipk extraction we had $ORANGE$FILES_AFTER_DEB$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
   fi
 }
 
 deb_extractor() {
   print_output ""
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
-  extract_deb_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
+  extract_deb_helper
+  # this does not work as expected -> we have to check it again
+  #WAIT_PIDS+=( "$!" )
+  #wait_for_extractor
+  #WAIT_PIDS=( )
 
-  if [[ ${#DEB_DB[@]} -ne 0 ]] ; then
+  if [[ ${#DEB_DB[@]} -gt 0 ]] ; then
     print_output "[*] Found ${#DEB_DB[@]} debian archives - extracting them to the root directories ..."
     for R_PATH in "${ROOT_PATH[@]}"; do
       for DEB in "${DEB_DB[@]}"; do
@@ -134,6 +139,9 @@ deb_extractor() {
         dpkg-deb --extract "$DEB" "$R_PATH"
       done
     done
+    FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    echo ""
+    print_output "[*] Before deb extraction we had $ORANGE$FILES_AFTER_DEEP$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
   fi
 }
 
@@ -230,8 +238,8 @@ extract_fact_helper() {
   mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH")
 }
 extract_ipk_helper() {
-  mapfile -t IPK_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk")
+  mapfile -t IPK_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 }
 extract_deb_helper() {
-  mapfile -t DEB_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.deb")
+  mapfile -t DEB_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.deb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 }

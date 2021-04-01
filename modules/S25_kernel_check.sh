@@ -114,36 +114,40 @@ get_kernel_vulns()
 {
   sub_module_title "Kernel vulnerabilities"
 
-  print_output "[+] Found linux kernel version/s:"
-  for VER in "${KERNEL_VERSION[@]}" ; do
-    print_output "$(indent "$VER")"
-  done
-
-  if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
-    HTML_REPORT=1
-    print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"
-    print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
-    # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
-    local KV_ARR
+  if [[ "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
+    print_output "[+] Found linux kernel version/s:"
     for VER in "${KERNEL_VERSION[@]}" ; do
-      local KV
-      KV=$(echo "$VER" | tr "-" " ")
-      KV=$(echo "$KV" | tr "+" " ")
-      KV=$(echo "$KV" | tr "_" " ")
-      KV=$(echo "$KV" | cut -d\  -f1)
-
-      while echo "$KV" | grep -q '[a-zA-Z]'; do
-        KV="${KV::-1}"
+      print_output "$(indent "$VER")"
+    done
+  
+    if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
+      HTML_REPORT=1
+      print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"
+      print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
+      # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
+      local KV_ARR
+      for VER in "${KERNEL_VERSION[@]}" ; do
+        local KV
+        KV=$(echo "$VER" | tr "-" " ")
+        KV=$(echo "$KV" | tr "+" " ")
+        KV=$(echo "$KV" | tr "_" " ")
+        KV=$(echo "$KV" | cut -d\  -f1)
+  
+        while echo "$KV" | grep -q '[a-zA-Z]'; do
+          KV="${KV::-1}"
+        done
+        KV_ARR=("${KV_ARR[@]}" "$KV")
       done
-      KV_ARR=("${KV_ARR[@]}" "$KV")
-    done
-    IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
-    for V in "${KV_C_ARR[@]}" ; do
-      print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" -f -d -k "$V")"
-    done
+      IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+      for V in "${KV_C_ARR[@]}" ; do
+        print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" -f -d -k "$V")"
+      done
+    else
+      print_output "[-] linux-exploit-suggester.sh is not installed"
+      print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
+    fi
   else
-    print_output "[-] linux-exploit-suggester.sh is not installed"
-    print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
+      print_output "[-] No linux kernel version information found."
   fi
 }
 
