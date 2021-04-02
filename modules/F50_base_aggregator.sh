@@ -15,6 +15,8 @@
 
 # Description:  Generates an overview over all modules.
 
+export HTML_REPORT
+
 F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final aggregator"
@@ -41,6 +43,7 @@ F50_base_aggregator() {
   S120_LOG="s120_cwe_checker.txt"
 
   LOG_FILE="$( get_log_file )"
+  HTML_REPORT=1
 
   get_data
   output_overview
@@ -48,6 +51,8 @@ F50_base_aggregator() {
   output_config_issues
   output_binaries
   output_cve_exploits
+
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }

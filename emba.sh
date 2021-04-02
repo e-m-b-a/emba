@@ -470,7 +470,7 @@ main()
         print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
       fi
 
-      # useful prints for debuggin:
+      # useful prints for debugging:
       # print_output "[!] Firmware value: $FIRMWARE"
       # print_output "[!] Firmware path: $FIRMWARE_PATH"
       # print_output "[!] Output dir: $OUTPUT_DIR"
@@ -547,32 +547,33 @@ main()
   run_modules "F" "0" "$HTML"
 
   if [[ $HTML -eq 1 && $THREADED -eq 1 ]]; then
+    print_output "[*] Web reporter started in $HTML_PATH\\n" "main" 
     LOG_INDICATORS=( p s f )
     for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
       mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
       for LOG_FILE in "${LOG_FILES[@]}"; do
         HTML_REPORT=$(grep HTML_REPORT "$LOG_FILE" | cut -d: -f2)
-        #print_output "[*] Generate web report for $LOG_FILE / $HTML_REPORT"
         generate_html_file "$LOG_FILE" "$HTML_REPORT"
       done
     done
-    cp "$HTML_PATH"/collection.html "$HTML_PATH"/index.html
-    print_output "[*] Web report created in $LOG_DIR/html-report\\n" "main" 
   fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
-      echo
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
-      else
-        print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-      fi
-      write_grep_log "$(date)" "TIMESTAMP"
-      write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
+    if [[ -f "$HTML_PATH"/index.html ]]; then
+      print_output "[*] Web report created in $LOG_DIR/html-report\\n" "main" 
+    fi
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+    else
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
+    write_grep_log "$(date)" "TIMESTAMP"
+    write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
-      print_output "[!] No extracted firmware found" "no_log"
-      print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
-      exit 1
+    print_output "[!] No extracted firmware found" "no_log"
+    print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
+    exit 1
   fi
 }
 

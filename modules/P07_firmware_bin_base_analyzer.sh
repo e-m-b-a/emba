@@ -35,7 +35,6 @@ P07_firmware_bin_base_analyzer() {
     else
       os_identification
     fi
-
   fi
 
   # we only do this if we have not found a Linux filesystem
