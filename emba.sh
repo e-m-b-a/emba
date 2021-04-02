@@ -105,7 +105,8 @@ run_modules()
         else
           $MODULE_MAIN
         fi
-        if [[ $HTML_SET -eq 1 ]]; then
+        # currently our dynamic web report generation only works without threading:
+        if [[ $HTML_SET -eq 1 && $THREADING_SET -eq 0 ]]; then
           generate_html_file "$LOG_FILE" "$HTML_REPORT"
         fi
         reset_module_count
@@ -128,7 +129,7 @@ run_modules()
           else
             $MODULE_MAIN
           fi
-          if [[ $HTML_SET -eq 1 ]]; then
+          if [[ $HTML_SET -eq 1 && $THREADING_SET -eq 0 ]]; then
             generate_html_file "$LOG_FILE" "$HTML_REPORT"
           fi
           reset_module_count
@@ -152,7 +153,7 @@ run_modules()
             else
               $MODULE_MAIN
             fi
-            if [[ $HTML_SET -eq 1 ]]; then
+            if [[ $HTML_SET -eq 1 && $THREADING_SET -eq 0 ]]; then
               generate_html_file "$LOG_FILE" "$HTML_REPORT"
             fi
             reset_module_count
@@ -544,6 +545,20 @@ main()
   fi
  
   run_modules "F" "0" "$HTML"
+
+  if [[ $HTML -eq 1 && $THREADED -eq 1 ]]; then
+    LOG_INDICATORS=( p s f )
+    for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
+      mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
+      for LOG_FILE in "${LOG_FILES[@]}"; do
+        HTML_REPORT=$(grep HTML_REPORT "$LOG_FILE" | cut -d: -f2)
+        #print_output "[*] Generate web report for $LOG_FILE / $HTML_REPORT"
+        generate_html_file "$LOG_FILE" "$HTML_REPORT"
+      done
+    done
+    cp "$HTML_PATH"/collection.html "$HTML_PATH"/index.html
+    print_output "[*] Web report created in $LOG_DIR/html-report\\n" "main" 
+  fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
       echo

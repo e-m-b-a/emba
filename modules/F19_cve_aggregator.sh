@@ -15,10 +15,12 @@
 
 # Description:  Aggregates all found version numbers together from R09, S09, S25 and S115 and searches with cve-search for all CVEs, 
 #               then it lists exploits that could possible be used for the firmware.
+export HTML_REPORT
 
 F19_cve_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final CVE aggregator"
+  LOG_FILE="$( get_log_file )"
   
   # we need:
   # apt-get install bc
@@ -47,6 +49,7 @@ F19_cve_aggregator() {
   EXPLOIT_OVERVIEW_LOG="$LOG_DIR"/aggregator/exploits-overview.txt
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
+    HTML_REPORT=1
     print_output "[*] Aggregate vulnerability details"
 
     get_kernel_check
@@ -85,6 +88,8 @@ F19_cve_aggregator() {
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
+
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 
@@ -593,10 +598,10 @@ generate_cve_details() {
 
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
       print_output ""
-      print_output "[+] ${RED}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH.${NC}"
+      print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$VERSION_SEARCH.${NC}"
     elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]];then
       print_output ""
-      print_output "[+] ${ORANGE}Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH.${NC}"
+      print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$VERSION_SEARCH.${NC}"
     else
       print_output "[-] Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH."
     fi

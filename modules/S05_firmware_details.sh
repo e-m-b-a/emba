@@ -56,6 +56,7 @@ S05_firmware_details()
   release_info
 
   echo -e "\\n[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

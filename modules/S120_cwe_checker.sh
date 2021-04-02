@@ -19,6 +19,7 @@
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
+export HTML_REPORT
 
 S120_cwe_checker()
 {
@@ -37,6 +38,7 @@ S120_cwe_checker()
     print_output "[!] Enable it with the -c switch."
   fi
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 
@@ -63,6 +65,7 @@ cwe_check() {
 
       # this is the logging after every tested file
       if [[ ${#BAP_OUT[@]} -ne 0 ]] ; then
+        HTML_REPORT=1
         print_output ""
         print_output "[+] cwe-checker found ""$ORANGE""${#BAP_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":"
         for BAP_LINE in "${BAP_OUT[@]}"; do

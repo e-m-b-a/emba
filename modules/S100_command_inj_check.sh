@@ -61,5 +61,6 @@ S100_command_inj_check()
   else
     print_output "[-] No directories or files used for web scripts found"
   fi
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }

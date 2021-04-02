@@ -51,6 +51,7 @@ S09_firmware_base_version_check() {
         echo ""
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
+        HTML_REPORT=1
         echo "." | tr -d "\n"
       fi
       
@@ -63,6 +64,7 @@ S09_firmware_base_version_check() {
           echo ""
           print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
+          HTML_REPORT=1
         fi  
         echo "." | tr -d "\n"
       fi  
@@ -73,11 +75,15 @@ S09_firmware_base_version_check() {
         echo ""
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
+        HTML_REPORT=1
       fi  
       echo "." | tr -d "\n"
     fi
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
+
   echo "." | tr -d "\n"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
+
   print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
 }

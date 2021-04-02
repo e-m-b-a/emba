@@ -21,10 +21,13 @@ S35_http_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check HTTP files"
+  LOG_FILE="$( get_log_file )"
 
   http_file_search
   webserver_check
   php_check
+
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

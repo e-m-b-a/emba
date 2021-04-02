@@ -27,12 +27,14 @@ F50_base_aggregator() {
   S10_LOG="s10_binaries_check.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
+  S22_LOG="s22_php_check.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
   S40_LOG="s40_weak_perm_check.txt"
   S45_LOG="s45_pass_file_check.txt"
   S50_LOG="s50_authentication_check.txt"
   S55_LOG="s55_history_file_check.txt"
   S60_LOG="s60_cert_file_check.txt"
+  S85_LOG="s85_ssh_check.txt"
   S95_LOG="s95_interesting_binaries_check.txt"
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
@@ -98,6 +100,9 @@ output_details() {
   if [[ "$S21_PY_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
   fi
+  if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+  fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
   fi
@@ -111,7 +116,7 @@ output_details() {
 
 output_config_issues() {
 
-  if [[ "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
+  if [[ "$S85_SSH_VUL_CNT" -gt 0 || "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
@@ -121,6 +126,9 @@ output_config_issues() {
     fi
     if [[ "$S50_AUTH_ISSUES" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S50_AUTH_ISSUES$GREEN authentication issues.")")"
+    fi
+    if [[ "$S85_SSH_VUL_CNT" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$S85_SSH_VUL_CNT$GREEN SSHd issues.")")"
     fi
     if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
       print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details.")")"
@@ -237,7 +245,7 @@ output_cve_exploits() {
 
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
 
-    print_output "[*] Generated the following software inventory, vulnerabilities and exploits:"
+    print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
     print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
     print_output ""
@@ -265,7 +273,7 @@ get_data() {
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2)
   fi
   if [[ -f "$LOG_DIR"/"$P07_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P02_LOG" | cut -d: -f2)
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P07_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
@@ -274,6 +282,18 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
     STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
+    S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
+    S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S21_LOG" ]]; then
+    S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f2)
+    S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S22_LOG" ]]; then
+    S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f2)
+    S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3)
   fi
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
@@ -285,23 +305,29 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S40_LOG" ]]; then
     S40_WEAK_PERM_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S40_LOG" | cut -d: -f2)
   fi
+  if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
+    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
+  fi
   if [[ -f "$LOG_DIR"/"$S50_LOG" ]]; then
     S50_AUTH_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S50_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S55_LOG" ]]; then
     S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S55_LOG" | cut -d: -f2)
   fi
-  if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
-    S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
-    S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3)
-  fi
-  if [[ -f "$LOG_DIR"/"$S21_LOG" ]]; then
-    S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f2)
-    S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f3)
-  fi
   if [[ -f "$LOG_DIR"/"$S60_LOG" ]]; then
     CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2)
     CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S85_LOG" ]]; then
+    S85_SSH_VUL_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S85_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
+    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
+    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
+    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)
+    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3)
   fi
   if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2)
@@ -309,17 +335,6 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
     export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
-  fi
-  if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
-    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
-  fi
-  if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
-    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)
-    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3)
-  fi
-  if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
-    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
-    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
   fi
 }
 

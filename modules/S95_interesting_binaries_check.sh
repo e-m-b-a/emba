@@ -28,6 +28,7 @@ S95_interesting_binaries_check()
   post_exploitation
 
   echo -e "\\n[*] Statistics:$INT_COUNT:$POST_COUNT" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

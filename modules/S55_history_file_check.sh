@@ -38,6 +38,7 @@ S55_history_file_check()
   fi
 
   echo -e "\\n[*] Statistics:${#HIST_FILES[@]}" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

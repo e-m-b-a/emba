@@ -28,6 +28,7 @@ S75_network_check()
   check_snmp
   check_network_configs
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 

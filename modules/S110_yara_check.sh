@@ -55,6 +55,7 @@ S110_yara_check()
     print_output "[!] Check with yara not possible, because it isn't installed!"
   fi
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 

@@ -16,6 +16,8 @@
 # Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, and Linux. 
 #               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
 
+export HTML_REPORT
+
 P07_firmware_bin_base_analyzer() {
 
   export PRE_PIDS
@@ -52,6 +54,7 @@ P07_firmware_bin_base_analyzer() {
     wait_for_pid
   fi
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 
@@ -122,6 +125,7 @@ os_identification() {
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC)) -gt 0 ]] ; then
+    HTML_REPORT=1
     print_output ""
     print_output "$(indent "$(orange "Operating system detection:")")"
     if [[ $COUNTER_VxWorks -gt 5 ]] ; then print_output "$(indent "$(orange "VxWorks detected\t\t""$COUNTER_VxWorks")")"; fi
@@ -142,6 +146,7 @@ os_identification() {
 
   echo
   if [[ $LINUX_PATH_COUNTER -gt 0 ]] ; then
+    HTML_REPORT=1
     print_output "[+] Found possible Linux operating system in $(print_path "$OUTPUT_DIR")"
   fi
 }
@@ -153,6 +158,7 @@ binary_architecture_detection()
 
   mapfile -t PRE_ARCH < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | awk '{print $3}' | sort -u)
   for PRE_ARCH_ in "${PRE_ARCH[@]}"; do
+    HTML_REPORT=1
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_"
   done
 }

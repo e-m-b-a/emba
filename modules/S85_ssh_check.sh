@@ -22,8 +22,14 @@ S85_ssh_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check SSH"
 
+  LOG_FILE="$( get_log_file )"
+  SSH_VUL_CNT=0
+
   search_ssh_files
   check_squid
+
+  echo -e "\\n[*] Statistics:$SSH_VUL_CNT" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }
@@ -51,6 +57,7 @@ search_ssh_files()
                 # print finding title as emba finding:
                 if [[ "$S_ISSUE" =~ ^\([0-9+]\)\ \[[A-Z]+\]\  ]]; then
                   print_output "[+] $S_ISSUE"
+                  ((SSH_VUL_CNT++))
                 # print everything else (except RESULTS and done) as usual output
                 elif ! [[ "$S_ISSUE" == *RESULTS* || "$S_ISSUE" == *done* ]]; then
                   print_output "[*] $S_ISSUE"

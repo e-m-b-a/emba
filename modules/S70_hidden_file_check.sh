@@ -35,6 +35,7 @@ S70_hidden_file_check()
     print_output "[-] No hidden files found!"
   fi
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 

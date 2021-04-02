@@ -114,6 +114,7 @@ S40_weak_perm_check() {
   fi
 
   echo -e "\\n[*] Statistics:$WEAK_PERM_COUNTER" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

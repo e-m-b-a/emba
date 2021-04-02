@@ -41,6 +41,7 @@ S50_authentication_check() {
   search_pam_files
 
   echo -e "\\n[*] Statistics:$AUTH_ISSUES" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

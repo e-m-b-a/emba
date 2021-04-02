@@ -101,6 +101,7 @@ S45_pass_file_check()
     print_output "[-] No password files found"
   fi
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 

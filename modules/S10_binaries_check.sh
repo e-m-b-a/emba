@@ -31,8 +31,10 @@ S10_binaries_check()
   objdump_disassembly
   binary_protection
 
+  # shellcheck disable=SC2129
   echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
   echo -e "\\n[*] Statistics1:$ARCH" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

@@ -22,6 +22,8 @@ S22_php_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check php scripts for syntax errors"
 
+  LOG_FILE="$( get_log_file )"
+
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
 
@@ -39,6 +41,7 @@ S22_php_check()
         VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null)
         (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
         if [[ "$VULNS" -ne 0 ]] ; then
+          HTML_REPORT=1
           #check if this is common linux file:
           local COMMON_FILES_FOUND
           if [[ -f "$BASE_LINUX_FILES" ]]; then
@@ -56,6 +59,8 @@ S22_php_check()
     done
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
+    echo -e "\\n[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS" >> "$LOG_FILE"
+    echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"

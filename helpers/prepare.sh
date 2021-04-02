@@ -46,7 +46,7 @@ architecture_check()
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
     local DETECT_ARCH ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
     # do not use -executable here. Not all firmware updates have exec permissions set
-    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -xdev -exec file {} \; 2>/dev/null | grep "executable\|shared\ object" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
+    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -xdev -exec file {} \; 2>/dev/null | grep ELF | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
     for D_ARCH in "${DETECT_ARCH[@]}" ; do
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))

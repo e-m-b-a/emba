@@ -28,6 +28,7 @@ S15_bootloader_check()
   find_boot_files
   find_runlevel
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 

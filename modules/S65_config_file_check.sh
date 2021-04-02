@@ -25,6 +25,7 @@ S65_config_file_check()
   scan_config
   check_fstab
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 

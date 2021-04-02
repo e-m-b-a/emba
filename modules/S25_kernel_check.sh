@@ -93,6 +93,7 @@ S25_kernel_check()
     done
   fi
   echo "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD" >> "$LOG_FILE"
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

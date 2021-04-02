@@ -111,6 +111,7 @@ S80_cronjob_check()
     HTML_REPORT=1
   fi
 
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }
 

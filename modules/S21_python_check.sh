@@ -42,6 +42,7 @@ S21_python_check()
         VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
         (( S21_PY_VULNS="$S21_PY_VULNS"+"$VULNS" ))
         if [[ "$VULNS" -ne 0 ]] ; then
+          HTML_REPORT=1
           #check if this is common linux file:
           local COMMON_FILES_FOUND
           if [[ -f "$BASE_LINUX_FILES" ]]; then
@@ -65,6 +66,7 @@ S21_python_check()
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
     echo -e "\\n[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS" >> "$LOG_FILE"
+    echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
     # we just print one issue per issue type:
     # W1505: Using deprecated method assert_() (deprecated-method)
