@@ -547,7 +547,7 @@ main()
   run_modules "F" "0" "$HTML"
 
   if [[ $HTML -eq 1 && $THREADED -eq 1 ]]; then
-    print_output "[*] Web reporter started in $HTML_PATH\\n" "main" 
+    module_start_log "Web reporter"
     LOG_INDICATORS=( p s f )
     for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
       mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
@@ -556,11 +556,12 @@ main()
         generate_html_file "$LOG_FILE" "$HTML_REPORT"
       done
     done
+    module_end_log "Web repoter"
   fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ -f "$HTML_PATH"/index.html ]]; then
-      print_output "[*] Web report created in $LOG_DIR/html-report\\n" "main" 
+      print_output "[*] Web report created HTML report in $LOG_DIR/html-report\\n" "main" 
     fi
     echo
     if [[ -d "$LOG_DIR" ]]; then
