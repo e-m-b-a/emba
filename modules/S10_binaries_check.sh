@@ -32,6 +32,7 @@ S10_binaries_check()
   binary_protection
 
   echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
+  echo -e "\\n[*] Statistics1:$ARCH" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}"
 }

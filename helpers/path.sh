@@ -251,6 +251,7 @@ config_find() {
       done
 
       eval "FIND_RESULTS=($(for i in "${FIND_RESULTS[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+      # Todo: we should remove this and use the FIND_RESULTS array in the modules
       for LINE in "${FIND_RESULTS[@]}"; do
         echo -e "$LINE"
       done
