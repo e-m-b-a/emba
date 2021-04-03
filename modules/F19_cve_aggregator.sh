@@ -112,6 +112,8 @@ prepare_version_data() {
     # alsactl, amixer -> alsa
     VERSION_lower="${VERSION_lower//alsactl/alsa}"
     VERSION_lower="${VERSION_lower//amixer/alsa}"
+    #sudoreplay -> sudo
+    VERSION_lower="${VERSION_lower//sudoreplay/sudo}"
     # VIM - Vi IMproved 1.2
     VERSION_lower="${VERSION_lower//vim\ -\ vi\ improved/vim}"
     #zic.c
@@ -410,6 +412,9 @@ prepare_version_data() {
 
     # final cleanup of start and ending
     # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-beta$//')"
+    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^-//')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^_//')"
@@ -624,7 +629,8 @@ generate_cve_details() {
 
   print_output ""
   print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-  mapfile -d '' LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -name "*" -print0 2> /dev/null)
+  #mapfile -d '' LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -name "*" -print0 2> /dev/null)
+  mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -type f -name "*.txt" | sort 2> /dev/null)
   for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
     if [[ -f $FILE_AGGR ]]; then
       BIN=""
