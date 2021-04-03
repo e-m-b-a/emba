@@ -83,7 +83,7 @@ output_overview() {
     fi
   fi
   os_detector
-  print_output "\\n-----------------------------------------------------------------\\n"
+  print_bar
 }
 
 output_details() {
@@ -116,7 +116,7 @@ output_details() {
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
   fi
 
-  print_output "\\n-----------------------------------------------------------------\\n"
+  print_bar
 }
 
 output_config_issues() {
@@ -150,7 +150,7 @@ output_config_issues() {
     if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
     fi
-    print_output "\\n-----------------------------------------------------------------\\n"
+    print_bar
   fi
 }
 
@@ -193,7 +193,7 @@ output_binaries() {
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
     fi
-    print_output "\\n-----------------------------------------------------------------\\n"
+    print_bar
   fi
 
   # we use the logger from the s120 cwe checker module again:
@@ -241,7 +241,7 @@ output_binaries() {
         (( i++ ))
       done
     fi  
-    print_output "\\n-----------------------------------------------------------------\\n"
+    print_bar
   fi 
 
 }
@@ -269,7 +269,7 @@ output_cve_exploits() {
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
     fi
-    print_output "\\n-----------------------------------------------------------------"
+    print_bar
   fi
 }
 

@@ -439,6 +439,9 @@ print_excluded()
     echo
   fi
 }
+print_bar() {
+  print_output "\\n-----------------------------------------------------------------\\n"
+}
 
 module_start_log() {
   MODULE_MAIN_NAME="$1"

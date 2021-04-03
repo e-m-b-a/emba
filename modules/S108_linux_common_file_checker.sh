@@ -34,6 +34,7 @@ S108_linux_common_file_checker() {
       if ! grep -q "$SEARCH_TERM" "$BASE_LINUX_FILES" 2>/dev/null; then
         print_output "[+] ""$ORANGE""$(print_path "$FILE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC"
         FILE_COUNTER=$((FILE_COUNTER+1))
+        HTML_REPORT=1
       fi
       FILE_COUNTER_ALL=$((FILE_COUNTER_ALL+1))
     done
@@ -43,5 +44,7 @@ S108_linux_common_file_checker() {
   else
     print_output "[-] No common Linux files dictionary (""$BASE_LINUX_FILES"") found in config directory"
   fi
+
+  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
   module_end_log "${FUNCNAME[0]}"
 }

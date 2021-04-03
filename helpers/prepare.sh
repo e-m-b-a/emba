@@ -170,63 +170,18 @@ check_firmware()
   # Check if firmware got normal linux directory structure and warn if not
   # as we already have done some root directory detection we are going to use it now
   local DIR_COUNT=0
+  local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
   for R_PATH in "${ROOT_PATH[@]}"; do
-    if [[ -d "$R_PATH""/bin" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/boot" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/dev" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/etc" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/home" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/lib" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/media" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/mnt" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/opt" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/proc" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/root" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/run" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/sbin" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/srv" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/tmp" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/usr" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
-    if [[ -d "$R_PATH""/var" ]] ; then
-      DIR_COUNT=$((DIR_COUNT + 1))
-    fi
+    for L_PATH in "${LINUX_PATHS[@]}"; do
+      if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+        ((DIR_COUNT++))
+      fi
+    done
   done
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
     echo
-    print_output "[!] Your firmware looks strange, sure that you have entered the correct path?" "no_log"
+    print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?" "no_log"
   fi
 }
 

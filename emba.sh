@@ -556,7 +556,7 @@ main()
         generate_html_file "$LOG_FILE" "$HTML_REPORT"
       done
     done
-    module_end_log "Web repoter"
+    module_end_log "Web reporter"
   fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then

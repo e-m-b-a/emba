@@ -76,6 +76,9 @@ build_index_file(){
       if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
         break
       fi
+      if [[ "$OUTPUT" == *"Statistics"* || "$OUTPUT" == *"HTML_REPORT"* ]]; then
+        OUTPUT=""
+      fi
       if [[ "$OUTPUT" == *"top 10"* ]]; then
         TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
       elif [ "$TOP10_FORMAT_COUNTER" -gt 10 ]; then
@@ -196,16 +199,13 @@ build_report_files(){
   TOP10_FORMAT_COUNTER=0
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
-      if [[ "$FILE_LINE" == *"Statistics"* ]]; then
-        FILE_LINE=""
-      fi
-      if [[ "$FILE_LINE" == *"HTML_REPORT"* ]]; then
+      if [[ "$FILE_LINE" == *"Statistics"* || "$FILE_LINE" == *"HTML_REPORT"* ]]; then
         FILE_LINE=""
       fi
       if [[ "$FILE_LINE" == *"entropy.png"* ]]; then
         IFS=':' read -r -a "FILE_LINE_ARR" <<< "$FILE_LINE"
         cp "$LOG_DIR"/*entropy.png "$ABS_HTML_PATH""/style/entropy.png"
-        FILE_LINE="${FILE_LINE_ARR[0]}""33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\"./style/entropy.png\">"
+        FILE_LINE="${FILE_LINE_ARR[0]}""<br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\"./style/entropy.png\">"
       fi
 	
       if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then

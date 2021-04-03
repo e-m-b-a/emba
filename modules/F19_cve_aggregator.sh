@@ -108,6 +108,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//(gdb)/}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
+    VERSION_lower="${VERSION_lower//acpid-/acpid\ }"
     # alsactl, amixer -> alsa
     VERSION_lower="${VERSION_lower//alsactl/alsa}"
     VERSION_lower="${VERSION_lower//amixer/alsa}"
@@ -183,6 +184,15 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//i2cdump/i2c-tools}"
     VERSION_lower="${VERSION_lower//i2cget/i2c-tools}"
     VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
+    #manxyz -> man-db
+    VERSION_lower="${VERSION_lower//mandb/man-db}"
+    VERSION_lower="${VERSION_lower//manpath/man-db}"
+    VERSION_lower="${VERSION_lower//catman/man-db}"
+    VERSION_lower="${VERSION_lower//globbing/man-db}"
+    VERSION_lower="${VERSION_lower//lexgrog/man-db}"
+    #jfsxyz -> jfsutils
+    VERSION_lower="${VERSION_lower//jfs_fscklog/jfsutils}"
+    VERSION_lower="${VERSION_lower//jfs_tune/jfsutils}"
     # expat_1.1.1 -> expat 1.1.1
     VERSION_lower="${VERSION_lower//expat_/expat\ }"
     #file-
@@ -284,6 +294,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(eglibc)/eglibc/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(.*\ eglibc\ .*)/eglibc/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(debian\ glibc.*)/glibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
     #vxworks5.5.1 -> no space
@@ -307,6 +319,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zip\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zip\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/([a-z]\ UnZip),/info-zip:zip/')"
     #mdns repeater (1.10)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/mdns\ repeater\ \(([0-9]\.[0-9][0-9])\)/mdnsrepeater\ \1/g')"
     #management console agent 1.5 (c) ubiquiti networks inc
@@ -322,6 +336,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
+    VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"
     #jq commandline json processor [5a49c82-dirty]
     VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
