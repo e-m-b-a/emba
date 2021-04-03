@@ -76,7 +76,7 @@ build_index_file(){
       if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
         break
       fi
-      if [[ "$OUTPUT" == *"Statistics"* || "$OUTPUT" == *"HTML_REPORT"* ]]; then
+      if [[ "$OUTPUT" == *"Statistics"* ]]; then
         OUTPUT=""
       fi
       if [[ "$OUTPUT" == *"top 10"* ]]; then
@@ -199,7 +199,7 @@ build_report_files(){
   TOP10_FORMAT_COUNTER=0
   if [[ -n ${REPORT_ARRAY[*]} ]]; then
     for FILE_LINE in "${REPORT_ARRAY[@]}"; do
-      if [[ "$FILE_LINE" == *"Statistics"* || "$FILE_LINE" == *"HTML_REPORT"* ]]; then
+      if [[ "$FILE_LINE" == *"Statistics"* ]]; then
         FILE_LINE=""
       fi
       if [[ "$FILE_LINE" == *"entropy.png"* ]]; then

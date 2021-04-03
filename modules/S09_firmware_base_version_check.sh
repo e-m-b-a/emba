@@ -17,8 +17,6 @@
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and 
 #               checks if these fit on a binary in the firmware. 
 
-export HTML_REPORT
-
 S09_firmware_base_version_check() {
 
   # this module check for version details statically.
@@ -51,7 +49,6 @@ S09_firmware_base_version_check() {
         echo ""
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
-        HTML_REPORT=1
         echo "." | tr -d "\n"
       fi
       
@@ -64,7 +61,6 @@ S09_firmware_base_version_check() {
           echo ""
           print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
-          HTML_REPORT=1
         fi  
         echo "." | tr -d "\n"
       fi  
@@ -75,7 +71,6 @@ S09_firmware_base_version_check() {
         echo ""
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
-        HTML_REPORT=1
       fi  
       echo "." | tr -d "\n"
     fi
@@ -83,7 +78,6 @@ S09_firmware_base_version_check() {
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
 
   echo "." | tr -d "\n"
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
-  print_output "[*] $(date) - ${FUNCNAME[0]} finished ... " "main"
+  module_end_log "${FUNCNAME[0]}" "${#VERSIONS_DETECTED[@]}"
 }

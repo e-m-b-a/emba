@@ -15,8 +15,6 @@
 
 # Description:  Searches for password related files and tries to extract passwords and root accounts.
 
-export HTML_REPORT
-
 S45_pass_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -31,7 +29,6 @@ S45_pass_file_check()
 
   if [[ "${PASSWD_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#PASSWD_STUFF[@]}" -ne 0 ]] ; then
-    HTML_REPORT=1
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
     local SUDOERS
@@ -101,7 +98,6 @@ S45_pass_file_check()
     print_output "[-] No password files found"
   fi
 
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$PASS_FILES_FOUND"
 }
 

@@ -15,8 +15,6 @@
 
 # Description:  Looks for ssh-related files and checks squid configuration.
 
-export HTML_REPORT
-
 S85_ssh_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -24,14 +22,18 @@ S85_ssh_check()
 
   LOG_FILE="$( get_log_file )"
   SSH_VUL_CNT=0
+  SQUID_VUL_CNT=0
 
   search_ssh_files
   check_squid
 
   echo -e "\\n[*] Statistics:$SSH_VUL_CNT" >> "$LOG_FILE"
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
-  module_end_log "${FUNCNAME[0]}"
+  if [[ "$SQUID_VUL_CNT" -gt 0 || "$SSH_VUL_CNT" -gt 0 ]]; then
+    NEG_LOG=1
+  fi
+
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 search_ssh_files()
@@ -71,7 +73,6 @@ search_ssh_files()
         fi
       fi
     done
-    HTML_REPORT=1
   else
     print_output "[-] No ssh configuration files found"
   fi
@@ -83,17 +84,14 @@ check_squid()
 {
   sub_module_title "Check squid"
 
-  local CHECK=0
   for BIN_FILE in "${BINARIES[@]}"; do
     if [[ "$BIN_FILE" == *"squid"* ]] && ( file "$BIN_FILE" | grep -q ELF ) ; then
       print_output "[+] Found possible squid executable: ""$(print_path "$BIN_FILE")"
-      CHECK=1
+      ((SQUID_VUL_CNT++))
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
+  if [[ $SQUID_VUL_CNT -eq 0 ]] ; then
     print_output "[-] No possible squid executable found"
-  else
-    HTML_REPORT=1
   fi
 
   CHECK=0
@@ -106,9 +104,11 @@ check_squid()
       if [[ -f "$SQUID_E""/squid.conf" ]] ; then
         CHECK=1
         print_output "[+] Found squid config: ""$(print_path "$SQUID_E")"
+        ((SQUID_VUL_CNT++))
       elif [[ -f "$SQUID_E""/squid3.conf" ]] ; then
         CHECK=1
         print_output "[+] Found squid config: ""$(print_path "$SQUID_E")"
+        ((SQUID_VUL_CNT++))
       fi
       if [[ $CHECK -eq 1 ]] ; then
         print_output "[*] Check external access control list type:"
@@ -120,7 +120,5 @@ check_squid()
   fi
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No squid configuration found"
-  else
-    HTML_REPORT=1
   fi
 }

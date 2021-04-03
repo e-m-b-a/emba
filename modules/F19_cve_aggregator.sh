@@ -15,12 +15,10 @@
 
 # Description:  Aggregates all found version numbers together from R09, S09, S25 and S115 and searches with cve-search for all CVEs, 
 #               then it lists exploits that could possible be used for the firmware.
-export HTML_REPORT
 
 F19_cve_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final CVE aggregator"
-  LOG_FILE="$( get_log_file )"
   
   # we need:
   # apt-get install bc
@@ -49,7 +47,6 @@ F19_cve_aggregator() {
   EXPLOIT_OVERVIEW_LOG="$LOG_DIR"/aggregator/exploits-overview.txt
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
-    HTML_REPORT=1
     print_output "[*] Aggregate vulnerability details"
 
     get_kernel_check
@@ -89,8 +86,7 @@ F19_cve_aggregator() {
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
 
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$CVE_COUNTER"
 }
 
 prepare_version_data() {
@@ -633,7 +629,6 @@ generate_cve_details() {
 
   print_output ""
   print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-  #mapfile -d '' LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -name "*" -print0 2> /dev/null)
   mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -type f -name "*.txt" | sort 2> /dev/null)
   for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
     if [[ -f $FILE_AGGR ]]; then

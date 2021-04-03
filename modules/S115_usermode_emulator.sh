@@ -19,12 +19,10 @@
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
-export HTML_REPORT
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Software component and version detection via emulation started"
-  LOG_FILE="$( get_log_file )"
 
   if [[ "$QEMULATION" -eq 1 ]]; then
 
@@ -108,8 +106,7 @@ S115_usermode_emulator() {
     print_output "[!] Enable it with the -E switch."
   fi
 
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$QEMULATION"
 }
 
 print_filesystem_fixes() {

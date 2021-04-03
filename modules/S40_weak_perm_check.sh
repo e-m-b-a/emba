@@ -16,8 +16,6 @@
 # Description:  Scans everything for setuid, setgid, world writable and shadow files and checks if all rc.d and init.d files 
 #               have weak permissions.
 
-export HTML_REPORT
-
 S40_weak_perm_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search files with weak permissions"
@@ -42,7 +40,6 @@ S40_weak_perm_check() {
   readarray -t WEAK_INIT_FILES < <(find "${ETC_ARR[@]}" "${EXCL_FIND[@]}" -xdev \! -uid 0 -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null)
 
   if [[ ${#SETUID_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#SETUID_FILES[@]}"" setuid files:"
     for LINE in "${SETUID_FILES[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -54,7 +51,6 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#SETGID_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#SETGID_FILES[@]}"" setgid files:"
     for LINE in "${SETGID_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -66,7 +62,6 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WORLD_WRITE_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#WORLD_WRITE_FILES[@]}"" world writeable files:"
     for LINE in "${WORLD_WRITE_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -78,7 +73,6 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WEAK_SHADOW_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#WEAK_SHADOW_FILES[@]}"" weak shadow files:"
     for LINE in "${WEAK_SHADOW_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -90,7 +84,6 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WEAK_RC_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#WEAK_RC_FILES[@]}"" rc.d files not belonging to root:"
     for LINE in "${WEAK_RC_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -102,7 +95,6 @@ S40_weak_perm_check() {
   fi
 
   if [[ ${#WEAK_INIT_FILES[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[+] Found ""${#WEAK_INIT_FILES[@]}"" init.d files not belonging to root:"
     for LINE in "${WEAK_INIT_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
@@ -114,7 +106,6 @@ S40_weak_perm_check() {
   fi
 
   echo -e "\\n[*] Statistics:$WEAK_PERM_COUNTER" >> "$LOG_FILE"
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$WEAK_PERM_COUNTER"
 }

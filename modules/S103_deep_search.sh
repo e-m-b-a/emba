@@ -15,8 +15,6 @@
 
 # Description:  Searches for files with a specified string pattern inside.
 
-export HTML_REPORT
-
 S103_deep_search()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -34,8 +32,7 @@ S103_deep_search()
   deep_pattern_search
   deep_pattern_reporter
 
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$PATTERN_COUNT"
 }
 
 deep_pattern_search() {
@@ -66,8 +63,6 @@ deep_pattern_search() {
     fi
     echo
   done
-
-  HTML_REPORT=1
 }
 
 deep_pattern_reporter() {

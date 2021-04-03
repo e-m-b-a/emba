@@ -15,8 +15,6 @@
 
 # Description:  Looks for web-based files in folders like www and searches for code executions inside of them.
 
-export HTML_REPORT
-
 S100_command_inj_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -57,10 +55,8 @@ S100_command_inj_check()
         done
       fi
     done
-    HTML_REPORT=1
   else
     print_output "[-] No directories or files used for web scripts found"
   fi
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "${#CMD_INJ_DIRS[@]}"
 }

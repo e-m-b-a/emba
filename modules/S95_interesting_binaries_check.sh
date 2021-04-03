@@ -15,8 +15,6 @@
 
 # Description:  Searches explicitly for binaries like gcc or gdb and also binaries for post exploitation like wget or ftp.
 
-export HTML_REPORT
-
 S95_interesting_binaries_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -28,9 +26,11 @@ S95_interesting_binaries_check()
   post_exploitation
 
   echo -e "\\n[*] Statistics:$INT_COUNT:$POST_COUNT" >> "$LOG_FILE"
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
-  module_end_log "${FUNCNAME[0]}"
+  if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
+    NEG_LOG=1
+  fi
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 interesting_binaries()
@@ -62,8 +62,6 @@ interesting_binaries()
   fi
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries found"
-  else
-    HTML_REPORT=1
   fi
 }
 
@@ -96,8 +94,6 @@ post_exploitation()
   fi
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries for post exploitation found"
-  else
-    HTML_REPORT=1
   fi
 }
 
