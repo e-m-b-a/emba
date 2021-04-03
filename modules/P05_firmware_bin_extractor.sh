@@ -16,13 +16,9 @@
 # Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware in the log directory. 
 #               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
 
-export HTML_REPORT
-
 P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
-
-  LOG_FILE="$( get_log_file )"
 
   # we love binwalk ... this is our first chance for extracting everything
   binwalking
@@ -64,8 +60,8 @@ P05_firmware_bin_extractor() {
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
   fi
 
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
-  module_end_log "${FUNCNAME[0]}"
+  # we can use $BINS as parameter -> it is usually gt 0
+  module_end_log "${FUNCNAME[0]}" "$BINS"
 }
 
 wait_for_extractor() {
@@ -108,7 +104,6 @@ ipk_extractor() {
   #WAIT_PIDS=( )
 
   if [[ ${#IPK_DB[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[*] Found ${#IPK_DB[@]} IPK archives - extracting them to the root directories ..."
     mkdir "$LOG_DIR"/ipk_tmp
     for R_PATH in "${ROOT_PATH[@]}"; do
@@ -136,7 +131,6 @@ deb_extractor() {
   #WAIT_PIDS=( )
 
   if [[ ${#DEB_DB[@]} -gt 0 ]] ; then
-    HTML_REPORT=1
     print_output "[*] Found ${#DEB_DB[@]} debian archives - extracting them to the root directories ..."
     for R_PATH in "${ROOT_PATH[@]}"; do
       for DEB in "${DEB_DB[@]}"; do
@@ -190,7 +184,6 @@ fact_extractor() {
   WAIT_PIDS=( )
 
   if [[ ${#FACT_EXTRACT[@]} -ne 0 ]] ; then
-    HTML_REPORT=1
     for LINE in "${FACT_EXTRACT[@]}" ; do
       print_output "$LINE"
     done
@@ -203,7 +196,6 @@ binwalking() {
   print_output "[*] Basic analysis with binwalk"
   mapfile -t BINWALK_OUTPUT < <(binwalk "$FIRMWARE_PATH")
   if [[ ${#BINWALK_OUTPUT[@]} -ne 0 ]] ; then
-    HTML_REPORT=1
     for LINE in "${BINWALK_OUTPUT[@]}" ; do
       print_output "$LINE"
     done
@@ -233,7 +225,6 @@ binwalking() {
   WAIT_PIDS=( )
 
   if [[ ${#BINWALK_EXTRACT[@]} -ne 0 ]] ; then
-    HTML_REPORT=1
     for LINE in "${BINWALK_EXTRACT[@]}" ; do
       print_output "$LINE"
     done

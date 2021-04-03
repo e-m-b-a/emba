@@ -15,8 +15,6 @@
 
 # Description:  Checks for bugs, stylistic errors, etc. in shell scripts, then it lists the found error types.
 
-export HTML_REPORT
-
 S20_shell_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -27,7 +25,6 @@ S20_shell_check()
   LOG_FILE="$( get_log_file )"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
-    HTML_REPORT=1
     if ! [[ -d "$LOG_DIR""/shellchecker/" ]] ; then
       mkdir "$LOG_DIR""/shellchecker/" 2> /dev/null
     fi
@@ -41,7 +38,6 @@ S20_shell_check()
         VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
         (( S20_SHELL_VULNS="$S20_SHELL_VULNS"+"$VULNS" ))
         if [[ "$VULNS" -ne 0 ]] ; then
-          HTML_REPORT=1
           #check if this is common linux file:
           local COMMON_FILES_FOUND
           if [[ -f "$BASE_LINUX_FILES" ]]; then
@@ -65,7 +61,6 @@ S20_shell_check()
     print_output ""
     print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts:""$NC""\\n"
     echo -e "\\n[*] Statistics:$S20_SHELL_VULNS:$S20_SCRIPTS" >> "$LOG_FILE"
-    echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
     mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "$LOG_DIR"/shellchecker/shellchecker_* | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1)
     for VTYPE in "${S20_VULN_TYPES[@]}" ; do
@@ -75,5 +70,5 @@ S20_shell_check()
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$S20_SHELL_VULNS"
 }

@@ -15,8 +15,6 @@
 
 # Description:  Gives some very basic information about the provided firmware binary.
 
-export HTML_REPORT
-
 P02_firmware_bin_file_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware file analyzer"
@@ -35,9 +33,6 @@ P02_firmware_bin_file_check() {
   print_output "$(indent "$FILE_BIN_OUT")"
   echo
   print_output "$(indent "$ENTROPY")"
-  HTML_REPORT=1
 
-  # probably we can do a lot more stuff in the future ...
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" 1
 }

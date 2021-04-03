@@ -114,6 +114,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//amixer/alsa}"
     #sudoreplay -> sudo
     VERSION_lower="${VERSION_lower//sudoreplay/sudo}"
+    #visudo -> sudo
+    VERSION_lower="${VERSION_lower//visudo/sudo}"
     # VIM - Vi IMproved 1.2
     VERSION_lower="${VERSION_lower//vim\ -\ vi\ improved/vim}"
     #zic.c
@@ -356,6 +358,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ mtools)/gnu:mtools/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
     # handle grub version 2:

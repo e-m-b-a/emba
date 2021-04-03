@@ -15,8 +15,6 @@
 
 # Description:  Checks for bugs, stylistic errors, etc. in python scripts, then it lists the found error types.
 
-export HTML_REPORT
-
 S21_python_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -28,7 +26,6 @@ S21_python_check()
   S21_PY_SCRIPTS=0
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
-    HTML_REPORT=1
     if ! [[ -d "$LOG_DIR""/pylint_checker/" ]] ; then
       mkdir "$LOG_DIR""/pylint_checker/" 2> /dev/null
     fi
@@ -42,7 +39,6 @@ S21_python_check()
         VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
         (( S21_PY_VULNS="$S21_PY_VULNS"+"$VULNS" ))
         if [[ "$VULNS" -ne 0 ]] ; then
-          HTML_REPORT=1
           #check if this is common linux file:
           local COMMON_FILES_FOUND
           if [[ -f "$BASE_LINUX_FILES" ]]; then
@@ -66,7 +62,6 @@ S21_python_check()
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
     echo -e "\\n[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS" >> "$LOG_FILE"
-    echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
     # we just print one issue per issue type:
     # W1505: Using deprecated method assert_() (deprecated-method)
@@ -81,5 +76,5 @@ S21_python_check()
   else
     print_output "[-] Pylint check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}"
+  module_end_log "${FUNCNAME[0]}" "$S21_PY_VULNS"
 }

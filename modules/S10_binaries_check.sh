@@ -18,8 +18,6 @@
 #               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg). 
 #               It also looks for protection mechanisms in the binaries via checksec.
 
-export HTML_REPORT
-
 S10_binaries_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -34,16 +32,19 @@ S10_binaries_check()
   # shellcheck disable=SC2129
   echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
   echo -e "\\n[*] Statistics1:$ARCH" >> "$LOG_FILE"
-  echo -e "\\n[*] HTML_REPORT:$HTML_REPORT" >> "$LOG_FILE"
 
-  module_end_log "${FUNCNAME[0]}"
+  if [[ "$COUNTER" -gt 0 || "${#RESULTS[@]}" -gt 0 ]] ; then
+    NEG_LOG=1
+  fi
+
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 vul_func_basic_check()
 {
   sub_module_title "Searching interesting functions"
 
-  local COUNTER=0
+  COUNTER=0
   local BIN_COUNT=0
   local VULNERABLE_FUNCTIONS
   VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
@@ -52,7 +53,6 @@ vul_func_basic_check()
 
   if [[ "$VULNERABLE_FUNCTIONS" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$VULNERABLE_FUNCTIONS" ]] ; then
-    HTML_REPORT=1
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q "ELF" ) ; then
         local VUL_FUNC_RESULT
@@ -96,7 +96,6 @@ objdump_disassembly()
       "$OBJDUMP" -d "$LINE" > "$OBJDUMP_LOG"
 
         if ( file "$LINE" | grep -q "x86-64" ) ; then
-          HTML_REPORT=1
           for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
             if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
               local OBJ_DUMPS_OUT
@@ -127,7 +126,6 @@ objdump_disassembly()
           done
 
           elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
                 local OBJ_DUMPS_OUT
@@ -158,7 +156,6 @@ objdump_disassembly()
             done
 
           elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
-            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               NAME=$(basename "$LINE" 2> /dev/null)
               local OBJ_DUMPS_OUT
@@ -191,7 +188,6 @@ objdump_disassembly()
 
           # ARM 64 code is in alpha state and nearly not tested!
           elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
-            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               NAME=$(basename "$LINE" 2> /dev/null)
               local OBJ_DUMPS_OUT
@@ -222,7 +218,6 @@ objdump_disassembly()
             done
 
           elif ( file "$LINE" | grep -q "MIPS" ) ; then
-            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               FUNC_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
               STRLEN_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
@@ -257,7 +252,6 @@ objdump_disassembly()
             done
 
           elif ( file "$LINE" | grep -q "PowerPC" ) ; then
-            HTML_REPORT=1
             for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
               if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
                 NAME=$(basename "$LINE" 2> /dev/null)
@@ -344,7 +338,6 @@ output_function_details()
   fi
   
   if [[ $COUNT_FUNC -ne 0 ]] ; then
-    HTML_REPORT=1
     if [[ "$FUNCTION" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
       print_output "$OUTPUT"
@@ -371,8 +364,8 @@ binary_protection()
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       if [[ -f "$EXT_DIR"/checksec ]] ; then
-        HTML_REPORT=1
         print_output "$( "$EXT_DIR"/checksec --file="$LINE" | grep -v "CANARY" | rev | cut -f 2- | rev )""\\t""$NC""$(print_path "$LINE")"
+        NEG_LOG=1
       fi
     fi
   done

@@ -449,8 +449,16 @@ module_start_log() {
   ((MOD_RUNNING++))
 }
 
+# on module end we log that the module is finished in emba.log
+# additionally we can log that emba has nothing found -> this is used for the web reporter
 module_end_log() {
   MODULE_MAIN_NAME="$1"
+  MODULE_REPORT_STATE="$2"
+
+  if [[ "$MODULE_REPORT_STATE" -eq 0 ]]; then
+    print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
+  fi
+
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
   ((MOD_RUNNING--))
   #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
