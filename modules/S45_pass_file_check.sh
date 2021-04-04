@@ -98,6 +98,6 @@ S45_pass_file_check()
     print_output "[-] No password files found"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$PASS_FILES_FOUND"
+  module_end_log "${FUNCNAME[0]}" "${#PASSWD_STUFF[@]}"
 }
 

@@ -76,7 +76,6 @@ run_modules()
 {
   MODULE_GROUP="$1"
   printf -v THREADING_SET '%d\n' "$2" 2>/dev/null
-  printf -v HTML_SET '%d\n' "$3" 2>/dev/null
 
   local SELECT_PRE_MODULES_COUNT=0
 
@@ -94,7 +93,6 @@ run_modules()
     fi
     for MODULE_FILE in "${MODULES[@]}" ; do
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
-        HTML_REPORT=0
         MODULE_BN=$(basename "$MODULE_FILE")
         MODULE_MAIN=${MODULE_BN%.*}
         module_start_log "$MODULE_MAIN"
@@ -104,10 +102,6 @@ run_modules()
           max_pids_protection
         else
           $MODULE_MAIN
-        fi
-        # currently our dynamic web report generation only works without threading:
-        if [[ $HTML_SET -eq 1 && $THREADING_SET -eq 0 ]]; then
-          generate_html_file "$LOG_FILE" "$HTML_REPORT"
         fi
         reset_module_count
       fi
@@ -543,17 +537,17 @@ main()
     for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
       mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
       for LOG_FILE in "${LOG_FILES[@]}"; do
-        HTML_REPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
-        if [[ "$HTML_REPORT" -gt 0 ]]; then
-          print_output "[*] generating log file with NO content $LOG_FILE"
+        XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
+        if [[ "$XREPORT" -gt 0 ]]; then
+          #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
           generate_html_file "$LOG_FILE" 0
         else
-          print_output "[+] generating log file with content $LOG_FILE"
+          #print_output "[+] generating log file with content $LOG_FILE" "no_log"
           generate_html_file "$LOG_FILE" 1
         fi
       done
     done
-    module_end_log "Web reporter"
+    module_end_log "Web reporter" 1
   fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
