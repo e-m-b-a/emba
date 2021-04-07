@@ -20,7 +20,6 @@ P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
 
-  ## probably we should thing about ram disks to store logs
   mkdir "$LOG_DIR"/tmp/
 
   # we love binwalk ... this is our first chance for extracting everything
@@ -65,6 +64,7 @@ P05_firmware_bin_extractor() {
   fi
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  rm -r "$LOG_DIR"/tmp/
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
 }
 
