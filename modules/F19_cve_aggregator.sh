@@ -133,6 +133,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nc.traditional\ \[v/nc.traditional\ }"
     # sqlite3 -> sqlite
     VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
+    # dnsmasq- -> dnsmasq 
+    VERSION_lower="${VERSION_lower//dnsmasq-/dnsmasq\ }"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version

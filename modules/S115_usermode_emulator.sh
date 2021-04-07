@@ -42,8 +42,13 @@ S115_usermode_emulator() {
     readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
 
     # as we modify the firmware area, we copy it to the log directory and do the modifications in this area
+    # Note: only for firmware directories - if we have already extracted the firmware we do not copy it again
     copy_firmware
-    detect_root_dir_helper "$EMULATION_PATH_BASE"
+
+    # we only need to detect the root directory again if we have copied it before
+    if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
+      detect_root_dir_helper "$EMULATION_PATH_BASE"
+    fi
 
     print_output "[*] Detected ${#ROOT_PATH[@]} root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
@@ -52,15 +57,18 @@ S115_usermode_emulator() {
 
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_output "[*] Running emulation processes in $R_PATH root path ..."
-      readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+      #readarray -t R_BINARIES < <( find "$R_PATH" "${EXCL_FIND[@]}" ! -name "*.ko" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! -name "*.ko" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null && cd "$DIR" || exit)
 
-      print_output "[*] Found ${#R_BINARIES[@]} unique executables in root dirctory: $R_PATH."
+      #print_output "[*] Found ${#R_BINARIES[@]} unique executables in root dirctory: $R_PATH."
+      print_output "[*] Found ${#BIN_EMU[@]} unique executables in root dirctory: $R_PATH."
 
       for BIN_ in "${BIN_EMU[@]}" ; do
         FULL_BIN_PATH="$R_PATH"/"$BIN_"
+        print_output "[*] BINARY: $BIN_"
+        print_output "[*] FULL_BIN_PATH: $FULL_BIN_PATH"
         if ( file "$FULL_BIN_PATH" | grep -q ELF ) && [[ "$BIN_" != './qemu-'*'-static' ]]; then
           if ! [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
             if ( file "$FULL_BIN_PATH" | grep -q "x86-64" ) ; then

@@ -27,6 +27,7 @@ S25_kernel_check()
 
   KERNEL_VERSION=()
   KERNEL_DESC=()
+  LOG_FILE="$( get_log_file )"
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
 
@@ -83,7 +84,6 @@ S25_kernel_check()
   fi
 
   if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
-    LOG_FILE="$( get_log_file )"
     for LINE in "${KV_C_ARR[@]}" ; do
       echo "[*] Statistics:$LINE" >> "$LOG_FILE"
     done
@@ -98,7 +98,7 @@ populate_karrays() {
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     KERNEL_VERSION+=( "$(modinfo "$K_MODULE" | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
-    KERNEL_DESC+=( "$(modinfo "$K_MODULE" | grep -E "description" | cut -d: -f2 | sed 's/^ *//g')" )
+    KERNEL_DESC+=( "$(modinfo "$K_MODULE" | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
   done
 
   # unique our results
@@ -162,7 +162,7 @@ analyze_kernel_module()
     local LICENSE
     LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
     if file "$M_PATH" 2>/dev/null | grep -q 'not stripped'; then
-      if echo "$LINE" | grep -q -e 'license:GPL' -e 'license:.*BSD' ; then
+      if echo "$LINE" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
         # kernel module is GPL/BSD license then not stripped is fine
         print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
       elif ! [[ $LICENSE =~ "License:" ]] ; then
