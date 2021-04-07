@@ -50,6 +50,7 @@ P05_firmware_bin_extractor() {
 
   detect_root_dir_helper "$FIRMWARE_PATH_CP"
 
+  FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
   deb_extractor
   ipk_extractor
 
@@ -60,8 +61,10 @@ P05_firmware_bin_extractor() {
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
   fi
 
-  # we can use $BINS as parameter -> it is usually gt 0
-  module_end_log "${FUNCNAME[0]}" "$BINS"
+  if [[ "$FILES_EXT" -eq 0 ]]; then
+    FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  fi
+  module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
 }
 
 wait_for_extractor() {
@@ -97,51 +100,57 @@ wait_for_extractor() {
 ipk_extractor() {
   print_output ""
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
-  extract_ipk_helper
+  extract_ipk_helper &
   # this does not work as expected -> we have to check it again
-  #WAIT_PIDS+=( "$!" )
-  #wait_for_extractor
-  #WAIT_PIDS=( )
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
 
-  if [[ ${#IPK_DB[@]} -gt 0 ]] ; then
-    print_output "[*] Found ${#IPK_DB[@]} IPK archives - extracting them to the root directories ..."
-    mkdir "$LOG_DIR"/ipk_tmp
-    for R_PATH in "${ROOT_PATH[@]}"; do
-      for IPK in "${IPK_DB[@]}"; do
-        IPK_NAME=$(basename "$IPK")
-        print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-        tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp
-        tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH"
-        rm -r "$LOG_DIR"/ipk_tmp/*
+  if [[ -f "$TMP_DIR"/ipk_db.txt ]] ; then
+    IPK_ARCHIVES=$(wc -l "$TMP_DIR"/ipk_db.txt | awk '{print $1}')
+    if [[ "$IPK_ARCHIVES" -gt 0 ]]; then
+      print_output "[*] Found $ORANGE$IPK_ARCHIVES$NC IPK archives - extracting them to the root directories ..."
+      mkdir "$LOG_DIR"/ipk_tmp
+      for R_PATH in "${ROOT_PATH[@]}"; do
+        while read -r IPK; do
+          IPK_NAME=$(basename "$IPK")
+          print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
+          tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp
+          tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH"
+          rm -r "$LOG_DIR"/ipk_tmp/*
+        done < "$TMP_DIR"/ipk_db.txt
       done
-    done
-    FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-    echo ""
-    print_output "[*] Before ipk extraction we had $ORANGE$FILES_AFTER_DEB$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
+      FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+      echo ""
+      print_output "[*] Before ipk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
+    fi
   fi
 }
 
 deb_extractor() {
   print_output ""
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
-  extract_deb_helper
+  extract_deb_helper &
   # this does not work as expected -> we have to check it again
-  #WAIT_PIDS+=( "$!" )
-  #wait_for_extractor
-  #WAIT_PIDS=( )
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
 
-  if [[ ${#DEB_DB[@]} -gt 0 ]] ; then
-    print_output "[*] Found ${#DEB_DB[@]} debian archives - extracting them to the root directories ..."
-    for R_PATH in "${ROOT_PATH[@]}"; do
-      for DEB in "${DEB_DB[@]}"; do
-        DEB_NAME=$(basename "$DEB")
-        print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-        dpkg-deb --extract "$DEB" "$R_PATH"
+  if [[ -f "$TMP_DIR"/deb_db.txt ]] ; then
+    DEB_ARCHIVES=$(wc -l "$TMP_DIR"/deb_db.txt | awk '{print $1}')
+    if [[ "$DEB_ARCHIVES" -gt 0 ]]; then
+      print_output "[*] Found $ORANGE$DEB_ARCHIVES$NC debian archives - extracting them to the root directories ..."
+      for R_PATH in "${ROOT_PATH[@]}"; do
+        while read -r DEB; do
+          DEB_NAME=$(basename "$DEB")
+          print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
+          dpkg-deb --extract "$DEB" "$R_PATH"
+        done < "$TMP_DIR"/deb_db.txt
       done
-    done
-    FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-    echo ""
-    print_output "[*] Before deb extraction we had $ORANGE$FILES_AFTER_DEEP$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
+      FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+      echo ""
+      print_output "[*] Before deb extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
+    fi
   fi
 }
 
@@ -183,10 +192,12 @@ fact_extractor() {
   wait_for_extractor
   WAIT_PIDS=( )
 
-  if [[ ${#FACT_EXTRACT[@]} -ne 0 ]] ; then
-    for LINE in "${FACT_EXTRACT[@]}" ; do
+  # as we probably kill FACT and to not loose the results we need to execute FACT in a function 
+  # and read the results from the caller
+  if [[ -f "$TMP_DIR"/FACTer.txt ]] ; then
+    while read -r LINE; do 
       print_output "$LINE"
-    done
+    done < "$TMP_DIR"/FACTer.txt
   fi
 }
 
@@ -218,28 +229,29 @@ binwalking() {
   print_output "[*] Extracting firmware to directory $OUTPUT_DIR_binwalk"
   # this is not working in background. I have created a new function that gets executed in the background
   # probably there is a more elegant way
-  #mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" &)
   extract_binwalk_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
 
-  if [[ ${#BINWALK_EXTRACT[@]} -ne 0 ]] ; then
-    for LINE in "${BINWALK_EXTRACT[@]}" ; do
+  # as we probably kill binwalk and to not loose the results we need to execute binwalk in a function 
+  # and read the results from the caller
+  if [[ -f "$TMP_DIR"/binwalker.txt ]] ; then
+    while read -r LINE; do 
       print_output "$LINE"
-    done
+    done < "$TMP_DIR"/binwalker.txt
   fi
 }
 
 extract_binwalk_helper() {
-  mapfile -t BINWALK_EXTRACT < <(binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH")
+  binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
 }
 extract_fact_helper() {
-  mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH")
+  ./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
 }
 extract_ipk_helper() {
-  mapfile -t IPK_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/ipk_db.txt
 }
 extract_deb_helper() {
-  mapfile -t DEB_DB < <(find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.deb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.deb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
 }

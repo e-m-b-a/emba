@@ -202,6 +202,7 @@ create_log_dir() {
     fi
     export FIRMWARE_PATH_CP="$LOG_DIR""/firmware"
     mkdir "$FIRMWARE_PATH_CP" 2> /dev/null
+    mkdir "$TMP_DIR" 2> /dev/null
   fi
 }
 
