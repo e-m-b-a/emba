@@ -39,7 +39,7 @@ S25_kernel_check()
         print_output "$(indent "$LINE")"
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
-        print_output "Kernel description:"
+        print_output "Kernel details:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
         done
@@ -67,7 +67,7 @@ S25_kernel_check()
         print_output "$(indent "$LINE")"
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
-        print_output "Kernel description:"
+        print_output "Kernel details:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
         done
@@ -151,12 +151,11 @@ analyze_kernel_module()
   sub_module_title "Analyze kernel modules"
 
   KMOD_BAD=0
-  mapfile -t MOD_DATA < <(find "$FIRMWARE_PATH" -xdev -iname "*.ko" -execdir modinfo {} \; 2> /dev/null | grep -E "filename|license" | cut -d: -f1,2 | \
-  sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' 2> /dev/null)
 
-  print_output "[*] Found ""${#MOD_DATA[@]}"" kernel modules"
+  print_output "[*] Found ${#KERNEL_MODULES[@]} kernel modules."
 
-  for LINE in "${MOD_DATA[@]}" ; do
+  for LINE in "${KERNEL_MODULES[@]}" ; do
+    LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
     local M_PATH
     M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
     local LICENSE
@@ -205,6 +204,5 @@ check_modprobe()
   if [[ $MP_CHECK -eq 0 ]] ; then
     print_output "[-] No modprobe.d directory found"
   fi
-
 }
 

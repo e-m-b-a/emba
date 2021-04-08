@@ -184,6 +184,7 @@ main()
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
+  export TMP_DIR="$LOG_DIR""/tmp"
   export MAIN_LOG_FILE="emba.log"
   export CONFIG_DIR="$INVOCATION_PATH""/config"
   export EXT_DIR="$INVOCATION_PATH""/external"
@@ -259,6 +260,7 @@ main()
         ;;
       l)
         export LOG_DIR="$OPTARG"
+        export TMP_DIR="$LOG_DIR""/tmp"
         ;;
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
@@ -557,7 +559,7 @@ main()
     echo
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
-      rm -r "$LOG_DIR"/tmp
+      rm -r "$TMP_DIR" 2>/dev/null
     else
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
     fi

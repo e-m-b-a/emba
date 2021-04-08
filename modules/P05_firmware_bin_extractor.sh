@@ -20,8 +20,6 @@ P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
 
-  mkdir "$LOG_DIR"/tmp/
-
   # we love binwalk ... this is our first chance for extracting everything
   binwalking
 
@@ -106,8 +104,8 @@ ipk_extractor() {
   wait_for_extractor
   WAIT_PIDS=( )
 
-  if [[ -f "$LOG_DIR"/tmp/ipk_db.txt ]] ; then
-    IPK_ARCHIVES=$(wc -l "$LOG_DIR"/tmp/ipk_db.txt | awk '{print $1}')
+  if [[ -f "$TMP_DIR"/ipk_db.txt ]] ; then
+    IPK_ARCHIVES=$(wc -l "$TMP_DIR"/ipk_db.txt | awk '{print $1}')
     if [[ "$IPK_ARCHIVES" -gt 0 ]]; then
       print_output "[*] Found $ORANGE$IPK_ARCHIVES$NC IPK archives - extracting them to the root directories ..."
       mkdir "$LOG_DIR"/ipk_tmp
@@ -118,7 +116,7 @@ ipk_extractor() {
           tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp
           tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH"
           rm -r "$LOG_DIR"/ipk_tmp/*
-        done < "$LOG_DIR"/tmp/ipk_db.txt
+        done < "$TMP_DIR"/ipk_db.txt
       done
       FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
       echo ""
@@ -136,8 +134,8 @@ deb_extractor() {
   wait_for_extractor
   WAIT_PIDS=( )
 
-  if [[ -f "$LOG_DIR"/tmp/deb_db.txt ]] ; then
-    DEB_ARCHIVES=$(wc -l "$LOG_DIR"/tmp/deb_db.txt | awk '{print $1}')
+  if [[ -f "$TMP_DIR"/deb_db.txt ]] ; then
+    DEB_ARCHIVES=$(wc -l "$TMP_DIR"/deb_db.txt | awk '{print $1}')
     if [[ "$DEB_ARCHIVES" -gt 0 ]]; then
       print_output "[*] Found $ORANGE$DEB_ARCHIVES$NC debian archives - extracting them to the root directories ..."
       for R_PATH in "${ROOT_PATH[@]}"; do
@@ -145,7 +143,7 @@ deb_extractor() {
           DEB_NAME=$(basename "$DEB")
           print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
           dpkg-deb --extract "$DEB" "$R_PATH"
-        done < "$LOG_DIR"/tmp/deb_db.txt
+        done < "$TMP_DIR"/deb_db.txt
       done
       FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
       echo ""
@@ -194,10 +192,10 @@ fact_extractor() {
 
   # as we probably kill FACT and to not loose the results we need to execute FACT in a function 
   # and read the results from the caller
-  if [[ -f "$LOG_DIR"/tmp/FACTer.txt ]] ; then
+  if [[ -f "$TMP_DIR"/FACTer.txt ]] ; then
     while read -r LINE; do 
       print_output "$LINE"
-    done < "$LOG_DIR"/tmp/FACTer.txt
+    done < "$TMP_DIR"/FACTer.txt
   fi
 }
 
@@ -236,22 +234,22 @@ binwalking() {
 
   # as we probably kill binwalk and to not loose the results we need to execute binwalk in a function 
   # and read the results from the caller
-  if [[ -f "$LOG_DIR"/tmp/binwalker.txt ]] ; then
+  if [[ -f "$TMP_DIR"/binwalker.txt ]] ; then
     while read -r LINE; do 
       print_output "$LINE"
-    done < "$LOG_DIR"/tmp/binwalker.txt
+    done < "$TMP_DIR"/binwalker.txt
   fi
 }
 
 extract_binwalk_helper() {
-  binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$LOG_DIR"/tmp/binwalker.txt
+  binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
 }
 extract_fact_helper() {
-  ./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" >> "$LOG_DIR"/tmp/FACTer.txt
+  ./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
 }
 extract_ipk_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$LOG_DIR"/tmp/ipk_db.txt
+  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/ipk_db.txt
 }
 extract_deb_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.deb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$LOG_DIR"/tmp/deb_db.txt
+  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.deb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
 }
