@@ -183,6 +183,7 @@ main()
   export YARA=1
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
+  export MAX_EXT_SPACE=21000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
   export TMP_DIR="$LOG_DIR""/tmp"
   export MAIN_LOG_FILE="emba.log"

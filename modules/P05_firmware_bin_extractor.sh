@@ -61,7 +61,9 @@ P05_firmware_bin_extractor() {
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
   fi
 
-  FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  if [[ "$FILES_EXT" -eq 0 ]]; then
+    FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  fi
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
 }
 
