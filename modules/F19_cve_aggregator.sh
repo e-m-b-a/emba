@@ -104,7 +104,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//(gdb)/}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
+    # some - -> space
     VERSION_lower="${VERSION_lower//acpid-/acpid\ }"
+    VERSION_lower="${VERSION_lower//linux-/linux\ }"
     # alsactl, amixer -> alsa
     VERSION_lower="${VERSION_lower//alsactl/alsa}"
     VERSION_lower="${VERSION_lower//amixer/alsa}"
