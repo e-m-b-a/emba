@@ -52,7 +52,7 @@ P07_firmware_bin_base_analyzer() {
     wait_for_pid
   fi
 
-  if [[ $LINUX_PATH_COUNTER -gt 0 || "$OS_DETECTED" -eq 1 || "${#PRE_ARCH[@]}" -gt 0 ]] ; then
+  if [[ $(wc -l "$LOG_DIR"/tmp/p07.tmp | awk '{print $1}') ]] ; then
     NEG_LOG=1
   fi
 
@@ -142,12 +142,13 @@ os_identification() {
     elif [[ $COUNTER_SIPROTEC -gt 10 ]] ; then
       print_output "$(indent "$(orange "SIPROTEC detected\t\t""$COUNTER_SIPROTEC")")";
     fi
-    OS_DETECTED=1
+    echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC))" >> "$LOG_DIR"/tmp/p07.tmp
   fi
 
   echo
   if [[ $LINUX_PATH_COUNTER -gt 0 ]] ; then
     print_output "[+] Found possible Linux operating system in $(print_path "$OUTPUT_DIR")"
+    echo "$LINUX_PATH_COUNTER" >> "$LOG_DIR"/tmp/p07.tmp
   fi
 }
 
@@ -159,5 +160,6 @@ binary_architecture_detection()
   mapfile -t PRE_ARCH < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | awk '{print $3}' | sort -u)
   for PRE_ARCH_ in "${PRE_ARCH[@]}"; do
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_"
+    echo "$PRE_ARCH_" >> "$LOG_DIR"/tmp/p07.tmp
   done
 }

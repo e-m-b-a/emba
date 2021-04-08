@@ -64,7 +64,6 @@ P05_firmware_bin_extractor() {
   fi
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  rm -r "$LOG_DIR"/tmp/
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
 }
 

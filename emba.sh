@@ -557,6 +557,7 @@ main()
     echo
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+      rm -r "$LOG_DIR"/tmp
     else
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
     fi
