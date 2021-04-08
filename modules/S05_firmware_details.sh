@@ -23,11 +23,9 @@ S05_firmware_details()
 
   LOG_FILE="$( get_log_file )"
 
-  #local DETECTED_FILES
   local DETECTED_DIR
   
   # we use the file FILE_ARR from helpers module
-  #DETECTED_FILES=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type f 2>/dev/null | wc -l )
   DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
   
   print_output "[*] ""${#FILE_ARR[@]}"" files and ""$DETECTED_DIR"" directories detected."

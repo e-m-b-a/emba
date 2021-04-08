@@ -46,9 +46,10 @@ deep_pattern_search() {
         S_OUTPUT="$(grep -E -n -a -h -o ".{0,25}""$PATTERN"".{0,25}" -D skip "$DEEP_S_FILE" | tr -d '\0' )" 
         if [[ -n "$S_OUTPUT" ]] ; then
           print_output "[+] ""$(print_path "$DEEP_S_FILE")"
+          #print_output "[+] $DEEP_S_FILE"
           mapfile -t OUTPUT_ARR < <(echo "$S_OUTPUT")
           for O_LINE in "${OUTPUT_ARR[@]}" ; do
-            print_output "[*] $O_LINE"
+            #print_output "[*] $O_LINE"
             COLOR_PATTERN="$GREEN""$PATTERN""$NC"
             O_LINE="${O_LINE//'\n'/.}"
             print_output "$( indent "$(echo "${O_LINE//$PATTERN/$COLOR_PATTERN}" | tr "\000-\037\177-\377" "." )")"      

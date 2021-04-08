@@ -97,8 +97,8 @@ populate_karrays() {
   mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
-    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
-    KERNEL_DESC+=( "$(modinfo "$K_MODULE" | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
+    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
+    KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
   done
 
   # unique our results

@@ -20,8 +20,8 @@
 S09_firmware_base_version_check() {
 
   # this module check for version details statically.
-  # this module is designed for linux systems
-  # for other systems we have the R09
+  # this module is designed for *x based systems
+  # for other systems (eg RTOS) we have the R09
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware versions detection"
@@ -70,13 +70,15 @@ S09_firmware_base_version_check() {
         echo "." | tr -d "\n"
       fi  
 
-      VERSION_FINDER=$(find "$OUTPUT_DIR" -xdev -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-
-      if [[ -n $VERSION_FINDER ]]; then
-        echo ""
-        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files."
-        VERSIONS_DETECTED+=("$VERSION_FINDER")
-      fi  
+      #VERSION_FINDER=$(find "$OUTPUT_DIR" -xdev -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      for BIN in "${BINARIES[@]}"; do
+        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in $BIN."
+          VERSIONS_DETECTED+=("$VERSION_FINDER")
+        fi  
+      done
       echo "." | tr -d "\n"
     fi
 

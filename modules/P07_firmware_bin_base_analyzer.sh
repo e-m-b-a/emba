@@ -52,7 +52,7 @@ P07_firmware_bin_base_analyzer() {
     wait_for_pid
   fi
 
-  if [[ $(wc -l "$LOG_DIR"/tmp/p07.tmp | awk '{print $1}') ]] ; then
+  if [[ $(wc -l "$TMP_DIR"/p07.tmp | awk '{print $1}') ]] ; then
     NEG_LOG=1
   fi
 
@@ -74,6 +74,17 @@ os_identification() {
   echo "." | tr -d "\n"
   COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW+COUNTER_Linux_EXT))
   echo "." | tr -d "\n"
+
+  echo "." | tr -d "\n"
+  COUNTER_FreeBSD="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeBSD 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_FreeBSD_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_FreeBSD_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeBSD)"
+  echo "." | tr -d "\n"
+  COUNTER_FreeBSD=$((COUNTER_FreeBSD+COUNTER_FreeBSD_FW+COUNTER_FreeBSD_EXT))
+  echo "." | tr -d "\n"
+
 
   COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "VxWorks\|Wind" 2> /dev/null)"
   echo "." | tr -d "\n"
@@ -125,12 +136,13 @@ os_identification() {
   export LINUX_PATH_COUNTER
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
-  if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC)) -gt 0 ]] ; then
+  if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD)) -gt 0 ]] ; then
     print_output ""
     print_output "$(indent "$(orange "Operating system detection:")")"
     if [[ $COUNTER_VxWorks -gt 5 ]] ; then print_output "$(indent "$(orange "VxWorks detected\t\t""$COUNTER_VxWorks")")"; fi
     if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected\t\t""$COUNTER_FreeRTOS")")"; fi
     if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected\t\t""$COUNTER_eCos")")"; fi
+    if [[ $COUNTER_FreeBSD -gt 0 ]] ; then print_output "$(indent "$(orange "FreeBSD detected\t\t""$COUNTER_FreeBSD")")"; fi
     if [[ $COUNTER_Linux -gt 5 && $LINUX_PATH_COUNTER -gt 1 ]] ; then 
       print_output "$(indent "$(green "Linux detected\t\t""$COUNTER_Linux""\t-\tverified Linux operating system detected")")"
     elif [[ $COUNTER_Linux -gt 5 ]] ; then 
@@ -142,13 +154,13 @@ os_identification() {
     elif [[ $COUNTER_SIPROTEC -gt 10 ]] ; then
       print_output "$(indent "$(orange "SIPROTEC detected\t\t""$COUNTER_SIPROTEC")")";
     fi
-    echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC))" >> "$LOG_DIR"/tmp/p07.tmp
+    echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD))" >> "$TMP_DIR"/p07.tmp
   fi
 
   echo
   if [[ $LINUX_PATH_COUNTER -gt 0 ]] ; then
     print_output "[+] Found possible Linux operating system in $(print_path "$OUTPUT_DIR")"
-    echo "$LINUX_PATH_COUNTER" >> "$LOG_DIR"/tmp/p07.tmp
+    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/p07.tmp
   fi
 }
 
@@ -160,6 +172,6 @@ binary_architecture_detection()
   mapfile -t PRE_ARCH < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | awk '{print $3}' | sort -u)
   for PRE_ARCH_ in "${PRE_ARCH[@]}"; do
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_"
-    echo "$PRE_ARCH_" >> "$LOG_DIR"/tmp/p07.tmp
+    echo "$PRE_ARCH_" >> "$TMP_DIR"/p07.tmp
   done
 }

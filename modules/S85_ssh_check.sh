@@ -47,6 +47,7 @@ search_ssh_files()
   elif [[ "${#SSH_FILES[@]}" -ne 0 ]] ; then
     print_output "[+] Found ""${#SSH_FILES[@]}"" ssh configuration files:"
     for LINE in "${SSH_FILES[@]}" ; do
+      ((SSH_VUL_CNT++))
       if [[ -f "$LINE" ]] ; then
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
         if [[ -f "$EXT_DIR"/sshdcc ]]; then
@@ -59,7 +60,6 @@ search_ssh_files()
                 # print finding title as emba finding:
                 if [[ "$S_ISSUE" =~ ^\([0-9+]\)\ \[[A-Z]+\]\  ]]; then
                   print_output "[+] $S_ISSUE"
-                  ((SSH_VUL_CNT++))
                 # print everything else (except RESULTS and done) as usual output
                 elif ! [[ "$S_ISSUE" == *RESULTS* || "$S_ISSUE" == *done* ]]; then
                   print_output "[*] $S_ISSUE"
