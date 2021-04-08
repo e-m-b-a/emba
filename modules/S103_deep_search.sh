@@ -48,6 +48,7 @@ deep_pattern_search() {
           print_output "[+] ""$(print_path "$DEEP_S_FILE")"
           mapfile -t OUTPUT_ARR < <(echo "$S_OUTPUT")
           for O_LINE in "${OUTPUT_ARR[@]}" ; do
+            print_output "[*] $O_LINE"
             COLOR_PATTERN="$GREEN""$PATTERN""$NC"
             O_LINE="${O_LINE//'\n'/.}"
             print_output "$( indent "$(echo "${O_LINE//$PATTERN/$COLOR_PATTERN}" | tr "\000-\037\177-\377" "." )")"      

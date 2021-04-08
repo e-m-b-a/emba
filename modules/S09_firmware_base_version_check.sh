@@ -38,6 +38,11 @@ S09_firmware_base_version_check() {
 
     # as we do not have a typical linux executable we can't use strict version details
     # but to not exhaust the run time we only search for stuff that we know is possible to detect
+    # on the other hand, if we do not use emulation for deeper detection we run all checks
+
+    if [[ "$STRICT" != "strict" && "$QEMULATION" -ne 1 ]]; then
+      STRICT="binary"
+    fi
 
     if [[ $STRICT == "binary" ]]; then
       VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
