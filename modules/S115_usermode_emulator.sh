@@ -68,6 +68,7 @@ S115_usermode_emulator() {
         if ( file "$FULL_BIN_PATH" | grep -q ELF ) && [[ "$BIN_" != './qemu-'*'-static' ]]; then
           if ! [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
             if ( file "$FULL_BIN_PATH" | grep -q "version\ .\ (FreeBSD)" ) ; then
+              # https://superuser.com/questions/1404806/running-a-freebsd-binary-on-linux-using-qemu-user
               print_output "[-] No working emulator found for FreeBSD binary $BIN_"
               EMULATOR="NA"
             elif ( file "$FULL_BIN_PATH" | grep -q "x86-64" ) ; then
