@@ -198,17 +198,17 @@ dependency_check()
     # Docker with cwe-checker and fact extractor images
     # at the moment no check for docker inside of docker
     if [[ IN_DOCKER -eq 0 ]]; then 
-      if [[ $BAP -eq 1 ]] || [[ $FACT_EXTRACTOR -eq 1 ]] || [[ $ONLY_DEP -eq 1 ]]; then
+      if [[ $CWE_CHECKER -eq 1 ]] || [[ $FACT_EXTRACTOR -eq 1 ]] || [[ $ONLY_DEP -eq 1 ]]; then
         print_output "    docker - \\c" "no_log"
         if ! command -v docker > /dev/null ; then
           echo -e "$RED""not ok""$NC"
           echo -e "$RED""    Missing docker - check your installation""$NC"
-          BAP=0
+          CWE_CHECKER=0
           FACT_EXTRACTOR=0
         else
           echo -e "$GREEN""ok""$NC"
           # cwe-checker
-          if [[ $BAP -eq 1 ]] || [[ $ONLY_DEP -eq 1 ]] ; then
+          if [[ $CWE_CHECKER -eq 1 ]] || [[ $ONLY_DEP -eq 1 ]] ; then
             print_output "    cwe-checker - \\c" "no_log"
             if docker images 2>/dev/null | grep -q "cwe_checker"  ; then
               echo -e "$GREEN""ok""$NC"
@@ -219,7 +219,7 @@ dependency_check()
               echo -e "$RED""not ok""$NC"
               echo -e "$RED""    Missing docker image cwe-checker - check your installation""$NC"
               echo -e "$ORANGE""    Deactivating cwe-checker""$NC"
-              BAP=0
+              CWE_CHECKER=0
             fi
           fi
           # fact-extractor

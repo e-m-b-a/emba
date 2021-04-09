@@ -193,8 +193,8 @@ create_log_dir() {
     if ! [[ -d "$LOG_DIR""/dtb_dump" ]] && [[ $DTBDUMP -eq 1 ]] ; then
       mkdir -p "$LOG_DIR""/dtb_dump" 2> /dev/null
     fi
-    if ! [[ -d "$LOG_DIR""/bap_cwe_checker" ]] && [[ $BAP -eq 1 ]] ; then
-      mkdir "$LOG_DIR""/bap_cwe_checker" 2> /dev/null
+    if ! [[ -d "$LOG_DIR""/cwe_checker" ]] && [[ $CWE_CHECKER -eq 1 ]] ; then
+      mkdir "$LOG_DIR""/cwe_checker" 2> /dev/null
     fi
     export HTML_PATH="$LOG_DIR""/html-report"
     if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then

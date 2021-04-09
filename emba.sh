@@ -157,7 +157,7 @@ main()
   set -a 
 
   export ARCH_CHECK=1
-  export BAP=0
+  export CWE_CHECKER=0
   export DEEP_EXTRACTOR=0
   export FACT_EXTRACTOR=0
   export FIRMWARE=0
@@ -221,7 +221,7 @@ main()
         export ARCH_CHECK=0
         ;;
       c)
-        export BAP=1
+        export CWE_CHECKER=1
         ;;
       d)
         export ONLY_DEP=1
