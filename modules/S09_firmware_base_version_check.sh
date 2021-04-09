@@ -36,13 +36,17 @@ S09_firmware_base_version_check() {
 
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
     BIN_NAME="$(echo "$VERSION_LINE" | cut -d: -f1)"
+    echo "VERSION_LINE: $VERSION_LINE"
+    echo "STRICT: $STRICT"
+    echo "BIN_NAME: $BIN_NAME"
 
     # as we do not have a typical linux executable we can't use strict version details
     # but to not exhaust the run time we only search for stuff that we know is possible to detect
     # on the other hand, if we do not use emulation for deeper detection we run all checks
 
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
+
     if [[ $STRICT != "strict" ]]; then
-      VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
       echo "." | tr -d "\n"
 
       # check binwalk files sometimes we can find kernel version information or something else in it
@@ -79,10 +83,10 @@ S09_firmware_base_version_check() {
     else
       mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
       for BIN in "${STRICT_BINS[@]}"; do
-        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $BIN (strict)."
+          print_output "[+] Version information found ${RED}""$BIN"" ""$VERSION_FINDER""${NC}${GREEN} in binary $BIN (strict)."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
         fi
       done
