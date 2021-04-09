@@ -256,7 +256,7 @@ if command -v docker > /dev/null ; then
   export DOCKER_CLI_EXPERIMENTAL=disabled
 else
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
-  echo "Download-Size: ~1500 MB"
+  echo "Download-Size: ~600 MB"
 fi
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
@@ -295,7 +295,7 @@ if command -v docker > /dev/null ; then
   export DOCKER_CLI_EXPERIMENTAL=disabled
 else
   echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
-  echo "Download-Size: ~1500 MB"
+  echo "Download-Size: ~700 MB"
 fi
 
 
