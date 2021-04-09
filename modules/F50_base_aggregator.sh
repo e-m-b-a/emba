@@ -341,7 +341,7 @@ get_data() {
 os_detector() {
 
   VERIFIED=0
-  OSES=("kernel" "vxworks" "siprotec")
+  OSES=("kernel" "vxworks" "siprotec" "freebsd")
 
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
@@ -354,6 +354,8 @@ os_detector() {
           SYSTEM="SIPROTEC"
         elif [[ "$OS_TO_CHECK" == "vxworks" ]]; then
           SYSTEM="VxWorks"
+        elif [[ "$OS_TO_CHECK" == "freebsd" ]]; then
+          SYSTEM="FreeBSD"
         else
           SYSTEM="$OS_TO_CHECK"
         fi

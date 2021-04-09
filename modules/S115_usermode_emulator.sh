@@ -67,7 +67,11 @@ S115_usermode_emulator() {
         FULL_BIN_PATH="$R_PATH"/"$BIN_"
         if ( file "$FULL_BIN_PATH" | grep -q ELF ) && [[ "$BIN_" != './qemu-'*'-static' ]]; then
           if ! [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
-            if ( file "$FULL_BIN_PATH" | grep -q "x86-64" ) ; then
+            if ( file "$FULL_BIN_PATH" | grep -q "version\ .\ (FreeBSD)" ) ; then
+              # https://superuser.com/questions/1404806/running-a-freebsd-binary-on-linux-using-qemu-user
+              print_output "[-] No working emulator found for FreeBSD binary $BIN_"
+              EMULATOR="NA"
+            elif ( file "$FULL_BIN_PATH" | grep -q "x86-64" ) ; then
               EMULATOR="qemu-x86_64-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "Intel 80386" ) ; then
               EMULATOR="qemu-i386-static"
@@ -82,7 +86,7 @@ S115_usermode_emulator() {
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*PowerPC" ) ; then
               EMULATOR="qemu-ppc-static"
             else
-              print_output "[-] No working emulator found for ""$LINE"
+              print_output "[-] No working emulator found for $BIN_"
               EMULATOR="NA"
             fi
     

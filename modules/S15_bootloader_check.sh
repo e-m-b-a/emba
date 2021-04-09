@@ -292,8 +292,8 @@ find_boot_files()
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
       if [[ "$(basename "$LINE")" == "inittab" ]]  ; then
         INITTAB_V=("${INITTAB_V[@]}" "$LINE")
-        ((STARTUP_FINDS++))
       fi
+      ((STARTUP_FINDS++))
     done
   else
     print_output "[-] No startup files found"

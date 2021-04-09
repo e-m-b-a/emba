@@ -34,7 +34,6 @@ scan_config()
 {
   sub_module_title "Search for config file"
 
-  local CONF_FILES_ARR
   readarray -t CONF_FILES_ARR < <(config_find "$CONFIG_DIR""/config_files.cfg")
 
   if [[ "${CONF_FILES_ARR[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"

@@ -97,7 +97,12 @@ prepare_version_data() {
     # remove multiple spaces
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
-    VERSION_lower="${VERSION_lower//in\ extracted\ firmware\ files\./}"
+    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\./\ }"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
 
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
@@ -120,6 +125,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//zic\.c/zic}"
     #bzip2, a block-sorting file compressor.  Version 1.0.6, 
     VERSION_lower="${VERSION_lower//bzip2,\ a\ block-sorting\ file\ compressor\.\ version/bzip2}"
+    VERSION_lower="${VERSION_lower//bzip2recover/bzip2}"
     # gnutls
     VERSION_lower="${VERSION_lower//enabled\ gnutls/gnutls}"
     VERSION_lower="${VERSION_lower//project-id-version:\ gnutls/gnutls}"
@@ -317,6 +323,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*query.*([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
     # ntpdate 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdate\ ([0-9]\.[0-9]\.[0-9])([a-z]([0-9]))/ntp\ \1:\2/g')"
+    # FreeBSD 12.1-RELEASE-p8  -> FreeBSD 12.1:p8 
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/freebsd\ ([0-9]+\.[0-9]+)-release-([a-z]([0-9]+))/freebsd\ \1:\2/g')"
     # unzip .... info-zip -> info-zip
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipinfo\ ([0-9]\.[0-9][0-9])\ .*\ info-zip.*/info-zip:zip\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/unzip\ ([0-9]\.[0-9][0-9])\ .*\ by\ info-zip.*/info-zip:unzip\ \1/g')"

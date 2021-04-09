@@ -37,7 +37,7 @@ detect_binary_versions() {
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
 
     # as we do not have a typical linux executable we can't use strict version details
-    if [[ $STRICT == "binary" ]]; then
+    if [[ $STRICT != "strict" ]]; then
       #print_output "[*] $VERSION_LINE"
       VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
       echo "." | tr -d "\n"
@@ -63,7 +63,6 @@ detect_binary_versions() {
         fi
         echo "." | tr -d "\n"
       fi
-
 
       VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
 

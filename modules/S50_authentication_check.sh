@@ -348,24 +348,28 @@ search_pam_testing_libs() {
         FOUND_CRACKLIB=1
         FOUND=1
         print_output "[+] Found pam_cracklib.so (crack library PAM) in ""$(print_path "$FULL_PATH")"
+        ((AUTH_ISSUES++))
       fi
 
       if [[ -f "$FULL_PATH""/pam_passwdqc.so" ]] ; then
         FOUND_PASSWDQC=1
         FOUND=1
         print_output "[+] Found pam_passwdqc.so (passwd quality control PAM) in ""$(print_path "$FULL_PATH")"
+        ((AUTH_ISSUES++))
       fi
 
       if [[ -f "$FULL_PATH""/pam_pwquality.so" ]] ; then
         FOUND_PWQUALITY=1
         FOUND=1
         print_output "[+] Found pam_pwquality.so (password quality control PAM) in ""$(print_path "$FULL_PATH")"
+        ((AUTH_ISSUES++))
       fi
     done
 
     # Cracklib
     if [[ $FOUND_CRACKLIB -eq 1 ]] ; then
       print_output "[+] pam_cracklib.so found"
+      ((AUTH_ISSUES++))
     else
       print_output "[-] pam_cracklib.so not found"
     fi
@@ -373,6 +377,7 @@ search_pam_testing_libs() {
     # Password quality control
     if [[ $FOUND_PASSWDQC -eq 1 ]] ; then
       print_output "[+] pam_passwdqc.so found"
+      ((AUTH_ISSUES++))
     else
       print_output "[-] pam_passwdqc.so not found"
     fi
@@ -380,6 +385,7 @@ search_pam_testing_libs() {
     # pwquality module
     if [[ $FOUND_PWQUALITY -eq 1 ]] ; then
       print_output "[+] pam_pwquality.so found"
+      ((AUTH_ISSUES++))
     else
       print_output "[-] pam_pwquality.so not found"
     fi
@@ -388,6 +394,7 @@ search_pam_testing_libs() {
       print_output "[-] No PAM modules for password strength testing found"
     else
       print_output "[-] Found at least one PAM module for password strength testing"
+      ((AUTH_ISSUES++))
     fi
 
   else
@@ -415,6 +422,7 @@ scan_pam_conf() {
         local LINE
         LINE=$(echo "$FIND" | ${SEDBINARY} 's/:space:/ /g')
         print_output "$(indent "$(orange "$LINE")")"
+        ((AUTH_ISSUES++))
       fi
     fi
   done
@@ -445,6 +453,7 @@ search_pam_configs() {
       for FILE in "${AUTH_FILES[@]}"; do
         print_output "[*] Check if LDAP support in PAM files"
         if [[ -f "$FILE" ]] ; then
+          ((AUTH_ISSUES++))
           print_output "[+] ""$(print_path "$FILE")"" exist"
           local FIND2
           FIND2=$(grep "^auth.*ldap" "$FILE")
@@ -479,6 +488,7 @@ search_pam_files() {
       if [[ -f "$LINE" ]] ; then
         CHECK=1
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        ((AUTH_ISSUES++))
       fi
       if [[ -d "$LINE" ]] && [[ ! -L "$LINE" ]] ; then
         print_output "$(indent "$(print_path "$LINE")")"
@@ -487,6 +497,7 @@ search_pam_files() {
         for FIND_FILE in "${FIND[@]}"; do
           CHECK=1
           print_output "$(indent "$(orange "$FIND_FILE")")"
+          ((AUTH_ISSUES++))
         done
       fi
     done
