@@ -36,9 +36,6 @@ S09_firmware_base_version_check() {
 
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
     BIN_NAME="$(echo "$VERSION_LINE" | cut -d: -f1)"
-    echo "VERSION_LINE: $VERSION_LINE"
-    echo "STRICT: $STRICT"
-    echo "BIN_NAME: $BIN_NAME"
 
     # as we do not have a typical linux executable we can't use strict version details
     # but to not exhaust the run time we only search for stuff that we know is possible to detect
