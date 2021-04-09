@@ -64,7 +64,6 @@ detect_binary_versions() {
         echo "." | tr -d "\n"
       fi
 
-
       VERSION_FINDER=$(find "$OUTPUT_DIR" -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
 
       if [[ -n $VERSION_FINDER ]]; then

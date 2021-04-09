@@ -35,16 +35,13 @@ S09_firmware_base_version_check() {
     echo "." | tr -d "\n"
 
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
+    BIN_NAME="$(echo "$VERSION_LINE" | cut -d: -f1)"
 
     # as we do not have a typical linux executable we can't use strict version details
     # but to not exhaust the run time we only search for stuff that we know is possible to detect
     # on the other hand, if we do not use emulation for deeper detection we run all checks
 
-    if [[ "$STRICT" != "strict" && "$QEMULATION" -ne 1 ]]; then
-      STRICT="binary"
-    fi
-
-    if [[ $STRICT == "binary" ]]; then
+    if [[ $STRICT != "strict" ]]; then
       VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
       echo "." | tr -d "\n"
 
@@ -70,14 +67,24 @@ S09_firmware_base_version_check() {
         echo "." | tr -d "\n"
       fi  
 
-      #VERSION_FINDER=$(find "$OUTPUT_DIR" -xdev -type f -print0 2> /dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
       for BIN in "${BINARIES[@]}"; do
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in $BIN."
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $BIN."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
         fi  
+      done
+      echo "." | tr -d "\n"
+    else
+      mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      for BIN in "${STRICT_BINS[@]}"; do
+        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $BIN (strict)."
+          VERSIONS_DETECTED+=("$VERSION_FINDER")
+        fi
       done
       echo "." | tr -d "\n"
     fi
