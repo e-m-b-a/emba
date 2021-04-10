@@ -72,7 +72,7 @@ S09_firmware_base_version_check() {
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $BIN."
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
         fi  
       done
@@ -83,7 +83,7 @@ S09_firmware_base_version_check() {
         VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}""$BIN"" ""$VERSION_FINDER""${NC}${GREEN} in binary $BIN (strict)."
+          print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (strict)."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
         fi
       done
