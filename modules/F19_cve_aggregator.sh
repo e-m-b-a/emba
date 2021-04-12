@@ -68,6 +68,7 @@ F19_cve_aggregator() {
     if [[ $(netstat -ant | grep -c 27017) -eq 0 && $IN_DOCKER -eq 0 ]]; then
       print_output "[*] Trying to start the vulnerability database"
       systemctl restart mongod
+      sleep 2
     fi
 
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
@@ -97,12 +98,13 @@ prepare_version_data() {
     # remove multiple spaces
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
-    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(static\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ (static)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"

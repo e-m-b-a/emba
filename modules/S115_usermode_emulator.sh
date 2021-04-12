@@ -135,6 +135,9 @@ version_detection() {
     BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
+    if [[ -f "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt ]]; then
+      mapfile -t BINARY_PATHS < <(grep -a "Emulating binary:" "$LOG_DIR"/qemu_emulator/qemu_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)
+    fi
 
     # if we have the key strict this version identifier only works for the defined binary and is not generic!
     if [[ $STRICT == "strict" ]]; then
@@ -162,7 +165,9 @@ version_detection() {
           VERS_DET_OLD="$VERSION_DETECTED"
           VERSIONS_BIN="$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
           VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
-          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} (from binary $BINARY) found in $VERSIONS_BIN."
+          for BINARY_PATH in "${BINARY_PATHS[@]}"; do
+            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$(print_path "$BINARY_PATH")$GREEN (emulation)."
+          done
         fi
       done
     fi
@@ -398,6 +403,8 @@ emulate_binary() {
   print_output "[*] Emulating binary: $ORANGE$BIN_$NC"
   print_output "[*] Using root directory: $ORANGE$R_PATH$NC"
   BIN_EMU_NAME=$(basename "$FULL_BIN_PATH")
+  echo -e "[*] Emulating binary: $FULL_BIN_PATH" >> "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt"
+  echo -e "[*] Emulating binary name: $BIN_EMU_NAME" >> "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt"
 
   # we check every binary only once. So calculate the checksum and store it for checking
   BIN_MD5=$(md5sum "$FULL_BIN_PATH" | cut -d\  -f1)
@@ -419,6 +426,7 @@ emulate_binary() {
   
     for PARAM in "${EMULATION_PARAMS[@]}"; do
       print_output "[*] Trying to emulate binary ${GREEN}""$BIN_""${NC} with parameter ""$PARAM"
+      echo -e "[*] Trying to emulate binary $BIN_ with parameter $PARAM" >> "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt"
       chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
       print_output ""
       check_disk_space
