@@ -104,6 +104,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
+    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
     # GNU gdbserver (GDB)
