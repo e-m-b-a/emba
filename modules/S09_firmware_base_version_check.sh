@@ -30,7 +30,7 @@ S09_firmware_base_version_check() {
 
   declare -a VERSIONS_DETECTED
 
-  print_output "[*] Initial version detection running ..." | tr -d "\n"
+  print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
     echo "." | tr -d "\n"
 
@@ -62,29 +62,42 @@ S09_firmware_base_version_check() {
 
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (static)."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
         fi  
         echo "." | tr -d "\n"
       fi  
 
-      for BIN in "${BINARIES[@]}"; do
-        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-        if [[ -n $VERSION_FINDER ]]; then
-          echo ""
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN."
-          VERSIONS_DETECTED+=("$VERSION_FINDER")
-        fi  
+      for BIN in "${FILE_ARR[@]}"; do
+        # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
+        if file "$BIN" | grep -q ELF ; then
+          VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+          if [[ -n $VERSION_FINDER ]]; then
+            echo ""
+            print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static)."
+            VERSIONS_DETECTED+=("$VERSION_FINDER")
+          fi
+        elif file "$BIN" | grep -q "uImage\|Kernel\ Image" ; then
+          VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+          if [[ -n $VERSION_FINDER ]]; then
+            echo ""
+            print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (static)."
+            VERSIONS_DETECTED+=("$VERSION_FINDER")
+          fi
+        fi
       done
       echo "." | tr -d "\n"
     else
       mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
       for BIN in "${STRICT_BINS[@]}"; do
-        VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
-        if [[ -n $VERSION_FINDER ]]; then
-          echo ""
-          print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (strict)."
-          VERSIONS_DETECTED+=("$VERSION_FINDER")
+        # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
+        if file "$BIN" | grep -q ELF ; then
+          VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
+          if [[ -n $VERSION_FINDER ]]; then
+            echo ""
+            print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static - strict)."
+            VERSIONS_DETECTED+=("$VERSION_FINDER")
+          fi
         fi
       done
       echo "." | tr -d "\n"

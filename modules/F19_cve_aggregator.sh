@@ -68,6 +68,7 @@ F19_cve_aggregator() {
     if [[ $(netstat -ant | grep -c 27017) -eq 0 && $IN_DOCKER -eq 0 ]]; then
       print_output "[*] Trying to start the vulnerability database"
       systemctl restart mongod
+      sleep 2
     fi
 
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
@@ -97,12 +98,14 @@ prepare_version_data() {
     # remove multiple spaces
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
-    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(static\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ (static)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
+    # shellcheck disable=SC2001
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
@@ -187,6 +190,14 @@ prepare_version_data() {
     # zlib:binary:"inflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark Adler"
     VERSION_lower="${VERSION_lower//deflate/zlib}"
     VERSION_lower="${VERSION_lower//inflate/zlib}"
+    # e2fsprogs
+    VERSION_lower="${VERSION_lower//debugfs/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//dumpe2fs/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//e2fsck/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//e2image/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//mke2fs/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//resize2fs/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//tune2fs/e2fsprogs}"
     #ntfslabel -> ntfs-3g
     VERSION_lower="${VERSION_lower//ntfslabel/ntfs-3g}"
     #i2cXYZ -> i2c-tools
@@ -343,14 +354,14 @@ prepare_version_data() {
     #server debian wheezy upnp/1.1 miniupnpd/2.1
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/server.*upnp.*miniupnpd\/([0-9]\.[0-9])/miniupnpd\ \1/g')"
     # linux -> kernel (we find the CVEs in the database with kernel as search string)
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/linux\ ([0-9])/kernel\ \1/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^linux\ ([0-9])/kernel\ \1/')"
     # Siprotec 5 firmware has a version identifier like FWAOS_V01.11.01.123
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
     VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"
     #jq commandline json processor [5a49c82-dirty]
-    VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
+    #VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
     VERSION_lower="${VERSION_lower//squid\ cache:/squid-cache:squid}"
     #tar (GNU tar) 1.23
