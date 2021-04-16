@@ -14,6 +14,22 @@
 
 declare -a MENU_LIST
 
+add_aggegator_links(){
+  OUTPUT=$1
+  LINKED_FILE=$2
+  IFS=' ' read -r -a "FILE_LINE_ARR" <<< "$OUTPUT"
+  OUTPUT=""
+  if [[ -n ${FILE_LINE_ARR[*]} ]]; then
+    for WORDS in "${FILE_LINE_ARR[@]}"; do
+      if [[ "$WORDS" == *"[0;33m"* ]]; then
+        OUTPUT="$OUTPUT""<a href=\"""$LINKED_FILE""\">""$WORDS""</a>"
+      else
+        OUTPUT="$OUTPUT""$WORDS"
+      fi
+    done
+  fi
+}
+
 build_index_file(){
   
   local TOP10_FORMAT_COUNTER
@@ -74,35 +90,37 @@ build_index_file(){
       fi
 
       if [[ "$OUTPUT" == *"files and"*"directories detected."* ]]; then
-        OUTPUT="<a href=\"s05_firmware_details.html\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s05_firmware_details.html"
       elif [[ "$OUTPUT" == *"Found"*"issues in"*"shell scripts."* ]]; then
-        OUTPUT="<a href=\"s20_shell_check.html\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s20_shell_check.html"
       elif [[ "$OUTPUT" == *"Found"*"issues in"*"python scripts."* ]]; then
-        OUTPUT="<a href=\"s21_python_check.html\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s21_python_check.html"
       elif [[ "$OUTPUT" == *"Found"*"yara rule matches in"*"files."* ]]; then
-        OUTPUT="<a href=\"s110_yara_check.html\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s110_yara_check.html"
       elif [[ "$OUTPUT" == *"Found"*"areas with weak permissions."* ]]; then
-        OUTPUT="<a href=\"s40_weak_perm_check.html\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s40_weak_perm_check.html"
       elif [[ "$OUTPUT" == *"Found passwords or weak credential configuration - check log file for details."* ]]; then
-        OUTPUT="<a href=\"s45_pass_file_check.html\">""$OUTPUT""<\/a>"
+        OUTPUT="<a href=\"s45_pass_file_check.html\">""$OUTPUT""</a>"
       elif [[ "$OUTPUT" == *"Found"*"kernel modules with"*"licensing issues."* ]]; then
-        OUTPUT="<a href=\"s25_kernel_check.html#Analyze_kernel_modules\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s25_kernel_check.html#Analyze_kernel_modules"
       elif [[ "$OUTPUT" == *"Found"*"not common Linux files with"*"files at all."* ]]; then
-        OUTPUT="<a href=\"s108_linux_common_file_checker.html\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s108_linux_common_file_checker.html"
       elif [[ "$OUTPUT" == *"Found"*"interesting files and"*"files that could be useful for post-exploitation."* ]]; then
-        OUTPUT="<a href=\"s95_interesting_binaries_check.html\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s95_interesting_binaries_check.html"
       elif [[ "$OUTPUT" == *"Found"*"binaries without enabled stack canaries in"*"binaries."* ]]; then
-        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh"
       elif [[ "$OUTPUT" == *"Found"*"binaries without enabled RELRO in"*"binaries."* ]]; then
-        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh"
       elif [[ "$OUTPUT" == *"Found"*"binaries without enabled NX in"*"binaries."* ]]; then
-        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh"
       elif [[ "$OUTPUT" == *"Found "*"binaries without enabled PIE in"*"binaries."* ]]; then
-        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh"
       elif [[ "$OUTPUT" == *"Found "*"stripped binaries without symbols in "*" binaries"* ]]; then
-        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">""$OUTPUT""<\/a>"
+        add_aggegator_links "$OUTPUT" "s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh"
+      elif [[ "$OUTPUT" == *"Found"*"usages of strcpy in"*"binaries. "* ]]; then
+        add_aggegator_links "$OUTPUT" "s10_binaries_check.html#Generating_objdump_disassembly"
       elif [[ "$OUTPUT" == *"Found version details:"* ]]; then
-        OUTPUT="<a href=\"./s09_firmware_base_version_check\">""$OUTPUT""<\/a>"
+        OUTPUT="<a href=\"s09_firmware_base_version_check.html\">""$OUTPUT""</a>"
       fi
 
       if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
@@ -117,7 +135,7 @@ build_index_file(){
         TOP10_FORMAT_COUNTER=0
       elif [ "$TOP10_FORMAT_COUNTER" -ne 0 ]; then
         TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-        OUTPUT="<span  style=\"white-space: pre\">""$OUTPUT""</span>"
+        OUTPUT="<span  style=\"white-space: pre\">""<a href=\"s10_binaries_check.html#Generating_objdump_disassembly\">""$OUTPUT""</a>""</span>"
       fi
 	
       if [[ "$OUTPUT" == *"0;34m+"*"0;36m"* ]] && [[ "$OUTPUT" != *"h2 id"* ]]; then
