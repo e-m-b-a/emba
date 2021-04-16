@@ -72,7 +72,39 @@ build_index_file(){
         IFS=':' read -r -a "FILE_LINE_ARR" <<< "$OUTPUT"
         OUTPUT="${FILE_LINE_ARR[0]}""33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\"./style/entropy.png\">"
       fi
-     
+
+      if [[ "$OUTPUT" == *"files and"*"directories detected."* ]]; then
+        OUTPUT="<a href=\"s05_firmware_details.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"issues in"*"shell scripts."* ]]; then
+        OUTPUT="<a href=\"s20_shell_check.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"issues in"*"python scripts."* ]]; then
+        OUTPUT="<a href=\"s21_python_check.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"yara rule matches in"*"files."* ]]; then
+        OUTPUT="<a href=\"s110_yara_check.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"areas with weak permissions."* ]]; then
+        OUTPUT="<a href=\"s40_weak_perm_check.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found passwords or weak credential configuration - check log file for details."* ]]; then
+        OUTPUT="<a href=\"s45_pass_file_check.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"kernel modules with"*"licensing issues."* ]]; then
+        OUTPUT="<a href=\"s25_kernel_check.html#Analyze_kernel_modules\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"not common Linux files with"*"files at all."* ]]; then
+        OUTPUT="<a href=\"s108_linux_common_file_checker.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"interesting files and"*"files that could be useful for post-exploitation."* ]]; then
+        OUTPUT="<a href=\"s95_interesting_binaries_check.html\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"binaries without enabled stack canaries in"*"binaries."* ]]; then
+        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"binaries without enabled RELRO in"*"binaries."* ]]; then
+        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found"*"binaries without enabled NX in"*"binaries."* ]]; then
+        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found "*"binaries without enabled PIE in"*"binaries."* ]]; then
+        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found "*"stripped binaries without symbols in "*" binaries"* ]]; then
+        OUTPUT="<a href=\"s10_binaries_check.html#Binary_check_for_mechanisms_via_checksec.sh\">"$OUTPUT"<\/a>"
+      elif [[ "$OUTPUT" == *"Found version details:"* ]]; then
+        OUTPUT="<a href=\"./s09_firmware_base_version_check\">"$OUTPUT"<\/a>"
+      fi
+
       if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
         break
       fi
