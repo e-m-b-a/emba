@@ -302,6 +302,14 @@ main()
 
   echo
 
+  if [[ $IN_DOCKER -eq 1 ]] ; then
+    # set external path new for docker
+    export EXT_DIR="/external"
+    export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
+    export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
+    export AHA_PATH="$EXT_DIR""/aha"
+  fi
+
   # Check all dependencies of emba
   dependency_check
 
@@ -403,7 +411,7 @@ main()
     echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "cp -R /external ./external && ./emba.sh -l /log/ -f /firmware -i $ARGS"
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
     D_RETURN=$?
 
     if [[ $D_RETURN -eq 0 ]] ; then
