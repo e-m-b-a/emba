@@ -395,7 +395,7 @@ main()
         D|f|i|l)
           ;;
         *)
-          export ARGS="$ARGS -$OPT"
+          export ARGS="$ARGS -$OPT $OPTARG"
           ;;
       esac
     done
@@ -403,7 +403,7 @@ main()
     echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "cp -R /external ./external && ./emba.sh -l /log/ -f /firmware -i $ARGS"
     D_RETURN=$?
 
     if [[ $D_RETURN -eq 0 ]] ; then
