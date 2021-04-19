@@ -21,7 +21,6 @@ add_aggegator_links_to_numbers(){
   OUTPUT=""
   if [[ -n ${FILE_LINE_ARR[*]} ]]; then
     for WORDS in "${FILE_LINE_ARR[@]}"; do
-    <\/a>\[0;32m
       if [[ "$WORDS" == *"[0;33m"* ]] && [[ "$OUTPUT" == *"[0;32m"* ]]; then
         OUTPUT="$OUTPUT""<a href=\"""$LINKED_FILE""\">""$WORDS""</a>[0;32m"
       elif [[ "$WORDS" == *"[0;33m"* ]]; then
