@@ -670,7 +670,7 @@ generate_cve_details() {
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     # threading currently not working. This is work in progress
-    if [[ "$THREADED" -eq 9 ]]; then
+    if [[ "$THREADED" -eq 1 ]]; then
       cve_db_lookup &
       WAIT_PIDS+=( "$!" )
       max_pids_protection
@@ -679,7 +679,7 @@ generate_cve_details() {
     fi
   done
 
-  if [[ "$THREADED" -eq 9 ]]; then
+  if [[ "$THREADED" -eq 1 ]]; then
     wait_for_pid
   fi
 
