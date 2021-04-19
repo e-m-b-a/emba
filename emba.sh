@@ -190,10 +190,7 @@ main()
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
-  export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
-  export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
-  export AHA_PATH="$EXT_DIR""/aha"
 
   echo
 
@@ -305,9 +302,6 @@ main()
   if [[ $IN_DOCKER -eq 1 ]] ; then
     # set external path new for docker
     export EXT_DIR="/external"
-    export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
-    export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
-    export AHA_PATH="$EXT_DIR""/aha"
   fi
 
   # Check all dependencies of emba

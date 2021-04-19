@@ -59,6 +59,7 @@ log_folder()
     read -p "(Y/n)  " -r ANSWER
     case ${ANSWER:0:1} in
         y|Y|"" )
+          echo
         ;;
         * )
           echo -e "\\n${RED}Terminate emba${NC}\\n"
