@@ -534,6 +534,7 @@ main()
   run_modules "F" "0" "$HTML"
 
   if [[ $HTML -eq 1 ]]; then
+    prepare_report
     module_start_log "Web reporter"
     LOG_INDICATORS=( p s f )
     for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
@@ -546,6 +547,7 @@ main()
         else
           #print_output "[+] generating log file with content $LOG_FILE" "no_log"
           generate_html_file "$LOG_FILE" 1
+          generate_report_file "$LOG_FILE"
         fi
       done
     done
