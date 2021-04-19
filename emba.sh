@@ -179,7 +179,6 @@ main()
   export THREADED=0             # 0 -> single thread
                                 # 1 -> multi threaded
   export USE_DOCKER=0
-  export V_FEED=1
   export YARA=1
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
