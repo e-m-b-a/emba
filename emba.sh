@@ -181,6 +181,7 @@ main()
   export USE_DOCKER=0
   export V_FEED=1
   export YARA=1
+  export MAX_PIDS=5             # the maximum modules in parallel -> after S09 is finished this value gets adjusted
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
@@ -533,24 +534,7 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  if [[ $HTML -eq 1 ]]; then
-    module_start_log "Web reporter"
-    LOG_INDICATORS=( p s f )
-    for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
-      mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
-      for LOG_FILE in "${LOG_FILES[@]}"; do
-        XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
-        if [[ "$XREPORT" -gt 0 ]]; then
-          #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
-          generate_html_file "$LOG_FILE" 0
-        else
-          #print_output "[+] generating log file with content $LOG_FILE" "no_log"
-          generate_html_file "$LOG_FILE" 1
-        fi
-      done
-    done
-    module_end_log "Web reporter" 1
-  fi
+  run_web_reporter_build_index
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ -f "$HTML_PATH"/index.html ]]; then

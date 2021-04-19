@@ -34,6 +34,8 @@ F19_cve_aggregator() {
   HIGH_CVE_COUNTER=0
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
+  CVE_SEARCHSPLOIT=0
+  VERSIONS_CLEANED=( )
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
@@ -72,6 +74,9 @@ F19_cve_aggregator() {
     fi
 
     if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
+      if command -v cve_searchsploit > /dev/null ; then
+        CVE_SEARCHSPLOIT=1
+      fi
       generate_cve_details
       generate_special_log
     else
@@ -460,6 +465,14 @@ prepare_version_data() {
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
       VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f2-3)"
     fi
+
+    # now we should have the name and the version in the first two coloumns:
+    VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"
+    # check if we have some number in it ... without a number we have no version info and we can drop this entry ...
+    if [[ $VERSION_lower =~ [0-9] ]]; then
+      #VERSIONS_CLEANED+=( "$VERSION_lower" )
+      echo "$VERSION_lower" >> "$LOG_DIR"/aggregator/versions.tmp
+    fi
 }
 
 aggregate_versions() {
@@ -486,17 +499,16 @@ aggregate_versions() {
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # remove color codes:
     VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-    prepare_version_data
-    # now we should have the name and the version in the first two coloumns:
-    VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"
-    # check if we have some number in it ... without a number we have no version info and we can drop this entry ...
-    if [[ $VERSION_lower =~ [0-9] ]]; then
-      VERSIONS_CLEANED+=( "$VERSION_lower" )
-    fi
+    prepare_version_data &
+    WAIT_PIDS+=( "$!" )
   done
 
+  wait_for_pid
+
   # sorting and unique our versions array:
-  eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+  #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+  mapfile -t VERSIONS_CLEANED < <(cat "$LOG_DIR"/aggregator/versions.tmp | sort -u)
+  rm "$LOG_DIR"/aggregator/versions.tmp
 
   if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
     print_output "[*] Software inventory aggregated:"
@@ -590,13 +602,19 @@ generate_cve_details() {
         done
       fi
 
-      if command -v cve_searchsploit > /dev/null ; then
+
+      if [[ "$CVE_SEARCHSPLOIT" -eq 1 ]] ; then
         # if no exploit was found lets talk to exploitdb:
         if [[ "$EXPLOIT" == "No exploit available" ]]; then
-          if cve_searchsploit "$CVE_VALUE" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
+          mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null)
+          if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
+          #if cve_searchsploit "$CVE_VALUE" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
             EXPLOIT="Exploit available (Source: Exploit database)"
             echo -e "\\n[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR"/aggregator/exploit-details.txt
-            cve_searchsploit "$CVE_VALUE" >> "$LOG_DIR"/aggregator/exploit-details.txt
+            for LINE in "${EXPLOIT_AVAIL[@]}"; do
+              #cve_searchsploit "$CVE_VALUE" >> "$LOG_DIR"/aggregator/exploit-details.txt
+              echo "$LINE" >> "$LOG_DIR"/aggregator/exploit-details.txt
+            done
             ((EXPLOIT_COUNTER++))
             ((EXPLOIT_COUNTER_VERSION++))
           fi

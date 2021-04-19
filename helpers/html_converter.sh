@@ -258,7 +258,8 @@ generate_html_file(){
   if [[ $2 == 1 ]]; then
     #print_output "[*] report file $1 - $2"
     build_report_files "$1"
-    build_index_file "$1"
+    # currently we create the final index only once at the end -> this is called from emba.sh
+    #build_index_file "$1"
   else
     #print_output "[*] collection file $1 - $2"
     build_collection_file "$1"

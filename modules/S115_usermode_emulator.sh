@@ -33,7 +33,7 @@ S115_usermode_emulator() {
     # to protect the host we are going to kill them on a KILL_SIZE limit
     KILL_SIZE="100M"
     # to get rid of all the running stuff we are going to kill it after RUNTIME
-    RUNTIME="10m"
+    RUNTIME="2m"
 
     declare -a MISSING
     declare -a MD5_DONE
@@ -215,11 +215,12 @@ cleanup() {
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
     print_output "[*] Terminating qemu processes - check it with ps"
-    mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
-    for PID in "${CJOBS[@]}"; do
-      print_output "[*] Terminating process ""$PID"
-      kill "$PID" 2> /dev/null
-    done
+    killall -9 --quiet -r .*qemu.*sta.*
+    #mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
+    #for PID in "${CJOBS[@]}"; do
+    #  print_output "[*] Terminating process ""$PID"
+    #  kill "$PID" 2> /dev/null
+    #done
   fi
 
   CJOBS_=$(pgrep qemu-)
@@ -438,7 +439,7 @@ emulate_binary() {
   
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
-  killall --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
+  killall -9 --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
   
   # reset the terminal - after all the uncontrolled emulation it is typically broken!
   reset

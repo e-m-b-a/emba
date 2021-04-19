@@ -17,6 +17,9 @@
 #               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and 
 #               checks if these fit on a binary in the firmware. 
 
+# Threading priority - if set to 1, these modules will be executed first
+export THREAD_PRIO=1
+
 S09_firmware_base_version_check() {
 
   # this module check for version details statically.
@@ -29,6 +32,7 @@ S09_firmware_base_version_check() {
   EXTRACTOR_LOG="$LOG_DIR"/p05_firmware_bin_extractor.txt
 
   declare -a VERSIONS_DETECTED
+  BIN_WAIT_PIDS=( )
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
@@ -68,25 +72,11 @@ S09_firmware_base_version_check() {
         echo "." | tr -d "\n"
       fi  
 
-      for BIN in "${FILE_ARR[@]}"; do
-        # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
-        if file "$BIN" | grep -q ELF ; then
-          VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-          if [[ -n $VERSION_FINDER ]]; then
-            echo ""
-            print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static)."
-            VERSIONS_DETECTED+=("$VERSION_FINDER")
-          fi
-        elif file "$BIN" | grep -q "uImage\|Kernel\ Image" ; then
-          VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-          if [[ -n $VERSION_FINDER ]]; then
-            echo ""
-            print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (static)."
-            VERSIONS_DETECTED+=("$VERSION_FINDER")
-          fi
-        fi
-      done
-      echo "." | tr -d "\n"
+      # this will burn the CPU but in most cases the time of testing is cut into half
+      bin_string_checker &
+      BIN_WAIT_PIDS+=( "$!" )
+
+     echo "." | tr -d "\n"
     else
       mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
       for BIN in "${STRICT_BINS[@]}"; do
@@ -106,6 +96,42 @@ S09_firmware_base_version_check() {
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
 
   echo "." | tr -d "\n"
+  wait_for_bin_checker
 
   module_end_log "${FUNCNAME[0]}" "${#VERSIONS_DETECTED[@]}"
+}
+
+bin_string_checker() {
+  for BIN in "${FILE_ARR[@]}"; do
+    # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
+    if file "$BIN" | grep -q ELF ; then
+      VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      if [[ -n $VERSION_FINDER ]]; then
+        echo ""
+        print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static)."
+        VERSIONS_DETECTED+=("$VERSION_FINDER")
+      fi
+    elif file "$BIN" | grep -q "uImage\|Kernel\ Image" ; then
+      VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      if [[ -n $VERSION_FINDER ]]; then
+        echo ""
+        print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (static)."
+        VERSIONS_DETECTED+=("$VERSION_FINDER")
+      fi
+    fi
+  done
+}
+
+wait_for_bin_checker() {
+  for PID in "${BIN_WAIT_PIDS[@]}"; do
+    running=1
+    while [[ $running -eq 1 ]]; do
+      echo "." | tr -d "\n"
+      if ! pgrep -v grep | grep -q "$PID"; then
+        running=0
+      fi
+      sleep 1
+    done
+  done
+
 }
