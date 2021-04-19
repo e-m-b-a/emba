@@ -51,13 +51,17 @@ run_web_reporter_build_index() {
 
 wait_for_pid() {
   for PID in ${WAIT_PIDS[*]}; do
+    print_output "[*] waiting for ${#WAIT_PIDS[@]} processes"
+    if ! pgrep -v grep | grep -q "$PID"; then
+      continue
+    fi
     running=1
     while [[ $running -eq 1 ]]; do
       echo "." | tr -d "\n"
       if ! pgrep -v grep | grep -q "$PID"; then
         running=0
+        continue
       fi
-      sleep 1
     done
   done
 }
