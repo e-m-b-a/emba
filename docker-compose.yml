@@ -5,7 +5,7 @@ services:
     volumes:
         - ${FIRMWARE}/:/firmware
         - ${LOG}/:/log
-        - ${EMBA}/:/emba
+        - ${EMBA}/:/emba:ro
         - /var/run/docker.sock:/var/run/docker.sock
         - /tmp/:/tmp/
     network_mode: "host"
