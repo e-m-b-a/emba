@@ -48,7 +48,7 @@ log_folder()
     esac
   fi
 
-  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config \) -prune -false -o -name "*.txt" -o -name "*.log" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   if [[ $USE_DOCKER -eq 1 && ${#D_LOG_FILES[@]} -gt 0 ]] ; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the emba directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
