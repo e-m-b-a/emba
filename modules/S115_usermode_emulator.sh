@@ -132,6 +132,20 @@ version_detection() {
   sub_module_title "Software component and version detection started"
 
   while read -r VERSION_LINE; do 
+    if [[ $THREADING -eq 1 ]]; then
+      version_detection_thread &
+      WAIT_PIDS+=( "$!" )
+    else
+      version_detection_thread
+    fi
+  done < "$CONFIG_DIR"/bin_version_strings.cfg
+  echo
+  if [[ $THREADED -eq 1 ]]; then
+    wait_for_pid
+  fi
+}
+
+version_detection_thread() {
     BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
@@ -171,8 +185,6 @@ version_detection() {
         fi
       done
     fi
-  done < "$CONFIG_DIR"/bin_version_strings.cfg 
-  echo
 }
 
 copy_firmware() {

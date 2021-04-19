@@ -35,7 +35,6 @@ F19_cve_aggregator() {
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
   CVE_SEARCHSPLOIT=0
-  VERSIONS_CLEANED=( )
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
@@ -111,7 +110,6 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
-
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
     VERSION_lower="${VERSION_lower//(gdb)/}"
@@ -471,6 +469,7 @@ prepare_version_data() {
     # check if we have some number in it ... without a number we have no version info and we can drop this entry ...
     if [[ $VERSION_lower =~ [0-9] ]]; then
       #VERSIONS_CLEANED+=( "$VERSION_lower" )
+      # for multi threading we have to go via a temp file
       echo "$VERSION_lower" >> "$LOG_DIR"/aggregator/versions.tmp
     fi
 }
@@ -499,6 +498,7 @@ aggregate_versions() {
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # remove color codes:
     VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    # as this is just a background job we always thread it
     prepare_version_data &
     WAIT_PIDS+=( "$!" )
   done
@@ -507,7 +507,7 @@ aggregate_versions() {
 
   # sorting and unique our versions array:
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  mapfile -t VERSIONS_CLEANED < <(cat "$LOG_DIR"/aggregator/versions.tmp | sort -u)
+  mapfile -t VERSIONS_CLEANED < <(sort -u "$LOG_DIR"/aggregator/versions.tmp)
   rm "$LOG_DIR"/aggregator/versions.tmp
 
   if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
@@ -562,13 +562,7 @@ generate_special_log() {
   fi
 }
 
-generate_cve_details() {
-  sub_module_title "Collect CVE details."
-
-  CVE_COUNTER=0
-  EXPLOIT_COUNTER=0
-
-  for VERSION in "${VERSIONS_CLEANED[@]}"; do
+cve_db_lookup() {
     CVE_COUNTER_VERSION=0
     EXPLOIT_COUNTER_VERSION=0
     VERSION_SEARCH="${VERSION//\ /:}"
@@ -666,7 +660,28 @@ generate_cve_details() {
     else
       print_output "[-] Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH."
     fi
+}
+
+generate_cve_details() {
+  sub_module_title "Collect CVE details."
+
+  CVE_COUNTER=0
+  EXPLOIT_COUNTER=0
+  export MAX_PIDS=15 # for accessing the mongodb in threaded mode
+
+  for VERSION in "${VERSIONS_CLEANED[@]}"; do
+    if [[ "$THREADED" -eq 1 ]]; then
+      cve_db_lookup &
+      WAIT_PIDS+=( "$!" )
+      max_pids_protection
+    else
+      cve_db_lookup
+    fi
   done
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid
+  fi
 
   print_output ""
   print_output "[*] Identified the following version details, vulnerabilities and exploits:"

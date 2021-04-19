@@ -63,7 +63,6 @@ wait_for_pid() {
 }
 
 max_pids_protection() {
-  print_output "[*] Maximum PIDS: $MAX_PIDS" "no_log"
   while [[ ${#WAIT_PIDS[@]} -gt "$MAX_PIDS" ]]; do
     TEMP_PIDS=()
     # check for really running PIDs and re-create the array
