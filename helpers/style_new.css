@@ -34,8 +34,6 @@ body {
 .side {
   -ms-flex: 30%; /* IE10 */
   flex: 30%;
-  background-color: #f1f1f1;
-  padding-top: 20px;
   max-height: 100%;
   max-width: 400px;
   width: 30%;
@@ -158,10 +156,15 @@ p {
 
 hr.mono {
   border: 0;
-  border-top: 2px solid #fff;
+  border-top: 2px solid #9f9f9f;
 }
 
 hr.double {
   border: 0;
-  border-top: 5px double #fff;
+  border-top: 5px double #9f9f9f;
+}
+
+.nav-box {
+  background-color: #f2f2f2;
+  padding-top: 20px;
 }

@@ -200,6 +200,10 @@ create_log_dir() {
     if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then
       mkdir "$HTML_PATH" 2> /dev/null
     fi
+    export HTML_PATH2="$LOG_DIR""/html-report2"
+    if ! [[ -d "$HTML_PATH2" ]] && [[ "$HTML" -eq 1 ]]; then
+      mkdir "$HTML_PATH2" 2> /dev/null
+    fi
     export FIRMWARE_PATH_CP="$LOG_DIR""/firmware"
     mkdir "$FIRMWARE_PATH_CP" 2> /dev/null
     mkdir "$TMP_DIR" 2> /dev/null

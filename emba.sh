@@ -534,7 +534,7 @@ main()
   run_modules "F" "0" "$HTML"
 
   if [[ $HTML -eq 1 ]]; then
-    prepare_report
+    print_output "[!] web 1 started on ""$(date)""\\n" "no_log"
     module_start_log "Web reporter"
     LOG_INDICATORS=( p s f )
     for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
@@ -547,11 +547,28 @@ main()
         else
           #print_output "[+] generating log file with content $LOG_FILE" "no_log"
           generate_html_file "$LOG_FILE" 1
-          generate_report_file "$LOG_FILE"
         fi
       done
     done
     module_end_log "Web reporter" 1
+    print_output "[!] web 1 ended   on ""$(date)""\\n" "no_log" 
+  fi
+
+  
+  if [[ $HTML -eq 1 ]]; then
+    print_output "[!] web 2 started on ""$(date)""\\n" "no_log" 
+    prepare_report
+    module_start_log "Web reporter NEW"
+    LOG_INDICATORS=( p s f )
+    for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
+      mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
+      for LOG_FILE in "${LOG_FILES[@]}"; do
+        generate_report_file "$LOG_FILE"
+        print_output "x ""$LOG_FILE"
+      done
+    done
+    module_end_log "Web reporter NEW" 1
+    print_output "[!] web 2 ended   on ""$(date)""\\n" "no_log" 
   fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
