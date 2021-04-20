@@ -41,30 +41,44 @@ deep_pattern_search() {
     print_output "[*] Searching all files for '""$PATTERN""' ... this may take a while!"
     echo
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
-      if [[ -e "$DEEP_S_FILE" ]] ; then
-        local S_OUTPUT
-        S_OUTPUT="$(grep -E -n -a -h -o ".{0,25}""$PATTERN"".{0,25}" -D skip "$DEEP_S_FILE" | tr -d '\0' )" 
-        if [[ -n "$S_OUTPUT" ]] ; then
-          print_output "[+] ""$(print_path "$DEEP_S_FILE")"
-          #print_output "[+] $DEEP_S_FILE"
-          mapfile -t OUTPUT_ARR < <(echo "$S_OUTPUT")
-          for O_LINE in "${OUTPUT_ARR[@]}" ; do
-            #print_output "[*] $O_LINE"
-            COLOR_PATTERN="$GREEN""$PATTERN""$NC"
-            O_LINE="${O_LINE//'\n'/.}"
-            print_output "$( indent "$(echo "${O_LINE//$PATTERN/$COLOR_PATTERN}" | tr "\000-\037\177-\377" "." )")"      
-            ((COUNT++))
-          done
-          echo
-        fi
+      if [[ "$THREADED" -eq 1 ]]; then
+        deep_pattern_searcher &
+        WAIT_PIDS+=( "$!" )
+        max_pids_protection
+      else
+        deep_pattern_searcher
       fi
-    done
+   done
     PATTERN_COUNT=("$COUNT" "${PATTERN_COUNT[@]}")
     if [[ $COUNT -eq 0 ]] ; then
       print_output "[-] No files with pattern '""$PATTERN""' found!"
     fi
     echo
   done
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid
+  fi
+}
+
+deep_pattern_searcher() {
+  if [[ -e "$DEEP_S_FILE" ]] ; then
+    local S_OUTPUT
+    S_OUTPUT="$(grep -E -n -a -h -o ".{0,25}""$PATTERN"".{0,25}" -D skip "$DEEP_S_FILE" | tr -d '\0' )" 
+    if [[ -n "$S_OUTPUT" ]] ; then
+      print_output "[+] ""$(print_path "$DEEP_S_FILE")"
+      #print_output "[+] $DEEP_S_FILE"
+      mapfile -t OUTPUT_ARR < <(echo "$S_OUTPUT")
+      for O_LINE in "${OUTPUT_ARR[@]}" ; do
+        #print_output "[*] $O_LINE"
+        COLOR_PATTERN="$GREEN""$PATTERN""$NC"
+        O_LINE="${O_LINE//'\n'/.}"
+        print_output "$( indent "$(echo "${O_LINE//$PATTERN/$COLOR_PATTERN}" | tr "\000-\037\177-\377" "." )")"      
+        ((COUNT++))
+      done
+      echo
+    fi
+  fi
 }
 
 deep_pattern_reporter() {

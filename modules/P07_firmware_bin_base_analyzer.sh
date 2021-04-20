@@ -23,7 +23,7 @@ P07_firmware_bin_base_analyzer() {
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
-  local NEG_LOG
+  local NEG_LOG=0
 
   if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
     export OUTPUT_DIR
@@ -52,7 +52,7 @@ P07_firmware_bin_base_analyzer() {
     wait_for_pid
   fi
 
-  if [[ $(wc -l "$TMP_DIR"/p07.tmp | awk '{print $1}') ]] ; then
+  if [[ "$(wc -l "$TMP_DIR"/p07.tmp | awk '{print $1}')" -gt 0 ]] ; then
     NEG_LOG=1
   fi
 

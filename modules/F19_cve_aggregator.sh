@@ -508,7 +508,7 @@ aggregate_versions() {
   # sorting and unique our versions array:
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   mapfile -t VERSIONS_CLEANED < <(sort -u "$LOG_DIR"/aggregator/versions.tmp)
-  rm "$LOG_DIR"/aggregator/versions.tmp
+  rm "$LOG_DIR"/aggregator/versions.tmp 2>/dev/null
 
   if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
     print_output "[*] Software inventory aggregated:"

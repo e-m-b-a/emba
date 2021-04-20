@@ -18,15 +18,16 @@
 run_web_reporter_mod_name() {
   MOD_NAME="$1"
   if [[ $HTML -eq 1 ]]; then
+    # usually we should only find one file:
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
     for LOG_FILE in "${LOG_FILES[@]}"; do
       XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
       if [[ "$XREPORT" -gt 0 ]]; then
         #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 0
+        generate_html_file "$LOG_FILE" 0 &
       else
         #print_output "[+] generating log file with content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 1
+        generate_html_file "$LOG_FILE" 1 &
       fi
     done
    fi
@@ -50,38 +51,33 @@ run_web_reporter_build_index() {
 }
 
 wait_for_pid() {
+  local PID
   for PID in ${WAIT_PIDS[*]}; do
-    if ! pgrep -v grep | grep -q "$PID"; then
+    echo "." | tr -d "\n"
+    if ! [[ -e /proc/"$PID" ]]; then
       continue
     fi
-    running=1
-    while [[ $running -eq 1 ]]; do
+    while [[ -e /proc/"$PID" ]]; do
       echo "." | tr -d "\n"
-      if ! pgrep -v grep | grep -q "$PID"; then
-        running=0
-        continue
-      fi
     done
   done
 }
 
 max_pids_protection() {
+  local PID
   while [[ ${#WAIT_PIDS[@]} -gt "$MAX_PIDS" ]]; do
     TEMP_PIDS=()
     # check for really running PIDs and re-create the array
     for PID in ${WAIT_PIDS[*]}; do
-      if pgrep -v grep | grep -q "$PID"; then
-        TEMP_PIDS+=( "$PID" )
+      if ! [[ -e /proc/"$PID" ]]; then
+        continue
       fi
+      TEMP_PIDS+=( "$PID" )
     done
 
-    if [[ ${#TEMP_PIDS[@]} -gt "$MAX_PIDS" ]]; then
-      echo "." | tr -d "\n"
-      echo "[*] Waiting for processess ... ${#TEMP_PIDS[@]}"
-      sleep 1
-    fi
     # recreate the arry with the current running PIDS
     WAIT_PIDS=("${TEMP_PIDS[@]}")
+    echo "." | tr -d "\n"
   done
 }
 
