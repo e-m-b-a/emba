@@ -21,6 +21,7 @@ S110_yara_check()
   module_title "Check for code patterns with yara"
   LOG_FILE="$( get_log_file )"
   YARA_CNT=0
+  local WAIT_PIDS_S110=()
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it
@@ -32,7 +33,7 @@ S110_yara_check()
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
       if [[ "$THREADED" -eq 1 ]]; then
         yara_check &
-        WAIT_PIDS+=( "$!" )
+        WAIT_PIDS_S110+=( "$!" )
         # to fix:
         YARA_CNT=1
       else
@@ -41,7 +42,7 @@ S110_yara_check()
     done
 
     if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid
+      wait_for_pid "${WAIT_PIDS_S110[@]}"
     fi
     print_output ""
     print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches in $ORANGE${#FILE_ARR[@]}$NC files."

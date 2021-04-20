@@ -99,7 +99,7 @@ run_modules()
         if [[ $THREADING_SET -eq 1 ]]; then
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
-          max_pids_protection
+          max_pids_protection "${WAIT_PIDS[@]}"
         else
           $MODULE_MAIN
         fi
@@ -118,7 +118,7 @@ run_modules()
           if [[ $THREADING_SET -eq 1 ]]; then
             $MODULE_MAIN &
             WAIT_PIDS+=( "$!" )
-            max_pids_protection
+            max_pids_protection "${WAIT_PIDS[@]}"
           else
             $MODULE_MAIN
           fi
@@ -138,7 +138,7 @@ run_modules()
             if [[ $THREADING_SET -eq 1 ]]; then
               $MODULE_MAIN &
               WAIT_PIDS+=( "$!" )
-              max_pids_protection
+              max_pids_protection "${WAIT_PIDS[@]}"
             else
               $MODULE_MAIN
             fi
@@ -443,7 +443,7 @@ main()
 
       # if we running threaded we ware going to wait for the slow guys here
       if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid
+        wait_for_pid "${WAIT_PIDS[@]}"
       fi
 
       if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then

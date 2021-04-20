@@ -36,6 +36,7 @@ S103_deep_search()
 }
 
 deep_pattern_search() {
+  local WAIT_PIDS_S103=()
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     local COUNT=0
     print_output "[*] Searching all files for '""$PATTERN""' ... this may take a while!"
@@ -43,12 +44,12 @@ deep_pattern_search() {
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
       if [[ "$THREADED" -eq 1 ]]; then
         deep_pattern_searcher &
-        WAIT_PIDS+=( "$!" )
-        max_pids_protection
+        WAIT_PIDS_S103+=( "$!" )
+        max_pids_protection "${WAIT_PIDS_S103[@]}"
       else
         deep_pattern_searcher
       fi
-   done
+    done
     PATTERN_COUNT=("$COUNT" "${PATTERN_COUNT[@]}")
     if [[ $COUNT -eq 0 ]] ; then
       print_output "[-] No files with pattern '""$PATTERN""' found!"
@@ -57,7 +58,7 @@ deep_pattern_search() {
   done
 
   if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid
+    wait_for_pid "${WAIT_PIDS_S103[@]}"
   fi
 }
 

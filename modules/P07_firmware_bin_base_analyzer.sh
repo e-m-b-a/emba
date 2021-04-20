@@ -18,19 +18,17 @@
 
 P07_firmware_bin_base_analyzer() {
 
-  export PRE_PIDS
-  PRE_PIDS=()
-
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
   local NEG_LOG=0
+  local WAIT_PIDS_P07=()
 
   if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
     export OUTPUT_DIR
     OUTPUT_DIR="$FIRMWARE_PATH_CP"
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
-      WAIT_PIDS+=( "$!" )
+      WAIT_PIDS_P07+=( "$!" )
     else
       os_identification
     fi
@@ -41,7 +39,7 @@ P07_firmware_bin_base_analyzer() {
     if [[ $LINUX_PATH_COUNTER -eq 0 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
         binary_architecture_detection &
-        WAIT_PIDS+=( "$!" )
+        WAIT_PIDS_P07+=( "$!" )
       else
         binary_architecture_detection
       fi
@@ -49,7 +47,7 @@ P07_firmware_bin_base_analyzer() {
   fi
 
   if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid
+    wait_for_pid "${WAIT_PIDS_P07[@]}"
   fi
 
   if [[ "$(wc -l "$TMP_DIR"/p07.tmp | awk '{print $1}')" -gt 0 ]] ; then

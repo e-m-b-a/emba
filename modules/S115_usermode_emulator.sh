@@ -134,14 +134,14 @@ version_detection() {
   while read -r VERSION_LINE; do 
     if [[ $THREADING -eq 1 ]]; then
       version_detection_thread &
-      WAIT_PIDS+=( "$!" )
+      WAIT_PIDS_S115+=( "$!" )
     else
       version_detection_thread
     fi
   done < "$CONFIG_DIR"/bin_version_strings.cfg
   echo
   if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid
+    wait_for_pid "${WAIT_PIDS_S115[@]}"
   fi
 }
 

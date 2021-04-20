@@ -24,10 +24,10 @@ run_web_reporter_mod_name() {
       XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
       if [[ "$XREPORT" -gt 0 ]]; then
         #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 0 &
+        generate_html_file "$LOG_FILE" 0
       else
         #print_output "[+] generating log file with content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 1 &
+        generate_html_file "$LOG_FILE" 1
       fi
     done
    fi
@@ -51,6 +51,7 @@ run_web_reporter_build_index() {
 }
 
 wait_for_pid() {
+  local WAIT_PIDS=("$@")
   local PID
   for PID in ${WAIT_PIDS[*]}; do
     echo "." | tr -d "\n"
@@ -64,6 +65,7 @@ wait_for_pid() {
 }
 
 max_pids_protection() {
+  local WAIT_PIDS=("$@")
   local PID
   while [[ ${#WAIT_PIDS[@]} -gt "$MAX_PIDS" ]]; do
     TEMP_PIDS=()

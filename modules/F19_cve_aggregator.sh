@@ -500,10 +500,10 @@ aggregate_versions() {
     VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
     # as this is just a background job we always thread it
     prepare_version_data &
-    WAIT_PIDS+=( "$!" )
+    WAIT_PIDS_F19+=( "$!" )
   done
 
-  wait_for_pid
+  wait_for_pid "${WAIT_PIDS_F19[@]}"
 
   # sorting and unique our versions array:
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
@@ -672,15 +672,15 @@ generate_cve_details() {
     # threading currently not working. This is work in progress
     if [[ "$THREADED" -eq 1 ]]; then
       cve_db_lookup &
-      WAIT_PIDS+=( "$!" )
-      max_pids_protection
+      WAIT_PIDS_F19+=( "$!" )
+      max_pids_protection "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup
     fi
   done
 
   if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid
+    wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
   print_output ""

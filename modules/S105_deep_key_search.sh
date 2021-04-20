@@ -22,6 +22,7 @@ S105_deep_key_search()
 
   local DEEP_KEY_COUNTER
   local QUERY_L
+  local WAIT_PIDS_S105
   QUERY_L="$(config_list "$CONFIG_DIR""/deep_key_search.cfg" "")"
   readarray -t STRING_LIST < <(printf '%s' "$QUERY_L")
   for QUERY in "${STRING_LIST[@]}" ; do
@@ -31,8 +32,8 @@ S105_deep_key_search()
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
       if [[ "$THREADED" -eq 1 ]]; then
         deep_key_searcher &
-        WAIT_PIDS+=( "$!" )
-        max_pids_protection
+        WAIT_PIDS_S105+=( "$!" )
+        max_pids_protection "${WAIT_PIDS_S105[@]}"
       else
         deep_key_searcher
       fi
@@ -41,7 +42,7 @@ S105_deep_key_search()
   done
 
   if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid
+    wait_for_pid "${WAIT_PIDS_S105[@]}"
     DEEP_KEY_COUNTER=1
   fi
   module_end_log "${FUNCNAME[0]}" "$DEEP_KEY_COUNTER"
