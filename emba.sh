@@ -150,19 +150,17 @@ run_modules()
   fi
 }
 
-catch_errors() {
-  echo "[*] Catching an error!"
-  if [ "$1" != "0" ]; then
-    # error handling goes here
-    echo "Error $1 occurred on $2"
-    exit 1
-  fi
+ctrl_c() {
+  print_output "[*] Ctrl+C detected" "no_log"
+  print_output "[*] Cleanup started" "no_log"
+  # now we can unmount the stuff from emulator and delete temporary stuff
+  exit 1
 }
 
 main()
 {
   set -a 
-  trap 'catch_errors $? $LINENO' EXIT
+  trap ctrl_c INT
 
   INVOCATION_PATH="$(dirname "$0")"
 
