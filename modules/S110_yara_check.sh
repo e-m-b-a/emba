@@ -14,6 +14,8 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Checks files with yara for suspicious patterns.
+export THREAD_PRIO=1
+
 
 S110_yara_check()
 {

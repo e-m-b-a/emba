@@ -14,6 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Searches for files with a specified string pattern inside.
+export THREAD_PRIO=1
 
 S103_deep_search()
 {
@@ -22,7 +23,6 @@ S103_deep_search()
 
   local PATTERNS
   PATTERNS="$(config_list "$CONFIG_DIR""/deep_search.cfg" "")"
-  local PATTERN_COUNT
 
   print_output "[*] Patterns: ""$( echo -e "$PATTERNS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
   print_output "[*] Special characters are replaced by a '.' for better readability.\\n"
@@ -42,10 +42,10 @@ deep_pattern_search() {
     print_output "[*] Searching all files for '""$PATTERN""' ... this may take a while!"
     echo
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
-      if [[ "$THREADED" -eq 1 ]]; then
+      if [[ "$THREADED" -eq "X" ]]; then
+        # we have to check this in detail
         deep_pattern_searcher &
         WAIT_PIDS_S103+=( "$!" )
-        max_pids_protection "${WAIT_PIDS_S103[@]}"
       else
         deep_pattern_searcher
       fi
@@ -57,7 +57,7 @@ deep_pattern_search() {
     echo
   done
 
-  if [[ "$THREADED" -eq 1 ]]; then
+  if [[ "$THREADED" -eq "X" ]]; then
     wait_for_pid "${WAIT_PIDS_S103[@]}"
   fi
 }

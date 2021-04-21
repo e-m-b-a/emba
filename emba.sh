@@ -150,11 +150,21 @@ run_modules()
   fi
 }
 
+catch_errors() {
+  echo "[*] Catching an error!"
+  if [ "$1" != "0" ]; then
+    # error handling goes here
+    echo "Error $1 occurred on $2"
+    exit 1
+  fi
+}
+
 main()
 {
-  INVOCATION_PATH="$(dirname "$0")"
-
   set -a 
+  trap 'catch_errors $? $LINENO' EXIT
+
+  INVOCATION_PATH="$(dirname "$0")"
 
   export ARCH_CHECK=1
   export BAP=0
@@ -500,7 +510,7 @@ main()
       run_modules "S" "$THREADED" "$HTML"
 
       if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid
+        wait_for_pid "${WAIT_PIDS[@]}"
       fi
     else
       # here we can deal with other non linux things like RTOS specific checks
@@ -509,7 +519,7 @@ main()
       run_modules "R" "$THREADED" "$HTML"
 
       if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid
+        wait_for_pid "${WAIT_PIDS[@]}"
       fi
     fi
 

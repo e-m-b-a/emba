@@ -53,12 +53,15 @@ run_web_reporter_build_index() {
 wait_for_pid() {
   local WAIT_PIDS=("$@")
   local PID
+  #print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
   for PID in ${WAIT_PIDS[*]}; do
+    #print_output "[*] wait pid protection: $PID"
     echo "." | tr -d "\n"
     if ! [[ -e /proc/"$PID" ]]; then
       continue
     fi
     while [[ -e /proc/"$PID" ]]; do
+      #print_output "[*] wait pid protection - running pid: $PID"
       echo "." | tr -d "\n"
     done
   done
@@ -71,13 +74,14 @@ max_pids_protection() {
     TEMP_PIDS=()
     # check for really running PIDs and re-create the array
     for PID in ${WAIT_PIDS[*]}; do
-      if ! [[ -e /proc/"$PID" ]]; then
-        continue
+      #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
+      if [[ -e /proc/"$PID" ]]; then
+        TEMP_PIDS+=( "$PID" )
       fi
-      TEMP_PIDS+=( "$PID" )
     done
 
     # recreate the arry with the current running PIDS
+    WAIT_PIDS=()
     WAIT_PIDS=("${TEMP_PIDS[@]}")
     echo "." | tr -d "\n"
   done

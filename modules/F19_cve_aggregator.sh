@@ -84,7 +84,6 @@ F19_cve_aggregator() {
       print_output "[-] Have you installed all the needed dependencies?"
       print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
     fi
-    FORMAT_LOG="$FORMAT_LOG_BAK"
   else
     print_output "[-] CVE search binary search.py not found."
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
@@ -618,8 +617,6 @@ cve_db_lookup() {
     BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
     VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
     # we do not deal with output formatting the usual way -> we use printf
-    FORMAT_LOG_BAK="$FORMAT_LOG"
-    FORMAT_LOG=0
     if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
       if [[ "$EXPLOIT" == *Source* ]]; then
         printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
@@ -642,12 +639,11 @@ cve_db_lookup() {
       fi
       ((LOW_CVE_COUNTER++))
     fi
-    FORMAT_LOG="$FORMAT_LOG_BAK"
   done
 
   { echo ""
-    echo "[*] Statistics:CVE_COUNTER|EXPLOIT_COUNTER|BINARY VERSION"
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
+    echo "[+] Statistics1:$HIGH_CVE_COUNTER|$MEDIUM_CVE_COUNTER|$LOW_CVE_COUNTER"
   } >> "$LOG_DIR"/aggregator/"$VERSION_PATH".txt
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
@@ -670,7 +666,7 @@ generate_cve_details() {
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     # threading currently not working. This is work in progress
-    if [[ "$THREADED" -eq 1 ]]; then
+    if [[ "$THREADED" -eq "X" ]]; then
       cve_db_lookup &
       WAIT_PIDS_F19+=( "$!" )
       max_pids_protection "${WAIT_PIDS_F19[@]}"
@@ -679,7 +675,7 @@ generate_cve_details() {
     fi
   done
 
-  if [[ "$THREADED" -eq 1 ]]; then
+  if [[ "$THREADED" -eq "X" ]]; then
     wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
@@ -737,9 +733,6 @@ generate_cve_details() {
       EXPLOITS=$(echo "$STATS" | cut -d\| -f2 | sed -e 's/\ //g')
       CVEs=$(echo "$STATS" | cut -d\| -f1 | sed -e 's/\ //g')
   
-      # we do not deal with output formatting the usual way -> we use printf
-      FORMAT_LOG_BAK="$FORMAT_LOG"
-      FORMAT_LOG=0
       if [[ -n "$CVEs" && -n "$EXPLOITS" ]]; then
         if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
           if [[ "$EXPLOITS" -gt 0 ]]; then
@@ -754,7 +747,6 @@ generate_cve_details() {
           printf "[+] Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         fi
       fi
-      FORMAT_LOG="$FORMAT_LOG_BAK"
     fi
   done
   print_output "${NC}"

@@ -33,7 +33,7 @@ S105_deep_key_search()
       if [[ "$THREADED" -eq 1 ]]; then
         deep_key_searcher &
         WAIT_PIDS_S105+=( "$!" )
-        max_pids_protection "${WAIT_PIDS_S105[@]}"
+        #max_pids_protection "${WAIT_PIDS_S105[@]}"
       else
         deep_key_searcher
       fi
