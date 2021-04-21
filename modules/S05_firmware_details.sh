@@ -33,15 +33,15 @@ S05_firmware_details()
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
     if [[ $FORMAT_LOG -eq 1 ]] ; then
-      tree -p -s -a -C "$FIRMWARE_PATH" >> "$LOG_FILE" > /dev/null
+      tree -p -s -a -C "$FIRMWARE_PATH" >> "$LOG_FILE"
     else
-      tree -p -s -a -n "$FIRMWARE_PATH" >> "$LOG_FILE" > /dev/null
+      tree -p -s -a -n "$FIRMWARE_PATH" >> "$LOG_FILE"
     fi
   else
     if [[ $FORMAT_LOG -eq 1 ]] ; then
-      ls -laR "$FIRMWARE_PATH" >> "$LOG_FILE" > /dev/null
+      ls -laR "$FIRMWARE_PATH" >> "$LOG_FILE"
     else
-      ls -laR --color=never "$FIRMWARE_PATH" >> "$LOG_FILE" > /dev/null
+      ls -laR --color=never "$FIRMWARE_PATH" >> "$LOG_FILE"
     fi
   fi
   release_info
