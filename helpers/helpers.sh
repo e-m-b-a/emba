@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description: Multiple usefull helpers
+# Description: Multiple useful helpers
 
 run_web_reporter_mod_name() {
   MOD_NAME="$1"

@@ -103,7 +103,7 @@ S115_usermode_emulator() {
       done
     done
 
-    cleanup
+    s115_cleanup
     running_jobs
     print_filesystem_fixes
     version_detection
@@ -220,7 +220,7 @@ running_jobs() {
   fi
 }
 
-cleanup() {
+s115_cleanup() {
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
 
