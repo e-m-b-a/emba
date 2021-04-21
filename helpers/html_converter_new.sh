@@ -44,35 +44,35 @@ add_color_tags()
   if [[ -z "$LINE" ]] ; then
     echo "$BR"
   else
-    LINE="$1"
+    LINE="$(echo "$1" | tr -d '\000-\010\013\014\016-\037' )"
     LINE="${LINE//-----------------------------------------------------------------/$HR_MONO}"
-    LINE="${LINE//[1m=================================================================[0m/$HR_DOUBLE}"
+    LINE="${LINE//=================================================================/$HR_DOUBLE}"
     LINE="$SPAN""$LINE"
-    LINE="${LINE//[0;31m/$SPAN_END$SPAN_RED}"
-    LINE="${LINE//[0;32m/$SPAN_END$SPAN_GREEN}"
-    LINE="${LINE//[0;33m/$SPAN_END$SPAN_ORANGE}"
-    LINE="${LINE//[0;34m/$SPAN_END$SPAN_BLUE}"
-    LINE="${LINE//[0;35m/$SPAN_END$SPAN_MAGENTA}"
-    LINE="${LINE//[0;36m/$SPAN_END$SPAN_CYAN}"
-    LINE="${LINE//[1m/$SPAN_BOLD}"
-    LINE="${LINE//[3m/$SPAN_ITALIC}"
-    LINE="${LINE//[0m/$SPAN_END}"
+    LINE="${LINE//[0;31m/$SPAN_END$SPAN_RED}"
+    LINE="${LINE//[0;32m/$SPAN_END$SPAN_GREEN}"
+    LINE="${LINE//[0;33m/$SPAN_END$SPAN_ORANGE}"
+    LINE="${LINE//[0;34m/$SPAN_END$SPAN_BLUE}"
+    LINE="${LINE//[0;35m/$SPAN_END$SPAN_MAGENTA}"
+    LINE="${LINE//[0;36m/$SPAN_END$SPAN_CYAN}"
+    LINE="${LINE//[1m/$SPAN_BOLD}"
+    LINE="${LINE//[3m/$SPAN_ITALIC}"
+    LINE="${LINE//[0m/$SPAN_END}"
     echo "$LINE"
   fi
 }
 
 strip_color_tags()
 {
-  LINE="$1"
-  LINE="${LINE//[0;31m/}"
-  LINE="${LINE//[0;32m/}"
-  LINE="${LINE//[0;33m/}"
-  LINE="${LINE//[0;34m/}"
-  LINE="${LINE//[0;35m/}"
-  LINE="${LINE//[0;36m/}"
-  LINE="${LINE//[1m/}"
-  LINE="${LINE//[3m/}"
-  LINE="${LINE//[0m/}"
+  LINE="$(echo "$1" | tr -d '\000-\010\013\014\016-\037' )"
+  LINE="${LINE//[0;31m/}"
+  LINE="${LINE//[0;32m/}"
+  LINE="${LINE//[0;33m/}"
+  LINE="${LINE//[0;34m/}"
+  LINE="${LINE//[0;35m/}"
+  LINE="${LINE//[0;36m/}"
+  LINE="${LINE//[1m/}"
+  LINE="${LINE//[3m/}"
+  LINE="${LINE//[0m/}"
   echo "$LINE"
 }
 
@@ -105,9 +105,9 @@ generate_report_file()
       MODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/\[+\]\ //g")"
       LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo $MODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$LINE""$LINK_END"
     elif [[ $LINE == *"-----------------------------------------------------------------"* ]] ; then
-      SUBMODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/\[+\]\ //g")"
+      SUBMODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/==> //g" | sed -e "s/\[+\]\ //g")"
       SUBMODUL_NAMES=( "${SUBMODUL_NAMES[@]}" "$SUBMODUL_NAME" )
-      LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo $SUBMODUL_NAME | sed -e "s/==> //g" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$LINE""$LINK_END"
+      LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo $SUBMODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$LINE""$LINK_END"
     fi
     # add html tags for style and add to document
     HTML_LINE="$(add_color_tags "$LINE")"
@@ -123,14 +123,14 @@ generate_report_file()
 
   # add module anchor to navigation
   LINE_NUMBER=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
-  NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@./$HTML_FILE@g")"
+  NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$(echo $MODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
   sed -i "$LINE_NUMBER""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
   ((LINE_NUMBER++))
 
   for NAME in "${SUBMODUL_NAMES[@]}" ; do
     # add submodule anchors to navigation
     LINE_NUMBER=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
-    SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$(echo $NAME | sed -e "s/==> //g" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
+    SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$(echo $NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
     sed -i "$LINE_NUMBER""i""$SUB_NAV_LINK""$NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
     ((LINE_NUMBER++))
   done
