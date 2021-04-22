@@ -57,14 +57,13 @@ body {
   display: none;
 }
 
-/* Fake image, just for this example */
 .logo {
   background-color: #fff;
   width: 100%;
   padding: 5%;
 }
 
-.logo img {
+.inherit {
   width: inherit;
 }
 
@@ -183,12 +182,21 @@ a.submodul:hover {
   bottom: 0px;
   left: 0px;
   visibility: hidden;
+  cursor: pointer;
 }
 
 .buttonOpen {
   background-color: #096b09;
 }
 
+.buttonOpen:hover {
+  background-color: #0b860b;
+}
+
 .buttonClose {
   background-color: #821c1c;
+}
+
+.buttonClose:hover {
+  background-color: #a52323;
 }

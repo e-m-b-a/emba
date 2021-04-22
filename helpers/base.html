@@ -10,7 +10,7 @@
 
 <div id="mySidenav" class="side">
   <div class="logo">
-    <a href="index2.html"><img src="./style2/emba.svg" alt="emba logo"></a>
+    <a class="inherit" href="index2.html"><img class="inherit" src="./style2/emba.svg" alt="emba logo"></a>
   </div>
   <div id="nav">
       <a id="back" href="index2.html">Main</a>
@@ -18,7 +18,7 @@
       <!-- navigation end -->
   </div> 
   <div id="button" class="buttonClose" onclick="buttonNav()">
-    &times;
+    &laquo;
   </div>
 </div>
 <div id="main" class="main">
@@ -49,12 +49,12 @@ function buttonNav() {
   if ( button.classList.contains('buttonOpen') ) {
     button.classList.remove('buttonOpen');
     button.classList.add('buttonClose');
-    button.innerHTML = "&times;";
+    button.innerHTML = "&laquo;";
     openNav();
   } else if( button.classList.contains('buttonClose') ) {
     button.classList.remove('buttonClose');
     button.classList.add('buttonOpen');
-    button.innerHTML = "&#187;";
+    button.innerHTML = "&raquo;";
     closeNav();
   };
 }
