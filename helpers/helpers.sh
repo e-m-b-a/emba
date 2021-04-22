@@ -34,6 +34,7 @@ run_web_reporter_mod_name() {
 }
 
 run_web_reporter_mod_name2() {
+  HTML_PATH="$LOG_DIR""/html-report2"
   MOD_NAME="$1"
   if [[ $HTML -eq 1 ]]; then
     # usually we should only find one file:
@@ -41,7 +42,8 @@ run_web_reporter_mod_name2() {
     for LOG_FILE in "${LOG_FILES[@]}"; do
       generate_report_file "$LOG_FILE"
     done
-   fi
+  fi
+  HTML_PATH="$LOG_DIR""/html-report"
 }
 
 run_web_reporter_build_index() {

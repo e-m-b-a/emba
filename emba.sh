@@ -359,7 +359,9 @@ main()
       print_output "[*] Activate colored log for webreport" "no_log"
     fi
     print_output "[*] Prepare webreport" "no_log"
+    HTML_PATH="$LOG_DIR""/html-report2"
     prepare_report
+    HTML_PATH="$LOG_DIR""/html-report"
   fi
 
   if [[ $LOG_GREP -eq 1 ]] ; then

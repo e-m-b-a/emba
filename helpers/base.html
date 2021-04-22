@@ -8,37 +8,56 @@
 </head>
 <body>
 
-<div class="row">
-  <div class="side">
-    <div class="nav-box">
-      <div class="logo"></div>
-      <h2>Firmware report</h2>
-      <div id="nav">
-          <a id="back" href="index2.html">Main</a>
-          <!-- navigation start -->
-          <!-- navigation end -->
-      </div> 
-    </div>
+<div id="mySidenav" class="side">
+  <div class="logo">
+    <a href="index2.html"><img src="./style2/emba.svg" alt="emba logo"></a>
   </div>
-  <div class="main">
-    <!-- content start -->
-    <!-- content end -->
+  <div id="nav">
+      <a id="back" href="index2.html">Main</a>
+      <!-- navigation start -->
+      <!-- navigation end -->
+  </div> 
+  <div id="button" class="buttonClose" onclick="buttonNav()">
+    &times;
   </div>
+</div>
+<div id="main" class="main">
+  <!-- content start -->
+  <!-- content end -->
 </div>
 
 <script>
-window.onscroll = function() {changeNavigation()};
+window.onload = function () {
+  document.getElementById("button").style.visibility = "visible";
+}
 
-var nav = document.getElementById("nav");
-var sticky = nav.offsetTop;
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("nav").style.visibility = "visible";
+}
 
-function changeNavigation() {
-  if (window.pageYOffset >= sticky - 20) {
-    nav.classList.add("sticky")
-  } else {
-    nav.classList.remove("sticky");
-  }
-} 
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "50px";
+  document.getElementById("mySidenav").scrollTop = 0;
+  document.getElementById("main").style.marginLeft = "50px";
+  document.getElementById("nav").style.visibility = "hidden";
+}
+
+function buttonNav() {
+  var button = document.getElementById("button");
+  if ( button.classList.contains('buttonOpen') ) {
+    button.classList.remove('buttonOpen');
+    button.classList.add('buttonClose');
+    button.innerHTML = "&times;";
+    openNav();
+  } else if( button.classList.contains('buttonClose') ) {
+    button.classList.remove('buttonClose');
+    button.classList.add('buttonOpen');
+    button.innerHTML = "&#187;";
+    closeNav();
+  };
+}
 </script>
 
 </body>
