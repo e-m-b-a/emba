@@ -14,6 +14,8 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Checks files with yara for suspicious patterns.
+export THREAD_PRIO=1
+
 
 S110_yara_check()
 {
@@ -21,6 +23,7 @@ S110_yara_check()
   module_title "Check for code patterns with yara"
   LOG_FILE="$( get_log_file )"
   YARA_CNT=0
+  local WAIT_PIDS_S110=()
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it
@@ -30,15 +33,19 @@ S110_yara_check()
     fi
 
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
-      if [[ -e "$YARA_S_FILE" ]] ; then
-        local S_OUTPUT
-        S_OUTPUT="$(yara -r -w ./dir-combined.yara "$YARA_S_FILE")"
-        if [[ -n "$S_OUTPUT" ]] ; then
-          print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
-          ((YARA_CNT++))
-        fi
+      if [[ "$THREADED" -eq 1 ]]; then
+        yara_check &
+        WAIT_PIDS_S110+=( "$!" )
+        # to fix:
+        YARA_CNT=1
+      else
+        yara_check 
       fi
     done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_S110[@]}"
+    fi
     print_output ""
     print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches in $ORANGE${#FILE_ARR[@]}$NC files."
     echo -e "\\n[*] Statistics:$YARA_CNT" >> "$LOG_FILE"
@@ -53,3 +60,13 @@ S110_yara_check()
   module_end_log "${FUNCNAME[0]}" "$YARA_CNT"
 }
 
+yara_check() {
+  if [[ -e "$YARA_S_FILE" ]] ; then
+    local S_OUTPUT
+    S_OUTPUT="$(yara -r -w ./dir-combined.yara "$YARA_S_FILE")"
+    if [[ -n "$S_OUTPUT" ]] ; then
+      print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
+      ((YARA_CNT++))
+    fi
+  fi
+}

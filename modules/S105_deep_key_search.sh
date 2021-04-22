@@ -22,6 +22,7 @@ S105_deep_key_search()
 
   local DEEP_KEY_COUNTER
   local QUERY_L
+  local WAIT_PIDS_S105
   QUERY_L="$(config_list "$CONFIG_DIR""/deep_key_search.cfg" "")"
   readarray -t STRING_LIST < <(printf '%s' "$QUERY_L")
   for QUERY in "${STRING_LIST[@]}" ; do
@@ -29,19 +30,33 @@ S105_deep_key_search()
     echo
     # FILE_ARR is known from the helper modules
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
-      if [[ -e "$DEEP_S_FILE" ]] ; then
-        local S_OUTPUT
-        S_OUTPUT="$(grep -a -h "$QUERY" -A 2 -D skip "$DEEP_S_FILE" | tr "\000-\011\013-\037\177-\377" "." | cut -c-200 )"
-        if [[ -n "$S_OUTPUT" ]] ; then
-          print_output "[+] ""$(print_path "$DEEP_S_FILE")"
-          print_output "$( indent "$(echo "$S_OUTPUT" | tr -dc '\11\12\15\40-\176' )")"
-          ((DEEP_KEY_COUNTER++))
-          echo
-        fi
+      if [[ "$THREADED" -eq 1 ]]; then
+        deep_key_searcher &
+        WAIT_PIDS_S105+=( "$!" )
+        #max_pids_protection "${WAIT_PIDS_S105[@]}"
+      else
+        deep_key_searcher
       fi
     done
     echo
   done
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S105[@]}"
+    DEEP_KEY_COUNTER=1
+  fi
   module_end_log "${FUNCNAME[0]}" "$DEEP_KEY_COUNTER"
 }
 
+deep_key_searcher() {
+  if [[ -e "$DEEP_S_FILE" ]] ; then
+    local S_OUTPUT
+    S_OUTPUT="$(grep -a -h "$QUERY" -A 2 -D skip "$DEEP_S_FILE" | tr "\000-\011\013-\037\177-\377" "." | cut -c-200 )"
+    if [[ -n "$S_OUTPUT" ]] ; then
+      print_output "[+] ""$(print_path "$DEEP_S_FILE")"
+      print_output "$( indent "$(echo "$S_OUTPUT" | tr -dc '\11\12\15\40-\176' )")"
+      ((DEEP_KEY_COUNTER++))
+      echo
+    fi
+  fi
+}

@@ -225,35 +225,3 @@ detect_root_dir_helper() {
   done
 }
 
-wait_for_pid() {
-  for PID in ${WAIT_PIDS[*]}; do
-    running=1
-    while [[ $running -eq 1 ]]; do
-      echo "." | tr -d "\n"
-      if ! pgrep -v grep | grep -q "$PID"; then
-        running=0
-      fi
-      sleep 1
-    done
-  done
-}
-
-max_pids_protection() {
-  while [[ ${#WAIT_PIDS[@]} -gt 5 ]]; do
-    TEMP_PIDS=()
-    # check for really running PIDs and re-create the array
-    for PID in ${WAIT_PIDS[*]}; do
-      if pgrep -v grep | grep -q "$PID"; then
-        TEMP_PIDS+=( "$PID" )
-      fi
-    done
-
-    if [[ ${#TEMP_PIDS[@]} -gt 5 ]]; then
-      echo "." | tr -d "\n"
-      echo "[*] Waiting for processess ... ${#TEMP_PIDS[@]}"
-      sleep 1
-    fi
-    # recreate the arry with the current running PIDS
-    WAIT_PIDS=("${TEMP_PIDS[@]}")
-  done
-}

@@ -450,7 +450,8 @@ module_start_log() {
 }
 
 # on module end we log that the module is finished in emba.log
-# additionally we can log that emba has nothing found -> this is used for the web reporter
+# additionally we log that emba has nothing found -> this is used for index generation of the web reporter
+# additionally we generate the HTML file of the web reporter if web reporting is enabled
 module_end_log() {
   MODULE_MAIN_NAME="$1"
   MODULE_REPORT_STATE="$2"
@@ -459,7 +460,15 @@ module_end_log() {
     print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
   fi
 
+  if [[ "$MODULE_MAIN_NAME" == "S09_firmware_base_version_check" ]]; then
+    print_output "[*] $MODULE_MAIN_NAME finished - increase number of maximum running modules"
+    export MAX_PIDS=15
+  fi
+
+  run_web_reporter_mod_name "$MODULE_MAIN_NAME"
+
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
   ((MOD_RUNNING--))
   #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }
+

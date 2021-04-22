@@ -99,7 +99,7 @@ run_modules()
         if [[ $THREADING_SET -eq 1 ]]; then
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
-          max_pids_protection
+          max_pids_protection "${WAIT_PIDS[@]}"
         else
           $MODULE_MAIN
         fi
@@ -118,7 +118,7 @@ run_modules()
           if [[ $THREADING_SET -eq 1 ]]; then
             $MODULE_MAIN &
             WAIT_PIDS+=( "$!" )
-            max_pids_protection
+            max_pids_protection "${WAIT_PIDS[@]}"
           else
             $MODULE_MAIN
           fi
@@ -138,7 +138,7 @@ run_modules()
             if [[ $THREADING_SET -eq 1 ]]; then
               $MODULE_MAIN &
               WAIT_PIDS+=( "$!" )
-              max_pids_protection
+              max_pids_protection "${WAIT_PIDS[@]}"
             else
               $MODULE_MAIN
             fi
@@ -150,11 +150,19 @@ run_modules()
   fi
 }
 
+ctrl_c() {
+  print_output "[*] Ctrl+C detected" "no_log"
+  print_output "[*] Cleanup started" "no_log"
+  # now we can unmount the stuff from emulator and delete temporary stuff
+  exit 1
+}
+
 main()
 {
-  INVOCATION_PATH="$(dirname "$0")"
-
   set -a 
+  trap ctrl_c INT
+
+  INVOCATION_PATH="$(dirname "$0")"
 
   export ARCH_CHECK=1
   export CWE_CHECKER=0
@@ -181,6 +189,7 @@ main()
   export USE_DOCKER=0
   export V_FEED=1
   export YARA=1
+  export MAX_PIDS=5             # the maximum modules in parallel -> after S09 is finished this value gets adjusted
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
@@ -442,7 +451,7 @@ main()
 
       # if we running threaded we ware going to wait for the slow guys here
       if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid
+        wait_for_pid "${WAIT_PIDS[@]}"
       fi
 
       if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
@@ -499,7 +508,7 @@ main()
       run_modules "S" "$THREADED" "$HTML"
 
       if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid
+        wait_for_pid "${WAIT_PIDS[@]}"
       fi
     else
       # here we can deal with other non linux things like RTOS specific checks
@@ -508,7 +517,7 @@ main()
       run_modules "R" "$THREADED" "$HTML"
 
       if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid
+        wait_for_pid "${WAIT_PIDS[@]}"
       fi
     fi
 
@@ -533,24 +542,7 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  if [[ $HTML -eq 1 ]]; then
-    module_start_log "Web reporter"
-    LOG_INDICATORS=( p s f )
-    for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
-      mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -name "$LOG_INDICATOR*.txt" | sort)
-      for LOG_FILE in "${LOG_FILES[@]}"; do
-        XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
-        if [[ "$XREPORT" -gt 0 ]]; then
-          #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
-          generate_html_file "$LOG_FILE" 0
-        else
-          #print_output "[+] generating log file with content $LOG_FILE" "no_log"
-          generate_html_file "$LOG_FILE" 1
-        fi
-      done
-    done
-    module_end_log "Web reporter" 1
-  fi
+  run_web_reporter_build_index
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ -f "$HTML_PATH"/index.html ]]; then

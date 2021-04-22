@@ -14,6 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Searches for files with a specified string pattern inside.
+export THREAD_PRIO=1
 
 S103_deep_search()
 {
@@ -22,7 +23,6 @@ S103_deep_search()
 
   local PATTERNS
   PATTERNS="$(config_list "$CONFIG_DIR""/deep_search.cfg" "")"
-  local PATTERN_COUNT
 
   print_output "[*] Patterns: ""$( echo -e "$PATTERNS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
   print_output "[*] Special characters are replaced by a '.' for better readability.\\n"
@@ -36,27 +36,18 @@ S103_deep_search()
 }
 
 deep_pattern_search() {
+  local WAIT_PIDS_S103=()
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     local COUNT=0
     print_output "[*] Searching all files for '""$PATTERN""' ... this may take a while!"
     echo
     for DEEP_S_FILE in "${FILE_ARR[@]}"; do
-      if [[ -e "$DEEP_S_FILE" ]] ; then
-        local S_OUTPUT
-        S_OUTPUT="$(grep -E -n -a -h -o ".{0,25}""$PATTERN"".{0,25}" -D skip "$DEEP_S_FILE" | tr -d '\0' )" 
-        if [[ -n "$S_OUTPUT" ]] ; then
-          print_output "[+] ""$(print_path "$DEEP_S_FILE")"
-          #print_output "[+] $DEEP_S_FILE"
-          mapfile -t OUTPUT_ARR < <(echo "$S_OUTPUT")
-          for O_LINE in "${OUTPUT_ARR[@]}" ; do
-            #print_output "[*] $O_LINE"
-            COLOR_PATTERN="$GREEN""$PATTERN""$NC"
-            O_LINE="${O_LINE//'\n'/.}"
-            print_output "$( indent "$(echo "${O_LINE//$PATTERN/$COLOR_PATTERN}" | tr "\000-\037\177-\377" "." )")"      
-            ((COUNT++))
-          done
-          echo
-        fi
+      if [[ "$THREADED" -eq "X" ]]; then
+        # we have to check this in detail
+        deep_pattern_searcher &
+        WAIT_PIDS_S103+=( "$!" )
+      else
+        deep_pattern_searcher
       fi
     done
     PATTERN_COUNT=("$COUNT" "${PATTERN_COUNT[@]}")
@@ -65,6 +56,30 @@ deep_pattern_search() {
     fi
     echo
   done
+
+  if [[ "$THREADED" -eq "X" ]]; then
+    wait_for_pid "${WAIT_PIDS_S103[@]}"
+  fi
+}
+
+deep_pattern_searcher() {
+  if [[ -e "$DEEP_S_FILE" ]] ; then
+    local S_OUTPUT
+    S_OUTPUT="$(grep -E -n -a -h -o ".{0,25}""$PATTERN"".{0,25}" -D skip "$DEEP_S_FILE" | tr -d '\0' )" 
+    if [[ -n "$S_OUTPUT" ]] ; then
+      print_output "[+] ""$(print_path "$DEEP_S_FILE")"
+      #print_output "[+] $DEEP_S_FILE"
+      mapfile -t OUTPUT_ARR < <(echo "$S_OUTPUT")
+      for O_LINE in "${OUTPUT_ARR[@]}" ; do
+        #print_output "[*] $O_LINE"
+        COLOR_PATTERN="$GREEN""$PATTERN""$NC"
+        O_LINE="${O_LINE//'\n'/.}"
+        print_output "$( indent "$(echo "${O_LINE//$PATTERN/$COLOR_PATTERN}" | tr "\000-\037\177-\377" "." )")"      
+        ((COUNT++))
+      done
+      echo
+    fi
+  fi
 }
 
 deep_pattern_reporter() {
