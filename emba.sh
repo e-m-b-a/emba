@@ -298,6 +298,11 @@ main()
 
   echo
 
+  # check provided paths for validity 
+  check_path_valid "$FIRMWARE_PATH"
+  check_path_valid "$KERNEL_CONFIG"
+  check_path_valid "$LOG_DIR"
+
   if [[ $IN_DOCKER -eq 1 ]] ; then
     # set external path new for docker
     export EXT_DIR="/external"
