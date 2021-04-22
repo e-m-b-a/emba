@@ -18,19 +18,17 @@
 
 P07_firmware_bin_base_analyzer() {
 
-  export PRE_PIDS
-  PRE_PIDS=()
-
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
-  local NEG_LOG
+  local NEG_LOG=0
+  local WAIT_PIDS_P07=()
 
   if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
     export OUTPUT_DIR
     OUTPUT_DIR="$FIRMWARE_PATH_CP"
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
-      WAIT_PIDS+=( "$!" )
+      WAIT_PIDS_P07+=( "$!" )
     else
       os_identification
     fi
@@ -41,7 +39,7 @@ P07_firmware_bin_base_analyzer() {
     if [[ $LINUX_PATH_COUNTER -eq 0 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
         binary_architecture_detection &
-        WAIT_PIDS+=( "$!" )
+        WAIT_PIDS_P07+=( "$!" )
       else
         binary_architecture_detection
       fi
@@ -49,10 +47,10 @@ P07_firmware_bin_base_analyzer() {
   fi
 
   if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid
+    wait_for_pid "${WAIT_PIDS_P07[@]}"
   fi
 
-  if [[ $(wc -l "$TMP_DIR"/p07.tmp | awk '{print $1}') ]] ; then
+  if [[ "$(wc -l "$TMP_DIR"/p07.tmp | awk '{print $1}')" -gt 0 ]] ; then
     NEG_LOG=1
   fi
 
@@ -68,7 +66,7 @@ os_identification() {
   echo "." | tr -d "\n"
   COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c Linux 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_Linux_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c Linux {} \; 2> /dev/null)"
+  COUNTER_Linux_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c Linux {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c Linux)"
   echo "." | tr -d "\n"
@@ -78,7 +76,7 @@ os_identification() {
   echo "." | tr -d "\n"
   COUNTER_FreeBSD="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeBSD 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_FreeBSD_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
+  COUNTER_FreeBSD_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_FreeBSD_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeBSD)"
   echo "." | tr -d "\n"
@@ -88,7 +86,7 @@ os_identification() {
 
   COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "VxWorks\|Wind" 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_VxWorks_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
+  COUNTER_VxWorks_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c -i "VxWorks\|Wind")"
   echo "." | tr -d "\n"
@@ -97,7 +95,7 @@ os_identification() {
 
   COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeRTOS 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_FreeRTOS_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
+  COUNTER_FreeRTOS_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeRTOS)"
   echo "." | tr -d "\n"
@@ -106,7 +104,7 @@ os_identification() {
 
   COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_eCos_EXT="$(find "$LOG_DIR" -type f -name "p05_*" -exec grep -c eCos {} \; 2> /dev/null)"
+  COUNTER_eCos_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -c eCos {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c eCos)"
   echo "." | tr -d "\n"

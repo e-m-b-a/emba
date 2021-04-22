@@ -58,7 +58,7 @@ S45_pass_file_check()
 
           local ROOT_ACCOUNTS
           # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-          ROOT_ACCOUNTS=$(grep -v -E "^#" "$LINE" 2>/dev/null| awk -F: '$3 == 0 { print $1}' 2> /dev/null 2> /dev/null)
+          ROOT_ACCOUNTS=$(grep -v -E "^#" "$LINE" 2>/dev/null| awk -F: '$3 == 0 { print $1}' 2> /dev/null)
 
           local L_BREAK=0
           if [[ "$(echo "$ROOT_ACCOUNTS" | wc -w)" -gt 0 ]] ; then

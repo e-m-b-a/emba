@@ -33,7 +33,7 @@ S115_usermode_emulator() {
     # to protect the host we are going to kill them on a KILL_SIZE limit
     KILL_SIZE="100M"
     # to get rid of all the running stuff we are going to kill it after RUNTIME
-    RUNTIME="10m"
+    RUNTIME="2m"
 
     declare -a MISSING
     declare -a MD5_DONE
@@ -103,7 +103,7 @@ S115_usermode_emulator() {
       done
     done
 
-    cleanup
+    s115_cleanup
     running_jobs
     print_filesystem_fixes
     version_detection
@@ -132,6 +132,20 @@ version_detection() {
   sub_module_title "Software component and version detection started"
 
   while read -r VERSION_LINE; do 
+    if [[ $THREADING -eq 1 ]]; then
+      version_detection_thread &
+      WAIT_PIDS_S115+=( "$!" )
+    else
+      version_detection_thread
+    fi
+  done < "$CONFIG_DIR"/bin_version_strings.cfg
+  echo
+  if [[ $THREADED -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S115[@]}"
+  fi
+}
+
+version_detection_thread() {
     BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
@@ -171,8 +185,6 @@ version_detection() {
         fi
       done
     fi
-  done < "$CONFIG_DIR"/bin_version_strings.cfg 
-  echo
 }
 
 copy_firmware() {
@@ -208,18 +220,19 @@ running_jobs() {
   fi
 }
 
-cleanup() {
+s115_cleanup() {
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
     print_output "[*] Terminating qemu processes - check it with ps"
-    mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
-    for PID in "${CJOBS[@]}"; do
-      print_output "[*] Terminating process ""$PID"
-      kill "$PID" 2> /dev/null
-    done
+    killall -9 --quiet -r .*qemu.*sta.*
+    #mapfile -t CJOBS < <(pgrep -f "$EMULATOR")
+    #for PID in "${CJOBS[@]}"; do
+    #  print_output "[*] Terminating process ""$PID"
+    #  kill "$PID" 2> /dev/null
+    #done
   fi
 
   CJOBS_=$(pgrep qemu-)
@@ -438,7 +451,7 @@ emulate_binary() {
   
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
-  killall --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
+  killall -9 --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
   
   # reset the terminal - after all the uncontrolled emulation it is typically broken!
   reset
