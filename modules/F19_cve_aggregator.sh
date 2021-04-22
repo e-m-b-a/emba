@@ -497,12 +497,17 @@ aggregate_versions() {
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # remove color codes:
     VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-    # as this is just a background job we always thread it
-    prepare_version_data &
-    WAIT_PIDS_F19+=( "$!" )
+    if [[ "$THREADED" -eq 1 ]]; then
+      prepare_version_data &
+      WAIT_PIDS_F19+=( "$!" )
+    else
+      prepare_version_data
+    fi
   done
 
-  wait_for_pid "${WAIT_PIDS_F19[@]}"
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_F19[@]}"
+  fi
 
   # sorting and unique our versions array:
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
