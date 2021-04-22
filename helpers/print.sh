@@ -466,6 +466,7 @@ module_end_log() {
   fi
 
   run_web_reporter_mod_name "$MODULE_MAIN_NAME"
+  run_web_reporter_mod_name2 "$MODULE_MAIN_NAME"
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
   ((MOD_RUNNING--))

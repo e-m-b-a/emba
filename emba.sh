@@ -352,10 +352,14 @@ main()
     exit 1
   fi
 
-  # Change log output to color for web report
-  if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
-    FORMAT_LOG=1
-    print_output "[*] Activate colored log for webreporter" "no_log"
+  # Change log output to color for web report and prepare report
+  if [[ $HTML -eq 1 ]] ; then
+    if [[ $FORMAT_LOG -eq 0 ]] ; then
+      FORMAT_LOG=1
+      print_output "[*] Activate colored log for webreport" "no_log"
+    fi
+    print_output "[*] Prepare webreport" "no_log"
+    prepare_report
   fi
 
   if [[ $LOG_GREP -eq 1 ]] ; then

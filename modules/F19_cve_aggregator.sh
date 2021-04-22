@@ -613,26 +613,6 @@ cve_db_lookup() {
       fi
     fi
 
-<<<<<<< HEAD
-      CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
-      BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-      VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
-      # we do not deal with output formatting the usual way -> we use printf
-      if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *Source* ]]; then
-          printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
-        else
-          printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
-        fi
-        ((HIGH_CVE_COUNTER++))
-      elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *Source* ]]; then
-          printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
-        else
-          printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
-        fi
-        ((MEDIUM_CVE_COUNTER++))
-=======
     CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
     BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
     VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
@@ -640,13 +620,9 @@ cve_db_lookup() {
     if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
       if [[ "$EXPLOIT" == *Source* ]]; then
         printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
->>>>>>> upstream/master
       else
         printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
       fi
-<<<<<<< HEAD
-    done
-=======
       ((HIGH_CVE_COUNTER++))
     elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
       if [[ "$EXPLOIT" == *Source* ]]; then
@@ -664,7 +640,7 @@ cve_db_lookup() {
       ((LOW_CVE_COUNTER++))
     fi
   done
->>>>>>> upstream/master
+
 
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
@@ -758,10 +734,6 @@ generate_cve_details() {
       EXPLOITS=$(echo "$STATS" | cut -d\| -f2 | sed -e 's/\ //g')
       CVEs=$(echo "$STATS" | cut -d\| -f1 | sed -e 's/\ //g')
   
-<<<<<<< HEAD
-      # we do not deal with output formatting the usual way -> we use printf
-=======
->>>>>>> upstream/master
       if [[ -n "$CVEs" && -n "$EXPLOITS" ]]; then
         if [[ "$CVEs" -gt 0 || "$EXPLOITS" -gt 0 ]]; then
           if [[ "$EXPLOITS" -gt 0 ]]; then

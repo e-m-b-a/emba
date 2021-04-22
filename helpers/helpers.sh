@@ -33,6 +33,17 @@ run_web_reporter_mod_name() {
    fi
 }
 
+run_web_reporter_mod_name2() {
+  MOD_NAME="$1"
+  if [[ $HTML -eq 1 ]]; then
+    # usually we should only find one file:
+    mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
+    for LOG_FILE in "${LOG_FILES[@]}"; do
+      generate_report_file "$LOG_FILE"
+    done
+   fi
+}
+
 run_web_reporter_build_index() {
   if [[ $HTML -eq 1 ]]; then
     #print_output "[*] Building index file for web report"
