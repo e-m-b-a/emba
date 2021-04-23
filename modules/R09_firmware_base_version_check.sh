@@ -58,7 +58,7 @@ detect_binary_versions() {
 
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file."
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (static)."
           VERSIONS_DETECTED+=("$VERSION_FINDER")
         fi
         echo "." | tr -d "\n"
@@ -68,7 +68,7 @@ detect_binary_versions() {
 
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
-        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files."
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in extracted firmware files (static)."
         VERSIONS_DETECTED+=("$VERSION_FINDER")
       fi
       echo "." | tr -d "\n"
