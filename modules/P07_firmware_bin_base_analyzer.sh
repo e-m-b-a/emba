@@ -15,6 +15,7 @@
 
 # Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, and Linux. 
 #               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
+# Todo: Cleanup and optimise function os_identification - currently it has too many code duplicates!
 
 P07_firmware_bin_base_analyzer() {
 
@@ -127,6 +128,14 @@ os_identification() {
   COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_FW))
   echo "." | tr -d "\n"
 
+  # uc/OS devicees
+  COUNTER_ucOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c "uC/OS" 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_ucOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c "uC/OS")"
+  echo "." | tr -d "\n"
+  COUNTER_ucOS=$((COUNTER_ucOS+COUNTER_ucOS_FW))
+  echo "." | tr -d "\n"
+
   print_output "\\n"
   print_output "[*] Trying to identify a Linux root path in $(print_path "$OUTPUT_DIR")"
   # just to check if there is somewhere a linux filesystem in the extracted stuff
@@ -134,12 +143,13 @@ os_identification() {
   export LINUX_PATH_COUNTER
   LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
-  if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD)) -gt 0 ]] ; then
+  if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS)) -gt 0 ]] ; then
     print_output ""
     print_output "$(indent "$(orange "Operating system detection:")")"
     if [[ $COUNTER_VxWorks -gt 5 ]] ; then print_output "$(indent "$(orange "VxWorks detected\t\t""$COUNTER_VxWorks")")"; fi
     if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected\t\t""$COUNTER_FreeRTOS")")"; fi
     if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected\t\t""$COUNTER_eCos")")"; fi
+    if [[ $COUNTER_ucOS -gt 0 ]] ; then print_output "$(indent "$(orange "uC/OS detected\t\t""$COUNTER_ucOS")")"; fi
     if [[ $COUNTER_FreeBSD -gt 0 ]] ; then print_output "$(indent "$(orange "FreeBSD detected\t\t""$COUNTER_FreeBSD")")"; fi
     if [[ $COUNTER_Linux -gt 5 && $LINUX_PATH_COUNTER -gt 1 ]] ; then 
       print_output "$(indent "$(green "Linux detected\t\t""$COUNTER_Linux""\t-\tverified Linux operating system detected")")"
@@ -152,7 +162,7 @@ os_identification() {
     elif [[ $COUNTER_SIPROTEC -gt 10 ]] ; then
       print_output "$(indent "$(orange "SIPROTEC detected\t\t""$COUNTER_SIPROTEC")")";
     fi
-    echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD))" >> "$TMP_DIR"/p07.tmp
+    echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS))" >> "$TMP_DIR"/p07.tmp
   fi
 
   echo

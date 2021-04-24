@@ -399,6 +399,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//dpkg-split/debian:dpkg}"
     VERSION_lower="${VERSION_lower//dpkg-deb/debian:dpkg}"
     VERSION_lower="${VERSION_lower//dpkg-trigger/debian:dpkg}"
+    # sisco mms lite (MMS-LITE-80X-001)
+    # we currently have no version data
+    VERSION_lower="${VERSION_lower//mms-lite-80x-001/sisco:mms-lite}"
     # ncurses -> gnu:ncurses
     VERSION_lower="${VERSION_lower//ncurses/gnu:ncurses}"
     #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
@@ -497,27 +500,36 @@ aggregate_versions() {
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # remove color codes:
     VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-    # as this is just a background job we always thread it
-    prepare_version_data &
-    WAIT_PIDS_F19+=( "$!" )
+    if [[ "$THREADED" -eq 1 ]]; then
+      prepare_version_data &
+      WAIT_PIDS_F19+=( "$!" )
+    else
+      prepare_version_data
+    fi
   done
 
-  wait_for_pid "${WAIT_PIDS_F19[@]}"
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_F19[@]}"
+  fi
 
   # sorting and unique our versions array:
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  mapfile -t VERSIONS_CLEANED < <(sort -u "$LOG_DIR"/aggregator/versions.tmp)
-  rm "$LOG_DIR"/aggregator/versions.tmp 2>/dev/null
+  if [[ -f "$LOG_DIR"/aggregator/versions.tmp ]]; then
+    mapfile -t VERSIONS_CLEANED < <(sort -u "$LOG_DIR"/aggregator/versions.tmp)
+    rm "$LOG_DIR"/aggregator/versions.tmp 2>/dev/null
 
-  if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
-    print_output "[*] Software inventory aggregated:"
-    for VERSION in "${VERSIONS_CLEANED[@]}"; do
-      print_output "[+] Found Version details (aggregated): ""$VERSION"
-    done
-  else
+    if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
+      print_output "[*] Software inventory aggregated:"
+      for VERSION in "${VERSIONS_CLEANED[@]}"; do
+        print_output "[+] Found Version details (aggregated): ""$VERSION"
+      done
+    else
       print_output "[-] No Version details found."
+    fi
+    print_output ""
+  else
+    print_output "[-] No Version details found."
   fi
-  print_output ""
 }
 
 generate_special_log() {

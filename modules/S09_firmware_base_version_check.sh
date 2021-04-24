@@ -67,9 +67,13 @@ S09_firmware_base_version_check() {
         echo "." | tr -d "\n"
       fi  
 
-      # this will burn the CPU but in most cases the time of testing is cut into half
-      bin_string_checker &
-      WAIT_PIDS_S09+=( "$!" )
+      if [[ "$THREADED" -eq 1 ]]; then
+        # this will burn the CPU but in most cases the time of testing is cut into half
+        bin_string_checker &
+        WAIT_PIDS_S09+=( "$!" )
+      else
+        bin_string_checker
+      fi
 
      echo "." | tr -d "\n"
     else
@@ -91,7 +95,10 @@ S09_firmware_base_version_check() {
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
 
   echo "." | tr -d "\n"
-  wait_for_pid "${WAIT_PIDS_S09[@]}"
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S09[@]}"
+  fi
 
   VERSIONS_DETECTED=$(grep -c "Version information found" "$( get_log_file )")
 
