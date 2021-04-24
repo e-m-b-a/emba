@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2001
 
 # emba - EMBEDDED LINUX ANALYZER
 #
@@ -18,7 +19,6 @@ STYLE_PATH="/style"
 # variables for html style
 P_START="<pre>"
 P_END="</pre>"
-SPAN="<span>"
 SPAN_RED="<span class=\"red\">"
 SPAN_GREEN="<span class=\"green\">"
 SPAN_ORANGE="<span class=\"orange\">"
@@ -38,12 +38,6 @@ SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\">"
 ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
 ENTROPY_IMAGE="<img id=\"entropy\" src=\".$STYLE_PATH/entropy.png\">"
-
-update_navigation()
-{
-  echo
-
-}
 
 add_color_tags()
 {
@@ -71,7 +65,8 @@ add_color_tags()
         LINE="${LINE//$COLOR_ELEM/}"
       fi
     done
-    echo "$( strip_color_tags "$LINE")"
+    LINE="$(strip_color_tags "$LINE")"
+    echo "$LINE"
   fi  
 }
 
@@ -96,15 +91,15 @@ generate_report_file()
 {
   FILE=$1
   HTML_FILE="$(basename "${FILE%.txt}"".html")"
-  cp "./helpers/base.html" "$A_HTML_PATH""/""$HTML_FILE"
+  cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
   MODUL_NAME=""
 
   # parse log content and add to html file
   readarray -t FILE_LINES < "$FILE"
-  LINE_NUMBER=$(grep -n "content start" "$A_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
-  LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$A_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
+  LINE_NUMBER=$(grep -n "content start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
+  LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
   if [[ "$HTML_FILE" == "f50"* ]] ; then
-    LINE_NUMBER_INDEX=$(grep -n "content start" "$A_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
+    LINE_NUMBER_INDEX=$(grep -n "content start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
   fi
   PREV_LINE=""
   for LINE in "${FILE_LINES[@]}" ; do
@@ -116,21 +111,22 @@ generate_report_file()
       if [[ "$(strip_color_tags "$LINE" )" == "=================================================================" ]] && [[ "$(strip_color_tags "$PREV_LINE" )" == "[+] "* ]]; then
         MODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/\[+\]\ //g")"
         if [[ -n "$MODUL_NAME" ]] ; then
-          LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo $MODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_DOUBLE""$LINK_END"
+          LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_DOUBLE""$LINK_END"
           # add link to index navigation
           add_link_to_index "$HTML_FILE" "$MODUL_NAME"
+          ((LINE_NUMBER_INDEX++))
           # add module anchor to navigation
-          NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$(echo $MODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
-          sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$A_HTML_PATH""/""$HTML_FILE"
+          NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
+          sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
           ((LINE_NUMBER++))
           ((LINE_NUMBER_REP_NAV++))
         fi
       elif [[ "$(strip_color_tags "$LINE" )" == "-----------------------------------------------------------------" ]] && [[ "$(strip_color_tags "$PREV_LINE" )" == *"==&gt; "* ]]; then
         SUBMODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/==&gt; //g")"
         if [[ -n "$SUBMODUL_NAME" ]] ; then
-          LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo $SUBMODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_MONO""$LINK_END"
-          SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$(echo $NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
-          sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$A_HTML_PATH""/""$HTML_FILE"
+          LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_MONO""$LINK_END"
+          SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
+          sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
           ((LINE_NUMBER++))
           ((LINE_NUMBER_REP_NAV++))
         fi
@@ -140,11 +136,11 @@ generate_report_file()
       # add link tags to links
       HTML_LINE="$(add_link_tags "$HTML_LINE")"
       ((LINE_NUMBER++))
-      sed -i "$LINE_NUMBER""i""$P_START""$HTML_LINE""$P_END" "$A_HTML_PATH""/""$HTML_FILE"
+      sed -i "$LINE_NUMBER""i""$P_START""$HTML_LINE""$P_END" "$ABS_HTML_PATH""/""$HTML_FILE"
       # add aggregator lines to index page
       if [[ "$HTML_FILE" == "f50"* ]] ; then
-        sed -i "$LINE_NUMBER_INDEX""i""$P_START""$HTML_LINE""$P_END" "$A_HTML_PATH""/""$INDEX_FILE"
         ((LINE_NUMBER_INDEX++))
+        sed -i "$LINE_NUMBER_INDEX""i""$P_START""$HTML_LINE""$P_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
       fi
       PREV_LINE="$LINE"
     fi
@@ -156,9 +152,9 @@ add_link_to_index() {
   insert_line() {
     SEARCH_VAL="$1"
     MODUL_NAME="$2"
-    LINE_NUMBER_NAV=$(grep -n "$SEARCH_VAL" "$A_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
+    LINE_NUMBER_NAV=$(grep -n "$SEARCH_VAL" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
     REP_NAV_LINK="$(echo "$MODUL_INDEX_LINK" | sed -e "s@LINK@./$HTML_FILE@g" | sed -e "s@CLASS@$CLASS@g" | sed -e "s@DATA@$DATA@g")"
-    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$MODUL_NAME""$LINK_END" "$A_HTML_PATH""/""$INDEX_FILE"
+    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   }
 
   HTML_FILE="$1"
@@ -166,7 +162,7 @@ add_link_to_index() {
   DATA="$( echo "$HTML_FILE" | cut -d "_" -f 1)"
   CLASS="${DATA:0:1}"
 
-  readarray -t INDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' $A_HTML_PATH/$INDEX_FILE | sed -e '1d;$d' | grep -P -o '(?<=data=\").*?(?=\")')
+  readarray -t INDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' "$ABS_HTML_PATH""/""$INDEX_FILE" | sed -e '1d;$d' | grep -P -o '(?<=data=\").*?(?=\")')
   readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep "$CLASS")
 
   if [[ ${#INDEX_NAV_GROUP_ARR[@]} -eq 0 ]] ; then
@@ -177,8 +173,8 @@ add_link_to_index() {
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
       if [[ $COUNT -eq 0 ]] && [[ ${DATA:1} -lt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
-      elif [[ ${DATA:1} -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] && [[ ${DATA:1} -lt ${INDEX_NAV_GROUP_ARR[$(($COUNT+1))]:1} ]] ; then
-        insert_line "${INDEX_NAV_GROUP_ARR[$(($COUNT+1))]}" "$MODUL_NAME"
+      elif [[ ${DATA:1} -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] && [[ ${DATA:1} -lt ${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1} ]] ; then
+        insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
       elif [[ $COUNT -eq $((${#INDEX_NAV_GROUP_ARR[@]}-1)) ]] && [[ ${DATA:1} -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
       fi
@@ -188,33 +184,26 @@ add_link_to_index() {
 
 update_index()
 {
-  LINE_NUMBER_ENTROPY=$(grep -n "entropy.png" "$A_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
+  LINE_NUMBER_ENTROPY=$(grep -n "entropy.png" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
   if [[ "$LINE_NUMBER" -ne 0 ]] ; then 
     readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
     if [[ -f "${ENTROPY_IMAGES_ARR[0]}" ]] ; then
-      cp "${ENTROPY_IMAGES_ARR[0]}" "$A_HTML_PATH$STYLE_PATH/entropy.png"
-      sed -i "$(($LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$A_HTML_PATH""/""$INDEX_FILE"
+      cp "${ENTROPY_IMAGES_ARR[0]}" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"
+      sed -i "$((LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$ABS_HTML_PATH""/""$INDEX_FILE"
     fi
   fi
 }
 
-generate_index()
-{
-  FILE=$1
-  HTML_FILE="$INDEX_FILE"
-  cp "./helpers/base.html" "$A_HTML_PATH""/""$HTML_FILE"
-  sed -i 's/back/back hidden/g' "$A_HTML_PATH""/""$HTML_FILE"
-}
-
 prepare_report()
 {
-  A_HTML_PATH="$(abs_path "$HTML_PATH")"
+  ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
   
-  if [ ! -d "$A_HTML_PATH$STYLE_PATH" ] ; then
-    mkdir "$A_HTML_PATH$STYLE_PATH"
-    cp "$HELP_DIR/style.css" "$A_HTML_PATH$STYLE_PATH/style.css"
-    cp "$HELP_DIR/emba.svg" "$A_HTML_PATH$STYLE_PATH/emba.svg"
+  if [ ! -d "$ABS_HTML_PATH$STYLE_PATH" ] ; then
+    mkdir "$ABS_HTML_PATH$STYLE_PATH"
+    cp "$HELP_DIR/style.css" "$ABS_HTML_PATH$STYLE_PATH/style.css"
+    cp "$HELP_DIR/emba.svg" "$ABS_HTML_PATH$STYLE_PATH/emba.svg"
   fi
 
-  generate_index
+  cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  sed -i 's/back/back hidden/g' "$ABS_HTML_PATH""/""$INDEX_FILE"
 }

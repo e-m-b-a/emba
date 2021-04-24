@@ -39,22 +39,22 @@ a.submodul:hover {
 }
 
 a.p {
-  background:linear-gradient(270deg,#088a83 10px,rgba(0,0,0,0));
+  background:linear-gradient(270deg,#088a83 10px,rgba(0,0,0,0) 0px);
   padding-right:18px!important;
 }
 
 a.s {
-  background:linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0));
+  background:linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0) 0px);
   padding-right:18px!important;
 }
 
 a.r {
-  background:linear-gradient(270deg,#99079e 10px,rgba(0,0,0,0));
+  background:linear-gradient(270deg,#99079e 10px,rgba(0,0,0,0) 0px);
   padding-right:18px!important;
 }
 
 a.f {
-  background:linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0));
+  background:linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0) 0px);
   padding-right:18px !important;
 }
 
