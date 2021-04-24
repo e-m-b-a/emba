@@ -1,99 +1,235 @@
-/*
-
-emba - EMBEDDED LINUX ANALYZER
-
-Copyright 2020-2021 Siemens AG
-
-emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
-welcome to redistribute it under the terms of the GNU General Public License.
-See LICENSE file for usage of this software.
-
-emba is licensed under GPLv3
-
-Author(s): Stefan Haboeck
-
-*/
-
 * {
-  box-sizing:border-box;
+  box-sizing: border-box;
 }
 
 body {
+  font-family: monospace;
+  background-color: #222;
+  margin: 0;
+}
+  
+/* Header/logo Title */
+.header {
+  padding: 80px;
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+}
+
+/* Increase the font size of the heading */
+.header h1 {
+  font-size: 40px;
+}
+
+/* Create two unequal columns that sits next to each other */
+/* Sidebar/left column */
+.side {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #2d2d2d;
+  overflow-y: scroll;
+  transition: 0.5s;
+  height: 100%;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.side::-webkit-scrollbar {
+  display: none;
+}
+
+/* Main column */
+.main {   
+  padding: 20px;
+  color: white;
+  transition: margin-left .5s;
+  margin-left: 250px;
+  overflow: scroll;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.main::-webkit-scrollbar {
+  display: none;
+}
+
+.logo {
+  background-color: #fff;
+  width: 100%;
+  padding: 5%;
+}
+
+.inherit {
+  width: inherit;
+}
+
+/* Footer */
+.footer {
+  padding: 20px;
+  text-align: center;
+  background: #ddd;
+}
+
+/* Style the nav */
+#nav {
+  overflow: hidden;
+  visibility: show;
+  padding-bottom: 50px;
+}
+
+/* Nav links */
+#nav a {
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 8px;
+  text-decoration: none;
+}
+
+.back {
+  background-color: #2d6029 !important;
+}
+
+.back:hover {
+  background-color: #377732 !important;
+}
+
+.hidden {
+  visibility: hidden;
+  height: 0px;
+  padding: 0px !important;
+}
+
+span {
+  white-space: pre-wrap;
+}
+
+pre {
   margin:0;
+  font-size: 16px;
 }
 
-body > header {
-  display:flex;
-  flex-flow:row nowrap;
-  background-color:#FAF9F4;
+.red {
+  color: #ff0000;
 }
 
-h1 {
-  text-align:center;
+.green {
+  color: #00ff00;
 }
 
-h3 {
-  text-align:center;
+.orange {
+  color: #ff9900;
 }
 
-header {
-  align-items:center;
+.blue {
+  color: #0000ff;
 }
 
-html {
-  height:100%;
-  font:16px "Courier New", Courier, monospace;
+.magenta {
+  color: #ff99ff;
 }
 
-li {
-  text-align:center;
-  border-bottom:1px solid #555;
+.cyan {
+  color: #0099ff;
 }
 
-li a {
-  display:block;
-  color:#999;
-  text-decoration:none;
-  padding:8px 16px;
+.bold {
+  font-weight: bold;
 }
 
-li a:hover {
-  background-color:#555;
-  color:#FFF;
+.italic {
+  font-style: italic;
 }
 
-ul {
-  list-style-type:none;
-  width:20%;
-  background-color:#333;
-  height:100%;
-  position:fixed;
-  overflow:auto;
-  border:1px solid #555;
-  font-size:13px;
-  margin:0;
-  padding:0;
+hr.mono {
+  border: 0;
+  border-top: 2px solid #9f9f9f;
 }
 
-.headline {
-  padding-left:5%;
-  padding-right:15%;
-  flex:3;
+hr.double {
+  border: 0;
+  border-top: 5px double #9f9f9f;
 }
 
-.main {
-  margin-left:20%;
-  margin-bottom:5%;
-  font-size:13px;
-  padding:1px 15px;
+pre a {   
+  color: white;
 }
 
-.pictureleft {
-  flex:2;
-  padding:.5% 5%;
+pre a:hover {   
+  color: rgb(190, 133, 216);
 }
 
-.pictureright {
-  padding-left:5%;
-  flex:1;
+a.modul {
+  background-color: #333;
+}
+
+a.modul:hover {
+  background-color: #4e4e4e;
+}
+
+a.submodul {
+  background-color: #555;
+}
+
+a.submodul:hover {
+  background-color: #6e6e6e;
+}
+
+#button {
+  width: 50px;
+  height: 50px;
+  font-size: 40px;
+  color: #fff;
+  text-align: center;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  visibility: hidden;
+  cursor: pointer;
+}
+
+.buttonOpen {
+  background-color: #096b09;
+}
+
+.buttonOpen:hover {
+  background-color: #0b860b;
+}
+
+.buttonClose {
+  background-color: #821c1c;
+}
+
+.buttonClose:hover {
+  background-color: #a52323;
+}
+
+a.f {
+  background: linear-gradient(270deg, #CC410B 10px, rgba(0, 0, 0, 0) 0);
+  padding-right: 18px !important;
+}
+
+a.p {
+  background: linear-gradient(270deg, #088a83 10px, rgba(0, 0, 0, 0) 0);
+  padding-right: 18px !important;
+}
+
+a.s {
+  background: linear-gradient(270deg, #079e07 10px, rgba(0, 0, 0, 0) 0);
+  padding-right: 18px !important;
+}
+
+a.r {
+  background: linear-gradient(270deg, #99079e 10px, rgba(0, 0, 0, 0) 0);
+  padding-right: 18px !important;
+}
+
+#entropy {
+  margin: 15px 0;
+  width: 100%;
+  max-width: 567px;
 }

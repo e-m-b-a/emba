@@ -21,44 +21,7 @@ run_web_reporter_mod_name() {
     # usually we should only find one file:
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
     for LOG_FILE in "${LOG_FILES[@]}"; do
-      XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
-      if [[ "$XREPORT" -gt 0 ]]; then
-        #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 0
-      else
-        #print_output "[+] generating log file with content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 1
-      fi
-    done
-   fi
-}
-
-run_web_reporter_mod_name2() {
-  HTML_PATH="$LOG_DIR""/html-report2"
-  MOD_NAME="$1"
-  if [[ $HTML -eq 1 ]]; then
-    # usually we should only find one file:
-    mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
-    for LOG_FILE in "${LOG_FILES[@]}"; do
       generate_report_file "$LOG_FILE"
-    done
-  fi
-  HTML_PATH="$LOG_DIR""/html-report"
-}
-
-run_web_reporter_build_index() {
-  if [[ $HTML -eq 1 ]]; then
-    #print_output "[*] Building index file for web report"
-    LOG_INDICATORS=( p s f )
-    for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
-      mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$LOG_INDICATOR*.txt" | sort)
-      for LOG_FILE in "${LOG_FILES[@]}"; do
-        XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
-        if [[ "$XREPORT" -eq 0 ]]; then
-          #print_output "[+] Generating index file with content $LOG_FILE" "no_log"
-          build_index_file "$LOG_FILE"
-        fi
-      done
     done
   fi
 }

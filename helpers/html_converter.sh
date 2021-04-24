@@ -10,258 +10,211 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Stefan Haboeck
+# Author(s): Pascal Eckmann, Stefan Haboeck
 
-declare -a MENU_LIST
+INDEX_FILE="index.html"
+STYLE_PATH="/style"
 
-build_index_file(){
-  
-  local TOP10_FORMAT_COUNTER
-  local HTML_FILE
+# variables for html style
+P_START="<pre>"
+P_END="</pre>"
+SPAN="<span>"
+SPAN_RED="<span class=\"red\">"
+SPAN_GREEN="<span class=\"green\">"
+SPAN_ORANGE="<span class=\"orange\">"
+SPAN_BLUE="<span class=\"blue\">"
+SPAN_MAGENTA="<span class=\"magenta\">"
+SPAN_CYAN="<span class=\"cyan\">"
+SPAN_BOLD="<span class=\"bold\">"
+SPAN_ITALIC="<span class=\"italic\">"
+SPAN_END="</span>"
+HR_MONO="<hr class=\"mono\" />"
+HR_DOUBLE="<hr class=\"double\" />"
+BR="<br />"
+LINK="<a href=\"LINK\" target=\"\_blank\" >"
+MODUL_LINK="<a class=\"modul\" href=\"LINK\">"
+MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\">"
+SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\">"
+ANCHOR="<a id=\"ANCHOR\">"
+LINK_END="</a>"
+ENTROPY_IMAGE="<img id=\"entropy\" src=\".$STYLE_PATH/entropy.png\">"
+
+update_navigation()
+{
+  echo
+
+}
+
+add_color_tags()
+{
+  LINE="$1"
+  if [[ -z "$LINE" ]] ; then
+    echo "$BR"
+  else
+    for (( COUNT=0; COUNT<${#LINE}; COUNT++ )) ; do
+      if [[ "${LINE:$COUNT:1}" == "" ]] ; then
+        COLOR_ELEM="$( echo "${LINE:$COUNT}" | cut -d 'm' -f 1)""m"
+        readarray -t COLOR_ELEM_ARR < <(echo -e "$COLOR_ELEM" | sed -e 's/\x1b\[//' | sed -e 's/m//' | sed -e 's/;/\n/g' | sed '1!G;h;$!d')
+        for ELEM in "${COLOR_ELEM_ARR[@]}" ; do
+          case "$ELEM" in
+            0) LINE="${LINE:0:$COUNT}""$SPAN_END""${LINE:$COUNT}";;
+            1) LINE="${LINE:0:$COUNT}""$SPAN_BOLD""${LINE:$COUNT}";;
+            3) LINE="${LINE:0:$COUNT}""$SPAN_ITALIC""${LINE:$COUNT}";;
+            31) LINE="${LINE:0:$COUNT}""$SPAN_RED""${LINE:$COUNT}";;
+            32) LINE="${LINE:0:$COUNT}""$SPAN_GREEN""${LINE:$COUNT}";;
+            33) LINE="${LINE:0:$COUNT}""$SPAN_ORANGE""${LINE:$COUNT}";;
+            34) LINE="${LINE:0:$COUNT}""$SPAN_BLUE""${LINE:$COUNT}";;
+            35) LINE="${LINE:0:$COUNT}""$SPAN_MAGENTA""${LINE:$COUNT}";;
+            36) LINE="${LINE:0:$COUNT}""$SPAN_CYAN""${LINE:$COUNT}";;
+          esac
+        done
+        LINE="${LINE//$COLOR_ELEM/}"
+      fi
+    done
+    echo "$( strip_color_tags "$LINE")"
+  fi  
+}
+
+add_link_tags() {
+  LINE="$1"
+  F_LINK="$(echo "$LINE" | grep -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' )"
+  if [[ -n "$F_LINK" ]] ; then
+    HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$F_LINK@g")""$F_LINK""$LINK_END"
+    LINE="$(echo "$LINE" | sed -e "s@$F_LINK@$HTML_LINK@g")"
+  fi
+  echo "$LINE"
+}
+
+strip_color_tags()
+{
+  LINE="$(echo "$1" | sed 's/\x1b\[[0-9;]*m//g' )"
+  LINE="$(echo "$LINE" | tr -d '\000-\010\013\014\016-\037' )"
+  echo "$LINE"
+}
+
+generate_report_file()
+{
   FILE=$1
-  FILENAME=$(basename "$FILE")
   HTML_FILE="$(basename "${FILE%.txt}"".html")"
-  COLORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
-  
-  if [[ ${FILENAME%.txt} == "s05"* ]] || [[ ${FILENAME%.txt} == "s25"* ]]; then
-    if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-      readarray -t STRING_LIST <"$FILE"
-      INDEX_CONTENT_ARR+=("${STRING_LIST[@]}")
-    fi
-  elif [[ ${FILENAME%.txt} == "f50"* ]]; then
-    if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-      readarray -t STRING_LIST <"$FILE"
-      INDEX_CONTENT_ARR=("${STRING_LIST[@]}")
-    fi
-  fi
- 
-  MENU_LIST+=("<li><a href=\"$HTML_FILE\">$COLORLESS_FILE_LINE</a></li>")
+  cp "./helpers/base.html" "$A_HTML_PATH""/""$HTML_FILE"
+  MODUL_NAME=""
 
-  if [ ${#FILENAMES[@]} -ne 0 ]; then
-    FILENAMES[${#FILENAMES[@]}]="${FILENAME%.txt}"
-  else
-    FILENAMES[0]="${FILENAME%.txt}"
+  # parse log content and add to html file
+  readarray -t FILE_LINES < "$FILE"
+  LINE_NUMBER=$(grep -n "content start" "$A_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
+  LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$A_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
+  if [[ "$HTML_FILE" == "f50"* ]] ; then
+    LINE_NUMBER_INDEX=$(grep -n "content start" "$A_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
   fi
-
-  echo "$HTML_FILE_HEADER<div><ul>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
-      	
-  if [[ -n ${MENU_LIST[*]} ]]; then
-    for OUTPUT in "${MENU_LIST[@]}"; do
-      echo -e "$OUTPUT" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null	
-    done
-  fi
-  
-  if test -f "$ABS_HTML_PATH""/collection.html"; then
-    echo "<li><a href=""collection.html"">""Nothing found""</a></li>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
-  fi
-  
-  echo "</ul></div><div class=\"main\">"| tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
-  if [[ ${FILENAME%.txt} != "f"* ]]; then
-    FW_PATH_PRINT="$(echo -e "$(basename "$FIRMWARE_PATH" )" | sed 's/</\&lt;/g' )"
-    ARCH_PRINT="$(echo -e "$ARCH" | sed 's/</\&lt;/g' )"
-    EMBA_COMMAND_PRINT="$(echo -e "$EMBA_COMMAND" | sed 's/</\&lt;/g' )"
-    echo "<h2>[[0;34m+[0m] [0;36m[1mGeneral information[0m[1m[0m</h2>File: ""$FW_PATH_PRINT""<br>Architecture: ""$ARCH_PRINT""<br>""Date: $(date) <br>""Duration time: ""$(date -d@$SECONDS -u +%H:%M:%S)"" <br>emba Command: ""$EMBA_COMMAND_PRINT"" <br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
-  fi
-     	
-  i=0
-  TOP10_FORMAT_COUNTER=0
-  if [[ -n ${INDEX_CONTENT_ARR[*]} ]]; then
-    for OUTPUT in "${INDEX_CONTENT_ARR[@]}"; do
-      OUTPUT="$(echo -e "$OUTPUT" | sed "s/</\&lt;/g")"
-      if [[ "$OUTPUT" == *"entropy.png"* ]]; then
-        IFS=':' read -r -a "FILE_LINE_ARR" <<< "$OUTPUT"
-        OUTPUT="${FILE_LINE_ARR[0]}""33m <br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\"./style/entropy.png\">"
-      fi
-     
-      if [[ "$OUTPUT" == *"Kernel vulnerabilities"* ]]; then
-        break
-      fi
-      if [[ "$OUTPUT" == *"Statistics"* ]]; then
-        OUTPUT=""
-      fi
-      if [[ "$OUTPUT" == *"top 10"* ]]; then
-        TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-      elif [ "$TOP10_FORMAT_COUNTER" -gt 10 ]; then
-        TOP10_FORMAT_COUNTER=0
-      elif [ "$TOP10_FORMAT_COUNTER" -ne 0 ]; then
-        TOP10_FORMAT_COUNTER=$(( TOP10_FORMAT_COUNTER+1 ))
-        OUTPUT="<span  style=\"white-space: pre\">""$OUTPUT""</span>"
-      fi
-	
-      if [[ "$OUTPUT" == *"0;34m+"*"0;36m"* ]] && [[ "$OUTPUT" != *"h2 id"* ]]; then
-        echo -e "<h2 id=""${FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
-        i=$(( i+1 ))
-      else
-        if [[ "$OUTPUT" != *"entropy.png"* ]]; then
-          OUTPUT="<span  style=\"white-space: pre\">$OUTPUT</span>"
+  PREV_LINE=""
+  for LINE in "${FILE_LINES[@]}" ; do
+    if [[ "$(strip_color_tags "$LINE" )" != "[*] Statistics"* ]] ; then
+      LINE="${LINE//&/&amp;}"
+      LINE="${LINE//</&lt;}"
+      LINE="${LINE//>/&gt;}"
+      # get (sub)modul names and add anchor
+      if [[ "$(strip_color_tags "$LINE" )" == "=================================================================" ]] && [[ "$(strip_color_tags "$PREV_LINE" )" == "[+] "* ]]; then
+        MODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/\[+\]\ //g")"
+        if [[ -n "$MODUL_NAME" ]] ; then
+          LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo $MODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_DOUBLE""$LINK_END"
+          # add link to index navigation
+          add_link_to_index "$HTML_FILE" "$MODUL_NAME"
+          # add module anchor to navigation
+          NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$(echo $MODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
+          sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$A_HTML_PATH""/""$HTML_FILE"
+          ((LINE_NUMBER++))
+          ((LINE_NUMBER_REP_NAV++))
         fi
-        echo "<br>$OUTPUT" | tee -a "$ABS_HTML_PATH""/index.txt" >/dev/null
+      elif [[ "$(strip_color_tags "$LINE" )" == "-----------------------------------------------------------------" ]] && [[ "$(strip_color_tags "$PREV_LINE" )" == *"==&gt; "* ]]; then
+        SUBMODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/==&gt; //g")"
+        if [[ -n "$SUBMODUL_NAME" ]] ; then
+          LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo $SUBMODUL_NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_MONO""$LINK_END"
+          SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$(echo $NAME | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
+          sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$A_HTML_PATH""/""$HTML_FILE"
+          ((LINE_NUMBER++))
+          ((LINE_NUMBER_REP_NAV++))
+        fi
       fi
-    done
-  fi
-
-  $AHA_PATH --title "emba Report Manager" > "$ABS_HTML_PATH""/index.html" < "$ABS_HTML_PATH""/index.txt"
-  rm "$ABS_HTML_PATH""/index.txt"
-
-  sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/index.html"
-  sed -i 's/\&amp;lt;/\&lt;/g' "$ABS_HTML_PATH""/index.html"
-  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/index.html"
+      # add html tags for style and replace lt character
+      HTML_LINE="$(add_color_tags "$LINE" )"
+      # add link tags to links
+      HTML_LINE="$(add_link_tags "$HTML_LINE")"
+      ((LINE_NUMBER++))
+      sed -i "$LINE_NUMBER""i""$P_START""$HTML_LINE""$P_END" "$A_HTML_PATH""/""$HTML_FILE"
+      # add aggregator lines to index page
+      if [[ "$HTML_FILE" == "f50"* ]] ; then
+        sed -i "$LINE_NUMBER_INDEX""i""$P_START""$HTML_LINE""$P_END" "$A_HTML_PATH""/""$INDEX_FILE"
+        ((LINE_NUMBER_INDEX++))
+      fi
+      PREV_LINE="$LINE"
+    fi
+  done
 }
 
+add_link_to_index() {
 
-build_collection_file(){
+  insert_line() {
+    SEARCH_VAL="$1"
+    MODUL_NAME="$2"
+    LINE_NUMBER_NAV=$(grep -n "$SEARCH_VAL" "$A_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
+    REP_NAV_LINK="$(echo "$MODUL_INDEX_LINK" | sed -e "s@LINK@./$HTML_FILE@g" | sed -e "s@CLASS@$CLASS@g" | sed -e "s@DATA@$DATA@g")"
+    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$MODUL_NAME""$LINK_END" "$A_HTML_PATH""/""$INDEX_FILE"
+  }
+
+  HTML_FILE="$1"
+  MODUL_NAME="$2"
+  DATA="$( echo "$HTML_FILE" | cut -d "_" -f 1)"
+  CLASS="${DATA:0:1}"
+
+  readarray -t INDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' $A_HTML_PATH/$INDEX_FILE | sed -e '1d;$d' | grep -P -o '(?<=data=\").*?(?=\")')
+  readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep "$CLASS")
+
+  if [[ ${#INDEX_NAV_GROUP_ARR[@]} -eq 0 ]] ; then
+    # due the design of emba, which are already groups the modules (even threaded), it isn't necessary to check - 
+    # insert new entry at bottom of the navigation
+    insert_line "navigation end" "$MODUL_NAME"
+  else
+    for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
+      if [[ $COUNT -eq 0 ]] && [[ ${DATA:1} -lt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
+        insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
+      elif [[ ${DATA:1} -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] && [[ ${DATA:1} -lt ${INDEX_NAV_GROUP_ARR[$(($COUNT+1))]:1} ]] ; then
+        insert_line "${INDEX_NAV_GROUP_ARR[$(($COUNT+1))]}" "$MODUL_NAME"
+      elif [[ $COUNT -eq $((${#INDEX_NAV_GROUP_ARR[@]}-1)) ]] && [[ ${DATA:1} -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
+        insert_line "navigation end" "$MODUL_NAME"
+      fi
+    done
+  fi
+}
+
+update_index()
+{
+  LINE_NUMBER_ENTROPY=$(grep -n "entropy.png" "$A_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
+  if [[ "$LINE_NUMBER" -ne 0 ]] ; then 
+    readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
+    if [[ -f "${ENTROPY_IMAGES_ARR[0]}" ]] ; then
+      cp "${ENTROPY_IMAGES_ARR[0]}" "$A_HTML_PATH$STYLE_PATH/entropy.png"
+      sed -i "$(($LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$A_HTML_PATH""/""$INDEX_FILE"
+    fi
+  fi
+}
+
+generate_index()
+{
   FILE=$1
-  local FILENAME
-  FILENAME=$(basename "$FILE")
-  if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-    readarray -t STRING_LIST <"$FILE"
-    NOT_FINDINGS_CONTENT_ARR+=("${STRING_LIST[@]}")
-  fi
-
-  HTML_FILE="${FILE%.txt}.html"
-  COLORLESS_FILE_LINE=$(head -1 "$FILE" | tail -n 1 | cut -c27-)
-  LINKNAME="${COLORLESS_FILE_LINE// /_}"
-  NOT_FINDINGS_MENU_LIST+="<li><a href=\"collection.html#$LINKNAME\">$COLORLESS_FILE_LINE</a></li>"
-  if [ ${#NOT_FINDINGS_FILENAMES[@]} -ne 0 ]; then
-    NOT_FINDINGS_FILENAMES[${#NOT_FINDINGS_FILENAMES[@]}]="$LINKNAME"
-  else
-    NOT_FINDINGS_FILENAMES[0]="$LINKNAME"
-  fi
-
-  echo "$HTML_FILE_HEADER
-    <ul>
-    <li><a href=\"./index.html\">Go back</a></li>
-    $NOT_FINDINGS_MENU_LIST
-    </ul>
-    </div>
-    <div class=\"main\">" | tee -a "$ABS_HTML_PATH""/collection.txt" >/dev/null
-     	
-  i=0
-  if [[ -n ${NOT_FINDINGS_CONTENT_ARR[*]} ]]; then
-    for OUTPUT in "${NOT_FINDINGS_CONTENT_ARR[@]}"; do
-      OUTPUT="$(echo -e "$OUTPUT" | sed "s/</\&lt;/g")"
-      if [[ "$OUTPUT" == *"0;34m+"*"0;36m"* ]] && [[ "$OUTPUT" != *"h2 id"* ]]; then
-        echo -e "<h2 id=""${NOT_FINDINGS_FILENAMES[$i]}"">""$OUTPUT""</h2><br>" | tee -a "$ABS_HTML_PATH""/collection.txt" >/dev/null
-        i=$(( i+1 ))
-      else
-        echo -e "$OUTPUT""<br>" | tee -a "$ABS_HTML_PATH""/collection.txt" >/dev/null
-      fi
-    done
-  fi
-  
-  $AHA_PATH --title "emba Report Manager" > "$ABS_HTML_PATH""/collection.html" < "$ABS_HTML_PATH""/collection.txt" 
-  rm "$ABS_HTML_PATH""/collection.txt"
-
-  sed -i 's/&lt;/</g; s/&quot;/"/g; s/&gt;/>/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/collection.html"
-  sed -i 's/\&amp;lt;/\&lt;/g' "$ABS_HTML_PATH""/collection.html"
-  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/collection.html"
+  HTML_FILE="$INDEX_FILE"
+  cp "./helpers/base.html" "$A_HTML_PATH""/""$HTML_FILE"
+  sed -i 's/back/back hidden/g' "$A_HTML_PATH""/""$HTML_FILE"
 }
 
-build_report_files(){
- 
-  local SUB_MENU_LIST="<li><a href=\"./index.html\">Go back</a></li>"
-  local FILE=$1
-  local FILENAME
-  local HTML_FILE
-  local REPORT_ARRAY
-  local HEADLINE
-  local TOP10_FORMAT_COUNTER
+prepare_report()
+{
+  A_HTML_PATH="$(abs_path "$HTML_PATH")"
   
-  FILENAME=$(basename "$FILE")
-  HTML_FILE="$(basename "${FILE%.txt}".html)"
-  
-  HEADLINE="$( head -n 1 "$FILE" | sed 's/[+] //' )"
-  HEADLINE=${HEADLINE:26}
-  HEADLINE_SUB=${FILENAME%.txt}
- 
-  if [[ "$(wc -l "$FILE" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
-    readarray -t STRING_LIST <"$FILE"
-    REPORT_ARRAY+=("${STRING_LIST[@]}")
-  fi
-  
-  if [[ -n ${REPORT_ARRAY[*]} ]]; then
-    for FILE_LINE in "${REPORT_ARRAY[@]}"; do
-      FILE_LINE="$(echo -e "$FILE_LINE" | sed "s/</\&lt;/g")"
-      if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
-        COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
-      elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
-        COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
-      fi
-    done
-  fi
- 
-  echo "<header><div class=\"pictureleft\"><img width=\"100px\" heigth=\"100px\" src=\"./style/emba.svg\"></div>
-    <div class=\"headline\"><h1>$HEADLINE</h1><h3>$HEADLINE_SUB</h3></div><div class=\"pictureright\"><img width=\"100px\" heigth=\"100px\" src=\"./style/emba.svg\">
-    </div></header><div><ul>$SUB_MENU_LIST</ul></div><div class=\"main\">" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
- 
-  TOP10_FORMAT_COUNTER=0
-  if [[ -n ${REPORT_ARRAY[*]} ]]; then
-    for FILE_LINE in "${REPORT_ARRAY[@]}"; do
-      if [[ "$FILE_LINE" == *"Statistics"* ]]; then
-        FILE_LINE=""
-      fi
-      if [[ "$FILE_LINE" == *"entropy.png"* ]]; then
-        IFS=':' read -r -a "FILE_LINE_ARR" <<< "$FILE_LINE"
-        cp "$LOG_DIR"/*entropy.png "$ABS_HTML_PATH""/style/entropy.png"
-        FILE_LINE="${FILE_LINE_ARR[0]}""<br> <img id=\"entropypic\" heigth=\"380px\" width=\"540px\" src=\"./style/entropy.png\">"
-      fi
-	
-      if [[ $FILE_LINE == *"[[0;34m+[0m] [0;36m[1m"* ]]; then
-        COLORLESS_FILE_LINE=${FILE_LINE:26:${#FILE_LINE}-3}	
-        echo "<h2 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h2>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}\">$COLORLESS_FILE_LINE</a></li>"
-      elif [[ $FILE_LINE == *"0;34m==>[0m [0;36m"* ]]; then
-        COLORLESS_FILE_LINE=${FILE_LINE:22:${#FILE_LINE}-4}
-        echo "<h4 id=""${COLORLESS_FILE_LINE// /_}"">$FILE_LINE</h4>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-        SUB_MENU_LIST="$SUB_MENU_LIST<li><a href=\"$HTML_FILE#${COLORLESS_FILE_LINE// /_}""\">""$COLORLESS_FILE_LINE""</a></li>"
-      else
-        if [[ "$FILE_LINE" != *"entropy.png"* ]]; then
-          FILE_LINE="$(echo -e "$FILE_LINE" | sed "s/</\&lt;/g")"
-          FILE_LINE="<span  style=\"white-space: pre\">$FILE_LINE</span>"
-        fi
-        echo "<br>$FILE_LINE" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-      fi
-    done
-  fi
-  echo "</div>" | tee -a "$ABS_HTML_PATH""/$FILENAME" >/dev/null
-  $AHA_PATH --title "emba Report Manager" > "$ABS_HTML_PATH""/$HTML_FILE" <"$ABS_HTML_PATH""/$FILENAME"
-  rm "$ABS_HTML_PATH""/$FILENAME"
-  
-  sed -i 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/<pre>//g; s/<\/pre>//g' "$ABS_HTML_PATH""/$HTML_FILE"
-  sed -i 's/\&amp;lt;/\&lt;/g' "$ABS_HTML_PATH""/$HTML_FILE"
-  ESCAPED_SUB_MENU_LIST=${SUB_MENU_LIST//\//\\\/}
-  sed -i "s/<ul><\/ul>/<ul>$ESCAPED_SUB_MENU_LIST<\/ul>/g" "$ABS_HTML_PATH""/$HTML_FILE"
-  sed -i "s/<head>/<head><br><link rel=\"stylesheet\" href=\".\/style\/style.css\" type=\"text\/css\"\/>/g" "$ABS_HTML_PATH""/$HTML_FILE"
-}
-
-generate_html_file(){  
-  ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
-  
-  if [ ! -d "$ABS_HTML_PATH/style" ] ; then
-    mkdir "$ABS_HTML_PATH/style"
-    cp "$HELP_DIR/style.css" "$ABS_HTML_PATH/style/style.css"
-    cp "$HELP_DIR/emba.svg" "$ABS_HTML_PATH/style/emba.svg"
+  if [ ! -d "$A_HTML_PATH$STYLE_PATH" ] ; then
+    mkdir "$A_HTML_PATH$STYLE_PATH"
+    cp "$HELP_DIR/style.css" "$A_HTML_PATH$STYLE_PATH/style.css"
+    cp "$HELP_DIR/emba.svg" "$A_HTML_PATH$STYLE_PATH/emba.svg"
   fi
 
-  HTML_FILE_HEADER="<header>
-    <div class=\"pictureleft\"><img width=\"100px\" heigth=\"100px\" src=\"./style/emba.svg\"></div>
-    <div class=\"headline\">
-    <h1>emba Report Manager</h1> 
-    </div>
-    <div class=\"pictureright\">
-    <img width=\"100px\" heigth=\"100px\" src=\"./style/emba.svg\">
-    </div>
-    </header>"
-
-  if [[ $2 == 1 ]]; then
-    #print_output "[*] report file $1 - $2"
-    build_report_files "$1"
-    # currently we create the final index only once at the end -> this is called from emba.sh
-    #build_index_file "$1"
-  else
-    #print_output "[*] collection file $1 - $2"
-    build_collection_file "$1"
-  fi
+  generate_index
 }
