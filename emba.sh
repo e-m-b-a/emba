@@ -187,7 +187,6 @@ main()
   export THREADED=0             # 0 -> single thread
                                 # 1 -> multi threaded
   export USE_DOCKER=0
-  export V_FEED=1
   export YARA=1
   export MAX_PIDS=5             # the maximum modules in parallel -> after S09 is finished this value gets adjusted
 
@@ -199,10 +198,7 @@ main()
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
-  export VUL_FEED_DB="$EXT_DIR""/allitems.csv"
-  export VUL_FEED_CVSS_DB="$EXT_DIR""/allitemscvss.csv"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
-  export AHA_PATH="$EXT_DIR""/aha"
 
   echo
 
@@ -311,6 +307,16 @@ main()
 
   echo
 
+  # check provided paths for validity 
+  check_path_valid "$FIRMWARE_PATH"
+  check_path_valid "$KERNEL_CONFIG"
+  check_path_valid "$LOG_DIR"
+
+  if [[ $IN_DOCKER -eq 1 ]] ; then
+    # set external path new for docker
+    export EXT_DIR="/external"
+  fi
+
   # Check all dependencies of emba
   dependency_check
 
@@ -404,7 +410,7 @@ main()
         D|f|i|l)
           ;;
         *)
-          export ARGS="$ARGS -$OPT"
+          export ARGS="$ARGS -$OPT $OPTARG"
           ;;
       esac
     done
@@ -412,7 +418,7 @@ main()
     echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
     D_RETURN=$?
 
     if [[ $D_RETURN -eq 0 ]] ; then

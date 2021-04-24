@@ -2,12 +2,15 @@ FROM kalilinux/kali-rolling
 
 RUN apt-get update && \ 
     apt-get -y upgrade && \
-    apt-get -y install wget kmod procps sudo
+    apt-get -y install wget kmod procps sudo apt-utils
 
-WORKDIR /app
-ADD . /app
+ADD ./installer.sh /
 
-RUN yes | sudo ./installer.sh -D -F
+WORKDIR /
+
+RUN yes | sudo /installer.sh -D -F
+
+WORKDIR /emba
 
 ENTRYPOINT [ "/bin/bash" ]
 

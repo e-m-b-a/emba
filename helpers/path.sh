@@ -18,6 +18,16 @@
 #                 firmware root path via $FIRMWARE_PATH
 #                 binary array via ${BINARIES[@]}
 
+check_path_valid() {
+  C_PATH="$1"
+  if [[ -n "$C_PATH" ]] && { [[ "${C_PATH:0:1}" != "/" ]] && [[ "${C_PATH:0:2}" != "./" ]] && [[ "${C_PATH:0:3}" != "../" ]] ; } ; then
+    print_output "[!] ""$C_PATH"" is not a valid path in the context of emba" "no_log"
+    print_output "    Try it again with \"/\", \"./\" or \"../\" at the beginning of the path.\\n" "no_log"
+    print_output "$RED""Terminate emba""${NC}\\n" "no_log"
+    exit 1
+  fi
+}
+
 abs_path() {
   if [[ -e "$1" ]] ; then
     echo -e "$(realpath -s "$1")"

@@ -238,6 +238,7 @@ build_report_files(){
 
 generate_html_file(){  
   ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
+  AHA_PATH="$EXT_DIR""/aha"
   
   if [ ! -d "$ABS_HTML_PATH/style" ] ; then
     mkdir "$ABS_HTML_PATH/style"
