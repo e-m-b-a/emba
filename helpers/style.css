@@ -1,235 +1,219 @@
+/*
+emba - EMBEDDED LINUX ANALYZER
+
+Copyright 2020-2021 Siemens AG
+
+emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the terms of the GNU General Public License.
+See LICENSE file for usage of this software.
+
+emba is licensed under GPLv3
+
+Author(s): Pascal Eckmann, Stefan Haboeck
+*/
+
 * {
-  box-sizing: border-box;
+  box-sizing:border-box;
 }
 
 body {
-  font-family: monospace;
-  background-color: #222;
-  margin: 0;
-}
-  
-/* Header/logo Title */
-.header {
-  padding: 80px;
-  text-align: center;
-  background: #1abc9c;
-  color: white;
-}
-
-/* Increase the font size of the heading */
-.header h1 {
-  font-size: 40px;
-}
-
-/* Create two unequal columns that sits next to each other */
-/* Sidebar/left column */
-.side {
-  height: 100%;
-  width: 250px;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #2d2d2d;
-  overflow-y: scroll;
-  transition: 0.5s;
-  height: 100%;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.side::-webkit-scrollbar {
-  display: none;
-}
-
-/* Main column */
-.main {   
-  padding: 20px;
-  color: white;
-  transition: margin-left .5s;
-  margin-left: 250px;
-  overflow: scroll;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.main::-webkit-scrollbar {
-  display: none;
-}
-
-.logo {
-  background-color: #fff;
-  width: 100%;
-  padding: 5%;
-}
-
-.inherit {
-  width: inherit;
-}
-
-/* Footer */
-.footer {
-  padding: 20px;
-  text-align: center;
-  background: #ddd;
-}
-
-/* Style the nav */
-#nav {
-  overflow: hidden;
-  visibility: show;
-  padding-bottom: 50px;
-}
-
-/* Nav links */
-#nav a {
-  display: block;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 14px 8px;
-  text-decoration: none;
-}
-
-.back {
-  background-color: #2d6029 !important;
-}
-
-.back:hover {
-  background-color: #377732 !important;
-}
-
-.hidden {
-  visibility: hidden;
-  height: 0px;
-  padding: 0px !important;
-}
-
-span {
-  white-space: pre-wrap;
-}
-
-pre {
+  background-color:#222;
+  font-family:monospace;
   margin:0;
-  font-size: 16px;
-}
-
-.red {
-  color: #ff0000;
-}
-
-.green {
-  color: #00ff00;
-}
-
-.orange {
-  color: #ff9900;
-}
-
-.blue {
-  color: #0000ff;
-}
-
-.magenta {
-  color: #ff99ff;
-}
-
-.cyan {
-  color: #0099ff;
-}
-
-.bold {
-  font-weight: bold;
-}
-
-.italic {
-  font-style: italic;
-}
-
-hr.mono {
-  border: 0;
-  border-top: 2px solid #9f9f9f;
-}
-
-hr.double {
-  border: 0;
-  border-top: 5px double #9f9f9f;
-}
-
-pre a {   
-  color: white;
-}
-
-pre a:hover {   
-  color: rgb(190, 133, 216);
 }
 
 a.modul {
-  background-color: #333;
+  background-color:#333;
 }
 
 a.modul:hover {
-  background-color: #4e4e4e;
+  background-color:#4e4e4e;
 }
 
 a.submodul {
-  background-color: #555;
+  background-color:#555;
 }
 
 a.submodul:hover {
-  background-color: #6e6e6e;
-}
-
-#button {
-  width: 50px;
-  height: 50px;
-  font-size: 40px;
-  color: #fff;
-  text-align: center;
-  position: fixed;
-  bottom: 0px;
-  left: 0px;
-  visibility: hidden;
-  cursor: pointer;
-}
-
-.buttonOpen {
-  background-color: #096b09;
-}
-
-.buttonOpen:hover {
-  background-color: #0b860b;
-}
-
-.buttonClose {
-  background-color: #821c1c;
-}
-
-.buttonClose:hover {
-  background-color: #a52323;
-}
-
-a.f {
-  background: linear-gradient(270deg, #CC410B 10px, rgba(0, 0, 0, 0) 0);
-  padding-right: 18px !important;
+  background-color:#6e6e6e;
 }
 
 a.p {
-  background: linear-gradient(270deg, #088a83 10px, rgba(0, 0, 0, 0) 0);
-  padding-right: 18px !important;
+  background:linear-gradient(270deg,#088a83 10px,rgba(0,0,0,0));
+  padding-right:18px!important;
 }
 
 a.s {
-  background: linear-gradient(270deg, #079e07 10px, rgba(0, 0, 0, 0) 0);
-  padding-right: 18px !important;
+  background:linear-gradient(270deg,#079e07 10px,rgba(0,0,0,0));
+  padding-right:18px!important;
 }
 
 a.r {
-  background: linear-gradient(270deg, #99079e 10px, rgba(0, 0, 0, 0) 0);
-  padding-right: 18px !important;
+  background:linear-gradient(270deg,#99079e 10px,rgba(0,0,0,0));
+  padding-right:18px!important;
+}
+
+a.f {
+  background:linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0));
+  padding-right:18px !important;
+}
+
+hr.double {
+  border:0;
+  border-top:5px double #9f9f9f;
+}
+
+hr.mono {
+  border:0;
+  border-top:2px solid #9f9f9f;
+}
+
+pre {
+  font-size:16px;
+  margin:0;
+}
+
+pre a {
+  color:#FFF;
+}
+
+pre a:hover {
+  color:#be85d8;
+}
+
+span {
+  white-space:pre-wrap;
+}
+
+.back {
+  background-color:#2d6029!important;
+}
+
+.back:hover {
+  background-color:#377732!important;
+}
+
+.buttonClose {
+  background-color:#821c1c;
+}
+
+.buttonClose:hover {
+  background-color:#a52323;
+}
+
+.buttonOpen {
+  background-color:#096b09;
+}
+
+.buttonOpen:hover {
+  background-color:#0b860b;
+}
+
+.hidden {
+  height:0;
+  padding:0!important;
+  visibility:hidden;
+}
+
+.inherit {
+  width:inherit;
+}
+
+.logo {
+  background-color:#fff;
+  padding:5%;
+  width:100%;
+}
+
+.main {
+  -ms-overflow-style:none;
+  color:#FFF;
+  margin-left:250px;
+  overflow:scroll;
+  padding:20px;
+  scrollbar-width:none;
+  transition:margin-left .5s;
+}
+
+.bold {
+  font-weight:700;
+}
+
+.italic {
+  font-style:italic;
+}
+
+.blue {
+  color:#00f;
+}
+
+.cyan {
+  color:#09f;
+}
+
+.green {
+  color:#0f0;
+}
+
+.magenta {
+  color:#f9f;
+}
+
+.orange {
+  color:#f90;
+}
+
+.red {
+  color:red;
+}
+
+.side {
+  -ms-overflow-style:none;
+  background-color:#2d2d2d;
+  height:100%;
+  left:0;
+  overflow-y:scroll;
+  position:fixed;
+  scrollbar-width:none;
+  top:0;
+  transition:.5s;
+  width:250px;
+  z-index:1;
+}
+
+.side::-webkit-scrollbar,.main::-webkit-scrollbar {
+  display:none;
+}
+
+#button {
+  bottom:0;
+  color:#fff;
+  cursor:pointer;
+  font-size:40px;
+  height:50px;
+  left:0;
+  position:fixed;
+  text-align:center;
+  visibility:hidden;
+  width:50px;
 }
 
 #entropy {
-  margin: 15px 0;
-  width: 100%;
-  max-width: 567px;
+  margin:15px 0;
+  max-width:567px;
+  width:100%;
+}
+
+#nav {
+  overflow:hidden;
+  padding-bottom:50px;
+  visibility:show;
+}
+
+#nav a {
+  color:#f2f2f2;
+  display:block;
+  padding:14px 8px;
+  text-align:center;
+  text-decoration:none;
 }
