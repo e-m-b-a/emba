@@ -336,6 +336,29 @@ get_data() {
     export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
   fi
+  if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
+    while read -r COUNTING; do
+      (( HIGH_CVE_COUNTER="$HIGH_CVE_COUNTER"+"$COUNTING" ))
+    done < "$TMP_DIR"/HIGH_CVE_COUNTER.tmp 
+    (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
+  fi
+  if [[ -f "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp ]]; then
+    while read -r COUNTING; do
+      (( MEDIUM_CVE_COUNTER="$MEDIUM_CVE_COUNTER"+"$COUNTING" ))
+    done < "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp 
+    (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
+  fi
+  if [[ -f "$TMP_DIR"/LOW_CVE_COUNTER.tmp ]]; then
+    while read -r COUNTING; do
+      (( LOW_CVE_COUNTER="$LOW_CVE_COUNTER"+"$COUNTING" ))
+    done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp 
+    (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
+  fi
+  if [[ -f "$TMP_DIR"/EXPLOIT_COUNTER.tmp ]]; then
+    while read -r COUNTING; do
+      (( EXPLOIT_COUNTER="$EXPLOIT_COUNTER"+"$COUNTING" ))
+    done < "$TMP_DIR"/EXPLOIT_COUNTER.tmp 
+  fi
 }
 
 os_detector() {
