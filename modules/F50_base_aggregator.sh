@@ -346,13 +346,13 @@ get_data() {
     while read -r COUNTING; do
       (( MEDIUM_CVE_COUNTER="$MEDIUM_CVE_COUNTER"+"$COUNTING" ))
     done < "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp 
-    (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
+    (( CVE_COUNTER="$CVE_COUNTER"+"$MEDIUM_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/LOW_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( LOW_CVE_COUNTER="$LOW_CVE_COUNTER"+"$COUNTING" ))
     done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp 
-    (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
+    (( CVE_COUNTER="$CVE_COUNTER"+"$LOW_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/EXPLOIT_COUNTER.tmp ]]; then
     while read -r COUNTING; do
