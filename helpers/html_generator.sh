@@ -32,6 +32,7 @@ HR_MONO="<hr class=\"mono\" />"
 HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
 LINK="<a href=\"LINK\" target=\"\_blank\" >"
+EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\">"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\">"
 SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\">"
@@ -76,6 +77,11 @@ add_link_tags() {
   if [[ -n "$F_LINK" ]] ; then
     HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$F_LINK@g")""$F_LINK""$LINK_END"
     LINE="$(echo "$LINE" | sed -e "s@$F_LINK@$HTML_LINK@g")"
+  fi
+  EXPLOIT_ID="$(echo "$LINE" | sed -n -e 's/^.*Exploit database ID //p' | sed 's/[^0-9]//g' )"
+  if [[ -n "$EXPLOIT_ID" ]] ; then
+    HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
+    LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
   fi
   echo "$LINE"
 }
