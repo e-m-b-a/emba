@@ -197,6 +197,7 @@ update_index()
 prepare_report()
 {
   ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
+  AHA_PATH="$EXT_DIR""/aha"
   
   if [ ! -d "$ABS_HTML_PATH$STYLE_PATH" ] ; then
     mkdir "$ABS_HTML_PATH$STYLE_PATH"

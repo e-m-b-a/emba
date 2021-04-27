@@ -109,13 +109,15 @@ dependency_check()
   fi
 
   # Check for ./external
-  print_output "    external directory - \\c" "no_log"
-  if ! [[ -d "$EXT_DIR" ]] ; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    Missing configuration directory for external programs - check your installation""$NC"
-    DEP_ERROR=1
-  else
-    echo -e "$GREEN""ok""$NC"
+  if [[ $USE_DOCKER -eq 0 ]] ; then
+    print_output "    external directory - \\c" "no_log"
+    if ! [[ -d "$EXT_DIR" ]] ; then
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    Missing configuration directory for external programs - check your installation""$NC"
+      DEP_ERROR=1
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
   fi
 
 
