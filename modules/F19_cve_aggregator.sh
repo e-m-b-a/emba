@@ -655,8 +655,12 @@ cve_db_lookup() {
 
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
-    echo "[+] Statistics1:$HIGH_CVE_COUNTER|$MEDIUM_CVE_COUNTER|$LOW_CVE_COUNTER"
+    #echo "[+] Statistics1:$HIGH_CVE_COUNTER|$MEDIUM_CVE_COUNTER|$LOW_CVE_COUNTER"
   } >> "$LOG_DIR"/aggregator/"$VERSION_PATH".txt
+  echo "$LOW_CVE_COUNTER" >> "$TMP_DIR"/LOW_CVE_COUNTER.tmp
+  echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
+  echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
+  echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_output ""
@@ -678,7 +682,7 @@ generate_cve_details() {
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     # threading currently not working. This is work in progress
-    if [[ "$THREADED" -eq "X" ]]; then
+    if [[ "$THREADED" -eq 1 ]]; then
       cve_db_lookup &
       WAIT_PIDS_F19+=( "$!" )
       max_pids_protection "${WAIT_PIDS_F19[@]}"
@@ -687,7 +691,7 @@ generate_cve_details() {
     fi
   done
 
-  if [[ "$THREADED" -eq "X" ]]; then
+  if [[ "$THREADED" -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
