@@ -28,5 +28,6 @@ jobs:
       - name: ShellCheck
         # You may pin to the exact commit or the version.
         # uses: ludeeus/action-shellcheck@d586102c117f97e63d7e3b56629d269efc9a7c60
-        uses: ludeeus/action-shellcheck@1.0.0
+        uses: ludeeus/action-shellcheck@1.1.0
+        
 
