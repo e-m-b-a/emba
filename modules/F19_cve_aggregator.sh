@@ -105,6 +105,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
     # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     # shellcheck disable=SC2001

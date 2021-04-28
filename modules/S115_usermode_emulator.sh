@@ -179,9 +179,14 @@ version_detection_thread() {
           VERS_DET_OLD="$VERSION_DETECTED"
           #VERSIONS_BIN="$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
           VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
-          for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$(print_path "$BINARY_PATH")$GREEN (emulation)."
-          done
+
+          if [[ ${#BINARY_PATHS[@]} -ne 0 ]]; then
+            for BINARY_PATH in "${BINARY_PATHS[@]}"; do
+              print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$(print_path "$BINARY_PATH")$GREEN (emulation)."
+            done
+          else
+            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file (emulation)."
+          fi
         fi
       done
     fi
