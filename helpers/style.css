@@ -74,7 +74,8 @@ pre {
 }
 
 pre a {
-  color:#FFF;
+  color: #E844FF;
+  font-weight: bold;
 }
 
 pre a:hover {

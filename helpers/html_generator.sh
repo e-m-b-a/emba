@@ -15,6 +15,7 @@
 
 INDEX_FILE="index.html"
 STYLE_PATH="/style"
+TEMP_PATH="/tmp"
 
 # variables for html style
 P_START="<pre>"
@@ -47,9 +48,9 @@ add_color_tags()
     echo "$BR"
   else
     for (( COUNT=0; COUNT<${#LINE}; COUNT++ )) ; do
-      if [[ "${LINE:$COUNT:1}" == "" ]] ; then
+      if [[ "${LINE:$COUNT}" == "$(echo -e "\x1b")"* ]] ; then
         COLOR_ELEM="$( echo "${LINE:$COUNT}" | cut -d 'm' -f 1)""m"
-        readarray -t COLOR_ELEM_ARR < <(echo -e "$COLOR_ELEM" | sed -e 's/\x1b\[//' | sed -e 's/m//' | sed -e 's/;/\n/g' | sed '1!G;h;$!d')
+        readarray -t COLOR_ELEM_ARR < <(echo -e "$COLOR_ELEM" | sed -e 's/[^;0-9]*//g' | sed -e 's/;/\n/g' | sed '1!G;h;$!d') 
         for ELEM in "${COLOR_ELEM_ARR[@]}" ; do
           case "$ELEM" in
             0) LINE="${LINE:0:$COUNT}""$SPAN_END""${LINE:$COUNT}";;
@@ -78,11 +79,14 @@ add_link_tags() {
     HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$F_LINK@g")""$F_LINK""$LINK_END"
     LINE="$(echo "$LINE" | sed -e "s@$F_LINK@$HTML_LINK@g")"
   fi
-  EXPLOIT_ID="$(echo "$LINE" | sed -n -e 's/^.*Exploit database ID //p' | sed 's/[^0-9]//g' )"
-  if [[ -n "$EXPLOIT_ID" ]] ; then
-    HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-    LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
-  fi
+  readarray -t EXPLOIT_IDS < <(echo "$LINE" | sed -n -e 's/^.*Exploit database ID //p' | sed 's/[^0-9]//g' )
+  # readarray -t EXPLOIT_FILES < <(echo "$LINE" | grep -E "File:" | sed -e 's/File\://g' -e "s/\ //g" )
+  for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
+    if [[ -n "$EXPLOIT_ID" ]] ; then
+      HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
+      LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+    fi
+  done
   echo "$LINE"
 }
 
@@ -93,64 +97,85 @@ strip_color_tags()
   echo "$LINE"
 }
 
+# often we have additional information, like exploits or cve's
+generate_info_file()
+{
+  INFO_FILE=$1
+  BACK_LINK=$2
+  HTML_INFO_FILE="$(basename "${INFO_FILE%.txt}"".html")"
+  cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_INFO_FILE"
+  sed -i 's/back/back hidden/g' "$ABS_HTML_PATH""/""$HTML_INFO_FILE"
+
+  # parse log content and add to html file
+  readarray -t INFO_FILE_LINES < "$FILE"
+  INFO_LINE_NUMBER=$(grep -n "content start" "$ABS_HTML_PATH""/""$HTML_INFO_FILE" | cut -d ":" -f 1)
+  LINE_NUMBER_REP_INFO_NAV=$(($(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_INFO_FILE" | cut -d ":" -f 1)+1))
+  sed -i "$LINE_NUMBER_REP_NAV""i""$(echo "$MODUL_LINK" | sed -e "s@LINK@$BACK_LINK@g")""$(basename "${BACK_LINK%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$HTML_INFO_FILE"
+  for LINE in "${FILE_LINES[@]}" ; do
+    LINE="${LINE//&/&amp;}"
+    LINE="${LINE//</&lt;}"
+    LINE="${LINE//>/&gt;}"
+    # add link tags to links
+    INFO_HTML_LINE="$(add_link_tags "$LINE")"
+    ((INFO_LINE_NUMBER++))
+    sed -i "$INFO_LINE_NUMBER""i""$P_START""$INFO_HTML_LINE""$P_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+  done
+}
+
 generate_report_file()
 {
   FILE=$1
   HTML_FILE="$(basename "${FILE%.txt}"".html")"
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
+  TMP_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$HTML_FILE"
   MODUL_NAME=""
 
   # parse log content and add to html file
-  readarray -t FILE_LINES < "$FILE"
-  LINE_NUMBER=$(grep -n "content start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
   LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
-  if [[ "$HTML_FILE" == "f50"* ]] ; then
-    LINE_NUMBER_INDEX=$(grep -n "content start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-  fi
   PREV_LINE=""
-  for LINE in "${FILE_LINES[@]}" ; do
-    if [[ "$(strip_color_tags "$LINE" )" != "[*] Statistics"* ]] ; then
+  while IFS= read -r LINE; do 
+    LINE_NO_C="$(strip_color_tags "$LINE")"
+    PREV_LINE_NO_C="$(strip_color_tags "$PREV_LINE")"
+    if [[ "$LINE_NO_C" != "[*] Statistics"* ]] ; then
       LINE="${LINE//&/&amp;}"
       LINE="${LINE//</&lt;}"
       LINE="${LINE//>/&gt;}"
       # get (sub)modul names and add anchor
-      if [[ "$(strip_color_tags "$LINE" )" == "=================================================================" ]] && [[ "$(strip_color_tags "$PREV_LINE" )" == "[+] "* ]]; then
-        MODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/\[+\]\ //g")"
+      if [[ "$LINE_NO_C" == "=================================================================" ]] && [[ "$PREV_LINE_NO_C" == "[+] "* ]]; then
+        MODUL_NAME="$(echo -e "$PREV_LINE_NO_C" | sed -e "s/\[+\]\ //g")"
         if [[ -n "$MODUL_NAME" ]] ; then
           LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_DOUBLE""$LINK_END"
           # add link to index navigation
           add_link_to_index "$HTML_FILE" "$MODUL_NAME"
-          ((LINE_NUMBER_INDEX++))
           # add module anchor to navigation
           NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
           sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
-          ((LINE_NUMBER++))
           ((LINE_NUMBER_REP_NAV++))
         fi
-      elif [[ "$(strip_color_tags "$LINE" )" == "-----------------------------------------------------------------" ]] && [[ "$(strip_color_tags "$PREV_LINE" )" == *"==&gt; "* ]]; then
-        SUBMODUL_NAME="$(strip_color_tags "$PREV_LINE" | sed -e "s/==&gt; //g")"
+      elif [[ "$LINE_NO_C" == "-----------------------------------------------------------------" ]] && [[ "$PREV_LINE_NO_C" == *"==&gt; "* ]]; then
+        SUBMODUL_NAME="$(echo -e "$PREV_LINE_NO_C" | sed -e "s/==&gt; //g")"
         if [[ -n "$SUBMODUL_NAME" ]] ; then
           LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_MONO""$LINK_END"
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
           sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
-          ((LINE_NUMBER++))
           ((LINE_NUMBER_REP_NAV++))
         fi
       fi
-      # add html tags for style and replace lt character
+      # add html tags for style
       HTML_LINE="$(add_color_tags "$LINE" )"
-      # add link tags to links
-      HTML_LINE="$(add_link_tags "$HTML_LINE")"
-      ((LINE_NUMBER++))
-      sed -i "$LINE_NUMBER""i""$P_START""$HTML_LINE""$P_END" "$ABS_HTML_PATH""/""$HTML_FILE"
-      # add aggregator lines to index page
-      if [[ "$HTML_FILE" == "f50"* ]] ; then
-        ((LINE_NUMBER_INDEX++))
-        sed -i "$LINE_NUMBER_INDEX""i""$P_START""$HTML_LINE""$P_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
-      fi
+      # add link tags to links/generate info files and link to them and write line to tmp file
+      echo "$P_START""$(add_link_tags "$HTML_LINE")""$P_END" >> "$TMP_FILE"
       PREV_LINE="$LINE"
     fi
-  done
+  done < "$FILE"
+
+  # add content of temporary html into template
+  sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
+  # add aggregator lines to index page
+  if [[ "$HTML_FILE" == "f50"* ]] ; then
+    sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  fi
+  rm "$TMP_FILE"
 }
 
 add_link_to_index() {
@@ -208,6 +233,9 @@ prepare_report()
     mkdir "$ABS_HTML_PATH$STYLE_PATH"
     cp "$HELP_DIR/style.css" "$ABS_HTML_PATH$STYLE_PATH/style.css"
     cp "$HELP_DIR/emba.svg" "$ABS_HTML_PATH$STYLE_PATH/emba.svg"
+  fi
+  if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
+    mkdir "$ABS_HTML_PATH$TEMP_PATH"
   fi
 
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"
