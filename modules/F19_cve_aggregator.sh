@@ -26,6 +26,7 @@ F19_cve_aggregator() {
   # https://github.com/cve-search/cve-search
 
   # set it up
+  LOG_FILE="$(get_log_file)"
   PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
   if ! [[ -d "$LOG_DIR"/aggregator ]] ; then
     mkdir "$LOG_DIR"/aggregator
@@ -90,7 +91,9 @@ F19_cve_aggregator() {
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$CVE_COUNTER"
+  FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_FILE" | grep -c -E "\[\+\]\ Found\ [1-9]")
+
+  module_end_log "${FUNCNAME[0]}" "$FOUND_CVE"
 }
 
 prepare_version_data() {
@@ -656,7 +659,6 @@ cve_db_lookup() {
 
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
-    #echo "[+] Statistics1:$HIGH_CVE_COUNTER|$MEDIUM_CVE_COUNTER|$LOW_CVE_COUNTER"
   } >> "$LOG_DIR"/aggregator/"$VERSION_PATH".txt
   echo "$LOW_CVE_COUNTER" >> "$TMP_DIR"/LOW_CVE_COUNTER.tmp
   echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp

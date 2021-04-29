@@ -22,7 +22,7 @@ export THREAD_PRIO=1
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Software component and version detection via emulation started"
+  module_title "Software component and version detection via emulation."
 
   if [[ "$QEMULATION" -eq 1 ]]; then
 
