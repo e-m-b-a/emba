@@ -155,26 +155,50 @@ analyze_kernel_module()
   print_output "[*] Found ${#KERNEL_MODULES[@]} kernel modules."
 
   for LINE in "${KERNEL_MODULES[@]}" ; do
-    LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
-    local M_PATH
-    M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
-    local LICENSE
-    LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
-    if file "$M_PATH" 2>/dev/null | grep -q 'not stripped'; then
-      if echo "$LINE" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
-        # kernel module is GPL/BSD license then not stripped is fine
-        print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
-      elif ! [[ $LICENSE =~ "License:" ]] ; then
-        print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
-      else
-        # kernel module is NOT GPL license then not stripped is bad!
-        print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
-        KMOD_BAD=$((KMOD_BAD+1))
-      fi
+    # modinfos can run in parallel:
+    if [[ "$THREADED" -eq 1 ]]; then
+      module_analyzer &
+      WAIT_PIDS_S25+=( "$!" )
     else
-      print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
+      module_analyzer
     fi
   done
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S25[@]}"
+  fi
+
+  # in threading we need to go via a temp file with the need to count it now:
+  # shellcheck disable=SC2153
+  if [[ -f "$TMP_DIR"/KMOD_BAD.tmp ]]; then
+    while read -r COUNTING; do
+      (( KMOD_BAD="$KMOD_BAD"+"$COUNTING" ))
+    done < "$TMP_DIR"/KMOD_BAD.tmp
+  fi
+}
+
+module_analyzer() {
+  LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
+  local M_PATH
+  M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
+  local LICENSE
+  LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
+  if file "$M_PATH" 2>/dev/null | grep -q 'not stripped'; then
+    if echo "$LINE" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
+      # kernel module is GPL/BSD license then not stripped is fine
+      print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
+    elif ! [[ $LICENSE =~ "License:" ]] ; then
+      print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+    else
+      # kernel module is NOT GPL license then not stripped is bad!
+      print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+      KMOD_BAD=$((KMOD_BAD+1))
+    fi
+  else
+    print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
+  fi
+
+  echo "$KMOD_BAD" >> "$TMP_DIR"/KMOD_BAD.tmp
 }
 
 # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_usb

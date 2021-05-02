@@ -22,14 +22,28 @@ S95_interesting_binaries_check()
 
   LOG_FILE="$( get_log_file )"
 
-  interesting_binaries
-  post_exploitation
+  if [[ "$THREADED" -eq 1 ]]; then
+    interesting_binaries &
+    WAIT_PIDS_S95+=( "$!" )
+    post_exploitation &
+    WAIT_PIDS_S95+=( "$!" )
+  else
+    interesting_binaries
+    post_exploitation
+  fi
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S95[@]}"
+  fi
+
+  if [[ -f "$TMP_DIR"/INT_COUNT.tmp || -f "$TMP_DIR"/POST_COUNT.tmp ]]; then
+    NEG_LOG=1
+    POST_COUNT=$(cat "$TMP_DIR"/POST_COUNT.tmp 2>/dev/null)
+    INT_COUNT=$(cat "$TMP_DIR"/INT_COUNT.tmp 2>/dev/null)
+  fi
 
   echo -e "\\n[*] Statistics:$INT_COUNT:$POST_COUNT" >> "$LOG_FILE"
 
-  if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
-    NEG_LOG=1
-  fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
@@ -60,9 +74,11 @@ interesting_binaries()
       fi
     done
   fi
+
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries found"
   fi
+  echo "$INT_COUNT" >> "$TMP_DIR"/INT_COUNT.tmp
 }
 
 post_exploitation()
@@ -95,5 +111,6 @@ post_exploitation()
   if [[ $COUNT -eq 0 ]] ; then
     print_output "[-] No interesting binaries for post exploitation found"
   fi
+  echo "$POST_COUNT" >> "$TMP_DIR"/POST_COUNT.tmp
 }
 
