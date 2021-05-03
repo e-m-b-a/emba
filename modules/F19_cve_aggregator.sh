@@ -30,6 +30,9 @@ F19_cve_aggregator() {
   if ! [[ -d "$LOG_DIR"/aggregator ]] ; then
     mkdir "$LOG_DIR"/aggregator
   fi
+  if ! [[ -d "$LOG_DIR"/aggregator/exploit ]] ; then
+    mkdir "$LOG_DIR"/aggregator/exploit
+  fi
   KERNELV=0
   HIGH_CVE_COUNTER=0
   MEDIUM_CVE_COUNTER=0
@@ -613,15 +616,24 @@ cve_db_lookup() {
         mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null)
         if [[ " ${EXPLOIT_AVAIL[@]} " =~ "Exploit DB Id:" ]]; then
         #if cve_searchsploit "$CVE_VALUE" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
-          EXPLOIT_ID="$(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //g')"
-          EXPLOIT="Exploit available (Source: Exploit database ID ""$EXPLOIT_ID"")"
-          echo -e "\\n[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR"/aggregator/exploit-details.txt
-          for LINE in "${EXPLOIT_AVAIL[@]}"; do
-            #cve_searchsploit "$CVE_VALUE" >> "$LOG_DIR"/aggregator/exploit-details.txt
-            echo "$LINE" >> "$LOG_DIR"/aggregator/exploit-details.txt
+          readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //')
+          EXPLOIT="Exploit available (Source: Exploit database ID"
+          for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_ID"
+            echo -e "[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
+            for LINE in "${EXPLOIT_AVAIL[@]}"; do
+              echo "$LINE" >> "$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
+            done
+            ((EXPLOIT_COUNTER++))
+            ((EXPLOIT_COUNTER_VERSION++))
           done
-          ((EXPLOIT_COUNTER++))
-          ((EXPLOIT_COUNTER_VERSION++))
+          EXPLOIT="$EXPLOIT"")"
+          readarray -t EXPLOIT_FILES < <(echo "${EXPLOIT_AVAIL[@]}" | grep "File:" | cut -d ":" -f 2 | sed 's/\ //')
+          for E_FILE in "${EXPLOIT_FILES[@]}"; do
+            if [[ -f "$E_FILE" ]] ; then
+              cp "$E_FILE" "$LOG_DIR""/aggregator/exploit/""$(basename "$E_FILE")"
+            fi
+          done
         fi
       fi
     fi

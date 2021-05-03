@@ -4,6 +4,7 @@
 # emba - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
+# Copyright 2020-2021 Siemens Energy AG
 #
 # emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +12,7 @@
 #
 # emba is licensed under GPLv3
 #
-# Author(s): Pascal Eckmann, Stefan Haboeck
+# Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
 
 INDEX_FILE="index.html"
 STYLE_PATH="/style"
@@ -33,6 +34,7 @@ HR_MONO="<hr class=\"mono\" />"
 HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
 LINK="<a href=\"LINK\" target=\"\_blank\" >"
+LOCAL_LINK="<a href=\"LINK\">"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\">"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\">"
@@ -47,26 +49,16 @@ add_color_tags()
   if [[ -z "$LINE" ]] ; then
     echo "$BR"
   else
-    for (( COUNT=0; COUNT<${#LINE}; COUNT++ )) ; do
-      if [[ "${LINE:$COUNT}" == "$(echo -e "\x1b")"* ]] ; then
-        COLOR_ELEM="$( echo "${LINE:$COUNT}" | cut -d 'm' -f 1)""m"
-        readarray -t COLOR_ELEM_ARR < <(echo -e "$COLOR_ELEM" | sed -e 's/[^;0-9]*//g' | sed -e 's/;/\n/g' | sed '1!G;h;$!d') 
-        for ELEM in "${COLOR_ELEM_ARR[@]}" ; do
-          case "$ELEM" in
-            0) LINE="${LINE:0:$COUNT}""$SPAN_END""${LINE:$COUNT}";;
-            1) LINE="${LINE:0:$COUNT}""$SPAN_BOLD""${LINE:$COUNT}";;
-            3) LINE="${LINE:0:$COUNT}""$SPAN_ITALIC""${LINE:$COUNT}";;
-            31) LINE="${LINE:0:$COUNT}""$SPAN_RED""${LINE:$COUNT}";;
-            32) LINE="${LINE:0:$COUNT}""$SPAN_GREEN""${LINE:$COUNT}";;
-            33) LINE="${LINE:0:$COUNT}""$SPAN_ORANGE""${LINE:$COUNT}";;
-            34) LINE="${LINE:0:$COUNT}""$SPAN_BLUE""${LINE:$COUNT}";;
-            35) LINE="${LINE:0:$COUNT}""$SPAN_MAGENTA""${LINE:$COUNT}";;
-            36) LINE="${LINE:0:$COUNT}""$SPAN_CYAN""${LINE:$COUNT}";;
-          esac
-        done
-        LINE="${LINE//$COLOR_ELEM/}"
-      fi
-    done
+    LINE="$(echo "$LINE" | sed 's/\x1b\[/##/g' | sed -E 's/([##0-9]{1})m/\1/g' | sed -E 's/(##[0-9]);/\1##/g')"
+    LINE="${LINE//"##31"/"$SPAN_RED"}"
+    LINE="${LINE//"##32"/"$SPAN_GREEN"}"
+    LINE="${LINE//"##33"/"$SPAN_ORANGE"}"
+    LINE="${LINE//"##34"/"$SPAN_BLUE"}"
+    LINE="${LINE//"##35"/"$SPAN_MAGENTA"}"
+    LINE="${LINE//"##36"/"$SPAN_CYAN"}"
+    LINE="${LINE//"##0"/"$SPAN_END"}"
+    LINE="${LINE//"##1"/"$SPAN_BOLD"}"
+    LINE="${LINE//"##3"/"$SPAN_ITALIC"}"
     LINE="$(strip_color_tags "$LINE")"
     echo "$LINE"
   fi  
@@ -80,11 +72,18 @@ add_link_tags() {
     LINE="$(echo "$LINE" | sed -e "s@$F_LINK@$HTML_LINK@g")"
   fi
   readarray -t EXPLOIT_IDS < <(echo "$LINE" | sed -n -e 's/^.*Exploit database ID //p' | sed 's/[^0-9]//g' )
-  # readarray -t EXPLOIT_FILES < <(echo "$LINE" | grep -E "File:" | sed -e 's/File\://g' -e "s/\ //g" )
   for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
     if [[ -n "$EXPLOIT_ID" ]] ; then
-      HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-      LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+      EXPLOIT_FILE="$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
+      if [[ -f "$EXPLOIT_FILE" ]] ; then
+        readarray -t EXPLOIT_FILES < <(grep "File: " "$EXPLOIT_FILE" | cut -d ":" -f 2 | sed 's/^\ //')
+        generate_info_file "$EXPLOIT_FILE" "./f19_cve_aggregator.html" "${EXPLOIT_FILES[@]}"
+        HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@$EXPLOIT_ID".html"@g")""$EXPLOIT_ID""$LINK_END"
+        LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+      else
+        HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
+        LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+      fi
     fi
   done
   echo "$LINE"
@@ -100,30 +99,51 @@ strip_color_tags()
 # often we have additional information, like exploits or cve's
 generate_info_file()
 {
-  INFO_FILE=$1
-  BACK_LINK=$2
-  HTML_INFO_FILE="$(basename "${INFO_FILE%.txt}"".html")"
-  cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_INFO_FILE"
-  sed -i 's/back/back hidden/g' "$ABS_HTML_PATH""/""$HTML_INFO_FILE"
+  FILE=$1
+  SRC_FILE=$2
+  shift            
+  ADD_PATH=("$@")
+  INFO_HTML_FILE="$(basename "${FILE%.txt}"".html")"
+  cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+  TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
 
   # parse log content and add to html file
-  readarray -t INFO_FILE_LINES < "$FILE"
-  INFO_LINE_NUMBER=$(grep -n "content start" "$ABS_HTML_PATH""/""$HTML_INFO_FILE" | cut -d ":" -f 1)
-  LINE_NUMBER_REP_INFO_NAV=$(($(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_INFO_FILE" | cut -d ":" -f 1)+1))
-  sed -i "$LINE_NUMBER_REP_NAV""i""$(echo "$MODUL_LINK" | sed -e "s@LINK@$BACK_LINK@g")""$(basename "${BACK_LINK%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$HTML_INFO_FILE"
-  for LINE in "${FILE_LINES[@]}" ; do
-    LINE="${LINE//&/&amp;}"
-    LINE="${LINE//</&lt;}"
-    LINE="${LINE//>/&gt;}"
-    # add link tags to links
-    INFO_HTML_LINE="$(add_link_tags "$LINE")"
-    ((INFO_LINE_NUMBER++))
-    sed -i "$INFO_LINE_NUMBER""i""$P_START""$INFO_HTML_LINE""$P_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+  LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$INFO_HTML_FILE" | cut -d ":" -f 1)
+  ((LINE_NUMBER_INFO_NAV++))
+  NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@$SRC_FILE@g")"
+  sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_LINK""Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+
+  while IFS= read -r LINE; do 
+    LINE_NO_C="$(strip_color_tags "$LINE")"
+    if [[ "$LINE_NO_C" != "[*] Statistics"* ]] ; then
+      LINE="${LINE//&/&amp;}"
+      LINE="${LINE//</&lt;}"
+      LINE="${LINE//>/&gt;}"
+      # add html tags for style
+      HTML_INFO_LINE="$(add_color_tags "$LINE" )"
+      # add link tags to links/generate info files and link to them and write line to tmp file
+      echo "$P_START""$(add_link_tags "$HTML_INFO_LINE")""$P_END" >> "$TMP_INFO_FILE"
+    fi
+  done < "$FILE"
+
+  for E_PATH in "${ADD_PATH[@]}" ; do
+    if [[ -f "$E_PATH" ]] ; then
+      cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
+      HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@"./""$(basename "$E_PATH")"@g")""$(basename "$E_PATH")""$LINK_END"
+      LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+      echo "$HR""$P_START""$HTML_LINK""$P_END" >> "$TMP_INFO_FILE"
+    fi
   done
+
+  # add content of temporary html into template
+  sed -i "/content start/ r $TMP_INFO_FILE" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+  rm "$TMP_INFO_FILE"
 }
 
 generate_report_file()
 {
+  SECONDS=0
+
   FILE=$1
   HTML_FILE="$(basename "${FILE%.txt}"".html")"
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
@@ -134,15 +154,14 @@ generate_report_file()
   LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d ":" -f 1)
   PREV_LINE=""
   while IFS= read -r LINE; do 
-    LINE_NO_C="$(strip_color_tags "$LINE")"
-    PREV_LINE_NO_C="$(strip_color_tags "$PREV_LINE")"
     if [[ "$LINE_NO_C" != "[*] Statistics"* ]] ; then
       LINE="${LINE//&/&amp;}"
       LINE="${LINE//</&lt;}"
       LINE="${LINE//>/&gt;}"
+      LINE_NO_C="$(strip_color_tags "$LINE")"
       # get (sub)modul names and add anchor
-      if [[ "$LINE_NO_C" == "=================================================================" ]] && [[ "$PREV_LINE_NO_C" == "[+] "* ]]; then
-        MODUL_NAME="$(echo -e "$PREV_LINE_NO_C" | sed -e "s/\[+\]\ //g")"
+      if [[ "$LINE_NO_C" == "=================================================================" ]] && [[ "$PREV_LINE" == "[+] "* ]]; then
+        MODUL_NAME="$(echo -e "$PREV_LINE" | sed -e "s/\[+\]\ //g")"
         if [[ -n "$MODUL_NAME" ]] ; then
           LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_DOUBLE""$LINK_END"
           # add link to index navigation
@@ -152,8 +171,8 @@ generate_report_file()
           sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
           ((LINE_NUMBER_REP_NAV++))
         fi
-      elif [[ "$LINE_NO_C" == "-----------------------------------------------------------------" ]] && [[ "$PREV_LINE_NO_C" == *"==&gt; "* ]]; then
-        SUBMODUL_NAME="$(echo -e "$PREV_LINE_NO_C" | sed -e "s/==&gt; //g")"
+      elif [[ "$LINE_NO_C" == "-----------------------------------------------------------------" ]] && [[ "$PREV_LINE" == "==&gt; "* ]]; then
+        SUBMODUL_NAME="$(echo -e "$PREV_LINE" | sed -e "s/==&gt; //g")"
         if [[ -n "$SUBMODUL_NAME" ]] ; then
           LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")""$HR_MONO""$LINK_END"
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")@g")"
@@ -165,7 +184,7 @@ generate_report_file()
       HTML_LINE="$(add_color_tags "$LINE" )"
       # add link tags to links/generate info files and link to them and write line to tmp file
       echo "$P_START""$(add_link_tags "$HTML_LINE")""$P_END" >> "$TMP_FILE"
-      PREV_LINE="$LINE"
+      PREV_LINE="$LINE_NO_C"
     fi
   done < "$FILE"
 

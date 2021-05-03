@@ -2,6 +2,7 @@
 emba - EMBEDDED LINUX ANALYZER
 
 Copyright 2020-2021 Siemens AG
+Copyright 2020-2021 Siemens Energy AG
 
 emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 welcome to redistribute it under the terms of the GNU General Public License.
@@ -9,8 +10,8 @@ See LICENSE file for usage of this software.
 
 emba is licensed under GPLv3
 
-Author(s): Pascal Eckmann
- -->
+Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
+-->
  
 <!DOCTYPE html>
 <html lang="en">
@@ -22,7 +23,7 @@ Author(s): Pascal Eckmann
 </head>
 <body>
 
-<div id="mySidenav" class="side">
+<div id="sidenav" class="side">
   <div class="logo">
     <a class="inherit" href="index.html"><img class="inherit" src="./style/emba.svg" alt="emba logo"></a>
   </div>
@@ -46,14 +47,14 @@ window.onload = function () {
 }
 
 function openNav() {
-  document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("sidenav").style.width = "250px";
   document.getElementById("main").style.marginLeft = "250px";
   document.getElementById("nav").style.visibility = "visible";
 }
 
 function closeNav() {
-  document.getElementById("mySidenav").style.width = "50px";
-  document.getElementById("mySidenav").scrollTop = 0;
+  document.getElementById("sidenav").style.width = "50px";
+  document.getElementById("sidenav").scrollTop = 0;
   document.getElementById("main").style.marginLeft = "50px";
   document.getElementById("nav").style.visibility = "hidden";
 }
