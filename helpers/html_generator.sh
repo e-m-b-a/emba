@@ -67,6 +67,7 @@ add_color_tags()
 
 add_link_tags() {
   LINE="$1"
+  BACK_LINK="$2"
   EXPLOITS_IDS=()
   F_LINK="$(echo "$LINE" | grep -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' )"
   if [[ -n "$F_LINK" ]] ; then
@@ -105,7 +106,7 @@ add_link_tags() {
   for EXPLOIT_FILE in "${EXPLOIT_FILE_ARR[@]}" ; do
     HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
     readarray -t EXPLOIT_FILES < <(grep "File: " "$EXPLOIT_FILE" | cut -d ":" -f 2 | sed 's/^\ //')
-    generate_info_file "$EXPLOIT_FILE" "./f19_cve_aggregator.html" "$HTML_LINK" "${EXPLOIT_FILES[@]}"
+    generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" "$HTML_LINK" "${EXPLOIT_FILES[@]}"
   done
 }
 
@@ -133,7 +134,7 @@ generate_info_file()
     # parse log content and add to html file
     LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$INFO_HTML_FILE" | cut -d ":" -f 1)
     ((LINE_NUMBER_INFO_NAV++))
-    NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@$SRC_FILE@g")"
+    NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@./$SRC_FILE@g")"
     sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
 
     while IFS= read -r LINE; do 
@@ -145,16 +146,13 @@ generate_info_file()
         # add html tags for style
         HTML_INFO_LINE="$(add_color_tags "$LINE" )"
         # add link tags to links/generate info files and link to them and write line to tmp file
-        HTML_INFO_LINE="$(add_link_tags "$HTML_INFO_LINE")"
+        HTML_INFO_LINE="$(add_link_tags "$HTML_INFO_LINE" "$(basename "$SRC_FILE")")"
         echo -e "$P_START""$HTML_INFO_LINE""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
       fi
     done < "$FILE"
 
-    if [[ -f "$E_PATH" ]] ; then
-      cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
-      HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
-      LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
-      echo -e "$HR_MONO""$P_START""$HTML_LINK""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
+    if [[ -n "$ONLINE" ]] ; then
+      echo -e "$HR_MONO""$P_START""Online: ""$ONLINE""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
     fi
 
     for E_PATH in "${ADD_PATH[@]}" ; do
@@ -162,7 +160,7 @@ generate_info_file()
         cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
         HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
-        echo -e "$HR_MONO""$P_START""$HTML_LINK""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
+        echo -e "$HR_MONO""$P_START""File: ""$HTML_LINK""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
       fi
     done
 
@@ -215,7 +213,7 @@ generate_report_file()
       # add html tags for style
       HTML_LINE="$(add_color_tags "$LINE" )"
       # add link tags to links/generate info files and link to them and write line to tmp file
-      echo "$P_START""$(add_link_tags "$HTML_LINE")""$P_END" >> "$TMP_FILE"
+      echo "$P_START""$(add_link_tags "$HTML_LINE" "$HTML_FILE")""$P_END" >> "$TMP_FILE"
       PREV_LINE="$LINE_NO_C"
     fi
   done < "$FILE"
