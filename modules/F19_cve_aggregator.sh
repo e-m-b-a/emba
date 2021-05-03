@@ -614,7 +614,7 @@ cve_db_lookup() {
       # if no exploit was found lets talk to exploitdb:
       if [[ "$EXPLOIT" == "No exploit available" ]]; then
         mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null)
-        if [[ " ${EXPLOIT_AVAIL[@]} " =~ "Exploit DB Id:" ]]; then
+        if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
         #if cve_searchsploit "$CVE_VALUE" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
           readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //')
           EXPLOIT="Exploit available (Source: Exploit database ID"

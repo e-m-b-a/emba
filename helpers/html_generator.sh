@@ -66,27 +66,37 @@ add_color_tags()
 
 add_link_tags() {
   LINE="$1"
+  EXPLOITS_IDS=()
   F_LINK="$(echo "$LINE" | grep -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' )"
   if [[ -n "$F_LINK" ]] ; then
     HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$F_LINK@g")""$F_LINK""$LINK_END"
     LINE="$(echo "$LINE" | sed -e "s@$F_LINK@$HTML_LINK@g")"
   fi
-  readarray -t EXPLOIT_IDS < <(echo "$LINE" | sed -n -e 's/^.*Exploit database ID //p' | sed 's/[^0-9]//g' )
-  for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
+
+  # Exploit links and additional files
+  readarray -t EXPLOITS_IDS_F < <(echo "$LINE" | sed -n -e 's/^.*Exploit database ID //p' | sed 's/[^0-9\ ]//g' )
+  readarray -t EXPLOITS_IDS_S < <(echo "$LINE" | sed -n -e 's/^.*exploit-db: //p' | sed 's/[^0-9\ ]//g' )
+  EXPLOITS_IDS=( "${EXPLOITS_IDS_F[@]}" "${EXPLOITS_IDS_S[@]}" )
+  for EXPLOIT_ID in "${EXPLOITS_IDS[@]}" ; do
     if [[ -n "$EXPLOIT_ID" ]] ; then
       EXPLOIT_FILE="$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
       if [[ -f "$EXPLOIT_FILE" ]] ; then
-        readarray -t EXPLOIT_FILES < <(grep "File: " "$EXPLOIT_FILE" | cut -d ":" -f 2 | sed 's/^\ //')
-        generate_info_file "$EXPLOIT_FILE" "./f19_cve_aggregator.html" "${EXPLOIT_FILES[@]}"
-        HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@$EXPLOIT_ID".html"@g")""$EXPLOIT_ID""$LINK_END"
+        HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
         LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+        EXPLOIT_FILE_ARR=( "${EXPLOIT_FILE_ARR[@]}" "$EXPLOIT_FILE" )
       else
         HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
         LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
       fi
     fi
   done
+
   echo "$LINE"
+
+  for EXPLOIT_FILE in "${EXPLOIT_FILE_ARR[@]}" ; do
+    readarray -t EXPLOIT_FILES < <(grep "File: " "$EXPLOIT_FILE" | cut -d ":" -f 2 | sed 's/^\ //')
+    generate_info_file "$EXPLOIT_FILE" "./f19_cve_aggregator.html" "${EXPLOIT_FILES[@]}"
+  done
 }
 
 strip_color_tags()
@@ -104,40 +114,44 @@ generate_info_file()
   shift            
   ADD_PATH=("$@")
   INFO_HTML_FILE="$(basename "${FILE%.txt}"".html")"
-  cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
-  TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
 
-  # parse log content and add to html file
-  LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$INFO_HTML_FILE" | cut -d ":" -f 1)
-  ((LINE_NUMBER_INFO_NAV++))
-  NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@$SRC_FILE@g")"
-  sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_LINK""Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+  if ! [[ -f "$ABS_HTML_PATH""/""$INFO_HTML_FILE" ]] ; then
+    cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+    TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
 
-  while IFS= read -r LINE; do 
-    LINE_NO_C="$(strip_color_tags "$LINE")"
-    if [[ "$LINE_NO_C" != "[*] Statistics"* ]] ; then
-      LINE="${LINE//&/&amp;}"
-      LINE="${LINE//</&lt;}"
-      LINE="${LINE//>/&gt;}"
-      # add html tags for style
-      HTML_INFO_LINE="$(add_color_tags "$LINE" )"
-      # add link tags to links/generate info files and link to them and write line to tmp file
-      echo "$P_START""$(add_link_tags "$HTML_INFO_LINE")""$P_END" >> "$TMP_INFO_FILE"
-    fi
-  done < "$FILE"
+    # parse log content and add to html file
+    LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$INFO_HTML_FILE" | cut -d ":" -f 1)
+    ((LINE_NUMBER_INFO_NAV++))
+    NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@$SRC_FILE@g")"
+    sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_LINK""Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
 
-  for E_PATH in "${ADD_PATH[@]}" ; do
-    if [[ -f "$E_PATH" ]] ; then
-      cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
-      HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@"./""$(basename "$E_PATH")"@g")""$(basename "$E_PATH")""$LINK_END"
-      LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
-      echo "$HR""$P_START""$HTML_LINK""$P_END" >> "$TMP_INFO_FILE"
-    fi
-  done
+    while IFS= read -r LINE; do 
+      LINE_NO_C="$(strip_color_tags "$LINE")"
+      if [[ "$LINE_NO_C" != "[*] Statistics"* ]] ; then
+        LINE="${LINE//&/&amp;}"
+        LINE="${LINE//</&lt;}"
+        LINE="${LINE//>/&gt;}"
+        # add html tags for style
+        HTML_INFO_LINE="$(add_color_tags "$LINE" )"
+        # add link tags to links/generate info files and link to them and write line to tmp file
+        HTML_INFO_LINE="$(add_link_tags "$HTML_INFO_LINE")"
+        echo -e "$P_START""$HTML_INFO_LINE""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
+      fi
+    done < "$FILE"
 
-  # add content of temporary html into template
-  sed -i "/content start/ r $TMP_INFO_FILE" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
-  rm "$TMP_INFO_FILE"
+    for E_PATH in "${ADD_PATH[@]}" ; do
+      if [[ -f "$E_PATH" ]] ; then
+        cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
+        HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+        LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+        echo -e "$HR_MONO""$P_START""$HTML_LINK""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
+      fi
+    done
+
+    # add content of temporary html into template
+    sed -i "/content start/ r $TMP_INFO_FILE" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+    #rm "$TMP_INFO_FILE"
+  fi
 }
 
 generate_report_file()
@@ -194,7 +208,7 @@ generate_report_file()
   if [[ "$HTML_FILE" == "f50"* ]] ; then
     sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$INDEX_FILE"
   fi
-  rm "$TMP_FILE"
+  #rm "$TMP_FILE"
 }
 
 add_link_to_index() {
@@ -211,9 +225,10 @@ add_link_to_index() {
   MODUL_NAME="$2"
   DATA="$( echo "$HTML_FILE" | cut -d "_" -f 1)"
   CLASS="${DATA:0:1}"
+  C_NUMBER="$(echo "${DATA:1}" | sed -E 's/^0*//g')"
 
   readarray -t INDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' "$ABS_HTML_PATH""/""$INDEX_FILE" | sed -e '1d;$d' | grep -P -o '(?<=data=\").*?(?=\")')
-  readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep "$CLASS")
+  readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep "$CLASS" )
 
   if [[ ${#INDEX_NAV_GROUP_ARR[@]} -eq 0 ]] ; then
     # due the design of emba, which are already groups the modules (even threaded), it isn't necessary to check - 
@@ -221,11 +236,11 @@ add_link_to_index() {
     insert_line "navigation end" "$MODUL_NAME"
   else
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
-      if [[ $COUNT -eq 0 ]] && [[ ${DATA:1} -lt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
+      if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
-      elif [[ ${DATA:1} -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] && [[ ${DATA:1} -lt ${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1} ]] ; then
+      elif [[ $C_NUMBER -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] && [[ $C_NUMBER -lt ${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1} ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
-      elif [[ $COUNT -eq $((${#INDEX_NAV_GROUP_ARR[@]}-1)) ]] && [[ ${DATA:1} -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
+      elif [[ $COUNT -eq $((${#INDEX_NAV_GROUP_ARR[@]}-1)) ]] && [[ $C_NUMBER -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
       fi
     done
