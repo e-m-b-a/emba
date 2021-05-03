@@ -23,6 +23,10 @@ body {
   margin:0;
 }
 
+a {
+  color: inherit; 
+}
+
 a.modul {
   background-color:#333;
 }
@@ -75,12 +79,11 @@ pre {
 }
 
 pre a {
-  color: #E844FF;
   font-weight: bold;
 }
 
 pre a:hover {
-  color:#be85d8;
+  background-color:#505050;
 }
 
 span {
@@ -119,6 +122,10 @@ span {
 
 .inherit {
   width:inherit;
+}
+
+.local {
+  color: #beec18;
 }
 
 .logo {

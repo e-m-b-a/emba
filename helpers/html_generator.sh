@@ -34,8 +34,9 @@ HR_MONO="<hr class=\"mono\" />"
 HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
 LINK="<a href=\"LINK\" target=\"\_blank\" >"
-LOCAL_LINK="<a href=\"LINK\">"
+LOCAL_LINK="<a class=\"local\" href=\"LINK\">"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" target=\"\_blank\" >"
+CVE_LINK="<a href=\"https://cve.mitre.org/cgi-bin/cvename.cgi?name=LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\">"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\">"
 SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\">"
@@ -49,7 +50,7 @@ add_color_tags()
   if [[ -z "$LINE" ]] ; then
     echo "$BR"
   else
-    LINE="$(echo "$LINE" | sed 's/\x1b\[/##/g' | sed -E 's/([##0-9]{1})m/\1/g' | sed -E 's/(##[0-9]);/\1##/g')"
+    LINE="$(echo "$LINE" | sed 's/\x1b\[/##/g' | sed -E 's/(##[0-9]);/\1##/g' | sed -E 's/(##[0-9]{1,2})m/\1/g' )"
     LINE="${LINE//"##31"/"$SPAN_RED"}"
     LINE="${LINE//"##32"/"$SPAN_GREEN"}"
     LINE="${LINE//"##33"/"$SPAN_ORANGE"}"
@@ -91,11 +92,20 @@ add_link_tags() {
     fi
   done
 
+  readarray -t CVE_IDS < <(echo "$LINE" | grep -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' )
+  for CVE_ID in "${CVE_IDS[@]}" ; do
+    if [[ -n "$CVE_ID" ]] ; then
+      HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID@g")""$CVE_ID""$LINK_END"
+      LINE="$(echo "$LINE" | sed -e "s@$CVE_ID@$HTML_LINK@g")"
+    fi
+  done
+
   echo "$LINE"
 
   for EXPLOIT_FILE in "${EXPLOIT_FILE_ARR[@]}" ; do
+    HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
     readarray -t EXPLOIT_FILES < <(grep "File: " "$EXPLOIT_FILE" | cut -d ":" -f 2 | sed 's/^\ //')
-    generate_info_file "$EXPLOIT_FILE" "./f19_cve_aggregator.html" "${EXPLOIT_FILES[@]}"
+    generate_info_file "$EXPLOIT_FILE" "./f19_cve_aggregator.html" "$HTML_LINK" "${EXPLOIT_FILES[@]}"
   done
 }
 
@@ -111,6 +121,7 @@ generate_info_file()
 {
   FILE=$1
   SRC_FILE=$2
+  ONLINE=$3
   shift            
   ADD_PATH=("$@")
   INFO_HTML_FILE="$(basename "${FILE%.txt}"".html")"
@@ -123,7 +134,7 @@ generate_info_file()
     LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$INFO_HTML_FILE" | cut -d ":" -f 1)
     ((LINE_NUMBER_INFO_NAV++))
     NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@$SRC_FILE@g")"
-    sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_LINK""Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+    sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
 
     while IFS= read -r LINE; do 
       LINE_NO_C="$(strip_color_tags "$LINE")"
@@ -139,6 +150,13 @@ generate_info_file()
       fi
     done < "$FILE"
 
+    if [[ -f "$E_PATH" ]] ; then
+      cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
+      HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+      LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
+      echo -e "$HR_MONO""$P_START""$HTML_LINK""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
+    fi
+
     for E_PATH in "${ADD_PATH[@]}" ; do
       if [[ -f "$E_PATH" ]] ; then
         cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
@@ -150,7 +168,7 @@ generate_info_file()
 
     # add content of temporary html into template
     sed -i "/content start/ r $TMP_INFO_FILE" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
-    #rm "$TMP_INFO_FILE"
+    rm "$TMP_INFO_FILE"
   fi
 }
 
@@ -208,7 +226,7 @@ generate_report_file()
   if [[ "$HTML_FILE" == "f50"* ]] ; then
     sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$INDEX_FILE"
   fi
-  #rm "$TMP_FILE"
+  rm "$TMP_FILE"
 }
 
 add_link_to_index() {
