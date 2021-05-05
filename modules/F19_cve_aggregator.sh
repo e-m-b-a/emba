@@ -207,6 +207,13 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//mke2fs/e2fsprogs}"
     VERSION_lower="${VERSION_lower//resize2fs/e2fsprogs}"
     VERSION_lower="${VERSION_lower//tune2fs/e2fsprogs}"
+    # ntfsprogs
+    VERSION_lower="${VERSION_lower//mkntfs/ntfsprogs}"
+    VERSION_lower="${VERSION_lower//ntfsck/ntfsprogs}"
+    VERSION_lower="${VERSION_lower//ntfsresize/ntfsprogs}"
+    VERSION_lower="${VERSION_lower//ntfsfix/ntfsprogs}"
+    VERSION_lower="${VERSION_lower//ntfsck/ntfsprogs}"
+    VERSION_lower="${VERSION_lower//ntfsdecrypt/ntfsprogs}"
     #ntfslabel -> ntfs-3g
     VERSION_lower="${VERSION_lower//ntfslabel/ntfs-3g}"
     #i2cXYZ -> i2c-tools

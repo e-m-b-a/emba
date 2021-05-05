@@ -36,8 +36,6 @@ S110_yara_check()
       if [[ "$THREADED" -eq 1 ]]; then
         yara_check &
         WAIT_PIDS_S110+=( "$!" )
-        # to fix:
-        YARA_CNT=1
       else
         yara_check 
       fi
@@ -46,6 +44,13 @@ S110_yara_check()
     if [[ "$THREADED" -eq 1 ]]; then
       wait_for_pid "${WAIT_PIDS_S110[@]}"
     fi
+
+    if [[ -f "$TMP_DIR"/YARA_CNT.tmp ]]; then
+      while read -r COUNTING; do
+        (( YARA_CNT="$YARA_CNT"+"$COUNTING" ))
+      done < "$TMP_DIR"/YARA_CNT.tmp
+    fi
+
     print_output ""
     print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches in $ORANGE${#FILE_ARR[@]}$NC files."
     echo -e "\\n[*] Statistics:$YARA_CNT" >> "$LOG_FILE"
@@ -57,6 +62,7 @@ S110_yara_check()
     print_output "[!] Check with yara not possible, because it isn't installed!"
   fi
 
+
   module_end_log "${FUNCNAME[0]}" "$YARA_CNT"
 }
 
@@ -66,7 +72,7 @@ yara_check() {
     S_OUTPUT="$(yara -r -w ./dir-combined.yara "$YARA_S_FILE")"
     if [[ -n "$S_OUTPUT" ]] ; then
       print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
-      ((YARA_CNT++))
+      echo "1" >> "$TMP_DIR"/YARA_CNT.tmp
     fi
   fi
 }

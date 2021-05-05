@@ -353,6 +353,14 @@ prepare_emulator() {
     print_output "[*] Currently mounted areas:"
     print_output "$(indent "$(mount | grep "$R_PATH" 2> /dev/null )")""\\n"
 
+    # we disable core dumps in our docker environment. If running on the host without docker
+    # the user is responsible for useful settings
+    if [[ $IN_DOCKER -eq 1 ]] ; then
+      print_output ""
+      print_output "[*] We disable core dumps to prevent wasting our disk space."
+      ulimit -c 0
+    fi
+
   fi
   if ! [[ -d "$LOG_DIR""/qemu_emulator" ]] ; then
     mkdir "$LOG_DIR""/qemu_emulator" 2> /dev/null
