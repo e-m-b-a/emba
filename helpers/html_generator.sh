@@ -85,7 +85,7 @@ add_link_tags() {
           # generate exploit file
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
           readarray -t EXPLOIT_FILES < <(grep "File: " "$EXPLOIT_FILE" | cut -d ":" -f 2 | sed 's/^\ //')
-          #generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" "$HTML_LINK" "${EXPLOIT_FILES[@]}"
+          generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" "$HTML_LINK" "${EXPLOIT_FILES[@]}"
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
           sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$FILE"
@@ -125,30 +125,25 @@ generate_info_file()
     cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
     TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
 
-    # parse log content and add to html file
-    LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$INFO_HTML_FILE" | cut -d ":" -f 1)
-    ((LINE_NUMBER_INFO_NAV++))
-    NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@./$SRC_FILE@g")"
-    sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+    # add back Link anchor to navigation
+    LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d":" -f1)
+    NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@$SRC_FILE@g")"
+    sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
 
-    readarray -t FILE_LINES < "$FILE"
-    #while IFS= read -r LINE; do 
-    for LINE in "${FILE_LINES[@]}" ; do
-      LINE_NO_C="$(strip_color_tags "$LINE")"
-      if [[ "$LINE_NO_C" != "[*] Statistics"* ]] ; then
-        LINE="${LINE//&/&amp;}"
-        LINE="${LINE//</&lt;}"
-        LINE="${LINE//>/&gt;}"
-        # add html tags for style
-        HTML_INFO_LINE="$(add_color_tags "$LINE" )"
-        # add link tags to links/generate info files and link to them and write line to tmp file
-        #HTML_INFO_LINE="$(add_link_tags "$HTML_INFO_LINE" "$(basename "$SRC_FILE")")"
-        echo -e "$P_START""$HTML_INFO_LINE""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
-      fi
-    done # < "$FILE"
+    cp "$FILE" "$TMP_INFO_FILE"
+    sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_FILE"
+    sed -i '/[*] Statistics/d' "$TMP_FILE"
+
+    sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_FILE"
+    # add html tags for style
+    add_color_tags "$TMP_FILE"
+    sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:[-]{65}:$HR_MONO:g" "$TMP_FILE"
+    
+    # add link tags to links/generate info files and link to them and write line to tmp file
+    add_link_tags "$TMP_FILE" "$HTML_FILE"
 
     if [[ -n "$ONLINE" ]] ; then
-      echo -e "$HR_MONO""$P_START""Online: ""$ONLINE""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
+      echo -e "$HR_MONO""$P_START""Online: ""$ONLINE""$P_END" >> "$TMP_INFO_FILE"
     fi
 
     for E_PATH in "${ADD_PATH[@]}" ; do
@@ -156,7 +151,7 @@ generate_info_file()
         cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
         HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
-        echo -e "$HR_MONO""$P_START""File: ""$HTML_LINK""$P_END" | tee -a "$TMP_INFO_FILE" >/dev/null
+        echo -e "$HR_MONO""$P_START""File: ""$HTML_LINK""$P_END" >> "$TMP_INFO_FILE"
       fi
     done
 
@@ -271,7 +266,7 @@ add_link_to_index() {
 update_index()
 {
   LINE_NUMBER_ENTROPY=$(grep -n "entropy.png" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-  if [[ "$LINE_NUMBER" -ne 0 ]] ; then 
+  if [[ -n "$LINE_NUMBER" ]] ; then 
     readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
     if [[ -f "${ENTROPY_IMAGES_ARR[0]}" ]] ; then
       cp "${ENTROPY_IMAGES_ARR[0]}" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"

@@ -556,7 +556,7 @@ main()
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ -f "$HTML_PATH"/index.html ]]; then
-      print_output "[*] Web report created HTML report in $LOG_DIR/html-report\\n" "main" 
+      print_output "[*] Web report created HTML report in ""$LOG_DIR""html-report\\n" "main" 
     fi
     echo
     if [[ -d "$LOG_DIR" ]]; then
