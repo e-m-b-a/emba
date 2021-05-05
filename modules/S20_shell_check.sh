@@ -32,31 +32,24 @@ S20_shell_check()
     for LINE in "${SH_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "shell script" ) ; then
         ((S20_SCRIPTS++))
-        NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-        SHELL_LOG="$LOG_DIR""/shellchecker/shellchecker_""$NAME"".txt"
-        shellcheck "$LINE" > "$SHELL_LOG" 2> /dev/null
-        VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
-        (( S20_SHELL_VULNS="$S20_SHELL_VULNS"+"$VULNS" ))
-        if [[ "$VULNS" -ne 0 ]] ; then
-          #check if this is common linux file:
-          local COMMON_FILES_FOUND
-          if [[ -f "$BASE_LINUX_FILES" ]]; then
-            COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
-            if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
-            fi
-          else
-            COMMON_FILES_FOUND=""
-          fi
-
-          if [[ "$VULNS" -gt 20 ]] ; then
-            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-          else
-            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-          fi
+        if [[ "$THREADED" -eq 1 ]]; then
+          s20_script_check &
+          WAIT_PIDS_S20+=( "$!" )
+        else
+          s20_script_check
         fi
-      fi
+     fi
     done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_S20[@]}"
+    fi
+
+    if [[ -f "$TMP_DIR"/S20_VULNS.tmp ]]; then
+      while read -r VULNS; do
+        (( S20_SHELL_VULNS="$S20_SHELL_VULNS"+"$VULNS" ))
+      done < "$TMP_DIR"/S20_VULNS.tmp
+    fi
 
     print_output ""
     print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts:""$NC""\\n"
@@ -71,4 +64,30 @@ S20_shell_check()
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi
   module_end_log "${FUNCNAME[0]}" "$S20_SHELL_VULNS"
+}
+
+s20_script_check() {
+  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  SHELL_LOG="$LOG_DIR""/shellchecker/shellchecker_""$NAME"".txt"
+  shellcheck "$LINE" > "$SHELL_LOG" 2> /dev/null
+  VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
+  if [[ "$VULNS" -ne 0 ]] ; then
+    #check if this is common linux file:
+    local COMMON_FILES_FOUND
+    if [[ -f "$BASE_LINUX_FILES" ]]; then
+      COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
+      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+        COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
+      fi
+    else
+      COMMON_FILES_FOUND=""
+    fi
+
+    if [[ "$VULNS" -gt 20 ]] ; then
+      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+    else
+      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+    fi
+    echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
+  fi
 }

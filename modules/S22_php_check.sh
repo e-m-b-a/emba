@@ -33,26 +33,25 @@ S22_php_check()
     for LINE in "${PHP_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "PHP script" ) ; then
         ((S22_PHP_SCRIPTS++))
-        NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-        PHP_LOG="$LOG_DIR""/php_checker/php_""$NAME"".txt"
-        php -l "$LINE" > "$PHP_LOG" 2>&1
-        VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null)
-        (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
-        if [[ "$VULNS" -ne 0 ]] ; then
-          #check if this is common linux file:
-          local COMMON_FILES_FOUND
-          if [[ -f "$BASE_LINUX_FILES" ]]; then
-            COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
-            if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
-            fi
-          else
-            COMMON_FILES_FOUND=""
-          fi
-          print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+        if [[ "$THREADED" -eq 1 ]]; then
+          s22_script_check &
+          WAIT_PIDS_S22+=( "$!" )
+        else
+          s22_script_check
         fi
       fi
     done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_S22[@]}"
+    fi
+
+    if [[ -f "$TMP_DIR"/S22_VULNS.tmp ]]; then
+      while read -r VULNS; do
+        (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
+      done < "$TMP_DIR"/S22_VULNS.tmp
+    fi
+
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
     echo -e "\\n[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS" >> "$LOG_FILE"
@@ -61,4 +60,25 @@ S22_php_check()
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
   module_end_log "${FUNCNAME[0]}" "$S22_PHP_VULNS"
+}
+
+s22_script_check() {
+  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  PHP_LOG="$LOG_DIR""/php_checker/php_""$NAME"".txt"
+  php -l "$LINE" > "$PHP_LOG" 2>&1
+  VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null)
+  if [[ "$VULNS" -ne 0 ]] ; then
+    #check if this is common linux file:
+    local COMMON_FILES_FOUND
+    if [[ -f "$BASE_LINUX_FILES" ]]; then
+      COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
+      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+        COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
+      fi
+    else
+      COMMON_FILES_FOUND=""
+    fi
+    print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+    echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
+  fi
 }

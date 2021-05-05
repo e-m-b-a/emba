@@ -33,31 +33,24 @@ S21_python_check()
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
         ((S21_PY_SCRIPTS++))
-        NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-        PY_LOG="$LOG_DIR""/pylint_checker/pylint_""$NAME"".txt"
-        pylint "$LINE" > "$PY_LOG" 2> /dev/null
-        VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
-        (( S21_PY_VULNS="$S21_PY_VULNS"+"$VULNS" ))
-        if [[ "$VULNS" -ne 0 ]] ; then
-          #check if this is common linux file:
-          local COMMON_FILES_FOUND
-          if [[ -f "$BASE_LINUX_FILES" ]]; then
-            COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
-            if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
-            fi
-          else
-            COMMON_FILES_FOUND=""
-          fi
-
-          if [[ "$VULNS" -gt 20 ]] ; then
-            print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-          else
-            print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-          fi
+        if [[ "$THREADED" -eq 1 ]]; then
+          s21_script_check &
+          WAIT_PIDS_S21+=( "$!" )
+        else
+          s21_script_check
         fi
       fi
     done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_S21[@]}"
+    fi
+
+    if [[ -f "$TMP_DIR"/S21_VULNS.tmp ]]; then
+      while read -r VULNS; do
+        (( S21_PY_VULNS="$S21_PY_VULNS"+"$VULNS" ))
+      done < "$TMP_DIR"/S21_VULNS.tmp
+    fi
 
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
@@ -77,4 +70,30 @@ S21_python_check()
     print_output "[-] Pylint check is disabled ... no tests performed"
   fi
   module_end_log "${FUNCNAME[0]}" "$S21_PY_VULNS"
+}
+
+s21_script_check() {
+  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  PY_LOG="$LOG_DIR""/pylint_checker/pylint_""$NAME"".txt"
+  pylint "$LINE" > "$PY_LOG" 2> /dev/null
+  VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
+  if [[ "$VULNS" -ne 0 ]] ; then
+    #check if this is common linux file:
+    local COMMON_FILES_FOUND
+    if [[ -f "$BASE_LINUX_FILES" ]]; then
+      COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
+      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+        COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
+      fi
+    else
+      COMMON_FILES_FOUND=""
+    fi
+
+    if [[ "$VULNS" -gt 20 ]] ; then
+      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+    else
+      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+    fi
+    echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
+  fi
 }
