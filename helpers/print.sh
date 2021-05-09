@@ -468,6 +468,7 @@ module_end_log() {
   run_web_reporter_mod_name "$MODULE_MAIN_NAME"
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
+  print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
   ((MOD_RUNNING--))
   #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }
