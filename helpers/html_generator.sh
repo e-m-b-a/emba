@@ -46,14 +46,14 @@ ENTROPY_IMAGE="<img id=\"entropy\" src=\".$STYLE_PATH/entropy.png\">"
 
 add_color_tags()
 {
-  FILE="$1"
+  COLOR_FILE="$1"
   sed -i -E \
     -e 's/\x1b\[/##/g ; s/(##[0-9]{1,2});/\1##/g ; s/(##[0-9]{1,2})m/\1/g' \
     -e "s/\#\#31/$SPAN_RED/g ; s/\#\#32/$SPAN_GREEN/g ; s/\#\#33/$SPAN_ORANGE/g" \
     -e "s/\#\#34/$SPAN_BLUE/g ; s/\#\#35/$SPAN_MAGENTA/g ; s/\#\#36/$SPAN_CYAN/g" \
     -e "s/\#\#01/$SPAN_BOLD/g ; s/\#\#03/$SPAN_ITALIC/g ; s@\#\#00@$SPAN_END@g ; /(##[0-9]{2})/d" \
     -e "s/\#\#1/$SPAN_BOLD/g ; s/\#\#3/$SPAN_ITALIC/g ; s@\#\#0@$SPAN_END@g" \
-    -e "s@$P_START$P_END@$BR@g" "$FILE"
+    -e "s@$P_START$P_END@$BR@g" "$COLOR_FILE"
 }
 
 add_link_tags() {
@@ -72,35 +72,35 @@ add_link_tags() {
   fi
 
   # Exploit links and additional files
-  if ( grep -q -E '(Exploit|exploit)' "$FILE" ) ; then
-    readarray -t EXPLOITS_IDS_F < <( sed -n -e 's/^.*Exploit database ID //p' "$FILE" | sed 's/[^0-9\ ]//g' | sort -u)
-    readarray -t EXPLOITS_IDS_S < <( sed -n -e 's/^.*exploit-db: //p' "$FILE" | sed 's/[^0-9\ ]//g' | sort -u)
+  if ( grep -q -E '(Exploit|exploit)' "$LINK_FILE" ) ; then
+    readarray -t EXPLOITS_IDS_F < <( sed -n -e 's/^.*Exploit database ID //p' "$LINK_FILE" | sed 's/[^0-9\ ]//g' | sort -u)
+    readarray -t EXPLOITS_IDS_S < <( sed -n -e 's/^.*exploit-db: //p' "$LINK_FILE" | sed 's/[^0-9\ ]//g' | sort -u)
     EXPLOITS_IDS=( "${EXPLOITS_IDS_F[@]}" "${EXPLOITS_IDS_S[@]}" )
     for EXPLOIT_ID in "${EXPLOITS_IDS[@]}" ; do
       if [[ -n "$EXPLOIT_ID" ]] ; then
         EXPLOIT_FILE="$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$FILE"
+          sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$LINK_FILE"
           # generate exploit file
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
           readarray -t EXPLOIT_FILES < <(grep "File: " "$EXPLOIT_FILE" | cut -d ":" -f 2 | sed 's/^\ //')
           generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" "$HTML_LINK" "${EXPLOIT_FILES[@]}"
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$FILE"
+          sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$LINK_FILE"
         fi
       fi
     done
   fi
 
   # CVE links
-  if ( grep -q -E '(CVE)' "$FILE" ) ; then
-    readarray -t CVE_IDS < <( grep -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$FILE" | sort -u)
+  if ( grep -q -E '(CVE)' "$LINK_FILE" ) ; then
+    readarray -t CVE_IDS < <( grep -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$LINK_FILE" | sort -u)
     for CVE_ID in "${CVE_IDS[@]}" ; do
       if [[ -n "$CVE_ID" ]] ; then
         HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID@g")""$CVE_ID""$LINK_END"
-        sed -i -e "s@$CVE_ID@$HTML_LINK@g" "$FILE"
+        sed -i -e "s@$CVE_ID@$HTML_LINK@g" "$LINK_FILE"
       fi
     done
   fi
@@ -131,16 +131,16 @@ generate_info_file()
     sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
 
     cp "$FILE" "$TMP_INFO_FILE"
-    sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_FILE"
-    sed -i '/[*] Statistics/d' "$TMP_FILE"
+    sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_INFO_FILE"
+    sed -i '/[*] Statistics/d' "$TMP_INFO_FILE"
 
-    sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_FILE"
+    sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_INFO_FILE"
     # add html tags for style
-    add_color_tags "$TMP_FILE"
-    sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:[-]{65}:$HR_MONO:g" "$TMP_FILE"
+    add_color_tags "$TMP_INFO_FILE"
+    sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:[-]{65}:$HR_MONO:g" "$TMP_INFO_FILE"
     
     # add link tags to links/generate info files and link to them and write line to tmp file
-    add_link_tags "$TMP_FILE" "$HTML_FILE"
+    add_link_tags "$TMP_INFO_FILE" "$INFO_HTML_FILE"
 
     if [[ -n "$ONLINE" ]] ; then
       echo -e "$HR_MONO""$P_START""Online: ""$ONLINE""$P_END" >> "$TMP_INFO_FILE"
@@ -149,9 +149,8 @@ generate_info_file()
     for E_PATH in "${ADD_PATH[@]}" ; do
       if [[ -f "$E_PATH" ]] ; then
         cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
-        HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
-        LINE="$(echo "$LINE" | sed -e "s@$EXPLOIT_ID@$HTML_LINK@g")"
-        echo -e "$HR_MONO""$P_START""File: ""$HTML_LINK""$P_END" >> "$TMP_INFO_FILE"
+        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+        echo -e "$HR_MONO""$P_START""File: ""$E_HTML_LINK""$P_END" >> "$TMP_INFO_FILE"
       fi
     done
 
@@ -268,11 +267,16 @@ update_index()
   LINE_NUMBER_ENTROPY=$(grep -n "entropy.png" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
   if [[ -n "$LINE_NUMBER" ]] ; then 
     readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
-    if [[ -f "${ENTROPY_IMAGES_ARR[0]}" ]] ; then
-      cp "${ENTROPY_IMAGES_ARR[0]}" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"
-      sed -i "$((LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$ABS_HTML_PATH""/""$INDEX_FILE"
-    fi
+    for IMAGE in "${ENTROPY_IMAGES_ARR[@]}" ; do
+      if [[ -f "$IMAGE" ]] ; then
+        cp "$IMAGE" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"
+        sed -i "$((LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$ABS_HTML_PATH""/""$INDEX_FILE"
+        ((LINE_NUMBER_ENTROPY++))
+      fi
+    done
   fi
+
+
 }
 
 prepare_report()

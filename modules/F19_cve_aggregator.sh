@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2001
 
 # emba - EMBEDDED LINUX ANALYZER
 #
@@ -105,16 +106,13 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
     # tab -> space
     # remove multiple spaces
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
     VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(static\)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
@@ -241,25 +239,17 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
     VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/nc\.traditional\ \[v\ /nc.traditional\ /g')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/getconf\ (.*)/getconf/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/localedef\ (.*)/localedef/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/pt_chown\ (.*)/pt_chown/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/rpcinfo\ (.*)/rpcinfo/')"
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ perl\ ([0-9]),\ ([0-9][0-9]),\ sub([0-9])/perl\ \1\.\2\.\3/')"
     #"GNU\ gdb\ \(Debian\ [0-9]\.[0-9]+-[0-9]\)\ "
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/gnu\ gdb\ \(debian\ ([0-9]\.[0-9]+-[0-9]+\))\ /gdb\ \1/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
     #Wireless-Tools version 29
     VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
@@ -324,14 +314,10 @@ prepare_version_data() {
     # busybox 1.00-pre2 -> we ignore the pre
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/busybox\ ([0-9]\.[0-9][0-9])-pre[0-9]/busybox\ \1/g')"
     # GNU C Library (AuDis-V04.56) stable release version 2.23
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/glibc/')"
     # (Debian EGLIBC 2.13-38+deb7u11) 2.13
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(eglibc)/eglibc/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(.*\ eglibc\ .*)/eglibc/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(debian\ glibc.*)/glibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
@@ -358,7 +344,6 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zip\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zip\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/([a-z]\ UnZip),/info-zip:zip/')"
     #mdns repeater (1.10)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/mdns\ repeater\ \(([0-9]\.[0-9][0-9])\)/mdnsrepeater\ \1/g')"
@@ -381,26 +366,16 @@ prepare_version_data() {
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
     VERSION_lower="${VERSION_lower//squid\ cache:/squid-cache:squid}"
     #tar (GNU tar) 1.23
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ tar)/gnu:tar/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ findutils)/gnu:findutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ groff)/gnu:groff/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sed)/gnu:sed/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ mtools)/gnu:mtools/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
     # handle grub version 2:
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)/grub/')"
     VERSION_lower="${VERSION_lower//gnu\ sed/gnu:sed}"
     VERSION_lower="${VERSION_lower//gnu\ make/gnu:make}"
@@ -419,17 +394,11 @@ prepare_version_data() {
     # ncurses -> gnu:ncurses
     VERSION_lower="${VERSION_lower//ncurses/gnu:ncurses}"
     #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ binutils.*)/gnu:binutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ grep.*)/gnu:grep/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ diffutils.*)/gnu:diffutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ coreutils.*)/gnu:coreutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sharutils.*)/gnu:sharutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(xz\ utils.*)/xz-utils/')"
     #zend engine 2.4.0 copyright (c) 1998-2014 zend technologies
     VERSION_lower="${VERSION_lower//zend\ engine/zend:engine}"
@@ -453,24 +422,15 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
 
     # final cleanup of start and ending
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-beta$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^-//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^_//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/_$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^\ //')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ $//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\.$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\]$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/[)$]//')"
     #print_output "$VERSION_lower"
