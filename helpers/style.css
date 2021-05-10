@@ -80,10 +80,15 @@ pre {
 
 pre a {
   font-weight: bold;
+  background-size: 100% 200%;
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, #a2a2a2 50%);
+  -webkit-transition: background-position 1s;
+  -moz-transition: background-position 1s;
+  transition: background-position 0.1s;
 }
 
 pre a:hover {
-  background-color:#505050;
+  background-position: 0 100%;
 }
 
 span {
