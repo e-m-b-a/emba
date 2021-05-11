@@ -51,8 +51,11 @@ P05_firmware_bin_extractor() {
   detect_root_dir_helper "$FIRMWARE_PATH_CP"
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  deb_extractor
-  ipk_extractor
+
+  if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
+    deb_extractor
+    ipk_extractor
+  fi
 
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
   UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
@@ -159,16 +162,10 @@ deep_extractor() {
   print_output "[*] Deep extraction with binwalk - 1st round"
 
   FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  find "$FIRMWARE_PATH_CP" -xdev -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
+  find "$FIRMWARE_PATH_CP" -xdev -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M -C "$FIRMWARE_PATH_CP" {} \;
 
   print_output "[*] Deep extraction with binwalk - 2nd round"
-  find "$FIRMWARE_PATH_CP" -xdev -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M {} \; &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
+  find "$FIRMWARE_PATH_CP" -xdev -type f ! -name "*.deb" ! -name "*.ipk" -exec binwalk -e -M -C "$FIRMWARE_PATH_CP" {} \;
 
   FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
