@@ -65,7 +65,7 @@ deep_pattern_search() {
 deep_pattern_searcher() {
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
-    S_OUTPUT="$(grep -E -n -a -h -o ".{0,25}""$PATTERN"".{0,25}" -D skip "$DEEP_S_FILE" | tr -d '\0' )" 
+    S_OUTPUT="$(grep -E -n -a -h -o -i ".{0,15}""$PATTERN"".{0,15}" -D skip "$DEEP_S_FILE" | tr -d "\0" )" 
     if [[ -n "$S_OUTPUT" ]] ; then
       print_output "[+] ""$(print_path "$DEEP_S_FILE")"
       #print_output "[+] $DEEP_S_FILE"
