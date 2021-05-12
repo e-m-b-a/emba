@@ -115,6 +115,7 @@ architecture_check()
         ARCH_PPC=$((ARCH_PPC+1))
       fi
     done
+
     if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture  Count")")" "no_log"
       if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" "no_log" ; fi
