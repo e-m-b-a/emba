@@ -13,7 +13,7 @@ Author(s): Michael Messner, Pascal Eckmann
 -->
 
 # emba
-### An analyzer for Linux-based firmware of embedded devices
+### The security analyzer for embedded device firmware
 
 <p align="center">
   <img src="./helpers/emba.svg" width="200"/>
