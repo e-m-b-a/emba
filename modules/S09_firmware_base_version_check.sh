@@ -30,6 +30,9 @@ S09_firmware_base_version_check() {
   module_title "Binary firmware versions detection"
 
   EXTRACTOR_LOG="$LOG_DIR"/p05_firmware_bin_extractor.txt
+  # a first try to not kill the system with too many version detection tasks
+  MAX_THREADS_S09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
+  print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
@@ -92,6 +95,13 @@ S09_firmware_base_version_check() {
       echo "." | tr -d "\n"
     fi
 
+    if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
+      recover_wait_pids "${WAIT_PIDS_S09[@]}"
+      if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
+        max_pids_protection "$MAX_THREADS_S09" "${WAIT_PIDS_S09[@]}"
+      fi
+    fi
+
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
 
   echo "." | tr -d "\n"
@@ -130,5 +140,22 @@ bin_string_checker() {
       fi
     fi
   done
+}
+
+recover_wait_pids() {
+  local TEMP_PIDS=()
+  local PID
+  # check for really running PIDs and re-create the array
+  for PID in ${WAIT_PIDS_S09[*]}; do
+    #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
+    if [[ -e /proc/"$PID" ]]; then
+      TEMP_PIDS+=( "$PID" )
+    fi
+  done
+  #print_output "[!] S09 - really running pids: ${#TEMP_PIDS[@]}"
+
+  # recreate the arry with the current running PIDS
+  WAIT_PIDS_S09=()
+  WAIT_PIDS_S09=("${TEMP_PIDS[@]}")
 }
 

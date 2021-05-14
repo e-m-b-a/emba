@@ -691,14 +691,13 @@ generate_cve_details() {
 
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
-  export MAX_PIDS=20 # for accessing the mongodb in threaded mode
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     # threading currently not working. This is work in progress
     if [[ "$THREADED" -eq 1 ]]; then
       cve_db_lookup &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection "${WAIT_PIDS_F19[@]}"
+      max_pids_protection 10 "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup
     fi

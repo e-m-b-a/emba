@@ -462,7 +462,7 @@ module_end_log() {
 
   if [[ "$MODULE_MAIN_NAME" == "S09_firmware_base_version_check" ]]; then
     print_output "[*] $MODULE_MAIN_NAME finished - increase number of maximum running modules"
-    export MAX_PIDS=15
+    export MAX_MODS=15
   fi
 
   run_web_reporter_mod_name "$MODULE_MAIN_NAME"

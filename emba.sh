@@ -99,7 +99,7 @@ run_modules()
         if [[ $THREADING_SET -eq 1 ]]; then
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
-          max_pids_protection "${WAIT_PIDS[@]}"
+          max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
         else
           $MODULE_MAIN
         fi
@@ -118,7 +118,7 @@ run_modules()
           if [[ $THREADING_SET -eq 1 ]]; then
             $MODULE_MAIN &
             WAIT_PIDS+=( "$!" )
-            max_pids_protection "${WAIT_PIDS[@]}"
+            max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
           else
             $MODULE_MAIN
           fi
@@ -138,7 +138,7 @@ run_modules()
             if [[ $THREADING_SET -eq 1 ]]; then
               $MODULE_MAIN &
               WAIT_PIDS+=( "$!" )
-              max_pids_protection "${WAIT_PIDS[@]}"
+              max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
             else
               $MODULE_MAIN
             fi
@@ -150,17 +150,10 @@ run_modules()
   fi
 }
 
-ctrl_c() {
-  print_output "[*] Ctrl+C detected" "no_log"
-  print_output "[*] Cleanup started" "no_log"
-  # now we can unmount the stuff from emulator and delete temporary stuff
-  exit 1
-}
-
 main()
 {
   set -a 
-  trap ctrl_c INT
+  trap cleaner INT
 
   INVOCATION_PATH="$(dirname "$0")"
 
@@ -188,7 +181,16 @@ main()
                                 # 1 -> multi threaded
   export USE_DOCKER=0
   export YARA=1
-  export MAX_PIDS=5             # the maximum modules in parallel -> after S09 is finished this value gets adjusted
+
+  # the maximum modules in parallel -> after S09 is finished this value gets adjusted
+  # rule of thumb - per core one module
+  MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
+
+  # if we have only one core we run two modules in parallel
+  if [[ "$MAX_MODS" -lt 2 ]]; then
+    MAX_MODS=2
+  fi
+  export MAX_MODS
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
@@ -357,6 +359,7 @@ main()
     print_help
     exit 1
   fi
+  print_output "    Emba is running with $MAX_MODS modules in parallel." "no_log"
 
   # Change log output to color for web report
   if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
