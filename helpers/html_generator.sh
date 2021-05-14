@@ -165,67 +165,70 @@ generate_info_file()
 generate_report_file()
 {
   REPORT_FILE=$1
-  HTML_FILE="$(basename "${REPORT_FILE%.txt}"".html")"
-  cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
-  TMP_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$HTML_FILE"
-  MODUL_NAME=""
 
-  # parse log content and add to html file
-  LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d":" -f1)
+  if ! [[ grep -o -i "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ]] ; then
+    HTML_FILE="$(basename "${REPORT_FILE%.txt}"".html")"
+    cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
+    TMP_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$HTML_FILE"
+    MODUL_NAME=""
 
-  cp "$REPORT_FILE" "$TMP_FILE"
-  sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_FILE"
-  sed -i '/\[\*\]\ Statistics/d' "$TMP_FILE"
+    # parse log content and add to html file
+    LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d":" -f1)
 
-  # module title anchor links
-  if ( grep -q -E '[=]{65}' "$TMP_FILE" ) ; then
-    MODUL_NAME="$( strip_color_tags "$(grep -E -B 1 '[=]{65}' "$TMP_FILE" | head -n 1)" | cut -d" " -f2- )"
-    if [[ -n "$MODUL_NAME" ]] ; then
-      # add anchor to file
-      A_MODUL_NAME="$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")"
-      LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$A_MODUL_NAME@g")""$MODUL_NAME""$LINK_END"
-      sed -i -E "s@$MODUL_NAME@$LINE@" "$TMP_FILE"
-      # add link to index navigation
-      add_link_to_index "$HTML_FILE" "$MODUL_NAME"
-      # add module anchor to navigation
-      NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$A_MODUL_NAME@g")"
-      sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
-      ((LINE_NUMBER_REP_NAV++))
-    fi
-  fi
+    cp "$REPORT_FILE" "$TMP_FILE"
+    sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_FILE"
+    sed -i '/\[\*\]\ Statistics/d' "$TMP_FILE"
 
-  # submodule title anchor links
-  if ( grep -q -E '^[-]{65}$' "$TMP_FILE" ) ; then
-    readarray -t SUBMODUL_NAMES < <( grep -E -B 1 '^[-]{65}$' "$TMP_FILE" | sed -E '/[-]{65}/d' | grep -v "^--")
-    for SUBMODUL_NAME in "${SUBMODUL_NAMES[@]}" ; do
-      if [[ -n "$SUBMODUL_NAME" ]] ; then
-        SUBMODUL_NAME="$( strip_color_tags "$SUBMODUL_NAME" | cut -d" " -f 2- )"
-        A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")"
-        LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$A_SUBMODUL_NAME@g")""$SUBMODUL_NAME""$LINK_END"
-        sed -i -E "s@$SUBMODUL_NAME@$LINE@" "$TMP_FILE"
-        # Add anchor to file
-        SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
-        sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
+    # module title anchor links
+    if ( grep -q -E '[=]{65}' "$TMP_FILE" ) ; then
+      MODUL_NAME="$( strip_color_tags "$(grep -E -B 1 '[=]{65}' "$TMP_FILE" | head -n 1)" | cut -d" " -f2- )"
+      if [[ -n "$MODUL_NAME" ]] ; then
+        # add anchor to file
+        A_MODUL_NAME="$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")"
+        LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$A_MODUL_NAME@g")""$MODUL_NAME""$LINK_END"
+        sed -i -E "s@$MODUL_NAME@$LINE@" "$TMP_FILE"
+        # add link to index navigation
+        add_link_to_index "$HTML_FILE" "$MODUL_NAME"
+        # add module anchor to navigation
+        NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$A_MODUL_NAME@g")"
+        sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
         ((LINE_NUMBER_REP_NAV++))
       fi
-    done
-  fi
+    fi
 
-  sed -i -E -e "s:[=]{65}:$HR_DOUBLE:g ; s:[-]{65}:$HR_MONO:g" "$TMP_FILE"
-  sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_FILE"
-  
-  # add html tags for style
-  add_color_tags "$TMP_FILE"
+    # submodule title anchor links
+    if ( grep -q -E '^[-]{65}$' "$TMP_FILE" ) ; then
+      readarray -t SUBMODUL_NAMES < <( grep -E -B 1 '^[-]{65}$' "$TMP_FILE" | sed -E '/[-]{65}/d' | grep -v "^--")
+      for SUBMODUL_NAME in "${SUBMODUL_NAMES[@]}" ; do
+        if [[ -n "$SUBMODUL_NAME" ]] ; then
+          SUBMODUL_NAME="$( strip_color_tags "$SUBMODUL_NAME" | cut -d" " -f 2- )"
+          A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")"
+          LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$A_SUBMODUL_NAME@g")""$SUBMODUL_NAME""$LINK_END"
+          sed -i -E "s@$SUBMODUL_NAME@$LINE@" "$TMP_FILE"
+          # Add anchor to file
+          SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
+          sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
+          ((LINE_NUMBER_REP_NAV++))
+        fi
+      done
+    fi
 
+    sed -i -E -e "s:[=]{65}:$HR_DOUBLE:g ; s:[-]{65}:$HR_MONO:g" "$TMP_FILE"
+    sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_FILE"
     
-  # add link tags to links/generate info files and link to them and write line to tmp file
-  add_link_tags "$TMP_FILE" "$HTML_FILE"
+    # add html tags for style
+    add_color_tags "$TMP_FILE"
 
-  # add content of temporary html into template
-  sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
-  # add aggregator lines to index page
-  if [[ "$HTML_FILE" == "f50"* ]] ; then
-    sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$INDEX_FILE"
+      
+    # add link tags to links/generate info files and link to them and write line to tmp file
+    add_link_tags "$TMP_FILE" "$HTML_FILE"
+
+    # add content of temporary html into template
+    sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
+    # add aggregator lines to index page
+    if [[ "$HTML_FILE" == "f50"* ]] ; then
+      sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$INDEX_FILE"
+    fi
   fi
 }
 
