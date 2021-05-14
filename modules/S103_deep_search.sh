@@ -42,7 +42,6 @@ S103_deep_search()
 
 deep_pattern_search() {
   local WAIT_PIDS_S103=()
-  local COUNT=0
   GREP_PATTERN_COMMAND=()
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
@@ -74,7 +73,7 @@ deep_pattern_searcher() {
       done
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -i "$PATTERN" "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt" | wc -l )
+        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt" )
         if [[ $F_COUNT -gt 0 ]] ; then
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
