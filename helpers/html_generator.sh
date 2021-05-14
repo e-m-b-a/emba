@@ -166,7 +166,7 @@ generate_report_file()
 {
   REPORT_FILE=$1
 
-  if ! [[ grep -o -i "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ]] ; then
+  if ! ( grep -o -i "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ) ; then
     HTML_FILE="$(basename "${REPORT_FILE%.txt}"".html")"
     cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
     TMP_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$HTML_FILE"
