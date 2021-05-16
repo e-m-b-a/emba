@@ -103,7 +103,7 @@ wait_for_extractor() {
 }
 
 ipk_extractor() {
-  print_output ""
+  sub_module_title "IPK archive extraction mode"
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
   extract_ipk_helper &
   # this does not work as expected -> we have to check it again
@@ -135,7 +135,7 @@ ipk_extractor() {
 }
 
 deb_extractor() {
-  print_output ""
+  sub_module_title "Debian archive extraction mode"
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
   extract_deb_helper &
   # this does not work as expected -> we have to check it again
@@ -313,7 +313,7 @@ extract_deb_helper() {
   find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
 }
 binwalk_deep_extract_helper() {
-  binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP"
+  binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_DIR"/p05_binwalker_deep.txt
 }
 extract_deb_extractor_helper(){
   DEB_NAME=$(basename "$DEB")

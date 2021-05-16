@@ -279,6 +279,10 @@ get_data() {
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
     DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f3)
   fi
+  if ! [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
+    FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f | wc -l)
+    DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d | wc -l)
+  fi
   if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
     STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
