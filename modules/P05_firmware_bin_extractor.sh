@@ -29,6 +29,7 @@ P05_firmware_bin_extractor() {
   # shellcheck disable=SC2153
   if [[ $FACT_EXTRACTOR -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
     fact_extractor
+    linux_basic_identification_helper
   fi
 
   FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
@@ -43,15 +44,13 @@ P05_firmware_bin_extractor() {
     print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
   fi
 
-  linux_basic_identification_helper
-
   # If we have not found a linux filesystem we try to do a binwalk -e -M on every file for two times
   # Manual activation via -x switch:
   if [[ $LINUX_PATH_COUNTER -lt 2 || $DEEP_EXTRACTOR -eq 1 ]] ; then
     deep_extractor
   fi
 
-  detect_root_dir_helper "$FIRMWARE_PATH_CP"
+  detect_root_dir_helper "$FIRMWARE_PATH_CP" "$(get_log_file)"
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
@@ -322,5 +321,5 @@ extract_deb_extractor_helper(){
   dpkg-deb --extract "$DEB" "$R_PATH"
 }
 linux_basic_identification_helper() {
-  LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR_binwalk" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 }

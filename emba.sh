@@ -342,14 +342,18 @@ main()
   fi
 
   # Check firmware type (file/directory)
-  if [[ -d "$FIRMWARE_PATH" ]]; then
+  # copy the firmware outside of the docker and not a second time within the docker
+  if [[ -d "$FIRMWARE_PATH" ]] ; then
     PRE_CHECK=0
     print_output "[*] Firmware directory detected." "no_log"
     print_output "    Emba starts with testing the environment." "no_log"
-    print_output "    The provided firmware will be copied to ""$FIRMWARE_PATH_CP" "no_log"
-    cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
-    FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
-    OUTPUT_DIR="$FIRMWARE_PATH_CP"
+    if [[ $IN_DOCKER -eq 0 ]] ; then
+      # in docker environment the firmware is already available
+      print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""" "no_log"
+      cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
+      FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
+      OUTPUT_DIR="$FIRMWARE_PATH_CP"
+    fi
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
@@ -359,7 +363,7 @@ main()
     print_help
     exit 1
   fi
-  print_output "    Emba is running with $MAX_MODS modules in parallel." "no_log"
+  print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
 
   # Change log output to color for web report
   if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
@@ -381,7 +385,7 @@ main()
   #######################################################################################
   if [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]] ; then
     if ! [[ -f "$KERNEL_CONFIG" ]] ; then
-      print_output "[-] Invalid kernel configuration file: $KERNEL_CONFIG" "no_log"
+      print_output "[-] Invalid kernel configuration file: $ORANGE$KERNEL_CONFIG" "no_log"
       exit 1
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
@@ -427,8 +431,8 @@ main()
     if [[ $D_RETURN -eq 0 ]] ; then
       if [[ $ONLY_DEP -eq 0 ]] ; then
         print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-        print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
-        print_output "[*] Log directory: $LOG_DIR" "no_log"
+        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH" "no_log"
+        print_output "[*] Log directory: $ORANGE$LOG_DIR" "no_log"
         exit
       fi
     else
@@ -505,7 +509,7 @@ main()
       write_grep_log "$(date)" "TIMESTAMP"
 
       if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
-        detect_root_dir_helper "$FIRMWARE_PATH"
+        detect_root_dir_helper "$FIRMWARE_PATH" "main"
       fi
 
       check_firmware
