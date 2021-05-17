@@ -115,6 +115,7 @@ architecture_check()
         ARCH_PPC=$((ARCH_PPC+1))
       fi
     done
+
     if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture  Count")")" "no_log"
       if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" "no_log" ; fi
@@ -242,7 +243,12 @@ check_firmware()
 
 detect_root_dir_helper() {
   SEARCH_PATH="$1"
-  print_output "[*] Root directory auto detection (could take some time)\\n" "no_log"
+  if [[ -n "$2" ]];then
+    LOGGER="$2"
+  else
+    LOGGER="no_log"
+  fi
+  print_output "[*] Root directory auto detection (could take some time)\\n" "$LOGGER"
   ROOT_PATH=()
   export ROOT_PATH
   local R_PATH
@@ -267,16 +273,16 @@ detect_root_dir_helper() {
   fi
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    print_output "[*] Root directory set to firmware path ... last resort" "no_log"
+    print_output "[*] Root directory set to firmware path ... last resort" "$LOGGER"
     ROOT_PATH+=( "$SEARCH_PATH" )
   fi
 
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
-    print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "no_log"
+    print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
-    print_output "[+] Found the following root directory: $R_PATH" "no_log"
+    print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
   done
 }
 

@@ -62,17 +62,18 @@ S110_yara_check()
     print_output "[!] Check with yara not possible, because it isn't installed!"
   fi
 
-
   module_end_log "${FUNCNAME[0]}" "$YARA_CNT"
 }
 
 yara_check() {
   if [[ -e "$YARA_S_FILE" ]] ; then
     local S_OUTPUT
-    S_OUTPUT="$(yara -r -w ./dir-combined.yara "$YARA_S_FILE")"
-    if [[ -n "$S_OUTPUT" ]] ; then
-      print_output "[+] ""$(echo -e "$S_OUTPUT" | head -n1 | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
-      echo "1" >> "$TMP_DIR"/YARA_CNT.tmp
+    mapfile -t S_OUTPUT < <(yara -r -w ./dir-combined.yara "$YARA_S_FILE")
+    if [[ "${#S_OUTPUT[@]}" -gt 0 ]] ; then
+      for YARA_OUT in "${S_OUTPUT[@]}"; do
+        print_output "[+] ""$(echo -e "$YARA_OUT" | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
+        echo "1" >> "$TMP_DIR"/YARA_CNT.tmp
+      done
     fi
   fi
 }

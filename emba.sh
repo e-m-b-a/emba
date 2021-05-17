@@ -99,7 +99,7 @@ run_modules()
         if [[ $THREADING_SET -eq 1 ]]; then
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
-          max_pids_protection "${WAIT_PIDS[@]}"
+          max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
         else
           $MODULE_MAIN
         fi
@@ -118,7 +118,7 @@ run_modules()
           if [[ $THREADING_SET -eq 1 ]]; then
             $MODULE_MAIN &
             WAIT_PIDS+=( "$!" )
-            max_pids_protection "${WAIT_PIDS[@]}"
+            max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
           else
             $MODULE_MAIN
           fi
@@ -138,7 +138,7 @@ run_modules()
             if [[ $THREADING_SET -eq 1 ]]; then
               $MODULE_MAIN &
               WAIT_PIDS+=( "$!" )
-              max_pids_protection "${WAIT_PIDS[@]}"
+              max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
             else
               $MODULE_MAIN
             fi
@@ -150,17 +150,10 @@ run_modules()
   fi
 }
 
-ctrl_c() {
-  print_output "[*] Ctrl+C detected" "no_log"
-  print_output "[*] Cleanup started" "no_log"
-  # now we can unmount the stuff from emulator and delete temporary stuff
-  exit 1
-}
-
 main()
 {
   set -a 
-  trap ctrl_c INT
+  trap cleaner INT
 
   INVOCATION_PATH="$(dirname "$0")"
 
@@ -188,7 +181,16 @@ main()
                                 # 1 -> multi threaded
   export USE_DOCKER=0
   export YARA=1
-  export MAX_PIDS=5             # the maximum modules in parallel -> after S09 is finished this value gets adjusted
+
+  # the maximum modules in parallel -> after S09 is finished this value gets adjusted
+  # rule of thumb - per core one module
+  MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
+
+  # if we have only one core we run two modules in parallel
+  if [[ "$MAX_MODS" -lt 2 ]]; then
+    MAX_MODS=2
+  fi
+  export MAX_MODS
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
@@ -340,14 +342,18 @@ main()
   fi
 
   # Check firmware type (file/directory)
-  if [[ -d "$FIRMWARE_PATH" ]]; then
+  # copy the firmware outside of the docker and not a second time within the docker
+  if [[ -d "$FIRMWARE_PATH" ]] ; then
     PRE_CHECK=0
     print_output "[*] Firmware directory detected." "no_log"
     print_output "    Emba starts with testing the environment." "no_log"
-    print_output "    The provided firmware will be copied to ""$FIRMWARE_PATH_CP" "no_log"
-    cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
-    FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
-    OUTPUT_DIR="$FIRMWARE_PATH_CP"
+    if [[ $IN_DOCKER -eq 0 ]] ; then
+      # in docker environment the firmware is already available
+      print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""" "no_log"
+      cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
+      FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
+      OUTPUT_DIR="$FIRMWARE_PATH_CP"
+    fi
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
@@ -357,6 +363,7 @@ main()
     print_help
     exit 1
   fi
+  print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
 
   # Change log output to color for web report
   if [[ $HTML -eq 1 ]] && [[ $FORMAT_LOG -eq 0 ]]; then
@@ -378,7 +385,7 @@ main()
   #######################################################################################
   if [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]] ; then
     if ! [[ -f "$KERNEL_CONFIG" ]] ; then
-      print_output "[-] Invalid kernel configuration file: $KERNEL_CONFIG" "no_log"
+      print_output "[-] Invalid kernel configuration file: $ORANGE$KERNEL_CONFIG" "no_log"
       exit 1
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
@@ -424,8 +431,8 @@ main()
     if [[ $D_RETURN -eq 0 ]] ; then
       if [[ $ONLY_DEP -eq 0 ]] ; then
         print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-        print_output "[*] Firmware tested: $FIRMWARE_PATH" "no_log"
-        print_output "[*] Log directory: $LOG_DIR" "no_log"
+        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH" "no_log"
+        print_output "[*] Log directory: $ORANGE$LOG_DIR" "no_log"
         exit
       fi
     else
@@ -502,7 +509,7 @@ main()
       write_grep_log "$(date)" "TIMESTAMP"
 
       if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
-        detect_root_dir_helper "$FIRMWARE_PATH"
+        detect_root_dir_helper "$FIRMWARE_PATH" "main"
       fi
 
       check_firmware

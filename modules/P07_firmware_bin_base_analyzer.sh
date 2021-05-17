@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, and Linux. 
+# Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, uC/OS and Linux. 
 #               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
 # Todo: Cleanup and optimise function os_identification - currently it has too many code duplicates!
 
@@ -136,12 +136,10 @@ os_identification() {
   COUNTER_ucOS=$((COUNTER_ucOS+COUNTER_ucOS_FW))
   echo "." | tr -d "\n"
 
-  print_output "\\n"
-  print_output "[*] Trying to identify a Linux root path in $(print_path "$OUTPUT_DIR")"
-  # just to check if there is somewhere a linux filesystem in the extracted stuff
-  # emba is able to handle the rest
-  export LINUX_PATH_COUNTER
-  LINUX_PATH_COUNTER="$(find "$OUTPUT_DIR" "${EXCL_FIND[@]}" -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
+    echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/p07.tmp
+    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/p07.tmp
+  fi
 
   if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS)) -gt 0 ]] ; then
     print_output ""
@@ -151,7 +149,9 @@ os_identification() {
     if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected\t\t""$COUNTER_eCos")")"; fi
     if [[ $COUNTER_ucOS -gt 0 ]] ; then print_output "$(indent "$(orange "uC/OS detected\t\t""$COUNTER_ucOS")")"; fi
     if [[ $COUNTER_FreeBSD -gt 0 ]] ; then print_output "$(indent "$(orange "FreeBSD detected\t\t""$COUNTER_FreeBSD")")"; fi
-    if [[ $COUNTER_Linux -gt 5 && $LINUX_PATH_COUNTER -gt 1 ]] ; then 
+    if [[ $COUNTER_Linux -gt 5 &&  ${#ROOT_PATH[@]} -gt 1 ]] ; then 
+      print_output "$(indent "$(green "Linux detected\t\t""$COUNTER_Linux""\t-\tverified Linux operating system detected")")"
+    elif [[ $COUNTER_Linux -gt 5 &&  $LINUX_PATH_COUNTER -gt 2 ]] ; then 
       print_output "$(indent "$(green "Linux detected\t\t""$COUNTER_Linux""\t-\tverified Linux operating system detected")")"
     elif [[ $COUNTER_Linux -gt 5 ]] ; then 
       print_output "$(indent "$(orange "Linux detected\t\t""$COUNTER_Linux")")"
@@ -165,11 +165,6 @@ os_identification() {
     echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS))" >> "$TMP_DIR"/p07.tmp
   fi
 
-  echo
-  if [[ $LINUX_PATH_COUNTER -gt 0 ]] ; then
-    print_output "[+] Found possible Linux operating system in $(print_path "$OUTPUT_DIR")"
-    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/p07.tmp
-  fi
 }
 
 binary_architecture_detection()
