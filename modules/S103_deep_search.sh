@@ -25,39 +25,38 @@ S103_deep_search()
   PATTERNS="$(config_list "$CONFIG_DIR""/deep_search.cfg" "")"
 
   print_output "[*] Patterns: ""$( echo -e "$PATTERNS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-  print_output "[*] Special characters are replaced by a '.' for better readability.\\n"
   
   readarray -t PATTERN_LIST < <(printf '%s' "$PATTERNS")
+
+  if ! [[ -d "$LOG_DIR""/deep_search/" ]] ; then
+    mkdir "$LOG_DIR""/deep_search/" 2> /dev/null
+  fi
+
+  OCC_LIST=()
 
   deep_pattern_search
   deep_pattern_reporter
 
-  module_end_log "${FUNCNAME[0]}" "$PATTERN_COUNT"
+  module_end_log "${FUNCNAME[0]}" "${#OCC_LIST[@]}"
 }
 
 deep_pattern_search() {
   local WAIT_PIDS_S103=()
+  GREP_PATTERN_COMMAND=()
   for PATTERN in "${PATTERN_LIST[@]}" ; do
-    local COUNT=0
-    print_output "[*] Searching all files for '""$PATTERN""' ... this may take a while!"
-    echo
-    for DEEP_S_FILE in "${FILE_ARR[@]}"; do
-      if [[ "$THREADED" -eq "X" ]]; then
-        # we have to check this in detail
-        deep_pattern_searcher &
-        WAIT_PIDS_S103+=( "$!" )
-      else
-        deep_pattern_searcher
-      fi
-    done
-    PATTERN_COUNT=("$COUNT" "${PATTERN_COUNT[@]}")
-    if [[ $COUNT -eq 0 ]] ; then
-      print_output "[-] No files with pattern '""$PATTERN""' found!"
+    GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
+  done
+  echo
+  for DEEP_S_FILE in "${FILE_ARR[@]}"; do
+    if [[ $THREADED -eq 1 ]]; then
+      deep_pattern_searcher &
+      WAIT_PIDS_S103+=( "$!" )
+    else
+      deep_pattern_searcher
     fi
-    echo
   done
 
-  if [[ "$THREADED" -eq "X" ]]; then
+  if [[ $THREADED -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_S103[@]}"
   fi
 }
@@ -65,37 +64,37 @@ deep_pattern_search() {
 deep_pattern_searcher() {
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
-    S_OUTPUT="$(grep -E -n -a -h -o ".{0,25}""$PATTERN"".{0,25}" -D skip "$DEEP_S_FILE" | tr -d '\0' )" 
-    if [[ -n "$S_OUTPUT" ]] ; then
-      print_output "[+] ""$(print_path "$DEEP_S_FILE")"
-      #print_output "[+] $DEEP_S_FILE"
-      mapfile -t OUTPUT_ARR < <(echo "$S_OUTPUT")
-      for O_LINE in "${OUTPUT_ARR[@]}" ; do
-        #print_output "[*] $O_LINE"
-        COLOR_PATTERN="$GREEN""$PATTERN""$NC"
-        O_LINE="${O_LINE//'\n'/.}"
-        print_output "$( indent "$(echo "${O_LINE//$PATTERN/$COLOR_PATTERN}" | tr "\000-\037\177-\377" "." )")"      
-        ((COUNT++))
+    readarray -t S_OUTPUT < <(grep -E -n -a -h -o -i "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0')
+    if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
+      echo "[+] ""$DEEP_S_FILE" >> "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
+      for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do
+        DEEP_S_LINE="$( echo "$DEEP_S_LINE" | tr "\000-\037\177-\377" "." )"
+        echo "$DEEP_S_LINE" >> "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
       done
-      echo
+      local D_S_FINDINGS=""
+      for PATTERN in "${PATTERN_LIST[@]}" ; do
+        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt" )
+        if [[ $F_COUNT -gt 0 ]] ; then
+          D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
+        fi
+      done
+      #COUNT=((COUNT+${#S_OUTPUT[@]}))
+      print_output "[+] ""$DEEP_S_FILE""$NC""\\n""$D_S_FINDINGS"  
     fi
   fi
 }
 
 deep_pattern_reporter() {
-
-  local OCC_LIST
-  for I in "${!PATTERN_LIST[@]}"; do
-    if [[ "${PATTERN_COUNT[$I]}" -gt 0 ]] ; then
-      OCC_LIST=("${PATTERN_COUNT[$I]}"": ""${PATTERN_LIST[$I]}" "${OCC_LIST[@]}")
-    fi
+  for PATTERN in "${PATTERN_LIST[@]}" ; do
+    P_COUNT=$(grep -i "$PATTERN" "$LOG_FILE" | cut -f 1 | sed 's/\ //g' | awk '{ SUM += $1} END { print SUM }' )
+    OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
   done
 
   if [[ "${#PATTERN_LIST[@]}" -gt 0 ]] ; then
     print_output "[*] Occurences of pattern:"
     SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
     for OCC in "${SORTED_OCC_LIST[@]}"; do
-      print_output "$( indent "$(orange "$OCC" )")"
+      print_output "$( indent "$(orange "$OCC" )")""\n"
     done
   fi
 }
