@@ -67,49 +67,59 @@ os_identification() {
   echo "." | tr -d "\n"
   COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c Linux 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_Linux_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c Linux {} \; 2> /dev/null)"
+  COUNTER_Linux_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c Linux {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_Linux_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c Linux {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c Linux)"
   echo "." | tr -d "\n"
-  COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW+COUNTER_Linux_EXT))
+  COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW+COUNTER_Linux_EXT+COUNTER_Linux_EXT1))
   echo "." | tr -d "\n"
 
   echo "." | tr -d "\n"
   COUNTER_FreeBSD="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeBSD 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_FreeBSD_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
+  COUNTER_FreeBSD_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_FreeBSD_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_FreeBSD_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeBSD)"
   echo "." | tr -d "\n"
-  COUNTER_FreeBSD=$((COUNTER_FreeBSD+COUNTER_FreeBSD_FW+COUNTER_FreeBSD_EXT))
+  COUNTER_FreeBSD=$((COUNTER_FreeBSD+COUNTER_FreeBSD_FW+COUNTER_FreeBSD_EXT+COUNTER_FreeBSD_EXT1))
   echo "." | tr -d "\n"
 
 
   COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "VxWorks\|Wind" 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_VxWorks_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
+  COUNTER_VxWorks_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_VxWorks_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c -i "VxWorks\|Wind")"
   echo "." | tr -d "\n"
-  COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW+COUNTER_VxWorks_EXT))
+  COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW+COUNTER_VxWorks_EXT+COUNTER_VxWorks_EXT1))
   echo "." | tr -d "\n"
 
   COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeRTOS 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_FreeRTOS_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
+  COUNTER_FreeRTOS_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_FreeRTOS_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeRTOS)"
   echo "." | tr -d "\n"
-  COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW+COUNTER_FreeRTOS_EXT))
+  COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW+COUNTER_FreeRTOS_EXT+COUNTER_FreeRTOS_EXT1))
   echo "." | tr -d "\n"
 
   COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
   echo "." | tr -d "\n"
-  COUNTER_eCos_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_*" -exec grep -c eCos {} \; 2> /dev/null)"
+  COUNTER_eCos_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -c eCos {} \; 2> /dev/null)"
+  echo "." | tr -d "\n"
+  COUNTER_eCos_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -c eCos {} \; 2> /dev/null)"
   echo "." | tr -d "\n"
   COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c eCos)"
   echo "." | tr -d "\n"
-  COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW+COUNTER_eCos_EXT))
+  COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW+COUNTER_eCos_EXT+COUNTER_eCos_EXT1))
   echo "." | tr -d "\n"
 
   # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
