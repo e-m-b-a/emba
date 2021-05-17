@@ -396,21 +396,21 @@ print_help()
 print_firmware_info()
 {
   if [[ -n "$1" || -n "$2" || -n "$3" || -n "$4" ]]; then
-    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+    print_bar "no_log"
     print_output "[*] Firmware information:" "no_log"
     if [[ -n "$1" ]]; then
-      print_output "$(indent "$BOLD""Vendor: ""$NC""$ORANGE""$1""$NC")" "no_log"
+      print_output "$(indent "$BOLD""Vendor:\t""$NC""$ORANGE""$1""$NC")" "no_log"
     fi
     if [[ -n "$2" ]]; then
-      print_output "$(indent "$BOLD""Version: ""$NC""$ORANGE""$2""$NC")" "no_log"
+      print_output "$(indent "$BOLD""Version:\t""$NC""$ORANGE""$2""$NC")" "no_log"
     fi
     if [[ -n "$3" ]]; then
-      print_output "$(indent "$BOLD""Device: ""$NC""$ORANGE""$3""$NC")" "no_log"
+      print_output "$(indent "$BOLD""Device:\t""$NC""$ORANGE""$3""$NC")" "no_log"
     fi
     if [[ -n "$4" ]]; then
-      print_output "$(indent "$BOLD""Additional notes: ""$NC""$ORANGE""$4""$NC")" "no_log"
+      print_output "$(indent "$BOLD""Additional notes:\t""$NC""$ORANGE""$4""$NC")" "no_log"
     fi
-    print_output "\\n-----------------------------------------------------------------\\n" "no_log"
+    print_bar "no_log"
   fi
 }
 
@@ -440,7 +440,11 @@ print_excluded()
   fi
 }
 print_bar() {
-  print_output "\\n-----------------------------------------------------------------\\n"
+  if [[ -n "$1" ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n" "$1"
+  else
+    print_output "\\n-----------------------------------------------------------------\\n"
+  fi
 }
 
 module_start_log() {
@@ -460,14 +464,10 @@ module_end_log() {
     print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
   fi
 
-  if [[ "$MODULE_MAIN_NAME" == "S09_firmware_base_version_check" ]]; then
-    print_output "[*] $MODULE_MAIN_NAME finished - increase number of maximum running modules"
-    export MAX_PIDS=15
-  fi
-
   run_web_reporter_mod_name "$MODULE_MAIN_NAME"
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
+  print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
   ((MOD_RUNNING--))
   #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }

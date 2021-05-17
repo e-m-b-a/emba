@@ -25,19 +25,55 @@ S50_authentication_check() {
   LOG_FILE="$( get_log_file )"
   AUTH_ISSUES=0
 
-  user_zero
-  non_unique_acc
-  non_unique_group_id
-  non_unique_group_name
-  query_user_acc
-  query_nis_plus_auth_supp
-  check_sudoers
-  check_owner_perm_sudo_config
-  search_pam_testing_libs
-  scan_pam_conf
-  search_pam_configs
-  search_pam_files
+  if [[ "$THREADED" -eq 1 ]]; then
+    user_zero &
+    WAIT_PIDS_S50+=( "$!" )
+    non_unique_acc &
+    WAIT_PIDS_S50+=( "$!" )
+    non_unique_group_id &
+    WAIT_PIDS_S50+=( "$!" )
+    non_unique_group_name &
+    WAIT_PIDS_S50+=( "$!" )
+    query_user_acc &
+    WAIT_PIDS_S50+=( "$!" )
+    query_nis_plus_auth_supp &
+    WAIT_PIDS_S50+=( "$!" )
+    check_sudoers &
+    WAIT_PIDS_S50+=( "$!" )
+    check_owner_perm_sudo_config &
+    WAIT_PIDS_S50+=( "$!" )
+    search_pam_testing_libs &
+    WAIT_PIDS_S50+=( "$!" )
+    scan_pam_conf &
+    WAIT_PIDS_S50+=( "$!" )
+    search_pam_configs &
+    WAIT_PIDS_S50+=( "$!" )
+    search_pam_files &
+    WAIT_PIDS_S50+=( "$!" )
+  else
+    user_zero
+    non_unique_acc
+    non_unique_group_id
+    non_unique_group_name
+    query_user_acc
+    query_nis_plus_auth_supp
+    check_sudoers
+    check_owner_perm_sudo_config
+    search_pam_testing_libs
+    scan_pam_conf
+    search_pam_configs
+    search_pam_files
+  fi
 
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S50[@]}"
+  fi
+
+  if [[ -f "$TMP_DIR"/S50_AUTH_ISSUES.tmp ]]; then
+    while read -r ISSUES; do
+      (( AUTH_ISSUES="$AUTH_ISSUES"+"$ISSUES" ))
+    done < "$TMP_DIR"/S50_AUTH_ISSUES.tmp
+  fi
   echo -e "\\n[*] Statistics:$AUTH_ISSUES" >> "$LOG_FILE"
 
   module_end_log "${FUNCNAME[0]}" "$AUTH_ISSUES"
@@ -48,6 +84,7 @@ user_zero() {
 
   print_output "[*] Searching accounts with UID 0"
   local CHECK=0
+  local AUTH_ISSUES=0
   local PASSWD_FILE_PATHS
   mapfile -t PASSWD_FILE_PATHS < <(mod_path "/ETC_PATHS/passwd")
 
@@ -68,6 +105,7 @@ user_zero() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 non_unique_acc() {
@@ -75,6 +113,7 @@ non_unique_acc() {
 
   print_output "[*] Searching non-unique accounts"
   local CHECK=0
+  local AUTH_ISSUES=0
   local PASSWD_FILE_PATHS
   mapfile -t PASSWD_FILE_PATHS < <(mod_path "/ETC_PATHS/passwd")
 
@@ -95,6 +134,7 @@ non_unique_acc() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 non_unique_group_id() {
@@ -102,6 +142,7 @@ non_unique_group_id() {
 
   print_output "[*] Searching non-unique group ID's"
   local CHECK=0
+  local AUTH_ISSUES=0
   local GROUP_PATHS
   mapfile -t GROUP_PATHS < <(mod_path "/ETC_PATHS/group")
 
@@ -122,6 +163,7 @@ non_unique_group_id() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/group not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 non_unique_group_name() {
@@ -129,6 +171,7 @@ non_unique_group_name() {
 
   print_output "[*] Searching non-unique group names"
   local CHECK=0
+  local AUTH_ISSUES=0
   local GROUP_PATHS
   mapfile -t GROUP_PATHS < <(mod_path "/ETC_PATHS/group")
 
@@ -149,6 +192,7 @@ non_unique_group_name() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/group not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 query_user_acc() {
@@ -156,6 +200,7 @@ query_user_acc() {
 
   print_output "[*] Reading system users"
   local CHECK=0
+  local AUTH_ISSUES=0
   local PASSWD_FILE_PATHS
   mapfile -t PASSWD_FILE_PATHS < <(mod_path "/ETC_PATHS/passwd")
 
@@ -188,6 +233,7 @@ query_user_acc() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/passwd not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 query_nis_plus_auth_supp() {
@@ -195,6 +241,7 @@ query_nis_plus_auth_supp() {
 
   print_output "[*] Check nsswitch.conf"
   local CHECK=0
+  local AUTH_ISSUES=0
   local NSS_PATH_L
   mapfile -t NSS_PATH_L < <(mod_path "/ETC_PATHS/nsswitch.conf")
   for NSS_PATH in "${NSS_PATH_L[@]}"; do
@@ -227,11 +274,13 @@ query_nis_plus_auth_supp() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/nsswitch.conf not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 check_sudoers() {
   sub_module_title "Scan and test sudoers files"
   local SUDOERS_ISSUES
+  local AUTH_ISSUES=0
   local S_ISSUE
 
   for R_PATH in "${ROOT_PATH[@]}"; do
@@ -253,11 +302,13 @@ check_sudoers() {
       print_output "[-] No sudoers files found in $R_PATH"
     fi
   done
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 check_owner_perm_sudo_config() {
   sub_module_title "Ownership and permissions for sudo configuration files"
 
+  local AUTH_ISSUES=0
   if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
     for FILE in "${SUDOERS_FILES_ARR[@]}"; do
       local SUDOERS_D
@@ -322,6 +373,7 @@ check_owner_perm_sudo_config() {
   else
     print_output "[-] No sudoers files found - no check possible"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 search_pam_testing_libs() {
@@ -330,6 +382,7 @@ search_pam_testing_libs() {
   print_output "[*] Searching PAM password testing modules (cracklib, passwdqc, pwquality)"
 
   local FILE_PATH FOUND FOUND_CRACKLIB FOUND_PASSWDQC FOUND_PWQUALITY
+  local AUTH_ISSUES=0
   mapfile -t FILE_PATH < <(mod_path_array "$(config_list "$CONFIG_DIR""/pam_files.cfg" "")")
 
   if [[ "${FILE_PATH[0]}" == "C_N_F" ]] ; then
@@ -400,13 +453,14 @@ search_pam_testing_libs() {
   else
     print_output "[-] No pam files found"
   fi
-
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 scan_pam_conf() {
   sub_module_title "Scan PAM configuration file"
 
   local CHECK=0
+  local AUTH_ISSUES=0
   local PAM_PATH_L
   mapfile -t PAM_PATH_L < <(mod_path "/ETC_PATHS/pam.conf")
   for PAM_PATH in "${PAM_PATH_L[@]}"; do
@@ -429,12 +483,14 @@ scan_pam_conf() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/pam.conf not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 search_pam_configs() {
   sub_module_title "Searching PAM configurations and LDAP support in PAM files"
 
   local CHECK
+  local AUTH_ISSUES=0
   CHECK=0
   local PAM_PATH_L
   mapfile -t PAM_PATH_L < <(mod_path "/ETC_PATHS/pam.d")
@@ -472,12 +528,14 @@ search_pam_configs() {
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] /etc/pam.d not available"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 search_pam_files() {
   sub_module_title "Searching available PAM files"
 
   local CHECK=0
+  local AUTH_ISSUES=0
   local PAM_FILES
   readarray -t PAM_FILES < <(config_find "$CONFIG_DIR""/pam_files.cfg")
 
@@ -507,4 +565,5 @@ search_pam_files() {
   else
     print_output "[-] Nothing found"
   fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }

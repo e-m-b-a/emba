@@ -30,6 +30,26 @@ S05_firmware_details()
   
   print_output "[*] ""${#FILE_ARR[@]}"" files and ""$DETECTED_DIR"" directories detected."
 
+  if [[ "$THREADED" -eq 1 ]]; then
+    filesystem_tree &
+    WAIT_PIDS_S05+=( "$!" )
+    release_info &
+    WAIT_PIDS_S05+=( "$!" )
+  else
+    filesystem_tree
+    release_info
+  fi
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S05[@]}"
+  fi
+
+  echo -e "\\n[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR" >> "$LOG_FILE"
+
+  module_end_log "${FUNCNAME[0]}" "${#FILE_ARR[@]}"
+}
+
+filesystem_tree() {
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
     if [[ $FORMAT_LOG -eq 1 ]] ; then
@@ -44,11 +64,7 @@ S05_firmware_details()
       ls -laR --color=never "$FIRMWARE_PATH" >> "$LOG_FILE"
     fi
   fi
-  release_info
 
-  echo -e "\\n[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR" >> "$LOG_FILE"
-
-  module_end_log "${FUNCNAME[0]}" "${#FILE_ARR[@]}"
 }
 
 # Test source: http://linuxmafia.com/faq/Admin/release-files.html

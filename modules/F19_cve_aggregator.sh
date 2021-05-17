@@ -111,6 +111,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs./\ }"
     VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
@@ -153,6 +154,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
     # dnsmasq- -> dnsmasq 
     VERSION_lower="${VERSION_lower//dnsmasq-/dnsmasq\ }"
+    # lighttpd- -> lighttpd\ 
+    VERSION_lower="${VERSION_lower//lighttpd-/lighttpd\ }"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
@@ -662,14 +665,13 @@ generate_cve_details() {
 
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
-  export MAX_PIDS=20 # for accessing the mongodb in threaded mode
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     # threading currently not working. This is work in progress
     if [[ "$THREADED" -eq 1 ]]; then
       cve_db_lookup &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection "${WAIT_PIDS_F19[@]}"
+      max_pids_protection 10 "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup
     fi
@@ -757,7 +759,7 @@ get_firmware_base_version_check() {
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
-      readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel")
+      readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel\|Linux-")
     else
       readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
     fi

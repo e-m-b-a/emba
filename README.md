@@ -13,7 +13,7 @@ Author(s): Michael Messner, Pascal Eckmann
 -->
 
 # emba
-### An analyzer for Linux-based firmware of embedded devices
+### The security analyzer for embedded device firmware
 
 <p align="center">
   <img src="./helpers/emba.svg" width="200"/>
@@ -56,10 +56,10 @@ Author(s): Michael Messner, Pascal Eckmann
 
 ## About
 
-*Emba* is being developed as a firmware scanner that analyzes Linux-based firmware images, regardless of whether the firmware is a single file or has already been extracted. It should help you identify and focus on interesting areas of firmware images.
+*Emba* is being developed as a firmware scanner that analyzes firmware images, regardless of whether the firmware is a single file or has already been extracted. It should help you identify and focus on interesting areas of firmware images. Beside Linux-based embedded devices *Emba* also analyzes [different RTOS-based operating systems](https://github.com/e-m-b-a/emba/wiki/OS-support) like *VxWorks* or *FreeRTOS*.
 
-Although *emba* is optimized for offline firmware images, it can test both, live systems and extracted images. Additionally, it can also analyze kernel configurations.
-*Emba* is designed to assist penetration testers and not as a standalone tool without human interaction. *Emba* should provide as much information as possible about the firmware, the the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
+*Emba* is optimized for offline/extracted firmware images. Additionally, it can also analyze kernel configurations.
+*Emba* is designed to assist penetration testers and not as a standalone tool without human interaction. *Emba* should provide as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
 
 ## Installation
 
@@ -80,6 +80,6 @@ sudo ./emba.sh -l ./log -f /firmware -D
 ```
 
 ---
-You can specify some [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments) and get more [information about usage of *emba* in the wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
+You can specify multiple [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments) and get more [information about usage of *emba* in the wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
 
 
