@@ -48,11 +48,11 @@ add_color_tags()
 {
   COLOR_FILE="$1"
   sed -i -E \
-    -e 's/\x1b\[/##/g ; s/(##[0-9]{1,2});/\1##/g ; s/(##[0-9]{1,2})m/\1/g' \
+    -e 's/\x1b\[/##/g ; s/(##[0-9]{0,2});/\1##/g ; s/(##[0-9]{0,2})m/\1/g' \
     -e "s/\#\#31/$SPAN_RED/g ; s/\#\#32/$SPAN_GREEN/g ; s/\#\#33/$SPAN_ORANGE/g" \
     -e "s/\#\#34/$SPAN_BLUE/g ; s/\#\#35/$SPAN_MAGENTA/g ; s/\#\#36/$SPAN_CYAN/g" \
     -e "s/\#\#01/$SPAN_BOLD/g ; s/\#\#03/$SPAN_ITALIC/g ; s@\#\#00@$SPAN_END@g ; /(##[0-9]{2})/d" \
-    -e "s/\#\#1/$SPAN_BOLD/g ; s/\#\#3/$SPAN_ITALIC/g ; s@\#\#0@$SPAN_END@g" \
+    -e "s/\#\#1/$SPAN_BOLD/g ; s/\#\#3/$SPAN_ITALIC/g ; s@\#\#0@$SPAN_END@g ; /##/d" \
     -e "s@$P_START$P_END@$BR@g" "$COLOR_FILE"
 }
 
@@ -202,7 +202,7 @@ generate_report_file()
       for SUBMODUL_NAME in "${SUBMODUL_NAMES[@]}" ; do
         if [[ -n "$SUBMODUL_NAME" ]] ; then
           SUBMODUL_NAME="$( strip_color_tags "$SUBMODUL_NAME" | cut -d" " -f 2- )"
-          A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")"
+          A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s/[^a-zA-Z0-9]//g" | tr "[:upper:]" "[:lower:]")"
           LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$A_SUBMODUL_NAME@g")""$SUBMODUL_NAME""$LINK_END"
           sed -i -E "s@$SUBMODUL_NAME@$LINE@" "$TMP_FILE"
           # Add anchor to file
@@ -213,7 +213,7 @@ generate_report_file()
       done
     fi
 
-    sed -i -E -e "s:[=]{65}:$HR_DOUBLE:g ; s:[-]{65}:$HR_MONO:g" "$TMP_FILE"
+    sed -i -E -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_FILE"
     sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_FILE"
     
     # add html tags for style
@@ -271,7 +271,7 @@ add_link_to_index() {
 update_index()
 {
   LINE_NUMBER_ENTROPY=$(grep -n "entropy.png" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-  if [[ -n "$LINE_NUMBER" ]] ; then 
+  if [[ -n "$LINE_NUMBER_ENTROPY" ]] ; then 
     readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
     for IMAGE in "${ENTROPY_IMAGES_ARR[@]}" ; do
       if [[ -f "$IMAGE" ]] ; then
@@ -281,7 +281,7 @@ update_index()
       fi
     done
   fi
-  #rm -R "$ABS_HTML_PATH$TEMP_PATH"
+  rm -R "$ABS_HTML_PATH$TEMP_PATH"
 }
 
 prepare_report()
