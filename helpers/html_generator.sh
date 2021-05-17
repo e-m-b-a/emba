@@ -51,8 +51,8 @@ add_color_tags()
     -e 's/\x1b\[/##/g ; s/(##[0-9]{0,2});/\1##/g ; s/(##[0-9]{0,2})m/\1/g' \
     -e "s/\#\#31/$SPAN_RED/g ; s/\#\#32/$SPAN_GREEN/g ; s/\#\#33/$SPAN_ORANGE/g" \
     -e "s/\#\#34/$SPAN_BLUE/g ; s/\#\#35/$SPAN_MAGENTA/g ; s/\#\#36/$SPAN_CYAN/g" \
-    -e "s/\#\#01/$SPAN_BOLD/g ; s/\#\#03/$SPAN_ITALIC/g ; s@\#\#00@$SPAN_END@g ; /(##[0-9]{2})/d" \
-    -e "s/\#\#1/$SPAN_BOLD/g ; s/\#\#3/$SPAN_ITALIC/g ; s@\#\#0@$SPAN_END@g ; /##/d" \
+    -e "s/\#\#01/$SPAN_BOLD/g ; s/\#\#03/$SPAN_ITALIC/g ; s@\#\#00@$SPAN_END@g ; s@\#\#[0-9]{2}@@g" \
+    -e "s/\#\#1/$SPAN_BOLD/g ; s/\#\#3/$SPAN_ITALIC/g ; s@\#\#0@$SPAN_END@g ; s@\#\#@@g" \
     -e "s@$P_START$P_END@$BR@g" "$COLOR_FILE"
 }
 
@@ -82,7 +82,7 @@ add_link_tags() {
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
           if [[ $(generate_info_file "$EXPLOIT_FILE" "$BACK_LINK") -eq 1 ]] ; then
-            HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
+            HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
             sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$LINK_FILE"
           fi
         else
@@ -117,15 +117,21 @@ generate_info_file()
   SRC_FILE=$2
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%.txt}"".html")"
+  INFO_PATH="$ABS_HTML_PATH""/info"
+  EXPLOIT_PATH="$INFO_PATH""/exploits"
 
-  if ! [[ -f "$ABS_HTML_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
-    cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+  if ! [[ -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" ; fi
+  if ! [[ -d "$EXPLOIT_PATH" ]] ; then mkdir "$EXPLOIT_PATH" ; fi
+
+  if ! [[ -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
+    cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE"
+    sed -i -e "s:\.\/:\.\/\.\.\/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
     TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
 
     # add back Link anchor to navigation
-    LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$INFO_HTML_FILE" | cut -d":" -f1)
-    NAV_INFO_BACK_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@$SRC_FILE@g")"
-    sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+    LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$INFO_PATH""/""$INFO_HTML_FILE" | cut -d":" -f1)
+    NAV_INFO_BACK_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@./../$SRC_FILE@g")"
+    sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
 
     cp "$INFO_FILE" "$TMP_INFO_FILE"
     sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_INFO_FILE"
@@ -134,7 +140,7 @@ generate_info_file()
     sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_INFO_FILE"
     # add html tags for style
     add_color_tags "$TMP_INFO_FILE"
-    sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:[-]{65}:$HR_MONO:g" "$TMP_INFO_FILE"
+    sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_INFO_FILE"
     
     # add link tags to links/generate info files and link to them and write line to tmp file
     add_link_tags "$TMP_INFO_FILE" "$INFO_HTML_FILE"
@@ -148,14 +154,14 @@ generate_info_file()
     readarray -t EXPLOIT_FILES < <(grep "File: " "$INFO_FILE" | cut -d ":" -f 2 | sed 's/^\ //' | sort -u)
     for E_PATH in "${EXPLOIT_FILES[@]}" ; do
       if [[ -f "$E_PATH" ]] ; then
-        cp "$E_PATH" "$ABS_HTML_PATH""/""$(basename "$E_PATH")"
-        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+        cp "$E_PATH" "$ABS_HTML_PATH""/info/exploits/""$(basename "$E_PATH")"
+        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./exploits/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         printf "%s%sFile: %s%s\n" "$HR_MONO" "$P_START" "$E_HTML_LINK" "$P_END" >> "$TMP_INFO_FILE"
       fi
     done
 
     # add content of temporary html into template
-    sed -i "/content start/ r $TMP_INFO_FILE" "$ABS_HTML_PATH""/""$INFO_HTML_FILE"
+    sed -i "/content start/ r $TMP_INFO_FILE" "$INFO_PATH""/""$INFO_HTML_FILE"
     echo 1
   else
     echo 0
