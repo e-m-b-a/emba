@@ -18,7 +18,7 @@
 
 S108_linux_common_file_checker() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Module to check for common linux files"
+  module_title "Check for common linux files"
 
   LOG_FILE="$( get_log_file )"
   FILE_COUNTER=0
