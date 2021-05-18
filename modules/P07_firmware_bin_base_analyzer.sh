@@ -65,6 +65,7 @@ os_identification() {
   OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC")
   echo "." | tr -d "\n"
   declare -A OS_COUNTER=()
+  local COUNTER
 
   if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
     echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/p07.tmp
@@ -108,9 +109,9 @@ os_identification() {
         print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
       fi
     fi
-    #echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS))" >> "$TMP_DIR"/p07.tmp
-
+    COUNTER=$(("$COUNTER"+"${OS_COUNTER[$OS]}"))
   done
+  echo "$COUNTER" >> "$TMP_DIR"/p07.tmp
 }
 
 binary_architecture_detection()
