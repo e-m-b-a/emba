@@ -34,6 +34,11 @@ P02_firmware_bin_file_check() {
   print_output ""
   print_output "$(indent "$ENTROPY")"
   print_output ""
+  if [[ -x "$EXT_DIR"/pixde ]]; then
+    print_output "[*] Visualized firmware file (first 100 lines):"
+    "$EXT_DIR"/pixde "$FIRMWARE_PATH" >> "$LOG_DIR"/P02_pixd.txt
+    cat "$LOG_DIR"/P02_pixd.txt | head -n 100
+  fi
 
   module_end_log "${FUNCNAME[0]}" 1
 }
