@@ -24,7 +24,6 @@ F50_base_aggregator() {
   P02_LOG="p02_firmware_bin_file_check.txt"
   P07_LOG="p07_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
-  S10_LOG="s10_binaries_basic_check.txt"
   S11_LOG="s11_weak_func_check.txt"
   S12_LOG="s12_binary_protection.txt"
   S20_LOG="s20_shell_check.txt"
