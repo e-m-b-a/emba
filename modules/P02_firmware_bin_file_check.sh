@@ -29,10 +29,11 @@ P02_firmware_bin_file_check() {
   
   print_output "[*] Details of the binary file:"
   print_output "$(indent "$FILE_LS_OUT")"
-  echo
+  print_output ""
   print_output "$(indent "$FILE_BIN_OUT")"
-  echo
+  print_output ""
   print_output "$(indent "$ENTROPY")"
+  print_output ""
 
   module_end_log "${FUNCNAME[0]}" 1
 }
