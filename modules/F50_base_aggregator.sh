@@ -24,7 +24,9 @@ F50_base_aggregator() {
   P02_LOG="p02_firmware_bin_file_check.txt"
   P07_LOG="p07_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
-  S10_LOG="s10_binaries_check.txt"
+  S10_LOG="s10_binaries_basic_check.txt"
+  S11_LOG="s11_weak_func_check.txt"
+  S12_LOG="s12_binary_protection.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
@@ -152,13 +154,13 @@ output_config_issues() {
 output_binaries() {
 
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
-    if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
-      CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S10_LOG")
-      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S10_LOG")
-      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$S10_LOG")
-      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S10_LOG")
-      STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$S10_LOG")
-      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$S10_LOG")
+    if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
+      CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG")
+      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S12_LOG")
+      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$S12_LOG")
+      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S12_LOG")
+      STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$S12_LOG")
+      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$S12_LOG")
       # we have to remove the first line of the original output:
       (( BINS_CHECKED-- ))
     fi
@@ -283,9 +285,9 @@ get_data() {
     FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f | wc -l)
     DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d | wc -l)
   fi
-  if [[ -f "$LOG_DIR"/"$S10_LOG" ]]; then
-    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
-    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S10_LOG" | cut -d: -f2)
+  if [[ -f "$LOG_DIR"/"$S11_LOG" ]]; then
+    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S11_LOG" | cut -d: -f2)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S11_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)

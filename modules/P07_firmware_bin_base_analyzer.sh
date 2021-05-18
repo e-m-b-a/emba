@@ -62,119 +62,55 @@ os_identification() {
   sub_module_title "OS detection"
 
   print_output "[*] Initial OS detection running ..." | tr -d "\n"
+  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC")
   echo "." | tr -d "\n"
-
-  echo "." | tr -d "\n"
-  COUNTER_Linux="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c Linux 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_Linux_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c Linux {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_Linux_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c Linux {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_Linux_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c Linux)"
-  echo "." | tr -d "\n"
-  COUNTER_Linux=$((COUNTER_Linux+COUNTER_Linux_FW+COUNTER_Linux_EXT+COUNTER_Linux_EXT1))
-  echo "." | tr -d "\n"
-
-  echo "." | tr -d "\n"
-  COUNTER_FreeBSD="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeBSD 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeBSD_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeBSD_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c FreeBSD {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeBSD_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeBSD)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeBSD=$((COUNTER_FreeBSD+COUNTER_FreeBSD_FW+COUNTER_FreeBSD_EXT+COUNTER_FreeBSD_EXT1))
-  echo "." | tr -d "\n"
-
-
-  COUNTER_VxWorks="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "VxWorks\|Wind" 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_VxWorks_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_VxWorks_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c "VxWorks\|Wind" {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_VxWorks_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c -i "VxWorks\|Wind")"
-  echo "." | tr -d "\n"
-  COUNTER_VxWorks=$((COUNTER_VxWorks+COUNTER_VxWorks_FW+COUNTER_VxWorks_EXT+COUNTER_VxWorks_EXT1))
-  echo "." | tr -d "\n"
-
-  COUNTER_FreeRTOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c FreeRTOS 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeRTOS_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeRTOS_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c FreeRTOS {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeRTOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c FreeRTOS)"
-  echo "." | tr -d "\n"
-  COUNTER_FreeRTOS=$((COUNTER_FreeRTOS+COUNTER_FreeRTOS_FW+COUNTER_FreeRTOS_EXT+COUNTER_FreeRTOS_EXT1))
-  echo "." | tr -d "\n"
-
-  COUNTER_eCos="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c eCos 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_eCos_EXT="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -c eCos {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_eCos_EXT1="$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -c eCos {} \; 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_eCos_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c eCos)"
-  echo "." | tr -d "\n"
-  COUNTER_eCos=$((COUNTER_eCos+COUNTER_eCos_FW+COUNTER_eCos_EXT+COUNTER_eCos_EXT1))
-  echo "." | tr -d "\n"
-
-  # just a wild guess after looking at: https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf
-  COUNTER_ADONIS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c ADONIS 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_ADONIS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c ADONIS)"
-  echo "." | tr -d "\n"
-  COUNTER_ADONIS=$((COUNTER_ADONIS+COUNTER_ADONIS_FW))
-  echo "." | tr -d "\n"
-
-  # Siemens SIPROTEC devices
-  COUNTER_SIPROTEC="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c siprotec 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_SIPROTEC_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c siprotec)"
-  echo "." | tr -d "\n"
-  COUNTER_SIPROTEC=$((COUNTER_SIPROTEC+COUNTER_SIPROTEC_FW))
-  echo "." | tr -d "\n"
-
-  # uc/OS devicees
-  COUNTER_ucOS="$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -c "uC/OS" 2> /dev/null)"
-  echo "." | tr -d "\n"
-  COUNTER_ucOS_FW="$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -c "uC/OS")"
-  echo "." | tr -d "\n"
-  COUNTER_ucOS=$((COUNTER_ucOS+COUNTER_ucOS_FW))
-  echo "." | tr -d "\n"
+  declare -A OS_COUNTER=()
 
   if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
     echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/p07.tmp
     echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/p07.tmp
   fi
 
-  if [[ $((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS)) -gt 0 ]] ; then
-    print_output ""
-    print_output "$(indent "$(orange "Operating system detection:")")"
-    if [[ $COUNTER_VxWorks -gt 5 ]] ; then print_output "$(indent "$(orange "VxWorks detected\t\t""$COUNTER_VxWorks")")"; fi
-    if [[ $COUNTER_FreeRTOS -gt 0 ]] ; then print_output "$(indent "$(orange "FreeRTOS detected\t\t""$COUNTER_FreeRTOS")")"; fi
-    if [[ $COUNTER_eCos -gt 0 ]] ; then print_output "$(indent "$(orange "eCos detected\t\t""$COUNTER_eCos")")"; fi
-    if [[ $COUNTER_ucOS -gt 0 ]] ; then print_output "$(indent "$(orange "uC/OS detected\t\t""$COUNTER_ucOS")")"; fi
-    if [[ $COUNTER_FreeBSD -gt 0 ]] ; then print_output "$(indent "$(orange "FreeBSD detected\t\t""$COUNTER_FreeBSD")")"; fi
-    if [[ $COUNTER_Linux -gt 5 &&  ${#ROOT_PATH[@]} -gt 1 ]] ; then 
-      print_output "$(indent "$(green "Linux detected\t\t""$COUNTER_Linux""\t-\tverified Linux operating system detected")")"
-    elif [[ $COUNTER_Linux -gt 5 &&  $LINUX_PATH_COUNTER -gt 2 ]] ; then 
-      print_output "$(indent "$(green "Linux detected\t\t""$COUNTER_Linux""\t-\tverified Linux operating system detected")")"
-    elif [[ $COUNTER_Linux -gt 5 ]] ; then 
-      print_output "$(indent "$(orange "Linux detected\t\t""$COUNTER_Linux")")"
-    fi
-    if [[ $COUNTER_ADONIS -gt 10 ]] ; then print_output "$(indent "$(orange "Adonis detected\t\t""$COUNTER_ADONIS")")"; fi
-    if [[ $COUNTER_SIPROTEC -gt 100 && $COUNTER_VxWorks -gt 20 ]] ; then
-      print_output "$(indent "$(green "SIPROTEC detected\t\t""$COUNTER_SIPROTEC""\t-\tverified SIPROTEC system detected")")";
-    elif [[ $COUNTER_SIPROTEC -gt 10 ]] ; then
-      print_output "$(indent "$(orange "SIPROTEC detected\t\t""$COUNTER_SIPROTEC")")";
-    fi
-    echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS))" >> "$TMP_DIR"/p07.tmp
-  fi
+  print_output ""
+  print_output "$(indent "$(orange "Operating system detection:")")"
 
+  for OS in "${OS_SEARCHER[@]}"; do
+    OS_COUNTER[$OS]=0
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null)"))
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
+    if [[ -f "$LOG_DIR"/p05_binwalker_deep.txt ]]; then
+      OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
+    fi
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS")" ))
+
+    if [[ $OS == "VxWorks\|Wind" ]]; then
+      OS_COUNTER_VxWorks="${OS_COUNTER[$OS]}"
+    fi
+
+    if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  ${#ROOT_PATH[@]} -gt 1 ]] ; then 
+      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified Linux operating system detected")")"
+    elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  $LINUX_PATH_COUNTER -gt 2 ]] ; then 
+      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified Linux operating system detected")")"
+    elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
+      print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
+    fi
+
+    if [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
+      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified SIPROTEC system detected")")";
+    elif [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
+      print_output "$(indent "$(orange "SIPROTEC detected\t\t""${OS_COUNTER[$OS]}")")";
+    fi
+
+    if [[ ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
+      if [[ $OS == "VxWorks\|Wind" ]]; then
+        print_output "$(indent "$(orange "VxWorks detected\t\t""${OS_COUNTER[$OS]}")")"
+      else
+        print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
+      fi
+    fi
+    #echo "$((COUNTER_Linux+COUNTER_VxWorks+COUNTER_FreeRTOS+COUNTER_eCos+COUNTER_ADONIS+COUNTER_SIPROTEC+COUNTER_FreeBSD+COUNTER_ucOS))" >> "$TMP_DIR"/p07.tmp
+
+  done
 }
 
 binary_architecture_detection()
