@@ -83,11 +83,11 @@ add_link_tags() {
           # generate exploit file
           if [[ $(generate_info_file "$EXPLOIT_FILE" "$BACK_LINK") -eq 1 ]] ; then
             HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-            sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$LINK_FILE"
+            sed -i -E "s@([^[:digit:]]{1})$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\2@g" "$LINK_FILE"
           fi
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@\ +$EXPLOIT_ID@\ $HTML_LINK@g" "$LINK_FILE"
+          sed -i -E "s@([^[:digit:]]{1})$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\2@g" "$LINK_FILE"
         fi
       fi
     done
@@ -99,7 +99,7 @@ add_link_tags() {
     for CVE_ID in "${CVE_IDS[@]}" ; do
       if [[ -n "$CVE_ID" ]] ; then
         HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID@g")""$CVE_ID""$LINK_END"
-        sed -i -e "s@$CVE_ID@$HTML_LINK@g" "$LINK_FILE"
+        sed -i -E "s@$CVE_ID([^[:digit:]]{1})@$HTML_LINK\1@g" "$LINK_FILE"
       fi
     done
   fi
