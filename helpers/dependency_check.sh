@@ -176,6 +176,9 @@ dependency_check()
     # sudo-parser.pl
     check_dep_file "sudo-parser script" "$EXT_DIR""/sudo-parser.pl"
 
+    # pixd
+    check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
+
     # CVE and CVSS databases
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
     check_dep_file "CVSS database" "$EXT_DIR""/allitemscvss.csv"

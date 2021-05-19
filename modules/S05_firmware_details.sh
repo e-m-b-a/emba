@@ -28,7 +28,7 @@ S05_firmware_details()
   # we use the file FILE_ARR from helpers module
   DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
   
-  print_output "[*] ""${#FILE_ARR[@]}"" files and ""$DETECTED_DIR"" directories detected."
+  print_output "[*] $ORANGE${#FILE_ARR[@]}$NC files and $ORANGE$DETECTED_DIR$NC directories detected."
 
   if [[ "$THREADED" -eq 1 ]]; then
     filesystem_tree &
