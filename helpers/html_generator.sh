@@ -48,12 +48,12 @@ add_color_tags()
 {
   COLOR_FILE="$1"
   sed -i -E \
-    -e 's/\x1b\[/##/g ; s/(##[0-9]{0,2});/\1##/g ; s/(##[0-9]{0,2})m/\1/g' \
+    -e 's/\x1b\[/##/g ; s/##([0-9]{0})(;){1}/##00##/g ; s/##([0-9]{1})(;){1}/##0\1##/g ; s/##([0-9]{2})(;){1}/##\1##/g ' \
+    -e 's/##([0-9]{0})(m){1}/##00/g ; s/##([0-9]{1})(m){1}/##0\1/g ; s/##([0-9]{2})(m){1}/##\1/g ' \
     -e "s/\#\#31/$SPAN_RED/g ; s/\#\#32/$SPAN_GREEN/g ; s/\#\#33/$SPAN_ORANGE/g" \
     -e "s/\#\#34/$SPAN_BLUE/g ; s/\#\#35/$SPAN_MAGENTA/g ; s/\#\#36/$SPAN_CYAN/g" \
-    -e "s/\#\#01/$SPAN_BOLD/g ; s/\#\#03/$SPAN_ITALIC/g ; s@\#\#00@$SPAN_END@g ; s@\#\#[0-9]{2}@@g" \
-    -e "s/\#\#1/$SPAN_BOLD/g ; s/\#\#3/$SPAN_ITALIC/g ; s@\#\#0@$SPAN_END@g ; s@\#\#@@g" \
-    -e "s@$P_START$P_END@$BR@g" "$COLOR_FILE"
+    -e "s/\#\#01/$SPAN_BOLD/g ; s/\#\#03/$SPAN_ITALIC/g ; s@\#\#00@$SPAN_END@g" \
+    -e "s@\#\#[0-9]{2}@@g ; s@\#\#@@g ; s@$P_START$P_END@$BR@g" "$COLOR_FILE"
 }
 
 add_link_tags() {
@@ -263,11 +263,11 @@ add_link_to_index() {
     insert_line "navigation end" "$MODUL_NAME"
   else
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
-      if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
+      if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
-      elif [[ $C_NUMBER -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] && [[ $C_NUMBER -lt ${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1} ]] ; then
+      elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$(($COUNT+1))]:1}" | sed -E 's/^0*//g' ) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
-      elif [[ $COUNT -eq $((${#INDEX_NAV_GROUP_ARR[@]}-1)) ]] && [[ $C_NUMBER -gt ${INDEX_NAV_GROUP_ARR[$COUNT]:1} ]] ; then
+      elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
       fi
     done
