@@ -225,6 +225,7 @@ print_tool_info "ent" 1
 print_tool_info "tcllib" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
+print_tool_info "make" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
