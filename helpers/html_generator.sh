@@ -265,7 +265,7 @@ add_link_to_index() {
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
       if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
-      elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$(($COUNT+1))]:1}" | sed -E 's/^0*//g' ) ]] ; then
+      elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's/^0*//g' ) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
       elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
