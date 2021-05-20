@@ -83,11 +83,11 @@ add_link_tags() {
           # generate exploit file
           if [[ $(generate_info_file "$EXPLOIT_FILE" "$BACK_LINK") -eq 1 ]] ; then
             HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-            sed -i -E "s@([^[:digit:]]{1})$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\2@g" "$LINK_FILE"
+            sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
           fi
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@([^[:digit:]]{1})$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\2@g" "$LINK_FILE"
+          sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
         fi
       fi
     done
