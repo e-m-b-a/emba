@@ -493,6 +493,7 @@ aggregate_versions() {
     mapfile -t VERSIONS_CLEANED < <(sort -u "$LOG_DIR"/aggregator/versions.tmp)
     rm "$LOG_DIR"/aggregator/versions.tmp 2>/dev/null
 
+    # leave this here for debugging reasons
     #if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
     #  print_output "[*] Software inventory aggregated:"
     #  for VERSION in "${VERSIONS_CLEANED[@]}"; do
@@ -599,8 +600,9 @@ cve_extractor() {
       if [[ "$EXPLOIT" == "No exploit available" ]]; then
         mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null)
         if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
+          readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //')
           EXPLOIT="Exploit available (Source: Exploit database ID"
-          for EXPLOIT_ID in "${EXPLOIT_AVAIL[@]}" ; do
+          for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
             EXPLOIT="$EXPLOIT"" ""$EXPLOIT_ID"
             echo -e "[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
             for LINE in "${EXPLOIT_AVAIL[@]}"; do
