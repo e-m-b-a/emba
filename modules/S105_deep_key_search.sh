@@ -43,7 +43,6 @@ S105_deep_key_search()
 
   if [[ "$THREADED" -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_S105[@]}"
-    DEEP_KEY_COUNTER=1
   fi
   module_end_log "${FUNCNAME[0]}" "$DEEP_KEY_COUNTER"
 }

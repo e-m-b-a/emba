@@ -160,9 +160,6 @@ dependency_check()
 
     echo
     print_output "[*] External utils:" "no_log"
-
-    # aha
-    check_dep_file "aha" "$EXT_DIR""/aha"
   
     # bc
     check_dep_tool "bc"
