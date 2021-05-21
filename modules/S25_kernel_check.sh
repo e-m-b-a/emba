@@ -205,7 +205,7 @@ module_analyzer() {
 
 check_modprobe()
 {
-  sub_module_title "Check modprobe.d directory and content (loadable kernel module config)"
+  sub_module_title "Check modprobe.d directory and content"
 
   local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0
   readarray -t MODPROBE_D_DIRS < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
