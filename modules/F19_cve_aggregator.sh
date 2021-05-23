@@ -26,8 +26,7 @@ F19_cve_aggregator() {
 
   if ! [[ -d "$LOG_DIR"/aggregator ]] ; then
     mkdir "$LOG_DIR"/aggregator
-  fi
-  if ! [[ -d "$LOG_DIR"/aggregator/exploit ]] ; then
+    mkdir "$LOG_DIR"/aggregator/cve_sum/
     mkdir "$LOG_DIR"/aggregator/exploit
   fi
 
@@ -628,24 +627,23 @@ cve_extractor() {
     # we do not deal with output formatting the usual way -> we use printf
     if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE"
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       else
-        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE"
+        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       fi
       ((HIGH_CVE_COUNTER++))
     elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE"
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       else
-        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE"
-
+        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       fi
       ((MEDIUM_CVE_COUNTER++))
     else
       if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE"
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       else
-        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE"
+        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       fi
       ((LOW_CVE_COUNTER++))
     fi
@@ -654,7 +652,7 @@ cve_extractor() {
 
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
-  } >> "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE"
+  } >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
   echo "$LOW_CVE_COUNTER" >> "$TMP_DIR"/LOW_CVE_COUNTER.tmp
   echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
   echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
@@ -662,12 +660,12 @@ cve_extractor() {
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_output ""
-    grep -v "Statistics" "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
+    grep -v "Statistics" "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
     print_output ""
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
     print_output ""
-    grep -v "Statistics" "$LOG_DIR"/aggregator_cve/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
+    grep -v "Statistics" "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
     print_output ""
   fi
@@ -679,7 +677,6 @@ generate_cve_details() {
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
 
-  mkdir "$LOG_DIR"/aggregator_cve/
 
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
     if [[ "$THREADED" -eq 1 ]]; then
@@ -698,7 +695,7 @@ generate_cve_details() {
 
   print_output ""
   print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-  mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator_cve/ -type f -name "*.txt" | sort 2> /dev/null)
+  mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/cve_sum/ -type f -name "*.txt" | sort 2> /dev/null)
   for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
     if [[ "$THREADED" -eq 1 ]]; then
       final_outputter &
