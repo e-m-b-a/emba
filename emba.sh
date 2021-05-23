@@ -559,7 +559,9 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  update_index
+  if [[ "$HTML" -eq 1 ]]; then
+    update_index
+  fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ -f "$HTML_PATH"/index.html ]]; then
