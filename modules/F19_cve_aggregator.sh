@@ -507,12 +507,12 @@ aggregate_versions() {
 }
 
 generate_special_log() {
-  sub_module_title "Generate special log files."
+  sub_module_title "Minimal report of exploits and CVE's."
 
   if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE") -gt 0 ]]; then
     readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
     print_output ""
-    print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
+    print_output "[*] CVE log file stored in $CVE_MINIMAL_LOG.\\n"
     for FILE in "${FILES[@]}"; do
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
       CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
@@ -526,7 +526,7 @@ generate_special_log() {
     done
 
     print_output ""
-    print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
+    print_output "[*] Minimal exploit summary file stored in $EXPLOIT_OVERVIEW_LOG.\\n"
     mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
@@ -672,7 +672,7 @@ cve_extractor() {
 }
 
 generate_cve_details() {
-  sub_module_title "Collect CVE details."
+  sub_module_title "Collect CVE and exploit details."
 
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
@@ -780,7 +780,7 @@ final_outputter() {
 }
 
 get_firmware_base_version_check() {
-  sub_module_title "Collect version details of module r09 or s09 - firmware_base_version_check."
+  print_output "[*] Collect version details of module r09 or s09 - firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
@@ -791,13 +791,8 @@ get_firmware_base_version_check() {
   fi
 }
 
-get_version_vulnerability_check() {
-  sub_module_title "Collect version details of module s30_version_vulnerability_check."
-  print_output "[*] Currently nothing todo here ..."
-}
-
 get_kernel_check() {
-  sub_module_title "Collect version details of module s25_kernel_check."
+  print_output "[*] Collect version details of module s25_kernel_check."
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
     readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
     ## do a bit of sed modifications to have the same output as from the pre checker
@@ -806,7 +801,7 @@ get_kernel_check() {
 }
 
 get_usermode_emulator() {
-  sub_module_title "Collect version details of module s115_usermode_emulator."
+  print_output "[*] Collect version details of module s115_usermode_emulator."
   if [[ -f "$LOG_DIR"/"$EMUL_LOG" ]]; then
     readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (from.*$//' | sort -u)
   fi
