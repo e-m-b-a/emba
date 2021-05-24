@@ -79,6 +79,7 @@ deep_pattern_searcher() {
         fi
       done
       #COUNT=((COUNT+${#S_OUTPUT[@]}))
+      print_output ""
       print_output "[+] ""$DEEP_S_FILE""$NC""\\n""$D_S_FINDINGS"  
     fi
   fi
@@ -91,6 +92,7 @@ deep_pattern_reporter() {
   done
 
   if [[ "${#PATTERN_LIST[@]}" -gt 0 ]] ; then
+    print_output ""
     print_output "[*] Occurences of pattern:"
     SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
     for OCC in "${SORTED_OCC_LIST[@]}"; do
