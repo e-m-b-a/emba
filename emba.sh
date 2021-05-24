@@ -435,8 +435,8 @@ main()
     if [[ $D_RETURN -eq 0 ]] ; then
       if [[ $ONLY_DEP -eq 0 ]] ; then
         print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH" "no_log"
-        print_output "[*] Log directory: $ORANGE$LOG_DIR" "no_log"
+        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
+        print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
         exit
       fi
     else

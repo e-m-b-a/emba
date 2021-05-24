@@ -22,7 +22,7 @@ export THREAD_PRIO=1
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Software component and version detection via emulation."
+  module_title "Emulation based software component and version detection."
 
   if [[ "$QEMULATION" -eq 1 ]]; then
 
@@ -140,7 +140,7 @@ print_filesystem_fixes() {
 }
 
 version_detection() {
-  sub_module_title "Software component and version detection"
+  sub_module_title "Identified software components."
 
   while read -r VERSION_LINE; do 
     if [[ $THREADING -eq 1 ]]; then
