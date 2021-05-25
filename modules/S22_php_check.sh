@@ -82,3 +82,22 @@ s22_script_check() {
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   fi
 }
+
+#Must heaves
+# PHP7.2+
+#display_errors = Off
+#allow_url_fopen         = Off
+#allow_url_include       = Off
+#file_uploads            = On (nur wenn benötigt)
+#enable_dl               = Off
+#disable_functions       = system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, move_uploaded_file, chdir, mkdir, rmdir, chmod, rename, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo
+# see also: http://ir.php.net/features.safe-mode
+#disable_classes         =
+#session.name                     = myPHPSESSID
+#session.referer_check   = /application/path
+#memory_limit            = 50M
+#post_max_size           = 20M
+#max_execution_time      = 60
+#report_memleaks         = On
+#track_errors            = Off
+#html_errors             = Off
