@@ -69,7 +69,7 @@ S20_shell_check()
 s20_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   SHELL_LOG="$LOG_DIR""/shellchecker/shellchecker_""$NAME"".txt"
-  shellcheck "$LINE" > "$SHELL_LOG" 2> /dev/null
+  shellcheck -C "$LINE" > "$SHELL_LOG" 2> /dev/null
   VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
@@ -85,8 +85,10 @@ s20_script_check() {
 
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+      write_link "$SHELL_LOG"
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+      write_link "$SHELL_LOG"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi

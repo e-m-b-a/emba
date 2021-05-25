@@ -44,7 +44,7 @@ welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
   echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            e m b a                            ""$NC""$BOLD""║""$NC"
-  echo -e "$BOLD""║                    EMBEDDED LINUX ANALYZER                    ""$NC""$BOLD""║""$NC"
+  echo -e "$BOLD""║                       EMBEDDED ANALYZER                       ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""╚═══════════════════════════════════════════════════════════════╝""$NC"
 
   warning
@@ -190,6 +190,16 @@ write_grep_log()
   fi
 }
 
+write_link()
+{
+  local LINK
+  LINK="$1"
+  if [[ -f "$LINK" ]] && [[ -f "$LOG_FILE" ]]; then
+    LINK="$(format_log "[REF] ""$LINK" 1)"
+    echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+  fi
+}
+
 reset_module_count()
 {
   MODULE_NUMBER="--"
@@ -326,13 +336,13 @@ indent()
 
 format_log()
 {
-  if [[ $FORMAT_LOG -eq 1 ]] ; then
-    echo "$1"
-  else
+  if [[ $FORMAT_LOG -eq 0 ]] || [[ $2 -eq 1 ]] ; then
     echo "$1" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
       | sed -e "s/\\\\n/\\n/g"
+  else
+    echo "$1"
   fi
 }
 

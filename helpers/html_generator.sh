@@ -71,6 +71,21 @@ add_link_tags() {
     done
   fi
 
+  # [REF] anchor 
+  if ( grep -q -E '\[REF\]' "$LINK_FILE" ) ; then
+    readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1 | sort -u)
+    for REF_LINK in "${REF_LINKS[@]}" ; do
+      if [[ -f "$REF_LINK" ]] ; then
+        # generate reference file
+        if [[ $(generate_info_file "$REF_LINK" "$BACK_LINK") -eq 1 ]] ; then
+          LINE_NUMBER_INFO_PREV=$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1 )/$(basename "${REF_LINK%.txt}").html@g")"
+          sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; ""$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
+        fi
+      fi
+    done
+  fi
+
   # Exploit links and additional files
   if ( grep -q -E '(Exploit|exploit)' "$LINK_FILE" ) ; then
     readarray -t EXPLOITS_IDS_F < <( sed -n -e 's/^.*Exploit database ID //p' "$LINK_FILE" | sed 's/[^0-9\ ]//g' | sort -u)
@@ -117,11 +132,11 @@ generate_info_file()
   SRC_FILE=$2
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%.txt}"".html")"
-  INFO_PATH="$ABS_HTML_PATH""/info"
-  EXPLOIT_PATH="$INFO_PATH""/exploits"
+  INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"_" -f1 )"
+  RES_PATH="$INFO_PATH""/res"
 
   if ! [[ -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" ; fi
-  if ! [[ -d "$EXPLOIT_PATH" ]] ; then mkdir "$EXPLOIT_PATH" ; fi
+  if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
 
   if ! [[ -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE"
@@ -154,14 +169,17 @@ generate_info_file()
     readarray -t EXPLOIT_FILES < <(grep "File: " "$INFO_FILE" | cut -d ":" -f 2 | sed 's/^\ //' | sort -u)
     for E_PATH in "${EXPLOIT_FILES[@]}" ; do
       if [[ -f "$E_PATH" ]] ; then
-        cp "$E_PATH" "$ABS_HTML_PATH""/info/exploits/""$(basename "$E_PATH")"
-        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./exploits/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+        cp "$E_PATH" "$RES_PATH""/""$(basename "$E_PATH")"
+        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"_" -f1 )/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         printf "%s%sFile: %s%s\n" "$HR_MONO" "$P_START" "$E_HTML_LINK" "$P_END" >> "$TMP_INFO_FILE"
       fi
     done
 
     # add content of temporary html into template
     sed -i "/content start/ r $TMP_INFO_FILE" "$INFO_PATH""/""$INFO_HTML_FILE"
+    if [ -z "$(ls -A "$RES_PATH")" ]; then
+      rmdir "$RES_PATH"
+    fi
     echo 1
   else
     echo 0
@@ -227,6 +245,7 @@ generate_report_file()
 
       
     # add link tags to links/generate info files and link to them and write line to tmp file
+    # also parsing for [REF] anchor and generate linked files and link it
     add_link_tags "$TMP_FILE" "$HTML_FILE"
 
     # add content of temporary html into template
