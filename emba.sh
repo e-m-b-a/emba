@@ -500,6 +500,10 @@ main()
 
       print_output "\n=================================================================\n" "no_log"
 
+      check_firmware
+      prepare_binary_arr
+      prepare_file_arr
+
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
         architecture_dep_check
@@ -516,9 +520,9 @@ main()
         detect_root_dir_helper "$FIRMWARE_PATH" "main"
       fi
 
-      check_firmware
-      prepare_binary_arr
-      prepare_file_arr
+      #check_firmware
+      #prepare_binary_arr
+      #prepare_file_arr
       set_etc_paths
       echo
 
