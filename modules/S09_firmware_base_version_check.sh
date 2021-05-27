@@ -69,7 +69,7 @@ S09_firmware_base_version_check() {
 
       if [[ "$THREADED" -eq 1 ]]; then
         MAX_THREADS_S09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
-        if [[ $(grep -c S115_ "$LOG_DIR"/emba.log) -eq 1 ]]; then
+        if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
           MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo)"))
         fi
         #print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
