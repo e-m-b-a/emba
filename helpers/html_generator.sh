@@ -58,7 +58,9 @@ add_color_tags()
 }
 
 add_link_tags() {
+  local LINK_FILE
   LINK_FILE="$1"
+  local BACK_LINK
   BACK_LINK="$2"
 
   # web links
@@ -78,11 +80,19 @@ add_link_tags() {
     for REF_LINK in "${REF_LINKS[@]}" ; do
       if [[ -f "$REF_LINK" ]] ; then
         # generate reference file
-        if [[ $(generate_info_file "$REF_LINK" "$BACK_LINK") -eq 1 ]] ; then
-          LINE_NUMBER_INFO_PREV=$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)
-          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1 )/$(basename "${REF_LINK%.txt}").html@g")"
-          sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; ""$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
+        if [[ "$THREADED" -eq 1 ]]; then
+          generate_info_file "$REF_LINK" "$BACK_LINK" &
+          WAIT_PIDS_WR+=( "$!" )
+        else
+          generate_info_file "$REF_LINK" "$BACK_LINK"
         fi
+        LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+        LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
+        HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@g")"
+        while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" $LINK_FILE )" == "$P_START$SPAN_END$P_END" ]] ; do 
+          LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
+        done
+        sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
       fi
     done
   fi
@@ -97,10 +107,14 @@ add_link_tags() {
         EXPLOIT_FILE="$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
-          if [[ $(generate_info_file "$EXPLOIT_FILE" "$BACK_LINK") -eq 1 ]] ; then
-            HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-            sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
+          if [[ "$THREADED" -eq 1 ]]; then
+            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
+            WAIT_PIDS_WR+=( "$!" )
+          else
+            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
           fi
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
+          sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
           sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
@@ -118,6 +132,10 @@ add_link_tags() {
         sed -i -E "s@$CVE_ID([^[:digit:]]{1})@$HTML_LINK\1@g" "$LINK_FILE"
       fi
     done
+  fi
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_WR[@]}"
   fi
 }
 
@@ -137,7 +155,7 @@ generate_info_file()
   RES_PATH="$INFO_PATH""/res"
 
   if ! [[ -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" ; fi
-  if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
+  
 
   if ! [[ -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE"
@@ -170,6 +188,7 @@ generate_info_file()
     readarray -t EXPLOIT_FILES < <(grep "File: " "$INFO_FILE" | cut -d ":" -f 2 | sed 's/^\ //' | sort -u)
     for E_PATH in "${EXPLOIT_FILES[@]}" ; do
       if [[ -f "$E_PATH" ]] ; then
+        if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
         cp "$E_PATH" "$RES_PATH""/""$(basename "$E_PATH")"
         E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"_" -f1 )/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         printf "%s%sFile: %s%s\n" "$HR_MONO" "$P_START" "$E_HTML_LINK" "$P_END" >> "$TMP_INFO_FILE"
@@ -178,12 +197,6 @@ generate_info_file()
 
     # add content of temporary html into template
     sed -i "/content start/ r $TMP_INFO_FILE" "$INFO_PATH""/""$INFO_HTML_FILE"
-    if [ -z "$(ls -A "$RES_PATH")" ]; then
-      rmdir "$RES_PATH"
-    fi
-    echo 1
-  else
-    echo 0
   fi
 }
 

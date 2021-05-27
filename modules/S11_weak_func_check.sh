@@ -81,7 +81,7 @@ function_check_PPC32(){
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -115,7 +115,7 @@ function_check_MIPS32() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -146,7 +146,7 @@ function_check_ARM64() {
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -177,7 +177,7 @@ function_check_ARM32() {
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -208,7 +208,7 @@ function_check_x86() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -239,7 +239,7 @@ function_check_x86_64() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -258,11 +258,11 @@ function_check_x86_64() {
 }
 
 print_top10_statistics() {
-  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$(find "$LOG_PATH_MODULE""/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM
       local F_COUNTER
-      readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS < <( find "$LOG_PATH_MODULE""/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
@@ -291,7 +291,8 @@ print_top10_statistics() {
 output_function_details()
 {
   local LOG_FILE_LOC
-  LOG_FILE_LOC="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+  LOG_FILE_LOC="$LOG_PATH_MODULE""/vul_func_""$COUNT_FUNC""_""$FUNCTION""-""$NAME"".txt" 
+  mv "$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt" "$LOG_FILE_LOC"  2> /dev/null
 
   #check if this is common linux file:
   local COMMON_FILES_FOUND
@@ -313,18 +314,19 @@ output_function_details()
     if [[ "$FUNCTION" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
       print_output "$OUTPUT"
+      write_link "$LOG_FILE_LOC"
       write_log "$OUTPUT" "$LOG_FILE_LOC"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
       print_output "$OUTPUT"
+      write_link "$LOG_FILE_LOC"
       write_log "$OUTPUT" "$LOG_FILE_LOC"
     else
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
       print_output "$OUTPUT"
+      write_link "$LOG_FILE_LOC"
       write_log "$OUTPUT" "$LOG_FILE_LOC"
     fi
   fi
-
-  mv "$LOG_FILE_LOC" "$LOG_DIR""/vul_func_checker/vul_func_""$COUNT_FUNC""_""$FUNCTION""-""$NAME"".txt" 2> /dev/null
 }
 
