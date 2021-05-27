@@ -49,12 +49,12 @@ add_color_tags()
 {
   COLOR_FILE="$1"
   sed -i -E \
-    -e 's/\x1b\[/##/g ; s/##([0-9]{0})(;){1}/##00##/g ; s/##([0-9]{1})(;){1}/##0\1##/g ; s/##([0-9]{2})(;){1}/##\1##/g ' \
-    -e 's/##([0-9]{0})(m){1}/##00/g ; s/##([0-9]{1})(m){1}/##0\1/g ; s/##([0-9]{2})(m){1}/##\1/g ' \
-    -e "s/\#\#31/$SPAN_RED/g ; s/\#\#32/$SPAN_GREEN/g ; s/\#\#33/$SPAN_ORANGE/g" \
-    -e "s/\#\#34/$SPAN_BLUE/g ; s/\#\#35/$SPAN_MAGENTA/g ; s/\#\#36/$SPAN_CYAN/g" \
-    -e "s/\#\#01/$SPAN_BOLD/g ; s/\#\#03/$SPAN_ITALIC/g ; s@\#\#00@$SPAN_END@g" \
-    -e "s@\#\#[0-9]{2}@@g ; s@\#\#@@g ; s@$P_START$P_END@$BR@g" "$COLOR_FILE"
+    -e 's/\x1b\[/;/g ; s/;[0-9]{0};/;00;/g ; s/;([0-9]{1});/;0\1;/g ; s/;([0-9]{2});/;\1;/g ' \
+    -e 's/;([0-9]{0})(m){1}/;00/g ; s/;([0-9]{1})(m){1}/;0\1/g ; s/;([0-9]{2})(m){1}/;\1/g ' \
+    -e "s/;31/$SPAN_RED/g ; s/;32/$SPAN_GREEN/g ; s/;33/$SPAN_ORANGE/g" \
+    -e "s/;34/$SPAN_BLUE/g ; s/;35/$SPAN_MAGENTA/g ; s/;36/$SPAN_CYAN/g" \
+    -e "s/;01/$SPAN_BOLD/g ; s/;03/$SPAN_ITALIC/g ; s@;00@$SPAN_END@g" \
+    -e "s@;[0-9]{2}@@g ; s@$P_START$P_END@$BR@g" "$COLOR_FILE"
 }
 
 add_link_tags() {

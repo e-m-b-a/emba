@@ -145,7 +145,9 @@ pre a:hover {
 
 .reference:hover {
   background: linear-gradient(45deg, transparent 75%, #beec18 75%);
+  background-position: top right;
   background-size: 15px 35px;
+  background-repeat: no-repeat;
 }
 
 .logo {
