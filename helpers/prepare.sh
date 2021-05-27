@@ -139,7 +139,7 @@ architecture_check()
       elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
         D_ARCH="PPC"
       fi
-      print_output ""
+      print_output "" "no_log"
       print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n" "no_log"
       if [[ -n "$ARCH" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
