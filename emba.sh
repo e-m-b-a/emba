@@ -175,6 +175,9 @@ main()
                                 # afterwards do a default emba scan
   export PYTHON_CHECK=1
   export QEMULATION=0
+  # to get rid of all the running stuff we are going to kill it after RUNTIME
+  export QRUNTIME="20s"
+
   export SHELLCHECK=1
   export SHORT_PATH=0           # short paths in cli output
   export THREADED=0             # 0 -> single thread
@@ -435,8 +438,8 @@ main()
     if [[ $D_RETURN -eq 0 ]] ; then
       if [[ $ONLY_DEP -eq 0 ]] ; then
         print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH" "no_log"
-        print_output "[*] Log directory: $ORANGE$LOG_DIR" "no_log"
+        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
+        print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
         exit
       fi
     else
@@ -500,6 +503,10 @@ main()
 
       print_output "\n=================================================================\n" "no_log"
 
+      check_firmware
+      prepare_binary_arr
+      prepare_file_arr
+
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
         architecture_dep_check
@@ -516,9 +523,9 @@ main()
         detect_root_dir_helper "$FIRMWARE_PATH" "main"
       fi
 
-      check_firmware
-      prepare_binary_arr
-      prepare_file_arr
+      #check_firmware
+      #prepare_binary_arr
+      #prepare_file_arr
       set_etc_paths
       echo
 
@@ -559,11 +566,13 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  update_index
+  if [[ "$HTML" -eq 1 ]]; then
+    update_index
+  fi
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ -f "$HTML_PATH"/index.html ]]; then
-      print_output "[*] Web report created HTML report in ""$LOG_DIR""html-report\\n" "main" 
+      print_output "[*] Web report created HTML report in $LOG_DIR/html-report\\n" "main" 
     fi
     echo
     if [[ -d "$LOG_DIR" ]]; then

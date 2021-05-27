@@ -56,9 +56,9 @@ Author(s): Michael Messner, Pascal Eckmann
 
 ## About
 
-*Emba* is being developed as a firmware scanner that analyzes firmware images, regardless of whether the firmware is a single file or has already been extracted. It should help you identify and focus on interesting areas of firmware images. Beside Linux-based embedded devices *Emba* also analyzes [different RTOS-based operating systems](https://github.com/e-m-b-a/emba/wiki/OS-support) like *VxWorks* or *FreeRTOS*.
+*Emba* is being developed as a firmware scanner that analyzes firmware images, regardless of whether the firmware is a single file or has already been extracted. It should help you to identify and focus on the interesting areas of firmware images. Beside Linux-based embedded devices *Emba* also analyzes [different RTOS-based operating systems](https://github.com/e-m-b-a/emba/wiki/OS-support) like *VxWorks* or *FreeRTOS*.
 
-*Emba* is optimized for offline/extracted firmware images. Additionally, it can also analyze kernel configurations.
+*Emba* is optimized for offline/extracted firmware images. Additionally, it can also analyze kernel configuration files.
 *Emba* is designed to assist penetration testers and not as a standalone tool without human interaction. *Emba* should provide as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
 
 ## Installation

@@ -99,20 +99,25 @@ architecture_check()
 {
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
-    local DETECT_ARCH ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
-    # do not use -executable here. Not all firmware updates have exec permissions set
-    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -xdev -exec file {} \; 2>/dev/null | grep ELF | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
-    for D_ARCH in "${DETECT_ARCH[@]}" ; do
+    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
+    # we use the binaries array which is already unique
+    for D_ARCH in "${BINARIES[@]}" ; do
+      D_ARCH=$(file "$D_ARCH")
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
+        continue
       elif [[ "$D_ARCH" == *"ARM"* ]] ; then
         ARCH_ARM=$((ARCH_ARM+1))
+        continue
       elif [[ "$D_ARCH" == *"x86-64"* ]] ; then
         ARCH_X64=$((ARCH_X64+1))
+        continue
       elif [[ "$D_ARCH" == *"80386"* ]] ; then
         ARCH_X86=$((ARCH_X86+1))
+        continue
       elif [[ "$D_ARCH" == *"PowerPC"* ]] ; then
         ARCH_PPC=$((ARCH_PPC+1))
+        continue
       fi
     done
 
@@ -134,7 +139,7 @@ architecture_check()
       elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
         D_ARCH="PPC"
       fi
-      echo
+      print_output ""
       print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n" "no_log"
       if [[ -n "$ARCH" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
