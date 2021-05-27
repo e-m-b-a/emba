@@ -192,11 +192,13 @@ write_grep_log()
 
 write_link()
 {
-  local LINK
-  LINK="$1"
-  if [[ -f "$LINK" ]] && [[ -f "$LOG_FILE" ]]; then
-    LINK="$(format_log "[REF] ""$LINK" 1)"
-    echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+  if [[ $HTML -eq 1 ]] ; then
+    local LINK
+    LINK="$1"
+    if [[ -f "$LINK" ]] && [[ -f "$LOG_FILE" ]]; then
+      LINK="$(format_log "[REF] ""$LINK" 1)"
+      echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+    fi
   fi
 }
 
@@ -460,6 +462,9 @@ print_bar() {
 module_start_log() {
   MODULE_MAIN_NAME="$1"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
+  export LOG_PATH_MODULE
+  LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | cut -d"_" -f1 | tr '[:upper:]' '[:lower:]')"
+  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" ; fi
   ((MOD_RUNNING++))
 }
 
@@ -475,6 +480,9 @@ module_end_log() {
   fi
 
   run_web_reporter_mod_name "$MODULE_MAIN_NAME"
+  if [ -z "$(ls -A "$LOG_PATH_MODULE")" ]; then
+    rmdir "$LOG_PATH_MODULE"
+  fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
