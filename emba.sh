@@ -335,6 +335,7 @@ main()
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
+  check_init_size
 
   # Now we have the firmware and log path, lets set some additional paths
   FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
