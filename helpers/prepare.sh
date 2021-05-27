@@ -291,3 +291,13 @@ detect_root_dir_helper() {
   done
 }
 
+check_init_size() {
+  SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}')
+  if [[ $SIZE -gt 400000000 ]]; then
+    print_output "" "no_log"
+    print_output "[!] WARNING: Your firmware is very big!" "no_log"
+    print_output "[!] WARNING: Analysing huge firmwares will take a lot of disk space, RAM and time!" "no_log"
+    print_output "" "no_log"
+  fi
+
+}
