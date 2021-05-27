@@ -32,11 +32,10 @@ S115_usermode_emulator() {
     # some processes are running long and logging a lot
     # to protect the host we are going to kill them on a KILL_SIZE limit
     KILL_SIZE="50M"
-    # to get rid of all the running stuff we are going to kill it after RUNTIME
-    RUNTIME="1m"
 
     declare -a MISSING
     declare -a MD5_DONE
+    ROOT_CNT=0
 
     ## load blacklist of binaries that could cause troubles during emulation:
     readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
@@ -50,36 +49,48 @@ S115_usermode_emulator() {
       detect_root_dir_helper "$EMULATION_PATH_BASE" "$(get_log_file)"
     fi
 
-    print_output "[*] Detected ${#ROOT_PATH[@]} root directories:"
+    print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
-      print_output "[*] Detected root path: $R_PATH"
+      print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
     done
 
     for R_PATH in "${ROOT_PATH[@]}" ; do
-      print_output "[*] Running emulation processes in $R_PATH root path ..."
+      BIN_CNT=0
+      ((ROOT_CNT=ROOT_CNT+1))
+      print_output "[*] Running emulation processes in $ORANGE$R_PATH$NC root path ..."
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! -name "*.ko" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null && cd "$DIR" || exit)
 
-      print_output "[*] Found ${#BIN_EMU[@]} unique executables in root dirctory: $R_PATH."
+      print_output "[*] Found $ORANGE${#BIN_EMU[@]}$NC unique executables in root dirctory: $ORANGE$R_PATH$NC."
 
       for BIN_ in "${BIN_EMU[@]}" ; do
+        ((BIN_CNT=BIN_CNT+1))
         FULL_BIN_PATH="$R_PATH"/"$BIN_"
         if [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
-          print_output "[!] Blacklist triggered ... $BIN_"
+          print_output "[!] Blacklist triggered ... $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
           continue
         else
           # we check every binary only once. So calculate the checksum and store it for checking
           BIN_MD5=$(md5sum "$FULL_BIN_PATH" | cut -d\  -f1)
           if [[ " ${MD5_DONE[*]} " =~ ${BIN_MD5} ]]; then
-            print_output "[*] Binary $BIN_ was already tested."
+            print_output "[*] Binary $ORANGE$BIN_$NC was already tested ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
             continue
           else
+            if [[ "$THREADED" -eq 1 ]]; then
+              # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
+              MAX_THREADS_S115=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
+              if [[ $(grep -c S09_ "$LOG_DIR"/emba.log) -eq 1 ]]; then
+                # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
+                MAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo)"))
+              fi
+              #print_output "[*] Max threads for dynamic version detection: $MAX_THREADS_S115"
+            fi
             MD5_DONE+=( "$BIN_MD5" )
-            if ( file "$FULL_BIN_PATH" | grep -q ELF ) && [[ "$BIN_" != './qemu-'*'-static' ]]; then
+            if ( file "$FULL_BIN_PATH" | grep -q "ELF.*executable" ) && [[ "$BIN_" != './qemu-'*'-static' ]]; then
               if ( file "$FULL_BIN_PATH" | grep -q "version\ .\ (FreeBSD)" ) ; then
                 # https://superuser.com/questions/1404806/running-a-freebsd-binary-on-linux-using-qemu-user
-                print_output "[-] No working emulator found for FreeBSD binary $BIN_"
+                print_output "[-] No working emulator found for FreeBSD binary $ORANGE$BIN_$NC."
                 EMULATOR="NA"
                 continue
               elif ( file "$FULL_BIN_PATH" | grep -q "x86-64" ) ; then
@@ -105,7 +116,13 @@ S115_usermode_emulator() {
               if [[ "$EMULATOR" != "NA" ]]; then
                 print_output "[*] Emulator used: $ORANGE$EMULATOR$NC"
                 prepare_emulator
-                emulate_binary
+                if [[ "$THREADED" -eq 1 ]]; then
+                  emulate_binary &
+                  WAIT_PIDS_S115_x+=( "$!" )
+                  max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115_x[@]}"
+                else
+                  emulate_binary
+                fi
               fi
             fi
             running_jobs
@@ -113,6 +130,10 @@ S115_usermode_emulator() {
         fi
       done
     done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_S115_x[@]}"
+    fi
 
     s115_cleanup
     running_jobs
@@ -122,7 +143,7 @@ S115_usermode_emulator() {
   else
     print_output ""
     print_output "[!] Automated emulation is disabled."
-    print_output "[!] Enable it with the -E switch."
+    print_output "[!] Enable it with the $ORANGE-E$NC switch."
   fi
 
   module_end_log "${FUNCNAME[0]}" "$QEMULATION"
@@ -134,7 +155,7 @@ print_filesystem_fixes() {
     print_output "[*] Emba has auto-generated the files during runtime."
     print_output "[*] For persistence you could generate it manually in your filesystem.\\n"
     for MISSING_FILE in "${MISSING[@]}"; do
-      print_output "[*] Missing file: $MISSING_FILE"
+      print_output "[*] Missing file: $ORANGE$MISSING_FILE$NC"
     done
   fi
 }
@@ -215,11 +236,11 @@ copy_firmware() {
     cp -pri "$FIRMWARE_PATH" "$LOG_DIR"/qemu_emulator/ 2> /dev/null
     EMULATION_DIR=$(basename "$FIRMWARE_PATH")
     EMULATION_PATH_BASE="$LOG_DIR"/qemu_emulator/"$EMULATION_DIR"
-    print_output "[*] Firmware backup for emulation created in $EMULATION_PATH_BASE"
+    print_output "[*] Firmware backup for emulation created in $ORANGE$EMULATION_PATH_BASE$NC"
   else
     EMULATION_DIR=$(basename "$FIRMWARE_PATH")
     EMULATION_PATH_BASE="$LOG_DIR"/"$EMULATION_DIR"
-    print_output "[*] Firmware used for emulation in $EMULATION_PATH_BASE"
+    print_output "[*] Firmware used for emulation in $ORANGE$EMULATION_PATH_BASE$NC"
   fi
 }
 
@@ -436,16 +457,16 @@ check_disk_space() {
 
 emulate_binary() {
   print_output ""
-  print_output "[*] Emulating binary: $ORANGE$BIN_$NC"
-  print_output "[*] Using root directory: $ORANGE$R_PATH$NC"
+  print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
+  print_output "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)"
   BIN_EMU_NAME=$(basename "$FULL_BIN_PATH")
   echo -e "[*] Emulating binary: $FULL_BIN_PATH" >> "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt"
   echo -e "[*] Emulating binary name: $BIN_EMU_NAME" >> "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt"
 
-  # letz assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
+  # lets assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
   # we are going to give all ELF files exec permissions to execute it in the emulator
   if ! [[ -x "$FULL_BIN_PATH" ]]; then
-    print_output "[*] Change permissions +x to $FULL_BIN_PATH"
+    print_output "[*] Change permissions +x to $ORANGE$FULL_BIN_PATH$NC."
     chmod +x "$FULL_BIN_PATH"
   fi
   emulate_strace_run
@@ -467,7 +488,7 @@ emulate_binary() {
   
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
-  killall -9 --quiet --older-than "$RUNTIME" -r .*qemu.*sta.*
+  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
   
   # reset the terminal - after all the uncontrolled emulation it is typically broken!
   reset

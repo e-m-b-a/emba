@@ -30,11 +30,6 @@ S09_firmware_base_version_check() {
   module_title "Binary firmware versions detection"
 
   EXTRACTOR_LOG="$LOG_DIR"/p05_firmware_bin_extractor.txt
-  if [[ "$THREADED" -eq 1 ]]; then
-    # a first try to not kill the system with too many version detection tasks
-    MAX_THREADS_S09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
-    print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
-  fi
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
@@ -73,6 +68,12 @@ S09_firmware_base_version_check() {
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
+        MAX_THREADS_S09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
+        if [[ $(grep -c S115_ "$LOG_DIR"/emba.log) -eq 1 ]]; then
+          MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo)"))
+        fi
+        #print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
+
         # this will burn the CPU but in most cases the time of testing is cut into half
         bin_string_checker &
         WAIT_PIDS_S09+=( "$!" )

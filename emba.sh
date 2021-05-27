@@ -175,6 +175,9 @@ main()
                                 # afterwards do a default emba scan
   export PYTHON_CHECK=1
   export QEMULATION=0
+  # to get rid of all the running stuff we are going to kill it after RUNTIME
+  export QRUNTIME="20s"
+
   export SHELLCHECK=1
   export SHORT_PATH=0           # short paths in cli output
   export THREADED=0             # 0 -> single thread

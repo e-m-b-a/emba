@@ -489,8 +489,12 @@ aggregate_versions() {
   # sorting and unique our versions array:
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ -f "$LOG_DIR"/aggregator/versions.tmp ]]; then
-    mapfile -t VERSIONS_CLEANED < <(sort -u "$LOG_DIR"/aggregator/versions.tmp)
-    rm "$LOG_DIR"/aggregator/versions.tmp 2>/dev/null
+    # on old kernels it takes a huge amount of time to query all kernel CVE's. So, we move the kernel entry to the begin of our versions array
+    KERNEL=$(grep kernel "$LOG_DIR"/aggregator/versions.tmp)
+    grep -v kernel "$LOG_DIR"/aggregator/versions.tmp | sort -u > "$LOG_DIR"/aggregator/versions1.tmp
+    sed -i "1s/^/$KERNEL\n/" "$LOG_DIR"/aggregator/versions1.tmp
+    mapfile -t VERSIONS_CLEANED < <(cat "$LOG_DIR"/aggregator/versions1.tmp)
+    rm "$LOG_DIR"/aggregator/versions*.tmp 2>/dev/null
 
     # leave this here for debugging reasons
     #if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
