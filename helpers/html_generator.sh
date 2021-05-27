@@ -35,6 +35,7 @@ HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
 LINK="<a href=\"LINK\" target=\"\_blank\" >"
 LOCAL_LINK="<a class=\"local\" href=\"LINK\">"
+REFERENCE_LINK="<a class=\"reference\" href=\"LINK\">"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" target=\"\_blank\" >"
 CVE_LINK="<a href=\"https://cve.mitre.org/cgi-bin/cvename.cgi?name=LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\">"
@@ -79,7 +80,7 @@ add_link_tags() {
         # generate reference file
         if [[ $(generate_info_file "$REF_LINK" "$BACK_LINK") -eq 1 ]] ; then
           LINE_NUMBER_INFO_PREV=$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)
-          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1 )/$(basename "${REF_LINK%.txt}").html@g")"
+          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1 )/$(basename "${REF_LINK%.txt}").html@g")"
           sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; ""$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
         fi
       fi

@@ -87,15 +87,10 @@ pre {
 
 pre a {
   font-weight: bold;
-  background-size: 100% 200%;
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, #a2a2a2 50%);
-  -webkit-transition: background-position 1s;
-  -moz-transition: background-position 1s;
-  transition: background-position 0.1s;
 }
 
 pre a:hover {
-  background-position: 0 100%;
+  background-color: rgb(104, 104, 104);
 }
 
 .back {
@@ -134,6 +129,23 @@ pre a:hover {
 
 .local {
   color: #beec18;
+}
+
+.reference {
+  padding-right: 20px;
+  display: inline-block;
+  background-color: #333;
+  width: 100%;
+  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-position: top right;
+  background-size: 15px 35px;
+  background-repeat: no-repeat;
+  text-decoration: none;
+}
+
+.reference:hover {
+  background: linear-gradient(45deg, transparent 75%, #beec18 75%);
+  background-size: 15px 35px;
 }
 
 .logo {
