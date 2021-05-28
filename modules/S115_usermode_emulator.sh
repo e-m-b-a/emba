@@ -57,12 +57,12 @@ S115_usermode_emulator() {
     for R_PATH in "${ROOT_PATH[@]}" ; do
       BIN_CNT=0
       ((ROOT_CNT=ROOT_CNT+1))
-      print_output "[*] Running emulation processes in $ORANGE$R_PATH$NC root path ..."
+      print_output "[*] Running emulation processes in $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
 
       DIR=$(pwd)
       mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null && cd "$DIR" || exit)
 
-      print_output "[*] Found $ORANGE${#BIN_EMU[@]}$NC unique executables in root dirctory: $ORANGE$R_PATH$NC."
+      print_output "[*] Found $ORANGE${#BIN_EMU[@]}$NC unique executables in root dirctory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
 
       for BIN_ in "${BIN_EMU[@]}" ; do
         ((BIN_CNT=BIN_CNT+1))

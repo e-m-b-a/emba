@@ -23,6 +23,8 @@ S11_weak_func_check()
   module_title "Check binaries for weak functions (intense)"
 
   LOG_FILE="$( get_log_file )"
+  LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
+  mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
 
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
@@ -81,7 +83,7 @@ function_check_PPC32(){
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -115,7 +117,7 @@ function_check_MIPS32() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -146,7 +148,7 @@ function_check_ARM64() {
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -177,7 +179,7 @@ function_check_ARM32() {
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -208,7 +210,7 @@ function_check_x86() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -239,7 +241,7 @@ function_check_x86_64() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -258,11 +260,11 @@ function_check_x86_64() {
 }
 
 print_top10_statistics() {
-  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$(find "$LOG_DIR"/"$LOG_DIR_MOD"/ -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM
       local F_COUNTER
-      readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS < <( find "$LOG_DIR"/"$LOG_DIR_MOD"/ -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
@@ -291,7 +293,7 @@ print_top10_statistics() {
 output_function_details()
 {
   local LOG_FILE_LOC
-  LOG_FILE_LOC="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+  LOG_FILE_LOC="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
 
   #check if this is common linux file:
   local COMMON_FILES_FOUND
@@ -325,6 +327,6 @@ output_function_details()
     fi
   fi
 
-  mv "$LOG_FILE_LOC" "$LOG_DIR""/vul_func_checker/vul_func_""$COUNT_FUNC""_""$FUNCTION""-""$NAME"".txt" 2> /dev/null
+  mv "$LOG_FILE_LOC" "$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt 2> /dev/null
 }
 
