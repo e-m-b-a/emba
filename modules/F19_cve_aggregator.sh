@@ -496,7 +496,7 @@ aggregate_versions() {
       sed -i "1s/^/$KERNEL\n/" "$LOG_DIR"/aggregator/versions1.tmp
     done
     mapfile -t VERSIONS_CLEANED < <(cat "$LOG_DIR"/aggregator/versions1.tmp)
-    #rm "$LOG_DIR"/aggregator/versions*.tmp 2>/dev/null
+    rm "$LOG_DIR"/aggregator/versions*.tmp 2>/dev/null
 
     # leave this here for debugging reasons
     #if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
