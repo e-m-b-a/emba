@@ -34,7 +34,6 @@ S115_usermode_emulator() {
     KILL_SIZE="50M"
 
     declare -a MISSING
-    declare -a MD5_DONE
     ROOT_CNT=0
 
     ## load blacklist of binaries that could cause troubles during emulation:
@@ -54,15 +53,30 @@ S115_usermode_emulator() {
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
     done
 
+    # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
+    MD5_DONE_INT=()
     for R_PATH in "${ROOT_PATH[@]}" ; do
       BIN_CNT=0
       ((ROOT_CNT=ROOT_CNT+1))
       print_output "[*] Running emulation processes in $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU_TMP < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file {} \; 2>/dev/null | grep "ELF.*executable" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "$DIR" || exit)
+      # we re-create the BIN_EMU array with all unique binaries for every root directory
+      # as we have all tested MD5s in MD5_DONE_INT (for all root dirs) we test every bin only once
+      BIN_EMU=()
 
-      print_output "[*] Found $ORANGE${#BIN_EMU[@]}$NC unique executables in root dirctory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
+      print_output "[*] Create unique binary array for $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
+      for BINARY in "${BIN_EMU_TMP[@]}"; do
+        # we emulate every binary only once. So calculate the checksum and store it for checking
+        BIN_MD5_=$(md5sum "$R_PATH"/"$BINARY" | cut -d\  -f1)
+        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5_} ]]; then
+          BIN_EMU+=( "$BINARY" )
+          MD5_DONE_INT+=( "$BIN_MD5_" )
+        fi
+      done
+
+      print_output "[*] Testing $ORANGE${#BIN_EMU[@]}$NC unique executables in root dirctory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
 
       for BIN_ in "${BIN_EMU[@]}" ; do
         ((BIN_CNT=BIN_CNT+1))
@@ -71,62 +85,53 @@ S115_usermode_emulator() {
           print_output "[!] Blacklist triggered ... $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
           continue
         else
-          # we check every binary only once. So calculate the checksum and store it for checking
-          BIN_MD5=$(md5sum "$FULL_BIN_PATH" | cut -d\  -f1)
-          if [[ " ${MD5_DONE[*]} " =~ ${BIN_MD5} ]]; then
-            print_output "[*] Binary $ORANGE$BIN_$NC was already tested ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
-            continue
-          else
-            if [[ "$THREADED" -eq 1 ]]; then
-              # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
-              MAX_THREADS_S115=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
-              if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
-                # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
-                MAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo)"))
-              fi
-              #print_output "[*] Max threads for dynamic version detection: $MAX_THREADS_S115"
+          if [[ "$THREADED" -eq 1 ]]; then
+            # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
+            MAX_THREADS_S115=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
+            if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+              # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
+              MAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo)"))
             fi
-            MD5_DONE+=( "$BIN_MD5" )
-            if ( file "$FULL_BIN_PATH" | grep -q "ELF.*executable" ) && [[ "$BIN_" != './qemu-'*'-static' ]]; then
-              if ( file "$FULL_BIN_PATH" | grep -q "version\ .\ (FreeBSD)" ) ; then
-                # https://superuser.com/questions/1404806/running-a-freebsd-binary-on-linux-using-qemu-user
-                print_output "[-] No working emulator found for FreeBSD binary $ORANGE$BIN_$NC."
-                EMULATOR="NA"
-                continue
-              elif ( file "$FULL_BIN_PATH" | grep -q "x86-64" ) ; then
-                EMULATOR="qemu-x86_64-static"
-              elif ( file "$FULL_BIN_PATH" | grep -q "Intel 80386" ) ; then
-                EMULATOR="qemu-i386-static"
-              elif ( file "$FULL_BIN_PATH" | grep -q "32-bit LSB.*ARM" ) ; then
-                EMULATOR="qemu-arm-static"
-              elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*ARM" ) ; then
-                EMULATOR="qemu-armeb-static"
-              elif ( file "$FULL_BIN_PATH" | grep -q "32-bit LSB.*MIPS" ) ; then
-                EMULATOR="qemu-mipsel-static"
-              elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*MIPS" ) ; then
-                EMULATOR="qemu-mips-static"
-              elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*PowerPC" ) ; then
-                EMULATOR="qemu-ppc-static"
-              else
-                print_output "[-] No working emulator found for $BIN_"
-                EMULATOR="NA"
-                continue
-              fi
-    
-              if [[ "$EMULATOR" != "NA" ]]; then
-                print_output "[*] Emulator used: $ORANGE$EMULATOR$NC"
-                prepare_emulator
-                if [[ "$THREADED" -eq 1 ]]; then
-                  emulate_binary &
-                  WAIT_PIDS_S115_x+=( "$!" )
-                  max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115_x[@]}"
-                else
-                  emulate_binary
-                fi
-              fi
-            fi
-            running_jobs
           fi
+          if [[ "$BIN_" != './qemu-'*'-static' ]]; then
+            if ( file "$FULL_BIN_PATH" | grep -q "version\ .\ (FreeBSD)" ) ; then
+              # https://superuser.com/questions/1404806/running-a-freebsd-binary-on-linux-using-qemu-user
+              print_output "[-] No working emulator found for FreeBSD binary $ORANGE$BIN_$NC."
+              EMULATOR="NA"
+              continue
+            elif ( file "$FULL_BIN_PATH" | grep -q "x86-64" ) ; then
+              EMULATOR="qemu-x86_64-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "Intel 80386" ) ; then
+              EMULATOR="qemu-i386-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "32-bit LSB.*ARM" ) ; then
+              EMULATOR="qemu-arm-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*ARM" ) ; then
+              EMULATOR="qemu-armeb-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "32-bit LSB.*MIPS" ) ; then
+              EMULATOR="qemu-mipsel-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*MIPS" ) ; then
+              EMULATOR="qemu-mips-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*PowerPC" ) ; then
+              EMULATOR="qemu-ppc-static"
+            else
+              print_output "[-] No working emulator found for $BIN_"
+              EMULATOR="NA"
+              continue
+            fi
+
+            if [[ "$EMULATOR" != "NA" ]]; then
+              print_output "[*] Emulator used: $ORANGE$EMULATOR$NC"
+              prepare_emulator
+              if [[ "$THREADED" -eq 1 ]]; then
+                emulate_binary &
+                WAIT_PIDS_S115_x+=( "$!" )
+                max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115_x[@]}"
+              else
+                emulate_binary
+              fi
+            fi
+          fi
+          running_jobs
         fi
       done
     done
@@ -451,6 +456,7 @@ check_disk_space() {
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
       print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
       pkill -f "$EMULATOR.*$KILLER.*"
+      rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
     fi
   done
 }
@@ -479,7 +485,11 @@ emulate_binary() {
   fi
   
   for PARAM in "${EMULATION_PARAMS[@]}"; do
-    print_output "[*] Trying to emulate binary ${GREEN}""$BIN_""${NC} with parameter ""$PARAM"
+    if [[ -z "$PARAM" ]]; then
+      print_output "[*] Trying to emulate binary ${GREEN}$BIN_${NC} with no parameter"
+    else
+      print_output "[*] Trying to emulate binary ${GREEN}$BIN_${NC} with parameter $PARAM"
+    fi
     echo -e "[*] Trying to emulate binary $BIN_ with parameter $PARAM" >> "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt"
     chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_DIR""/qemu_emulator/qemu_""$BIN_EMU_NAME"".txt" &
     print_output ""

@@ -85,7 +85,8 @@ cleaner() {
   # now we can unmount the stuff from emulator and delete temporary stuff
 
   # if S115 is found only once in main.log the module was started and we have to clean it up
-  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+  # additionally we need to check some variable from a running emba instance
+  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" && "${#FILE_ARR[@]}" -gt 0 ]]; then
     if [[ $(grep -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu.*sta.*

@@ -25,6 +25,9 @@ S11_weak_func_check()
   LOG_FILE="$( get_log_file )"
   LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
   mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
+  if ! [[ -d "$TMP_DIR" ]]; then
+    mkdir "$TMP_DIR"
+  fi
 
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
@@ -42,25 +45,65 @@ S11_weak_func_check()
       #"$OBJDUMP" -d "$LINE" > "$OBJDUMP_LOG"
 
       if ( file "$LINE" | grep -q "x86-64" ) ; then
-        function_check_x86_64
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_x86_64 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_x86_64
+        fi
       elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-        function_check_x86
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_x86 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_x86
+        fi
       elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
-        function_check_ARM32
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_ARM32 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_ARM32
+        fi
       elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
         # ARM 64 code is in alpha state and nearly not tested!
-        function_check_ARM64
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_ARM64 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_ARM64
+        fi
       elif ( file "$LINE" | grep -q "MIPS" ) ; then
-        function_check_MIPS32
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_MIPS32 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_MIPS32
+        fi
       elif ( file "$LINE" | grep -q "PowerPC" ) ; then
-        function_check_PPC32
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_PPC32 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_PPC32
+        fi
       else
         print_output "[-] Something went wrong ... no supported architecture available"
       fi
     fi
   done
 
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S11[@]}"
+  fi
+
   print_top10_statistics
+
+  if [[ -f "$TMP_DIR"/S11_STRCPY_CNT.tmp ]]; then
+    while read -r STRCPY; do
+      (( STRCPY_CNT="$STRCPY_CNT"+"$STRCPY" ))
+    done < "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  fi
 
   # shellcheck disable=SC2129
   echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
@@ -99,6 +142,7 @@ function_check_PPC32(){
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_MIPS32() {
@@ -134,6 +178,7 @@ function_check_MIPS32() {
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_ARM64() {
@@ -165,6 +210,7 @@ function_check_ARM64() {
       output_function_details
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_ARM32() {
@@ -195,6 +241,7 @@ function_check_ARM32() {
       output_function_details
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_x86() {
@@ -226,6 +273,7 @@ function_check_x86() {
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_x86_64() {
@@ -257,10 +305,11 @@ function_check_x86_64() {
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 print_top10_statistics() {
-  if [[ "$(find "$LOG_DIR"/"$LOG_DIR_MOD"/ -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$(find "$LOG_DIR"/"$LOG_DIR_MOD"/ -xdev -iname "vul_func_*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM
       local F_COUNTER
