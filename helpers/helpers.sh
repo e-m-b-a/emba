@@ -22,7 +22,7 @@ run_web_reporter_mod_name() {
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
     for LOG_FILE in "${LOG_FILES[@]}"; do
       generate_report_file "$LOG_FILE"
-      #sed -i -E '/^\[REF\].*/d' "$LOG_FILE"
+      sed -i -E '/^\[REF\].*/d' "$LOG_FILE"
     done
   fi
 }
