@@ -200,10 +200,8 @@ write_link()
   if [[ $HTML -eq 1 ]] ; then
     local LINK
     LINK="$1"
-    if [[ -f "$LINK" ]] && [[ -f "$LOG_FILE" ]]; then
-      LINK="$(format_log "[REF] ""$LINK" 1)"
-      echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
-    fi
+    LINK="$(format_log "[REF] ""$LINK" 1)"
+    echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
   fi
 }
 

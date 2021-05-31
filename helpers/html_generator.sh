@@ -93,7 +93,6 @@ add_link_tags() {
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           # add linked image
           LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
-          echo "x""$LINE_NUMBER_INFO_PREV""x" > "$LOG_DIR""/test.txt"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")"
           IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
           sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
@@ -102,11 +101,15 @@ add_link_tags() {
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
-        HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
+        MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
+        HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@")"
         while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE" )" == "$P_START$SPAN_END$P_END" ]] ; do 
           LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
         done
         sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
+      else
+        LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+        sed -i -E -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
       fi
     done
   fi
