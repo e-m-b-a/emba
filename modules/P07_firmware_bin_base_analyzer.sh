@@ -15,7 +15,6 @@
 
 # Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, uC/OS and Linux. 
 #               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
-# Todo: Cleanup and optimise function os_identification - currently it has too many code duplicates!
 
 P07_firmware_bin_base_analyzer() {
 

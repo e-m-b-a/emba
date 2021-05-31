@@ -196,7 +196,6 @@ output_binaries() {
   final_cwe_log "$TOTAL_CWE_CNT"
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
-
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
   fi
 

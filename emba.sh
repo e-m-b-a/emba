@@ -335,6 +335,7 @@ main()
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
+  check_init_size
 
   # Now we have the firmware and log path, lets set some additional paths
   FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
@@ -352,7 +353,7 @@ main()
     print_output "    Emba starts with testing the environment." "no_log"
     if [[ $IN_DOCKER -eq 0 ]] ; then
       # in docker environment the firmware is already available
-      print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""" "no_log"
+      print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""$NC" "no_log"
       cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       OUTPUT_DIR="$FIRMWARE_PATH_CP"
