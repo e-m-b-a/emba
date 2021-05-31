@@ -39,7 +39,8 @@ P02_firmware_bin_file_check() {
     write_link "./pixd.png"
     "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/p02_pixd.txt
     print_output ""
-    #python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 20
+    python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null
+    write_link "$LOG_DIR"/pixd.png
   fi
 
   module_end_log "${FUNCNAME[0]}" 1

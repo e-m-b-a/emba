@@ -452,10 +452,11 @@ check_disk_space() {
 }
 
 emulate_binary() {
+  BIN_EMU_NAME=$(basename "$FULL_BIN_PATH")
   print_output ""
   print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
+  write_link "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
   print_output "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)"
-  BIN_EMU_NAME=$(basename "$FULL_BIN_PATH")
   echo -e "[*] Emulating binary: $FULL_BIN_PATH" >> "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
   echo -e "[*] Emulating binary name: $BIN_EMU_NAME" >> "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
 
@@ -476,7 +477,6 @@ emulate_binary() {
   
   for PARAM in "${EMULATION_PARAMS[@]}"; do
     print_output "[*] Trying to emulate binary ${GREEN}""$BIN_""${NC} with parameter ""$PARAM"
-    write_link "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
     echo -e "[*] Trying to emulate binary $BIN_ with parameter $PARAM" >> "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
     chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt" &
     print_output ""

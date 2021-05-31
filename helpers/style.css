@@ -150,6 +150,25 @@ pre a:hover {
   background-repeat: no-repeat;
 }
 
+.refmodul {
+  padding-right: 20px;
+  display: inline-block;
+  background-color: #333;
+  width: 100%;
+  background: linear-gradient(45deg, transparent 75%, #777 75%);
+  background-position: top right;
+  background-size: 15px 35px;
+  background-repeat: no-repeat;
+  text-decoration: none;
+}
+
+.refmodul:hover {
+  background: linear-gradient(45deg, transparent 75%, #eca218 75%);
+  background-position: top right;
+  background-size: 15px 35px;
+  background-repeat: no-repeat;
+}
+
 .logo {
   background-color:#fff;
   padding:5%;
@@ -229,9 +248,9 @@ pre a:hover {
   width:50px;
 }
 
-#entropy {
+.image {
   margin:15px 0;
-  max-width:567px;
+  max-width:640px;
   width:100%;
 }
 

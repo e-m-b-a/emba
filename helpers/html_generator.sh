@@ -36,6 +36,7 @@ BR="<br />"
 LINK="<a href=\"LINK\" target=\"\_blank\" >"
 LOCAL_LINK="<a class=\"local\" href=\"LINK\">"
 REFERENCE_LINK="<a class=\"reference\" href=\"LINK\">"
+REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\">"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" target=\"\_blank\" >"
 CVE_LINK="<a href=\"https://cve.mitre.org/cgi-bin/cvename.cgi?name=LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\">"
@@ -43,7 +44,7 @@ MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\">"
 SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\">"
 ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
-ENTROPY_IMAGE="<img id=\"entropy\" src=\".$STYLE_PATH/entropy.png\">"
+IMAGE="<img class=\"image\" src=\".$STYLE_PATH/PICTURE\">"
 
 add_color_tags()
 {
@@ -79,11 +80,29 @@ add_link_tags() {
     readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
     for REF_LINK in "${REF_LINKS[@]}" ; do
       if [[ -f "$REF_LINK" ]] ; then
-        # generate reference file
-        generate_info_file "$REF_LINK" "$BACK_LINK" &
+        if [[ "${REF_LINK: -4}" == ".txt" ]] ; then
+          # generate reference file
+          generate_info_file "$REF_LINK" "$BACK_LINK" &
+          LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+          LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
+          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
+          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" $LINK_FILE )" == "$P_START$SPAN_END$P_END" ]] ; do 
+            LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
+          done
+          sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
+        elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
+          # add linked image
+          LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+          echo "x""$LINE_NUMBER_INFO_PREV""x" > "$LOG_DIR""/test.txt"
+          cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")"
+          IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
+          sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
+        fi
+      elif [[ "$REF_LINK" =~ "^(p|r|s|f){1}[0-9]{2,3}$" ]] ; then
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
-        HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
+        readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
+        HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
         while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" $LINK_FILE )" == "$P_START$SPAN_END$P_END" ]] ; do 
           LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
         done
@@ -248,19 +267,6 @@ generate_report_file()
     # also parsing for [REF] anchor and generate linked files and link it
     add_link_tags "$TMP_FILE" "$HTML_FILE"
 
-    # check for images
-    LINE_NUMBER_ENTROPY=$(grep -n "*_visual.png" "$TMP_FILE" | cut -d ":" -f 1)
-  if [[ -n "$LINE_NUMBER_ENTROPY" ]] ; then 
-    readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
-    for IMAGE in "${ENTROPY_IMAGES_ARR[@]}" ; do
-      if [[ -f "$IMAGE" ]] ; then
-        cp "$IMAGE" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"
-        sed -i "$((LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$ABS_HTML_PATH""/""$INDEX_FILE"
-        ((LINE_NUMBER_ENTROPY++))
-      fi
-    done
-  fi
-
     # add content of temporary html into template
     sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
     # add aggregator lines to index page
@@ -316,10 +322,10 @@ update_index()
         cp "$IMAGE" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"
         sed -i "$((LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$ABS_HTML_PATH""/""$INDEX_FILE"
         ((LINE_NUMBER_ENTROPY++))
-      fi
+      fi #PICTURE
     done
   fi
-  rm -R "$ABS_HTML_PATH$TEMP_PATH"
+  #rm -R "$ABS_HTML_PATH$TEMP_PATH"
 }
 
 prepare_report()

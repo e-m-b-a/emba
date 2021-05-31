@@ -180,7 +180,7 @@ dependency_check()
     check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
 
     # pixd image
-    #check_dep_file "pixd image renderer" "$EXT_DIR""/pixd_png.py"
+    check_dep_file "pixd image renderer" "$EXT_DIR""/pixd_png.py"
 
     # CVE and CVSS databases
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
