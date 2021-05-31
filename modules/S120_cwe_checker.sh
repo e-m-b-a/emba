@@ -26,6 +26,8 @@ S120_cwe_checker()
   module_title "Check binaries with cwe-checker"
 
   LOG_FILE="$( get_log_file )"
+  LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
+  mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
 
   if [[ $CWE_CHECKER -eq 1 ]] ; then
     cwe_check
@@ -47,7 +49,7 @@ cwe_check() {
     if ( file "$LINE" | grep -q ELF ) ; then
       NAME=$(basename "$LINE")
       LINE=$(readlink -f "$LINE")
-      readarray -t TEST_OUTPUT < <( docker run --rm -v "$LINE":/tmp/input fkiecad/cwe_checker /tmp/input | tee -a "$LOG_DIR"/cwe_checker/cwe_"$NAME".log )
+      readarray -t TEST_OUTPUT < <( docker run --rm -v "$LINE":/tmp/input fkiecad/cwe_checker /tmp/input | tee -a "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_"$NAME".log )
       if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then
         print_output "[*] ""$(print_path "$LINE")"
       fi
@@ -59,7 +61,7 @@ cwe_check() {
         fi
       done
 
-      mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_DIR"/cwe_checker/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+      mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
 
       # this is the logging after every tested file
       if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
@@ -68,7 +70,7 @@ cwe_check() {
         for CWE_LINE in "${CWE_OUT[@]}"; do
           CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
           CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-          CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/cwe_checker/cwe_"$NAME".log 2>/dev/null)"
+          CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_"$NAME".log 2>/dev/null)"
           (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
           print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
         done
@@ -81,8 +83,8 @@ cwe_check() {
 final_cwe_log() {
   TOTAL_CWE_CNT="$1"
 
-  if [[ -d "$LOG_DIR""/cwe_checker" ]]; then
-    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/cwe_checker/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+  if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
+    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
     print_output ""
     if [[ ${#CWE_OUT[@]} -eq 0 ]] ; then
       print_output "[-] cwe-checker found 0 security issues."
@@ -91,7 +93,7 @@ final_cwe_log() {
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(cat "$LOG_DIR"/cwe_checker/cwe_*.log 2>/dev/null | grep -c "$CWE")"
+        CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE")"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
     fi
