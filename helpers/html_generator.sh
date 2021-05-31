@@ -86,7 +86,7 @@ add_link_tags() {
           LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
           HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
-          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" $LINK_FILE )" == "$P_START$SPAN_END$P_END" ]] ; do 
+          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE" )" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
@@ -98,12 +98,12 @@ add_link_tags() {
           IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
           sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
         fi
-      elif [[ "$REF_LINK" =~ "^(p|r|s|f){1}[0-9]{2,3}$" ]] ; then
+      elif [[ "$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ]] ; then
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
         HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
-        while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" $LINK_FILE )" == "$P_START$SPAN_END$P_END" ]] ; do 
+        while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE" )" == "$P_START$SPAN_END$P_END" ]] ; do 
           LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
         done
         sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"

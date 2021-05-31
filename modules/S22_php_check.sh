@@ -20,8 +20,6 @@ S22_php_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check php scripts for syntax errors"
 
-  LOG_FILE="$( get_log_file )"
-
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
 

@@ -20,8 +20,6 @@ S21_python_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check python scripts with pylint"
 
-  LOG_FILE="$( get_log_file )"
-
   S21_PY_VULNS=0
   S21_PY_SCRIPTS=0
 

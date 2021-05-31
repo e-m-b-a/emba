@@ -27,7 +27,6 @@ S25_kernel_check()
 
   KERNEL_VERSION=()
   KERNEL_DESC=()
-  LOG_FILE="$( get_log_file )"
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
 
@@ -85,10 +84,10 @@ S25_kernel_check()
 
   if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
     for LINE in "${KV_C_ARR[@]}" ; do
-      echo "[*] Statistics:$LINE" >> "$LOG_FILE"
+      write_log "[*] Statistics:$LINE"
     done
   fi
-  echo "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD" >> "$LOG_FILE"
+  write_log "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD"
 
   module_end_log "${FUNCNAME[0]}" "${#KERNEL_VERSION[@]}"
 }

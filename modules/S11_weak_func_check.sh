@@ -23,11 +23,6 @@ S11_weak_func_check()
   module_title "Check binaries for weak functions (intense)"
 
   LOG_FILE="$( get_log_file )"
-  LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
-  mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
-  if ! [[ -d "$TMP_DIR" ]]; then
-    mkdir "$TMP_DIR"
-  fi
 
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
