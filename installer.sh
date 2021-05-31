@@ -349,10 +349,12 @@ case ${ANSWER:0:1} in
     download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
     download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
     ### pixd installation
-    git clone https://github.com/FireyFly/pixd external/pixd
+    pip3 install pillow
+    git clone https://github.com/p4cx/pixd_image external/pixd
     cd ./external/pixd/ || exit 1
     make
     mv pixd ../pixde
+    mv pixd_png.py ../pixd_png.py
     cd ../../ || exit 1
     rm -r ./external/pixd/
     ### pixd installation

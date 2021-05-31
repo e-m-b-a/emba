@@ -76,19 +76,14 @@ add_link_tags() {
 
   # [REF] anchor 
   if ( grep -q -E '\[REF\]' "$LINK_FILE" ) ; then
-    readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1 | sort -u)
+    readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
     for REF_LINK in "${REF_LINKS[@]}" ; do
       if [[ -f "$REF_LINK" ]] ; then
         # generate reference file
-        if [[ "$THREADED" -eq 1 ]]; then
-          generate_info_file "$REF_LINK" "$BACK_LINK" &
-          WAIT_PIDS_WR+=( "$!" )
-        else
-          generate_info_file "$REF_LINK" "$BACK_LINK"
-        fi
+        generate_info_file "$REF_LINK" "$BACK_LINK" &
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
-        HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@g")"
+        HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
         while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" $LINK_FILE )" == "$P_START$SPAN_END$P_END" ]] ; do 
           LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
         done
@@ -107,12 +102,7 @@ add_link_tags() {
         EXPLOIT_FILE="$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
-          if [[ "$THREADED" -eq 1 ]]; then
-            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
-            WAIT_PIDS_WR+=( "$!" )
-          else
-            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
-          fi
+          generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
           sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
         else
@@ -132,10 +122,6 @@ add_link_tags() {
         sed -i -E "s@$CVE_ID([^[:digit:]]{1})@$HTML_LINK\1@g" "$LINK_FILE"
       fi
     done
-  fi
-
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_WR[@]}"
   fi
 }
 
@@ -261,6 +247,19 @@ generate_report_file()
     # add link tags to links/generate info files and link to them and write line to tmp file
     # also parsing for [REF] anchor and generate linked files and link it
     add_link_tags "$TMP_FILE" "$HTML_FILE"
+
+    # check for images
+    LINE_NUMBER_ENTROPY=$(grep -n "*_visual.png" "$TMP_FILE" | cut -d ":" -f 1)
+  if [[ -n "$LINE_NUMBER_ENTROPY" ]] ; then 
+    readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
+    for IMAGE in "${ENTROPY_IMAGES_ARR[@]}" ; do
+      if [[ -f "$IMAGE" ]] ; then
+        cp "$IMAGE" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"
+        sed -i "$((LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$ABS_HTML_PATH""/""$INDEX_FILE"
+        ((LINE_NUMBER_ENTROPY++))
+      fi
+    done
+  fi
 
     # add content of temporary html into template
     sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
