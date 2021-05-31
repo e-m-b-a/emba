@@ -26,9 +26,6 @@ S21_python_check()
   S21_PY_SCRIPTS=0
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
-    if ! [[ -d "$LOG_DIR""/pylint_checker/" ]] ; then
-      mkdir "$LOG_DIR""/pylint_checker/" 2> /dev/null
-    fi
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
@@ -54,7 +51,8 @@ S21_python_check()
 
     print_output ""
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
-    echo -e "\\n[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS" >> "$LOG_FILE"
+    write_log ""
+    write_log "[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS"
 
     # we just print one issue per issue type:
     # W1505: Using deprecated method assert_() (deprecated-method)
@@ -62,7 +60,7 @@ S21_python_check()
     # W1505: Using deprecated method splitunc() (deprecated-method)
     # -> we only print one W1505
 
-    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "$LOG_DIR"/pylint_checker/pylint_* 2>/dev/null | cut -d: -f5- | sort -u -t: -k1,1)
+    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "$LOG_PATH_MODULE"/pylint_* 2>/dev/null | cut -d: -f5- | sort -u -t: -k1,1)
     for VTYPE in "${S21_VULN_TYPES[@]}" ; do
       print_output "$(indent "$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""$GREEN")"
     done
@@ -74,7 +72,7 @@ S21_python_check()
 
 s21_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-  PY_LOG="$LOG_DIR""/pylint_checker/pylint_""$NAME"".txt"
+  PY_LOG="$LOG_PATH_MODULE""/pylint_""$NAME"".txt"
   pylint "$LINE" > "$PY_LOG" 2> /dev/null
   VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
   if [[ "$VULNS" -ne 0 ]] ; then
@@ -91,8 +89,10 @@ s21_script_check() {
 
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+      write_link "$PY_LOG"
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+      write_link "$PY_LOG"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi

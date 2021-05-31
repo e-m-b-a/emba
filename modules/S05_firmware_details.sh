@@ -30,21 +30,11 @@ S05_firmware_details()
   
   print_output "[*] $ORANGE${#FILE_ARR[@]}$NC files and $ORANGE$DETECTED_DIR$NC directories detected."
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    filesystem_tree &
-    WAIT_PIDS_S05+=( "$!" )
-    release_info &
-    WAIT_PIDS_S05+=( "$!" )
-  else
-    filesystem_tree
-    release_info
-  fi
+  release_info
+  filesystem_tree
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S05[@]}"
-  fi
-
-  echo -e "\\n[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR"
 
   module_end_log "${FUNCNAME[0]}" "${#FILE_ARR[@]}"
 }

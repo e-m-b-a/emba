@@ -126,6 +126,11 @@ print_output()
 write_log()
 {
   readarray TEXT_ARR <<< "$1"
+  if [[ "$2" == "" ]] ; then
+    W_LOG_FILE="$LOG_FILE"
+  else
+    W_LOG_FILE="$2"
+  fi
 
   for E in "${TEXT_ARR[@]}" ; do
     local TYPE_CHECK
@@ -133,9 +138,9 @@ write_log()
     if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
       local COLOR_OUTPUT_STRING
       COLOR_OUTPUT_STRING="$(color_output "$E")"
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$2" >/dev/null
+      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$W_LOG_FILE" >/dev/null
     else
-      echo -e "$(format_log "$E")" | tee -a "$2" >/dev/null
+      echo -e "$(format_log "$E")" | tee -a "$W_LOG_FILE" >/dev/null
     fi
   done
   if [[ "$3" == "g" ]] ; then

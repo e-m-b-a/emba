@@ -35,7 +35,6 @@ S11_weak_func_check()
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
-      #local OBJDUMP_LOG="$LOG_DIR""/objdumps/objdump_""$NAME".txt
       # create disassembly of every binary file:
       #"$OBJDUMP" -d "$LINE" > "$OBJDUMP_LOG"
 
@@ -61,8 +60,10 @@ S11_weak_func_check()
   print_top10_statistics
 
   # shellcheck disable=SC2129
-  echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
-  echo -e "\\n[*] Statistics1:$ARCH" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:$STRCPY_CNT"
+  write_log ""
+  write_log "[*] Statistics1:$ARCH"
 
   module_end_log "${FUNCNAME[0]}" "${#RESULTS[@]}"
 }

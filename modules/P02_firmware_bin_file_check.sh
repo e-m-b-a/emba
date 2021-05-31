@@ -36,7 +36,7 @@ P02_firmware_bin_file_check() {
   print_output ""
   if [[ -x "$EXT_DIR"/pixde ]]; then
     print_output "[*] Visualized firmware file (first 2000 bytes):"
-    "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/P02_pixd.txt
+    "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/p02_pixd.txt
     print_output ""
   fi
 

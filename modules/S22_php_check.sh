@@ -26,9 +26,6 @@ S22_php_check()
   S22_PHP_SCRIPTS=0
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
-    if ! [[ -d "$LOG_DIR""/php_checker/" ]] ; then
-      mkdir "$LOG_DIR""/php_checker/" 2> /dev/null
-    fi
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PHP_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "PHP script" ) ; then
@@ -54,7 +51,8 @@ S22_php_check()
 
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
-    echo -e "\\n[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS" >> "$LOG_FILE"
+    write_log ""
+    write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"
@@ -64,7 +62,7 @@ S22_php_check()
 
 s22_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-  PHP_LOG="$LOG_DIR""/php_checker/php_""$NAME"".txt"
+  PHP_LOG="$LOG_PATH_MODULE""/php_""$NAME"".txt"
   php -l "$LINE" > "$PHP_LOG" 2>&1
   VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null)
   if [[ "$VULNS" -ne 0 ]] ; then
@@ -79,6 +77,7 @@ s22_script_check() {
       COMMON_FILES_FOUND=""
     fi
     print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+    write_link "$PHP_LOG"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   fi
 }
