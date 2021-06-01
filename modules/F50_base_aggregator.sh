@@ -42,7 +42,7 @@ F50_base_aggregator() {
   S120_LOG="s120_cwe_checker.txt"
 
   LOG_FILE="$( get_log_file )"
-  CSV_LOG_FILE="$LOG_DIR"/"$(basename -s .txt $( get_log_file )).csv"
+  CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$( get_log_file )")".csv
 
   get_data
   output_overview
@@ -229,11 +229,14 @@ output_binaries() {
       echo "stripped;\"$STRIPPED\"" >> "$CSV_LOG_FILE"
       echo "stripped_per;\"$STRIPPED_PER\"" >> "$CSV_LOG_FILE"
     fi
+    echo "bins_checked;\"$BINS_CHECKED\"" >> "$CSV_LOG_FILE"
     print_bar
   fi
 
   # we use the logger from the s120 cwe checker module again:
-  final_cwe_log "$TOTAL_CWE_CNT"
+  if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
+    final_cwe_log "$TOTAL_CWE_CNT"
+  fi
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
@@ -302,6 +305,7 @@ output_cve_exploits() {
       print_output "$(indent "$(green "Confirmed $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
       print_output "$(indent "$(green "Confirmed $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries.")")"
       print_output "$(indent "$(green "Confirmed $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries.")")"
+      # shellcheck disable=SC2129
       echo "cve_high;\"$HIGH_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "cve_medium;\"$MEDIUM_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "cve_low;\"$LOW_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
