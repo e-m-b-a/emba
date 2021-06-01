@@ -42,6 +42,7 @@ F50_base_aggregator() {
   S120_LOG="s120_cwe_checker.txt"
 
   LOG_FILE="$( get_log_file )"
+  CSV_LOG_FILE="$LOG_DIR"/"$(basename -s .txt $( get_log_file )).csv"
 
   get_data
   output_overview
@@ -57,25 +58,33 @@ output_overview() {
 
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR"
+    echo "Firmware_vendor;\"$FW_VENDOR\"" >> "$CSV_LOG_FILE"
   fi  
   if [[ -n "$FW_VERSION" ]]; then
     print_output "[+] Tested Firmware version: ""$ORANGE""$FW_VERSION"
+    echo "Firmware_version;\"$FW_VERSION\"" >> "$CSV_LOG_FILE"
   fi  
   if [[ -n "$FW_DEVICE" ]]; then
     print_output "[+] Tested Firmware from device: ""$ORANGE""$FW_DEVICE"
+    echo "Device;\"$FW_DEVICE\"" >> "$CSV_LOG_FILE"
   fi  
   if [[ -n "$FW_NOTES" ]]; then
     print_output "[+] Additional notes: ""$ORANGE""$FW_NOTES"
+    echo "FW_notes;\"$FW_NOTES\"" >> "$CSV_LOG_FILE"
   fi  
 
   print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"
+  echo "FW_path;\"$FIRMWARE_PATH\"" >> "$CSV_LOG_FILE"
   print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND"
+  echo "emba_command;\"$EMBA_COMMAND\"" >> "$CSV_LOG_FILE"
 
   if [[ -n "$ARCH" ]]; then
     print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
+    echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
   elif [[ -f "$LOG_DIR"/"$P07_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
+      echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
     fi
   fi
   os_detector
@@ -86,10 +95,13 @@ output_details() {
 
   if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
+    echo "files;\"$FILE_ARR_COUNT\"" >> "$CSV_LOG_FILE"
+    echo "directories;\"$DETECTED_DIR\"" >> "$CSV_LOG_FILE"
   fi
   ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
+    echo "entropy_value;\"$ENTROPY\"" >> "$CSV_LOG_FILE"
   fi
   if [[ -n "$ENTROPY_PIC" ]]; then
     print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"
@@ -97,15 +109,22 @@ output_details() {
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts.""$NC"
+    echo "shell_scripts;\"$S20_SCRIPTS\"" >> "$CSV_LOG_FILE"
+    echo "shell_script_vulns;\"$S20_SHELL_VULNS\"" >> "$CSV_LOG_FILE"
   fi
   if [[ "$S21_PY_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
+    echo "python_scripts;\"$S21_PY_SCRIPTS\"" >> "$CSV_LOG_FILE"
+    echo "python_vulns;\"$S21_PY_VULNS\"" >> "$CSV_LOG_FILE"
   fi
   if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+    echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
+    echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
+    echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
   fi
   EMUL=$(find "$LOG_DIR"/qemu_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
@@ -121,30 +140,41 @@ output_config_issues() {
     print_output "[+] Found the following configuration issues:"
     if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
+      echo "weak_perm_count;\"$S40_WEAK_PERM_COUNTER\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$S55_HISTORY_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S55_HISTORY_COUNTER$GREEN history files.")")"
+      echo "history_file_count;\"$S55_HISTORY_COUNTER\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$S50_AUTH_ISSUES" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S50_AUTH_ISSUES$GREEN authentication issues.")")"
+      echo "auth_issues;\"$S50_AUTH_ISSUES\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$S85_SSH_VUL_CNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S85_SSH_VUL_CNT$GREEN SSHd issues.")")"
+      echo "ssh_issues;\"$S85_SSH_VUL_CNT\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
       print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details.")")"
+      #echo "password_files;\"$PASS_FILES_FOUND\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$CERT_CNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
+      echo "certificates;\"$CERT_CNT\"" >> "$CSV_LOG_FILE"
+      echo "certificates_outdated;\"$CERT_OUT_CNT\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$MOD_DATA_COUNTER$GREEN kernel modules with $ORANGE$KMOD_BAD$GREEN licensing issues.")")"
+      echo "kernel_modules;\"$MOD_DATA_COUNTER\"" >> "$CSV_LOG_FILE"
+      echo "kernel_modules_lic;\"$KMOD_BAD\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$FILE_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
     fi
     if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
+      echo "interesting_files;\"$INT_COUNT\"" >> "$CSV_LOG_FILE"
+      echo "post_files;\"$POST_COUNT\"" >> "$CSV_LOG_FILE"
     fi
     print_bar
   fi
@@ -168,26 +198,36 @@ output_binaries() {
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      echo "canary;\"$CANARY\"" >> "$CSV_LOG_FILE"
+      echo "canary_per;\"$CAN_PER\"" >> "$CSV_LOG_FILE"
     fi
     if [[ -n "$RELRO" ]]; then
       RELRO_PER=$(bc -l <<< "$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
       RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      echo "relro;\"$RELRO\"" >> "$CSV_LOG_FILE"
+      echo "relro_per;\"$RELRO_PER\"" >> "$CSV_LOG_FILE"
     fi
     if [[ -n "$NX" ]]; then
       NX_PER=$(bc -l <<< "$NX/($BINS_CHECKED/100)" 2>/dev/null)
       NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      echo "nx;\"$NX\"" >> "$CSV_LOG_FILE"
+      echo "nx_per;\"$NX_PER\"" >> "$CSV_LOG_FILE"
     fi
     if [[ -n "$PIE" ]]; then
       PIE_PER=$(bc -l <<< "$PIE/($BINS_CHECKED/100)" 2>/dev/null)
       PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      echo "pie;\"$PIE\"" >> "$CSV_LOG_FILE"
+      echo "pie_per;\"$PIE_PER\"" >> "$CSV_LOG_FILE"
     fi
     if [[ -n "$STRIPPED" ]]; then
       STRIPPED_PER=$(bc -l <<< "$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      echo "stripped;\"$STRIPPED\"" >> "$CSV_LOG_FILE"
+      echo "stripped_per;\"$STRIPPED_PER\"" >> "$CSV_LOG_FILE"
     fi
     print_bar
   fi
@@ -197,6 +237,7 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
+    echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
 
   FUNCTION="strcpy"
@@ -251,6 +292,7 @@ output_cve_exploits() {
     print_output ""
     if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
+      echo "versions_identified;\"${#VERSIONS_CLEANED[@]}\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
@@ -260,9 +302,13 @@ output_cve_exploits() {
       print_output "$(indent "$(green "Confirmed $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
       print_output "$(indent "$(green "Confirmed $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries.")")"
       print_output "$(indent "$(green "Confirmed $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries.")")"
+      echo "cve_high;\"$HIGH_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
+      echo "cve_medium;\"$MEDIUM_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
+      echo "cve_low;\"$LOW_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
     fi
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
+      echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
     fi
     print_bar
   fi
@@ -450,8 +496,10 @@ os_kernel_module_detect() {
 print_os() {
   if [[ $VERIFIED -eq 1 ]]; then
     print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+    echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
+    echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   fi
 }
 
