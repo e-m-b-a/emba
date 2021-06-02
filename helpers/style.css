@@ -248,6 +248,25 @@ pre a:hover {
   width:50px;
 }
 
+#buttonTime {
+  bottom:0px;
+  color:#fff;
+  cursor:pointer;
+  font-size:30px;
+  height:50px;
+  line-height: 50px;
+  left:0;
+  position:fixed;
+  text-align:center;
+  visibility:hidden;
+  width:50px;
+  background-color:#000;
+}
+
+#buttonTime:hover {
+  background-color:rgb(39, 39, 39);
+}
+
 .image {
   margin:15px 0;
   max-width:640px;

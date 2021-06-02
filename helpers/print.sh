@@ -135,7 +135,7 @@ write_log()
   for E in "${TEXT_ARR[@]}" ; do
     local TYPE_CHECK
     TYPE_CHECK="$( echo "$E" | cut -c1-3 )"
-    if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
+    if [[ ( "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]") && ("$E" != "[*] Statistic"* ) ]] ; then
       local COLOR_OUTPUT_STRING
       COLOR_OUTPUT_STRING="$(color_output "$E")"
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$W_LOG_FILE" >/dev/null
@@ -201,7 +201,11 @@ write_link()
     local LINK
     LINK="$1"
     LINK="$(format_log "[REF] ""$LINK" 1)"
-    echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+    if [[ -f "$2" ]] ; then
+      echo -e "$LINK" | tee -a "$2" >/dev/null
+    else
+      echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+    fi
   fi
 }
 

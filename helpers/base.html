@@ -32,9 +32,8 @@ Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
       <!-- navigation start -->
       <!-- navigation end -->
   </div> 
-  <div id="button" class="buttonClose" onclick="buttonNav()">
-    &laquo;
-  </div>
+  <a href="TIMELINK"><div id="buttonTime">&#x23F2;</div></a>
+  <div id="button" class="buttonClose" onclick="buttonNav()">&laquo;</div>
 </div>
 <div id="main" class="main">
   <!-- content start -->
@@ -44,6 +43,8 @@ Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
 <script>
 window.onload = function () {
   document.getElementById("button").style.visibility = "visible";
+  document.getElementById("button").style.height = "50px";
+  document.getElementById("buttonTime").style.bottom = "50px";
 }
 
 function openNav() {

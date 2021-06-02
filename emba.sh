@@ -198,7 +198,7 @@ main()
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
   export TMP_DIR="$LOG_DIR""/tmp"
-  export MAIN_LOG_FILE="emba.log"
+  export MAIN_LOG_FILE="emba.txt"
   export CONFIG_DIR="$INVOCATION_PATH""/config"
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"

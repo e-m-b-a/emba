@@ -15,6 +15,7 @@
 # Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
 
 INDEX_FILE="index.html"
+MAIN_LOG="./emba.txt"
 STYLE_PATH="/style"
 TEMP_PATH="/tmp"
 
@@ -82,32 +83,35 @@ add_link_tags() {
       if [[ -f "$REF_LINK" ]] ; then
         if [[ "${REF_LINK: -4}" == ".txt" ]] ; then
           # generate reference file
-          generate_info_file "$REF_LINK" "$BACK_LINK" &
-          LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+          generate_info_file "$REF_LINK" "$BACK_LINK"
+          LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
           HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
-          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
+          while [[ ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           # add linked image
-          LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+          LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")"
           IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@")"
           sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
         fi
       elif [[ "$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ]] ; then
         # link modules
-        LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+        LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
-        MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
-        HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@")"
-        while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
-          LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
-        done
-        sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
+        if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
+          MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
+          HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@")"
+          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
+            LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
+          done
+          sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@" "$LINK_FILE"
+        fi
+        sed -i -E -e "$LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
       else
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         sed -i -E -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
@@ -125,7 +129,7 @@ add_link_tags() {
         EXPLOIT_FILE="$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
-          generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
+          generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
           sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
         else
@@ -160,11 +164,10 @@ generate_info_file()
   SRC_FILE=$2
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%.txt}"".html")"
-  INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"_" -f1 )"
+  INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 | cut -d"_" -f1 )"
   RES_PATH="$INFO_PATH""/res"
 
   if ! [[ -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" ; fi
-  
 
   if ! [[ -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE"
@@ -266,7 +269,6 @@ generate_report_file()
     # add html tags for style
     add_color_tags "$TMP_FILE"
 
-      
     # add link tags to links/generate info files and link to them and write line to tmp file
     # also parsing for [REF] anchor and generate linked files and link it
     add_link_tags "$TMP_FILE" "$HTML_FILE"
@@ -318,6 +320,10 @@ add_link_to_index() {
 
 update_index()
 {
+  # add emba.log to webreport
+  generate_report_file "$MAIN_LOG"
+  sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.txt}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
 }
 
