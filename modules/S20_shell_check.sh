@@ -81,12 +81,11 @@ s20_script_check() {
     fi
 
     if [[ "$VULNS" -gt 20 ]] ; then
-      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-      write_link "$SHELL_LOG"
+      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$SHELL_LOG"
     else
-      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-      write_link "$SHELL_LOG"
+      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$SHELL_LOG"
     fi
+    
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi
 }

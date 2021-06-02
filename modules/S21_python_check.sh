@@ -86,11 +86,9 @@ s21_script_check() {
     fi
 
     if [[ "$VULNS" -gt 20 ]] ; then
-      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-      write_link "$PY_LOG"
+      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" ""  "$PY_LOG"
     else
-      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-      write_link "$PY_LOG"
+      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$PY_LOG"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi

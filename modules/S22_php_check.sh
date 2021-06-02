@@ -74,8 +74,7 @@ s22_script_check() {
     else
       COMMON_FILES_FOUND=""
     fi
-    print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
-    write_link "$PHP_LOG"
+    print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$PHP_LOG"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   fi
 }

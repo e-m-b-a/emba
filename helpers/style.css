@@ -260,11 +260,11 @@ pre a:hover {
   text-align:center;
   visibility:hidden;
   width:50px;
-  background-color:#000;
+  background-color:#232323;
 }
 
 #buttonTime:hover {
-  background-color:rgb(39, 39, 39);
+  background-color:#343434;
 }
 
 .image {
@@ -275,7 +275,7 @@ pre a:hover {
 
 #nav {
   overflow:hidden;
-  padding-bottom:50px;
+  padding-bottom:100px;
   visibility:show;
 }
 

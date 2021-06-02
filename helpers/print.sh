@@ -108,14 +108,22 @@ print_output()
     if [[ "$2" == "main" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
     elif [[ "$2" != "no_log" ]] ; then
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null
+      if [[ -z "$3" ]] ; then
+        echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
+      else
+        echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$3" 1)" | tee -a "$LOG_FILE" >/dev/null 
+      fi
     fi
   else
     echo -e "$OUTPUT"
     if [[ "$2" == "main" ]] ; then
       echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_FILE" >/dev/null
     elif [[ "$2" != "no_log" ]] ; then
-      echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null
+      if [[ -z "$3" ]] ; then
+        echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
+      else
+        echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$3" 1)" | tee -a "$LOG_FILE" >/dev/null 
+      fi
     fi
   fi
   if [[ "$2" != "no_log" ]] ; then
