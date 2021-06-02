@@ -350,7 +350,7 @@ main()
   if [[ -d "$FIRMWARE_PATH" ]] ; then
     PRE_CHECK=0
     print_output "[*] Firmware directory detected." "no_log"
-    print_output "    Emba starts with testing the environment." "no_log"
+    print_output "[*] Emba starts with testing the environment." "no_log"
     if [[ $IN_DOCKER -eq 0 ]] ; then
       # in docker environment the firmware is already available
       print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""$NC" "no_log"
@@ -367,7 +367,9 @@ main()
     print_help
     exit 1
   fi
-  print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
+  if [[ $THREADED -eq 1 ]]; then
+    print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
+  fi
 
   # Change log output to color for web report and prepare report
   if [[ $HTML -eq 1 ]] ; then
