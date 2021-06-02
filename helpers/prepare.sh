@@ -232,7 +232,7 @@ check_firmware()
   # as we already have done some root directory detection we are going to use it now
   local DIR_COUNT=0
   local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
-  if [[ ${RPATH[@]} -gt 0 ]]; then
+  if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
     for R_PATH in "${ROOT_PATH[@]}"; do
       for L_PATH in "${LINUX_PATHS[@]}"; do
         if [[ -d "$R_PATH"/"$L_PATH" ]] ; then

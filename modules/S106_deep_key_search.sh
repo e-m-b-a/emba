@@ -86,7 +86,7 @@ deep_pattern_searcher() {
 
 deep_pattern_reporter() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
-    P_COUNT=$(grep -i "$PATTERN" "$LOG_FILE" | cut -d: -f 1 | sed 's/\ //g' | awk '{ SUM += $1} END { print SUM }' )
+    P_COUNT=$(grep -i "$PATTERN" "$LOG_DIR""/""$LOG_DIR_MOD"/deep_key_search_* | cut -d: -f 2 | sed 's/\ //g' | awk '{ SUM += $1} END { print SUM }' )
     OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
   done
 
