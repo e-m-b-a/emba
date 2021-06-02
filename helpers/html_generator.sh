@@ -86,7 +86,7 @@ add_link_tags() {
           LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
           HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
-          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE" )" == "$P_START$SPAN_END$P_END" ]] ; do 
+          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
@@ -94,16 +94,17 @@ add_link_tags() {
           # add linked image
           LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")"
-          IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
+          IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@")"
           sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
         fi
       elif [[ "$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ]] ; then
+        # link modules
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
         MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
         HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@")"
-        while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE" )" == "$P_START$SPAN_END$P_END" ]] ; do 
+        while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
           LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
         done
         sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
@@ -212,7 +213,7 @@ generate_report_file()
 {
   REPORT_FILE=$1
 
-  if ! ( grep -o -i "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ) ; then
+  if ! ( grep -o -i -q "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ) ; then
     HTML_FILE="$(basename "${REPORT_FILE%.txt}"".html")"
     cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
     TMP_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$HTML_FILE"
@@ -317,18 +318,7 @@ add_link_to_index() {
 
 update_index()
 {
-  LINE_NUMBER_ENTROPY=$(grep -n "entropy.png" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-  if [[ -n "$LINE_NUMBER_ENTROPY" ]] ; then 
-    readarray -t ENTROPY_IMAGES_ARR < <( find "$LOG_DIR" -xdev -iname "*_entropy.png" 2> /dev/null )
-    for IMAGE in "${ENTROPY_IMAGES_ARR[@]}" ; do
-      if [[ -f "$IMAGE" ]] ; then
-        cp "$IMAGE" "$ABS_HTML_PATH$STYLE_PATH/entropy.png"
-        sed -i "$((LINE_NUMBER_ENTROPY+1))""i""$ENTROPY_IMAGE" "$ABS_HTML_PATH""/""$INDEX_FILE"
-        ((LINE_NUMBER_ENTROPY++))
-      fi #PICTURE
-    done
-  fi
-  #rm -R "$ABS_HTML_PATH$TEMP_PATH"
+  rm -R "$ABS_HTML_PATH$TEMP_PATH"
 }
 
 prepare_report()

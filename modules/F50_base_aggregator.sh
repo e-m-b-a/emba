@@ -93,6 +93,7 @@ output_details() {
   fi
   if [[ -n "$ENTROPY_PIC" ]]; then
     print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"
+    write_link "$ENTROPY_PIC"
   fi
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
@@ -193,7 +194,9 @@ output_binaries() {
   fi
 
   # we use the logger from the s120 cwe checker module again:
-  final_cwe_log "$TOTAL_CWE_CNT"
+  if [[ $CWE_CHECKER -ne 0 ]] ; then
+    final_cwe_log "$TOTAL_CWE_CNT"
+  fi
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
@@ -202,43 +205,44 @@ output_binaries() {
   FUNCTION="strcpy"
   FUNCTION1="system"
   
-  if [[ "$(find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
-    readarray -t RESULTS < <( find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
-    readarray -t RESULTS1 < <( find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
+  if [[ -d "$LOG_DIR""/s11/" ]] ; then
+    if [[ "$(find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+      readarray -t RESULTS < <( find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS1 < <( find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
 
-    if [[ "${#RESULTS[@]}" -gt 0 ]]; then
-      print_output ""
-      print_output "[+] ""$FUNCTION""/""$FUNCTION1"" - top 10 results:"
-      i=0 
-      for LINE in "${RESULTS[@]}" ; do
-        SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
-        F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
-        SEARCH_TERM1="$(echo "${RESULTS1[$i]}" | cut -d\  -f3)"
-        F_COUNTER1="$(echo "${RESULTS1[$i]}" | cut -d\  -f1)"
-        if [[ -f "$BASE_LINUX_FILES" ]]; then
-          # if we have the base linux config file we are checking it:
-          if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-            if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+      if [[ "${#RESULTS[@]}" -gt 0 ]]; then
+        print_output ""
+        print_output "[+] ""$FUNCTION""/""$FUNCTION1"" - top 10 results:"
+        i=0 
+        for LINE in "${RESULTS[@]}" ; do
+          SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
+          F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
+          SEARCH_TERM1="$(echo "${RESULTS1[$i]}" | cut -d\  -f3)"
+          F_COUNTER1="$(echo "${RESULTS1[$i]}" | cut -d\  -f1)"
+          if [[ -f "$BASE_LINUX_FILES" ]]; then
+            # if we have the base linux config file we are checking it:
+            if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+              if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+                printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+              else
+                printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+              fi  
             else
-              printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+              if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+                printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+              else
+                printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
+              fi  
             fi  
           else
-            if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-            else
-              printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-            fi  
+            printf "${ORANGE}\t%-5.5s : %-15.15s${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
           fi  
-        else
-          printf "${ORANGE}\t%-5.5s : %-15.15s${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-        fi  
-        (( i++ ))
-      done
-    fi  
-    print_bar
-  fi 
-
+          (( i++ ))
+        done
+      fi  
+      print_bar
+    fi 
+  fi
 }
 
 output_cve_exploits() {
