@@ -14,7 +14,6 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Searches for files with a specified string pattern inside.
-export THREAD_PRIO=1
 
 S103_deep_search()
 {
