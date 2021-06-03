@@ -360,7 +360,7 @@ output_cve_exploits() {
       print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
       echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
       # we report only software components with exploits to csv:
-      grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
+      grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "[+]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
       DATA=1
     fi
   fi
