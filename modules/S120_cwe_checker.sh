@@ -86,9 +86,7 @@ final_cwe_log() {
   if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
     mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
     print_output ""
-    if [[ ${#CWE_OUT[@]} -eq 0 && -n "$LOG_DIR_MOD" ]] ; then
-      print_output "[-] cwe-checker found 0 security issues."
-    else
+    if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"

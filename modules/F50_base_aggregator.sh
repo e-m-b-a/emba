@@ -297,17 +297,21 @@ output_binaries() {
             if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
               DATA=1
+              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
             else
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
               DATA=1
+              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
             fi  
           else
             if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
               DATA=1
+              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
             else
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
               DATA=1
+              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
             fi  
           fi  
         else
@@ -355,6 +359,8 @@ output_cve_exploits() {
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
       echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
+      # we report only software components with exploits to csv:
+      grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
       DATA=1
     fi
   fi
