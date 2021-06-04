@@ -64,7 +64,7 @@ deep_pattern_search() {
 deep_pattern_searcher() {
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
-    readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-200)
+    readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-100)
     if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
       echo "[+] $DEEP_S_FILE" >> "$LOG_DIR""/""$LOG_DIR_MOD"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
       for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do

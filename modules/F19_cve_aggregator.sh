@@ -455,35 +455,37 @@ aggregate_versions() {
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
-  print_output "[*] Software inventory initial overview:"
-  for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
-    print_output "[+] Found Version details (base check): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
-    print_output "[+] Found Version details (statical check): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_EMULATOR[@]}"; do
-    print_output "[+] Found Version details (emulator): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_KERNEL[@]}"; do
-    print_output "[+] Found Version details (kernel): ""$VERSION"
-  done
+  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 ]]; then
+    print_output "[*] Software inventory initial overview:"
+    for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
+      print_output "[+] Found Version details (base check): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
+      print_output "[+] Found Version details (statical check): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_EMULATOR[@]}"; do
+      print_output "[+] Found Version details (emulator): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_KERNEL[@]}"; do
+      print_output "[+] Found Version details (kernel): ""$VERSION"
+    done
 
-  print_output ""
-  VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
-  for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
-    # remove color codes:
-    VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    print_output ""
+    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
+    for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+      # remove color codes:
+      VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+      if [[ "$THREADED" -eq 1 ]]; then
+        prepare_version_data &
+        WAIT_PIDS_F19+=( "$!" )
+      else
+        prepare_version_data
+      fi
+    done
+
     if [[ "$THREADED" -eq 1 ]]; then
-      prepare_version_data &
-      WAIT_PIDS_F19+=( "$!" )
-    else
-      prepare_version_data
+      wait_for_pid "${WAIT_PIDS_F19[@]}"
     fi
-  done
-
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
   # sorting and unique our versions array:
@@ -513,9 +515,9 @@ aggregate_versions() {
 }
 
 generate_special_log() {
-  sub_module_title "Minimal report of exploits and CVE's."
-
   if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE") -gt 0 ]]; then
+    sub_module_title "Minimal report of exploits and CVE's."
+
     readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
     print_output ""
     print_output "[*] CVE log file stored in $CVE_MINIMAL_LOG.\\n"
@@ -699,22 +701,24 @@ generate_cve_details() {
     wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
-  print_output ""
-  print_output "[*] Identified the following version details, vulnerabilities and exploits:"
   mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/cve_sum/ -type f -name "*.txt" | sort 2> /dev/null)
-  for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
-    if [[ "$THREADED" -eq 1 ]]; then
-      final_outputter &
-      WAIT_PIDS_F19+=( "$!" )
-    else
-      final_outputter
-    fi
-  done
+  if [[ ${#LOG_AGGR_FILES[@]} -gt 0 ]]; then
+    print_output ""
+    print_output "[*] Identified the following version details, vulnerabilities and exploits:"
+    for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
+      if [[ "$THREADED" -eq 1 ]]; then
+        final_outputter &
+        WAIT_PIDS_F19+=( "$!" )
+      else
+        final_outputter
+      fi
+    done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19[@]}"
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_F19[@]}"
+    fi
+    print_output "${NC}"
   fi
-  print_output "${NC}"
 }
 
 final_outputter() {
