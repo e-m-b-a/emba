@@ -29,18 +29,19 @@ S106_deep_key_search()
     print_output "[*] Pattern: $PATTERN"
   done
   
+  LOG_FILE="$( get_log_file )"
   LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
   mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
 
   OCC_LIST=()
 
-  deep_pattern_search
-  deep_pattern_reporter
+  deep_key_search
+  deep_key_reporter
 
   module_end_log "${FUNCNAME[0]}" "${#OCC_LIST[@]}"
 }
 
-deep_pattern_search() {
+deep_key_search() {
   local WAIT_PIDS_S105=()
   GREP_PATTERN_COMMAND=()
   for PATTERN in "${PATTERN_LIST[@]}" ; do
@@ -49,10 +50,10 @@ deep_pattern_search() {
   echo
   for DEEP_S_FILE in "${FILE_ARR[@]}"; do
     if [[ $THREADED -eq 1 ]]; then
-      deep_pattern_searcher &
+      deep_key_searcher &
       WAIT_PIDS_S105+=( "$!" )
     else
-      deep_pattern_searcher
+      deep_key_searcher
     fi
   done
 
@@ -61,7 +62,7 @@ deep_pattern_search() {
   fi
 }
 
-deep_pattern_searcher() {
+deep_key_searcher() {
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
     readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-100)
@@ -84,7 +85,7 @@ deep_pattern_searcher() {
   fi
 }
 
-deep_pattern_reporter() {
+deep_key_reporter() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     P_COUNT=$(grep -c "$PATTERN" "$LOG_DIR""/""$LOG_DIR_MOD"/deep_key_search_* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' )
     OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )

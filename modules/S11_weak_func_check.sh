@@ -22,7 +22,7 @@ S11_weak_func_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries for weak functions (intense)"
 
-  #LOG_FILE="$( get_log_file )"
+  LOG_FILE="$( get_log_file )"
   LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
   mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
 

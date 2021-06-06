@@ -195,6 +195,7 @@ main()
   export MOD_DIR="$INVOCATION_PATH""/modules"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
+  export MSF_PATH="/usr/share/metasploit-framework/modules/"
 
   echo
 
@@ -408,8 +409,7 @@ main()
   fi
 
   # we use the metasploit path for exploit information from the metasploit framework
-  if [[ -d "/usr/share/metasploit-framework/modules/" ]]; then
-    export MSF_PATH="/usr/share/metasploit-framework/modules/"
+  if [[ -d "$MSF_PATH" ]]; then
     generate_msf_db &
   fi
 
