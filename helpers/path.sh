@@ -193,6 +193,9 @@ create_log_dir() {
   if ! [[ -d "$LOG_DIR" ]] ; then
       mkdir "$LOG_DIR" 2> /dev/null
   fi
+  if ! [[ -d "$TMP_DIR" ]] ; then
+      mkdir "$TMP_DIR" 2> /dev/null
+  fi
   if [[ $FIRMWARE -eq 1 ]] ; then
     if ! [[ -d "$LOG_DIR""/dtb_dump" ]] && [[ $DTBDUMP -eq 1 ]] ; then
       mkdir -p "$LOG_DIR""/dtb_dump" 2> /dev/null

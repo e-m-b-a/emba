@@ -311,3 +311,11 @@ check_init_size() {
   fi
 
 }
+
+generate_msf_db() {
+  print_output "[*] Metasploit exploit database creation" "no_log"
+  # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
+  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' > "$TMP_DIR"/msf_cve-db.txt
+  cat "$TMP_DIR"/msf_cve-db.txt
+}
+
