@@ -652,6 +652,7 @@ cve_extractor() {
             if [[ -f "$EXPLOIT_PATH" ]] ; then
               cp "$EXPLOIT_PATH" "$LOG_DIR""/aggregator/exploit/msf_""$EXPLOIT_NAME".rb
             fi
+            ((MSF_MODULE_CNT++))
           done
           if [[ $EDB -eq 0 ]]; then
             # only count the msf exploit if we have not already count a EDB exploit
@@ -703,6 +704,7 @@ cve_extractor() {
   echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
   echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
   echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
+  echo "$MSF_MODULE_CNT" >> "$TMP_DIR"/MSF_MODULE_CNT.tmp
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_output ""
