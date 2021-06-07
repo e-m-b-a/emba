@@ -323,8 +323,25 @@ update_index()
   # add emba.log to webreport
   generate_report_file "$MAIN_LOG"
   sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.txt}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  scan_report
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
+}
+
+scan_report()
+{
+  # at the end of an emba run, we have to disable all non-valid links to modules
+  local LINK_ARR
+  readarray -t LINK_ARR < <(grep -R -E "class\=\"refmodul\" href=\"(.*)" $ABS_HTML_PATH | cut -d"\"" -f 4 | sort -u)
+  local LINK_FILE_ARR
+  readarray -t LINK_FILE_ARR < <(grep -R -E -l "class\=\"refmodul\" href=\"(.*)" $ABS_HTML_PATH)
+  for LINK in "${LINK_ARR[@]}" ; do
+    for FILE in "${LINK_FILE_ARR[@]}" ; do
+      if ! [[ -f "$LINK" ]] ; then
+        sed -i -E "s@class=\"refmodul\" href=\"($LINK)\"@title=\"\1\"@g" "$FILE"
+      fi
+    done
+  done
 }
 
 prepare_report()
