@@ -305,11 +305,11 @@ function_check_x86_64() {
 }
 
 print_top10_statistics() {
-  if [[ "$(find "$LOG_PATH_MODULE""/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM
       local F_COUNTER
-      readarray -t RESULTS < <( find "$LOG_PATH_MODULE""/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
@@ -331,12 +331,24 @@ print_top10_statistics() {
       fi  
     done
   else
+    print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
 }
 
 output_function_details()
 {
+  write_s11_log()
+  {
+    OLD_LOG_FILE="$LOG_FILE"
+    LOG_FILE="$3"
+    print_output "$1"
+    write_link "$2"
+    cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+    rm "$LOG_FILE" 2> /dev/null
+    LOG_FILE="$OLD_LOG_FILE"
+  }
+
   local LOG_FILE_LOC
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$FUNCTION"-"$NAME".txt
 
@@ -355,26 +367,22 @@ output_function_details()
   else
     COMMON_FILES_FOUND=" -"
   fi
+
+  LOG_FILE_LOC_OLD="$LOG_FILE_LOC"
+  LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
+  mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
   
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_link "$LOG_FILE_LOC"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_link "$LOG_FILE_LOC"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     else
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_link "$LOG_FILE_LOC"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     fi
+    write_s11_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
   fi
 
-  mv "$LOG_FILE_LOC" "$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt 2> /dev/null
+  
 }
 
