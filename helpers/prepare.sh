@@ -232,13 +232,23 @@ check_firmware()
   # as we already have done some root directory detection we are going to use it now
   local DIR_COUNT=0
   local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
-  for R_PATH in "${ROOT_PATH[@]}"; do
+  if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      for L_PATH in "${LINUX_PATHS[@]}"; do
+        if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+          ((DIR_COUNT++))
+        fi
+      done
+    done
+  else
+    # this is needed for directories we are testing
+    # in such a case the pre-checking modules are not executed and no RPATH is available
     for L_PATH in "${LINUX_PATHS[@]}"; do
-      if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+      if [[ -d "$FIRMWARE_PATH"/"$L_PATH" ]] ; then
         ((DIR_COUNT++))
       fi
     done
-  done
+  fi
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
     echo
@@ -301,3 +311,10 @@ check_init_size() {
   fi
 
 }
+
+generate_msf_db() {
+  print_output "[*] Building the Metasploit exploit database" "no_log"
+  # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
+  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' > "$TMP_DIR"/msf_cve-db.txt
+}
+

@@ -61,7 +61,7 @@ S115_usermode_emulator() {
       print_output "[*] Running emulation processes in $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
 
       DIR=$(pwd)
-      mapfile -t BIN_EMU_TMP < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file {} \; 2>/dev/null | grep "ELF.*executable" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "$DIR" || exit)
+      mapfile -t BIN_EMU_TMP < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file {} \; 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "$DIR" || exit)
       # we re-create the BIN_EMU array with all unique binaries for every root directory
       # as we have all tested MD5s in MD5_DONE_INT (for all root dirs) we test every bin only once
       BIN_EMU=()
@@ -452,7 +452,7 @@ check_disk_space() {
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
       print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
       pkill -f "$EMULATOR.*$KILLER.*"
-      rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
+      #rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
     fi
   done
 }

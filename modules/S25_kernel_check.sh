@@ -38,6 +38,7 @@ S25_kernel_check()
         print_output "$(indent "$LINE")"
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
+        print_output ""
         print_output "Kernel details:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"

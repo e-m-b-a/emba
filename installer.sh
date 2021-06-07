@@ -226,6 +226,7 @@ print_tool_info "tcllib" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 print_tool_info "make" 1
+print_tool_info "metasploit-framework" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -529,7 +530,7 @@ case ${ANSWER:0:1} in
         /etc/init.d/redis-server start
         ./sbin/db_mgmt_cpe_dictionary.py -p
         ./sbin/db_mgmt_json.py -p
-        ./sbin/db_updater.py -c
+        ./sbin/db_updater.py -f
         cd ../.. || exit 1
         sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
         chmod +x config/cve_database_updater
@@ -683,3 +684,4 @@ case ${ANSWER:0:1} in
     fi
   ;;
 esac
+echo -e "$GREEN""Emba installation finished ""$NC"
