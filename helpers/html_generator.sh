@@ -18,7 +18,7 @@ INDEX_FILE="index.html"
 MAIN_LOG="./emba.txt"
 STYLE_PATH="/style"
 TEMP_PATH="/tmp"
-SUPPL_H_PATH="/etc"
+SUPPL_PATH_HTML="/etc"
 
 # variables for html style
 P_START="<pre>"
@@ -230,7 +230,7 @@ generate_report_file()
   if ! ( grep -o -i -q "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ) ; then
     HTML_FILE="$(basename "${REPORT_FILE%.txt}"".html")"
     if [[ $SUPPL_FILE_GEN -eq 1 ]] ; then
-      cp "./helpers/base.html" "$ABS_HTML_PATH$SUPPL_H_PATH""/""$HTML_FILE"
+      cp "./helpers/base.html" "$ABS_HTML_PATH$SUPPL_PATH_HTML""/""$HTML_FILE"
     else
       cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
     fi
@@ -290,7 +290,7 @@ generate_report_file()
 
     # add content of temporary html into template
     if [[ $SUPPL_FILE_GEN -eq 1 ]] ; then
-      sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH$SUPPL_H_PATH""/""$HTML_FILE"
+      sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH$SUPPL_PATH_HTML""/""$HTML_FILE"
     else
       sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
     fi
@@ -343,14 +343,14 @@ update_index()
   generate_report_file "$MAIN_LOG"
   sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.txt}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
   # generate files in $SUPPL_PATH (supplementary files from modules) 
-  readarray -t SUPPL_FILES < <(find $SUPPL_PATH ! -path $SUPPL_PATH)
+  readarray -t SUPPL_FILES < <(find "$SUPPL_PATH" ! -path "$SUPPL_PATH")
   if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
     sed -i 's/expand_njs hidden/expand_njs/g' "$ABS_HTML_PATH""/""$INDEX_FILE"
   fi
   for S_FILE in "${SUPPL_FILES[@]}" ; do
-    generate_info_file "$S_FILE" "" "$SUPPL_H_PATH"
+    generate_info_file "$S_FILE" "" "$SUPPL_PATH_HTML"
     LINE_NUMBER_NAV=$(grep -n "etc start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-    REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_H_PATH/$(basename "${S_FILE%.txt}"".html")@g")"
+    REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_PATH_HTML/$(basename "${S_FILE%.txt}"".html")@g")"
     sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.txt}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   done
   scan_report
@@ -362,9 +362,9 @@ scan_report()
 {
   # at the end of an emba run, we have to disable all non-valid links to modules
   local LINK_ARR
-  readarray -t LINK_ARR < <(grep -R -E "class\=\"refmodul\" href=\"(.*)" $ABS_HTML_PATH | cut -d"\"" -f 4 | sort -u)
+  readarray -t LINK_ARR < <(grep -R -E "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH" | cut -d"\"" -f 4 | sort -u)
   local LINK_FILE_ARR
-  readarray -t LINK_FILE_ARR < <(grep -R -E -l "class\=\"refmodul\" href=\"(.*)" $ABS_HTML_PATH)
+  readarray -t LINK_FILE_ARR < <(grep -R -E -l "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH")
   for LINK in "${LINK_ARR[@]}" ; do
     for FILE in "${LINK_FILE_ARR[@]}" ; do
       if ! [[ -f "$ABS_HTML_PATH""/""$LINK" ]] ; then
@@ -386,8 +386,8 @@ prepare_report()
   if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
     mkdir "$ABS_HTML_PATH$TEMP_PATH"
   fi
-  if [ ! -d "$ABS_HTML_PATH$SUPPL_H_PATH" ] ; then
-    mkdir "$ABS_HTML_PATH$SUPPL_H_PATH"
+  if [ ! -d "$ABS_HTML_PATH$SUPPL_PATH_HTML" ] ; then
+    mkdir "$ABS_HTML_PATH$SUPPL_PATH_HTML"
   fi
 
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"
