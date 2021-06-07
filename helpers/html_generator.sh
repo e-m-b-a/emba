@@ -352,7 +352,6 @@ update_index()
     LINE_NUMBER_NAV=$(grep -n "etc start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
     REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_H_PATH/$(basename "${S_FILE%.txt}"".html")@g")"
     sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.txt}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
-    #add_link_to_index "$SUPPL_H_PATH""/""$(basename "${S_FILE%.txt}"".html")" "$(basename "${S_FILE%.txt}")"
   done
   scan_report
   # remove tempory files from web report
