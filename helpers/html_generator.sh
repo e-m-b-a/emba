@@ -34,15 +34,15 @@ SPAN_END="</span>"
 HR_MONO="<hr class=\"mono\" />"
 HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
-LINK="<a href=\"LINK\" target=\"\_blank\" >"
-LOCAL_LINK="<a class=\"local\" href=\"LINK\">"
-REFERENCE_LINK="<a class=\"reference\" href=\"LINK\">"
-REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\">"
-EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" target=\"\_blank\" >"
-CVE_LINK="<a href=\"https://cve.mitre.org/cgi-bin/cvename.cgi?name=LINK\" target=\"\_blank\" >"
-MODUL_LINK="<a class=\"modul\" href=\"LINK\">"
-MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\">"
-SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\">"
+LINK="<a href=\"LINK\" title=\"LINK\" target=\"\_blank\" >"
+LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
+REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
+REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
+EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"\_blank\" >"
+CVE_LINK="<a href=\"https://cve.mitre.org/cgi-bin/cvename.cgi?name=LINK\" title=\"LINK\" target=\"\_blank\" >"
+MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
+MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
+SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
 ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
 IMAGE="<img class=\"image\" src=\".$STYLE_PATH/PICTURE\">"
@@ -86,7 +86,7 @@ add_link_tags() {
           generate_info_file "$REF_LINK" "$BACK_LINK"
           LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
-          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@")"
+          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@g")"
           while [[ ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
@@ -95,7 +95,7 @@ add_link_tags() {
           # add linked image
           LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")"
-          IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@")"
+          IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
           sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
         fi
       elif [[ "$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ]] ; then
@@ -105,7 +105,7 @@ add_link_tags() {
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
         if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
           MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
-          HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@")"
+          HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@g")"
           while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
@@ -323,6 +323,9 @@ update_index()
   # add emba.log to webreport
   generate_report_file "$MAIN_LOG"
   sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.txt}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  # generate files in $ADD_PATH (additional files from modules) 
+
+
   scan_report
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
@@ -338,7 +341,7 @@ scan_report()
   for LINK in "${LINK_ARR[@]}" ; do
     for FILE in "${LINK_FILE_ARR[@]}" ; do
       if ! [[ -f "$LINK" ]] ; then
-        sed -i -E "s@class=\"refmodul\" href=\"($LINK)\"@title=\"\1\"@g" "$FILE"
+        sed -i -E "s@class=\"refmodul\" href=\"($LINK)\"@@g" "$FILE"
       fi
     done
   done

@@ -84,7 +84,6 @@ deep_pattern_searcher() {
       cat "$LOG_FILE" >> "$OLD_LOG_FILE"
       rm "$LOG_FILE" 2> /dev/null
       LOG_FILE="$OLD_LOG_FILE"
-      
     fi
   fi
 }
