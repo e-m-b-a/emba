@@ -31,6 +31,11 @@ Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
       <a class="back" href="./index.html">&laquo; Back to main</a>
       <!-- navigation start -->
       <!-- navigation end -->
+      <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
+      <div class="expand_area">
+        <!-- etc start -->
+        <!-- etc end -->
+      </div>
   </div> 
   <a href="TIMELINK"><div id="buttonTime">&#x23F2;</div></a>
   <div id="button" class="buttonClose" onclick="buttonNav()">&laquo;</div>
@@ -45,6 +50,8 @@ window.onload = function () {
   document.getElementById("button").style.visibility = "visible";
   document.getElementById("button").style.height = "50px";
   document.getElementById("buttonTime").style.bottom = "50px";
+  document.getElementById("expand").value = "+ Show more results";
+  document.getElementById("expand").className += " expand";
 }
 
 function openNav() {

@@ -27,6 +27,14 @@ a {
   color: inherit; 
 }
 
+a.etc {
+  background-color:#2c354a;
+}
+
+a.etc:hover {
+  background-color:#3c4864;
+}
+
 a.modul {
   background-color:#333;
 }
@@ -99,6 +107,26 @@ pre a:hover {
 
 .back:hover {
   background-color:#377732!important;
+}
+
+.expand {
+  background-color:#133d5f!important;
+}
+
+.expand:hover {
+  background-color:#3d4781!important;
+}
+
+.expand_area {
+  overflow: hidden;
+}
+
+.expand[value="+ Show more results"]+.expand_area {
+  max-height: 0;
+}
+
+.expand_njs {
+  background-color:#133d5f!important;
 }
 
 .buttonClose {
@@ -285,4 +313,15 @@ pre a:hover {
   padding:14px 8px;
   text-align:center;
   text-decoration:none;
+}
+
+#nav input {
+  color:#f2f2f2;
+  display:block;
+  padding:14px 8px;
+  text-align:center;
+  text-decoration:none;
+  border: none;
+  width: 100%;
+  font-family: monospace;
 }

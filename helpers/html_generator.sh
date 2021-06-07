@@ -18,6 +18,7 @@ INDEX_FILE="index.html"
 MAIN_LOG="./emba.txt"
 STYLE_PATH="/style"
 TEMP_PATH="/tmp"
+SUPPL_H_PATH="/etc"
 
 # variables for html style
 P_START="<pre>"
@@ -42,6 +43,7 @@ EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\
 CVE_LINK="<a href=\"https://cve.mitre.org/cgi-bin/cvename.cgi?name=LINK\" title=\"LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
+ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
 SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
 ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
@@ -162,9 +164,14 @@ generate_info_file()
 {
   INFO_FILE=$1
   SRC_FILE=$2
+  CUSTOM_SUB_PATH=$3
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%.txt}"".html")"
-  INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 | cut -d"_" -f1 )"
+  if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
+    INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 | cut -d"_" -f1 )"
+  else
+    INFO_PATH="$ABS_HTML_PATH""/""$CUSTOM_SUB_PATH"
+  fi
   RES_PATH="$INFO_PATH""/res"
 
   if ! [[ -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" ; fi
@@ -175,9 +182,11 @@ generate_info_file()
     TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
 
     # add back Link anchor to navigation
-    LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$INFO_PATH""/""$INFO_HTML_FILE" | cut -d":" -f1)
-    NAV_INFO_BACK_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@./../$SRC_FILE@g")"
-    sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
+    if [[ -n "$SRC_FILE" ]] ; then
+      LINE_NUMBER_INFO_NAV=$(grep -n "navigation start" "$INFO_PATH""/""$INFO_HTML_FILE" | cut -d":" -f1)
+      NAV_INFO_BACK_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@./../$SRC_FILE@g")"
+      sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
+    fi
 
     cp "$INFO_FILE" "$TMP_INFO_FILE"
     sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_INFO_FILE"
@@ -215,10 +224,16 @@ generate_info_file()
 generate_report_file()
 {
   REPORT_FILE=$1
+  # if set to 1, then generate file in supplementary folder and link to menu
+  SUPPL_FILE_GEN=$2
 
   if ! ( grep -o -i -q "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ) ; then
     HTML_FILE="$(basename "${REPORT_FILE%.txt}"".html")"
-    cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
+    if [[ $SUPPL_FILE_GEN -eq 1 ]] ; then
+      cp "./helpers/base.html" "$ABS_HTML_PATH$SUPPL_H_PATH""/""$HTML_FILE"
+    else
+      cp "./helpers/base.html" "$ABS_HTML_PATH""/""$HTML_FILE"
+    fi
     TMP_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$HTML_FILE"
     MODUL_NAME=""
 
@@ -274,7 +289,11 @@ generate_report_file()
     add_link_tags "$TMP_FILE" "$HTML_FILE"
 
     # add content of temporary html into template
-    sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
+    if [[ $SUPPL_FILE_GEN -eq 1 ]] ; then
+      sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH$SUPPL_H_PATH""/""$HTML_FILE"
+    else
+      sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$HTML_FILE"
+    fi
     # add aggregator lines to index page
     if [[ "$HTML_FILE" == "f50"* ]] ; then
       sed -i "/content start/ r $TMP_FILE" "$ABS_HTML_PATH""/""$INDEX_FILE"
@@ -323,9 +342,18 @@ update_index()
   # add emba.log to webreport
   generate_report_file "$MAIN_LOG"
   sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.txt}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
-  # generate files in $ADD_PATH (additional files from modules) 
-
-
+  # generate files in $SUPPL_PATH (supplementary files from modules) 
+  readarray -t SUPPL_FILES < <(find $SUPPL_PATH ! -path $SUPPL_PATH)
+  if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
+    sed -i 's/expand_njs hidden/expand_njs/g' "$ABS_HTML_PATH""/""$INDEX_FILE"
+  fi
+  for S_FILE in "${SUPPL_FILES[@]}" ; do
+    generate_info_file "$S_FILE" "" "$SUPPL_H_PATH"
+    LINE_NUMBER_NAV=$(grep -n "etc start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
+    REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_H_PATH/$(basename "${S_FILE%.txt}"".html")@g")"
+    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.txt}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
+    #add_link_to_index "$SUPPL_H_PATH""/""$(basename "${S_FILE%.txt}"".html")" "$(basename "${S_FILE%.txt}")"
+  done
   scan_report
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
@@ -340,7 +368,7 @@ scan_report()
   readarray -t LINK_FILE_ARR < <(grep -R -E -l "class\=\"refmodul\" href=\"(.*)" $ABS_HTML_PATH)
   for LINK in "${LINK_ARR[@]}" ; do
     for FILE in "${LINK_FILE_ARR[@]}" ; do
-      if ! [[ -f "$LINK" ]] ; then
+      if ! [[ -f "$ABS_HTML_PATH""/""$LINK" ]] ; then
         sed -i -E "s@class=\"refmodul\" href=\"($LINK)\"@@g" "$FILE"
       fi
     done
@@ -358,6 +386,9 @@ prepare_report()
   fi
   if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
     mkdir "$ABS_HTML_PATH$TEMP_PATH"
+  fi
+  if [ ! -d "$ABS_HTML_PATH$SUPPL_H_PATH" ] ; then
+    mkdir "$ABS_HTML_PATH$SUPPL_H_PATH"
   fi
 
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"
