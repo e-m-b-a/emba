@@ -185,16 +185,6 @@ main()
   export USE_DOCKER=0
   export YARA=1
 
-  # the maximum modules in parallel -> after S09 is finished this value gets adjusted
-  # rule of thumb - per core one module
-  MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
-
-  # if we have only one core we run two modules in parallel
-  if [[ "$MAX_MODS" -lt 2 ]]; then
-    MAX_MODS=2
-  fi
-  export MAX_MODS
-
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
   export TMP_DIR="$LOG_DIR""/tmp"
@@ -204,6 +194,8 @@ main()
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
+  export PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
+  export MSF_PATH="/usr/share/metasploit-framework/modules/"
 
   echo
 
@@ -350,7 +342,7 @@ main()
   if [[ -d "$FIRMWARE_PATH" ]] ; then
     PRE_CHECK=0
     print_output "[*] Firmware directory detected." "no_log"
-    print_output "    Emba starts with testing the environment." "no_log"
+    print_output "[*] Emba starts with testing the environment." "no_log"
     if [[ $IN_DOCKER -eq 0 ]] ; then
       # in docker environment the firmware is already available
       print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""$NC" "no_log"
@@ -367,7 +359,20 @@ main()
     print_help
     exit 1
   fi
-  print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
+
+  # calculate the maximum modules are running in parallel
+  if [[ $THREADED -eq 1 ]]; then
+    # the maximum modules in parallel -> after S09 is finished this value gets adjusted
+    # rule of thumb - per core one module
+    MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
+
+    # if we have only one core we run two modules in parallel
+    if [[ "$MAX_MODS" -lt 2 ]]; then
+      MAX_MODS=2
+    fi
+    export MAX_MODS
+    print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
+  fi
 
   # Change log output to color for web report and prepare report
   if [[ $HTML -eq 1 ]] ; then
@@ -402,6 +407,12 @@ main()
       S25_kernel_check
     fi
   fi
+
+  # we use the metasploit path for exploit information from the metasploit framework
+  if [[ -d "$MSF_PATH" ]]; then
+    generate_msf_db &
+  fi
+
 
   #######################################################################################
   # Docker
@@ -524,9 +535,6 @@ main()
         detect_root_dir_helper "$FIRMWARE_PATH" "main"
       fi
 
-      #check_firmware
-      #prepare_binary_arr
-      #prepare_file_arr
       set_etc_paths
       echo
 

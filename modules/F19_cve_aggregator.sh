@@ -22,7 +22,6 @@ F19_cve_aggregator() {
   module_title "Final CVE aggregator"
   
   LOG_FILE="$(get_log_file)"
-  PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
 
   if ! [[ -d "$LOG_DIR"/aggregator ]] ; then
     mkdir "$LOG_DIR"/aggregator
@@ -35,6 +34,7 @@ F19_cve_aggregator() {
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
   CVE_SEARCHSPLOIT=0
+  MSF_MODULE_CNT=0
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
@@ -78,6 +78,10 @@ F19_cve_aggregator() {
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
       fi
+      if [[ -f "$TMP_DIR"/msf_cve-db.txt ]]; then
+        MSF_SEARCH=1
+      fi
+
       generate_cve_details
       generate_special_log
     else
@@ -455,35 +459,37 @@ aggregate_versions() {
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
-  print_output "[*] Software inventory initial overview:"
-  for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
-    print_output "[+] Found Version details (base check): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
-    print_output "[+] Found Version details (statical check): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_EMULATOR[@]}"; do
-    print_output "[+] Found Version details (emulator): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_KERNEL[@]}"; do
-    print_output "[+] Found Version details (kernel): ""$VERSION"
-  done
+  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 ]]; then
+    print_output "[*] Software inventory initial overview:"
+    for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
+      print_output "[+] Found Version details (base check): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
+      print_output "[+] Found Version details (statical check): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_EMULATOR[@]}"; do
+      print_output "[+] Found Version details (emulator): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_KERNEL[@]}"; do
+      print_output "[+] Found Version details (kernel): ""$VERSION"
+    done
 
-  print_output ""
-  VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
-  for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
-    # remove color codes:
-    VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    print_output ""
+    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
+    for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+      # remove color codes:
+      VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+      if [[ "$THREADED" -eq 1 ]]; then
+        prepare_version_data &
+        WAIT_PIDS_F19+=( "$!" )
+      else
+        prepare_version_data
+      fi
+    done
+
     if [[ "$THREADED" -eq 1 ]]; then
-      prepare_version_data &
-      WAIT_PIDS_F19+=( "$!" )
-    else
-      prepare_version_data
+      wait_for_pid "${WAIT_PIDS_F19[@]}"
     fi
-  done
-
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
   # sorting and unique our versions array:
@@ -513,9 +519,9 @@ aggregate_versions() {
 }
 
 generate_special_log() {
-  sub_module_title "Minimal report of exploits and CVE's."
-
   if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE") -gt 0 ]]; then
+    sub_module_title "Minimal report of exploits and CVE's."
+
     readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
     print_output ""
     print_output "[*] CVE log file stored in $CVE_MINIMAL_LOG.\\n"
@@ -533,7 +539,7 @@ generate_special_log() {
 
     print_output ""
     print_output "[*] Minimal exploit summary file stored in $EXPLOIT_OVERVIEW_LOG.\\n"
-    mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
+    mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
@@ -573,9 +579,10 @@ cve_db_lookup() {
 }
 
 cve_extractor() {
-  # extract the CVE numbers and the CVSS values and sort it:
   EXPLOIT_COUNTER_VERSION=0
   CVE_COUNTER_VERSION=0
+
+  # extract the CVE numbers and the CVSS values and sort it:
   readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_DIR"/aggregator/"$AGG_LOG_FILE" | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r)
   VERSION_SEARCH=$(echo "$AGG_LOG_FILE" | sed -e 's/.txt$//' | sed -e 's/_/:/g')
 
@@ -589,42 +596,80 @@ cve_extractor() {
     # default value
     EXPLOIT="No exploit available"
 
+    EDB=0
     # as we already know about a buch of kernel exploits - lets search them first
     if [[ "$VERSION" == *kernel* ]]; then
       for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
         if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
-          EXPLOIT="Exploit available (Source: linux-exploit-suggester)"
+          EXPLOIT="Exploit (linux-exploit-suggester"
           ((EXPLOIT_COUNTER++))
           ((EXPLOIT_COUNTER_VERSION++))
+          EDB=1
         fi
       done
     fi
 
-    if [[ "$CVE_SEARCHSPLOIT" -eq 1 ]] ; then
-      # if no exploit was found lets talk to exploitdb:
-      if [[ "$EXPLOIT" == "No exploit available" ]]; then
+    if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 ]] ; then
+      if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
         mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null)
-        if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
-          readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //')
-          EXPLOIT="Exploit available (Source: Exploit database ID"
-          for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
-            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_ID"
-            echo -e "[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
-            for LINE in "${EXPLOIT_AVAIL[@]}"; do
-              echo "$LINE" >> "$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
-            done
-            ((EXPLOIT_COUNTER++))
-            ((EXPLOIT_COUNTER_VERSION++))
+      fi
+
+      if [[ $MSF_SEARCH -eq 1 ]]; then
+        mapfile -t EXPLOIT_AVAIL_MSF < <(grep "$CVE_VALUE" "$TMP_DIR"/msf_cve-db.txt 2>/dev/null)
+      fi
+
+      if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
+        readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //')
+        if [[ "$EXPLOIT" == "No exploit available" ]]; then
+          EXPLOIT="Exploit (EDB ID:"
+        else
+          EXPLOIT="$EXPLOIT"" / EDB ID:"
+        fi
+        for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
+          EXPLOIT="$EXPLOIT"" ""$EXPLOIT_ID"
+          echo -e "[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
+          for LINE in "${EXPLOIT_AVAIL[@]}"; do
+            echo "$LINE" >> "$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
           done
-          EXPLOIT="$EXPLOIT"")"
-          readarray -t EXPLOIT_FILES < <(echo "${EXPLOIT_AVAIL[@]}" | grep "File:" | cut -d ":" -f 2 | sed 's/\ //')
-          for E_FILE in "${EXPLOIT_FILES[@]}"; do
-            if [[ -f "$E_FILE" ]] ; then
-              cp "$E_FILE" "$LOG_DIR""/aggregator/exploit/""$(basename "$E_FILE")"
-            fi
-          done
+          EDB=1
+          ((EXPLOIT_COUNTER++))
+          ((EXPLOIT_COUNTER_VERSION++))
+        done
+        readarray -t EXPLOIT_FILES < <(echo "${EXPLOIT_AVAIL[@]}" | grep "File:" | cut -d ":" -f 2 | sed 's/\ //')
+        for E_FILE in "${EXPLOIT_FILES[@]}"; do
+          if [[ -f "$E_FILE" ]] ; then
+            cp "$E_FILE" "$LOG_DIR""/aggregator/exploit/edb_""$(basename "$E_FILE")"
+          fi
+        done
+      fi
+
+      if [[ ${#EXPLOIT_AVAIL_MSF[@]} -gt 0 ]]; then
+        if [[ "$EXPLOIT" == "No exploit available" ]]; then
+          EXPLOIT="Exploit (MSF:"
+        else
+          EXPLOIT="$EXPLOIT"" ""/ MSF:"
+        fi
+        for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
+          EXPLOIT_PATH=$(echo "$EXPLOIT_MSF" | cut -d: -f1)
+          EXPLOIT_NAME=$(basename -s .rb "$EXPLOIT_PATH")
+          EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
+          if [[ -f "$EXPLOIT_PATH" ]] ; then
+            # for the web reporter we copy the original metasploit module into the emba log directory
+            cp "$EXPLOIT_PATH" "$LOG_DIR""/aggregator/exploit/msf_""$EXPLOIT_NAME".rb
+          fi
+          ((MSF_MODULE_CNT++))
+        done
+        if [[ $EDB -eq 0 ]]; then
+          # only count the msf exploit if we have not already count an EDB exploit
+          # otherwise we count an exploit for one CVE twice
+          ((EXPLOIT_COUNTER++))
+          ((EXPLOIT_COUNTER_VERSION++))
+          EDB=1
         fi
       fi
+    fi
+    if [[ $EDB -eq 1 ]]; then
+      EXPLOIT="$EXPLOIT"")"
     fi
 
     CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
@@ -632,21 +677,21 @@ cve_extractor() {
     VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
     # we do not deal with output formatting the usual way -> we use printf
     if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-      if [[ "$EXPLOIT" == *Source* ]]; then
+      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* ]]; then
         printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       else
         printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       fi
       ((HIGH_CVE_COUNTER++))
     elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-      if [[ "$EXPLOIT" == *Source* ]]; then
+      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* ]]; then
         printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       else
         printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       fi
       ((MEDIUM_CVE_COUNTER++))
     else
-      if [[ "$EXPLOIT" == *Source* ]]; then
+      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* ]]; then
         printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
       else
         printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
@@ -659,10 +704,21 @@ cve_extractor() {
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
   } >> "$LOG_DIR"/aggregator/cve_sum/"$AGG_LOG_FILE"
-  echo "$LOW_CVE_COUNTER" >> "$TMP_DIR"/LOW_CVE_COUNTER.tmp
-  echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
-  echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
-  echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
+  if [[ $LOW_CVE_COUNTER -gt 0 ]]; then
+    echo "$LOW_CVE_COUNTER" >> "$TMP_DIR"/LOW_CVE_COUNTER.tmp
+  fi
+  if [[ $MEDIUM_CVE_COUNTER -gt 0 ]]; then
+    echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
+  fi
+  if [[ $HIGH_CVE_COUNTER -gt 0 ]]; then
+    echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
+  fi
+  if [[ $EXPLOIT_COUNTER -gt 0 ]]; then
+    echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
+  fi
+  if [[ $MSF_MODULE_CNT -gt 0 ]]; then
+    echo "$MSF_MODULE_CNT" >> "$TMP_DIR"/MSF_MODULE_CNT.tmp
+  fi
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_output ""
@@ -699,22 +755,24 @@ generate_cve_details() {
     wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
-  print_output ""
-  print_output "[*] Identified the following version details, vulnerabilities and exploits:"
   mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/cve_sum/ -type f -name "*.txt" | sort 2> /dev/null)
-  for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
-    if [[ "$THREADED" -eq 1 ]]; then
-      final_outputter &
-      WAIT_PIDS_F19+=( "$!" )
-    else
-      final_outputter
-    fi
-  done
+  if [[ ${#LOG_AGGR_FILES[@]} -gt 0 ]]; then
+    print_output ""
+    print_output "[*] Identified the following version details, vulnerabilities and exploits:"
+    for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
+      if [[ "$THREADED" -eq 1 ]]; then
+        final_outputter &
+        WAIT_PIDS_F19+=( "$!" )
+      else
+        final_outputter
+      fi
+    done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19[@]}"
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_F19[@]}"
+    fi
+    print_output "${NC}"
   fi
-  print_output "${NC}"
 }
 
 final_outputter() {
