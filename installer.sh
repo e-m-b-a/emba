@@ -528,7 +528,7 @@ case ${ANSWER:0:1} in
         /etc/init.d/redis-server start
         ./sbin/db_mgmt_cpe_dictionary.py -p
         ./sbin/db_mgmt_json.py -p
-        ./sbin/db_updater.py -c
+        ./sbin/db_updater.py -f
         cd ../.. || exit 1
         sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
         chmod +x config/cve_database_updater
@@ -682,3 +682,4 @@ case ${ANSWER:0:1} in
     fi
   ;;
 esac
+echo -e "$GREEN""Emba installation finished ""$NC"
