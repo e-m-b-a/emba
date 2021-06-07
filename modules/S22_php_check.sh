@@ -83,6 +83,29 @@ s22_script_check() {
   fi
 }
 
+s22_check_php_init(){
+  $(sudo ~/vendor/bin/iniscan scan --path=/etc/php/7.4/apache2/php.ini > ./logs/iniscan_output.txt)
+  FILE="./logs/iniscan_output.txt"
+  while IFS= read -r LINE
+  do
+    if (( $LINE == *"FAIL"* && $LINE == *"ERROR"*))
+         print_output "[-] ""$ORANGE""FAIL""$RED""ERROR""$WHITE""$LINE"
+    elif (( $LINE == *"FAIL"* && $LINE == *"WARNING"*))
+         print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+    elif (( $LINE == *"PASS"* && $LINE == *"WARNING"*))
+         print_output "[-] ""$GREEN""PASS""$ORANGE""ERROR""$WHITE""$LINE"
+    elif (( $LINE == *"PASS"* && $LINE == *"WARNING"*))
+         print_output "[-] ""$GREEN""PASS""$CYAN""WARNING""$WHITE""$LINE"
+    #print_output "$(orange "orange text example")"
+    #print_output "$(red "red text example")"
+    #print_output "$(blue "blue text example")"
+    #print_output "$(cyan "cyan text example")"
+    #print_output "$(green "green text example")"
+    #print_output "$(magenta "magenta text example")"
+  done < "$FILE"
+}
+
+
 #Must heaves
 # PHP7.2+
 #display_errors = Off
