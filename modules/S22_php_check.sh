@@ -83,19 +83,26 @@ s22_script_check() {
   fi
 }
 
+#memory_limit            = 50M
+#post_max_size           = 20M
+#max_execution_time      = 60
+
 s22_check_php_init(){
-  $(sudo ~/vendor/bin/iniscan scan --path=/etc/php/7.4/apache2/php.ini > ./logs/iniscan_output.txt)
+  #$(sudo ~/vendor/bin/iniscan scan --path=/etc/php/7.4/apache2/php.ini > ./logs/iniscan_output.txt)
   FILE="./logs/iniscan_output.txt"
   while IFS= read -r LINE
   do
-    if (( $LINE == *"FAIL"* && $LINE == *"ERROR"*))
+    if (( "$LINE" == *"FAIL"* && "$LINE" == *"ERROR"*)); then
+         add_recommendations LINE
          print_output "[-] ""$ORANGE""FAIL""$RED""ERROR""$WHITE""$LINE"
-    elif (( $LINE == *"FAIL"* && $LINE == *"WARNING"*))
+    elif (( "$LINE" == *"FAIL"* && "$LINE" == *"WARNING"*)); then
+         add_recommendations LINE
          print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
-    elif (( $LINE == *"PASS"* && $LINE == *"WARNING"*))
+    elif (( "$LINE" == *"PASS"* && "$LINE" == *"WARNING"*)); then
          print_output "[-] ""$GREEN""PASS""$ORANGE""ERROR""$WHITE""$LINE"
-    elif (( $LINE == *"PASS"* && $LINE == *"WARNING"*))
+    elif (( "$LINE" == *"PASS"* && "$LINE" == *"WARNING"*)); then
          print_output "[-] ""$GREEN""PASS""$CYAN""WARNING""$WHITE""$LINE"
+    fi
     #print_output "$(orange "orange text example")"
     #print_output "$(red "red text example")"
     #print_output "$(blue "blue text example")"
@@ -103,6 +110,19 @@ s22_check_php_init(){
     #print_output "$(green "green text example")"
     #print_output "$(magenta "magenta text example")"
   done < "$FILE"
+}
+
+add_recommendations(){
+   LINE = $1
+   LINE_ARR = LINE.split('|');
+
+   if()
+   #memory_limit            = 50M
+#post_max_size           = 20M
+#max_execution_time      = 60
+
+
+
 }
 
 
