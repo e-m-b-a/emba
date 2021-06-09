@@ -213,7 +213,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:stxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:p:stxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -270,6 +270,9 @@ main()
       N)
         export FW_NOTES="$OPTARG"
         ;;
+      p)
+        export PROFILE="$OPTARG"
+       ;;
       s)
         export SHORT_PATH=1
         ;;
@@ -304,6 +307,21 @@ main()
 
   echo
 
+  # profile handling
+  if [[ -n "$PROFILE" ]]; then
+    if [[ -f ./scan-profiles/"$PROFILE" ]]; then
+      print_bar "no_log"
+      print_output "[*] Loading profile with the following settings:" "no_log"
+      # shellcheck disable=SC1090
+      source ./scan-profiles/"$PROFILE"
+      print_output "[*] Profile ./scan-profiles/$PROFILE loaded" "no_log"
+      print_bar "no_log"
+    else
+      print_output "[!] Profile ./scan-profiles/$PROFILE not found" "no_log"
+      exit 1
+    fi
+  fi
+ 
   # check provided paths for validity 
   check_path_valid "$FIRMWARE_PATH"
   check_path_valid "$KERNEL_CONFIG"
@@ -431,7 +449,7 @@ main()
 
     OPTIND=1
     ARGS=""
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:stX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:p:stX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -444,8 +462,13 @@ main()
     echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
-    D_RETURN=$?
+    if [[ -f "$INVOCATION_PATH"/scan-profiles/"$PROFILE" ]]; then
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS -p $PROFILE"
+      D_RETURN=$?
+    else
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
+      D_RETURN=$?
+    fi
 
     if [[ $D_RETURN -eq 0 ]] ; then
       if [[ $ONLY_DEP -eq 0 ]] ; then
