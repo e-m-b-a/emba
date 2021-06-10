@@ -496,7 +496,11 @@ aggregate_versions() {
     mapfile -t KERNELS < <(grep kernel "$LOG_PATH_MODULE"/versions.tmp)
     grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u > "$LOG_PATH_MODULE"/versions1.tmp
     for KERNEL in "${KERNELS[@]}"; do
-      sed -i "1s/^/$KERNEL\n/" "$LOG_PATH_MODULE"/versions1.tmp
+      if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | cut -d" " -f1 ) -eq 0 ]] ; then
+        echo "$KERNEL" > "$LOG_PATH_MODULE"/versions1.tmp
+      else
+        sed -i "1s/^/$KERNEL\n/" "$LOG_PATH_MODULE"/versions1.tmp
+      fi
     done
     mapfile -t VERSIONS_CLEANED < <(cat "$LOG_PATH_MODULE"/versions1.tmp)
     rm "$LOG_PATH_MODULE"/versions*.tmp 2>/dev/null

@@ -122,21 +122,39 @@ add_link_tags() {
   fi
 
   # Exploit links and additional files
-  if ( grep -q -E '(Exploit|exploit)' "$LINK_FILE" ) ; then
-    readarray -t EXPLOITS_IDS_F < <( sed -n -e 's/^.*Exploit database ID //p' "$LINK_FILE" | sed 's/[^0-9\ ]//g' | sort -u)
-    readarray -t EXPLOITS_IDS_S < <( sed -n -e 's/^.*exploit-db: //p' "$LINK_FILE" | sed 's/[^0-9\ ]//g' | sort -u)
-    EXPLOITS_IDS=( "${EXPLOITS_IDS_F[@]}" "${EXPLOITS_IDS_S[@]}" )
+  if ( grep -q -E 'EDB ID:' "$LINK_FILE" ) ; then
+    readarray -t EXPLOITS_IDS < <( sed -E -e "s@.*EDB ID: ([0-9]*)[\ ]?*.*@\1@g" "$LINK_FILE" | sort -u)
     for EXPLOIT_ID in "${EXPLOITS_IDS[@]}" ; do
       if [[ -n "$EXPLOIT_ID" ]] ; then
-        EXPLOIT_FILE="$LOG_DIR""/aggregator/exploit/""$EXPLOIT_ID"".txt"
+        EXPLOIT_FILE="$LOG_DIR""/f19/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
+          echo "$EXPLOIT_FILE""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
           generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
-          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./info/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
+          echo "$HTML_LINK""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
+          sed -i -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE"
+          echo "$(sed -n -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE")""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@((Exploit database ID )|(exploit-db: ))$EXPLOIT_ID([^[:digit:]]{1})@\1$HTML_LINK\4@g" "$LINK_FILE"
+          sed -i -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE"
+        fi
+      fi
+    done
+  fi
+
+  # MSF key links and additional files
+  if ( grep -q -E 'Exploit.*MSF' "$LINK_FILE" ) ; then
+    readarray -t MSF_KEY_F < <( sed -E -e "s@.*MSF: ([0-9a-z_]*)*.*@\1@g" "$LINK_FILE" | sort -u)
+    for MSF_KEY in "${MSF_KEY_F[@]}" ; do
+      if [[ -n "$MSF_KEY" ]] ; then
+        MSF_KEY_FILE="$LOG_DIR""/f19/exploit/msf_""$MSF_KEY"".rb"
+        if [[ -f "$MSF_KEY_FILE" ]] ; then
+          # copy msf file
+          if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
+          cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")"
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 | cut -d"_" -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY""$LINK_END"
+          sed -i -E "s@(MSF: )$MSF_KEY([0-9a-z_]*)@\1$HTML_LINK\2@g" "$LINK_FILE"
         fi
       fi
     done
@@ -201,8 +219,8 @@ generate_info_file()
     add_link_tags "$TMP_INFO_FILE" "$INFO_HTML_FILE"
 
     readarray -t EXPLOITS_IDS_INFO < <( grep 'Exploit DB Id:' "$INFO_FILE" | sed -e 's/[^0-9\ ]//g ; s/\ //g' | sort -u )
-    for EXPLOIT_ID in "${EXPLOITS_IDS_INFO[@]}" ; do
-      ONLINE="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
+    for EXPLOIT_ID_INFO in "${EXPLOITS_IDS_INFO[@]}" ; do
+      ONLINE="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID_INFO@g")""$EXPLOIT_ID_INFO""$LINK_END"
       printf "%s%sOnline: %s%s\n" "$HR_MONO" "$P_START" "$ONLINE" "$P_END" >> "$TMP_INFO_FILE"
     done
 

@@ -28,10 +28,7 @@ S106_deep_key_search()
   for PATTERN in "${PATTERN_LIST[@]}";do
     print_output "[*] Pattern: $PATTERN"
   done
-  
-  LOG_FILE="$( get_log_file )"
-  LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
-  mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
+
 
   OCC_LIST=()
 
@@ -67,14 +64,14 @@ deep_key_searcher() {
     local S_OUTPUT
     readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-100)
     if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
-      echo "[+] $DEEP_S_FILE" >> "$LOG_DIR""/""$LOG_DIR_MOD"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
+      echo "[+] $DEEP_S_FILE" >> "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
       for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do
         DEEP_S_LINE="$( echo "$DEEP_S_LINE" | tr "\000-\037\177-\377" "." )"
-        echo "$DEEP_S_LINE" >> "$LOG_DIR""/""$LOG_DIR_MOD"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
+        echo "$DEEP_S_LINE" >> "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
       done
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c "$PATTERN" "$LOG_DIR""/""$LOG_DIR_MOD"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt" )
+        F_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt" )
         if [[ $F_COUNT -gt 0 ]] ; then
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
@@ -87,7 +84,7 @@ deep_key_searcher() {
 
 deep_key_reporter() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
-    P_COUNT=$(grep -c "$PATTERN" "$LOG_DIR""/""$LOG_DIR_MOD"/deep_key_search_* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' )
+    P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' )
     OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
   done
 
