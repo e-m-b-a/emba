@@ -291,7 +291,7 @@ prepare_version_data() {
     #gpg (GnuPG) 2.2.17
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
     #iw* Wireless-Tools version 29
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/iw[a-z]\+ wireless[-_]tools/wireless_tools/')"
+    VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     # apt-Version 1.2.3
     VERSION_lower="${VERSION_lower//apt-/apt\ }"
     # remove the v in something like this: "space v[number]"
