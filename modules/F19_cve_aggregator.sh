@@ -116,9 +116,41 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
+
+    #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
+    VERSION_lower="${VERSION_lower//chrony[cd] \(chrony\) /chrony }"
+    #Dropbear multi-purpose version 2012.55
+    VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear_ssh\ }"
+    #Dropbear v2016.74
+    VERSION_lower="${VERSION_lower//dropbear\ v/dropbear_ssh\ }"
+    #DynDns Update v1.0 (c) 2004,2005 AlphaNetworks,Inc.
+    VERSION_lower="${VERSION_lower//update\ /}"
+    #envsubst (GNU gettext-runtime) 0.19.8.1
+    #VERSION_lower="${VERSION_lower//envsubst\ \(/\ \()}"
+    VERSION_lower="${VERSION_lower//envsubst \(gnu/\(gnu}"
+    #ethswctl.c:v0.0.2 (January 27, 2009)
+    VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
+    #flashcp (mtd-utils) 2.0.2
+    VERSION_lower="${VERSION_lower//flashcp\ \(mtd-utils\)/mtd-utils}"
+    VERSION_lower="${VERSION_lower//flash_erase\ \(mtd-utils\)/mtd-utils}"
+    VERSION_lower="${VERSION_lower//flash_unlock\ \(mtd-utils\)/mtd-utils}"
+    VERSION_lower="${VERSION_lower//ftl_*\ \(mtd-utils\)/mtd-utils}"
+    #flock (util-linux UNKNOWN)
+    VERSION_lower="${VERSION_lower//flock \(util-linux/util-linux}"
+    #ftpd (GNU inetutils) 1.4.2
+    VERSION_lower="${VERSION_lower//ftpd\ \(gnu inetutils\)/gnu inetutils}"
+    #igmpproxy versoin 3.0 beta
+    VERSION_lower="${VERSION_lower//versoin/version}"
+    #xmlwf using expat_2.1.0
+    VERSION_lower="${VERSION_lower//xmlwf using expat_/expat\ }"
+    #zic (tzcode) 2018e
+    VERSION_lower="${VERSION_lower//zic\ \(tzcode\) /tzcode\ }"
+    #pppd version 2.4.2
+    VERSION_lower="${VERSION_lower/pppd/point-to-point_protocol}"
+
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
-    VERSION_lower="${VERSION_lower//(gdb)/}"
+    VERSION_lower="${VERSION_lower//(gdb) /}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
     # some - -> space
@@ -157,6 +189,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//dnsmasq-/dnsmasq\ }"
     # lighttpd- -> lighttpd\ 
     VERSION_lower="${VERSION_lower//lighttpd-/lighttpd\ }"
+    #lighttpd/1.4.33-devel-17M (Nov 13 2013 21:55:13) - a light and fast webserver
+    VERSION_lower="${VERSION_lower//lighttpd\//lighttpd\ }"
+    VERSION_lower="$(echo "$VERSION_lower" | sed "s/-devel-17m//")"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
@@ -255,13 +290,12 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
-    #Wireless-Tools version 29
-    VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
-    VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"
+    #iw* Wireless-Tools version 29
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/iw[a-z]\+ wireless[-_]tools/wireless_tools/')"
     # apt-Version 1.2.3
     VERSION_lower="${VERSION_lower//apt-/apt\ }"
     # remove the v in something like this: "space v[number]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')" 
     # "mkfs\.jffs2\ revision\ [0-9]\.[0-9]\.[0-9]\.[0-9]"
     VERSION_lower="${VERSION_lower//revision\ /}"
     # mkfs.jffs2: error!: revision 1.60
@@ -378,6 +412,7 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ inetutils/gnu:inetutils/')"
     # handle grub version 2:
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)/grub/')"
