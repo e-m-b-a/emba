@@ -105,6 +105,7 @@ output_details() {
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
     write_link "p05"
+    echo "entropy_value;\"$ENTROPY\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ -n "$ENTROPY_PIC" ]]; then
