@@ -53,11 +53,11 @@ add_color_tags()
 {
   COLOR_FILE="$1"
   sed -i -E \
-    -e 's/\x1b\[/;/g ; s/;[0-9]{0};/;00;/g ; s/;([0-9]{1});/;0\1;/g ; s/;([0-9]{2});/;\1;/g ' \
-    -e 's/;([0-9]{0})(m){1}/;00/g ; s/;([0-9]{1})(m){1}/;0\1/g ; s/;([0-9]{2})(m){1}/;\1/g ' \
-    -e "s/;31/$SPAN_RED/g ; s/;32/$SPAN_GREEN/g ; s/;33/$SPAN_ORANGE/g" \
-    -e "s/;34/$SPAN_BLUE/g ; s/;35/$SPAN_MAGENTA/g ; s/;36/$SPAN_CYAN/g" \
-    -e "s/;01/$SPAN_BOLD/g ; s/;03/$SPAN_ITALIC/g ; s@;00@$SPAN_END@g" \
+    -e 's@\x1b\[@;@g ; s@;[0-9]{0};@;00;@g ; s@;([0-9]{1});@;0\1;@g ; s@;([0-9]{2});@;\1;@g ' \
+    -e 's@;([0-9]{0})(m){1}@;00@g ; s@;([0-9]{1})(m){1}@;0\1@g ; s@;([0-9]{2})(m){1}@;\1@g ' \
+    -e "s@;31@$SPAN_RED@g ; s@;32@$SPAN_GREEN@g ; s@;33@$SPAN_ORANGE@g" \
+    -e "s@;34@$SPAN_BLUE@g ; s@;35@$SPAN_MAGENTA@g ; s@;36@$SPAN_CYAN@g" \
+    -e "s@;01@$SPAN_BOLD@g ; s@;03@$SPAN_ITALIC@g ; s@;00@$SPAN_END@g" \
     -e "s@;[0-9]{2}@@g ; s@$P_START$P_END@$BR@g" "$COLOR_FILE"
 }
 
@@ -173,16 +173,19 @@ add_link_tags() {
 
   # MSF key links and additional files
   if ( grep -q -E 'Exploit.*MSF' "$LINK_FILE" ) ; then
-    readarray -t MSF_KEY_F < <( sed -E -e "s@.*MSF: ([0-9a-z_]*)*.*@\1@g" "$LINK_FILE" | sort -u)
-    for MSF_KEY in "${MSF_KEY_F[@]}" ; do
+    readarray -t MSF_KEY_F < <( sed -E -e "s@.*MSF: (([0-9a-z_][\ ]?)*).*@\1@g" "$LINK_FILE" | sort -u)
+    for MSF_KEY in "${MSF_KEY_F[@]}" ; do 
+      echo "0""$MSF_KEY"
       if [[ -n "$MSF_KEY" ]] ; then
         MSF_KEY_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/msf_""$MSF_KEY"".rb"
         if [[ -f "$MSF_KEY_FILE" ]] ; then
+          echo "1""$MSF_KEY_FILE"
           # copy msf file
           if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
           cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")"
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY""$LINK_END"
-          sed -i -E "s@(MSF: )$MSF_KEY([0-9a-z_]*)@\1$HTML_LINK\2@g" "$LINK_FILE"
+          echo "2""$HTML_LINK"
+          sed -i -E "s@([\ ]+)$MSF_KEY@\1$HTML_LINK@g" "$LINK_FILE"
         fi
       fi
     done
@@ -202,7 +205,7 @@ add_link_tags() {
 
 strip_color_tags()
 {
-  echo "$1" | sed 's/\x1b\[[0-9;]*m//g' | tr -d '\000-\010\013\014\016-\037'
+  echo "$1" | sed 's@\x1b\[[0-9;]*m@@g' | tr -d '\000-\010\013\014\016-\037'
 }
 
 # often we have additional information, like exploits or cve's
@@ -235,8 +238,8 @@ generate_info_file()
     fi
 
     cp "$INFO_FILE" "$TMP_INFO_FILE"
-    sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_INFO_FILE"
-    sed -i -e '/\[\*\]\ Statistics/d' "$TMP_INFO_FILE"
+    sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE"
+    sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE"
 
     sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_INFO_FILE"
     # add html tags for style
@@ -246,13 +249,13 @@ generate_info_file()
     # add link tags to links/generate info files and link to them and write line to tmp file
     add_link_tags "$TMP_INFO_FILE" "$INFO_HTML_FILE"
 
-    readarray -t EXPLOITS_IDS_INFO < <( grep 'Exploit DB Id:' "$INFO_FILE" | sed -e 's/[^0-9\ ]//g ; s/\ //g' | sort -u )
+    readarray -t EXPLOITS_IDS_INFO < <( grep 'Exploit DB Id:' "$INFO_FILE" | sed -e 's@[^0-9\ ]@@g ; s@\ @@g' | sort -u )
     for EXPLOIT_ID_INFO in "${EXPLOITS_IDS_INFO[@]}" ; do
       ONLINE="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID_INFO@g")""$EXPLOIT_ID_INFO""$LINK_END"
       printf "%s%sOnline: %s%s\n" "$HR_MONO" "$P_START" "$ONLINE" "$P_END" >> "$TMP_INFO_FILE"
     done
 
-    readarray -t EXPLOIT_FILES < <(grep "File: " "$INFO_FILE" | cut -d ":" -f 2 | sed 's/^\ //' | sort -u)
+    readarray -t EXPLOIT_FILES < <(grep "File: " "$INFO_FILE" | cut -d ":" -f 2 | sed 's@^\ @@' | sort -u)
     for E_PATH in "${EXPLOIT_FILES[@]}" ; do
       if [[ -f "$E_PATH" ]] ; then
         if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
@@ -287,15 +290,15 @@ generate_report_file()
     LINE_NUMBER_REP_NAV=$(grep -n "navigation start" "$ABS_HTML_PATH""/""$HTML_FILE" | cut -d":" -f1)
 
     cp "$REPORT_FILE" "$TMP_FILE"
-    sed -i -e 's/&/\&amp;/g ; s/</\&lt;/g ; s/>/\&gt;/g' "$TMP_FILE"
-    sed -i '/\[\*\]\ Statistics/d' "$TMP_FILE"
+    sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_FILE"
+    sed -i '\@\[\*\]\ Statistics@d' "$TMP_FILE"
 
     # module title anchor links
     if ( grep -q -E '[=]{65}' "$TMP_FILE" ) ; then
       MODUL_NAME="$( strip_color_tags "$(grep -E -B 1 '[=]{65}' "$TMP_FILE" | head -n 1)" | cut -d" " -f2- )"
       if [[ -n "$MODUL_NAME" ]] ; then
         # add anchor to file
-        A_MODUL_NAME="$(echo "$MODUL_NAME" | sed -e "s/\ /_/g" | tr "[:upper:]" "[:lower:]")"
+        A_MODUL_NAME="$(echo "$MODUL_NAME" | sed -e "s@\ @_@g" | tr "[:upper:]" "[:lower:]")"
         LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$A_MODUL_NAME@g")""$MODUL_NAME""$LINK_END"
         sed -i -E "s@$MODUL_NAME@$LINE@" "$TMP_FILE"
         # add link to index navigation
@@ -309,11 +312,11 @@ generate_report_file()
 
     # submodule title anchor links
     if ( grep -q -E '^[-]{65}$' "$TMP_FILE" ) ; then
-      readarray -t SUBMODUL_NAMES < <( grep -E -B 1 '^[-]{65}$' "$TMP_FILE" | sed -E '/[-]{65}/d' | grep -v "^--")
+      readarray -t SUBMODUL_NAMES < <( grep -E -B 1 '^[-]{65}$' "$TMP_FILE" | sed -E '\@[-]{65}@d' | grep -v "^--")
       for SUBMODUL_NAME in "${SUBMODUL_NAMES[@]}" ; do
         if [[ -n "$SUBMODUL_NAME" ]] ; then
           SUBMODUL_NAME="$( strip_color_tags "$SUBMODUL_NAME" | cut -d" " -f 2- )"
-          A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s/[^a-zA-Z0-9]//g" | tr "[:upper:]" "[:lower:]")"
+          A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s@[^a-zA-Z0-9]@@g" | tr "[:upper:]" "[:lower:]")"
           LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@$A_SUBMODUL_NAME@g")""$SUBMODUL_NAME""$LINK_END"
           sed -i -E "s@$SUBMODUL_NAME@$LINE@" "$TMP_FILE"
           # Add anchor to file
@@ -361,7 +364,7 @@ add_link_to_index() {
   MODUL_NAME="$2"
   DATA="$( echo "$HTML_FILE" | cut -d "_" -f 1)"
   CLASS="${DATA:0:1}"
-  C_NUMBER="$(echo "${DATA:1}" | sed -E 's/^0*//g')"
+  C_NUMBER="$(echo "${DATA:1}" | sed -E 's@^0*@@g')"
 
   readarray -t INDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' "$ABS_HTML_PATH""/""$INDEX_FILE" | sed -e '1d;$d' | grep -P -o '(?<=data=\").*?(?=\")')
   readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep "$CLASS" )
@@ -372,11 +375,11 @@ add_link_to_index() {
     insert_line "navigation end" "$MODUL_NAME"
   else
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
-      if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] ; then
+      if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' ) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
-      elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's/^0*//g' ) ]] ; then
+      elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' ) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's@^0*@@g' ) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
-      elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's/^0*//g' ) ]] ; then
+      elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' ) ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
       fi
     done
@@ -391,7 +394,7 @@ update_index()
   # generate files in $SUPPL_PATH (supplementary files from modules) 
   readarray -t SUPPL_FILES < <(find "$SUPPL_PATH" ! -path "$SUPPL_PATH")
   if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
-    sed -i 's/expand_njs hidden/expand_njs/g' "$ABS_HTML_PATH""/""$INDEX_FILE"
+    sed -i 's@expand_njs hidden@expand_njs@g' "$ABS_HTML_PATH""/""$INDEX_FILE"
   fi
   for S_FILE in "${SUPPL_FILES[@]}" ; do
     generate_info_file "$S_FILE" "" "$SUPPL_PATH_HTML"
@@ -437,5 +440,5 @@ prepare_report()
   fi
 
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"
-  sed -i 's/back/back hidden/g' "$ABS_HTML_PATH""/""$INDEX_FILE"
+  sed -i 's@back@back hidden@g' "$ABS_HTML_PATH""/""$INDEX_FILE"
 }

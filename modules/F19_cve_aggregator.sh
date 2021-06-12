@@ -736,6 +736,8 @@ cve_extractor() {
 generate_cve_details() {
   sub_module_title "Collect CVE and exploit details."
 
+  write_anchor "collectcveandexploitdetails"
+
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
 

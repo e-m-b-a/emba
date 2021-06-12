@@ -141,7 +141,7 @@ output_details() {
     echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  EMUL=$(find "$LOG_DIR"/s115 -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
+  EMUL=$(find "$LOG_DIR"/s115_usermode_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
     write_link "s115"
@@ -301,10 +301,10 @@ output_binaries() {
   FUNCTION1="system"
   local DATA=0
 
-  if [[ -d "$LOG_DIR""/s11/" ]] ; then
-    if [[ "$(find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
-      readarray -t RESULTS < <( find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
-      readarray -t RESULTS1 < <( find "$LOG_DIR""/s11/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
+  if [[ -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
+    if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+      readarray -t RESULTS < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS1 < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
 
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
@@ -357,7 +357,7 @@ output_cve_exploits() {
   local DATA=0
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
     print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
-    write_link "f19"
+    write_link "f19#collectcveandexploitdetails"
     print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
     print_output ""
