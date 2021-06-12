@@ -82,14 +82,22 @@ add_link_tags() {
   if ( grep -q -E '\[REF\]' "$LINK_FILE" ) ; then
     readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
     for REF_LINK in "${REF_LINKS[@]}" ; do
-      if [[ -f "$REF_LINK" ]] ; then
-        if [[ ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ]] ; then
+      if [[ -f "$REF_LINK" ]] ; then #if [[ "$STR" == *"$SUB"* ]]
+        if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
+          REF_ANCHOR=""
+          if [[ ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
+            REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2)"
+            REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1)"
+          fi
           # generate reference file
           generate_info_file "$REF_LINK" "$BACK_LINK"
           LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
-          REF_LINK_HTML_FILE=
-          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html@g")"
+          if [[ -n "$REF_ANCHOR" ]] ; then
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html#anchor_$REF_ANCHOR@g")"
+          else
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html@g")"
+          fi
           while [[ ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
@@ -101,14 +109,23 @@ add_link_tags() {
           IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
           sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
         fi
-      elif [[ "$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ]] ; then
+      elif [[ ("$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
+        REF_ANCHOR=""
+        if [[ "$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}\#.*$ ]] ; then
+          REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2)"
+          REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1)"
+        fi
         # link modules
         LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
         LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
         if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
           MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
-          HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@g")"
+          if [[ -n "$REF_ANCHOR" ]] ; then
+            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html#anchor_$REF_ANCHOR@g")"
+          else
+            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@g")"
+          fi
           while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
@@ -122,12 +139,22 @@ add_link_tags() {
     done
   fi
 
+  # Add anchors to link inside of modules
+  if ( grep -q -E '\[ANC\]' "$LINK_FILE" ) ; then
+    readarray -t ANC_ARR < <(grep -o -E '\[ANC\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
+    for ANC in "${ANC_ARR[@]}" ; do
+      LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[ANC\] ""$ANC" "$LINK_FILE" | cut -d":" -f1)"
+      ANC_LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@anchor_$ANC@g")""$LINK_END"
+      sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$ANC_LINE" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
+    done
+  fi
+
   # Exploit links and additional files
   if ( grep -q -E 'EDB ID:' "$LINK_FILE" ) ; then
     readarray -t EXPLOITS_IDS < <( sed -E -e "s@.*EDB ID: ([0-9]*)[\ ]?*.*@\1@g" "$LINK_FILE" | sort -u)
     for EXPLOIT_ID in "${EXPLOITS_IDS[@]}" ; do
       if [[ -n "$EXPLOIT_ID" ]] ; then
-        EXPLOIT_FILE="$LOG_DIR""/f19/exploit/""$EXPLOIT_ID"".txt"
+        EXPLOIT_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
           echo "$EXPLOIT_FILE""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
@@ -149,7 +176,7 @@ add_link_tags() {
     readarray -t MSF_KEY_F < <( sed -E -e "s@.*MSF: ([0-9a-z_]*)*.*@\1@g" "$LINK_FILE" | sort -u)
     for MSF_KEY in "${MSF_KEY_F[@]}" ; do
       if [[ -n "$MSF_KEY" ]] ; then
-        MSF_KEY_FILE="$LOG_DIR""/f19/exploit/msf_""$MSF_KEY"".rb"
+        MSF_KEY_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/msf_""$MSF_KEY"".rb"
         if [[ -f "$MSF_KEY_FILE" ]] ; then
           # copy msf file
           if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
@@ -187,7 +214,7 @@ generate_info_file()
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%.${INFO_FILE##*.}}"".html")"
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
-    INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 | cut -d"_" -f1 )"
+    INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 )"
   else
     INFO_PATH="$ABS_HTML_PATH""/""$CUSTOM_SUB_PATH"
   fi

@@ -19,6 +19,9 @@ F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final aggregator"
 
+  print_output "[+] Anchortest: "
+  write_link "s11#test"
+
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   S25_LOG="s25_kernel_check.txt"
   P02_LOG="p02_firmware_bin_file_check.txt"
@@ -587,11 +590,12 @@ os_kernel_module_detect() {
 print_os() {
   if [[ $VERIFIED -eq 1 ]]; then
     print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+    write_link "s25"
     echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
+    write_link "p07"
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   fi
-  write_link "f19"
 }
 

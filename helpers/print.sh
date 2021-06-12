@@ -221,6 +221,21 @@ write_link()
   fi
 }
 
+write_anchor()
+{
+  if [[ $HTML -eq 1 ]] ; then
+    local ANCHOR
+    ANCHOR="$1"
+    ANCHOR="$(format_log "[ANC] ""$ANCHOR" 1)"
+    local LOG_FILE_ALT="$2"
+    if [[ -f "$LOG_FILE_ALT" ]] ; then
+      echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
+    else
+      echo -e "$ANCHOR" | tee -a "$LOG_FILE" >/dev/null
+    fi
+  fi
+}
+
 reset_module_count()
 {
   MODULE_NUMBER="--"
@@ -492,7 +507,7 @@ module_start_log() {
   MODULE_MAIN_NAME="$1"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   export LOG_PATH_MODULE
-  LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | cut -d"_" -f1 | tr '[:upper:]' '[:lower:]')"
+  LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
   if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" ; fi
   ((MOD_RUNNING++))
 }
