@@ -82,7 +82,7 @@ add_link_tags() {
   if ( grep -q -E '\[REF\]' "$LINK_FILE" ) ; then
     readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
     for REF_LINK in "${REF_LINKS[@]}" ; do
-      if [[ -f "$REF_LINK" ]] ; then #if [[ "$STR" == *"$SUB"* ]]
+      if [[ -f "$(echo "$REF_LINK" | cut -d"#" -f1)" ]] ; then
         if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
           REF_ANCHOR=""
           if [[ ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
@@ -94,9 +94,9 @@ add_link_tags() {
           LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
           if [[ -n "$REF_ANCHOR" ]] ; then
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html#anchor_$REF_ANCHOR@g")"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html""#anchor_$REF_ANCHOR@g")"
           else
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html@g")"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html@g")"
           fi
           while [[ ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
@@ -122,7 +122,7 @@ add_link_tags() {
         if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
           MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
           if [[ -n "$REF_ANCHOR" ]] ; then
-            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html#anchor_$REF_ANCHOR@g")"
+            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html\#anchor_$REF_ANCHOR@g")"
           else
             HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@g")"
           fi
@@ -159,7 +159,7 @@ add_link_tags() {
           # generate exploit file
           echo "$EXPLOIT_FILE""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
           generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
-          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
           echo "$HTML_LINK""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
           sed -i -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE"
           echo "$(sed -n -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE")""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
@@ -181,7 +181,7 @@ add_link_tags() {
           # copy msf file
           if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
           cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")"
-          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 | cut -d"_" -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY""$LINK_END"
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY""$LINK_END"
           sed -i -E "s@(MSF: )$MSF_KEY([0-9a-z_]*)@\1$HTML_LINK\2@g" "$LINK_FILE"
         fi
       fi
@@ -257,7 +257,7 @@ generate_info_file()
       if [[ -f "$E_PATH" ]] ; then
         if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
         cp "$E_PATH" "$RES_PATH""/""$(basename "$E_PATH")"
-        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"_" -f1 )/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 )/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         printf "%s%sFile: %s%s\n" "$HR_MONO" "$P_START" "$E_HTML_LINK" "$P_END" >> "$TMP_INFO_FILE"
       fi
     done
@@ -359,9 +359,9 @@ add_link_to_index() {
 
   HTML_FILE="$1"
   MODUL_NAME="$2"
-  DATA="$( echo "$HTML_FILE" | cut -d "_" -f 1)"
+  DATA="$( echo "$HTML_FILE" | cut -d "." -f 1)"
   CLASS="${DATA:0:1}"
-  C_NUMBER="$(echo "${DATA:1}" | sed -E 's/^0*//g')"
+  C_NUMBER="$(echo "${DATA:1}" | sed -E 's/^0*//g' | cut -d"_" -f 1)"
 
   readarray -t INDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' "$ABS_HTML_PATH""/""$INDEX_FILE" | sed -e '1d;$d' | grep -P -o '(?<=data=\").*?(?=\")')
   readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep "$CLASS" )
@@ -408,7 +408,7 @@ scan_report()
 {
   # at the end of an emba run, we have to disable all non-valid links to modules
   local LINK_ARR
-  readarray -t LINK_ARR < <(grep -R -E "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH" | cut -d"\"" -f 4 | sort -u)
+  readarray -t LINK_ARR < <(grep -R -E "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH" | cut -d"\"" -f 4 | cut -d"#" -f 1 | sort -u)
   local LINK_FILE_ARR
   readarray -t LINK_FILE_ARR < <(grep -R -E -l "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH")
   for LINK in "${LINK_ARR[@]}" ; do

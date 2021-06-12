@@ -160,7 +160,6 @@ function_check_MIPS32() {
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
-          write_anchor "test" "$FUNC_LOG"
         done
         COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
@@ -345,9 +344,6 @@ output_function_details()
     LOG_FILE="$3"
     print_output "$1"
     write_link "$2"
-    write_anchor "test"
-    print_output "anchortest"
-    write_link "$2""#test"
     cat "$LOG_FILE" >> "$OLD_LOG_FILE"
     rm "$LOG_FILE" 2> /dev/null
     LOG_FILE="$OLD_LOG_FILE"
