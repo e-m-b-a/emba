@@ -359,9 +359,9 @@ add_link_to_index() {
 
   HTML_FILE="$1"
   MODUL_NAME="$2"
-  DATA="$( echo "$HTML_FILE" | cut -d "." -f 1)"
+  DATA="$( echo "$HTML_FILE" | cut -d "_" -f 1)"
   CLASS="${DATA:0:1}"
-  C_NUMBER="$(echo "${DATA:1}" | sed -E 's/^0*//g' | cut -d"_" -f 1)"
+  C_NUMBER="$(echo "${DATA:1}" | sed -E 's/^0*//g')"
 
   readarray -t INDEX_NAV_ARR < <(sed -n -e '/navigation start/,/navigation end/p' "$ABS_HTML_PATH""/""$INDEX_FILE" | sed -e '1d;$d' | grep -P -o '(?<=data=\").*?(?=\")')
   readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep "$CLASS" )

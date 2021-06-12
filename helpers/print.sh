@@ -100,7 +100,8 @@ print_output()
   local LOG_SETTING="$2"
   # add a link as third argument to add a link marker for web report
   local REF_LINK="$3"
-  local TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
+  local TYPE_CHECK
+  TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
     local COLOR_OUTPUT_STRING
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
