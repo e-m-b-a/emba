@@ -15,7 +15,7 @@
 # Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
 
 INDEX_FILE="index.html"
-MAIN_LOG="./emba.txt"
+MAIN_LOG="./emba.log"
 STYLE_PATH="/style"
 TEMP_PATH="/tmp"
 SUPPL_PATH_HTML="/etc"
@@ -83,12 +83,13 @@ add_link_tags() {
     readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
     for REF_LINK in "${REF_LINKS[@]}" ; do
       if [[ -f "$REF_LINK" ]] ; then
-        if [[ "${REF_LINK: -4}" == ".txt" ]] ; then
+        if [[ ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ]] ; then
           # generate reference file
           generate_info_file "$REF_LINK" "$BACK_LINK"
           LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
-          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.txt}").html@g")"
+          REF_LINK_HTML_FILE=
+          HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"_" -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html@g")"
           while [[ ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
@@ -184,7 +185,7 @@ generate_info_file()
   SRC_FILE=$2
   CUSTOM_SUB_PATH=$3
 
-  INFO_HTML_FILE="$(basename "${INFO_FILE%.txt}"".html")"
+  INFO_HTML_FILE="$(basename "${INFO_FILE%.${INFO_FILE##*.}}"".html")"
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
     INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 | cut -d"_" -f1 )"
   else
@@ -245,8 +246,8 @@ generate_report_file()
   # if set to 1, then generate file in supplementary folder and link to menu
   SUPPL_FILE_GEN=$2
 
-  if ! ( grep -o -i -q "$(basename "${REPORT_FILE%.txt}")"" nothing reported" "$REPORT_FILE" ) ; then
-    HTML_FILE="$(basename "${REPORT_FILE%.txt}"".html")"
+  if ! ( grep -o -i -q "$(basename "${REPORT_FILE%.${REPORT_FILE##*.}}")"" nothing reported" "$REPORT_FILE" ) ; then
+    HTML_FILE="$(basename "${REPORT_FILE%.${REPORT_FILE##*.}}"".html")"
     if [[ $SUPPL_FILE_GEN -eq 1 ]] ; then
       cp "./helpers/base.html" "$ABS_HTML_PATH$SUPPL_PATH_HTML""/""$HTML_FILE"
     else
@@ -359,7 +360,7 @@ update_index()
 {
   # add emba.log to webreport
   generate_report_file "$MAIN_LOG"
-  sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.txt}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.${MAIN_LOG##*.}}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
   # generate files in $SUPPL_PATH (supplementary files from modules) 
   readarray -t SUPPL_FILES < <(find "$SUPPL_PATH" ! -path "$SUPPL_PATH")
   if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
@@ -368,8 +369,8 @@ update_index()
   for S_FILE in "${SUPPL_FILES[@]}" ; do
     generate_info_file "$S_FILE" "" "$SUPPL_PATH_HTML"
     LINE_NUMBER_NAV=$(grep -n "etc start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-    REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_PATH_HTML/$(basename "${S_FILE%.txt}"".html")@g")"
-    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.txt}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
+    REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_PATH_HTML/$(basename "${S_FILE%.${S_FILE##*.}}"".html")@g")"
+    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.${S_FILE##*.}}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   done
   scan_report
   # remove tempory files from web report
