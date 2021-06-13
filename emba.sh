@@ -311,13 +311,18 @@ main()
   if [[ -n "$PROFILE" ]]; then
     if [[ -f ./scan-profiles/"$PROFILE" ]]; then
       print_bar "no_log"
-      print_output "[*] Loading profile with the following settings:" "no_log"
+      if [[ $IN_DOCKER -ne 1 ]] ; then
+        print_output "[*] Loading emba scan profile with the following settings:" "no_log"
+      else
+        print_output "[*] Loading emba scan profile." "no_log"
+      fi
+      # all profile output and settings are done by the profile file located in ./scan-profiles/
       # shellcheck disable=SC1090
       source ./scan-profiles/"$PROFILE"
-      print_output "[*] Profile ./scan-profiles/$PROFILE loaded" "no_log"
+      print_output "[*] Profile ./scan-profiles/$PROFILE loaded." "no_log"
       print_bar "no_log"
     else
-      print_output "[!] Profile ./scan-profiles/$PROFILE not found" "no_log"
+      print_output "[!] Profile ./scan-profiles/$PROFILE not found." "no_log"
       exit 1
     fi
   fi
@@ -462,13 +467,8 @@ main()
     echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    if [[ -f "$INVOCATION_PATH"/scan-profiles/"$PROFILE" ]]; then
-      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS -p $PROFILE"
-      D_RETURN=$?
-    else
-      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
-      D_RETURN=$?
-    fi
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
+    D_RETURN=$?
 
     if [[ $D_RETURN -eq 0 ]] ; then
       if [[ $ONLY_DEP -eq 0 ]] ; then
