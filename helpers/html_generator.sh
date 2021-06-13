@@ -157,12 +157,9 @@ add_link_tags() {
         EXPLOIT_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
-          echo "$EXPLOIT_FILE""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
           generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-          echo "$HTML_LINK""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
           sed -i -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE"
-          echo "$(sed -n -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE")""  ""$EXPLOIT_ID" >> "$LOG_DIR""/local.txt"
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
           sed -i -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE"
@@ -173,18 +170,15 @@ add_link_tags() {
 
   # MSF key links and additional files
   if ( grep -q -E 'Exploit.*MSF' "$LINK_FILE" ) ; then
-    readarray -t MSF_KEY_F < <( sed -E -e "s@.*MSF: (([0-9a-z_][\ ]?)*).*@\1@g" "$LINK_FILE" | sort -u)
+    readarray -t MSF_KEY_F < <( grep -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "$LINK_FILE" | cut -d" " -f2- | tr ' ' '\n' | sort -u)
     for MSF_KEY in "${MSF_KEY_F[@]}" ; do 
-      echo "0""$MSF_KEY"
       if [[ -n "$MSF_KEY" ]] ; then
         MSF_KEY_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/msf_""$MSF_KEY"".rb"
         if [[ -f "$MSF_KEY_FILE" ]] ; then
-          echo "1""$MSF_KEY_FILE"
           # copy msf file
           if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
           cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")"
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY""$LINK_END"
-          echo "2""$HTML_LINK"
           sed -i -E "s@([\ ]+)$MSF_KEY@\1$HTML_LINK@g" "$LINK_FILE"
         fi
       fi
