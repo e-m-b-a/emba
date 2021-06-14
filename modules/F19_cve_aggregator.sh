@@ -285,9 +285,9 @@ prepare_version_data() {
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
     VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
     #Dropbear multi-purpose version 2012.55
-    VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear_ssh\ }"
+    VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear\ }"
     #Dropbear v2016.74
-    VERSION_lower="${VERSION_lower//dropbear\ v/dropbear_ssh\ }"
+    VERSION_lower="${VERSION_lower//dropbear/dropbear_ssh}"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
