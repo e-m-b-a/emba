@@ -117,37 +117,19 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
-    #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
-    VERSION_lower="${VERSION_lower//chrony[cd] \(chrony\) /chrony }"
-    #Dropbear multi-purpose version 2012.55
-    VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear_ssh\ }"
-    #Dropbear v2016.74
-    VERSION_lower="${VERSION_lower//dropbear\ v/dropbear_ssh\ }"
-    #DynDns Update v1.0 (c) 2004,2005 AlphaNetworks,Inc.
-    VERSION_lower="${VERSION_lower//update\ /}"
-    #envsubst (GNU gettext-runtime) 0.19.8.1
-    #VERSION_lower="${VERSION_lower//envsubst\ \(/\ \()}"
-    VERSION_lower="${VERSION_lower//envsubst \(gnu/\(gnu}"
+
     #ethswctl.c:v0.0.2 (January 27, 2009)
     VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
     #flashcp (mtd-utils) 2.0.2
-    VERSION_lower="${VERSION_lower//flashcp\ \(mtd-utils\)/mtd-utils}"
-    VERSION_lower="${VERSION_lower//flash_erase\ \(mtd-utils\)/mtd-utils}"
-    VERSION_lower="${VERSION_lower//flash_unlock\ \(mtd-utils\)/mtd-utils}"
-    VERSION_lower="${VERSION_lower//ftl_*\ \(mtd-utils\)/mtd-utils}"
-    #flock (util-linux UNKNOWN)
-    VERSION_lower="${VERSION_lower//flock \(util-linux/util-linux}"
+    VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
     #ftpd (GNU inetutils) 1.4.2
-    VERSION_lower="${VERSION_lower//ftpd\ \(gnu inetutils\)/gnu inetutils}"
-    #igmpproxy versoin 3.0 beta
-    VERSION_lower="${VERSION_lower//versoin/version}"
-    #xmlwf using expat_2.1.0
-    VERSION_lower="${VERSION_lower//xmlwf using expat_/expat\ }"
-    #zic (tzcode) 2018e
-    VERSION_lower="${VERSION_lower//zic\ \(tzcode\) /tzcode\ }"
+    VERSION_lower="${VERSION_lower//\(gnu inetutils\)/inetutils}"
     #pppd version 2.4.2
     VERSION_lower="${VERSION_lower/pppd/point-to-point_protocol}"
-
+    #conntrack v1.0.0 (conntrack-tools)
+    VERSION_lower="${VERSION_lower/conntrack/conntrack-tools}"
+    #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
+    VERSION_lower="${VERSION_lower//chrony[cd] \(chrony\) /chrony }"
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
     VERSION_lower="${VERSION_lower//(gdb) /}"
@@ -302,6 +284,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//:\ error!:/}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
     VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
+    #Dropbear multi-purpose version 2012.55
+    VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear_ssh\ }"
+    #Dropbear v2016.74
+    VERSION_lower="${VERSION_lower//dropbear\ v/dropbear_ssh\ }"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
@@ -411,7 +397,7 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ mtools)/gnu:mtools/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ inetutils/gnu:inetutils/')"
     # handle grub version 2:
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
