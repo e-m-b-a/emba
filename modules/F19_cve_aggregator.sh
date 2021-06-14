@@ -128,7 +128,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//chrony[cd] \(chrony\) /chrony }"
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
-    VERSION_lower="${VERSION_lower//(gdb) /}"
+    VERSION_lower="${VERSION_lower//(gdb)\ /}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
     # some - -> space
