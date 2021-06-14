@@ -120,12 +120,8 @@ prepare_version_data() {
 
     #ethswctl.c:v0.0.2 (January 27, 2009)
     VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
-    #flashcp (mtd-utils) 2.0.2
-    VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
     #ftpd (GNU inetutils) 1.4.2
     VERSION_lower="${VERSION_lower//\(gnu inetutils\)/inetutils}"
-    #pppd version 2.4.2
-    VERSION_lower="${VERSION_lower/pppd/point-to-point_protocol}"
     #conntrack v1.0.0 (conntrack-tools)
     VERSION_lower="${VERSION_lower/conntrack/conntrack-tools}"
     #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
@@ -214,6 +210,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nandwrite/mtd-utils}"
     VERSION_lower="${VERSION_lower//nanddump/mtd-utils}"
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
+    #flashcp (mtd-utils) 2.0.2
+    VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
     # zlib:binary:"deflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark\ Adler"
     # zlib:binary:"inflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark Adler"
     VERSION_lower="${VERSION_lower//deflate/zlib}"
@@ -256,6 +254,8 @@ prepare_version_data() {
     #libpcre.1.2.3
     VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
     VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
+    #pppd version 2.4.2
+    VERSION_lower="${VERSION_lower/pppd/point-to-point_protocol}"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
