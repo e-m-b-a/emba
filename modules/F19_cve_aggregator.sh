@@ -388,7 +388,7 @@ prepare_version_data() {
     #jq commandline json processor [5a49c82-dirty]
     #VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
-    VERSION_lower="${VERSION_lower//squid\ cache:/squid-cache:squid}"
+    VERSION_lower="${VERSION_lower//squid\ cache/squid-cache:squid}"
     #tar (GNU tar) 1.23
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ tar)/gnu:tar/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ findutils)/gnu:findutils/')"
