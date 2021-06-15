@@ -467,7 +467,7 @@ main()
     echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log -f /firmware -i $ARGS"
     D_RETURN=$?
 
     if [[ $D_RETURN -eq 0 ]] ; then

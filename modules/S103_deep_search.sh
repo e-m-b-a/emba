@@ -27,10 +27,6 @@ S103_deep_search()
   
   readarray -t PATTERN_LIST < <(printf '%s' "$PATTERNS")
 
-  if ! [[ -d "$LOG_DIR""/deep_search/" ]] ; then
-    mkdir "$LOG_DIR""/deep_search/" 2> /dev/null
-  fi
-
   OCC_LIST=()
 
   deep_pattern_search
@@ -65,21 +61,28 @@ deep_pattern_searcher() {
     local S_OUTPUT
     readarray -t S_OUTPUT < <(grep -E -n -a -h -o -i "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0')
     if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
-      echo "[+] ""$DEEP_S_FILE" >> "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
+      write_log "[+] ""$DEEP_S_FILE" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
       for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do
         DEEP_S_LINE="$( echo "$DEEP_S_LINE" | tr "\000-\037\177-\377" "." )"
-        echo "$DEEP_S_LINE" >> "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
+        write_log "$DEEP_S_LINE" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
       done
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_DIR""/deep_search/deep_search_""$(basename "$DEEP_S_FILE")"".txt" )
+        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt" )
         if [[ $F_COUNT -gt 0 ]] ; then
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
       done
       #COUNT=((COUNT+${#S_OUTPUT[@]}))
-      print_output ""
-      print_output "[+] ""$DEEP_S_FILE""$NC""\\n""$D_S_FINDINGS"  
+      # we have to write the file link manually, because threading is messing with the file (wrong order of entries and such awful stuff)
+      OLD_LOG_FILE="$LOG_FILE"
+      LOG_FILE="$LOG_PATH_MODULE""/deep_search_tmp_""$(basename "$DEEP_S_FILE")"".txt"
+      print_output "[+] ""$DEEP_S_FILE" 
+      write_link "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
+      print_output "$D_S_FINDINGS" 
+      cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+      rm "$LOG_FILE" 2> /dev/null
+      LOG_FILE="$OLD_LOG_FILE"
     fi
   fi
 }

@@ -23,8 +23,6 @@ S11_weak_func_check()
   module_title "Check binaries for weak functions (intense)"
 
   LOG_FILE="$( get_log_file )"
-  LOG_DIR_MOD=$(basename -s .txt "$LOG_FILE")
-  mkdir "$LOG_DIR"/"$LOG_DIR_MOD"
 
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
@@ -37,7 +35,6 @@ S11_weak_func_check()
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
-      #local OBJDUMP_LOG="$LOG_DIR""/objdumps/objdump_""$NAME".txt
       # create disassembly of every binary file:
       #"$OBJDUMP" -d "$LINE" > "$OBJDUMP_LOG"
 
@@ -103,8 +100,10 @@ S11_weak_func_check()
   fi
 
   # shellcheck disable=SC2129
-  echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
-  echo -e "\\n[*] Statistics1:$ARCH" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:$STRCPY_CNT"
+  write_log ""
+  write_log "[*] Statistics1:$ARCH"
 
   module_end_log "${FUNCNAME[0]}" "${#RESULTS[@]}"
 }
@@ -123,7 +122,7 @@ function_check_PPC32(){
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -158,7 +157,7 @@ function_check_MIPS32() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -190,7 +189,7 @@ function_check_ARM64() {
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -222,7 +221,7 @@ function_check_ARM32() {
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -254,7 +253,7 @@ function_check_x86() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -286,7 +285,7 @@ function_check_x86_64() {
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -306,11 +305,11 @@ function_check_x86_64() {
 }
 
 print_top10_statistics() {
-  if [[ "$(find "$LOG_DIR"/"$LOG_DIR_MOD"/ -xdev -iname "vul_func_*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM
       local F_COUNTER
-      readarray -t RESULTS < <( find "$LOG_DIR"/"$LOG_DIR_MOD"/ -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
@@ -332,14 +331,26 @@ print_top10_statistics() {
       fi  
     done
   else
+    print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
 }
 
 output_function_details()
 {
+  write_s11_log()
+  {
+    OLD_LOG_FILE="$LOG_FILE"
+    LOG_FILE="$3"
+    print_output "$1"
+    write_link "$2"
+    cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+    rm "$LOG_FILE" 2> /dev/null
+    LOG_FILE="$OLD_LOG_FILE"
+  }
+
   local LOG_FILE_LOC
-  LOG_FILE_LOC="$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$FUNCTION"-"$NAME".txt
+  LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$FUNCTION"-"$NAME".txt
 
   #check if this is common linux file:
   local COMMON_FILES_FOUND
@@ -348,31 +359,30 @@ output_function_details()
     SEARCH_TERM=$(basename "$LINE")
     if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
       COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
-      echo -e "[$GREEN+$NC] ""$GREEN"File "$(print_path "$LINE") found in default Linux file dictionary""$NC" >> "$LOG_DIR"/s11_common_linux_files.txt
+      echo -e "[$GREEN+$NC] ""$GREEN"File "$(print_path "$LINE") found in default Linux file dictionary""$NC" >> "$SUPPL_PATH"/common_linux_files.txt
     else
-      echo -e "[$GREEN+$NC] ""$ORANGE"File "$(print_path "$LINE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC" >> "$LOG_DIR"/s11_common_linux_files.txt
+      echo -e "[$GREEN+$NC] ""$ORANGE"File "$(print_path "$LINE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC" >> "$SUPPL_PATH"/common_linux_files.txt
       COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
     fi
   else
     COMMON_FILES_FOUND=" -"
   fi
+
+  LOG_FILE_LOC_OLD="$LOG_FILE_LOC"
+  LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
+  mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
   
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     else
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     fi
+    write_s11_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
   fi
 
-  mv "$LOG_FILE_LOC" "$LOG_DIR"/"$LOG_DIR_MOD"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt 2> /dev/null
+  
 }
 

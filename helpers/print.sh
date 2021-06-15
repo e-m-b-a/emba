@@ -44,9 +44,8 @@ welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
   echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            e m b a                            ""$NC""$BOLD""║""$NC"
-  echo -e "$BOLD""║                    EMBEDDED LINUX ANALYZER                    ""$NC""$BOLD""║""$NC"
+  echo -e "$BOLD""║                   EMBEDDED FIRMWARE ANALYZER                  ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""╚═══════════════════════════════════════════════════════════════╝""$NC"
-
   warning
 }
 
@@ -97,28 +96,38 @@ sub_module_title()
 
 print_output()
 {
-  local OUTPUT
-  OUTPUT="$1"
+  local OUTPUT="$1"
+  local LOG_SETTING="$2"
+  # add a link as third argument to add a link marker for web report
+  local REF_LINK="$3"
   local TYPE_CHECK
   TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
     local COLOR_OUTPUT_STRING
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
     echo -e "$COLOR_OUTPUT_STRING"
-    if [[ "$2" == "main" ]] ; then
+    if [[ "$LOG_SETTING" == "main" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
-    elif [[ "$2" != "no_log" ]] ; then
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null
+    elif [[ "$LOG_SETTING" != "no_log" ]] ; then
+      if [[ -z "$REF_LINK" ]] ; then
+        echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
+      else
+        echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+      fi
     fi
   else
     echo -e "$OUTPUT"
-    if [[ "$2" == "main" ]] ; then
+    if [[ "$LOG_SETTING" == "main" ]] ; then
       echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_FILE" >/dev/null
-    elif [[ "$2" != "no_log" ]] ; then
-      echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null
+    elif [[ "$LOG_SETTING" != "no_log" ]] ; then
+      if [[ -z "$REF_LINK" ]] ; then
+        echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
+      else
+        echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+      fi
     fi
   fi
-  if [[ "$2" != "no_log" ]] ; then
+  if [[ "$LOG_SETTING" != "no_log" ]] ; then
     write_grep_log "$OUTPUT"
   fi
 }
@@ -126,19 +135,26 @@ print_output()
 write_log()
 {
   readarray TEXT_ARR <<< "$1"
+  local LOG_FILE_ALT="$2"
+  local GREP_LOG_WRITE="$3"
+  if [[ "$LOG_FILE_ALT" == "" ]] ; then
+    W_LOG_FILE="$LOG_FILE"
+  else
+    W_LOG_FILE="$LOG_FILE_ALT"
+  fi
 
   for E in "${TEXT_ARR[@]}" ; do
     local TYPE_CHECK
     TYPE_CHECK="$( echo "$E" | cut -c1-3 )"
-    if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
+    if [[ ( "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]") && ("$E" != "[*] Statistic"* ) ]] ; then
       local COLOR_OUTPUT_STRING
       COLOR_OUTPUT_STRING="$(color_output "$E")"
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$2" >/dev/null
+      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$W_LOG_FILE" >/dev/null
     else
-      echo -e "$(format_log "$E")" | tee -a "$2" >/dev/null
+      echo -e "$(format_log "$E")" | tee -a "$W_LOG_FILE" >/dev/null
     fi
   done
-  if [[ "$3" == "g" ]] ; then
+  if [[ "$GREP_LOG_WRITE" == "g" ]] ; then
     write_grep_log "$1"
   fi
 }
@@ -148,10 +164,11 @@ write_grep_log()
   OLD_MESSAGE_TYPE=""
   if [[ $LOG_GREP -eq 1 ]] ; then
     readarray -t OUTPUT_ARR <<< "$1"
+    local MESSAGE_TYPE_PAR="$2"
     for E in "${OUTPUT_ARR[@]}" ; do
       if [[ -n "${E//[[:blank:]]/}" ]] && [[ "$E" != "\\n" ]] && [[ -n "$E" ]] ; then
-        if [[ -n "$2" ]] ; then
-          MESSAGE_TYPE="$2"
+        if [[ -n "$MESSAGE_TYPE_PAR" ]] ; then
+          MESSAGE_TYPE="$MESSAGE_TYPE_PAR"
           OLD_MESSAGE_TYPE="$MESSAGE_TYPE"
           TYPE=2
         else
@@ -187,6 +204,36 @@ write_grep_log()
         fi
       fi
     done
+  fi
+}
+
+write_link()
+{
+  if [[ $HTML -eq 1 ]] ; then
+    local LINK
+    LINK="$1"
+    LINK="$(format_log "[REF] ""$LINK" 1)"
+    local LOG_FILE_ALT="$2"
+    if [[ -f "$LOG_FILE_ALT" ]] ; then
+      echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
+    else
+      echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+    fi
+  fi
+}
+
+write_anchor()
+{
+  if [[ $HTML -eq 1 ]] ; then
+    local ANCHOR
+    ANCHOR="$1"
+    ANCHOR="$(format_log "[ANC] ""$ANCHOR" 1)"
+    local LOG_FILE_ALT="$2"
+    if [[ -f "$LOG_FILE_ALT" ]] ; then
+      echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
+    else
+      echo -e "$ANCHOR" | tee -a "$LOG_FILE" >/dev/null
+    fi
   fi
 }
 
@@ -326,19 +373,23 @@ indent()
 
 format_log()
 {
-  if [[ $FORMAT_LOG -eq 1 ]] ; then
-    echo "$1"
-  else
-    echo "$1" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+  local LOG_STRING="$1"
+  # remove log formatting, even if emba is set to format it (for [REF] markers used)
+  local OVERWRITE_SETTING="$2"
+  if [[ $FORMAT_LOG -eq 0 ]] || [[ $OVERWRITE_SETTING -eq 1 ]] ; then
+    echo "$LOG_STRING" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
       | sed -e "s/\\\\n/\\n/g"
+  else
+    echo "$LOG_STRING"
   fi
 }
 
 format_grep_log()
 {
-  echo "$1" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+  local LOG_STRING="$1"
+  echo "$LOG_STRING" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
       | sed -e "s/^ *//" \
@@ -396,20 +447,24 @@ print_help()
 
 print_firmware_info()
 {
-  if [[ -n "$1" || -n "$2" || -n "$3" || -n "$4" ]]; then
+  local _VENDOR="$1"
+  local _VERSION="$2"
+  local _DEVICE="$3"
+  local _NOTES="$4"
+  if [[ -n "$_VENDOR" || -n "$_VERSION" || -n "$_DEVICE" || -n "$_NOTES" ]]; then
     print_bar "no_log"
     print_output "[*] Firmware information:" "no_log"
-    if [[ -n "$1" ]]; then
-      print_output "$(indent "$BOLD""Vendor:\t""$NC""$ORANGE""$1""$NC")" "no_log"
+    if [[ -n "$_VENDOR" ]]; then
+      print_output "$(indent "$BOLD""Vendor:\t""$NC""$ORANGE""$_VENDOR""$NC")" "no_log"
     fi
-    if [[ -n "$2" ]]; then
-      print_output "$(indent "$BOLD""Version:\t""$NC""$ORANGE""$2""$NC")" "no_log"
+    if [[ -n "$_VERSION" ]]; then
+      print_output "$(indent "$BOLD""Version:\t""$NC""$ORANGE""$_VERSION""$NC")" "no_log"
     fi
-    if [[ -n "$3" ]]; then
-      print_output "$(indent "$BOLD""Device:\t""$NC""$ORANGE""$3""$NC")" "no_log"
+    if [[ -n "$_DEVICE" ]]; then
+      print_output "$(indent "$BOLD""Device:\t""$NC""$ORANGE""$_DEVICE""$NC")" "no_log"
     fi
-    if [[ -n "$4" ]]; then
-      print_output "$(indent "$BOLD""Additional notes:\t""$NC""$ORANGE""$4""$NC")" "no_log"
+    if [[ -n "$_NOTES" ]]; then
+      print_output "$(indent "$BOLD""Additional notes:\t""$NC""$ORANGE""$_NOTES""$NC")" "no_log"
     fi
     print_bar "no_log"
   fi
@@ -440,9 +495,11 @@ print_excluded()
     echo
   fi
 }
+
 print_bar() {
-  if [[ -n "$1" ]]; then
-    print_output "\\n-----------------------------------------------------------------\\n" "$1"
+  local LOG_SETTINGS="$1"
+  if [[ -n "$LOG_SETTINGS" ]]; then
+    print_output "\\n-----------------------------------------------------------------\\n" "$LOG_SETTINGS"
   else
     print_output "\\n-----------------------------------------------------------------\\n"
   fi
@@ -451,6 +508,9 @@ print_bar() {
 module_start_log() {
   MODULE_MAIN_NAME="$1"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
+  export LOG_PATH_MODULE
+  LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
+  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" ; fi
   ((MOD_RUNNING++))
 }
 
@@ -466,6 +526,9 @@ module_end_log() {
   fi
 
   run_web_reporter_mod_name "$MODULE_MAIN_NAME"
+  if [ -z "$(ls -A "$LOG_PATH_MODULE")" ]; then
+    rmdir "$LOG_PATH_MODULE"
+  fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
