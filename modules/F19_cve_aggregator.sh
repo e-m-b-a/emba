@@ -116,9 +116,19 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
+
+
+    #ethswctl.c:v0.0.2 (January 27, 2009)
+    VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
+    #ftpd (GNU inetutils) 1.4.2
+    VERSION_lower="${VERSION_lower//\(gnu inetutils\)/inetutils}"
+    #conntrack v1.0.0 (conntrack-tools)
+    VERSION_lower="${VERSION_lower/conntrack/conntrack-tools}"
+    #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
+    VERSION_lower="${VERSION_lower//chrony[cd] \(chrony\) /chrony }"
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
-    VERSION_lower="${VERSION_lower//(gdb)/}"
+    VERSION_lower="${VERSION_lower//(gdb)\ /}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
     # some - -> space
@@ -157,6 +167,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//dnsmasq-/dnsmasq\ }"
     # lighttpd- -> lighttpd\ 
     VERSION_lower="${VERSION_lower//lighttpd-/lighttpd\ }"
+    #lighttpd/1.4.33-devel-17M (Nov 13 2013 21:55:13) - a light and fast webserver
+    VERSION_lower="${VERSION_lower//lighttpd\//lighttpd\ }"
+    VERSION_lower="$(echo "$VERSION_lower" | sed "s/-devel-17m//")"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
@@ -197,6 +210,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nandwrite/mtd-utils}"
     VERSION_lower="${VERSION_lower//nanddump/mtd-utils}"
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
+    #flashcp (mtd-utils) 2.0.2
+    VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
     # zlib:binary:"deflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark\ Adler"
     # zlib:binary:"inflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark Adler"
     VERSION_lower="${VERSION_lower//deflate/zlib}"
@@ -239,6 +254,8 @@ prepare_version_data() {
     #libpcre.1.2.3
     VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
     VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
+    #pppd version 2.4.2
+    VERSION_lower="${VERSION_lower/pppd/point-to-point_protocol}"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
@@ -255,19 +272,22 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
-    #Wireless-Tools version 29
-    VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
-    VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"
+    #iw* Wireless-Tools version 29
+    VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     # apt-Version 1.2.3
     VERSION_lower="${VERSION_lower//apt-/apt\ }"
     # remove the v in something like this: "space v[number]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')" 
     # "mkfs\.jffs2\ revision\ [0-9]\.[0-9]\.[0-9]\.[0-9]"
     VERSION_lower="${VERSION_lower//revision\ /}"
     # mkfs.jffs2: error!: revision 1.60
     VERSION_lower="${VERSION_lower//:\ error!:/}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
     VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
+    #Dropbear multi-purpose version 2012.55
+    VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear\ }"
+    #Dropbear v2016.74
+    VERSION_lower="${VERSION_lower//dropbear/dropbear_ssh}"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
@@ -377,7 +397,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ mtools)/gnu:mtools/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ inetutils/gnu:inetutils/')"
     # handle grub version 2:
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)/grub/')"
