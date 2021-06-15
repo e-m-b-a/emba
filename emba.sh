@@ -309,7 +309,7 @@ main()
 
   # profile handling
   if [[ -n "$PROFILE" ]]; then
-    if [[ -f ./scan-profiles/"$PROFILE" ]]; then
+    if [[ -f "$PROFILE" ]]; then
       print_bar "no_log"
       if [[ $IN_DOCKER -ne 1 ]] ; then
         print_output "[*] Loading emba scan profile with the following settings:" "no_log"
@@ -318,11 +318,11 @@ main()
       fi
       # all profile output and settings are done by the profile file located in ./scan-profiles/
       # shellcheck disable=SC1090
-      source ./scan-profiles/"$PROFILE"
-      print_output "[*] Profile ./scan-profiles/$PROFILE loaded." "no_log"
+      source "$PROFILE"
+      print_output "[*] Profile $PROFILE loaded." "no_log"
       print_bar "no_log"
     else
-      print_output "[!] Profile ./scan-profiles/$PROFILE not found." "no_log"
+      print_output "[!] Profile $PROFILE not found." "no_log"
       exit 1
     fi
   fi
