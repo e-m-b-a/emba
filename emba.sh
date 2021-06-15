@@ -213,7 +213,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:stxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:p:stxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -270,6 +270,9 @@ main()
       N)
         export FW_NOTES="$OPTARG"
         ;;
+      p)
+        export PROFILE="$OPTARG"
+       ;;
       s)
         export SHORT_PATH=1
         ;;
@@ -304,6 +307,26 @@ main()
 
   echo
 
+  # profile handling
+  if [[ -n "$PROFILE" ]]; then
+    if [[ -f "$PROFILE" ]]; then
+      print_bar "no_log"
+      if [[ $IN_DOCKER -ne 1 ]] ; then
+        print_output "[*] Loading emba scan profile with the following settings:" "no_log"
+      else
+        print_output "[*] Loading emba scan profile." "no_log"
+      fi
+      # all profile output and settings are done by the profile file located in ./scan-profiles/
+      # shellcheck disable=SC1090
+      source "$PROFILE"
+      print_output "[*] Profile $PROFILE loaded." "no_log"
+      print_bar "no_log"
+    else
+      print_output "[!] Profile $PROFILE not found." "no_log"
+      exit 1
+    fi
+  fi
+ 
   # check provided paths for validity 
   check_path_valid "$FIRMWARE_PATH"
   check_path_valid "$KERNEL_CONFIG"
@@ -431,7 +454,7 @@ main()
 
     OPTIND=1
     ARGS=""
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:stX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:p:stX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
