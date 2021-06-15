@@ -209,6 +209,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
     #flashcp (mtd-utils) 2.0.2
     VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
+    # lspci, setpci -> pciutils
+    VERSION_lower="${VERSION_lower//lspci/pciutils}"
+    VERSION_lower="${VERSION_lower//setpci/pciutils}"
     # zlib:binary:"deflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark\ Adler"
     # zlib:binary:"inflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark Adler"
     VERSION_lower="${VERSION_lower//deflate/zlib}"
@@ -284,7 +287,7 @@ prepare_version_data() {
     #Dropbear multi-purpose version 2012.55
     VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear\ }"
     #Dropbear v2016.74
-    VERSION_lower="${VERSION_lower//dropbear/dropbear_ssh}"
+    VERSION_lower="${VERSION_lower//dropbear\ /dropbear_ssh\ }"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
@@ -514,7 +517,7 @@ aggregate_versions() {
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ -f "$LOG_PATH_MODULE"/versions.tmp ]]; then
     # on old kernels it takes a huge amount of time to query all kernel CVE's. So, we move the kernel entry to the begin of our versions array
-    mapfile -t KERNELS < <(grep kernel "$LOG_PATH_MODULE"/versions.tmp)
+    mapfile -t KERNELS < <(grep kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u)
     grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u > "$LOG_PATH_MODULE"/versions1.tmp
     for KERNEL in "${KERNELS[@]}"; do
       if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | cut -d" " -f1 ) -eq 0 ]] ; then
