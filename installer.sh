@@ -684,4 +684,14 @@ case ${ANSWER:0:1} in
     fi
   ;;
 esac
+
+echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
+echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
+echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+
+echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
+
+echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
+
 echo -e "$GREEN""Emba installation finished ""$NC"
