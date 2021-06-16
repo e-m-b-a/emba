@@ -20,8 +20,6 @@ S40_weak_perm_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search files with weak permissions"
 
-  LOG_FILE="$( get_log_file )"
-
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
   local WEAK_PERM_COUNTER=0
 
@@ -105,7 +103,8 @@ S40_weak_perm_check() {
     print_output "[-] No init.d files with weak permissions found"
   fi
 
-  echo -e "\\n[*] Statistics:$WEAK_PERM_COUNTER" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:$WEAK_PERM_COUNTER"
 
   module_end_log "${FUNCNAME[0]}" "$WEAK_PERM_COUNTER"
 }

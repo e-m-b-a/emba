@@ -96,6 +96,7 @@ output_details() {
   local DATA=0
   if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
+    write_link "s05"
     echo "files;\"$FILE_ARR_COUNT\"" >> "$CSV_LOG_FILE"
     echo "directories;\"$DETECTED_DIR\"" >> "$CSV_LOG_FILE"
     DATA=1
@@ -103,40 +104,47 @@ output_details() {
   ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
+    write_link "p05"
     echo "entropy_value;\"$ENTROPY\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ -n "$ENTROPY_PIC" ]]; then
     print_output "[+] Entropy analysis of binary firmware is available:""$ORANGE"" ""$ENTROPY_PIC"
+    write_link "$ENTROPY_PIC"
     DATA=1
   fi
 
   if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts.""$NC"
+    write_link "s20"
     echo "shell_scripts;\"$S20_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "shell_script_vulns;\"$S20_SHELL_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ "$S21_PY_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
+    write_link "s21"
     echo "python_scripts;\"$S21_PY_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "python_vulns;\"$S21_PY_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+    write_link "s22"
     echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
+    write_link "s110"
     echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  EMUL=$(find "$LOG_DIR"/qemu_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
+  EMUL=$(find "$LOG_DIR"/s115_usermode_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
+    write_link "s115"
     DATA=1
   fi
 
@@ -152,47 +160,56 @@ output_config_issues() {
     print_output "[+] Found the following configuration issues:"
     if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
+      write_link "s40"
       echo "weak_perm_count;\"$S40_WEAK_PERM_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$S55_HISTORY_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S55_HISTORY_COUNTER$GREEN history files.")")"
+      write_link "s55"
       echo "history_file_count;\"$S55_HISTORY_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$S50_AUTH_ISSUES" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S50_AUTH_ISSUES$GREEN authentication issues.")")"
+      write_link "s50"
       echo "auth_issues;\"$S50_AUTH_ISSUES\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$S85_SSH_VUL_CNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S85_SSH_VUL_CNT$GREEN SSHd issues.")")"
+      write_link "s85"
       echo "ssh_issues;\"$S85_SSH_VUL_CNT\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
       print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details.")")"
+      write_link "s45"
       #echo "password_files;\"$PASS_FILES_FOUND\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$CERT_CNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
+      write_link "s60"
       echo "certificates;\"$CERT_CNT\"" >> "$CSV_LOG_FILE"
       echo "certificates_outdated;\"$CERT_OUT_CNT\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$MOD_DATA_COUNTER$GREEN kernel modules with $ORANGE$KMOD_BAD$GREEN licensing issues.")")"
+      write_link "s25"
       echo "kernel_modules;\"$MOD_DATA_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "kernel_modules_lic;\"$KMOD_BAD\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$FILE_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
+      write_link "s11"
       DATA=1
     fi
     if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
+      write_link "s95"
       echo "interesting_files;\"$INT_COUNT\"" >> "$CSV_LOG_FILE"
       echo "post_files;\"$POST_COUNT\"" >> "$CSV_LOG_FILE"
       DATA=1
@@ -222,6 +239,7 @@ output_binaries() {
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      write_link "s12"
       echo "canary;\"$CANARY\"" >> "$CSV_LOG_FILE"
       echo "canary_per;\"$CAN_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
@@ -230,6 +248,7 @@ output_binaries() {
       RELRO_PER=$(bc -l <<< "$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
       RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      write_link "s12"
       echo "relro;\"$RELRO\"" >> "$CSV_LOG_FILE"
       echo "relro_per;\"$RELRO_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
@@ -238,6 +257,7 @@ output_binaries() {
       NX_PER=$(bc -l <<< "$NX/($BINS_CHECKED/100)" 2>/dev/null)
       NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      write_link "s12"
       echo "nx;\"$NX\"" >> "$CSV_LOG_FILE"
       echo "nx_per;\"$NX_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
@@ -246,6 +266,7 @@ output_binaries() {
       PIE_PER=$(bc -l <<< "$PIE/($BINS_CHECKED/100)" 2>/dev/null)
       PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      write_link "s12"
       echo "pie;\"$PIE\"" >> "$CSV_LOG_FILE"
       echo "pie_per;\"$PIE_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
@@ -254,6 +275,7 @@ output_binaries() {
       STRIPPED_PER=$(bc -l <<< "$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
+      write_link "s12"
       echo "stripped;\"$STRIPPED\"" >> "$CSV_LOG_FILE"
       echo "stripped_per;\"$STRIPPED_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
@@ -264,6 +286,7 @@ output_binaries() {
     print_bar
   fi
 
+  cwe_logging
   # we use the logger from the s120 cwe checker module again:
   if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
     final_cwe_log "$TOTAL_CWE_CNT"
@@ -271,6 +294,7 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
+    write_link "s11"
     echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
 
@@ -278,21 +302,22 @@ output_binaries() {
   FUNCTION1="system"
   local DATA=0
 
-  if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2>/dev/null | wc -l)" -gt 0 ]]; then
-    readarray -t RESULTS < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
-    readarray -t RESULTS1 < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
+  if [[ -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
+    if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+      readarray -t RESULTS < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS1 < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
 
-    if [[ "${#RESULTS[@]}" -gt 0 ]]; then
-      print_output ""
-      print_output "[+] ""$FUNCTION""/""$FUNCTION1"" - top 10 results:"
-      i=0 
-      for LINE in "${RESULTS[@]}" ; do
-        SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
-        F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
-        SEARCH_TERM1="$(echo "${RESULTS1[$i]}" | cut -d\  -f3)"
-        F_COUNTER1="$(echo "${RESULTS1[$i]}" | cut -d\  -f1)"
-        if [[ -f "$BASE_LINUX_FILES" ]]; then
-          # if we have the base linux config file we are checking it:
+      if [[ "${#RESULTS[@]}" -gt 0 ]]; then
+        print_output ""
+        print_output "[+] ""$FUNCTION""/""$FUNCTION1"" - top 10 results:"
+        i=0 
+        for LINE in "${RESULTS[@]}" ; do
+          SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
+          F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
+          SEARCH_TERM1="$(echo "${RESULTS1[$i]}" | cut -d\  -f3)"
+          F_COUNTER1="$(echo "${RESULTS1[$i]}" | cut -d\  -f1)"
+          if [[ -f "$BASE_LINUX_FILES" ]]; then
+            # if we have the base linux config file we are checking it:
           if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
             if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
@@ -319,13 +344,13 @@ output_binaries() {
           DATA=1
         fi  
         (( i++ ))
-      done
-    fi  
-  fi 
-  if [[ $DATA -eq 1 ]]; then
-    print_bar
+        done
+      fi  
+    fi 
+    if [[ $DATA -eq 1 ]]; then
+      print_bar
+    fi
   fi
-
 }
 
 output_cve_exploits() {
@@ -333,6 +358,7 @@ output_cve_exploits() {
   local DATA=0
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
     print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
+    write_link "f19#collectcveandexploitdetails"
     print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
 
     print_output ""
@@ -343,6 +369,7 @@ output_cve_exploits() {
     fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
+      write_link "s30"
       DATA=1
     fi
     if [[ "$CVE_COUNTER" -gt 0 ]]; then
@@ -561,10 +588,29 @@ os_kernel_module_detect() {
 print_os() {
   if [[ $VERIFIED -eq 1 ]]; then
     print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+    write_link "s25"
     echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
+    write_link "p07"
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
+  fi
+}
+
+cwe_logging() {
+  LOG_DIR_MOD="s120_cwe_checker"
+  if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
+    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+    print_output ""
+    if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
+      print_output "[+] cwe-checker found a total of ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" of the following security issues:"
+      for CWE_LINE in "${CWE_OUT[@]}"; do
+        CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
+        CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
+        CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE")"
+        print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
+      done
+    fi
   fi
 }
 

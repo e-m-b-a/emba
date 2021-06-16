@@ -1,0 +1,34 @@
+# emba - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2021 Siemens AG
+#
+# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# emba is licensed under GPLv3
+#
+# Author(s): Michael Messner, Pascal Eckmann
+#
+# Description: This is a default emba profile. You can Use it as a template for your own profiles
+#              or start emba with "-p full-scan_docker.emba" to use it
+
+export FORMAT_LOG=1
+export THREADED=1
+export SHORT_PATH=1
+export HTML=1
+export CWE_CHECKER=1
+export QEMULATION=1
+# we output the profile only at the beginning - outside the docker environment
+if [[ $IN_DOCKER -ne 1 ]] ; then
+  print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
+  print_output "$(indent "$(orange "Activate multi threading (destroys regular console output)")")" "no_log"
+  print_output "$(indent "$(orange "Prints only relative paths")")" "no_log"
+  print_output "$(indent "$(orange "Activates web report creation in log path")")" "no_log"
+  print_output "$(indent "$(orange "Enable cwe-checker")")" "no_log"
+  print_output "$(indent "$(orange "Enables automated qemu emulation tests (WARNING this module could harm your host!)")")" "no_log"
+  print_output "$(indent "$(orange "Runs emba in docker container")")" "no_log"
+  export USE_DOCKER=1
+fi
+

@@ -350,10 +350,12 @@ case ${ANSWER:0:1} in
     download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
     download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
     ### pixd installation
-    git clone https://github.com/FireyFly/pixd external/pixd
+    pip3 install pillow
+    git clone https://github.com/p4cx/pixd_image external/pixd
     cd ./external/pixd/ || exit 1
     make
     mv pixd ../pixde
+    mv pixd_png.py ../pixd_png.py
     cd ../../ || exit 1
     rm -r ./external/pixd/
     ### pixd installation
@@ -682,4 +684,14 @@ case ${ANSWER:0:1} in
     fi
   ;;
 esac
+
+echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
+echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
+echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+
+echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
+
+echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
+
 echo -e "$GREEN""Emba installation finished ""$NC"
