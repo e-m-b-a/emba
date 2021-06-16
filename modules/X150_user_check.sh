@@ -26,4 +26,6 @@ S150_user_check()
   for LINE in "${BINARIES[@]}" ; do
 	  print_output "$LINE"
   done
+
+  module_end_log "${FUNCNAME[0]}" 1
 }

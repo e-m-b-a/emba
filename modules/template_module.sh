@@ -22,13 +22,21 @@
 # If you use external code, add '# Test source: [LINK TO CODE]' above.
 # Use 'local' for variables if possible for better resource management
 # Use 'export' for variables which aren't only used in one file - it isn't necessary, but helps for readability
-# Boolean: 0=False 1=True, e.g. [[ $VAR -eq 0 ]]
 
-empty_module() {
-  # Initialize module and creates a log file "empty_module_log.txt" in your log folder
+
+template_module() {
+  # Initialize module and creates a log file "template_module_log.txt" and directory "template_module" (if needed) in your log folder
+  # Required!
   module_log_init "${FUNCNAME[0]}"
   # Prints title to CLI and into log
+  # Required!
   module_title "Empty module"
+
+  # Global variables
+
+    # $FIRMWARE_PATH - absolute path to the root directory of the firmware (String)
+    # $FILE_ARR - all valid files of the provided firmware (Array)
+    # $BINARIES - all executable binaries of the provided firmware (Array)
 
   # Prints everything to CLI, more information in function print_examples
   print_output "[*] Empty module output"
@@ -45,11 +53,18 @@ empty_module() {
   # Get all binaries from firmware and use them
   iterate_binary
 
+  # Add links to webreport
+  webreport_functions
+
   # Load stuff from external config files (get list of lines, grep and find)
   load_from_config
 
-  # - Usage of `find`: add "${EXCL_FIND[@]}" to exclude all paths (added with '-e' parameter)
+  # Usage of `find`: add "${EXCL_FIND[@]}" to exclude all paths (added with '-e' parameter)
   print_output "$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l)"
+
+  # Ends module and saves status into log - $COUNT_FINDINGS has to be replaced by a number of your findings. If your module didn't found something, then it isn't needed to be generated in the final report
+  # Required!
+  module_end_log "${FUNCNAME[0]}" "${#COUNT_FINDINGS[@]}"
 }
 
 sub_module() {
@@ -83,7 +98,7 @@ print_examples() {
 
   # Functions to change text
 
-  # indent text, e.g. "    indented text example"
+  # indent text, e.g. "    indented text example" - works for multiple lines too, if you only use single lines, you can also use "print_output "    indented text example" "
   print_output "$(indent "indented text example")"
 
   # color text
@@ -179,6 +194,26 @@ iterate_binary() {
   for BIN_FILE in "${BINARIES[@]}"; do
     print_output "$BIN_FILE"
   done
+}
+
+webreport_functions() {
+  # add a link in the webreport for the printed line to module (e.g. s42) - use the prefix of the module names
+  print_output "[*] Information"
+  write_link "s42"
+
+  # add anchor to this module, if this module is s42_....sh ...
+  write_anchor "test"
+
+  # ... then it can be called by following link
+  print_output "This should link to test anchor"
+  write_link "s42#test"
+
+  # add a png picture
+  write_link "PATH_TO_PNG"
+
+  # add custom log files to webreport
+  write_link "PATH_TO_TXT/LOG_FILE"
+  # it will be generated and linked with the text of the previous line
 }
 
 load_from_config() {
