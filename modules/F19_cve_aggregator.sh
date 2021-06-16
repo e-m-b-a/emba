@@ -117,7 +117,12 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
-
+    #radiusd: FreeRADIUS Version 2.2.2
+    VERSION_lower="${VERSION_lower/radiusd:\ freeradius/freeradius}"
+    #version: openser 1.0.0 (arm/linux)
+    VERSION_lower="${VERSION_lower/version:\ openser/openser}"
+    #Btrfs Btrfs v0.19
+    VERSION_lower="${VERSION_lower/btrfs\ btrfs/btrfs}"
     #ethswctl.c:v0.0.2 (January 27, 2009)
     VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
     #ftpd (GNU inetutils) 1.4.2
