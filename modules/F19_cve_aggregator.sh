@@ -328,6 +328,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
     #mini_httpd/1.19
+    #mtr mtr 0.85
+    VERSION_lower="${VERSION_lower/mtr\ mtr/mtr:mtr}"
     VERSION_lower="${VERSION_lower/\//\ }"
     #OpenLDAP:\ ldapsearch
     VERSION_lower="${VERSION_lower/openldap\ ldapsearch/openldap}"
