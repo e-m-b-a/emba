@@ -116,8 +116,6 @@ prepare_version_data() {
 
     #radiusd: FreeRADIUS Version 2.2.2
     VERSION_lower="${VERSION_lower/radiusd:\ freeradius/freeradius}"
-    #version: openser 1.0.0 (arm/linux)
-    VERSION_lower="${VERSION_lower/version:\ openser/openser}"
     #Btrfs Btrfs v0.19
     VERSION_lower="${VERSION_lower/btrfs\ btrfs/btrfs}"
     #ethswctl.c:v0.0.2 (January 27, 2009)
@@ -333,6 +331,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/\//\ }"
     #OpenLDAP:\ ldapsearch
     VERSION_lower="${VERSION_lower/openldap\ ldapsearch/openldap}"
+    #version: openser 1.0.0 (arm/linux)
+    VERSION_lower="${VERSION_lower/version\ openser/openser:openser}"
     #Beceem\ CM\ Server\
     VERSION_lower="${VERSION_lower//beceem\ cm\ server/beceem}"
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
