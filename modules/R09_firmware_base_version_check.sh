@@ -15,6 +15,7 @@
 
 # Description:  Searches for version strings in the extracted firmware, but this time without the strict version detail database, 
 #               because these aren't Linux executables.
+export THREAD_PRIO=1
 
 R09_firmware_base_version_check() {
 
@@ -25,6 +26,10 @@ R09_firmware_base_version_check() {
   print_output "[*] Initial version detection running on all firmware files ..." | tr -d "\n"
 
   EXTRACTOR_LOG="$LOG_DIR"/p05_firmware_bin_extractor.txt
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    MAX_THREADS_R09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
+  fi
 
   while read -r VERSION_LINE; do
     echo "." | tr -d "\n"
@@ -43,6 +48,13 @@ R09_firmware_base_version_check() {
         WAIT_PIDS_R09+=( "$!" )
       else
         R09_bin_string_checker
+      fi
+    fi
+
+    if [[ "${#WAIT_PIDS_R09[@]}" -gt "$MAX_THREADS_R09" ]]; then
+      recover_wait_pids_r09 "${WAIT_PIDS_R09[@]}"
+      if [[ "${#WAIT_PIDS_R09[@]}" -gt "$MAX_THREADS_R09" ]]; then
+        max_pids_protection "$MAX_THREADS_R09" "${WAIT_PIDS_R09[@]}"
       fi
     fi
 
@@ -89,3 +101,20 @@ R09_bin_string_checker() {
   echo "." | tr -d "\n"
 }
 
+recover_wait_pids_r09() {
+
+  local TEMP_PIDS=()
+  local PID
+  # check for really running PIDs and re-create the array
+  for PID in ${WAIT_PIDS_R09[*]}; do
+    #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
+    if [[ -e /proc/"$PID" ]]; then
+      TEMP_PIDS+=( "$PID" )
+    fi
+  done
+  #print_output "[!] R09 - really running pids: ${#TEMP_PIDS[@]}"
+
+  # recreate the arry with the current running PIDS
+  WAIT_PIDS_R09=()
+  WAIT_PIDS_R09=("${TEMP_PIDS[@]}")
+}
