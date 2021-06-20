@@ -524,8 +524,9 @@ module_end_log() {
   if [[ "$MODULE_REPORT_STATE" -eq 0 ]]; then
     print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
   fi
-
-  run_web_reporter_mod_name "$MODULE_MAIN_NAME"
+  if [[ "$HTML" -eq 1 ]]; then
+    run_web_reporter_mod_name "$MODULE_MAIN_NAME"
+  fi
   if [ -z "$(ls -A "$LOG_PATH_MODULE")" ]; then
     rmdir "$LOG_PATH_MODULE"
   fi

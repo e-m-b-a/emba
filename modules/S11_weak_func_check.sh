@@ -119,7 +119,7 @@ function_check_PPC32(){
       else
         OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
@@ -154,7 +154,7 @@ function_check_MIPS32() {
       else
         OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ )
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
@@ -186,7 +186,8 @@ function_check_ARM64() {
     else
       OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     fi
-    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
+    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
+        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
@@ -218,7 +219,7 @@ function_check_ARM32() {
     else
       OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     fi
-    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
+    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
       readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
       unset OBJ_DUMPS_OUT
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
@@ -250,7 +251,7 @@ function_check_x86() {
       else
         OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
@@ -282,7 +283,7 @@ function_check_x86_64() {
       else
         OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
         readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
         unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"

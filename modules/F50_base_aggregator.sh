@@ -298,11 +298,11 @@ output_binaries() {
     echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
 
-  FUNCTION="strcpy"
-  FUNCTION1="system"
   local DATA=0
 
-  if [[ -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
+  if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
+    FUNCTION="strcpy"
+    FUNCTION1="system"
     if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
       readarray -t RESULTS < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
       readarray -t RESULTS1 < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)

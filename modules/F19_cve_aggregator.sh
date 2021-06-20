@@ -209,6 +209,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
     #flashcp (mtd-utils) 2.0.2
     VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
+    # mount.cifs -> cifs-utils
+    VERSION_lower="${VERSION_lower//mount\.cifs/cifs-utils}"
     # lspci, setpci -> pciutils
     VERSION_lower="${VERSION_lower//lspci/pciutils}"
     VERSION_lower="${VERSION_lower//setpci/pciutils}"
