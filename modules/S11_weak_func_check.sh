@@ -115,13 +115,13 @@ function_check_PPC32(){
       local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null)
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        #readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
+        #unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
@@ -147,16 +147,16 @@ function_check_MIPS32() {
     STRLEN_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
     if [[ -n "$FUNC_ADDR" ]] ; then
       NAME=$(basename "$LINE" 2> /dev/null)
-      local OBJ_DUMPS_OUT
+      #local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ )
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ )
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ )
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ )
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        #readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
+        #unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
@@ -180,16 +180,16 @@ function_check_MIPS32() {
 function_check_ARM64() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
-    local OBJ_DUMPS_OUT
+    #local OBJ_DUMPS_OUT
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     else
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     fi
-    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-      readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
-      unset OBJ_DUMPS_OUT
+    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+      #readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
+      #readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
+      #unset OBJ_DUMPS_OUT
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
@@ -213,15 +213,16 @@ function_check_ARM64() {
 function_check_ARM32() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
-    local OBJ_DUMPS_OUT
+    #local OBJ_DUMPS_OUT
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      #OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     else
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     fi
-    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
-      readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
-      unset OBJ_DUMPS_OUT
+    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+      #readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
+      #unset OBJ_DUMPS_OUT
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
@@ -247,13 +248,13 @@ function_check_x86() {
       local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        #readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
+        #unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
@@ -279,13 +280,13 @@ function_check_x86_64() {
       local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && $(wc -l "$OBJ_DUMPS_OUT") -gt 0 ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        #readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
+        #unset OBJ_DUMPS_OUT
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
@@ -332,7 +333,7 @@ print_top10_statistics() {
       fi  
     done
   else
-    print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
+    #print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
 }
