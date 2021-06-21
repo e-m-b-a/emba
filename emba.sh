@@ -197,6 +197,9 @@ main()
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
   export MSF_PATH="/usr/share/metasploit-framework/modules/"
+  if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
+    export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
+  fi
 
   echo
 
