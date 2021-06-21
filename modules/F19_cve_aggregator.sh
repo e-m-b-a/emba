@@ -484,6 +484,7 @@ aggregate_versions() {
   # currently it is very helpful
   if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
+    write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
       print_output "[+] Found Version details (base check): ""$VERSION"
     done
@@ -548,6 +549,7 @@ aggregate_versions() {
 generate_special_log() {
   if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE") -gt 0 ]]; then
     sub_module_title "Minimal report of exploits and CVE's."
+    write_anchor "minimalreportofexploitsandcves"
 
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -type f)
     print_output ""

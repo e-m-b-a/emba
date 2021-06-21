@@ -24,8 +24,7 @@ P07_firmware_bin_base_analyzer() {
   local WAIT_PIDS_P07=()
 
   if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
-    export OUTPUT_DIR
-    OUTPUT_DIR="$FIRMWARE_PATH_CP"
+    export OUTPUT_DIR="$FIRMWARE_PATH_CP"
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
       WAIT_PIDS_P07+=( "$!" )
@@ -120,7 +119,8 @@ binary_architecture_detection()
 
   mapfile -t PRE_ARCH < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | awk '{print $3}' | sort -u)
   for PRE_ARCH_ in "${PRE_ARCH[@]}"; do
-    print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_"
+    print_output ""
+    print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/p07.tmp
   done
 }

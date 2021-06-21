@@ -235,7 +235,7 @@ output_binaries() {
       (( BINS_CHECKED-- ))
     fi
   
-    if [[ -n "$CANARY" ]]; then
+    if [[ "$CANARY" -gt 0 ]]; then
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
@@ -244,7 +244,7 @@ output_binaries() {
       echo "canary_per;\"$CAN_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ -n "$RELRO" ]]; then
+    if [[ "$RELRO" -gt 0 ]]; then
       RELRO_PER=$(bc -l <<< "$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
       RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
@@ -253,7 +253,7 @@ output_binaries() {
       echo "relro_per;\"$RELRO_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ -n "$NX" ]]; then
+    if [[ "$NX" -gt 0 ]]; then
       NX_PER=$(bc -l <<< "$NX/($BINS_CHECKED/100)" 2>/dev/null)
       NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
@@ -262,7 +262,7 @@ output_binaries() {
       echo "nx_per;\"$NX_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ -n "$PIE" ]]; then
+    if [[ "$PIE" -gt 0 ]]; then
       PIE_PER=$(bc -l <<< "$PIE/($BINS_CHECKED/100)" 2>/dev/null)
       PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
@@ -271,7 +271,7 @@ output_binaries() {
       echo "pie_per;\"$PIE_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ -n "$STRIPPED" ]]; then
+    if [[ "$STRIPPED" -gt 0 ]]; then
       STRIPPED_PER=$(bc -l <<< "$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
       print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
@@ -280,7 +280,10 @@ output_binaries() {
       echo "stripped_per;\"$STRIPPED_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    echo "bins_checked;\"$BINS_CHECKED\"" >> "$CSV_LOG_FILE"
+    if [[ "$BINS_CHECKED" -gt 0 ]]; then
+      echo "bins_checked;\"$BINS_CHECKED\"" >> "$CSV_LOG_FILE"
+      DATA=1
+    fi
   fi
   if [[ $DATA -eq 1 ]]; then
     print_bar
@@ -310,6 +313,7 @@ output_binaries() {
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
         print_output "[+] ""$FUNCTION""/""$FUNCTION1"" - top 10 results:"
+        write_link "s11#strcpysummary"
         i=0 
         for LINE in "${RESULTS[@]}" ; do
           SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
@@ -364,6 +368,7 @@ output_cve_exploits() {
     print_output ""
     if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
+      write_link "f19#softwareinventoryinitialoverview"
       echo "versions_identified;\"${#VERSIONS_CLEANED[@]}\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
@@ -374,6 +379,7 @@ output_cve_exploits() {
     fi
     if [[ "$CVE_COUNTER" -gt 0 ]]; then
       print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
+      write_link "f19#collectcveandexploitdetails"
       print_output "$(indent "$(green "Confirmed $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
       print_output "$(indent "$(green "Confirmed $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries.")")"
       print_output "$(indent "$(green "Confirmed $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries.")")"
@@ -387,9 +393,11 @@ output_cve_exploits() {
       echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
       if [[ $MSF_MODULE_CNT -gt 0 ]]; then
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available ($MAGENTA$MSF_MODULE_CNT$GREEN Metasploit modules).")")"
+        write_link "f19#minimalreportofexploitsandcves"
         echo "metasploit_modules;\"$MSF_MODULE_CNT\"" >> "$CSV_LOG_FILE"
       else
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
+        write_link "f19#minimalreportofexploitsandcves"
       fi
       # we report only software components with exploits to csv:
       grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
