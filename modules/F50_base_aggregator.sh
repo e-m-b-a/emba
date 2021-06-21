@@ -105,7 +105,7 @@ output_details() {
   ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
-    write_link "p05"
+    write_link "p02"
     echo "entropy_value;\"$ENTROPY\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
