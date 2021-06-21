@@ -587,9 +587,12 @@ generate_special_log() {
 }
 
 cve_db_lookup() {
+  # using $VERSION variable:
   VERSION_SEARCH="${VERSION//\ /:}"
   VERSION_PATH="${VERSION//\ /_}"
+  VERSION_BINARY=$(echo "$VERSION_SEARCH" | cut -d: -f1)
   print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}"
+  #write_link "f19#cve_$VERSION_BINARY"
 
   # CVE search:
   $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
@@ -626,7 +629,7 @@ cve_extractor() {
 
     EDB=0
     # as we already know about a buch of kernel exploits - lets search them first
-    if [[ "$VERSION" == *kernel* ]]; then
+    if [[ "$VERSION_BINARY" == *kernel* ]]; then
       for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
         if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
           EXPLOIT="Exploit (linux-exploit-suggester"
@@ -752,11 +755,13 @@ cve_extractor() {
     print_output ""
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
+    write_anchor "cve_$BINARY"
     print_output ""
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
     print_output ""
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
+    write_anchor "cve_$BINARY"
     print_output ""
   fi
 }
@@ -870,6 +875,7 @@ final_outputter() {
           printf "[+] Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         fi
       fi
+      #write_link "f19#$BIN"
     fi
 }
 
@@ -888,7 +894,7 @@ get_firmware_base_version_check() {
 get_kernel_check() {
   print_output "[*] Collect version details of module s25_kernel_check."
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
-    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
+    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
     ## do a bit of sed modifications to have the same output as from the pre checker
     readarray -t VERSIONS_KERNEL < <(grep "Statistics:" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel\ /' | sort -u)
   fi

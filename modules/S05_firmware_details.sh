@@ -46,12 +46,13 @@ S05_firmware_details()
 }
 
 filesystem_tree() {
+  sub_module_title "Filesystem information"
+  write_anchor "file_dirs"
   if [[ $RTOS -eq 0 ]]; then
     local LPATH="$FIRMWARE_PATH"
   else
     local LPATH="$OUTPUT_DIR"
   fi
-  echo -e "\\n\\n" >> "$LOG_FILE"
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
     if [[ $FORMAT_LOG -eq 1 ]] ; then

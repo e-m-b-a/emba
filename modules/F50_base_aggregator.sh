@@ -84,6 +84,7 @@ output_overview() {
   elif [[ -f "$LOG_DIR"/"$P07_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
+      write_link "p07"
       echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
     fi
   fi

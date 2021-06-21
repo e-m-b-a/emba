@@ -300,6 +300,7 @@ detect_root_dir_helper() {
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
+    write_link "s05#file_dirs"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
