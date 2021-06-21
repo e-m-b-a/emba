@@ -158,6 +158,7 @@ main()
   INVOCATION_PATH="$(dirname "$0")"
 
   export ARCH_CHECK=1
+  export RTOS=0                 # Testing RTOS based OS
   export CWE_CHECKER=0
   export DEEP_EXTRACTOR=0
   export FACT_EXTRACTOR=0
@@ -534,25 +535,19 @@ main()
   # Firmware-Check (S- and R-modules)
   #######################################################################################
   if [[ $FIRMWARE -eq 1 ]] ; then
+    print_output "\n=================================================================\n" "no_log"
+    check_firmware
+    prepare_binary_arr
     if [[ -d "$FIRMWARE_PATH" ]]; then
 
-      print_output "\n=================================================================\n" "no_log"
+      export RTOS=0
 
-      check_firmware
-      prepare_binary_arr
       prepare_file_arr
 
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
         architecture_dep_check
       fi
-
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
-      else
-        print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
-      fi
-      write_grep_log "$(date)" "TIMESTAMP"
 
       if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
         detect_root_dir_helper "$FIRMWARE_PATH" "main"
@@ -561,20 +556,27 @@ main()
       set_etc_paths
       echo
 
-      run_modules "S" "$THREADED" "$HTML"
-
-      if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS[@]}"
-      fi
     else
       # here we can deal with other non linux things like RTOS specific checks
       # lets call it R* modules
       # 'main' functions of imported finishing modules
-      run_modules "R" "$THREADED" "$HTML"
 
-      if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS[@]}"
-      fi
+      export RTOS=1
+
+      prepare_file_arr
+    fi
+
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
+    else
+      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
+    fi
+    write_grep_log "$(date)" "TIMESTAMP"
+
+    run_modules "S" "$THREADED" "$HTML"
+
+    if [[ $THREADED -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS[@]}"
     fi
 
     echo

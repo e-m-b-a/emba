@@ -90,7 +90,7 @@ deep_key_searcher() {
 
 deep_key_reporter() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
-    P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' )
+    P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' )
     OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
   done
 
