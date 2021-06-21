@@ -304,6 +304,7 @@ detect_root_dir_helper() {
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
+    write_link "s05#file_dirs"
   done
 }
 

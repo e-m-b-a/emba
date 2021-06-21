@@ -198,7 +198,7 @@ output_config_issues() {
     fi
     if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$MOD_DATA_COUNTER$GREEN kernel modules with $ORANGE$KMOD_BAD$GREEN licensing issues.")")"
-      write_link "s25"
+      write_link "s25#kernel_modules"
       echo "kernel_modules;\"$MOD_DATA_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "kernel_modules_lic;\"$KMOD_BAD\"" >> "$CSV_LOG_FILE"
       DATA=1
