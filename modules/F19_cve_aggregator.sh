@@ -114,7 +114,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
-
+    #radiusd: FreeRADIUS Version 2.2.2
+    VERSION_lower="${VERSION_lower/radiusd:\ freeradius/freeradius}"
+    #Btrfs Btrfs v0.19
+    VERSION_lower="${VERSION_lower/btrfs\ btrfs/btrfs}"
     #ethswctl.c:v0.0.2 (January 27, 2009)
     VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
     #ftpd (GNU inetutils) 1.4.2
@@ -325,9 +328,13 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
     #mini_httpd/1.19
+    #mtr mtr 0.85
+    VERSION_lower="${VERSION_lower/mtr\ mtr/mtr:mtr}"
     VERSION_lower="${VERSION_lower/\//\ }"
     #OpenLDAP:\ ldapsearch
     VERSION_lower="${VERSION_lower/openldap\ ldapsearch/openldap}"
+    #version: openser 1.0.0 (arm/linux)
+    VERSION_lower="${VERSION_lower/version\ openser/openser:openser}"
     #Beceem\ CM\ Server\
     VERSION_lower="${VERSION_lower//beceem\ cm\ server/beceem}"
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
@@ -388,7 +395,7 @@ prepare_version_data() {
     #jq commandline json processor [5a49c82-dirty]
     #VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
-    VERSION_lower="${VERSION_lower//squid\ cache:/squid-cache:squid}"
+    VERSION_lower="${VERSION_lower//squid\ cache/squid-cache:squid}"
     #tar (GNU tar) 1.23
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ tar)/gnu:tar/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ findutils)/gnu:findutils/')"
