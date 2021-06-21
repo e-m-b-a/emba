@@ -75,7 +75,7 @@ F19_cve_aggregator() {
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
       fi
-      if [[ -f "$TMP_DIR"/msf_cve-db.txt ]]; then
+      if [[ -f "$MSF_DB_PATH" ]]; then
         MSF_SEARCH=1
       fi
 
@@ -641,7 +641,7 @@ cve_extractor() {
       fi
 
       if [[ $MSF_SEARCH -eq 1 ]]; then
-        mapfile -t EXPLOIT_AVAIL_MSF < <(grep "$CVE_VALUE" "$TMP_DIR"/msf_cve-db.txt 2>/dev/null)
+        mapfile -t EXPLOIT_AVAIL_MSF < <(grep "$CVE_VALUE" "$MSF_DB_PATH" 2>/dev/null)
       fi
 
       if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
