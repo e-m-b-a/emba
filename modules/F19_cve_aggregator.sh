@@ -591,8 +591,7 @@ cve_db_lookup() {
   VERSION_SEARCH="${VERSION//\ /:}"
   VERSION_PATH="${VERSION//\ /_}"
   VERSION_BINARY=$(echo "$VERSION_SEARCH" | cut -d: -f1)
-  print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}"
-  #write_link "f19#cve_$VERSION_BINARY"
+  print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}" "" "f19#cve_$VERSION_BINARY"
 
   # CVE search:
   $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
@@ -768,7 +767,6 @@ cve_extractor() {
 
 generate_cve_details() {
   sub_module_title "Collect CVE and exploit details."
-
   write_anchor "collectcveandexploitdetails"
 
   CVE_COUNTER=0
@@ -875,7 +873,6 @@ final_outputter() {
           printf "[+] Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s\n" "$BIN" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
         fi
       fi
-      #write_link "f19#$BIN"
     fi
 }
 
