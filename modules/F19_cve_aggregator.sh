@@ -114,6 +114,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
+    #atftp-0.7
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(atftp)-([0-9]\.[0-9])/\1\ \2/')"
     #radiusd: FreeRADIUS Version 2.2.2
     VERSION_lower="${VERSION_lower/radiusd:\ freeradius/freeradius}"
     #Btrfs Btrfs v0.19
