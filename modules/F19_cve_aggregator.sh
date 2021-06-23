@@ -114,6 +114,12 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
+    #mkenvimage version 2016.11+dfsg1-4
+    VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
+    #mkimage version 2016.11+dfsg1-4
+    VERSION_lower="${VERSION_lower/mkimage\ /u-boot\ }"
+    #Version: lldpd 0.7.11
+    VERSION_lower="${VERSION_lower/version:\ lldpd\ /lldpd\ }"
     #cdialog (ComeOn Dialog!) version 1.3-20160828
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(cdialog).*(version [0-9]\.[0-9])/\1\ \2/')"
     #atftp-0.7
@@ -331,7 +337,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//:/}"
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
-    #mini_httpd/1.19
+    #glib-compile-schemas 2.50.3
+    VERSION_lower="${VERSION_lower/glib-compile-schemas\ /gnome:glib\ }"
     #mtr mtr 0.85
     VERSION_lower="${VERSION_lower/mtr\ mtr/mtr:mtr}"
     VERSION_lower="${VERSION_lower/\//\ }"
