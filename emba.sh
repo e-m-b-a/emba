@@ -429,7 +429,7 @@ main()
       exit 1
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
-        chmod 777 "$LOG_DIR" 2> /dev/null
+        mkdir "$LOG_DIR"
       fi
       S25_kernel_check
     fi
