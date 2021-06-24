@@ -291,10 +291,6 @@ output_binaries() {
   fi
 
   cwe_logging
-  # we use the logger from the s120 cwe checker module again:
-  if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
-    final_cwe_log "$TOTAL_CWE_CNT"
-  fi
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
@@ -362,12 +358,14 @@ output_cve_exploits() {
 
   local DATA=0
   if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
-    print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
-    write_link "f19#collectcveandexploitdetails"
-    print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
+    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
+      print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
+      write_link "f19#collectcveandexploitdetails"
+      print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
+    fi
 
-    print_output ""
     if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
+      print_output ""
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
       write_link "f19#softwareinventoryinitialoverview"
       echo "versions_identified;\"${#VERSIONS_CLEANED[@]}\"" >> "$CSV_LOG_FILE"

@@ -71,6 +71,7 @@ cwe_check() {
           (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
           print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
         done
+        print_output ""
       fi
       if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then echo ; fi
     fi
