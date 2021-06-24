@@ -349,9 +349,9 @@ add_link_to_index() {
   insert_line() {
     SEARCH_VAL="$1"
     MODUL_NAME="$2"
-    LINE_NUMBER_NAV=$(grep -n "$SEARCH_VAL" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-    REP_NAV_LINK="$(echo "$MODUL_INDEX_LINK" | sed -e "s@LINK@./$HTML_FILE@g" | sed -e "s@CLASS@$CLASS@g" | sed -e "s@DATA@$DATA@g")"
-    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
+    LINE_NUMBER_NAV_INSERT=$(grep -m 1 -n "$SEARCH_VAL" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
+    REP_NAV_LINK="$(echo "$MODUL_INDEX_LINK" | sed -e "s@LINK@.\/$HTML_FILE@g" | sed -e "s@CLASS@$CLASS@g" | sed -e "s@DATA@$DATA@g")"
+    sed -i "$LINE_NUMBER_NAV_INSERT""i""$REP_NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   }
 
   HTML_FILE="$1"
