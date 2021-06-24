@@ -26,7 +26,13 @@ S05_firmware_details()
   local DETECTED_DIR
   
   # we use the file FILE_ARR from helpers module
-  DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
+  if [[ $RTOS -eq 0 ]]; then
+    # Linux:
+    DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
+  else
+    #RTOS:
+    DETECTED_DIR=$(find "$OUTPUT_DIR" -xdev -type d 2>/dev/null | wc -l)
+  fi
   
   print_output "[*] $ORANGE${#FILE_ARR[@]}$NC files and $ORANGE$DETECTED_DIR$NC directories detected."
 
@@ -40,19 +46,25 @@ S05_firmware_details()
 }
 
 filesystem_tree() {
-  echo -e "\\n\\n" >> "$LOG_FILE"
+  sub_module_title "Filesystem information"
+  write_anchor "file_dirs"
+  if [[ $RTOS -eq 0 ]]; then
+    local LPATH="$FIRMWARE_PATH"
+  else
+    local LPATH="$OUTPUT_DIR"
+  fi
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
     if [[ $FORMAT_LOG -eq 1 ]] ; then
-      tree -p -s -a -C "$FIRMWARE_PATH" >> "$LOG_FILE"
+      tree -p -s -a -C "$LPATH" >> "$LOG_FILE"
     else
-      tree -p -s -a -n "$FIRMWARE_PATH" >> "$LOG_FILE"
+      tree -p -s -a -n "$LPATH" >> "$LOG_FILE"
     fi
   else
     if [[ $FORMAT_LOG -eq 1 ]] ; then
-      ls -laR "$FIRMWARE_PATH" >> "$LOG_FILE"
+      ls -laR "$LPATH" >> "$LOG_FILE"
     else
-      ls -laR --color=never "$FIRMWARE_PATH" >> "$LOG_FILE"
+      ls -laR --color=never "$LPATH" >> "$LOG_FILE"
     fi
   fi
 

@@ -149,6 +149,7 @@ get_kernel_vulns()
 analyze_kernel_module()
 {
   sub_module_title "Analyze kernel modules"
+  write_anchor "kernel_modules"
 
   KMOD_BAD=0
 
