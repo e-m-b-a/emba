@@ -114,6 +114,16 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
+    #Modern traceroute for Linux, version 2.1.0
+    VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
+    #signver - verify a detached PKCS7 signature - Version 3.26.2
+    VERSION_lower="${VERSION_lower/\ -\ verify\ a\ detached\ pkcs7\ signature\ -/}"
+    #part of minicom version 2.7
+    VERSION_lower="${VERSION_lower/part\ of\ minicom/minicom}"
+    #run-parts program, version 4.8.1.1
+    VERSION_lower="${VERSION_lower/run-parts\ program,/run-parts}"
+    #GNU parted) 3.2
+    VERSION_lower="${VERSION_lower/gnu\ parted\)/parted}"
     #mkenvimage version 2016.11+dfsg1-4
     VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
     #mkimage version 2016.11+dfsg1-4
