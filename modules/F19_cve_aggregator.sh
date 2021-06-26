@@ -114,6 +114,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
+    #ldpd version 0.99.24.1 #ospf6d version 0.99.24.1 #etc.
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd)\ version\ 0.9/quagga\ 0.9/')"
+    #bridge utility, 0.0
+    VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
     #Modern traceroute for Linux, version 2.1.0
     VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
     #signver - verify a detached PKCS7 signature - Version 3.26.2
