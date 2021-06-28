@@ -179,6 +179,11 @@ prepare_file_arr()
 
   export FILE_ARR
   readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  # RTOS handling:
+  if [[ -f $FIRMWARE_PATH && $RTOS -eq 1 ]]; then
+    readarray -t FILE_ARR < <(find "$OUTPUT_DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    FILE_ARR+=( "$FIRMWARE_PATH" )
+  fi
   print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
 
   # xdev will do the trick for us:
@@ -295,9 +300,11 @@ detect_root_dir_helper() {
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
+    write_link "s05#file_dirs"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
+    write_link "s05#file_dirs"
   done
 }
 
@@ -315,6 +322,9 @@ check_init_size() {
 generate_msf_db() {
   print_output "[*] Building the Metasploit exploit database" "no_log"
   # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
-  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' > "$TMP_DIR"/msf_cve-db.txt
+  if [[ $IN_DOCKER -eq 1 ]]; then
+    export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
+  fi
+  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' > "$MSF_DB_PATH"
 }
 

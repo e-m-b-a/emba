@@ -24,7 +24,7 @@ S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Emulation based software component and version detection."
 
-  if [[ "$QEMULATION" -eq 1 ]]; then
+  if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 
     print_output "[!] This module is experimental and could harm your host environment."
     print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
@@ -148,7 +148,7 @@ S115_usermode_emulator() {
   else
     print_output ""
     print_output "[!] Automated emulation is disabled."
-    print_output "[!] Enable it with the $ORANGE-E$NC switch."
+    print_output "[!] Enable it with the $ORANGE-E$MAGENTA switch.$NC"
   fi
 
   module_end_log "${FUNCNAME[0]}" "$QEMULATION"
