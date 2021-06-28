@@ -114,6 +114,9 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
+    #lvmetad version: 2.02.168(2) (2016-11-30)  #lvmpolld version: 2.02.168(2) (2016-11-30)
+    VERSION_lower="${VERSION_lower/lvmpolld\ /lvm2\ }"
+    VERSION_lower="${VERSION_lower/lvmetad\ /lvm2\ }"
     #ldpd version 0.99.24.1 #ospf6d version 0.99.24.1 #etc.
     VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd)\ version\ 0.9/quagga\ 0.9/')"
     #bridge utility, 0.0
@@ -409,6 +412,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/([a-z]\ UnZip),/info-zip:zip/')"
+    #ZipSplit 3.0
+    VERSION_lower="${VERSION_lower/zipsplit\ /info-zip:zip\ }"
     #mdns repeater (1.10)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/mdns\ repeater\ \(([0-9]\.[0-9][0-9])\)/mdnsrepeater\ \1/g')"
     #management console agent 1.5 (c) ubiquiti networks inc
