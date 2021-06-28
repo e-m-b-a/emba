@@ -390,8 +390,13 @@ prepare_version_data() {
     # ntpd 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntp[dq]\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*query.*([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*ntpd.*([0-9]\.[0-9]\.[0-9])([a-z][0-9]+)/ntp\ \1:\2/g')"
+    #sntp 4.2.8p10@1.3728-o Mon Mar  9 18:03:45 UTC 2020 (1)
+    VERSION_lower="${VERSION_lower/sntp\ /ntp\ }"
     # ntpdate 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdate\ ([0-9]\.[0-9]\.[0-9])([a-z]([0-9]))/ntp\ \1:\2/g')"
+    # ntp-keygen 4.2.8p10@1.3728-o Mon Mar  9 18:04:19 UTC 2020 (1)
+    VERSION_lower="${VERSION_lower/ntp-keygen\ /ntp\ }"
     # FreeBSD 12.1-RELEASE-p8  -> FreeBSD 12.1:p8 
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/freebsd\ ([0-9]+\.[0-9]+)-release-([a-z]([0-9]+))/freebsd\ \1:\2/g')"
     # unzip .... info-zip -> info-zip
