@@ -115,7 +115,7 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
     #ldpd version 0.99.24.1 #ospf6d version 0.99.24.1 #etc.
-    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd)\ version\ 0.9/quagga\ 0.9/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd)\ version\ 0.9/quagga\ 0.9/')"
     #bridge utility, 0.0
     VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
     #Modern traceroute for Linux, version 2.1.0
@@ -128,10 +128,11 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/run-parts\ program,/run-parts}"
     #GNU parted) 3.2
     VERSION_lower="${VERSION_lower/gnu\ parted\)/parted}"
-    #mkenvimage version 2016.11+dfsg1-4
-    VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
-    #mkimage version 2016.11+dfsg1-4
-    VERSION_lower="${VERSION_lower/mkimage\ /u-boot\ }"
+    # #mkenvimage version 2016.11+dfsg1-4
+    # VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
+    # #mkimage version 2016.11+dfsg1-4
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(mkenvimage|mkimage|dumpimage)\ version\ 20/u-boot\ 20/')"
+    # VERSION_lower="${VERSION_lower/mkimage\ /u-boot\ }"
     #Version: lldpd 0.7.11
     VERSION_lower="${VERSION_lower/version:\ lldpd\ /lldpd\ }"
     #cdialog (ComeOn Dialog!) version 1.3-20160828
