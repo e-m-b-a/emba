@@ -47,7 +47,7 @@ ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
 SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
 ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
-IMAGE="<img class=\"image\" src=\".$STYLE_PATH/PICTURE\">"
+IMAGE="<img class=\"image\" src=\".$STYLE_PATH\/PICTURE\">"
 
 add_color_tags()
 {
@@ -62,10 +62,21 @@ add_color_tags()
 }
 
 add_link_tags() {
+  escaper() {
+    ESC_STRING="$1"
+    #ESC_STRING="${ESC_STRING//\"/\\\"}"
+    #ESC_STRING="${ESC_STRING//\ /\\\ }"
+    echo "$ESC_STRING"
+  }
+
   local LINK_FILE
   LINK_FILE="$1"
   local BACK_LINK
   BACK_LINK="$2"
+
+  local LINK_COMMAND_ARR
+  LINK_COMMAND_ARR=()
+  local WAIT_PIDS_WR=()
 
   # web links
   if ( grep -q -E '(https?|ftp|file):\/\/' "$LINK_FILE" ) ; then
@@ -73,15 +84,16 @@ add_link_tags() {
     for WEB_LINK in "${WEB_LINKS[@]}" ; do
       if [[ -n "$WEB_LINK" ]] ; then
         HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$WEB_LINK@g")""$WEB_LINK""$LINK_END"
-        sed -i "s@$WEB_LINK@$HTML_LINK@g" "$LINK_FILE"
+        LINK_COMMAND_ARR+=( '-e' "$(escaper "s@""$WEB_LINK""@""$HTML_LINK""@g")" )
       fi
     done
   fi
 
   # [REF] anchor 
   if ( grep -q -E '\[REF\]' "$LINK_FILE" ) ; then
-    readarray -t REF_LINKS < <(grep -o -E '\[REF\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
-    for REF_LINK in "${REF_LINKS[@]}" ; do
+    readarray -t REF_LINKS_L_NUMBER < <(grep -n -E '\[REF\].*' "$LINK_FILE" | cut -d':' -f1 )
+    for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
+      REF_LINK="$(sed "$REF_LINK_NUMBER""q;d" "$LINK_FILE" | cut -c12- | cut -d'<' -f1 )"
       if [[ -f "$(echo "$REF_LINK" | cut -d"#" -f1)" ]] ; then
         if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
           REF_ANCHOR=""
@@ -90,24 +102,28 @@ add_link_tags() {
             REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1)"
           fi
           # generate reference file
-          generate_info_file "$REF_LINK" "$BACK_LINK"
-          LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
-          LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
+          if [[ $THREADED -eq 1 ]]; then
+            generate_info_file "$REF_LINK" "$BACK_LINK" &
+            WAIT_PIDS_WR+=( "$!" )
+          else
+            generate_info_file "$REF_LINK" "$BACK_LINK"
+          fi
           if [[ -n "$REF_ANCHOR" ]] ; then
             HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html""#anchor_$REF_ANCHOR@g")"
           else
             HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html@g")"
           fi
-          while [[ ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
+          LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
+          while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
-          sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@ ; $LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
+          LINK_COMMAND_ARR+=( '-e' "$(escaper "$LINE_NUMBER_INFO_PREV""s@(.*)@""$HTML_LINK""\1""$LINK_END""@")" )
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           # add linked image
           LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")"
           IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
-          sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
+          LINK_COMMAND_ARR+=( '-e' "$(escaper "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK")" )
         fi
       elif [[ ("$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
         REF_ANCHOR=""
@@ -116,8 +132,6 @@ add_link_tags() {
           REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1)"
         fi
         # link modules
-        LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
-        LINE_NUMBER_INFO_PREV_O=$(( LINE_NUMBER_INFO_PREV ))
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" )
         if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
           MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]')"
@@ -126,26 +140,25 @@ add_link_tags() {
           else
             HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@g")"
           fi
-          while [[ "$(sed "$(( LINE_NUMBER_INFO_PREV - 1 ))q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
+          LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
+          while [[ "$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
-          sed -i -E -e "$(( LINE_NUMBER_INFO_PREV - 1 ))s@(.*)@$HTML_LINK\1$LINK_END@" "$LINK_FILE"
+          LINK_COMMAND_ARR+=( '-e' "$(escaper "$LINE_NUMBER_INFO_PREV""s@(.*)@""$HTML_LINK""\1""$LINK_END""@")" )
         fi
-        sed -i -E -e "$LINE_NUMBER_INFO_PREV_O""d" "$LINK_FILE"
       else
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
-        sed -i -E -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
       fi
     done
   fi
 
   # Add anchors to link inside of modules
   if ( grep -q -E '\[ANC\]' "$LINK_FILE" ) ; then
-    readarray -t ANC_ARR < <(grep -o -E '\[ANC\].*' "$LINK_FILE" | cut -c7- | cut -d'<' -f1)
-    for ANC in "${ANC_ARR[@]}" ; do
-      LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[ANC\] ""$ANC" "$LINK_FILE" | cut -d":" -f1)"
+    readarray -t ANC_ARR < <(grep -n -E '\[ANC\].*' "$LINK_FILE" | cut -d':' -f1 )
+    for ANC_NUMBER in "${ANC_ARR[@]}" ; do
+      ANC="$(sed "$ANC_NUMBER""q;d" "$LINK_FILE" | cut -c12- | cut -d'<' -f1 )"
       ANC_LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@anchor_$ANC@g")""$LINK_END"
-      sed -i -E -e "$LINE_NUMBER_INFO_PREV""i""$ANC_LINE" -e "$LINE_NUMBER_INFO_PREV""d" "$LINK_FILE"
+      LINK_COMMAND_ARR+=( '-e' "$(escaper "$ANC_NUMBER""i""$ANC_LINE")" )
     done
   fi
 
@@ -157,12 +170,17 @@ add_link_tags() {
         EXPLOIT_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
-          generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
+          if [[ $THREADED -eq 1 ]]; then
+            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
+            WAIT_PIDS_WR+=( "$!" )
+          else
+            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
+          fi
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE"
+          LINK_COMMAND_ARR+=( '-e' "s@(EDB ID: )""$EXPLOIT_ID""([^0-9])@\1""$HTML_LINK""\2@g" )
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-          sed -i -E "s@(EDB ID: )$EXPLOIT_ID([^0-9])@\1$HTML_LINK\2@g" "$LINK_FILE"
+          LINK_COMMAND_ARR+=( '-e' "$(escaper "s@(EDB ID: )""$EXPLOIT_ID""([^0-9])@\1""$HTML_LINK""\2@g")" )
         fi
       fi
     done
@@ -179,7 +197,7 @@ add_link_tags() {
           if ! [[ -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" ; fi
           cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")"
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY""$LINK_END"
-          sed -i -E "s@([\ ]+)$MSF_KEY@\1$HTML_LINK@g" "$LINK_FILE"
+          LINK_COMMAND_ARR+=( '-e' "$(escaper "s@([\ ]+)""$MSF_KEY""@\1""$HTML_LINK""@g")" )
         fi
       fi
     done
@@ -191,10 +209,19 @@ add_link_tags() {
     for CVE_ID in "${CVE_IDS[@]}" ; do
       if [[ -n "$CVE_ID" ]] ; then
         HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID@g")""$CVE_ID""$LINK_END"
-        sed -i -E "s@$CVE_ID([^[:digit:]]{1})@$HTML_LINK\1@g" "$LINK_FILE"
+        LINK_COMMAND_ARR+=( '-e' "$(escaper "s@$CVE_ID([^[:digit:]]{1})@""$HTML_LINK""\1@g")" )
       fi
     done
   fi
+
+  if [[ "${#LINK_COMMAND_ARR[@]}" -gt 0 ]] ; then
+    sed -i -E "${LINK_COMMAND_ARR[@]}" "$LINK_FILE"
+  fi
+
+  if [[ $THREADED -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_WR[@]}"
+  fi
+  sed -i -E -e '/^<pre>(\[REF\])|(\[ANC\]).*$/d' "$LINK_FILE"
 }
 
 strip_color_tags()
