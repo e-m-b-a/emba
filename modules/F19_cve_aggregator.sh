@@ -75,7 +75,7 @@ F19_cve_aggregator() {
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
       fi
-      if [[ -f "$TMP_DIR"/msf_cve-db.txt ]]; then
+      if [[ -f "$MSF_DB_PATH" ]]; then
         MSF_SEARCH=1
       fi
 
@@ -236,6 +236,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
     #flashcp (mtd-utils) 2.0.2
     VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
+    # mount.cifs -> cifs-utils
+    VERSION_lower="${VERSION_lower//mount\.cifs/cifs-utils}"
     # lspci, setpci -> pciutils
     VERSION_lower="${VERSION_lower//lspci/pciutils}"
     VERSION_lower="${VERSION_lower//setpci/pciutils}"
@@ -519,6 +521,7 @@ aggregate_versions() {
   # currently it is very helpful
   if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
+    write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
       print_output "[+] Found Version details (base check): ""$VERSION"
     done
@@ -583,6 +586,7 @@ aggregate_versions() {
 generate_special_log() {
   if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE") -gt 0 ]]; then
     sub_module_title "Minimal report of exploits and CVE's."
+    write_anchor "minimalreportofexploitsandcves"
 
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -type f)
     print_output ""
@@ -620,9 +624,11 @@ generate_special_log() {
 }
 
 cve_db_lookup() {
+  # using $VERSION variable:
   VERSION_SEARCH="${VERSION//\ /:}"
   VERSION_PATH="${VERSION//\ /_}"
-  print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}"
+  VERSION_BINARY=$(echo "$VERSION_SEARCH" | cut -d: -f1)
+  print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}" "" "f19#cve_$VERSION_BINARY"
 
   # CVE search:
   $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
@@ -659,7 +665,7 @@ cve_extractor() {
 
     EDB=0
     # as we already know about a buch of kernel exploits - lets search them first
-    if [[ "$VERSION" == *kernel* ]]; then
+    if [[ "$VERSION_BINARY" == *kernel* ]]; then
       for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
         if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
           EXPLOIT="Exploit (linux-exploit-suggester"
@@ -676,7 +682,7 @@ cve_extractor() {
       fi
 
       if [[ $MSF_SEARCH -eq 1 ]]; then
-        mapfile -t EXPLOIT_AVAIL_MSF < <(grep "$CVE_VALUE" "$TMP_DIR"/msf_cve-db.txt 2>/dev/null)
+        mapfile -t EXPLOIT_AVAIL_MSF < <(grep "$CVE_VALUE" "$MSF_DB_PATH" 2>/dev/null)
       fi
 
       if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
@@ -782,11 +788,13 @@ cve_extractor() {
   fi
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
+    write_anchor "cve_$BINARY"
     print_output ""
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
     print_output ""
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
+    write_anchor "cve_$BINARY"
     print_output ""
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
@@ -796,7 +804,6 @@ cve_extractor() {
 
 generate_cve_details() {
   sub_module_title "Collect CVE and exploit details."
-
   write_anchor "collectcveandexploitdetails"
 
   CVE_COUNTER=0
@@ -921,7 +928,7 @@ get_firmware_base_version_check() {
 get_kernel_check() {
   print_output "[*] Collect version details of module s25_kernel_check."
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
-    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
+    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
     ## do a bit of sed modifications to have the same output as from the pre checker
     readarray -t VERSIONS_KERNEL < <(grep "Statistics:" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel\ /' | sort -u)
   fi
