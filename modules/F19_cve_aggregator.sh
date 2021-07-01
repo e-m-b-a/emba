@@ -118,7 +118,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/lvmpolld\ /lvm2\ }"
     VERSION_lower="${VERSION_lower/lvmetad\ /lvm2\ }"
     #ldpd version 0.99.24.1 #ospf6d version 0.99.24.1 #etc.
-    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd)\ version\ 0.9/quagga\ 0.9/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd|babeld|bgpd)\ version\ 0.9/quagga\ 0.9/')"
     #bridge utility, 0.0
     VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
     #Modern traceroute for Linux, version 2.1.0
