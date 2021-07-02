@@ -16,7 +16,7 @@
 # Description: Uploads the firmware to virustotal
 # Important:   This module needs a VT API key in the config file ./config/vt_api_key.txt
 #              This key is avilable via your VT profile
-# Pre-chcker Threading mode - if set to 1, these modules will run in threaded mode
+# Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=1
 
 P03_firmware_virustotal_check() {

@@ -14,7 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Gives some very basic information about the provided firmware binary.
-# Pre-chcker Threading mode - if set to 1, these modules will run in threaded mode
+# Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=1
 
 P02_firmware_bin_file_check() {

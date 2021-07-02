@@ -15,7 +15,7 @@
 
 # Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, uC/OS and Linux. 
 #               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
-# Pre-chcker Threading mode - if set to 1, these modules will run in threaded mode
+# Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=1
 
 P07_firmware_bin_base_analyzer() {

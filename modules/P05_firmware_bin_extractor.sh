@@ -15,7 +15,8 @@
 
 # Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware in the log directory. 
 #               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
-# Pre-chcker Threading mode - if set to 1, these modules will run in threaded mode
+# Pre-checker threading mode - if set to 1, these modules will run in threaded mode
+# This module extracts the firmware and is blocking modules that needs executed before the following modules can run
 export PRE_THREAD_ENA=0
 
 

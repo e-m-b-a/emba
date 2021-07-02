@@ -89,7 +89,6 @@ run_modules()
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
     local MODULES
     mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-    print_output "[*] module grouop: ${MODULE_GROUP^^}"
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
