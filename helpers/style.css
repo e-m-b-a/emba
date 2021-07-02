@@ -101,6 +101,12 @@ pre a:hover {
   background-color: rgb(104, 104, 104);
 }
 
+.anc {
+  visibility: hidden;
+  position: relative;
+  top: -50px;
+}
+
 .back {
   background-color:#2d6029!important;
 }

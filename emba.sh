@@ -488,13 +488,17 @@ main()
     fi
 
     OPTIND=1
-    ARGS=""
+    ARGUMENTS=()
     while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:stX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
         *)
-          export ARGS="$ARGS -$OPT $OPTARG"
+          if [[ "${#OPTARG[@]}" -gt 0 ]] ; then
+            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" "${OPTARG[@]}" )
+          else
+            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
+          fi
           ;;
       esac
     done
@@ -502,7 +506,7 @@ main()
     echo
     print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log -f /firmware -i $ARGS"
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
     D_RETURN=$?
 
     if [[ $D_RETURN -eq 0 ]] ; then

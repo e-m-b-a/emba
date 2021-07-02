@@ -296,7 +296,9 @@ print_top10_statistics() {
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
         print_output "[+] ""$FUNCTION"" - top 10 results:"
-        write_anchor "strcpysummary"
+        if [[ "$FUNCTION" == "strcpy" ]] ; then
+          write_anchor "strcpysummary"
+        fi
         for LINE in "${RESULTS[@]}" ; do
           SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
           F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
