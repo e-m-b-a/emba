@@ -114,6 +114,34 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
+    #lvmetad version: 2.02.168(2) (2016-11-30)  #lvmpolld version: 2.02.168(2) (2016-11-30)
+    VERSION_lower="${VERSION_lower/lvmpolld\ /lvm2\ }"
+    VERSION_lower="${VERSION_lower/lvmetad\ /lvm2\ }"
+    #ldpd version 0.99.24.1 #ospf6d version 0.99.24.1 #etc.
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd|babeld|bgpd)\ version\ 0.9/quagga\ 0.9/')"
+    #bridge utility, 0.0
+    VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
+    #Modern traceroute for Linux, version 2.1.0
+    VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
+    #signver - verify a detached PKCS7 signature - Version 3.26.2
+    VERSION_lower="${VERSION_lower/\ -\ verify\ a\ detached\ pkcs7\ signature\ -/}"
+    #part of minicom version 2.7
+    VERSION_lower="${VERSION_lower/part\ of\ minicom/minicom}"
+    #run-parts program, version 4.8.1.1
+    VERSION_lower="${VERSION_lower/run-parts\ program,/run-parts}"
+    #GNU parted) 3.2
+    VERSION_lower="${VERSION_lower/gnu\ parted\)/parted}"
+    # #mkenvimage version 2016.11+dfsg1-4
+    # VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
+    # #mkimage version 2016.11+dfsg1-4
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(mkenvimage|mkimage|dumpimage)\ version\ 20/u-boot\ 20/')"
+    # VERSION_lower="${VERSION_lower/mkimage\ /u-boot\ }"
+    #Version: lldpd 0.7.11
+    VERSION_lower="${VERSION_lower/version:\ lldpd\ /lldpd\ }"
+    #cdialog (ComeOn Dialog!) version 1.3-20160828
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(cdialog).*(version [0-9]\.[0-9])/\1\ \2/')"
+    #atftp-0.7
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(atftp)-([0-9]\.[0-9])/\1\ \2/')"
     #radiusd: FreeRADIUS Version 2.2.2
     VERSION_lower="${VERSION_lower/radiusd:\ freeradius/freeradius}"
     #Btrfs Btrfs v0.19
@@ -329,7 +357,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//:/}"
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
-    #mini_httpd/1.19
+    #glib-compile-schemas 2.50.3
+    VERSION_lower="${VERSION_lower/glib-compile-schemas\ /gnome:glib\ }"
     #mtr mtr 0.85
     VERSION_lower="${VERSION_lower/mtr\ mtr/mtr:mtr}"
     VERSION_lower="${VERSION_lower/\//\ }"
@@ -367,8 +396,13 @@ prepare_version_data() {
     # ntpd 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntp[dq]\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*query.*([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*ntpd.*([0-9]\.[0-9]\.[0-9])([a-z][0-9]+)/ntp\ \1:\2/g')"
+    #sntp 4.2.8p10@1.3728-o Mon Mar  9 18:03:45 UTC 2020 (1)
+    VERSION_lower="${VERSION_lower/sntp\ /ntp\ }"
     # ntpdate 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdate\ ([0-9]\.[0-9]\.[0-9])([a-z]([0-9]))/ntp\ \1:\2/g')"
+    # ntp-keygen 4.2.8p10@1.3728-o Mon Mar  9 18:04:19 UTC 2020 (1)
+    VERSION_lower="${VERSION_lower/ntp-keygen\ /ntp\ }"
     # FreeBSD 12.1-RELEASE-p8  -> FreeBSD 12.1:p8 
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/freebsd\ ([0-9]+\.[0-9]+)-release-([a-z]([0-9]+))/freebsd\ \1:\2/g')"
     # unzip .... info-zip -> info-zip
@@ -378,6 +412,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/([a-z]\ UnZip),/info-zip:zip/')"
+    #ZipSplit 3.0
+    VERSION_lower="${VERSION_lower/zipsplit\ /info-zip:zip\ }"
     #mdns repeater (1.10)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/mdns\ repeater\ \(([0-9]\.[0-9][0-9])\)/mdnsrepeater\ \1/g')"
     #management console agent 1.5 (c) ubiquiti networks inc
