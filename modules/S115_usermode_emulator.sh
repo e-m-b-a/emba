@@ -300,7 +300,7 @@ s115_cleanup() {
       else
         BIN=$(basename "$FILE")
         BIN=$(echo "$BIN" | cut -d_ -f2 | sed 's/.txt$//')
-        print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$FILE""${NC}"". Please check this manually."
+        print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$FILE""${NC}""."
       fi
     done
   fi

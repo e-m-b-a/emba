@@ -58,7 +58,6 @@ S09_firmware_base_version_check() {
       echo "." | tr -d "\n"
 
       if [[ $FIRMWARE -eq 0 || -f $FIRMWARE_PATH ]]; then
-        #print_output "[*] original firmware path searched"
         VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
 
         if [[ -n $VERSION_FINDER ]]; then
@@ -84,7 +83,6 @@ S09_firmware_base_version_check() {
 
      echo "." | tr -d "\n"
     else
-      #print_output "[*] RTOS: $RTOS"
       if [[ $RTOS -eq 1 ]]; then
         continue
       else
@@ -126,7 +124,7 @@ S09_firmware_base_version_check() {
 
 bin_string_checker() {
   for BIN in "${FILE_ARR[@]}"; do
-    if [[ $RTOS -eq 1 ]]; then
+    if [[ $RTOS -eq 0 ]]; then
       BIN_FILE=$(file "$BIN")
       # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
       if ! [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* || "$BIN_FILE" == *ELF* ]] ; then
