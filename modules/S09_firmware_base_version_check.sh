@@ -58,6 +58,7 @@ S09_firmware_base_version_check() {
       echo "." | tr -d "\n"
 
       if [[ $FIRMWARE -eq 0 || -f $FIRMWARE_PATH ]]; then
+        #print_output "[*] original firmware path searched"
         VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
 
         if [[ -n $VERSION_FINDER ]]; then
@@ -83,23 +84,24 @@ S09_firmware_base_version_check() {
 
      echo "." | tr -d "\n"
     else
+      #print_output "[*] RTOS: $RTOS"
       if [[ $RTOS -eq 1 ]]; then
         continue
-      fi
-
-      mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-      for BIN in "${STRICT_BINS[@]}"; do
-        # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-        if file "$BIN" | grep -q ELF ; then
-          VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
-          if [[ -n $VERSION_FINDER ]]; then
-            echo ""
-            print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static - strict)."
+      else
+        mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+        for BIN in "${STRICT_BINS[@]}"; do
+          # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
+          if file "$BIN" | grep -q ELF ; then
+            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
+            if [[ -n $VERSION_FINDER ]]; then
+              echo ""
+              print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static - strict)."
             continue
+            fi
           fi
-        fi
-      done
-      echo "." | tr -d "\n"
+        done
+        echo "." | tr -d "\n"
+      fi
     fi
 
     if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
