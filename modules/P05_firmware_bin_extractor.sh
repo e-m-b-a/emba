@@ -248,9 +248,7 @@ fact_extractor() {
   # as we probably kill FACT and to not loose the results we need to execute FACT in a function 
   # and read the results from the caller
   if [[ -f "$TMP_DIR"/FACTer.txt ]] ; then
-    while read -r LINE; do 
-      print_output "$LINE"
-    done < "$TMP_DIR"/FACTer.txt
+    cat "$TMP_DIR"/FACTer.txt | tee -a "$LOG_DIR"
   fi
 }
 
@@ -298,9 +296,7 @@ binwalking() {
   # as we probably kill binwalk and to not loose the results we need to execute binwalk in a function 
   # and read the results from the caller
   if [[ -f "$TMP_DIR"/binwalker.txt ]] ; then
-    while read -r LINE; do 
-      print_output "$LINE"
-    done < "$TMP_DIR"/binwalker.txt
+    cat "$TMP_DIR"/binwalker.txt | tee -a "$LOG_FILE"
   fi
 }
 
