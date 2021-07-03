@@ -248,7 +248,7 @@ fact_extractor() {
   # as we probably kill FACT and to not loose the results we need to execute FACT in a function 
   # and read the results from the caller
   if [[ -f "$TMP_DIR"/FACTer.txt ]] ; then
-    cat "$TMP_DIR"/FACTer.txt | tee -a "$LOG_DIR"
+    cat "$TMP_DIR"/FACTer.txt | tee -a "$LOG_FILE"
   fi
 }
 
