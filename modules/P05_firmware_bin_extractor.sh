@@ -248,7 +248,7 @@ fact_extractor() {
   # as we probably kill FACT and to not loose the results we need to execute FACT in a function 
   # and read the results from the caller
   if [[ -f "$TMP_DIR"/FACTer.txt ]] ; then
-    cat "$TMP_DIR"/FACTer.txt | tee -a "$LOG_FILE"
+    tee -a "$LOG_FILE" < "$TMP_DIR"/FACTer.txt 
   fi
 }
 
@@ -296,7 +296,7 @@ binwalking() {
   # as we probably kill binwalk and to not loose the results we need to execute binwalk in a function 
   # and read the results from the caller
   if [[ -f "$TMP_DIR"/binwalker.txt ]] ; then
-    cat "$TMP_DIR"/binwalker.txt | tee -a "$LOG_FILE"
+    tee -a "$LOG_FILE" < "$TMP_DIR"/binwalker.txt 
   fi
 }
 
@@ -313,7 +313,7 @@ extract_deb_helper() {
   find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
 }
 binwalk_deep_extract_helper() {
-  binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_DIR"/p05_binwalker_deep.txt
+  binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
 }
 extract_deb_extractor_helper(){
   DEB_NAME=$(basename "$DEB")
