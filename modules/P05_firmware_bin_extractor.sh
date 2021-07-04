@@ -59,6 +59,7 @@ P05_firmware_bin_extractor() {
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
+    print_output ""
     deb_extractor
     ipk_extractor
   fi
@@ -135,6 +136,8 @@ ipk_extractor() {
       print_output "[*] Before ipk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
       rm -r "$LOG_DIR"/ipk_tmp
     fi
+  else
+    print_output "[-] No ipk packages extracted."
   fi
 }
 
@@ -170,6 +173,8 @@ deb_extractor() {
       echo ""
       print_output "[*] Before deb extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
     fi
+  else
+    print_output "[-] No deb packages extracted."
   fi
 }
 
