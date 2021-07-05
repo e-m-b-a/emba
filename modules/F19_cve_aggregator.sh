@@ -191,6 +191,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nc.traditional\ \[v/nc.traditional\ }"
     # sqlite3 -> sqlite
     VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
+    # strict libsqlite3.so.0 -> sqlite
+    VERSION_lower="${VERSION_lower//libsqlite3\.so\.0/sqlite}"
     # dnsmasq- -> dnsmasq 
     VERSION_lower="${VERSION_lower//dnsmasq-/dnsmasq\ }"
     # lighttpd- -> lighttpd\ 
