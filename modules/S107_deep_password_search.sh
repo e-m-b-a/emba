@@ -21,6 +21,7 @@ S107_deep_password_search()
   module_title "Deep analysis of files for password hashes"
 
   PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
+  local PW_COUNTER=0
 
   find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP"/pw_hashes.txt
 
@@ -32,10 +33,10 @@ S107_deep_password_search()
       print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
       ((PW_COUNTER++))
     done < "$TMP"/pw_hashes.txt
-  fi
 
-  print_output ""
-  print_output "[*] Found $ORANGE$PW_COUNTER$NC password hashes."
+    print_output ""
+    print_output "[*] Found $ORANGE$PW_COUNTER$NC password hashes."
+  fi
   write_log ""
   write_log "[*] Statistics:$PW_COUNTER"
 
