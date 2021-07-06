@@ -712,7 +712,7 @@ case ${ANSWER:0:1} in
       mkdir external/iniscan
     fi
 
-    cd ./external/iniscan
+    cd ./external/iniscan || exit
     curl -sS https://getcomposer.org/installer | php
     composer require psecio/iniscan -n
   ;;
