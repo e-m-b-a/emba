@@ -83,15 +83,14 @@ s22_script_check() {
   fi
 }
 
-#memory_limit            = 50M
-#post_max_size           = 20M
-#max_execution_time      = 60
-
 s22_check_php_init(){
-  #$(sudo ~/vendor/bin/iniscan scan --path=/etc/php/7.4/apache2/php.ini > ./logs/iniscan_output.txt)
-  FILE="./logs/iniscan_output.txt"
-  while IFS= read -r LINE
+  sudo find "$FIRMWARE_PATH" -name php.ini
+  sudo ../external/iniscan/vendor/bin/iniscan scan --path=/etc/php/7.4/apache2/php.ini > ./iniscan_output.txt
+  sudo chmod 777 ./iniscan_output.txt
+  FILE="./iniscan_output.txt"
+  while read LINE
   do
+    echo "$LINE"
     if (( "$LINE" == *"FAIL"* && "$LINE" == *"ERROR"*)); then
          add_recommendations LINE
          print_output "[-] ""$ORANGE""FAIL""$RED""ERROR""$WHITE""$LINE"
@@ -103,44 +102,20 @@ s22_check_php_init(){
     elif (( "$LINE" == *"PASS"* && "$LINE" == *"WARNING"*)); then
          print_output "[-] ""$GREEN""PASS""$CYAN""WARNING""$WHITE""$LINE"
     fi
-    #print_output "$(orange "orange text example")"
-    #print_output "$(red "red text example")"
-    #print_output "$(blue "blue text example")"
-    #print_output "$(cyan "cyan text example")"
-    #print_output "$(green "green text example")"
-    #print_output "$(magenta "magenta text example")"
   done < "$FILE"
 }
 
 add_recommendations(){
    LINE = $1
-   LINE_ARR = LINE.split('|');
-
-   if()
-   #memory_limit            = 50M
-#post_max_size           = 20M
-#max_execution_time      = 60
-
-
-
+   IFS='|' read -ra LINE_ARR <<< "$LINE"
+   echo LINE_ARR
+   if(LINE_ARR[3] >= *"50"*); then
+     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+   fi
+   if(LINE_ARR[3] >= *"20"*); then
+     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+   fi
+   if(LINE_ARR[3] >= *"60"*); then
+     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+   fi
 }
-
-
-#Must heaves
-# PHP7.2+
-#display_errors = Off
-#allow_url_fopen         = Off
-#allow_url_include       = Off
-#file_uploads            = On (nur wenn benötigt)
-#enable_dl               = Off
-#disable_functions       = system, exec, shell_exec, passthru, phpinfo, show_source, highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open, putenv, move_uploaded_file, chdir, mkdir, rmdir, chmod, rename, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo
-# see also: http://ir.php.net/features.safe-mode
-#disable_classes         =
-#session.name                     = myPHPSESSID
-#session.referer_check   = /application/path
-#memory_limit            = 50M
-#post_max_size           = 20M
-#max_execution_time      = 60
-#report_memleaks         = On
-#track_errors            = Off
-#html_errors             = Off
