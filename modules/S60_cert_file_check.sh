@@ -18,9 +18,8 @@
 S60_cert_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Search certification files and other critical interesting stuff"
+  module_title "Search certificates"
 
-  LOG_FILE="$( get_log_file )"
 
   local CERT_FILES_ARR
   readarray -t CERT_FILES_ARR < <(config_find "$CONFIG_DIR""/cert_files.cfg")
@@ -38,6 +37,8 @@ S60_cert_file_check()
         if command -v openssl > /dev/null ; then
           CERT_DATE=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601)
           CERT_DATE_=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s)
+          CERT_NAME=$(basename "$LINE")
+          openssl x509 -in "$LINE" -text 2>/dev/null >> "$LOG_PATH_MODULE"/cert_details_"$CERT_NAME".txt
           if [[ $CERT_DATE_ -lt $CURRENT_DATE ]]; then
             print_output "  ${RED}""$CERT_DATE"" - ""$(print_path "$LINE")""${NC}"
             ((CERT_OUT_CNT++))
@@ -49,7 +50,8 @@ S60_cert_file_check()
         fi
       fi
     done
-    echo -e "\\n[*] Statistics:$CERT_CNT:$CERT_OUT_CNT" >> "$LOG_FILE"
+    write_log ""
+    write_log "[*] Statistics:$CERT_CNT:$CERT_OUT_CNT"
   else
     print_output "[-] No certification files found"
   fi

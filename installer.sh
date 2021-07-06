@@ -226,6 +226,7 @@ print_tool_info "tcllib" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 print_tool_info "make" 1
+print_tool_info "metasploit-framework" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -349,10 +350,12 @@ case ${ANSWER:0:1} in
     download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
     download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
     ### pixd installation
-    git clone https://github.com/FireyFly/pixd external/pixd
+    pip3 install pillow
+    git clone https://github.com/p4cx/pixd_image external/pixd
     cd ./external/pixd/ || exit 1
     make
     mv pixd ../pixde
+    mv pixd_png.py ../pixd_png.py
     cd ../../ || exit 1
     rm -r ./external/pixd/
     ### pixd installation
@@ -527,7 +530,7 @@ case ${ANSWER:0:1} in
         /etc/init.d/redis-server start
         ./sbin/db_mgmt_cpe_dictionary.py -p
         ./sbin/db_mgmt_json.py -p
-        ./sbin/db_updater.py -c
+        ./sbin/db_updater.py -f
         cd ../.. || exit 1
         sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
         chmod +x config/cve_database_updater
@@ -682,41 +685,13 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
+echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
+echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
 
-# aha for html generation
-INSTALL_APP_LIST=()
-echo -e "\\nTo use the emba report generator, we need a html file generator. make will be needed to compile aha."
-print_tool_info "make" 0
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and compile aha (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""aha (if not already on the system) will be downloaded and be compiled!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    if ! [[ -f "external/aha" ]] ; then
-      apt-get install "${INSTALL_APP_LIST[@]}" -y
-      wget https://github.com/theZiz/aha/archive/master.zip -O external/aha-master.zip
-      unzip ./external/aha-master.zip -d ./external
-      rm external/aha-master.zip
-      cd ./external/aha-master || exit 1
-      echo -e "$ORANGE""$BOLD""Compile aha""$NC"
-      make
-      cd ../.. || exit 1
-      mv "external/aha-master/aha" "external/aha"
-      rm -R external/aha-master
-      
-      if ! [[ -f "external/aha" ]] ; then
-         echo -e "$MAGENTA""$BOLD""aha installation failed! You can not use the emba report manager""$NC"
-      else
-         echo -e "$GREEN""aha has been installed""$NC"
-      fi
-    else
-      echo -e "$ORANGE""aha is already installed""$NC"
-    fi      
-  ;;
-esac
+echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
+
+echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
+
+echo -e "$GREEN""Emba installation finished ""$NC"

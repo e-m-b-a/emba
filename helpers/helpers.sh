@@ -21,31 +21,8 @@ run_web_reporter_mod_name() {
     # usually we should only find one file:
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
     for LOG_FILE in "${LOG_FILES[@]}"; do
-      XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
-      if [[ "$XREPORT" -gt 0 ]]; then
-        #print_output "[*] generating log file with NO content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 0
-      else
-        #print_output "[+] generating log file with content $LOG_FILE" "no_log"
-        generate_html_file "$LOG_FILE" 1
-      fi
-    done
-   fi
-}
-
-run_web_reporter_build_index() {
-  if [[ $HTML -eq 1 ]]; then
-    #print_output "[*] Building index file for web report"
-    LOG_INDICATORS=( p s f )
-    for LOG_INDICATOR in "${LOG_INDICATORS[@]}"; do
-      mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$LOG_INDICATOR*.txt" | sort)
-      for LOG_FILE in "${LOG_FILES[@]}"; do
-        XREPORT=$(grep -c "[-]\ .*\ nothing\ reported" "$LOG_FILE")
-        if [[ "$XREPORT" -eq 0 ]]; then
-          #print_output "[+] Generating index file with content $LOG_FILE" "no_log"
-          build_index_file "$LOG_FILE"
-        fi
-      done
+      generate_report_file "$LOG_FILE"
+      sed -i -E '/^\[REF\]|\[ANC\].*/d' "$LOG_FILE"
     done
   fi
 }
@@ -56,13 +33,17 @@ wait_for_pid() {
   #print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
   for PID in ${WAIT_PIDS[*]}; do
     #print_output "[*] wait pid protection: $PID"
-    echo "." | tr -d "\n"
+    echo "." | tr -d "\n" 2>/dev/null
     if ! [[ -e /proc/"$PID" ]]; then
       continue
     fi
     while [[ -e /proc/"$PID" ]]; do
       #print_output "[*] wait pid protection - running pid: $PID"
-      echo "." | tr -d "\n"
+      echo "." | tr -d "\n" 2>/dev/null
+      # if S115 is running we have to kill old qemu processes
+      if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
+        killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
+      fi
     done
   done
 }
@@ -85,22 +66,28 @@ max_pids_protection() {
         TEMP_PIDS+=( "$PID" )
       fi
     done
+    # if S115 is running we have to kill old qemu processes
+    if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
+      killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
+    fi
+
     #print_output "[!] really running pids: ${#TEMP_PIDS[@]}"
 
     # recreate the arry with the current running PIDS
     WAIT_PIDS=()
     WAIT_PIDS=("${TEMP_PIDS[@]}")
-    echo "." | tr -d "\n"
+    echo "." | tr -d "\n" 2>/dev/null
   done
 }
 
 cleaner() {
-  print_output "[*] Ctrl+C detected!" "no_log"
+  print_output "[*] User interrupt detected!" "no_log"
   print_output "[*] Final cleanup started." "no_log"
-  # now we can unmount the stuff from emulator and delete temporary stuff
 
   # if S115 is found only once in main.log the module was started and we have to clean it up
-  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+  # additionally we need to check some variable from a running emba instance
+  # otherwise the unmounter runs crazy in some corner cases
+  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" && "${#FILE_ARR[@]}" -gt 0 ]]; then
     if [[ $(grep -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu.*sta.*
@@ -108,6 +95,7 @@ cleaner() {
       find "$FIRMWARE_PATH_CP" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
       print_output "[*] Umounting proc, sys and run" "no_log"
       mapfile -t CHECK_MOUNTS < <(mount | grep "$FIRMWARE_PATH_CP")
+      # now we can unmount the stuff from emulator and delete temporary stuff
       for MOUNT in "${CHECK_MOUNTS[@]}"; do
         print_output "[*] Unmounting $MOUNT" "no_log"
         MOUNT=$(echo "$MOUNT" | cut -d\  -f3)

@@ -20,8 +20,6 @@ S95_interesting_binaries_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check interesting binaries"
 
-  LOG_FILE="$( get_log_file )"
-
   if [[ "$THREADED" -eq 1 ]]; then
     interesting_binaries &
     WAIT_PIDS_S95+=( "$!" )
@@ -42,7 +40,8 @@ S95_interesting_binaries_check()
     INT_COUNT=$(cat "$TMP_DIR"/INT_COUNT.tmp 2>/dev/null)
   fi
 
-  echo -e "\\n[*] Statistics:$INT_COUNT:$POST_COUNT" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:$INT_COUNT:$POST_COUNT"
 
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }

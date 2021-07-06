@@ -160,9 +160,6 @@ dependency_check()
 
     echo
     print_output "[*] External utils:" "no_log"
-
-    # aha
-    check_dep_file "aha" "$EXT_DIR""/aha"
   
     # bc
     check_dep_tool "bc"
@@ -181,6 +178,9 @@ dependency_check()
 
     # pixd
     check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
+
+    # pixd image
+    check_dep_file "pixd image renderer" "$EXT_DIR""/pixd_png.py"
 
     # CVE and CVSS databases
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"

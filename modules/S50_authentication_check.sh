@@ -22,7 +22,6 @@ S50_authentication_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check users, groups and authentication"
 
-  LOG_FILE="$( get_log_file )"
   AUTH_ISSUES=0
 
   if [[ "$THREADED" -eq 1 ]]; then
@@ -74,7 +73,8 @@ S50_authentication_check() {
       (( AUTH_ISSUES="$AUTH_ISSUES"+"$ISSUES" ))
     done < "$TMP_DIR"/S50_AUTH_ISSUES.tmp
   fi
-  echo -e "\\n[*] Statistics:$AUTH_ISSUES" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:$AUTH_ISSUES"
 
   module_end_log "${FUNCNAME[0]}" "$AUTH_ISSUES"
 }

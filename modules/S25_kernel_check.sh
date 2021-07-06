@@ -27,7 +27,6 @@ S25_kernel_check()
 
   KERNEL_VERSION=()
   KERNEL_DESC=()
-  LOG_FILE="$( get_log_file )"
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
 
@@ -39,6 +38,7 @@ S25_kernel_check()
         print_output "$(indent "$LINE")"
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
+        print_output ""
         print_output "Kernel details:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
@@ -85,10 +85,10 @@ S25_kernel_check()
 
   if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
     for LINE in "${KV_C_ARR[@]}" ; do
-      echo "[*] Statistics:$LINE" >> "$LOG_FILE"
+      write_log "[*] Statistics:$LINE"
     done
   fi
-  echo "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD" >> "$LOG_FILE"
+  write_log "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD"
 
   module_end_log "${FUNCNAME[0]}" "${#KERNEL_VERSION[@]}"
 }
@@ -149,6 +149,7 @@ get_kernel_vulns()
 analyze_kernel_module()
 {
   sub_module_title "Analyze kernel modules"
+  write_anchor "kernel_modules"
 
   KMOD_BAD=0
 
@@ -205,7 +206,7 @@ module_analyzer() {
 
 check_modprobe()
 {
-  sub_module_title "Check modprobe.d directory and content (loadable kernel module config)"
+  sub_module_title "Check modprobe.d directory and content"
 
   local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0
   readarray -t MODPROBE_D_DIRS < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )

@@ -30,11 +30,6 @@ S09_firmware_base_version_check() {
   module_title "Binary firmware versions detection"
 
   EXTRACTOR_LOG="$LOG_DIR"/p05_firmware_bin_extractor.txt
-  if [[ "$THREADED" -eq 1 ]]; then
-    # a first try to not kill the system with too many version detection tasks
-    MAX_THREADS_S09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
-    print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
-  fi
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
@@ -62,7 +57,7 @@ S09_firmware_base_version_check() {
       
       echo "." | tr -d "\n"
 
-      if [[ $FIRMWARE -eq 0 ]]; then
+      if [[ $FIRMWARE -eq 0 || -f $FIRMWARE_PATH ]]; then
         VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
 
         if [[ -n $VERSION_FINDER ]]; then
@@ -73,6 +68,12 @@ S09_firmware_base_version_check() {
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
+        MAX_THREADS_S09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
+        if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+          MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo)"))
+        fi
+        #print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
+
         # this will burn the CPU but in most cases the time of testing is cut into half
         bin_string_checker &
         WAIT_PIDS_S09+=( "$!" )
@@ -82,6 +83,10 @@ S09_firmware_base_version_check() {
 
      echo "." | tr -d "\n"
     else
+      if [[ $RTOS -eq 1 ]]; then
+        continue
+      fi
+
       mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
       for BIN in "${STRICT_BINS[@]}"; do
         # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
@@ -119,25 +124,32 @@ S09_firmware_base_version_check() {
 
 bin_string_checker() {
   for BIN in "${FILE_ARR[@]}"; do
-    BIN_FILE=$(file "$BIN")
-    # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
-    if ! [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* || "$BIN_FILE" == *ELF* ]] ; then
-      continue
-    fi
-    #if file "$BIN" | grep -q ELF ; then
-    if [[ "$BIN_FILE" == *ELF* ]] ; then
+    if [[ $RTOS -eq 1 ]]; then
+      BIN_FILE=$(file "$BIN")
+      # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
+      if ! [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* || "$BIN_FILE" == *ELF* ]] ; then
+        continue
+      fi
+      if [[ "$BIN_FILE" == *ELF* ]] ; then
+        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static)."
+          continue
+        fi
+      elif [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* ]] ; then
+        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        if [[ -n $VERSION_FINDER ]]; then
+          echo ""
+          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (static)."
+          continue
+        fi
+      fi
+    else
       VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
         print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static)."
-        continue
-      fi
-    #elif file "$BIN" | grep -q "uImage\|Kernel\ Image" ; then
-    elif [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* ]] ; then
-      VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
-      if [[ -n $VERSION_FINDER ]]; then
-        echo ""
-        print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (static)."
         continue
       fi
     fi

@@ -12,9 +12,6 @@ emba is licensed under GPLv3
 Author(s): Michael Messner, Pascal Eckmann
 -->
 
-# emba
-### The security analyzer for embedded device firmware
-
 <p align="center">
   <img src="./helpers/emba.svg" width="200"/>
 </p>
@@ -26,40 +23,27 @@ Author(s): Michael Messner, Pascal Eckmann
   <a href="https://github.com/e-m-b-a/emba/network/members"><img src="https://img.shields.io/github/forks/e-m-b-a/emba?label=Forks"></a>
 </p>
 
-- [About](#About)
-- [Installation](#Installation)
-- [Usage](#Usage)
+# emba
+## The security analyzer for embedded device firmware
+
+*Emba* is designed to help penetration testers gain a lot of knowledge about firmware in a short period of time. As a pentester, you normally use numerous tools, e.g. binwalk, cve-search or yara [(and many others)](https://github.com/e-m-b-a/emba/wiki/Installation#dependencies) and use them to assess the firmware to be tested. 
+
+This is where *emba* comes into play: This tool combines many of the common applications under its hood and can be started with a single command and then scans the firmware for possible security risks. If the firmware has not yet been extracted, this is not an obstacle for *emba*. It will be done automatically. No cumbersome installation of all helpers, once the installation script has been executed, you are ready to test your firmware. One of the most important aspects of development is that Emba is easy to use and easy to set up at all times.
+
+*Emba* is designed to assist penetration testers and not as a standalone tool without human interaction. *Emba* should provide as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
+
+If you have questions about *emba*, have a look at the [wiki](https://github.com/e-m-b-a/emba/wiki) and if they are not answered there, create an issue.
+
+----------------------
 
 #### Links to the wiki (more detailed information)
 
 - [Home](https://github.com/e-m-b-a/emba/wiki)
-  - [Motivation](https://github.com/e-m-b-a/emba/wiki#motivation)
 - [Feature overview](https://github.com/e-m-b-a/emba/wiki/Feature-overview)
-  - [Emulator](https://github.com/e-m-b-a/emba/wiki/Emulator)
-  - [Aggregator](https://github.com/e-m-b-a/emba/wiki/Aggregator)
 - [FAQ](https://github.com/e-m-b-a/emba/wiki/FAQ)
 - [Installation](https://github.com/e-m-b-a/emba/wiki/Installation)
-  - [Classic](https://github.com/e-m-b-a/emba/wiki/Installation#classic-installation)
-  - [Docker](https://github.com/e-m-b-a/emba/wiki/Installation#docker-installation)
-  - [CVE-Search](https://github.com/e-m-b-a/emba/wiki/Installation#cve-search-installation)
-  - [Dependencies](https://github.com/e-m-b-a/emba/wiki/Installation#dependencies)
-  - [System tools](https://github.com/e-m-b-a/emba/wiki/Installation#system-tools)
 - [Usage](https://github.com/e-m-b-a/emba/wiki/Usage)
-  - [Classic](https://github.com/e-m-b-a/emba/wiki/Usage#classic)
-  - [Docker](https://github.com/e-m-b-a/emba/wiki/Usage#docker)
-  - [Arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments)
-  - [Live system](https://github.com/e-m-b-a/emba/wiki/Usage#live-systems)
-- [Development](https://github.com/e-m-b-a/emba/wiki/Developement)
-  - [Structure](https://github.com/e-m-b-a/emba/wiki/Developement#structure-of-emba)
-  - [Modules](https://github.com/e-m-b-a/emba/wiki/Developement#development-of-modules)
-
-
-## About
-
-*Emba* is being developed as a firmware scanner that analyzes firmware images, regardless of whether the firmware is a single file or has already been extracted. It should help you identify and focus on interesting areas of firmware images. Beside Linux-based embedded devices *Emba* also analyzes [different RTOS-based operating systems](https://github.com/e-m-b-a/emba/wiki/OS-support) like *VxWorks* or *FreeRTOS*.
-
-*Emba* is optimized for offline/extracted firmware images. Additionally, it can also analyze kernel configurations.
-*Emba* is designed to assist penetration testers and not as a standalone tool without human interaction. *Emba* should provide as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
+- [Development](https://github.com/e-m-b-a/emba/wiki/Development)
 
 ## Installation
 

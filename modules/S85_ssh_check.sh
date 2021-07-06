@@ -20,14 +20,14 @@ S85_ssh_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check SSH"
 
-  LOG_FILE="$( get_log_file )"
   SSH_VUL_CNT=0
   SQUID_VUL_CNT=0
 
   search_ssh_files
   check_squid
 
-  echo -e "\\n[*] Statistics:$SSH_VUL_CNT" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:$SSH_VUL_CNT"
 
   if [[ "$SQUID_VUL_CNT" -gt 0 || "$SSH_VUL_CNT" -gt 0 ]]; then
     NEG_LOG=1

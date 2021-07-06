@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2001
 
 # emba - EMBEDDED LINUX ANALYZER
 #
@@ -20,33 +21,30 @@ F19_cve_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final CVE aggregator"
   
-  # we need:
-  # apt-get install bc
-  # sudo pip3 install cve-searchsploit
-  # https://github.com/cve-search/cve-search
-
-  # set it up
   LOG_FILE="$(get_log_file)"
-  PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
-  if ! [[ -d "$LOG_DIR"/aggregator ]] ; then
-    mkdir "$LOG_DIR"/aggregator
-  fi
+
+  mkdir "$LOG_PATH_MODULE"/cve_sum
+  mkdir "$LOG_PATH_MODULE"/exploit
+
   KERNELV=0
   HIGH_CVE_COUNTER=0
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
   CVE_SEARCHSPLOIT=0
+  MSF_MODULE_CNT=0
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
+  FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
+
   if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
     FW_VER_CHECK_LOG="r09_firmware_base_version_check.txt"
-  else
-    FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
   fi
+
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
-  CVE_MINIMAL_LOG="$LOG_DIR"/aggregator/CVE_minimal.txt
-  EXPLOIT_OVERVIEW_LOG="$LOG_DIR"/aggregator/exploits-overview.txt
+
+  CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
+  EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
     print_output "[*] Aggregate vulnerability details"
@@ -77,6 +75,10 @@ F19_cve_aggregator() {
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
       fi
+      if [[ -f "$MSF_DB_PATH" ]]; then
+        MSF_SEARCH=1
+      fi
+
       generate_cve_details
       generate_special_log
     else
@@ -91,7 +93,7 @@ F19_cve_aggregator() {
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
   fi
 
-  FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_FILE" | grep -c -E "\[\+\]\ Found\ [1-9]")
+  FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_FILE" | grep -c -E "\[\+\]\ Found\ ")
 
   module_end_log "${FUNCNAME[0]}" "$FOUND_CVE"
 }
@@ -102,7 +104,6 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
     # tab -> space
     # remove multiple spaces
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
     VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(static\)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
@@ -110,13 +111,52 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs./\ }"
     VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
+
+    #lvmetad version: 2.02.168(2) (2016-11-30)  #lvmpolld version: 2.02.168(2) (2016-11-30)
+    VERSION_lower="${VERSION_lower/lvmpolld\ /lvm2\ }"
+    VERSION_lower="${VERSION_lower/lvmetad\ /lvm2\ }"
+    #ldpd version 0.99.24.1 #ospf6d version 0.99.24.1 #etc.
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd|babeld|bgpd)\ version\ 0.9/quagga\ 0.9/')"
+    #bridge utility, 0.0
+    VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
+    #Modern traceroute for Linux, version 2.1.0
+    VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
+    #signver - verify a detached PKCS7 signature - Version 3.26.2
+    VERSION_lower="${VERSION_lower/\ -\ verify\ a\ detached\ pkcs7\ signature\ -/}"
+    #part of minicom version 2.7
+    VERSION_lower="${VERSION_lower/part\ of\ minicom/minicom}"
+    #run-parts program, version 4.8.1.1
+    VERSION_lower="${VERSION_lower/run-parts\ program,/run-parts}"
+    #GNU parted) 3.2
+    VERSION_lower="${VERSION_lower/gnu\ parted\)/parted}"
+    # #mkenvimage version 2016.11+dfsg1-4
+    # VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
+    # #mkimage version 2016.11+dfsg1-4
+    VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(mkenvimage|mkimage|dumpimage)\ version\ 20/u-boot\ 20/')"
+    # VERSION_lower="${VERSION_lower/mkimage\ /u-boot\ }"
+    #Version: lldpd 0.7.11
+    VERSION_lower="${VERSION_lower/version:\ lldpd\ /lldpd\ }"
+    #cdialog (ComeOn Dialog!) version 1.3-20160828
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(cdialog).*(version [0-9]\.[0-9])/\1\ \2/')"
+    #atftp-0.7
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(atftp)-([0-9]\.[0-9])/\1\ \2/')"
+    #radiusd: FreeRADIUS Version 2.2.2
+    VERSION_lower="${VERSION_lower/radiusd:\ freeradius/freeradius}"
+    #Btrfs Btrfs v0.19
+    VERSION_lower="${VERSION_lower/btrfs\ btrfs/btrfs}"
+    #ethswctl.c:v0.0.2 (January 27, 2009)
+    VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
+    #ftpd (GNU inetutils) 1.4.2
+    VERSION_lower="${VERSION_lower//\(gnu inetutils\)/inetutils}"
+    #conntrack v1.0.0 (conntrack-tools)
+    VERSION_lower="${VERSION_lower/conntrack/conntrack-tools}"
+    #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
+    VERSION_lower="${VERSION_lower//chrony[cd] \(chrony\) /chrony }"
     # GNU gdbserver (GDB)
     VERSION_lower="${VERSION_lower//gnu\ gdbserver\ /gdb\ }"
-    VERSION_lower="${VERSION_lower//(gdb)/}"
+    VERSION_lower="${VERSION_lower//(gdb)\ /}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
     # some - -> space
@@ -155,6 +195,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//dnsmasq-/dnsmasq\ }"
     # lighttpd- -> lighttpd\ 
     VERSION_lower="${VERSION_lower//lighttpd-/lighttpd\ }"
+    #lighttpd/1.4.33-devel-17M (Nov 13 2013 21:55:13) - a light and fast webserver
+    VERSION_lower="${VERSION_lower//lighttpd\//lighttpd\ }"
+    VERSION_lower="$(echo "$VERSION_lower" | sed "s/-devel-17m//")"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
@@ -195,6 +238,13 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nandwrite/mtd-utils}"
     VERSION_lower="${VERSION_lower//nanddump/mtd-utils}"
     VERSION_lower="${VERSION_lower//flash_erase/mtd-utils}"
+    #flashcp (mtd-utils) 2.0.2
+    VERSION_lower="${VERSION_lower//\(mtd-utils\)/mtd-utils}"
+    # mount.cifs -> cifs-utils
+    VERSION_lower="${VERSION_lower//mount\.cifs/cifs-utils}"
+    # lspci, setpci -> pciutils
+    VERSION_lower="${VERSION_lower//lspci/pciutils}"
+    VERSION_lower="${VERSION_lower//setpci/pciutils}"
     # zlib:binary:"deflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark\ Adler"
     # zlib:binary:"inflate\ [0-9]\.[0-9]+\.[0-9]+\ Copyright.*Mark Adler"
     VERSION_lower="${VERSION_lower//deflate/zlib}"
@@ -237,43 +287,40 @@ prepare_version_data() {
     #libpcre.1.2.3
     VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
     VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
+    #pppd version 2.4.2
+    VERSION_lower="${VERSION_lower/pppd/point-to-point_protocol}"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
     VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/nc\.traditional\ \[v\ /nc.traditional\ /g')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/getconf\ (.*)/getconf/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/localedef\ (.*)/localedef/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/pt_chown\ (.*)/pt_chown/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/rpcinfo\ (.*)/rpcinfo/')"
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ perl\ ([0-9]),\ ([0-9][0-9]),\ sub([0-9])/perl\ \1\.\2\.\3/')"
     #"GNU\ gdb\ \(Debian\ [0-9]\.[0-9]+-[0-9]\)\ "
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/gnu\ gdb\ \(debian\ ([0-9]\.[0-9]+-[0-9]+\))\ /gdb\ \1/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
-    #Wireless-Tools version 29
-    VERSION_lower="${VERSION_lower//wireless-tools\ /wireless_tools\ }"
-    VERSION_lower="${VERSION_lower//i.*\ wireless_tools\ /wireless_tools\ }"
+    #iw* Wireless-Tools version 29
+    VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     # apt-Version 1.2.3
     VERSION_lower="${VERSION_lower//apt-/apt\ }"
     # remove the v in something like this: "space v[number]"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ v([0-9]+)/\ \1/g')" 
     # "mkfs\.jffs2\ revision\ [0-9]\.[0-9]\.[0-9]\.[0-9]"
     VERSION_lower="${VERSION_lower//revision\ /}"
     # mkfs.jffs2: error!: revision 1.60
     VERSION_lower="${VERSION_lower//:\ error!:/}"
     #"Dropbear\ sshd\ v20[0-9][0-9]\.[0-9][0-9]"
     VERSION_lower="${VERSION_lower//dropbear\ sshd/dropbear_ssh}"
+    #Dropbear multi-purpose version 2012.55
+    VERSION_lower="${VERSION_lower//dropbear multi-purpose\ /dropbear\ }"
+    #Dropbear v2016.74
+    VERSION_lower="${VERSION_lower//dropbear\ /dropbear_ssh\ }"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
@@ -310,10 +357,15 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//:/}"
     VERSION_lower="${VERSION_lower//--\ /}"
     VERSION_lower="${VERSION_lower//-\ /}"
-    #mini_httpd/1.19
+    #glib-compile-schemas 2.50.3
+    VERSION_lower="${VERSION_lower/glib-compile-schemas\ /gnome:glib\ }"
+    #mtr mtr 0.85
+    VERSION_lower="${VERSION_lower/mtr\ mtr/mtr:mtr}"
     VERSION_lower="${VERSION_lower/\//\ }"
     #OpenLDAP:\ ldapsearch
     VERSION_lower="${VERSION_lower/openldap\ ldapsearch/openldap}"
+    #version: openser 1.0.0 (arm/linux)
+    VERSION_lower="${VERSION_lower/version\ openser/openser:openser}"
     #Beceem\ CM\ Server\
     VERSION_lower="${VERSION_lower//beceem\ cm\ server/beceem}"
     VERSION_lower="${VERSION_lower//beceem\ cscm\ command\ line\ client/beceem}"
@@ -324,14 +376,10 @@ prepare_version_data() {
     # busybox 1.00-pre2 -> we ignore the pre
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/busybox\ ([0-9]\.[0-9][0-9])-pre[0-9]/busybox\ \1/g')"
     # GNU C Library (AuDis-V04.56) stable release version 2.23
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ c\ library\ .*\ release/glibc/')"
     # (Debian EGLIBC 2.13-38+deb7u11) 2.13
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(eglibc)/eglibc/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(.*\ eglibc\ .*)/eglibc/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(debian\ glibc.*)/glibc/')"
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
@@ -348,8 +396,13 @@ prepare_version_data() {
     # ntpd 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntp[dq]\ ([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*query.*([0-9]\.[0-9]\.[0-9])([a-z][0-9])/ntp\ \1:\2/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdc\ vendor-specific.*ntpd.*([0-9]\.[0-9]\.[0-9])([a-z][0-9]+)/ntp\ \1:\2/g')"
+    #sntp 4.2.8p10@1.3728-o Mon Mar  9 18:03:45 UTC 2020 (1)
+    VERSION_lower="${VERSION_lower/sntp\ /ntp\ }"
     # ntpdate 4.2.8p13 -> ntp 4.2.8:p13
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ntpdate\ ([0-9]\.[0-9]\.[0-9])([a-z]([0-9]))/ntp\ \1:\2/g')"
+    # ntp-keygen 4.2.8p10@1.3728-o Mon Mar  9 18:04:19 UTC 2020 (1)
+    VERSION_lower="${VERSION_lower/ntp-keygen\ /ntp\ }"
     # FreeBSD 12.1-RELEASE-p8  -> FreeBSD 12.1:p8 
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/freebsd\ ([0-9]+\.[0-9]+)-release-([a-z]([0-9]+))/freebsd\ \1:\2/g')"
     # unzip .... info-zip -> info-zip
@@ -358,8 +411,9 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zip\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zip\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipcloak\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipcloak\ \1/g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/zipnote\ ([0-9]\.[0-9])\ .*\ by\ info-zip.*/info-zip:zipnote\ \1/g')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/([a-z]\ UnZip),/info-zip:zip/')"
+    #ZipSplit 3.0
+    VERSION_lower="${VERSION_lower/zipsplit\ /info-zip:zip\ }"
     #mdns repeater (1.10)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/mdns\ repeater\ \(([0-9]\.[0-9][0-9])\)/mdnsrepeater\ \1/g')"
     #management console agent 1.5 (c) ubiquiti networks inc
@@ -379,28 +433,19 @@ prepare_version_data() {
     #jq commandline json processor [5a49c82-dirty]
     #VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
-    VERSION_lower="${VERSION_lower//squid\ cache:/squid-cache:squid}"
+    VERSION_lower="${VERSION_lower//squid\ cache/squid-cache:squid}"
     #tar (GNU tar) 1.23
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ tar)/gnu:tar/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ findutils)/gnu:findutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ groff)/gnu:groff/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sed)/gnu:sed/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ mtools)/gnu:mtools/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ cpio)/gnu:cpio/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
-    # shellcheck disable=SC2001
-    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext-runtime/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ inetutils/gnu:inetutils/')"
     # handle grub version 2:
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)/grub/')"
     VERSION_lower="${VERSION_lower//gnu\ sed/gnu:sed}"
     VERSION_lower="${VERSION_lower//gnu\ make/gnu:make}"
@@ -419,17 +464,11 @@ prepare_version_data() {
     # ncurses -> gnu:ncurses
     VERSION_lower="${VERSION_lower//ncurses/gnu:ncurses}"
     #VERSION_lower="${VERSION_lower//(gnu\ binutils.*)/gnu:binutils}"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ binutils.*)/gnu:binutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ grep.*)/gnu:grep/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ diffutils.*)/gnu:diffutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ coreutils.*)/gnu:coreutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sharutils.*)/gnu:sharutils/')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(xz\ utils.*)/xz-utils/')"
     #zend engine 2.4.0 copyright (c) 1998-2014 zend technologies
     VERSION_lower="${VERSION_lower//zend\ engine/zend:engine}"
@@ -453,24 +492,15 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
 
     # final cleanup of start and ending
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-beta$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^-//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^_//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/_$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^\ //')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ $//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\.$//')"
-    # shellcheck disable=SC2001
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\]$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/[)$]//')"
     #print_output "$VERSION_lower"
@@ -486,7 +516,7 @@ prepare_version_data() {
     if [[ $VERSION_lower =~ [0-9] ]]; then
       #VERSIONS_CLEANED+=( "$VERSION_lower" )
       # for multi threading we have to go via a temp file
-      echo "$VERSION_lower" >> "$LOG_DIR"/aggregator/versions.tmp
+      echo "$VERSION_lower" >> "$LOG_PATH_MODULE"/versions.tmp
     fi
 }
 
@@ -495,64 +525,78 @@ aggregate_versions() {
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
-  print_output "[*] Software inventory initial overview:"
-  for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
-    print_output "[+] Found Version details (base check): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
-    print_output "[+] Found Version details (statical check): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_EMULATOR[@]}"; do
-    print_output "[+] Found Version details (emulator): ""$VERSION"
-  done
-  for VERSION in "${VERSIONS_KERNEL[@]}"; do
-    print_output "[+] Found Version details (kernel): ""$VERSION"
-  done
+  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 ]]; then
+    print_output "[*] Software inventory initial overview:"
+    write_anchor "softwareinventoryinitialoverview"
+    for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
+      print_output "[+] Found Version details (base check): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
+      print_output "[+] Found Version details (statical check): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_EMULATOR[@]}"; do
+      print_output "[+] Found Version details (emulator): ""$VERSION"
+    done
+    for VERSION in "${VERSIONS_KERNEL[@]}"; do
+      print_output "[+] Found Version details (kernel): ""$VERSION"
+    done
 
-  print_output ""
-  VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
-  for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
-    # remove color codes:
-    VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    print_output ""
+    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
+    for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+      # remove color codes:
+      VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+      if [[ "$THREADED" -eq 1 ]]; then
+        prepare_version_data &
+        WAIT_PIDS_F19+=( "$!" )
+      else
+        prepare_version_data
+      fi
+    done
+
     if [[ "$THREADED" -eq 1 ]]; then
-      prepare_version_data &
-      WAIT_PIDS_F19+=( "$!" )
-    else
-      prepare_version_data
+      wait_for_pid "${WAIT_PIDS_F19[@]}"
     fi
-  done
-
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
   # sorting and unique our versions array:
   #eval "VERSIONS_CLEANED=($(for i in "${VERSIONS_CLEANED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  if [[ -f "$LOG_DIR"/aggregator/versions.tmp ]]; then
-    mapfile -t VERSIONS_CLEANED < <(sort -u "$LOG_DIR"/aggregator/versions.tmp)
-    rm "$LOG_DIR"/aggregator/versions.tmp 2>/dev/null
+  if [[ -f "$LOG_PATH_MODULE"/versions.tmp ]]; then
+    # on old kernels it takes a huge amount of time to query all kernel CVE's. So, we move the kernel entry to the begin of our versions array
+    mapfile -t KERNELS < <(grep kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u)
+    grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u > "$LOG_PATH_MODULE"/versions1.tmp
+    for KERNEL in "${KERNELS[@]}"; do
+      if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | cut -d" " -f1 ) -eq 0 ]] ; then
+        echo "$KERNEL" > "$LOG_PATH_MODULE"/versions1.tmp
+      else
+        sed -i "1s/^/$KERNEL\n/" "$LOG_PATH_MODULE"/versions1.tmp
+      fi
+    done
+    mapfile -t VERSIONS_CLEANED < <(cat "$LOG_PATH_MODULE"/versions1.tmp)
+    rm "$LOG_PATH_MODULE"/versions*.tmp 2>/dev/null
 
-    if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
-      print_output "[*] Software inventory aggregated:"
-      for VERSION in "${VERSIONS_CLEANED[@]}"; do
-        print_output "[+] Found Version details (aggregated): ""$VERSION"
-      done
-    else
-      print_output "[-] No Version details found."
-    fi
-    print_output ""
+    # leave this here for debugging reasons
+    #if [[ ${#VERSIONS_CLEANED[@]} -ne 0 ]]; then
+    #  print_output "[*] Software inventory aggregated:"
+    #  for VERSION in "${VERSIONS_CLEANED[@]}"; do
+    #    print_output "[+] Found Version details (aggregated): ""$VERSION"
+    #  done
+    #else
+    #  print_output "[-] No Version details found."
+    #fi
   else
     print_output "[-] No Version details found."
   fi
 }
 
 generate_special_log() {
-  sub_module_title "Generate special log files."
+  if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE") -gt 0 ]]; then
+    sub_module_title "Minimal report of exploits and CVE's."
+    write_anchor "minimalreportofexploitsandcves"
 
-  if [[ "$CVE_COUNTER" -gt 0 ]]; then
-    readarray -t FILES < <(find "$LOG_DIR"/aggregator/ -type f)
+    readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -type f)
     print_output ""
-    print_output "[*] Generate CVE log file in $CVE_MINIMAL_LOG:\\n"
+    print_output "[*] CVE log file stored in $CVE_MINIMAL_LOG.\\n"
     for FILE in "${FILES[@]}"; do
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
       CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //') 
@@ -564,12 +608,10 @@ generate_special_log() {
         print_output ""
       fi
     done
-  fi
 
-  if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
     print_output ""
-    print_output "[*] Generate minimal exploit summary file in $EXPLOIT_OVERVIEW_LOG:\\n"
-    mapfile -t EXPLOITS_AVAIL < <(grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
+    print_output "[*] Minimal exploit summary file stored in $EXPLOIT_OVERVIEW_LOG.\\n"
+    mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r)
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
@@ -588,18 +630,34 @@ generate_special_log() {
 }
 
 cve_db_lookup() {
-  CVE_COUNTER_VERSION=0
-  EXPLOIT_COUNTER_VERSION=0
+  # using $VERSION variable:
   VERSION_SEARCH="${VERSION//\ /:}"
   VERSION_PATH="${VERSION//\ /_}"
-  print_output ""
-  print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}"
+  VERSION_BINARY=$(echo "$VERSION_SEARCH" | cut -d: -f1)
+  print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}" "" "f19#cve_$VERSION_BINARY"
 
   # CVE search:
-  $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_DIR"/aggregator/"$VERSION_PATH".txt
+  $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
 
+  AGG_LOG_FILE="$VERSION_PATH".txt
+  if [[ "$THREADED" -eq 1 ]]; then
+    cve_extractor &
+    WAIT_PIDS_F19_2+=( "$!" )
+  else
+    cve_extractor
+  fi
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_F19_2[@]}"
+  fi
+}
+
+cve_extractor() {
+  EXPLOIT_COUNTER_VERSION=0
+  CVE_COUNTER_VERSION=0
   # extract the CVE numbers and the CVSS values and sort it:
-  readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_DIR"/aggregator/"$VERSION_PATH".txt | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r)
+  readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r)
+  VERSION_SEARCH=$(echo "$AGG_LOG_FILE" | sed -e 's/.txt$//' | sed -e 's/_/:/g')
 
   for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
     ((CVE_COUNTER++))
@@ -608,35 +666,83 @@ cve_db_lookup() {
     CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
     CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
 
+    # default value
     EXPLOIT="No exploit available"
 
-    # as we already know about a buch of kernel exploits - lets search them
-    if [[ "$VERSION" == *kernel* ]]; then
+    EDB=0
+    # as we already know about a buch of kernel exploits - lets search them first
+    if [[ "$VERSION_BINARY" == *kernel* ]]; then
       for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
         if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
-          EXPLOIT="Exploit available (Source: linux-exploit-suggester)"
+          EXPLOIT="Exploit (linux-exploit-suggester"
           ((EXPLOIT_COUNTER++))
           ((EXPLOIT_COUNTER_VERSION++))
+          EDB=1
         fi
       done
     fi
 
-    if [[ "$CVE_SEARCHSPLOIT" -eq 1 ]] ; then
-      # if no exploit was found lets talk to exploitdb:
-      if [[ "$EXPLOIT" == "No exploit available" ]]; then
+    if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 ]] ; then
+      if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
         mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null)
-        if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
-        #if cve_searchsploit "$CVE_VALUE" 2>/dev/null| grep -q "Exploit DB Id:" 2>/dev/null ; then
-          EXPLOIT="Exploit available (Source: Exploit database)"
-          echo -e "\\n[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_DIR"/aggregator/exploit-details.txt
+      fi
+
+      if [[ $MSF_SEARCH -eq 1 ]]; then
+        mapfile -t EXPLOIT_AVAIL_MSF < <(grep "$CVE_VALUE" "$MSF_DB_PATH" 2>/dev/null)
+      fi
+
+      if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
+        readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //')
+        if [[ "$EXPLOIT" == "No exploit available" ]]; then
+          EXPLOIT="Exploit (EDB ID:"
+        else
+          EXPLOIT="$EXPLOIT"" / EDB ID:"
+        fi
+        for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
+          EXPLOIT="$EXPLOIT"" ""$EXPLOIT_ID"
+          echo -e "[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_PATH_MODULE""/exploit/""$EXPLOIT_ID"".txt"
           for LINE in "${EXPLOIT_AVAIL[@]}"; do
-            #cve_searchsploit "$CVE_VALUE" >> "$LOG_DIR"/aggregator/exploit-details.txt
-            echo "$LINE" >> "$LOG_DIR"/aggregator/exploit-details.txt
+            echo "$LINE" >> "$LOG_PATH_MODULE""/exploit/""$EXPLOIT_ID"".txt"
           done
+          EDB=1
           ((EXPLOIT_COUNTER++))
           ((EXPLOIT_COUNTER_VERSION++))
+        done
+        readarray -t EXPLOIT_FILES < <(echo "${EXPLOIT_AVAIL[@]}" | grep "File:" | cut -d ":" -f 2 | sed 's/\ //')
+        for E_FILE in "${EXPLOIT_FILES[@]}"; do
+          if [[ -f "$E_FILE" ]] ; then
+            cp "$E_FILE" "$LOG_PATH_MODULE""/exploit/edb_""$(basename "$E_FILE")"
+          fi
+        done
+      fi
+
+      if [[ ${#EXPLOIT_AVAIL_MSF[@]} -gt 0 ]]; then
+        if [[ "$EXPLOIT" == "No exploit available" ]]; then
+          EXPLOIT="Exploit (MSF:"
+        else
+          EXPLOIT="$EXPLOIT"" ""/ MSF:"
+        fi
+        for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
+          EXPLOIT_PATH=$(echo "$EXPLOIT_MSF" | cut -d: -f1)
+          EXPLOIT_NAME=$(basename -s .rb "$EXPLOIT_PATH")
+          EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
+          if [[ -f "$EXPLOIT_PATH" ]] ; then
+            # for the web reporter we copy the original metasploit module into the emba log directory
+            cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/msf_""$EXPLOIT_NAME".rb
+          fi
+          ((MSF_MODULE_CNT++))
+        done
+        if [[ $EDB -eq 0 ]]; then
+          # only count the msf exploit if we have not already count an EDB exploit
+          # otherwise we count an exploit for one CVE twice
+          ((EXPLOIT_COUNTER++))
+          ((EXPLOIT_COUNTER_VERSION++))
+          EDB=1
         fi
       fi
+    fi
+    if [[ $EDB -eq 1 ]]; then
+      EXPLOIT="$EXPLOIT"")"
     fi
 
     CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
@@ -644,60 +750,78 @@ cve_db_lookup() {
     VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
     # we do not deal with output formatting the usual way -> we use printf
     if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-      if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* ]]; then
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
       else
-        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${RED}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
       fi
       ((HIGH_CVE_COUNTER++))
     elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-      if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* ]]; then
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
       else
-        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${ORANGE}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
       fi
       ((MEDIUM_CVE_COUNTER++))
     else
-      if [[ "$EXPLOIT" == *Source* ]]; then
-        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* ]]; then
+        printf "${MAGENTA}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
       else
-        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+        printf "${GREEN}\t%-15.15s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
       fi
       ((LOW_CVE_COUNTER++))
     fi
   done
 
+
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
-  } >> "$LOG_DIR"/aggregator/"$VERSION_PATH".txt
-  echo "$LOW_CVE_COUNTER" >> "$TMP_DIR"/LOW_CVE_COUNTER.tmp
-  echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
-  echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
-  echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
+  } >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+  if [[ $LOW_CVE_COUNTER -gt 0 ]]; then
+    echo "$LOW_CVE_COUNTER" >> "$TMP_DIR"/LOW_CVE_COUNTER.tmp
+  fi
+  if [[ $MEDIUM_CVE_COUNTER -gt 0 ]]; then
+    echo "$MEDIUM_CVE_COUNTER" >> "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
+  fi
+  if [[ $HIGH_CVE_COUNTER -gt 0 ]]; then
+    echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
+  fi
+  if [[ $EXPLOIT_COUNTER -gt 0 ]]; then
+    echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
+  fi
+  if [[ $MSF_MODULE_CNT -gt 0 ]]; then
+    echo "$MSF_MODULE_CNT" >> "$TMP_DIR"/MSF_MODULE_CNT.tmp
+  fi
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
+    write_anchor "cve_$BINARY"
     print_output ""
-    print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$VERSION_SEARCH.${NC}"
-  elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]];then
+    grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
+    print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
     print_output ""
-    print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$VERSION_SEARCH.${NC}"
-  else
-    print_output "[-] Found $CVE_COUNTER_VERSION CVEs and $EXPLOIT_COUNTER_VERSION exploits in $VERSION_SEARCH."
+  elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
+    write_anchor "cve_$BINARY"
+    print_output ""
+    grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
+    print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION.${NC}"
+    print_output ""
   fi
 }
 
 generate_cve_details() {
-  sub_module_title "Collect CVE details."
+  sub_module_title "Collect CVE and exploit details."
+  write_anchor "collectcveandexploitdetails"
 
   CVE_COUNTER=0
   EXPLOIT_COUNTER=0
 
+
   for VERSION in "${VERSIONS_CLEANED[@]}"; do
-    # threading currently not working. This is work in progress
     if [[ "$THREADED" -eq 1 ]]; then
+      # cve-search/mongodb calls called in parallel
       cve_db_lookup &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection 10 "${WAIT_PIDS_F19[@]}"
+      max_pids_protection "$MAX_MODS" "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup
     fi
@@ -707,10 +831,27 @@ generate_cve_details() {
     wait_for_pid "${WAIT_PIDS_F19[@]}"
   fi
 
-  print_output ""
-  print_output "[*] Identified the following version details, vulnerabilities and exploits:"
-  mapfile -t LOG_AGGR_FILES < <(find "$LOG_DIR"/aggregator/ -type f -name "*.txt" | sort 2> /dev/null)
-  for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
+  mapfile -t LOG_AGGR_FILES < <(find "$LOG_PATH_MODULE"/cve_sum/ -type f -name "*.txt" | sort 2> /dev/null)
+  if [[ ${#LOG_AGGR_FILES[@]} -gt 0 ]]; then
+    print_output ""
+    print_output "[*] Identified the following version details, vulnerabilities and exploits:"
+    for FILE_AGGR in "${LOG_AGGR_FILES[@]}"; do
+      if [[ "$THREADED" -eq 1 ]]; then
+        final_outputter &
+        WAIT_PIDS_F19+=( "$!" )
+      else
+        final_outputter
+      fi
+    done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_F19[@]}"
+    fi
+    print_output "${NC}"
+  fi
+}
+
+final_outputter() {
     if [[ -f $FILE_AGGR ]]; then
       BIN=""
       VERSION=""
@@ -776,12 +917,10 @@ generate_cve_details() {
         fi
       fi
     fi
-  done
-  print_output "${NC}"
 }
 
 get_firmware_base_version_check() {
-  sub_module_title "Collect version details of module r09 or s09 - firmware_base_version_check."
+  print_output "[*] Collect version details of module r09 or s09 - firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
@@ -792,22 +931,17 @@ get_firmware_base_version_check() {
   fi
 }
 
-get_version_vulnerability_check() {
-  sub_module_title "Collect version details of module s30_version_vulnerability_check."
-  print_output "[*] Currently nothing todo here ..."
-}
-
 get_kernel_check() {
-  sub_module_title "Collect version details of module s25_kernel_check."
+  print_output "[*] Collect version details of module s25_kernel_check."
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
-    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
+    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
     ## do a bit of sed modifications to have the same output as from the pre checker
     readarray -t VERSIONS_KERNEL < <(grep "Statistics:" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel\ /' | sort -u)
   fi
 }
 
 get_usermode_emulator() {
-  sub_module_title "Collect version details of module s115_usermode_emulator."
+  print_output "[*] Collect version details of module s115_usermode_emulator."
   if [[ -f "$LOG_DIR"/"$EMUL_LOG" ]]; then
     readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (from.*$//' | sort -u)
   fi

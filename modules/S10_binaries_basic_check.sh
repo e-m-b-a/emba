@@ -19,7 +19,7 @@
 S10_binaries_basic_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check binaries"
+  module_title "Check binaries for critical functions"
 
   COUNTER=0
   local BIN_COUNT=0

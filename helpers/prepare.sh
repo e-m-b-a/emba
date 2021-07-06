@@ -99,20 +99,25 @@ architecture_check()
 {
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
-    local DETECT_ARCH ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
-    # do not use -executable here. Not all firmware updates have exec permissions set
-    IFS=" " read -r -a DETECT_ARCH < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -xdev -exec file {} \; 2>/dev/null | grep ELF | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)
-    for D_ARCH in "${DETECT_ARCH[@]}" ; do
+    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
+    # we use the binaries array which is already unique
+    for D_ARCH in "${BINARIES[@]}" ; do
+      D_ARCH=$(file "$D_ARCH")
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
+        continue
       elif [[ "$D_ARCH" == *"ARM"* ]] ; then
         ARCH_ARM=$((ARCH_ARM+1))
+        continue
       elif [[ "$D_ARCH" == *"x86-64"* ]] ; then
         ARCH_X64=$((ARCH_X64+1))
+        continue
       elif [[ "$D_ARCH" == *"80386"* ]] ; then
         ARCH_X86=$((ARCH_X86+1))
+        continue
       elif [[ "$D_ARCH" == *"PowerPC"* ]] ; then
         ARCH_PPC=$((ARCH_PPC+1))
+        continue
       fi
     done
 
@@ -134,7 +139,7 @@ architecture_check()
       elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
         D_ARCH="PPC"
       fi
-      echo
+      print_output "" "no_log"
       print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n" "no_log"
       if [[ -n "$ARCH" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
@@ -174,6 +179,11 @@ prepare_file_arr()
 
   export FILE_ARR
   readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  # RTOS handling:
+  if [[ -f $FIRMWARE_PATH && $RTOS -eq 1 ]]; then
+    readarray -t FILE_ARR < <(find "$OUTPUT_DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    FILE_ARR+=( "$FIRMWARE_PATH" )
+  fi
   print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
 
   # xdev will do the trick for us:
@@ -227,13 +237,23 @@ check_firmware()
   # as we already have done some root directory detection we are going to use it now
   local DIR_COUNT=0
   local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
-  for R_PATH in "${ROOT_PATH[@]}"; do
+  if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      for L_PATH in "${LINUX_PATHS[@]}"; do
+        if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+          ((DIR_COUNT++))
+        fi
+      done
+    done
+  else
+    # this is needed for directories we are testing
+    # in such a case the pre-checking modules are not executed and no RPATH is available
     for L_PATH in "${LINUX_PATHS[@]}"; do
-      if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+      if [[ -d "$FIRMWARE_PATH"/"$L_PATH" ]] ; then
         ((DIR_COUNT++))
       fi
     done
-  done
+  fi
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
     echo
@@ -280,9 +300,31 @@ detect_root_dir_helper() {
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
+    write_link "s05#file_dirs"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
+    write_link "s05#file_dirs"
   done
+}
+
+check_init_size() {
+  SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}')
+  if [[ $SIZE -gt 400000000 ]]; then
+    print_output "" "no_log"
+    print_output "[!] WARNING: Your firmware is very big!" "no_log"
+    print_output "[!] WARNING: Analysing huge firmwares will take a lot of disk space, RAM and time!" "no_log"
+    print_output "" "no_log"
+  fi
+
+}
+
+generate_msf_db() {
+  print_output "[*] Building the Metasploit exploit database" "no_log"
+  # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
+  if [[ $IN_DOCKER -eq 1 ]]; then
+    export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
+  fi
+  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' > "$MSF_DB_PATH"
 }
 

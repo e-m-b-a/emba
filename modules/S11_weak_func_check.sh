@@ -20,7 +20,7 @@
 S11_weak_func_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check binaries for weak functions"
+  module_title "Check binaries for weak functions (intense)"
 
   LOG_FILE="$( get_log_file )"
 
@@ -35,34 +35,75 @@ S11_weak_func_check()
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
-      #local OBJDUMP_LOG="$LOG_DIR""/objdumps/objdump_""$NAME".txt
       # create disassembly of every binary file:
       #"$OBJDUMP" -d "$LINE" > "$OBJDUMP_LOG"
 
       if ( file "$LINE" | grep -q "x86-64" ) ; then
-        function_check_x86_64
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_x86_64 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_x86_64
+        fi
       elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-        function_check_x86
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_x86 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_x86
+        fi
       elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
-        function_check_ARM32
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_ARM32 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_ARM32
+        fi
       elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
         # ARM 64 code is in alpha state and nearly not tested!
-        function_check_ARM64
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_ARM64 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_ARM64
+        fi
       elif ( file "$LINE" | grep -q "MIPS" ) ; then
-        function_check_MIPS32
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_MIPS32 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_MIPS32
+        fi
       elif ( file "$LINE" | grep -q "PowerPC" ) ; then
-        function_check_PPC32
+        if [[ "$THREADED" -eq 1 ]]; then
+          function_check_PPC32 &
+          WAIT_PIDS_S11+=( "$!" )
+        else
+          function_check_PPC32
+        fi
       else
         print_output "[-] Something went wrong ... no supported architecture available"
       fi
     fi
   done
 
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S11[@]}"
+  fi
+
   print_top10_statistics
 
+  if [[ -f "$TMP_DIR"/S11_STRCPY_CNT.tmp ]]; then
+    while read -r STRCPY; do
+      (( STRCPY_CNT="$STRCPY_CNT"+"$STRCPY" ))
+    done < "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  fi
+
   # shellcheck disable=SC2129
-  echo -e "\\n[*] Statistics:$STRCPY_CNT" >> "$LOG_FILE"
-  echo -e "\\n[*] Statistics1:$ARCH" >> "$LOG_FILE"
+  write_log ""
+  write_log "[*] Statistics:$STRCPY_CNT"
+  write_log ""
+  write_log "[*] Statistics1:$ARCH"
 
   module_end_log "${FUNCNAME[0]}" "${#RESULTS[@]}"
 }
@@ -71,17 +112,14 @@ function_check_PPC32(){
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
-      local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null)
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -97,6 +135,7 @@ function_check_PPC32(){
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_MIPS32() {
@@ -105,17 +144,14 @@ function_check_MIPS32() {
     STRLEN_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
     if [[ -n "$FUNC_ADDR" ]] ; then
       NAME=$(basename "$LINE" 2> /dev/null)
-      local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ )
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ )
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ )
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ )
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -132,21 +168,19 @@ function_check_MIPS32() {
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_ARM64() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
-    local OBJ_DUMPS_OUT
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     else
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     fi
-    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
-      readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
-      unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -163,21 +197,19 @@ function_check_ARM64() {
       output_function_details
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_ARM32() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
-    local OBJ_DUMPS_OUT
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     else
-      OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
+      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     fi
-    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
-      readarray -t OBJ_DUMPS_ARR <<<"${OBJ_DUMPS_OUT}"
-      unset OBJ_DUMPS_OUT
-      FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+    if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         echo "$E" >> "$FUNC_LOG"
       done
@@ -193,22 +225,20 @@ function_check_ARM32() {
       output_function_details
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_x86() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
-      local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -224,22 +254,20 @@ function_check_x86() {
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 function_check_x86_64() {
    for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
-      local OBJ_DUMPS_OUT
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
       else
-        OBJ_DUMPS_OUT=$("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
+        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null)
       fi
-      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"*  ]] ; then
-        readarray -t OBJ_DUMPS_ARR <<<"$OBJ_DUMPS_OUT"
-        unset OBJ_DUMPS_OUT
-        FUNC_LOG="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+      if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
+        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           echo "$E" >> "$FUNC_LOG"
         done
@@ -255,18 +283,22 @@ function_check_x86_64() {
       fi
     fi
   done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
 }
 
 print_top10_statistics() {
-  if [[ "$(find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM
       local F_COUNTER
-      readarray -t RESULTS < <( find "$LOG_DIR""/vul_func_checker/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""
         print_output "[+] ""$FUNCTION"" - top 10 results:"
+        if [[ "$FUNCTION" == "strcpy" ]] ; then
+          write_anchor "strcpysummary"
+        fi
         for LINE in "${RESULTS[@]}" ; do
           SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
           F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
@@ -284,14 +316,26 @@ print_top10_statistics() {
       fi  
     done
   else
+    #print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
 }
 
 output_function_details()
 {
+  write_s11_log()
+  {
+    OLD_LOG_FILE="$LOG_FILE"
+    LOG_FILE="$3"
+    print_output "$1"
+    write_link "$2"
+    cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+    rm "$LOG_FILE" 2> /dev/null
+    LOG_FILE="$OLD_LOG_FILE"
+  }
+
   local LOG_FILE_LOC
-  LOG_FILE_LOC="$LOG_DIR""/vul_func_checker/vul_func_""$FUNCTION""-""$NAME"".txt"
+  LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$FUNCTION"-"$NAME".txt
 
   #check if this is common linux file:
   local COMMON_FILES_FOUND
@@ -300,31 +344,30 @@ output_function_details()
     SEARCH_TERM=$(basename "$LINE")
     if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
       COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
-      echo -e "[$GREEN+$NC] ""$GREEN"File "$(print_path "$LINE") found in default Linux file dictionary""$NC" >> "$LOG_DIR"/s11_common_linux_files.txt
+      echo -e "[$GREEN+$NC] ""$GREEN"File "$(print_path "$LINE") found in default Linux file dictionary""$NC" >> "$SUPPL_PATH"/common_linux_files.txt
     else
-      echo -e "[$GREEN+$NC] ""$ORANGE"File "$(print_path "$LINE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC" >> "$LOG_DIR"/s11_common_linux_files.txt
+      echo -e "[$GREEN+$NC] ""$ORANGE"File "$(print_path "$LINE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC" >> "$SUPPL_PATH"/common_linux_files.txt
       COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
     fi
   else
     COMMON_FILES_FOUND=" -"
   fi
+
+  LOG_FILE_LOC_OLD="$LOG_FILE_LOC"
+  LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
+  mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
   
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     else
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
-      print_output "$OUTPUT"
-      write_log "$OUTPUT" "$LOG_FILE_LOC"
     fi
+    write_s11_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
   fi
 
-  mv "$LOG_FILE_LOC" "$LOG_DIR""/vul_func_checker/vul_func_""$COUNT_FUNC""_""$FUNCTION""-""$NAME"".txt" 2> /dev/null
+  
 }
 

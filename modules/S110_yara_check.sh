@@ -21,7 +21,6 @@ S110_yara_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check for code patterns with yara"
-  LOG_FILE="$( get_log_file )"
   YARA_CNT=0
   local WAIT_PIDS_S110=()
 
@@ -53,7 +52,8 @@ S110_yara_check()
 
     print_output ""
     print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches in $ORANGE${#FILE_ARR[@]}$NC files."
-    echo -e "\\n[*] Statistics:$YARA_CNT" >> "$LOG_FILE"
+    write_log ""
+    write_log "[*] Statistics:$YARA_CNT"
 
     if [[ "$YARA_CNT" -eq 0 ]] ; then print_output "[-] No code patterns found with yara." ; fi
     # do not remove this to run multiple instances of emba
