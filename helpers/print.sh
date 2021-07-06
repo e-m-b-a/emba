@@ -431,6 +431,7 @@ print_help()
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
+  echo -e "$CYAN""-o""$NC""                Activate online checks (e.g. upload and test with VirusTotal)"
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"

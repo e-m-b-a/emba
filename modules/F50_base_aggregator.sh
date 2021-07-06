@@ -37,6 +37,7 @@ F50_base_aggregator() {
   S60_LOG="s60_cert_file_check.txt"
   S85_LOG="s85_ssh_check.txt"
   S95_LOG="s95_interesting_binaries_check.txt"
+  S107_LOG="s107_deep_password_search.txt"
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
@@ -157,7 +158,7 @@ output_details() {
 output_config_issues() {
 
   local DATA=0
-  if [[ "$S85_SSH_VUL_CNT" -gt 0 || "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
+  if [[ "$PW_COUNTER" -gt 0 || "$S85_SSH_VUL_CNT" -gt 0 || "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
@@ -183,10 +184,10 @@ output_config_issues() {
       echo "ssh_issues;\"$S85_SSH_VUL_CNT\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$PASS_FILES_FOUND" -ne 0 ]]; then
-      print_output "$(indent "$(green "Found passwords or weak credential configuration - check log file for details.")")"
-      write_link "s45"
-      #echo "password_files;\"$PASS_FILES_FOUND\"" >> "$CSV_LOG_FILE"
+    if [[ "$PW_COUNTER" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password hashes.")")"
+      write_link "s107"
+      echo "password_hashes;\"$PW_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$CERT_CNT" -gt 0 ]]; then
@@ -468,6 +469,9 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
     INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
     POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$S107_LOG" ]]; then
+    PW_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S107_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
     FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)

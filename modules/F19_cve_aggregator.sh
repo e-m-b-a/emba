@@ -121,6 +121,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd|babeld|bgpd)\ version\ 0.9/quagga\ 0.9/')"
     #bridge utility, 0.0
     VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
+    # smbd -> samba
+    VERSION_lower="${VERSION_lower/smbd/samba}"
     #Modern traceroute for Linux, version 2.1.0
     VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
     #signver - verify a detached PKCS7 signature - Version 3.26.2
@@ -191,6 +193,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//nc.traditional\ \[v/nc.traditional\ }"
     # sqlite3 -> sqlite
     VERSION_lower="${VERSION_lower//sqlite3/sqlite}"
+    # strict libsqlite3.so.0 -> sqlite
+    VERSION_lower="${VERSION_lower//libsqlite3\.so\.0/sqlite}"
     # dnsmasq- -> dnsmasq 
     VERSION_lower="${VERSION_lower//dnsmasq-/dnsmasq\ }"
     # lighttpd- -> lighttpd\ 
