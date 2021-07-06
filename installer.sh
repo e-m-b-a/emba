@@ -136,6 +136,12 @@ download_file()
   fi
 }
 
+#curl -sS https://getcomposer.org/installer | php
+#   90  composer require psecio/iniscan
+#   91  ./composer.phar global require psecio/iniscan
+#   92  ~/.composer/vendor/bin/iniscan
+
+
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
@@ -682,6 +688,33 @@ case ${ANSWER:0:1} in
         echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
       fi
     fi
+  ;;
+esac
+
+#iniscan
+
+echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download iniscan."
+
+print_file_info "iniscan/composer.phar" "" "https://getcomposer.org/installer " "external/iniscan/composer.phar"
+
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download iniscan (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
+else
+  echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    if ! [[ -d "external/iniscan/" ]] ; then
+      mkdir external/iniscan
+    fi
+
+    cd ./external/iniscan
+    curl -sS https://getcomposer.org/installer | php
+    composer require psecio/iniscan -n
   ;;
 esac
 
