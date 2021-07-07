@@ -69,13 +69,14 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
-# $1: module group letter [P, S, R, F]
+# $1: module group letter [P, S, F]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
 run_modules()
 {
   MODULE_GROUP="$1"
   printf -v THREADING_SET '%d\n' "$2" 2>/dev/null
+  THREADING_MOD_GROUP="$THREADING_SET"
 
   local SELECT_PRE_MODULES_COUNT=0
 
@@ -88,11 +89,20 @@ run_modules()
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
     local MODULES
     mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-    if [[ $THREADING_SET -eq 1 ]] ; then
+    if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
     for MODULE_FILE in "${MODULES[@]}" ; do
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+        if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+          # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
+          # export PRE_THREAD_ENA=1/0
+          # shellcheck source=/dev/null
+          source "$MODULE_FILE"
+          if [[ $PRE_THREAD_ENA -eq 0 ]] ; then
+            THREADING_SET=0
+          fi
+        fi
         MODULE_BN=$(basename "$MODULE_FILE")
         MODULE_MAIN=${MODULE_BN%.*}
         module_start_log "$MODULE_MAIN"
@@ -104,6 +114,9 @@ run_modules()
           $MODULE_MAIN
         fi
         reset_module_count
+      fi
+      if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+        THREADING_SET="$THREADING_MOD_GROUP"
       fi
     done
   else
@@ -132,6 +145,16 @@ run_modules()
         fi
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+            if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+              # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
+              # export PRE_THREAD_ENA=1/0
+              # shellcheck source=/dev/null
+              source "$MODULE_FILE"
+              if [[ $PRE_THREAD_ENA -eq 0 ]] ; then
+                THREADING_SET=0
+              fi
+            fi
+
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             module_start_log "$MODULE_MAIN"
@@ -143,6 +166,9 @@ run_modules()
               $MODULE_MAIN
             fi
             reset_module_count
+          fi
+          if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+            THREADING_SET="$THREADING_MOD_GROUP"
           fi
         done
       fi
@@ -171,6 +197,7 @@ main()
   export LOG_GREP=0
   export MOD_RUNNING=0          # for tracking how many modules currently running
   export ONLY_DEP=0             # test only dependency
+  export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
@@ -200,6 +227,7 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
+  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
 
   echo
 
@@ -217,7 +245,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:p:stxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:stxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -273,6 +301,9 @@ main()
         ;;
       N)
         export FW_NOTES="$OPTARG"
+        ;;
+      o)
+        export ONLINE_CHECKS=1
         ;;
       p)
         export PROFILE="$OPTARG"
@@ -458,7 +489,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:p:stX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:stX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -510,7 +541,8 @@ main()
 
       ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules, therefore overwriting $THREADED as 0
       ## as there are internal dependencies it is easier to handle it in the modules
-      run_modules "P" "0" "0"
+      #run_modules "P" "0" "0"
+      run_modules "P" "$THREADED" "0"
 
       # if we running threaded we ware going to wait for the slow guys here
       if [[ $THREADED -eq 1 ]]; then
@@ -539,8 +571,9 @@ main()
   fi
 
   #######################################################################################
-  # Firmware-Check (S- and R-modules)
+  # Firmware-Check (S modules)
   #######################################################################################
+  WAIT_PIDS=()
   if [[ $FIRMWARE -eq 1 ]] ; then
     print_output "\n=================================================================\n" "no_log"
     check_firmware

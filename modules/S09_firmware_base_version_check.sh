@@ -85,21 +85,21 @@ S09_firmware_base_version_check() {
     else
       if [[ $RTOS -eq 1 ]]; then
         continue
-      fi
-
-      mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-      for BIN in "${STRICT_BINS[@]}"; do
-        # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-        if file "$BIN" | grep -q ELF ; then
-          VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
-          if [[ -n $VERSION_FINDER ]]; then
-            echo ""
-            print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static - strict)."
+      else
+        mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+        for BIN in "${STRICT_BINS[@]}"; do
+          # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
+          if file "$BIN" | grep -q ELF ; then
+            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
+            if [[ -n $VERSION_FINDER ]]; then
+              echo ""
+              print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static - strict)."
             continue
+            fi
           fi
-        fi
-      done
-      echo "." | tr -d "\n"
+        done
+        echo "." | tr -d "\n"
+      fi
     fi
 
     if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
@@ -124,7 +124,7 @@ S09_firmware_base_version_check() {
 
 bin_string_checker() {
   for BIN in "${FILE_ARR[@]}"; do
-    if [[ $RTOS -eq 1 ]]; then
+    if [[ $RTOS -eq 0 ]]; then
       BIN_FILE=$(file "$BIN")
       # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
       if ! [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* || "$BIN_FILE" == *ELF* ]] ; then

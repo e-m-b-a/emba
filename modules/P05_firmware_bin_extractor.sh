@@ -15,6 +15,10 @@
 
 # Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware in the log directory. 
 #               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
+# Pre-checker threading mode - if set to 1, these modules will run in threaded mode
+# This module extracts the firmware and is blocking modules that needs executed before the following modules can run
+export PRE_THREAD_ENA=0
+
 
 P05_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
@@ -55,6 +59,7 @@ P05_firmware_bin_extractor() {
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
+    print_output ""
     deb_extractor
     ipk_extractor
   fi
@@ -131,6 +136,8 @@ ipk_extractor() {
       print_output "[*] Before ipk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
       rm -r "$LOG_DIR"/ipk_tmp
     fi
+  else
+    print_output "[-] No ipk packages extracted."
   fi
 }
 
@@ -166,6 +173,8 @@ deb_extractor() {
       echo ""
       print_output "[*] Before deb extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
     fi
+  else
+    print_output "[-] No deb packages extracted."
   fi
 }
 
@@ -244,9 +253,7 @@ fact_extractor() {
   # as we probably kill FACT and to not loose the results we need to execute FACT in a function 
   # and read the results from the caller
   if [[ -f "$TMP_DIR"/FACTer.txt ]] ; then
-    while read -r LINE; do 
-      print_output "$LINE"
-    done < "$TMP_DIR"/FACTer.txt
+    tee -a "$LOG_FILE" < "$TMP_DIR"/FACTer.txt 
   fi
 }
 
@@ -294,9 +301,7 @@ binwalking() {
   # as we probably kill binwalk and to not loose the results we need to execute binwalk in a function 
   # and read the results from the caller
   if [[ -f "$TMP_DIR"/binwalker.txt ]] ; then
-    while read -r LINE; do 
-      print_output "$LINE"
-    done < "$TMP_DIR"/binwalker.txt
+    tee -a "$LOG_FILE" < "$TMP_DIR"/binwalker.txt 
   fi
 }
 
@@ -313,7 +318,7 @@ extract_deb_helper() {
   find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
 }
 binwalk_deep_extract_helper() {
-  binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_DIR"/p05_binwalker_deep.txt
+  binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
 }
 extract_deb_extractor_helper(){
   DEB_NAME=$(basename "$DEB")
