@@ -38,12 +38,13 @@ S60_cert_file_check()
           CERT_DATE=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601)
           CERT_DATE_=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s)
           CERT_NAME=$(basename "$LINE")
-          openssl x509 -in "$LINE" -text 2>/dev/null >> "$LOG_PATH_MODULE"/cert_details_"$CERT_NAME".txt
+          CERT_LOG="$LOG_PATH_MODULE/cert_details_$CERT_NAME.txt"
+          openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG"
           if [[ $CERT_DATE_ -lt $CURRENT_DATE ]]; then
-            print_output "  ${RED}""$CERT_DATE"" - ""$(print_path "$LINE")""${NC}"
+            print_output "  ${RED}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
             ((CERT_OUT_CNT++))
           else
-            print_output "  ${GREEN}""$CERT_DATE"" - ""$(print_path "$LINE")""${NC}"
+            print_output "  ${GREEN}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
           fi
         else
           print_output "$(indent "$(orange "$(print_path "$LINE")")")"
