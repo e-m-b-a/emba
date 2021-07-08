@@ -45,7 +45,7 @@ S115_usermode_emulator() {
 
     # we only need to detect the root directory again if we have copied it before
     if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
-      detect_root_dir_helper "$EMULATION_PATH_BASE" "$(get_log_file)"
+      detect_root_dir_helper "$EMULATION_PATH_BASE" "$LOG_FILE"
     fi
 
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"

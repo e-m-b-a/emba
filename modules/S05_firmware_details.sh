@@ -21,8 +21,6 @@ S05_firmware_details()
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware and testing details"
 
-  LOG_FILE="$( get_log_file )"
-
   local DETECTED_DIR
   
   # we use the file FILE_ARR from helpers module

@@ -41,8 +41,7 @@ F50_base_aggregator() {
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
 
-  LOG_FILE="$( get_log_file )"
-  CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$( get_log_file )")".csv
+  CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$LOG_FILE")".csv
 
   get_data
   output_overview

@@ -75,11 +75,6 @@ module_title()
   SUB_MODULE_COUNT=0
 }
 
-get_log_file()
-{
-  echo "$LOG_FILE"
-}
-
 sub_module_title()
 {
   local SUB_MODULE_TITLE
@@ -214,10 +209,12 @@ write_link()
     LINK="$1"
     LINK="$(format_log "[REF] ""$LINK" 1)"
     local LOG_FILE_ALT="$2"
-    if [[ -f "$LOG_FILE_ALT" ]] ; then
-      echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
-    else
-      echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+    if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
+      if [[ -f "$LOG_FILE_ALT" ]] ; then
+        echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
+      else
+        echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+      fi
     fi
   fi
 }
@@ -229,10 +226,12 @@ write_anchor()
     ANCHOR="$1"
     ANCHOR="$(format_log "[ANC] ""$ANCHOR" 1)"
     local LOG_FILE_ALT="$2"
-    if [[ -f "$LOG_FILE_ALT" ]] ; then
-      echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
-    else
-      echo -e "$ANCHOR" | tee -a "$LOG_FILE" >/dev/null
+    if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
+      if [[ -f "$LOG_FILE_ALT" ]] ; then
+        echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
+      else
+        echo -e "$ANCHOR" | tee -a "$LOG_FILE" >/dev/null
+      fi
     fi
   fi
 }
