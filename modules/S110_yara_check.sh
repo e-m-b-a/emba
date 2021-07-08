@@ -23,12 +23,13 @@ S110_yara_check()
   module_title "Check for code patterns with yara"
   YARA_CNT=0
   local WAIT_PIDS_S110=()
+  local DIR_COMB_YARA="$TMP_DIR""/dir-combined.yara"
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it
     # after updating yara rules we should remove this file and it gets regenerated
-    if [[ ! -f "./dir-combined.yara" ]]; then
-      find "$EXT_DIR""/yara" -xdev -iname '*.yar*' -printf 'include "./%p"\n' | sort -n > "./dir-combined.yara"
+    if [[ ! -f "$DIR_COMB_YARA" ]]; then
+      find "$(pwd)""/""$EXT_DIR""/yara" -xdev -iname '*.yar*' -printf 'include "%p"\n' | sort -n > "$DIR_COMB_YARA"
     fi
 
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
@@ -56,8 +57,7 @@ S110_yara_check()
     write_log "[*] Statistics:$YARA_CNT"
 
     if [[ "$YARA_CNT" -eq 0 ]] ; then print_output "[-] No code patterns found with yara." ; fi
-    # do not remove this to run multiple instances of emba
-    #if [[ -f "./dir-combined.yara" ]] ; then rm "./dir-combined.yara" ; fi
+    if [[ -f "$DIR_COMB_YARA" ]] ; then rm "$DIR_COMB_YARA" ; fi
   else
     print_output "[!] Check with yara not possible, because it isn't installed!"
   fi
@@ -68,7 +68,7 @@ S110_yara_check()
 yara_check() {
   if [[ -e "$YARA_S_FILE" ]] ; then
     local S_OUTPUT
-    mapfile -t S_OUTPUT < <(yara -r -w ./dir-combined.yara "$YARA_S_FILE")
+    mapfile -t S_OUTPUT < <(yara -r -w "$DIR_COMB_YARA" "$YARA_S_FILE")
     if [[ "${#S_OUTPUT[@]}" -gt 0 ]] ; then
       for YARA_OUT in "${S_OUTPUT[@]}"; do
         print_output "[+] ""$(echo -e "$YARA_OUT" | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
