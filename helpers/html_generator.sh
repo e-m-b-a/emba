@@ -296,7 +296,7 @@ generate_info_file()
       if [[ -f "$E_PATH" ]] ; then
         if [[ ! -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" > /dev/null ; fi
         cp "$E_PATH" "$RES_PATH""/""$(basename "$E_PATH")"
-        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./res/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         printf "%s%sFile: %s%s\n" "$HR_MONO" "$P_START" "$E_HTML_LINK" "$P_END" >> "$TMP_INFO_FILE"
       fi
     done
