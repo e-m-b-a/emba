@@ -40,7 +40,7 @@ LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"\_blank\" >"
-CVE_LINK="<a href=\"https://cve.mitre.org/cgi-bin/cvename.cgi?name=LINK\" title=\"LINK\" target=\"\_blank\" >"
+CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
 ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
@@ -74,11 +74,13 @@ add_link_tags() {
 
   # web links
   if ( grep -q -E '(https?|ftp|file):\/\/' "$LINK_FILE" ) ; then
-    readarray -t WEB_LINKS < <( grep -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' "$LINK_FILE" | sort -u)
+    readarray -t WEB_LINKS < <( grep -n -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' "$LINK_FILE" | sort -u)
     for WEB_LINK in "${WEB_LINKS[@]}" ; do
+      WEB_LINK_LINE_NUM="$(echo "$WEB_LINK" | cut -d ":" -f 1)"
+      WEB_LINK_URL="$(echo "$WEB_LINK" | cut -d ":" -f 2-)"
       if [[ -n "$WEB_LINK" ]] ; then
-        HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$WEB_LINK@g")""$WEB_LINK""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "s@""$WEB_LINK""@""$HTML_LINK""@g" )
+        HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$WEB_LINK_URL@g")""$WEB_LINK_URL""$LINK_END"
+        LINK_COMMAND_ARR+=( '-e' "$WEB_LINK_LINE_NUM""s@""$WEB_LINK_URL""@""$HTML_LINK""@" )
       fi
     done
   fi
@@ -111,7 +113,7 @@ add_link_tags() {
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
-          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""s@(.*)@""$HTML_LINK""\1""$LINK_END""@" )
+          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK""@" '-e' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END""@")
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           # add linked image
           LINE_NUMBER_INFO_PREV="$(grep -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
@@ -138,7 +140,7 @@ add_link_tags() {
           while [[ "$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
-          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""s@(.*)@""$HTML_LINK""\1""$LINK_END""@" )
+          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK""@" '-e' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END""@")
         fi
       else
         LINE_NUMBER_INFO_PREV="$(grep -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
@@ -151,7 +153,7 @@ add_link_tags() {
     readarray -t LES_LINE_ARR < <( grep -o -n -E "Exploit.*linux-exploit-suggester" "$LINK_FILE" | cut -d":" -f1)
     for LES_LINE in "${LES_LINE_ARR[@]}" ; do 
       HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./s25_kernel_check.html@g")""linux-exploit-suggester""$LINK_END"
-      LINK_COMMAND_ARR+=( '-e' "$LES_LINE""s@linux-exploit-suggester@""$HTML_LINK""@g" )
+      LINK_COMMAND_ARR+=( '-e' "$LES_LINE""s@linux-exploit-suggester@""$HTML_LINK""@" )
     done
   fi
 
@@ -167,9 +169,12 @@ add_link_tags() {
 
   # Exploit links and additional files
   if ( grep -q -E 'EDB ID:' "$LINK_FILE" ) ; then
-    readarray -t EXPLOITS_IDS < <( sed -E -e "s@.*EDB ID: ([0-9]*)[\ ]?*.*@\1@g" "$LINK_FILE" | sort -u)
+    readarray -t EXPLOITS_IDS < <( grep -n -o -E ".*EDB ID: ([0-9]*)[\ ]?*.*" "$LINK_FILE" | sort -u)
     for EXPLOIT_ID in "${EXPLOITS_IDS[@]}" ; do
-      if [[ -n "$EXPLOIT_ID" ]] ; then
+      EXPLOIT_ID_LINE="$(echo "$EXPLOIT_ID" | cut -d ":" -f 1)"
+      EXPLOIT_ID_STRING="$(echo "$EXPLOIT_ID" | cut -d ":" -f 2-)"
+      if [[ -n "$EXPLOIT_ID_STRING" ]] ; then
+        EXPLOIT_ID="$(echo "$EXPLOIT_ID_STRING" | grep -o -E "EDB ID: ([0-9]*)" | cut -d ":" -f 2 | sed -e 's/^[[:space:]]*//')"
         EXPLOIT_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/""$EXPLOIT_ID"".txt"
         if [[ -f "$EXPLOIT_FILE" ]] ; then
           # generate exploit file
@@ -180,47 +185,51 @@ add_link_tags() {
             generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
           fi
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
-          LINK_COMMAND_ARR+=( '-e' "s@(EDB ID: )""$EXPLOIT_ID""([^0-9])@\1""$HTML_LINK""\2@g" )
         else
           HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
-          LINK_COMMAND_ARR+=( '-e' "s@(EDB ID: )""$EXPLOIT_ID""([^0-9])@\1""$HTML_LINK""\2@g" )
         fi
+        LINK_COMMAND_ARR+=( '-e' "$EXPLOIT_ID_LINE""s@""$EXPLOIT_ID""@""$HTML_LINK""@g" )
       fi
     done
   fi
 
   # MSF key links and additional files
   if ( grep -q -E 'Exploit.*MSF' "$LINK_FILE" ) ; then
-    readarray -t MSF_KEY_F < <( grep -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "$LINK_FILE" | cut -d" " -f2- | tr ' ' '\n' | sort -u)
+    readarray -t MSF_KEY_F < <( grep -n -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "$LINK_FILE" | sort -u)
     for MSF_KEY in "${MSF_KEY_F[@]}" ; do 
-      if [[ -n "$MSF_KEY" ]] ; then
-        MSF_KEY_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/msf_""$MSF_KEY"".rb"
+      MSF_KEY_LINE="$(echo "$MSF_KEY" | cut -d ":" -f 1)"
+      MSF_KEY_STRING="$(echo "$MSF_KEY" | cut -d ":" -f 3- | sed -e 's/^[[:space:]]*//')"
+      readarray -t MSF_KEY_STRING_ARR < <(echo "$MSF_KEY_STRING" | tr " " "\n" | sort -u)
+      for MSF_KEY_ELEM in "${MSF_KEY_STRING_ARR[@]}" ; do
+        MSF_KEY_FILE="$LOG_DIR""/f19_cve_aggregator/exploit/msf_""$MSF_KEY_ELEM"".rb"
         if [[ -f "$MSF_KEY_FILE" ]] ; then
           # copy msf file
           local RES_PATH
           RES_PATH="$ABS_HTML_PATH""/""$(echo "$BACK_LINK" | cut -d"." -f1 )""/res"
           if [[ ! -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" > /dev/null ; fi
           cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")"
-          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY""$LINK_END"
-          LINK_COMMAND_ARR+=( '-e' "s@([\ ]+)""$MSF_KEY""@\1""$HTML_LINK""@g" )
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY_ELEM""$LINK_END"
+          LINK_COMMAND_ARR+=( '-e' "$MSF_KEY_LINE""s@""$MSF_KEY_ELEM""@""$HTML_LINK""@g" )
         fi
-      fi
+      done
     done
   fi
 
   # CVE links
   if ( grep -q -E '(CVE)' "$LINK_FILE" ) ; then
-    readarray -t CVE_IDS < <( grep -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$LINK_FILE" | sort -u)
+    readarray -t CVE_IDS < <( grep -n -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$LINK_FILE" | sort -u)
     for CVE_ID in "${CVE_IDS[@]}" ; do
-      if [[ -n "$CVE_ID" ]] ; then
-        HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID@g")""$CVE_ID""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "s@$CVE_ID([^[:digit:]]{1})@""$HTML_LINK""\1@g" )
+      CVE_ID_LINE="$(echo "$CVE_ID" | cut -d ":" -f 1)"
+      CVE_ID_STRING="$(echo "$CVE_ID" | cut -d ":" -f 2-)"
+      if [[ -n "$CVE_ID_STRING" ]] ; then
+        HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID_STRING@g")""$CVE_ID_STRING""$LINK_END"
+        LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""$CVE_ID_STRING""@""$HTML_LINK""@g" )
       fi
     done
   fi
 
   if [[ "${#LINK_COMMAND_ARR[@]}" -gt 0 ]] ; then
-    sed -i -E "${LINK_COMMAND_ARR[@]}" "$LINK_FILE"
+    sed -i "${LINK_COMMAND_ARR[@]}" "$LINK_FILE"
   fi
 
   if [[ $THREADED -eq 1 ]]; then
@@ -287,7 +296,7 @@ generate_info_file()
       if [[ -f "$E_PATH" ]] ; then
         if [[ ! -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" > /dev/null ; fi
         cp "$E_PATH" "$RES_PATH""/""$(basename "$E_PATH")"
-        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$SRC_FILE" | cut -d"." -f1 )/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
+        E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         printf "%s%sFile: %s%s\n" "$HR_MONO" "$P_START" "$E_HTML_LINK" "$P_END" >> "$TMP_INFO_FILE"
       fi
     done
@@ -455,15 +464,15 @@ prepare_report()
   ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
   
   if [ ! -d "$ABS_HTML_PATH$STYLE_PATH" ] ; then
-    mkdir "$ABS_HTML_PATH$STYLE_PATH"
+    mkdir -p "$ABS_HTML_PATH$STYLE_PATH"
     cp "$HELP_DIR/style.css" "$ABS_HTML_PATH$STYLE_PATH/style.css"
     cp "$HELP_DIR/emba.svg" "$ABS_HTML_PATH$STYLE_PATH/emba.svg"
   fi
   if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
-    mkdir "$ABS_HTML_PATH$TEMP_PATH"
+    mkdir -p "$ABS_HTML_PATH$TEMP_PATH"
   fi
   if [ ! -d "$ABS_HTML_PATH$SUPPL_PATH_HTML" ] ; then
-    mkdir "$ABS_HTML_PATH$SUPPL_PATH_HTML"
+    mkdir -p "$ABS_HTML_PATH$SUPPL_PATH_HTML"
   fi
 
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"
