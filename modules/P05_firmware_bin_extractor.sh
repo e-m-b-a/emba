@@ -54,7 +54,7 @@ P05_firmware_bin_extractor() {
     deep_extractor
   fi
 
-  detect_root_dir_helper "$FIRMWARE_PATH_CP" "$(get_log_file)"
+  detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
