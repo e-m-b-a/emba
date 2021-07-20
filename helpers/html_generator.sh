@@ -439,6 +439,7 @@ update_index()
     sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.${S_FILE##*.}}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   done
   scan_report
+  add_arrows
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
 }
@@ -453,10 +454,16 @@ scan_report()
   for LINK in "${LINK_ARR[@]}" ; do
     for FILE in "${LINK_FILE_ARR[@]}" ; do
       if ! [[ -f "$ABS_HTML_PATH""/""$LINK" ]] ; then
-        sed -i -E "s@class=\"refmodul\" href=\"($LINK)\"@@g" "$FILE"
+        sed -i "s@class=\"refmodul\" href=\"($LINK)\"@@g" "$FILE"
       fi
     done
   done
+}
+
+add_arrows()
+{
+  # todo generate arrays of available report files and add before and after links to each one
+  #if none found: replace stroke="white" and add class for background
 }
 
 prepare_report()
