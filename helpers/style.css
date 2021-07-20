@@ -135,22 +135,6 @@ pre a:hover {
   background-color:#133d5f!important;
 }
 
-.buttonClose {
-  background-color:#821c1c;
-}
-
-.buttonClose:hover {
-  background-color:#a52323;
-}
-
-.buttonOpen {
-  background-color:#096b09;
-}
-
-.buttonOpen:hover {
-  background-color:#0b860b;
-}
-
 .hidden {
   height:0;
   padding:0!important;
@@ -217,6 +201,7 @@ pre a:hover {
   padding:20px;
   scrollbar-width:none;
   transition:margin-left .5s;
+  margin-bottom: 100px;
 }
 
 .bold {
@@ -269,36 +254,93 @@ pre a:hover {
   display:none;
 }
 
-#button {
-  bottom:0;
-  color:#fff;
+.rectButton {
+  bottom:0px;
   cursor:pointer;
-  font-size:40px;
   height:50px;
-  left:0;
+  width:50px;
+  line-height: 50px;
   position:fixed;
   text-align:center;
   visibility:hidden;
+  padding:5px;
+}
+
+.rectButtonVisible {
+  bottom:0px;
+  cursor:pointer;
+  height:50px;
   width:50px;
+  line-height: 50px;
+  position:fixed;
+  text-align:center;
+  padding:5px;
+}
+
+#buttonSizer {
+  bottom:0;
+  left:0;
+}
+
+.buttonClose {
+  background-color:#821c1c;
+}
+
+.buttonClose:hover {
+  background-color:#a52323;
+}
+
+.buttonOpen {
+  background-color:#096b09;
+}
+
+.buttonOpen:hover {
+  background-color:#0b860b;
 }
 
 #buttonTime {
   bottom:0px;
-  color:#fff;
-  cursor:pointer;
-  font-size:30px;
-  height:50px;
-  line-height: 50px;
   left:0;
-  position:fixed;
-  text-align:center;
-  visibility:hidden;
-  width:50px;
-  background-color:#232323;
+  background-color:#044209;
 }
 
 #buttonTime:hover {
-  background-color:#343434;
+  background-color:#05500b;
+}
+
+#buttonInfo {
+  bottom:0px;
+  right:0;
+  background-color:#093a41;
+}
+
+#buttonForward:hover {
+  background-color:#0b4a53;
+}
+
+#buttonBack {
+  bottom:0px;
+  right:50px;
+  background-color:#614406;
+}
+
+#buttonBack:hover {
+  background-color:#795509;
+}
+
+#buttonForward {
+  bottom:0px;
+  right:100px;
+  background-color:#614406;
+}
+
+#buttonForward:hover {
+  background-color:#795509;
+}
+
+.nonClickable {
+  background-color: #333 !important;
+  cursor: default;
 }
 
 .image {

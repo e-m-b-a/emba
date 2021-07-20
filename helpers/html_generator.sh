@@ -36,6 +36,7 @@ HR_MONO="<hr class=\"mono\" />"
 HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
 LINK="<a href=\"LINK\" title=\"LINK\" target=\"\_blank\" >"
+ARROW_LINK="<a href=\"LINK\" title=\"LINK\" >"
 LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
@@ -463,7 +464,29 @@ scan_report()
 add_arrows()
 {
   # todo generate arrays of available report files and add before and after links to each one
-  #if none found: replace stroke="white" and add class for background
+  #if found: replace stroke="#333 with white" and remove nonClickable class for background
+  local P_MODULE_ARR
+  readarray -t P_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -E "./p[0-9]*.*" | sort -V)
+  local S_MODULE_ARR
+  readarray -t S_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -E "./s[0-9]*.*" | sort -V)
+  local F_MODULE_ARR
+  readarray -t F_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -E "./f[0-9]*.*" | sort -V)
+  local ALL_MODULE_ARR
+  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}" )
+  for M_NUM in "${!ALL_MODULE_ARR[@]}"; do 
+    if [[ "$M_NUM" -gt 0 ]] ; then
+      FIRST_LINK="${ALL_MODULE_ARR[$(( M_NUM - 1 ))]}"
+      LINE_NUMBER_A_BUTTON=$(grep -n "buttonForward" "${ALL_MODULE_ARR[$M_NUM]}" | cut -d ":" -f 1)
+      HTML_LINK="$(echo "$ARROW_LINK" | sed -e "s@LINK@./""$(basename "$FIRST_LINK")""@g")"
+      sed -i -e "$LINE_NUMBER_A_BUTTON""s@^@""$HTML_LINK""@" -e "$LINE_NUMBER_A_BUTTON""s@$""@""$LINK_END""@" -e "$LINE_NUMBER_A_BUTTON""s@nonClickable @@" -e "$LINE_NUMBER_A_BUTTON""s@stroke=\"#444\"@stroke=\"#fff\"@" "${ALL_MODULE_ARR[$M_NUM]}"
+    fi
+    if [[ "$(( M_NUM + 1 ))" -lt "${#ALL_MODULE_ARR[@]}" ]] ; then
+      SECOND_LINK="${ALL_MODULE_ARR[$(( M_NUM + 1 ))]}"
+      LINE_NUMBER_A_BUTTON=$(grep -n "buttonBack" "${ALL_MODULE_ARR[$M_NUM]}" | cut -d ":" -f 1)
+      HTML_LINK="$(echo "$ARROW_LINK" | sed -e "s@LINK@./""$(basename "$SECOND_LINK")""@g")"
+      sed -i -e "$LINE_NUMBER_A_BUTTON""s@^@""$HTML_LINK""@" -e "$LINE_NUMBER_A_BUTTON""s@$""@""$LINK_END""@" -e "$LINE_NUMBER_A_BUTTON""s@nonClickable @@" -e "$LINE_NUMBER_A_BUTTON""s@stroke=\"#444\"@stroke=\"#fff\"@" "${ALL_MODULE_ARR[$M_NUM]}"
+    fi
+  done
 }
 
 prepare_report()
