@@ -98,6 +98,17 @@ function buttonNav() {
     closeNav();
   };
 }
+
+document.onkeydown = function(e) {
+    switch (e.keyCode) {
+      case 37:
+        var link = document.getElementById("buttonForward").parentNode.click(); 
+        break;
+      case 39:
+        var link = document.getElementById("buttonBack").parentNode.click();       
+        break;
+    }
+};
 </script>
 
 </body>
