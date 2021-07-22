@@ -321,8 +321,28 @@ pre a:hover {
   background-color:#093a41;
 }
 
-#buttonForward:hover {
+#buttonInfo:hover {
   background-color:#0b4a53;
+}
+
+#buttonDown {
+  bottom:0px;
+  right:150px;
+  background-color:#614406;
+}
+
+#buttonDown:hover {
+  background-color:#795509;
+}
+
+#buttonUp {
+  bottom:0px;
+  right:200px;
+  background-color:#614406;
+}
+
+#buttonUp:hover {
+  background-color:#795509;
 }
 
 #buttonBack {
