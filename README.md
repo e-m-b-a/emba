@@ -47,7 +47,7 @@ If you have questions about *emba*, have a look at the [wiki](https://github.com
 
 ## Installation
 
-Before running *emba* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation) all dependencies.
+Before running *emba* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation) all dependencies and met the [prerequisites](https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites)
 
 ## Usage
 
