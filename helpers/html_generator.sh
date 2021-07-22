@@ -36,6 +36,7 @@ HR_MONO="<hr class=\"mono\" />"
 HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
 LINK="<a href=\"LINK\" title=\"LINK\" target=\"\_blank\" >"
+ARROW_LINK="<a href=\"LINK\" title=\"LINK\" >"
 LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
@@ -426,7 +427,7 @@ update_index()
 {
   # add emba.log to webreport
   generate_report_file "$MAIN_LOG"
-  sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.${MAIN_LOG##*.}}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.${MAIN_LOG##*.}}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
   # generate files in $SUPPL_PATH (supplementary files from modules) 
   readarray -t SUPPL_FILES < <(find "$SUPPL_PATH" ! -path "$SUPPL_PATH")
   if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
@@ -439,6 +440,7 @@ update_index()
     sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.${S_FILE##*.}}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   done
   scan_report
+  add_arrows
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
 }
@@ -453,9 +455,35 @@ scan_report()
   for LINK in "${LINK_ARR[@]}" ; do
     for FILE in "${LINK_FILE_ARR[@]}" ; do
       if ! [[ -f "$ABS_HTML_PATH""/""$LINK" ]] ; then
-        sed -i -E "s@class=\"refmodul\" href=\"($LINK)\"@@g" "$FILE"
+        sed -i "s@class=\"refmodul\" href=\"($LINK)\"@@g" "$FILE"
       fi
     done
+  done
+}
+
+add_arrows()
+{
+  local P_MODULE_ARR
+  readarray -t P_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -E "./p[0-9]*.*" | sort -V)
+  local S_MODULE_ARR
+  readarray -t S_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -E "./s[0-9]*.*" | sort -V)
+  local F_MODULE_ARR
+  readarray -t F_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -E "./f[0-9]*.*" | sort -V)
+  local ALL_MODULE_ARR
+  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}" )
+  for M_NUM in "${!ALL_MODULE_ARR[@]}"; do 
+    if [[ "$M_NUM" -gt 0 ]] ; then
+      FIRST_LINK="${ALL_MODULE_ARR[$(( M_NUM - 1 ))]}"
+      LINE_NUMBER_A_BUTTON=$(grep -m 1 -n "buttonForward" "${ALL_MODULE_ARR[$M_NUM]}" | cut -d ":" -f 1)
+      HTML_LINK="$(echo "$ARROW_LINK" | sed -e "s@LINK@./""$(basename "$FIRST_LINK")""@g")"
+      sed -i -e "$LINE_NUMBER_A_BUTTON"'s@^@'"$HTML_LINK"'@' -e "$LINE_NUMBER_A_BUTTON"'s@$@'"$LINK_END"'@' -e "$LINE_NUMBER_A_BUTTON""s@nonClickable @@" -e "$LINE_NUMBER_A_BUTTON""s@stroke=\"#444\"@stroke=\"#fff\"@" "${ALL_MODULE_ARR[$M_NUM]}"
+    fi
+    if [[ "$(( M_NUM + 1 ))" -lt "${#ALL_MODULE_ARR[@]}" ]] ; then
+      SECOND_LINK="${ALL_MODULE_ARR[$(( M_NUM + 1 ))]}"
+      LINE_NUMBER_A_BUTTON=$(grep -m 1 -n "buttonBack" "${ALL_MODULE_ARR[$M_NUM]}" | cut -d ":" -f 1)
+      HTML_LINK="$(echo "$ARROW_LINK" | sed -e "s@LINK@./""$(basename "$SECOND_LINK")""@g")"
+      sed -i -e "$LINE_NUMBER_A_BUTTON"'s@^@'"$HTML_LINK"'@' -e "$LINE_NUMBER_A_BUTTON"'s@$@'"$LINK_END"'@' -e "$LINE_NUMBER_A_BUTTON""s@nonClickable @@" -e "$LINE_NUMBER_A_BUTTON""s@stroke=\"#444\"@stroke=\"#fff\"@" "${ALL_MODULE_ARR[$M_NUM]}"
+    fi
   done
 }
 
