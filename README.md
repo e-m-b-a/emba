@@ -63,6 +63,13 @@ Before running *emba* make sure, that you have [installed](https://github.com/e-
 sudo ./emba.sh -l ./log -f /firmware -D
 ```
 
+---   
+### Profile support:
+```console
+sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan-docker.emba
+
+```
+
 ---
 You can specify multiple [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments) and get more [information about usage of *emba* in the wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
 
