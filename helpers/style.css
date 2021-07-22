@@ -304,6 +304,13 @@ pre a:hover {
   background-color:#044209;
 }
 
+#buttonTimeInvisible {
+  bottom:0px;
+  left:0;
+  background-color:#044209;
+  visibility: hidden !important;
+}
+
 #buttonTime:hover {
   background-color:#05500b;
 }

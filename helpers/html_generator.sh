@@ -427,7 +427,7 @@ update_index()
 {
   # add emba.log to webreport
   generate_report_file "$MAIN_LOG"
-  sed -i -E -e "s@(id=\"buttonTime\")@\1 style=\"visibility: visible\"@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.${MAIN_LOG##*.}}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.${MAIN_LOG##*.}}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
   # generate files in $SUPPL_PATH (supplementary files from modules) 
   readarray -t SUPPL_FILES < <(find "$SUPPL_PATH" ! -path "$SUPPL_PATH")
   if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
