@@ -136,12 +136,6 @@ download_file()
   fi
 }
 
-#curl -sS https://getcomposer.org/installer | php
-#   90  composer require psecio/iniscan
-#   91  ./composer.phar global require psecio/iniscan
-#   92  ~/.composer/vendor/bin/iniscan
-
-
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"

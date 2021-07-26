@@ -46,7 +46,7 @@ S22_php_check()
         (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
       done < "$TMP_DIR"/S22_VULNS.tmp
     fi
-
+    
     s22_check_php_init
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
@@ -80,57 +80,66 @@ s22_script_check() {
   fi
 }
 
-s22_check_php_init(){
-
-  local CURRENT_VALUE
-  mapfile -t FILES < <( sudo find / -name php.ini )
-  for PHP_FILE in "${FILES[@]}"
-  do
-    mapfile -t INISCAN_RESULT < <( sudo ../external/iniscan/vendor/bin/iniscan scan --path="$PHP_FILE" )
-    for LINE in "${INISCAN_RESULT[@]}"
-    do
-      IFS='|' read -ra LINE_ARR <<< "$LINE"
-
-      if [[ "${LINE_ARR[0]}" == "FAIL"* ]]; then
-        CURRENT_VALUE=add_recommendations"${LINE_ARR[3]}""${LINE_ARR[4]}"
-        STATUS="$RED""${LINE_ARR[0]}"
-      elif [[ "${LINE_ARR[0]}" == "PASS"* ]]; then
-        CURRENT_VALUE=add_recommendations"${LINE_ARR[3]}""${LINE_ARR[4]}"
-        STATUS="$GREEN""${LINE_ARR[0]}"
-      else
-        CURRENT_VALUE=add_recommendations"${LINE_ARR[3]}""${LINE_ARR[4]}"
-        STATUS="$WHITE""${LINE_ARR[0]}"
-      fi
-
-      if [[ "${LINE_ARR[1]}" == "ERROR"* ]]; then
-        SEVERTIY="$RED""${LINE_ARR[1]}"
-      elif [[ "${LINE_ARR[1]}" == "WARNING"* ]]; then
-        SEVERTIY="$CYAN""${LINE_ARR[1]}"
-      else
-        SEVERTIY="$WHITE""${LINE_ARR[1]}"
-      fi
-      print_output "[-] ""$STATUS"" | ""$SEVERTIY"" | ""${LINE_ARR[2]}"" | ""$CURRENT_VALUE"" | ""${LINE_ARR[4]}"" | ""${LINE_ARR[5]}"
-    done
-  done
-}
-
 add_recommendations(){
-   CURRENT_VALUE="$1"
+   local VALUE
+   local KEY
+   VALUE="$1"
    KEY="$2"
 
-   if [[ $CURRENT_VALUE == *"M"* ]]; then
-      LIMIT=${"$CURRENT_VALUE"//"M"/""}
+   if [[ $VALUE == *"M"* ]]; then
+      echo ".""$VALUE""."
+      LIMIT="${VALUE//M/}"
    fi
 
    if [[ $KEY == *"memory_limit"* ]] && [[ $(( LIMIT)) -gt 50 ]]; then
-     VALUE="$CYAN""$CURRENT_VALUE"
+     CURRENT_VALUE="$CYAN""$VALUE"
    elif [[ $KEY == *"post_max_size"* ]] && [[ $(( LIMIT)) -gt 20 ]]; then
-     VALUE="$CYAN""$CURRENT_VALUE"
+     CURRENT_VALUE="$CYAN""$VALUE"
    elif [[ $KEY == *"max_execution_time"* ]] && [[ $(( LIMIT )) -gt 60 ]]; then
-     VALUE="$CYAN""$CURRENT_VALUE"
+     CURRENT_VALUE="$CYAN""$VALUE"
    else
-     VALUE="$WHITE""$CURRENT_VALUE"
+     CURRENT_VALUE="$WHITE""$VALUE"
    fi
+}
 
-   return "$VALUE"
+s22_check_php_init(){
+
+  mapfile -t FILES < <( sudo find / -name php.ini )
+  for PHP_FILE in "${FILES[@]}"
+  do
+    mapfile -t INISCAN_RESULT < <( sudo "./external/iniscan/vendor/bin/iniscan" scan --path="$PHP_FILE")
+    for LINE in "${INISCAN_RESULT[@]}"
+    do
+      if [[ $VALUE == *"|"* ]]; then
+        IFS='|' read -ra LINE_ARR <<< "$LINE"
+      
+        if [[ "${LINE_ARR[0]}" == "FAIL"* ]]; then
+          add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
+          STATUS="$RED""${LINE_ARR[0]}"
+        elif [[ "${LINE_ARR[0]}" == "PASS"* ]]; then
+          add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
+          STATUS="$GREEN""${LINE_ARR[0]}"
+        else
+          add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
+          STATUS="$WHITE""${LINE_ARR[0]}"
+        fi
+
+        if [[ "${LINE_ARR[1]}" == "ERROR"* ]]; then
+          SEVERTIY="$RED""${LINE_ARR[1]}"
+          echo "$RED"
+          echo "Test"
+        elif [[ "${LINE_ARR[1]}" == "WARNING"* ]]; then
+          SEVERTIY="$CYAN""${LINE_ARR[1]}"
+        else
+          SEVERTIY="$WHITE""${LINE_ARR[1]}"
+        fi
+
+        print_output "[-] ""$STATUS"" | ""$SEVERTIY"" | ""${LINE_ARR[2]}"" | ""$CURRENT_VALUE"" | ""${LINE_ARR[4]}"" | ""${LINE_ARR[5]}"
+      
+      else
+        print_output "[-]""$WHITE""$LINE"
+      fi
+      CURRENT_VALUE=""
+    done
+  done
 }
