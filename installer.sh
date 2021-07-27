@@ -687,28 +687,29 @@ esac
 
 #iniscan
 
-echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download iniscan."
+echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
 
-print_file_info "iniscan/composer.phar" "" "https://getcomposer.org/installer " "external/iniscan/composer.phar"
+print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download iniscan (if not already on the system)?""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download Composer and iniscan (if not already on the system)?""$NC"
   read -p "(y/N)" -r ANSWER
 elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
-  echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""Composer and iniscan (if not already on the system) will be downloaded!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    if ! [[ -d "external/iniscan/" ]] ; then
+    if ! [[ -d "external/iniscan" ]] ; then
       mkdir external/iniscan
     fi
-
-    cd ./external/iniscan || exit
-    curl -sS https://getcomposer.org/installer | php
-    composer require psecio/iniscan -n
+    download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
+    php ./external/iniscan/composer.phar build
+    php composer.phar global require psecio/iniscan
+    readarray -t INISCAN_PATH < <(find / -path "*/vendor/bin/iniscan")
+    cp -r "$(echo "${INISCAN_PATH[0]}" | sed 's@/bin/iniscan@@')" "./external/iniscan/vendor"
   ;;
 esac
 

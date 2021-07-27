@@ -41,13 +41,14 @@ S22_php_check()
       wait_for_pid "${WAIT_PIDS_S22[@]}"
     fi
 
+    s22_check_php_ini
+
     if [[ -f "$TMP_DIR"/S22_VULNS.tmp ]]; then
       while read -r VULNS; do
         (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
       done < "$TMP_DIR"/S22_VULNS.tmp
     fi
-    
-    s22_check_php_init
+        
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
     write_log ""
@@ -56,7 +57,7 @@ S22_php_check()
   else
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}" "$S22_PHP_VULNS"
+  module_end_log "${FUNCNAME[0]}" "1" #"$S22_PHP_VULNS" # TODO here has to be the accumulated number of the previous s22_php_vulns and the new failures of the inicheck
 }
 
 s22_script_check() {
@@ -102,44 +103,53 @@ add_recommendations(){
    fi
 }
 
-s22_check_php_init(){
-
-  mapfile -t FILES < <( sudo find / -name php.ini )
-  for PHP_FILE in "${FILES[@]}"
-  do
-    mapfile -t INISCAN_RESULT < <( sudo "./external/iniscan/vendor/bin/iniscan" scan --path="$PHP_FILE")
-    for LINE in "${INISCAN_RESULT[@]}"
-    do
-      if [[ $VALUE == *"|"* ]]; then
-        IFS='|' read -ra LINE_ARR <<< "$LINE"
-      
-        if [[ "${LINE_ARR[0]}" == "FAIL"* ]]; then
-          add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
-          STATUS="$RED""${LINE_ARR[0]}"
-        elif [[ "${LINE_ARR[0]}" == "PASS"* ]]; then
-          add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
-          STATUS="$GREEN""${LINE_ARR[0]}"
-        else
-          add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
-          STATUS="$WHITE""${LINE_ARR[0]}"
-        fi
-
-        if [[ "${LINE_ARR[1]}" == "ERROR"* ]]; then
-          SEVERTIY="$RED""${LINE_ARR[1]}"
-          echo "$RED"
-          echo "Test"
-        elif [[ "${LINE_ARR[1]}" == "WARNING"* ]]; then
-          SEVERTIY="$CYAN""${LINE_ARR[1]}"
-        else
-          SEVERTIY="$WHITE""${LINE_ARR[1]}"
-        fi
-
-        print_output "[-] ""$STATUS"" | ""$SEVERTIY"" | ""${LINE_ARR[2]}"" | ""$CURRENT_VALUE"" | ""${LINE_ARR[4]}"" | ""${LINE_ARR[5]}"
-      
+s22_check_php_ini(){
+  mapfile -t PHP_CONF_FILES < <( find / -name php.ini )
+  for PHP_FILE in "${PHP_CONF_FILES[@]}" ;  do
+    print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
+    mapfile -t INISCAN_RESULT < <( "$EXT_DIR"/iniscan/vendor/bin/iniscan scan --path="$PHP_FILE" )
+    for LINE in "${INISCAN_RESULT[@]}" ; do
+      if ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "WARNING" )  ; then
+        print_output "$(orange "$LINE")"
+      elif ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "ERROR" )  ; then
+        print_output "$(red "$LINE")"
+      elif ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "INFO" ) ; then
+        print_output "$(blue "$LINE")"
+      elif ( echo "$LINE" | grep -q "PASS" ) ; then
+        print_output "$(green "$LINE")"
       else
-        print_output "[-]""$WHITE""$LINE"
+        print_output "$LINE"
       fi
-      CURRENT_VALUE=""
+      # TODO add the FAILURES NUMBER to the final check, 
+      # if [[ $VALUE == *"|"* ]]; then
+      #   IFS='|' read -ra LINE_ARR <<< "$LINE"
+
+      #   if [[ "${LINE_ARR[0]}" == "FAIL"* ]]; then
+      #     add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
+      #     STATUS="$RED""${LINE_ARR[0]}"
+      #   elif [[ "${LINE_ARR[0]}" == "PASS"* ]]; then
+      #     add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
+      #     STATUS="$GREEN""${LINE_ARR[0]}"
+      #   else
+      #     add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
+      #     STATUS="$WHITE""${LINE_ARR[0]}"
+      #   fi
+
+      #   if [[ "${LINE_ARR[1]}" == "ERROR"* ]]; then
+      #     SEVERTIY="$RED""${LINE_ARR[1]}"
+      #     echo "$RED"
+      #     echo "Test"
+      #   elif [[ "${LINE_ARR[1]}" == "WARNING"* ]]; then
+      #     SEVERTIY="$CYAN""${LINE_ARR[1]}"
+      #   else
+      #     SEVERTIY="$WHITE""${LINE_ARR[1]}"
+      #   fi
+
+      #   print_output "[-] ""$STATUS"" | ""$SEVERTIY"" | ""${LINE_ARR[2]}"" | ""$CURRENT_VALUE"" | ""${LINE_ARR[4]}"" | ""${LINE_ARR[5]}"
+      
+      #else
+      #  print_output "[-]""$WHITE""$LINE"
+      #fi
     done
   done
 }
