@@ -34,10 +34,6 @@ F19_cve_aggregator() {
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
 
-  if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
-    FW_VER_CHECK_LOG="r09_firmware_base_version_check.txt"
-  fi
-
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
 
@@ -922,10 +918,11 @@ final_outputter() {
 }
 
 get_firmware_base_version_check() {
-  print_output "[*] Collect version details of module r09 or s09 - firmware_base_version_check."
+  print_output "[*] Collect version details of module s09 - firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
+      # do not name a path to your firmware with "Linux-*" or "Linux kernel*"
       readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel\|Linux-")
     else
       readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)

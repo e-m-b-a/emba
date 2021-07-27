@@ -107,12 +107,22 @@ S115_usermode_emulator() {
               EMULATOR="qemu-arm-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*ARM" ) ; then
               EMULATOR="qemu-armeb-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "64-bit LSB.*ARM aarch64" ) ; then
+              EMULATOR="qemu-aarch64-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "64-bit MSB.*ARM aarch64" ) ; then
+              EMULATOR="qemu-aarch64_be-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit LSB.*MIPS" ) ; then
               EMULATOR="qemu-mipsel-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*MIPS" ) ; then
               EMULATOR="qemu-mips-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "64-bit LSB.*MIPS" ) ; then
+              EMULATOR="qemu-mips64el-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "64-bit MSB.*MIPS" ) ; then
+              EMULATOR="qemu-mips64-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*PowerPC" ) ; then
               EMULATOR="qemu-ppc-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "64-bit MSB.*PowerPC" ) ; then
+              EMULATOR="qemu-ppc64-static"
             else
               print_output "[-] No working emulator found for $BIN_"
               EMULATOR="NA"
