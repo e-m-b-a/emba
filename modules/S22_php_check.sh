@@ -104,7 +104,7 @@ add_recommendations(){
 }
 
 s22_check_php_ini(){
-  mapfile -t PHP_CONF_FILES < <( find / -name php.ini )
+  mapfile -t PHP_CONF_FILES < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for PHP_FILE in "${PHP_CONF_FILES[@]}" ;  do
     print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
     mapfile -t INISCAN_RESULT < <( "$EXT_DIR"/iniscan/vendor/bin/iniscan scan --path="$PHP_FILE" )
