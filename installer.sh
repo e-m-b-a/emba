@@ -706,8 +706,8 @@ case ${ANSWER:0:1} in
       mkdir external/iniscan
     fi
     download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
-    php ./external/iniscan/composer.phar build
-    php composer.phar global require psecio/iniscan
+    php ./external/iniscan/composer.phar build --no-interaction
+    php composer.phar global require psecio/iniscan --no-interaction
     readarray -t INISCAN_PATH < <(find / -path "*/vendor/bin/iniscan")
     cp -r "$(echo "${INISCAN_PATH[0]}" | sed 's@/bin/iniscan@@')" "./external/iniscan/vendor"
   ;;
