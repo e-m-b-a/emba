@@ -127,6 +127,12 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/run-parts\ program,/run-parts}"
     #GNU parted) 3.2
     VERSION_lower="${VERSION_lower/gnu\ parted\)/parted}"
+    #pax-utils-v1.2.8:
+    VERSION_lower="${VERSION_lower/pax-utils-v/pax-utils\ }"
+    #(OpenRC) 
+    VERSION_lower="${VERSION_lower/\(openrc\)\ /openrc\ }"
+    #(tzcode) 
+    VERSION_lower="${VERSION_lower/\(tzcode\)\ /tzcode\ }"
     # #mkenvimage version 2016.11+dfsg1-4
     # VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
     # #mkimage version 2016.11+dfsg1-4
@@ -442,6 +448,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ inetutils/gnu:inetutils/')"
+    #ld-musl-armhf.so.1 -> musl-libc:musl
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/ld-musl-armhf.so.1/musl-libc:musl/')"
     # handle grub version 2:
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)/grub/')"

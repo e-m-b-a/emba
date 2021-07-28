@@ -62,6 +62,7 @@ P05_firmware_bin_extractor() {
     print_output ""
     deb_extractor
     ipk_extractor
+    apk_extractor
   fi
 
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
@@ -105,6 +106,34 @@ wait_for_extractor() {
       sleep 1
     done
   done
+}
+
+apk_extractor() {
+  sub_module_title "APK archive extraction mode"
+  print_output "[*] Identify apk archives and extracting it to the root directories ..."
+  extract_apk_helper &
+  WAIT_PIDS+=( "$!" )
+  wait_for_extractor
+  WAIT_PIDS=( )
+  if [[ -f "$TMP_DIR"/apk_db.txt ]] ; then
+    APK_ARCHIVES=$(wc -l "$TMP_DIR"/apk_db.txt | awk '{print $1}')
+    if [[ "$APK_ARCHIVES" -gt 0 ]]; then
+      print_output "[*] Found $ORANGE$APK_ARCHIVES$NC APK archives - extracting them to the root directories ..."
+      for R_PATH in "${ROOT_PATH[@]}"; do
+        while read -r APK; do
+          APK_NAME=$(basename "$APK")
+          print_output "[*] Extracting $ORANGE$APK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
+          tar xpf "$APK" --directory "$R_PATH" 
+        done < "$TMP_DIR"/apk_db.txt
+      done
+
+      FILES_AFTER_APK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+      echo ""
+      print_output "[*] Before apk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_APK$NC files extracted."
+    fi
+  else
+    print_output "[-] No apk packages extracted."
+  fi
 }
 
 ipk_extractor() {
@@ -313,6 +342,9 @@ extract_fact_helper() {
 }
 extract_ipk_helper() {
   find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/ipk_db.txt
+}
+extract_apk_helper() {
+  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.apk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/apk_db.txt
 }
 extract_deb_helper() {
   find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
