@@ -119,21 +119,17 @@ apk_extractor() {
     APK_ARCHIVES=$(wc -l "$TMP_DIR"/apk_db.txt | awk '{print $1}')
     if [[ "$APK_ARCHIVES" -gt 0 ]]; then
       print_output "[*] Found $ORANGE$APK_ARCHIVES$NC APK archives - extracting them to the root directories ..."
-      mkdir "$LOG_DIR"/apk_tmp
       for R_PATH in "${ROOT_PATH[@]}"; do
         while read -r APK; do
           APK_NAME=$(basename "$APK")
           print_output "[*] Extracting $ORANGE$APK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar xpf "$APK" --directory "$LOG_DIR"/apk_tmp
-          find "$LOG_DIR"/apk_tmp -type f -exec cp --parents {} "$R_PATH" \;
-          rm -r "$LOG_DIR"/apk_tmp/*
+          tar xpf "$APK" --directory "$R_PATH" 
         done < "$TMP_DIR"/apk_db.txt
       done
 
       FILES_AFTER_APK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
       echo ""
       print_output "[*] Before apk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_APK$NC files extracted."
-      rm -r "$LOG_DIR"/apk_tmp
     fi
   else
     print_output "[-] No apk packages extracted."
