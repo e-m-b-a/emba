@@ -217,7 +217,7 @@ print_tool_info "device-tree-compiler" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
 print_tool_info "qemu-user-static" 0 "qemu-mips-static"
-print_tool_info "binwalk" 0
+print_tool_info "binwalk" 1
 print_tool_info "bc" 1
 print_tool_info "coreutils" 1
 print_tool_info "ent" 1
@@ -226,8 +226,8 @@ print_tool_info "tcllib" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 print_tool_info "make" 1
-# qemu-utils is needed to mount vmdk images
-print_tool_info "qemu-utils" 1
+# libguestfs-tools is needed to mount vmdk images
+print_tool_info "libguestfs-tools" 1
 print_tool_info "metasploit-framework" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
