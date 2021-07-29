@@ -24,8 +24,10 @@ P20_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
 
-  # we love binwalk ... this is our first chance for extracting everything
-  binwalking
+  if [[ -f "$FIRMWARE_PATH" ]]; then
+    # we love binwalk ... this is our first chance for extracting everything
+    binwalking
+  fi
 
   linux_basic_identification_helper
 
