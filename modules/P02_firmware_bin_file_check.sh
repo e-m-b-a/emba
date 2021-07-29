@@ -22,7 +22,13 @@ P02_firmware_bin_file_check() {
   module_title "Binary firmware file analyzer"
 
   local FILE_BIN_OUT
+  export VMDK_DETECTED=0
   FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
+
+  if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
+    export VMDK_DETECTED=1
+  fi
+
   local FILE_LS_OUT
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
 
