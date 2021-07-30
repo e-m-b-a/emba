@@ -304,11 +304,11 @@ binwalking() {
   # we have to change the working directory for binwalk, because /emba is read-only in the Docker container and binwalk fails to save the entropy picture there
   if [[ $IN_DOCKER -eq 1 ]] ; then
     cd / || return
-    print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+    print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
     mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
     cd /emba || return
   else
-    print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+    print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
     mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
   fi
   # we have to think about this thing. I like it for testing only one firmware but it drives me crazy in massive testing
