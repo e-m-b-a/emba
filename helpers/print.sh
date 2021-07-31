@@ -37,7 +37,7 @@ OLD_MESSAGE_TYPE=""
 
 warning()
 {
-  echo -e "\\n""$RED""$BOLD""Warning:""$NC""$RED"" This script is in an early alpha state - use it on your own risk.""$NC"
+  echo -e "\\n""$RED""$BOLD""Warning:""$NC""$RED"" Emba is in an early alpha state - use it on your own risk.""$NC"
 }
 
 welcome()

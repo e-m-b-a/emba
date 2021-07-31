@@ -31,20 +31,21 @@ P20_firmware_bin_extractor() {
 
   linux_basic_identification_helper
 
-  # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
-  # shellcheck disable=SC2153
-  if [[ $FACT_EXTRACTOR -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
-    fact_extractor
-    linux_basic_identification_helper
-  fi
+  if [[ -f "$FIRMWARE_PATH" ]]; then
+    # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
+    # shellcheck disable=SC2153
+    if [[ $FACT_EXTRACTOR -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
+      fact_extractor
+      linux_basic_identification_helper
+    fi
 
-  FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
-  if [[ -n "$OUTPUT_DIR_fact" ]]; then
-    FILES_FACT=$(find "$OUTPUT_DIR_fact" -xdev -type f | wc -l )
+    FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
+    if [[ -n "$OUTPUT_DIR_fact" ]]; then
+      FILES_FACT=$(find "$OUTPUT_DIR_fact" -xdev -type f | wc -l )
+    fi
+    print_output ""
+    print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
   fi
-
-  print_output ""
-  print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
 
   if [[ -n $FILES_FACT ]]; then
     print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
@@ -300,21 +301,20 @@ binwalking() {
   fi
 
   echo
-  print_output "[*] Entropy testing with binwalk ... "
-  # we have to change the working directory for binwalk, because /emba is read-only in the Docker container and binwalk fails to save the entropy picture there
-  if [[ $IN_DOCKER -eq 1 ]] ; then
-    cd / || return
-    print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-    mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
-    cd /emba || return
-  else
-    print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-    mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
+  # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
+  if [[ -f $FIRMWARE_PATH_BAK ]] ; then
+    print_output "[*] Entropy testing with binwalk ... "
+    # we have to change the working directory for binwalk, because /emba is read-only in the Docker container and binwalk fails to save the entropy picture there
+    if [[ $IN_DOCKER -eq 1 ]] ; then
+      cd / || return
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
+      cd /emba || return
+    else
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
+    fi
   fi
-  # we have to think about this thing. I like it for testing only one firmware but it drives me crazy in massive testing
-  #if command -v xdg-open > /dev/null; then
-  #  xdg-open "$LOG_DIR"/"$(basename "$FIRMWARE_PATH"_entropy.png)" 2> /dev/null
-  #fi
 
   export OUTPUT_DIR_binwalk
   OUTPUT_DIR_binwalk=$(basename "$FIRMWARE_PATH")

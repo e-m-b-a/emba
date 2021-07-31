@@ -202,7 +202,7 @@ version_detection_thread() {
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT != "strict" ]]; then
-    readarray -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/* 2>/dev/null)
+    readarray -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_* | sort -u 2>/dev/null)
   else
     if [[ -f "$LOG_PATH_MODULE"/qemu_"$BINARY".txt ]]; then
       VERSION_STRICT=$(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
@@ -237,6 +237,8 @@ version_detection_thread() {
         fi
       fi
     done
+    BINARY_PATH=""
+    BINARY_PATHS=()
   fi
 }
 
