@@ -18,18 +18,18 @@
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=1
 
-P07_firmware_bin_base_analyzer() {
+P70_firmware_bin_base_analyzer() {
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
   local NEG_LOG=0
-  local WAIT_PIDS_P07=()
+  local WAIT_PIDS_P70=()
 
   if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
     export OUTPUT_DIR="$FIRMWARE_PATH_CP"
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
-      WAIT_PIDS_P07+=( "$!" )
+      WAIT_PIDS_P70+=( "$!" )
     else
       os_identification
     fi
@@ -40,7 +40,7 @@ P07_firmware_bin_base_analyzer() {
     if [[ $LINUX_PATH_COUNTER -eq 0 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
         binary_architecture_detection &
-        WAIT_PIDS_P07+=( "$!" )
+        WAIT_PIDS_P70+=( "$!" )
       else
         binary_architecture_detection
       fi
@@ -48,10 +48,10 @@ P07_firmware_bin_base_analyzer() {
   fi
 
   if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_P07[@]}"
+    wait_for_pid "${WAIT_PIDS_P70[@]}"
   fi
 
-  if [[ "$(wc -l "$TMP_DIR"/p07.tmp | awk '{print $1}')" -gt 0 ]] ; then
+  if [[ "$(wc -l "$TMP_DIR"/p70.tmp | awk '{print $1}')" -gt 0 ]] ; then
     NEG_LOG=1
   fi
 
@@ -68,8 +68,8 @@ os_identification() {
   local COUNTER
 
   if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
-    echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/p07.tmp
-    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/p07.tmp
+    echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/p70.tmp
+    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/p70.tmp
   fi
 
   print_output ""
@@ -78,10 +78,10 @@ os_identification() {
   for OS in "${OS_SEARCHER[@]}"; do
     OS_COUNTER[$OS]=0
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null)"))
-    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
-    if [[ -f "$LOG_DIR"/p05_binwalker_deep.txt ]]; then
-      OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p05_binwalker*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
-    fi
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
+    #if [[ -f "$LOG_DIR"/p20_binwalker_deep.txt ]]; then
+    #  OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_binwalker*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
+    #fi
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS")" ))
 
     if [[ $OS == "VxWorks\|Wind" ]]; then
@@ -111,7 +111,7 @@ os_identification() {
     fi
     COUNTER=$(("$COUNTER"+"${OS_COUNTER[$OS]}"))
   done
-  echo "$COUNTER" >> "$TMP_DIR"/p07.tmp
+  echo "$COUNTER" >> "$TMP_DIR"/p70.tmp
 }
 
 binary_architecture_detection()
@@ -123,6 +123,6 @@ binary_architecture_detection()
   for PRE_ARCH_ in "${PRE_ARCH[@]}"; do
     print_output ""
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
-    echo "$PRE_ARCH_" >> "$TMP_DIR"/p07.tmp
+    echo "$PRE_ARCH_" >> "$TMP_DIR"/p70.tmp
   done
 }

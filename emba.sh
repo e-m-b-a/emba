@@ -395,6 +395,8 @@ main()
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
   fi
 
+  check_start_cve_database
+
   # Check firmware type (file/directory)
   # copy the firmware outside of the docker and not a second time within the docker
   if [[ -d "$FIRMWARE_PATH" ]] ; then

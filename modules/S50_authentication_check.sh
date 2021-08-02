@@ -24,7 +24,8 @@ S50_authentication_check() {
 
   AUTH_ISSUES=0
 
-  if [[ "$THREADED" -eq 1 ]]; then
+  # disabled internal module threading as the output is not readable anymore
+  if [[ "$THREADED" -eq 9 ]]; then
     user_zero &
     WAIT_PIDS_S50+=( "$!" )
     non_unique_acc &

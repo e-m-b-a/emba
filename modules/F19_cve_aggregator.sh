@@ -129,8 +129,6 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/gnu\ parted\)/parted}"
     #pax-utils-v1.2.8:
     VERSION_lower="${VERSION_lower/pax-utils-v/pax-utils\ }"
-    #(OpenRC) 
-    VERSION_lower="${VERSION_lower/\(openrc\)\ /openrc\ }"
     #(tzcode) 
     VERSION_lower="${VERSION_lower/\(tzcode\)\ /tzcode\ }"
     # #mkenvimage version 2016.11+dfsg1-4
@@ -142,6 +140,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/version:\ lldpd\ /lldpd\ }"
     #cdialog (ComeOn Dialog!) version 1.3-20160828
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(cdialog).*(version [0-9]\.[0-9])/\1\ \2/')"
+    #(OpenRC) 0.42.1.7888a888
+    #VERSION_lower="${VERSION_lower/\(openrc\)\ /openrc\ }"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\(openrc\)\ ([0-9])\.([0-9]+)\.([0-9]+)\..*/openrc \1\.\2\.\3/')"
     #atftp-0.7
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(atftp)-([0-9]\.[0-9])/\1\ \2/')"
     #radiusd: FreeRADIUS Version 2.2.2
