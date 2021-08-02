@@ -196,16 +196,14 @@ version_detection_thread() {
   BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
   STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
   VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
-  if [[ -f "$LOG_PATH_MODULE"/qemu_"$BINARY".txt ]]; then
-    mapfile -t BINARY_PATHS < <(grep -a "Emulating binary:" "$LOG_PATH_MODULE"/qemu_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)
-  fi
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT != "strict" ]]; then
-    readarray -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_* | sort -u 2>/dev/null)
+    readarray -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_*.txt | sort -u 2>/dev/null)
   else
     if [[ -f "$LOG_PATH_MODULE"/qemu_"$BINARY".txt ]]; then
       VERSION_STRICT=$(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
+      BINARY_PATH=$(grep -a "Emulating binary:" "$LOG_PATH_MODULE"/qemu_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u | head -1 2>/dev/null)
       if [[ -n "$VERSION_STRICT" ]]; then
         if [[ "$BINARY" == "smbd" ]]; then
           # we log it as the original binary and the samba binary name
@@ -213,7 +211,7 @@ version_detection_thread() {
           VERSIONS_DETECTED+=("$VERSION_")
           BINARY="samba"
         fi
-        VERSION_="$BINARY:$BINARY $VERSION_STRICT"
+        VERSION_="$BINARY_PATH:$BINARY $VERSION_STRICT"
         VERSIONS_DETECTED+=("$VERSION_")
       fi
     fi
@@ -224,21 +222,23 @@ version_detection_thread() {
       # if we have multiple detection of the same version details:
       if [ "$VERSION_DETECTED" != "$VERS_DET_OLD" ]; then
         VERS_DET_OLD="$VERSION_DETECTED"
-        #VERSIONS_BIN="$(basename "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
+        LOG_PATH="$(echo "$VERSION_DETECTED" | cut -d: -f1)"
         VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
 
+        mapfile -t BINARY_PATHS < <(grep -a "Emulating binary:" "$LOG_PATH" | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)
+
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
-          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file (emulation)."
+          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$(print_path "$LOG_PATH")$GREEN (emulation)." "" "$LOG_PATH"
           continue
         else
           for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$(print_path "$BINARY_PATH")$GREEN (emulation)."
+            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$(print_path "$BINARY_PATH")$GREEN (emulation)." "" "$LOG_PATH"
           done
         fi
+        BINARY_PATH=""
+        BINARY_PATHS=()
       fi
     done
-    BINARY_PATH=""
-    BINARY_PATHS=()
   fi
 }
 
