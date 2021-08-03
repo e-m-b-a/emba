@@ -669,7 +669,7 @@ main()
     update_index
   fi
   if [[ -f "$HTML_PATH"/index.html ]]; then
-    print_output "[*] Web report created HTML report in $LOG_DIR/html-report\\n" "main" 
+    print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main" 
   fi
 }
 
