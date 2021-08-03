@@ -644,7 +644,7 @@ case ${ANSWER:0:1} in
 
     if ! command -v yaffshiv > /dev/null ; then
       git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
-      cd ./external/binwalk/yaffshiv/
+      cd ./external/binwalk/yaffshiv/ || exit 1
       python3 setup.py install
       cd ../../.. || exit 1
     else
