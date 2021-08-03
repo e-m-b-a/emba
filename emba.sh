@@ -195,6 +195,7 @@ main()
   export IN_DOCKER=0
   export KERNEL=0
   export LOG_GREP=0
+  export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export MOD_RUNNING=0          # for tracking how many modules currently running
   export ONLY_DEP=0             # test only dependency
   export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
@@ -245,7 +246,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:stxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -307,6 +308,9 @@ main()
         ;;
       p)
         export PROFILE="$OPTARG"
+       ;;
+      r)
+        export FINAL_FW_RM=1
        ;;
       s)
         export SHORT_PATH=1
@@ -491,7 +495,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:stX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -642,13 +646,10 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  if [[ "$HTML" -eq 1 ]]; then
-    update_index
-  fi
-
   if [[ "$TESTING_DONE" -eq 1 ]]; then
-    if [[ -f "$HTML_PATH"/index.html ]]; then
-      print_output "[*] Web report created HTML report in $LOG_DIR/html-report\\n" "main" 
+    if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/firmware ]]; then
+      print_output "[*] Removing temp firmware directory\\n" "no_log" 
+      rm -r "$LOG_DIR"/firmware 2>/dev/null
     fi
     echo
     if [[ -d "$LOG_DIR" ]]; then
@@ -663,6 +664,12 @@ main()
     print_output "[!] No extracted firmware found" "no_log"
     print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
     exit 1
+  fi
+  if [[ "$HTML" -eq 1 ]]; then
+    update_index
+  fi
+  if [[ -f "$HTML_PATH"/index.html ]]; then
+    print_output "[*] Web report created HTML report in $LOG_DIR/html-report\\n" "main" 
   fi
 }
 

@@ -616,6 +616,7 @@ print_tool_info "build-essential" 1
 print_tool_info "zlib1g-dev" 1
 print_tool_info "liblzma-dev" 1
 print_tool_info "liblzo2-dev" 1
+# firmware-mod-kit is only available on Kali Linux
 print_tool_info "firmware-mod-kit" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
@@ -629,88 +630,89 @@ else
 fi
 case ${ANSWER:0:1} in
   y|Y )
+    BINWALK_PRE_AVAILABLE=0
 
-      apt-get install "${INSTALL_APP_LIST[@]}" -y
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
 
-      pip3 install nose
-      pip3 install coverage
-      pip3 install pyqtgraph
-      pip3 install capstone
-      pip3 install cstruct
+    pip3 install nose
+    pip3 install coverage
+    pip3 install pyqtgraph
+    pip3 install capstone
+    pip3 install cstruct
 
-      git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+    git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
 
-      if ! command -v yaffshiv1 > /dev/null ; then
-        git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
-        python3 ./external/binwalk/yaffshiv/setup.py install
-      else
-        echo -e "$GREEN""yaffshiv already installed""$NC"
-      fi
+    if ! command -v yaffshiv > /dev/null ; then
+      git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
+      cd ./external/binwalk/yaffshiv/
+      python3 setup.py install
+      cd ../../.. || exit 1
+    else
+      echo -e "$GREEN""yaffshiv already installed""$NC"
+    fi
 
-      if ! command -v sasquatch > /dev/null ; then
-        git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
-        CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
-      else
-        echo -e "$GREEN""sasquatch already installed""$NC"
-      fi
+    if ! command -v sasquatch > /dev/null ; then
+      git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+      CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+    else
+      echo -e "$GREEN""sasquatch already installed""$NC"
+    fi
 
-      if ! command -v jefferson > /dev/null ; then
-        git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
-        pip3 install -r ./external/binwalk/jefferson/requirements.txt
-        python3 ./external/binwalk/jefferson/setup.py install
-      else
-        echo -e "$GREEN""jefferson already installed""$NC"
-      fi
+    if ! command -v jefferson > /dev/null ; then
+      git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
+      pip3 install -r ./external/binwalk/jefferson/requirements.txt
+      python3 ./external/binwalk/jefferson/setup.py install
+    else
+      echo -e "$GREEN""jefferson already installed""$NC"
+    fi
 
-      if ! command -v unstuff > /dev/null ; then
-        mkdir ./external/binwalk/unstuff
-        wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
-        tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
-        cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
-      else
-        echo -e "$GREEN""unstuff already installed""$NC"
-      fi
+    if ! command -v unstuff > /dev/null ; then
+      mkdir ./external/binwalk/unstuff
+      wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+      tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
+      cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+    else
+      echo -e "$GREEN""unstuff already installed""$NC"
+    fi
       
-      if ! command -v cramfsck > /dev/null ; then
-        if [[ -f "/opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck" ]]; then
-          ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
-        fi
-
-        git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
-        make -C ./external/binwalk/cramfs-tools/
-        install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
-        install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
-      else
-        echo -e "$GREEN""cramfsck already installed""$NC"
+    if ! command -v cramfsck > /dev/null ; then
+      if [[ -f "/opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck" ]]; then
+        ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
       fi
 
+      git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
+      make -C ./external/binwalk/cramfs-tools/
+      install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
+      install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
+    else
+      echo -e "$GREEN""cramfsck already installed""$NC"
+    fi
 
-      if ! command -v ubi_reader > /dev/null ; then
-        git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
-        cd ./external/binwalk/ubi_reader || exit 1
-        git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
-        python2 setup.py install
-        cd .. || exit 1
-      else
-        echo -e "$GREEN""ubi_reader already installed""$NC"
-      fi
 
-      if ! command -v binwalk > /dev/null ; then
-        python3 setup.py install
-      else
-        echo -e "$GREEN""binwalk already installed""$NC"
-      fi
+    if ! command -v ubireader_extract_files > /dev/null ; then
+      git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
+      cd ./external/binwalk/ubi_reader || exit 1
+      git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
+      python2 setup.py install
+      cd .. || exit 1
+    else
+      echo -e "$GREEN""ubi_reader already installed""$NC"
+    fi
 
-      cd ../.. || exit 1
+    if ! command -v binwalk > /dev/null ; then
+      python3 setup.py install
+    else
+      echo -e "$GREEN""binwalk already installed""$NC"
+      BINWALK_PRE_AVAILABLE=1
+    fi
 
-      #rm -rf ./external/binwalk
+    cd ../.. || exit 1
 
-      if [[ -f "/usr/local/bin/binwalk" ]] ; then
-        echo -e "$GREEN""binwalk installed successfully""$NC"
-      else
-        echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
-      fi
-    #fi
+    if [[ -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+      echo -e "$GREEN""binwalk installed successfully""$NC"
+    elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+      echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
+    fi
   ;;
 esac
 
