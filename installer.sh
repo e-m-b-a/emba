@@ -580,7 +580,7 @@ case ${ANSWER:0:1} in
       fi
       case ${ANSWER:0:1} in
         y|Y )
-          cve_searchsploit -u
+          #cve_searchsploit -u
         ;;
       esac    
     fi
@@ -597,6 +597,7 @@ print_tool_info "python3-pyqt5" 1
 print_tool_info "python3-pyqt5.qtopengl" 1
 print_tool_info "python3-numpy" 1
 print_tool_info "python3-scipy" 1
+print_tool_info "python2" 1
 print_tool_info "mtd-utils" 1
 print_tool_info "gzip" 1
 print_tool_info "bzip2" 1
@@ -661,7 +662,9 @@ case ${ANSWER:0:1} in
     if ! command -v jefferson > /dev/null ; then
       git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
       pip3 install -r ./external/binwalk/jefferson/requirements.txt
-      python3 ./external/binwalk/jefferson/setup.py install
+      cd ./external/binwalk/jefferson/ || exit 1
+      python3 ./setup.py install
+      cd ../../.. || exit 1
     else
       echo -e "$GREEN""jefferson already installed""$NC"
     fi
