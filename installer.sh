@@ -706,7 +706,7 @@ case ${ANSWER:0:1} in
     fi
 
     if ! command -v binwalk > /dev/null ; then
-      cd ./external/binwalk
+      cd ./external/binwalk || exit 1
       python3 setup.py install
     else
       echo -e "$GREEN""binwalk already installed""$NC"
