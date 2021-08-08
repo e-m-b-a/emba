@@ -504,20 +504,36 @@ main()
     done
 
     echo
-    print_output "[!] Emba initializes kali docker container.\\n" "no_log"
+    print_output "[*] Emba sets up the docker environment.\\n" "no_log"
 
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-    D_RETURN=$?
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose build emba
+    DBUILD_RETURN=$?
+    if [[ $DBUILD_RETURN -ne 0 ]] ; then
+      print_output "[-] Emba docker build failed!" "no_log"
+      exit 1
+    fi
 
-    if [[ $D_RETURN -eq 0 ]] ; then
-      if [[ $ONLY_DEP -eq 0 ]] ; then
-        print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
-        print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
-        exit
+    if docker images | grep -q emba; then
+
+      setup_docker_iptables
+
+      print_output "[*] Emba initializes docker container.\\n" "no_log"
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      D_RETURN=$?
+
+      if [[ $D_RETURN -eq 0 ]] ; then
+        if [[ $ONLY_DEP -eq 0 ]] ; then
+          print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+          print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
+          print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
+          exit
+        fi
+      else
+        print_output "[-] Emba failed in docker mode!" "no_log"
+        exit 1
       fi
     else
-      print_output "[-] Emba docker failed!" "no_log"
+      print_output "[-] Emba failed in docker mode!" "no_log"
       exit 1
     fi
   fi
