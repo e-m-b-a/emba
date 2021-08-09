@@ -85,6 +85,7 @@ output_overview() {
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
       write_link "p07"
+      echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
       echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
     fi
   fi
@@ -603,6 +604,7 @@ print_os() {
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
     write_link "p07"
+    echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   fi
 }
