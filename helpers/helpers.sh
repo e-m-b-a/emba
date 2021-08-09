@@ -118,5 +118,13 @@ setup_docker_iptables() {
   #iptables -I INPUT -p udp -i docker0 -j DROP
   #iptables -I OUTPUT -p tcp -j DROP
   iptables -L
+}
 
+check_start_cve_database() {
+  # Mongo DB is running on Port 27017. If not we can't check CVEs
+  if ! netstat -ant | grep -q 27017; then
+    print_output "[*] Trying to start the vulnerability database" "no_log"
+    systemctl restart mongod
+    sleep 2
+  fi
 }

@@ -15,14 +15,20 @@
 
 # Description:  Gives some very basic information about the provided firmware binary.
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
-export PRE_THREAD_ENA=1
+export PRE_THREAD_ENA=0
 
 P02_firmware_bin_file_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware file analyzer"
 
   local FILE_BIN_OUT
+  export VMDK_DETECTED=0
   FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
+
+  if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
+    export VMDK_DETECTED=1
+  fi
+
   local FILE_LS_OUT
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
 

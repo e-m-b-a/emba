@@ -34,10 +34,6 @@ F19_cve_aggregator() {
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
 
-  if [[ -f "$LOG_DIR"/r09_firmware_base_version_check.txt ]]; then 
-    FW_VER_CHECK_LOG="r09_firmware_base_version_check.txt"
-  fi
-
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
 
@@ -131,6 +127,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/run-parts\ program,/run-parts}"
     #GNU parted) 3.2
     VERSION_lower="${VERSION_lower/gnu\ parted\)/parted}"
+    #pax-utils-v1.2.8:
+    VERSION_lower="${VERSION_lower/pax-utils-v/pax-utils\ }"
+    #(tzcode) 
+    VERSION_lower="${VERSION_lower/\(tzcode\)\ /tzcode\ }"
     # #mkenvimage version 2016.11+dfsg1-4
     # VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
     # #mkimage version 2016.11+dfsg1-4
@@ -140,6 +140,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/version:\ lldpd\ /lldpd\ }"
     #cdialog (ComeOn Dialog!) version 1.3-20160828
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(cdialog).*(version [0-9]\.[0-9])/\1\ \2/')"
+    #(OpenRC) 0.42.1.7888a888
+    #VERSION_lower="${VERSION_lower/\(openrc\)\ /openrc\ }"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\(openrc\)\ ([0-9])\.([0-9]+)\.([0-9]+)\..*/openrc \1\.\2\.\3/')"
     #atftp-0.7
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(atftp)-([0-9]\.[0-9])/\1\ \2/')"
     #radiusd: FreeRADIUS Version 2.2.2
@@ -446,6 +449,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ texinfo)/gnu:texinfo/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ gettext-runtime)/gnu:gettext/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/gnu\ inetutils/gnu:inetutils/')"
+    #ld-musl-armhf.so.1 -> musl-libc:musl
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/ld-musl-armhf.so.1/musl-libc:musl/')"
     # handle grub version 2:
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)\ 2/grub2\ 2/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(grub)/grub/')"
@@ -922,10 +927,11 @@ final_outputter() {
 }
 
 get_firmware_base_version_check() {
-  print_output "[*] Collect version details of module r09 or s09 - firmware_base_version_check."
+  print_output "[*] Collect version details of module s09 - firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
+      # do not name a path to your firmware with "Linux-*" or "Linux kernel*"
       readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel\|Linux-")
     else
       readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)

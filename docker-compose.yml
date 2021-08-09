@@ -3,6 +3,7 @@ services:
   emba:
     image: emba:latest
     build: .
+    privileged: true
     volumes:
         - ${FIRMWARE}/:/firmware
         - ${LOG}/:/log
@@ -12,3 +13,7 @@ services:
     network_mode: "host"
     environment:
         - USER
+    devices:
+      - /dev/fuse:/dev/fuse:rwm
+    cap_add:
+      - SYS_ADMIN

@@ -20,15 +20,15 @@ F50_base_aggregator() {
   module_title "Final aggregator"
 
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
-  S25_LOG="s25_kernel_check.txt"
   P02_LOG="p02_firmware_bin_file_check.txt"
-  P07_LOG="p07_firmware_bin_base_analyzer.txt"
+  P70_LOG="p70_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
   S11_LOG="s11_weak_func_check.txt"
   S12_LOG="s12_binary_protection.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
+  S25_LOG="s25_kernel_check.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
   S40_LOG="s40_weak_perm_check.txt"
   S45_LOG="s45_pass_file_check.txt"
@@ -81,10 +81,11 @@ output_overview() {
   if [[ -n "$ARCH" ]]; then
     print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
     echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
-  elif [[ -f "$LOG_DIR"/"$P07_LOG" ]]; then
+  elif [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
       write_link "p07"
+      echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
       echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
     fi
   fi
@@ -412,8 +413,8 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2)
   fi
-  if [[ -f "$LOG_DIR"/"$P07_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P07_LOG" | cut -d: -f2)
+  if [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P70_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
@@ -549,7 +550,7 @@ os_detector() {
   #### The following check is needed if the aggreagator has failed till now
   if [[ $VERIFIED -eq 0 ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
-    mapfile -t OS_DETECT < <(grep "\ verified.*operating\ system\ detected" "$LOG_DIR"/"$P07_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "\ verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED=1
@@ -557,7 +558,7 @@ os_detector() {
       done
     fi
 
-    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P07_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
@@ -603,6 +604,7 @@ print_os() {
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
     write_link "p07"
+    echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   fi
 }
