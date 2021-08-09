@@ -16,6 +16,7 @@
 # Description:  Runs a Docker container with cwe-checker on Ghidra to check binary for
 #               common bug classes such as vicious functions or integer overflows.
 #               As the runtime is quite long, it needs to be activated separately via -c switch.
+#               Currently this module only work in a non docker environment!
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
