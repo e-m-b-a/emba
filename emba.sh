@@ -510,17 +510,18 @@ main()
     done
 
     echo
-    print_output "[*] Emba sets up the docker environment.\\n" "no_log"
 
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose build emba
-    DBUILD_RETURN=$?
-    if [[ $DBUILD_RETURN -ne 0 ]] ; then
-      print_output "[-] Emba docker build failed!" "no_log"
-      exit 1
+    if docker images emba; then
+      print_output "[*] Emba sets up the docker environment.\\n" "no_log"
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose build emba
+      DBUILD_RETURN=$?
+      if [[ $DBUILD_RETURN -ne 0 ]] ; then
+        print_output "[-] Emba docker build failed!" "no_log"
+        exit 1
+      fi
     fi
 
-    if docker images | grep -q emba; then
-
+    if docker images emba; then
       setup_docker_iptables
 
       print_output "[*] Emba initializes docker container.\\n" "no_log"
