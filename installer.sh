@@ -407,6 +407,7 @@ print_tool_info "gcc" 1
 print_tool_info "build-essential" 1
 print_tool_info "gawk" 1
 print_tool_info "bison" 1
+print_tool_info "debuginfod" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
