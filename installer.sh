@@ -524,15 +524,26 @@ case ${ANSWER:0:1} in
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        
         git clone https://github.com/cve-search/cve-search.git external/cve-search
         cd ./external/cve-search/ || exit 1
         pip3 install -r requirements.txt
         xargs sudo apt-get install -y < requirements.system
-        /etc/init.d/redis-server start
-        ./sbin/db_mgmt_cpe_dictionary.py -p
-        ./sbin/db_mgmt_json.py -p
-        ./sbin/db_updater.py -f
+        CVE_INST=1
+        if netstat -anpt | grep LISTEN | grep 27017; then
+          if [[ $(./bin/search.py -p busybox | wc -l | awk '{print $1}') -gt 2000 ]]; then
+            CVE_INST=0
+          else
+            CVE_INST=1
+          fi
+        fi
+        if [[ "$CVE_INST" -eq 1 ]]; then
+          /etc/init.d/redis-server start
+          ./sbin/db_mgmt_cpe_dictionary.py -p
+          ./sbin/db_mgmt_json.py -p
+          ./sbin/db_updater.py -f
+        else
+          echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
+        fi
         cd ../.. || exit 1
         sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
         chmod +x config/cve_database_updater
