@@ -111,6 +111,15 @@ cleaner() {
   exit 1
 }
 
+setup_docker_iptables() {
+  print_output "[*] Setup iptables rules to protect the docker environment" "no_log"
+  #iptables -I INPUT -p tcp -i docker0 -j DROP
+  #iptables -I INPUT -p icmp -i docker0 -j DROP
+  #iptables -I INPUT -p udp -i docker0 -j DROP
+  #iptables -I OUTPUT -p tcp -j DROP
+  iptables -L
+}
+
 check_start_cve_database() {
   # Mongo DB is running on Port 27017. If not we can't check CVEs
   if ! netstat -ant | grep -q 27017; then
@@ -118,5 +127,4 @@ check_start_cve_database() {
     systemctl restart mongod
     sleep 2
   fi
-
 }
