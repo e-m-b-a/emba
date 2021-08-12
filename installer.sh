@@ -49,26 +49,30 @@ print_tool_info(){
   echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
   TOOL_INFO="$(apt show "${1}" 2> /dev/null)"
   echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
-  COMMAND_=""
-  if [[ -z "$3" ]] ; then
-    COMMAND_="$3"
+  if echo "$TOOL_INFO" | grep -E "^E:\ "; then
+    echo -e "$RED""$1"" was not identified and is not installable.""$NC"
   else
-    COMMAND_="$1"
-  fi
-  if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-    if [[ $2 -eq 0 ]] ; then
-      echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
+    COMMAND_=""
+    if [[ -z "$3" ]] ; then
+      COMMAND_="$3"
     else
-      if [[ $COMPLEMENT -eq 0 ]] ; then
-        echo -e "$ORANGE""$1"" will be updated.""$NC"
-        INSTALL_APP_LIST+=("$1")
-      else
-        echo -e "$ORANGE""$1"" won't be updated.""$NC"
-      fi
+      COMMAND_="$1"
     fi
-  else
-    echo -e "$ORANGE""$1"" will be newly installed.""$NC"
-    INSTALL_APP_LIST+=("$1")
+    if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+      if [[ $2 -eq 0 ]] ; then
+        echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
+      else
+        if [[ $COMPLEMENT -eq 0 ]] ; then
+          echo -e "$ORANGE""$1"" will be updated.""$NC"
+          INSTALL_APP_LIST+=("$1")
+        else
+          echo -e "$ORANGE""$1"" won't be updated.""$NC"
+        fi
+      fi
+    else
+      echo -e "$ORANGE""$1"" will be newly installed.""$NC"
+      INSTALL_APP_LIST+=("$1")
+    fi
   fi
 }
 
