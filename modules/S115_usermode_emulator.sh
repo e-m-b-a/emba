@@ -277,7 +277,7 @@ running_jobs() {
 s115_cleanup() {
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
-  rm "$LOG_PATH_MODULE""/stracer_*.txt"
+  rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
