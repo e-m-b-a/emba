@@ -20,10 +20,15 @@ S22_php_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check php scripts for syntax errors"
 
+  LOG_FILE="$( get_log_file )"
+
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
+    if ! [[ -d "$LOG_DIR""/php_checker/" ]] ; then
+      mkdir "$LOG_DIR""/php_checker/" 2> /dev/null
+    fi
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PHP_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "PHP script" ) ; then
@@ -41,28 +46,25 @@ S22_php_check()
       wait_for_pid "${WAIT_PIDS_S22[@]}"
     fi
 
-    s22_check_php_ini
-
     if [[ -f "$TMP_DIR"/S22_VULNS.tmp ]]; then
       while read -r VULNS; do
         (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
       done < "$TMP_DIR"/S22_VULNS.tmp
     fi
-        
+
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
-    write_log ""
-    write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS"
+    echo -e "\\n[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS" >> "$LOG_FILE"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}" "1" #"$S22_PHP_VULNS" # TODO here has to be the accumulated number of the previous s22_php_vulns and the new failures of the inicheck
+  module_end_log "${FUNCNAME[0]}" "$S22_PHP_VULNS"
 }
 
 s22_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-  PHP_LOG="$LOG_PATH_MODULE""/php_""$NAME"".txt"
+  PHP_LOG="$LOG_DIR""/php_checker/php_""$NAME"".txt"
   php -l "$LINE" > "$PHP_LOG" 2>&1
   VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null)
   if [[ "$VULNS" -ne 0 ]] ; then
@@ -76,80 +78,44 @@ s22_script_check() {
     else
       COMMON_FILES_FOUND=""
     fi
-    print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$PHP_LOG"
+    print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   fi
 }
 
-add_recommendations(){
-   local VALUE
-   local KEY
-   VALUE="$1"
-   KEY="$2"
-
-   if [[ $VALUE == *"M"* ]]; then
-      echo ".""$VALUE""."
-      LIMIT="${VALUE//M/}"
-   fi
-
-   if [[ $KEY == *"memory_limit"* ]] && [[ $(( LIMIT)) -gt 50 ]]; then
-     CURRENT_VALUE="$CYAN""$VALUE"
-   elif [[ $KEY == *"post_max_size"* ]] && [[ $(( LIMIT)) -gt 20 ]]; then
-     CURRENT_VALUE="$CYAN""$VALUE"
-   elif [[ $KEY == *"max_execution_time"* ]] && [[ $(( LIMIT )) -gt 60 ]]; then
-     CURRENT_VALUE="$CYAN""$VALUE"
-   else
-     CURRENT_VALUE="$WHITE""$VALUE"
-   fi
+s22_check_php_init(){
+  sudo find "$FIRMWARE_PATH" -name php.ini
+  sudo ../external/iniscan/vendor/bin/iniscan scan --path=/etc/php/7.4/apache2/php.ini > ./iniscan_output.txt
+  sudo chmod 777 ./iniscan_output.txt
+  FILE="./iniscan_output.txt"
+  while read LINE
+  do
+    echo "$LINE"
+    if (( "$LINE" == *"FAIL"* && "$LINE" == *"ERROR"*)); then
+         add_recommendations LINE
+         print_output "[-] ""$ORANGE""FAIL""$RED""ERROR""$WHITE""$LINE"
+    elif (( "$LINE" == *"FAIL"* && "$LINE" == *"WARNING"*)); then
+         add_recommendations LINE
+         print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+    elif (( "$LINE" == *"PASS"* && "$LINE" == *"WARNING"*)); then
+         print_output "[-] ""$GREEN""PASS""$ORANGE""ERROR""$WHITE""$LINE"
+    elif (( "$LINE" == *"PASS"* && "$LINE" == *"WARNING"*)); then
+         print_output "[-] ""$GREEN""PASS""$CYAN""WARNING""$WHITE""$LINE"
+    fi
+  done < "$FILE"
 }
 
-s22_check_php_ini(){
-  mapfile -t PHP_CONF_FILES < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  for PHP_FILE in "${PHP_CONF_FILES[@]}" ;  do
-    print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
-    mapfile -t INISCAN_RESULT < <( "$EXT_DIR"/iniscan/vendor/bin/iniscan scan --path="$PHP_FILE" )
-    for LINE in "${INISCAN_RESULT[@]}" ; do
-      if ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "WARNING" )  ; then
-        print_output "$(orange "$LINE")"
-      elif ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "ERROR" )  ; then
-        print_output "$(red "$LINE")"
-      elif ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "INFO" ) ; then
-        print_output "$(blue "$LINE")"
-      elif ( echo "$LINE" | grep -q "PASS" ) ; then
-        print_output "$(green "$LINE")"
-      else
-        print_output "$LINE"
-      fi
-      # TODO add the FAILURES NUMBER to the final check, 
-      # if [[ $VALUE == *"|"* ]]; then
-      #   IFS='|' read -ra LINE_ARR <<< "$LINE"
-
-      #   if [[ "${LINE_ARR[0]}" == "FAIL"* ]]; then
-      #     add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
-      #     STATUS="$RED""${LINE_ARR[0]}"
-      #   elif [[ "${LINE_ARR[0]}" == "PASS"* ]]; then
-      #     add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
-      #     STATUS="$GREEN""${LINE_ARR[0]}"
-      #   else
-      #     add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
-      #     STATUS="$WHITE""${LINE_ARR[0]}"
-      #   fi
-
-      #   if [[ "${LINE_ARR[1]}" == "ERROR"* ]]; then
-      #     SEVERTIY="$RED""${LINE_ARR[1]}"
-      #     echo "$RED"
-      #     echo "Test"
-      #   elif [[ "${LINE_ARR[1]}" == "WARNING"* ]]; then
-      #     SEVERTIY="$CYAN""${LINE_ARR[1]}"
-      #   else
-      #     SEVERTIY="$WHITE""${LINE_ARR[1]}"
-      #   fi
-
-      #   print_output "[-] ""$STATUS"" | ""$SEVERTIY"" | ""${LINE_ARR[2]}"" | ""$CURRENT_VALUE"" | ""${LINE_ARR[4]}"" | ""${LINE_ARR[5]}"
-      
-      #else
-      #  print_output "[-]""$WHITE""$LINE"
-      #fi
-    done
-  done
+add_recommendations(){
+   LINE = $1
+   IFS='|' read -ra LINE_ARR <<< "$LINE"
+   echo LINE_ARR
+   if(LINE_ARR[3] >= *"50"*); then
+     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+   fi
+   if(LINE_ARR[3] >= *"20"*); then
+     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+   fi
+   if(LINE_ARR[3] >= *"60"*); then
+     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
+   fi
 }

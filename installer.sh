@@ -226,7 +226,6 @@ print_tool_info "tcllib" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 print_tool_info "make" 1
-print_tool_info "metasploit-framework" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -350,12 +349,10 @@ case ${ANSWER:0:1} in
     download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
     download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
     ### pixd installation
-    pip3 install pillow
-    git clone https://github.com/p4cx/pixd_image external/pixd
+    git clone https://github.com/FireyFly/pixd external/pixd
     cd ./external/pixd/ || exit 1
     make
     mv pixd ../pixde
-    mv pixd_png.py ../pixd_png.py
     cd ../../ || exit 1
     rm -r ./external/pixd/
     ### pixd installation
@@ -530,7 +527,7 @@ case ${ANSWER:0:1} in
         /etc/init.d/redis-server start
         ./sbin/db_mgmt_cpe_dictionary.py -p
         ./sbin/db_mgmt_json.py -p
-        ./sbin/db_updater.py -f
+        ./sbin/db_updater.py -c
         cd ../.. || exit 1
         sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
         chmod +x config/cve_database_updater
@@ -684,42 +681,3 @@ case ${ANSWER:0:1} in
     fi
   ;;
 esac
-
-#iniscan
-
-echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
-
-print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download Composer and iniscan (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""Composer and iniscan (if not already on the system) will be downloaded!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    if ! [[ -d "external/iniscan" ]] ; then
-      mkdir external/iniscan
-    fi
-    download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
-    php ./external/iniscan/composer.phar build --no-interaction
-    php composer.phar global require psecio/iniscan --no-interaction
-    readarray -t INISCAN_PATH < <(find / -path "*/vendor/bin/iniscan")
-    cp -r "$(echo "${INISCAN_PATH[0]}" | sed 's@/bin/iniscan@@')" "./external/iniscan/vendor"
-  ;;
-esac
-
-echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
-echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
-echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
-echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
-
-echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
-
-echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
-
-echo -e "$GREEN""Emba installation finished ""$NC"
