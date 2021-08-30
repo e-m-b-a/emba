@@ -45,7 +45,7 @@ log_folder()
             print_output "[!] If emba is failing check this manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
-            rm -R "${LOG_DIR:?}/"*
+            rm -R "${LOG_DIR:?}/"* 2>/dev/null
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
           fi
         ;;

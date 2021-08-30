@@ -29,7 +29,7 @@ S09_firmware_base_version_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware versions detection"
 
-  EXTRACTOR_LOG="$LOG_DIR"/p05_firmware_bin_extractor.txt
+  EXTRACTOR_LOG="$LOG_DIR"/p20_firmware_bin_extractor.txt
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
