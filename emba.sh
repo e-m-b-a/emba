@@ -69,13 +69,14 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
-# $1: module group letter [P, S, R, F]
+# $1: module group letter [P, S, F]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
 run_modules()
 {
   MODULE_GROUP="$1"
   printf -v THREADING_SET '%d\n' "$2" 2>/dev/null
+  THREADING_MOD_GROUP="$THREADING_SET"
 
   local SELECT_PRE_MODULES_COUNT=0
 
@@ -84,17 +85,24 @@ run_modules()
       (( SELECT_PRE_MODULES_COUNT+=1 ))
     fi
   done
-  echo "${SELECT_MODULES[@]}"
+
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
-    echo "YES"
     local MODULES
     mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-    if [[ $THREADING_SET -eq 1 ]] ; then
+    if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
     for MODULE_FILE in "${MODULES[@]}" ; do
-      echo "$MODULE_FILE"
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+        if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+          # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
+          # export PRE_THREAD_ENA=1/0
+          # shellcheck source=/dev/null
+          source "$MODULE_FILE"
+          if [[ $PRE_THREAD_ENA -eq 0 ]] ; then
+            THREADING_SET=0
+          fi
+        fi
         MODULE_BN=$(basename "$MODULE_FILE")
         MODULE_MAIN=${MODULE_BN%.*}
         module_start_log "$MODULE_MAIN"
@@ -107,9 +115,11 @@ run_modules()
         fi
         reset_module_count
       fi
+      if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+        THREADING_SET="$THREADING_MOD_GROUP"
+      fi
     done
   else
-    echo "no"
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
       if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
         local MODULE
@@ -135,6 +145,16 @@ run_modules()
         fi
         for MODULE_FILE in "${MODULES[@]}" ; do
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
+            if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+              # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
+              # export PRE_THREAD_ENA=1/0
+              # shellcheck source=/dev/null
+              source "$MODULE_FILE"
+              if [[ $PRE_THREAD_ENA -eq 0 ]] ; then
+                THREADING_SET=0
+              fi
+            fi
+
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             module_start_log "$MODULE_MAIN"
@@ -146,6 +166,9 @@ run_modules()
               $MODULE_MAIN
             fi
             reset_module_count
+          fi
+          if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+            THREADING_SET="$THREADING_MOD_GROUP"
           fi
         done
       fi
@@ -161,6 +184,7 @@ main()
   INVOCATION_PATH="$(dirname "$0")"
 
   export ARCH_CHECK=1
+  export RTOS=0                 # Testing RTOS based OS
   export CWE_CHECKER=0
   export DEEP_EXTRACTOR=0
   export FACT_EXTRACTOR=0
@@ -171,29 +195,24 @@ main()
   export IN_DOCKER=0
   export KERNEL=0
   export LOG_GREP=0
+  export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export MOD_RUNNING=0          # for tracking how many modules currently running
   export ONLY_DEP=0             # test only dependency
+  export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default emba scan
   export PYTHON_CHECK=1
   export QEMULATION=0
+  # to get rid of all the running stuff we are going to kill it after RUNTIME
+  export QRUNTIME="20s"
+
   export SHELLCHECK=1
   export SHORT_PATH=0           # short paths in cli output
   export THREADED=0             # 0 -> single thread
                                 # 1 -> multi threaded
   export USE_DOCKER=0
   export YARA=1
-
-  # the maximum modules in parallel -> after S09 is finished this value gets adjusted
-  # rule of thumb - per core one module
-  MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
-
-  # if we have only one core we run two modules in parallel
-  if [[ "$MAX_MODS" -lt 2 ]]; then
-    MAX_MODS=2
-  fi
-  export MAX_MODS
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
@@ -204,6 +223,12 @@ main()
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
+  export PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
+  export MSF_PATH="/usr/share/metasploit-framework/modules/"
+  if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
+    export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
+  fi
+  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
 
   echo
 
@@ -221,7 +246,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:stxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -278,6 +303,15 @@ main()
       N)
         export FW_NOTES="$OPTARG"
         ;;
+      o)
+        export ONLINE_CHECKS=1
+        ;;
+      p)
+        export PROFILE="$OPTARG"
+       ;;
+      r)
+        export FINAL_FW_RM=1
+       ;;
       s)
         export SHORT_PATH=1
         ;;
@@ -312,6 +346,26 @@ main()
 
   echo
 
+  # profile handling
+  if [[ -n "$PROFILE" ]]; then
+    if [[ -f "$PROFILE" ]]; then
+      print_bar "no_log"
+      if [[ $IN_DOCKER -ne 1 ]] ; then
+        print_output "[*] Loading emba scan profile with the following settings:" "no_log"
+      else
+        print_output "[*] Loading emba scan profile." "no_log"
+      fi
+      # all profile output and settings are done by the profile file located in ./scan-profiles/
+      # shellcheck disable=SC1090
+      source "$PROFILE"
+      print_output "[*] Profile $PROFILE loaded." "no_log"
+      print_bar "no_log"
+    else
+      print_output "[!] Profile $PROFILE not found." "no_log"
+      exit 1
+    fi
+  fi
+ 
   # check provided paths for validity 
   check_path_valid "$FIRMWARE_PATH"
   check_path_valid "$KERNEL_CONFIG"
@@ -335,6 +389,7 @@ main()
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
+  check_init_size
 
   # Now we have the firmware and log path, lets set some additional paths
   FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
@@ -344,15 +399,17 @@ main()
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
   fi
 
+  check_start_cve_database
+
   # Check firmware type (file/directory)
   # copy the firmware outside of the docker and not a second time within the docker
   if [[ -d "$FIRMWARE_PATH" ]] ; then
     PRE_CHECK=0
     print_output "[*] Firmware directory detected." "no_log"
-    print_output "    Emba starts with testing the environment." "no_log"
+    print_output "[*] Emba starts with testing the environment." "no_log"
     if [[ $IN_DOCKER -eq 0 ]] ; then
       # in docker environment the firmware is already available
-      print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""" "no_log"
+      print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""$NC" "no_log"
       cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       OUTPUT_DIR="$FIRMWARE_PATH_CP"
@@ -366,7 +423,21 @@ main()
     print_help
     exit 1
   fi
-  print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
+
+  # calculate the maximum modules are running in parallel
+  if [[ $THREADED -eq 1 ]]; then
+    # the maximum modules in parallel -> after S09 is finished this value gets adjusted
+    # rule of thumb - per core one module
+    MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
+
+    # if we have only one core we run two modules in parallel
+    if [[ "$MAX_MODS" -lt 2 ]]; then
+      MAX_MODS=2
+    fi
+    export MAX_MODS
+    print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
+  fi
+
   # Change log output to color for web report and prepare report
   if [[ $HTML -eq 1 ]] ; then
     if [[ $FORMAT_LOG -eq 0 ]] ; then
@@ -395,11 +466,17 @@ main()
       exit 1
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
-        chmod 777 "$LOG_DIR" 2> /dev/null
+        mkdir "$LOG_DIR"
       fi
       S25_kernel_check
     fi
   fi
+
+  # we use the metasploit path for exploit information from the metasploit framework
+  if [[ -d "$MSF_PATH" ]]; then
+    generate_msf_db &
+  fi
+
 
   #######################################################################################
   # Docker
@@ -417,32 +494,54 @@ main()
     fi
 
     OPTIND=1
-    ARGS=""
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:stX:Y:WxzZ: OPT ; do
+    ARGUMENTS=()
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
         *)
-          export ARGS="$ARGS -$OPT $OPTARG"
+          if [[ "${#OPTARG[@]}" -gt 0 ]] ; then
+            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" "${OPTARG[@]}" )
+          else
+            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
+          fi
           ;;
       esac
     done
 
     echo
-    print_output "[!] Emba initializes kali docker container.\\n" "no_log"
 
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c "./emba.sh -l /log/ -f /firmware -i $ARGS"
-    D_RETURN=$?
+    if ! docker images | grep -qE "^emba[[:space:]]*latest"; then
+      print_output "[*] Emba sets up the docker environment.\\n" "no_log"
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose build emba
+      DBUILD_RETURN=$?
 
-    if [[ $D_RETURN -eq 0 ]] ; then
-      if [[ $ONLY_DEP -eq 0 ]] ; then
-        print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
-        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH" "no_log"
-        print_output "[*] Log directory: $ORANGE$LOG_DIR" "no_log"
-        exit
+      if [[ $DBUILD_RETURN -ne 0 ]] ; then
+        print_output "[-] Emba docker build failed!" "no_log"
+        exit 1
+      fi
+    fi
+
+    if docker images | grep -qE "^emba[[:space:]]*latest"; then
+      setup_docker_iptables
+
+      print_output "[*] Emba initializes docker container.\\n" "no_log"
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      D_RETURN=$?
+
+      if [[ $D_RETURN -eq 0 ]] ; then
+        if [[ $ONLY_DEP -eq 0 ]] ; then
+          print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+          print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
+          print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
+          exit
+        fi
+      else
+        print_output "[-] Emba failed in docker mode!" "no_log"
+        exit 1
       fi
     else
-      print_output "[-] Emba docker failed!" "no_log"
+      print_output "[-] Emba failed in docker mode!" "no_log"
       exit 1
     fi
   fi
@@ -466,7 +565,8 @@ main()
 
       ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules, therefore overwriting $THREADED as 0
       ## as there are internal dependencies it is easier to handle it in the modules
-      run_modules "P" "0" "0"
+      #run_modules "P" "0" "0"
+      run_modules "P" "$THREADED" "0"
 
       # if we running threaded we ware going to wait for the slow guys here
       if [[ $THREADED -eq 1 ]]; then
@@ -495,52 +595,52 @@ main()
   fi
 
   #######################################################################################
-  # Firmware-Check (S- and R-modules)
+  # Firmware-Check (S modules)
   #######################################################################################
-  echo "SR"
+  WAIT_PIDS=()
   if [[ $FIRMWARE -eq 1 ]] ; then
+    print_output "\n=================================================================\n" "no_log"
+    check_firmware
+    prepare_binary_arr
     if [[ -d "$FIRMWARE_PATH" ]]; then
 
-      print_output "\n=================================================================\n" "no_log"
-      echo "SRsadsa"
+      export RTOS=0
+
+      prepare_file_arr
+
       if [[ $KERNEL -eq 0 ]] ; then
         architecture_check
         architecture_dep_check
       fi
 
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
-      else
-        print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
-      fi
-      write_grep_log "$(date)" "TIMESTAMP"
-      echo "t7"
       if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
         detect_root_dir_helper "$FIRMWARE_PATH" "main"
       fi
 
-      check_firmware
-      prepare_binary_arr
-      prepare_file_arr
       set_etc_paths
       echo
-      echo "t4"
-      run_modules "S" "$THREADED" "$HTML"
-      echo "t3"
-      if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS[@]}"
-      fi
-      echo "t6"
+
     else
       # here we can deal with other non linux things like RTOS specific checks
       # lets call it R* modules
       # 'main' functions of imported finishing modules
-      echo "R"
-      run_modules "R" "$THREADED" "$HTML"
 
-      if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS[@]}"
-      fi
+      export RTOS=1
+
+      prepare_file_arr
+    fi
+
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
+    else
+      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
+    fi
+    write_grep_log "$(date)" "TIMESTAMP"
+
+    run_modules "S" "$THREADED" "$HTML"
+
+    if [[ $THREADED -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS[@]}"
     fi
 
     echo
@@ -564,11 +664,10 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  update_index
-
   if [[ "$TESTING_DONE" -eq 1 ]]; then
-    if [[ -f "$HTML_PATH"/index.html ]]; then
-      print_output "[*] Web report created HTML report in ""$LOG_DIR""html-report\\n" "main" 
+    if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/firmware ]]; then
+      print_output "[*] Removing temp firmware directory\\n" "no_log" 
+      rm -r "$LOG_DIR"/firmware 2>/dev/null
     fi
     echo
     if [[ -d "$LOG_DIR" ]]; then
@@ -583,6 +682,12 @@ main()
     print_output "[!] No extracted firmware found" "no_log"
     print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
     exit 1
+  fi
+  if [[ "$HTML" -eq 1 ]]; then
+    update_index
+  fi
+  if [[ -f "$HTML_PATH"/index.html ]]; then
+    print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main" 
   fi
 }
 

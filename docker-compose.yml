@@ -1,13 +1,21 @@
 version: "3"
 services:
   emba:
+    image: emba:latest
     build: .
+    privileged: true
     volumes:
         - ${FIRMWARE}/:/firmware
         - ${LOG}/:/log
         - ${EMBA}/:/emba:ro
         - /var/run/docker.sock:/var/run/docker.sock
         - /tmp/:/tmp/
+        - /etc/timezone:/etc/timezone:ro
+        - /etc/localtime:/etc/localtime:ro
     network_mode: "host"
     environment:
         - USER
+    devices:
+      - /dev/fuse:/dev/fuse:rwm
+    cap_add:
+      - SYS_ADMIN

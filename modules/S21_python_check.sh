@@ -71,7 +71,7 @@ S21_python_check()
 s21_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/pylint_""$NAME"".txt"
-  pylint "$LINE" > "$PY_LOG" 2> /dev/null
+  pylint --max-line-length=240 -d C0115,C0114,C0116,W0511,E0401 "$LINE" > "$PY_LOG" 2> /dev/null
   VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:

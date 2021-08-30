@@ -202,10 +202,10 @@ create_log_dir() {
       mkdir "$HTML_PATH" 2> /dev/null
     fi
     export FIRMWARE_PATH_CP="$LOG_DIR""/firmware"
-    mkdir "$FIRMWARE_PATH_CP" 2> /dev/null
+    mkdir -p "$FIRMWARE_PATH_CP" 2> /dev/null
     export SUPPL_PATH="$LOG_DIR""/etc"
-    mkdir "$SUPPL_PATH" 2> /dev/null
-    mkdir "$TMP_DIR" 2> /dev/null
+    mkdir -p "$SUPPL_PATH" 2> /dev/null
+    mkdir -p "$TMP_DIR" 2> /dev/null
   fi
 }
 

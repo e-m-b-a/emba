@@ -22,8 +22,6 @@ S11_weak_func_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries for weak functions (intense)"
 
-  LOG_FILE="$( get_log_file )"
-
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
 

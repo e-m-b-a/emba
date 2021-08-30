@@ -37,7 +37,7 @@ OLD_MESSAGE_TYPE=""
 
 warning()
 {
-  echo -e "\\n""$RED""$BOLD""Warning:""$NC""$RED"" This script is in an early alpha state - use it on your own risk.""$NC"
+  echo -e "\\n""$RED""$BOLD""Warning:""$NC""$RED"" Emba is in an early alpha state - use it on your own risk.""$NC"
 }
 
 welcome()
@@ -73,11 +73,6 @@ module_title()
     fi
   fi
   SUB_MODULE_COUNT=0
-}
-
-get_log_file()
-{
-  echo "$LOG_FILE"
 }
 
 sub_module_title()
@@ -214,10 +209,12 @@ write_link()
     LINK="$1"
     LINK="$(format_log "[REF] ""$LINK" 1)"
     local LOG_FILE_ALT="$2"
-    if [[ -f "$LOG_FILE_ALT" ]] ; then
-      echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
-    else
-      echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+    if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
+      if [[ -f "$LOG_FILE_ALT" ]] ; then
+        echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
+      else
+        echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+      fi
     fi
   fi
 }
@@ -229,10 +226,12 @@ write_anchor()
     ANCHOR="$1"
     ANCHOR="$(format_log "[ANC] ""$ANCHOR" 1)"
     local LOG_FILE_ALT="$2"
-    if [[ -f "$LOG_FILE_ALT" ]] ; then
-      echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
-    else
-      echo -e "$ANCHOR" | tee -a "$LOG_FILE" >/dev/null
+    if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
+      if [[ -f "$LOG_FILE_ALT" ]] ; then
+        echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
+      else
+        echo -e "$ANCHOR" | tee -a "$LOG_FILE" >/dev/null
+      fi
     fi
   fi
 }
@@ -432,6 +431,7 @@ print_help()
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
   echo -e "$CYAN""-o""$NC""                Activate online checks (e.g. upload and test with VirusTotal)"
+  echo -e "$CYAN""-r""$NC""                Remove temprorary firmware directory after testing"
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"

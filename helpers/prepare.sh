@@ -45,7 +45,7 @@ log_folder()
             print_output "[!] If emba is failing check this manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
-            rm -R "${LOG_DIR:?}/"*
+            rm -R "${LOG_DIR:?}/"* 2>/dev/null
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
           fi
         ;;
@@ -199,7 +199,7 @@ prepare_binary_arr()
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES
-  readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # in some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   # this is a slow fallback solution just to have something we can work with
@@ -300,11 +300,11 @@ detect_root_dir_helper() {
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
-    write_link "s05#file_dirs"
+    write_link "s05#file_dirs" "$LOGGER"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
-    write_link "s05#file_dirs"
+    write_link "s05#file_dirs" "$LOGGER"
   done
 }
 

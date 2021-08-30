@@ -49,26 +49,30 @@ print_tool_info(){
   echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
   TOOL_INFO="$(apt show "${1}" 2> /dev/null)"
   echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
-  COMMAND_=""
-  if [[ -z "$3" ]] ; then
-    COMMAND_="$3"
+  if echo "$TOOL_INFO" | grep -E "^E:\ "; then
+    echo -e "$RED""$1"" was not identified and is not installable.""$NC"
   else
-    COMMAND_="$1"
-  fi
-  if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-    if [[ $2 -eq 0 ]] ; then
-      echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
+    COMMAND_=""
+    if [[ -z "$3" ]] ; then
+      COMMAND_="$3"
     else
-      if [[ $COMPLEMENT -eq 0 ]] ; then
-        echo -e "$ORANGE""$1"" will be updated.""$NC"
-        INSTALL_APP_LIST+=("$1")
-      else
-        echo -e "$ORANGE""$1"" won't be updated.""$NC"
-      fi
+      COMMAND_="$1"
     fi
-  else
-    echo -e "$ORANGE""$1"" will be newly installed.""$NC"
-    INSTALL_APP_LIST+=("$1")
+    if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+      if [[ $2 -eq 0 ]] ; then
+        echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
+      else
+        if [[ $COMPLEMENT -eq 0 ]] ; then
+          echo -e "$ORANGE""$1"" will be updated.""$NC"
+          INSTALL_APP_LIST+=("$1")
+        else
+          echo -e "$ORANGE""$1"" won't be updated.""$NC"
+        fi
+      fi
+    else
+      echo -e "$ORANGE""$1"" will be newly installed.""$NC"
+      INSTALL_APP_LIST+=("$1")
+    fi
   fi
 }
 
@@ -217,7 +221,7 @@ print_tool_info "device-tree-compiler" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
 print_tool_info "qemu-user-static" 0 "qemu-mips-static"
-print_tool_info "binwalk" 0
+print_tool_info "binwalk" 1
 print_tool_info "bc" 1
 print_tool_info "coreutils" 1
 print_tool_info "ent" 1
@@ -226,6 +230,9 @@ print_tool_info "tcllib" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 print_tool_info "make" 1
+# libguestfs-tools is needed to mount vmdk images
+print_tool_info "libguestfs-tools" 1
+print_tool_info "metasploit-framework" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -349,10 +356,12 @@ case ${ANSWER:0:1} in
     download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
     download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
     ### pixd installation
-    git clone https://github.com/FireyFly/pixd external/pixd
+    pip3 install pillow
+    git clone https://github.com/p4cx/pixd_image external/pixd
     cd ./external/pixd/ || exit 1
     make
     mv pixd ../pixde
+    mv pixd_png.py ../pixd_png.py
     cd ../../ || exit 1
     rm -r ./external/pixd/
     ### pixd installation
@@ -404,6 +413,7 @@ print_tool_info "gcc" 1
 print_tool_info "build-essential" 1
 print_tool_info "gawk" 1
 print_tool_info "bison" 1
+print_tool_info "debuginfod" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
@@ -519,15 +529,26 @@ case ${ANSWER:0:1} in
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        
         git clone https://github.com/cve-search/cve-search.git external/cve-search
         cd ./external/cve-search/ || exit 1
         pip3 install -r requirements.txt
         xargs sudo apt-get install -y < requirements.system
-        /etc/init.d/redis-server start
-        ./sbin/db_mgmt_cpe_dictionary.py -p
-        ./sbin/db_mgmt_json.py -p
-        ./sbin/db_updater.py -c
+        CVE_INST=1
+        if netstat -anpt | grep LISTEN | grep 27017; then
+          if [[ $(./bin/search.py -p busybox | wc -l | awk '{print $1}') -gt 2000 ]]; then
+            CVE_INST=0
+          else
+            CVE_INST=1
+          fi
+        fi
+        if [[ "$CVE_INST" -eq 1 ]]; then
+          /etc/init.d/redis-server start
+          ./sbin/db_mgmt_cpe_dictionary.py -p
+          ./sbin/db_mgmt_json.py -p
+          ./sbin/db_updater.py -f
+        else
+          echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
+        fi
         cd ../.. || exit 1
         sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
         chmod +x config/cve_database_updater
@@ -587,12 +608,15 @@ esac
 
 INSTALL_APP_LIST=()
 print_tool_info "python3-pip" 1
-print_tool_info "python3-crypto" 1
 print_tool_info "python3-opengl" 1
 print_tool_info "python3-pyqt5" 1
 print_tool_info "python3-pyqt5.qtopengl" 1
 print_tool_info "python3-numpy" 1
 print_tool_info "python3-scipy" 1
+# python2 is needed for ubireader installation
+print_tool_info "python2" 1
+# python-setuptools is needed for ubireader installation
+print_tool_info "python-setuptools" 1
 print_tool_info "mtd-utils" 1
 print_tool_info "gzip" 1
 print_tool_info "bzip2" 1
@@ -612,8 +636,8 @@ print_tool_info "build-essential" 1
 print_tool_info "zlib1g-dev" 1
 print_tool_info "liblzma-dev" 1
 print_tool_info "liblzo2-dev" 1
-# print_tool_info "firmware-mod-kit" 1
-# This is no valid packet, couldn't be found
+# firmware-mod-kit is only available on Kali Linux
+print_tool_info "firmware-mod-kit" 1
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
@@ -626,58 +650,102 @@ else
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    if [[ -f "/usr/local/bin/binwalk" ]]; then
-      echo -e "Found binwalk. Skipping installation."
-    else
+    BINWALK_PRE_AVAILABLE=0
 
-      apt-get install "${INSTALL_APP_LIST[@]}" -y
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
 
-      pip3 install nose
-      pip3 install coverage
-      pip3 install pyqtgraph
-      pip3 install capstone
-      pip3 install cstruct
+    pip3 install nose
+    pip3 install coverage
+    pip3 install pyqtgraph
+    pip3 install capstone
+    pip3 install cstruct
 
-      git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+    git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
 
+    if ! command -v yaffshiv > /dev/null ; then
       git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
-      sudo python3 ./external/binwalk/yaffshiv/setup.py install
+      cd ./external/binwalk/yaffshiv/ || exit 1
+      python3 setup.py install
+      cd ../../.. || exit 1
+    else
+      echo -e "$GREEN""yaffshiv already installed""$NC"
+    fi
 
+    if ! command -v sasquatch > /dev/null ; then
       git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
-      sudo CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+      CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+    else
+      echo -e "$GREEN""sasquatch already installed""$NC"
+    fi
 
+    if ! command -v jefferson > /dev/null ; then
       git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
-      sudo pip3 install -r ./external/binwalk/jefferson/requirements.txt
-      sudo python3 ./external/binwalk/jefferson/setup.py install
+      pip3 install -r ./external/binwalk/jefferson/requirements.txt
+      cd ./external/binwalk/jefferson/ || exit 1
+      python3 ./setup.py install
+      cd ../../.. || exit 1
+    else
+      echo -e "$GREEN""jefferson already installed""$NC"
+    fi
 
+    if ! command -v unstuff > /dev/null ; then
       mkdir ./external/binwalk/unstuff
       wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
       tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
-      sudo cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+      cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+    else
+      echo -e "$GREEN""unstuff already installed""$NC"
+    fi
       
-      sudo ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
+    if ! command -v cramfsck > /dev/null ; then
+      if [[ -f "/opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck" ]]; then
+        ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
+      fi
 
       git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
       make -C ./external/binwalk/cramfs-tools/
       install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
-      sudo install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
+      install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
+    else
+      echo -e "$GREEN""cramfsck already installed""$NC"
+    fi
 
+
+    if ! command -v ubireader_extract_files > /dev/null ; then
       git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
       cd ./external/binwalk/ubi_reader || exit 1
       git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
-      sudo python2 setup.py install
-      cd .. || exit 1
+      python2 setup.py install
+      cd ../../.. || exit 1
+    else
+      echo -e "$GREEN""ubi_reader already installed""$NC"
+    fi
 
-      sudo python3 setup.py install
-      cd ../.. || exit 1
+    if ! command -v binwalk > /dev/null ; then
+      cd ./external/binwalk || exit 1
+      python3 setup.py install
+    else
+      echo -e "$GREEN""binwalk already installed""$NC"
+      BINWALK_PRE_AVAILABLE=1
+    fi
 
-      rm -rf ./external/binwalk
+    cd ../.. || exit 1
 
-      if [[ -f "/usr/local/bin/binwalk" ]] ; then
-        echo -e "$GREEN""binwalk installed successfully""$NC"
-      else
-        echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
-      fi
+    if [[ -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+      echo -e "$GREEN""binwalk installed successfully""$NC"
+    elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+      echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
     fi
   ;;
 esac
+
+echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
+echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
+echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+
+echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
+
+echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
+
+echo -e "$GREEN""Emba installation finished ""$NC"
