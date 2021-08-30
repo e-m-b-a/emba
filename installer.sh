@@ -603,6 +603,33 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+#iniscan
+
+echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
+
+print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
+
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download Composer and iniscan (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
+else
+  echo -e "\\n""$MAGENTA""$BOLD""Composer and iniscan (if not already on the system) will be downloaded!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    if ! [[ -d "external/iniscan" ]] ; then
+      mkdir external/iniscan
+    fi
+    download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
+    php ./external/iniscan/composer.phar build --no-interaction
+    php composer.phar global require psecio/iniscan --no-interaction
+    readarray -t INISCAN_PATH < <(find / -path "*/vendor/bin/iniscan")
+    cp -r "$(${"${INISCAN_PATH[0]}"//\/bin\/iniscan/})" "./external/iniscan/vendor"
+  ;;
+esac
 
 # binwalk
 
@@ -736,34 +763,6 @@ case ${ANSWER:0:1} in
     elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
       echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
     fi
-  ;;
-esac
-
-#iniscan
-
-echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
-
-print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download Composer and iniscan (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""Composer and iniscan (if not already on the system) will be downloaded!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    if ! [[ -d "external/iniscan" ]] ; then
-      mkdir external/iniscan
-    fi
-    download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
-    php ./external/iniscan/composer.phar build --no-interaction
-    php composer.phar global require psecio/iniscan --no-interaction
-    readarray -t INISCAN_PATH < <(find / -path "*/vendor/bin/iniscan")
-    cp -r "$(echo "${INISCAN_PATH[0]}" | sed 's@/bin/iniscan@@')" "./external/iniscan/vendor"
   ;;
 esac
 
