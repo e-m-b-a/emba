@@ -24,6 +24,9 @@ S22_php_check()
 
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
+  S22_PHP_INI_LIMIT_EXCEEDED=0
+  S22_PHP_INI_FAILURE=0
+  S22_PHP_INI_WARNINGS=0
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
     if ! [[ -d "$LOG_DIR""/php_checker/" ]] ; then
@@ -51,10 +54,11 @@ S22_php_check()
         (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
       done < "$TMP_DIR"/S22_VULNS.tmp
     fi
-
+    s22_check_php_ini
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
-    echo -e "\\n[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS" >> "$LOG_FILE"
+    write_log ""
+    write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_LIMIT_EXCEEDED:$S22_PHP_INI_FAILURE:$S22_PHP_INI_WARNINGS"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"
@@ -83,39 +87,65 @@ s22_script_check() {
   fi
 }
 
-s22_check_php_init(){
-  sudo find "$FIRMWARE_PATH" -name php.ini
-  sudo ../external/iniscan/vendor/bin/iniscan scan --path=/etc/php/7.4/apache2/php.ini > ./iniscan_output.txt
-  sudo chmod 777 ./iniscan_output.txt
-  FILE="./iniscan_output.txt"
-  while read LINE
-  do
-    echo "$LINE"
-    if (( "$LINE" == *"FAIL"* && "$LINE" == *"ERROR"*)); then
-         add_recommendations LINE
-         print_output "[-] ""$ORANGE""FAIL""$RED""ERROR""$WHITE""$LINE"
-    elif (( "$LINE" == *"FAIL"* && "$LINE" == *"WARNING"*)); then
-         add_recommendations LINE
-         print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
-    elif (( "$LINE" == *"PASS"* && "$LINE" == *"WARNING"*)); then
-         print_output "[-] ""$GREEN""PASS""$ORANGE""ERROR""$WHITE""$LINE"
-    elif (( "$LINE" == *"PASS"* && "$LINE" == *"WARNING"*)); then
-         print_output "[-] ""$GREEN""PASS""$CYAN""WARNING""$WHITE""$LINE"
-    fi
-  done < "$FILE"
+add_recommendations(){
+   local VALUE
+   local KEY
+   VALUE="$1"
+   KEY="$2"
+
+   if [[ $VALUE == *"M"* ]]; then
+      LIMIT="${VALUE//M/}"
+   fi
+
+   if [[ $KEY == *"memory_limit"* ]] && [[ $(( LIMIT)) -gt 50 ]]; then
+     return 1
+   elif [[ $KEY == *"post_max_size"* ]] && [[ $(( LIMIT)) -gt 20 ]]; then
+     return 1
+   elif [[ $KEY == *"max_execution_time"* ]] && [[ $(( LIMIT )) -gt 60 ]]; then
+     return 1
+   else
+     return 0
+   fi
 }
 
-add_recommendations(){
-   LINE = $1
-   IFS='|' read -ra LINE_ARR <<< "$LINE"
-   echo LINE_ARR
-   if(LINE_ARR[3] >= *"50"*); then
-     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
-   fi
-   if(LINE_ARR[3] >= *"20"*); then
-     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
-   fi
-   if(LINE_ARR[3] >= *"60"*); then
-     print_output "[-] ""$ORANGE""FAIL""$CYAN""WARNING""$WHITE""$LINE"
-   fi
+s22_check_php_ini(){
+  mapfile -t PHP_CONF_FILES < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  for PHP_FILE in "${PHP_CONF_FILES[@]}" ;  do
+    print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
+    mapfile -t INISCAN_RESULT < <( "$EXT_DIR"/iniscan/vendor/bin/iniscan scan --path="$PHP_FILE" )
+    for LINE in "${INISCAN_RESULT[@]}" ; do  
+      local LIMIT_CHECK
+
+      IFS='|' read -ra LINE_ARR <<< "$LINE"
+      add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
+      LIMIT_CHECK="$?"
+      if [[ "$LIMIT_CHECK" -eq 1 ]]; then
+        print_output "$(magenta "$LINE")"
+        PHP_INI_LIMIT_EXCEEDED=$(( PHP_INI_LIMIT_EXCEEDED+1 ))
+      elif ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "ERROR" ) ; then
+        print_output "$(red "$LINE")"
+      elif ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "WARNING" )  ; then
+        print_output "$(orange "$LINE")"
+      elif ( echo "$LINE" | grep -q "FAIL" ) && ( echo "$LINE" | grep -q "INFO" ) ; then
+        print_output "$(blue "$LINE")"
+      elif ( echo "$LINE" | grep -q "PASS" ) ; then
+        print_output "$(green "$LINE")"
+      else
+        if ( echo "$LINE" | grep -q "failure" ) && ( echo "$LINE" | grep -q "warning" ) ; then
+          IFS=' ' read -ra LINE_ARR <<< "$LINE"
+          PHP_INI_FAILURE=${LINE_ARR[0]}
+          PHP_INI_WARNINGS=${LINE_ARR[3]}
+          print_output "$(magenta "$PHP_INI_LIMIT_EXCEEDED exceeding the limit value")""$(white ", ")""$(red "$PHP_INI_FAILURE ${LINE_ARR[1]}")""$(white " and ")""$(orange "$PHP_INI_WARNINGS ${LINE_ARR[4]}")"
+          (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$PHP_INI_LIMIT_EXCEEDED"+"$PHP_INI_FAILURE"+"$PHP_INI_WARNINGS" ))
+          ((S22_PHP_SCRIPTS++))
+        elif ( echo "$LINE" | grep -q "passing" ) ; then
+          IFS=' ' read -ra LINE_ARR <<< "$LINE"
+          LINE_ARR[0]=$(( LINE_ARR[0]-PHP_INI_LIMIT_EXCEEDED ))
+          print_output "$(green "${LINE_ARR[0]} ${LINE_ARR[1]}")"
+        else
+          print_output "$LINE"
+        fi
+      fi
+    done
+  done
 }
