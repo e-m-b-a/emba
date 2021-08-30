@@ -58,7 +58,7 @@ S22_php_check()
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
     write_log ""
-    write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_LIMIT_EXCEEDED:$S22_PHP_INI_FAILURE:$S22_PHP_INI_WARNINGS"
+    write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_LIMIT_EXCEEDED:$S22_PHP_INI_FAILURE:$S22_PHP_INI_WARNINGS" >> "$LOG_FILE"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"
