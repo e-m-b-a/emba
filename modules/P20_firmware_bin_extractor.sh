@@ -342,14 +342,15 @@ extract_binwalk_helper() {
 extract_fact_helper() {
   if [[ -d /tmp/extractor ]]; then
     # This directory is currently hard coded in FACT-extractor
-    rm /tmp/extractor
+    rm -rf /tmp/extractor
   fi
 
   ./external/fact_extractor/fact_extractor/fact_extract.py -d "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
 
   if [[ -d /tmp/extractor/files ]]; then
     cat /tmp/extractor/reports/meta.json >> "$TMP_DIR"/FACTer.txt
-    cp /tmp/extractor/files "$OUTPUT_DIR_fact"
+    cp -r /tmp/extractor/files "$OUTPUT_DIR_fact"
+    rm -rf /tmp/extractor
   fi
 }
 extract_ipk_helper() {
