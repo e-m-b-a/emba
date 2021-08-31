@@ -288,47 +288,31 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
-# FACT-extractor docker
+# FACT-extractor
 
-echo -e "\\nWith emba you can automatically use FACT-extractor as a second extraction tool. Docker and the fact_extractor from fkiecad are required for this."
-INSTALL_APP_LIST=()
-print_tool_info "docker.io" 0 "docker"
-print_file_info "FACT-extract" "Extractor for most of the common container formats" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
-
-if command -v docker > /dev/null ; then
-  echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
-  export DOCKER_CLI_EXPERIMENTAL=enabled
-  f="$(docker manifest inspect fkiecad/fact_extractor:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-  echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
-  export DOCKER_CLI_EXPERIMENTAL=disabled
-else
-  echo -e "\\n""$ORANGE""$BOLD""fkiecad/fact_extractor docker image""$NC"
-  echo "Download-Size: ~700 MB"
-fi
-
+echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extraction tool. FACT-extractor from fkiecad is required for this."
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
-  ANSWER=("n")
 else
-  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""FACT-extractor will be downloaded and installed!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-    if [[ "$(docker images -q fkiecad/fact_extractor:latest 2> /dev/null)" == "" ]] ; then
-      echo -e "$ORANGE""fkiecad/fact_extractor docker image will be downloaded""$NC"
-      docker pull fkiecad/fact_extractor:latest
-    else
-      echo -e "$ORANGE""fkiecad/fact_extractor docker image is already downloaded""$NC"
-    fi
-    download_file "FACT-extract" "https://raw.githubusercontent.com/fkie-cad/fact_extractor/master/extract.py" "external/extract.py"
+    # this is a temporary solution until the official fact repo supports a current kali linux
+    git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
+    cd external/fact_extractor/fact_extractor/ || exit 1
+    ./install/pre_install.sh
+    python3 ./install.py
+    cd ../../.. || exit 1
   ;;
 esac
 
+if python3 external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
+  echo -e "$GREEN""FACT-extractor installed""$NC"
+fi
 
 # open source tools from github
 
