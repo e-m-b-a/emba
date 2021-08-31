@@ -340,7 +340,17 @@ extract_binwalk_helper() {
   binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
 }
 extract_fact_helper() {
-  ./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
+  if [[ -d /tmp/extractor ]]; then
+    # This directory is currently hard coded in FACT-extractor
+    rm /tmp/extractor
+  fi
+
+  ./external/fact_extractor/fact_extractor/fact_extract.py -d "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
+
+  if [[ -d /tmp/extractor/files ]]; then
+    cat /tmp/extractor/reports/meta.json >> "$TMP_DIR"/FACTer.txt
+    cp /tmp/extractor/files "$OUTPUT_DIR_fact"
+  fi
 }
 extract_ipk_helper() {
   find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/ipk_db.txt
