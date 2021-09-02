@@ -12,17 +12,23 @@
 # Author(s): Michael Messner, Pascal Eckmann
 #
 # Description: This is a default emba profile. You can Use it as a template for your own profiles
-#              or start emba with "-p full-scan.emba" to use it
+#              or start emba with "-p full-scan_docker.emba" to use it
 
-print_output "$(indent "Adds ANSI color codes to log")" "no_log"
 export FORMAT_LOG=1
-print_output "$(indent "Activate multi threading (destroys regular console output)")" "no_log"
 export THREADED=1
-print_output "$(indent "Prints only relative paths")" "no_log"
 export SHORT_PATH=1
-print_output "$(indent "Activates web report creation in log path")" "no_log"
 export HTML=1
-print_output "$(indent "Enables automated qemu emulation tests (WARNING this module could harm your host!)")" "no_log"
-export QEMULATION=1
-print_output "$(indent "Enable cwe-checker")" "no_log"
 export CWE_CHECKER=1
+export QEMULATION=1
+# we output the profile only at the beginning - outside the docker environment
+if [[ $IN_DOCKER -ne 1 ]] ; then
+  print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
+  print_output "$(indent "$(orange "Activate multi threading (destroys regular console output)")")" "no_log"
+  print_output "$(indent "$(orange "Prints only relative paths")")" "no_log"
+  print_output "$(indent "$(orange "Activates web report creation in log path")")" "no_log"
+  print_output "$(indent "$(orange "Enable cwe-checker")")" "no_log"
+  print_output "$(indent "$(orange "Enables automated qemu emulation tests (WARNING this module could harm your host!)")")" "no_log"
+  print_output "$(indent "$(orange "Runs emba in docker container")")" "no_log"
+  export USE_DOCKER=1
+fi
+
