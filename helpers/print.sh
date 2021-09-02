@@ -35,18 +35,12 @@ GREP_LOG_LINEBREAK=" || "
 MESSAGE_TYPE=""
 OLD_MESSAGE_TYPE=""
 
-warning()
-{
-  echo -e "\\n""$RED""$BOLD""Warning:""$NC""$RED"" Emba is in an early alpha state - use it on your own risk.""$NC"
-}
-
 welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
   echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            e m b a                            ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""║                   EMBEDDED FIRMWARE ANALYZER                  ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""╚═══════════════════════════════════════════════════════════════╝""$NC"
-  warning
 }
 
 module_log_init()
@@ -443,7 +437,6 @@ print_help()
   echo -e "\\nHelp"
   echo -e "$CYAN""-h""$NC""                Prints this help message"
 
-  warning
 }
 
 print_firmware_info()
