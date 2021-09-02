@@ -562,7 +562,7 @@ fi
 
 # we always need the cve-search stuff:
 if [[ -d external/cve-search ]]; then
-  rm external/cve-search
+  rm -r external/cve-search
 fi
 
 git clone https://github.com/cve-search/cve-search.git external/cve-search
@@ -618,46 +618,43 @@ esac
 
 # aggregator tools to 
 
-echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
-INSTALL_APP_LIST=()
-print_tool_info "python3-pip" 1
-print_tool_info "net-tools" 1
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-    pip3 install cve_searchsploit
-    #git clone https://github.com/cve-search/cve-search.git external/cve-search
-    #cd ./external/cve-search/ || exit 1
-    #pip3 install -r requirements.txt
-    #xargs sudo apt-get install -y < requirements.system
-    #cd ../.. || exit 1
-
-    if [[ "$IN_DOCKER" -eq 1 ]] ; then
-      if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-        echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database on docker emba?""$NC"
-        read -p "(y/N)" -r ANSWER
-      else
-        echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database on docker.""$NC"
-        ANSWER=("y")
+if [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
+  INSTALL_APP_LIST=()
+  print_tool_info "python3-pip" 1
+  print_tool_info "net-tools" 1
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
+      pip3 install cve_searchsploit
+  
+      if [[ "$IN_DOCKER" -eq 1 ]] ; then
+        if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+          echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database on docker emba?""$NC"
+          read -p "(y/N)" -r ANSWER
+        else
+          echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database on docker.""$NC"
+          ANSWER=("y")
+        fi
+        case ${ANSWER:0:1} in
+          y|Y )
+            cve_searchsploit -u
+          ;;
+        esac    
       fi
-      case ${ANSWER:0:1} in
-        y|Y )
-          cve_searchsploit -u
-        ;;
-      esac    
-    fi
-  ;;
-esac
+    ;;
+  esac
+fi
 
 
 # binwalk
