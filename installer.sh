@@ -335,6 +335,8 @@ echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extra
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
   read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
+  ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""FACT-extractor will be downloaded and installed!""$NC"
   ANSWER=("y")
@@ -539,7 +541,8 @@ fi
 git clone https://github.com/cve-search/cve-search.git external/cve-search
 cd ./external/cve-search/ || exit 1
 xargs sudo apt-get install -y < requirements.system
-pip3 install -r requirements.txt
+# shellcheck disable=SC2002
+cat requirements.txt | xargs -n 1 pip install
  
 case ${ANSWER:0:1} in
   y|Y )
@@ -606,11 +609,11 @@ case ${ANSWER:0:1} in
   y|Y )
     apt-get install "${INSTALL_APP_LIST[@]}" -y
     pip3 install cve_searchsploit
-    git clone https://github.com/cve-search/cve-search.git external/cve-search
-    cd ./external/cve-search/ || exit 1
-    pip3 install -r requirements.txt
-    xargs sudo apt-get install -y < requirements.system
-    cd ../.. || exit 1
+    #git clone https://github.com/cve-search/cve-search.git external/cve-search
+    #cd ./external/cve-search/ || exit 1
+    #pip3 install -r requirements.txt
+    #xargs sudo apt-get install -y < requirements.system
+    #cd ../.. || exit 1
 
     if [[ "$IN_DOCKER" -eq 1 ]] ; then
       if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
