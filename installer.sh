@@ -283,7 +283,7 @@ if [[ $DOCKER_SETUP -eq 1 ]] ; then
   elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
     ANSWER=("n")
   else
-    echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+    echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the EMBA image be downloaded!""$NC"
     ANSWER=("y")
   fi
   case ${ANSWER:0:1} in
@@ -301,190 +301,200 @@ fi
 
 # cwe checker docker
 
-echo -e "\\nWith emba you can automatically find vulnerable pattern in binary executables (just start emba with the parameter -c). Docker and the cwe_checker from fkiecad are required for this."
-INSTALL_APP_LIST=()
-print_tool_info "docker.io" 0 "docker"
-
-if command -v docker > /dev/null ; then
-  echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
-  export DOCKER_CLI_EXPERIMENTAL=enabled
-  f="$(docker manifest inspect fkiecad/cwe_checker:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-  echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
-  export DOCKER_CLI_EXPERIMENTAL=disabled
-else
-  echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
-  echo "Download-Size: ~600 MB"
+if [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\nWith emba you can automatically find vulnerable pattern in binary executables (just start emba with the parameter -c). Docker and the cwe_checker from fkiecad are required for this."
+  INSTALL_APP_LIST=()
+  print_tool_info "docker.io" 0 "docker"
+  
+  if command -v docker > /dev/null ; then
+    echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
+    export DOCKER_CLI_EXPERIMENTAL=enabled
+    f="$(docker manifest inspect fkiecad/cwe_checker:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
+    echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
+    export DOCKER_CLI_EXPERIMENTAL=disabled
+  else
+    echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
+    echo "Download-Size: ~600 MB"
+  fi
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
+      if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
+        echo -e "$ORANGE""fkiecad/cwe_checker docker image will be downloaded""$NC"
+        docker pull fkiecad/cwe_checker:latest
+      else
+        echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
+      fi
+    ;;
+  esac
 fi
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-    if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
-      echo -e "$ORANGE""fkiecad/cwe_checker docker image will be downloaded""$NC"
-      docker pull fkiecad/cwe_checker:latest
-    else
-      echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
-    fi
-  ;;
-esac
 
 # FACT-extractor
 
-echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extraction tool. FACT-extractor from fkiecad is required for this."
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""FACT-extractor will be downloaded and installed!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    # this is a temporary solution until the official fact repo supports a current kali linux
-    git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
-    cd external/fact_extractor/fact_extractor/ || exit 1
-    ./install/pre_install.sh
-    python3 ./install.py
-    cd ../../.. || exit 1
-  ;;
-esac
-
-if python3 external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
-  echo -e "$GREEN""FACT-extractor installed""$NC"
+if [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extraction tool. FACT-extractor from fkiecad is required for this."
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""FACT-extractor will be downloaded and installed!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      # this is a temporary solution until the official fact repo supports a current kali linux
+      git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
+      cd external/fact_extractor/fact_extractor/ || exit 1
+      ./install/pre_install.sh
+      python3 ./install.py
+      cd ../../.. || exit 1
+    ;;
+  esac
+  
+  if python3 external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
+    echo -e "$GREEN""FACT-extractor installed""$NC"
+  fi
 fi
 
 # open source tools from github
 
-echo -e "\\nWe use a few well-known open source tools in emba, for example checksec."
-
-print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
-print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
-print_file_info "sshdcc" "Check SSHd configuration files" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
-print_file_info "sudo-parser.pl" "Parses and tests sudoers configuration files" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
-print_file_info "pixd" "pixd is a tool for visualizing binary data using a colour palette." "https://github.com/FireyFly/pixd/pixd.c" "external/pixd"
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
-  ANSWER=("y")
+if [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\nWe use a few well-known open source tools in emba, for example checksec."
+  
+  print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
+  print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
+  print_file_info "sshdcc" "Check SSHd configuration files" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
+  print_file_info "sudo-parser.pl" "Parses and tests sudoers configuration files" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
+  print_file_info "pixd" "pixd is a tool for visualizing binary data using a colour palette." "https://github.com/FireyFly/pixd/pixd.c" "external/pixd"
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
+      download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
+      download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
+      download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
+      ### pixd installation
+      pip3 install pillow
+      git clone https://github.com/p4cx/pixd_image external/pixd
+      cd ./external/pixd/ || exit 1
+      make
+      mv pixd ../pixde
+      mv pixd_png.py ../pixd_png.py
+      cd ../../ || exit 1
+      rm -r ./external/pixd/
+      ### pixd installation
+    ;;
+  esac
 fi
-case ${ANSWER:0:1} in
-  y|Y )
-    download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
-    download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
-    download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
-    download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
-    ### pixd installation
-    pip3 install pillow
-    git clone https://github.com/p4cx/pixd_image external/pixd
-    cd ./external/pixd/ || exit 1
-    make
-    mv pixd ../pixde
-    mv pixd_png.py ../pixd_png.py
-    cd ../../ || exit 1
-    rm -r ./external/pixd/
-    ### pixd installation
-  ;;
-esac
 
 
 # yara rules
 
-echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
-
-print_file_info "Xumeiquer/yara-forensics/compressed.yar" "" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
-print_file_info "DiabloHorn/yara4pentesters/juicy_files.txt" "" "https://raw.githubusercontent.com/DiabloHorn/yara4pentesters/master/juicy_files.txt" "external/yara/juicy_files.yar"
-print_file_info "ahhh/YARA/crypto_signatures.yar" "" "https://raw.githubusercontent.com/ahhh/YARA/master/crypto_signatures.yar" "external/yara/crypto_signatures.yar"
-print_file_info "Yara-Rules/rules/packer_compiler_signatures.yar" "" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
-  ANSWER=("y")
+if [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
+  
+  print_file_info "Xumeiquer/yara-forensics/compressed.yar" "" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
+  print_file_info "DiabloHorn/yara4pentesters/juicy_files.txt" "" "https://raw.githubusercontent.com/DiabloHorn/yara4pentesters/master/juicy_files.txt" "external/yara/juicy_files.yar"
+  print_file_info "ahhh/YARA/crypto_signatures.yar" "" "https://raw.githubusercontent.com/ahhh/YARA/master/crypto_signatures.yar" "external/yara/crypto_signatures.yar"
+  print_file_info "Yara-Rules/rules/packer_compiler_signatures.yar" "" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these rules (if not already on the system)?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      if ! [[ -d "external/yara/" ]] ; then
+        mkdir external/yara
+      fi
+      download_file "Xumeiquer/yara-forensics/compressed.yar" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
+      download_file "DiabloHorn/yara4pentesters/juicy_files.txt" "https://raw.githubusercontent.com/DiabloHorn/yara4pentesters/master/juicy_files.txt" "external/yara/juicy_files.yar"
+      download_file "ahhh/YARA/crypto_signatures.yar" "https://raw.githubusercontent.com/ahhh/YARA/master/crypto_signatures.yar" "external/yara/crypto_signatures.yar"
+      download_file "Yara-Rules/rules/packer_compiler_signatures.yar" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
+    ;;
+  esac
 fi
-case ${ANSWER:0:1} in
-  y|Y )
-    if ! [[ -d "external/yara/" ]] ; then
-      mkdir external/yara
-    fi
-    download_file "Xumeiquer/yara-forensics/compressed.yar" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
-    download_file "DiabloHorn/yara4pentesters/juicy_files.txt" "https://raw.githubusercontent.com/DiabloHorn/yara4pentesters/master/juicy_files.txt" "external/yara/juicy_files.yar"
-    download_file "ahhh/YARA/crypto_signatures.yar" "https://raw.githubusercontent.com/ahhh/YARA/master/crypto_signatures.yar" "external/yara/crypto_signatures.yar"
-    download_file "Yara-Rules/rules/packer_compiler_signatures.yar" "https://raw.githubusercontent.com/Yara-Rules/rules/master/packers/packer_compiler_signatures.yar" "external/yara/packer_compiler_signatures.yar"
-  ;;
-esac
 
 
 # binutils - objdump
 
-BINUTIL_VERSION_NAME="binutils-2.35.1"
-
-echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
-INSTALL_APP_LIST=()
-
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
-  print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
-  print_tool_info "texinfo" 1
-  print_tool_info "gcc" 1
-  print_tool_info "build-essential" 1
-  print_tool_info "gawk" 1
-  print_tool_info "bison" 1
-  print_tool_info "debuginfod" 1
-fi
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-    download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
-    if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
-      tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
-      cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
-      echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
-      ./configure --enable-targets=all
-      make
-      cd ../.. || exit 1
-    fi
-    if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
-      mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
-      rm -R "external/""$BINUTIL_VERSION_NAME"
-      rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
-      if [[ -f "external/objdump" ]] ; then
-        echo -e "$GREEN""objdump installed successfully""$NC"
+if [[ $DOCKER_SETUP -eq 0 ]] ; then
+  BINUTIL_VERSION_NAME="binutils-2.35.1"
+  
+  echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
+  INSTALL_APP_LIST=()
+  
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+    print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
+    print_tool_info "texinfo" 1
+    print_tool_info "gcc" 1
+    print_tool_info "build-essential" 1
+    print_tool_info "gawk" 1
+    print_tool_info "bison" 1
+    print_tool_info "debuginfod" 1
+  fi
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
+      download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
+      if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
+        tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
+        cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
+        echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
+        ./configure --enable-targets=all
+        make
+        cd ../.. || exit 1
       fi
-    else
-      echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
-    fi
-  ;;
-esac
+      if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
+        mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
+        rm -R "external/""$BINUTIL_VERSION_NAME"
+        rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
+        if [[ -f "external/objdump" ]] ; then
+          echo -e "$GREEN""objdump installed successfully""$NC"
+        fi
+      else
+        echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
+      fi
+    ;;
+  esac
+fi
 
 
 # CSV and CVSS databases
