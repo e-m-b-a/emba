@@ -27,6 +27,8 @@ FORCE=0
 IN_DOCKER=0
 # list dependencies
 LIST_DEP=0
+# install for running in docker mode
+DOCKER_SETUP=1
 
 ## Color definition
 RED="\033[0;31m"
@@ -143,8 +145,8 @@ download_file()
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
-  echo -e "$CYAN""-d""$NC""         Installation of all dependencies needed for emba in Docker mode (-D) (typical initial installation)"
-  echo -e "$CYAN""-F""$NC""         Installation of emba with all dependencies"
+  echo -e "$CYAN""-d""$NC""         Installation of all dependencies needed for emba in default/docker mode (typical initial installation)"
+  echo -e "$CYAN""-F""$NC""         Installation of emba with all dependencies (for running on your host - developer mode)"
   echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of emba"
@@ -164,11 +166,11 @@ while getopts cdDFhl OPT ; do
     d)
       export DOCKER_SETUP=1
       export FORCE=1
-      echo -e "$GREEN""$BOLD""Install all dependecies for emba in Docker mode (-D)""$NC"
+      echo -e "$GREEN""$BOLD""Install all dependecies for emba in default/docker mode""$NC"
       ;;
     D)
       export IN_DOCKER=1
-      echo -e "$GREEN""$BOLD""Install emba on docker""$NC"
+      echo -e "$GREEN""$BOLD""Install emba on docker (docker image)""$NC"
       ;;
     F)
       export FORCE=1
@@ -212,27 +214,16 @@ fi
 
 echo -e "\\nTo use emba, some applications must be installed and some data (database for CVS for example) downloaded and parsed."
 echo -e "\\n""$ORANGE""$BOLD""These applications will be installed/updated:""$NC"
-print_tool_info "tree" 1
-print_tool_info "yara" 1
 print_tool_info "shellcheck" 1
-print_tool_info "pylint" 1
-print_tool_info "php" 1
-print_tool_info "device-tree-compiler" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
-print_tool_info "qemu-user-static" 0 "qemu-mips-static"
-print_tool_info "binwalk" 1
 print_tool_info "bc" 1
 print_tool_info "coreutils" 1
-print_tool_info "ent" 1
-# needed for sshdcc:
-print_tool_info "tcllib" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
-print_tool_info "make" 1
 # libguestfs-tools is needed to mount vmdk images
-print_tool_info "libguestfs-tools" 1
 print_tool_info "metasploit-framework" 1
+
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -250,10 +241,28 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+INSTALL_APP_LIST=()
+
+if [[ "$DOCKER_SETUP" -eq 0 ]] || [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
+  print_tool_info "make" 1
+  print_tool_info "tree" 1
+  print_tool_info "yara" 1
+  print_tool_info "device-tree-compiler" 1
+  print_tool_info "qemu-user-static" 0 "qemu-mips-static"
+  print_tool_info "binwalk" 1
+  print_tool_info "pylint" 1
+  print_tool_info "libguestfs-tools" 1
+  print_tool_info "php" 1
+  print_tool_info "ent" 1
+  # needed for sshdcc:
+  print_tool_info "tcllib" 1
+  apt-get install "${INSTALL_APP_LIST[@]}" -y
+fi
+
 # download EMBA docker image
 
 if [[ $DOCKER_SETUP -eq 1 ]] ; then
-  echo -e "\\nThe normal EMBA operation mode use a docker image to protect your host. Docker and the EMBA container are required for this."
+  echo -e "\\nThe normal EMBA operation mode uses a docker image to protect your host. The docker environment and the EMBA image are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
 
@@ -307,10 +316,10 @@ else
   echo "Download-Size: ~600 MB"
 fi
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
@@ -332,10 +341,10 @@ esac
 
 echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extraction tool. FACT-extractor from fkiecad is required for this."
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""FACT-extractor will be downloaded and installed!""$NC"
@@ -433,13 +442,15 @@ BINUTIL_VERSION_NAME="binutils-2.35.1"
 echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
 INSTALL_APP_LIST=()
 
-print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
-print_tool_info "texinfo" 1
-print_tool_info "gcc" 1
-print_tool_info "build-essential" 1
-print_tool_info "gawk" 1
-print_tool_info "bison" 1
-print_tool_info "debuginfod" 1
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+  print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
+  print_tool_info "texinfo" 1
+  print_tool_info "gcc" 1
+  print_tool_info "build-essential" 1
+  print_tool_info "gawk" 1
+  print_tool_info "bison" 1
+  print_tool_info "debuginfod" 1
+fi
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
@@ -477,51 +488,53 @@ esac
 
 
 # CSV and CVSS databases
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
 
-echo -e "\\nTo check binaries to known CSV entries and CVSS values, we need a vulnerability database. Additional we have to parse data and need jq as tool for it, if it's missing, it will be installed."
-
-NVD_URL="https://nvd.nist.gov/feeds/json/cve/1.1/"
-INSTALL_APP_LIST=()
-
-print_file_info "cve.mitre.org database" "CVE® is a list of records—each containing an identification number, a description, and at least one public reference—for publicly known cybersecurity vulnerabilities." "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
-print_tool_info "jq" 1
-for YEAR in $(seq 2002 $(($(date +%Y)))); do
-  NVD_FILE="nvdcve-1.1-""$YEAR"".json"
-  print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip" "./external/allitemscvss.csv"
-done
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and jq be installed (if not already on the system)!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-    download_file "cve.mitre.org database" "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
-    if ! [[ -d "external/nvd" ]] ; then
-      mkdir external/nvd
-    fi
-    for YEAR in $(seq 2002 $(($(date +%Y)))); do
-      NVD_FILE="nvdcve-1.1-""$YEAR"".json"
-      download_file "$NVD_FILE" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
-
-      if [[ -f "external/nvd/""$NVD_FILE"".zip" ]] ; then
-        unzip -o "./external/nvd/""$NVD_FILE"".zip" -d "./external/nvd"
-        jq -r '. | .CVE_Items[] | [.cve.CVE_data_meta.ID, (.impact.baseMetricV2.cvssV2.baseScore|tostring), (.impact.baseMetricV3.cvssV3.baseScore|tostring)] | @csv' "./external/nvd/""$NVD_FILE" -c | sed -e 's/\"//g' >> "./external/allitemscvss.csv"
-        rm "external/nvd/""$NVD_FILE"".zip"
-        rm "external/nvd/""$NVD_FILE"
-      else
-        echo -e "$ORANGE""$NVD_FILE"" is not available or a valid zip archive""$NC"
+  echo -e "\\nTo check binaries to known CSV entries and CVSS values, we need a vulnerability database. Additional we have to parse data and need jq as tool for it, if it's missing, it will be installed."
+  
+  NVD_URL="https://nvd.nist.gov/feeds/json/cve/1.1/"
+  INSTALL_APP_LIST=()
+  
+  print_file_info "cve.mitre.org database" "CVE® is a list of records—each containing an identification number, a description, and at least one public reference—for publicly known cybersecurity vulnerabilities." "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
+  print_tool_info "jq" 1
+  for YEAR in $(seq 2002 $(($(date +%Y)))); do
+    NVD_FILE="nvdcve-1.1-""$YEAR"".json"
+    print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip" "./external/allitemscvss.csv"
+  done
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and jq be installed (if not already on the system)!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
+      download_file "cve.mitre.org database" "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
+      if ! [[ -d "external/nvd" ]] ; then
+        mkdir external/nvd
       fi
-    done
-    rmdir "external/nvd/"
-  ;;
-esac
+      for YEAR in $(seq 2002 $(($(date +%Y)))); do
+        NVD_FILE="nvdcve-1.1-""$YEAR"".json"
+        download_file "$NVD_FILE" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip"
+  
+        if [[ -f "external/nvd/""$NVD_FILE"".zip" ]] ; then
+          unzip -o "./external/nvd/""$NVD_FILE"".zip" -d "./external/nvd"
+          jq -r '. | .CVE_Items[] | [.cve.CVE_data_meta.ID, (.impact.baseMetricV2.cvssV2.baseScore|tostring), (.impact.baseMetricV3.cvssV3.baseScore|tostring)] | @csv' "./external/nvd/""$NVD_FILE" -c | sed -e 's/\"//g' >> "./external/allitemscvss.csv"
+          rm "external/nvd/""$NVD_FILE"".zip"
+          rm "external/nvd/""$NVD_FILE"
+        else
+          echo -e "$ORANGE""$NVD_FILE"" is not available or a valid zip archive""$NC"
+        fi
+      done
+      rmdir "external/nvd/"
+    ;;
+  esac
+fi
 
 # cve-search database for host 
 
@@ -537,7 +550,11 @@ else
   ANSWER=("y")
 fi
 
-# we always need the cve-seach stuff:
+# we always need the cve-search stuff:
+if [[ -d external/cve-search ]]; then
+  rm external/cve-search
+fi
+
 git clone https://github.com/cve-search/cve-search.git external/cve-search
 cd ./external/cve-search/ || exit 1
 xargs sudo apt-get install -y < requirements.system
@@ -564,7 +581,7 @@ case ${ANSWER:0:1} in
     case ${ANSWER:0:1} in
       y|Y )
         CVE_INST=1
-        if netstat -anpt | grep LISTEN | grep 27017; then
+        if netstat -anpt | grep LISTEN | grep -q 27017; then
           if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
             CVE_INST=0
           fi
@@ -636,37 +653,39 @@ esac
 # binwalk
 
 INSTALL_APP_LIST=()
-print_tool_info "python3-pip" 1
-print_tool_info "python3-opengl" 1
-print_tool_info "python3-pyqt5" 1
-print_tool_info "python3-pyqt5.qtopengl" 1
-print_tool_info "python3-numpy" 1
-print_tool_info "python3-scipy" 1
-# python2 is needed for ubireader installation
-print_tool_info "python2" 1
-# python-setuptools is needed for ubireader installation
-print_tool_info "python-setuptools" 1
-print_tool_info "mtd-utils" 1
-print_tool_info "gzip" 1
-print_tool_info "bzip2" 1
-print_tool_info "tar" 1
-print_tool_info "arj" 1
-print_tool_info "lhasa" 1
-print_tool_info "p7zip" 1
-print_tool_info "p7zip-full" 1
-print_tool_info "cabextract" 1
-print_tool_info "cramfsswap" 1
-print_tool_info "squashfs-tools" 1
-print_tool_info "sleuthkit" 1
-print_tool_info "default-jdk" 1
-print_tool_info "lzop" 1
-print_tool_info "srecord" 1
-print_tool_info "build-essential" 1
-print_tool_info "zlib1g-dev" 1
-print_tool_info "liblzma-dev" 1
-print_tool_info "liblzo2-dev" 1
-# firmware-mod-kit is only available on Kali Linux
-print_tool_info "firmware-mod-kit" 1
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+  print_tool_info "python3-pip" 1
+  print_tool_info "python3-opengl" 1
+  print_tool_info "python3-pyqt5" 1
+  print_tool_info "python3-pyqt5.qtopengl" 1
+  print_tool_info "python3-numpy" 1
+  print_tool_info "python3-scipy" 1
+  # python2 is needed for ubireader installation
+  print_tool_info "python2" 1
+  # python-setuptools is needed for ubireader installation
+  print_tool_info "python-setuptools" 1
+  print_tool_info "mtd-utils" 1
+  print_tool_info "gzip" 1
+  print_tool_info "bzip2" 1
+  print_tool_info "tar" 1
+  print_tool_info "arj" 1
+  print_tool_info "lhasa" 1
+  print_tool_info "p7zip" 1
+  print_tool_info "p7zip-full" 1
+  print_tool_info "cabextract" 1
+  print_tool_info "cramfsswap" 1
+  print_tool_info "squashfs-tools" 1
+  print_tool_info "sleuthkit" 1
+  print_tool_info "default-jdk" 1
+  print_tool_info "lzop" 1
+  print_tool_info "srecord" 1
+  print_tool_info "build-essential" 1
+  print_tool_info "zlib1g-dev" 1
+  print_tool_info "liblzma-dev" 1
+  print_tool_info "liblzo2-dev" 1
+  # firmware-mod-kit is only available on Kali Linux
+  print_tool_info "firmware-mod-kit" 1
+fi
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
