@@ -193,6 +193,7 @@ main()
   export FORMAT_LOG=0
   export HTML=0
   export IN_DOCKER=0
+  export USE_DOCKER=1
   export KERNEL=0
   export LOG_GREP=0
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
@@ -211,7 +212,6 @@ main()
   export SHORT_PATH=0           # short paths in cli output
   export THREADED=0             # 0 -> single thread
                                 # 1 -> multi threaded
-  export USE_DOCKER=0
   export YARA=1
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
@@ -262,7 +262,7 @@ main()
         export ONLY_DEP=1
         ;;
       D)
-        export USE_DOCKER=1
+        export USE_DOCKER=0
         ;;
       e)
         export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")

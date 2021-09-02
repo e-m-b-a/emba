@@ -252,41 +252,43 @@ esac
 
 # download EMBA docker image
 
-echo -e "\\nThe normal EMBA operation mode use a docker image to protect your host. Docker and the EMBA container are required for this."
-INSTALL_APP_LIST=()
-print_tool_info "docker.io" 0 "docker"
+if [[ $DOCKER_SETUP -eq 1 ]] ; then
+  echo -e "\\nThe normal EMBA operation mode use a docker image to protect your host. Docker and the EMBA container are required for this."
+  INSTALL_APP_LIST=()
+  print_tool_info "docker.io" 0 "docker"
 
-if command -v docker > /dev/null ; then
-  echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
-  export DOCKER_CLI_EXPERIMENTAL=enabled
-  f="$(docker manifest inspect embeddedanalyzer/emba:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-  echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
-  export DOCKER_CLI_EXPERIMENTAL=disabled
-else
-  echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
-  echo "Download-Size: ~5000 MB"
-fi
+  if command -v docker > /dev/null ; then
+    echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
+    export DOCKER_CLI_EXPERIMENTAL=enabled
+    f="$(docker manifest inspect embeddedanalyzer/emba:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
+    echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
+    export DOCKER_CLI_EXPERIMENTAL=disabled
+  else
+    echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
+    echo "Download-Size: ~5000 MB"
+  fi
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
-  ANSWER=("y")
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
+      if [[ "$(docker images -q embeddedanalyzer/emba:latest 2> /dev/null)" == "" ]] ; then
+        echo -e "$ORANGE""embeddedanalyzer/emba docker image will be downloaded""$NC"
+        docker pull embeddedanalyzer/emba:latest
+      else
+        echo -e "$ORANGE""embeddedanalyzer/emba docker image is already downloaded""$NC"
+      fi
+    ;;
+  esac
 fi
-case ${ANSWER:0:1} in
-  y|Y )
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-    if [[ "$(docker images -q embeddedanalyzer/emba:latest 2> /dev/null)" == "" ]] ; then
-      echo -e "$ORANGE""embeddedanalyzer/emba docker image will be downloaded""$NC"
-      docker pull embeddedanalyzer/emba:latest
-    else
-      echo -e "$ORANGE""embeddedanalyzer/emba docker image is already downloaded""$NC"
-    fi
-  ;;
-esac
 
 # cwe checker docker
 
@@ -532,6 +534,13 @@ else
   echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
   ANSWER=("y")
 fi
+
+# we always need the cve-seach stuff:
+git clone https://github.com/cve-search/cve-search.git external/cve-search
+cd ./external/cve-search/ || exit 1
+xargs sudo apt-get install -y < requirements.system
+pip3 install -r requirements.txt
+ 
 case ${ANSWER:0:1} in
   y|Y )
     wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
@@ -551,18 +560,13 @@ case ${ANSWER:0:1} in
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        git clone https://github.com/cve-search/cve-search.git external/cve-search
-        cd ./external/cve-search/ || exit 1
-        pip3 install -r requirements.txt
-        xargs sudo apt-get install -y < requirements.system
         CVE_INST=1
         if netstat -anpt | grep LISTEN | grep 27017; then
-          if [[ $(./bin/search.py -p busybox | wc -l | awk '{print $1}') -gt 2000 ]]; then
+          if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
             CVE_INST=0
-          else
-            CVE_INST=1
           fi
         fi
+        # only update and install the database if we have no working database:
         if [[ "$CVE_INST" -eq 1 ]]; then
           /etc/init.d/redis-server start
           ./sbin/db_mgmt_cpe_dictionary.py -p
