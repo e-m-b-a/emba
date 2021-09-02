@@ -225,10 +225,10 @@ print_tool_info "git" 1
 print_tool_info "metasploit-framework" 1
 
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+elif [[ "$LIST_DEP" -eq 1 ]] ; then
   ANSWER=("n")
 else
   echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
