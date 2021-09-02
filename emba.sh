@@ -349,6 +349,12 @@ main()
 
   echo
 
+  if [[ $USE_DOCKER -eq 0 && $IN_DOCKER -eq 0 ]]; then
+    print_bar "no_log"
+    print_output "[!] WARNING: EMBA running in developer mode!" "no_log"
+    print_bar "no_log"
+  fi
+
   # profile handling
   if [[ -n "$PROFILE" ]]; then
     if [[ -f "$PROFILE" ]]; then
