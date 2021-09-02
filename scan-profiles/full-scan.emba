@@ -12,7 +12,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 #
 # Description: This is a default emba profile. You can Use it as a template for your own profiles
-#              or start emba with "-p full-scan_docker.emba" to use it
+#              or start emba with "-p full-scan.emba" to use it
 
 export FORMAT_LOG=1
 export THREADED=1
