@@ -259,13 +259,27 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   # needed for sshdcc:
   print_tool_info "tcllib" 1
   print_tool_info "net-tools" 1
-  echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
-  apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      echo
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
+    ;;
+  esac
 fi
 
-# download EMBA docker image
+# download EMBA docker image (only for -d Docker installation)
 
-if [[ $DOCKER_SETUP -eq 1 ]] && [[ $IN_DOCKER -eq 0 ]]; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   echo -e "\\nThe normal EMBA operation mode uses a docker image to protect your host. The docker environment and the EMBA image are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
@@ -278,7 +292,7 @@ if [[ $DOCKER_SETUP -eq 1 ]] && [[ $IN_DOCKER -eq 0 ]]; then
     export DOCKER_CLI_EXPERIMENTAL=disabled
   else
     echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
-    echo "Download-Size: ~5000 MB"
+    echo "Download-Size: ~2500 MB"
   fi
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
@@ -360,18 +374,21 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   fi
   case ${ANSWER:0:1} in
     y|Y )
+      if [[ -d ./external/fact_extractor ]]; then
+        rm -r external/fact_extractor
+      fi
       # this is a temporary solution until the official fact repo supports a current kali linux
       git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
       cd ./external/fact_extractor/fact_extractor/ || exit 1
       ./install/pre_install.sh
       python3 ./install.py
       cd ../../.. || exit 1
+  
+      if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
+        echo -e "$GREEN""FACT-extractor installed""$NC"
+      fi
     ;;
   esac
-  
-  if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
-    echo -e "$GREEN""FACT-extractor installed""$NC"
-  fi
 fi
 
 # open source tools from github
@@ -565,20 +582,23 @@ else
   ANSWER=("y")
 fi
 
-# we always need the cve-search stuff:
-if [[ -d external/cve-search ]]; then
-  rm -r external/cve-search
-fi
-
-git clone https://github.com/cve-search/cve-search.git external/cve-search
-cd ./external/cve-search/ || exit 1
-xargs sudo apt-get install -y < requirements.system
-# shellcheck disable=SC2002
-cat requirements.txt | xargs -n 1 pip install
- 
 case ${ANSWER:0:1} in
   y|Y )
+
+    # we always need the cve-search stuff:
+    if [[ -d external/cve-search ]]; then
+      rm -r external/cve-search
+    fi
+
+    git clone https://github.com/cve-search/cve-search.git external/cve-search
+    cd ./external/cve-search/ || exit 1
+    xargs sudo apt-get install -y < requirements.system
+    # shellcheck disable=SC2002
+    cat requirements.txt | xargs -n 1 pip install
+    cd ../.. || exit 1
+ 
     CVE_INST=1
+    echo -e "\\n""$MAGENTA""First check if the cve-search database is already installed.""$NC"
     if netstat -anpt | grep LISTEN | grep -q 27017; then
       if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
         CVE_INST=0
@@ -603,6 +623,7 @@ case ${ANSWER:0:1} in
       case ${ANSWER:0:1} in
         y|Y )
           CVE_INST=1
+          echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
           if netstat -anpt | grep LISTEN | grep -q 27017; then
             if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
               CVE_INST=0
@@ -610,14 +631,15 @@ case ${ANSWER:0:1} in
           fi
           # only update and install the database if we have no working database:
           if [[ "$CVE_INST" -eq 1 ]]; then
+            cd ./external/cve-search/ || exit 1
             /etc/init.d/redis-server start
             ./sbin/db_mgmt_cpe_dictionary.py -p
             ./sbin/db_mgmt_json.py -p
             ./sbin/db_updater.py -f
+            cd ../.. || exit 1
           else
             echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
           fi
-          cd ../.. || exit 1
           sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
           chmod +x config/cve_database_updater
           echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
@@ -792,12 +814,12 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       if ! command -v binwalk > /dev/null ; then
         cd ./external/binwalk || exit 1
         python3 setup.py install
+        cd ../.. || exit 1
       else
         echo -e "$GREEN""binwalk already installed""$NC"
         BINWALK_PRE_AVAILABLE=1
       fi
   
-      cd ../.. || exit 1
       if [[ -d ./external/binwalk ]]; then
         rm ./external/binwalk -r
       fi
