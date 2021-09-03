@@ -172,10 +172,12 @@ while getopts cdDFhl OPT ; do
     D)
       export IN_DOCKER=1
       export DOCKER_SETUP=0
-      echo -e "$GREEN""$BOLD""Install emba on docker (docker image)""$NC"
+      export FORCE=1
+      echo -e "$GREEN""$BOLD""Install emba in docker image - used for building a docker image""$NC"
       ;;
     F)
       export FORCE=1
+      export FULL=1
       export DOCKER_SETUP=0
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
@@ -227,7 +229,7 @@ print_tool_info "git" 1
 # libguestfs-tools is needed to mount vmdk images
 print_tool_info "metasploit-framework" 1
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+if [[ "$FORCE" -eq 0 ]] && { [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]];}; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
   read -p "(y/N)" -r ANSWER
 elif [[ "$LIST_DEP" -eq 1 ]] ; then
@@ -245,7 +247,7 @@ esac
 
 INSTALL_APP_LIST=()
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   print_tool_info "make" 1
   print_tool_info "tree" 1
   print_tool_info "yara" 1
@@ -279,7 +281,7 @@ fi
 
 # download EMBA docker image (only for -d Docker installation)
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nThe normal EMBA operation mode uses a docker image to protect your host. The docker environment and the EMBA image are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
@@ -295,7 +297,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
     echo "Download-Size: ~2500 MB"
   fi
 
-  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
+  if [[ "$FORCE" -eq 0 ]] && { [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]];}; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
     read -p "(y/N)" -r ANSWER
   elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
@@ -320,7 +322,7 @@ fi
 # cwe checker docker
 
 # currently only available on a full host installation:
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nWith emba you can automatically find vulnerable pattern in binary executables (just start emba with the parameter -c). Docker and the cwe_checker from fkiecad are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
@@ -339,7 +341,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
     read -p "(y/N)" -r ANSWER
-  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
     ANSWER=("n")
   else
     echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
@@ -360,7 +362,7 @@ fi
 
 # FACT-extractor
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extraction tool. FACT-extractor from fkiecad is required for this."
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
@@ -393,7 +395,7 @@ fi
 
 # open source tools from github
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nWe use a few well-known open source tools in emba, for example checksec."
   
   print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
@@ -434,7 +436,7 @@ fi
 
 # yara rules
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
   
   print_file_info "Xumeiquer/yara-forensics/compressed.yar" "" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
@@ -467,7 +469,7 @@ fi
 
 # binutils - objdump
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   BINUTIL_VERSION_NAME="binutils-2.35.1"
   
   echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
@@ -520,7 +522,7 @@ fi
 
 
 # CSV and CVSS databases
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
 
   echo -e "\\nTo check binaries to known CSV entries and CVSS values, we need a vulnerability database. Additional we have to parse data and need jq as tool for it, if it's missing, it will be installed."
   
@@ -570,88 +572,92 @@ fi
 
 # cve-search database for host 
 
-echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database."
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install cve-search and mongodb and populate it?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
-  ANSWER=("y")
-fi
-
-case ${ANSWER:0:1} in
-  y|Y )
-
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
+  echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database."
+  
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install cve-search and mongodb and populate it?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
+    ANSWER=("y")
+  fi
+  
+  if [[ "$FORCE" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
     # we always need the cve-search stuff:
     if [[ -d external/cve-search ]]; then
       rm -r external/cve-search
     fi
-
+  
     git clone https://github.com/cve-search/cve-search.git external/cve-search
     cd ./external/cve-search/ || exit 1
     xargs sudo apt-get install -y < requirements.system
     # shellcheck disable=SC2002
     cat requirements.txt | xargs -n 1 pip install
- 
-    CVE_INST=1
-    echo -e "\\n""$MAGENTA""First check if the cve-search database is already installed.""$NC"
-    if netstat -anpt | grep LISTEN | grep -q 27017; then
-      if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
-        CVE_INST=0
+  fi
+   
+  case ${ANSWER:0:1} in
+    y|Y )
+  
+      CVE_INST=1
+      echo -e "\\n""$MAGENTA""First check if the cve-search database is already installed.""$NC"
+      if netstat -anpt | grep LISTEN | grep -q 27017; then
+        if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
+          CVE_INST=0
+        fi
       fi
-    fi
-    if [[ "$CVE_INST" -eq 1 ]]; then
-      wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-      echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-      apt-get update -y
-      apt-get install mongodb-org -y
-      systemctl daemon-reload
-      systemctl start mongod
-      systemctl enable mongod
-      
-      if [[ "$FORCE" -eq 0 ]] ; then
-        echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
-        read -p "(y/N)" -r ANSWER
-      else
-        echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
-        ANSWER=("y")
-      fi
-      case ${ANSWER:0:1} in
-        y|Y )
-          CVE_INST=1
-          echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
-          if netstat -anpt | grep LISTEN | grep -q 27017; then
-            if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
-              CVE_INST=0
+      if [[ "$CVE_INST" -eq 1 ]]; then
+        wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+        echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+        apt-get update -y
+        apt-get install mongodb-org -y
+        systemctl daemon-reload
+        systemctl start mongod
+        systemctl enable mongod
+        
+        if [[ "$FORCE" -eq 0 ]] ; then
+          echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
+          read -p "(y/N)" -r ANSWER
+        else
+          echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
+          ANSWER=("y")
+        fi
+        case ${ANSWER:0:1} in
+          y|Y )
+            CVE_INST=1
+            echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
+            if netstat -anpt | grep LISTEN | grep -q 27017; then
+              if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
+                CVE_INST=0
+              fi
             fi
-          fi
-          # only update and install the database if we have no working database:
-          if [[ "$CVE_INST" -eq 1 ]]; then
-            /etc/init.d/redis-server start
-            ./sbin/db_mgmt_cpe_dictionary.py -p
-            ./sbin/db_mgmt_json.py -p
-            ./sbin/db_updater.py -f
-          else
-            echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
-          fi
-          sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
-          chmod +x config/cve_database_updater
-          echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
-          echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
-          echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
-        ;;
-      esac
-      cd ../.. || exit 1
-    fi
-  ;;
-esac
+            # only update and install the database if we have no working database:
+            if [[ "$CVE_INST" -eq 1 ]]; then
+              /etc/init.d/redis-server start
+              ./sbin/db_mgmt_cpe_dictionary.py -p
+              ./sbin/db_mgmt_json.py -p
+              ./sbin/db_updater.py -f
+            else
+              echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
+            fi
+            sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
+            chmod +x config/cve_database_updater
+            echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+            echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
+            echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+          ;;
+        esac
+        cd ../.. || exit 1
+      fi
+    ;;
+  esac
+fi
 
 # aggregator tools to 
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
   echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
   INSTALL_APP_LIST=()
@@ -694,7 +700,7 @@ fi
 # binwalk
 
 INSTALL_APP_LIST=()
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   print_tool_info "python3-pip" 1
   print_tool_info "python3-opengl" 1
   print_tool_info "python3-pyqt5" 1
@@ -831,13 +837,15 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   esac
 fi
 
-echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
-echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
-echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
-echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
+  echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
+  echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+  echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
+  echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
 
-echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
+  echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
 
-echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
+  echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
+fi
 
 echo -e "$GREEN""Emba installation finished ""$NC"

@@ -54,6 +54,19 @@ check_dep_tool()
   fi
 }
 
+check_dep_port()
+{
+  TOOL_NAME="$1"
+  PORT_NR="$2"
+  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
+  if ! netstat -anpt | grep -q "$PORT_NR"; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    Missing ""$TOOL_NAME"" - check your installation""$NC"
+    DEP_ERROR=1
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+}
 
 dependency_check() 
 {
@@ -130,6 +143,7 @@ dependency_check()
   if [[ $USE_DOCKER -eq 1 ]] ; then
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
+    check_dep_port "cve-search" 27017
   fi
 
   #######################################################################################
@@ -191,6 +205,7 @@ dependency_check()
     if [[ IN_DOCKER -eq 0 ]]; then 
       # really basic check, if cve-search database is running - no check, if populated and also no check, if emba in docker
       check_dep_tool "mongoDB" "mongod"
+      check_dep_port "cve-search" 27017
     fi
 
     # CVE searchsploit
@@ -201,7 +216,7 @@ dependency_check()
     export FACT_EXTRACTOR=1 
 
     print_output "    fact-extractor start script - \\c" "no_log"
-    if [[ -f "./external/fact_extractor/fact_extractor/fact_extract.py" ]] ; then
+    if [[ -f "$EXT_DIR""/fact_extractor/fact_extractor/fact_extract.py" ]] ; then
       echo -e "$GREEN""ok""$NC"
     else
       echo -e "$RED""not ok""$NC"
