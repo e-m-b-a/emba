@@ -145,9 +145,10 @@ download_file()
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
-  echo -e "$CYAN""-d""$NC""         Installation of all dependencies needed for emba in default/docker mode (typical initial installation)"
-  echo -e "$CYAN""-F""$NC""         Installation of emba with all dependencies (for running on your host - developer mode)"
+  echo -e "$CYAN""-d""$NC""         Installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
+  echo -e "$CYAN""-F""$NC""         Installation of EMBA with all dependencies (for running on your host - developer mode)"
   echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
+  echo -e "$CYAN""-D""$NC""         Build EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of emba"
   echo
@@ -170,11 +171,13 @@ while getopts cdDFhl OPT ; do
       ;;
     D)
       export IN_DOCKER=1
+      export DOCKER_SETUP=0
       echo -e "$GREEN""$BOLD""Install emba on docker (docker image)""$NC"
       ;;
     F)
       export FORCE=1
-      echo -e "$GREEN""$BOLD""Install all dependecies""$NC"
+      export DOCKER_SETUP=0
+      echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
     h)
       print_help
@@ -224,7 +227,6 @@ print_tool_info "git" 1
 # libguestfs-tools is needed to mount vmdk images
 print_tool_info "metasploit-framework" 1
 
-
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
   read -p "(y/N)" -r ANSWER
@@ -243,7 +245,7 @@ esac
 
 INSTALL_APP_LIST=()
 
-if [[ "$DOCKER_SETUP" -eq 0 ]] || [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
   print_tool_info "make" 1
   print_tool_info "tree" 1
   print_tool_info "yara" 1
@@ -256,12 +258,14 @@ if [[ "$DOCKER_SETUP" -eq 0 ]] || [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1
   print_tool_info "ent" 1
   # needed for sshdcc:
   print_tool_info "tcllib" 1
+  print_tool_info "net-tools" 1
+  echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
   apt-get install "${INSTALL_APP_LIST[@]}" -y
 fi
 
 # download EMBA docker image
 
-if [[ $DOCKER_SETUP -eq 1 ]] ; then
+if [[ $DOCKER_SETUP -eq 1 ]] && [[ $IN_DOCKER -eq 0 ]]; then
   echo -e "\\nThe normal EMBA operation mode uses a docker image to protect your host. The docker environment and the EMBA image are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
@@ -301,7 +305,8 @@ fi
 
 # cwe checker docker
 
-if [[ $DOCKER_SETUP -eq 0 ]] ; then
+# currently only available on a full host installation:
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
   echo -e "\\nWith emba you can automatically find vulnerable pattern in binary executables (just start emba with the parameter -c). Docker and the cwe_checker from fkiecad are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
@@ -341,7 +346,7 @@ fi
 
 # FACT-extractor
 
-if [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
   echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extraction tool. FACT-extractor from fkiecad is required for this."
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
@@ -357,21 +362,21 @@ if [[ $DOCKER_SETUP -eq 0 ]] ; then
     y|Y )
       # this is a temporary solution until the official fact repo supports a current kali linux
       git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
-      cd external/fact_extractor/fact_extractor/ || exit 1
+      cd ./external/fact_extractor/fact_extractor/ || exit 1
       ./install/pre_install.sh
       python3 ./install.py
       cd ../../.. || exit 1
     ;;
   esac
   
-  if python3 external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
+  if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
     echo -e "$GREEN""FACT-extractor installed""$NC"
   fi
 fi
 
 # open source tools from github
 
-if [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
   echo -e "\\nWe use a few well-known open source tools in emba, for example checksec."
   
   print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
@@ -412,7 +417,7 @@ fi
 
 # yara rules
 
-if [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
   echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
   
   print_file_info "Xumeiquer/yara-forensics/compressed.yar" "" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
@@ -445,7 +450,7 @@ fi
 
 # binutils - objdump
 
-if [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
   BINUTIL_VERSION_NAME="binutils-2.35.1"
   
   echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
@@ -573,52 +578,61 @@ cat requirements.txt | xargs -n 1 pip install
  
 case ${ANSWER:0:1} in
   y|Y )
-    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-    apt-get update -y
-    apt-get install mongodb-org -y
-    systemctl daemon-reload
-    systemctl start mongod
-    systemctl enable mongod
-    
-    if [[ "$FORCE" -eq 0 ]] ; then
-      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
-      read -p "(y/N)" -r ANSWER
-    else
-      echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
-      ANSWER=("y")
+    CVE_INST=1
+    if netstat -anpt | grep LISTEN | grep -q 27017; then
+      if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
+        CVE_INST=0
+      fi
     fi
-    case ${ANSWER:0:1} in
-      y|Y )
-        CVE_INST=1
-        if netstat -anpt | grep LISTEN | grep -q 27017; then
-          if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
-            CVE_INST=0
+    if [[ "$CVE_INST" -eq 1 ]]; then
+      wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+      echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+      apt-get update -y
+      apt-get install mongodb-org -y
+      systemctl daemon-reload
+      systemctl start mongod
+      systemctl enable mongod
+      
+      if [[ "$FORCE" -eq 0 ]] ; then
+        echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
+        read -p "(y/N)" -r ANSWER
+      else
+        echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
+        ANSWER=("y")
+      fi
+      case ${ANSWER:0:1} in
+        y|Y )
+          CVE_INST=1
+          if netstat -anpt | grep LISTEN | grep -q 27017; then
+            if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
+              CVE_INST=0
+            fi
           fi
-        fi
-        # only update and install the database if we have no working database:
-        if [[ "$CVE_INST" -eq 1 ]]; then
-          /etc/init.d/redis-server start
-          ./sbin/db_mgmt_cpe_dictionary.py -p
-          ./sbin/db_mgmt_json.py -p
-          ./sbin/db_updater.py -f
-        else
-          echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
-        fi
-        cd ../.. || exit 1
-        sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
-        chmod +x config/cve_database_updater
-        echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
-        echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
-        echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
-      ;;
-    esac
+          # only update and install the database if we have no working database:
+          if [[ "$CVE_INST" -eq 1 ]]; then
+            /etc/init.d/redis-server start
+            ./sbin/db_mgmt_cpe_dictionary.py -p
+            ./sbin/db_mgmt_json.py -p
+            ./sbin/db_updater.py -f
+          else
+            echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
+          fi
+          cd ../.. || exit 1
+          sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
+          chmod +x config/cve_database_updater
+          echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+          echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
+          echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+        ;;
+      esac
+    fi
   ;;
 esac
 
 # aggregator tools to 
 
-if [[ $DOCKER_SETUP -eq 0 ]] ; then
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
+  echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
   echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
   INSTALL_APP_LIST=()
   print_tool_info "python3-pip" 1
@@ -692,108 +706,110 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_tool_info "liblzo2-dev" 1
   # firmware-mod-kit is only available on Kali Linux
   print_tool_info "firmware-mod-kit" 1
-fi
 
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
-  read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
-  ANSWER=("n")
-else
-  echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
-  ANSWER=("y")
-fi
-case ${ANSWER:0:1} in
-  y|Y )
-    BINWALK_PRE_AVAILABLE=0
-
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-
-    pip3 install nose
-    pip3 install coverage
-    pip3 install pyqtgraph
-    pip3 install capstone
-    pip3 install cstruct
-
-    git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
-
-    if ! command -v yaffshiv > /dev/null ; then
-      git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
-      cd ./external/binwalk/yaffshiv/ || exit 1
-      python3 setup.py install
-      cd ../../.. || exit 1
-    else
-      echo -e "$GREEN""yaffshiv already installed""$NC"
-    fi
-
-    if ! command -v sasquatch > /dev/null ; then
-      git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
-      CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
-    else
-      echo -e "$GREEN""sasquatch already installed""$NC"
-    fi
-
-    if ! command -v jefferson > /dev/null ; then
-      git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
-      pip3 install -r ./external/binwalk/jefferson/requirements.txt
-      cd ./external/binwalk/jefferson/ || exit 1
-      python3 ./setup.py install
-      cd ../../.. || exit 1
-    else
-      echo -e "$GREEN""jefferson already installed""$NC"
-    fi
-
-    if ! command -v unstuff > /dev/null ; then
-      mkdir ./external/binwalk/unstuff
-      wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
-      tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
-      cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
-    else
-      echo -e "$GREEN""unstuff already installed""$NC"
-    fi
-      
-    if ! command -v cramfsck > /dev/null ; then
-      if [[ -f "/opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck" ]]; then
-        ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+      BINWALK_PRE_AVAILABLE=0
+  
+      apt-get install "${INSTALL_APP_LIST[@]}" -y
+  
+      pip3 install nose
+      pip3 install coverage
+      pip3 install pyqtgraph
+      pip3 install capstone
+      pip3 install cstruct
+  
+      git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+  
+      if ! command -v yaffshiv > /dev/null ; then
+        git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
+        cd ./external/binwalk/yaffshiv/ || exit 1
+        python3 setup.py install
+        cd ../../.. || exit 1
+      else
+        echo -e "$GREEN""yaffshiv already installed""$NC"
       fi
-
-      git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
-      make -C ./external/binwalk/cramfs-tools/
-      install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
-      install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
-    else
-      echo -e "$GREEN""cramfsck already installed""$NC"
-    fi
-
-
-    if ! command -v ubireader_extract_files > /dev/null ; then
-      git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
-      cd ./external/binwalk/ubi_reader || exit 1
-      git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
-      python2 setup.py install
-      cd ../../.. || exit 1
-    else
-      echo -e "$GREEN""ubi_reader already installed""$NC"
-    fi
-
-    if ! command -v binwalk > /dev/null ; then
-      cd ./external/binwalk || exit 1
-      python3 setup.py install
-    else
-      echo -e "$GREEN""binwalk already installed""$NC"
-      BINWALK_PRE_AVAILABLE=1
-    fi
-
-    cd ../.. || exit 1
-    rm ./external/binwalk -r
-
-    if [[ -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
-      echo -e "$GREEN""binwalk installed successfully""$NC"
-    elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
-      echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
-    fi
-  ;;
-esac
+  
+      if ! command -v sasquatch > /dev/null ; then
+        git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+        CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+      else
+        echo -e "$GREEN""sasquatch already installed""$NC"
+      fi
+  
+      if ! command -v jefferson > /dev/null ; then
+        git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
+        pip3 install -r ./external/binwalk/jefferson/requirements.txt
+        cd ./external/binwalk/jefferson/ || exit 1
+        python3 ./setup.py install
+        cd ../../.. || exit 1
+      else
+        echo -e "$GREEN""jefferson already installed""$NC"
+      fi
+  
+      if ! command -v unstuff > /dev/null ; then
+        mkdir ./external/binwalk/unstuff
+        wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+        tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
+        cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
+      else
+        echo -e "$GREEN""unstuff already installed""$NC"
+      fi
+        
+      if ! command -v cramfsck > /dev/null ; then
+        if [[ -f "/opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck" ]]; then
+          ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
+        fi
+  
+        git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
+        make -C ./external/binwalk/cramfs-tools/
+        install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
+        install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
+      else
+        echo -e "$GREEN""cramfsck already installed""$NC"
+      fi
+  
+  
+      if ! command -v ubireader_extract_files > /dev/null ; then
+        git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
+        cd ./external/binwalk/ubi_reader || exit 1
+        git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
+        python2 setup.py install
+        cd ../../.. || exit 1
+      else
+        echo -e "$GREEN""ubi_reader already installed""$NC"
+      fi
+  
+      if ! command -v binwalk > /dev/null ; then
+        cd ./external/binwalk || exit 1
+        python3 setup.py install
+      else
+        echo -e "$GREEN""binwalk already installed""$NC"
+        BINWALK_PRE_AVAILABLE=1
+      fi
+  
+      cd ../.. || exit 1
+      if [[ -d ./external/binwalk ]]; then
+        rm ./external/binwalk -r
+      fi
+  
+      if [[ -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+        echo -e "$GREEN""binwalk installed successfully""$NC"
+      elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+        echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
+      fi
+    ;;
+  esac
+fi
 
 echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
 echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
