@@ -595,7 +595,6 @@ case ${ANSWER:0:1} in
     xargs sudo apt-get install -y < requirements.system
     # shellcheck disable=SC2002
     cat requirements.txt | xargs -n 1 pip install
-    cd ../.. || exit 1
  
     CVE_INST=1
     echo -e "\\n""$MAGENTA""First check if the cve-search database is already installed.""$NC"
@@ -631,12 +630,10 @@ case ${ANSWER:0:1} in
           fi
           # only update and install the database if we have no working database:
           if [[ "$CVE_INST" -eq 1 ]]; then
-            cd ./external/cve-search/ || exit 1
             /etc/init.d/redis-server start
             ./sbin/db_mgmt_cpe_dictionary.py -p
             ./sbin/db_mgmt_json.py -p
             ./sbin/db_updater.py -f
-            cd ../.. || exit 1
           else
             echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
           fi
@@ -647,6 +644,7 @@ case ${ANSWER:0:1} in
           echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
         ;;
       esac
+      cd ../.. || exit 1
     fi
   ;;
 esac
