@@ -606,7 +606,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       if netstat -anpt | grep LISTEN | grep -q 27017; then
         if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
           CVE_INST=0
+        else
+          echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
         fi
+      else
+        echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
       fi
       if [[ "$CVE_INST" -eq 1 ]]; then
         wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
@@ -631,7 +635,13 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             if netstat -anpt | grep LISTEN | grep -q 27017; then
               if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
                 CVE_INST=0
+              else
+                echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
+                echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
               fi
+            else
+              echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
+              echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
             fi
             # only update and install the database if we have no working database:
             if [[ "$CVE_INST" -eq 1 ]]; then

@@ -60,7 +60,7 @@ sudo ./emba.sh -l ./log -f /firmware
 ---   
 ### Profile support:
 ```console
-sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan-docker.emba
+sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 
 ```
 ---
