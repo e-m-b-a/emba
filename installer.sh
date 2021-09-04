@@ -609,7 +609,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       CVE_INST=1
       echo -e "\\n""$MAGENTA""First check if the cve-search database is already installed.""$NC"
       if netstat -anpt | grep LISTEN | grep -q 27017; then
-        if [[ $(./bin/search.py -p busybox 2>/dev/null | grep ":\ CVE-"  | wc -l | awk '{print $1}') -gt 18 ]]; then
+        if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_INST=0
         else
           echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
@@ -639,7 +639,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             CVE_INST=1
             echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
             if netstat -anpt | grep LISTEN | grep -q 27017; then
-              if [[ $(./bin/search.py -p busybox 2>/dev/null | grep ":\ CVE-"  | wc -l | awk '{print $1}') -gt 18 ]]; then
+              if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 CVE_INST=0
               else
                 echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
