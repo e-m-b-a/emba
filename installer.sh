@@ -27,8 +27,6 @@ FORCE=0
 IN_DOCKER=0
 # list dependencies
 LIST_DEP=0
-# install for running in docker mode
-DOCKER_SETUP=1
 
 ## Color definition
 RED="\033[0;31m"
@@ -297,7 +295,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
     echo "Download-Size: ~2500 MB"
   fi
 
-  if [[ "$FORCE" -eq 0 ]] && { [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]];}; then
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
     read -p "(y/N)" -r ANSWER
   elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
@@ -403,6 +401,9 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_file_info "sshdcc" "Check SSHd configuration files" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
   print_file_info "sudo-parser.pl" "Parses and tests sudoers configuration files" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
   print_file_info "pixd" "pixd is a tool for visualizing binary data using a colour palette." "https://github.com/FireyFly/pixd/pixd.c" "external/pixd"
+
+  ## MISSING for -l:
+  # pip: pillow
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
@@ -574,7 +575,11 @@ fi
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database."
-  
+
+  ## MISSING for -l:
+  # packages from requirements.system
+  # pip packages from requirements.txt
+
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install cve-search and mongodb and populate it?""$NC"
     read -p "(y/N)" -r ANSWER
@@ -604,7 +609,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       CVE_INST=1
       echo -e "\\n""$MAGENTA""First check if the cve-search database is already installed.""$NC"
       if netstat -anpt | grep LISTEN | grep -q 27017; then
-        if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
+        if [[ $(./bin/search.py -p busybox 2>/dev/null | grep ":\ CVE-"  | wc -l | awk '{print $1}') -gt 18 ]]; then
           CVE_INST=0
         else
           echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
@@ -616,6 +621,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
         wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
         echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
         apt-get update -y
+        print_tool_info "mongodb-org" 1
         apt-get install mongodb-org -y
         systemctl daemon-reload
         systemctl start mongod
@@ -633,7 +639,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             CVE_INST=1
             echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
             if netstat -anpt | grep LISTEN | grep -q 27017; then
-              if [[ $(./bin/search.py -p busybox 2>/dev/null | wc -l | awk '{print $1}') -gt 2000 ]]; then
+              if [[ $(./bin/search.py -p busybox 2>/dev/null | grep ":\ CVE-"  | wc -l | awk '{print $1}') -gt 18 ]]; then
                 CVE_INST=0
               else
                 echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
@@ -670,9 +676,11 @@ fi
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
   echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
+
   INSTALL_APP_LIST=()
   print_tool_info "python3-pip" 1
   print_tool_info "net-tools" 1
+  ### MISSING: cve_searchsploit pip package
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
@@ -742,6 +750,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_tool_info "liblzo2-dev" 1
   # firmware-mod-kit is only available on Kali Linux
   print_tool_info "firmware-mod-kit" 1
+
+  ### MISSING for -l:
+  # pip: nose, coverage, pyqtgraph, capstone, cstruct
+  # git projects: binwalk, yaffshiv, sasquatch, jefferson, cramfs-tools, ubi_reader
+  # others: unstuff
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
@@ -858,4 +871,6 @@ if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
   echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
 fi
 
-echo -e "$GREEN""Emba installation finished ""$NC"
+if [[ "$LIST_DEP" -eq 0 ]]; then
+  echo -e "$GREEN""Emba installation finished ""$NC"
+fi
