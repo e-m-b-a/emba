@@ -24,6 +24,7 @@ HELP_DIR="./helpers"
 MOD_DIR="./modules"
 
 SOURCES=()
+MODULES_TO_CHECK_ARR=()
 
 import_helper() {
   HELPERS=$(find "$HELP_DIR" -iname "*.sh" 2>/dev/null)
@@ -58,6 +59,7 @@ check()
     echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
   else
     echo -e "\\n""$ORANGE$BOLD==> FIX ERRORS""$NC""\\n"
+    MODULES_TO_CHECK_ARR+=("check_project.sh")
   fi
 
   echo -e "\\n""$GREEN""Run shellcheck on installer:""$NC""\\n"
@@ -65,6 +67,7 @@ check()
     echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
   else
     echo -e "\\n""$ORANGE$BOLD==> FIX ERRORS""$NC""\\n"
+    MODULES_TO_CHECK_ARR+=("installer.sh")
   fi
 
   echo -e "\\n""$GREEN""Load all files for check:""$NC""\\n"
@@ -73,11 +76,28 @@ check()
   import_module
 
   echo -e "\\n""$GREEN""Run shellcheck:""$NC""\\n"
-  if shellcheck -P "$HELP_DIR":"$MOD_DIR" -a ./emba.sh "${SOURCES[@]}" || [[ $? -ne 1 && $? -ne 2 ]]; then
-    echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
-  else
-    echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+  for SOURCE in "${SOURCES[@]}"; do
+    echo -e "\\n""$GREEN""Run shellcheck on $SOURCE""$NC""\\n"
+    if shellcheck -P "$HELP_DIR":"$MOD_DIR" -a ./emba.sh "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
+      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    else
+      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+      MODULES_TO_CHECK_ARR+=("$SOURCE")
+    fi
+  done
+}
+
+summary() {
+  if [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "Modules to check: ${#MODULES_TO_CHECK_ARR[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR[@]}"; do
+      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+    done
+    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
 }
 
 check
+summary
+
