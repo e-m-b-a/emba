@@ -155,6 +155,12 @@ print_help()
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
+if [ "$#" -ne 1 ]; then
+  echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
+  print_help
+  exit 1
+fi
+
 while getopts cdDFhl OPT ; do
   case $OPT in
     c)
