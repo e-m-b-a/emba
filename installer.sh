@@ -250,41 +250,53 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
-# cwe checker docker
+# cwe checker
 
-echo -e "\\nWith emba you can automatically find vulnerable pattern in binary executables (just start emba with the parameter -c). Docker and the cwe_checker from fkiecad are required for this."
+echo -e "\\nWith emba you can automatically find vulnerable pattern in binary executables (just start emba with the parameter -c). To be able to compile cwe-checker from fkiecad, we have to install Java SDK, Ghidra and Rust at first."
 INSTALL_APP_LIST=()
-print_tool_info "docker.io" 0 "docker"
 
-if command -v docker > /dev/null ; then
-  echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
-  export DOCKER_CLI_EXPERIMENTAL=enabled
-  f="$(docker manifest inspect fkiecad/cwe_checker:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-  echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
-  export DOCKER_CLI_EXPERIMENTAL=disabled
-else
-  echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
-  echo "Download-Size: ~600 MB"
-fi
-
-if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
-  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
   read -p "(y/N)" -r ANSWER
-elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
   ANSWER=("n")
 else
-  echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+  echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
   ANSWER=("y")
 fi
 case ${ANSWER:0:1} in
   y|Y )
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
-    if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
-      echo -e "$ORANGE""fkiecad/cwe_checker docker image will be downloaded""$NC"
-      docker pull fkiecad/cwe_checker:latest
-    else
-      echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
-    fi
+    echo
+    curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
+    # shellcheck disable=SC1090
+    # shellcheck disable=SC1091
+    source "$HOME/.cargo/env"
+    RUSTUP_HOME=external/rustup rustup default stable
+    export RUSTUP_TOOLCHAIN=stable 
+
+    # Java SDK for ghidra
+    if [[ -d .external/jdk ]] ; then rm -R .external/jdk ; fi
+    curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
+    mkdir external/jdk
+    tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
+    rm external/jdk.tar.gz
+
+    # Ghidra
+    if [[ -d .external/ghidra ]] ; then rm -R .external/ghidra ; fi
+    curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip -Sf -o external/ghidra.zip
+    mkdir external/ghidra
+    unzip -qo external/ghidra.zip -d external/ghidra
+    sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.0.2_PUBLIC/support/launch.properties
+    rm external/ghidra.zip
+
+    # cwe-checker
+    if [[ -d .external/cwe_checker ]] ; then rm -R .external/cwe_checker ; fi
+    mkdir external/cwe_checker
+    git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
+    cd external/cwe_checker || exit 1
+    make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
+    cd ../../ || exit 1
+    cp -r "$HOME""/.cargo/bin" "external/cwe_checker/bin"
   ;;
 esac
 
@@ -355,7 +367,7 @@ case ${ANSWER:0:1} in
     download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
     download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
     download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
-    ### pixd installation
+    # pixd installation
     pip3 install pillow
     git clone https://github.com/p4cx/pixd_image external/pixd
     cd ./external/pixd/ || exit 1
@@ -364,7 +376,7 @@ case ${ANSWER:0:1} in
     mv pixd_png.py ../pixd_png.py
     cd ../../ || exit 1
     rm -r ./external/pixd/
-    ### pixd installation
+    # pixd installation
   ;;
 esac
 
