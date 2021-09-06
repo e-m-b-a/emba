@@ -43,12 +43,29 @@ S120_cwe_checker()
 cwe_check() {
   TOTAL_CWE_CNT=0
 
+  export PATH=./external/cwe_checker/bin:$PATH # needed for docker setup
+
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        cwe_checker_threaded &
+        WAIT_PIDS_S120+=( "$!" )
+        max_pids_protection 10 "${WAIT_PIDS_S120[@]}"
+      else
+        cwe_checker_threaded
+      fi
+    fi
+
+  done
+  if [[ $THREADED -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S120[@]}"
+  fi
+}
+
+cwe_checker_threaded () {
       NAME=$(basename "$LINE")
       LINE=$(readlink -f "$LINE")
       print_output "[*] Testing $LINE"
-      export PATH=/root/.cargo/bin:$PATH # needed for docker setup
       readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log )
       if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then
         print_output "[*] ""$(print_path "$LINE")"
@@ -77,8 +94,6 @@ cwe_check() {
         print_output ""
       fi
       if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then echo ; fi
-    fi
-  done
 }
 
 final_cwe_log() {
