@@ -627,7 +627,7 @@ case ${ANSWER:0:1} in
     php ./external/iniscan/composer.phar build --no-interaction
     php composer.phar global require psecio/iniscan --no-interaction
     readarray -t INISCAN_PATH < <(find / -path "*/vendor/bin/iniscan")
-    cp -r "$(${"${INISCAN_PATH[0]}"//\/bin\/iniscan/})" "./external/iniscan/vendor"
+    cp -r "${INISCAN_PATH[0]//"/bin/iniscan"/""}" "./external/iniscan/vendor"
   ;;
 esac
 
