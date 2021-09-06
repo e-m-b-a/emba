@@ -103,10 +103,10 @@ print_git_info() {
 # b = package version
 print_pip_info() {
   PIP_NAME="$1"
-  if [[ -n "${2}" ]] ; then
-    # TODO: include in update check
-    PACKAGE_VERSION="$2"
-  fi
+  #if [[ -n "${2}" ]] ; then
+  #  # TODO: include in update check
+  #  PACKAGE_VERSION="$2"
+  #fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
   mapfile -t pip_infos < <(pip3 show "$PIP_NAME")
   for info in "${pip_infos[@]}"; do
@@ -299,7 +299,6 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
-<<<<<<< HEAD
 INSTALL_APP_LIST=()
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
