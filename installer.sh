@@ -299,6 +299,7 @@ case ${ANSWER:0:1} in
   ;;
 esac
 
+<<<<<<< HEAD
 INSTALL_APP_LIST=()
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
