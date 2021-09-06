@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
 # Copyright 2020-2021 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
-# Description:  Installs needed stuff for emba
+# Description:  Installs needed stuff for EMBA
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -23,7 +23,7 @@ DOWNLOAD_FILE_LIST=()
 
 # force install everything
 FORCE=0
-# install docker emba
+# install docker EMBA
 IN_DOCKER=0
 # list dependencies
 LIST_DEP=0
@@ -76,6 +76,51 @@ print_tool_info(){
   fi
 }
 
+# print_git_info a b c
+# a = tool name
+# b = GIT url
+# c = description of tool
+print_git_info() {
+  GIT_NAME="$1"
+  GIT_URL="$2"
+  GIT_DESC="$3"
+  echo -e "\\n""$ORANGE""$BOLD""$GIT_NAME""$NC"
+  if [[ -n "$GIT_DESC" ]] ; then
+    echo -e "Description: ""$GIT_DESC"
+  fi
+
+  GIT_SIZE=$(curl https://api.github.com/repos/"$GIT_URL" 2> /dev/null | jq -r '.size')
+
+  if (( GIT_SIZE > 1024 )) ; then
+    echo -e "Download-Size: ""$(( GIT_SIZE / 1024 ))"" MB"
+  else
+    echo -e "Download-Size: ""$GIT_SIZE"" KB"
+  fi
+}
+
+# print_pip_info a
+# a = file name
+print_pip_info() {
+  PIP_NAME="$1"
+  echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
+  mapfile -t pip_infos < <(pip3 show "$PIP_NAME")
+  for info in "${pip_infos[@]}"; do
+    if [[ "$info" == *"Summary"* ]]; then
+      info=${info//Summary/Description}
+      echo -e "$info $version"
+    fi
+    if [[ "$info" == *"Version"* ]]; then
+      version=" / ""$info"
+    fi
+  done
+  # we need this way -> with -q we got errors
+  INSTALLED=$(pip3 list | grep -c "$PIP_NAME")
+  if [[ "$INSTALLED" -gt 0 ]]; then
+    echo -e "$ORANGE""$PIP_NAME"" is already installed and will be updated (if a newer version is available).""$NC"
+  else
+    echo -e "$ORANGE""$PIP_NAME"" will be installed.""$NC"
+  fi
+}
 # print_file_info a b c d e
 # a = file name
 # b = description of file
@@ -145,10 +190,10 @@ print_help()
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "$CYAN""-d""$NC""         Installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "$CYAN""-F""$NC""         Installation of EMBA with all dependencies (for running on your host - developer mode)"
-  echo -e "$CYAN""-c""$NC""         Complements emba dependencies (get/install all missing files/applications)"
+  echo -e "$CYAN""-c""$NC""         Complements EMBA dependencies (get/install all missing files/applications)"
   echo -e "$CYAN""-D""$NC""         Build EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
-  echo -e "$CYAN""-l""$NC""         List all dependencies of emba"
+  echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
   echo
 }
 
@@ -166,18 +211,18 @@ while getopts cdDFhl OPT ; do
     c)
       export COMPLEMENT=1
       export FORCE=1
-      echo -e "$GREEN""$BOLD""Complement emba dependecies""$NC"
+      echo -e "$GREEN""$BOLD""Complement EMBA dependecies""$NC"
       ;;
     d)
       export DOCKER_SETUP=1
       export FORCE=1
-      echo -e "$GREEN""$BOLD""Install all dependecies for emba in default/docker mode""$NC"
+      echo -e "$GREEN""$BOLD""Install all dependecies for EMBA in default/docker mode""$NC"
       ;;
     D)
       export IN_DOCKER=1
       export DOCKER_SETUP=0
       export FORCE=1
-      echo -e "$GREEN""$BOLD""Install emba in docker image - used for building a docker image""$NC"
+      echo -e "$GREEN""$BOLD""Install EMBA in docker image - used for building a docker image""$NC"
       ;;
     F)
       export FORCE=1
@@ -191,7 +236,7 @@ while getopts cdDFhl OPT ; do
       ;;
     l)
       export LIST_DEP=1
-      echo -e "$GREEN""$BOLD""List all dependecies (except pip packages)""$NC"
+      echo -e "$GREEN""$BOLD""List all dependecies""$NC"
       ;;
     *)
       echo -e "$RED""$BOLD""Invalid option""$NC"
@@ -202,7 +247,7 @@ while getopts cdDFhl OPT ; do
 done
 
 if ! [[ $EUID -eq 0 ]] && [[ $LIST_DEP -eq 0 ]] ; then
-  echo -e "\\n""$RED""Run emba installation script with root permissions!""$NC\\n"
+  echo -e "\\n""$RED""Run EMBA installation script with root permissions!""$NC\\n"
   print_help
   exit 1
 fi
@@ -219,9 +264,9 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   apt-get update
 fi
 
-# applications needed for emba to run
+# applications needed for EMBA to run
 
-echo -e "\\nTo use emba, some applications must be installed and some data (database for CVS for example) downloaded and parsed."
+echo -e "\\nTo use EMBA, some applications must be installed and some data (database for CVS for example) downloaded and parsed."
 echo -e "\\n""$ORANGE""$BOLD""These applications will be installed/updated:""$NC"
 print_tool_info "shellcheck" 1
 print_tool_info "unzip" 1
@@ -286,19 +331,24 @@ fi
 # download EMBA docker image (only for -d Docker installation)
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
-  echo -e "\\nThe normal EMBA operation mode uses a docker image to protect your host. The docker environment and the EMBA image are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
 
+  echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
+  echo -e "Description: EMBA docker images used for firmware analysis."
   if command -v docker > /dev/null ; then
-    echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
     export DOCKER_CLI_EXPERIMENTAL=enabled
     f="$(docker manifest inspect embeddedanalyzer/emba:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
     echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
-    export DOCKER_CLI_EXPERIMENTAL=disabled
+    if [[ "$(docker images -q embeddedanalyzer/emba 2> /dev/null)" == "" ]]; then
+      echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
+      export DOCKER_CLI_EXPERIMENTAL=disabled
+    else
+      echo -e "$ORANGE""EMBA docker image is already available.""$NC"
+    fi
   else
-    echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"
-    echo "Download-Size: ~2500 MB"
+    echo "Estimated download-Size: ~2500 MB"
+    echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
   fi
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
@@ -327,7 +377,6 @@ fi
 
 # currently only available on a full host installation:
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  echo -e "\\nWith emba you can automatically find vulnerable pattern in binary executables (just start emba with the parameter -c). Docker and the cwe_checker from fkiecad are required for this."
   INSTALL_APP_LIST=()
   print_tool_info "docker.io" 0 "docker"
   
@@ -367,7 +416,7 @@ fi
 # FACT-extractor
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  echo -e "\\nWith EMBA you can automatically use FACT-extractor as a second extraction tool. FACT-extractor from fkiecad is required for this."
+  print_git_info "fact-extractor" "m-1-k-3/fact_extractor" "Wraps FACT unpack plugins into standalone utility. Should be able to extract most of the common container formats."
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
@@ -400,7 +449,6 @@ fi
 # open source tools from github
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  echo -e "\\nWe use a few well-known open source tools in emba, for example checksec."
   
   print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
   print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
@@ -408,8 +456,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_file_info "sudo-parser.pl" "Parses and tests sudoers configuration files" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
   print_file_info "pixd" "pixd is a tool for visualizing binary data using a colour palette." "https://github.com/FireyFly/pixd/pixd.c" "external/pixd"
 
-  ## MISSING for -l:
-  # pip: pillow
+  print_pip_info "pillow"
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these applications (if not already on the system)?""$NC"
@@ -444,7 +491,6 @@ fi
 # yara rules
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
   
   print_file_info "Xumeiquer/yara-forensics/compressed.yar" "" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
   print_file_info "DiabloHorn/yara4pentesters/juicy_files.txt" "" "https://raw.githubusercontent.com/DiabloHorn/yara4pentesters/master/juicy_files.txt" "external/yara/juicy_files.yar"
@@ -479,11 +525,10 @@ fi
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   BINUTIL_VERSION_NAME="binutils-2.35.1"
   
-  echo -e "\\nWe are using objdump in emba to get more information from object files. This application is in the binutils package and has to be compiled. We also need following applications for compiling:"
   INSTALL_APP_LIST=()
   
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
-    print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
+    print_file_info "$BINUTIL_VERSION_NAME / objdump" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
     print_tool_info "texinfo" 1
     print_tool_info "gcc" 1
     print_tool_info "build-essential" 1
@@ -531,12 +576,10 @@ fi
 # CSV and CVSS databases
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
 
-  echo -e "\\nTo check binaries to known CSV entries and CVSS values, we need a vulnerability database. Additional we have to parse data and need jq as tool for it, if it's missing, it will be installed."
-  
   NVD_URL="https://nvd.nist.gov/feeds/json/cve/1.1/"
   INSTALL_APP_LIST=()
   
-  print_file_info "cve.mitre.org database" "CVE® is a list of records—each containing an identification number, a description, and at least one public reference—for publicly known cybersecurity vulnerabilities." "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
+  print_file_info "cve.mitre.org database" "CVE® is a list of publicly known cybersecurity vulnerabilities." "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
   print_tool_info "jq" 1
   for YEAR in $(seq 2002 $(($(date +%Y)))); do
     NVD_FILE="nvdcve-1.1-""$YEAR"".json"
@@ -580,11 +623,8 @@ fi
 # cve-search database for host 
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
-  echo -e "\\nTo use the aggregator and check if exploits are available, we need a searchable exploit database."
 
-  ## MISSING for -l:
-  # packages from requirements.system
-  # pip packages from requirements.txt
+  print_git_info "cve-search" "cve-search/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install cve-search and mongodb and populate it?""$NC"
@@ -604,6 +644,15 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
   
     git clone https://github.com/cve-search/cve-search.git external/cve-search
     cd ./external/cve-search/ || exit 1
+
+    while read -r TOOL_NAME; do
+      print_tool_info "$TOOL_NAME" 1
+    done < requirements.system
+
+    while read -r TOOL_NAME; do
+      print_pip_info "$TOOL_NAME"
+    done < requirements.txt
+
     xargs sudo apt-get install -y < requirements.system
     # shellcheck disable=SC2002
     cat requirements.txt | xargs -n 1 pip install
@@ -680,13 +729,11 @@ fi
 # aggregator tools to 
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  echo -e "\\nWe are using yara in emba and to improve the experience with emba, you should download some yara rules."
-  echo -e "\\nTo use the aggregator and check if exploits are available, we need cve-search and cve-searchsploit."
 
   INSTALL_APP_LIST=()
   print_tool_info "python3-pip" 1
   print_tool_info "net-tools" 1
-  ### MISSING: cve_searchsploit pip package
+  print_pip_info "cve_searchsploit"
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
@@ -704,7 +751,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   
       if [[ "$IN_DOCKER" -eq 1 ]] ; then
         if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-          echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database on docker emba?""$NC"
+          echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database on docker EMBA?""$NC"
           read -p "(y/N)" -r ANSWER
         else
           echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database on docker.""$NC"
@@ -757,10 +804,18 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   # firmware-mod-kit is only available on Kali Linux
   print_tool_info "firmware-mod-kit" 1
 
-  ### MISSING for -l:
-  # pip: nose, coverage, pyqtgraph, capstone, cstruct
-  # git projects: binwalk, yaffshiv, sasquatch, jefferson, cramfs-tools, ubi_reader
-  # others: unstuff
+  print_pip_info "nose"
+  print_pip_info "coverage"
+  print_pip_info "pyqtgraph"
+  print_pip_info "capstone"
+  print_pip_info "cstruct"
+  print_git_info "binwalk" "ReFirmLabs/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
+  print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
+  print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
+  print_git_info "jefferson" "sviehb/jefferson" "JFFS2 filesystem extraction tool"
+  print_git_info "cramfs-tools" "npitre/cramfs-tools" "Cramfs - cram a filesystem onto a small ROM"
+  print_git_info "ubi_reader" "jrspruitt/ubi_reader" "UBI Reader is a Python module and collection of scripts capable of extracting the contents of UBI and UBIFS images"
+  print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system)?""$NC"
@@ -803,6 +858,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   
       if ! command -v jefferson > /dev/null ; then
         git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
+
+        while read -r TOOL_NAME; do
+          print_pip_info "$TOOL_NAME"
+        done < ./external/binwalk/jefferson/requirements.txt
+
         pip3 install -r ./external/binwalk/jefferson/requirements.txt
         cd ./external/binwalk/jefferson/ || exit 1
         python3 ./setup.py install
@@ -874,7 +934,7 @@ if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
 
   echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
 
-  echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of emba at https://github.com/e-m-b-a.""$NC"
+  echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of EMBA at https://github.com/e-m-b-a.""$NC"
 fi
 
 if [[ "$LIST_DEP" -eq 0 ]]; then
