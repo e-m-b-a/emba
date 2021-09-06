@@ -268,7 +268,8 @@ case ${ANSWER:0:1} in
   y|Y )
     echo
     curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
-    source $HOME/.cargo/env
+    # shellcheck disable=SC1090
+    source "$HOME/.cargo/env"
     RUSTUP_HOME=external/rustup rustup default stable
     export RUSTUP_TOOLCHAIN=stable 
 
