@@ -100,8 +100,13 @@ print_git_info() {
 
 # print_pip_info a
 # a = file name
+# b = package version
 print_pip_info() {
   PIP_NAME="$1"
+  if [[ -n "${2}" ]] ; then
+    # TODO: include in update check
+    PACKAGE_VERSION="$2"
+  fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
   mapfile -t pip_infos < <(pip3 show "$PIP_NAME")
   for info in "${pip_infos[@]}"; do
@@ -350,65 +355,59 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
     echo "Estimated download-Size: ~2500 MB"
     echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
   fi
-
-  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]]; then
-    echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
-    read -p "(y/N)" -r ANSWER
-  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
-    ANSWER=("n")
-  else
-    echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the EMBA image be downloaded!""$NC"
-    ANSWER=("y")
-  fi
-  case ${ANSWER:0:1} in
-    y|Y )
-      apt-get install "${INSTALL_APP_LIST[@]}" -y
-      if [[ "$(docker images -q embeddedanalyzer/emba:latest 2> /dev/null)" == "" ]] ; then
-        echo -e "$ORANGE""embeddedanalyzer/emba docker image will be downloaded""$NC"
-        docker pull embeddedanalyzer/emba:latest
-      else
-        echo -e "$ORANGE""embeddedanalyzer/emba docker image is already downloaded""$NC"
-      fi
-    ;;
-  esac
 fi
 
-# cwe checker docker
+INSTALL_APP_LIST=()
 
-# currently only available on a full host installation:
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  INSTALL_APP_LIST=()
-  print_tool_info "docker.io" 0 "docker"
-  
-  if command -v docker > /dev/null ; then
-    echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
-    export DOCKER_CLI_EXPERIMENTAL=enabled
-    f="$(docker manifest inspect fkiecad/cwe_checker:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-    echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
-    export DOCKER_CLI_EXPERIMENTAL=disabled
-  else
-    echo -e "\\n""$ORANGE""$BOLD""fkiecad/cwe_checker docker image""$NC"
-    echo "Download-Size: ~600 MB"
-  fi
-  
+# cwe-checker
+
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  print_git_info "cwe-checker" "fkie-cad/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
+  print_file_info "OpenJDK" "Description missing" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
+  print_file_info "GHIDRA" "Description missing" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip" "external/ghidra.zip"
+
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-    echo -e "\\n""$MAGENTA""$BOLD""Do you want to install Docker (if not already on the system) and download the image?""$NC"
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
     read -p "(y/N)" -r ANSWER
-  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]]; then
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
     ANSWER=("n")
   else
-    echo -e "\\n""$MAGENTA""$BOLD""Docker will be installed (if not already on the system) and the image be downloaded!""$NC"
+    echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
     ANSWER=("y")
   fi
+
   case ${ANSWER:0:1} in
     y|Y )
-      apt-get install "${INSTALL_APP_LIST[@]}" -y
-      if [[ "$(docker images -q fkiecad/cwe_checker:latest 2> /dev/null)" == "" ]] ; then
-        echo -e "$ORANGE""fkiecad/cwe_checker docker image will be downloaded""$NC"
-        docker pull fkiecad/cwe_checker:latest
-      else
-        echo -e "$ORANGE""fkiecad/cwe_checker docker image is already downloaded""$NC"
-      fi
+      echo
+      curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
+      # shellcheck disable=SC1090
+      # shellcheck disable=SC1091
+      source "$HOME/.cargo/env"
+      RUSTUP_HOME=external/rustup rustup default stable
+      export RUSTUP_TOOLCHAIN=stable 
+  
+      # Java SDK for ghidra
+      if [[ -d .external/jdk ]] ; then rm -R .external/jdk ; fi
+      curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
+      mkdir external/jdk
+      tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
+      rm external/jdk.tar.gz
+  
+      # Ghidra
+      if [[ -d .external/ghidra ]] ; then rm -R .external/ghidra ; fi
+      curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip -Sf -o external/ghidra.zip
+      mkdir external/ghidra
+      unzip -qo external/ghidra.zip -d external/ghidra
+      sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.0.2_PUBLIC/support/launch.properties
+      rm external/ghidra.zip
+  
+      if [[ -d .external/cwe_checker ]] ; then rm -R .external/cwe_checker ; fi
+      mkdir external/cwe_checker
+      git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
+      cd external/cwe_checker || exit 1
+      make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
+      cd ../../ || exit 1
+      cp -r "$HOME""/.cargo/bin" "external/cwe_checker/bin"
     ;;
   esac
 fi
@@ -417,7 +416,7 @@ fi
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   print_git_info "fact-extractor" "m-1-k-3/fact_extractor" "Wraps FACT unpack plugins into standalone utility. Should be able to extract most of the common container formats."
-  
+
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
     read -p "(y/N)" -r ANSWER
@@ -473,7 +472,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
       download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
       download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
-      ### pixd installation
+      # pixd installation
       pip3 install pillow
       git clone https://github.com/p4cx/pixd_image external/pixd
       cd ./external/pixd/ || exit 1
@@ -482,11 +481,10 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       mv pixd_png.py ../pixd_png.py
       cd ../../ || exit 1
       rm -r ./external/pixd/
-      ### pixd installation
+      # pixd installation
     ;;
   esac
 fi
-
 
 # yara rules
 
@@ -518,7 +516,6 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
     ;;
   esac
 fi
-
 
 # binutils - objdump
 
@@ -650,7 +647,9 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     done < requirements.system
 
     while read -r TOOL_NAME; do
-      print_pip_info "$TOOL_NAME"
+      TOOL_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
+      TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
+      print_pip_info "$TOOL_NAME" "$TOOL_VERSION"
     done < requirements.txt
 
     xargs sudo apt-get install -y < requirements.system
@@ -809,6 +808,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_pip_info "pyqtgraph"
   print_pip_info "capstone"
   print_pip_info "cstruct"
+
   print_git_info "binwalk" "ReFirmLabs/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
   print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
   print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
