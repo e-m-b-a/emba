@@ -26,8 +26,7 @@ S120_cwe_checker()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries with cwe-checker"
 
-  # currently disabling in docker mode
-  if [[ $CWE_CHECKER -eq 1 && $IN_DOCKER -eq 0 ]] ; then
+  if [[ $CWE_CHECKER -eq 1 ]] ; then
     cwe_check
     final_cwe_log "$TOTAL_CWE_CNT"
 
@@ -49,7 +48,8 @@ cwe_check() {
       NAME=$(basename "$LINE")
       LINE=$(readlink -f "$LINE")
       print_output "[*] Testing $LINE"
-      readarray -t TEST_OUTPUT < <( docker run --rm -v "$LINE":/tmp/input fkiecad/cwe_checker /tmp/input | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log )
+      export PATH=/root/.cargo/bin:$PATH # needed for docker setup
+      readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log )
       if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then
         print_output "[*] ""$(print_path "$LINE")"
       fi
