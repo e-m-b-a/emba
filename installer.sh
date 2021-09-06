@@ -295,6 +295,7 @@ case ${ANSWER:0:1} in
     cd external/cwe_checker || exit 1
     make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
     cd ../../ || exit 1
+    cp $HOME/.cargo/bin external/cwe_checker/bin
   ;;
 esac
 
