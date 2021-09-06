@@ -268,6 +268,7 @@ case ${ANSWER:0:1} in
   y|Y )
     echo
     curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
+    # shellcheck disable=SC1090
     # shellcheck disable=SC1091
     source "$HOME/.cargo/env"
     RUSTUP_HOME=external/rustup rustup default stable
@@ -295,7 +296,7 @@ case ${ANSWER:0:1} in
     cd external/cwe_checker || exit 1
     make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
     cd ../../ || exit 1
-    cp $HOME/.cargo/bin external/cwe_checker/bin
+    cp "$HOME""/.cargo/bin" "external/cwe_checker/bin"
   ;;
 esac
 
