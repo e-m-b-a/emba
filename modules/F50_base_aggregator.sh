@@ -136,10 +136,11 @@ output_details() {
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files."
     print_output "[+] Thereof, found in php.ini files: ""$MAGENTA""$S22_PHP_INI_LIMIT_EXCEEDED"" exceeding the limit value, ""$RED""$S22_PHP_INI_FAILURE"" failure(s) ""$GREEN""and ""$ORANGE""$S22_PHP_INI_WARNINGS"" warnings.""$NC"
     write_link "s22"
-    echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
-    #echo "php_ini_limit_exceeded;\"$S22_PHP_INI_LIMIT_EXCEEDED\"" >> "$CSV_LOG_FILE"
-    #echo "php_ini_failure;\"$S22_PHP_INI_FAILURE\"" >> "$CSV_LOG_FILE"
-    #echo "php_ini_warnings;\"$S22_PHP_INI_WARNINGS\"" >> "$CSV_LOG_FILE"
+    # shellcheck disable=SC2129
+	echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
+    echo "php_ini_limit_exceeded;\"$S22_PHP_INI_LIMIT_EXCEEDED\"" >> "$CSV_LOG_FILE"
+    echo "php_ini_failure;\"$S22_PHP_INI_FAILURE\"" >> "$CSV_LOG_FILE"
+    echo "php_ini_warnings;\"$S22_PHP_INI_WARNINGS\"" >> "$CSV_LOG_FILE"
     echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
