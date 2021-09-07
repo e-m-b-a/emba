@@ -156,7 +156,7 @@ print_file_info()
     echo -e "Description: ""${2}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
-  FILE_SIZE=$(($(wget "${3}" --spider --server-response -O - 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}')))
+  FILE_SIZE=$(($(wget "${3}" --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d')))
 
   if (( FILE_SIZE > 1048576 )) ; then
     echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
@@ -382,9 +382,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_git_info "cwe-checker" "fkie-cad/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
   echo -e "$ORANGE""cwe-checker will be downloaded.""$NC"
   print_file_info "OpenJDK" "Description missing" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
-  echo -e "$ORANGE""OpenJDK will be downloaded.""$NC"
   print_file_info "GHIDRA" "Description missing" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip" "external/ghidra.zip"
-  echo -e "$ORANGE""GHIDRA will be downloaded.""$NC"
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
