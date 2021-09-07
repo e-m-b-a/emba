@@ -66,7 +66,7 @@ print_tool_info(){
           echo -e "$ORANGE""$1"" will be updated.""$NC"
           INSTALL_APP_LIST+=("$1")
         else
-          echo -e "$ORANGE""$1"" won't be updated.""$NC"
+          echo -e "$GREEN""$1"" won't be updated.""$NC"
         fi
       fi
     else
@@ -80,6 +80,7 @@ print_tool_info(){
 # a = tool name
 # b = GIT url
 # c = description of tool
+
 print_git_info() {
   GIT_NAME="$1"
   GIT_URL="$2"
@@ -98,34 +99,49 @@ print_git_info() {
   fi
 }
 
-# print_pip_info a
+# print_pip_info a b
 # a = file name
 # b = package version
+
 print_pip_info() {
   PIP_NAME="$1"
-  #if [[ -n "${2}" ]] ; then
-  #  # TODO: include in update check
-  #  PACKAGE_VERSION="$2"
-  #fi
+  if [[ -n "${2}" ]] ; then
+    PACKAGE_VERSION="$2"
+  fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
-  mapfile -t pip_infos < <(pip3 show "$PIP_NAME")
-  for info in "${pip_infos[@]}"; do
-    if [[ "$info" == *"Summary"* ]]; then
-      info=${info//Summary/Description}
-      echo -e "$info $version"
+  mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" 2>/dev/null)
+  # in the error message of pip install we can find all available versions
+  PVERSION=$(pip3 install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION")
+  for INFO in "${PIP_INFOS[@]}"; do
+    if [[ "$INFO" == *"Summary"* ]]; then
+      INFO=${INFO//Summary/Description}
+      if [[ -n "$PVERSION" ]]; then
+        echo -e "$INFO / Version: $PVERSION"
+      elif [[ -n "$VERSION" ]]; then
+        echo -e "$INFO $VERSION"
+      else
+        echo -e "$INFO"
+      fi
     fi
-    if [[ "$info" == *"Version"* ]]; then
-      version=" / ""$info"
+    if [[ "$INFO" == *"Version"* ]]; then
+      VERSION=" / ""$INFO"
     fi
   done
-  # we need this way -> with -q we got errors
-  INSTALLED=$(pip3 list | grep -c "$PIP_NAME")
+
+  # we need grep -c -> with -q we got errors
+  INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^${PIP_NAME}[[:space:]]+$PACKAGE_VERSION")
   if [[ "$INSTALLED" -gt 0 ]]; then
-    echo -e "$ORANGE""$PIP_NAME"" is already installed and will be updated (if a newer version is available).""$NC"
+    echo -e "$GREEN""$PIP_NAME"" is already installed - no further action performed.""$NC"
   else
-    echo -e "$ORANGE""$PIP_NAME"" will be installed.""$NC"
+    INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^$PIP_NAME")
+    if [[ "$INSTALLED" -gt 0 ]]; then
+      echo -e "$ORANGE""$PIP_NAME"" is already installed and will be updated (if a newer version is available).""$NC"
+    else
+      echo -e "$ORANGE""$PIP_NAME"" will be installed.""$NC"
+    fi
   fi
 }
+
 # print_file_info a b c d e
 # a = file name
 # b = description of file
@@ -139,11 +155,9 @@ print_file_info()
   if [[ -n "${2}" ]] ; then
     echo -e "Description: ""${2}"
   fi
-  #echo "$(wget "${3}" --spider --server-response -O -)"
-  FILE_SIZE=$(($(wget "${3}" --spider --server-response -O - 2>&1 | sed -ne '/Content-Length/{s/.*: //;p}')))
-  if (( FILE_SIZE == 0 )) ; then
-    FILE_SIZE=$(($(wget "${3}" --spider --server-response -O - 2>&1 | sed -ne '/content-length/{s/.*: //;p}')))
-  fi 
+  # echo "$(wget "${3}" --spider --server-response -O -)"
+  FILE_SIZE=$(($(wget "${3}" --spider --server-response -O - 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}')))
+
   if (( FILE_SIZE > 1048576 )) ; then
     echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
   elif (( FILE_SIZE > 1024 )) ; then
@@ -151,10 +165,11 @@ print_file_info()
   else
     echo -e "Download-Size: ""$FILE_SIZE"" B"
   fi
+
   if ! [[ -f "${4}" ]] ; then
     if [[ -n "${5}" ]] ; then
       if [[ -f "${5}" ]] || ( command -v "${5}" > /dev/null) || ( dpkg -s "${5}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-        echo -e "$ORANGE""$1"" won't be downloaded.""$NC"
+        echo -e "$GREEN""$1"" is already installed - no further action performed.""$NC"
       else
         echo -e "$ORANGE""$1"" will be downloaded.""$NC"
         DOWNLOAD_FILE_LIST+=("$1")
@@ -164,7 +179,7 @@ print_file_info()
       DOWNLOAD_FILE_LIST+=("${1}")
     fi
   else
-    echo -e "$ORANGE""${1}"" is already been downloaded.""$NC"
+    echo -e "$ORANGE""${1}"" has already been downloaded.""$NC"
   fi
 }
 
@@ -181,7 +196,7 @@ download_file()
       if ! [[ -f "${3}" ]] ; then
         wget "${2}" -O "${3}"
       else
-        echo -e "$ORANGE""${1}"" is already downloaded""$NC"
+        echo -e "$GREEN""${1}"" is already downloaded - no further action performed.""$NC"
       fi
     fi
   done
@@ -261,7 +276,7 @@ fi
 
 if [[ $LIST_DEP -eq 0 ]] ; then
   if ! [[ -d "external" ]] ; then
-    echo -e "\\n""$ORANGE""Created ./external""$NC"
+    echo -e "\\n""$ORANGE""Created external directory: ./external""$NC"
     mkdir external
   fi
 
@@ -273,6 +288,7 @@ fi
 
 echo -e "\\nTo use EMBA, some applications must be installed and some data (database for CVS for example) downloaded and parsed."
 echo -e "\\n""$ORANGE""$BOLD""These applications will be installed/updated:""$NC"
+print_tool_info "jq" 1
 print_tool_info "shellcheck" 1
 print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
@@ -349,7 +365,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
       echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
       export DOCKER_CLI_EXPERIMENTAL=disabled
     else
-      echo -e "$ORANGE""EMBA docker image is already available.""$NC"
+      echo -e "$GREEN""EMBA docker image is already available - no further action will be performed.""$NC"
     fi
   else
     echo "Estimated download-Size: ~2500 MB"
@@ -363,8 +379,11 @@ INSTALL_APP_LIST=()
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   print_git_info "cwe-checker" "fkie-cad/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
+  echo -e "$ORANGE""cwe-checker will be downloaded.""$NC"
   print_file_info "OpenJDK" "Description missing" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
+  echo -e "$ORANGE""OpenJDK will be downloaded.""$NC"
   print_file_info "GHIDRA" "Description missing" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip" "external/ghidra.zip"
+  echo -e "$ORANGE""GHIDRA will be downloaded.""$NC"
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -407,7 +426,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       cd external/cwe_checker || exit 1
       make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
       cd ../../ || exit 1
-      cp -r "$HOME""/.cargo/bin" "external/cwe_checker/bin"
+      #cp -r "$HOME""/.cargo/bin" "external/cwe_checker/bin"
+      mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
     ;;
   esac
 fi
@@ -416,6 +436,7 @@ fi
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   print_git_info "fact-extractor" "m-1-k-3/fact_extractor" "Wraps FACT unpack plugins into standalone utility. Should be able to extract most of the common container formats."
+  echo -e "$ORANGE""fact_extractor will be downloaded.""$NC"
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install FACT-extractor?""$NC"
@@ -473,7 +494,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
       download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
       # pixd installation
-      pip3 install pillow
+      pip3 install pillow 2>/dev/null
       git clone https://github.com/p4cx/pixd_image external/pixd
       cd ./external/pixd/ || exit 1
       make
@@ -525,7 +546,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   INSTALL_APP_LIST=()
   
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
-    print_file_info "$BINUTIL_VERSION_NAME / objdump" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
+    print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
     print_tool_info "texinfo" 1
     print_tool_info "gcc" 1
     print_tool_info "build-essential" 1
@@ -546,6 +567,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   case ${ANSWER:0:1} in
     y|Y )
       apt-get install "${INSTALL_APP_LIST[@]}" -y
+      echo "Downloading binutils"
       download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
       if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
         tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
@@ -577,19 +599,18 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   INSTALL_APP_LIST=()
   
   print_file_info "cve.mitre.org database" "CVE® is a list of publicly known cybersecurity vulnerabilities." "https://cve.mitre.org/data/downloads/allitems.csv" "external/allitems.csv"
-  print_tool_info "jq" 1
   for YEAR in $(seq 2002 $(($(date +%Y)))); do
     NVD_FILE="nvdcve-1.1-""$YEAR"".json"
     print_file_info "$NVD_FILE" "" "$NVD_URL""$NVD_FILE"".zip" "external/nvd/""$NVD_FILE"".zip" "./external/allitemscvss.csv"
   done
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases and install jq (if not already on the system)?""$NC"
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download these databases?""$NC"
     read -p "(y/N)" -r ANSWER
   elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
     ANSWER=("n")
   else
-    echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and jq be installed (if not already on the system)!""$NC"
+    echo -e "\\n""$MAGENTA""$BOLD""These databases will be downloaded and installed (if not already on the system)!""$NC"
     ANSWER=("y")
   fi
   case ${ANSWER:0:1} in
@@ -622,6 +643,7 @@ fi
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
 
   print_git_info "cve-search" "cve-search/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
+  echo -e "$ORANGE""cve-search will be downloaded.""$NC"
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] && [[ $DOCKER_SETUP -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install cve-search and mongodb and populate it?""$NC"
@@ -647,24 +669,25 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     done < requirements.system
 
     while read -r TOOL_NAME; do
-      TOOL_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
+      PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
       TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
-      print_pip_info "$TOOL_NAME" "$TOOL_VERSION"
+      print_pip_info "$PIP_NAME" "$TOOL_VERSION"
     done < requirements.txt
 
     xargs sudo apt-get install -y < requirements.system
     # shellcheck disable=SC2002
-    cat requirements.txt | xargs -n 1 pip install
+    cat requirements.txt | xargs -n 1 pip install 2>/dev/null
   fi
    
   case ${ANSWER:0:1} in
     y|Y )
   
       CVE_INST=1
-      echo -e "\\n""$MAGENTA""First check if the cve-search database is already installed.""$NC"
+      echo -e "\\n""$MAGENTA""Ceck if the cve-search database is already installed.""$NC"
       if netstat -anpt | grep LISTEN | grep -q 27017; then
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_INST=0
+          echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
         else
           echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
         fi
@@ -695,6 +718,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             if netstat -anpt | grep LISTEN | grep -q 27017; then
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 CVE_INST=0
+                echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
               else
                 echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
                 echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
@@ -710,7 +734,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
               ./sbin/db_mgmt_json.py -p
               ./sbin/db_updater.py -f
             else
-              echo -e "\\n""$MAGENTA""$BOLD""CVE database is up and running. No installation process performed!""$NC"
+              echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
             fi
             sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
             chmod +x config/cve_database_updater
@@ -732,7 +756,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   INSTALL_APP_LIST=()
   print_tool_info "python3-pip" 1
   print_tool_info "net-tools" 1
-  print_pip_info "cve_searchsploit"
+  print_pip_info "cve-searchsploit"
   
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the net-tools, pip3, cve-search and cve_searchsploit (if not already on the system)?""$NC"
@@ -746,11 +770,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   case ${ANSWER:0:1} in
     y|Y )
       apt-get install "${INSTALL_APP_LIST[@]}" -y
-      pip3 install cve_searchsploit
+      pip3 install cve_searchsploit 2>/dev/null
   
       if [[ "$IN_DOCKER" -eq 1 ]] ; then
         if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-          echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database on docker EMBA?""$NC"
+          echo -e "\\n""$MAGENTA""$BOLD""Do you want to update the cve_searchsploit database in EMBA docker environment?""$NC"
           read -p "(y/N)" -r ANSWER
         else
           echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database on docker.""$NC"
@@ -810,11 +834,17 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_pip_info "cstruct"
 
   print_git_info "binwalk" "ReFirmLabs/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
+  echo -e "$ORANGE""cve-search will be downloaded.""$NC"
   print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
+  echo -e "$ORANGE""binwalk will be downloaded.""$NC"
   print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
+  echo -e "$ORANGE""sasquatch will be downloaded.""$NC"
   print_git_info "jefferson" "sviehb/jefferson" "JFFS2 filesystem extraction tool"
+  echo -e "$ORANGE""jefferson will be downloaded.""$NC"
   print_git_info "cramfs-tools" "npitre/cramfs-tools" "Cramfs - cram a filesystem onto a small ROM"
+  echo -e "$ORANGE""cramfs-tools will be downloaded.""$NC"
   print_git_info "ubi_reader" "jrspruitt/ubi_reader" "UBI Reader is a Python module and collection of scripts capable of extracting the contents of UBI and UBIFS images"
+  echo -e "$ORANGE""ubi_reader will be downloaded.""$NC"
   print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
@@ -832,11 +862,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   
       apt-get install "${INSTALL_APP_LIST[@]}" -y
   
-      pip3 install nose
-      pip3 install coverage
-      pip3 install pyqtgraph
-      pip3 install capstone
-      pip3 install cstruct
+      pip3 install nose 2>/dev/null
+      pip3 install coverage 2>/dev/null
+      pip3 install pyqtgraph 2>/dev/null
+      pip3 install capstone 2>/dev/null
+      pip3 install cstruct 2>/dev/null
   
       git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
   
