@@ -49,6 +49,10 @@ print_tool_info(){
   echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
   TOOL_INFO="$(apt show "${1}" 2> /dev/null)"
   echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
+  SIZE=$(apt show "$1" 2>/dev/null | grep Download-Size | cut -d: -f2)
+  if [[ -n "$SIZE" ]]; then
+    echo -e "Download-Size:$SIZE"
+  fi
   if echo "$TOOL_INFO" | grep -E "^E:\ "; then
     echo -e "$RED""$1"" was not identified and is not installable.""$NC"
   else
@@ -275,6 +279,8 @@ fi
 
 # standard stuff before installation run
 
+HOME_PATH=$(pwd)
+
 if [[ $LIST_DEP -eq 0 ]] ; then
   if ! [[ -d "external" ]] ; then
     echo -e "\\n""$ORANGE""Created external directory: ./external""$NC"
@@ -424,7 +430,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
       cd external/cwe_checker || exit 1
       make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
-      cd ../../ || exit 1
+      cd "$HOME_PATH" || exit 1
       #cp -r "$HOME""/.cargo/bin" "external/cwe_checker/bin"
       mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
     ;;
@@ -456,7 +462,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       cd ./external/fact_extractor/fact_extractor/ || exit 1
       ./install/pre_install.sh
       python3 ./install.py
-      cd ../../.. || exit 1
+      cd "$HOME_PATH" || exit 1
   
       if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
         echo -e "$GREEN""FACT-extractor installed""$NC"
@@ -499,7 +505,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       make
       mv pixd ../pixde
       mv pixd_png.py ../pixd_png.py
-      cd ../../ || exit 1
+      cd "$HOME_PATH" || exit 1
       rm -r ./external/pixd/
       # pixd installation
     ;;
@@ -573,7 +579,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
         ./configure --enable-targets=all
         make
-        cd ../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       fi
       if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
         mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
@@ -681,7 +687,9 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     y|Y )
   
       CVE_INST=1
-      echo -e "\\n""$MAGENTA""Ceck if the cve-search database is already installed.""$NC"
+      echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
+      cd "$HOME_PATH" || exit 1
+      cd ./external/cve-search/ || exit 1
       if netstat -anpt | grep LISTEN | grep -q 27017; then
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_INST=0
@@ -734,6 +742,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             else
               echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
             fi
+            cd "$HOME_PATH" || exit 1
             sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
             chmod +x config/cve_database_updater
             echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
@@ -741,7 +750,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
           ;;
         esac
-        cd ../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       fi
     ;;
   esac
@@ -872,7 +881,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
         cd ./external/binwalk/yaffshiv/ || exit 1
         python3 setup.py install
-        cd ../../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""yaffshiv already installed""$NC"
       fi
@@ -894,7 +903,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         pip3 install -r ./external/binwalk/jefferson/requirements.txt
         cd ./external/binwalk/jefferson/ || exit 1
         python3 ./setup.py install
-        cd ../../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""jefferson already installed""$NC"
       fi
@@ -927,7 +936,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         cd ./external/binwalk/ubi_reader || exit 1
         git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
         python2 setup.py install
-        cd ../../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""ubi_reader already installed""$NC"
       fi
@@ -935,7 +944,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       if ! command -v binwalk > /dev/null ; then
         cd ./external/binwalk || exit 1
         python3 setup.py install
-        cd ../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""binwalk already installed""$NC"
         BINWALK_PRE_AVAILABLE=1
@@ -953,6 +962,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
     ;;
   esac
 fi
+
+cd "$HOME_PATH" || exit 1
 
 if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
