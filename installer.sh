@@ -63,15 +63,12 @@ print_tool_info(){
       COMMAND_="$1"
     fi
     if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-      if [[ $2 -eq 0 ]] ; then
-        echo -e "$GREEN""$1"" is already installed and won't be updated.""$NC"
+      UPDATE=$(apt-cache policy "$1" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
+      if [[ "$UPDATE" -eq 1 ]] ; then
+        echo -e "$GREEN""$1"" won't be updated.""$NC"
       else
-        if [[ $COMPLEMENT -eq 0 ]] ; then
-          echo -e "$ORANGE""$1"" will be updated.""$NC"
-          INSTALL_APP_LIST+=("$1")
-        else
-          echo -e "$GREEN""$1"" won't be updated.""$NC"
-        fi
+        echo -e "$ORANGE""$1"" will be updated.""$NC"
+        INSTALL_APP_LIST+=("$1")
       fi
     else
       echo -e "$ORANGE""$1"" will be newly installed.""$NC"
