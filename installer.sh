@@ -497,6 +497,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
       # pixd installation
       pip3 install pillow 2>/dev/null
+      echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"
       git clone https://github.com/p4cx/pixd_image external/pixd
       cd ./external/pixd/ || exit 1
       make
