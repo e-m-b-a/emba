@@ -187,6 +187,7 @@ print_file_info()
 # a = file name
 # b = file url
 # c = path on system
+# WARNING: you need to do a print_file_info first!
 
 download_file()
 {
@@ -567,7 +568,6 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   case ${ANSWER:0:1} in
     y|Y )
       apt-get install "${INSTALL_APP_LIST[@]}" -y
-      echo "Downloading binutils"
       download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
       if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
         tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
