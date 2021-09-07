@@ -367,13 +367,14 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
     echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
     if [[ "$(docker images -q embeddedanalyzer/emba 2> /dev/null)" == "" ]]; then
       echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
+      docker pull embeddedanalyzer/emba
       export DOCKER_CLI_EXPERIMENTAL=disabled
     else
       echo -e "$GREEN""EMBA docker image is already available - no further action will be performed.""$NC"
     fi
   else
     echo "Estimated download-Size: ~2500 MB"
-    echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
+    echo -e "$ORANGE""WARNING: docker command missing - no docker pull possible.""$NC"
   fi
 fi
 
