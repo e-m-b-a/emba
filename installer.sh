@@ -60,7 +60,7 @@ print_tool_info(){
     fi
     if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
       if [[ $2 -eq 0 ]] ; then
-        echo -e "$ORANGE""$1"" is already installed and won't be updated.""$NC"
+        echo -e "$GREEN""$1"" is already installed and won't be updated.""$NC"
       else
         if [[ $COMPLEMENT -eq 0 ]] ; then
           echo -e "$ORANGE""$1"" will be updated.""$NC"
@@ -209,10 +209,10 @@ download_file()
 print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
-  echo -e "$CYAN""-d""$NC""         Installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
+  echo -e "$CYAN""-d""$NC""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "$CYAN""-F""$NC""         Installation of EMBA with all dependencies (for running on your host - developer mode)"
   echo -e "$CYAN""-c""$NC""         Complements EMBA dependencies (get/install all missing files/applications)"
-  echo -e "$CYAN""-D""$NC""         Build EMBA docker container"
+  echo -e "$CYAN""-D""$NC""         Only used via docker-compose for building EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
   echo
