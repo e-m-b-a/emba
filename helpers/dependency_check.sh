@@ -54,6 +54,19 @@ check_dep_tool()
   fi
 }
 
+check_dep_port()
+{
+  TOOL_NAME="$1"
+  PORT_NR="$2"
+  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
+  if ! netstat -anpt | grep -q "$PORT_NR"; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    Missing ""$TOOL_NAME"" - check your installation""$NC"
+    DEP_ERROR=1
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+}
 
 dependency_check() 
 {
@@ -130,6 +143,7 @@ dependency_check()
   if [[ $USE_DOCKER -eq 1 ]] ; then
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
+    check_dep_port "cve-search" 27017
   fi
 
   #######################################################################################
@@ -191,6 +205,7 @@ dependency_check()
     if [[ IN_DOCKER -eq 0 ]]; then 
       # really basic check, if cve-search database is running - no check, if populated and also no check, if emba in docker
       check_dep_tool "mongoDB" "mongod"
+      check_dep_port "cve-search" 27017
     fi
 
     # CVE searchsploit
@@ -200,62 +215,14 @@ dependency_check()
     # Check if fact extractor is on the system - disable, if not
     export FACT_EXTRACTOR=1 
 
-    # Docker with cwe-checker and fact extractor images
-    # at the moment no check for docker inside of docker
-    if [[ IN_DOCKER -eq 0 ]]; then 
-      if [[ $CWE_CHECKER -eq 1 ]] || [[ $FACT_EXTRACTOR -eq 1 ]] || [[ $ONLY_DEP -eq 1 ]]; then
-        print_output "    docker - \\c" "no_log"
-        if ! command -v docker > /dev/null ; then
-          echo -e "$RED""not ok""$NC"
-          echo -e "$RED""    Missing docker - check your installation""$NC"
-          CWE_CHECKER=0
-          FACT_EXTRACTOR=0
-        else
-          echo -e "$GREEN""ok""$NC"
-          # cwe-checker
-          if [[ $CWE_CHECKER -eq 1 ]] || [[ $ONLY_DEP -eq 1 ]] ; then
-            print_output "    cwe-checker - \\c" "no_log"
-            if docker images 2>/dev/null | grep -q "cwe_checker"  ; then
-              echo -e "$GREEN""ok""$NC"
-            elif [[ $( docker images 2>/dev/null | wc -l ) -eq 0 ]]  ; then
-              echo -e "$ORANGE""not ok""$NC"
-              echo -e "$ORANGE""    To check docker images, run emba with sudo""$NC"
-            else
-              echo -e "$RED""not ok""$NC"
-              echo -e "$RED""    Missing docker image cwe-checker - check your installation""$NC"
-              echo -e "$ORANGE""    Deactivating cwe-checker""$NC"
-              CWE_CHECKER=0
-            fi
-          fi
-          # fact-extractor
-            if [[ $FACT_EXTRACTOR -eq 1 ]] || [[ $ONLY_DEP -eq 1 ]] ; then
-            print_output "    fact-extractor - \\c" "no_log"
-            if docker images 2>/dev/null | grep -q "fact_extractor" ; then
-              echo -e "$GREEN""ok""$NC"
-            elif [[ $(docker images 2>/dev/null | wc -l) -eq 0 ]]  ; then
-              echo -e "$ORANGE""not ok""$NC"
-              echo -e "$ORANGE""    To check docker images, run emba with sudo""$NC"
-            else
-              echo -e "$RED""not ok""$NC"
-              echo -e "$RED""    Missing docker image fact_extractor - check your installation""$NC"
-              echo -e "$ORANGE""    Deactivating fact-extractor""$NC"
-              FACT_EXTRACTOR=0
-            fi
-            print_output "    fact-extractor start script - \\c" "no_log"
-            if [[ -f "./external/extract.py" ]] ; then
-              echo -e "$GREEN""ok""$NC"
-            else
-              echo -e "$RED""not ok""$NC"
-              echo -e "$RED""    Missing fact-extractor start script - check your installation""$NC"
-              FACT_EXTRACTOR=0
-              DEP_ERROR=1
-            fi
-          fi
-        fi
-      else
-        print_output "    docker + docker images - \\c" "no_log"
-        echo -e "$ORANGE""not checked (disabled)""$NC"
-      fi
+    print_output "    fact-extractor start script - \\c" "no_log"
+    if [[ -f "$EXT_DIR""/fact_extractor/fact_extractor/fact_extract.py" ]] ; then
+      echo -e "$GREEN""ok""$NC"
+    else
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    Missing fact-extractor start script - check your installation""$NC"
+      FACT_EXTRACTOR=0
+      DEP_ERROR=1
     fi
  
     # fdtdump (device tree compiler)

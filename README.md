@@ -51,24 +51,24 @@ Before running *EMBA* make sure, that you have [installed](https://github.com/e-
 
 ## Usage
 
----
-### Classic:
-```console
-./emba.sh -l ./log -f ./firmware
-``` 
-
 ---   
-### Docker:
+### Classic (Docker mode):
 ```console
-sudo ./emba.sh -l ./log -f /firmware -D
+sudo ./emba.sh -l ./log -f /firmware
 ```
 
 ---   
 ### Profile support:
 ```console
-sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan-docker.emba
+sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 
 ```
+---
+### Developer mode (WARNING: EMBA runs on your host and could harm your host!):
+```console
+./emba.sh -l ./log -f ./firmware -D
+```
+
 
 ---
 *EMBA* supports multiple [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).

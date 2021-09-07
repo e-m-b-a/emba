@@ -123,6 +123,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/\ -\ verify\ a\ detached\ pkcs7\ signature\ -/}"
     #part of minicom version 2.7
     VERSION_lower="${VERSION_lower/part\ of\ minicom/minicom}"
+    # part of SSLeay 0.8.1 19-Jul-1997A
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/part\ of\ ssleay\ ([0-9]\.[0-9]+\.[0-9]+)\ [0-9]+.*/ssleay\ \1/')"
+    # Welcome to QNX Neutrino 1.2.3
+    VERSION_lower="${VERSION_lower/welcome\ to\ qnx\ neutrino/qnx_neutrino_rtos}"
     #run-parts program, version 4.8.1.1
     VERSION_lower="${VERSION_lower/run-parts\ program,/run-parts}"
     #GNU parted) 3.2

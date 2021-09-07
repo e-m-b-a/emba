@@ -26,7 +26,10 @@ S115_usermode_emulator() {
 
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 
-    print_output "[!] This module is experimental and could harm your host environment."
+    if [[ $IN_DOCKER -eq 0 ]] ; then
+      print_output "[!] This module should not be used in developer mode and could harm your host environment."
+    fi
+
     print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
     # some processes are running long and logging a lot

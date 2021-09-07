@@ -1,14 +1,15 @@
 FROM kalilinux/kali-rolling
 
-RUN apt-get update && \ 
-    apt-get -y upgrade && \
-    apt-get -y install wget kmod procps sudo dialog apt-utils
-
 ADD ./installer.sh /
 
 WORKDIR /
 
-RUN yes | sudo /installer.sh -D -F
+# updates system, install EMBA, disable coredumps and final cleanup
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install wget kmod procps sudo dialog apt-utils && \
+    yes | sudo /installer.sh -D && \
+    ulimit -c 0 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /emba
 
