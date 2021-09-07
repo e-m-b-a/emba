@@ -49,6 +49,12 @@ Author(s): Michael Messner, Pascal Eckmann
 
 Before running *EMBA* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation) all dependencies with the installation script and met the [prerequisites](https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites)
 
+```console
+git clone https://github.com/e-m-b-a/emba.git
+cd emba
+sudo ./installer.sh -d
+```
+
 ## Usage
 
 ---   
