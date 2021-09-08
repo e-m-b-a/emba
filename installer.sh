@@ -212,7 +212,7 @@ print_help()
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "$CYAN""-d""$NC""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "$CYAN""-F""$NC""         Installation of EMBA with all dependencies (for running on your host - developer mode)"
-  echo -e "$CYAN""-c""$NC""         Complements EMBA dependencies (get/install all missing files/applications)"
+#  echo -e "$CYAN""-c""$NC""         Complements EMBA dependencies (get/install all missing files/applications)"
   echo -e "$CYAN""-D""$NC""         Only used via docker-compose for building EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
@@ -224,6 +224,12 @@ echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD
 
 if [ "$#" -ne 1 ]; then
   echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
+  echo -e "\n\n------------------------------------------------------------------"
+  echo -e "Probably you would check all packets we are going to install with:"
+  echo -e "$CYAN""     sudo ./installer.sh -l""$NC"
+  echo -e "If you are going to install EMBA in default mode you can use:"
+  echo -e "$CYAN""     sudo ./installer.sh -d""$NC"
+  echo -e "------------------------------------------------------------------\n\n"
   print_help
   exit 1
 fi
@@ -430,6 +436,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
       cd "$HOME_PATH" || exit 1
       mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
+      rm -r "$HOME""/.cargo/"
+      rm -r ./external/rustup
     ;;
   esac
 fi
@@ -800,6 +808,7 @@ fi
 
 INSTALL_APP_LIST=()
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  cd "$HOME_PATH" || exit 1
   print_tool_info "python3-pip" 1
   print_tool_info "python3-opengl" 1
   print_tool_info "python3-pyqt5" 1
@@ -907,7 +916,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       fi
   
       if ! command -v unstuff > /dev/null ; then
-        mkdir ./external/binwalk/unstuff
+        mkdir -p ./external/binwalk/unstuff
         wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
         tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
         cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
