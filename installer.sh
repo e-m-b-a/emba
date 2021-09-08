@@ -291,7 +291,7 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
-  apt-get update
+  apt-get -y update
 fi
 
 # applications needed for EMBA to run
