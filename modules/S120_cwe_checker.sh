@@ -45,7 +45,7 @@ S120_cwe_checker()
     print_output "[!] Enable it with the -c switch."
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${#CWE_OUT[@]}"
+  module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
 }
 
 cwe_check() {
