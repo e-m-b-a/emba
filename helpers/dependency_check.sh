@@ -224,6 +224,16 @@ dependency_check()
       FACT_EXTRACTOR=0
       DEP_ERROR=1
     fi
+
+    print_output "    cwe-checker environment - \\c" "no_log"
+    if [[ -f "$EXT_DIR""/cwe_checker/bin/cwe_checker" ]] ; then
+      echo -e "$GREEN""ok""$NC"
+    else
+      echo -e "$RED""not ok""$NC"
+      echo -e "$RED""    Missing cwe-checker start script - check your installation""$NC"
+      FACT_EXTRACTOR=0
+      DEP_ERROR=1
+    fi
  
     # fdtdump (device tree compiler)
     export DTBDUMP

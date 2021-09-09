@@ -53,16 +53,14 @@ cwe_check() {
 
   export PATH=$EXT_DIR/cwe_checker/bin:$PATH # needed for docker setup
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    MAX_THREADS_S120=$((2*"$(grep -c ^processor /proc/cpuinfo)"))
-    if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
-      MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo)"))
-    fi
-  fi
-
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       if [[ "$THREADED" -eq 1 ]]; then
+        MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo)"))
+        if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+          MAX_THREADS_S120=1
+        fi
+
         cwe_checker_threaded &
         WAIT_PIDS_S120+=( "$!" )
         max_pids_protection "$MAX_THREADS_S120" "${WAIT_PIDS_S120[@]}"
