@@ -74,7 +74,7 @@ sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 ```console
 ./emba.sh -l ./log -f ./firmware -D
 ```
-
+*WARNING: Before using the developer mode you need a full installation of emba with `sudo ./installer.sh -F`. Such a full installation needs around 14gig of disk space.*
 
 ---
 *EMBA* supports multiple [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
