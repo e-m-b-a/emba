@@ -400,7 +400,7 @@ print_help()
   ## help and command line parsing
 
   echo -e "\\n""$CYAN""USAGE""$NC"
-  echo -e "\\nTest firmware / live system"
+  echo -e "\\nTest firmware"
   echo -e "$CYAN""-a [MIPS]""$NC""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]"
   echo -e "$CYAN""-A [MIPS]""$NC""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)"
   echo -e "$CYAN""-l [./path]""$NC""       Log path"
