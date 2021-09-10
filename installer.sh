@@ -756,11 +756,10 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
               echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
             fi
             cd "$HOME_PATH" || exit 1
-            sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
-            chmod +x config/cve_database_updater
-            echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+            sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
+            chmod +x config/emba_updater
+            echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for EMBA is located in config/emba_updater""$NC"
             echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
-            echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
           ;;
         esac
         cd "$HOME_PATH" || exit 1
@@ -981,9 +980,9 @@ cd "$HOME_PATH" || exit 1
 
 if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
-  echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+  echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for EMBA is located in config/emba_updater""$NC"
   echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
-  echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+  echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/emba_updater""$NC"
 
   echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
 
@@ -991,5 +990,5 @@ if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
 fi
 
 if [[ "$LIST_DEP" -eq 0 ]]; then
-  echo -e "$GREEN""Emba installation finished ""$NC"
+  echo -e "$GREEN""EMBA installation finished ""$NC"
 fi
