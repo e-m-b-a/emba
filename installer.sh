@@ -49,6 +49,10 @@ print_tool_info(){
   echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
   TOOL_INFO="$(apt show "${1}" 2> /dev/null)"
   echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
+  SIZE=$(apt show "$1" 2>/dev/null | grep Download-Size | cut -d: -f2)
+  if [[ -n "$SIZE" ]]; then
+    echo -e "Download-Size:$SIZE"
+  fi
   if echo "$TOOL_INFO" | grep -E "^E:\ "; then
     echo -e "$RED""$1"" was not identified and is not installable.""$NC"
   else
@@ -59,15 +63,12 @@ print_tool_info(){
       COMMAND_="$1"
     fi
     if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-      if [[ $2 -eq 0 ]] ; then
-        echo -e "$GREEN""$1"" is already installed and won't be updated.""$NC"
+      UPDATE=$(apt-cache policy "$1" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
+      if [[ "$UPDATE" -eq 1 ]] ; then
+        echo -e "$GREEN""$1"" won't be updated.""$NC"
       else
-        if [[ $COMPLEMENT -eq 0 ]] ; then
-          echo -e "$ORANGE""$1"" will be updated.""$NC"
-          INSTALL_APP_LIST+=("$1")
-        else
-          echo -e "$GREEN""$1"" won't be updated.""$NC"
-        fi
+        echo -e "$ORANGE""$1"" will be updated.""$NC"
+        INSTALL_APP_LIST+=("$1")
       fi
     else
       echo -e "$ORANGE""$1"" will be newly installed.""$NC"
@@ -211,7 +212,7 @@ print_help()
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "$CYAN""-d""$NC""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "$CYAN""-F""$NC""         Installation of EMBA with all dependencies (for running on your host - developer mode)"
-  echo -e "$CYAN""-c""$NC""         Complements EMBA dependencies (get/install all missing files/applications)"
+#  echo -e "$CYAN""-c""$NC""         Complements EMBA dependencies (get/install all missing files/applications)"
   echo -e "$CYAN""-D""$NC""         Only used via docker-compose for building EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
@@ -223,6 +224,12 @@ echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD
 
 if [ "$#" -ne 1 ]; then
   echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
+  echo -e "\n\n------------------------------------------------------------------"
+  echo -e "Probably you would check all packets we are going to install with:"
+  echo -e "$CYAN""     sudo ./installer.sh -l""$NC"
+  echo -e "If you are going to install EMBA in default mode you can use:"
+  echo -e "$CYAN""     sudo ./installer.sh -d""$NC"
+  echo -e "------------------------------------------------------------------\n\n"
   print_help
   exit 1
 fi
@@ -275,6 +282,8 @@ fi
 
 # standard stuff before installation run
 
+HOME_PATH=$(pwd)
+
 if [[ $LIST_DEP -eq 0 ]] ; then
   if ! [[ -d "external" ]] ; then
     echo -e "\\n""$ORANGE""Created external directory: ./external""$NC"
@@ -282,7 +291,7 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
-  apt-get update
+  apt-get -y update
 fi
 
 # applications needed for EMBA to run
@@ -364,13 +373,14 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
     echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
     if [[ "$(docker images -q embeddedanalyzer/emba 2> /dev/null)" == "" ]]; then
       echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
+      docker pull embeddedanalyzer/emba
       export DOCKER_CLI_EXPERIMENTAL=disabled
     else
       echo -e "$GREEN""EMBA docker image is already available - no further action will be performed.""$NC"
     fi
   else
     echo "Estimated download-Size: ~2500 MB"
-    echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
+    echo -e "$ORANGE""WARNING: docker command missing - no docker pull possible.""$NC"
   fi
 fi
 
@@ -397,6 +407,12 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   case ${ANSWER:0:1} in
     y|Y )
       echo
+
+      # cleanup first
+      rm "$HOME"/.cargo -r -f
+      rm "$HOME"/.config -r -f
+      rm external/rustup -r -f
+
       curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
       # shellcheck disable=SC1090
       # shellcheck disable=SC1091
@@ -405,28 +421,30 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       export RUSTUP_TOOLCHAIN=stable 
   
       # Java SDK for ghidra
-      if [[ -d .external/jdk ]] ; then rm -R .external/jdk ; fi
+      if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
       curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
-      mkdir external/jdk
+      mkdir external/jdk 2>/dev/null
       tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
       rm external/jdk.tar.gz
   
       # Ghidra
-      if [[ -d .external/ghidra ]] ; then rm -R .external/ghidra ; fi
+      if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
       curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip -Sf -o external/ghidra.zip
-      mkdir external/ghidra
+      mkdir external/ghidra 2>/dev/null
       unzip -qo external/ghidra.zip -d external/ghidra
       sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.0.2_PUBLIC/support/launch.properties
       rm external/ghidra.zip
   
-      if [[ -d .external/cwe_checker ]] ; then rm -R .external/cwe_checker ; fi
-      mkdir external/cwe_checker
+      if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
+      mkdir external/cwe_checker 2>/dev/null
       git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
       cd external/cwe_checker || exit 1
       make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
-      cd ../../ || exit 1
-      #cp -r "$HOME""/.cargo/bin" "external/cwe_checker/bin"
+      cd "$HOME_PATH" || exit 1
+
       mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
+      rm -r -f "$HOME""/.cargo/"
+      rm -r ./external/rustup
     ;;
   esac
 fi
@@ -456,7 +474,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       cd ./external/fact_extractor/fact_extractor/ || exit 1
       ./install/pre_install.sh
       python3 ./install.py
-      cd ../../.. || exit 1
+      cd "$HOME_PATH" || exit 1
   
       if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
         echo -e "$GREEN""FACT-extractor installed""$NC"
@@ -494,12 +512,13 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
       # pixd installation
       pip3 install pillow 2>/dev/null
+      echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"
       git clone https://github.com/p4cx/pixd_image external/pixd
       cd ./external/pixd/ || exit 1
       make
       mv pixd ../pixde
       mv pixd_png.py ../pixd_png.py
-      cd ../../ || exit 1
+      cd "$HOME_PATH" || exit 1
       rm -r ./external/pixd/
       # pixd installation
     ;;
@@ -573,7 +592,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
         ./configure --enable-targets=all
         make
-        cd ../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       fi
       if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
         mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
@@ -681,7 +700,9 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     y|Y )
   
       CVE_INST=1
-      echo -e "\\n""$MAGENTA""Ceck if the cve-search database is already installed.""$NC"
+      echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
+      cd "$HOME_PATH" || exit 1
+      cd ./external/cve-search/ || exit 1
       if netstat -anpt | grep LISTEN | grep -q 27017; then
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_INST=0
@@ -734,14 +755,14 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             else
               echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
             fi
-            sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/cve_database_updater.init > config/cve_database_updater
-            chmod +x config/cve_database_updater
-            echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+            cd "$HOME_PATH" || exit 1
+            sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
+            chmod +x config/emba_updater
+            echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for EMBA is located in config/emba_updater""$NC"
             echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
-            echo -e "$MAGENTA""$BOLD""For manual updates just start it via sudo ./config/cve_database_updater""$NC"
           ;;
         esac
-        cd ../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       fi
     ;;
   esac
@@ -793,6 +814,7 @@ fi
 
 INSTALL_APP_LIST=()
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  cd "$HOME_PATH" || exit 1
   print_tool_info "python3-pip" 1
   print_tool_info "python3-opengl" 1
   print_tool_info "python3-pyqt5" 1
@@ -872,7 +894,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
         cd ./external/binwalk/yaffshiv/ || exit 1
         python3 setup.py install
-        cd ../../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""yaffshiv already installed""$NC"
       fi
@@ -894,13 +916,13 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         pip3 install -r ./external/binwalk/jefferson/requirements.txt
         cd ./external/binwalk/jefferson/ || exit 1
         python3 ./setup.py install
-        cd ../../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""jefferson already installed""$NC"
       fi
   
       if ! command -v unstuff > /dev/null ; then
-        mkdir ./external/binwalk/unstuff
+        mkdir -p ./external/binwalk/unstuff
         wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
         tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
         cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
@@ -927,7 +949,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         cd ./external/binwalk/ubi_reader || exit 1
         git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
         python2 setup.py install
-        cd ../../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""ubi_reader already installed""$NC"
       fi
@@ -935,7 +957,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       if ! command -v binwalk > /dev/null ; then
         cd ./external/binwalk || exit 1
         python3 setup.py install
-        cd ../.. || exit 1
+        cd "$HOME_PATH" || exit 1
       else
         echo -e "$GREEN""binwalk already installed""$NC"
         BINWALK_PRE_AVAILABLE=1
@@ -954,11 +976,13 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   esac
 fi
 
+cd "$HOME_PATH" || exit 1
+
 if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"
-  echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for the cve-search database is located in config/cve_database_updater""$NC"
+  echo -e "\\n""$MAGENTA""INFO: The cron.daily update script for EMBA is located in config/emba_updater""$NC"
   echo -e "$MAGENTA""INFO: For automatic updates it should be copied to /etc/cron.daily/""$NC"
-  echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/cve_database_updater""$NC"
+  echo -e "$MAGENTA""INFO: For manual updates just start it via sudo ./config/emba_updater""$NC"
 
   echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
 
@@ -966,5 +990,5 @@ if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
 fi
 
 if [[ "$LIST_DEP" -eq 0 ]]; then
-  echo -e "$GREEN""Emba installation finished ""$NC"
+  echo -e "$GREEN""EMBA installation finished ""$NC"
 fi

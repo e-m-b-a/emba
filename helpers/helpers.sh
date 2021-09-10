@@ -102,6 +102,10 @@ cleaner() {
         umount -l "$MOUNT"
       done
     fi
+    if [[ $(grep -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+      print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
+      killall -9 --quiet -r .*cwe_checker.*
+    fi
   fi
 
   if [[ -d "$TMP_DIR" ]]; then

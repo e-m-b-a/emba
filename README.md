@@ -23,6 +23,7 @@ Author(s): Michael Messner, Pascal Eckmann
   <a href="https://github.com/e-m-b-a/emba/graphs/contributors"><img src="https://img.shields.io/github/contributors/e-m-b-a/emba?color=9ea"></a>
   <a href="https://github.com/e-m-b-a/emba/stargazers"><img src="https://img.shields.io/github/stars/e-m-b-a/emba?label=Stars"></a>
   <a href="https://github.com/e-m-b-a/emba/network/members"><img src="https://img.shields.io/github/forks/e-m-b-a/emba?label=Forks"></a>
+  <a href="https://hub.docker.com/r/embeddedanalyzer/emba"><img src="https://img.shields.io/docker/pulls/embeddedanalyzer/emba"></a>
 </p>
 
 # EMBA
@@ -49,6 +50,12 @@ Author(s): Michael Messner, Pascal Eckmann
 
 Before running *EMBA* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation) all dependencies with the installation script and met the [prerequisites](https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites)
 
+```console
+git clone https://github.com/e-m-b-a/emba.git
+cd emba
+sudo ./installer.sh -d
+```
+
 ## Usage
 
 ---   
@@ -68,7 +75,7 @@ sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 ```console
 ./emba.sh -l ./log -f ./firmware -D
 ```
-
+*WARNING: Before using the developer mode you need a full installation of emba with `sudo ./installer.sh -F`. Such a full installation needs around 14gig of disk space.*
 
 ---
 *EMBA* supports multiple [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).

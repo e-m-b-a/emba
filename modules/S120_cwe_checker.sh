@@ -28,16 +28,24 @@ S120_cwe_checker()
 
   if [[ $CWE_CHECKER -eq 1 ]] ; then
     cwe_check
-    final_cwe_log "$TOTAL_CWE_CNT"
+
+    CWE_CNT_=0
+    if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
+      while read -r COUNTING; do
+        (( CWE_CNT_="$CWE_CNT_"+"$COUNTING" ))
+      done < "$TMP_DIR"/CWE_CNT.tmp
+    fi
+
+    final_cwe_log "$CWE_CNT_"
 
     write_log ""
-    write_log "[*] Statistics:$TOTAL_CWE_CNT"
+    write_log "[*] Statistics:$CWE_CNT_"
   else
     print_output "[!] Check with cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${#CWE_OUT[@]}"
+  module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
 }
 
 cwe_check() {
@@ -48,9 +56,14 @@ cwe_check() {
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       if [[ "$THREADED" -eq 1 ]]; then
+        MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo)"))
+        if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+          MAX_THREADS_S120=1
+        fi
+
         cwe_checker_threaded &
         WAIT_PIDS_S120+=( "$!" )
-        max_pids_protection 10 "${WAIT_PIDS_S120[@]}"
+        max_pids_protection "$MAX_THREADS_S120" "${WAIT_PIDS_S120[@]}"
       else
         cwe_checker_threaded
       fi
@@ -86,7 +99,8 @@ cwe_checker_threaded () {
       CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
       CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
       CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null)"
-      (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
+      echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
+      # (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
       print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
     done
     print_output ""
