@@ -318,6 +318,7 @@ output_binaries() {
 
       #strcpy:
       if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
+        print_output "\\n"
         print_output "[+] STRCPY - top 10 results:"
         write_link "s11#strcpysummary"
         DATA=1
@@ -325,7 +326,7 @@ output_binaries() {
           binary_fct_output "$LINE"
           echo "strcpy_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
         done
-        print_output "$NC"
+        print_output "\\n$NC"
       fi
 
       #system:
@@ -355,39 +356,39 @@ binary_fct_output() {
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
       RELRO="$RED_""No RELRO$NC_"
     else
-      RELRO="$GREEN_""RELRO$NC_"
+      RELRO="$GREEN_""RELRO   $NC_"
     fi
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No canary found"; then
       CANARY="$RED_""No Canary$NC_"
     else
-      CANARY="$GREEN_""Canary$NC_"
+      CANARY="$GREEN_""Canary   $NC_"
     fi
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "NX disabled"; then
       NX="$RED_""NX disabled$NC_"
     else
-      NX="$GREEN_""NX enabled$NC_"
+      NX="$GREEN_""NX enabled $NC_"
     fi
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No Symbols"; then
       SYMBOLS="$GREEN_""No Symbols$NC_"
     else
-      SYMBOLS="$RED_""Symbols$NC_"
+      SYMBOLS="$RED_""Symbols   $NC_"
     fi
   else
       RELRO="$ORANGE_""RELRO unknown$NC_"
       NX="$ORANGE_""NX unknown$NC_"
       CANARY="$ORANGE_""CANARY unknown$NC_"
-      SYMBOLS="$ORANGE_""SYMBOLS unknown$NC_"
+      SYMBOLS="$ORANGE_""Symbols unknown$NC_"
   fi
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     # if we have the base linux config file we are checking it:
     if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
-      printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-14.14s$NC_\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+      printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
     else
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-14.14s$NC_\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
     fi
   else
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown \t|\t%-14.14s\t|\t%-15.15s\t|\t%-16.16s\t|\t%-14.14s$NC_\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
   fi
 }
 
