@@ -311,7 +311,7 @@ output_binaries() {
       RED_="$(tput setaf 1)"
       GREEN_="$(tput setaf 2)"
       ORANGE_="$(tput setaf 3)"
-      NC="$(tput sgr0)"
+      NC_="$(tput sgr0)"
 
       readarray -t RESULTS_STRCPY < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
       readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
