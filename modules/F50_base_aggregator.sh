@@ -14,6 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Generates an overview over all modules.
+#shellcheck disable=SC2153
 
 F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
@@ -304,56 +305,89 @@ output_binaries() {
   local DATA=0
 
   if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
-    FUNCTION="strcpy"
-    FUNCTION1="system"
     if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
-      readarray -t RESULTS < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
-      readarray -t RESULTS1 < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION1""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION1""-/  /" | sed "s/\.txt//" 2> /dev/null)
 
-      if [[ "${#RESULTS[@]}" -gt 0 ]]; then
-        print_output ""
-        print_output "[+] ""$FUNCTION""/""$FUNCTION1"" - top 10 results:"
+      # color codes for printf
+      RED_="$(tput setaf 1)"
+      GREEN_="$(tput setaf 2)"
+      ORANGE_="$(tput setaf 3)"
+      NC="$(tput sgr0)"
+
+      readarray -t RESULTS_STRCPY < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
+
+      #strcpy:
+      if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
+        print_output "[+] STRCPY - top 10 results:"
         write_link "s11#strcpysummary"
-        i=0 
-        for LINE in "${RESULTS[@]}" ; do
-          SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
-          F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
-          SEARCH_TERM1="$(echo "${RESULTS1[$i]}" | cut -d\  -f3)"
-          F_COUNTER1="$(echo "${RESULTS1[$i]}" | cut -d\  -f1)"
-          if [[ -f "$BASE_LINUX_FILES" ]]; then
-            # if we have the base linux config file we are checking it:
-          if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-            if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-              DATA=1
-              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
-            else
-              printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-              DATA=1
-              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
-            fi  
-          else
-            if grep -q "^$SEARCH_TERM1\$" "$BASE_LINUX_FILES" 2>/dev/null; then
-              printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${GREEN}%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-              DATA=1
-              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
-            else
-              printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-              DATA=1
-              echo "strcpy_bin;\"$SEARCH_TERM\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
-            fi  
-          fi  
-        else
-          printf "${ORANGE}\t%-5.5s : %-15.15s${NC}\t\t||\t${ORANGE}%-5.5s : %-15.15s${NC}\n" "$F_COUNTER" "$SEARCH_TERM" "$F_COUNTER1" "$SEARCH_TERM1" | tee -a "$LOG_FILE"
-          DATA=1
-        fi  
-        (( i++ ))
+        DATA=1
+        for LINE in "${RESULTS_STRCPY[@]}" ; do
+          binary_fct_output "$LINE"
+          echo "strcpy_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
         done
-      fi  
-    fi 
+        print_output "$NC"
+      fi
+
+      #system:
+      if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
+        print_output "[+] SYSTEM - top 10 results:"
+        write_link "s11#strcpysummary"
+        DATA=1
+        for LINE in "${RESULTS_SYSTEM[@]}" ; do
+          binary_fct_output "$LINE"
+          echo "system_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
+        done
+        print_output "$NC"
+      fi
+    fi
     if [[ $DATA -eq 1 ]]; then
       print_bar
     fi
+  fi
+}
+
+binary_fct_output() {
+  BINARY_DETAILS="$1"
+  BINARY="$(echo "$BINARY_DETAILS" | cut -d\  -f3)"
+  F_COUNTER="$(echo "$BINARY_DETAILS" | cut -d\  -f1)"
+
+  if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG"; then
+    if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
+      RELRO="$RED_""No RELRO$NC_"
+    else
+      RELRO="$GREEN_""RELRO$NC_"
+    fi
+    if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No canary found"; then
+      CANARY="$RED_""No Canary$NC_"
+    else
+      CANARY="$GREEN_""Canary$NC_"
+    fi
+    if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "NX disabled"; then
+      NX="$RED_""NX disabled$NC_"
+    else
+      NX="$GREEN""NX enabled$NC"
+    fi
+    if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No Symbols"; then
+      SYMBOLS="$GREEN_""No Symbols$NC_"
+    else
+      SYMBOLS="$RED_""Symbols$NC_"
+    fi
+  else
+      RELRO="$ORANGE_""RELRO unknown$NC_"
+      NX="$ORANGE""NX unknown$NC_"
+      CANARY="$ORANGE""CANARY unknown$NC_"
+      SYMBOLS="$ORANGE""SYMBOLS unknown$NC_"
+  fi
+
+  if [[ -f "$BASE_LINUX_FILES" ]]; then
+    # if we have the base linux config file we are checking it:
+    if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
+      printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes\t|\t%-16.16s\t|\t%-16.16s\t|\t%-16.16s\t|\t%-16.16s$NC_\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+    else
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no \t|\t%-16.16s\t|\t%-16.16s\t|\t%-16.16s\t|\t%-16.16s$NC_\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+    fi
+  else
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown \t|\t%-16.16s\t|\t%-16.16s\t|\t%-16.16s\t|\t%-16.16s$NC_\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
   fi
 }
 
