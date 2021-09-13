@@ -305,7 +305,7 @@ output_binaries() {
   local DATA=0
 
   if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
-    if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" | wc -l)" -gt 0 ]]; then
+    if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_*.txt" | wc -l)" -gt 0 ]]; then
 
       # color codes for printf
       RED_="$(tput setaf 1)"
