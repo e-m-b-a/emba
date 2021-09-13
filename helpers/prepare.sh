@@ -325,6 +325,6 @@ generate_msf_db() {
   if [[ $IN_DOCKER -eq 1 ]]; then
     export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
   fi
-  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' > "$MSF_DB_PATH"
+  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' | sort > "$MSF_DB_PATH"
 }
 

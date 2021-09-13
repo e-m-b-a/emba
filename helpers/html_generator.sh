@@ -215,7 +215,7 @@ add_link_tags() {
         fi
       done
     done
-  fi # CWE[0-9]{3,4}
+  fi 
 
   # CVE links
   if ( grep -q -E '(CVE)' "$LINK_FILE" ) ; then
