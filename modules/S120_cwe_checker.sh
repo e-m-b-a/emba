@@ -77,12 +77,11 @@ cwe_check() {
 
 cwe_checker_threaded () {
   NAME=$(basename "$LINE")
+  OLD_LOG_FILE="$LOG_FILE"
+  LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
   LINE=$(readlink -f "$LINE")
-  print_output "[*] Testing $LINE"
   readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log )
-  if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then
-    print_output "[*] ""$(print_path "$LINE")"
-  fi
+  print_output "[*] Tested ""$(print_path "$LINE")"
   for ENTRY in "${TEST_OUTPUT[@]}" ; do
     if [[ -n "$ENTRY" ]] ; then
       if ! [[ "$ENTRY" == *"ERROR:"* || "$ENTRY" == *"DEBUG:"* || "$ENTRY" == *"INFO:"* ]] ; then
@@ -94,7 +93,7 @@ cwe_checker_threaded () {
   # this is the logging after every tested file
   if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
     print_output ""
-    print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":"
+    print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".log
     for CWE_LINE in "${CWE_OUT[@]}"; do
       CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
       CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
@@ -104,8 +103,14 @@ cwe_checker_threaded () {
       print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
     done
     print_output ""
+  else
+    print_output ""
+    print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
   fi
-  if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then echo ; fi
+  if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_output "" ; fi
+  cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+  rm "$LOG_FILE" 2> /dev/null
+  LOG_FILE="$OLD_LOG_FILE"
 }
 
 final_cwe_log() {

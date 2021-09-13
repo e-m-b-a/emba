@@ -42,6 +42,7 @@ REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"\_blank\" >"
 CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"\_blank\" >"
+CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
 ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
@@ -214,7 +215,7 @@ add_link_tags() {
         fi
       done
     done
-  fi
+  fi # CWE[0-9]{3,4}
 
   # CVE links
   if ( grep -q -E '(CVE)' "$LINK_FILE" ) ; then
@@ -225,6 +226,20 @@ add_link_tags() {
       if [[ -n "$CVE_ID_STRING" ]] ; then
         HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID_STRING@g")""$CVE_ID_STRING""$LINK_END"
         LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""$CVE_ID_STRING""@""$HTML_LINK""@g" )
+      fi
+    done
+  fi
+
+  # CWE links
+  if ( grep -q -E '(CWE)' "$LINK_FILE" ) ; then
+    readarray -t CWE_IDS < <( grep -n -E -o 'CWE[0-9]{3,4}' "$LINK_FILE" | sort -u)
+    for CWE_ID in "${CWE_IDS[@]}" ; do
+      CWE_ID_LINE="$(echo "$CWE_ID" | cut -d ":" -f 1)"
+      CWE_ID_STRING="$(echo "$CWE_ID" | cut -d ":" -f 2-)"
+      CWE_ID_NUMBER="${CWE_ID_STRING:3}"
+      if [[ -n "$CWE_ID_STRING" ]] ; then
+        HTML_LINK="$(echo "$CWE_LINK" | sed -e "s@LINK@$CWE_ID_NUMBER@g")""$CWE_ID_STRING""$LINK_END"
+        LINK_COMMAND_ARR+=( '-e' "$CWE_ID_LINE""s@""$CWE_ID_STRING""@""$HTML_LINK""@g" )
       fi
     done
   fi
