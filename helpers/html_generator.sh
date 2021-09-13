@@ -510,6 +510,7 @@ prepare_report()
     mkdir -p "$ABS_HTML_PATH$STYLE_PATH"
     cp "$HELP_DIR/style.css" "$ABS_HTML_PATH$STYLE_PATH/style.css"
     cp "$HELP_DIR/emba.svg" "$ABS_HTML_PATH$STYLE_PATH/emba.svg"
+    cp "$HELP_DIR/favicon.ico" "$ABS_HTML_PATH$STYLE_PATH/favicon.ico"
   fi
   if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
     mkdir -p "$ABS_HTML_PATH$TEMP_PATH"
