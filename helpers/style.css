@@ -71,6 +71,10 @@ a.f {
   padding-right:18px !important;
 }
 
+a pre:hover {
+  background-color: rgb(104, 104, 104);
+}
+
 pre hr {
   margin-left: -40px;
 }
