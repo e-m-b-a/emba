@@ -337,7 +337,7 @@ binwalking() {
 }
 
 extract_binwalk_helper() {
-  binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
+  binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
 }
 extract_fact_helper() {
   if [[ -d /tmp/extractor ]]; then
@@ -363,7 +363,7 @@ extract_deb_helper() {
   find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
 }
 binwalk_deep_extract_helper() {
-  binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
+  binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
 }
 extract_deb_extractor_helper(){
   DEB_NAME=$(basename "$DEB")
