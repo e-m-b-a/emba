@@ -27,7 +27,6 @@ P02_firmware_bin_file_check() {
 
   FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
   DLINK_ENC_CHECK=$(hexdump -C "$FIRMWARE_PATH"| head -1)
-  hexdump -C "$FIRMWARE_PATH"| head -1
 
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     export VMDK_DETECTED=1
