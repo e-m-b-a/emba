@@ -23,10 +23,16 @@ P02_firmware_bin_file_check() {
 
   local FILE_BIN_OUT
   export VMDK_DETECTED=0
+  export DLINK_ENC_DETECTED=0
+
   FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
+  DLINK_ENC_CHECK=$(hexdump -C "$FIRMWARE_PATH"| head -1)
 
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     export VMDK_DETECTED=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
+    export DLINK_ENC_DETECTED=1
   fi
 
   local FILE_LS_OUT

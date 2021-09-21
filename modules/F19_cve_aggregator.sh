@@ -172,6 +172,12 @@ prepare_version_data() {
     # alsactl, amixer -> alsa
     VERSION_lower="${VERSION_lower//alsactl/alsa}"
     VERSION_lower="${VERSION_lower//amixer/alsa}"
+    # ipsec ...
+    VERSION_lower="${VERSION_lower//ipsec\ _copyright/ipsec}"
+    VERSION_lower="${VERSION_lower//ipsec\ eroute/ipsec}"
+    VERSION_lower="${VERSION_lower//ipsec\ ranbits/ipsec}"
+    #fota client version: 0.1.5.
+    VERSION_lower="${VERSION_lower//fota\ client\ version:/fota}"
     #sudoreplay -> sudo
     VERSION_lower="${VERSION_lower//sudoreplay/sudo}"
     #visudo -> sudo
@@ -432,6 +438,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/avahi-.*\ ([0-9]\.[0-9]\.[0-9][0-9])/avahi\ \1/g')"
     #server debian wheezy upnp/1.1 miniupnpd/2.1
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/server.*upnp.*miniupnpd\/([0-9]\.[0-9])/miniupnpd\ \1/g')"
+    #CONFIG_SET (/runtime/VerInfo/Web, 1.4b191) error! -> goahead
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/CONFIG_SET\ \(\/runtime\/VerInfo\/Web,\ ([0-9]\.[0-9]b[0-9]+)\)/goahead\ \1/g')"
     # linux -> kernel (we find the CVEs in the database with kernel as search string)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^linux\ ([0-9])/kernel\ \1/')"
     # Siprotec 5 firmware has a version identifier like FWAOS_V01.11.01.123
