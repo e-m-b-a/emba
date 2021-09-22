@@ -100,9 +100,18 @@ architecture_check()
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
     local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
+    local D_END_LE=0 D_END_BE=0
+
     # we use the binaries array which is already unique
     for D_ARCH in "${BINARIES[@]}" ; do
       D_ARCH=$(file "$D_ARCH")
+
+      if [[ "$D_ARCH" == *"MSB"* ]] ; then
+        D_END_BE=$((D_END_BE+1))
+      elif [[ "$D_ARCH" == *"LSB"* ]] ; then
+        D_END_LE=$((D_END_LE+1))
+      fi
+
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
         continue
@@ -139,8 +148,31 @@ architecture_check()
       elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
         D_ARCH="PPC"
       fi
+
+      if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
+        print_output ""
+        print_output "$(indent "$(orange "Endianness  Count")")" "no_log"
+        if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" "no_log" ; fi
+        if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" "no_log" ; fi
+      fi
+
+      if [[ $D_END_LE -gt $D_END_BE ]] ; then
+        D_END="LE"
+      elif [[ $D_END_BE -gt $D_END_LE ]] ; then
+        D_END="BE"
+      else
+        D_END="NA"
+      fi
+
       print_output "" "no_log"
-      print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n" "no_log"
+
+      if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
+        print_output "$(indent "Detected architecture and endianness of the firmware: ""$ORANGE""$D_ARCH"" / ""$D_END""$NC")""\\n" "no_log"
+        export D_END
+      else
+        print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n" "no_log"
+      fi
+
       if [[ -n "$ARCH" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
           print_output "[!] Your set architecture (""$ARCH"") is different from the automatically detected one. The set architecture will be used." "no_log"
@@ -160,6 +192,7 @@ architecture_check()
         exit 1
       fi
     fi
+
   else
     print_output "[*] Architecture auto detection disabled\\n" "no_log"
     if [[ -n "$ARCH" ]] ; then
