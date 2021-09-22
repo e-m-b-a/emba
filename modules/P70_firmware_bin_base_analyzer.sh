@@ -62,7 +62,7 @@ os_identification() {
   sub_module_title "OS detection"
 
   print_output "[*] Initial OS detection running ..." | tr -d "\n"
-  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX")
+  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]")
   echo "." | tr -d "\n"
   declare -A OS_COUNTER=()
   local COUNTER
@@ -79,13 +79,13 @@ os_identification() {
     OS_COUNTER[$OS]=0
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null)"))
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
-    #if [[ -f "$LOG_DIR"/p20_binwalker_deep.txt ]]; then
-    #  OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_binwalker*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
-    #fi
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS")" ))
 
     if [[ $OS == "VxWorks\|Wind" ]]; then
       OS_COUNTER_VxWorks="${OS_COUNTER[$OS]}"
+    fi
+    if [[ $OS == *"CPU "* ]]; then
+      OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "Original Siemens Equipment")" ))
     fi
 
     if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  ${#ROOT_PATH[@]} -gt 1 ]] ; then 
@@ -105,6 +105,8 @@ os_identification() {
     if [[ ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
       if [[ $OS == "VxWorks\|Wind" ]]; then
         print_output "$(indent "$(orange "VxWorks detected\t\t""${OS_COUNTER[$OS]}")")"
+      elif [[ $OS == "CPU\ [34][12][0-9]-[0-9]" ]]; then
+        print_output "$(indent "$(orange "S7-CPU400 detected\t\t""${OS_COUNTER[$OS]}")")"
       else
         print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
       fi
