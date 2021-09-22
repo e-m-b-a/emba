@@ -446,6 +446,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^linux\ ([0-9])/kernel\ \1/')"
     # Siprotec 5 firmware has a version identifier like FWAOS_V01.11.01.123
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
+    #@(#1) CP443-1 GX20 V x.y.z 11.11.9999
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\@\(\#1\)\ cp443-1\ gx20\ v\ ([0-9]\.[0-9]\.[0-9]).*/siemens:simatic_cp443-1_firmware \1/')"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
     VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"

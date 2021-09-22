@@ -62,7 +62,7 @@ os_identification() {
   sub_module_title "OS detection"
 
   print_output "[*] Initial OS detection running ..." | tr -d "\n"
-  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]")
+  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443")
   echo "." | tr -d "\n"
   declare -A OS_COUNTER=()
   local COUNTER
@@ -107,6 +107,8 @@ os_identification() {
         print_output "$(indent "$(orange "VxWorks detected\t\t""${OS_COUNTER[$OS]}")")"
       elif [[ $OS == "CPU\ [34][12][0-9]-[0-9]" ]]; then
         print_output "$(indent "$(orange "S7-CPU400 detected\t\t""${OS_COUNTER[$OS]}")")"
+      elif [[ $OS == "CP443" ]]; then
+        print_output "$(indent "$(orange "S7-CP443 detected\t\t""${OS_COUNTER[$OS]}")")"
       else
         print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
       fi
