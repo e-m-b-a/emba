@@ -101,14 +101,17 @@ os_identification() {
     elif [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
       print_output "$(indent "$(orange "SIPROTEC detected\t\t""${OS_COUNTER[$OS]}")")";
     fi
+    if [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
+      print_output "$(indent "$(green "S7-CP443 detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified S7-CP443 system detected")")";
+    elif [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
+      print_output "$(indent "$(orange "S7-CP443 detected\t\t""${OS_COUNTER[$OS]}")")";
+    fi
 
     if [[ ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
       if [[ $OS == "VxWorks\|Wind" ]]; then
         print_output "$(indent "$(orange "VxWorks detected\t\t""${OS_COUNTER[$OS]}")")"
       elif [[ $OS == "CPU\ [34][12][0-9]-[0-9]" ]]; then
         print_output "$(indent "$(orange "S7-CPU400 detected\t\t""${OS_COUNTER[$OS]}")")"
-      elif [[ $OS == "CP443" ]]; then
-        print_output "$(indent "$(orange "S7-CP443 detected\t\t""${OS_COUNTER[$OS]}")")"
       else
         print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
       fi
