@@ -40,7 +40,7 @@ P20_firmware_bin_extractor() {
     fi
 
     FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
-    if [[ -n "$OUTPUT_DIR_fact" ]]; then
+    if [[ -n "$OUTPUT_DIR_fact" && -d "$OUTPUT_DIR_fact" ]]; then
       FILES_FACT=$(find "$OUTPUT_DIR_fact" -xdev -type f | wc -l )
     fi
     print_output ""
