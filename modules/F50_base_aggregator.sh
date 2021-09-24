@@ -132,15 +132,14 @@ output_details() {
     echo "python_vulns;\"$S21_PY_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files."
-    print_output "[+] Thereof, found in php.ini files: ""$MAGENTA""$S22_PHP_INI_LIMIT_EXCEEDED"" exceeding the limit value, ""$RED""$S22_PHP_INI_FAILURE"" failure(s) ""$GREEN""and ""$ORANGE""$S22_PHP_INI_WARNINGS"" warnings.""$NC"
+  if [[ "$S22_PHP_VULNS" -gt 0 ]] || [[ "$S22_PHP_INI_ISSUES" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+    print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_INI_CONFIGS""$GREEN"" php configuratoin files.""$NC"
     write_link "s22"
     # shellcheck disable=SC2129
-	echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
-    echo "php_ini_limit_exceeded;\"$S22_PHP_INI_LIMIT_EXCEEDED\"" >> "$CSV_LOG_FILE"
-    echo "php_ini_failure;\"$S22_PHP_INI_FAILURE\"" >> "$CSV_LOG_FILE"
-    echo "php_ini_warnings;\"$S22_PHP_INI_WARNINGS\"" >> "$CSV_LOG_FILE"
+	  echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
+    echo "php_ini_issues;\"$S22_PHP_INI_ISSUES\"" >> "$CSV_LOG_FILE"
+    echo "php_ini_configs;\"$S22_PHP_INI_CONFIGS\"" >> "$CSV_LOG_FILE"
     echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
@@ -446,9 +445,8 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S22_LOG" ]]; then
     S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f2)
     S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3)
-    S22_PHP_INI_LIMIT_EXCEEDED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f4)
-    S22_PHP_INI_FAILURE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f5)
-    S22_PHP_INI_WARNINGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f6)
+    S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f4)
+    S22_PHP_INI_FILES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f5)
   fi
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
