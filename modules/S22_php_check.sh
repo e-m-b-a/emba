@@ -12,6 +12,7 @@
 # emba is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Stefan Haboeck
 
 # Description:  Checks for bugs, stylistic errors, etc. in php scripts, then it lists the found error types.
 
