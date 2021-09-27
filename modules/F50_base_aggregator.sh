@@ -554,7 +554,7 @@ get_data() {
 os_detector() {
 
   VERIFIED=0
-  OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos")
+  OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
 
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
@@ -571,6 +571,8 @@ os_detector() {
           SYSTEM="FreeBSD"
         elif [[ "$OS_TO_CHECK" == "qnx\ neutrino\ rtos" ]]; then
           SYSTEM="QNX Neutrino"
+        elif [[ "$OS_TO_CHECK" == "simatic\ cp443-1" ]]; then
+          SYSTEM="Siemens CP443-1"
         else
           SYSTEM="$OS_TO_CHECK"
         fi
