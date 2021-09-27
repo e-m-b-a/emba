@@ -150,7 +150,7 @@ architecture_check()
       fi
 
       if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
-        print_output ""
+        print_output "" "no_log"
         print_output "$(indent "$(orange "Endianness  Count")")" "no_log"
         if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" "no_log" ; fi
         if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" "no_log" ; fi
