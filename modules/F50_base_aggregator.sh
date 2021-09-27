@@ -80,7 +80,11 @@ output_overview() {
   echo "emba_command;\"$EMBA_COMMAND\"" >> "$CSV_LOG_FILE"
 
   if [[ -n "$ARCH" ]]; then
-    print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
+    if [[ -n "$D_END" ]]; then
+      print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"" / ""$D_END"
+    else
+      print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
+    fi
     echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
   elif [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
