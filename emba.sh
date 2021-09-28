@@ -183,6 +183,7 @@ main()
 
   INVOCATION_PATH="$(dirname "$0")"
 
+  export FULL_EMULATION=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
   export CWE_CHECKER=0
@@ -246,7 +247,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:QrstxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -312,6 +313,10 @@ main()
       p)
         export PROFILE="$OPTARG"
        ;;
+      Q)
+        # this is for experimental system emulation module
+        export FULL_EMULATION=1
+        ;;
       r)
         export FINAL_FW_RM=1
        ;;
@@ -504,7 +509,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:QrstX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;

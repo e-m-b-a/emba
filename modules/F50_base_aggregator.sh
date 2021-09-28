@@ -42,6 +42,7 @@ F50_base_aggregator() {
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
+  S150_LOG="s150_system_emulator.txt"
 
   CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$LOG_FILE")".csv
 
@@ -150,6 +151,11 @@ output_details() {
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
     write_link "s115"
+    DATA=1
+  fi
+  if [[ "$SYS_ONLINE" -eq 1 ]]; then
+    print_output "[+] System emulation was successful"
+    write_link "s150"
     DATA=1
   fi
 
@@ -520,6 +526,9 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
     export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S150_LOG" ]]; then
+    SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S150_LOG" | cut -d: -f2)
   fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
