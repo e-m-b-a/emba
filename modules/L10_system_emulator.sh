@@ -18,17 +18,10 @@
 #               Currently this is an experimental module and needs to be activated separately via the -F switch. 
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
-# currently the following installs are needed:
-# sudo apt-get install busybox-static fakeroot git dmsetup kpartx netcat-openbsd nmap python3-psycopg2 snmp uml-utilities util-linux vlan nikto
-# sudo apt-get install qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
-# git clone --recursive https://github.com/firmadyne/firmadyne.git
-# change the export FIRMADYNE_DIR to the firmadyne root path
-
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=0
 
-S150_system_emulator() {
-  export FIRMADYNE_DIR="/home/m1k3/git-repos/firmadyne"
+L10_system_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "System emulation of Linux based embedded devices."
 
@@ -48,21 +41,13 @@ S150_system_emulator() {
         KPANIC=0
 
         print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
-        D_ARCH=$(file "$R_PATH"/bin/busybox)
 
-        if [[ "$D_ARCH" == *"MSB"* ]] ; then
-          T_END="eb"
-        elif [[ "$D_ARCH" == *"LSB"* ]] ; then
-          T_END="el"
-        else
-          T_END="NA"
-        fi
+        if [[ -n "$D_END" ]]; then
+          D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
+          ARCH_END="$(echo "$ARCH" | tr '[:upper:]' '[:lower:]')$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
+          CONSOLE=$(get_console "$ARCH_END")
+          LIBNVRAM=$(get_nvram "$ARCH_END")
 
-        ARCH_END="$(echo "$ARCH" | tr '[:upper:]' '[:lower:]')$(echo "$T_END" | tr '[:upper:]' '[:lower:]')"
-        CONSOLE=$(get_console "$ARCH_END")
-        LIBNVRAM=$(get_nvram "$ARCH_END")
-
-        if [[ "$T_END" != "NA" ]]; then
           create_emulation_filesystem "$R_PATH" "$ARCH_END"
           identify_networking "$IMAGE_NAME" "$ARCH_END"
           get_networking_details
@@ -192,7 +177,12 @@ identify_networking() {
   sleep 60
   pkill -f "qemu-system-.*$IMAGE_NAME.*"
   pkill -f "tail.*$LOG_PATH_MODULE/qemu.initial.serial.log.*"
-  cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_FILE"
+
+  if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
+    cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_FILE"
+  else
+    print_output "[-] No $LOG_PATH_MODULE/qemu.initial.serial.log log file generated."
+  fi
 
   print_output "[*] Firmware $IMAGE_NAME finished for identification of the network configuration"
 }
@@ -203,7 +193,6 @@ run_mipsel_network_id() {
 
   print_output "[*] Qemu run for $ARCH_END - $IMAGE_NAME"
   KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
-  #IMAGE="$LOG_PATH_MODULE/$IMAGE_NAME"
   IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
   qemu-system-mipsel -m 256 -M malta -kernel "$KERNEL" -drive if=ide,format=raw,file="$IMAGE" -append "firmadyne.syscall=1 root=/dev/sda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1" -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none -netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
 
@@ -224,6 +213,7 @@ run_armel_network_id() {
   print_output "[*] Qemu run for $ARCH_END - $IMAGE_NAME"
   print_output "[*] Emulate all the things.\\n"
 
+  print_output "[!] ARM not implemented"
 }
 
 get_networking_details() {
@@ -232,103 +222,112 @@ get_networking_details() {
 
   sub_module_title "Network identification - $IMAGE_NAME"
 
-  IPS=()
-  INT=()
-  VLAN=()
+  if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
+    IPS=()
+    INT=()
+    VLAN=()
+  
+    mapfile -t MAC_CHANGES < <(grep -a "ioctl_SIOCSIFHWADDR" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
+    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
+    mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
+    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
+    mapfile -t PANICS < <(grep -a "Kernel panic" "$LOG_PATH_MODULE"/qemu.initial.serial.log)
+  
+    for MAC_CHANGE in "${MAC_CHANGES[@]}"; do
+      print_output "[*] MAC change detected: $MAC_CHANGE"
+      # TODO
+    done
+  
+    for INTERFACE_CAND in "${INTERFACE_CANDIDATES[@]}"; do
+      print_output "[*] Possible interface candidate detected: $ORANGE$INTERFACE_CAND$NC"
+      # INTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
+      mapfile -t IP_ADDRESS < <(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | sed 's/0x//' | sed 's/../0x&\n/g')
+      # IP_ADDRESS -> c0a80001
+      # as I don't get it to change the hex ip to dec with printf, we do it the poor way:
+      IP_=""
+      for IPs in "${IP_ADDRESS[@]}"; do
+        if [[ "$IPs" == "0x"* ]]; then
+          #shellcheck disable=SC2004
+          IP_="$IP_.$(($IPs))"
+        fi
+      done
 
-  mapfile -t MAC_CHANGES < <(grep -a "ioctl_SIOCSIFHWADDR" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-  mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-  mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-  mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-  mapfile -t PANICS < <(grep -a "Kernel panic" "$LOG_PATH_MODULE"/qemu.initial.serial.log)
-
-  for MAC_CHANGE in "${MAC_CHANGES[@]}"; do
-    print_output "[*] MAC change detected: $MAC_CHANGE"
-    # TODO
-  done
-
-  for INTERFACE_CAND in "${INTERFACE_CANDIDATES[@]}"; do
-    print_output "[*] Possible interface candidate detected: $ORANGE$INTERFACE_CAND$NC"
-    # INTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
-    mapfile -t IP_ADDRESS < <(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | sed 's/0x//' | sed 's/../0x&\n/g')
-    # IP_ADDRESS -> c0a80001
-    # as I don't get it to change the hex ip to dec with printf, we do it the poor way:
-    IP_=""
-    for IPs in "${IP_ADDRESS[@]}"; do
-      if [[ "$IPs" == "0x"* ]]; then
-        IP_="$IP_.$(($IPs))"
+      #shellcheck disable=SC2001
+      IP_="$(echo "$IP_" | sed 's/^\.//')"
+  
+      if [[ "$D_END" == "eb" ]]; then
+        IP_ADDRESS_="$IP_"
+      elif [[ "$D_END" == "el" ]]; then
+        IP_ADDRESS_=$(echo "$IP_" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
+      fi
+      if ! [[ "$IP_ADDRESS_" == "127."* ]] && ! [[ "$IP_ADDRESS_" == "0.0.0.0" ]]; then
+        IPS+=( "$IP_ADDRESS_" )
+        NETWORK_DEVICE="$(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2)"
+        if [[ -n "$NETWORK_DEVICE" ]]; then
+          INT+=( "$NETWORK_DEVICE" )
+        fi
       fi
     done
-    IP_="$(echo "$IP_" | sed 's/^\.//')"
-
-    if [[ "$T_END" == "eb" ]]; then
-      IP_ADDRESS_="$IP_"
-    elif [[ "$T_END" == "el" ]]; then
-      IP_ADDRESS_=$(echo "$IP_" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
-    fi
-    if ! [[ "$IP_ADDRESS_" == "127."* ]] && ! [[ "$IP_ADDRESS_" == "0.0.0.0" ]]; then
-      IPS+=( "$IP_ADDRESS_" )
-      NETWORK_DEVICE="$(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2)"
-      if [[ -n "$NETWORK_DEVICE" ]]; then
-        INT+=( "$NETWORK_DEVICE" )
+  
+    for BRIDGE_INT in "${BRIDGE_INTERFACES[@]}"; do
+      print_output "[*] Possible bridge interface candidate detected: $ORANGE$BRIDGE_INT$NC"
+      # br_add_if[PID: 138 (brctl)]: br:br0 dev:eth1.1
+      BRIDGE_INT_="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2)"
+      NET_DEV="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | cut -d. -f1)"
+  
+      # check if the dev part is something like eth1.2:
+      # br_add_if[PID: 170 (brctl)]: br:br0 dev:eth0
+      #if [[ "$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]")" ]]; then
+        if echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+        VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | cut -d. -f2)"
       fi
-    fi
-  done
-
-  for BRIDGE_INT in "${BRIDGE_INTERFACES[@]}"; do
-    print_output "[*] Possible bridge interface candidate detected: $ORANGE$BRIDGE_INT$NC"
-    # br_add_if[PID: 138 (brctl)]: br:br0 dev:eth1.1
-    BRIDGE_INT_="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2)"
-    NET_DEV="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | cut -d. -f1)"
-
-    # check if the dev part is something like eth1.2:
-    # br_add_if[PID: 170 (brctl)]: br:br0 dev:eth0
-    if [[ "$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]")" ]]; then
-      VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | cut -d. -f2)"
-    fi
-    if [[ -n "$BRIDGE_INT_" ]]; then
-      INT+=( "$BRIDGE_INT_" )
-    fi
-    if [[ -n "$NET_DEV" ]]; then
-      INT+=( "$NET_DEV" )
+      if [[ -n "$BRIDGE_INT_" ]]; then
+        INT+=( "$BRIDGE_INT_" )
+      fi
+      if [[ -n "$NET_DEV" ]]; then
+        INT+=( "$NET_DEV" )
+        VLAN+=( "$VLAN_ID" )
+      fi
+    done
+  
+    for VLAN_INFO in "${VLAN_INFOS[@]}"; do
+      print_output "[*] Possible VLAN details detected: $ORANGE$VLAN_INFO$NC"
+      # register_vlan_dev[PID: 128 (vconfig)]: dev:eth1.1 vlan_id:1
+      NET_DEV="$(echo "$VLAN_INFO" | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 | cut -d. -f1)"
+      VLAN_ID="$(echo "$VLAN_INFO" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2)"
       VLAN+=( "$VLAN_ID" )
-    fi
-  done
+      INT+=( "$NET_DEV" )
+    done
+  
+    # make them unique:
+    eval "IPS=($(for i in "${IPS[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+    eval "INT=($(for i in "${INT[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+    eval "VLAN=($(for i in "${VLAN[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+    print_output ""
+    for IP in "${IPS[@]}"; do
+      print_output "[+] Found possible IP address: $ORANGE$IP$NC"
+    done
+    for INT_ in "${INT[@]}"; do
+      if [[ "$INT_" == *"br"* ]]; then
+        print_output "[+] Possible bridge interface detected: $ORANGE$INT_$NC"
+      else
+        print_output "[+] Possible network interface detected: $ORANGE$INT_$NC"
+      fi
+    done
+    for VLAN_ in "${VLAN[@]}"; do
+      if [[ "$VLAN_" == "[0-9]+" ]]; then
+        print_output "[+] Possible VLAN ID detected: $ORANGE$VLAN_$NC"
+      fi
+    done
+  
+    for PANIC in "${PANICS[@]}"; do
+      print_output "[!] WARNING: Kernel Panic detected: $ORANGE$PANIC$NC"
+      KPANIC=1
+    done
 
-  for VLAN_INFO in "${VLAN_INFOS[@]}"; do
-    print_output "[*] Possible VLAN details detected: $ORANGE$VLAN_INFO$NC"
-    # register_vlan_dev[PID: 128 (vconfig)]: dev:eth1.1 vlan_id:1
-    NET_DEV="$(echo "$VLAN_INFO" | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 | cut -d. -f1)"
-    VLAN_ID="$(echo "$VLAN_INFO" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2)"
-    VLAN+=( "$VLAN_ID" )
-    INT+=( "$NET_DEV" )
-  done
-
-  # make them unique:
-  eval "IPS=($(for i in "${IPS[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  eval "INT=($(for i in "${INT[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  eval "VLAN=($(for i in "${VLAN[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  print_output ""
-  for IP in "${IPS[@]}"; do
-    print_output "[+] Found possible IP address: $ORANGE$IP$NC"
-  done
-  for INT_ in "${INT[@]}"; do
-    if [[ "$INT_" == *"br"* ]]; then
-      print_output "[+] Possible bridge interface detected: $ORANGE$INT_$NC"
-    else
-      print_output "[+] Possible network interface detected: $ORANGE$INT_$NC"
-    fi
-  done
-  for VLAN_ in "${VLAN[@]}"; do
-    if [[ "$VLAN_" == "[0-9]+" ]]; then
-      print_output "[+] Possible VLAN ID detected: $ORANGE$VLAN_$NC"
-    fi
-  done
-
-  for PANIC in "${PANICS[@]}"; do
-    print_output "[!] WARNING: Kernel Panic detected: $ORANGE$PANIC$NC"
-    KPANIC=1
-  done
+  else
+    print_output "[-] No $LOG_PATH_MODULE/qemu.initial.serial.log log file generated."
+  fi
   print_output ""
 }
 
@@ -423,8 +422,6 @@ run_emulated_system() {
   if [[ "$QEMU_BIN" != "NA" ]]; then
     print_output "[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit"
     sleep 1s
-    #"$QEMU_ENV_VARS" "$QEMU" -m 256 -M "$QEMU_MACHINE" -kernel "$KERNEL" \
-    #shellcheck disable=SC2086
     run_qemu_final_emulation &
   else
     print_output "[-] No firmware emulation $ARCH / $IMAGE_NAME possible"
@@ -436,7 +433,8 @@ run_qemu_final_emulation() {
   # kill it afterwards with something like
   # pkill -f "qemu-system-.*$IMAGE_NAME.*"
 
-  $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \
+  #shellcheck disable=SC2086
+  $QEMU_ENV_VARS $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \
     -append "root=$QEMU_ROOTFS console=ttyS0\ nandsim.parts=64,64,64,64,64,64,64,64,64,64\ rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
     -nographic $QEMU_NETWORK | tee "$LOG_PATH_MODULE"/qemu.final.serial.log
 
@@ -446,20 +444,22 @@ check_online_stat() {
   # check for a maximum of 60 seconds
   while [[ "$PING_CNT" -lt 12 ]]; do
     for IP in "${IPS[@]}"; do
-      ping -c 1 $IP &> /dev/null
-      if [[ $? -ne 0 ]]; then
+      if ping -c 1 "$IP" &> /dev/null; then
         print_output "[*] Host with $IP is not reachable."
         SYS_ONLINE=0
       else
         print_output "[+] Ping to $IP is Ok."
+        # wait another 5 seconds to settle everything before proceeding
+        sleep 5
         SYS_ONLINE=1
         break 2
       fi
     done
     sleep 5
-    PING_CNT=($PING_CNT+1)
+    PING_CNT=("$PING_CNT"+1)
   done
 
+  print_output ""
   cat "$LOG_PATH_MODULE"/qemu.final.serial.log >> "$LOG_FILE"
 }
 

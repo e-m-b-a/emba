@@ -69,7 +69,7 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
-# $1: module group letter [P, S, F]
+# $1: module group letter [P, S, L, F]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
 run_modules()
@@ -224,12 +224,13 @@ main()
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
-  export PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
+  export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   export MSF_PATH="/usr/share/metasploit-framework/modules/"
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
+  export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
 
   echo
 
@@ -662,6 +663,29 @@ main()
     fi
 
     TESTING_DONE=1
+  fi
+
+  #######################################################################################
+  # Live Emulation - Check (L-modules)
+  #######################################################################################
+  if [[ $FULL_EMULATION -eq 1 ]] ; then
+    print_output "\n=================================================================\n" "no_log"
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
+    else
+      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
+    fi
+
+    write_grep_log "$(date)" "TIMESTAMP"
+    # these modules are not threaded!
+    run_modules "L" "0" "$HTML"
+
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
+    else
+      print_output "[!] System emulation ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
   fi
 
   #######################################################################################

@@ -157,9 +157,9 @@ architecture_check()
       fi
 
       if [[ $D_END_LE -gt $D_END_BE ]] ; then
-        D_END="LE"
+        D_END="EL"
       elif [[ $D_END_BE -gt $D_END_LE ]] ; then
-        D_END="BE"
+        D_END="EB"
       else
         D_END="NA"
       fi
