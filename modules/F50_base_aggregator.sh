@@ -81,7 +81,11 @@ output_overview() {
   echo "emba_command;\"$EMBA_COMMAND\"" >> "$CSV_LOG_FILE"
 
   if [[ -n "$ARCH" ]]; then
-    print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
+    if [[ -n "$D_END" ]]; then
+      print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"" / ""$D_END"
+    else
+      print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
+    fi
     echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
   elif [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
@@ -563,7 +567,7 @@ get_data() {
 os_detector() {
 
   VERIFIED=0
-  OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos")
+  OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
 
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
@@ -580,6 +584,8 @@ os_detector() {
           SYSTEM="FreeBSD"
         elif [[ "$OS_TO_CHECK" == "qnx\ neutrino\ rtos" ]]; then
           SYSTEM="QNX Neutrino"
+        elif [[ "$OS_TO_CHECK" == "simatic\ cp443-1" ]]; then
+          SYSTEM="Siemens CP443-1"
         else
           SYSTEM="$OS_TO_CHECK"
         fi

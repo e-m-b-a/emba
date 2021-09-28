@@ -315,6 +315,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/rpcinfo\ (.*)/rpcinfo/')"
     #This is perl 5, version 20, subversion 0 (v5.20.0) built
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ perl\ ([0-9]),\ ([0-9][0-9]),\ sub([0-9])/perl\ \1\.\2\.\3/')"
+    # "****  XDB 70 Monitor V 0.9 (15.06.04), Copyright (C) SIEMENS AG 2004. All rights reserved. ****"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\*\*\*\*\ xdb\ 70\ monitor\ v\ ([0-9]\.[0-9]+).*/xdb_70_monitor\ \1/')"
     #"GNU\ gdb\ \(Debian\ [0-9]\.[0-9]+-[0-9]\)\ "
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/gnu\ gdb\ \(debian\ ([0-9]\.[0-9]+-[0-9]+\))\ /gdb\ \1/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
@@ -444,6 +446,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^linux\ ([0-9])/kernel\ \1/')"
     # Siprotec 5 firmware has a version identifier like FWAOS_V01.11.01.123
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
+    #@(#1) CP443-1 GX20 V x.y.z 11.11.9999
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\@\(\#1\)\ cp443-1\ gx20\ v\ ([0-9]\.[0-9]\.[0-9]).*/simatic_cp443-1_firmware \1/')"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
     VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"
