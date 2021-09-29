@@ -344,7 +344,7 @@ setup_network() {
   # bridge, no vlan, ip address
   TAPDEV_0=tap$TAP_ID
   HOSTNETDEV_0=$TAPDEV_0
-  print_output "[*] Creating TAP device $TAPDEV_0..."
+  print_output "[*] Creating TAP device $ORANGE$TAPDEV_0$NC..."
   tunctl -t $TAPDEV_0
 
   if [[ "${#VLAN[@]}" -gt 0 ]]; then
@@ -361,9 +361,9 @@ setup_network() {
 
   for IP in "${IPS[@]}"; do
     HOSTIP="$(echo "$IP" | sed 's/\./&\n/g' | sed -E 's/^[0-9]+$/2/' | tr -d '\n')"
-    print_output "[*] New HOSTIP: $HOSTIP"
+    print_output "[*] Using HOSTIP: $ORANGE$HOSTIP$NC"
     print_output "[*] Possible IP address for emulated device: $ORANGE$IP$NC"
-    print_output "[*] Bringing up TAP device..."
+    print_output "[*] Bringing up TAP device $ORANGE$TAPDEV_0$NC"
 
     ip link set "${HOSTNETDEV_0}" up
     ip addr add "$HOSTIP"/24 dev "${HOSTNETDEV_0}"
@@ -435,7 +435,7 @@ run_qemu_final_emulation() {
 
   #shellcheck disable=SC2086
   $QEMU_ENV_VARS $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \
-    -append "root=$QEMU_ROOTFS console=ttyS0\ nandsim.parts=64,64,64,64,64,64,64,64,64,64\ rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
+    -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
     -nographic $QEMU_NETWORK | tee "$LOG_PATH_MODULE"/qemu.final.serial.log
 
 }
@@ -450,6 +450,7 @@ check_online_stat() {
       else
         print_output "[+] Ping to $IP is Ok."
         # wait another 60 seconds to settle everything before proceeding
+        print_output "[*] Wait 60 seconds until the boot process is completely finished"
         sleep 60
         SYS_ONLINE=1
         break 2

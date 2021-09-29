@@ -977,7 +977,7 @@ get_usermode_emulator() {
 }
 
 get_systemmode_emulator() {
-  print_output "[*] Collect version details of system mode emulator module l15_emulated_checks_init."
+  print_output "[*] Collect version details of module l15_emulated_checks_init."
   if [[ -f "$LOG_DIR"/"$SYS_EMUL_LOG" ]]; then
     readarray -t VERSIONS_SYS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$SYS_EMUL_LOG" | cut -d\  -f5- | sed 's/ in .* scanning logs.//' | sort -u)
   fi

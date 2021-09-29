@@ -211,7 +211,6 @@ dependency_check()
     # firmadyne
     if [[ $FULL_EMULATION -eq 1 ]]; then
       # check only some of the needed files
-      print_output "    firmadyne dependencies - \\c" "no_log"
       check_dep_file "console.mipsel" "$EXT_DIR""/firmadyne/binaries/console.mipsel"
       check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmadyne/binaries/vmlinux.mipseb"
       check_dep_file "fixImage.sh" "$EXT_DIR""/firmadyne/scripts/fixImage.sh"

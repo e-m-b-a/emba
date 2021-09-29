@@ -22,7 +22,7 @@ export THREAD_PRIO=1
 
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Emulation based software component and version detection."
+  module_title "Usermode emulation based software component and version detection."
 
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 

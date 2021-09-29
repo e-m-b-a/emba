@@ -51,11 +51,11 @@ check_live_nmap_basic() {
   sub_module_title "Nmap portscans for emulated system with IP $IP"
 
   nmap -sSV "$IP" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP" | tee -a "$LOG_FILE"
-  mapfile -t NMAP_PORTS_SERVICES < <(grep Ports "$LOG_PATH_MODULE"/nmap-basic-"$IP".gnmap | cut -d: -f3- | sed -E 's/,/\n/g' | sed -E 's/\/[[:space:]]+Ignored State:.*//' | sed 's/\/$//')
+  mapfile -t NMAP_PORTS_SERVICES < <(grep Ports "$LOG_PATH_MODULE"/nmap-basic-"$IP".gnmap | cut -d: -f3- | sed -E 's/\/,/\n/g' | sed -E 's/\/[[:space:]]+Ignored State:.*//' | sed 's/\/$//')
 
   print_output ""
   for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
-    VERSION=$(echo "$SERVICE" | sed -E 's/.*\/\///')
+    VERSION=$(echo "$SERVICE" | sed -E 's/.*\/\///' | sed 's/^\ //')
     print_output "[+] Version information found ${RED}""$VERSION""${NC}${GREEN} in Nmap port scanning logs."
   done
 
@@ -75,7 +75,6 @@ check_live_snmp() {
     print_output "[*] SNMP scan with community name private"
     snmp-check -c private -w "$IP"| tee "$LOG_PATH_MODULE"/snmp-check-private-"$IP".txt
     cat "$LOG_PATH_MODULE"/snmp-check-private-"$IP".txt >> "$LOG_FILE"
-    SNMP_UP=$(wc -l "$LOG_PATH_MODULE"/snmp-check* | tail -1 | awk '{print $1}')
   else
     print_output "[*] SNMP scan with community name public"
     snmpwalk -v2c -c public "$IP" .iso | tee "$LOG_PATH_MODULE"/snmpwalk-public-"$IP".txt
@@ -84,8 +83,8 @@ check_live_snmp() {
     print_output "[*] SNMP scan with community name private"
     snmpwalk -v2c -c private "$IP" .iso | tee "$LOG_PATH_MODULE"/snmapwalk-private-"$IP".txt
     cat "$LOG_PATH_MODULE"/snmpwalk-private-"$IP".txt >> "$LOG_FILE"
-    SNMP_UP=$(wc -l "$LOG_PATH_MODULE"/snmpwalk* | tail -1 | awk '{print $1}')
   fi
+  SNMP_UP=$(wc -l "$LOG_PATH_MODULE"/snmp* | tail -1 | awk '{print $1}')
 
   if [[ "$SNMP_UP" -gt 20 ]]; then
     SNMP_UP=1
@@ -102,15 +101,16 @@ check_live_nikto() {
   if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
     for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
       PORT=$(echo "$SERVICE" | cut -d/ -f1 | tr -d "[:blank:]")
-      NIKTO_OPTS="-timeout 3 -nointeractive -maxtime 15m"
+      NIKTO_OPTS="-timeout 3 -nointeractive -maxtime 8m"
       if [[ "$SERVICE" == *"ssl|http"* ]];then
-        nikto "$NIKTO_OPTS" -ssl -port "$PORT" -host "$IP" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt
-        cat "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt >> "$LOG_FILE"
+        #shellcheck disable=SC2086
+        nikto $NIKTO_OPTS -ssl -port "$PORT" -host "$IP" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt
       elif [[ "$SERVICE" == *"http"* ]];then
-        nikto "$NIKTO_OPTS" -port "$PORT" -host "$IP" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt
-        cat "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt >> "$LOG_FILE"
+        #shellcheck disable=SC2086
+        nikto $NIKTO_OPTS -port "$PORT" -host "$IP" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt
       fi
     done
+    cat "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt >> "$LOG_FILE"
     if [[ -f "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt ]]; then
       print_output ""
       mapfile -t VERSIONS < <(grep "Server" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt | cut -d: -f2 | sort -u | sed 's/^\ //')
@@ -118,7 +118,7 @@ check_live_nikto() {
         print_output "[+] Version information found ${RED}""$VERSION""${NC}${GREEN} in Nikto web server scanning logs."
       done
 
-      mapfile -t VERSIONS < <(grep "Retrieved x-powered-by header" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt | cut -d: -f2 | sort -u)
+      mapfile -t VERSIONS < <(grep "Retrieved x-powered-by header" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt | cut -d: -f2 | sort -u | sed 's/^\ //')
       for VERSION in "${VERSIONS[@]}"; do
         print_output "[+] Version information found ${RED}""$VERSION""${NC}${GREEN} in Nikto web server scanning logs."
       done
