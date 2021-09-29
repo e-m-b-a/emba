@@ -36,6 +36,7 @@ F19_cve_aggregator() {
 
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
+  SYS_EMUL_LOG="l15_emulated_checks_init.txt"
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
@@ -55,6 +56,7 @@ F19_cve_aggregator() {
 
     get_firmware_base_version_check
     get_usermode_emulator
+    get_systemmode_emulator
 
     aggregate_versions
     
@@ -548,7 +550,7 @@ aggregate_versions() {
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
-  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 ]]; then
+  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
@@ -560,12 +562,15 @@ aggregate_versions() {
     for VERSION in "${VERSIONS_EMULATOR[@]}"; do
       print_output "[+] Found Version details (emulator): ""$VERSION"
     done
+    for VERSION in "${VERSIONS_SYS_EMULATOR[@]}"; do
+      print_output "[+] Found Version details (system emulator): ""$VERSION"
+    done
     for VERSION in "${VERSIONS_KERNEL[@]}"; do
       print_output "[+] Found Version details (kernel): ""$VERSION"
     done
 
     print_output ""
-    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
+    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}")
     for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
       # remove color codes:
       VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
@@ -968,5 +973,12 @@ get_usermode_emulator() {
   print_output "[*] Collect version details of module s115_usermode_emulator."
   if [[ -f "$LOG_DIR"/"$EMUL_LOG" ]]; then
     readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (from.*$//' | sort -u)
+  fi
+}
+
+get_systemmode_emulator() {
+  print_output "[*] Collect version details of system mode emulator module l15_emulated_checks_init."
+  if [[ -f "$LOG_DIR"/"$SYS_EMUL_LOG" ]]; then
+    readarray -t VERSIONS_SYS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$SYS_EMUL_LOG" | cut -d\  -f5- | sed 's/ in .* scanning logs.//' | sort -u)
   fi
 }

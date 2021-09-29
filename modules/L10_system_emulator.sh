@@ -17,6 +17,8 @@
 #               Check out the original firmadyne project at https://github.com/firmadyne
 #               Currently this is an experimental module and needs to be activated separately via the -F switch. 
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
+# Warning:      This module changes your network configuration and it could happen that your system looses
+#               network connectivity.
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=0
@@ -51,6 +53,7 @@ L10_system_emulator() {
           create_emulation_filesystem "$R_PATH" "$ARCH_END"
           identify_networking "$IMAGE_NAME" "$ARCH_END"
           get_networking_details
+
           if [[ "$KPANIC" -eq 0 && "${#IPS[@]}" -gt 0 ]]; then
             setup_network
             run_emulated_system
@@ -89,6 +92,7 @@ create_emulation_filesystem() {
   sub_module_title "Create Qemu filesystem"
   ROOT_PATH="$1"
   ARCH_END="$2"
+  export IMAGE_NAME
   IMAGE_NAME="$(basename "$ROOT_PATH")_$ARCH_END"
   MNT_POINT="$LOG_PATH_MODULE/emulation_tmp_fs"
   if ! [[ -d "$MNT_POINT" ]]; then
@@ -303,6 +307,7 @@ get_networking_details() {
     eval "IPS=($(for i in "${IPS[@]}" ; do echo "\"$i\"" ; done | sort -u))"
     eval "INT=($(for i in "${INT[@]}" ; do echo "\"$i\"" ; done | sort -u))"
     eval "VLAN=($(for i in "${VLAN[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+
     print_output ""
     for IP in "${IPS[@]}"; do
       print_output "[+] Found possible IP address: $ORANGE$IP$NC"
@@ -355,16 +360,11 @@ setup_network() {
   fi
 
   for IP in "${IPS[@]}"; do
-    #if echo "$IP" | sed 's/\./&\n/g' | tail -1 -eq 1; then
-    #  # 192.168.0.1 -> 192.168.0.2
-    #  HOSTIP="$(echo $IP | sed 's/\./&\n/g' | sed -E 's/^1$/2/' | tr -d '\n')"
-    #else
-    #fi
     HOSTIP="$(echo "$IP" | sed 's/\./&\n/g' | sed -E 's/^[0-9]+$/2/' | tr -d '\n')"
     print_output "[*] New HOSTIP: $HOSTIP"
-
-    print_output "[+] Found possible IP address: $ORANGE$IP$NC"
+    print_output "[*] Possible IP address for emulated device: $ORANGE$IP$NC"
     print_output "[*] Bringing up TAP device..."
+
     ip link set "${HOSTNETDEV_0}" up
     ip addr add "$HOSTIP"/24 dev "${HOSTNETDEV_0}"
 
@@ -375,7 +375,7 @@ setup_network() {
 
 }
 run_emulated_system() {
-  sub_module_title "Emulate all the things."
+  sub_module_title "Final system emulation."
 
   KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
   IMAGE="$LOG_PATH_MODULE/$IMAGE_NAME"
@@ -449,8 +449,8 @@ check_online_stat() {
         SYS_ONLINE=0
       else
         print_output "[+] Ping to $IP is Ok."
-        # wait another 5 seconds to settle everything before proceeding
-        sleep 5
+        # wait another 60 seconds to settle everything before proceeding
+        sleep 60
         SYS_ONLINE=1
         break 2
       fi

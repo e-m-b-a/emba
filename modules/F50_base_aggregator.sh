@@ -42,7 +42,8 @@ F50_base_aggregator() {
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
-  S150_LOG="s150_system_emulator.txt"
+  L10_LOG="l10_system_emulator.txt"
+  L15_LOG="l15_emulated_checks_init.txt"
 
   CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$LOG_FILE")".csv
 
@@ -157,9 +158,23 @@ output_details() {
     write_link "s115"
     DATA=1
   fi
+
   if [[ "$SYS_ONLINE" -eq 1 ]]; then
-    print_output "[+] System emulation was successful"
-    write_link "s150"
+
+    STATE="$ORANGE(""$GREEN""ICMP"
+    if [[ "$NMAP_UP" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""NMAP"
+    fi
+    if [[ "$SNMP_UP" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""SNMP"
+    fi
+    if [[ "$NIKTO_UP" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""NIKTO"
+    fi
+    STATE="$STATE$ORANGE"")$NC"
+
+    print_output "[+] System emulation was successful $STATE" "" "l10"
+    #write_link "l10"
     DATA=1
   fi
 
@@ -531,8 +546,13 @@ get_data() {
     export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
   fi
-  if [[ -f "$LOG_DIR"/"$S150_LOG" ]]; then
-    SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S150_LOG" | cut -d: -f2)
+  if [[ -f "$LOG_DIR"/"$L10_LOG" ]]; then
+    SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
+    NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2)
+    SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f3)
+    NIKTO_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f4)
   fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
