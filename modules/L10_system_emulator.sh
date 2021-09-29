@@ -89,6 +89,7 @@ L10_system_emulator() {
 create_emulation_filesystem() {
   # based on the original firmadyne script:
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/makeImage.sh
+
   sub_module_title "Create Qemu filesystem"
   ROOT_PATH="$1"
   ARCH_END="$2"

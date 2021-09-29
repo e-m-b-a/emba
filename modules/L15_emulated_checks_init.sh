@@ -66,7 +66,6 @@ check_live_nmap_basic() {
 check_live_snmp() {
   sub_module_title "SNMP enumeration for emulated system with IP $IP"
 
-  SNMP_UP=0
   if command snmp-check > /dev/null; then
     print_output "[*] SNMP scan with community name public"
     snmp-check -w "$IP"| tee "$LOG_PATH_MODULE"/snmp-check-public-"$IP".txt
@@ -88,6 +87,8 @@ check_live_snmp() {
 
   if [[ "$SNMP_UP" -gt 20 ]]; then
     SNMP_UP=1
+  else
+    SNMP_UP=0
   fi
 
   print_output ""

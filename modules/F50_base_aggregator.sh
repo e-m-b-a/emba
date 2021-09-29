@@ -173,8 +173,7 @@ output_details() {
     fi
     STATE="$STATE$ORANGE"")$NC"
 
-    print_output "[+] System emulation was successful $STATE"
-    #write_link "l10"
+    print_output "[+] System emulation was successful $STATE" "" "l10"
     DATA=1
   fi
 
