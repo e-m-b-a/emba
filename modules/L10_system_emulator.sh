@@ -64,6 +64,7 @@ L10_system_emulator() {
               print_output "[+] System emulation was successful."
               print_output "[+] System should be available via IP $IP."
             fi
+            create_emulation_archive
           else
             print_output "[!] No further emulation steps are performed"
           fi
@@ -340,6 +341,11 @@ get_networking_details() {
 setup_network() {
   sub_module_title "Setup networking - $IMAGE_NAME"
 
+  # used for generating startup scripts for offline analysis
+  ARCHIVE_PATH="$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"/
+  mkdir "$ARCHIVE_PATH"
+  echo "#!/bin/bash" > "$ARCHIVE_PATH"/run.sh
+
   TAP_ID=2 #temp
 
   # bridge, no vlan, ip address
@@ -347,6 +353,7 @@ setup_network() {
   HOSTNETDEV_0=$TAPDEV_0
   print_output "[*] Creating TAP device $ORANGE$TAPDEV_0$NC..."
   tunctl -t $TAPDEV_0
+  echo "tunctl -t $TAPDEV_0" >> "$ARCHIVE_PATH"/run.sh
 
   if [[ "${#VLAN[@]}" -gt 0 ]]; then
     print_output "[*] Init VLAN ..."
@@ -356,6 +363,8 @@ setup_network() {
         HOSTNETDEV_0=$TAPDEV_0.$VLANID
         ip link add link "$TAPDEV_0" name "$HOSTNETDEV_0" type vlan id "$VLANID"
         ip link set "$TAPDEV_0" up
+        echo "ip link add link $TAPDEV_0 name $HOSTNETDEV_0 type vlan id $VLANID" >> "$ARCHIVE_PATH"/run.sh
+        echo "ip link set $TAPDEV_0 up" >> "$ARCHIVE_PATH"/run.sh
       fi
     done
   fi
@@ -368,9 +377,12 @@ setup_network() {
 
     ip link set "${HOSTNETDEV_0}" up
     ip addr add "$HOSTIP"/24 dev "${HOSTNETDEV_0}"
+    echo "ip link set ${HOSTNETDEV_0} up" >> "$ARCHIVE_PATH"/run.sh
+    echo "ip addr add $HOSTIP/24 dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
 
     print_output "Adding route to $IP..."
     ip route add "$IP" via "$IP" dev "${HOSTNETDEV_0}"
+    echo "ip route add $IP via $IP dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
   done
 
 
@@ -439,6 +451,10 @@ run_qemu_final_emulation() {
     -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
     -nographic $QEMU_NETWORK | tee "$LOG_PATH_MODULE"/qemu.final.serial.log
 
+  echo "[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit" >> "$ARCHIVE_PATH"/run.sh
+  echo "$QEMU_ENV_VARS $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \\" >> "$ARCHIVE_PATH"/run.sh
+  echo "  -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \\" >> "$ARCHIVE_PATH"/run.sh
+  echo "  -nographic $QEMU_NETWORK" >> "$ARCHIVE_PATH"/run.sh
 }
 
 check_online_stat() {
@@ -465,20 +481,37 @@ check_online_stat() {
   cat "$LOG_PATH_MODULE"/qemu.final.serial.log >> "$LOG_FILE"
 }
 
+create_emulation_archive() {
+  sub_module_title "Create scripts and archive to re-run the emulated system"
+
+  cp "$KERNEL" "$ARCHIVE_PATH"
+  cp "$IMAGE" "$ARCHIVE_PATH"
+  chmod +x "$ARCHIVE_PATH"/run.sh
+  tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz "$ARCHIVE_PATH"
+  if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz ]]; then
+    print_output "[*] Qemu emulation archive created in $LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz"
+    print_output "[!] WARNING: Qemu run script missing!"
+  fi
+}
+
 reset_network() {
   sub_module_title "Reset network environment"
 
   print_output "[*] Deleting route..."
-  sudo ip route flush dev "${HOSTNETDEV_0}"
+  ip route flush dev "${HOSTNETDEV_0}"
+  echo "ip route flush dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
 
   print_output "[*] Bringing down TAP device..."
   ip link set "$TAPDEV_0" down
+  echo "ip link set $TAPDEV_0 down" >> "$ARCHIVE_PATH"/run.sh
 
   print_output "Removing VLAN..."
-  sudo ip link delete "${HOSTNETDEV_0}"
+  ip link delete "${HOSTNETDEV_0}"
+  echo "ip link delete ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
 
   print_output "Deleting TAP device ${TAPDEV_0}..."
-  sudo tunctl -d ${TAPDEV_0}
+  tunctl -d ${TAPDEV_0}
+  echo "tunctl -d ${TAPDEV_0}" >> "$ARCHIVE_PATH"/run.sh
 
 }
 

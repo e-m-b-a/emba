@@ -466,15 +466,14 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   fi
   case ${ANSWER:0:1} in
     y|Y )
-      if [[ -d ./external/fact_extractor ]]; then
-        rm -r external/fact_extractor
+      if ! [[ -d ./external/fact_extractor ]]; then
+        # this is a temporary solution until the official fact repo supports a current kali linux
+        git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
+        cd ./external/fact_extractor/fact_extractor/ || exit 1
+        ./install/pre_install.sh
+        python3 ./install.py
+        cd "$HOME_PATH" || exit 1
       fi
-      # this is a temporary solution until the official fact repo supports a current kali linux
-      git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
-      cd ./external/fact_extractor/fact_extractor/ || exit 1
-      ./install/pre_install.sh
-      python3 ./install.py
-      cd "$HOME_PATH" || exit 1
   
       if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
         echo -e "$GREEN""FACT-extractor installed""$NC"
@@ -1027,62 +1026,62 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
     apt-get install "${INSTALL_APP_LIST[@]}" -y
 
     if ! [[ -f "external/firmadyne/binaries/vmlinux.mipsel" ]]; then
-      download_file "Linux kernel 2.6 - MIPSel" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipsel" "external/firmadyne/binaries/vmlinux.mipsel"
+      download_file "vmlinux.mipsel" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipsel" "external/firmadyne/binaries/vmlinux.mipsel"
     else
       echo -e "$GREEN""vmlinux.mipsel already installed""$NC"
     fi
 
     if ! [[ -f "external/firmadyne/binaries/vmlinux.mipsel" ]]; then
-      download_file "Linux kernel 2.6 - MIPSeb" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipseb" "external/firmadyne/binaries/vmlinux.mipseb"
+      download_file "vmlinux.mipseb" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipseb" "external/firmadyne/binaries/vmlinux.mipseb"
     else
       echo -e "$GREEN""vmlinux.mipseb already installed""$NC"
     fi
 
     if ! [[ -f "external/firmadyne/binaries/zImage.armel" ]]; then
-      download_file "Linux kernel 4.1 - ARMel" "https://github.com/firmadyne/kernel-v4.1/releases/download/v1.1/zImage.armel" "external/firmadyne/binaries/zImage.armel"
+      download_file "zImage.armel" "https://github.com/firmadyne/kernel-v4.1/releases/download/v1.1/zImage.armel" "external/firmadyne/binaries/zImage.armel"
     else
       echo -e "$GREEN""zImage.armel already installed""$NC"
     fi
 
     if ! [[ -f "external/firmadyne/binaries/console.armel" ]]; then
-      download_file "Console - ARMel" "https://github.com/firmadyne/console/releases/download/v1.0/console.armel" "external/firmadyne/binaries/console.armel"
+      download_file "console.armel" "https://github.com/firmadyne/console/releases/download/v1.0/console.armel" "external/firmadyne/binaries/console.armel"
     else
       echo -e "$GREEN""console.armel already installed""$NC"
     fi
     if ! [[ -f "external/firmadyne/binaries/console.mipseb" ]]; then
-      download_file "Console - MIPSeb" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipseb" "external/firmadyne/binaries/console.mipseb"
+      download_file "console.mipseb" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipseb" "external/firmadyne/binaries/console.mipseb"
     else
       echo -e "$GREEN""console.mipseb already installed""$NC"
     fi
     if ! [[ -f "external/firmadyne/binaries/console.mipsel" ]]; then
-      download_file "Console - MIPSel" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipsel" "external/firmadyne/binaries/console.mipsel"
+      download_file "console.mipsel" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipsel" "external/firmadyne/binaries/console.mipsel"
     else
       echo -e "$GREEN""console.mipsel already installed""$NC"
     fi
 
     if ! [[ -f "external/firmadyne/binaries/libnvram.so.armel" ]]; then
-      download_file "libnvram - ARMel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.armel" "external/firmadyne/binaries/libnvram.so.armel"
+      download_file "libnvram.so.armel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.armel" "external/firmadyne/binaries/libnvram.so.armel"
     else
       echo -e "$GREEN""libnvram.so.armel already installed""$NC"
     fi
     if ! [[ -f "external/firmadyne/binaries/libnvram.so.mipseb" ]]; then
-      download_file "libnvram - MIPSeb" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipseb" "external/firmadyne/binaries/libnvram.so.mipseb"
+      download_file "libnvram.so.mipseb" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipseb" "external/firmadyne/binaries/libnvram.so.mipseb"
     else
       echo -e "$GREEN""libnvram.so.mipseb already installed""$NC"
     fi
     if ! [[ -f "external/firmadyne/binaries/libnvram.so.mipsel" ]]; then
-      download_file "libnvram - MIPSel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipsel" "external/firmadyne/binaries/libnvram.so.mipsel"
+      download_file "libnvram.so.mipsel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipsel" "external/firmadyne/binaries/libnvram.so.mipsel"
     else
       echo -e "$GREEN""libnvram.so.mipsel already installed""$NC"
     fi
 
     if ! [[ -f "external/firmadyne/scripts/fixImage.sh" ]]; then
-      download_file "fixImage.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/"
+      download_file "fixImage.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/fixImage.sh"
     else
       echo -e "$GREEN""fixImage.sh already installed""$NC"
     fi
     if ! [[ -f "external/firmadyne/scripts/preInit.sh" ]]; then
-      download_file "preInit.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/"
+      download_file "preInit.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/preInit.sh"
     else
       echo -e "$GREEN""preInit.sh already installed""$NC"
     fi
