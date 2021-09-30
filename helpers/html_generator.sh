@@ -123,9 +123,9 @@ add_link_tags() {
           IMAGE_LINK="$(echo "$IMAGE" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g")"
           LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""i""$IMAGE_LINK" )
         fi
-      elif [[ ("$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
+      elif [[ ("$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
         REF_ANCHOR=""
-        if [[ "$REF_LINK" =~ ^(p|r|s|f){1}[0-9]{2,3}\#.*$ ]] ; then
+        if [[ "$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}\#.*$ ]] ; then
           REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2)"
           REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1)"
         fi
