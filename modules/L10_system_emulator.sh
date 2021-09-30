@@ -344,7 +344,7 @@ setup_network() {
   # used for generating startup scripts for offline analysis
   ARCHIVE_PATH="$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"/
   mkdir "$ARCHIVE_PATH"
-  echo "#!/bin/bash" > "$ARCHIVE_PATH"/run.sh
+  echo -e "#!/bin/bash\n" > "$ARCHIVE_PATH"/run.sh
 
   TAP_ID=2 #temp
 
@@ -392,6 +392,8 @@ run_emulated_system() {
 
   KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
   IMAGE="$LOG_PATH_MODULE/$IMAGE_NAME"
+  # IMAGE_ used for the script
+  IMAGE_="./$IMAGE_NAME"
   # SYS_ONLINE is used to check the network reachability
   SYS_ONLINE=0
 
@@ -410,6 +412,7 @@ run_emulated_system() {
 
   if [[ "$ARCH" == "ARM" ]]; then
     QEMU_DISK="-drive if=none,file=$IMAGE,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
+    QEMU_DISK_="-drive if=none,file=$IMAGE_,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     QEMU_ENV_VARS="QEMU_AUDIO_DRV=none"
     QEMU_ROOTFS="/dev/vda1"
     NET_ID=0
@@ -421,6 +424,7 @@ run_emulated_system() {
 
   elif [[ "$ARCH" == "MIPS" ]]; then
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
+    QEMU_DISK_="-drive if=ide,format=raw,file=$IMAGE_"
     QEMU_ENV_VARS=""
     QEMU_ROOTFS="/dev/sda1"
     NET_ID=0
@@ -451,10 +455,14 @@ run_qemu_final_emulation() {
     -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
     -nographic $QEMU_NETWORK | tee "$LOG_PATH_MODULE"/qemu.final.serial.log
 
-  echo "[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit" >> "$ARCHIVE_PATH"/run.sh
-  echo "$QEMU_ENV_VARS $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \\" >> "$ARCHIVE_PATH"/run.sh
-  echo "  -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \\" >> "$ARCHIVE_PATH"/run.sh
-  echo "  -nographic $QEMU_NETWORK" >> "$ARCHIVE_PATH"/run.sh
+  KERNEL_="./vmlinux.$ARCH_END"
+  IMAGE_="./$IMAGE_NAME"
+  { 
+    echo "echo \"[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit\""
+    echo "$QEMU_ENV_VARS $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL_ $QEMU_DISK_ \\"
+    echo "-append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0\" \\"
+    echo "-nographic $QEMU_NETWORK" 
+  } >> "$ARCHIVE_PATH"/run.sh
 }
 
 check_online_stat() {
@@ -489,8 +497,8 @@ create_emulation_archive() {
   chmod +x "$ARCHIVE_PATH"/run.sh
   tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz "$ARCHIVE_PATH"
   if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz ]]; then
-    print_output "[*] Qemu emulation archive created in $LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz"
-    print_output "[!] WARNING: Qemu run script missing!"
+    print_output "[*] Qemu emulation archive created in $LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz" "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz"
+    print_output "[!] WARNING: Qemu run script is in an very early alpha state!"
   fi
 }
 
