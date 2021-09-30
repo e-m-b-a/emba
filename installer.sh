@@ -1031,7 +1031,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       echo -e "$GREEN""vmlinux.mipsel already installed""$NC"
     fi
 
-    if ! [[ -f "external/firmadyne/binaries/vmlinux.mipsel" ]]; then
+    if ! [[ -f "external/firmadyne/binaries/vmlinux.mipseb" ]]; then
       download_file "vmlinux.mipseb" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipseb" "external/firmadyne/binaries/vmlinux.mipseb"
     else
       echo -e "$GREEN""vmlinux.mipseb already installed""$NC"
