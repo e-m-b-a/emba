@@ -419,8 +419,8 @@ binary_fct_output() {
 output_cve_exploits() {
 
   local DATA=0
-  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
-    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
+  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
+    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f19#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"

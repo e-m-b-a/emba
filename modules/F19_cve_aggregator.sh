@@ -453,6 +453,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
     #@(#1) CP443-1 GX20 V x.y.z 11.11.9999
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\@\(\#1\)\ cp443-1\ gx20\ v\ ([0-9]\.[0-9]\.[0-9]).*/simatic_cp443-1_firmware \1/')"
+    #  Firmware Update V3.2.17 for the communication processor CP443-1
+    echo "$VERSION_lower"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/firmware\ update\ ([0-9]\.[0-9]\.[0-9]+)\ for\ the\ communication\ processor\ cp443-1/simatic_cp443-1_firmware \1/')"
+    echo "$VERSION_lower"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
     VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"

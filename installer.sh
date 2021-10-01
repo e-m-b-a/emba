@@ -304,6 +304,7 @@ print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
 print_tool_info "bc" 1
 print_tool_info "coreutils" 1
+print_tool_info "ncurses-bin" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 # libguestfs-tools is needed to mount vmdk images
