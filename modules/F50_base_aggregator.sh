@@ -159,9 +159,12 @@ output_details() {
     DATA=1
   fi
 
-  if [[ "$SYS_ONLINE" -eq 1 ]]; then
+  if [[ "$IP_ADDR" -gt 0 ]]; then
 
-    STATE="$ORANGE(""$GREEN""ICMP"
+    STATE="$ORANGE(""$GREEN""IP address detected"
+    if [[ "$SYS_ONLINE" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
+    fi
     if [[ "$NMAP_UP" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NMAP"
     fi
@@ -322,6 +325,7 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
+    print_output ""
     write_link "s11"
     echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
@@ -355,6 +359,7 @@ output_binaries() {
 
       #system:
       if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
+        print_output ""
         print_output "[+] SYSTEM - top 10 results:"
         write_link "s11#strcpysummary"
         DATA=1
@@ -547,6 +552,7 @@ get_data() {
   fi
   if [[ -f "$LOG_DIR"/"$L10_LOG" ]]; then
     SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f2)
+    IP_ADDR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f3)
   fi
   if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
     NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2)

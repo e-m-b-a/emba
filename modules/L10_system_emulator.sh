@@ -15,8 +15,8 @@
 
 # Description:  Builds and emulates Linux firmware - this module is based on the great work of firmadyne
 #               Check out the original firmadyne project at https://github.com/firmadyne
-#               Currently this is an experimental module and needs to be activated separately via the -F switch. 
-#               It is also recommended to only use this technique in a dockerized or virtualized environment.
+#               Currently this is an experimental module and needs to be activated separately via the -Q switch. 
+#               Important note: This module is currently only working in developer mode!
 # Warning:      This module changes your network configuration and it could happen that your system looses
 #               network connectivity.
 
@@ -29,8 +29,9 @@ L10_system_emulator() {
 
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 
-    if [[ $IN_DOCKER -eq 0 ]] ; then
-      print_output "[!] This module should not be used in developer mode and could harm your host environment."
+    if [[ $IN_DOCKER -eq 1 ]] ; then
+      print_output "[!] This module is in an very early alpha state!"
+      print_output "[!] This module is only fully working in developer mode!"
     fi
 
     print_output "[!] This module creates a full copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
@@ -58,12 +59,11 @@ L10_system_emulator() {
             setup_network
             run_emulated_system
             check_online_stat
-            if [[ "$SYS_ONLINE" -eq 0 ]]; then
-              reset_network
-            else
+            if [[ "$SYS_ONLINE" -eq 1 ]]; then
               print_output "[+] System emulation was successful."
               print_output "[+] System should be available via IP $IP."
             fi
+            reset_network
             create_emulation_archive
             # if the emulation was successful, we stop here - no emulation of other detected rootfs
             break
@@ -84,7 +84,7 @@ L10_system_emulator() {
   fi
 
   write_log ""
-  write_log "[*] Statistics:$SYS_ONLINE"
+  write_log "[*] Statistics:$SYS_ONLINE:${#IPS[@]}"
   module_end_log "${FUNCNAME[0]}" "$MODULE_END"
 
 }

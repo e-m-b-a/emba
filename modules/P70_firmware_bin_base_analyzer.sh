@@ -76,6 +76,7 @@ os_identification() {
   print_output "$(indent "$(orange "Operating system detection:")")"
 
   for OS in "${OS_SEARCHER[@]}"; do
+    DETECTED=0
     OS_COUNTER[$OS]=0
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null)"))
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
@@ -89,31 +90,38 @@ os_identification() {
     fi
 
     if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  ${#ROOT_PATH[@]} -gt 1 ]] ; then 
-      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified Linux operating system detected")")"
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  $LINUX_PATH_COUNTER -gt 2 ]] ; then 
-      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified Linux operating system detected")")"
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
-      print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     fi
 
     if [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
-      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified SIPROTEC system detected")")";
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified SIPROTEC system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     elif [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
-      print_output "$(indent "$(orange "SIPROTEC detected\t\t""${OS_COUNTER[$OS]}")")";
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "SIPROTEC detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     fi
     if [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
-      print_output "$(indent "$(green "S7-CP443 detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified S7-CP443 system detected")")";
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified S7-CP443 system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     elif [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
-      print_output "$(indent "$(orange "S7-CP443 detected\t\t""${OS_COUNTER[$OS]}")")";
+      printf "${ORANGE}\t%-20.20x\t:\t%-15s${NC}\n" "S7-CP443 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     fi
 
     if [[ ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
       if [[ $OS == "VxWorks\|Wind" ]]; then
-        print_output "$(indent "$(orange "VxWorks detected\t\t""${OS_COUNTER[$OS]}")")"
+        printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "VxWorks detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       elif [[ $OS == "CPU\ [34][12][0-9]-[0-9]" ]]; then
-        print_output "$(indent "$(orange "S7-CPU400 detected\t\t""${OS_COUNTER[$OS]}")")"
-      else
-        print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
+        printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "S7-CPU400 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      elif [[ $DETECTED -eq 0 ]]; then
+        printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       fi
     fi
     COUNTER=$(("$COUNTER"+"${OS_COUNTER[$OS]}"))
