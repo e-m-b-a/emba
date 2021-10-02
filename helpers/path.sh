@@ -50,9 +50,19 @@ cut_path() {
     PREFIX_PRE_CHECK="."
     FIRST="${SHORT:0:1}"
     if [[ "$FIRST" == "/" ]] ;  then
-      echo -e "$PREFIX_PRE_CHECK""$SHORT"
+      PATH_="$PREFIX_PRE_CHECK""$SHORT"
     else
-      echo -e "$PREFIX_PRE_CHECK""/""$SHORT"
+      PATH_="$PREFIX_PRE_CHECK""/""$SHORT"
+    fi
+    if [[ "${#ROOT_PATH[@]}" -eq 1 && "$HTML" -eq 1 ]]; then
+      # strip detected root directory from complete path
+      # currently only one detected root directory supported
+      # ./log/firmware/firmware_binwalk_emba/_firmware.extracted/_rootfs.squashfs.extracted/squashfs-root/usr/bin/curl
+      # -> /usr/bin/curl
+      R_PATH="$(realpath "${ROOT_PATH[0]}")"
+      echo -e "$C_PATH" | sed "s#$R_PATH#\/#" | sed 's/^.//'
+    else
+      echo -e "$PATH_"
     fi
   else
     local FIRST

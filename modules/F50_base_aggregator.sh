@@ -342,7 +342,7 @@ output_binaries() {
 
       #strcpy:
       if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
-        print_output "\\n"
+        print_output ""
         print_output "[+] STRCPY - top 10 results:"
         write_link "s11#strcpysummary"
         DATA=1
@@ -350,7 +350,7 @@ output_binaries() {
           binary_fct_output "$LINE"
           echo "strcpy_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
         done
-        print_output "\\n$NC"
+        print_output "$NC"
       fi
 
       #system:

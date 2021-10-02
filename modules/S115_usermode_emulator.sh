@@ -231,11 +231,11 @@ version_detection_thread() {
         mapfile -t BINARY_PATHS < <(grep -a "Emulating binary:" "$LOG_PATH" | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)
 
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
-          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$(print_path "$LOG_PATH")$GREEN (emulation)." "" "$LOG_PATH"
+          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH$GREEN (emulation)." "" "$LOG_PATH"
           continue
         else
           for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$(print_path "$BINARY_PATH")$GREEN (emulation)." "" "$LOG_PATH"
+            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (emulation)." "" "$LOG_PATH"
           done
         fi
         BINARY_PATH=""
@@ -481,7 +481,9 @@ emulate_binary() {
   print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
   write_link "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
   print_output "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)"
-  write_log "[*] Emulating binary: $FULL_BIN_PATH" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
+  write_log "[*] Root path used: $R_PATH" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
+  #shellcheck disable=SC2001
+  write_log "[*] Emulating binary: $(echo "$BIN_" | sed 's/^\.//')" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
   write_log "[*] Emulating binary name: $BIN_EMU_NAME" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
 
   # lets assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird

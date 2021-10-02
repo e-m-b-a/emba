@@ -486,14 +486,14 @@ check_online_stat() {
   while [[ "$PING_CNT" -lt 12 ]]; do
     for IP in "${IPS[@]}"; do
       if ping -c 1 "$IP" &> /dev/null; then
-        print_output "[*] Host with $IP is not reachable."
-        SYS_ONLINE=0
-      else
         print_output "[+] Host with $IP is reachable via ICMP."
         print_output "[*] Wait 60 seconds until the boot process is completely finished"
         sleep 60
         SYS_ONLINE=1
         break 2
+      else
+        print_output "[*] Host with $IP is not reachable."
+        SYS_ONLINE=0
       fi
     done
     sleep 5

@@ -454,9 +454,7 @@ prepare_version_data() {
     #@(#1) CP443-1 GX20 V x.y.z 11.11.9999
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\@\(\#1\)\ cp443-1\ gx20\ v\ ([0-9]\.[0-9]\.[0-9]).*/simatic_cp443-1_firmware \1/')"
     #  Firmware Update V3.2.17 for the communication processor CP443-1
-    echo "$VERSION_lower"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/firmware\ update\ ([0-9]\.[0-9]\.[0-9]+)\ for\ the\ communication\ processor\ cp443-1/simatic_cp443-1_firmware \1/')"
-    echo "$VERSION_lower"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
     VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"
@@ -960,7 +958,7 @@ final_outputter() {
 }
 
 get_firmware_base_version_check() {
-  print_output "[*] Collect version details of module s09 - firmware_base_version_check."
+  print_output "[*] Collect version details of module s09_firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then

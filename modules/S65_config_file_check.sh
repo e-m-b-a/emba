@@ -40,7 +40,8 @@ scan_config()
   elif [[ ${#CONF_FILES_ARR[@]} -ne 0 ]] ; then
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
     for LINE in "${CONF_FILES_ARR[@]}" ; do
-      print_output "$(indent "$(orange "$LINE")")" # "$(print_path "$LINE")"
+      #print_output "$(indent "$(orange "$LINE")")" # "$(print_path "$LINE")"
+      print_output "$(indent "$(orange "$(print_path "$LINE")")")"
     done
   else
     print_output "[-] No configuration files found"

@@ -80,8 +80,8 @@ S09_firmware_base_version_check() {
       else
         bin_string_checker
       fi
-
-     echo "." | tr -d "\n"
+      
+      echo "." | tr -d "\n"
     else
       if [[ $RTOS -eq 1 ]]; then
         continue
@@ -94,7 +94,7 @@ S09_firmware_base_version_check() {
             if [[ -n $VERSION_FINDER ]]; then
               echo ""
               print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static - strict)."
-            continue
+              continue
             fi
           fi
         done
