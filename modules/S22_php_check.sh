@@ -15,7 +15,7 @@
 # Contributor(s): Stefan Haboeck
 
 # Description:  Checks for bugs, stylistic errors, etc. in php scripts, then it lists the found error types.
-
+ 
 S22_php_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -27,9 +27,6 @@ S22_php_check()
   S22_PHP_INI_CONFIGS=0
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
-    if ! [[ -d "$LOG_DIR""/php_checker/" ]] ; then
-      mkdir "$LOG_DIR""/php_checker/" 2> /dev/null
-    fi
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PHP_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "PHP script" ) ; then
@@ -56,7 +53,7 @@ S22_php_check()
     print_output ""
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
     write_log ""
-    write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_ISSUES:$S22_PHP_INI_CONFIGS" >> "$LOG_FILE"
+    write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_ISSUES:$S22_PHP_INI_CONFIGS"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"
@@ -113,14 +110,12 @@ s22_check_php_ini(){
   PHP_INI_FAILURE=0
   PHP_INI_LIMIT_EXCEEDED=0
   PHP_INI_WARNINGS=0
-
-  mapfile -t PHP_INI_FILES < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  for PHP_FILE in "${PHP_INI_FILES[@]}" ;  do
+  mapfile -t PHP_INI_FILE < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
     print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
-    mapfile -t INISCAN_RESULT < <( "$PHP_SCAN_PATH" scan --path="$PHP_FILE" )
+    mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" 2>/dev/null)
     for LINE in "${INISCAN_RESULT[@]}" ; do  
       local LIMIT_CHECK
-
       IFS='|' read -ra LINE_ARR <<< "$LINE"
       add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
       LIMIT_CHECK="$?"
@@ -140,15 +135,11 @@ s22_check_php_ini(){
           IFS=' ' read -ra LINE_ARR <<< "$LINE"
           PHP_INI_FAILURE=${LINE_ARR[0]}
           PHP_INI_WARNINGS=${LINE_ARR[3]}
-          print_output "$(magenta "$PHP_INI_LIMIT_EXCEEDED exceeding the limit value")""$(white ", ")""$(red "$PHP_INI_FAILURE ${LINE_ARR[1]}")""$(white " and ")""$(orange "$PHP_INI_WARNINGS ${LINE_ARR[4]}")"
           (( S22_PHP_INI_ISSUES="$S22_PHP_INI_ISSUES"+"$PHP_INI_LIMIT_EXCEEDED"+"$PHP_INI_FAILURE"+"$PHP_INI_WARNINGS" ))
           S22_PHP_INI_CONFIGS=$(( S22_PHP_INI_CONFIGS+1 ))
         elif ( echo "$LINE" | grep -q "passing" ) ; then
           IFS=' ' read -ra LINE_ARR <<< "$LINE"
           LINE_ARR[0]=$(( LINE_ARR[0]-PHP_INI_LIMIT_EXCEEDED ))
-          print_output "$(green "${LINE_ARR[0]} ${LINE_ARR[1]}")"
-        else
-          print_output "$LINE"
         fi
       fi
     done
