@@ -62,8 +62,9 @@ L10_system_emulator() {
             if [[ "$SYS_ONLINE" -eq 1 ]]; then
               print_output "[+] System emulation was successful."
               print_output "[+] System should be available via IP $IP."
+            else
+              reset_network
             fi
-            reset_network
             create_emulation_archive
             # if the emulation was successful, we stop here - no emulation of other detected rootfs
             break
@@ -298,14 +299,15 @@ get_networking_details() {
       # br_add_if[PID: 170 (brctl)]: br:br0 dev:eth0
       #if [[ "$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]")" ]]; then
       if echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
-        VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | cut -d. -f2)"
+        VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2)"
       fi
       if [[ -n "$BRIDGE_INT_" ]]; then
         INT+=( "$BRIDGE_INT_" )
       fi
       if [[ -n "$NET_DEV" ]]; then
         INT+=( "$NET_DEV" )
-        VLAN+=( "$VLAN_ID" )
+        # VLAN+=( "$VLAN_ID" )
+        # print_output "vlan id1: $VLAN_ID"
       fi
     done
   
@@ -313,7 +315,8 @@ get_networking_details() {
       print_output "[*] Possible VLAN details detected: $ORANGE$VLAN_INFO$NC"
       # register_vlan_dev[PID: 128 (vconfig)]: dev:eth1.1 vlan_id:1
       NET_DEV="$(echo "$VLAN_INFO" | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 | cut -d. -f1)"
-      VLAN_ID="$(echo "$VLAN_INFO" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2)"
+      VLAN_ID="$(echo "$VLAN_INFO" | grep -o "vlan_id:[0-9]" | cut -d: -f2)"
+      print_output "vlan id2: $VLAN_ID"
       VLAN+=( "$VLAN_ID" )
       INT+=( "$NET_DEV" )
     done
@@ -335,9 +338,7 @@ get_networking_details() {
       fi
     done
     for VLAN_ in "${VLAN[@]}"; do
-      if [[ "$VLAN_" == "[0-9]+" ]]; then
-        print_output "[+] Possible VLAN ID detected: $ORANGE$VLAN_$NC"
-      fi
+      print_output "[+] Possible VLAN ID detected: $ORANGE$VLAN_$NC"
     done
   
     for PANIC in "${PANICS[@]}"; do
@@ -362,7 +363,7 @@ setup_network() {
   TAP_ID=2 #temp
 
   # bridge, no vlan, ip address
-  TAPDEV_0=tap$TAP_ID
+  TAPDEV_0=tap$TAP_ID"_0"
   HOSTNETDEV_0=$TAPDEV_0
   print_output "[*] Creating TAP device $ORANGE$TAPDEV_0$NC..."
   tunctl -t $TAPDEV_0
@@ -371,14 +372,13 @@ setup_network() {
   if [[ "${#VLAN[@]}" -gt 0 ]]; then
     print_output "[*] Init VLAN ..."
     for VLANID in "${VLAN[@]}"; do
-      if [[ "$VLANID" == "[0-9]+" ]]; then
-        print_output "[*] Init VLAN $VLAN_ID ..."
-        HOSTNETDEV_0=$TAPDEV_0.$VLANID
-        ip link add link "$TAPDEV_0" name "$HOSTNETDEV_0" type vlan id "$VLANID"
-        ip link set "$TAPDEV_0" up
-        echo "ip link add link $TAPDEV_0 name $HOSTNETDEV_0 type vlan id $VLANID" >> "$ARCHIVE_PATH"/run.sh
-        echo "ip link set $TAPDEV_0 up" >> "$ARCHIVE_PATH"/run.sh
-      fi
+      print_output "[*] Init VLAN $VLAN_ID ..."
+      HOSTNETDEV_0x=$TAPDEV_0.$VLANID
+      print_output "[*] Bringing up HOSTNETDEV $ORANGE$HOSTNETDEV_0x$NC"
+      ip link add link "$TAPDEV_0" name "$HOSTNETDEV_0x" type vlan id "$VLANID"
+      ip link set "$TAPDEV_0" up
+      echo "ip link add link $TAPDEV_0 name $HOSTNETDEV_0x type vlan id $VLANID" >> "$ARCHIVE_PATH"/run.sh
+      echo "ip link set $TAPDEV_0 up" >> "$ARCHIVE_PATH"/run.sh
     done
   fi
 
@@ -519,6 +519,9 @@ create_emulation_archive() {
 
 reset_network() {
   sub_module_title "Reset network environment"
+
+  print_output "[*] Stopping Qemu emulation ..."
+  pkill -9 -f "qemu-system-.*$IMAGE_NAME.*"
 
   print_output "[*] Deleting route..."
   ip route flush dev "${HOSTNETDEV_0}"

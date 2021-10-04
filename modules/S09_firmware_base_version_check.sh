@@ -80,7 +80,7 @@ S09_firmware_base_version_check() {
       else
         bin_string_checker
       fi
-      
+
       echo "." | tr -d "\n"
     else
       if [[ $RTOS -eq 1 ]]; then

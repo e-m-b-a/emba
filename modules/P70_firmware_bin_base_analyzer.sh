@@ -85,7 +85,7 @@ os_identification() {
     if [[ $OS == "VxWorks\|Wind" ]]; then
       OS_COUNTER_VxWorks="${OS_COUNTER[$OS]}"
     fi
-    if [[ $OS == *"CPU "* ]]; then
+    if [[ $OS == *"CPU "* || $OS == "ADONIS" || $OS == "CP443" ]]; then
       OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "Original Siemens Equipment")" ))
     fi
 

@@ -367,35 +367,7 @@ prepare_emulator() {
       mount -o bind /sys "$R_PATH""/sys" 2> /dev/null
     fi
 
-    if ! [[ -e "$R_PATH""/dev/console" ]] ; then
-      mknod -m 622 "$R_PATH""/dev/console" c 5 1 2> /dev/null
-    fi
-
-    if ! [[ -e "$R_PATH""/dev/null" ]] ; then
-      mknod -m 666 "$R_PATH""/dev/null" c 1 3 2> /dev/null
-    fi
-
-    if ! [[ -e "$R_PATH""/dev/zero" ]] ; then
-      mknod -m 666 "$R_PATH""/dev/zero" c 1 5 2> /dev/null
-    fi
-
-    if ! [[ -e "$R_PATH""/dev/ptmx" ]] ; then
-      mknod -m 666 "$R_PATH""/dev/ptmx" c 5 2 2> /dev/null
-    fi
-
-    if ! [[ -e "$R_PATH""/dev/tty" ]] ; then
-      mknod -m 666 "$R_PATH""/dev/tty" c 5 0 2> /dev/null
-    fi
-
-    if ! [[ -e "$R_PATH""/dev/random" ]] ; then
-      mknod -m 444 "$R_PATH""/dev/random" c 1 8 2> /dev/null
-    fi
-
-    if ! [[ -e "$R_PATH""/dev/urandom" ]] ; then
-      mknod -m 444 "$R_PATH""/dev/urandom" c 1 9 2> /dev/null
-    fi
-
-    chown -v root:tty "$R_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
+    creating_dev_area
 
     print_output ""
     print_output "[*] Currently mounted areas:"
@@ -409,7 +381,171 @@ prepare_emulator() {
       ulimit -c 0
     fi
 
+    print_output "[*] Final fixes of the root filesytem in a chroot environment"
+    cp ./config/fixImage_user_mode_emulation.sh "$R_PATH"/
+    chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
+    cp "$(which busybox)" "$R_PATH"/
+    chmod +x "$R_PATH"/busybox
+    chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
+    rm "$R_PATH"/fixImage_user_mode_emulation.sh
+    rm "$R_PATH"/busybox
+
   fi
+}
+
+creating_dev_area() {
+  print_output "[*] Creating dev area for user mode emulation"
+
+  if ! [[ -e "$R_PATH""/dev/console" ]] ; then
+    print_output "[*] Creating /dev/console"
+    mknod -m 622 "$R_PATH""/dev/console" c 5 1 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/null" ]] ; then
+    print_output "[*] Creating /dev/null"
+    mknod -m 666 "$R_PATH""/dev/null" c 1 3 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/zero" ]] ; then
+    print_output "[*] Creating /dev/zero"
+    mknod -m 666 "$R_PATH""/dev/zero" c 1 5 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/ptmx" ]] ; then
+    print_output "[*] Creating /dev/ptmx"
+    mknod -m 666 "$R_PATH""/dev/ptmx" c 5 2 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/tty" ]] ; then
+    print_output "[*] Creating /dev/tty"
+    mknod -m 666 "$R_PATH""/dev/tty" c 5 0 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/random" ]] ; then
+    print_output "[*] Creating /dev/random"
+    mknod -m 444 "$R_PATH""/dev/random" c 1 8 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/urandom" ]] ; then
+    print_output "[*] Creating /dev/urandom"
+    mknod -m 444 "$R_PATH""/dev/urandom" c 1 9 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/mem" ]] ; then
+    print_output "[*] Creating /dev/mem"
+    mknod -m 660 "$R_PATH"/dev/mem c 1 1 2> /dev/null
+  fi
+  if ! [[ -e "$R_PATH""/dev/kmem" ]] ; then
+    print_output "[*] Creating /dev/kmem"
+    mknod -m 640 "$R_PATH"/dev/kmem c 1 2 2> /dev/null
+  fi
+  if ! [[ -e "$R_PATH""/dev/armem" ]] ; then
+    print_output "[*] Creating /dev/armem"
+    mknod -m 666 "$R_PATH"/dev/armem c 1 13 2> /dev/null
+  fi
+  
+  if ! [[ -e "$R_PATH""/dev/tty0" ]] ; then
+    print_output "[*] Creating /dev/tty0"
+    mknod -m 622 "$R_PATH"/dev/tty0 c 4 0 2> /dev/null
+  fi
+  if ! [[ -e "$R_PATH""/dev/ttyS0" ]] ; then
+    print_output "[*] Creating /dev/ttyS0 - ttyS3"
+    mknod -m 660 "$R_PATH"/dev/ttyS0 c 4 64 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/ttyS1 c 4 65 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/ttyS2 c 4 66 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/ttyS3 c 4 67 2> /dev/null
+  fi
+
+  if ! [[ -e "$R_PATH""/dev/adsl0" ]] ; then
+    print_output "[*] Creating /dev/adsl0"
+    mknod -m 644 "$R_PATH"/dev/adsl0 c 100 0 2> /dev/null
+  fi
+  if ! [[ -e "$R_PATH""/dev/ppp" ]] ; then
+    print_output "[*] Creating /dev/ppp"
+    mknod -m 644 "$R_PATH"/dev/ppp c 108 0 2> /dev/null
+  fi
+  if ! [[ -e "$R_PATH""/dev/hidraw0" ]] ; then
+    print_output "[*] Creating /dev/hidraw0"
+    mknod -m 666 "$R_PATH"/dev/hidraw0 c 251 0 2> /dev/null
+  fi
+
+  if ! [[ -d "$R_PATH"/dev/mtd ]]; then
+    print_output "[*] Creating and populating /dev/mtd"
+    mkdir -p "$R_PATH"/dev/mtd 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/0 c 90 0 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/1 c 90 2 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/2 c 90 4 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/3 c 90 6 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/4 c 90 8 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/5 c 90 10 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/6 c 90 12 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/7 c 90 14 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/8 c 90 16 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/9 c 90 18 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/10 c 90 20 2> /dev/null
+  fi
+
+  mknod -m 644 "$R_PATH"/dev/mtd0 c 90 0 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr0 c 90 1 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd1 c 90 2 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr1 c 90 3 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd2 c 90 4 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr2 c 90 5 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd3 c 90 6 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr3 c 90 7 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd4 c 90 8 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr4 c 90 9 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd5 c 90 10 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr5 c 90 11 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd6 c 90 12 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr6 c 90 13 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd7 c 90 14 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr7 c 90 15 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd8 c 90 16 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr8 c 90 17 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd9 c 90 18 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr9 c 90 19 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd10 c 90 20 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdr10 c 90 21 2> /dev/null
+
+  if ! [[ -d "$R_PATH"/dev/mtdblock ]]; then
+    print_output "[*] Creating and populating /dev/mtdblock"
+    mkdir -p "$R_PATH"/dev/mtdblock 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/0 b 31 0 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/1 b 31 1 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/2 b 31 2 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/3 b 31 3 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/4 b 31 4 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/5 b 31 5 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/6 b 31 6 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/7 b 31 7 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/8 b 31 8 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/9 b 31 9 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/10 b 31 10 2> /dev/null
+  fi
+
+  mknod -m 644 "$R_PATH"/dev/mtdblock0 b 31 0 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock1 b 31 1 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock2 b 31 2 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock3 b 31 3 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock4 b 31 4 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock5 b 31 5 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock6 b 31 6 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock7 b 31 7 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock8 b 31 8 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock9 b 31 9 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock10 b 31 10 2> /dev/null
+
+  if ! [[ -d "$R_PATH"/dev/tts ]]; then
+    print_output "[*] Creating and populating /dev/tts"
+    mkdir -p "$R_PATH"/dev/tts 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/tts/0 c 4 64 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/tts/1 c 4 65 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/tts/2 c 4 66 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/tts/3 c 4 67 2> /dev/null
+  fi
+
+  chown -v root:tty "$R_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
 }
 
 emulate_strace_run() {

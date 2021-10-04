@@ -327,6 +327,12 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
+    #hostapd v2.0-devel
+    echo "$VERSION_lower"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/hostapd\ v([0-9]+\.[0-9]+)-devel/hostapd\ \1/g')"
+    #wpa_supplicant v2.0-devel
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/wpa_supplicant\ v([0-9]+\.[0-9]+)-devel/wpa_supplicant\ \1/g')"
+    echo "$VERSION_lower"
     #iw* Wireless-Tools version 29
     VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     # apt-Version 1.2.3
