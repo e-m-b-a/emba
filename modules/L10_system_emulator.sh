@@ -306,8 +306,6 @@ get_networking_details() {
       fi
       if [[ -n "$NET_DEV" ]]; then
         INT+=( "$NET_DEV" )
-        # VLAN+=( "$VLAN_ID" )
-        # print_output "vlan id1: $VLAN_ID"
       fi
     done
   
@@ -316,7 +314,6 @@ get_networking_details() {
       # register_vlan_dev[PID: 128 (vconfig)]: dev:eth1.1 vlan_id:1
       NET_DEV="$(echo "$VLAN_INFO" | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 | cut -d. -f1)"
       VLAN_ID="$(echo "$VLAN_INFO" | grep -o "vlan_id:[0-9]" | cut -d: -f2)"
-      print_output "vlan id2: $VLAN_ID"
       VLAN+=( "$VLAN_ID" )
       INT+=( "$NET_DEV" )
     done

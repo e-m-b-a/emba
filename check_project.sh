@@ -22,9 +22,20 @@ NC='\033[0m' # no color
 
 HELP_DIR="./helpers"
 MOD_DIR="./modules"
+CONF_DIR="./config"
 
 SOURCES=()
 MODULES_TO_CHECK_ARR=()
+
+import_config_scripts() {
+  HELPERS=$(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
+  for LINE in $HELPERS; do
+    if (file "$LINE" | grep -q "shell script"); then
+      echo "$LINE"
+      SOURCES+=("$LINE")
+    fi
+  done
+}
 
 import_helper() {
   HELPERS=$(find "$HELP_DIR" -iname "*.sh" 2>/dev/null)
@@ -73,6 +84,7 @@ check()
   echo -e "\\n""$GREEN""Load all files for check:""$NC""\\n"
   echo "./emba.sh"
   import_helper
+  import_config_scripts
   import_module
 
   echo -e "\\n""$GREEN""Run shellcheck:""$NC""\\n"
