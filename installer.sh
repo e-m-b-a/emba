@@ -585,24 +585,28 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   case ${ANSWER:0:1} in
     y|Y )
       apt-get install "${INSTALL_APP_LIST[@]}" -y
-      download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
-      if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
-        tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
-        cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
-        echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
-        ./configure --enable-targets=all
-        make
-        cd "$HOME_PATH" || exit 1
-      fi
-      if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
-        mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
-        rm -R "external/""$BINUTIL_VERSION_NAME"
-        rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
-        if [[ -f "external/objdump" ]] ; then
-          echo -e "$GREEN""objdump installed successfully""$NC"
+      if ! [[ -f "external/objdump" ]] ; then
+        download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
+        if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
+          tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
+          cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
+          echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
+          ./configure --enable-targets=all
+          make
+          cd "$HOME_PATH" || exit 1
+        fi
+        if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
+          mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
+          rm -R "external/""$BINUTIL_VERSION_NAME"
+          rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
+          if [[ -f "external/objdump" ]] ; then
+            echo -e "$GREEN""objdump installed successfully""$NC"
+          fi
+        else
+          echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
         fi
       else
-        echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
+        echo -e "$GREEN""objdump already installed - no further action performed.""$NC"
       fi
     ;;
   esac
