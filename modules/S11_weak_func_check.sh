@@ -357,13 +357,13 @@ print_top10_statistics() {
 
 log_func_header() {
   write_log "" "$FUNC_LOG"
-  write_log "[*] Function $ORANGE$FUNCTION$NC tear down" "$FUNC_LOG"
+  write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
   write_log "" "$FUNC_LOG"
 }
 
 log_func_footer() {
   write_log "" "$FUNC_LOG"
-  write_log "[*] Function $ORANGE$FUNCTION$NC used $ORANGE$COUNT_FUNC$NC times" "$FUNC_LOG"
+  write_log "[*] Function $ORANGE$FUNCTION$NC used $ORANGE$COUNT_FUNC$NC times $ORANGE$NAME$NC" "$FUNC_LOG"
   write_log "" "$FUNC_LOG"
 }
 
