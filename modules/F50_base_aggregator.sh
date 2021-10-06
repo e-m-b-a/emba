@@ -381,7 +381,7 @@ binary_fct_output() {
   BINARY="$(echo "$BINARY_DETAILS" | cut -d\  -f3)"
   F_COUNTER="$(echo "$BINARY_DETAILS" | cut -d\  -f1)"
 
-  if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG"; then
+  if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG" 2>/dev/null; then
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
       RELRO="$RED_""No RELRO$NC_"
     else

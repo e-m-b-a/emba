@@ -205,7 +205,13 @@ run_mipsel_network_id() {
   KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
   IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
 
-  qemu-system-mipsel -m 256 -M malta -kernel "$KERNEL" -drive if=ide,format=raw,file="$IMAGE" -append "firmadyne.syscall=1 root=/dev/sda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1" -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none -netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
+  qemu-system-mipsel -m 256 -M malta -kernel "$KERNEL" -drive if=ide,format=raw,file="$IMAGE" \
+    -append "firmadyne.syscall=1 root=/dev/sda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1" \
+    -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none \
+    -netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 \
+    -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 \
+    -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 \
+    -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
 
 }
 
@@ -218,7 +224,13 @@ run_mipsbe_network_id() {
   KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
   IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
 
-  qemu-system-mips -m 256 -M malta -kernel "$KERNEL" -drive if=ide,format=raw,file="$IMAGE" -append "firmadyne.syscall=1 root=/dev/sda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1" -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none -netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
+  qemu-system-mips -m 256 -M malta -kernel "$KERNEL" -drive if=ide,format=raw,file="$IMAGE" \
+    -append "firmadyne.syscall=1 root=/dev/sda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1" \
+    -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none \
+    -netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 \
+    -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 \
+    -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 \
+    -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
 
 }
 
@@ -231,8 +243,14 @@ run_armel_network_id() {
   KERNEL="$FIRMADYNE_DIR/binaries/zImage.$ARCH_END"
   IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
 
-  qemu-system-arm -m 256 -M virt -kernel "$KERNEL" -drive if=none,file="$IMAGE",format=raw,id=rootfs -device virtio-blk-device,drive=rootfs -append "firmadyne.syscall=1 root=/dev/vda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31" -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4 -audiodev driver=none,id=none
-
+  qemu-system-arm -m 256 -M virt -kernel "$KERNEL" -drive if=none,file="$IMAGE",format=raw,id=rootfs -device virtio-blk-device,drive=rootfs \
+    -append "firmadyne.syscall=1 root=/dev/vda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31" \
+    -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none \
+    -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 \
+    -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 \
+    -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 \
+    -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4 \
+    -audiodev driver=none,id=none
 
 }
 
@@ -367,7 +385,6 @@ setup_network() {
   echo "tunctl -t $TAPDEV_0" >> "$ARCHIVE_PATH"/run.sh
 
   if [[ "${#VLAN[@]}" -gt 0 ]]; then
-    print_output "[*] Init VLAN ..."
     for VLANID in "${VLAN[@]}"; do
       print_output "[*] Init VLAN $VLAN_ID ..."
       HOSTNETDEV_0x=$TAPDEV_0.$VLANID

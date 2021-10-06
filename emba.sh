@@ -419,7 +419,7 @@ main()
   # Check firmware type (file/directory)
   # copy the firmware outside of the docker and not a second time within the docker
   if [[ -d "$FIRMWARE_PATH" ]] ; then
-    PRE_CHECK=0
+    PRE_CHECK=1
     print_output "[*] Firmware directory detected." "no_log"
     print_output "[*] Emba starts with testing the environment." "no_log"
     if [[ $IN_DOCKER -eq 0 ]] ; then
@@ -427,7 +427,7 @@ main()
       print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""$NC" "no_log"
       cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
-      OUTPUT_DIR="$FIRMWARE_PATH_CP"
+      export OUTPUT_DIR="$FIRMWARE_PATH_CP"
     fi
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
@@ -563,47 +563,38 @@ main()
   # Pre-Check (P-modules)
   #######################################################################################
   if [[ $PRE_CHECK -eq 1 ]] ; then
-    if [[ -f "$FIRMWARE_PATH" ]]; then
 
-      echo
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
-      else
-        print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
-      fi
-
-      # 'main' functions of imported modules
-      # in the pre-check phase we execute all modules with P[Number]_Name.sh
-
-      ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules, therefore overwriting $THREADED as 0
-      ## as there are internal dependencies it is easier to handle it in the modules
-      #run_modules "P" "0" "0"
-      run_modules "P" "$THREADED" "0"
-
-      # if we running threaded we ware going to wait for the slow guys here
-      if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS[@]}"
-      fi
-
-      if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
-        FIRMWARE=1
-        FIRMWARE_PATH="$(abs_path "$OUTPUT_DIR")"
-      fi
-
-      echo
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
-      else
-        print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-      fi
-
-      # useful prints for debugging:
-      # print_output "[!] Firmware value: $FIRMWARE"
-      # print_output "[!] Firmware path: $FIRMWARE_PATH"
-      # print_output "[!] Output dir: $OUTPUT_DIR"
-      # print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
-      # print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
+    else
+      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
     fi
+
+    # 'main' functions of imported modules
+    # in the pre-check phase we execute all modules with P[Number]_Name.sh
+
+    #run_modules "P" "0" "0"
+    run_modules "P" "$THREADED" "0"
+
+    # if we running threaded we ware going to wait for the slow guys here
+    if [[ $THREADED -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS[@]}"
+    fi
+
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+    else
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
+
+    # useful prints for debugging:
+    # print_output "[!] Firmware value: $FIRMWARE"
+    # print_output "[!] Firmware path: $FIRMWARE_PATH"
+    # print_output "[!] Output dir: $OUTPUT_DIR"
+    # print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
+    # print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
   fi
 
   #######################################################################################
@@ -612,35 +603,6 @@ main()
   WAIT_PIDS=()
   if [[ $FIRMWARE -eq 1 ]] ; then
     print_output "\n=================================================================\n" "no_log"
-    check_firmware
-    prepare_binary_arr
-    if [[ -d "$FIRMWARE_PATH" ]]; then
-
-      export RTOS=0
-
-      prepare_file_arr
-
-      if [[ $KERNEL -eq 0 ]] ; then
-        architecture_check
-        architecture_dep_check
-      fi
-
-      if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
-        detect_root_dir_helper "$FIRMWARE_PATH" "main"
-      fi
-
-      set_etc_paths
-      echo
-
-    else
-      # here we can deal with other non linux things like RTOS specific checks
-      # lets call it R* modules
-      # 'main' functions of imported finishing modules
-
-      export RTOS=1
-
-      prepare_file_arr
-    fi
 
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
