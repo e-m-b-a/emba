@@ -114,9 +114,11 @@ check_live_nikto() {
     cat "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt >> "$LOG_FILE"
     if [[ -f "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt ]]; then
       print_output ""
-      mapfile -t VERSIONS < <(grep "Server" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt | cut -d: -f2 | sort -u | sed 's/^\ //')
+      mapfile -t VERSIONS < <(grep "Server" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt | cut -d: -f2 | sort -u | grep -v "null" | sed 's/^\ //')
       for VERSION in "${VERSIONS[@]}"; do
-        print_output "[+] Version information found ${RED}""$VERSION""${NC}${GREEN} in Nikto web server scanning logs."
+        if [[ "$VERSION" != *"Server banner has changed from"* ]]; then
+          print_output "[+] Version information found ${RED}""$VERSION""${NC}${GREEN} in Nikto web server scanning logs."
+        fi
       done
 
       mapfile -t VERSIONS < <(grep "Retrieved x-powered-by header" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt | cut -d: -f2 | sort -u | sed 's/^\ //')
