@@ -41,24 +41,23 @@ P99_prepare_analyzer() {
 
   print_output "[*] Quick check if it is a real Linux system"
   check_firmware
-  print_output "[*] Prepare unique binary array"
+  print_output ""
   prepare_binary_arr
+  print_output ""
 
   if [[ -d "$FIRMWARE_PATH" ]]; then
 
     export RTOS=0
 
-    print_output "[*] Prepare unique file array"
     prepare_file_arr
+    print_output ""
 
     if [[ $KERNEL -eq 0 ]] ; then
-      print_output "[*] Do an intense architecture check"
       architecture_check
       architecture_dep_check
     fi
 
     if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
-      print_output "[*] Do an intense root filesystem detection"
       detect_root_dir_helper "$FIRMWARE_PATH" "main"
     fi
 
@@ -70,7 +69,6 @@ P99_prepare_analyzer() {
 
     export RTOS=1
 
-    print_output "[*] Prepare unique file array"
     prepare_file_arr
   fi
 
