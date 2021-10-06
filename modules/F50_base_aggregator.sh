@@ -107,7 +107,11 @@ output_details() {
   local DATA=0
   if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
-    write_link "s05"
+    if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
+      write_link "s05"
+    else
+      write_link "p20"
+    fi
     echo "files;\"$FILE_ARR_COUNT\"" >> "$CSV_LOG_FILE"
     echo "directories;\"$DETECTED_DIR\"" >> "$CSV_LOG_FILE"
     DATA=1
@@ -152,7 +156,7 @@ output_details() {
     echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  EMUL=$(find "$LOG_DIR"/s115_usermode_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
+  EMUL=$(grep -c "Version information found" "$LOG_DIR"/s115_usermode_emulator.txt 2>/dev/null)
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
     write_link "s115"
@@ -598,6 +602,7 @@ get_data() {
 os_detector() {
 
   VERIFIED=0
+  VERIFIED_P70=0
   OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
 
   #### The following check is based on the results of the aggregator:
@@ -638,6 +643,7 @@ os_detector() {
     mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
+        VERIFIED_P70=1
         VERIFIED=1
         print_os
       done
@@ -683,12 +689,18 @@ os_kernel_module_detect() {
 
 print_os() {
   if [[ $VERIFIED -eq 1 ]]; then
-    print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
-    write_link "s25"
+    if [[ "$VERIFIED_P70" -eq 1 ]]; then
+      SYSTEM=$(echo "$SYSTEM" | awk '{print $1}')
+      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+      write_link "p70"
+    else
+      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+      write_link "s25"
+    fi
     echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
-    write_link "p07"
+    write_link "p70"
     echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   fi
