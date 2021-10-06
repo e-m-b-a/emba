@@ -162,21 +162,27 @@ output_details() {
   if [[ "$IP_ADDR" -gt 0 ]]; then
 
     STATE="$ORANGE(""$GREEN""IP address detected"
+    EMU_STATE="IP_add_dete"
     if [[ "$SYS_ONLINE" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
+      EMU_STATE="$EMU_STATE"";ICMP"
     fi
     if [[ "$NMAP_UP" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NMAP"
+      EMU_STATE="$EMU_STATE"";NMAP"
     fi
     if [[ "$SNMP_UP" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""SNMP"
+      EMU_STATE="$EMU_STATE"";SNMP"
     fi
     if [[ "$NIKTO_UP" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NIKTO"
+      EMU_STATE="$EMU_STATE"";NIKTO"
     fi
     STATE="$STATE$ORANGE"")$NC"
 
     print_output "[+] System emulation was successful $STATE" "" "l10"
+    echo "system_emulation_state;\"$EMU_STATE\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
 
