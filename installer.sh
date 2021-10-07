@@ -304,6 +304,7 @@ print_tool_info "unzip" 1
 print_tool_info "docker-compose" 1
 print_tool_info "bc" 1
 print_tool_info "coreutils" 1
+print_tool_info "ncurses-bin" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 # libguestfs-tools is needed to mount vmdk images
@@ -391,8 +392,8 @@ INSTALL_APP_LIST=()
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   print_git_info "cwe-checker" "fkie-cad/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
   echo -e "$ORANGE""cwe-checker will be downloaded.""$NC"
-  print_file_info "OpenJDK" "Description missing" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
-  print_file_info "GHIDRA" "Description missing" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip" "external/ghidra.zip"
+  print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
+  print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip" "external/ghidra.zip"
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -408,43 +409,47 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
     y|Y )
       echo
 
-      # cleanup first
-      rm "$HOME"/.cargo -r -f
-      rm "$HOME"/.config -r -f
-      rm external/rustup -r -f
+      if ! [[ -d ./external/cwe_checker ]]; then
+        # cleanup first
+        rm "$HOME"/.cargo -r -f
+        rm "$HOME"/.config -r -f
+        rm external/rustup -r -f
 
-      curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
-      # shellcheck disable=SC1090
-      # shellcheck disable=SC1091
-      source "$HOME/.cargo/env"
-      RUSTUP_HOME=external/rustup rustup default stable
-      export RUSTUP_TOOLCHAIN=stable 
+        curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
+        # shellcheck disable=SC1090
+        # shellcheck disable=SC1091
+        source "$HOME/.cargo/env"
+        RUSTUP_HOME=external/rustup rustup default stable
+        export RUSTUP_TOOLCHAIN=stable 
   
-      # Java SDK for ghidra
-      if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
-      curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
-      mkdir external/jdk 2>/dev/null
-      tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
-      rm external/jdk.tar.gz
+        # Java SDK for ghidra
+        if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
+        curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
+        mkdir external/jdk 2>/dev/null
+        tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
+        rm external/jdk.tar.gz
   
-      # Ghidra
-      if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
-      curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip -Sf -o external/ghidra.zip
-      mkdir external/ghidra 2>/dev/null
-      unzip -qo external/ghidra.zip -d external/ghidra
-      sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.0.2_PUBLIC/support/launch.properties
-      rm external/ghidra.zip
+        # Ghidra
+        if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
+        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.0.2_build/ghidra_10.0.2_PUBLIC_20210804.zip -Sf -o external/ghidra.zip
+        mkdir external/ghidra 2>/dev/null
+        unzip -qo external/ghidra.zip -d external/ghidra
+        sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.0.2_PUBLIC/support/launch.properties
+        rm external/ghidra.zip
   
-      if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
-      mkdir external/cwe_checker 2>/dev/null
-      git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
-      cd external/cwe_checker || exit 1
-      make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
-      cd "$HOME_PATH" || exit 1
+        if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
+        mkdir external/cwe_checker 2>/dev/null
+        git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
+        cd external/cwe_checker || exit 1
+        make all GHIDRA_PATH=external/ghidra/ghidra_10.0.2_PUBLIC
+        cd "$HOME_PATH" || exit 1
 
-      mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
-      rm -r -f "$HOME""/.cargo/"
-      rm -r ./external/rustup
+        mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
+        rm -r -f "$HOME""/.cargo/"
+        rm -r ./external/rustup
+      else
+        echo -e "\\n""$GREEN""cwe-checker already installed - no further action performed.""$NC"
+      fi
     ;;
   esac
 fi
@@ -466,15 +471,14 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   fi
   case ${ANSWER:0:1} in
     y|Y )
-      if [[ -d ./external/fact_extractor ]]; then
-        rm -r external/fact_extractor
+      if ! [[ -d ./external/fact_extractor ]]; then
+        # this is a temporary solution until the official fact repo supports a current kali linux
+        git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
+        cd ./external/fact_extractor/fact_extractor/ || exit 1
+        ./install/pre_install.sh
+        python3 ./install.py
+        cd "$HOME_PATH" || exit 1
       fi
-      # this is a temporary solution until the official fact repo supports a current kali linux
-      git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
-      cd ./external/fact_extractor/fact_extractor/ || exit 1
-      ./install/pre_install.sh
-      python3 ./install.py
-      cd "$HOME_PATH" || exit 1
   
       if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
         echo -e "$GREEN""FACT-extractor installed""$NC"
@@ -585,24 +589,28 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   case ${ANSWER:0:1} in
     y|Y )
       apt-get install "${INSTALL_APP_LIST[@]}" -y
-      download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
-      if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
-        tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
-        cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
-        echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
-        ./configure --enable-targets=all
-        make
-        cd "$HOME_PATH" || exit 1
-      fi
-      if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
-        mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
-        rm -R "external/""$BINUTIL_VERSION_NAME"
-        rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
-        if [[ -f "external/objdump" ]] ; then
-          echo -e "$GREEN""objdump installed successfully""$NC"
+      if ! [[ -f "external/objdump" ]] ; then
+        download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
+        if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
+          tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
+          cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
+          echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
+          ./configure --enable-targets=all
+          make
+          cd "$HOME_PATH" || exit 1
+        fi
+        if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
+          mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
+          rm -R "external/""$BINUTIL_VERSION_NAME"
+          rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
+          if [[ -f "external/objdump" ]] ; then
+            echo -e "$GREEN""objdump installed successfully""$NC"
+          fi
+        else
+          echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
         fi
       else
-        echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
+        echo -e "$GREEN""objdump already installed - no further action performed.""$NC"
       fi
     ;;
   esac
@@ -972,6 +980,120 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
         echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
       fi
+    ;;
+  esac
+fi
+
+# firmadyne / full system emulation
+
+INSTALL_APP_LIST=()
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  cd "$HOME_PATH" || exit 1
+
+  print_tool_info "busybox-static" 1
+  print_tool_info "fakeroot" 1
+  print_tool_info "git" 1
+  print_tool_info "dmsetup" 1
+  print_tool_info "kpartx" 1
+  print_tool_info "nmap" 1
+  print_tool_info "snmp" 1
+  print_tool_info "uml-utilities" 1
+  print_tool_info "util-linux" 1
+  print_tool_info "vlan" 1
+  print_tool_info "qemu-system-arm" 1
+  print_tool_info "qemu-system-mips" 1
+  print_tool_info "qemu-system-x86" 1
+  print_tool_info "qemu-utils" 1
+
+  print_file_info "vmlinux.mipsel" "Firmadyne - Linux kernel 2.6 - MIPSel" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipsel" "external/firmadyne/binaries/vmlinux.mipsel"
+  print_file_info "vmlinux.mipseb" "Firmadyne - Linux kernel 2.6 - MIPSeb" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipseb" "external/firmadyne/binaries/vmlinux.mipseb"
+  print_file_info "zImage.armel" "Firmadyne - Linux kernel 4.1 - ARMel" "https://github.com/firmadyne/kernel-v4.1/releases/download/v1.1/zImage.armel" "external/firmadyne/binaries/zImage.armel"
+  print_file_info "console.armel" "Firmadyne - Console - ARMel" "https://github.com/firmadyne/console/releases/download/v1.0/console.armel" "external/firmadyne/binaries/console.armel"
+  print_file_info "console.mipseb" "Firmadyne - Console - MIPSeb" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipseb" "external/firmadyne/binaries/console.mipseb"
+  print_file_info "console.mipsel" "Firmadyne - Console - MIPSel" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipsel" "external/firmadyne/binaries/console.mipsel"
+  print_file_info "libnvram.so.armel" "Firmadyne - libnvram - ARMel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.armel" "external/firmadyne/binaries/libnvram.so.armel"
+  print_file_info "libnvram.so.mipseb" "Firmadyne - libnvram - MIPSeb" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipseb" "external/firmadyne/binaries/libnvram.so.mipseb"
+  print_file_info "libnvram.so.mipsel" "Firmadyne - libnvram - MIPSel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipsel" "external/firmadyne/binaries/libnvram.so.mipsel"
+  print_file_info "fixImage.sh" "Firmadyne fixImage script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/"
+  print_file_info "preInit.sh" "Firmadyne preInit script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/"
+ 
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the firmadyne dependencies (if not already on the system)?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""The firmadyne dependencies (if not already on the system) will be downloaded and be installed!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+
+    mkdir -p external/firmadyne/binaries
+    mkdir -p external/firmadyne/scripts
+
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+    if ! [[ -f "external/firmadyne/binaries/vmlinux.mipsel" ]]; then
+      download_file "vmlinux.mipsel" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipsel" "external/firmadyne/binaries/vmlinux.mipsel"
+    else
+      echo -e "$GREEN""vmlinux.mipsel already installed""$NC"
+    fi
+
+    if ! [[ -f "external/firmadyne/binaries/vmlinux.mipseb" ]]; then
+      download_file "vmlinux.mipseb" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipseb" "external/firmadyne/binaries/vmlinux.mipseb"
+    else
+      echo -e "$GREEN""vmlinux.mipseb already installed""$NC"
+    fi
+
+    if ! [[ -f "external/firmadyne/binaries/zImage.armel" ]]; then
+      download_file "zImage.armel" "https://github.com/firmadyne/kernel-v4.1/releases/download/v1.1/zImage.armel" "external/firmadyne/binaries/zImage.armel"
+    else
+      echo -e "$GREEN""zImage.armel already installed""$NC"
+    fi
+
+    if ! [[ -f "external/firmadyne/binaries/console.armel" ]]; then
+      download_file "console.armel" "https://github.com/firmadyne/console/releases/download/v1.0/console.armel" "external/firmadyne/binaries/console.armel"
+    else
+      echo -e "$GREEN""console.armel already installed""$NC"
+    fi
+    if ! [[ -f "external/firmadyne/binaries/console.mipseb" ]]; then
+      download_file "console.mipseb" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipseb" "external/firmadyne/binaries/console.mipseb"
+    else
+      echo -e "$GREEN""console.mipseb already installed""$NC"
+    fi
+    if ! [[ -f "external/firmadyne/binaries/console.mipsel" ]]; then
+      download_file "console.mipsel" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipsel" "external/firmadyne/binaries/console.mipsel"
+    else
+      echo -e "$GREEN""console.mipsel already installed""$NC"
+    fi
+
+    if ! [[ -f "external/firmadyne/binaries/libnvram.so.armel" ]]; then
+      download_file "libnvram.so.armel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.armel" "external/firmadyne/binaries/libnvram.so.armel"
+    else
+      echo -e "$GREEN""libnvram.so.armel already installed""$NC"
+    fi
+    if ! [[ -f "external/firmadyne/binaries/libnvram.so.mipseb" ]]; then
+      download_file "libnvram.so.mipseb" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipseb" "external/firmadyne/binaries/libnvram.so.mipseb"
+    else
+      echo -e "$GREEN""libnvram.so.mipseb already installed""$NC"
+    fi
+    if ! [[ -f "external/firmadyne/binaries/libnvram.so.mipsel" ]]; then
+      download_file "libnvram.so.mipsel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipsel" "external/firmadyne/binaries/libnvram.so.mipsel"
+    else
+      echo -e "$GREEN""libnvram.so.mipsel already installed""$NC"
+    fi
+
+    if ! [[ -f "external/firmadyne/scripts/fixImage.sh" ]]; then
+      download_file "fixImage.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/fixImage.sh"
+    else
+      echo -e "$GREEN""fixImage.sh already installed""$NC"
+    fi
+    if ! [[ -f "external/firmadyne/scripts/preInit.sh" ]]; then
+      download_file "preInit.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/preInit.sh"
+    else
+      echo -e "$GREEN""preInit.sh already installed""$NC"
+    fi
     ;;
   esac
 fi

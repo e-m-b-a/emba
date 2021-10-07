@@ -22,7 +22,7 @@ import_helper()
 {
   local HELPERS
   local HELPER_COUNT
-  mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "*.sh" -print0 2> /dev/null)
+  mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for HELPER_FILE in "${HELPERS[@]}" ; do
     if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
@@ -69,7 +69,7 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
-# $1: module group letter [P, S, F]
+# $1: module group letter [P, S, L, F]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
 run_modules()
@@ -183,6 +183,7 @@ main()
 
   INVOCATION_PATH="$(dirname "$0")"
 
+  export FULL_EMULATION=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
   export CWE_CHECKER=0
@@ -223,12 +224,13 @@ main()
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
-  export PATH_CVE_SEARCH="./external/cve-search/bin/search.py"
+  export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   export MSF_PATH="/usr/share/metasploit-framework/modules/"
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
+  export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
 
   echo
 
@@ -246,7 +248,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:QrstxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -312,6 +314,10 @@ main()
       p)
         export PROFILE="$OPTARG"
        ;;
+      Q)
+        # this is for experimental system emulation module
+        export FULL_EMULATION=1
+        ;;
       r)
         export FINAL_FW_RM=1
        ;;
@@ -413,7 +419,7 @@ main()
   # Check firmware type (file/directory)
   # copy the firmware outside of the docker and not a second time within the docker
   if [[ -d "$FIRMWARE_PATH" ]] ; then
-    PRE_CHECK=0
+    PRE_CHECK=1
     print_output "[*] Firmware directory detected." "no_log"
     print_output "[*] Emba starts with testing the environment." "no_log"
     if [[ $IN_DOCKER -eq 0 ]] ; then
@@ -421,7 +427,7 @@ main()
       print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""$NC" "no_log"
       cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
-      OUTPUT_DIR="$FIRMWARE_PATH_CP"
+      export OUTPUT_DIR="$FIRMWARE_PATH_CP"
     fi
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
@@ -504,7 +510,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:rstX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:QrstX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -557,47 +563,38 @@ main()
   # Pre-Check (P-modules)
   #######################################################################################
   if [[ $PRE_CHECK -eq 1 ]] ; then
-    if [[ -f "$FIRMWARE_PATH" ]]; then
 
-      echo
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
-      else
-        print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
-      fi
-
-      # 'main' functions of imported modules
-      # in the pre-check phase we execute all modules with P[Number]_Name.sh
-
-      ## IMPORTANT NOTE: Threading is handled withing the pre-checking modules, therefore overwriting $THREADED as 0
-      ## as there are internal dependencies it is easier to handle it in the modules
-      #run_modules "P" "0" "0"
-      run_modules "P" "$THREADED" "0"
-
-      # if we running threaded we ware going to wait for the slow guys here
-      if [[ $THREADED -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS[@]}"
-      fi
-
-      if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
-        FIRMWARE=1
-        FIRMWARE_PATH="$(abs_path "$OUTPUT_DIR")"
-      fi
-
-      echo
-      if [[ -d "$LOG_DIR" ]]; then
-        print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
-      else
-        print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
-      fi
-
-      # useful prints for debugging:
-      # print_output "[!] Firmware value: $FIRMWARE"
-      # print_output "[!] Firmware path: $FIRMWARE_PATH"
-      # print_output "[!] Output dir: $OUTPUT_DIR"
-      # print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
-      # print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
+    else
+      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
     fi
+
+    # 'main' functions of imported modules
+    # in the pre-check phase we execute all modules with P[Number]_Name.sh
+
+    #run_modules "P" "0" "0"
+    run_modules "P" "$THREADED" "0"
+
+    # if we running threaded we ware going to wait for the slow guys here
+    if [[ $THREADED -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS[@]}"
+    fi
+
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+    else
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
+
+    # useful prints for debugging:
+    # print_output "[!] Firmware value: $FIRMWARE"
+    # print_output "[!] Firmware path: $FIRMWARE_PATH"
+    # print_output "[!] Output dir: $OUTPUT_DIR"
+    # print_output "[!] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
+    # print_output "[!] LINUX_PATH_ARRAY: ${#ROOT_PATH[@]}"
   fi
 
   #######################################################################################
@@ -606,35 +603,6 @@ main()
   WAIT_PIDS=()
   if [[ $FIRMWARE -eq 1 ]] ; then
     print_output "\n=================================================================\n" "no_log"
-    check_firmware
-    prepare_binary_arr
-    if [[ -d "$FIRMWARE_PATH" ]]; then
-
-      export RTOS=0
-
-      prepare_file_arr
-
-      if [[ $KERNEL -eq 0 ]] ; then
-        architecture_check
-        architecture_dep_check
-      fi
-
-      if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
-        detect_root_dir_helper "$FIRMWARE_PATH" "main"
-      fi
-
-      set_etc_paths
-      echo
-
-    else
-      # here we can deal with other non linux things like RTOS specific checks
-      # lets call it R* modules
-      # 'main' functions of imported finishing modules
-
-      export RTOS=1
-
-      prepare_file_arr
-    fi
 
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
@@ -657,6 +625,29 @@ main()
     fi
 
     TESTING_DONE=1
+  fi
+
+  #######################################################################################
+  # Live Emulation - Check (L-modules)
+  #######################################################################################
+  if [[ $FULL_EMULATION -eq 1 ]] ; then
+    print_output "\n=================================================================\n" "no_log"
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "main" 
+    else
+      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
+    fi
+
+    write_grep_log "$(date)" "TIMESTAMP"
+    # these modules are not threaded!
+    run_modules "L" "0" "$HTML"
+
+    echo
+    if [[ -d "$LOG_DIR" ]]; then
+      print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
+    else
+      print_output "[!] System emulation ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
   fi
 
   #######################################################################################

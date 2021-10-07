@@ -24,8 +24,8 @@ F50_base_aggregator() {
   P02_LOG="p02_firmware_bin_file_check.txt"
   P70_LOG="p70_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
-  S11_LOG="s11_weak_func_check.txt"
   S12_LOG="s12_binary_protection.txt"
+  S13_LOG="s13_weak_func_check.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
@@ -42,6 +42,8 @@ F50_base_aggregator() {
   S108_LOG="s108_linux_common_file_checker.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
+  L10_LOG="l10_system_emulator.txt"
+  L15_LOG="l15_emulated_checks_init.txt"
 
   CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$LOG_FILE")".csv
 
@@ -85,11 +87,12 @@ output_overview() {
     else
       print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
     fi
+    write_link "p99"
     echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
   elif [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
-      write_link "p07"
+      write_link "p99"
       echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
       echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
     fi
@@ -105,7 +108,11 @@ output_details() {
   local DATA=0
   if [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
-    write_link "s05"
+    if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
+      write_link "s05"
+    else
+      write_link "p20"
+    fi
     echo "files;\"$FILE_ARR_COUNT\"" >> "$CSV_LOG_FILE"
     echo "directories;\"$DETECTED_DIR\"" >> "$CSV_LOG_FILE"
     DATA=1
@@ -150,10 +157,37 @@ output_details() {
     echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  EMUL=$(find "$LOG_DIR"/s115_usermode_emulator -xdev -type f -iname "qemu_*" 2>/dev/null | wc -l) 
+  EMUL=$(grep -c "Version information found" "$LOG_DIR"/s115_usermode_emulator.txt 2>/dev/null)
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
     write_link "s115"
+    DATA=1
+  fi
+
+  if [[ "$IP_ADDR" -gt 0 ]]; then
+
+    STATE="$ORANGE(""$GREEN""IP address detected"
+    EMU_STATE="IP_add_dete"
+    if [[ "$SYS_ONLINE" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
+      EMU_STATE="$EMU_STATE"";ICMP"
+    fi
+    if [[ "$NMAP_UP" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""NMAP"
+      EMU_STATE="$EMU_STATE"";NMAP"
+    fi
+    if [[ "$SNMP_UP" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""SNMP"
+      EMU_STATE="$EMU_STATE"";SNMP"
+    fi
+    if [[ "$NIKTO_UP" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""NIKTO"
+      EMU_STATE="$EMU_STATE"";NIKTO"
+    fi
+    STATE="$STATE$ORANGE"")$NC"
+
+    print_output "[+] System emulation was successful $STATE" "" "l10"
+    echo "system_emulation_state;\"$EMU_STATE\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
 
@@ -302,14 +336,15 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
-    write_link "s11"
+    print_output ""
+    write_link "s13"
     echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
 
   local DATA=0
 
-  if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
-    if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s13_weak_func_check/" ]] ; then
+    if [[ "$(find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_*.txt" | wc -l)" -gt 0 ]]; then
 
       # color codes for printf
       RED_="$(tput setaf 1)"
@@ -317,26 +352,27 @@ output_binaries() {
       ORANGE_="$(tput setaf 3)"
       NC_="$(tput sgr0)"
 
-      readarray -t RESULTS_STRCPY < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
-      readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS_STRCPY < <( find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
 
       #strcpy:
       if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
-        print_output "\\n"
+        print_output ""
         print_output "[+] STRCPY - top 10 results:"
-        write_link "s11#strcpysummary"
+        write_link "s13#strcpysummary"
         DATA=1
         for LINE in "${RESULTS_STRCPY[@]}" ; do
           binary_fct_output "$LINE"
           echo "strcpy_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
         done
-        print_output "\\n$NC"
+        print_output "$NC"
       fi
 
       #system:
       if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
+        print_output ""
         print_output "[+] SYSTEM - top 10 results:"
-        write_link "s11#strcpysummary"
+        write_link "s13#strcpysummary"
         DATA=1
         for LINE in "${RESULTS_SYSTEM[@]}" ; do
           binary_fct_output "$LINE"
@@ -356,7 +392,7 @@ binary_fct_output() {
   BINARY="$(echo "$BINARY_DETAILS" | cut -d\  -f3)"
   F_COUNTER="$(echo "$BINARY_DETAILS" | cut -d\  -f1)"
 
-  if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG"; then
+  if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG" 2>/dev/null; then
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
       RELRO="$RED_""No RELRO$NC_"
     else
@@ -399,8 +435,8 @@ binary_fct_output() {
 output_cve_exploits() {
 
   local DATA=0
-  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
-    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 ]]; then
+  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
+    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f19#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
@@ -465,9 +501,9 @@ get_data() {
     FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f | wc -l)
     DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d | wc -l)
   fi
-  if [[ -f "$LOG_DIR"/"$S11_LOG" ]]; then
-    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S11_LOG" | cut -d: -f2)
-    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S11_LOG" | cut -d: -f2)
+  if [[ -f "$LOG_DIR"/"$S13_LOG" ]]; then
+    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
@@ -525,6 +561,15 @@ get_data() {
     export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
   fi
+  if [[ -f "$LOG_DIR"/"$L10_LOG" ]]; then
+    SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f2)
+    IP_ADDR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f3)
+  fi
+  if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
+    NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2)
+    SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f3)
+    NIKTO_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f4)
+  fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( HIGH_CVE_COUNTER="$HIGH_CVE_COUNTER"+"$COUNTING" ))
@@ -558,6 +603,7 @@ get_data() {
 os_detector() {
 
   VERIFIED=0
+  VERIFIED_P70=0
   OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
 
   #### The following check is based on the results of the aggregator:
@@ -595,15 +641,16 @@ os_detector() {
   #### The following check is needed if the aggreagator has failed till now
   if [[ $VERIFIED -eq 0 ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
-    mapfile -t OS_DETECT < <(grep "\ verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
+        VERIFIED_P70=1
         VERIFIED=1
         print_os
       done
     fi
 
-    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | awk '{print $1 " - #" $3}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
@@ -643,12 +690,18 @@ os_kernel_module_detect() {
 
 print_os() {
   if [[ $VERIFIED -eq 1 ]]; then
-    print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
-    write_link "s25"
+    if [[ "$VERIFIED_P70" -eq 1 ]]; then
+      SYSTEM=$(echo "$SYSTEM" | awk '{print $1}')
+      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+      write_link "p70"
+    else
+      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+      write_link "s25"
+    fi
     echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
-    write_link "p07"
+    write_link "p70"
     echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   fi

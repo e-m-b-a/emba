@@ -208,6 +208,18 @@ dependency_check()
       check_dep_port "cve-search" 27017
     fi
 
+    # firmadyne
+    if [[ $FULL_EMULATION -eq 1 ]]; then
+      # check only some of the needed files
+      check_dep_file "console.mipsel" "$EXT_DIR""/firmadyne/binaries/console.mipsel"
+      check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmadyne/binaries/vmlinux.mipseb"
+      check_dep_file "fixImage.sh" "$EXT_DIR""/firmadyne/scripts/fixImage.sh"
+      check_dep_file "preInit.sh" "$EXT_DIR""/firmadyne/scripts/preInit.sh"
+      check_dep_tool "qemu-system-arm"
+      check_dep_tool "qemu-system-mips"
+      check_dep_tool "qemu-system-mipsel"
+    fi
+
     # CVE searchsploit
     check_dep_tool "CVE Searchsploit" "cve_searchsploit"
 

@@ -34,8 +34,10 @@ F19_cve_aggregator() {
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
 
+  S05_LOG="s05_firmware_details.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
+  SYS_EMUL_LOG="l15_emulated_checks_init.txt"
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
@@ -53,8 +55,10 @@ F19_cve_aggregator() {
       KERNELV=1
     fi
 
+    get_firmware_details
     get_firmware_base_version_check
     get_usermode_emulator
+    get_systemmode_emulator
 
     aggregate_versions
     
@@ -105,6 +109,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
     VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs./\ }"
     VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
+    VERSION_lower="${VERSION_lower//\ for\ d-link\ device\./\ }"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
 
@@ -322,6 +327,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/this\ is\ perl.*.v/perl\ /')"
     #gpg (GnuPG) 2.2.17
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/g.*\ (gnupg)/gnupg/')"
+    #hostapd v2.0-devel
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/hostapd\ v([0-9]+\.[0-9]+)-devel/hostapd\ \1/g')"
+    #wpa_supplicant v2.0-devel
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/wpa_supplicant\ v([0-9]+\.[0-9]+)-devel/wpa_supplicant\ \1/g')"
     #iw* Wireless-Tools version 29
     VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     # apt-Version 1.2.3
@@ -448,6 +457,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//fwaos_v/siprotec_5\ }"
     #@(#1) CP443-1 GX20 V x.y.z 11.11.9999
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\@\(\#1\)\ cp443-1\ gx20\ v\ ([0-9]\.[0-9]\.[0-9]).*/simatic_cp443-1_firmware \1/')"
+    #  Firmware Update V3.2.17 for the communication processor CP443-1
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/firmware\ update\ ([0-9]\.[0-9]\.[0-9]+)\ for\ the\ communication\ processor\ cp443-1/simatic_cp443-1_firmware \1/')"
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
     VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"
@@ -476,6 +487,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//loadkeys\ from\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//kbd_mode\ from\ kbd/kbd-project:kbd}"
+    # dir-300_firmware_2.14B01
+    VERSION_lower="${VERSION_lower//_firmware_/_firmware:}"
     #dpkg-ABC -> dpkg
     VERSION_lower="${VERSION_lower//dpkg-divert/debian:dpkg}"
     VERSION_lower="${VERSION_lower//dpkg-split/debian:dpkg}"
@@ -548,9 +561,12 @@ aggregate_versions() {
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
-  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 ]]; then
+  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S05_FW_DETAILS[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
+    for VERSION in "${VERSIONS_S05_FW_DETAILS[@]}"; do
+      print_output "[+] Found Version details (firmware details check): ""$VERSION"
+    done
     for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
       print_output "[+] Found Version details (base check): ""$VERSION"
     done
@@ -560,12 +576,15 @@ aggregate_versions() {
     for VERSION in "${VERSIONS_EMULATOR[@]}"; do
       print_output "[+] Found Version details (emulator): ""$VERSION"
     done
+    for VERSION in "${VERSIONS_SYS_EMULATOR[@]}"; do
+      print_output "[+] Found Version details (system emulator): ""$VERSION"
+    done
     for VERSION in "${VERSIONS_KERNEL[@]}"; do
       print_output "[+] Found Version details (kernel): ""$VERSION"
     done
 
     print_output ""
-    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}")
+    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S05_FW_DETAILS[@]}")
     for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
       # remove color codes:
       VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
@@ -943,7 +962,7 @@ final_outputter() {
 }
 
 get_firmware_base_version_check() {
-  print_output "[*] Collect version details of module s09 - firmware_base_version_check."
+  print_output "[*] Collect version details of module s09_firmware_base_version_check."
   if [[ -f "$LOG_DIR"/"$FW_VER_CHECK_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
@@ -968,5 +987,19 @@ get_usermode_emulator() {
   print_output "[*] Collect version details of module s115_usermode_emulator."
   if [[ -f "$LOG_DIR"/"$EMUL_LOG" ]]; then
     readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (from.*$//' | sort -u)
+  fi
+}
+
+get_systemmode_emulator() {
+  print_output "[*] Collect version details of module l15_emulated_checks_init."
+  if [[ -f "$LOG_DIR"/"$SYS_EMUL_LOG" ]]; then
+    readarray -t VERSIONS_SYS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$SYS_EMUL_LOG" | cut -d\  -f5- | sed 's/ in .* scanning logs.//' | sort -u)
+  fi
+}
+
+get_firmware_details() {
+  print_output "[*] Collect version details of module s05_firmware_details."
+  if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
+    readarray -t VERSIONS_S05_FW_DETAILS < <(grep "Version information found" "$LOG_DIR"/"$S05_LOG" | cut -d\  -f5- | sort -u)
   fi
 }

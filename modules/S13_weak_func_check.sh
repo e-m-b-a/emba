@@ -17,10 +17,18 @@
 #               functions and to establish a ranking of areas to look at first.
 #               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg). 
 
-S11_weak_func_check()
+S13_weak_func_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries for weak functions (intense)"
+
+  # This module waits for S12 - binary protections
+  # check emba.log for S12_binary_protection starting
+  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+    while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+      sleep 1
+    done
+  fi
 
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
@@ -118,8 +126,14 @@ function_check_PPC32(){
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
+        log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          echo "$E" >> "$FUNC_LOG"
+          if [[ "$E" == *"$FUNCTION"* ]]; then
+            # we need the hex codes for sed here -> red output of the important line:
+            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
+          fi
+          write_log "$E" "$FUNC_LOG"
         done
         COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
@@ -129,6 +143,7 @@ function_check_PPC32(){
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null)
         fi
+        log_func_footer
         output_function_details
       fi
     fi
@@ -150,8 +165,14 @@ function_check_MIPS32() {
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
+        log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          echo "$E" >> "$FUNC_LOG"
+          if [[ "$E" == *"$FUNCTION"* ]]; then
+            # we need the hex codes for sed here -> red output of the important line:
+            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
+          fi
+          write_log "$E" "$FUNC_LOG"
         done
         COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
@@ -162,6 +183,7 @@ function_check_MIPS32() {
           # Check this. This test is very rough:
           COUNT_MMAP_OK=$(grep -c ",-1$" "$FUNC_LOG"  2> /dev/null)
         fi
+        log_func_footer
         output_function_details
       fi
     fi
@@ -179,8 +201,14 @@ function_check_ARM64() {
     fi
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening
+      log_func_header
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
-        echo "$E" >> "$FUNC_LOG"
+        if [[ "$E" == *"$FUNCTION"* ]]; then
+          # we need the hex codes for sed here -> red output of the important line:
+          E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
+        fi
+        write_log "$E" "$FUNC_LOG"
       done
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
@@ -192,6 +220,7 @@ function_check_ARM64() {
         #COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
+      log_func_footer
       output_function_details
     fi
   done
@@ -208,8 +237,14 @@ function_check_ARM32() {
     fi
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening
+      log_func_header
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
-        echo "$E" >> "$FUNC_LOG"
+        if [[ "$E" == *"$FUNCTION"* ]]; then
+          # we need the hex codes for sed here -> red output of the important line:
+          E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
+        fi
+        write_log "$E" "$FUNC_LOG"
       done
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
@@ -220,6 +255,7 @@ function_check_ARM32() {
         # Check this testcase. Not sure if it works in all cases! 
         COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
       fi
+      log_func_footer
       output_function_details
     fi
   done
@@ -237,8 +273,14 @@ function_check_x86() {
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
+        log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          echo "$E" >> "$FUNC_LOG"
+          if [[ "$E" == *"$FUNCTION"* ]]; then
+            # we need the hex codes for sed here -> red output of the important line:
+            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
+          fi
+          write_log "$E" "$FUNC_LOG"
         done
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
@@ -248,6 +290,7 @@ function_check_x86() {
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "$FUNC_LOG"  2> /dev/null)
         fi
+        log_func_footer
         output_function_details
       fi
     fi
@@ -266,8 +309,14 @@ function_check_x86_64() {
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
+        log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          echo "$E" >> "$FUNC_LOG"
+          if [[ "$E" == *"$FUNCTION"* ]]; then
+            # we need the hex codes for sed here -> red output of the important line:
+            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
+          fi
+          write_log "$E" "$FUNC_LOG"
         done
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
         if [[ "$FUNCTION" == "strcpy"  ]] ; then
@@ -278,6 +327,7 @@ function_check_x86_64() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null)
         fi
         output_function_details
+        log_func_footer
       fi
     fi
   done
@@ -317,11 +367,37 @@ print_top10_statistics() {
     #print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
+} 
+
+log_bin_hardening() {
+  if [[ -f "$LOG_DIR"/s12_binary_protection.txt ]]; then
+    write_log "[*] Binary protection state of $ORANGE$NAME$NC" "$FUNC_LOG"
+    write_log "" "$FUNC_LOG"
+    # get headline:
+    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u)
+    write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
+    # get binary entry
+    BIN_PROT=$(grep "$NAME" "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u)
+    write_log "  $BIN_PROT" "$FUNC_LOG"
+    write_log "" "$FUNC_LOG"
+  fi
+}
+
+log_func_header() {
+  write_log "" "$FUNC_LOG"
+  write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
+  write_log "" "$FUNC_LOG"
+}
+
+log_func_footer() {
+  write_log "" "$FUNC_LOG"
+  write_log "[*] Function $ORANGE$FUNCTION$NC used $ORANGE$COUNT_FUNC$NC times $ORANGE$NAME$NC" "$FUNC_LOG"
+  write_log "" "$FUNC_LOG"
 }
 
 output_function_details()
 {
-  write_s11_log()
+  write_s13_log()
   {
     OLD_LOG_FILE="$LOG_FILE"
     LOG_FILE="$3"
@@ -363,7 +439,7 @@ output_function_details()
     else
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
     fi
-    write_s11_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
+    write_s13_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
   fi
 
   
