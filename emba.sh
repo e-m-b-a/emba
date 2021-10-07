@@ -527,7 +527,7 @@ main()
     echo
 
     print_output "[*] Emba sets up the docker environment.\\n" "no_log"
-    #EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
 
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
       print_output "[-] Emba docker build failed!" "no_log"
