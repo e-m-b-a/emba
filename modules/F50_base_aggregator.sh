@@ -24,8 +24,8 @@ F50_base_aggregator() {
   P02_LOG="p02_firmware_bin_file_check.txt"
   P70_LOG="p70_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
-  S11_LOG="s11_weak_func_check.txt"
   S12_LOG="s12_binary_protection.txt"
+  S13_LOG="s13_weak_func_check.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
@@ -87,11 +87,12 @@ output_overview() {
     else
       print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
     fi
+    write_link "p99"
     echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
   elif [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
-      write_link "p07"
+      write_link "p99"
       echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
       echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
     fi
@@ -336,14 +337,14 @@ output_binaries() {
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
     print_output ""
-    write_link "s11"
+    write_link "s13"
     echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
 
   local DATA=0
 
-  if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s11_weak_func_check/" ]] ; then
-    if [[ "$(find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_*.txt" | wc -l)" -gt 0 ]]; then
+  if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s13_weak_func_check/" ]] ; then
+    if [[ "$(find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_*.txt" | wc -l)" -gt 0 ]]; then
 
       # color codes for printf
       RED_="$(tput setaf 1)"
@@ -351,14 +352,14 @@ output_binaries() {
       ORANGE_="$(tput setaf 3)"
       NC_="$(tput sgr0)"
 
-      readarray -t RESULTS_STRCPY < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
-      readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR""/s11_weak_func_check/" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS_STRCPY < <( find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
 
       #strcpy:
       if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
         print_output ""
         print_output "[+] STRCPY - top 10 results:"
-        write_link "s11#strcpysummary"
+        write_link "s13#strcpysummary"
         DATA=1
         for LINE in "${RESULTS_STRCPY[@]}" ; do
           binary_fct_output "$LINE"
@@ -371,7 +372,7 @@ output_binaries() {
       if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
         print_output ""
         print_output "[+] SYSTEM - top 10 results:"
-        write_link "s11#strcpysummary"
+        write_link "s13#strcpysummary"
         DATA=1
         for LINE in "${RESULTS_SYSTEM[@]}" ; do
           binary_fct_output "$LINE"
@@ -500,9 +501,9 @@ get_data() {
     FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f | wc -l)
     DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d | wc -l)
   fi
-  if [[ -f "$LOG_DIR"/"$S11_LOG" ]]; then
-    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S11_LOG" | cut -d: -f2)
-    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S11_LOG" | cut -d: -f2)
+  if [[ -f "$LOG_DIR"/"$S13_LOG" ]]; then
+    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)

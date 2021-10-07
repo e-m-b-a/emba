@@ -22,7 +22,7 @@ import_helper()
 {
   local HELPERS
   local HELPER_COUNT
-  mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "*.sh" -print0 2> /dev/null)
+  mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for HELPER_FILE in "${HELPERS[@]}" ; do
     if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090

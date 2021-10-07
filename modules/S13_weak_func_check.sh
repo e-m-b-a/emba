@@ -17,10 +17,18 @@
 #               functions and to establish a ranking of areas to look at first.
 #               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg). 
 
-S11_weak_func_check()
+S13_weak_func_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries for weak functions (intense)"
+
+  # This module waits for S12 - binary protections
+  # check emba.log for S12_binary_protection starting
+  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+    while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+      sleep 1
+    done
+  fi
 
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
@@ -118,6 +126,7 @@ function_check_PPC32(){
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
         log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           if [[ "$E" == *"$FUNCTION"* ]]; then
@@ -156,6 +165,7 @@ function_check_MIPS32() {
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
         log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           if [[ "$E" == *"$FUNCTION"* ]]; then
@@ -191,6 +201,7 @@ function_check_ARM64() {
     fi
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening
       log_func_header
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         if [[ "$E" == *"$FUNCTION"* ]]; then
@@ -226,6 +237,7 @@ function_check_ARM32() {
     fi
     if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening
       log_func_header
       for E in "${OBJ_DUMPS_ARR[@]}" ; do
         if [[ "$E" == *"$FUNCTION"* ]]; then
@@ -261,6 +273,7 @@ function_check_x86() {
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
         log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           if [[ "$E" == *"$FUNCTION"* ]]; then
@@ -296,6 +309,7 @@ function_check_x86_64() {
       fi
       if [[ "$OBJ_DUMPS_OUT" != *"file format not recognized"* && "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
         FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+        log_bin_hardening
         log_func_header
         for E in "${OBJ_DUMPS_ARR[@]}" ; do
           if [[ "$E" == *"$FUNCTION"* ]]; then
@@ -353,6 +367,20 @@ print_top10_statistics() {
     #print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
+} 
+
+log_bin_hardening() {
+  if [[ -f "$LOG_DIR"/s12_binary_protection.txt ]]; then
+    write_log "[*] Binary protection state of $ORANGE$NAME$NC" "$FUNC_LOG"
+    write_log "" "$FUNC_LOG"
+    # get headline:
+    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u)
+    write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
+    # get binary entry
+    BIN_PROT=$(grep "$NAME" "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u)
+    write_log "  $BIN_PROT" "$FUNC_LOG"
+    write_log "" "$FUNC_LOG"
+  fi
 }
 
 log_func_header() {
@@ -369,7 +397,7 @@ log_func_footer() {
 
 output_function_details()
 {
-  write_s11_log()
+  write_s13_log()
   {
     OLD_LOG_FILE="$LOG_FILE"
     LOG_FILE="$3"
@@ -411,7 +439,7 @@ output_function_details()
     else
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
     fi
-    write_s11_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
+    write_s13_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
   fi
 
   

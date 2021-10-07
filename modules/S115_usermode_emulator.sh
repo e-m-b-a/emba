@@ -382,7 +382,7 @@ prepare_emulator() {
     fi
 
     print_output "[*] Final fixes of the root filesytem in a chroot environment"
-    cp ./config/fixImage_user_mode_emulation.sh "$R_PATH"/
+    cp ./helpers/fixImage_user_mode_emulation.sh "$R_PATH"/
     chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
     cp "$(which busybox)" "$R_PATH"/
     chmod +x "$R_PATH"/busybox
