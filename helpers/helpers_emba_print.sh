@@ -35,18 +35,12 @@ GREP_LOG_LINEBREAK=" || "
 MESSAGE_TYPE=""
 OLD_MESSAGE_TYPE=""
 
-warning()
-{
-  echo -e "\\n""$RED""$BOLD""Warning:""$NC""$RED"" Emba is in an early alpha state - use it on your own risk.""$NC"
-}
-
 welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
   echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            e m b a                            ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""║                   EMBEDDED FIRMWARE ANALYZER                  ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""╚═══════════════════════════════════════════════════════════════╝""$NC"
-  warning
 }
 
 module_log_init()
@@ -406,7 +400,7 @@ print_help()
   ## help and command line parsing
 
   echo -e "\\n""$CYAN""USAGE""$NC"
-  echo -e "\\nTest firmware / live system"
+  echo -e "\\nTest firmware"
   echo -e "$CYAN""-a [MIPS]""$NC""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]"
   echo -e "$CYAN""-A [MIPS]""$NC""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)"
   echo -e "$CYAN""-l [./path]""$NC""       Log path"
@@ -418,7 +412,8 @@ print_help()
   echo -e "$CYAN""-g""$NC""                Create grep-able log file in [log_path]/fw_grep.log"
   echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
   echo -e "$CYAN""-E""$NC""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
-  echo -e "$CYAN""-D""$NC""                Runs emba in docker container"
+  echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
+  echo -e "$CYAN""-D""$NC""                Developer mode - EMBA runs on the host without container protection"
   echo -e "$CYAN""-i""$NC""                Ignores log path check"
   echo -e "$CYAN""-p [PROFILE]""$NC""      Emba starts with a pre-defined profile (stored in ./scan-profiles)"
   echo -e "\\nWeb reporter"
@@ -431,7 +426,7 @@ print_help()
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
   echo -e "$CYAN""-o""$NC""                Activate online checks (e.g. upload and test with VirusTotal)"
-  echo -e "$CYAN""-r""$NC""                Remove temprorary firmware directory after testing"
+  echo -e "$CYAN""-r""$NC""                Remove temporary firmware directory after testing"
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"
@@ -443,7 +438,6 @@ print_help()
   echo -e "\\nHelp"
   echo -e "$CYAN""-h""$NC""                Prints this help message"
 
-  warning
 }
 
 print_firmware_info()

@@ -7,3 +7,5 @@ documentation
 CONTRIBUTING.md
 LICENSE
 README.md
+log*
+check_project.sh

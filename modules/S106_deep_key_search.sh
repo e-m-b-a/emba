@@ -78,7 +78,7 @@ deep_key_searcher() {
       # we have to write the file link manually, because threading is messing with the file (wrong order of entries and such awful stuff)
       OLD_LOG_FILE="$LOG_FILE"
       LOG_FILE="$LOG_PATH_MODULE""/deep_key_search_tmp_""$(basename "$DEEP_S_FILE")"".txt"
-      print_output "[+] ""$DEEP_S_FILE" 
+      print_output "[+] $(print_path "$DEEP_S_FILE")"
       write_link "$LOG_PATH_MODULE""/deep_key_search_""$(basename "$DEEP_S_FILE")"".txt"
       print_output "$D_S_FINDINGS" 
       cat "$LOG_FILE" >> "$OLD_LOG_FILE"

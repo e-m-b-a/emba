@@ -61,7 +61,7 @@ a.s {
   padding-right:18px!important;
 }
 
-a.r {
+a.l {
   background:linear-gradient(270deg,#99079e 10px,rgba(0,0,0,0) 0px);
   padding-right:18px!important;
 }
@@ -69,6 +69,10 @@ a.r {
 a.f {
   background:linear-gradient(270deg,#CC410B 10px,rgba(0,0,0,0) 0px);
   padding-right:18px !important;
+}
+
+a pre:hover {
+  background-color: rgb(104, 104, 104);
 }
 
 pre hr {

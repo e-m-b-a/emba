@@ -98,11 +98,20 @@ set_exclude()
 architecture_check()
 {
   if [[ $ARCH_CHECK -eq 1 ]] ; then
-    print_output "[*] Architecture auto detection (could take some time)\\n" "no_log"
+    print_output "[*] Architecture auto detection (could take some time)\\n"
     local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
+    local D_END_LE=0 D_END_BE=0
+
     # we use the binaries array which is already unique
     for D_ARCH in "${BINARIES[@]}" ; do
       D_ARCH=$(file "$D_ARCH")
+
+      if [[ "$D_ARCH" == *"MSB"* ]] ; then
+        D_END_BE=$((D_END_BE+1))
+      elif [[ "$D_ARCH" == *"LSB"* ]] ; then
+        D_END_LE=$((D_END_LE+1))
+      fi
+
       if [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
         continue
@@ -122,12 +131,12 @@ architecture_check()
     done
 
     if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC)) -gt 0 ]] ; then
-      print_output "$(indent "$(orange "Architecture  Count")")" "no_log"
-      if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" "no_log" ; fi
-      if [[ $ARCH_ARM -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""$ARCH_ARM")")" "no_log" ; fi
-      if [[ $ARCH_X64 -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""$ARCH_X64")")" "no_log" ; fi
-      if [[ $ARCH_X86 -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""$ARCH_X86")")" "no_log" ; fi
-      if [[ $ARCH_PPC -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""$ARCH_PPC")")" "no_log" ; fi
+      print_output "$(indent "$(orange "Architecture  Count")")"
+      if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" ; fi
+      if [[ $ARCH_ARM -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""$ARCH_ARM")")" ; fi
+      if [[ $ARCH_X64 -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""$ARCH_X64")")" ; fi
+      if [[ $ARCH_X86 -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""$ARCH_X86")")" ; fi
+      if [[ $ARCH_PPC -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""$ARCH_PPC")")" ; fi
       if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] ; then
         D_ARCH="MIPS"
       elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] ; then
@@ -139,33 +148,57 @@ architecture_check()
       elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
         D_ARCH="PPC"
       fi
-      print_output "" "no_log"
-      print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n" "no_log"
+
+      if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
+        print_output ""
+        print_output "$(indent "$(orange "Endianness  Count")")"
+        if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" ; fi
+        if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" ; fi
+      fi
+
+      if [[ $D_END_LE -gt $D_END_BE ]] ; then
+        D_END="EL"
+      elif [[ $D_END_BE -gt $D_END_LE ]] ; then
+        D_END="EB"
+      else
+        D_END="NA"
+      fi
+
+      print_output ""
+
+      if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
+        print_output "$(indent "Detected architecture and endianness of the firmware: ""$ORANGE""$D_ARCH"" / ""$D_END""$NC")""\\n"
+        export D_END
+      else
+        print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n"
+      fi
+
       if [[ -n "$ARCH" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
-          print_output "[!] Your set architecture (""$ARCH"") is different from the automatically detected one. The set architecture will be used." "no_log"
+          print_output "[!] Your set architecture (""$ARCH"") is different from the automatically detected one. The set architecture will be used."
         fi
       else
-        print_output "[*] No architecture was enforced, so the automatically detected one is used." "no_log"
+        print_output "[*] No architecture was enforced, so the automatically detected one is used."
         ARCH="$D_ARCH"
         export ARCH
       fi
     else
-      print_output "$(indent "$(red "No architecture in firmware found")")" "no_log"
+      print_output "$(indent "$(red "No architecture in firmware found")")"
       if [[ -n "$ARCH" ]] ; then
-        print_output "[*] Your set architecture (""$ARCH"") will be used." "no_log"
+        print_output "[*] Your set architecture (""$ARCH"") will be used."
       else
-        print_output "[!] Since no architecture could be detected, you have to set one." "no_log"
+        print_output "[!] Since no architecture could be detected, you have to set one."
         print_help
         exit 1
       fi
     fi
+
   else
-    print_output "[*] Architecture auto detection disabled\\n" "no_log"
+    print_output "[*] Architecture auto detection disabled\\n"
     if [[ -n "$ARCH" ]] ; then
-      print_output "[*] Your set architecture (""$ARCH"") will be used." "no_log"
+      print_output "[*] Your set architecture (""$ARCH"") will be used."
     else
-      print_output "[!] Since no architecture could be detected, you have to set one." "no_log"
+      print_output "[!] Since no architecture could be detected, you have to set one."
       print_help
       exit 1
     fi
@@ -175,7 +208,7 @@ architecture_check()
 prepare_file_arr()
 {
   echo ""
-  print_output "[*] Unique files auto detection (could take some time)\\n" "main"
+  print_output "[*] Unique files auto detection (could take some time)\\n"
 
   export FILE_ARR
   readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
@@ -184,7 +217,7 @@ prepare_file_arr()
     readarray -t FILE_ARR < <(find "$OUTPUT_DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     FILE_ARR+=( "$FIRMWARE_PATH" )
   fi
-  print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files." "main"
+  print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files."
 
   # xdev will do the trick for us:
   # remove ./proc/* executables (for live testing)
@@ -194,7 +227,7 @@ prepare_file_arr()
 prepare_binary_arr()
 {
   echo ""
-  print_output "[*] Unique binary auto detection (could take some time)\\n" "main"
+  print_output "[*] Unique binary auto detection (could take some time)\\n"
 
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
@@ -213,7 +246,7 @@ prepare_binary_arr()
       fi
     done
   fi
-  print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables." "main"
+  print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables."
 
   # remove ./proc/* executables (for live testing)
   #rm_proc_binary "${BINARIES[@]}"
@@ -257,7 +290,9 @@ check_firmware()
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
     echo
-    print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?" "no_log"
+    print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?"
+  else
+    print_output "[+] Your firmware looks like a regular Linux system."
   fi
 }
 
@@ -325,6 +360,6 @@ generate_msf_db() {
   if [[ $IN_DOCKER -eq 1 ]]; then
     export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
   fi
-  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' > "$MSF_DB_PATH"
+  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' | sort > "$MSF_DB_PATH"
 }
 

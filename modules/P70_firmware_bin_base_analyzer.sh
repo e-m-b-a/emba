@@ -62,7 +62,7 @@ os_identification() {
   sub_module_title "OS detection"
 
   print_output "[*] Initial OS detection running ..." | tr -d "\n"
-  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC")
+  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443")
   echo "." | tr -d "\n"
   declare -A OS_COUNTER=()
   local COUNTER
@@ -76,37 +76,52 @@ os_identification() {
   print_output "$(indent "$(orange "Operating system detection:")")"
 
   for OS in "${OS_SEARCHER[@]}"; do
+    DETECTED=0
     OS_COUNTER[$OS]=0
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null)"))
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
-    #if [[ -f "$LOG_DIR"/p20_binwalker_deep.txt ]]; then
-    #  OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_binwalker*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
-    #fi
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS")" ))
 
     if [[ $OS == "VxWorks\|Wind" ]]; then
       OS_COUNTER_VxWorks="${OS_COUNTER[$OS]}"
     fi
+    if [[ $OS == *"CPU "* || $OS == "ADONIS" || $OS == "CP443" ]]; then
+      OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "Original Siemens Equipment")" ))
+    fi
 
     if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  ${#ROOT_PATH[@]} -gt 1 ]] ; then 
-      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified Linux operating system detected")")"
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  $LINUX_PATH_COUNTER -gt 2 ]] ; then 
-      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified Linux operating system detected")")"
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
-      print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     fi
 
     if [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
-      print_output "$(indent "$(green "$OS detected\t\t""${OS_COUNTER[$OS]}""\t-\tverified SIPROTEC system detected")")";
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified SIPROTEC system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     elif [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
-      print_output "$(indent "$(orange "SIPROTEC detected\t\t""${OS_COUNTER[$OS]}")")";
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "SIPROTEC detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
+    fi
+    if [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified S7-CP443 system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
+    elif [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
+      printf "${ORANGE}\t%-20.20x\t:\t%-15s${NC}\n" "S7-CP443 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      DETECTED=1
     fi
 
     if [[ ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
       if [[ $OS == "VxWorks\|Wind" ]]; then
-        print_output "$(indent "$(orange "VxWorks detected\t\t""${OS_COUNTER[$OS]}")")"
-      else
-        print_output "$(indent "$(orange "$OS detected\t\t""${OS_COUNTER[$OS]}")")"
+        printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "VxWorks detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      elif [[ $OS == "CPU\ [34][12][0-9]-[0-9]" ]]; then
+        printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "S7-CPU400 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      elif [[ $DETECTED -eq 0 ]]; then
+        printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       fi
     fi
     COUNTER=$(("$COUNTER"+"${OS_COUNTER[$OS]}"))
@@ -119,8 +134,15 @@ binary_architecture_detection()
   sub_module_title "Architecture detection"
   print_output "[*] Architecture detection running on ""$FIRMWARE_PATH"
 
-  mapfile -t PRE_ARCH < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | awk '{print $3}' | sort -u)
-  for PRE_ARCH_ in "${PRE_ARCH[@]}"; do
+  # as Thumb is usually false positive we remove it from the results
+  mapfile -t PRE_ARCH_Y < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | grep -v "Thumb" | awk '{print $3}' | sort -u)
+  mapfile -t PRE_ARCH_A < <(binwalk -A "$FIRMWARE_PATH" | grep "\ instructions," | awk '{print $3}' | uniq -c | sort -n | tail -1 | awk '{print $2}')
+  for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
+    print_output ""
+    print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
+    echo "$PRE_ARCH_" >> "$TMP_DIR"/p70.tmp
+  done
+  for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
     print_output ""
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/p70.tmp

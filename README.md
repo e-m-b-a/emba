@@ -23,55 +23,61 @@ Author(s): Michael Messner, Pascal Eckmann
   <a href="https://github.com/e-m-b-a/emba/graphs/contributors"><img src="https://img.shields.io/github/contributors/e-m-b-a/emba?color=9ea"></a>
   <a href="https://github.com/e-m-b-a/emba/stargazers"><img src="https://img.shields.io/github/stars/e-m-b-a/emba?label=Stars"></a>
   <a href="https://github.com/e-m-b-a/emba/network/members"><img src="https://img.shields.io/github/forks/e-m-b-a/emba?label=Forks"></a>
+  <a href="https://hub.docker.com/r/embeddedanalyzer/emba"><img src="https://img.shields.io/docker/pulls/embeddedanalyzer/emba"></a>
 </p>
 
 # EMBA
 ## The security analyzer for embedded device firmware
 
-*EMBA* is designed to help penetration testers in analyzing firmware for security vulnerabilities. During such a firmware analysis numerous tools are used, e.g. binwalk, cve-search or yara [(and many others)](https://github.com/e-m-b-a/emba/wiki/Installation#dependencies).
+*EMBA* is designed as the central firmware analysis tool. It supports the complete security analysis process starting with the *firmware extraction* process, doing *static analysis* and *dynamic analysis* via emulation and finally generating a report. *EMBA* automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts or hard-coded passwords. *EMBA* is a command line tool with the option to generate an easy to use web report for further analysis.
 
-*EMBA* combines these tools under its hood and can be started with one simple command. Afterwards it tests the firmware for possible security risks and interesting areas for further investigation. If the firmware has not yet been extracted, this is done automatically by *EMBA*. No cumbersome installation of all helpers, once the installation script has been executed, you are ready to test your firmware. One of the most important aspects of development is that *EMBA* is easy to use and easy to set up at all times.
+*EMBA* combines multiple established analysis tools and can be started with one simple command. Afterwards it tests the firmware for possible security risks and interesting areas for further investigation. No manual installation of all helpers, once the integrated installation script has been executed, you are ready to test your firmware.
 
 *EMBA* is designed to assist penetration testers and not as a standalone tool without human interaction. *EMBA* should provide as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
 
 ----------------------
 
-#### Links to the wiki (more detailed information)
+#### Links to the wiki for more detailed information
 
 - [Home](https://github.com/e-m-b-a/emba/wiki)
 - [Feature overview](https://github.com/e-m-b-a/emba/wiki/Feature-overview)
-- [FAQ](https://github.com/e-m-b-a/emba/wiki/FAQ)
 - [Installation](https://github.com/e-m-b-a/emba/wiki/Installation)
 - [Usage](https://github.com/e-m-b-a/emba/wiki/Usage)
-- [Development](https://github.com/e-m-b-a/emba/wiki/Development)
+- [FAQ](https://github.com/e-m-b-a/emba/wiki/FAQ)
 
 ## Installation
 
 Before running *EMBA* make sure, that you have [installed](https://github.com/e-m-b-a/emba/wiki/Installation) all dependencies with the installation script and met the [prerequisites](https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites)
 
+```console
+git clone https://github.com/e-m-b-a/emba.git
+cd emba
+sudo ./installer.sh -d
+```
+
 ## Usage
 
----
-### Classic:
-```console
-./emba.sh -l ./log -f ./firmware
-``` 
-
 ---   
-### Docker:
+### Classic (Docker mode):
 ```console
-sudo ./emba.sh -l ./log -f /firmware -D
+sudo ./emba.sh -l ./log -f /firmware
 ```
 
 ---   
 ### Profile support:
 ```console
-sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan-docker.emba
+sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 
 ```
+---
+### Developer mode (WARNING: EMBA runs on your host and could harm your host!):
+```console
+./emba.sh -l ./log -f ./firmware -D
+```
+*WARNING: Before using the developer mode you need a full installation of emba with `sudo ./installer.sh -F`. This installation mode needs more than 14gig of disk space.*
 
 ---
-*EMBA* supports multiple [arguments](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
+*EMBA* supports multiple testing and reporting [options](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
 
 ## Get involved
 The IoT is growing, the development is ongoing, and there are many new features that we want to add.

@@ -23,7 +23,7 @@ P03_firmware_virustotal_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware VirusTotal analyzer"
 
-  if [[ -f "$VT_API_KEY_FILE" && "$ONLINE_CHECKS" -eq 1 ]]; then
+  if [[ -f "$VT_API_KEY_FILE" && "$ONLINE_CHECKS" -eq 1 && -f "$FIRMWARE_PATH" ]]; then
     VT_API_KEY=$(cat "$VT_API_KEY_FILE")
     # upload our firmware file to VT:
     print_output "[*] Upload to VirusTotal in progress ..."

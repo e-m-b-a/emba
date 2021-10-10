@@ -26,59 +26,91 @@ S120_cwe_checker()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries with cwe-checker"
 
-  # currently disabling in docker mode
-  if [[ $CWE_CHECKER -eq 1 && $IN_DOCKER -eq 0 ]] ; then
+  if [[ $CWE_CHECKER -eq 1 ]] ; then
     cwe_check
-    final_cwe_log "$TOTAL_CWE_CNT"
+
+    CWE_CNT_=0
+    if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
+      while read -r COUNTING; do
+        (( CWE_CNT_="$CWE_CNT_"+"$COUNTING" ))
+      done < "$TMP_DIR"/CWE_CNT.tmp
+    fi
+
+    final_cwe_log "$CWE_CNT_"
 
     write_log ""
-    write_log "[*] Statistics:$TOTAL_CWE_CNT"
+    write_log "[*] Statistics:$CWE_CNT_"
   else
     print_output "[!] Check with cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${#CWE_OUT[@]}"
+  module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
 }
 
 cwe_check() {
   TOTAL_CWE_CNT=0
 
+  export PATH=$EXT_DIR/cwe_checker/bin:$PATH # needed for docker setup
+
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
-      NAME=$(basename "$LINE")
-      LINE=$(readlink -f "$LINE")
-      print_output "[*] Testing $LINE"
-      readarray -t TEST_OUTPUT < <( docker run --rm -v "$LINE":/tmp/input fkiecad/cwe_checker /tmp/input | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log )
-      if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then
-        print_output "[*] ""$(print_path "$LINE")"
-      fi
-      for ENTRY in "${TEST_OUTPUT[@]}" ; do
-        if [[ -n "$ENTRY" ]] ; then
-          if ! [[ "$ENTRY" == *"ERROR:"* || "$ENTRY" == *"DEBUG:"* || "$ENTRY" == *"INFO:"* ]] ; then
-            print_output "$(indent "$ENTRY")"
-          fi
+      if [[ "$THREADED" -eq 1 ]]; then
+        MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo)"))
+        if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+          MAX_THREADS_S120=1
         fi
-      done
 
-      mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
-
-      # this is the logging after every tested file
-      if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
-        print_output ""
-        print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":"
-        for CWE_LINE in "${CWE_OUT[@]}"; do
-          CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
-          CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-          CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null)"
-          (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
-          print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
-        done
-        print_output ""
+        cwe_checker_threaded &
+        WAIT_PIDS_S120+=( "$!" )
+        max_pids_protection "$MAX_THREADS_S120" "${WAIT_PIDS_S120[@]}"
+      else
+        cwe_checker_threaded
       fi
-      if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then echo ; fi
     fi
   done
+
+  if [[ $THREADED -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_S120[@]}"
+  fi
+}
+
+cwe_checker_threaded () {
+  NAME=$(basename "$LINE")
+  OLD_LOG_FILE="$LOG_FILE"
+  LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
+  LINE=$(readlink -f "$LINE")
+  readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log )
+  print_output "[*] Tested ""$(print_path "$LINE")"
+  for ENTRY in "${TEST_OUTPUT[@]}" ; do
+    if [[ -n "$ENTRY" ]] ; then
+      if ! [[ "$ENTRY" == *"ERROR:"* || "$ENTRY" == *"DEBUG:"* || "$ENTRY" == *"INFO:"* ]] ; then
+        print_output "$(indent "$ENTRY")"
+      fi
+    fi
+  done
+  mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+  # this is the logging after every tested file
+  if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
+    print_output ""
+    print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".log
+    for CWE_LINE in "${CWE_OUT[@]}"; do
+      CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
+      CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
+      CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null)"
+      echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
+      # (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
+      print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
+    done
+    print_output ""
+  else
+    print_output ""
+    print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
+  fi
+  if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_output "" ; fi
+  cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+  rm "$LOG_FILE" 2> /dev/null
+  LOG_FILE="$OLD_LOG_FILE"
 }
 
 final_cwe_log() {
