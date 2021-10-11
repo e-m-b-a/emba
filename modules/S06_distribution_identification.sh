@@ -62,8 +62,11 @@ dlink_image_sign() {
   # the firmware version can be found in /config/buildver
   mapfile -t DLINK_BUILDVER < <(find "$FIRMWARE_PATH" -path "*config/buildver")
   for DLINK_BVER in "${DLINK_BUILDVER[@]}"; do
-    DLINK_FW_VER=$(grep -E "^[0-9]+\.[0-9]+" "$DLINK_BVER")
-    # -> 2.14
+    DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "$DLINK_BVER")
+    if ! [[ "$DLINK_FW_VER" =~ ^v.* ]]; then
+      DLINK_FW_VER="v$DLINK_FW_VER"
+    fi
+    # -> v2.14
   done
 
   # probably we can use this in the future. Currently there is no need for it:
@@ -72,11 +75,11 @@ dlink_image_sign() {
     DLINK_FW_VERx=$(grep -E "^[A-Z][0-9]+" "$DLINK_BREV")
     # -> B01
     DLINK_FW_VER="$DLINK_FW_VER""$DLINK_FW_VERx"
-    # -> 2.14B01
+    # -> v2.14B01
   done
 
   if [[ -n "$DLINK_FW_VER" ]]; then
-    IDENTIFIER="D-Link $IDENTIFIER"" v$DLINK_FW_VER"
+    IDENTIFIER="D-Link $IDENTIFIER"" $DLINK_FW_VER"
     # -> D-Link dir-300 v2.14B01
   fi
 }
