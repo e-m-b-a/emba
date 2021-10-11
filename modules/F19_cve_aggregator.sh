@@ -34,7 +34,7 @@ F19_cve_aggregator() {
   CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
   FW_VER_CHECK_LOG="s09_firmware_base_version_check.txt"
 
-  S05_LOG="s05_firmware_details.txt"
+  S06_LOG="s06_distribution_identification.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
   EMUL_LOG="s115_usermode_emulator.txt"
   SYS_EMUL_LOG="l15_emulated_checks_init.txt"
@@ -487,8 +487,6 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//loadkeys\ from\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//kbd_mode\ from\ kbd/kbd-project:kbd}"
-    # dir-300_firmware_2.14B01
-    VERSION_lower="${VERSION_lower//_firmware_/_firmware:}"
     #dpkg-ABC -> dpkg
     VERSION_lower="${VERSION_lower//dpkg-divert/debian:dpkg}"
     VERSION_lower="${VERSION_lower//dpkg-split/debian:dpkg}"
@@ -524,8 +522,25 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ralink\ dot1x\ daemon\ \=\ /ralink-dot1x\ }"
     #his\ is\ WiFiDog\ 
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
-    # letz try to handle something like 1p2 -> 1:p2
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
+
+    ### handle versions of linux distributions:
+    # Debian 9 (stretch) - installer build 20170615+deb9u5
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(debian)\ [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
+    # Fedora 17 (Beefy Miracle)
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(fedora)\ ([0-9]+).*/\1project:\1:\2/')"
+    # OpenWRT KAMIKAZE r18* -> 8.09.2
+    # see also: https://openwrt.org/about/history
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(openwrt)\ (kamikaze)\ r1[4-8][0-9][0-9][0-9].*/\1:\2:8.09/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(openwrt)\ (backfire)\ r2[0-9][0-9][0-9][0-9].*/\1:\2:10.03/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(openwrt)\ (lede)\ r3[2-9][0-9][0-9].*/\1:\2:17.01/')"
+    # d-link dir-300 2.14b01
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/d-link\ (.*)\ ([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/d-link\ (.*)\ ([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
+
+    if ! [[ "$VERSION_lower" == "dlink"* ]]; then
+      # letz try to handle something like 1p2 -> 1:p2
+      VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
+    fi
 
     # final cleanup of start and ending
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
@@ -561,10 +576,10 @@ aggregate_versions() {
 
   # initial output - probably we will remove it in the future
   # currently it is very helpful
-  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S05_FW_DETAILS[@]} -gt 0 ]]; then
+  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
-    for VERSION in "${VERSIONS_S05_FW_DETAILS[@]}"; do
+    for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
       print_output "[+] Found Version details (firmware details check): ""$VERSION"
     done
     for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
@@ -584,7 +599,7 @@ aggregate_versions() {
     done
 
     print_output ""
-    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S05_FW_DETAILS[@]}")
+    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}")
     for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
       # remove color codes:
       VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
@@ -680,6 +695,13 @@ cve_db_lookup() {
 
   # CVE search:
   $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+
+  if [[ "$VERSION_SEARCH" == *"dlink"* ]]; then
+    # dlink extrawurst: dlink vs d-link
+    VERSION_SEARCHx="$(echo "$VERSION_SEARCH" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
+    print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCHx${NC}" "" "f19#cve_$VERSION_BINARY"
+    $PATH_CVE_SEARCH -p "$VERSION_SEARCHx" >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+  fi
 
   AGG_LOG_FILE="$VERSION_PATH".txt
   if [[ "$THREADED" -eq 1 ]]; then
@@ -937,7 +959,7 @@ final_outputter() {
         # shellcheck disable=SC2001
         VERSION=$(echo "$VERSION" | sed -e 's/^\ //')
         # shellcheck disable=SC2001
-        BIN=$(echo "$BIN" | sed -e 's/^\ //')
+        BIN=$(echo "$BIN" | sed -e 's/^\ //' | sed -e 's/firmware//')
         (( F_COUNTER++ ))
       done
   
@@ -998,8 +1020,8 @@ get_systemmode_emulator() {
 }
 
 get_firmware_details() {
-  print_output "[*] Collect version details of module s05_firmware_details."
-  if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
-    readarray -t VERSIONS_S05_FW_DETAILS < <(grep "Version information found" "$LOG_DIR"/"$S05_LOG" | cut -d\  -f5- | sort -u)
+  print_output "[*] Collect version details of module s06_distribution_identification."
+  if [[ -f "$LOG_DIR"/"$S06_LOG" ]]; then
+    readarray -t VERSIONS_S06_FW_DETAILS < <(grep "Version information found" "$LOG_DIR"/"$S06_LOG" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u)
   fi
 }
