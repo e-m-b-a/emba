@@ -237,6 +237,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//-\ sdp\ tool/}"
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
+    #iproute2-ss040823 -> iproute2-2_6_8-040823
+    VERSION_lower="$(echo "$VERSION_lower" |sed -r 's/iproute2-ss(040823)/iproute2\ 2\.6\.8\-\1/')"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
     #nettle-hash\ (nettle\ -> nettle
     VERSION_lower="${VERSION_lower//nettle-hash\ ./}"
