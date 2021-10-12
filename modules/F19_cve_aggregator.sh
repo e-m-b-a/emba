@@ -962,6 +962,9 @@ final_outputter() {
         VERSION=$(echo "$VERSION" | sed -e 's/^\ //')
         # shellcheck disable=SC2001
         BIN=$(echo "$BIN" | sed -e 's/^\ //' | sed -e 's/firmware//')
+        if [[ "$BIN" == *"debian debian"* ]]; then
+          BIN=$(echo "$BIN" | sed -e 's/debian\ debian/debian/')
+        fi
         (( F_COUNTER++ ))
       done
   
