@@ -524,8 +524,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
 
     ### handle versions of linux distributions:
-    # Debian 9 (stretch) - installer build 20170615+deb9u5
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(debian)\ [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
+    # debian 9 (stretch) - installer build 20170615+deb9u5
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
     # Fedora 17 (Beefy Miracle)
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(fedora)\ ([0-9]+).*/\1project:\1:\2/')"
     # Ubuntu
