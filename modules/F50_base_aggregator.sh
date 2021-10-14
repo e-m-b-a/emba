@@ -503,8 +503,8 @@ get_data() {
     mapfile -t LINUX_DISTRIS < <(grep "Version information found" "$LOG_DIR"/"$S06_LOG" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u )
   fi
   if ! [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
-    FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f | wc -l)
-    DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d | wc -l)
+    FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f 2>/dev/null| wc -l)
+    DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d 2>/dev/null | wc -l)
   fi
   if [[ -f "$LOG_DIR"/"$S13_LOG" ]]; then
     STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
