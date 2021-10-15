@@ -196,6 +196,9 @@ dependency_check()
     # pixd image
     check_dep_file "pixd image renderer" "$EXT_DIR""/pixd_png.py"
 
+    # progpilot for php code checks
+    check_dep_file "progpilot php checker" "$EXT_DIR""/progpilot"
+
     # CVE and CVSS databases
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
     check_dep_file "CVSS database" "$EXT_DIR""/allitemscvss.csv"
