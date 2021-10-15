@@ -185,7 +185,7 @@ dependency_check()
     check_dep_tool "binwalk"
     if command -v binwalk > /dev/null ; then
       BINWALK_VER=$(binwalk 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//')
-      if ! [ $(version $BINWALK_VER) -ge $(version "2.3.3") ]; then
+      if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
         echo -e "$RED""    binwalk version - not ok""$NC"
         echo -e "$RED""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
         DEP_ERROR=1
