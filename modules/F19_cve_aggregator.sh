@@ -342,6 +342,7 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/wpa_supplicant\ v([0-9]+\.[0-9]+)-devel/wpa_supplicant\ \1/g')"
     #iw* Wireless-Tools version 29
     VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
+    VERSION_lower="${VERSION_lower/iwconfig\ wireless_tools/wireless_tools}"
     # apt-Version 1.2.3
     VERSION_lower="${VERSION_lower//apt-/apt\ }"
     # remove the v in something like this: "space v[number]"
@@ -577,7 +578,7 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\.$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\]$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/[)$]//')"
-    print_output "$VERSION_lower"
+    #print_output "$VERSION_lower"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
@@ -586,9 +587,9 @@ prepare_version_data() {
 
     # now we should have the name and the version in the first two coloumns:
     VERSION_lower="$(echo "$VERSION_lower" | cut -d\  -f1-2)"
+
     # check if we have some number in it ... without a number we have no version info and we can drop this entry ...
     if [[ $VERSION_lower =~ [0-9] ]]; then
-      #VERSIONS_CLEANED+=( "$VERSION_lower" )
       # for multi threading we have to go via a temp file
       echo "$VERSION_lower" >> "$LOG_PATH_MODULE"/versions.tmp
     fi
