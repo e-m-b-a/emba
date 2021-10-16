@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -30,7 +30,7 @@ S115_usermode_emulator() {
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
-    print_output "[!] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+    print_output "[*] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
     # some processes are running long and logging a lot
     # to protect the host we are going to kill them on a KILL_SIZE limit
@@ -70,6 +70,15 @@ S115_usermode_emulator() {
       BIN_EMU=()
 
       print_output "[*] Create unique binary array for $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
+
+      # this is a little check to ensure we get something usefull out of the emulation of the root path
+      # if we have too many errors we try all bins in the next root path, otherwise only unknown bins
+      # Here is a lot of room for future improvement. E.g. only try the failed bins in the next root path
+      FULL_FAIL_CNT=$(cat "$LOG_PATH_MODULE"/qemu_*.txt 2>/dev/null | grep -c "qemu-.*-static: Could not open")
+      if [[ "$FULL_FAIL_CNT" -gt "${#BINARIES[@]}" ]]; then
+        MD5_DONE_INT=()
+      fi
+
       for BINARY in "${BIN_EMU_TMP[@]}"; do
         # we emulate every binary only once. So calculate the checksum and store it for checking
         BIN_MD5_=$(md5sum "$R_PATH"/"$BINARY" | cut -d\  -f1)

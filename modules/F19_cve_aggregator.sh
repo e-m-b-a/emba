@@ -122,6 +122,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
     # smbd -> samba
     VERSION_lower="${VERSION_lower/smbd/samba}"
+    # jq-1.5 -> jq 1.5
+    VERSION_lower="${VERSION_lower/jq-/jq\ }"
     #Modern traceroute for Linux, version 2.1.0
     VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
     #signver - verify a detached PKCS7 signature - Version 3.26.2
@@ -291,6 +293,11 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//i2cdump/i2c-tools}"
     VERSION_lower="${VERSION_lower//i2cget/i2c-tools}"
     VERSION_lower="${VERSION_lower//i2cset/i2c-tools}"
+    # xfs_db -> xfsprogs
+    VERSION_lower="${VERSION_lower//xfs_db/xfsprogs}"
+    VERSION_lower="${VERSION_lower//xfs_growfs/xfsprogs}"
+    VERSION_lower="${VERSION_lower//xfs_repair/xfsprogs}"
+    VERSION_lower="${VERSION_lower//mkfs.xfs/xfsprogs}"
     #manxyz -> man-db
     VERSION_lower="${VERSION_lower//mandb/man-db}"
     VERSION_lower="${VERSION_lower//manpath/man-db}"
@@ -349,6 +356,15 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//dropbear\ /dropbear_ssh\ }"
     #3.0.10 - $Id: ez-ipupdate.c,v 1.44 (from binary 3322ip) found in qemu_3322ip.txt.
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]\.[0-9]+)\ -\ .*ez\-ipupdate\.c,v\ [0-9]\.[0-9][0-9]/ez-ipupdate \1/')"
+    # blockman 0.0.1.blockman build-20151021
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/blockman\ ([0-9]\.[0-9]\.[0-9]+)\.blockman\ .*/blockman \1/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/flowman\ ([0-9]\.[0-9]\.[0-9]+)\.flowman\ .*/flowman \1/')"
+    # ipset 6.30 protocol 6
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ipset\ ([0-9]\.[0-9]+)\ protocol\ [0-9]/ipset \1/')"
+    # ozker 0.0.2.ozker build-20151021
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ozker\ ([0-9]\.[0-9]\.[0-9])\.ozker\ .*/ozker \1/')"
+    # this is haserl 0.9.35 (http /haserl.sourceforge.net
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ haserl\ ([0-9]\.[0-9]\.[0-9]+)\ .*/haserl \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
     VERSION_lower="${VERSION_lower//\:\ ipv6\ neighbor\/router\ discovery\ userland\ tool/}"
     #"ucloud_v2\ ver\.[0-9][0-9][0-9]"
@@ -462,6 +478,9 @@ prepare_version_data() {
     #isc-dhclient-4.1-ESV-R8 -> isc:dhcp_client
     VERSION_lower="${VERSION_lower//isc-dhclient-/isc:dhcp_client\ }"
     VERSION_lower="${VERSION_lower//internet\ systems\ consortium\ dhcp\ client\ /isc:dhcp_client\ }"
+    # DHCP Client Daemon v.1.3.22-pl4 -> it is phystech dhcpcd
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/dhcp\ client\ daemon\ v\.([0-9]\.[0-9]\.[0-9]+)-(pl[0-9])/phystech:dhcpcd \1_\2/')"
+    VERSION_lower="${VERSION_lower//dhcp\ client\ daemon\ v\./phystech:dhcpcd\ }"
     #jq commandline json processor [5a49c82-dirty]
     #VERSION_lower="${VERSION_lower//jq\ commandline\ json\ processor\ \[/jq_project:jq\ }"
     #Squid\ Cache:\ Version\ [0-9]\.[0-9]\.[0-9]$"
@@ -556,7 +575,7 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\.$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\]$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/[)$]//')"
-    #print_output "$VERSION_lower"
+    print_output "$VERSION_lower"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
