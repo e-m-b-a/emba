@@ -770,8 +770,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
           ;;
         esac
-        cd "$HOME_PATH" || exit 1
       fi
+      cd "$HOME_PATH" || exit 1
     ;;
   esac
 fi
@@ -837,7 +837,7 @@ case ${ANSWER:0:1} in
     if ! [[ -d "external/iniscan" ]] ; then
       mkdir external/iniscan
     fi
-    download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
+    download_file "./extenal/iniscan/composer.phar" "https://getcomposer.org/installer" "./external/iniscan/composer.phar"
     php ./external/iniscan/composer.phar build --no-interaction
     php composer.phar global require psecio/iniscan --no-interaction
     cp -r "/root/.config/composer/vendor/." "./external/iniscan/"

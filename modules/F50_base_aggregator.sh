@@ -144,15 +144,17 @@ output_details() {
     echo "python_vulns;\"$S21_PY_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  if [[ "$S22_PHP_VULNS" -gt 0 ]] || [[ "$S22_PHP_INI_ISSUES" -gt 0 ]]; then
+  if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+    write_link "s22"
+    echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
+    echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
+  fi
+  if [[ "$S22_PHP_INI_ISSUES" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_INI_CONFIGS""$GREEN"" php configuratoin files.""$NC"
     write_link "s22"
-    # shellcheck disable=SC2129
-	  echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "php_ini_issues;\"$S22_PHP_INI_ISSUES\"" >> "$CSV_LOG_FILE"
     echo "php_ini_configs;\"$S22_PHP_INI_CONFIGS\"" >> "$CSV_LOG_FILE"
-    echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
