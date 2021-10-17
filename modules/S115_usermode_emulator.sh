@@ -205,13 +205,15 @@ version_detection() {
 }
 
 version_detection_thread() {
+  # BINARY used for strict mode
   BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
   STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
+
   VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT != "strict" ]]; then
-    readarray -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_*.txt | sort -u 2>/dev/null)
+    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_*.txt | sort -u 2>/dev/null)
   else
     if [[ -f "$LOG_PATH_MODULE"/qemu_"$BINARY".txt ]]; then
       VERSION_STRICT=$(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE"/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
@@ -234,15 +236,21 @@ version_detection_thread() {
       # if we have multiple detection of the same version details:
       if [ "$VERSION_DETECTED" != "$VERS_DET_OLD" ]; then
         VERS_DET_OLD="$VERSION_DETECTED"
+
+        # first field is the path of the qemu log file
         LOG_PATH="$(echo "$VERSION_DETECTED" | cut -d: -f1)"
+
         VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
 
-        mapfile -t BINARY_PATHS < <(grep -a "Emulating binary:" "$LOG_PATH" | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)
+        if [[ -n "$LOG_PATH" ]]; then
+          mapfile -t BINARY_PATHS < <(grep -a "Emulating binary:" "$LOG_PATH" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)
+        fi
 
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
           print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH$GREEN (emulation)." "" "$LOG_PATH"
           continue
         else
+          # binary path set in strict mode
           for BINARY_PATH in "${BINARY_PATHS[@]}"; do
             print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (emulation)." "" "$LOG_PATH"
           done

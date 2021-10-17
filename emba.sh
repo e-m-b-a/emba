@@ -552,6 +552,9 @@ main()
           print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
           print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
           print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
+          if [[ -f "$HTML_PATH"/index.html ]]; then
+            print_output "[*] Open the web-report with$ORANGE firefox $LOG_DIR/html-report/index.html$NC\\n" "main" 
+          fi
           exit
         fi
       else

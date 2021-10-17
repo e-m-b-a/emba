@@ -368,6 +368,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/ozker\ ([0-9]\.[0-9]\.[0-9])\.ozker\ .*/ozker \1/')"
     # this is haserl 0.9.35 (http /haserl.sourceforge.net
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/this\ is\ haserl\ ([0-9]\.[0-9]\.[0-9]+)\ .*/haserl \1/')"
+    # 1.00 Copyright by Nikki Chumakov -> rflow
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9]\.[0-9]+)\ copyright\ by\ nikki\ chumakov/rflow \1/')"
     #"ndisc6\:\ IPv6\ Neighbor\/Router\ Discovery\ userland\ tool\ [0-9]\.[0-9]\.[0-9]\ "
     VERSION_lower="${VERSION_lower//\:\ ipv6\ neighbor\/router\ discovery\ userland\ tool/}"
     #"ucloud_v2\ ver\.[0-9][0-9][0-9]"
@@ -509,6 +511,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//loadkeys\ von\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//loadkeys\ from\ kbd/kbd-project:kbd}"
     VERSION_lower="${VERSION_lower//kbd_mode\ from\ kbd/kbd-project:kbd}"
+    # LIBTIFF, Version 4.0.3 -> libtiff:libtiff:4.0.3
+    VERSION_lower="${VERSION_lower//libtiff,/libtiff:libtiff}"
     #dpkg-ABC -> dpkg
     VERSION_lower="${VERSION_lower//dpkg-divert/debian:dpkg}"
     VERSION_lower="${VERSION_lower//dpkg-split/debian:dpkg}"
@@ -526,6 +530,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ coreutils.*)/gnu:coreutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sharutils.*)/gnu:sharutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(xz\ utils.*)/xz-utils/')"
+    # inadyn 1.96-adv
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/inadyn\ ([0-9]\.[0-9]+).*/inadyn \1/')"
+    # Independent JPEG Group's CJPEG, version 6b  27-Mar-1998
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/independent\ jpeg\ group.s\ cjpeg\ ([0-9][a-z])\ .*/ijg:libjpeg \1/')"
     #zend engine 2.4.0 copyright (c) 1998-2014 zend technologies
     VERSION_lower="${VERSION_lower//zend\ engine/zend:engine}"
     #D-Bus Message Bus Daemon 1.6.8
@@ -560,6 +568,8 @@ prepare_version_data() {
     # d-link dir-300 2.14b01
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/d-link\ (.*)\ ([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/d-link\ (.*)\ ([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
+    # dd-wrt v24-sp2
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/dd-wrt\ ([0-9]+)-(sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
 
     if ! [[ "$VERSION_lower" == "dlink"* ]]; then
       # letz try to handle something like 1p2 -> 1:p2
@@ -578,7 +588,6 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\.$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\]$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/[)$]//')"
-    #print_output "$VERSION_lower"
 
     # sometimes we get "Linux kernel x.yz.ab -> remove the first part of it
     if [[ $VERSION_lower == *linux\ kernel* ]]; then
@@ -987,6 +996,10 @@ final_outputter() {
         if [[ "$BIN" == *"debian debian"* ]]; then
           BIN=$(echo "$BIN" | sed -e 's/debian\ debian/debian/')
         fi
+        if [[ "$BIN" == *"dd-wrt dd-wrt"* ]]; then
+          BIN=$(echo "$BIN" | sed -e 's/dd-wrt\ dd-wrt/dd-wrt/')
+        fi
+
         (( F_COUNTER++ ))
       done
   
@@ -1016,9 +1029,9 @@ get_firmware_base_version_check() {
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
       # do not name a path to your firmware with "Linux-*" or "Linux kernel*"
-      readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel\|Linux-")
+      readarray -t VERSIONS_STAT_CHECK < <(grep -a "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u | grep -v "Linux kernel\|Linux-")
     else
-      readarray -t VERSIONS_STAT_CHECK < <(grep "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
+      readarray -t VERSIONS_STAT_CHECK < <(grep -a "Version information found" "$LOG_DIR"/"$FW_VER_CHECK_LOG" | cut -d\  -f5- | sed -e 's/ in firmware blob.//' | sort -u)
     fi
   fi
 }
@@ -1028,27 +1041,27 @@ get_kernel_check() {
   if [[ -f "$LOG_DIR"/"$KERNEL_CHECK_LOG" ]]; then
     readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
     ## do a bit of sed modifications to have the same output as from the pre checker
-    readarray -t VERSIONS_KERNEL < <(grep "Statistics:" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel\ /' | sort -u)
+    readarray -t VERSIONS_KERNEL < <(grep -a "Statistics:" "$LOG_DIR"/"$KERNEL_CHECK_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel\ /' | sort -u)
   fi
 }
 
 get_usermode_emulator() {
   print_output "[*] Collect version details of module s115_usermode_emulator."
   if [[ -f "$LOG_DIR"/"$EMUL_LOG" ]]; then
-    readarray -t VERSIONS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (from.*$//' | sort -u)
+    readarray -t VERSIONS_EMULATOR < <(grep -a "Version information found" "$LOG_DIR"/"$EMUL_LOG" | cut -d\  -f5- | sed -e 's/\ found\ in.*$//' | sed -e 's/vers..n\ //' | sed -e 's/\ (from.*$//' | sort -u)
   fi
 }
 
 get_systemmode_emulator() {
   print_output "[*] Collect version details of module l15_emulated_checks_init."
   if [[ -f "$LOG_DIR"/"$SYS_EMUL_LOG" ]]; then
-    readarray -t VERSIONS_SYS_EMULATOR < <(grep "Version information found" "$LOG_DIR"/"$SYS_EMUL_LOG" | cut -d\  -f5- | sed 's/ in .* scanning logs.//' | sort -u)
+    readarray -t VERSIONS_SYS_EMULATOR < <(grep -a "Version information found" "$LOG_DIR"/"$SYS_EMUL_LOG" | cut -d\  -f5- | sed 's/ in .* scanning logs.//' | sort -u)
   fi
 }
 
 get_firmware_details() {
   print_output "[*] Collect version details of module s06_distribution_identification."
   if [[ -f "$LOG_DIR"/"$S06_LOG" ]]; then
-    readarray -t VERSIONS_S06_FW_DETAILS < <(grep "Version information found" "$LOG_DIR"/"$S06_LOG" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u)
+    readarray -t VERSIONS_S06_FW_DETAILS < <(grep -a "Version information found" "$LOG_DIR"/"$S06_LOG" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u)
   fi
 }
