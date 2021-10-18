@@ -19,7 +19,7 @@
 S22_php_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check php scripts for syntax errors"
+  module_title "Check php scripts for vulnerabilities"
 
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
@@ -32,10 +32,10 @@ S22_php_check()
       if ( file "$LINE" | grep -q "PHP script" ) ; then
         ((S22_PHP_SCRIPTS++))
         if [[ "$THREADED" -eq 1 ]]; then
-          s22_script_check &
+          s22_vuln_check &
           WAIT_PIDS_S22+=( "$!" )
         else
-          s22_script_check
+          s22_vuln_check
         fi
       fi
     done
@@ -51,7 +51,7 @@ S22_php_check()
     fi
     s22_check_php_ini
     print_output ""
-    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
     write_log ""
     write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_ISSUES:$S22_PHP_INI_CONFIGS"
 
@@ -61,6 +61,30 @@ S22_php_check()
   module_end_log "${FUNCNAME[0]}" "$(( $S22_PHP_VULNS + $S22_PHP_INI_ISSUES ))"
 }
 
+s22_vuln_check() {
+  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
+  ./external/progpilot "$LINE" > "$PHP_LOG" 2>&1
+  VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null)
+
+  if [[ "$VULNS" -ne 0 ]] ; then
+    #check if this is common linux file:
+    local COMMON_FILES_FOUND
+    if [[ -f "$BASE_LINUX_FILES" ]]; then
+      COMMON_FILES_FOUND=" (""${RED}""common linux file: no""${GREEN}"")"
+      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+        COMMON_FILES_FOUND=" (""${CYAN}""common linux file: yes""${GREEN}"")"
+      fi
+    else
+      COMMON_FILES_FOUND=""
+    fi
+    print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$LINE")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
+    echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
+  fi
+}
+
+# lets leave this here. Probably it is of interest for dev teams
+# for this you need to call it (see line 32/35)
 s22_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PHP_LOG="$LOG_PATH_MODULE""/php_""$NAME"".txt"

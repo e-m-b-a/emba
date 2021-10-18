@@ -24,6 +24,7 @@ Author(s): Michael Messner, Pascal Eckmann
   <a href="https://github.com/e-m-b-a/emba/stargazers"><img src="https://img.shields.io/github/stars/e-m-b-a/emba?label=Stars"></a>
   <a href="https://github.com/e-m-b-a/emba/network/members"><img src="https://img.shields.io/github/forks/e-m-b-a/emba?label=Forks"></a>
   <a href="https://hub.docker.com/r/embeddedanalyzer/emba"><img src="https://img.shields.io/docker/pulls/embeddedanalyzer/emba"></a>
+  <a href="https://twitter.com/intent/tweet?text=Check%20out%20EMBA%20-%20The%20Firmware%20security%20scanner!%20https://github.com/e-m-b-a/emba"><img src="https://img.shields.io/twitter/url.svg?style=social&url=https%3A%2F%2Fgithub.com%2Fe-m-b-a%2Femba"></a>
 </p>
 
 # EMBA

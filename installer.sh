@@ -496,6 +496,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_file_info "sshdcc" "Check SSHd configuration files" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
   print_file_info "sudo-parser.pl" "Parses and tests sudoers configuration files" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
   print_file_info "pixd" "pixd is a tool for visualizing binary data using a colour palette." "https://github.com/FireyFly/pixd/pixd.c" "external/pixd"
+  print_file_info "progpilot" "progpilot is a tool for static security tests on php files." "https://github.com/designsecurity/progpilot/releases/download/v0.8.0/progpilot_v0.8.0.phar" "external/progpilot"
 
   print_pip_info "pillow"
   
@@ -514,6 +515,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
       download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
       download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
       download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
+      download_file "progpilot" "https://github.com/designsecurity/progpilot/releases/download/v0.8.0/progpilot_v0.8.0.phar" "external/progpilot"
       # pixd installation
       pip3 install pillow 2>/dev/null
       echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"

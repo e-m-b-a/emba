@@ -405,7 +405,9 @@ main()
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
-  check_init_size
+  if [[ "$KERNEL" -ne 1 ]]; then
+    check_init_size
+  fi
 
   # Now we have the firmware and log path, lets set some additional paths
   FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
@@ -434,6 +436,8 @@ main()
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
     print_output "    Emba starts with the pre-testing phase." "no_log"
+  elif [[ -f "$KERNEL_CONFIG" && "$KERNEL" -eq 1 ]]; then
+    print_output "[*] Kernel configuration file detected." "no_log"
   else
     print_output "[!] Invalid firmware file" "no_log"
     print_help
@@ -470,8 +474,10 @@ main()
     write_grep_log "sudo ""$EMBA_COMMAND" "COMMAND"
   fi
 
-  # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
-  set_exclude
+  if [[ "$KERNEL" -ne 1 ]]; then
+    # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
+    set_exclude
+  fi
 
   #######################################################################################
   # Kernel configuration check
@@ -547,6 +553,9 @@ main()
           print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
           print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
           print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
+          if [[ -f "$HTML_PATH"/index.html ]]; then
+            print_output "[*] Open the web-report with$ORANGE firefox $LOG_DIR/html-report/index.html$NC\\n" "main" 
+          fi
           exit
         fi
       else
