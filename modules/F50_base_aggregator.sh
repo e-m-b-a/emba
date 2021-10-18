@@ -24,6 +24,7 @@ F50_base_aggregator() {
   P02_LOG="p02_firmware_bin_file_check.txt"
   P70_LOG="p70_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
+  S06_LOG="s06_distribution_identification.txt"
   S12_LOG="s12_binary_protection.txt"
   S13_LOG="s13_weak_func_check.txt"
   S20_LOG="s20_shell_check.txt"
@@ -83,15 +84,15 @@ output_overview() {
 
   if [[ -n "$ARCH" ]]; then
     if [[ -n "$D_END" ]]; then
-      print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"" / ""$D_END"
+      print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"" / ""$D_END""$NC"
     else
-      print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"
+      print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH""$NC"
     fi
     write_link "p99"
     echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
   elif [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
-      print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH"
+      print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH""$NC"
       write_link "p99"
       echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
       echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
@@ -100,6 +101,7 @@ output_overview() {
     echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
   fi
   os_detector
+  distribution_detector
   print_bar
 }
 
@@ -497,9 +499,12 @@ get_data() {
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
     DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f3)
   fi
+  if [[ -f "$LOG_DIR"/"$S06_LOG" ]]; then
+    mapfile -t LINUX_DISTRIS < <(grep "Version information found" "$LOG_DIR"/"$S06_LOG" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u )
+  fi
   if ! [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
-    FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f | wc -l)
-    DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d | wc -l)
+    FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f 2>/dev/null| wc -l)
+    DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d 2>/dev/null | wc -l)
   fi
   if [[ -f "$LOG_DIR"/"$S13_LOG" ]]; then
     STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
@@ -600,6 +605,14 @@ get_data() {
   fi
 }
 
+distribution_detector() {
+  for DISTRI in "${LINUX_DISTRIS[@]}"; do
+    print_output "[+] Linux distribution detected: $ORANGE$DISTRI$NC"
+    write_link "s06"
+  done
+}
+
+
 os_detector() {
 
   VERIFIED=0
@@ -692,15 +705,15 @@ print_os() {
   if [[ $VERIFIED -eq 1 ]]; then
     if [[ "$VERIFIED_P70" -eq 1 ]]; then
       SYSTEM=$(echo "$SYSTEM" | awk '{print $1}')
-      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM$NC"
       write_link "p70"
     else
-      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM"
+      print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM$NC"
       write_link "s25"
     fi
     echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   else
-    print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM"
+    print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM$NC"
     write_link "p70"
     echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"

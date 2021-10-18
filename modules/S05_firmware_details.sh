@@ -88,41 +88,6 @@ release_info()
             print_output "$(indent "$(magenta "$RELEASE")")"
           fi
         fi
-
-        if [[ $(basename "$R_INFO") == "image_sign" ]]; then
-
-          # parsing d-link image_sign identifier
-          DLINK_HW_VER=$(grep ".*_d.*_.*" "$R_INFO")
-          DLINK_HW_VER=$(echo "$DLINK_HW_VER" | cut -d_ -f3)
-          # -> dir300b5
-          DLINK_HW_VER=$(echo "$DLINK_HW_VER" | sed -r 's/([a-z])([1-9])/\1-\2/' | sed -r 's/([0-9])([a-z]).*/\1/')
-          # -> dir-300
-
-          mapfile -t DLINK_BUILDVER < <(find "$FIRMWARE_PATH" -path "*config/buildver")
-          for DLINK_BVER in "${DLINK_BUILDVER[@]}"; do
-            DLINK_FW_VERx=$(grep -E "^[0-9]+\.[0-9]+" "$DLINK_BVER")
-            DLINK_FW_VER="$DLINK_FW_VER""$DLINK_FW_VERx"
-            # -> 2.14
-          done
-
-          # probably we can use this in the future. Currently there is no need for it:
-          #mapfile -t DLINK_BUILDREV < <(find "$FIRMWARE_PATH" -path "*config/buildrev")
-          #for DLINK_BREV in "${DLINK_BUILDREV[@]}"; do
-          #  DLINK_FW_VERx=$(cat "$DLINK_BREV" | grep -E "^[A-Z][0-9]+")
-          #  # -> B01
-          #  DLINK_FW_VER="$DLINK_FW_VER""$DLINK_FW_VERx"
-          #  # -> 2.14B01
-          #done
-
-          if [[ -n "$DLINK_HW_VER" ]]; then
-            DLINK_FW_VER="$DLINK_HW_VER"_firmware_"$DLINK_FW_VER"
-          fi
-
-          if [[ -n "$DLINK_FW_VER" ]]; then
-            print_output "[+] Version information found ${RED}""$DLINK_FW_VER""${NC}${GREEN} for D-Link device."
-          fi
-        fi
-
       else
         print_output "\\n""$(magenta "Directory:")"" ""$( print_path "$R_INFO")""\\n"
       fi

@@ -27,6 +27,7 @@ S25_kernel_check()
 
   KERNEL_VERSION=()
   KERNEL_DESC=()
+  FOUND=0
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
 
@@ -36,12 +37,14 @@ S25_kernel_check()
       print_output "Kernel version:"
       for LINE in "${KERNEL_VERSION[@]}" ; do
         print_output "$(indent "$LINE")"
+        FOUND=1
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
         print_output ""
         print_output "Kernel details:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
+          FOUND=1
         done
       fi
       print_output "[-] No check for kernel configuration"
@@ -56,6 +59,7 @@ S25_kernel_check()
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]]  ; then
     print_output "[*] Check kernel configuration ""$(print_path "$KERNEL_CONFIG" )"" via checksec.sh"
     print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
+    FOUND=1
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 1 ]] ; then
 
@@ -74,6 +78,7 @@ S25_kernel_check()
       fi
       print_output "[*] Check kernel configuration ""$(print_path "$KERNEL_CONFIG" )"" via checksec.sh"
       print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
+      FOUND=1
 
       get_kernel_vulns
       check_modprobe
@@ -90,7 +95,7 @@ S25_kernel_check()
   fi
   write_log "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD"
 
-  module_end_log "${FUNCNAME[0]}" "${#KERNEL_VERSION[@]}"
+  module_end_log "${FUNCNAME[0]}" "$FOUND"
 }
 
 populate_karrays() {

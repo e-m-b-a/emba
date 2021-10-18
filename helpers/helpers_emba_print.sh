@@ -522,8 +522,10 @@ module_end_log() {
   if [[ "$HTML" -eq 1 ]]; then
     run_web_reporter_mod_name "$MODULE_MAIN_NAME"
   fi
-  if [ -z "$(ls -A "$LOG_PATH_MODULE")" ]; then
-    rmdir "$LOG_PATH_MODULE"
+  if [ -z "$(ls -A "$LOG_PATH_MODULE" 2>/dev/null)" ]; then
+    if [[ -d "$LOG_PATH_MODULE" ]]; then
+      rmdir "$LOG_PATH_MODULE"
+    fi
   fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"

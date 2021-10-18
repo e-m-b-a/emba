@@ -68,6 +68,9 @@ check_dep_port()
   fi
 }
 
+# Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+
 dependency_check() 
 {
   module_title "Dependency check" "no_log"
@@ -180,6 +183,14 @@ dependency_check()
 
     # binwalk
     check_dep_tool "binwalk"
+    if command -v binwalk > /dev/null ; then
+      BINWALK_VER=$(binwalk 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//')
+      if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
+        echo -e "$RED""    binwalk version - not ok""$NC"
+        echo -e "$RED""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
+        DEP_ERROR=1
+      fi
+    fi
 
     # checksec
     check_dep_file "checksec script" "$EXT_DIR""/checksec"
@@ -195,6 +206,9 @@ dependency_check()
 
     # pixd image
     check_dep_file "pixd image renderer" "$EXT_DIR""/pixd_png.py"
+
+    # progpilot for php code checks
+    check_dep_file "progpilot php checker" "$EXT_DIR""/progpilot"
 
     # CVE and CVSS databases
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
