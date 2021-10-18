@@ -822,7 +822,6 @@ fi
 #iniscan
 
 echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
-
 print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
 
 if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
