@@ -58,7 +58,7 @@ S22_php_check()
   else
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}" "$S22_PHP_VULNS"
+  module_end_log "${FUNCNAME[0]}" "$(( $S22_PHP_VULNS + $S22_PHP_INI_ISSUES ))"
 }
 
 s22_script_check() {
