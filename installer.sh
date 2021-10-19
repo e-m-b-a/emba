@@ -772,8 +772,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
           ;;
         esac
-        cd "$HOME_PATH" || exit 1
       fi
+      cd "$HOME_PATH" || exit 1
     ;;
   esac
 fi
@@ -819,6 +819,35 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   esac
 fi
 
+#iniscan
+
+echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
+
+print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
+
+if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+  echo -e "\\n""$MAGENTA""$BOLD""Do you want to download Composer and iniscan (if not already on the system)?""$NC"
+  read -p "(y/N)" -r ANSWER
+elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  ANSWER=("n")
+else
+  echo -e "\\n""$MAGENTA""$BOLD""Composer and iniscan (if not already on the system) will be downloaded!""$NC"
+  ANSWER=("y")
+fi
+case ${ANSWER:0:1} in
+  y|Y )
+    cd "$HOME_PATH" || exit 1
+    if ! [[ -d "external/iniscan" ]] ; then
+      mkdir external/iniscan
+    fi
+    download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
+    cd ./external/iniscan || exit 1
+    php composer.phar build --no-interaction
+    php composer.phar global require psecio/iniscan --no-interaction
+    cd "$HOME_PATH" || exit 1
+    cp -r "/root/.config/composer/vendor/." "./external/iniscan/"
+  ;;
+esac
 
 # binwalk
 

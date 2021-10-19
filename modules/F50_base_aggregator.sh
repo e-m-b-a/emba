@@ -151,6 +151,12 @@ output_details() {
     write_link "s22"
     echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
+  fi
+  if [[ "$S22_PHP_INI_ISSUES" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_INI_CONFIGS""$GREEN"" php configuration file.""$NC"
+    write_link "s22"
+    echo "php_ini_issues;\"$S22_PHP_INI_ISSUES\"" >> "$CSV_LOG_FILE"
+    echo "php_ini_configs;\"$S22_PHP_INI_CONFIGS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ "$YARA_CNT" -gt 0 ]]; then
@@ -521,6 +527,8 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S22_LOG" ]]; then
     S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f2)
     S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3)
+    S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f4)
+    S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f5)
   fi
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
