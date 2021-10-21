@@ -239,7 +239,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//-\ sdp\ tool/}"
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
-    #iproute2-ss040823 -> iproute2-2_6_8-040823
+    # iproute2-ss040823 -> iproute2-2_6_8-040823
+    # reference: https://git.kernel.org/pub/scm/network/iproute2/iproute2.git/refs/
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/iproute2-ss(040823)/iproute2\ 2\.6\.8\-\1/')"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
     #nettle-hash\ (nettle\ -> nettle
@@ -281,6 +282,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//mke2fs/e2fsprogs}"
     VERSION_lower="${VERSION_lower//resize2fs/e2fsprogs}"
     VERSION_lower="${VERSION_lower//tune2fs/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//mklost+found/e2fsprogs}"
+    VERSION_lower="${VERSION_lower//ext2fs\ library/e2fsprogs}"
     # ntfsprogs
     VERSION_lower="${VERSION_lower//mkntfs/ntfsprogs}"
     VERSION_lower="${VERSION_lower//ntfsck/ntfsprogs}"
@@ -315,9 +318,13 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//file-/file\ }"
     #libpcre.1.2.3
     VERSION_lower="${VERSION_lower//libpcre\.so\./pcre\ }"
+    # pcregrep version 8.43 2019-02-23 -> pcre
+    VERSION_lower="${VERSION_lower//pcregrep/pcre}"
     VERSION_lower="${VERSION_lower//pppd\.so\./pppd\ }"
     #pppd version 2.4.2
     VERSION_lower="${VERSION_lower/pppd/point-to-point_protocol}"
+    # rngtest -> rngd
+    VERSION_lower="${VERSION_lower/rngtest/rngd}"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
     # lsusb (usbutils)
@@ -411,6 +418,13 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/\//\ }"
     #OpenLDAP:\ ldapsearch
     VERSION_lower="${VERSION_lower/openldap\ ldapsearch/openldap}"
+    VERSION_lower="${VERSION_lower/openldap\ ldapcompare/openldap}"
+    VERSION_lower="${VERSION_lower/openldap\ ldapmodify/openldap}"
+    VERSION_lower="${VERSION_lower/openldap\ ldapdelete/openldap}"
+    VERSION_lower="${VERSION_lower/openldap\ ldapexop/openldap}"
+    VERSION_lower="${VERSION_lower/openldap\ ldapmodrdn/openldap}"
+    VERSION_lower="${VERSION_lower/openldap\ ldappasswd/openldap}"
+    VERSION_lower="${VERSION_lower/openldap\ ldapwhoami/openldap}"
     #version: openser 1.0.0 (arm/linux)
     VERSION_lower="${VERSION_lower/version\ openser/openser:openser}"
     #Beceem\ CM\ Server\
@@ -534,6 +548,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/inadyn\ ([0-9]\.[0-9]+).*/inadyn \1/')"
     # Independent JPEG Group's CJPEG, version 6b  27-Mar-1998
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/independent\ jpeg\ group.s\ cjpeg\ ([0-9][a-z])\ .*/ijg:libjpeg \1/')"
+    # nginx version: nginx/1.16.1
+    VERSION_lower="${VERSION_lower//nginx\ nginx/nginx}"
     #zend engine 2.4.0 copyright (c) 1998-2014 zend technologies
     VERSION_lower="${VERSION_lower//zend\ engine/zend:engine}"
     #D-Bus Message Bus Daemon 1.6.8
@@ -552,6 +568,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ralink\ dot1x\ daemon\ \=\ /ralink-dot1x\ }"
     #his\ is\ WiFiDog\ 
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
+    # This is Sendmail version 8.8.4
+    VERSION_lower="${VERSION_lower//this\ is\ sendmail/sendmail}"
 
     ### handle versions of linux distributions:
     # debian 9 (stretch) - installer build 20170615+deb9u5
@@ -575,6 +593,7 @@ prepare_version_data() {
       # letz try to handle something like 1p2 -> 1:p2
       VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/([0-9])([a-z]([0-9]))/\1:\2/g')"
     fi
+    print_output "[*] Version: $VERSION_lower"
 
     # final cleanup of start and ending
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
@@ -635,7 +654,7 @@ aggregate_versions() {
     VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}")
     for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
       # remove color codes:
-      VERSION=$(echo "$VERSION" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+      VERSION=$(strip_color_codes "$VERSION")
       if [[ "$THREADED" -eq 1 ]]; then
         prepare_version_data &
         WAIT_PIDS_F19+=( "$!" )

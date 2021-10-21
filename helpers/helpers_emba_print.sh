@@ -534,3 +534,6 @@ module_end_log() {
   #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }
 
+strip_color_codes() {
+  echo "$1" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+}

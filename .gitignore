@@ -2,5 +2,6 @@
 log*/
 dir-combined.yara
 external/
+tools/
 !external/.keep
 config/vt_api_key.txt

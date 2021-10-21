@@ -167,15 +167,16 @@ output_details() {
   fi
   EMUL=$(grep -c "Version information found" "$LOG_DIR"/s115_usermode_emulator.txt 2>/dev/null)
   if [[ "$EMUL" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes.""$NC"
+    print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes (user mode emulation).""$NC"
     write_link "s115"
+    echo "user_emulation_state;\"$EMUL\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
 
   if [[ "$IP_ADDR" -gt 0 ]]; then
 
     STATE="$ORANGE(""$GREEN""IP address detected"
-    EMU_STATE="IP_add_dete"
+    EMU_STATE="IP_DET"
     if [[ "$SYS_ONLINE" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
       EMU_STATE="$EMU_STATE"";ICMP"
@@ -496,10 +497,11 @@ output_cve_exploits() {
 
 get_data() {
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
-    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2)
+    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //')
   fi
   if [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P70_LOG" | cut -d: -f2)
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P70_LOG" | cut -d: -f2 | tr -d '[:space:]')
+    PRE_ARCH=$(strip_color_codes "$PRE_ARCH")
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
@@ -723,7 +725,9 @@ print_os() {
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM$NC"
     write_link "p70"
-    echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
+    if [[ "$(grep -c os_verified "$CSV_LOG_FILE")" -lt 1 ]]; then
+      echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
+    fi
     echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   fi
 }
