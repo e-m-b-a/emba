@@ -218,6 +218,9 @@ dependency_check()
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
     check_dep_file "CVSS database" "$EXT_DIR""/allitemscvss.csv"
 
+    # Freetz-NG
+    check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
+
     # CVE-search
     check_dep_file "cve-search" "$EXT_DIR""/cve-search/bin/search.py"
     if [[ IN_DOCKER -eq 0 ]]; then 
