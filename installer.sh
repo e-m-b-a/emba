@@ -1136,6 +1136,51 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   esac
 fi
 
+# Freetz-NG
+
+INSTALL_APP_LIST=()
+if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  cd "$HOME_PATH" || exit 1
+
+  print_tool_info "console-data" 1
+
+  print_file_info "execstack" "execstack for Freetz-NG" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/freetz-ng/execstack_0.0.20131005-1+b10_amd64.deb"
+
+  if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+    echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install Freetz-NG and the needed dependencies (if not already on the system)?""$NC"
+    read -p "(y/N)" -r ANSWER
+  elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    ANSWER=("n")
+  else
+    echo -e "\\n""$MAGENTA""$BOLD""The Freetz-NG dependencies (if not already on the system) will be downloaded and be installed!""$NC"
+    ANSWER=("y")
+  fi
+  case ${ANSWER:0:1} in
+    y|Y )
+
+    echo -e "\\n""$MAGENTA""$BOLD""The Freetz-NG installation is currently not fully working!""$NC"
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
+    if ! grep -q freetzuser /etc/passwd; then
+      useradd -m freetzuser
+    fi
+    download_file "execstack" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/execstack_0.0.20131005-1+b10_amd64.deb"
+    dpkg -i external/execstack_0.0.20131005-1+b10_amd64.deb
+    rm external/execstack_0.0.20131005-1+b10_amd64.deb
+    locale-gen de_DE && dpkg-reconfigure console-data
+    mkdir external/freetz-ng
+    chown -R freetzuser:freetzuser external/freetz-ng
+    chmod 777 -R external/freetz-ng
+    su freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
+    cd external/freetz-ng || exit 1
+    sudo -u freetzuser make allnoconfig
+    sudo -u freetzuser make tools
+    cd "$HOME_PATH" || exit 1
+    chown -R root:root external/freetz-ng
+    userdel freetzuser
+    ;;
+  esac
+fi
+
 cd "$HOME_PATH" || exit 1
 
 if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then

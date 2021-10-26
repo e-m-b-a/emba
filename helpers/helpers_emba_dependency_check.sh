@@ -147,6 +147,10 @@ dependency_check()
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
     check_dep_port "cve-search" 27017
+    if ! netstat -anpt | grep -q 27017; then
+      sudo mongod restart
+      check_dep_port "cve-search" 27017
+    fi
   fi
 
   #######################################################################################

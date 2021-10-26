@@ -24,16 +24,21 @@ P02_firmware_bin_file_check() {
   local FILE_BIN_OUT
   export VMDK_DETECTED=0
   export DLINK_ENC_DETECTED=0
+  export AVM_DETECTED=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
     DLINK_ENC_CHECK=$(hexdump -C "$FIRMWARE_PATH"| head -1)
+    AVM_CHECK=$(strings "$FIRMWARE_PATH" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
 
     if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
       export VMDK_DETECTED=1
     fi
     if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
       export DLINK_ENC_DETECTED=1
+    fi
+    if [[ "$AVM_CHECK" -gt 0 ]]; then
+      export AVM_DETECTED=1
     fi
 
     # entropy checking on binary file
