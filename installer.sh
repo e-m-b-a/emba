@@ -342,6 +342,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   # needed for sshdcc:
   print_tool_info "tcllib" 1
   print_tool_info "net-tools" 1
+  print_tool_info "radare2" 1
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"

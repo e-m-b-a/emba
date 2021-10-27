@@ -185,6 +185,9 @@ dependency_check()
     # bc
     check_dep_tool "bc"
 
+    # radare2
+    check_dep_tool "r2"
+
     # binwalk
     check_dep_tool "binwalk"
     if command -v binwalk > /dev/null ; then
