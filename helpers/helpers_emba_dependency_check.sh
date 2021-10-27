@@ -220,6 +220,7 @@ dependency_check()
 
     # Freetz-NG
     check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
+    DEP_ERROR=0
 
     # CVE-search
     check_dep_file "cve-search" "$EXT_DIR""/cve-search/bin/search.py"

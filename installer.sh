@@ -1142,9 +1142,9 @@ INSTALL_APP_LIST=()
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   cd "$HOME_PATH" || exit 1
 
-  print_tool_info "console-data" 1
-
   print_file_info "execstack" "execstack for Freetz-NG" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/freetz-ng/execstack_0.0.20131005-1+b10_amd64.deb"
+  print_tool_info "subversion" 1
+  print_tool_info "python3" 1
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install Freetz-NG and the needed dependencies (if not already on the system)?""$NC"
@@ -1166,7 +1166,6 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
     download_file "execstack" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/execstack_0.0.20131005-1+b10_amd64.deb"
     dpkg -i external/execstack_0.0.20131005-1+b10_amd64.deb
     rm external/execstack_0.0.20131005-1+b10_amd64.deb
-    locale-gen de_DE && dpkg-reconfigure console-data
     mkdir external/freetz-ng
     chown -R freetzuser:freetzuser external/freetz-ng
     chmod 777 -R external/freetz-ng

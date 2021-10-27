@@ -35,7 +35,7 @@ S10_binaries_basic_check()
       if ( file "$LINE" | grep -q "ELF" ) ; then
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
-        mapfile -t VUL_FUNC_RESULT < <("$OBJDUMP" -T "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format")
+        mapfile -t VUL_FUNC_RESULT < <(readelf -a --use-dynamic "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format")
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
           print_output ""
           print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"

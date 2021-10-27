@@ -219,7 +219,9 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//lighttpd-/lighttpd\ }"
     #lighttpd/1.4.33-devel-17M (Nov 13 2013 21:55:13) - a light and fast webserver
     VERSION_lower="${VERSION_lower//lighttpd\//lighttpd\ }"
-    VERSION_lower="$(echo "$VERSION_lower" | sed "s/-devel-[0-9]+[A-Za-z]+//")"
+    print_output "$VERSION_lower"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r "s/-devel-[0-9]+[a-z]\ .*\ a\ light\ and\ fast\ webserver//")"
+    print_output "$VERSION_lower"
     # Compiled\ with\ U-Boot -> u-boot
     VERSION_lower="${VERSION_lower//compiled\ with\ u-boot/u-boot }"
     #tcpdump.4.6.2 version
