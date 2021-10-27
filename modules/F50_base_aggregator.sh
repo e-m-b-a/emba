@@ -346,13 +346,12 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
-    print_output ""
     if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
       write_link "s13"
     else
       write_link "s14"
     fi
-    write_link "s13"
+    print_output ""
     echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
 
