@@ -544,6 +544,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ coreutils.*)/gnu:coreutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sharutils.*)/gnu:sharutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(xz\ utils.*)/xz-utils/')"
+    # BIRD Internet routing daemon
+    VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/bird/:bird:/')"
     # inadyn 1.96-adv
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/inadyn\ ([0-9]\.[0-9]+).*/inadyn \1/')"
     # Independent JPEG Group's CJPEG, version 6b  27-Mar-1998
@@ -582,12 +584,15 @@ prepare_version_data() {
     # see also: https://openwrt.org/about/history
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(openwrt)\ (kamikaze)\ r1[4-8][0-9][0-9][0-9].*/\1:\2:8.09/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(openwrt)\ (backfire)\ r2[0-9][0-9][0-9][0-9].*/\1:\2:10.03/')"
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/(openwrt)\ (lede)\ r3[2-9][0-9][0-9].*/\1:\2:17.01/')"
+    print_output "[*] Version: $VERSION_lower"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/lede\ ([0-9]+\.[0-9]+\.[0-9]+)(-)?(rc[0-9])?.*/openwrt:\1:\3/')"
+    print_output "[*] Version: $VERSION_lower"
     # d-link dir-300 2.14b01
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/d-link\ (.*)\ ([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/d-link\ (.*)\ ([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
     # dd-wrt v24-sp2
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/dd-wrt\ ([0-9]+)-(sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/dd-wrt\ \#([0-9]+)/dd-wrt:dd-wrt:\1/')"
 
     if ! [[ "$VERSION_lower" == "dlink"* ]]; then
       # letz try to handle something like 1p2 -> 1:p2
