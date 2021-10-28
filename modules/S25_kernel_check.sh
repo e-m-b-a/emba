@@ -56,6 +56,7 @@ S25_kernel_check()
     fi
     if [[ ${#KERNEL_MODULES[@]} -ne 0 ]] ; then
       analyze_kernel_module
+      FOUND=1
     fi
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]]  ; then
@@ -109,16 +110,41 @@ populate_karrays() {
   done
 
   # unique our results
-  eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  # remove empty entries:
-  for i in "${KERNEL_VERSION[@]}" ; do 
+  eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do
     if [[ -z "$i" ]]; then
-      continue
+      # remove empty entries:
+      continue;
     fi
-    NEW+=("$i")
+    echo "\"$i\"" ;
+  done | sort -u))"
+
+  eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+
+  # if we have no kernel version -> we try to identify something via the path:
+  if [[ "${#KERNEL_VERSION[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
+    KERNEL_VERSION1=$(echo "${KERNEL_MODULES[1]}" | sed 's/.*\/lib\/modules\///')
+    KERNEL_VERSION+=("$KERNEL_VERSION1")
+    demess_kv_version "${KERNEL_VERSION[@]}"
+    IFS=" " read -r -a KERNEL_VERSION <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+  fi
+}
+
+demess_kv_version() {
+  K_VERSION=("$@")
+  # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
+  for VER in "${K_VERSION[@]}" ; do
+    local KV
+    KV=$(echo "$VER" | tr "-" " ")
+    KV=$(echo "$KV" | tr "+" " ")
+    KV=$(echo "$KV" | tr "_" " ")
+    KV=$(echo "$KV" | tr "/" " ")
+    KV=$(echo "$KV" | cut -d\  -f1)
+
+    while echo "$KV" | grep -q '[a-zA-Z]'; do
+      KV="${KV::-1}"
+    done
+    KV_ARR=("${KV_ARR[@]}" "$KV")
   done
-  KERNEL_VERSION=("${NEW[@]}")
 }
 
 get_kernel_vulns()
@@ -135,19 +161,7 @@ get_kernel_vulns()
       print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"
       print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
       # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
-      local KV_ARR
-      for VER in "${KERNEL_VERSION[@]}" ; do
-        local KV
-        KV=$(echo "$VER" | tr "-" " ")
-        KV=$(echo "$KV" | tr "+" " ")
-        KV=$(echo "$KV" | tr "_" " ")
-        KV=$(echo "$KV" | cut -d\  -f1)
-  
-        while echo "$KV" | grep -q '[a-zA-Z]'; do
-          KV="${KV::-1}"
-        done
-        KV_ARR=("${KV_ARR[@]}" "$KV")
-      done
+      demess_kv_version "${KERNEL_VERSION[@]}"
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
       for V in "${KV_C_ARR[@]}" ; do
         print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" -f -d -k "$V")"
