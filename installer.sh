@@ -1144,8 +1144,59 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   cd "$HOME_PATH" || exit 1
 
   print_file_info "execstack" "execstack for Freetz-NG" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/freetz-ng/execstack_0.0.20131005-1+b10_amd64.deb"
-  print_tool_info "subversion" 1
   print_tool_info "python3" 1
+  print_tool_info "pv" 1
+  print_tool_info "rsync" 1
+  print_tool_info "kmod" 1
+  #print_tool_info "sqlite3" 1
+  #print_tool_info "libsqlite3-dev" 1
+  print_tool_info "libzstd-dev" 1
+  print_tool_info "cmake" 1
+  print_tool_info "lib32z1-dev" 1
+  print_tool_info "unar" 1
+  print_tool_info "inkscape" 1
+  print_tool_info "imagemagick" 1
+  print_tool_info "subversion" 1
+  print_tool_info "git" 1
+  print_tool_info "bc" 1
+  print_tool_info "wget" 1
+  print_tool_info "sudo" 1
+  print_tool_info "ccache" 1
+  print_tool_info "gcc" 1
+  print_tool_info "g++" 1
+  print_tool_info "binutils" 1
+  print_tool_info "autoconf" 1
+  print_tool_info "automake" 1
+  print_tool_info "autopoint" 1
+  print_tool_info "libtool-bin" 1
+  print_tool_info "make" 1
+  print_tool_info "bzip2" 1
+  print_tool_info "libncurses5-dev" 1
+  print_tool_info "libreadline-dev" 1
+  print_tool_info "zlib1g-dev" 1
+  print_tool_info "flex" 1
+  print_tool_info "bison" 1
+  print_tool_info "patch" 1
+  print_tool_info "texinfo" 1
+  print_tool_info "tofrodos" 1
+  print_tool_info "gettext" 1
+  print_tool_info "pkg-config" 1
+  print_tool_info "ecj" 1
+  print_tool_info "fastjar" 1
+  print_tool_info "perl" 1
+  print_tool_info "libstring-crc32-perl" 1
+  print_tool_info "ruby" 1
+  print_tool_info "gawk" 1
+  print_tool_info "libusb-dev" 1
+  print_tool_info "unzip" 1
+  print_tool_info "intltool" 1
+  print_tool_info "libacl1-dev" 1
+  print_tool_info "libcap-dev" 1
+  print_tool_info "libc6-dev-i386" 1
+  print_tool_info "lib32ncurses5-dev" 1
+  print_tool_info "gcc-multilib" 1
+  print_tool_info "lib32stdc++6" 1
+  print_tool_info "libglib2.0-dev" 1
 
   if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
     echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install Freetz-NG and the needed dependencies (if not already on the system)?""$NC"
@@ -1172,7 +1223,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
     chmod 777 -R external/freetz-ng
     su freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
     cd external/freetz-ng || exit 1
+    if [[ $IN_DOCKER -eq 1 ]]; then
+      ln -s /usr/bin/python3 /usr/bin/python
+    fi
     sudo -u freetzuser make allnoconfig
+    sudo -u freetzuser make
     sudo -u freetzuser make tools
     cd "$HOME_PATH" || exit 1
     chown -R root:root external/freetz-ng
