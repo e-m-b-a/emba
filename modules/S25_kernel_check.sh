@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
 # Copyright 2020-2021 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -21,7 +21,7 @@
 S25_kernel_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check kernel"
+  module_title "Identify and check kernel version"
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
@@ -50,10 +50,12 @@ S25_kernel_check()
       print_output "[-] No check for kernel configuration"
 
       get_kernel_vulns
-      analyze_kernel_module
       check_modprobe
     else
-      print_output "[-] No kernel found"
+      print_output "[-] No kernel version identified"
+    fi
+    if [[ ${#KERNEL_MODULES[@]} -ne 0 ]] ; then
+      analyze_kernel_module
     fi
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]]  ; then
@@ -102,13 +104,21 @@ populate_karrays() {
   mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
-    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
+    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g' | tr -d [:blank:])" )
     KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
   done
 
   # unique our results
   eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+  # remove empty entries:
+  for i in "${KERNEL_VERSION[@]}" ; do 
+    if [[ -z "$i" ]]; then
+      continue
+    fi
+    NEW+=("$i")
+  done
+  KERNEL_VERSION=("${NEW[@]}")
 }
 
 get_kernel_vulns()
