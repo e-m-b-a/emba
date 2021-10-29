@@ -572,6 +572,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//this\ is\ wifidog/wifidog}"
     # This is Sendmail version 8.8.4
     VERSION_lower="${VERSION_lower//this\ is\ sendmail/sendmail}"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/hello\ this\ is\ quagga\ \(([0-9]\.[0-9]+\.[0-9]+)\).*/quagga\ \1/')"
 
     ### handle versions of linux distributions:
     # debian 9 (stretch) - installer build 20170615+deb9u5
