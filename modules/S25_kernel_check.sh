@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
 # Copyright 2020-2021 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -21,7 +21,7 @@
 S25_kernel_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check kernel"
+  module_title "Identify and check kernel version"
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
@@ -50,10 +50,13 @@ S25_kernel_check()
       print_output "[-] No check for kernel configuration"
 
       get_kernel_vulns
-      analyze_kernel_module
       check_modprobe
     else
-      print_output "[-] No kernel found"
+      print_output "[-] No kernel version identified"
+    fi
+    if [[ ${#KERNEL_MODULES[@]} -ne 0 ]] ; then
+      analyze_kernel_module
+      FOUND=1
     fi
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]]  ; then
@@ -107,8 +110,41 @@ populate_karrays() {
   done
 
   # unique our results
-  eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+  eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do
+    if [[ -z "$i" ]]; then
+      # remove empty entries:
+      continue;
+    fi
+    echo "\"$i\"" ;
+  done | sort -u))"
+
   eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+
+  # if we have no kernel version -> we try to identify something via the path:
+  if [[ "${#KERNEL_VERSION[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
+    KERNEL_VERSION1=$(echo "${KERNEL_MODULES[1]}" | sed 's/.*\/lib\/modules\///')
+    KERNEL_VERSION+=("$KERNEL_VERSION1")
+    demess_kv_version "${KERNEL_VERSION[@]}"
+    IFS=" " read -r -a KERNEL_VERSION <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+  fi
+}
+
+demess_kv_version() {
+  K_VERSION=("$@")
+  # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
+  for VER in "${K_VERSION[@]}" ; do
+    local KV
+    KV=$(echo "$VER" | tr "-" " ")
+    KV=$(echo "$KV" | tr "+" " ")
+    KV=$(echo "$KV" | tr "_" " ")
+    KV=$(echo "$KV" | tr "/" " ")
+    KV=$(echo "$KV" | cut -d\  -f1)
+
+    while echo "$KV" | grep -q '[a-zA-Z]'; do
+      KV="${KV::-1}"
+    done
+    KV_ARR=("${KV_ARR[@]}" "$KV")
+  done
 }
 
 get_kernel_vulns()
@@ -125,19 +161,7 @@ get_kernel_vulns()
       print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"
       print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
       # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
-      local KV_ARR
-      for VER in "${KERNEL_VERSION[@]}" ; do
-        local KV
-        KV=$(echo "$VER" | tr "-" " ")
-        KV=$(echo "$KV" | tr "+" " ")
-        KV=$(echo "$KV" | tr "_" " ")
-        KV=$(echo "$KV" | cut -d\  -f1)
-  
-        while echo "$KV" | grep -q '[a-zA-Z]'; do
-          KV="${KV::-1}"
-        done
-        KV_ARR=("${KV_ARR[@]}" "$KV")
-      done
+      demess_kv_version "${KERNEL_VERSION[@]}"
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
       for V in "${KV_C_ARR[@]}" ; do
         print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" -f -d -k "$V")"

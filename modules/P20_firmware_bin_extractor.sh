@@ -220,7 +220,7 @@ deep_extractor() {
   local MD5_DONE_DEEP
 
   FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -name "*.udeb" -o -name "*.deb" -o -name "*.ipk" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
     if [[ "$THREADED" -eq 1 ]]; then
       binwalk_deep_extract_helper &
@@ -240,7 +240,7 @@ deep_extractor() {
   print_output "[*] Deep extraction with binwalk - 2nd round"
   print_output "[*] Walking through all files and try to extract what ever possible"
 
-  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -name "*.udeb" -o -name "*.deb" -o -name "*.ipk" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
     FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
     # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted

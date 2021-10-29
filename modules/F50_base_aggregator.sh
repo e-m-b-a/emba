@@ -27,6 +27,7 @@ F50_base_aggregator() {
   S06_LOG="s06_distribution_identification.txt"
   S12_LOG="s12_binary_protection.txt"
   S13_LOG="s13_weak_func_check.txt"
+  S14_LOG="s14_weak_func_radare_check.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
@@ -345,54 +346,69 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
+    if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
+      write_link "s13"
+    else
+      write_link "s14"
+    fi
     print_output ""
-    write_link "s13"
     echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
   fi
 
   local DATA=0
 
-  if [[ "$STRCPY_CNT" -gt 0 && -d "$LOG_DIR""/s13_weak_func_check/" ]] ; then
-    if [[ "$(find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_*.txt" | wc -l)" -gt 0 ]]; then
-
-      # color codes for printf
-      RED_="$(tput setaf 1)"
-      GREEN_="$(tput setaf 2)"
-      ORANGE_="$(tput setaf 3)"
-      NC_="$(tput sgr0)"
-
-      readarray -t RESULTS_STRCPY < <( find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
-      readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
-
-      #strcpy:
-      if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
-        print_output ""
-        print_output "[+] STRCPY - top 10 results:"
-        write_link "s13#strcpysummary"
-        DATA=1
-        for LINE in "${RESULTS_STRCPY[@]}" ; do
-          binary_fct_output "$LINE"
-          echo "strcpy_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
-        done
-        print_output "$NC"
-      fi
-
-      #system:
-      if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
-        print_output ""
-        print_output "[+] SYSTEM - top 10 results:"
-        write_link "s13#strcpysummary"
-        DATA=1
-        for LINE in "${RESULTS_SYSTEM[@]}" ; do
-          binary_fct_output "$LINE"
-          echo "system_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
-        done
-        print_output "$NC"
-      fi
+  if [[ "$STRCPY_CNT" -gt 0 ]] && [[ -d "$LOG_DIR""/s13_weak_func_check/" || -d "$LOG_DIR""/s14_weak_func_radare_check/" ]] ; then
+    if [[ "$(find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_*.txt" 2>/dev/null | wc -l)" -gt 0 ]]; then
+      LDIR="$LOG_DIR""/s13_weak_func_check/"
+    elif [[ "$(find "$LOG_DIR""/s14_weak_func_radare_check/" -xdev -iname "vul_func_*_*.txt" 2>/dev/null | wc -l)" -gt 0 ]]; then
+      LDIR="$LOG_DIR""/s14_weak_func_radare_check/"
     fi
-    if [[ $DATA -eq 1 ]]; then
-      print_bar
+
+    # color codes for printf
+    RED_="$(tput setaf 1)"
+    GREEN_="$(tput setaf 2)"
+    ORANGE_="$(tput setaf 3)"
+    NC_="$(tput sgr0)"
+
+    readarray -t RESULTS_STRCPY < <( find "$LDIR" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS_SYSTEM < <( find "$LDIR" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
+
+    #strcpy:
+    if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
+      print_output ""
+      print_output "[+] STRCPY - top 10 results:"
+      if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
+        write_link "s13#strcpysummary"
+      else
+        write_link "s14#strcpysummary"
+      fi
+      DATA=1
+      for LINE in "${RESULTS_STRCPY[@]}" ; do
+        binary_fct_output "$LINE"
+        echo "strcpy_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
+      done
+      print_output "$NC"
     fi
+
+    #system:
+    if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
+      print_output ""
+      print_output "[+] SYSTEM - top 10 results:"
+      if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
+        write_link "s13#strcpysummary"
+      else
+        write_link "s14#strcpysummary"
+      fi
+      DATA=1
+      for LINE in "${RESULTS_SYSTEM[@]}" ; do
+        binary_fct_output "$LINE"
+        echo "system_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
+      done
+      print_output "$NC"
+    fi
+  fi
+  if [[ $DATA -eq 1 ]]; then
+    print_bar
   fi
 }
 
@@ -423,10 +439,10 @@ binary_fct_output() {
       SYMBOLS="$RED_""Symbols   $NC_"
     fi
   else
-      RELRO="$ORANGE_""RELRO unknown$NC_"
-      NX="$ORANGE_""NX unknown$NC_"
-      CANARY="$ORANGE_""CANARY unknown$NC_"
-      SYMBOLS="$ORANGE_""Symbols unknown$NC_"
+    RELRO="$ORANGE_""RELRO unknown$NC_"
+    NX="$ORANGE_""NX unknown$NC_"
+    CANARY="$ORANGE_""CANARY unknown$NC_"
+    SYMBOLS="$ORANGE_""Symbols unknown$NC_"
   fi
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
@@ -437,7 +453,7 @@ binary_fct_output() {
       printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
     fi
   else
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+    printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
   fi
 }
 
@@ -517,6 +533,10 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S13_LOG" ]]; then
     STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
+  fi
+  if [[ -f "$LOG_DIR"/"$S14_LOG" && "$STRCPY_CNT" -lt 1 ]]; then
+    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
@@ -622,7 +642,6 @@ distribution_detector() {
   done
 }
 
-
 os_detector() {
 
   VERIFIED=0
@@ -692,7 +711,6 @@ os_detector() {
       print_os
     fi
   fi
-
 }
 
 os_kernel_module_detect() {

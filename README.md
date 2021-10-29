@@ -30,7 +30,7 @@ Author(s): Michael Messner, Pascal Eckmann
 # EMBA
 ## The security analyzer for embedded device firmware
 
-*EMBA* is designed as the central firmware analysis tool. It supports the complete security analysis process starting with the *firmware extraction* process, doing *static analysis* and *dynamic analysis* via emulation and finally generating a report. *EMBA* automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts or hard-coded passwords. *EMBA* is a command line tool with the option to generate an easy to use web report for further analysis.
+*EMBA* is designed as the central firmware analysis tool for penetration testers. It supports the complete security analysis process starting with the *firmware extraction* process, doing *static analysis* and *dynamic analysis* via emulation and finally generating a report. *EMBA* automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts or hard-coded passwords. *EMBA* is a command line tool with the option to generate an easy to use web report for further analysis.
 
 *EMBA* combines multiple established analysis tools and can be started with one simple command. Afterwards it tests the firmware for possible security risks and interesting areas for further investigation. No manual installation of all helpers, once the integrated installation script has been executed, you are ready to test your firmware.
 

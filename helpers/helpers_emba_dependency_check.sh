@@ -147,6 +147,10 @@ dependency_check()
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
     check_dep_port "cve-search" 27017
+    if ! netstat -anpt | grep -q 27017; then
+      sudo mongod restart
+      check_dep_port "cve-search" 27017
+    fi
   fi
 
   #######################################################################################
@@ -181,6 +185,9 @@ dependency_check()
     # bc
     check_dep_tool "bc"
 
+    # radare2
+    check_dep_tool "r2"
+
     # binwalk
     check_dep_tool "binwalk"
     if command -v binwalk > /dev/null ; then
@@ -213,6 +220,10 @@ dependency_check()
     # CVE and CVSS databases
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
     check_dep_file "CVSS database" "$EXT_DIR""/allitemscvss.csv"
+
+    # Freetz-NG
+    check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
+    DEP_ERROR=0
 
     # CVE-search
     check_dep_file "cve-search" "$EXT_DIR""/cve-search/bin/search.py"

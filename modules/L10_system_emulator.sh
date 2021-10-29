@@ -129,7 +129,8 @@ create_emulation_filesystem() {
   mount "${DEVICE}" "$MNT_POINT"
 
   print_output "[*] Copy root filesystem to QEMU image"
-  cp -pri "$ROOT_PATH"/* "$MNT_POINT"/
+  rm -rf "${MNT_POINT:?}/"*
+  cp -prf "$ROOT_PATH"/* "$MNT_POINT"/
 
   print_output "[*] Creating FIRMADYNE Directories"
   mkdir -p "$MNT_POINT/firmadyne/libnvram/"

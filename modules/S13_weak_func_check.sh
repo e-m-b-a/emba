@@ -153,8 +153,8 @@ function_check_PPC32(){
 
 function_check_MIPS32() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    FUNC_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
-    STRLEN_ADDR=$(readelf -A "$LINE" 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+    FUNC_ADDR=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+    STRLEN_ADDR=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
     if [[ -n "$FUNC_ADDR" ]] ; then
       NAME=$(basename "$LINE" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
