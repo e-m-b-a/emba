@@ -31,10 +31,9 @@ L10_system_emulator() {
 
     if [[ $IN_DOCKER -eq 1 ]] ; then
       print_output "[!] This module is in an very early alpha state!"
-      print_output "[!] This module is only fully working in developer mode!"
     fi
 
-    print_output "[!] This module creates a full copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+    print_output "[*] This module creates a full copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
     if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" ]]; then
 
