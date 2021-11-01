@@ -1037,6 +1037,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
   print_tool_info "kpartx" 1
   print_tool_info "nmap" 1
   print_tool_info "snmp" 1
+  print_tool_info "snmpcheck" 1
   print_tool_info "uml-utilities" 1
   print_tool_info "util-linux" 1
   print_tool_info "vlan" 1
