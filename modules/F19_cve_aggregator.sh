@@ -164,6 +164,11 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
     #ftpd (GNU inetutils) 1.4.2
     VERSION_lower="${VERSION_lower//\(gnu inetutils\)/inetutils}"
+    # depmod/insmod -> kmod
+    VERSION_lower="${VERSION_lower//depmod\ /kmod\ }"
+    VERSION_lower="${VERSION_lower//insmod\ /kmod\ }"
+    #  tcci version: tcci V
+    VERSION_lower="${VERSION_lower//\ tcci\ version:\ tcci\ V/tcci\ }"
     #conntrack v1.0.0 (conntrack-tools)
     VERSION_lower="${VERSION_lower/conntrack/conntrack-tools}"
     #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
@@ -544,6 +549,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ coreutils.*)/gnu:coreutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sharutils.*)/gnu:sharutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(xz\ utils.*)/xz-utils/')"
+    # Embedthis Appweb 3.3.4-0
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/embedthis\ appweb/embedthis:appweb/')"
     # BIRD Internet routing daemon
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/bird/:bird:/')"
     # inadyn 1.96-adv

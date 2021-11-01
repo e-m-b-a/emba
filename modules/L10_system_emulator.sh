@@ -100,9 +100,10 @@ create_emulation_filesystem() {
   export IMAGE_NAME
   IMAGE_NAME="$(basename "$ROOT_PATH")_$ARCH_END"
   MNT_POINT="$LOG_PATH_MODULE/emulation_tmp_fs"
-  if ! [[ -d "$MNT_POINT" ]]; then
-    mkdir "$MNT_POINT"
+  if [[ -d "$MNT_POINT" ]]; then
+    MNT_POINT="$MNT_POINT"-"$RANDOM"
   fi
+  mkdir "$MNT_POINT"
 
   print_output "[*] Create filesystem for emulation - $ROOT_PATH.\\n"
   IMAGE_SIZE="$(du -b --max-depth=0 "$ROOT_PATH" | awk '{print $1}')"
@@ -129,7 +130,7 @@ create_emulation_filesystem() {
   mount "${DEVICE}" "$MNT_POINT"
 
   print_output "[*] Copy root filesystem to QEMU image"
-  rm -rf "${MNT_POINT:?}/"*
+  #rm -rf "${MNT_POINT:?}/"*
   cp -prf "$ROOT_PATH"/* "$MNT_POINT"/
 
   print_output "[*] Creating FIRMADYNE Directories"
@@ -162,6 +163,7 @@ create_emulation_filesystem() {
   kpartx -d "$LOG_PATH_MODULE/$IMAGE_NAME"
   losetup -d "${DEVICE}" &>/dev/null
   dmsetup remove "$(basename "$DEVICE")" &>/dev/null
+  rm -rf "${MNT_POINT:?}/"*
 }
 
 identify_networking() {

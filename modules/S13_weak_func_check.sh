@@ -418,9 +418,9 @@ output_function_details()
     SEARCH_TERM=$(basename "$LINE")
     if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
       COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
-      echo -e "[$GREEN+$NC] ""$GREEN"File "$(print_path "$LINE") found in default Linux file dictionary""$NC" >> "$SUPPL_PATH"/common_linux_files.txt
+      write_log "[+] File $(print_path "$LINE") found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
     else
-      echo -e "[$GREEN+$NC] ""$ORANGE"File "$(print_path "$LINE")""$NC""$GREEN"" not found in default Linux file dictionary""$NC" >> "$SUPPL_PATH"/common_linux_files.txt
+      write_log "[+] File $(print_path "$LINE") not found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
       COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
     fi
   else
