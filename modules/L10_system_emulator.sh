@@ -172,8 +172,8 @@ create_emulation_filesystem() {
   kpartx -v -d "$LOG_PATH_MODULE/$IMAGE_NAME"
   losetup -d "${DEVICE}" &>/dev/null
   # just in case we check the output and remove our device:
-  if losetup | grep -q $(basename "$IMAGE_NAME"); then
-    losetup -d $(losetup | grep $(basename "$IMAGE_NAME") | awk '{print $1}')
+  if losetup | grep -q "$(basename "$IMAGE_NAME")"; then
+    losetup -d "$(losetup | grep "$(basename "$IMAGE_NAME")" | awk '{print $1}')"
   fi
   dmsetup remove "$(basename "$DEVICE")" &>/dev/null
   rm -rf "${MNT_POINT:?}/"*
