@@ -97,18 +97,18 @@ F19_cve_aggregator() {
 }
 
 prepare_version_data() {
+    # TODO: remove this from the script and move it into the binary version config file
     #print_output "$VERSION_lower"
     # we try to handle as many version strings as possible through these generic rules
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
     # tab -> space
     # remove multiple spaces
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
-    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(static\)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ (static)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(license:\ .*\)\ \(static\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ \(license:\ .*\)\ \(static\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ \(license:\ .*\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ \(license:\ .*\)\ \(emulation\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ \(static\)\./\ }"
     VERSION_lower="${VERSION_lower//\ for\ d-link\ device\./\ }"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"

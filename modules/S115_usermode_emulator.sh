@@ -191,7 +191,7 @@ version_detection() {
   sub_module_title "Identified software components."
 
   while read -r VERSION_LINE; do 
-    if ! echo "$LINE" | grep -q "^[^#*/;]"; then
+    if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
       continue
     fi
 
@@ -252,12 +252,12 @@ version_detection_thread() {
         fi
 
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
-          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH$GREEN (emulation)." "" "$LOG_PATH"
+          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH"
           continue
         else
           # binary path set in strict mode
           for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (emulation)." "" "$LOG_PATH"
+            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH"
           done
         fi
         BINARY_PATH=""
