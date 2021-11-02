@@ -33,16 +33,21 @@ S09_firmware_base_version_check() {
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
+    if ! echo "$LINE" | grep -q "^[^#*/;]"; then
+      continue
+    fi
+
     echo "." | tr -d "\n"
 
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
+    LIC="$(echo "$VERSION_LINE" | cut -d: -f3)"
     BIN_NAME="$(echo "$VERSION_LINE" | cut -d: -f1)"
 
     # as we do not have a typical linux executable we can't use strict version details
     # but to not exhaust the run time we only search for stuff that we know is possible to detect
     # on the other hand, if we do not use emulation for deeper detection we run all checks
 
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f4- | sed s/^\"// | sed s/\"$//)"
 
     if [[ $STRICT != "strict" ]]; then
       echo "." | tr -d "\n"

@@ -695,6 +695,9 @@ main()
   fi
   if [[ -f "$HTML_PATH"/index.html ]]; then
     print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main" 
+    if [[ -f "$HTML_PATH"/index.html ]]; then
+      print_output "[*] Open the web-report with$ORANGE firefox $HTML_PATH/index.html$NC\\n" "main"
+    fi
   fi
 }
 
