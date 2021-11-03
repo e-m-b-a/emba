@@ -122,8 +122,12 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
     # smbd -> samba
     VERSION_lower="${VERSION_lower/smbd/samba}"
+    # klogd -> sysklogd
+    VERSION_lower="${VERSION_lower/klogd/sysklogd}"
     # jq-1.5 -> jq 1.5
     VERSION_lower="${VERSION_lower/jq-/jq\ }"
+    # ^X-Powered-By:\ PHP\/[0-9]\.[0-9]+(\.[0-9]+)+?$
+    VERSION_lower="${VERSION_lower/x-powered-by:\ php\//php\ }"
     #Modern traceroute for Linux, version 2.1.0
     VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
     #signver - verify a detached PKCS7 signature - Version 3.26.2
@@ -142,6 +146,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/pax-utils-v/pax-utils\ }"
     #(tzcode) 
     VERSION_lower="${VERSION_lower/\(tzcode\)\ /tzcode\ }"
+    #INIT_VERSION\=sysvinit-
+    VERSION_lower="${VERSION_lower/INIT\_VERSION=sysvinit-/sysvinit\ }"
     # #mkenvimage version 2016.11+dfsg1-4
     # VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
     # #mkimage version 2016.11+dfsg1-4
@@ -178,6 +184,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//(gdb)\ /}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
+    VERSION_lower="${VERSION_lower//udev-/udev\ }"
     # some - -> space
     VERSION_lower="${VERSION_lower//acpid-/acpid\ }"
     VERSION_lower="${VERSION_lower//linux-/linux\ }"
@@ -194,6 +201,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//sudoreplay/sudo}"
     #visudo -> sudo
     VERSION_lower="${VERSION_lower//visudo/sudo}"
+    #sudo-1.2.3/ -> sudo
+    VERSION_lower="${VERSION_lower//sudo-/sudo }"
     # VIM - Vi IMproved 1.2
     VERSION_lower="${VERSION_lower//vim\ -\ vi\ improved/vim}"
     #zic.c
@@ -611,9 +620,11 @@ prepare_version_data() {
     # final cleanup of start and ending
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-beta$//')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-devel$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^-//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^_//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-$//')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\/$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/_$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^\ //')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ $//')"
