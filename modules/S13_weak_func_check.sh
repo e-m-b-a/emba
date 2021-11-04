@@ -118,6 +118,7 @@ function_check_PPC32(){
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
+      NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null)
@@ -155,6 +156,7 @@ function_check_MIPS32() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     FUNC_ADDR=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
     STRLEN_ADDR=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null)
+    NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept" 2> /dev/null)
     if [[ -n "$FUNC_ADDR" ]] ; then
       NAME=$(basename "$LINE" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -194,6 +196,7 @@ function_check_MIPS32() {
 function_check_ARM64() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
+    NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
       mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     else
@@ -230,6 +233,7 @@ function_check_ARM64() {
 function_check_ARM32() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
+    NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
       mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null)
     else
@@ -265,6 +269,7 @@ function_check_ARM32() {
 function_check_x86() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
@@ -301,6 +306,7 @@ function_check_x86() {
 function_check_x86_64() {
    for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null)
@@ -431,13 +437,19 @@ output_function_details()
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
   mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
   
+  if [[ "$NETWORKING" -gt 1 ]]; then
+    NETWORKING_="${ORANGE}networking: yes${NC}"
+  else
+    NETWORKING_="${GREEN}networking: no${NC}"
+  fi
+
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
     else
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     fi
     write_s13_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
   fi

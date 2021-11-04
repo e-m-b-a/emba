@@ -13,42 +13,61 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
+# Description:  Collects license details and gives a list with binaries, identified version and
+#               the corresponding license (if available). The license details are maintained in the
+#               configuration file config/bin_version_strings.cfg
+
 
 F10_license_summary() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "License summary"
+  module_title "License inventory"
   COUNT_LIC=0
 
   mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt | grep -v "unknown" | sort -u)")
-  eval "LICENSE_DETECTION_STATIC=($(for i in "${LICENSE_DETECTION_STATIC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  # [+] Version information found BusyBox v1.14.1  in binary /bin/busybox (-rwxr-xr-x root root) (license: gplv2) (static).
-
   mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s115_*.txt | grep -v "unknown" | sort -u)")
-  eval "LICENSE_DETECTION_DYN=($(for i in "${LICENSE_DETECTION_DYN[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  # [+] Version information found BusyBox v1.14.1 (2012-10-10 12:06:47 CST) multi-call binary in binary /bin/busybox (license: gplv2) (emulation).
 
   # static version detection
   for ENTRY in "${LICENSE_DETECTION_STATIC[@]}"; do
+    if [[ -z "$ENTRY" ]]; then
+      continue
+    fi
+
     if [[ "$ENTRY" == *"in binary"* ]]; then
       BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
+      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
       LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
     elif [[ "$ENTRY" == *"binwalk logs"* ]]; then
-      BINARY="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binwalk logs.*//')"
-      LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
+      BINARY="NA"
+      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binwalk logs.*//')"
+      LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//' | tr -d ")" | sed 's/\.$//')"
     else
       # shellcheck disable=SC2001
       BINARY="$(echo "$ENTRY" | sed 's/.*Version information found //')"
+      VERSION="NA"
       LICENSE="$(echo "$ENTRY" | sed 's/.*Version information found //' | grep -o "license: .*)" | tr -d ")" | sed 's/license\:\ //')"
     fi
-    print_output "[+] Binary: $ORANGE$BINARY$GREEN License: $ORANGE$LICENSE$NC"
+
+    print_output "[+] Binary: $ORANGE$(basename "$BINARY" | cut -d\  -f1)$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
     ((COUNT_LIC+=1))
   done
 
   # Qemu version detection
   for ENTRY in "${LICENSE_DETECTION_DYN[@]}"; do
-    BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
-    LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
-    print_output "[+] Binary: $ORANGE$BINARY$GREEN License: $ORANGE$LICENSE$NC"
+    if [[ -z "$ENTRY" ]]; then
+      continue
+    fi
+
+    if [[ "$ENTRY" == *"in binary"* ]]; then
+      BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
+      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
+      LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
+    elif [[ "$ENTRY" == *"qemu log file"* ]]; then
+      BINARY="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/ (license: .*//')"
+      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in qemu log file .*//')"
+      LICENSE="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
+    fi
+
+    print_output "[+] Binary: $ORANGE$(basename "$BINARY")$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
     ((COUNT_LIC+=1))
   done
 

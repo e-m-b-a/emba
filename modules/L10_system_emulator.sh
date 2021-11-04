@@ -50,6 +50,8 @@ L10_system_emulator() {
           CONSOLE=$(get_console "$ARCH_END")
           LIBNVRAM=$(get_nvram "$ARCH_END")
 
+          pre_cleanup
+
           create_emulation_filesystem "$R_PATH" "$ARCH_END"
           if [[ "$FS_CREATED" -eq 1 ]]; then
             identify_networking "$IMAGE_NAME" "$ARCH_END"
@@ -91,6 +93,17 @@ L10_system_emulator() {
   write_log "[*] Statistics:$SYS_ONLINE:${#IPS[@]}"
   module_end_log "${FUNCNAME[0]}" "$MODULE_END"
 
+}
+
+pre_cleanup() {
+  # this cleanup function is to ensure that we have no mounts from previous tests mounted
+  print_output "[*] Checking for not unmounted proc, sys and run in log directory"
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$LOG_DIR" | grep "proc\|sys\|run" )
+  for MOUNT in "${CHECK_MOUNTS[@]}"; do
+    print_output "[*] Unmounting $MOUNT"
+    MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
+    umount -l "$MOUNT"
+  done
 }
 
 create_emulation_filesystem() {
