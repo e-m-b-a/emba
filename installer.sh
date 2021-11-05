@@ -240,11 +240,13 @@ while getopts cCdDFhl OPT ; do
     c)
       export COMPLEMENT=1
       export FORCE=1
+      export CVE_SEARCH=0
       echo -e "$GREEN""$BOLD""Complement EMBA dependecies""$NC"
       ;;
     d)
       export DOCKER_SETUP=1
       export FORCE=1
+      export CVE_SEARCH=0
       echo -e "$GREEN""$BOLD""Install all dependecies for EMBA in default/docker mode""$NC"
       ;;
     C)
@@ -259,12 +261,14 @@ while getopts cCdDFhl OPT ; do
       export IN_DOCKER=1
       export DOCKER_SETUP=0
       export FORCE=1
+      export CVE_SEARCH=0
       echo -e "$GREEN""$BOLD""Install EMBA in docker image - used for building a docker image""$NC"
       ;;
     F)
       export FORCE=1
       export FULL=1
       export DOCKER_SETUP=0
+      export CVE_SEARCH=0
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
     h)
