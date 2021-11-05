@@ -191,6 +191,10 @@ version_detection() {
   sub_module_title "Identified software components."
 
   while read -r VERSION_LINE; do 
+    if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
+      continue
+    fi
+
     if [[ $THREADING -eq 1 ]]; then
       version_detection_thread &
       WAIT_PIDS_S115+=( "$!" )
@@ -208,8 +212,9 @@ version_detection_thread() {
   # BINARY used for strict mode
   BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
   STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
+  LIC="$(echo "$VERSION_LINE" | cut -d: -f3)"
 
-  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
+  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f4- | sed s/^\"// | sed s/\"$//)"
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT != "strict" ]]; then
@@ -247,12 +252,12 @@ version_detection_thread() {
         fi
 
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
-          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH$GREEN (emulation)." "" "$LOG_PATH"
+          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH"
           continue
         else
           # binary path set in strict mode
           for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (emulation)." "" "$LOG_PATH"
+            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH"
           done
         fi
         BINARY_PATH=""

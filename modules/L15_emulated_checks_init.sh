@@ -51,7 +51,7 @@ check_live_nmap_basic() {
   sub_module_title "Nmap portscans for emulated system with IP $IP"
 
   nmap -sSV "$IP" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP" | tee -a "$LOG_FILE"
-  mapfile -t NMAP_PORTS_SERVICES < <(grep Ports "$LOG_PATH_MODULE"/nmap-basic-"$IP".gnmap | cut -d: -f3- | sed -E 's/\/,/\n/g' | sed -E 's/\/[[:space:]]+Ignored State:.*//' | sed 's/\/$//')
+  mapfile -t NMAP_PORTS_SERVICES < <(grep Ports "$LOG_PATH_MODULE"/nmap-basic-"$IP".gnmap | grep -v "Ignored State:" | cut -d: -f3- | sed -E 's/\/,/\n/g' | sed 's/\/$//')
 
   print_output ""
   for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do

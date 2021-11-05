@@ -31,10 +31,9 @@ L10_system_emulator() {
 
     if [[ $IN_DOCKER -eq 1 ]] ; then
       print_output "[!] This module is in an very early alpha state!"
-      print_output "[!] This module is only fully working in developer mode!"
     fi
 
-    print_output "[!] This module creates a full copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+    print_output "[*] This module creates a full copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
     if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" ]]; then
 
@@ -51,23 +50,29 @@ L10_system_emulator() {
           CONSOLE=$(get_console "$ARCH_END")
           LIBNVRAM=$(get_nvram "$ARCH_END")
 
-          create_emulation_filesystem "$R_PATH" "$ARCH_END"
-          identify_networking "$IMAGE_NAME" "$ARCH_END"
-          get_networking_details
+          pre_cleanup
 
-          if [[ "$KPANIC" -eq 0 && "${#IPS[@]}" -gt 0 ]]; then
-            setup_network
-            run_emulated_system
-            check_online_stat
-            if [[ "$SYS_ONLINE" -eq 1 ]]; then
-              print_output "[+] System emulation was successful."
-              print_output "[+] System should be available via IP $IP."
+          create_emulation_filesystem "$R_PATH" "$ARCH_END"
+          if [[ "$FS_CREATED" -eq 1 ]]; then
+            identify_networking "$IMAGE_NAME" "$ARCH_END"
+            get_networking_details
+
+            if [[ "$KPANIC" -eq 0 && "${#IPS[@]}" -gt 0 ]]; then
+              setup_network
+              run_emulated_system
+              check_online_stat
+              if [[ "$SYS_ONLINE" -eq 1 ]]; then
+                print_output "[+] System emulation was successful."
+                print_output "[+] System should be available via IP $IP."
+              else
+                reset_network
+              fi
+              create_emulation_archive
+              # if the emulation was successful, we stop here - no emulation of other detected rootfs
+              break
             else
-              reset_network
+              print_output "[!] No further emulation steps are performed"
             fi
-            create_emulation_archive
-            # if the emulation was successful, we stop here - no emulation of other detected rootfs
-            break
           else
             print_output "[!] No further emulation steps are performed"
           fi
@@ -90,6 +95,17 @@ L10_system_emulator() {
 
 }
 
+pre_cleanup() {
+  # this cleanup function is to ensure that we have no mounts from previous tests mounted
+  print_output "[*] Checking for not unmounted proc, sys and run in log directory"
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$LOG_DIR" | grep "proc\|sys\|run" )
+  for MOUNT in "${CHECK_MOUNTS[@]}"; do
+    print_output "[*] Unmounting $MOUNT"
+    MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
+    umount -l "$MOUNT"
+  done
+}
+
 create_emulation_filesystem() {
   # based on the original firmadyne script:
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/makeImage.sh
@@ -98,11 +114,13 @@ create_emulation_filesystem() {
   ROOT_PATH="$1"
   ARCH_END="$2"
   export IMAGE_NAME
-  IMAGE_NAME="$(basename "$ROOT_PATH")_$ARCH_END"
+  FS_CREATED=1
+  IMAGE_NAME="$(basename "$ROOT_PATH")_$ARCH_END-$RANDOM"
   MNT_POINT="$LOG_PATH_MODULE/emulation_tmp_fs"
-  if ! [[ -d "$MNT_POINT" ]]; then
-    mkdir "$MNT_POINT"
+  if [[ -d "$MNT_POINT" ]]; then
+    MNT_POINT="$MNT_POINT"-"$RANDOM"
   fi
+  mkdir "$MNT_POINT"
 
   print_output "[*] Create filesystem for emulation - $ROOT_PATH.\\n"
   IMAGE_SIZE="$(du -b --max-depth=0 "$ROOT_PATH" | awk '{print $1}')"
@@ -111,7 +129,7 @@ create_emulation_filesystem() {
   print_output "[*] Size of filesystem for emulation - $IMAGE_SIZE.\\n"
   print_output "[*] Name of filesystem for emulation - $IMAGE_NAME.\\n"
   qemu-img create -f raw "$LOG_PATH_MODULE/$IMAGE_NAME" "$IMAGE_SIZE"
-  chmod a+rw "$LOG_PATH_MODULE/$IMAGE_NAME" | tee -a "$LOG_FILE"
+  chmod a+rw "$LOG_PATH_MODULE/$IMAGE_NAME"
 
   print_output "[*] Creating Partition Table"
   echo -e "o\nn\np\n1\n\n\nw" | /sbin/fdisk "$LOG_PATH_MODULE/$IMAGE_NAME"
@@ -125,43 +143,52 @@ create_emulation_filesystem() {
   mkfs.ext2 "${DEVICE}"
   sync
 
-  print_output "[*] Mounting QEMU Image Partition 1"
+  print_output "[*] Mounting QEMU Image Partition 1 to $MNT_POINT"
   mount "${DEVICE}" "$MNT_POINT"
+  if mount | grep -q "$MNT_POINT"; then
+    print_output "[*] Copy root filesystem to QEMU image"
+    #rm -rf "${MNT_POINT:?}/"*
+    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/
 
-  print_output "[*] Copy root filesystem to QEMU image"
-  rm -rf "${MNT_POINT:?}/"*
-  cp -prf "$ROOT_PATH"/* "$MNT_POINT"/
+    print_output "[*] Creating FIRMADYNE Directories"
+    mkdir -p "$MNT_POINT/firmadyne/libnvram/"
+    mkdir "$MNT_POINT/firmadyne/libnvram.override/"
 
-  print_output "[*] Creating FIRMADYNE Directories"
-  mkdir -p "$MNT_POINT/firmadyne/libnvram/"
-  mkdir "$MNT_POINT/firmadyne/libnvram.override/"
+    print_output "[*] Patching Filesystem (chroot)"
+    cp "$(which busybox)" "$MNT_POINT"
+    cp "$FIRMADYNE_DIR/scripts/fixImage.sh" "$MNT_POINT"
+    chroot "$MNT_POINT" /busybox ash /fixImage.sh
+    rm "$MNT_POINT/fixImage.sh"
+    rm "$MNT_POINT/busybox"
 
-  print_output "[*] Patching Filesystem (chroot)"
-  cp "$(which busybox)" "$MNT_POINT"
-  cp "$FIRMADYNE_DIR/scripts/fixImage.sh" "$MNT_POINT"
-  chroot "$MNT_POINT" /busybox ash /fixImage.sh
-  rm "$MNT_POINT/fixImage.sh"
-  rm "$MNT_POINT/busybox"
+    print_output "[*] Setting up FIRMADYNE"
+    cp "${CONSOLE}" "$MNT_POINT/firmadyne/console"
+    chmod a+x "$MNT_POINT/firmadyne/console"
+    mknod -m 666 "$MNT_POINT/firmadyne/ttyS1" c 4 65
 
-  print_output "[*] Setting up FIRMADYNE"
-  cp "${CONSOLE}" "$MNT_POINT/firmadyne/console"
-  chmod a+x "$MNT_POINT/firmadyne/console"
-  mknod -m 666 "$MNT_POINT/firmadyne/ttyS1" c 4 65
+    cp "${LIBNVRAM}" "$MNT_POINT/firmadyne/libnvram.so"
+    chmod a+x "$MNT_POINT/firmadyne/libnvram.so"
 
-  cp "${LIBNVRAM}" "$MNT_POINT/firmadyne/libnvram.so"
-  chmod a+x "$MNT_POINT/firmadyne/libnvram.so"
+    cp "$FIRMADYNE_DIR/scripts/preInit.sh" "$MNT_POINT/firmadyne/preInit.sh"
+    chmod a+x "$MNT_POINT/firmadyne/preInit.sh"
 
-  cp "$FIRMADYNE_DIR/scripts/preInit.sh" "$MNT_POINT/firmadyne/preInit.sh"
-  chmod a+x "$MNT_POINT/firmadyne/preInit.sh"
+    print_output "[*] Unmounting QEMU Image"
+    sync
+    umount "${DEVICE}"
 
-  print_output "[*] Unmounting QEMU Image"
-  sync
-  umount "${DEVICE}"
-
+  else
+    print_output "[!] Filesystem mount failed"
+    FS_CREATED=0
+  fi
   print_output "[*] Deleting device mapper"
-  kpartx -d "$LOG_PATH_MODULE/$IMAGE_NAME"
+  kpartx -v -d "$LOG_PATH_MODULE/$IMAGE_NAME"
   losetup -d "${DEVICE}" &>/dev/null
+  # just in case we check the output and remove our device:
+  if losetup | grep -q "$(basename "$IMAGE_NAME")"; then
+    losetup -d "$(losetup | grep "$(basename "$IMAGE_NAME")" | awk '{print $1}')"
+  fi
   dmsetup remove "$(basename "$DEVICE")" &>/dev/null
+  rm -rf "${MNT_POINT:?}/"*
 }
 
 identify_networking() {

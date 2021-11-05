@@ -97,18 +97,18 @@ F19_cve_aggregator() {
 }
 
 prepare_version_data() {
+    # TODO: remove this from the script and move it into the binary version config file
     #print_output "$VERSION_lower"
     # we try to handle as many version strings as possible through these generic rules
     VERSION_lower="$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')"
     # tab -> space
     # remove multiple spaces
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/[[:space:]]\+/\ /g')"
-    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(static\)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ (static)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ (static)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ (static)\./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs./\ }"
-    VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ (emulation)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extracted\ firmware\ files\ \(license:\ .*\)\ \(static\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ original\ firmware\ file\ \(license:\ .*\)\ \(static\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ binwalk\ logs\ \(license:\ .*\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ qemu\ log\ file\ \(license:\ .*\)\ \(emulation\)\./\ }"
+    VERSION_lower="${VERSION_lower//\ in\ extraction\ logs\ \(static\)\./\ }"
     VERSION_lower="${VERSION_lower//\ for\ d-link\ device\./\ }"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ binary\ .*\./\ /g')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/\ in\ kernel\ image\ .*\./\ /g')"
@@ -122,8 +122,12 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
     # smbd -> samba
     VERSION_lower="${VERSION_lower/smbd/samba}"
+    # klogd -> sysklogd
+    VERSION_lower="${VERSION_lower/klogd/sysklogd}"
     # jq-1.5 -> jq 1.5
     VERSION_lower="${VERSION_lower/jq-/jq\ }"
+    # ^X-Powered-By:\ PHP\/[0-9]\.[0-9]+(\.[0-9]+)+?$
+    VERSION_lower="${VERSION_lower/x-powered-by:\ php\//php\ }"
     #Modern traceroute for Linux, version 2.1.0
     VERSION_lower="${VERSION_lower/modern\ traceroute\ for\ linux/traceroute}"
     #signver - verify a detached PKCS7 signature - Version 3.26.2
@@ -142,6 +146,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/pax-utils-v/pax-utils\ }"
     #(tzcode) 
     VERSION_lower="${VERSION_lower/\(tzcode\)\ /tzcode\ }"
+    #INIT_VERSION\=sysvinit-
+    VERSION_lower="${VERSION_lower/INIT\_VERSION=sysvinit-/sysvinit\ }"
     # #mkenvimage version 2016.11+dfsg1-4
     # VERSION_lower="${VERSION_lower/mkenvimage\ /u-boot\ }"
     # #mkimage version 2016.11+dfsg1-4
@@ -164,6 +170,11 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
     #ftpd (GNU inetutils) 1.4.2
     VERSION_lower="${VERSION_lower//\(gnu inetutils\)/inetutils}"
+    # depmod/insmod -> kmod
+    VERSION_lower="${VERSION_lower//depmod\ /kmod\ }"
+    VERSION_lower="${VERSION_lower//insmod\ /kmod\ }"
+    #  tcci version: tcci V
+    VERSION_lower="${VERSION_lower//\ tcci\ version:\ tcci\ V/tcci\ }"
     #conntrack v1.0.0 (conntrack-tools)
     VERSION_lower="${VERSION_lower/conntrack/conntrack-tools}"
     #chronyc (chrony) version 3.5 (-READLINE -SECHASH +IPV6 -DEBUG)
@@ -173,6 +184,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//(gdb)\ /}"
     #udevadm -> systemd
     VERSION_lower="${VERSION_lower//udevadm/systemd}"
+    VERSION_lower="${VERSION_lower//udev-/udev\ }"
     # some - -> space
     VERSION_lower="${VERSION_lower//acpid-/acpid\ }"
     VERSION_lower="${VERSION_lower//linux-/linux\ }"
@@ -189,6 +201,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//sudoreplay/sudo}"
     #visudo -> sudo
     VERSION_lower="${VERSION_lower//visudo/sudo}"
+    #sudo-1.2.3/ -> sudo
+    VERSION_lower="${VERSION_lower//sudo-/sudo }"
     # VIM - Vi IMproved 1.2
     VERSION_lower="${VERSION_lower//vim\ -\ vi\ improved/vim}"
     #zic.c
@@ -544,6 +558,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ coreutils.*)/gnu:coreutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(gnu\ sharutils.*)/gnu:sharutils/')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/(xz\ utils.*)/xz-utils/')"
+    # Embedthis Appweb 3.3.4-0
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/embedthis\ appweb/embedthis:appweb/')"
     # BIRD Internet routing daemon
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/bird/:bird:/')"
     # inadyn 1.96-adv
@@ -604,9 +620,11 @@ prepare_version_data() {
     # final cleanup of start and ending
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-git$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-beta$//')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-devel$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^-//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^_//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/-$//')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\/$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/_$//')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^\ //')"
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\ $//')"

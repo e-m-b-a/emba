@@ -33,16 +33,21 @@ S09_firmware_base_version_check() {
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
   while read -r VERSION_LINE; do
+    if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
+      continue
+    fi
+
     echo "." | tr -d "\n"
 
     STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
+    LIC="$(echo "$VERSION_LINE" | cut -d: -f3)"
     BIN_NAME="$(echo "$VERSION_LINE" | cut -d: -f1)"
 
     # as we do not have a typical linux executable we can't use strict version details
     # but to not exhaust the run time we only search for stuff that we know is possible to detect
     # on the other hand, if we do not use emulation for deeper detection we run all checks
 
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f3- | sed s/^\"// | sed s/\"$//)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f4- | sed s/^\"// | sed s/\"$//)"
 
     if [[ $STRICT != "strict" ]]; then
       echo "." | tr -d "\n"
@@ -51,7 +56,7 @@ S09_firmware_base_version_check() {
       VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null)
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
-        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs."
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs (license: $ORANGE$LIC$GREEN)."
         echo "." | tr -d "\n"
       fi
       
@@ -62,7 +67,7 @@ S09_firmware_base_version_check() {
 
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (static)."
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
         fi  
         echo "." | tr -d "\n"
       fi  
@@ -93,7 +98,7 @@ S09_firmware_base_version_check() {
             VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
             if [[ -n $VERSION_FINDER ]]; then
               echo ""
-              print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static - strict)."
+              print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
               continue
             fi
           fi
@@ -134,14 +139,14 @@ bin_string_checker() {
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static)."
+          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
           continue
         fi
       elif [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* ]] ; then
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (static)."
+          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
           continue
         fi
       fi
@@ -149,7 +154,7 @@ bin_string_checker() {
       VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
-        print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (static)."
+        print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
         continue
       fi
     fi
