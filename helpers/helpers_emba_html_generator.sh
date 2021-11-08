@@ -108,9 +108,9 @@ add_link_tags() {
             generate_info_file "$REF_LINK" "$BACK_LINK"
           fi
           if [[ -n "$REF_ANCHOR" ]] ; then
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html""#anchor_$REF_ANCHOR@g")"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g")"
           else
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%.${REF_LINK##*.}}").html@g")"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g")"
           fi
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
@@ -274,7 +274,7 @@ generate_info_file()
   SRC_FILE=$2
   CUSTOM_SUB_PATH=$3
 
-  INFO_HTML_FILE="$(basename "${INFO_FILE%.${INFO_FILE##*.}}"".html")"
+  INFO_HTML_FILE="$(basename "${INFO_FILE%."${INFO_FILE##*.}"}"".html")"
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
     INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 )"
   else
@@ -336,8 +336,8 @@ generate_report_file()
   # if set to 1, then generate file in supplementary folder and link to menu
   SUPPL_FILE_GEN=$2
 
-  if ! ( grep -a -o -i -q "$(basename "${REPORT_FILE%.${REPORT_FILE##*.}}")"" nothing reported" "$REPORT_FILE" ) ; then
-    HTML_FILE="$(basename "${REPORT_FILE%.${REPORT_FILE##*.}}"".html")"
+  if ! ( grep -a -o -i -q "$(basename "${REPORT_FILE%."${REPORT_FILE##*.}"}")"" nothing reported" "$REPORT_FILE" ) ; then
+    HTML_FILE="$(basename "${REPORT_FILE%."${REPORT_FILE##*.}"}"".html")"
     if [[ $SUPPL_FILE_GEN -eq 1 ]] ; then
       cp "./helpers/base.html" "$ABS_HTML_PATH$SUPPL_PATH_HTML""/""$HTML_FILE"
     else
@@ -450,7 +450,7 @@ update_index()
 {
   # add emba.log to webreport
   generate_report_file "$MAIN_LOG"
-  sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%.${MAIN_LOG##*.}}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
+  sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%."${MAIN_LOG##*.}"}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
   # generate files in $SUPPL_PATH (supplementary files from modules) 
   readarray -t SUPPL_FILES < <(find "$SUPPL_PATH" ! -path "$SUPPL_PATH")
   if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
@@ -459,8 +459,8 @@ update_index()
   for S_FILE in "${SUPPL_FILES[@]}" ; do
     generate_info_file "$S_FILE" "" "$SUPPL_PATH_HTML"
     LINE_NUMBER_NAV=$(grep -a -n "etc start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
-    REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_PATH_HTML/$(basename "${S_FILE%.${S_FILE##*.}}"".html")@g")"
-    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%.${S_FILE##*.}}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
+    REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_PATH_HTML/$(basename "${S_FILE%."${S_FILE##*.}"}"".html")@g")"
+    sed -i "$LINE_NUMBER_NAV""i""$REP_NAV_LINK""$(basename "${S_FILE%."${S_FILE##*.}"}")""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   done
   scan_report
   add_arrows
