@@ -341,6 +341,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/rngtest/rngd}"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
+    # cnid_dbd (Netatalk 2.2.5)
+    VERSION_lower="${VERSION_lower//cnid_dbd\ \(netatalk\ /netatalk\ }"
     # lsusb (usbutils)
     VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/nc\.traditional\ \[v\ /nc.traditional\ /g')"

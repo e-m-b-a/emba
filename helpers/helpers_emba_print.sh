@@ -148,6 +148,19 @@ write_log()
   fi
 }
 
+write_csv_log() {
+  local CSV_ITEMS=("$@")
+  # CSV_LOG=$(echo "$LOG_FILE" | sed 's/.txt$/.csv/')
+  CSV_LOG="${LOG_FILE/\.txt$/\.csv}"
+
+  W_LOG_FILE="$CSV_LOG"
+
+  (
+  IFS=,
+    echo -e "${CSV_ITEMS[*]}" | tee -a "$W_LOG_FILE" >/dev/null
+  )
+}
+
 write_grep_log()
 {
   OLD_MESSAGE_TYPE=""

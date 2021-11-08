@@ -358,6 +358,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     print_tool_info "radare2" 1
     print_tool_info "metasploit-framework" 1
     print_tool_info "iputils-ping" 1
+    print_tool_info "u-boot-tools" 1
   
     if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
       echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"

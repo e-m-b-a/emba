@@ -23,8 +23,8 @@ F10_license_summary() {
   module_title "License inventory"
   COUNT_LIC=0
 
-  mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt | grep -v "unknown" | sort -u)")
-  mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s115_*.txt | grep -v "unknown" | sort -u)")
+  mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")
+  mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s115_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")
 
   # static version detection
   for ENTRY in "${LICENSE_DETECTION_STATIC[@]}"; do

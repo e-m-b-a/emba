@@ -89,10 +89,10 @@ os_identification() {
       OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "Original Siemens Equipment")" ))
     fi
 
-    if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  ${#ROOT_PATH[@]} -gt 1 ]] ; then 
+    if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 && ${#ROOT_PATH[@]} -gt 1 ]] ; then
       printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       DETECTED=1
-    elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 &&  $LINUX_PATH_COUNTER -gt 2 ]] ; then 
+    elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 && $LINUX_PATH_COUNTER -gt 2 ]] ; then
       printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       DETECTED=1
     elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 ]] ; then 

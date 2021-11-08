@@ -185,6 +185,9 @@ dependency_check()
     # bc
     check_dep_tool "bc"
 
+    # mkimage (uboot)
+    check_dep_tool "mkimage"
+
     # radare2
     check_dep_tool "r2"
 

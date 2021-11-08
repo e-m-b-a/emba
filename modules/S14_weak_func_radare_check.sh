@@ -121,6 +121,7 @@ S14_weak_func_radare_check()
 }
 
 radare_function_check_PPC32(){
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
@@ -150,6 +151,7 @@ radare_function_check_PPC32(){
 }
 
 radare_function_check_MIPS32() {
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -180,6 +182,7 @@ radare_function_check_MIPS32() {
 }
 
 radare_function_check_ARM64() {
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -209,6 +212,7 @@ radare_function_check_ARM64() {
 }
 
 radare_function_check_ARM32() {
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -238,6 +242,7 @@ radare_function_check_ARM32() {
 }
 
 radare_function_check_x86() {
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -267,7 +272,8 @@ radare_function_check_x86() {
 }
 
 radare_function_check_x86_64() {
-   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
+  for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
@@ -401,18 +407,24 @@ radare_output_function_details()
 
   LOG_FILE_LOC_OLD="$LOG_FILE_LOC"
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
+
   mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
   
+  if [[ "$NETWORKING" -gt 1 ]]; then
+    NETWORKING_="${ORANGE}networking: yes${NC}"
+  else
+    NETWORKING_="${GREEN}networking: no${NC}"
+  fi
+
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
     else
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     fi
     write_s14_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
   fi
-  
 }
 

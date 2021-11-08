@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -23,6 +23,7 @@ export PRE_THREAD_ENA=0
 P20_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
+  DISK_SPACE_CRIT=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # we love binwalk ... this is our first chance for extracting everything
@@ -54,7 +55,14 @@ P20_firmware_bin_extractor() {
   # If we have not found a linux filesystem we try to do a binwalk -e -M on every file for two times
   # Manual activation via -x switch:
   if [[ $LINUX_PATH_COUNTER -lt 2 || $DEEP_EXTRACTOR -eq 1 ]] ; then
-    deep_extractor
+    check_disk_space
+    if ! [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+      deep_extractor
+    else
+      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+      print_output "[!] $(date) - Ending extraction processes - no deep extraction performed" "main"
+      DISK_SPACE_CRIT=1
+    fi
   fi
 
   detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
@@ -63,9 +71,27 @@ P20_firmware_bin_extractor() {
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
     print_output ""
-    deb_extractor
-    ipk_extractor
-    apk_extractor
+    if [[ "$DISK_SPACE_CRIT" -ne 1 ]]; then
+      deb_extractor
+    else
+      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+      print_output "[!] $(date) - Ending extraction processes - no deb extraction performed" "main"
+      DISK_SPACE_CRIT=1
+    fi
+    if [[ "$DISK_SPACE_CRIT" -ne 1 ]]; then
+      ipk_extractor
+    else
+      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+      print_output "[!] $(date) - Ending extraction processes - no ipk extraction performed" "main"
+      DISK_SPACE_CRIT=1
+    fi
+    if [[ "$DISK_SPACE_CRIT" -ne 1 ]]; then
+      apk_extractor
+    else
+      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+      print_output "[!] $(date) - Ending extraction processes - apk extraction performed" "main"
+      DISK_SPACE_CRIT=1
+    fi
   fi
 
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
@@ -82,7 +108,7 @@ P20_firmware_bin_extractor() {
 }
 
 wait_for_extractor() {
-  OUTPUT_DIR="$FIRMWARE_PATH_CP"
+  export OUTPUT_DIR="$FIRMWARE_PATH_CP"
   SEARCHER=$(basename "$FIRMWARE_PATH")
 
   # this is not solid and we probably have to adjust it in the future
@@ -96,19 +122,29 @@ wait_for_extractor() {
       if ! pgrep -v grep | grep -q "$PID"; then
         running=0
       fi
-      DISK_SPACE=$(du -hm "$OUTPUT_DIR"/ --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
-      if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
-        echo ""
-    	  print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-        print_output "[!] $(date) - Ending extraction processes" "main"
-        pgrep -a -f "binwalk.*$SEARCHER.*"
-        pkill -f ".*binwalk.*$SEARCHER.*"
-        pkill -f ".*extract\.py.*$SEARCHER.*"
-        kill -9 "$PID" 2>/dev/null
-      fi
+      disk_space_protection
       sleep 1
     done
   done
+}
+
+check_disk_space() {
+  DISK_SPACE=$(du -hm "$LOG_DIR"/firmware --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
+}
+
+
+disk_space_protection() {
+  check_disk_space
+  if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+    echo ""
+    print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+    print_output "[!] $(date) - Ending extraction processes" "main"
+    pgrep -a -f "binwalk.*$SEARCHER.*"
+    pkill -f ".*binwalk.*$SEARCHER.*"
+    pkill -f ".*extract\.py.*$SEARCHER.*"
+    kill -9 "$PID" 2>/dev/null
+    DISK_SPACE_CRIT=1
+  fi
 }
 
 apk_extractor() {
@@ -214,50 +250,73 @@ deep_extractor() {
   sub_module_title "Deep extraction mode"
   print_output "[*] Deep extraction with binwalk - 1st round"
   print_output "[*] Walking through all files and try to extract what ever possible"
+  MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo)"))
 
   local FILE_ARR_TMP
   local FILE_MD5
   local MD5_DONE_DEEP
 
-  FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
-    if [[ "$THREADED" -eq 1 ]]; then
-      binwalk_deep_extract_helper &
-      WAIT_PIDS_P20+=( "$!" )
-    else
-      binwalk_deep_extract_helper
-    fi
-    #let's build an array with all our unique md5 checksums of our files
-    FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
-    MD5_DONE_DEEP+=( "$FILE_MD5" )
-  done
-
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_P20[@]}"
-  fi
-
-  print_output "[*] Deep extraction with binwalk - 2nd round"
-  print_output "[*] Walking through all files and try to extract what ever possible"
-
-  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
-    FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
-    # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
-    # already extracted stuff is now ignored
-    if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
+  if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
+    FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
       if [[ "$THREADED" -eq 1 ]]; then
         binwalk_deep_extract_helper &
         WAIT_PIDS_P20+=( "$!" )
+        disk_space_protection
       else
         binwalk_deep_extract_helper
       fi
+      #let's build an array with all our unique md5 checksums of our files
+      FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
       MD5_DONE_DEEP+=( "$FILE_MD5" )
-    fi
-  done
+      max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
+      check_disk_space
+      if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+        print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+        print_output "[!] $(date) - Ending extraction processes" "main"
+        DISK_SPACE_CRIT=1
+        break
+      fi
+    done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_P20[@]}"
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_P20[@]}"
+    fi
+  fi
+
+  if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
+    print_output "[*] Deep extraction with binwalk - 2nd round"
+    print_output "[*] Walking through all files and try to extract what ever possible"
+
+    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
+      FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
+      # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
+      # already extracted stuff is now ignored
+      if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
+        if [[ "$THREADED" -eq 1 ]]; then
+          binwalk_deep_extract_helper &
+          WAIT_PIDS_P20+=( "$!" )
+          disk_space_protection
+        else
+          binwalk_deep_extract_helper
+        fi
+        MD5_DONE_DEEP+=( "$FILE_MD5" )
+        max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
+      fi
+      DISK_SPACE=$(du -hm "$LOG_DIR"/firmware --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
+      if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+        print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+        print_output "[!] $(date) - Ending extraction processes" "main"
+        DISK_SPACE_CRIT=1
+        break
+      fi
+    done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_P20[@]}"
+    fi
   fi
 
   FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
