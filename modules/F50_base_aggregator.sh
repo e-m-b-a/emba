@@ -141,14 +141,14 @@ output_details() {
     DATA=1
   fi
   if [[ "$S21_PY_VULNS" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
+    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
     write_link "s21"
     echo "python_scripts;\"$S21_PY_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "python_vulns;\"$S21_PY_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
   if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
     write_link "s22"
     echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"

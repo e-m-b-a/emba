@@ -29,6 +29,9 @@ S13_weak_func_check()
       sleep 1
     done
   fi
+  if ! [[ -d "$TMP_DIR" ]]; then
+    mkdir "$TMP_DIR"
+  fi
 
   # OBJDMP_ARCH, READELF are set in dependency check
   # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml

@@ -150,14 +150,11 @@ write_log()
 
 write_csv_log() {
   local CSV_ITEMS=("$@")
-  # CSV_LOG=$(echo "$LOG_FILE" | sed 's/.txt$/.csv/')
-  CSV_LOG="${LOG_FILE/\.txt$/\.csv}"
-
-  W_LOG_FILE="$CSV_LOG"
+  CSV_LOG="${LOG_FILE/\.txt/\.csv}"
 
   (
-  IFS=,
-    echo -e "${CSV_ITEMS[*]}" | tee -a "$W_LOG_FILE" >/dev/null
+  IFS=\;
+    echo -e "${CSV_ITEMS[*]}" | tee -a "$CSV_LOG" >/dev/null
   )
 }
 

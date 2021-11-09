@@ -65,9 +65,11 @@ P20_firmware_bin_extractor() {
     fi
   fi
 
-  detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
+  #detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
+  detect_root_dir_helper "$LOG_DIR"/firmware "$LOG_FILE"
 
-  FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  #FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  FILES_EXT=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
     print_output ""
@@ -94,15 +96,17 @@ P20_firmware_bin_extractor() {
     fi
   fi
 
-  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
-  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  #BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
+  BINS=$(find "$LOG_DIR"/firmware "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
+  #UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  UNIQUE_BINS=$(find "$LOG_DIR"/firmware "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
   fi
 
   if [[ "$FILES_EXT" -eq 0 ]]; then
-    FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    FILES_EXT=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
   fi
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
 }
@@ -131,7 +135,6 @@ wait_for_extractor() {
 check_disk_space() {
   DISK_SPACE=$(du -hm "$LOG_DIR"/firmware --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
 }
-
 
 disk_space_protection() {
   check_disk_space
@@ -170,6 +173,7 @@ apk_extractor() {
       echo ""
       print_output "[*] Before apk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_APK$NC files extracted."
     fi
+    check_disk_space
   else
     print_output "[-] No apk packages extracted."
   fi
@@ -204,6 +208,7 @@ ipk_extractor() {
       print_output "[*] Before ipk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
       rm -r "$LOG_DIR"/ipk_tmp
     fi
+    check_disk_space
   else
     print_output "[-] No ipk packages extracted."
   fi
@@ -213,7 +218,6 @@ deb_extractor() {
   sub_module_title "Debian archive extraction mode"
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
   extract_deb_helper &
-  # this does not work as expected -> we have to check it again
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
@@ -241,6 +245,7 @@ deb_extractor() {
       echo ""
       print_output "[*] Before deb extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
     fi
+    check_disk_space
   else
     print_output "[-] No deb packages extracted."
   fi
@@ -257,13 +262,13 @@ deep_extractor() {
   local MD5_DONE_DEEP
 
   if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
-    FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    #FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    FILES_BEFORE_DEEP=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
+    readarray -t FILE_ARR_TMP < <(find "$LOG_DIR"/firmware -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
       if [[ "$THREADED" -eq 1 ]]; then
         binwalk_deep_extract_helper &
         WAIT_PIDS_P20+=( "$!" )
-        disk_space_protection
       else
         binwalk_deep_extract_helper
       fi
@@ -289,7 +294,7 @@ deep_extractor() {
     print_output "[*] Deep extraction with binwalk - 2nd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
-    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    readarray -t FILE_ARR_TMP < <(find "$LOG_DIR"/firmware -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
       FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
       # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
@@ -298,14 +303,13 @@ deep_extractor() {
         if [[ "$THREADED" -eq 1 ]]; then
           binwalk_deep_extract_helper &
           WAIT_PIDS_P20+=( "$!" )
-          disk_space_protection
         else
           binwalk_deep_extract_helper
         fi
         MD5_DONE_DEEP+=( "$FILE_MD5" )
         max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
       fi
-      DISK_SPACE=$(du -hm "$LOG_DIR"/firmware --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
+      check_disk_space
       if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
         print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
         print_output "[!] $(date) - Ending extraction processes" "main"
@@ -319,7 +323,7 @@ deep_extractor() {
     fi
   fi
 
-  FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+  FILES_AFTER_DEEP=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
 
   print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."
 }

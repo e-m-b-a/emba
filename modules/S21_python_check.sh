@@ -18,7 +18,7 @@
 S21_python_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check python scripts with pylint"
+  module_title "Check python scripts for security issues"
 
   S21_PY_VULNS=0
   S21_PY_SCRIPTS=0
@@ -29,10 +29,10 @@ S21_python_check()
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
         ((S21_PY_SCRIPTS++))
         if [[ "$THREADED" -eq 1 ]]; then
-          s21_script_check &
+          s21_script_bandit &
           WAIT_PIDS_S21+=( "$!" )
         else
-          s21_script_check
+          s21_script_bandit
         fi
       fi
     done
@@ -47,8 +47,11 @@ S21_python_check()
       done < "$TMP_DIR"/S21_VULNS.tmp
     fi
 
-    print_output ""
-    print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" issues""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
+    if [[ "$S21_PY_VULNS" -gt 0 ]]; then
+      print_output ""
+      print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
+    fi
+
     write_log ""
     write_log "[*] Statistics:$S21_PY_VULNS:$S21_PY_SCRIPTS"
 
@@ -63,11 +66,29 @@ S21_python_check()
       print_output "$(indent "$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""$GREEN")"
     done
   else
-    print_output "[-] Pylint check is disabled ... no tests performed"
+    print_output "[-] Python check is disabled ... no tests performed"
   fi
   module_end_log "${FUNCNAME[0]}" "$S21_PY_VULNS"
 }
 
+s21_script_bandit() {
+  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  PY_LOG="$LOG_PATH_MODULE""/bandit""$NAME"".txt"
+  bandit -r "$LINE" > "$PY_LOG" 2> /dev/null
+
+  VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null)
+  if [[ "$VULNS" -ne 0 ]] ; then
+    if [[ "$VULNS" -gt 20 ]] ; then
+      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" ""  "$PY_LOG"
+    else
+      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$PY_LOG"
+    fi
+    echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
+  fi
+
+}
+
+# lets leave this here for reasons ;)
 s21_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/pylint_""$NAME"".txt"
