@@ -96,10 +96,8 @@ P20_firmware_bin_extractor() {
     fi
   fi
 
-  #BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
-  BINS=$(find "$LOG_DIR"/firmware "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
-  #UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-  UNIQUE_BINS=$(find "$LOG_DIR"/firmware "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable | wc -l )
+  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique executables and $ORANGE$BINS$NC executables at all."
@@ -183,7 +181,6 @@ ipk_extractor() {
   sub_module_title "IPK archive extraction mode"
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
   extract_ipk_helper &
-  # this does not work as expected -> we have to check it again
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
@@ -262,9 +259,8 @@ deep_extractor() {
   local MD5_DONE_DEEP
 
   if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
-    #FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-    FILES_BEFORE_DEEP=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
-    readarray -t FILE_ARR_TMP < <(find "$LOG_DIR"/firmware -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
       if [[ "$THREADED" -eq 1 ]]; then
         binwalk_deep_extract_helper &
@@ -294,7 +290,7 @@ deep_extractor() {
     print_output "[*] Deep extraction with binwalk - 2nd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
-    readarray -t FILE_ARR_TMP < <(find "$LOG_DIR"/firmware -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname ".pdf" -o -iname ".php" -o -iname ".txt" -o -iname ".doc" -o -iname ".rtf" -o -iname ".docx" -o -iname ".htm" -o -iname ".html" -o -iname ".md5" -o -iname ".sha1" -o -iname ".torrent" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
       FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
       # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
@@ -323,7 +319,7 @@ deep_extractor() {
     fi
   fi
 
-  FILES_AFTER_DEEP=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
+  FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
   print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."
 }

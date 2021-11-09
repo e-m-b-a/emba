@@ -26,6 +26,7 @@ P02_firmware_bin_file_check() {
   export DLINK_ENC_DETECTED=0
   export AVM_DETECTED=0
   export UBOOT_IMAGE=0
+  export EXT_IMAGE=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
@@ -43,6 +44,9 @@ P02_firmware_bin_file_check() {
     fi
     if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
       export UBOOT_IMAGE=1
+    fi
+    if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
+      export EXT_IMAGE=1
     fi
 
     # entropy checking on binary file
