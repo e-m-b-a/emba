@@ -178,18 +178,7 @@ mod_path() {
     done
   done
 
-  local NEW_RET_PATHS
-
-  for RET_PATHS_I in "${RET_PATHS[@]}"; do
-    mapfile -t NEW_RET_PATHS < <(find "$FIRMWARE_PATH" -xdev -path "$RET_PATHS_I")
-    for I in "${!NEW_RET_PATHS[@]}"; do
-      if ! [[ -e "${NEW_RET_PATHS[I]}" ]] || ! [[ -d "${NEW_RET_PATHS[I]}" ]] ;  then
-        unset 'NEW_RET_PATHS[I]'
-      fi
-    done
-  done
-
-  echo "${NEW_RET_PATHS[@]}"
+  echo "${RET_PATHS[@]}"
 }
 
 mod_path_array() {

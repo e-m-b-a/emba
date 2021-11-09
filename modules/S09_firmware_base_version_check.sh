@@ -169,7 +169,7 @@ recover_wait_pids() {
   local TEMP_PIDS=()
   local PID
   # check for really running PIDs and re-create the array
-  for PID in ${WAIT_PIDS_S09[*]}; do
+  for PID in "${WAIT_PIDS_S09[@]}"; do
     #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
     if [[ -e /proc/"$PID" ]]; then
       TEMP_PIDS+=( "$PID" )

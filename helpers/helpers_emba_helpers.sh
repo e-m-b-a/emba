@@ -31,7 +31,7 @@ wait_for_pid() {
   local WAIT_PIDS=("$@")
   local PID
   #print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
-  for PID in ${WAIT_PIDS[*]}; do
+  for PID in "${WAIT_PIDS[@]}"; do
     #print_output "[*] wait pid protection: $PID"
     echo "." | tr -d "\n" 2>/dev/null
     if ! [[ -e /proc/"$PID" ]]; then
@@ -60,7 +60,7 @@ max_pids_protection() {
   while [[ ${#WAIT_PIDS[@]} -gt "$MAX_PIDS_" ]]; do
     TEMP_PIDS=()
     # check for really running PIDs and re-create the array
-    for PID in ${WAIT_PIDS[*]}; do
+    for PID in "${WAIT_PIDS[@]}"; do
       #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
       if [[ -e /proc/"$PID" ]]; then
         TEMP_PIDS+=( "$PID" )
