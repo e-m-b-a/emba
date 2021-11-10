@@ -39,6 +39,9 @@ P02_firmware_bin_file_check() {
     if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
       export DLINK_ENC_DETECTED=1
     fi
+    if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
+      export DLINK_ENC_DETECTED=2
+    fi
     if [[ "$AVM_CHECK" -gt 0 ]]; then
       export AVM_DETECTED=1
     fi
