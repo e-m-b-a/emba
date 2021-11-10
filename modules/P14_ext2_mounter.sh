@@ -30,6 +30,10 @@ P14_ext2_mounter() {
       print_output "[*] Copying $ORANGE$TMP_DIR/ext_mount$NC to firmware tmp directory ($TMP_DIR/ext_mount)"
       mkdir -p "$LOG_DIR"/firmware/ext_mount_filesystem/
       cp -pri "$TMP_DIR"/ext_mount/* "$LOG_DIR"/firmware/ext_mount_filesystem/
+      print_output ""
+      print_output "[*] Using the following firmware directory ($LOG_DIR/firmware/ext_mount_filesystem) as base directory:"
+      ls -lh "$LOG_DIR"/firmware/ext_mount_filesystem/ | tee -a "$LOG_FILE"
+      print_output ""
       print_output "[*] Unmounting $ORANGE$TMP_DIR/ext_mount$NC directory"
       umount "$TMP_DIR"/ext_mount
     fi

@@ -363,6 +363,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/hostapd\ v([0-9]+\.[0-9]+)-devel/hostapd\ \1/g')"
     #wpa_supplicant v2.0-devel
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/wpa_supplicant\ v([0-9]+\.[0-9]+)-devel/wpa_supplicant\ \1/g')"
+    # /sudo-1.8.32/ -> sudo 
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/\/sudo-([0-9]+(\.[0-9]+)+?)\//sudo\ \1/g')"
+    # This is Libgcrypt 1.8.5 - The GNU Crypto Library
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^this\ is\ libgcrypt\ ([0-9]+(\.[0-9]+)+?)\ the\ gnu\ crypto\ library/libgcrypt\ \1/g')"
     #iw* Wireless-Tools version 29
     VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     VERSION_lower="${VERSION_lower/iwconfig\ wireless_tools/wireless_tools}"

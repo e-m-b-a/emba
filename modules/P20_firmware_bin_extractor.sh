@@ -65,11 +65,9 @@ P20_firmware_bin_extractor() {
     fi
   fi
 
-  #detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
-  detect_root_dir_helper "$LOG_DIR"/firmware "$LOG_FILE"
+  detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
 
-  #FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  FILES_EXT=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
+  FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
     print_output ""
@@ -104,7 +102,7 @@ P20_firmware_bin_extractor() {
   fi
 
   if [[ "$FILES_EXT" -eq 0 ]]; then
-    FILES_EXT=$(find "$LOG_DIR"/firmware -xdev -type f | wc -l )
+    FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
   fi
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
 }
@@ -131,7 +129,7 @@ wait_for_extractor() {
 }
 
 check_disk_space() {
-  DISK_SPACE=$(du -hm "$LOG_DIR"/firmware --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
+  DISK_SPACE=$(du -hm "$FIRMWARE_PATH_CP" --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
 }
 
 disk_space_protection() {
