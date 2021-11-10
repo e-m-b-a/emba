@@ -5,7 +5,7 @@ services:
     build: .
     privileged: true
     volumes:
-        - ${FIRMWARE}/:/firmware
+        - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/log
         - ${EMBA}/:/emba:ro
         - /etc/timezone:/etc/timezone:ro

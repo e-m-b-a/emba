@@ -31,10 +31,13 @@ P14_ext2_mounter() {
       mkdir -p "$LOG_DIR"/firmware/ext_mount_filesystem/
       cp -pri "$TMP_DIR"/ext_mount/* "$LOG_DIR"/firmware/ext_mount_filesystem/
       print_output ""
-      print_output "[*] Using the following firmware directory ($LOG_DIR/firmware/ext_mount_filesystem) as base directory:"
+      print_output "[*] Using the following firmware directory ($ORANGE$LOG_DIR/firmware/ext_mount_filesystem$NC) as base directory:"
       ls -lh "$LOG_DIR"/firmware/ext_mount_filesystem/ | tee -a "$LOG_FILE"
       print_output ""
       print_output "[*] Unmounting $ORANGE$TMP_DIR/ext_mount$NC directory"
+      FILES_EXT_MOUNT=$(find "$LOG_DIR"/firmware/ext_mount_filesystem/ -type f | wc -l)
+      DIRS_EXT_MOUNT=$(find "$LOG_DIR"/firmware/ext_mount_filesystem/ -type d | wc -l)
+      print_output "[*] Extracted $ORANGE$FILES_EXT_MOUNT$NC files and $ORANGE$DIRS_EXT_MOUNT$NC directories from the firmware image."
       umount "$TMP_DIR"/ext_mount
     fi
     export FIRMWARE_PATH="$LOG_DIR"/firmware/
