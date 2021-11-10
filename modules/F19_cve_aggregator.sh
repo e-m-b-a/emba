@@ -36,7 +36,7 @@ F19_cve_aggregator() {
 
   S06_LOG="s06_distribution_identification.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
-  EMUL_LOG="s115_usermode_emulator.txt"
+  EMUL_LOG="f05_qemu_version_detection.txt"
   SYS_EMUL_LOG="l15_emulated_checks_init.txt"
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt

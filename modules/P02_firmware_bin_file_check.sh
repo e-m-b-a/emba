@@ -57,7 +57,10 @@ P02_firmware_bin_file_check() {
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
   print_output "[*] Details of the binary file:"
+  print_output ""
   print_output "$(indent "$FILE_LS_OUT")"
+  print_output ""
+  hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
   print_output ""
 
   if [[ -f "$FIRMWARE_PATH" ]]; then

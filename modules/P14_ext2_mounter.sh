@@ -32,6 +32,7 @@ P14_ext2_mounter() {
       cp -pri "$TMP_DIR"/ext_mount/* "$LOG_DIR"/firmware/ext_mount_filesystem/
       print_output ""
       print_output "[*] Using the following firmware directory ($ORANGE$LOG_DIR/firmware/ext_mount_filesystem$NC) as base directory:"
+      #shellcheck disable=SC2012
       ls -lh "$LOG_DIR"/firmware/ext_mount_filesystem/ | tee -a "$LOG_FILE"
       print_output ""
       print_output "[*] Unmounting $ORANGE$TMP_DIR/ext_mount$NC directory"

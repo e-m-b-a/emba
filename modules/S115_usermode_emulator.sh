@@ -165,7 +165,7 @@ S115_usermode_emulator() {
     s115_cleanup
     running_jobs
     print_filesystem_fixes
-    version_detection
+    #version_detection
 
   else
     print_output ""
@@ -187,7 +187,7 @@ print_filesystem_fixes() {
   fi
 }
 
-version_detection() {
+Xversion_detection() {
   sub_module_title "Identified software components."
 
   while read -r VERSION_LINE; do 
@@ -208,8 +208,7 @@ version_detection() {
   fi
 }
 
-version_detection_thread() {
-  # BINARY used for strict mode
+Xversion_detection_thread() {
   BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
   STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
   LIC="$(echo "$VERSION_LINE" | cut -d: -f3)"
