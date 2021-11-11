@@ -321,7 +321,6 @@ print_tool_info "ncurses-bin" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 print_tool_info "net-tools" 1
-print_tool_info "iputils-ping" 1
 
 if [[ "$FORCE" -eq 0 ]] && { [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]];}; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -360,6 +359,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     print_tool_info "metasploit-framework" 1
     print_tool_info "u-boot-tools" 1
     print_tool_info "python3-bandit" 1
+    print_tool_info "iputils-ping" 1
   
     if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
       echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
