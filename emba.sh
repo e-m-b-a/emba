@@ -231,7 +231,6 @@ main()
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
-  export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
 
   echo
 

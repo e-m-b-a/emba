@@ -28,6 +28,7 @@ L10_system_emulator() {
   module_title "System emulation of Linux based embedded devices."
 
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
+    export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
 
     if [[ $IN_DOCKER -eq 1 ]] ; then
       print_output "[!] This module is in an very early alpha state!"
