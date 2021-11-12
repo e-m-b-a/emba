@@ -198,9 +198,9 @@ dependency_check()
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
         echo -e "$RED""    binwalk version - not ok""$NC"
         echo -e "$RED""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
-        BINWALK_VER_CHECK=0
+        export BINWALK_VER_CHECK=0
       else
-        BINWALK_VER_CHECK=1
+        export BINWALK_VER_CHECK=1
       fi
     fi
 
