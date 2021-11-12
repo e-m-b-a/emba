@@ -48,7 +48,7 @@ check_dep_tool()
   if ! command -v "$TOOL_COMMAND" > /dev/null ; then
     echo -e "$RED""not ok""$NC"
     echo -e "$RED""    Missing ""$TOOL_NAME"" - check your installation""$NC"
-    DEP_ERROR=1
+    # DEP_ERROR=1
   else
     echo -e "$GREEN""ok""$NC"
   fi
