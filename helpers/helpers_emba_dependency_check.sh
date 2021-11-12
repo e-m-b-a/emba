@@ -306,7 +306,7 @@ dependency_check()
     check_dep_tool "qemu-[ARCH]-static" "qemu-mips-static"
 
     # sh3llcheck - I know it's a typo, but this particular tool nags about it
-    check_dep_tool "shellcheck script"
+    check_dep_tool "shellcheck script" "shellcheck"
 
     # tree
     check_dep_tool "tree"
