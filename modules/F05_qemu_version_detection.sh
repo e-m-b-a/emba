@@ -23,6 +23,9 @@ F05_qemu_version_detection() {
   if [[ -f "$LOG_PATH_S115" ]]; then
     LOG_PATH_MODULE_S115="$LOG_DIR"/s115_usermode_emulator/
 
+    write_csv_log "binary/file" "version_rule" "version_detected" "license" "static/emulation"
+    TYPE="emulation"
+
     while read -r VERSION_LINE; do 
       if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
         continue
@@ -88,11 +91,13 @@ version_detection_thread() {
 
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
           print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH_$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH_"
+          write_csv_log "Qemu log $LOG_PATH_" "$VERSION_IDENTIFIER" "$VERSION_DETECTED" "$LIC" "$TYPE"
           continue
         else
           # binary path set in strict mode
           for BINARY_PATH in "${BINARY_PATHS[@]}"; do
             print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH_"
+            write_csv_log "$BINARY_PATH" "$VERSION_IDENTIFIER" "$VERSION_DETECTED" "$LIC" "$TYPE"
           done
         fi
         BINARY_PATH=""

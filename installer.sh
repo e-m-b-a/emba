@@ -852,7 +852,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     
         if ! command -v sasquatch > /dev/null ; then
           git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
-          CFLAGS=-fcommon ./external/binwalk/sasquatch/build.sh -y
+          CFLAGS="-fcommon -Wno-misleading-indentation" ./external/binwalk/sasquatch/build.sh -y
         else
           echo -e "$GREEN""sasquatch already installed""$NC"
         fi

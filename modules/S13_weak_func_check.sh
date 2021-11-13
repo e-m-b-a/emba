@@ -41,6 +41,7 @@ S13_weak_func_check()
   IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"
 
   STRCPY_CNT=0
+  write_csv_log "binary" "function" "function count" "common linux file" "networking"
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
@@ -428,9 +429,11 @@ output_function_details()
     if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
       COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
       write_log "[+] File $(print_path "$LINE") found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
+      CFF_CSV="true"
     else
       write_log "[+] File $(print_path "$LINE") not found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
       COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
+      CFF_CSV="false"
     fi
   else
     COMMON_FILES_FOUND=" -"
@@ -442,8 +445,10 @@ output_function_details()
   
   if [[ "$NETWORKING" -gt 1 ]]; then
     NETWORKING_="${ORANGE}networking: yes${NC}"
+    NW_CSV="yes"
   else
     NETWORKING_="${GREEN}networking: no${NC}"
+    NW_CSV="no"
   fi
 
   if [[ $COUNT_FUNC -ne 0 ]] ; then
@@ -455,6 +460,7 @@ output_function_details()
       OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     fi
     write_s13_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
+    write_csv_log "$(print_path "$LINE")" "$FUNCTION" "$COUNT_FUNC" "$CFF_CSV" "$NW_CSV"
   fi
 
   
