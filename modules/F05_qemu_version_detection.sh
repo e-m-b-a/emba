@@ -20,7 +20,7 @@ F05_qemu_version_detection() {
   module_title "Identified software components - via usermode emulation."
 
   LOG_PATH_S115="$LOG_DIR"/s115_usermode_emulator.txt
-  if [[ -f "$LOG_PATH_S115" ]]; then
+  if [[ -f "$LOG_PATH_S115" && -d "$LOG_DIR/s115_usermode_emulator" ]]; then
     LOG_PATH_MODULE_S115="$LOG_DIR"/s115_usermode_emulator/
 
     write_csv_log "binary/file" "version_rule" "version_detected" "license" "static/emulation"

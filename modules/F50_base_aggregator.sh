@@ -168,7 +168,7 @@ output_details() {
   fi
   EMUL=$(grep -c "Version information found" "$LOG_DIR"/f05_qemu_version_detection.txt 2>/dev/null)
   if [[ "$EMUL" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes (user mode emulation).""$NC"
+    print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "f05"
     echo "user_emulation_state;\"$EMUL\"" >> "$CSV_LOG_FILE"
     DATA=1
