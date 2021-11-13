@@ -36,7 +36,7 @@ F19_cve_aggregator() {
 
   S06_LOG="s06_distribution_identification.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
-  EMUL_LOG="s115_usermode_emulator.txt"
+  EMUL_LOG="f05_qemu_version_detection.txt"
   SYS_EMUL_LOG="l15_emulated_checks_init.txt"
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
@@ -341,6 +341,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/rngtest/rngd}"
     #pinentry-curses (pinentry)
     VERSION_lower="${VERSION_lower//pinentry-curses\ (pinentry)/pinentry}"
+    # cnid_dbd (Netatalk 2.2.5)
+    VERSION_lower="${VERSION_lower//cnid_dbd\ \(netatalk\ /netatalk\ }"
     # lsusb (usbutils)
     VERSION_lower="${VERSION_lower//lsusb\ (usbutils)/usbutils}"
     VERSION_lower="$(echo "$VERSION_lower" | sed -e 's/nc\.traditional\ \[v\ /nc.traditional\ /g')"
@@ -361,6 +363,10 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/hostapd\ v([0-9]+\.[0-9]+)-devel/hostapd\ \1/g')"
     #wpa_supplicant v2.0-devel
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/wpa_supplicant\ v([0-9]+\.[0-9]+)-devel/wpa_supplicant\ \1/g')"
+    # /sudo-1.8.32/ -> sudo 
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/sudo\ ([0-9]+(\.[0-9]+)+?)\//sudo\ \1/g')"
+    # This is Libgcrypt 1.8.5 - The GNU Crypto Library
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^this\ is\ libgcrypt\ ([0-9]+(\.[0-9]+)+?)\ the\ gnu\ crypto\ library/libgcrypt\ \1/g')"
     #iw* Wireless-Tools version 29
     VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     VERSION_lower="${VERSION_lower/iwconfig\ wireless_tools/wireless_tools}"

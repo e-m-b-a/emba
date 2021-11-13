@@ -146,10 +146,10 @@ dependency_check()
   if [[ $USE_DOCKER -eq 1 ]] ; then
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
-    check_dep_port "cve-search" 27017
+    check_dep_port "cve-search (port)" 27017
     if ! netstat -anpt | grep -q 27017; then
       sudo mongod restart
-      check_dep_port "cve-search" 27017
+      check_dep_port "cve-search (port)" 27017
     fi
   fi
 
@@ -185,17 +185,22 @@ dependency_check()
     # bc
     check_dep_tool "bc"
 
+    # mkimage (uboot)
+    check_dep_tool "uboot mkimage" "mkimage"
+
     # radare2
-    check_dep_tool "r2"
+    check_dep_tool "radare2" "r2"
 
     # binwalk
-    check_dep_tool "binwalk"
+    check_dep_tool "binwalk extractor" "binwalk"
     if command -v binwalk > /dev/null ; then
       BINWALK_VER=$(binwalk 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//')
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
         echo -e "$RED""    binwalk version - not ok""$NC"
         echo -e "$RED""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
-        DEP_ERROR=1
+        export BINWALK_VER_CHECK=0
+      else
+        export BINWALK_VER_CHECK=1
       fi
     fi
 
@@ -215,7 +220,7 @@ dependency_check()
     check_dep_file "pixd image renderer" "$EXT_DIR""/pixd_png.py"
 
     # progpilot for php code checks
-    check_dep_file "progpilot php checker" "$EXT_DIR""/progpilot"
+    check_dep_file "progpilot php ini checker" "$EXT_DIR""/progpilot"
 
     # CVE and CVSS databases
     check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
@@ -226,13 +231,13 @@ dependency_check()
     DEP_ERROR=0
 
     # CVE-search
-    check_dep_file "cve-search" "$EXT_DIR""/cve-search/bin/search.py"
+    check_dep_file "cve-search script" "$EXT_DIR""/cve-search/bin/search.py"
     # we have to ignore this warning, because shellcheck doesn't know, that this file will be imported
     # shellcheck disable=SC2309
     if [[ IN_DOCKER -eq 0 ]]; then 
       # really basic check, if cve-search database is running - no check, if populated and also no check, if emba in docker
-      check_dep_tool "mongoDB" "mongod"
-      check_dep_port "cve-search" 27017
+      check_dep_tool "mongo database" "mongod"
+      check_dep_port "cve-search (port)" 27017
     fi
 
     # firmadyne
@@ -242,14 +247,13 @@ dependency_check()
       check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmadyne/binaries/vmlinux.mipseb"
       check_dep_file "fixImage.sh" "$EXT_DIR""/firmadyne/scripts/fixImage.sh"
       check_dep_file "preInit.sh" "$EXT_DIR""/firmadyne/scripts/preInit.sh"
-      check_dep_tool "qemu-system-arm"
-      check_dep_tool "qemu-system-mips"
-      check_dep_tool "qemu-system-mipsel"
+      check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
+      check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
+      check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
     fi
 
     # CVE searchsploit
     check_dep_tool "CVE Searchsploit" "cve_searchsploit"
-
 
     # Check if fact extractor is on the system - disable, if not
     export FACT_EXTRACTOR=1 
@@ -289,19 +293,22 @@ dependency_check()
 
     # objdump
     OBJDUMP="$EXT_DIR""/objdump"
-    check_dep_file "objdump" "$OBJDUMP"
+    check_dep_file "objdump disassembler" "$OBJDUMP"
 
-    # php
-    check_dep_tool "php"
+    # php - currently not used
+    # check_dep_tool "php"
 
-    # pylint
-    check_dep_tool "pylint"
+    # pylint - currently not used
+    # check_dep_tool "pylint"
+
+    # bandit python security tester
+    check_dep_tool "bandit - python vulnerability scanner" "bandit"
 
     # qemu
     check_dep_tool "qemu-[ARCH]-static" "qemu-mips-static"
 
     # sh3llcheck - I know it's a typo, but this particular tool nags about it
-    check_dep_tool "shellcheck"
+    check_dep_tool "shellcheck script" "shellcheck"
 
     # tree
     check_dep_tool "tree"

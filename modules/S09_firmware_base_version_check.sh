@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -24,7 +24,6 @@ S09_firmware_base_version_check() {
 
   # this module check for version details statically.
   # this module is designed for *x based systems
-  # for other systems (eg RTOS) we have the R09
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware versions detection"
@@ -32,6 +31,9 @@ S09_firmware_base_version_check() {
   EXTRACTOR_LOG="$LOG_DIR"/p20_firmware_bin_extractor.txt
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
+  write_csv_log "binary/file" "version_rule" "version_detected" "license" "static/emulation"
+  TYPE="static"
+
   while read -r VERSION_LINE; do
     if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
       continue
@@ -43,10 +45,6 @@ S09_firmware_base_version_check() {
     LIC="$(echo "$VERSION_LINE" | cut -d: -f3)"
     BIN_NAME="$(echo "$VERSION_LINE" | cut -d: -f1)"
 
-    # as we do not have a typical linux executable we can't use strict version details
-    # but to not exhaust the run time we only search for stuff that we know is possible to detect
-    # on the other hand, if we do not use emulation for deeper detection we run all checks
-
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f4- | sed s/^\"// | sed s/\"$//)"
 
     if [[ $STRICT != "strict" ]]; then
@@ -57,6 +55,7 @@ S09_firmware_base_version_check() {
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs (license: $ORANGE$LIC$GREEN)."
+        write_csv_log "binwalk logs" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
         echo "." | tr -d "\n"
       fi
       
@@ -68,6 +67,7 @@ S09_firmware_base_version_check() {
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
           print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
+          write_csv_log "firmware" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
         fi  
         echo "." | tr -d "\n"
       fi  
@@ -99,6 +99,7 @@ S09_firmware_base_version_check() {
             if [[ -n $VERSION_FINDER ]]; then
               echo ""
               print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
+              write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
               continue
             fi
           fi
@@ -140,6 +141,7 @@ bin_string_checker() {
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
           print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
+          write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
           continue
         fi
       elif [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* ]] ; then
@@ -147,6 +149,7 @@ bin_string_checker() {
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
           print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
+          write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
           continue
         fi
       fi
@@ -155,6 +158,7 @@ bin_string_checker() {
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
         print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
+        write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
         continue
       fi
     fi

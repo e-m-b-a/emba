@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens AG
 # Copyright 2020-2021 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck
@@ -203,7 +203,7 @@ main()
   export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
-                                # afterwards do a default emba scan
+                                # afterwards do a default EMBA scan
   export PYTHON_CHECK=1
   export QEMULATION=0
   # to get rid of all the running stuff we are going to kill it after RUNTIME
@@ -231,17 +231,16 @@ main()
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
-  export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
 
   echo
 
   import_helper
   import_module
 
-  welcome  # Print emba welcome message
+  welcome  # Print EMBA welcome message
 
   if [[ $# -eq 0 ]]; then
-    print_output "\\n""$ORANGE""In order to be able to use emba, you have to specify at least a firmware (-f).\\nIf you don't set a log directory (-l), then ./logs will be used.""$NC" "no_log"
+    print_output "\\n""$ORANGE""In order to be able to use EMBA, you have to specify at least a firmware (-f).\\nIf you don't set a log directory (-l), then ./logs will be used.""$NC" "no_log"
     print_help
     exit 1
   fi
@@ -367,9 +366,9 @@ main()
     if [[ -f "$PROFILE" ]]; then
       print_bar "no_log"
       if [[ $IN_DOCKER -ne 1 ]] ; then
-        print_output "[*] Loading emba scan profile with the following settings:" "no_log"
+        print_output "[*] Loading EMBA scan profile with the following settings:" "no_log"
       else
-        print_output "[*] Loading emba scan profile." "no_log"
+        print_output "[*] Loading EMBA scan profile." "no_log"
       fi
       # all profile output and settings are done by the profile file located in ./scan-profiles/
       # shellcheck disable=SC1090
@@ -392,7 +391,7 @@ main()
     export EXT_DIR="/external"
   fi
 
-  # Check all dependencies of emba
+  # Check all dependencies of EMBA
   dependency_check
 
   if [[ $IN_DOCKER -eq 0 ]] ; then
@@ -424,7 +423,7 @@ main()
   if [[ -d "$FIRMWARE_PATH" ]] ; then
     PRE_CHECK=1
     print_output "[*] Firmware directory detected." "no_log"
-    print_output "[*] Emba starts with testing the environment." "no_log"
+    print_output "[*] EMBA starts with testing the environment." "no_log"
     if [[ $IN_DOCKER -eq 0 ]] ; then
       # in docker environment the firmware is already available
       print_output "    The provided firmware will be copied to $ORANGE""$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")""$NC" "no_log"
@@ -435,7 +434,7 @@ main()
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
-    print_output "    Emba starts with the pre-testing phase." "no_log"
+    print_output "    EMBA starts with the pre-testing phase." "no_log"
   elif [[ -f "$KERNEL_CONFIG" && "$KERNEL" -eq 1 ]]; then
     print_output "[*] Kernel configuration file detected." "no_log"
   else
@@ -455,7 +454,7 @@ main()
       MAX_MODS=2
     fi
     export MAX_MODS
-    print_output "    Emba is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
+    print_output "    EMBA is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
   fi
 
   # Change log output to color for web report and prepare report
@@ -505,13 +504,13 @@ main()
   #######################################################################################
   if [[ $USE_DOCKER -eq 1 ]] ; then
     if ! [[ $EUID -eq 0 ]] ; then
-      print_output "[!] Using emba with docker-compose requires root permissions" "no_log"
-      print_output "$(indent "Run emba with root permissions to use docker")" "no_log"
+      print_output "[!] Using EMBA with docker-compose requires root permissions" "no_log"
+      print_output "$(indent "Run EMBA with root permissions to use docker")" "no_log"
       exit 1
     fi
     if ! command -v docker-compose > /dev/null ; then
       print_output "[!] No docker-compose found" "no_log"
-      print_output "$(indent "Install docker-compose via apt-get install docker-compose to use emba with docker")" "no_log"
+      print_output "$(indent "Install docker-compose via apt-get install docker-compose to use EMBA with docker")" "no_log"
       exit 1
     fi
 
@@ -533,24 +532,24 @@ main()
 
     echo
 
-    print_output "[*] Emba sets up the docker environment.\\n" "no_log"
+    print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
     EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
 
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
-      print_output "[-] Emba docker build failed!" "no_log"
+      print_output "[-] EMBA docker build failed!" "no_log"
       exit 1
     fi
 
     if docker images | grep -qE "emba[[:space:]]*latest"; then
       setup_docker_iptables
 
-      print_output "[*] Emba initializes docker container.\\n" "no_log"
+      print_output "[*] EMBA initializes docker container.\\n" "no_log"
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
 
       if [[ $D_RETURN -eq 0 ]] ; then
         if [[ $ONLY_DEP -eq 0 ]] ; then
-          print_output "[*] Emba finished analysis in docker container.\\n" "no_log"
+          print_output "[*] EMBA finished analysis in docker container.\\n" "no_log"
           print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
           print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
           if [[ -f "$HTML_PATH"/index.html ]]; then
@@ -559,11 +558,11 @@ main()
           exit
         fi
       else
-        print_output "[-] Emba failed in docker mode!" "no_log"
+        print_output "[-] EMBA failed in docker mode!" "no_log"
         exit 1
       fi
     else
-      print_output "[-] Emba failed in docker mode!" "no_log"
+      print_output "[-] EMBA failed in docker mode!" "no_log"
       exit 1
     fi
   fi

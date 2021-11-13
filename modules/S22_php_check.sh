@@ -1,20 +1,21 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck
 
-# Description:  Checks for bugs, stylistic errors, etc. in php scripts, then it lists the found error types.
+# Description:  Checks for vulnerabilities in php scripts.
+#               Checks for configuration issues in php.ini files
  
 S22_php_check()
 {
@@ -67,13 +68,15 @@ s22_vuln_check_caller() {
   fi
  
   print_output ""
-  print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
+  if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
+  fi
 }
 
 s22_vuln_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
-  ./external/progpilot "$LINE" > "$PHP_LOG" 2>&1
+  "$EXT_DIR"/progpilot "$LINE" > "$PHP_LOG" 2>&1
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null)
 
   if [[ "$VULNS" -ne 0 ]] ; then

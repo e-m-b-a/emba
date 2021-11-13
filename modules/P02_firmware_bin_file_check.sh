@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -25,6 +25,8 @@ P02_firmware_bin_file_check() {
   export VMDK_DETECTED=0
   export DLINK_ENC_DETECTED=0
   export AVM_DETECTED=0
+  export UBOOT_IMAGE=0
+  export EXT_IMAGE=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
@@ -37,8 +39,17 @@ P02_firmware_bin_file_check() {
     if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
       export DLINK_ENC_DETECTED=1
     fi
+    if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
+      export DLINK_ENC_DETECTED=2
+    fi
     if [[ "$AVM_CHECK" -gt 0 ]]; then
       export AVM_DETECTED=1
+    fi
+    if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
+      export UBOOT_IMAGE=1
+    fi
+    if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
+      export EXT_IMAGE=1
     fi
 
     # entropy checking on binary file
@@ -49,7 +60,10 @@ P02_firmware_bin_file_check() {
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
   print_output "[*] Details of the binary file:"
+  print_output ""
   print_output "$(indent "$FILE_LS_OUT")"
+  print_output ""
+  hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
   print_output ""
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
