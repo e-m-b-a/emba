@@ -166,18 +166,22 @@ output_details() {
     echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  EMUL=$(grep -c "Version information found" "$LOG_DIR"/s115_usermode_emulator.txt 2>/dev/null)
+  EMUL=$(grep -c "Version information found" "$LOG_DIR"/f05_qemu_version_detection.txt 2>/dev/null)
   if [[ "$EMUL" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes (user mode emulation).""$NC"
-    write_link "s115"
+    print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
+    write_link "f05"
     echo "user_emulation_state;\"$EMUL\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
 
-  if [[ "$IP_ADDR" -gt 0 ]]; then
+  if [[ "$BOOTED" -gt 0 ]]; then
 
-    STATE="$ORANGE(""$GREEN""IP address detected"
-    EMU_STATE="IP_DET"
+    STATE="$ORANGE(""$GREEN""booted"
+    EMU_STATE="booted"
+    if [[ "$IP_ADDR" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""IP address detected"
+      EMU_STATE="$EMU_STATE"";IP_DET"
+    fi
     if [[ "$SYS_ONLINE" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
       EMU_STATE="$EMU_STATE"";ICMP"
@@ -599,6 +603,7 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$L10_LOG" ]]; then
     SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f2)
     IP_ADDR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f3)
+    BOOTED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f4)
   fi
   if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
     NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2)

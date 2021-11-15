@@ -42,6 +42,7 @@ L10_system_emulator() {
 
       for R_PATH in "${ROOT_PATH[@]}" ; do
         KPANIC=0
+        BOOTED=0
 
         print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
 
@@ -91,7 +92,7 @@ L10_system_emulator() {
   fi
 
   write_log ""
-  write_log "[*] Statistics:$SYS_ONLINE:${#IPS[@]}"
+  write_log "[*] Statistics:$SYS_ONLINE:${#IPS[@]}:$BOOTED"
   module_end_log "${FUNCNAME[0]}" "$MODULE_END"
 
 }
@@ -327,12 +328,16 @@ get_networking_details() {
       elif [[ "$D_END" == "el" ]]; then
         IP_ADDRESS_=$(echo "$IP_" | tr '.' '\n' | tac | tr '\n' '.' | sed 's/\.$//')
       fi
+
       if ! [[ "$IP_ADDRESS_" == "127."* ]] && ! [[ "$IP_ADDRESS_" == "0.0.0.0" ]]; then
         IPS+=( "$IP_ADDRESS_" )
         NETWORK_DEVICE="$(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2)"
         if [[ -n "$NETWORK_DEVICE" ]]; then
           INT+=( "$NETWORK_DEVICE" )
+          BOOTED=1
         fi
+      else
+        BOOTED=1
       fi
     done
   
