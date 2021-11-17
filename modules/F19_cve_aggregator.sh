@@ -85,6 +85,7 @@ F19_cve_aggregator() {
       print_output "[-] Have you installed all the needed dependencies?"
       print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
     fi
+  # TODO add elif for Dockerized
   else
     print_output "[-] CVE search binary search.py not found."
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
@@ -768,6 +769,7 @@ generate_special_log() {
   fi
 }
 
+#TODO write similar one for web-api
 cve_db_lookup() {
   # using $VERSION variable:
   VERSION_SEARCH="${VERSION//\ /:}"

@@ -10,10 +10,15 @@ services:
         - ${EMBA}/:/emba:ro
         - /etc/timezone:/etc/timezone:ro
         - /etc/localtime:/etc/localtime:ro
-    network_mode: "host"
     environment:
         - USER
     devices:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
       - SYS_ADMIN
+    networks:
+      - emba_frontend
+
+networks:
+  emba_frontend:
+    external: true

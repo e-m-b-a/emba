@@ -231,6 +231,7 @@ dependency_check()
     DEP_ERROR=0
 
     # CVE-search
+    # TODO change to portcheck and write one for external hosts
     check_dep_file "cve-search script" "$EXT_DIR""/cve-search/bin/search.py"
     # we have to ignore this warning, because shellcheck doesn't know, that this file will be imported
     # shellcheck disable=SC2309

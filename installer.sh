@@ -220,6 +220,12 @@ print_help()
   echo
 }
 
+# creates emba_networks if they arent already up
+setup_networks()
+{
+  #TODO
+}
+
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
@@ -1165,7 +1171,13 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     if [[ -d external/cve-search ]]; then
       rm -r external/cve-search
     fi
-  
+
+    #TODO change this whole chabang to docker-container 
+    #0 setup docker networks emba_frontend & emba_backend
+    setup_networks
+    #1 git clone
+    #2 change docker-compose to not expose on host and change all networks to external
+
     git clone https://github.com/cve-search/cve-search.git external/cve-search
     cd ./external/cve-search/ || exit 1
 
@@ -1191,7 +1203,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
       cd "$HOME_PATH" || exit 1
       cd ./external/cve-search/ || exit 1
-      if netstat -anpt | grep LISTEN | grep -q 27017; then
+      if netstat -anpt | grep LISTEN | grep -q 27017; then #TODO change to nc -z and get ip from ip route
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_INST=0
           echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
@@ -1222,6 +1234,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
           y|Y )
             CVE_INST=1
             echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
+            #TODO distinction between Dev or not dev
+            # nc -z check 
             if netstat -anpt | grep LISTEN | grep -q 27017; then
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 CVE_INST=0
