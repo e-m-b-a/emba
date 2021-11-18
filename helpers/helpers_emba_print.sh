@@ -87,6 +87,9 @@ print_output()
 {
   local OUTPUT="$1"
   local LOG_SETTING="$2"
+  if [[ -f "$LOG_SETTINGS" ]]; then
+    local LOG_FILE="$2"
+  fi
   # add a link as third argument to add a link marker for web report
   local REF_LINK="$3"
   local TYPE_CHECK
@@ -539,7 +542,7 @@ module_end_log() {
   fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
-  print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
+  #print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
   ((MOD_RUNNING--))
   #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }
