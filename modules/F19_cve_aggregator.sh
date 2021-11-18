@@ -63,27 +63,49 @@ F19_cve_aggregator() {
     aggregate_versions
     
     # Mongo DB is running on Port 27017. If not we can't check CVEs
-    if [[ $(netstat -ant | grep -c 27017) -eq 0 && $IN_DOCKER -eq 0 ]]; then
+    if [[ "$IN_DOCKER" -eq 0 && $(netstat -ant | grep -c 27017) ]]; then
       print_output "[*] Trying to start the vulnerability database"
       systemctl restart mongod
       sleep 2
     fi
 
-    if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
-      if command -v cve_searchsploit > /dev/null ; then
-        CVE_SEARCHSPLOIT=1
-      fi
-      if [[ -f "$MSF_DB_PATH" ]]; then
-        MSF_SEARCH=1
-      fi
 
-      generate_cve_details
-      generate_special_log
+    if [[ "$IN_DOCKER" -eq 1]] ;then
+      #get host-ip
+      HOST_IP=$(ip route | grep default | awk '/default/ { print $3 }')
+      if [[ $(nc -z "$HOST_IP" 27017) -eq 1 ]]; then 
+        print_output "[-] MongoDB not running on port 27017."
+        print_output "[-] CVE checks not possible!"
+        print_output "[-] Have you installed all the needed dependencies?"
+        print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+      else
+        if command -v cve_searchsploit > /dev/null ; then
+          CVE_SEARCHSPLOIT=1
+        fi
+        if [[ -f "$MSF_DB_PATH" ]]; then
+          MSF_SEARCH=1
+        fi
+
+        generate_cve_details
+        generate_special_log
+      fi
     else
-      print_output "[-] MongoDB not running on port 27017."
-      print_output "[-] CVE checks not possible!"
-      print_output "[-] Have you installed all the needed dependencies?"
-      print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+      if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
+        if command -v cve_searchsploit > /dev/null ; then
+          CVE_SEARCHSPLOIT=1
+        fi
+        if [[ -f "$MSF_DB_PATH" ]]; then
+          MSF_SEARCH=1
+        fi
+
+        generate_cve_details
+        generate_special_log
+      else
+        print_output "[-] MongoDB not running on port 27017."
+        print_output "[-] CVE checks not possible!"
+        print_output "[-] Have you installed all the needed dependencies?"
+        print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+      fi
     fi
   # TODO add elif for Dockerized
   else
