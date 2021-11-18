@@ -170,6 +170,8 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ethswctl.c:v/ethswctl\ }"
     #ftpd (GNU inetutils) 1.4.2
     VERSION_lower="${VERSION_lower//\(gnu inetutils\)/inetutils}"
+    # FTDI eeprom generator v[0-9]\.[0-9][0-9]
+    VERSION_lower="${VERSION_lower//\ eeprom\ generator\ v/-eeprom\ }"
     # depmod/insmod -> kmod
     VERSION_lower="${VERSION_lower//depmod\ /kmod\ }"
     VERSION_lower="${VERSION_lower//insmod\ /kmod\ }"
@@ -195,6 +197,12 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//ipsec\ _copyright/ipsec}"
     VERSION_lower="${VERSION_lower//ipsec\ eroute/ipsec}"
     VERSION_lower="${VERSION_lower//ipsec\ ranbits/ipsec}"
+    # ipLink Version: 8.0.3
+    VERSION_lower="${VERSION_lower//ipLink\ Version:\ /iplink\ }"
+    # ipunz V1.0
+    VERSION_lower="${VERSION_lower//ipunz\ V/ipunz\ }"
+    # ipzip V1.0
+    VERSION_lower="${VERSION_lower//ipzip\ V/ipzip\ }"
     #fota client version: 0.1.5.
     VERSION_lower="${VERSION_lower//fota\ client\ version:/fota}"
     #sudoreplay -> sudo
@@ -367,6 +375,8 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/sudo\ ([0-9]+(\.[0-9]+)+?)\//sudo\ \1/g')"
     # This is Libgcrypt 1.8.5 - The GNU Crypto Library
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^this\ is\ libgcrypt\ ([0-9]+(\.[0-9]+)+?)\ the\ gnu\ crypto\ library/libgcrypt\ \1/g')"
+    # GNU which v2.21, Copyright (C) 1999 - 2015 Carlo Wood.
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/^GNU\ which\ v/which\ /g' | cut -d, -f1)"
     #iw* Wireless-Tools version 29
     VERSION_lower="${VERSION_lower/wireless-tools/wireless_tools}"
     VERSION_lower="${VERSION_lower/iwconfig\ wireless_tools/wireless_tools}"
