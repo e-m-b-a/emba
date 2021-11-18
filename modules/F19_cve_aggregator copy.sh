@@ -769,6 +769,7 @@ generate_special_log() {
   fi
 }
 
+# TODO write similar one for web-api
 cve_db_lookup() {
   # using $VERSION variable:
   VERSION_SEARCH="${VERSION//\ /:}"
@@ -777,13 +778,13 @@ cve_db_lookup() {
   print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}" "" "f19#cve_$VERSION_BINARY"
 
   # CVE search:
-  $PATH_CVE_SEARCH -p "$VERSION_SEARCH" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+  curl https://cve_search:5000/api/search/"$VERSION_SEARCH" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt #TODO format would be wrong like that
 
   if [[ "$VERSION_SEARCH" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
     VERSION_SEARCHx="$(echo "$VERSION_SEARCH" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCHx${NC}" "" "f19#cve_$VERSION_BINARY"
-    $PATH_CVE_SEARCH -p "$VERSION_SEARCHx" >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+    #TODO $PATH_CVE_SEARCH -p "$VERSION_SEARCHx" >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
   fi
 
   AGG_LOG_FILE="$VERSION_PATH".txt
@@ -831,7 +832,7 @@ cve_extractor() {
 
     if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 ]] ; then
       if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
-        mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null)
+        mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null) #TODO problem
       fi
 
       if [[ $MSF_SEARCH -eq 1 ]]; then

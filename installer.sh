@@ -220,12 +220,6 @@ print_help()
   echo
 }
 
-# creates emba_networks if they arent already up
-setup_networks()
-{
-  #TODO
-}
-
 
 echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
@@ -1173,10 +1167,16 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     fi
 
     #TODO change this whole chabang to docker-container 
-    #0 setup docker networks emba_frontend & emba_backend
-    setup_networks
     #1 git clone
-    #2 change docker-compose to not expose on host and change all networks to external
+    git clone #TODO external/cve-search
+    cd ./external/cve-search || exit 1
+
+    #2 change docker-compose to expose on diffrent port
+    sed -ei 's/443/27017/' docker-compose.
+    
+    #3 start the container
+    docker-compose up -d 
+    #TODO del rest or keep for Host-mode?
 
     git clone https://github.com/cve-search/cve-search.git external/cve-search
     cd ./external/cve-search/ || exit 1
@@ -1202,6 +1202,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       CVE_INST=1
       echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
       cd "$HOME_PATH" || exit 1
+      if nc -z 
+      #TODO from here we have two options delete/keep
       cd ./external/cve-search/ || exit 1
       if netstat -anpt | grep LISTEN | grep -q 27017; then #TODO change to nc -z and get ip from ip route
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
