@@ -585,7 +585,7 @@ emulate_strace_run() {
     chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" > "$LOG_PATH_MODULE""/stracer_""$BIN_EMU_NAME"".txt" 2>&1 &
     PID=$!
   else
-    chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG" --strace "$BIN_" > "$LOG_PATH_MODULE""/stracer_""$BIN_EMU_NAME"".txt" 2>&1 &
+    chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" > "$LOG_PATH_MODULE""/stracer_""$BIN_EMU_NAME"".txt" 2>&1 &
     PID=$!
   fi
 
