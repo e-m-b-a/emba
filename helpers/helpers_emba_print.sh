@@ -87,8 +87,10 @@ print_output()
 {
   local OUTPUT="$1"
   local LOG_SETTING="$2"
-  if [[ -f "$LOG_SETTINGS" ]]; then
+  local OTHER_LOG=0
+  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" ]]; then
     local LOG_FILE="$2"
+    local OTHER_LOG=1
   fi
   # add a link as third argument to add a link marker for web report
   local REF_LINK="$3"
@@ -103,8 +105,15 @@ print_output()
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
+        # if we log to a special log file, we also log to the main log
+        if [[ "$OTHER_LOG" -eq 1 ]]; then
+          echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
+        fi
       else
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+        if [[ "$OTHER_LOG" -eq 1 ]]; then
+          echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$MAIN_LOG" >/dev/null 
+        fi
       fi
     fi
   else
@@ -114,8 +123,15 @@ print_output()
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
         echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
+        # if we log to a special log file, we also log to the main log
+        if [[ "$OTHER_LOG" -eq 1 ]]; then
+          echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
+        fi
       else
         echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+        if [[ "$OTHER_LOG" -eq 1 ]]; then
+          echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$MAIN_LOG" >/dev/null 
+        fi
       fi
     fi
   fi
@@ -542,9 +558,7 @@ module_end_log() {
   fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
-  #print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
   ((MOD_RUNNING--))
-  #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }
 
 strip_color_codes() {

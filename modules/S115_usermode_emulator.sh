@@ -58,7 +58,6 @@ S115_usermode_emulator() {
 
     # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
     MD5_DONE_INT=()
-    CPU_CONFIG=""
     for R_PATH in "${ROOT_PATH[@]}" ; do
       BIN_CNT=0
       ((ROOT_CNT=ROOT_CNT+1))
@@ -493,13 +492,13 @@ creating_dev_area() {
 run_init_test() {
 
   BIN_EMU_NAME=$(basename "$FULL_BIN_PATH")
-  local CPU_CONFIG
+  local CPU_CONFIG_
   # get the most used cpu configuration for the initial check:
-  CPU_CONFIG=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | sort -nr | uniq -c | head -1 | awk '{print $2}')
+  CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}')
 
-  print_output "[*] Initial emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG$NC." "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
+  print_output "[*] Initial emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
 
-  run_init_qemu "$CPU_CONFIG"
+  run_init_qemu "$CPU_CONFIG_"
 
   if [[ $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt") -gt 0 ]]; then
 
@@ -507,36 +506,36 @@ run_init_test() {
 
     mapfile -t CPU_CONFIGS < <(chroot "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'")
 
-    for CPU_CONFIG in "${CPU_CONFIGS[@]}"; do
+    for CPU_CONFIG_ in "${CPU_CONFIGS[@]}"; do
       if [[ -f "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" ]]; then
         rm "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
       fi
 
-      run_init_qemu "$CPU_CONFIG"
-      if [[ -z "$CPU_CONFIG" ]]; then
-        CPU_CONFIG="NONE"
+      run_init_qemu "$CPU_CONFIG_"
+      if [[ -z "$CPU_CONFIG_" ]]; then
+        CPU_CONFIG_="NONE"
       fi
 
       if [[ $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt") -gt 0 ]]; then
-        print_output "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG$NC failed" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
+        print_output "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
         continue
       fi
 
-      print_output "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME$GREEN: $ORANGE$CPU_CONFIG$GREEN" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
-      write_log "CPU_CONFIG\;$CPU_CONFIG" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
-      write_log "CPU_CONFIG\;$CPU_CONFIG" "$LOG_PATH_MODULE""/qemu_init_$BIN_EMU_NAME.txt"
+      print_output "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
+      write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
+      write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_$BIN_EMU_NAME.txt"
       break
 
     done
 
   else
-    if [[ -z "$CPU_CONFIG" ]]; then
-      CPU_CONFIG="NONE"
+    if [[ -z "$CPU_CONFIG_" ]]; then
+      CPU_CONFIG_="NONE"
     fi
 
-    print_output "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME$GREEN: $ORANGE$CPU_CONFIG$GREEN" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
-    write_log "CPU_CONFIG\;$CPU_CONFIG" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
-    write_log "CPU_CONFIG\;$CPU_CONFIG" "$LOG_PATH_MODULE""/qemu_init_$BIN_EMU_NAME.txt"
+    print_output "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
+    write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
+    write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_$BIN_EMU_NAME.txt"
   fi
 }
 
@@ -553,11 +552,10 @@ run_init_qemu() {
   run_init_qemu_runner "$CPU_CONFIG_" &
   PID=$!
 
-  # wait a second and then kill it
-  sleep 0.3
+  # wait a bit and then kill it
+  sleep 0.5
   kill -0 -9 "$PID" 2> /dev/null
 
-  print_output ""
 }
 
 run_init_qemu_runner() {
@@ -580,7 +578,7 @@ run_init_qemu_runner() {
 emulate_strace_run() {
   local CPU_CONFIG_="$1"
   print_output ""
-  print_output "[*] Initial strace run on the command ${GREEN}$BIN_${NC} to identify missing areas"
+  print_output "[*] Initial strace run on the command ${ORANGE}$BIN_${NC} to identify missing areas"
 
   # currently we only look for file errors (errno=2) and try to fix this
   if [[ -z "$CPU_CONFIG_" ]]; then
@@ -601,28 +599,28 @@ emulate_strace_run() {
   for MISSING_AREA in "${MISSING_AREAS[@]}"; do
     MISSING+=("$MISSING_AREA")
     if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
-      print_output "[*] Found missing area: $MISSING_AREA"
+      print_output "[*] Found missing area: $ORANGE$MISSING_AREA$NC"
   
       FILENAME_MISSING=$(basename "$MISSING_AREA")
-      print_output "[*] Trying to create this missing file: $FILENAME_MISSING"
+      print_output "[*] Trying to create this missing file: $ORANGE$FILENAME_MISSING$NC"
       PATH_MISSING=$(dirname "$MISSING_AREA")
 
       FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -path "$R_PATH"/sys -prune -false -o -path "$R_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING" 2>/dev/null)
       if [[ -n "$FILENAME_FOUND" ]]; then
-        print_output "[*] Possible matching file found: $FILENAME_FOUND"
+        print_output "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC"
       fi
     
       if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
-        print_output "[*] Creating directory $R_PATH$PATH_MISSING"
+        print_output "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC"
         mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null
         continue
       fi
       if [[ -n "$FILENAME_FOUND" ]]; then
-        print_output "[*] Copy file $FILENAME_FOUND to $R_PATH$PATH_MISSING/"
+        print_output "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC"
         cp "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null
         continue
       else
-        print_output "[*] Creating empty file $R_PATH$PATH_MISSING/$FILENAME_MISSING"
+        print_output "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC"
         touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
         continue
       fi
@@ -658,10 +656,10 @@ emulate_binary() {
   write_link "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
   print_output "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)"
   print_output "[*] Using CPU config: $ORANGE$CPU_CONFIG_$NC"
-  write_log "[*] Root path used: $R_PATH" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
+  write_log "[*] Root path used: $ORANGE$R_PATH$NC" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
   #shellcheck disable=SC2001
-  write_log "[*] Emulating binary: $(echo "$BIN_" | sed 's/^\.//')" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
-  write_log "[*] Emulating binary name: $BIN_EMU_NAME" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
+  write_log "[*] Emulating binary: $ORANGE$(echo "$BIN_" | sed 's/^\.//')$NC" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
+  write_log "[*] Emulating binary name: $ORANGE$BIN_EMU_NAME$NC" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
 
   # lets assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
   # we are going to give all ELF files exec permissions to execute it in the emulator
@@ -684,15 +682,14 @@ emulate_binary() {
 
   for PARAM in "${EMULATION_PARAMS[@]}"; do
     if [[ -z "$PARAM" ]]; then
-      print_output "[*] Trying to emulate binary ${GREEN}$BIN_${NC} with no parameter"
-    else
-      print_output "[*] Trying to emulate binary ${GREEN}$BIN_${NC} with parameter $PARAM"
+      PARAM="NONE"
     fi
+
     if [[ -z "$CPU_CONFIG_" ]]; then
-      print_output "[*] Trying to emulate binary $BIN_ with parameter $PARAM" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
+      print_output "[*] Trying to emulate binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
       chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt" &
     else
-      print_output "[*] Trying to emulate binary $BIN_ with parameter $PARAM and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
+      print_output "[*] Trying to emulate binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt"
       chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_PATH_MODULE""/qemu_""$BIN_EMU_NAME"".txt" &
     fi
     print_output ""
