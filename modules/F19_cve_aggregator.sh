@@ -266,7 +266,7 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/iproute2-ss(040823)/iproute2\ 2\.6\.8\-\1/')"
     VERSION_lower="${VERSION_lower//iproute2-ss/iproute2\ }"
     #nettle-hash\ (nettle\ -> nettle
-    VERSION_lower="${VERSION_lower//nettle-hash\ ./}"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/nettle-hash\ \(nettle/nettle/')"
     # if we have a version string like "binary version v1.2.3" we have to remove the version and the v:
     VERSION_lower="${VERSION_lower//\ version\:/}"
     VERSION_lower="${VERSION_lower//version\ /}"

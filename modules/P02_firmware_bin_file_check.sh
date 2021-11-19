@@ -63,10 +63,10 @@ P02_firmware_bin_file_check() {
   print_output ""
   print_output "$(indent "$FILE_LS_OUT")"
   print_output ""
-  hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
-  print_output ""
-
   if [[ -f "$FIRMWARE_PATH" ]]; then
+    hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
+    print_output ""
+
     print_output "$(indent "$FILE_BIN_OUT")"
     print_output ""
     print_output "$(indent "$ENTROPY")"
