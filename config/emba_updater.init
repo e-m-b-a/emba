@@ -5,8 +5,10 @@
 [ -x EMBA_INSTALL_PATH/external/cve-search/sbin/db_updater.py ] || exit 0
 [ -x /etc/init.d/redis-server ] || exit 0
 
-echo "[*] EMBA update - cve_searchsploit update" | tee -a /var/log/emba_update.log
-cve_searchsploit -u | tee -a /var/log/emba_update.log
+if command -v cve_searchsploit > /dev/null ; then
+  echo "[*] EMBA update - cve_searchsploit update" | tee -a /var/log/emba_update.log
+  cve_searchsploit -u | tee -a /var/log/emba_update.log
+fi
 
 echo "[*] EMBA update - cve-search update" | tee -a /var/log/emba_update.log
 /etc/init.d/redis-server start | tee -a /var/log/emba_update.log
