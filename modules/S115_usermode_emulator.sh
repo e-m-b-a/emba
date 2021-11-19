@@ -502,7 +502,7 @@ run_init_test() {
 
   if [[ $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt") -gt 0 ]]; then
 
-    print_output "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG$NC failed" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
+    print_output "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
 
     mapfile -t CPU_CONFIGS < <(chroot "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'")
 
