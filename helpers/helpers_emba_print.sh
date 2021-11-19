@@ -87,7 +87,6 @@ print_output()
 {
   local OUTPUT="$1"
   local LOG_SETTING="$2"
-  local OTHER_LOG=0
   if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" ]]; then
     local LOG_FILE_MOD="$2"
   fi
