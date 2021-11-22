@@ -136,19 +136,21 @@ demess_kv_version() {
   K_VERSION=("$@")
   # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
   for VER in "${K_VERSION[@]}" ; do
-    print_output "$VER"
+    if ! [[ "$VER" == *[0-9]* ]]; then
+      continue;
+    fi
+
     local KV
     KV=$(echo "$VER" | tr "-" " ")
     KV=$(echo "$KV" | tr "+" " ")
     KV=$(echo "$KV" | tr "_" " ")
     KV=$(echo "$KV" | tr "/" " ")
+    # the first field is the real kernel version:
     KV=$(echo "$KV" | cut -d\  -f1)
-    print_output "$KV"
 
     while echo "$KV" | grep -q '[a-zA-Z]'; do
       KV="${KV::-1}"
     done
-    print_output "$KV"
     KV_ARR=("${KV_ARR[@]}" "$KV")
   done
 }

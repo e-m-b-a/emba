@@ -1061,6 +1061,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
       echo -e "\\n""$MAGENTA""$BOLD""The routersploit dependencies (if not already on the system) will be downloaded and be installed!""$NC"
       ANSWER=("y")
     fi
+
     case ${ANSWER:0:1} in
       y|Y )
   
@@ -1069,14 +1070,14 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
       git clone https://github.com/m-1-k-3/routersploit.git external/routersploit
 
       if ! [[ -f "external/routersploit/docs/routersploit_patch" ]]; then
+        # is already applied in the used fork (leave this here for future usecases):
         download_file "routersploit_patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
+        patch -f -p1 < docs/routersploit_patch
       else
-        echo -e "$GREEN""routersploit_patch already available""$NC"
+        echo -e "$GREEN""routersploit_patch already downloaded""$NC"
       fi
 
-      # is already applied in the used fork (leave this here for future usecases):
       cd external/routersploit || exit 1
-      #patch -f -p1 < docs/routersploit_patch
       python3 -m pip install -r requirements.txt
 
       cd "$HOME_PATH" || exit 1
@@ -1096,8 +1097,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     print_tool_info "pv" 1
     print_tool_info "rsync" 1
     print_tool_info "kmod" 1
-    #print_tool_info "sqlite3" 1
-    #print_tool_info "libsqlite3-dev" 1
     print_tool_info "libzstd-dev" 1
     print_tool_info "cmake" 1
     print_tool_info "lib32z1-dev" 1
@@ -1158,7 +1157,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     case ${ANSWER:0:1} in
       y|Y )
   
-      echo -e "\\n""$MAGENTA""$BOLD""The Freetz-NG installation is currently not fully working!""$NC"
       apt-get install "${INSTALL_APP_LIST[@]}" -y
       if ! grep -q freetzuser /etc/passwd; then
         useradd -m freetzuser
