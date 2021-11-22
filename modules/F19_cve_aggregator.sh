@@ -62,14 +62,29 @@ F19_cve_aggregator() {
 
     aggregate_versions
     
-    # Mongo DB is running on Port 27017. If not we can't check CVEs
-    if [[ $(netstat -ant | grep -c 27017) -eq 0 && $IN_DOCKER -eq 0 ]]; then
-      print_output "[*] Trying to start the vulnerability database"
-      systemctl restart mongod
-      sleep 2
+    CVE_SEARCH=0
+    # check if the cve-search produces results:
+    if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+      # we can restart the mongod database only in dev mode and not in docker mode:
+      if [[ "$IN_DOCKER" -eq 0 ]]; then
+        print_output "[*] Mongo database for CVE-search restarting"
+        service mongod restart
+        sleep 5
+
+        # do a second try
+        if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+          print_output "[*] Starting Mongo database was not working as expected ... do it again"
+          service mongod restart
+          sleep 5
+        else
+          CVE_SEARCH=1
+        fi
+      fi
+    else
+      CVE_SEARCH=1
     fi
 
-    if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
+    if [[ "$CVE_SEARCH" -eq 1 ]]; then
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
       fi
