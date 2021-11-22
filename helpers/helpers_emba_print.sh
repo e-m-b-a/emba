@@ -87,6 +87,9 @@ print_output()
 {
   local OUTPUT="$1"
   local LOG_SETTING="$2"
+  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" ]]; then
+    local LOG_FILE_MOD="$2"
+  fi
   # add a link as third argument to add a link marker for web report
   local REF_LINK="$3"
   local TYPE_CHECK
@@ -100,8 +103,14 @@ print_output()
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
+        if [[ -n "$LOG_FILE_MOD" ]]; then 
+          echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE_MOD" >/dev/null 
+        fi
       else
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+        if [[ -n "$LOG_FILE_MOD" ]]; then 
+          echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
+        fi
       fi
     fi
   else
@@ -111,8 +120,14 @@ print_output()
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
         echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
+        if [[ -n "$LOG_FILE_MOD" ]]; then 
+          echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE_MOD" >/dev/null 
+        fi
       else
         echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+        if [[ -n "$LOG_FILE_MOD" ]]; then 
+          echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
+        fi
       fi
     fi
   fi
@@ -539,9 +554,7 @@ module_end_log() {
   fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
-  print_output "[*] $(date) - $MODULE_MAIN_NAME finished"
   ((MOD_RUNNING--))
-  #print_output "[*] $(date) - Number of running modules: $MOD_RUNNING ... " "main"
 }
 
 strip_color_codes() {

@@ -301,6 +301,10 @@ get_networking_details() {
     mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
     mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log)
   
+    if [[ "${#MAC_CHANGES[@]}" -gt 0 || "${#INTERFACE_CANDIDATES[@]}" -gt 0 || "${#BRIDGE_INTERFACES[@]}" -gt 0 || "${#VLAN_INFOS[@]}" -gt 0 ]]; then
+      BOOTED=1
+    fi
+
     for MAC_CHANGE in "${MAC_CHANGES[@]}"; do
       print_output "[*] MAC change detected: $MAC_CHANGE"
       print_output "[!] No further action implemented"
@@ -334,10 +338,7 @@ get_networking_details() {
         NETWORK_DEVICE="$(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2)"
         if [[ -n "$NETWORK_DEVICE" ]]; then
           INT+=( "$NETWORK_DEVICE" )
-          BOOTED=1
         fi
-      else
-        BOOTED=1
       fi
     done
   
