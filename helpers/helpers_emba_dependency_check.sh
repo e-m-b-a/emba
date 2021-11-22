@@ -252,6 +252,9 @@ dependency_check()
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
     fi
 
+    # routersploit for full system emulation
+    #check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
+
     # CVE searchsploit
     check_dep_tool "CVE Searchsploit" "cve_searchsploit"
 

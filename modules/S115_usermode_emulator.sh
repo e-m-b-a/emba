@@ -498,8 +498,10 @@ creating_dev_area() {
 
 run_init_test() {
 
-  BIN_EMU_NAME=$(basename "$FULL_BIN_PATH")
-  LOG_FILE_INIT="$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
+  local BIN_EMU_NAME_
+  BIN_EMU_NAME_=$(basename "$FULL_BIN_PATH")
+  local LOG_FILE_INIT
+  LOG_FILE_INIT="$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME_"".txt"
   local CPU_CONFIG_
   CPU_CONFIG_=""
   # get the most used cpu configuration for the initial check:
@@ -507,68 +509,78 @@ run_init_test() {
     CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}')
   fi
 
-  print_output "[*] Initial emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_FILE_INIT" "$LOG_FILE_INIT"
+  print_output "[*] Initial emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_FILE_INIT" "$LOG_FILE_INIT"
 
-  run_init_qemu "$CPU_CONFIG_"
+  run_init_qemu "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT"
 
-  if [[ $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt") -gt 0 ]]; then
+  if [[ ! -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2> /dev/null) -gt 0 || $(wc -l "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" | awk '{print $1}') -lt 6 ]]; then
 
-    write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
+    write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
 
     mapfile -t CPU_CONFIGS < <(chroot "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'")
 
     for CPU_CONFIG_ in "${CPU_CONFIGS[@]}"; do
-      if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt" ]]; then
-        rm "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt"
+      if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
+        rm "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt"
       fi
 
-      run_init_qemu "$CPU_CONFIG_"
+      run_init_qemu "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT"
 
       if [[ -z "$CPU_CONFIG_" ]]; then
         CPU_CONFIG_="NONE"
       fi
 
-      if [[ $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt") -gt 0 ]]; then
-        write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
+      if [[ ! -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2> /dev/null) -gt 0 || $(wc -l "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" | awk '{print $1}') -lt 6 ]]; then
+        write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
         continue
       fi
 
-      write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
-      write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
-      write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_$BIN_EMU_NAME.txt"
+      write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME_$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
+      write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
+      write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_FILE_INIT"
       break
 
     done
-
   else
     if [[ -z "$CPU_CONFIG_" ]]; then
       CPU_CONFIG_="NONE"
     fi
 
-    write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
-    write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
-    write_log "CPU_CONFIG\;$CPU_CONFIG_" "$LOG_FILE_INIT"
+    write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME_$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
+    write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
+    write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_FILE_INIT"
+  fi
+
+  # fallback solution - we use the most working configuration:
+  if ! grep -q "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"; then
+    CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}')
+    write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME_$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
+    write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
+    write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_FILE_INIT"
+    write_log "[*] Fallback to most found CPU configuration" "$LOG_FILE_INIT"
   fi
 }
 
 run_init_qemu() {
 
   local CPU_CONFIG_="$1"
+  local BIN_EMU_NAME_="$2"
+  local LOG_FILE_INIT="$3"
 
   # Enable the following echo output for debugging
-  #echo "BIN: $BIN_" | tee -a "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
-  #echo "EMULATOR: $EMULATOR" | tee -a "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
-  #echo "R_PATH: $R_PATH" | tee -a "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
-  #echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt"
+  echo "BIN: $BIN_" | tee -a "$LOG_FILE_INIT"
+  echo "EMULATOR: $EMULATOR" | tee -a "$LOG_FILE_INIT"
+  echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
+  echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
 
-  run_init_qemu_runner "$CPU_CONFIG_" &
+  run_init_qemu_runner "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT" &
   PID=$!
 
   # wait a bit and then kill it
-  sleep 0.5
+  sleep 1
   kill -0 -9 "$PID" 2> /dev/null
-  if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt" ]]; then
-    cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt" >> "$LOG_FILE_INIT"
+  if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
+    cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" >> "$LOG_FILE_INIT"
   fi
 
 }
@@ -576,17 +588,15 @@ run_init_qemu() {
 run_init_qemu_runner() {
 
   local CPU_CONFIG_="$1"
+  local BIN_EMU_NAME_="$2"
+  local LOG_FILE_INIT="$3"
 
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
-    chroot "$R_PATH" ./"$EMULATOR" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt" 2>&1
-    # possible later extension
-    #echo "$?" > "$TMP_DIR"/s115_qemu_init_ret_"$BIN_EMU_NAME".txt
+    chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
   else
-    print_output "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
-    chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME"".txt" 2>&1
-    # possible later extension
-    #echo "$?" > "$TMP_DIR"/s115_qemu_init_ret_"$BIN_EMU_NAME".txt
+    write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
+    chroot "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
   fi
 }
 
@@ -667,7 +677,7 @@ emulate_binary() {
   # now we should have CPU_CONFIG in log file from Binary
 
   local CPU_CONFIG_
-  CPU_CONFIG_="$(grep "CPU_CONFIG" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2)"
+  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2)"
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)" "" "$LOG_FILE_BIN"
