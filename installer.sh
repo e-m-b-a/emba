@@ -360,7 +360,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     print_tool_info "u-boot-tools" 1
     print_tool_info "python3-bandit" 1
     print_tool_info "iputils-ping" 1
-    print_tool_info "netcat-traditional" 1 # FOR cve-search netcat netstat only check for availability
   
     if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
       echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -1191,33 +1190,13 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       CVE_INST=1
       echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
       cd "$HOME_PATH" || exit 1
-      if nc -z 
-      
       cd ./external/cve-search/ || exit 1
-      if [[ "$IN_DOCKER" -eq 1]] ;then
-        #get host-ip
-        HOST_IP=$(ip route | grep default | awk '/default/ { print $3 }')
-        if [[ $(nc -z "$HOST_IP" 27017) -eq 0 ]]; then 
-          if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-            CVE_INST=0
-            echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
-          else
-            echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
-          fi
-        else
-          echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
-        fi
-      else 
-        if netstat -anpt | grep LISTEN | grep -q 27017; then 
-          if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-            CVE_INST=0
-            echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
-          else
-            echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
-          fi
-        else
-          echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
-        fi
+
+      if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+        CVE_INST=0
+        echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
+      else
+        echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
       fi
       if [[ "$CVE_INST" -eq 1 ]]; then
         wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
@@ -1240,33 +1219,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
           y|Y )
             CVE_INST=1
             echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
-            HOST_IP=$(ip route | grep default | awk '/default/ { print $3 }')
-            if [[ "$IN_DOCKER" -eq 1 ]]; then 
-              #get host-ip
-              HOST_IP=$(ip route | grep default | awk '/default/ { print $3 }')
-              if [[ $(nc -z "$HOST_IP" 27017) -eq 0 ]]; then 
-                if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-                  CVE_INST=0
-                  echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
-                else
-                  echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
-                fi
-              else
-                echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
-              fi
+            if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+              CVE_INST=0
+              echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
             else
-              if netstat -anpt | grep LISTEN | grep -q 27017; then
-                if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-                  CVE_INST=0
-                  echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
-                else
-                  echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
-                  echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
-                fi
-              else
-                echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
-                echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
-              fi
+              echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
             fi
             # only update and install the database if we have no working database:
             if [[ "$CVE_INST" -eq 1 ]]; then

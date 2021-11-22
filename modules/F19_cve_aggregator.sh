@@ -63,14 +63,15 @@ F19_cve_aggregator() {
     aggregate_versions
     
     # Mongo DB is running on Port 27017. If not we can't check CVEs
-    if [[ "$IN_DOCKER" -eq 0 && $(netstat -ant | grep -c 27017) ]]; then
+    RES=$(netstat -ant | grep -c 27017)
+    if [[ "$IN_DOCKER" -eq 0 && "$RES" -eq 1 ]]; then
       print_output "[*] Trying to start the vulnerability database"
       systemctl restart mongod
       sleep 2
     fi
 
 
-    if [[ "$IN_DOCKER" -eq 1]] ;then
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
       #get host-ip
       HOST_IP=$(ip route | grep default | awk '/default/ { print $3 }')
       if [[ $(nc -z "$HOST_IP" 27017) -eq 1 ]]; then 
