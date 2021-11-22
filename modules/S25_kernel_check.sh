@@ -115,7 +115,7 @@ populate_karrays() {
       # remove empty entries:
       continue;
     fi
-    if ! [[ "$i" =~ *[0-9]* ]]; then
+    if ! [[ "$i" == *[0-9]* ]]; then
       continue;
     fi
     echo "\"$i\"" ;
