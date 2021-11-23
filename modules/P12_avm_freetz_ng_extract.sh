@@ -23,7 +23,22 @@ P12_avm_freetz_ng_extract() {
 
   if [[ "$AVM_DETECTED" -eq 1 ]]; then
     module_title "AVM freetz-ng firmware extractor"
-    "$EXT_DIR"/freetz-ng/fwmod -u -d "$LOG_DIR"/firmware/freetz_ng_extractor "$FIRMWARE_PATH"
+
+    "$EXT_DIR"/freetz-ng/fwmod -u -d "$LOG_DIR"/firmware/freetz_ng_extractor "$FIRMWARE_PATH" | tee -a "$LOG_FILE"
+
+    FRITZ_FILES=$(find "$LOG_DIR"/firmware/freetz_ng_extractor -type f | wc -l)
+    FRITZ_DIRS=$(find "$LOG_DIR"/firmware/freetz_ng_extractor -type d | wc -l)
+    FRITZ_VERSION=$(grep "detected firmware version:" "$LOG_FILE" | cut -d ":" -f2-)
+    if [[ -n "$FRITZ_VERSION" ]]; then
+      FRITZ_VERSION="NA"
+    fi
+
+    if [[ "$FRITZ_FILES" -gt 0 ]]; then
+      print_output "[*] Extracted $ORANGE$FRITZ_FILES$NC files and $ORANGE$FRITZ_DIRS$NC directories from the firmware image."
+      write_csv_log "Extractor" "files" "directories" "detected firmware version"
+      write_csv_log "Freetz-NG" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
+    fi
+
     NEG_LOG=1
   fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"

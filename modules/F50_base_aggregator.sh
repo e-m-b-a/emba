@@ -495,6 +495,11 @@ output_cve_exploits() {
       echo "cve_low;\"$LOW_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
+    if [[ "$CVE_SEARCH" -ne 1 ]]; then
+      print_output ""
+      print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
+      print_output ""
+    fi
     if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
       echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
       if [[ $MSF_MODULE_CNT -gt 0 ]]; then
@@ -609,6 +614,9 @@ get_data() {
     NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2)
     SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f3)
     NIKTO_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f4)
+  fi
+  if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
+    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | cut -d: -f3)
   fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do

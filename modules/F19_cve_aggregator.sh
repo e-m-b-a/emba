@@ -62,27 +62,7 @@ F19_cve_aggregator() {
 
     aggregate_versions
     
-    CVE_SEARCH=0
-    # check if the cve-search produces results:
-    if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-      # we can restart the mongod database only in dev mode and not in docker mode:
-      if [[ "$IN_DOCKER" -eq 0 ]]; then
-        print_output "[*] Mongo database for CVE-search restarting"
-        service mongod restart
-        sleep 5
-
-        # do a second try
-        if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-          print_output "[*] Starting Mongo database was not working as expected ... do it again"
-          service mongod restart
-          sleep 5
-        else
-          CVE_SEARCH=1
-        fi
-      fi
-    else
-      CVE_SEARCH=1
-    fi
+    check_cve_search
 
     if [[ "$CVE_SEARCH" -eq 1 ]]; then
       if command -v cve_searchsploit > /dev/null ; then
@@ -95,20 +75,22 @@ F19_cve_aggregator() {
       generate_cve_details
       generate_special_log
     else
-      print_output "[-] MongoDB not running on port 27017."
+      print_output "[-] MongoDB not responding as expected."
       print_output "[-] CVE checks not possible!"
       print_output "[-] Have you installed all the needed dependencies?"
       print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+      CVE_SEARCH=0
     fi
   else
     print_output "[-] CVE search binary search.py not found."
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+    CVE_SEARCH=0
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_FILE" | grep -c -E "\[\+\]\ Found\ ")
 
-  module_end_log "${FUNCNAME[0]}" "$FOUND_CVE"
+  module_end_log "${FUNCNAME[0]}" "$FOUND_CVE" "$CVE_SEARCH"
 }
 
 prepare_version_data() {
