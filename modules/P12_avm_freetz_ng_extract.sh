@@ -34,9 +34,10 @@ P12_avm_freetz_ng_extract() {
     fi
 
     if [[ "$FRITZ_FILES" -gt 0 ]]; then
+      print_output ""
       print_output "[*] Extracted $ORANGE$FRITZ_FILES$NC files and $ORANGE$FRITZ_DIRS$NC directories from the firmware image."
-      write_csv_log "Extractor" "files" "directories" "detected firmware version"
-      write_csv_log "Freetz-NG" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
+      write_csv_log "Extractor" "files" "directories" "firmware directory" "detected firmware version"
+      write_csv_log "Freetz-NG" "$FRITZ_FILES" "$FRITZ_DIRS" "$LOG_DIR/firmware/freetz_ng_extractor" "$FRITZ_VERSION"
     fi
 
     NEG_LOG=1

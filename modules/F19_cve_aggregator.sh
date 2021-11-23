@@ -90,7 +90,10 @@ F19_cve_aggregator() {
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_FILE" | grep -c -E "\[\+\]\ Found\ ")
 
-  module_end_log "${FUNCNAME[0]}" "$FOUND_CVE" "$CVE_SEARCH"
+  write_log ""
+  write_log "[*] Statistics:$CVE_SEARCH"
+
+  module_end_log "${FUNCNAME[0]}" "$FOUND_CVE"
 }
 
 prepare_version_data() {
