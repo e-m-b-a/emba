@@ -56,11 +56,11 @@ version_detection_thread() {
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT != "strict" ]]; then
-    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_*.txt | sort -u 2>/dev/null)
+    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null)
   else
-    if [[ -f "$LOG_PATH_MODULE_S115"/qemu_"$BINARY".txt ]]; then
-      VERSION_STRICT=$(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_"$BINARY".txt | sort -u | head -1 2>/dev/null)
-      BINARY_PATH=$(grep -a "Emulating binary:" "$LOG_PATH_MODULE_S115"/qemu_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u | head -1 2>/dev/null)
+    if [[ -f "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt ]]; then
+      VERSION_STRICT=$(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | sort -u | head -1 2>/dev/null)
+      BINARY_PATH=$(grep -a "Emulating binary:" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u | head -1 2>/dev/null)
       if [[ -n "$VERSION_STRICT" ]]; then
         if [[ "$BINARY" == "smbd" ]]; then
           # we log it as the original binary and the samba binary name

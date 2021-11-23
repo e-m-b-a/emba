@@ -5,3 +5,4 @@ external/
 tools/
 !external/.keep
 config/vt_api_key.txt
+config/emba_updater

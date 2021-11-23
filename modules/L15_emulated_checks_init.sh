@@ -33,10 +33,13 @@ L15_emulated_checks_init() {
     check_live_nmap_basic
     check_live_snmp
     check_live_nikto
+    check_live_routersploit
     MODULE_END=1
 
     pkill -f "qemu-system-.*$IMAGE_NAME.*"
     reset_network
+
+
   else
     MODULE_END=0
   fi
@@ -51,12 +54,13 @@ check_live_nmap_basic() {
   sub_module_title "Nmap portscans for emulated system with IP $IP"
 
   nmap -sSV "$IP" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP" | tee -a "$LOG_FILE"
-  mapfile -t NMAP_PORTS_SERVICES < <(grep Ports "$LOG_PATH_MODULE"/nmap-basic-"$IP".gnmap | cut -d: -f3- | sed -E 's/\/,/\n/g' | sed 's/\/$//' | sed 's/[[:space:]]Ignored State.*//' | sed 's/\/\//\//g')
+  mapfile -t NMAP_PORTS_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $4,$5,$6}' | sort -u)
+  mapfile -t NMAP_PORTS < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u)
 
   print_output ""
   for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
-    VERSION=$(echo "$SERVICE" | sed -E 's/.*\/\///' | sed 's/^\ //')
-    print_output "[+] Version information found ${RED}""$VERSION""${NC}${GREEN} in Nmap port scanning logs."
+    #VERSION=$(echo "$SERVICE" | sed -E 's/.*\/\///' | sed 's/^\ //')
+    print_output "[+] Version information found ${RED}""$SERVICE""${NC}${GREEN} in Nmap port scanning logs."
   done
 
   print_output ""
@@ -99,9 +103,9 @@ check_live_nikto() {
   sub_module_title "Nikto web checks for emulated system with IP $IP"
 
   NIKTO_UP=0
-  if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
-    for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
-      PORT=$(echo "$SERVICE" | cut -d/ -f1 | tr -d "[:blank:]")
+  if [[ "${#NMAP_PORTS[@]}" -gt 0 ]]; then
+    for PORT in "${NMAP_PORTS[@]}"; do
+      #PORT=$(echo "$SERVICE" | cut -d/ -f1 | tr -d "[:blank:]")
       NIKTO_OPTS="-timeout 3 -nointeractive -maxtime 8m"
       if [[ "$SERVICE" == *"ssl|http"* ]];then
         #shellcheck disable=SC2086
@@ -134,5 +138,22 @@ check_live_nikto() {
   fi
 
   print_output "[*] Nikto web checks for emulated system with IP $IP finished"
+}
+
+check_live_routersploit() {
+  sub_module_title "Routersploit tests for emulated system with IP $IP"
+
+  if [[ -f /tmp/routersploit.log ]]; then
+    rm /tmp/routersploit.log
+  fi
+
+  timeout --preserve-status --signal SIGINT 300 "$EXT_DIR"/routersploit/rsf.py "$IP" 2>&1 | tee -a "$LOG_PATH_MODULE"/routersploit-"$IP".txt
+
+  if [[ -f /tmp/routersploit.log ]]; then
+    mv /tmp/routersploit.log "$LOG_PATH_MODULE"/routersploit-detail-"$IP".txt
+  fi
+
+  print_output ""
+  print_output "[*] Routersploit tests for emulated system with IP $IP finished"
 }
 
