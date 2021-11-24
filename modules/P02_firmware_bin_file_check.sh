@@ -29,6 +29,7 @@ P02_firmware_bin_file_check() {
   export EXT_IMAGE=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
+    CHECKSUM=$(sha512sum "$FIRMWARE_PATH")
     FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
     DLINK_ENC_CHECK=$(hexdump -C "$FIRMWARE_PATH"| head -1)
     AVM_CHECK=$(strings "$FIRMWARE_PATH" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
@@ -79,6 +80,9 @@ P02_firmware_bin_file_check() {
       write_link "$LOG_DIR"/pixd.png
     fi
   fi
+
+  write_csv_log "Firmware name" "Checksum" "Entropy" "Dlink enc state" "VMDK detected" "UBOOT image" "EXT filesystem" "AVM system detected"
+  write_csv_log "$(basename "$FIRMWARE_PATH")" "$CHECKSUM" "$ENTROPY" "$DLINK_ENC_DETECTED" "$VMDK_DETECTED" "$UBOOT_IMAGE" "$EXT_IMAGE" "$AVM_DETECTED"
 
   module_end_log "${FUNCNAME[0]}" 1
 }

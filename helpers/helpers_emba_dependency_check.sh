@@ -68,6 +68,47 @@ check_dep_port()
   fi
 }
 
+check_cve_search() {
+  TOOL_NAME="cve-search"
+  print_output "    ""$TOOL_NAME"" - testing" "no_log"
+  CVE_SEARCH=0
+  # check if the cve-search produces results:
+  if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+    # we can restart the mongod database only in dev mode and not in docker mode:
+    if [[ "$IN_DOCKER" -eq 0 ]]; then
+      print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
+      service mongod restart
+      sleep 5
+
+      # do a second try
+      if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+        print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
+        service mongod restart
+        sleep 5
+
+        if [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+          CVE_SEARCH=1
+        fi
+      else
+        CVE_SEARCH=1
+      fi
+    fi
+  else
+    CVE_SEARCH=1
+  fi
+
+  if [[ "$CVE_SEARCH" -eq 0 ]]; then
+    print_output "    ""$TOOL_NAME"" - ""$RED""not ok""$NC" "no_log"
+    print_output "[-] MongoDB not responding as expected." "no_log"
+    print_output "[-] CVE checks not possible!" "no_log"
+    print_output "[-] Have you installed all the needed dependencies?" "no_log"
+    print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation" "no_log"
+    export CVE_SEARCH=0
+  else
+    print_output "    ""$TOOL_NAME"" - ""$GREEN""ok""$NC" "no_log"
+  fi
+}
+
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
@@ -146,11 +187,7 @@ dependency_check()
   if [[ $USE_DOCKER -eq 1 ]] ; then
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
-    check_dep_port "cve-search (port)" 27017
-    if ! netstat -anpt | grep -q 27017; then
-      sudo mongod restart
-      check_dep_port "cve-search (port)" 27017
-    fi
+    check_cve_search
   fi
 
   #######################################################################################
@@ -238,10 +275,10 @@ dependency_check()
     if [[ IN_DOCKER -eq 0 ]]; then 
       # really basic check, if cve-search database is running - no check, if populated and also no check, if emba in docker
       check_dep_tool "mongo database" "mongod"
-      check_dep_port "cve-search (port)" 27017
+      check_cve_search
     fi
 
-    # firmadyne
+    # firmadyne / FirmAE
     if [[ $FULL_EMULATION -eq 1 ]]; then
       # check only some of the needed files
       check_dep_file "console.mipsel" "$EXT_DIR""/firmadyne/binaries/console.mipsel"
@@ -251,6 +288,9 @@ dependency_check()
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
+
+      # routersploit for full system emulation
+      #check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
     fi
 
     # CVE searchsploit

@@ -62,14 +62,9 @@ F19_cve_aggregator() {
 
     aggregate_versions
     
-    # Mongo DB is running on Port 27017. If not we can't check CVEs
-    if [[ $(netstat -ant | grep -c 27017) -eq 0 && $IN_DOCKER -eq 0 ]]; then
-      print_output "[*] Trying to start the vulnerability database"
-      systemctl restart mongod
-      sleep 2
-    fi
+    check_cve_search
 
-    if [[ $(netstat -ant | grep -c 27017) -gt 0 ]]; then
+    if [[ "$CVE_SEARCH" -eq 1 ]]; then
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
       fi
@@ -80,18 +75,23 @@ F19_cve_aggregator() {
       generate_cve_details
       generate_special_log
     else
-      print_output "[-] MongoDB not running on port 27017."
+      print_output "[-] MongoDB not responding as expected."
       print_output "[-] CVE checks not possible!"
       print_output "[-] Have you installed all the needed dependencies?"
       print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+      CVE_SEARCH=0
     fi
   else
     print_output "[-] CVE search binary search.py not found."
     print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
     print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+    CVE_SEARCH=0
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_FILE" | grep -c -E "\[\+\]\ Found\ ")
+
+  write_log ""
+  write_log "[*] Statistics:$CVE_SEARCH"
 
   module_end_log "${FUNCNAME[0]}" "$FOUND_CVE"
 }
