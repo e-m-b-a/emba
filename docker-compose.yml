@@ -16,4 +16,4 @@ services:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
       - SYS_ADMIN
-    network: none
+    network_mode: "none"
