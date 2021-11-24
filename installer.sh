@@ -1238,7 +1238,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             fi
             # only update and install the database if we have no working database:
             if [[ "$CVE_INST" -eq 1 ]]; then
-              if [[ $(cat /etc/mongod.conf | grep -c"127.0.0.1") -gt 0 ]]; then
+              if [[ $(grep -c"127.0.0.1" /etc/mongod.conf) -gt 0 ]]; then
                 sed -i 's/127.0.0.1/172.36.0.1/g' /etc/mongod.conf
               fi
               /etc/init.d/redis-server start
