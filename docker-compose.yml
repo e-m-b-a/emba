@@ -16,12 +16,4 @@ services:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
       - SYS_ADMIN
-    networks:
-      - emba_runs
-
-networks:
-  emba_runs:
-    name: emba_runs
-    driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: emba_runs
+    network: none
