@@ -31,6 +31,7 @@ Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
     <a class="inherit" href="./index.html"><img class="inherit" src="./style/emba.svg" alt="emba logo"></a>
   </div>
   <div id="nav">
+      <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a>
       <a class="back" href="./index.html">&laquo; Back to main</a>
       <!-- navigation start -->
       <!-- navigation end -->
@@ -80,6 +81,10 @@ window.onload = function () {
   }
   document.getElementById("expand").value = "+ Show more results";
   document.getElementById("expand").className += " expand";
+  var embarkButton = document.getElementById("embark");
+  if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
+    embarkButton.classList.remove('hidden');
+  }
 }
 
 function openNav() {

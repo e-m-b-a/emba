@@ -111,6 +111,14 @@ pre a:hover {
   top: -50px;
 }
 
+#embark {
+  background-color: #4d4197;
+}
+
+#embark:hover {
+  background-color: #6a5ebe;
+}
+
 .back {
   background-color:#2d6029!important;
 }
