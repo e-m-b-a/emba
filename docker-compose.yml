@@ -16,4 +16,18 @@ services:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
       - SYS_ADMIN
-    network_mode: "none"
+    networks:
+      - emba_runs
+    extra_hosts:
+      - "localhost:host-gateway" #THIS depends on how pymongo calls the db via port MIGHT NOT BE NEEDED!!
+
+networks:
+  emba_runs:
+    name: emba_runs
+    driver: bridge
+    internal: true 
+    driver_opts:
+      com.docker.network.bridge.name: emba_runs
+    ipam:
+      config:
+        - subnet: "172.36.0.0/16"

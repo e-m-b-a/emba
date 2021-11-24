@@ -1210,6 +1210,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
         systemctl daemon-reload
         systemctl start mongod
         systemctl enable mongod
+        sed -i 's/127.0.0.1/172.36.0.1/g' /etc/mongod.conf 
+        systmctl restart mongod.service
         
         if [[ "$FORCE" -eq 0 ]] ; then
           echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
@@ -1236,6 +1238,9 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             fi
             # only update and install the database if we have no working database:
             if [[ "$CVE_INST" -eq 1 ]]; then
+              if [[ $(cat /etc/mongod.conf | grep -c"127.0.0.1") -gt 0 ]]; then
+                sed -i 's/127.0.0.1/172.36.0.1/g' /etc/mongod.conf
+              fi
               /etc/init.d/redis-server start
               ./sbin/db_mgmt_cpe_dictionary.py -p
               ./sbin/db_mgmt_json.py -p
