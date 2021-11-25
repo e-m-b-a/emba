@@ -1222,6 +1222,9 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     xargs sudo apt-get install -y < requirements.system
     # shellcheck disable=SC2002
     cat requirements.txt | xargs -n 1 pip install 2>/dev/null
+    cp ./etc/configuration.ini.sample ./etc/configuration.ini
+    sed -i 's/localhost/172.36.0.1/g' ./etc/configuration.ini
+    sed -i 's/127.0.0.1/172.36.0.1/g' ./etc/configuration.ini
   fi
    
   case ${ANSWER:0:1} in
@@ -1231,15 +1234,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
       cd "$HOME_PATH" || exit 1
       cd ./external/cve-search/ || exit 1
-      if netstat -anpt | grep LISTEN | grep -q 27017 || [[ $(curl 172.36.0.1:27017 &>/dev/null) -eq 0 ]]; then
-        if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+      if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_INST=0
           echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
-        else
-          echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
-        fi
       else
-        echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
+          echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
       fi
       if [[ "$CVE_INST" -eq 1 ]]; then
         wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
@@ -1251,9 +1250,6 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
         systemctl start mongod
         systemctl enable mongod
         sed -i 's/bindIp\:\ 127.0.0.1/bindIp\:\ 172.36.0.1/g' /etc/mongod.conf
-        cp ./etc/configuration.ini.sample ./etc/configuration.ini
-        sed -i 's/localhost/172.36.0.1/g' ./etc/configuration.ini
-        sed -i 's/127.0.0.1/172.36.0.1/g' ./etc/configuration.ini
         systmctl restart mongod.service
         
         if [[ "$FORCE" -eq 0 ]] ; then
@@ -1267,26 +1263,15 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
           y|Y )
             CVE_INST=1
             echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
-            if netstat -anpt | grep LISTEN | grep -q 27017 || [[ $(curl 172.36.0.1:27017 &>/dev/null) -eq 0 ]]; then 
-              if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-                CVE_INST=0
-                echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
-              else
-                echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
-                echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
-              fi
+            if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+              CVE_INST=0
+              echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
             else
-              echo -e "\\n""$MAGENTA""cve-search database port 27017 not available.""$NC"
+              echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
               echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
             fi
             # only update and install the database if we have no working database:
             if [[ "$CVE_INST" -eq 1 ]]; then
-              if [[ $(grep -c"127.0.0.1" /etc/mongod.conf) -gt 0 ]]; then
-                sed -i 's/bindIp\:\ 127.0.0.1/bindIp\:\ 172.36.0.1/g' /etc/mongod.conf
-                cp ./etc/configuration.ini.sample ./etc/configuration.ini
-                sed -i 's/localhost/172.36.0.1/g' ./etc/configuration.ini
-                sed -i 's/127.0.0.1/172.36.0.1/g' ./etc/configuration.ini
-              fi
               /etc/init.d/redis-server start
               ./sbin/db_mgmt_cpe_dictionary.py -p
               ./sbin/db_mgmt_json.py -p
