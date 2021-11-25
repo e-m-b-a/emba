@@ -84,7 +84,7 @@ check_docker_env() {
   if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
     # echo -e "$RED""not ok""$NC"
     echo -e "$RED""    Missing ""Docker-Interface"" - check your installation""$NC"
-    echo -e "$RED""    run \$docker-compose up --no-start to start or reset it otherwise""$NC"
+    echo -e "$RED""    run \$docker-compose up --no-start to start or reset it otherwise (\$ docker network rm emba_runs)""$NC"
     DEP_ERROR=1
   else
     echo -e "$GREEN""ok""$NC"
