@@ -394,6 +394,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
         echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
         docker pull embeddedanalyzer/emba
         export DOCKER_CLI_EXPERIMENTAL=disabled
+        docker-compose up --no-start
       else
         echo -e "$GREEN""EMBA docker image is already available - no further action will be performed.""$NC"
       fi
