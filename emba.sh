@@ -541,8 +541,6 @@ main()
     fi
 
     if docker images | grep -qE "emba[[:space:]]*latest"; then
-      setup_docker_iptables
-
       print_output "[*] EMBA initializes docker container.\\n" "no_log"
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
