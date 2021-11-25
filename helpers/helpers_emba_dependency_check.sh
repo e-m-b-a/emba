@@ -68,6 +68,29 @@ check_dep_port()
   fi
 }
 
+check_docker_env() {
+  TOOL_NAME="MongoDB"
+  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
+  if ! grep -q "bindIp: 172.36.0.1" /etc/mongod.conf; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    Wrong ""mongodb config"" - check your installation""$NC"
+    echo -e "$RED""    RE-run installation - bindIp should be set to 172.36.0.1""$NC"
+    DEP_ERROR=1
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+  TOOL_NAME="Docker Interface"
+  print_output "    ""$TOOL_NAME"" -""$RED"" \\c" "no_log"
+  if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+    # echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    Missing ""Docker-Interface"" - check your installation""$NC"
+    echo -e "$RED""    run \$docker-compose up --no-start to start or reset it otherwise""$NC"
+    DEP_ERROR=1
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+}
+
 check_cve_search() {
   TOOL_NAME="cve-search"
   print_output "    ""$TOOL_NAME"" - testing" "no_log"
@@ -187,6 +210,7 @@ dependency_check()
   if [[ $USE_DOCKER -eq 1 ]] ; then
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
+    check_docker_env
     check_cve_search
   fi
 

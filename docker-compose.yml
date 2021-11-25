@@ -18,14 +18,12 @@ services:
       - SYS_ADMIN
     networks:
       - emba_runs
-    extra_hosts:
-      - "localhost:host-gateway" #THIS depends on how pymongo calls the db via port MIGHT NOT BE NEEDED!!
 
 networks:
   emba_runs:
     name: emba_runs
     driver: bridge
-    internal: true 
+    internal: true
     driver_opts:
       com.docker.network.bridge.name: emba_runs
     ipam:
