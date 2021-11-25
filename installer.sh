@@ -394,10 +394,10 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
         echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
         docker pull embeddedanalyzer/emba
         export DOCKER_CLI_EXPERIMENTAL=disabled
-        docker-compose up --no-start
       else
         echo -e "$GREEN""EMBA docker image is already available - no further action will be performed.""$NC"
       fi
+      docker-compose up --no-start
     else
       echo "Estimated download-Size: ~2500 MB"
       echo -e "$ORANGE""WARNING: docker command missing - no docker pull possible.""$NC"
@@ -1251,7 +1251,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
         systemctl start mongod
         systemctl enable mongod
         sed -i 's/bindIp\:\ 127.0.0.1/bindIp\:\ 172.36.0.1/g' /etc/mongod.conf
-        systmctl restart mongod.service
+        systemctl restart mongod.service
         
         if [[ "$FORCE" -eq 0 ]] ; then
           echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and update the cve-search database?""$NC"
