@@ -115,8 +115,8 @@ check_live_nikto() {
         nikto $NIKTO_OPTS -port "$PORT" -host "$IP" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt
       fi
     done
-    cat "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt >> "$LOG_FILE"
     if [[ -f "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt ]]; then
+      cat "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt >> "$LOG_FILE"
       print_output ""
       mapfile -t VERSIONS < <(grep "Server" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt | cut -d: -f2 | sort -u | grep -v "null" | sed 's/^\ //')
       for VERSION in "${VERSIONS[@]}"; do
@@ -129,11 +129,11 @@ check_live_nikto() {
       for VERSION in "${VERSIONS[@]}"; do
         print_output "[+] Version information found ${RED}""$VERSION""${NC}${GREEN} in Nikto web server scanning logs."
       done
-    fi
 
-    print_output ""
-    if [[ $(grep -c "+ [1-9] host(s) tested" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt) -gt 0 ]]; then
-      NIKTO_UP=1
+      print_output ""
+      if [[ $(grep -c "+ [1-9] host(s) tested" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt) -gt 0 ]]; then
+        NIKTO_UP=1
+      fi
     fi
   fi
 
