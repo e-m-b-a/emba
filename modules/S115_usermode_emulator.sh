@@ -716,11 +716,11 @@ emulate_binary() {
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       #chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT $QRUNTIME chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
       #chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
-      timeout --preserve-status --signal SIGINT $QRUNTIME chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
     fi
     check_disk_space
   done
@@ -728,6 +728,7 @@ emulate_binary() {
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
   killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
+  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.*
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   
   # reset the terminal - after all the uncontrolled emulation it is typically broken!

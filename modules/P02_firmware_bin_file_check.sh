@@ -67,7 +67,8 @@ P02_firmware_bin_file_check() {
   if [[ -f "$FIRMWARE_PATH" ]]; then
     hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
     print_output ""
-
+    print_output "[*] SHA512 checksum: $ORANGE$CHECKSUM$NC"
+    print_output ""
     print_output "$(indent "$FILE_BIN_OUT")"
     print_output ""
     print_output "$(indent "$ENTROPY")"

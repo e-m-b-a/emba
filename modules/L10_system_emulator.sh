@@ -16,7 +16,6 @@
 # Description:  Builds and emulates Linux firmware - this module is based on the great work of firmadyne
 #               Check out the original firmadyne project at https://github.com/firmadyne
 #               Currently this is an experimental module and needs to be activated separately via the -Q switch. 
-#               Important note: This module is currently only working in developer mode!
 # Warning:      This module changes your network configuration and it could happen that your system looses
 #               network connectivity.
 
@@ -25,7 +24,7 @@ export THREAD_PRIO=0
 
 L10_system_emulator() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "System emulation of Linux based embedded devices."
+  module_title "System emulation of Linux based embedded devices with firmadyne."
 
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
     export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
@@ -142,8 +141,8 @@ create_emulation_filesystem() {
   print_output "[*] Device mapper created at ${DEVICE}"
 
   print_output "[*] Creating Filesystem"
-  mkfs.ext2 "${DEVICE}"
   sync
+  mkfs.ext2 "${DEVICE}"
 
   print_output "[*] Mounting QEMU Image Partition 1 to $MNT_POINT"
   mount "${DEVICE}" "$MNT_POINT"
@@ -154,12 +153,14 @@ create_emulation_filesystem() {
 
     print_output "[*] Creating FIRMADYNE Directories"
     mkdir -p "$MNT_POINT/firmadyne/libnvram/"
-    mkdir "$MNT_POINT/firmadyne/libnvram.override/"
+    mkdir -p "$MNT_POINT/firmadyne/libnvram.override/"
 
     print_output "[*] Patching Filesystem (chroot)"
     cp "$(which busybox)" "$MNT_POINT"
-    cp "$FIRMADYNE_DIR/scripts/fixImage.sh" "$MNT_POINT"
+
+    cp "$FIRMADYNE_DIR/scripts/fixImage_firmadyne.sh" "$MNT_POINT"/fixImage.sh
     chroot "$MNT_POINT" /busybox ash /fixImage.sh
+
     rm "$MNT_POINT/fixImage.sh"
     rm "$MNT_POINT/busybox"
 
@@ -171,7 +172,7 @@ create_emulation_filesystem() {
     cp "${LIBNVRAM}" "$MNT_POINT/firmadyne/libnvram.so"
     chmod a+x "$MNT_POINT/firmadyne/libnvram.so"
 
-    cp "$FIRMADYNE_DIR/scripts/preInit.sh" "$MNT_POINT/firmadyne/preInit.sh"
+    cp "$FIRMADYNE_DIR/scripts/preInit_firmadyne.sh" "$MNT_POINT/firmadyne/preInit.sh"
     chmod a+x "$MNT_POINT/firmadyne/preInit.sh"
 
     print_output "[*] Unmounting QEMU Image"

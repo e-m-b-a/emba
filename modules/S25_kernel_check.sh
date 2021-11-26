@@ -91,9 +91,9 @@ S25_kernel_check()
     fi
   fi
 
-  if [[ ${#KV_C_ARR[@]} -ne 0 ]] ; then
-    for LINE in "${KV_C_ARR[@]}" ; do
-      write_log "[*] Statistics:$LINE"
+  if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
+    for K_VERS in "${KERNEL_VERSION[@]}" ; do
+      write_log "[*] Statistics:$K_VERS"
     done
   fi
   write_log "[*] Statistics1:${#KERNEL_MODULES[@]}:$KMOD_BAD"
@@ -103,11 +103,28 @@ S25_kernel_check()
 
 populate_karrays() {
   mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  export KERNEL_VERSION
+  export KERNEL_DESC
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
     KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
   done
+
+  # if we have found a kernel version in binary kernel:
+  if [[ -f "$LOG_DIR"/p25_kernel_bin_identifier.csv ]]; then
+    while IFS=";" read -r K_VER; do
+      K_VER="$(echo "$K_VER" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
+
+      demess_kv_version "$K_VER"
+
+      IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+
+      for V in "${KV_C_ARR[@]}" ; do
+        KERNEL_VERSION+=( "$V" )
+      done
+    done < <(cut -d ";" -f1 "$LOG_DIR"/p25_kernel_bin_identifier.csv | tail -n +2)
+  fi
 
   # unique our results
   eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do
@@ -115,7 +132,8 @@ populate_karrays() {
       # remove empty entries:
       continue;
     fi
-    if ! [[ "$i" == *"[0-9]\.[0-9]"* ]]; then
+    if ! [[ "$i" =~ [0-9].[0-9] ]]; then
+      # remove lines without someting like *1.2*
       continue;
     fi
     echo "\"$i\"" ;
@@ -130,6 +148,7 @@ populate_karrays() {
     demess_kv_version "${KERNEL_VERSION[@]}"
     IFS=" " read -r -a KERNEL_VERSION <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
   fi
+
 }
 
 demess_kv_version() {
