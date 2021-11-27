@@ -103,12 +103,27 @@ S25_kernel_check()
 
 populate_karrays() {
   mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  export KERNEL_VERSION
-  export KERNEL_DESC
+  local KERNEL_VERSION_
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
     KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
+  done
+
+  for VER in "${KERNEL_VERSION[@]}" ; do
+    demess_kv_version "$VER"
+
+    IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+    for V in "${KV_C_ARR[@]}" ; do
+      if [[ -z "$i" ]]; then
+        # remove empty entries:
+        continue
+      fi
+      if ! [[ "$i" =~ .*[0-9]\.[0-9].* ]]; then
+        continue
+      fi
+      KERNEL_VERSION_+=( "$V" )
+    done
   done
 
   # if we have found a kernel version in binary kernel:
@@ -121,18 +136,18 @@ populate_karrays() {
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
 
       for V in "${KV_C_ARR[@]}" ; do
-        KERNEL_VERSION+=( "$V" )
+        KERNEL_VERSION_+=( "$V" )
       done
     done < <(cut -d ";" -f1 "$LOG_DIR"/p25_kernel_bin_identifier.csv | tail -n +2)
   fi
 
   # unique our results
-  eval "KERNEL_VERSION=($(for i in "${KERNEL_VERSION[@]}" ; do
+  eval "KERNEL_VERSION_=($(for i in "${KERNEL_VERSION_[@]}" ; do
     if [[ -z "$i" ]]; then
       # remove empty entries:
       continue;
     fi
-    if ! [[ "$i" =~ [0-9].[0-9] ]]; then
+    if ! [[ "$i" =~ .*[0-9]\.[0-9].* ]]; then
       # remove lines without someting like *1.2*
       continue;
     fi
@@ -141,13 +156,18 @@ populate_karrays() {
 
   eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
 
-  # if we have no kernel version -> we try to identify something via the path:
-  if [[ "${#KERNEL_VERSION[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
+  # if we have no kernel version identified -> we try to identify something via the path:
+  if [[ "${#KERNEL_VERSION_[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
+    # remove the first part of the path:
     KERNEL_VERSION1=$(echo "${KERNEL_MODULES[1]}" | sed 's/.*\/lib\/modules\///')
-    KERNEL_VERSION+=("$KERNEL_VERSION1")
-    demess_kv_version "${KERNEL_VERSION[@]}"
-    IFS=" " read -r -a KERNEL_VERSION <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+    KERNEL_VERSION_+=("$KERNEL_VERSION1")
+    # demess_kv_version removes the unneeded stuff after the version:
+    demess_kv_version "${KERNEL_VERSION_[@]}"
+    # now rewrite the temp KERNEL_VERSION_ array
+    IFS=" " read -r -a KERNEL_VERSION_ <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
   fi
+
+  KERNEL_VERSION=("${KERNEL_VERSION_[@]}")
 
 }
 

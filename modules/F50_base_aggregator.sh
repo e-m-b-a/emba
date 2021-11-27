@@ -350,7 +350,7 @@ output_binaries() {
 
   if [[ "$STRCPY_CNT" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
-    if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
+    if [[ $(find "$LOG_DIR""/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "$LOG_DIR""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
       write_link "s13"
     else
       write_link "s14"
@@ -362,9 +362,9 @@ output_binaries() {
   local DATA=0
 
   if [[ "$STRCPY_CNT" -gt 0 ]] && [[ -d "$LOG_DIR""/s13_weak_func_check/" || -d "$LOG_DIR""/s14_weak_func_radare_check/" ]] ; then
-    if [[ "$(find "$LOG_DIR""/s13_weak_func_check/" -xdev -iname "vul_func_*_*.txt" 2>/dev/null | wc -l)" -gt 0 ]]; then
+    if [[ $(find "$LOG_DIR""/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "$LOG_DIR""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
       LDIR="$LOG_DIR""/s13_weak_func_check/"
-    elif [[ "$(find "$LOG_DIR""/s14_weak_func_radare_check/" -xdev -iname "vul_func_*_*.txt" 2>/dev/null | wc -l)" -gt 0 ]]; then
+    else
       LDIR="$LOG_DIR""/s14_weak_func_radare_check/"
     fi
 
@@ -544,8 +544,11 @@ get_data() {
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
   fi
   if [[ -f "$LOG_DIR"/"$S14_LOG" && "$STRCPY_CNT" -lt 1 ]]; then
-    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
+    STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
+  fi
+  if [[ "$STRCPY_CNT_14" -gt "$STRCPY_CNT" ]]; then
+    STRCPY_CNT="$STRCPY_CNT_14"
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
