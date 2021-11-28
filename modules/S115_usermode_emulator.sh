@@ -54,11 +54,8 @@ S115_usermode_emulator() {
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
-    done
-
-    # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
-    MD5_DONE_INT=()
-    for R_PATH in "${ROOT_PATH[@]}" ; do
+      # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
+      MD5_DONE_INT=()
       BIN_CNT=0
       ((ROOT_CNT=ROOT_CNT+1))
       print_output "[*] Running emulation processes in $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
@@ -70,14 +67,6 @@ S115_usermode_emulator() {
       BIN_EMU=()
 
       print_output "[*] Create unique binary array for $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
-
-      # this is a little check to ensure we get something usefull out of the emulation of the root path
-      # if we have too many errors we try all bins in the next root path, otherwise only unknown bins
-      # Here is a lot of room for future improvement. E.g. only try the failed bins in the next root path
-      FULL_FAIL_CNT=$(cat "$LOG_PATH_MODULE"/qemu_*.txt 2>/dev/null | grep -c "qemu-.*-static: Could not open")
-      if [[ "$FULL_FAIL_CNT" -gt "${#BINARIES[@]}" ]]; then
-        MD5_DONE_INT=()
-      fi
 
       for BINARY in "${BIN_EMU_TMP[@]}"; do
         # we emulate every binary only once. So calculate the checksum and store it for checking
@@ -93,6 +82,17 @@ S115_usermode_emulator() {
       for BIN_ in "${BIN_EMU[@]}" ; do
         ((BIN_CNT=BIN_CNT+1))
         FULL_BIN_PATH="$R_PATH"/"$BIN_"
+
+        local BIN_EMU_NAME_
+        BIN_EMU_NAME_=$(basename "$FULL_BIN_PATH")
+
+        THOLD=$(( 25*"$ROOT_CNT" ))
+        # if we have already a log file with a lot of content we assume this binary was already emulated correct
+        if [[ $(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$MAIN_LOG_DIR"/qemu_init_"$BIN_EMU_NAME_".txt 2>/dev/null | grep -c -v -E "\[\*\]\ ") -gt "$THOLD" ]]; then
+          print_output "[!] BIN $BIN_EMU_NAME_ was already emulated ... skipping"
+          continue
+        fi
+
         if [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
           print_output "[!] Blacklist triggered ... $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
           continue
@@ -677,7 +677,7 @@ emulate_binary() {
   # now we should have CPU_CONFIG in log file from Binary
 
   local CPU_CONFIG_
-  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2)"
+  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2 | sort -u | head -1)"
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)" "" "$LOG_FILE_BIN"
