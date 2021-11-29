@@ -50,6 +50,8 @@ S115_usermode_emulator() {
     if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
       detect_root_dir_helper "$EMULATION_PATH_BASE" "$LOG_FILE"
     fi
+    kill_qemu_threader &
+    PID_killer+="$!"
 
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
@@ -215,6 +217,14 @@ running_jobs() {
       CJOBS="NA"
     fi
   fi
+  # sometimes it is quite hard to get rid of all the qemu processes:
+}
+
+kill_qemu_threader() {
+  while true; do
+    pkill -O 240 -f .*qemu.*
+    sleep 20
+  done
 }
 
 s115_cleanup() {
@@ -223,6 +233,7 @@ s115_cleanup() {
 
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
+
   rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
@@ -236,6 +247,7 @@ s115_cleanup() {
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
     killall -9 "$EMULATOR" 2> /dev/null
   fi
+  kill "$PID_killer"
 
   print_output "[*] Cleaning the emulation environment\\n"
   find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
