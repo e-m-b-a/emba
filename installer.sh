@@ -1288,7 +1288,6 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
             echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
           ;;
         esac
-        
       fi
       cd "$HOME_PATH" || exit 1
     ;;
