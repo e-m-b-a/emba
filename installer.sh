@@ -1226,8 +1226,8 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
     cp ./etc/configuration.ini.sample ./etc/configuration.ini
     sed -i 's/localhost/172.36.0.1/g' ./etc/configuration.ini
     sed -i 's/127.0.0.1/172.36.0.1/g' ./etc/configuration.ini
-    sed -zE 's/172.36.0.1([^\n]*\n[^\n]*6379)/127.0.0.1\1/' ./etc/configuration.ini | tee ./etc/configuration.ini
-    # This excludes redis for the installation
+    sed -zE 's/172.36.0.1([^\n]*\n[^\n]*6379)/127.0.0.1\1/' ./etc/configuration.ini | tee ./etc/configuration.ini.new
+    cp ./etc/configuration.ini.new ./etc/configuration.ini  # This excludes redis for the installation
   fi
    
   case ${ANSWER:0:1} in
