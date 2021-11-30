@@ -94,6 +94,7 @@ check_docker_env() {
 check_cve_search() {
   TOOL_NAME="cve-search"
   print_output "    ""$TOOL_NAME"" - testing" "no_log"
+  export CVE_SEARCH
   CVE_SEARCH=0
   # check if the cve-search produces results:
   if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then

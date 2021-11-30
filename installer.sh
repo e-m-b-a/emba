@@ -935,6 +935,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     cd "$HOME_PATH" || exit 1
   
     print_tool_info "busybox-static" 1
+    print_tool_info "bash-static" 1
     print_tool_info "fakeroot" 1
     print_tool_info "git" 1
     print_tool_info "dmsetup" 1
@@ -976,10 +977,12 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
       y|Y )
   
       mkdir -p external/firmadyne/binaries
+      mkdir -p external/firmadyne/binaries_FirmAE
       mkdir -p external/firmadyne/scripts
   
       apt-get install "${INSTALL_APP_LIST[@]}" -y
   
+      # Firmadyne stuff:
       if ! [[ -f "external/firmadyne/binaries/vmlinux.mipsel" ]]; then
         download_file "vmlinux.mipsel" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipsel" "external/firmadyne/binaries/vmlinux.mipsel"
       else
@@ -1030,16 +1033,19 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
         echo -e "$GREEN""libnvram.so.mipsel already installed""$NC"
       fi
   
-      if ! [[ -f "external/firmadyne/scripts/fixImage.sh" ]]; then
-        download_file "fixImage.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/fixImage.sh"
+      if ! [[ -f "external/firmadyne/scripts/fixImage_firmadyne.sh" ]]; then
+        download_file "fixImage.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/fixImage_firmadyne.sh"
       else
-        echo -e "$GREEN""fixImage.sh already installed""$NC"
+        echo -e "$GREEN""firmadyne fixImage.sh already installed""$NC"
       fi
-      if ! [[ -f "external/firmadyne/scripts/preInit.sh" ]]; then
-        download_file "preInit.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/preInit.sh"
+      if ! [[ -f "external/firmadyne/scripts/preInit_firmadyne.sh" ]]; then
+        download_file "preInit.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/preInit_firmadyne.sh"
       else
-        echo -e "$GREEN""preInit.sh already installed""$NC"
+        echo -e "$GREEN""firmadyne preInit.sh already installed""$NC"
       fi
+
+      # firmAE stuff
+
       ;;
     esac
   fi

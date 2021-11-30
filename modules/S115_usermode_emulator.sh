@@ -50,15 +50,14 @@ S115_usermode_emulator() {
     if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
       detect_root_dir_helper "$EMULATION_PATH_BASE" "$LOG_FILE"
     fi
+    kill_qemu_threader &
+    PID_killer+="$!"
 
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
-    done
-
-    # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
-    MD5_DONE_INT=()
-    for R_PATH in "${ROOT_PATH[@]}" ; do
+      # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
+      MD5_DONE_INT=()
       BIN_CNT=0
       ((ROOT_CNT=ROOT_CNT+1))
       print_output "[*] Running emulation processes in $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
@@ -70,14 +69,6 @@ S115_usermode_emulator() {
       BIN_EMU=()
 
       print_output "[*] Create unique binary array for $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
-
-      # this is a little check to ensure we get something usefull out of the emulation of the root path
-      # if we have too many errors we try all bins in the next root path, otherwise only unknown bins
-      # Here is a lot of room for future improvement. E.g. only try the failed bins in the next root path
-      FULL_FAIL_CNT=$(cat "$LOG_PATH_MODULE"/qemu_*.txt 2>/dev/null | grep -c "qemu-.*-static: Could not open")
-      if [[ "$FULL_FAIL_CNT" -gt "${#BINARIES[@]}" ]]; then
-        MD5_DONE_INT=()
-      fi
 
       for BINARY in "${BIN_EMU_TMP[@]}"; do
         # we emulate every binary only once. So calculate the checksum and store it for checking
@@ -93,6 +84,17 @@ S115_usermode_emulator() {
       for BIN_ in "${BIN_EMU[@]}" ; do
         ((BIN_CNT=BIN_CNT+1))
         FULL_BIN_PATH="$R_PATH"/"$BIN_"
+
+        local BIN_EMU_NAME_
+        BIN_EMU_NAME_=$(basename "$FULL_BIN_PATH")
+
+        THOLD=$(( 25*"$ROOT_CNT" ))
+        # if we have already a log file with a lot of content we assume this binary was already emulated correct
+        if [[ $(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$MAIN_LOG_DIR"/qemu_init_"$BIN_EMU_NAME_".txt 2>/dev/null | grep -c -v -E "\[\*\]\ ") -gt "$THOLD" ]]; then
+          print_output "[!] BIN $BIN_EMU_NAME_ was already emulated ... skipping"
+          continue
+        fi
+
         if [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
           print_output "[!] Blacklist triggered ... $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
           continue
@@ -215,6 +217,14 @@ running_jobs() {
       CJOBS="NA"
     fi
   fi
+  # sometimes it is quite hard to get rid of all the qemu processes:
+}
+
+kill_qemu_threader() {
+  while true; do
+    pkill -O 240 -f .*qemu.*
+    sleep 20
+  done
 }
 
 s115_cleanup() {
@@ -223,6 +233,7 @@ s115_cleanup() {
 
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
+
   rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
@@ -236,6 +247,7 @@ s115_cleanup() {
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
     killall -9 "$EMULATOR" 2> /dev/null
   fi
+  kill "$PID_killer"
 
   print_output "[*] Cleaning the emulation environment\\n"
   find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
@@ -593,10 +605,10 @@ run_init_qemu_runner() {
 
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
-    chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
   else
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
-    chroot "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
   fi
 }
 
@@ -608,10 +620,10 @@ emulate_strace_run() {
 
   # currently we only look for file errors (errno=2) and try to fix this
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
-    chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   else
-    chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   fi
 
@@ -677,7 +689,7 @@ emulate_binary() {
   # now we should have CPU_CONFIG in log file from Binary
 
   local CPU_CONFIG_
-  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2)"
+  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2 | sort -u | head -1)"
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)" "" "$LOG_FILE_BIN"
@@ -715,10 +727,12 @@ emulate_binary() {
 
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
-      chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
+      #chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-      chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
+      #chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
     fi
     check_disk_space
   done
@@ -726,6 +740,7 @@ emulate_binary() {
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
   killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
+  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.*
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   
   # reset the terminal - after all the uncontrolled emulation it is typically broken!

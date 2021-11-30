@@ -116,6 +116,7 @@ prepare_version_data() {
     #lvmetad version: 2.02.168(2) (2016-11-30)  #lvmpolld version: 2.02.168(2) (2016-11-30)
     VERSION_lower="${VERSION_lower/lvmpolld\ /lvm2\ }"
     VERSION_lower="${VERSION_lower/lvmetad\ /lvm2\ }"
+    VERSION_lower="${VERSION_lower/linux\ openswan/openswan\ }"
     #ldpd version 0.99.24.1 #ospf6d version 0.99.24.1 #etc.
     VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd|babeld|bgpd)\ version\ 0.9/quagga\ 0.9/')"
     #bridge utility, 0.0

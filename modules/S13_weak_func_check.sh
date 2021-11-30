@@ -115,12 +115,12 @@ S13_weak_func_check()
   write_log ""
   write_log "[*] Statistics1:$ARCH"
 
-  module_end_log "${FUNCNAME[0]}" "${#RESULTS[@]}"
+  module_end_log "${FUNCNAME[0]}" "$STRCPY_CNT"
 }
 
 function_check_PPC32(){
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+    if ( readelf -r "$LINE" --use-dynamic | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
       NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
