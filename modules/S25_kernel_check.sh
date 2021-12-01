@@ -102,7 +102,7 @@ S25_kernel_check()
 }
 
 populate_karrays() {
-  mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.ko" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   local KERNEL_VERSION_
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
