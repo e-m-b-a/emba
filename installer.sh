@@ -1226,7 +1226,11 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
       print_pip_info "$PIP_NAME" "$TOOL_VERSION"
     done < requirements.txt
 
-    xargs sudo apt-get install -y < requirements.system
+    #xargs sudo apt-get install -y < requirements.system
+    while read -r TOOL_NAME; do
+      apt-get install -y "$TOOL_NAME"
+    done < requirements.system
+
     # shellcheck disable=SC2002
     cat requirements.txt | xargs -n 1 pip install 2>/dev/null
     sed -zE 's/localhost([^\n]*\n[^\n]*27017)/172.36.0.1\1/' ./etc/configuration.ini.sample | tee ./etc/configuration.ini &>/dev/null

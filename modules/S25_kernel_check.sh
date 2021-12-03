@@ -107,6 +107,9 @@ populate_karrays() {
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
+    if [[ "$K_MODULE" =~ .*\.o ]]; then
+      KERNEL_VERSION+=( "$(strings "$K_MODULE" 2>/dev/null | grep "kernel_version=" | cut -d= -f2)" )
+    fi
     KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
   done
 
