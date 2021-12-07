@@ -69,6 +69,14 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
+# lets check cve-search in a background job
+check_cve_search_job() {
+  while true; do
+    check_cve_search
+    sleep 90
+  done
+}
+
 # $1: module group letter [P, S, L, F]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
@@ -416,8 +424,6 @@ main()
     LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
   fi
 
-  check_start_cve_database
-
   # Check firmware type (file/directory)
   # copy the firmware outside of the docker and not a second time within the docker
   if [[ -d "$FIRMWARE_PATH" ]] ; then
@@ -498,6 +504,11 @@ main()
     generate_msf_db &
   fi
 
+  if [[ $IN_DOCKER -eq 0 ]] ; then
+    export CHECK_CVE_JOB_PID
+    check_cve_search_job &
+    CHECK_CVE_JOB_PID="$!"
+  fi
 
   #######################################################################################
   # Docker
@@ -667,6 +678,12 @@ main()
   fi
  
   run_modules "F" "0" "$HTML"
+
+  # let's kill the cve-checker
+  if [[ -n "$CHECK_CVE_JOB_PID" && "$CHECK_CVE_JOB_PID" -ne 0 ]]; then
+    kill -9 "$CHECK_CVE_JOB_PID"
+  fi
+
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/firmware ]]; then

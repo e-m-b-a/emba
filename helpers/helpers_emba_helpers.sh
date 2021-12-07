@@ -107,6 +107,9 @@ cleaner() {
       killall -9 --quiet -r .*cwe_checker.*
     fi
   fi
+  if [[ -n "$CHECK_CVE_JOB_PID" && "$CHECK_CVE_JOB_PID" -ne 0 ]]; then
+    kill -9 "$CHECK_CVE_JOB_PID"
+  fi
 
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null
@@ -115,19 +118,3 @@ cleaner() {
   exit 1
 }
 
-
-check_start_cve_database() {
-  # we check if cve-search reports real results:
-  if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-    print_output "[*] Mongo database for CVE-search restarting"
-    service mongod restart
-    sleep 5
-
-    # do a second try
-    if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-      print_output "[*] Starting Mongo database was not working as expected ... do it again"
-      service mongod restart
-      sleep 5
-    fi
-  fi
-}

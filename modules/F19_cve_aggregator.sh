@@ -64,6 +64,12 @@ F19_cve_aggregator() {
     
     check_cve_search
 
+    if [[ "$CVE_SEARCH" -eq 0 ]]; then
+      print_output "[*] Waiting for the cve-search environment ..."
+      sleep 120
+      check_cve_search
+    fi
+
     if [[ "$CVE_SEARCH" -eq 1 ]]; then
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
@@ -260,6 +266,10 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower//-\ hci\ tool\ ver/}"
     # sdptool - SDP tool 
     VERSION_lower="${VERSION_lower//-\ sdp\ tool/}"
+    # ookla-nano-c -
+    VERSION_lower="${VERSION_lower//ookla-nano-c\ -/ookla}"
+    # PX5G X.509 Certificate Generator Utility v0.1
+    VERSION_lower="${VERSION_lower//px5g\ x\.509\ certificate\ generator\ utility/px5g}"
     # iputils-sss
     VERSION_lower="${VERSION_lower//iputils-sss/iputils\ }"
     # iproute2-ss040823 -> iproute2-2_6_8-040823
@@ -476,7 +486,7 @@ prepare_version_data() {
     #vxworks 7 sr0530 -> vxworks 7:sr0530
     VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks\ ([0-9])\ sr([0-9]+)/vxworks\ \1:sr\2/g')"
     #vxworks5.5.1 -> no space
-    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks([0-9]\.[0-9]+\.[0-9]+)/vxworks\ \1/g')"
+    VERSION_lower="$(echo "$VERSION_lower" | sed -r 's/vxworks([0-9]\.[0-9]+(\.[0-9]+)+?)/vxworks\ \1/g')"
     #VxWorks operating system version "5.5.1"
     VERSION_lower="${VERSION_lower//vxworks\ operating\ system/vxworks}"
     #OpenSSH_7.8p1 -> openssh 7.8:p1 
@@ -783,7 +793,7 @@ cve_db_lookup() {
   # using $VERSION variable:
   VERSION_SEARCH="${VERSION//\ /:}"
   VERSION_PATH="${VERSION//\ /_}"
-  VERSION_BINARY=$(echo "$VERSION_SEARCH" | cut -d: -f1)
+  VERSION_BINARY=$(echo "$VERSION_SEARCH" | cut -d\; -f1)
   print_output "[*] CVE database lookup with version information: ${GREEN}$VERSION_SEARCH${NC}" "" "f19#cve_$VERSION_BINARY"
 
   # CVE search:

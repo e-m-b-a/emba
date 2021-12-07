@@ -300,7 +300,7 @@ dependency_check()
     if [[ IN_DOCKER -eq 0 ]]; then 
       # really basic check, if cve-search database is running - no check, if populated and also no check, if emba in docker
       check_dep_tool "mongo database" "mongod"
-      check_cve_search
+      # check_cve_search
     fi
 
     # firmadyne / FirmAE

@@ -38,7 +38,7 @@ OLD_MESSAGE_TYPE=""
 welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
-  echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            e m b a                            ""$NC""$BOLD""║""$NC"
+  echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            E M B A                            ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""║                   EMBEDDED FIRMWARE ANALYZER                  ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""╚═══════════════════════════════════════════════════════════════╝""$NC"
 }

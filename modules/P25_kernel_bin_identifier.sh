@@ -30,10 +30,10 @@ P25_kernel_bin_identifier()
   write_csv_log "Kernel version" "file" "identified init"
 
   for FILE in "${FILE_ARR_TMP[@]}" ; do
-    if strings "$FILE" 2>/dev/null | grep -q -E "^Linux version "; then
+    if strings "$FILE" 2>/dev/null | grep -q -E "^Linux version [0-9]+\.[0-9]+"; then
 	    print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
       print_output ""
-      K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version ")
+      K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+")
       print_output "$(indent "$(orange "$K_VER")")"
       print_output ""
 

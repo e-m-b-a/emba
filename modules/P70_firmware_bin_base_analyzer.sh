@@ -90,10 +90,10 @@ os_identification() {
     fi
 
     if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 && ${#ROOT_PATH[@]} -gt 1 ]] ; then
-      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected (root filesystem)${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       DETECTED=1
     elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 && $LINUX_PATH_COUNTER -gt 2 ]] ; then
-      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected (root filesystem)${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       DETECTED=1
     elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 ]] ; then 
       printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
@@ -111,7 +111,7 @@ os_identification() {
       printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified S7-CP443 system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       DETECTED=1
     elif [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
-      printf "${ORANGE}\t%-20.20x\t:\t%-15s${NC}\n" "S7-CP443 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "S7-CP443 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
       DETECTED=1
     fi
 
