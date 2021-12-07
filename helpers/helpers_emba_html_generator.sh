@@ -43,6 +43,7 @@ REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"\_blank\" >"
 CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"\_blank\" >"
 CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"\_blank\" >"
+LICENSE_LINK="<a href=\"LINK\" title=\"LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
 ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
@@ -248,6 +249,36 @@ add_link_tags() {
       if [[ -n "$CWE_ID_STRING" ]] ; then
         HTML_LINK="$(echo "$CWE_LINK" | sed -e "s@LINK@$CWE_ID_NUMBER@g")""$CWE_ID_STRING""$LINK_END"
         LINK_COMMAND_ARR+=( '-e' "$CWE_ID_LINE""s@""$CWE_ID_STRING""@""$HTML_LINK""@g" )
+      fi
+    done
+  fi
+
+  # License links
+  if ( grep -a -q -E 'License: ' "$LINK_FILE" ) ; then
+    LIC_CODE_ARR=()
+    LIC_URL_ARR=()
+    while read -r LICENSE_LINK_LINE; do
+      if echo "$LICENSE_LINK_LINE" | grep -v -q "^[^#*/;]"; then
+        continue
+      fi
+      LIC_CODE_ARR=( "${LIC_CODE_ARR[@]}" "$(echo "$LICENSE_LINK_LINE" | cut -d';' -f1)")
+      LIC_URL_ARR=( "${LIC_URL_ARR[@]}" "$(echo "$LICENSE_LINK_LINE" | cut -d';' -f2-)")
+    done  < "$CONFIG_DIR"/bin_version_strings_links.cfg
+
+    readarray -t LICENSE_LINES < <( grep -a -n -E -o 'License: .*$' "$LINK_FILE" | sort -u)
+    for LICENSE_LINE in "${LICENSE_LINES[@]}" ; do
+      LICENSE_LINE_NUM="$(echo "$LICENSE_LINE" | cut -d: -f1)"
+      LICENSE_STRING="$(echo "$LICENSE_LINE" | cut -d: -f3 | sed -e 's/<[^>]*>//g' )"
+      echo "x""${LICENSE_STRING:1}""x"
+      LIC_URL=""
+      for I in "${!LIC_CODE_ARR[@]}" ; do
+        if [[ "${LIC_CODE_ARR[$I]}" == "${LICENSE_STRING:1}" ]] ; then
+          LIC_URL="${LIC_URL_ARR[$I]}"
+        fi
+      done
+      if [[ -n "$LIC_URL" ]] ; then
+        HTML_LINK="$(echo "$LICENSE_LINK" | sed -e "s@LINK@$LIC_URL@g")""${LICENSE_STRING:1}""$LINK_END"
+        LINK_COMMAND_ARR+=( '-e' "$LICENSE_LINE_NUM""s@""${LICENSE_STRING:1}""@""$HTML_LINK""@g" )
       fi
     done
   fi
