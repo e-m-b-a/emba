@@ -261,8 +261,8 @@ add_link_tags() {
       if echo "$LICENSE_LINK_LINE" | grep -v -q "^[^#*/;]"; then
         continue
       fi
-      LIC_CODE_ARR=( "${LIC_CODE_ARR[@]}" "$(echo "$LICENSE_LINK_LINE" | cut -d: -f1)")
-      LIC_URL_ARR=( "${LIC_URL_ARR[@]}" "$(echo "$LICENSE_LINK_LINE" | cut -d: -f2-)")
+      LIC_CODE_ARR=( "${LIC_CODE_ARR[@]}" "$(echo "$LICENSE_LINK_LINE" | cut -d; -f1)")
+      LIC_URL_ARR=( "${LIC_URL_ARR[@]}" "$(echo "$LICENSE_LINK_LINE" | cut -d; -f2-)")
     done  < "$CONFIG_DIR"/bin_version_strings_links.cfg
 
     readarray -t LICENSE_LINES < <( grep -a -n -E -o 'License: .*$' "$LINK_FILE" | sort -u)
