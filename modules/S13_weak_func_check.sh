@@ -387,7 +387,7 @@ log_bin_hardening() {
     HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u)
     write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
     # get binary entry
-    BIN_PROT=$(grep \/"$NAME"\  "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u)
+    BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u)
     write_log "  $BIN_PROT" "$FUNC_LOG"
     write_log "" "$FUNC_LOG"
   fi

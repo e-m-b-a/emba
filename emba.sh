@@ -77,7 +77,7 @@ check_cve_search_job() {
         break
       fi
     fi
-    if ! ps -a | grep -q "$EMBA_PID"; then
+    if ! pgrep "$EMBA_PID"; then
       break
     fi
     check_cve_search
