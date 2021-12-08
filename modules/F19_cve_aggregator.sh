@@ -127,8 +127,14 @@ prepare_version_data() {
     VERSION_lower="$(echo "$VERSION_lower" | sed -E -e 's/(\bldpd|linkd|ospf6d|ripngd|zebra|ripd|babeld|bgpd)\ version\ 0.9/quagga\ 0.9/')"
     #bridge utility, 0.0
     VERSION_lower="${VERSION_lower/bridge\ utility/bridge-utility}"
+    # AppArmor parser version
+    VERSION_lower="${VERSION_lower/apparmor\ parser/apparmor}"
+    # cups BJNP backend
+    VERSION_lower="${VERSION_lower/cups\ bjnp\ backend\ -/cups}"
     # smbd -> samba
     VERSION_lower="${VERSION_lower/smbd/samba}"
+    # smbftpd ver
+    VERSION_lower="${VERSION_lower/smbftpd\ ver/smbftpd}"
     # klogd -> sysklogd
     VERSION_lower="${VERSION_lower/klogd/sysklogd}"
     # jq-1.5 -> jq 1.5
