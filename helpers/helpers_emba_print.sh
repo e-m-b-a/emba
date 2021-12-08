@@ -87,7 +87,7 @@ print_output()
 {
   local OUTPUT="$1"
   local LOG_SETTING="$2"
-  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" ]]; then
+  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" && "$LOG_FILE" != "$LOG_FILE_MOD" ]]; then
     local LOG_FILE_MOD="$2"
   fi
   # add a link as third argument to add a link marker for web report

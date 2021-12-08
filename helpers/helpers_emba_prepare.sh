@@ -298,12 +298,14 @@ check_firmware()
 
 detect_root_dir_helper() {
   SEARCH_PATH="$1"
-  if [[ -n "$2" ]];then
-    LOGGER="$2"
-  else
-    LOGGER="no_log"
-  fi
-  print_output "[*] Root directory auto detection (could take some time)\\n" "$LOGGER"
+  #if [[ -n "$2" ]];then
+  #  LOGGER="$2"
+  #else
+  #  LOGGER="no_log"
+  #fi
+
+  #print_output "[*] Root directory auto detection (could take some time)\\n" "$LOGGER"
+  print_output "[*] Root directory auto detection (could take some time)\\n"
   ROOT_PATH=()
   export ROOT_PATH
   local R_PATH
@@ -334,11 +336,13 @@ detect_root_dir_helper() {
 
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
-    print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
+    #print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
+    print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:"
     write_link "s05#file_dirs" "$LOGGER"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
-    print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
+    #print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
+    print_output "[+] Found the following root directory: $R_PATH"
     write_link "s05#file_dirs" "$LOGGER"
   done
 }

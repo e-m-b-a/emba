@@ -72,7 +72,12 @@ sort_modules()
 # lets check cve-search in a background job
 check_cve_search_job() {
   while true; do
-    if grep -q "Test ended" "$LOG_DIR"/emba.log; then
+    if [[ -f "$LOG_DIR"/emba.log ]]; then
+      if grep -q "Test ended\|Emba failed" "$LOG_DIR"/emba.log 2>/dev/null; then
+        break
+      fi
+    fi
+    if ! ps -a | grep -q "$EMBA_PID"; then
       break
     fi
     check_cve_search
@@ -194,6 +199,7 @@ main()
 
   INVOCATION_PATH="$(dirname "$0")"
 
+  export EMBA_PID="$$"
   export FULL_EMULATION=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
@@ -568,11 +574,11 @@ main()
           exit
         fi
       else
-        print_output "[-] EMBA failed in docker mode!" "no_log"
+        print_output "[-] EMBA failed in docker mode!" "main"
         exit 1
       fi
     else
-      print_output "[-] EMBA failed in docker mode!" "no_log"
+      print_output "[-] EMBA failed in docker mode!" "main"
       exit 1
     fi
   fi
