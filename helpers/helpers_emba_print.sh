@@ -38,7 +38,7 @@ OLD_MESSAGE_TYPE=""
 welcome()
 {
   echo -e "\\n""$BOLD""╔═══════════════════════════════════════════════════════════════╗""$NC"
-  echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            e m b a                            ""$NC""$BOLD""║""$NC"
+  echo -e "$BOLD""║""$BLUE""$BOLD""$ITALIC""                            E M B A                            ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""║                   EMBEDDED FIRMWARE ANALYZER                  ""$NC""$BOLD""║""$NC"
   echo -e "$BOLD""╚═══════════════════════════════════════════════════════════════╝""$NC"
 }
@@ -87,7 +87,7 @@ print_output()
 {
   local OUTPUT="$1"
   local LOG_SETTING="$2"
-  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" ]]; then
+  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" && "$LOG_FILE" != "$LOG_FILE_MOD" ]]; then
     local LOG_FILE_MOD="$2"
   fi
   # add a link as third argument to add a link marker for web report

@@ -48,11 +48,11 @@ F05_qemu_version_detection() {
 }
 
 version_detection_thread() {
-  BINARY="$(echo "$VERSION_LINE" | cut -d: -f1)"
-  STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
-  LIC="$(echo "$VERSION_LINE" | cut -d: -f3)"
+  BINARY="$(echo "$VERSION_LINE" | cut -d\; -f1)"
+  STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
+  LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
 
-  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f4- | sed s/^\"// | sed s/\"$//)"
+  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT != "strict" ]]; then

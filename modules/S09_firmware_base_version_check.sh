@@ -41,11 +41,11 @@ S09_firmware_base_version_check() {
 
     echo "." | tr -d "\n"
 
-    STRICT="$(echo "$VERSION_LINE" | cut -d: -f2)"
-    LIC="$(echo "$VERSION_LINE" | cut -d: -f3)"
-    BIN_NAME="$(echo "$VERSION_LINE" | cut -d: -f1)"
+    STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
+    LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
+    BIN_NAME="$(echo "$VERSION_LINE" | cut -d\; -f1)"
 
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d: -f4- | sed s/^\"// | sed s/\"$//)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
     if [[ $STRICT != "strict" ]]; then
       echo "." | tr -d "\n"

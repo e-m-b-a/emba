@@ -30,7 +30,7 @@ S14_weak_func_radare_check()
     done
   fi
 
-  if [[ $(grep "Statistics:" "$LOG_DIR"/s13_weak_func_check.txt 2>/dev/null | cut -d: -f2) -lt 50 || $(find "$LOG_DIR"/s13_weak_func_check.txt -type f | wc -l) -lt 20 ]]; then
+  if [[ $(grep "Statistics:" "$LOG_DIR"/s13_weak_func_check.txt 2>/dev/null | cut -d: -f2) -lt 50 || $(find "$LOG_DIR"/s13_weak_func_check/ -type f | wc -l) -lt 20 ]]; then
     print_output "[*] Module S13 was not able to analyse the binaries. EMBA brings radare in place!"
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
@@ -356,7 +356,7 @@ radare_log_bin_hardening() {
     HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u)
     write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
     # get binary entry
-    BIN_PROT=$(grep "$NAME" "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u)
+    BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u)
     write_log "  $BIN_PROT" "$FUNC_LOG"
     write_log "" "$FUNC_LOG"
   fi
