@@ -23,7 +23,7 @@ F05_qemu_version_detection() {
   if [[ -f "$LOG_PATH_S115" && -d "$LOG_DIR/s115_usermode_emulator" ]]; then
     LOG_PATH_MODULE_S115="$LOG_DIR"/s115_usermode_emulator/
 
-    write_csv_log "binary/file" "version_rule" "version_detected" "license" "static/emulation"
+    write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
     TYPE="emulation"
 
     while read -r VERSION_LINE; do 
@@ -51,6 +51,7 @@ version_detection_thread() {
   BINARY="$(echo "$VERSION_LINE" | cut -d\; -f1)"
   STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
   LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
+  CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
 
   VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
@@ -81,23 +82,29 @@ version_detection_thread() {
         VERS_DET_OLD="$VERSION_DETECTED"
 
         # first field is the path of the qemu log file
-        LOG_PATH_="$(echo "$VERSION_DETECTED" | cut -d: -f1)"
+        LOG_PATH_="$(strip_color_codes $(echo "$VERSION_DETECTED" | cut -d: -f1))"
 
         VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
 
+        get_csv_rule "$VERSION_DETECTED" "$CSV_REGEX"
+
         if [[ -n "$LOG_PATH_" ]]; then
-          mapfile -t BINARY_PATHS < <(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)
+          mapfile -t BINARY_PATHS < <(strip_color_codes $(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null))
         fi
 
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
           print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH_$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH_"
-          write_csv_log "Qemu log $LOG_PATH_" "$VERSION_IDENTIFIER" "$VERSION_DETECTED" "$LIC" "$TYPE"
+          # this is just a temp solution. We can change the final behaviour after the complete transformation
+          if [[ "$CSV_RULE" == *" "* ]]; then
+            CSV_RULE="$(echo "$CSV_RULE" | cut -d\  -f2)"
+          fi
+          write_csv_log "Qemu log $LOG_PATH_" "$BINARY" "$VERSION_DETECTED" "$CSV_RULE" "$LIC" "$TYPE"
           continue
         else
           # binary path set in strict mode
           for BINARY_PATH in "${BINARY_PATHS[@]}"; do
             print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH_"
-            write_csv_log "$BINARY_PATH" "$VERSION_IDENTIFIER" "$VERSION_DETECTED" "$LIC" "$TYPE"
+            write_csv_log "$BINARY_PATH" "$BINARY" "$VERSION_DETECTED" "$CSV_RULE" "$LIC" "$TYPE"
           done
         fi
         BINARY_PATH=""
