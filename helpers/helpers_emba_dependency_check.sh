@@ -419,10 +419,12 @@ architecture_dep_check() {
   elif [[ "$ARCH" == "PPC" ]] ; then
     #ARCH_STR="powerpc:common"
     ARCH_STR="powerpc"
+  else
+    ARCH_STR="unknown"
   fi
   if [[ -z "$ARCH_STR" ]] ; then
-    print_output "[-] ""$ARCH"" isn't a valid architecture - exit emba\\n" "no_log"
-    exit 1
+    print_output "[-] WARNING: No valid architecture detected\\n" "no_log"
+    #exit 1
   else
     print_output "[+] ""$ARCH"" is a valid architecture\\n" "no_log"
   fi

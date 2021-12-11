@@ -102,7 +102,9 @@ S09_firmware_base_version_check() {
             if [[ -n $VERSION_FINDER ]]; then
               echo ""
               print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
+              print_output "[*] CSV-regex (strict): $CSV_REGEX"
               get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+              print_output "[*] CSV-rule (strict): $CSV_RULE"
               write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
               continue
             fi
@@ -179,6 +181,7 @@ bin_string_checker() {
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
         print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
+        get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
         write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
         continue
       fi

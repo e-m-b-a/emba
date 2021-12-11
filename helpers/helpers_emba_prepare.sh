@@ -187,9 +187,9 @@ architecture_check()
       if [[ -n "$ARCH" ]] ; then
         print_output "[*] Your set architecture (""$ARCH"") will be used."
       else
-        print_output "[!] Since no architecture could be detected, you have to set one."
-        print_help
-        exit 1
+        print_output "[!] Since no architecture could be detected, you should set one."
+        #print_help
+        #exit 1
       fi
     fi
 
@@ -198,9 +198,9 @@ architecture_check()
     if [[ -n "$ARCH" ]] ; then
       print_output "[*] Your set architecture (""$ARCH"") will be used."
     else
-      print_output "[!] Since no architecture could be detected, you have to set one."
-      print_help
-      exit 1
+      print_output "[!] Since no architecture could be detected, you should set one."
+      #print_help
+      #exit 1
     fi
   fi
 }

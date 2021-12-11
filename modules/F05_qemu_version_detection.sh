@@ -95,9 +95,6 @@ version_detection_thread() {
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
           print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH_$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH_"
           # this is just a temp solution. We can change the final behaviour after the complete transformation
-          if [[ "$CSV_RULE" == *" "* ]]; then
-            CSV_RULE="$(echo "$CSV_RULE" | cut -d\  -f2)"
-          fi
           write_csv_log "Qemu log $LOG_PATH_" "$BINARY" "$VERSION_DETECTED" "$CSV_RULE" "$LIC" "$TYPE"
           continue
         else
