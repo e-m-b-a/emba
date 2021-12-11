@@ -119,11 +119,11 @@ pre a:hover {
   background-color: #6a5ebe;
 }
 
-.back {
+.backButton {
   background-color:#2d6029!important;
 }
 
-.back:hover {
+.backButton:hover {
   background-color:#377732!important;
 }
 
@@ -199,7 +199,7 @@ pre a:hover {
   background-repeat: no-repeat;
 }
 
-.logo {
+#logo {
   background-color:#fff;
   padding:5%;
   width:100%;

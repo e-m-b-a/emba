@@ -27,12 +27,12 @@ Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
 <body>
 
 <div id="sidenav" class="side">
-  <div class="logo">
-    <a class="inherit" href="./index.html"><img class="inherit" src="./style/emba.svg" alt="emba logo"></a>
+  <div id="logo">
+    <a class="inherit" href="./index.html"><img class="inherit" id="logoImage" src="./style/emba.svg" alt="logo"></a>
   </div>
   <div id="nav">
       <a id="embark" class="hidden" href="{{ embarkBackUrl }}">&laquo; Back to EMBArk</a>
-      <a class="back" href="./index.html">&laquo; Back to main</a>
+      <a class="backButton" href="./index.html">&laquo; Back to main</a>
       <!-- navigation start -->
       <!-- navigation end -->
       <input id="expand" class="expand_njs hidden" type="button" value="More results:" onclick="this.value=this.value=='+ Show more results'?'- Hide more results':'+ Show more results';">
@@ -84,6 +84,8 @@ window.onload = function () {
   var embarkButton = document.getElementById("embark");
   if ( !(embarkButton.href.includes("embarkBackUrl")) ) {
     embarkButton.classList.remove('hidden');
+    document.getElementById("logoImage").src = "./style/embark.svg";
+    document.getElementById("logo").style.background = "#2d2d2d";
   }
 }
 

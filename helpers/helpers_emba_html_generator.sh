@@ -551,6 +551,7 @@ prepare_report()
     mkdir -p "$ABS_HTML_PATH$STYLE_PATH"
     cp "$HELP_DIR/style.css" "$ABS_HTML_PATH$STYLE_PATH/style.css"
     cp "$HELP_DIR/emba.svg" "$ABS_HTML_PATH$STYLE_PATH/emba.svg"
+    cp "$HELP_DIR/embark.svg" "$ABS_HTML_PATH$STYLE_PATH/embark.svg"
     cp "$HELP_DIR/favicon.png" "$ABS_HTML_PATH$STYLE_PATH/favicon.png"
   fi
   if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
@@ -561,5 +562,5 @@ prepare_report()
   fi
 
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"
-  sed -i 's@back@back hidden@g' "$ABS_HTML_PATH""/""$INDEX_FILE"
+  sed -i 's@backButton@backButton hidden@g' "$ABS_HTML_PATH""/""$INDEX_FILE"
 }
