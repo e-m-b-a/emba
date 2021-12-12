@@ -21,6 +21,7 @@ S06_distribution_identification()
   module_title "Linux identification"
 
   OUTPUT=0
+  write_csv_log "file" "type" "identifier"
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
       FILE="$(echo "$LINE" | cut -d\; -f2)"
@@ -44,8 +45,10 @@ S06_distribution_identification()
             if [[ -n "${IDENTIFIER// }" ]]; then
               if [[ -n "$DLINK_FW_VER" ]]; then
                 print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN for D-Link device."
+                write_csv_log "$FILE" "dlink" "$IDENTIFIER"
               else
                 print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN with Linux distribution detection"
+                write_csv_log "$FILE" "Linux" "$IDENTIFIER"
               fi
               OUTPUT=1
             fi
