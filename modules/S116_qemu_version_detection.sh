@@ -15,9 +15,17 @@
 
 # Description:  This module extracts version information from the results of S115
 
-F05_qemu_version_detection() {
+S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Identified software components - via usermode emulation."
+
+  # This module waits for S115_usermode_emulator
+  # check emba.log for S115_usermode_emulator
+  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+    while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+      sleep 1
+    done
+  fi
 
   LOG_PATH_S115="$LOG_DIR"/s115_usermode_emulator.txt
   if [[ -f "$LOG_PATH_S115" && -d "$LOG_DIR/s115_usermode_emulator" ]]; then
@@ -82,14 +90,14 @@ version_detection_thread() {
         VERS_DET_OLD="$VERSION_DETECTED"
 
         # first field is the path of the qemu log file
-        LOG_PATH_="$(strip_color_codes $(echo "$VERSION_DETECTED" | cut -d: -f1))"
+        LOG_PATH_="$(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
 
         VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
 
         get_csv_rule "$VERSION_DETECTED" "$CSV_REGEX"
 
         if [[ -n "$LOG_PATH_" ]]; then
-          mapfile -t BINARY_PATHS < <(strip_color_codes $(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null))
+          mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
         fi
 
         if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
