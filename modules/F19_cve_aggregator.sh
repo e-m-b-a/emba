@@ -38,7 +38,7 @@ F19_cve_aggregator() {
 
   S06_LOG="s06_distribution_identification.txt"
   KERNEL_CHECK_LOG="s25_kernel_check.txt"
-  EMUL_LOG="f05_qemu_version_detection.txt"
+  EMUL_LOG="s116_qemu_version_detection.txt"
   SYS_EMUL_LOG="l15_emulated_checks_init.txt"
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
@@ -141,6 +141,7 @@ prepare_version_data() {
     VERSION_lower="${VERSION_lower/klogd/sysklogd}"
     # jq-1.5 -> jq 1.5
     VERSION_lower="${VERSION_lower/jq-/jq\ }"
+    VERSION_lower="${VERSION_lower/log4jreleaseversion/log4j}"
     # ^X-Powered-By:\ PHP\/[0-9]\.[0-9]+(\.[0-9]+)+?$
     VERSION_lower="${VERSION_lower/x-powered-by:\ php\//php\ }"
     #Modern traceroute for Linux, version 2.1.0
@@ -689,21 +690,27 @@ aggregate_versions() {
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
+      VERSION="$(strip_color_codes "$VERSION")"
       print_output "[+] Found Version details (firmware details check): ""$VERSION"
     done
     for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
+      VERSION="$(strip_color_codes "$VERSION")"
       print_output "[+] Found Version details (base check): ""$VERSION"
     done
     for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
+      VERSION="$(strip_color_codes "$VERSION")"
       print_output "[+] Found Version details (statical check): ""$VERSION"
     done
     for VERSION in "${VERSIONS_EMULATOR[@]}"; do
+      VERSION="$(strip_color_codes "$VERSION")"
       print_output "[+] Found Version details (emulator): ""$VERSION"
     done
     for VERSION in "${VERSIONS_SYS_EMULATOR[@]}"; do
+      VERSION="$(strip_color_codes "$VERSION")"
       print_output "[+] Found Version details (system emulator): ""$VERSION"
     done
     for VERSION in "${VERSIONS_KERNEL[@]}"; do
+      VERSION="$(strip_color_codes "$VERSION")"
       print_output "[+] Found Version details (kernel): ""$VERSION"
     done
 
