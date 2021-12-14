@@ -691,27 +691,27 @@ aggregate_versions() {
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
       VERSION="$(strip_color_codes "$VERSION")"
-      print_output "[+] Found Version details (firmware details check): ""$VERSION"
+      print_output "[+] Found Version details (firmware details check): ""$ORANGE$VERSION$NC"
     done
     for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
       VERSION="$(strip_color_codes "$VERSION")"
-      print_output "[+] Found Version details (base check): ""$VERSION"
+      print_output "[+] Found Version details (base check): ""$ORANGE$VERSION$NC"
     done
     for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
       VERSION="$(strip_color_codes "$VERSION")"
-      print_output "[+] Found Version details (statical check): ""$VERSION"
+      print_output "[+] Found Version details (statical check): ""$ORANGE$VERSION$NC"
     done
     for VERSION in "${VERSIONS_EMULATOR[@]}"; do
       VERSION="$(strip_color_codes "$VERSION")"
-      print_output "[+] Found Version details (emulator): ""$VERSION"
+      print_output "[+] Found Version details (emulator): ""$ORANGE$VERSION$NC"
     done
     for VERSION in "${VERSIONS_SYS_EMULATOR[@]}"; do
       VERSION="$(strip_color_codes "$VERSION")"
-      print_output "[+] Found Version details (system emulator): ""$VERSION"
+      print_output "[+] Found Version details (system emulator): ""$ORANGE$VERSION$NC"
     done
     for VERSION in "${VERSIONS_KERNEL[@]}"; do
       VERSION="$(strip_color_codes "$VERSION")"
-      print_output "[+] Found Version details (kernel): ""$VERSION"
+      print_output "[+] Found Version details (kernel): ""$ORANGE$VERSION$NC"
     done
 
     print_output ""

@@ -1185,6 +1185,9 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
       cd "$HOME_PATH" || exit 1
       chown -R root:root external/freetz-ng
       userdel freetzuser
+      if [[ -d external/freetz-ng/source ]]; then
+        rm external/freetz-ng/source
+      fi
       ;;
     esac
   fi
