@@ -22,6 +22,7 @@ F19_cve_aggregator() {
   module_title "Final CVE aggregator"
 
   print_output "[!] WARNING - Running deprecated ${FUNCNAME[0]} module!"
+  print_output "[!] WARNING - This module will be replaced by module f20!"
   
   mkdir "$LOG_PATH_MODULE"/cve_sum
   mkdir "$LOG_PATH_MODULE"/exploit

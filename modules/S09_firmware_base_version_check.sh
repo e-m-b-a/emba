@@ -48,8 +48,54 @@ S09_firmware_base_version_check() {
 
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
-    if [[ $STRICT != "strict" && $STRICT != "zgrep" ]]; then
+    if [[ $STRICT == *"strict"* ]]; then
+
+      # strict mode
+      #   use the defined regex only on a binary called BIN_NAME (field 1)
+
+      if [[ $RTOS -eq 1 ]]; then
+        continue
+      else
+        mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+        for BIN in "${STRICT_BINS[@]}"; do
+          # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
+          if file "$BIN" | grep -q ELF ; then
+            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
+            if [[ -n $VERSION_FINDER ]]; then
+              echo ""
+              get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+              write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
+              print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
+              continue
+            fi
+          fi
+        done
+        echo "." | tr -d "\n"
+      fi
       echo "." | tr -d "\n"
+
+    elif [[ $STRICT == "zgrep" ]]; then
+
+      # zgrep mode:
+      #   search for files with identifier in field 1
+      #   use regex (VERSION_IDENTIFIER) via zgrep on these files
+      #   use csv-regex to get the csv-search string for csv lookup
+
+      mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \;)
+      for SFILE in "${SPECIAL_FINDS[@]}"; do
+        BIN_PATH=$(echo "$SFILE" | cut -d ":" -f1)
+        BIN_NAME="$(basename "$(echo "$SFILE" | cut -d ":" -f1)")"
+        CSV_REGEX=$(echo "$VERSION_LINE" | cut -d\; -f5 | sed s/^\"// | sed s/\"$//)
+        VERSION_FINDER=$(echo "$SFILE" | cut -d ":" -f2-3 | tr -dc '[:print:]')
+        get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN_PATH")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - special$GREEN)."
+        write_csv_log "$BIN_PATH" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
+      done
+      echo "." | tr -d "\n"
+
+    else
+
+      # This is default mode!
 
       # check binwalk files sometimes we can find kernel version information or something else in it
       VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null)
@@ -91,40 +137,7 @@ S09_firmware_base_version_check() {
 
       echo "." | tr -d "\n"
 
-    elif [[ $STRICT == "zgrep" ]]; then
-      mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \;)
-      for SFILE in "${SPECIAL_FINDS[@]}"; do
-        BIN_PATH=$(echo "$SFILE" | cut -d ":" -f1)
-        BIN_NAME="$(basename "$(echo "$SFILE" | cut -d ":" -f1)")"
-        CSV_REGEX=$(echo "$VERSION_LINE" | cut -d\; -f5 | sed s/^\"// | sed s/\"$//)
-        VERSION_FINDER=$(echo "$SFILE" | cut -d ":" -f2-3 | tr -dc '[:print:]')
-        get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
-        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN_PATH")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - special$GREEN)."
-        write_csv_log "$BIN_PATH" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
-      done
-      echo "." | tr -d "\n"
 
-    else
-      # strict mode
-      if [[ $RTOS -eq 1 ]]; then
-        continue
-      else
-        mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-        for BIN in "${STRICT_BINS[@]}"; do
-          # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-          if file "$BIN" | grep -q ELF ; then
-            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
-            if [[ -n $VERSION_FINDER ]]; then
-              echo ""
-              print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
-              get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
-              write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
-              continue
-            fi
-          fi
-        done
-        echo "." | tr -d "\n"
-      fi
     fi
 
     if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
