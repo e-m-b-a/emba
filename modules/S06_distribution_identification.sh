@@ -21,7 +21,7 @@ S06_distribution_identification()
   module_title "Linux identification"
 
   OUTPUT=0
-  write_csv_log "file" "type" "identifier"
+  write_csv_log "file" "type" "identifier" "csv-rule"
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
       FILE="$(echo "$LINE" | cut -d\; -f2)"
@@ -96,7 +96,7 @@ get_csv_rule_distri() {
 
   ### handle versions of linux distributions:
   # debian 9 (stretch) - installer build 20170615+deb9u5
-  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
   # Fedora 17 (Beefy Miracle)
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(fedora)\ ([0-9]+).*/\1project:\1:\2/')"
   # Ubuntu
