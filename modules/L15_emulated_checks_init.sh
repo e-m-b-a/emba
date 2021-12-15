@@ -30,15 +30,13 @@ L15_emulated_checks_init() {
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
+    end_system_emulation "INIT" &
     check_live_nmap_basic
     check_live_snmp
     check_live_nikto
     check_live_routersploit
+    end_system_emulation "END"
     MODULE_END=1
-
-    pkill -f "qemu-system-.*$IMAGE_NAME.*"
-    reset_network
-
 
   else
     MODULE_END=0
@@ -48,6 +46,18 @@ L15_emulated_checks_init() {
   write_log "[*] Statistics:${#NMAP_PORTS_SERVICES[@]}:$SNMP_UP:$NIKTO_UP"
   module_end_log "${FUNCNAME[0]}" "$MODULE_END"
 
+}
+
+end_system_emulation() {
+  if [[ "$1" == "INIT" ]]; then
+    sleep 1800
+  fi
+
+  pkill -f "qemu-system-.*$IMAGE_NAME.*"
+
+  if [[ "$1" == "END" ]]; then
+    reset_network
+  fi
 }
 
 check_live_nmap_basic() {
