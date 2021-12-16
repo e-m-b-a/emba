@@ -23,11 +23,19 @@ S25_kernel_check()
   module_log_init "${FUNCNAME[0]}"
   module_title "Identify and check kernel version"
 
-  # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
-
   KERNEL_VERSION=()
   KERNEL_DESC=()
   FOUND=0
+
+  # This module waits for S24_kernel_bin_identifier
+  # check emba.log for S24_kernel_bin_identifier starting
+  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+    while [[ $(grep -c S24_kernel_bin_identifier "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+      sleep 1
+    done
+  fi
+
+  # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
   if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
 

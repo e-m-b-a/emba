@@ -20,7 +20,7 @@ F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final aggregator"
 
-  CVE_AGGREGATOR_LOG="f19_cve_aggregator.txt"
+  CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   P02_LOG="p02_firmware_bin_file_check.txt"
   P70_LOG="p70_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
@@ -464,18 +464,18 @@ binary_fct_output() {
 output_cve_exploits() {
 
   local DATA=0
-  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
-    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
+  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
-      write_link "f19#collectcveandexploitdetails"
+      write_link "f20#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
+      print_output ""
     fi
 
-    if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
-      print_output ""
-      print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
-      write_link "f19#softwareinventoryinitialoverview"
-      echo "versions_identified;\"${#VERSIONS_CLEANED[@]}\"" >> "$CSV_LOG_FILE"
+    if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+      print_output "[+] Identified ""$ORANGE""${#VERSIONS_AGGREGATED[@]}""$GREEN"" software components with version details.\\n"
+      write_link "f20#softwareinventoryinitialoverview"
+      echo "versions_identified;\"${#VERSIONS_AGGREGATED[@]}\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
@@ -484,11 +484,11 @@ output_cve_exploits() {
       DATA=1
     fi
     if [[ "$CVE_COUNTER" -gt 0 ]]; then
-      print_output "[+] Confirmed ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
-      write_link "f19#collectcveandexploitdetails"
-      print_output "$(indent "$(green "Confirmed $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
-      print_output "$(indent "$(green "Confirmed $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries.")")"
-      print_output "$(indent "$(green "Confirmed $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries.")")"
+      print_output "[+] Identified ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
+      write_link "f20#collectcveandexploitdetails"
+      print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
+      print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries.")")"
+      print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries.")")"
       # shellcheck disable=SC2129
       echo "cve_high;\"$HIGH_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "cve_medium;\"$MEDIUM_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
@@ -504,11 +504,11 @@ output_cve_exploits() {
       echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
       if [[ $MSF_MODULE_CNT -gt 0 ]]; then
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available ($MAGENTA$MSF_MODULE_CNT$GREEN Metasploit modules).")")"
-        write_link "f19#minimalreportofexploitsandcves"
+        write_link "f20#minimalreportofexploitsandcves"
         echo "metasploit_modules;\"$MSF_MODULE_CNT\"" >> "$CSV_LOG_FILE"
       else
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
-        write_link "f19#minimalreportofexploitsandcves"
+        write_link "f20#minimalreportofexploitsandcves"
       fi
       # we report only software components with exploits to csv:
       grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"

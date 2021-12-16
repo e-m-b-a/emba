@@ -15,7 +15,7 @@
 
 # Description:  This module tries to identify the kernel file and the init command line
 
-P25_kernel_bin_identifier()
+S24_kernel_bin_identifier()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Kernel Binary Identifier"

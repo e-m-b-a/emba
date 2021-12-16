@@ -21,6 +21,7 @@ S06_distribution_identification()
   module_title "Linux identification"
 
   OUTPUT=0
+  write_csv_log "file" "type" "identifier" "csv_rule"
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
       FILE="$(echo "$LINE" | cut -d\; -f2)"
@@ -44,8 +45,12 @@ S06_distribution_identification()
             if [[ -n "${IDENTIFIER// }" ]]; then
               if [[ -n "$DLINK_FW_VER" ]]; then
                 print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN for D-Link device."
+                get_csv_rule_distri "$IDENTIFIER"
+                write_csv_log "$FILE" "dlink" "$IDENTIFIER" "$CSV_RULE"
               else
                 print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN with Linux distribution detection"
+                get_csv_rule_distri "$IDENTIFIER"
+                write_csv_log "$FILE" "Linux" "$IDENTIFIER" "$CSV_RULE"
               fi
               OUTPUT=1
             fi
@@ -82,4 +87,30 @@ dlink_image_sign() {
     IDENTIFIER="D-Link $IDENTIFIER"" $DLINK_FW_VER"
     # -> D-Link dir-300 v2.14B01
   fi
+}
+
+get_csv_rule_distri() {
+  # this is a temp solution. If this list grows we are going to solve it via a configuration file
+  VERSION_IDENTIFIER="$1"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | tr '[:upper:]' '[:lower:]')"
+
+  ### handle versions of linux distributions:
+  # debian 9 (stretch) - installer build 20170615+deb9u5
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
+  # Fedora 17 (Beefy Miracle)
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(fedora)\ ([0-9]+).*/\1project:\1:\2/')"
+  # Ubuntu
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(ubuntu)\ ([0-9]+\,[0-9]+).*/\1_linux:\1:\2/')"
+  # OpenWRT KAMIKAZE r18* -> 8.09.2
+  # see also: https://openwrt.org/about/history
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ (kamikaze)\ r1[4-8][0-9][0-9][0-9].*/\1:\2:8.09/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ (backfire)\ r2[0-9][0-9][0-9][0-9].*/\1:\2:10.03/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/lede\ ([0-9]+\.[0-9]+\.[0-9]+)(-)?(rc[0-9])?.*/openwrt:\1:\3/')"
+  # d-link dir-300 v2.14b01
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
+  # dd-wrt v24-sp2
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ v([0-9]+)-(sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ \#([0-9]+)/dd-wrt:dd-wrt:\1/')"
+  CSV_RULE="$VERSION_IDENTIFIER"
 }

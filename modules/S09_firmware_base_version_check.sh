@@ -31,11 +31,14 @@ S09_firmware_base_version_check() {
   EXTRACTOR_LOG="$LOG_DIR"/p20_firmware_bin_extractor.txt
 
   print_output "[*] Static version detection running ..." | tr -d "\n"
-  write_csv_log "binary/file" "version_rule" "version_detected" "license" "static/emulation"
+  write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
   TYPE="static"
 
   while read -r VERSION_LINE; do
     if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
+      continue
+    fi
+    if echo "$VERSION_LINE" | grep -q "no_static"; then
       continue
     fi
 
@@ -44,18 +47,66 @@ S09_firmware_base_version_check() {
     STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
     LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
     BIN_NAME="$(echo "$VERSION_LINE" | cut -d\; -f1)"
+    CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
 
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
-    if [[ $STRICT != "strict" ]]; then
+    if [[ $STRICT == *"strict"* ]]; then
+
+      # strict mode
+      #   use the defined regex only on a binary called BIN_NAME (field 1)
+
+      if [[ $RTOS -eq 1 ]]; then
+        continue
+      else
+        mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+        for BIN in "${STRICT_BINS[@]}"; do
+          # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
+          if file "$BIN" | grep -q ELF ; then
+            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
+            if [[ -n $VERSION_FINDER ]]; then
+              echo ""
+              print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
+              get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+              write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
+              continue
+            fi
+          fi
+        done
+        echo "." | tr -d "\n"
+      fi
       echo "." | tr -d "\n"
+
+    elif [[ $STRICT == "zgrep" ]]; then
+
+      # zgrep mode:
+      #   search for files with identifier in field 1
+      #   use regex (VERSION_IDENTIFIER) via zgrep on these files
+      #   use csv-regex to get the csv-search string for csv lookup
+
+      mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \;)
+      for SFILE in "${SPECIAL_FINDS[@]}"; do
+        BIN_PATH=$(echo "$SFILE" | cut -d ":" -f1)
+        BIN_NAME="$(basename "$(echo "$SFILE" | cut -d ":" -f1)")"
+        CSV_REGEX=$(echo "$VERSION_LINE" | cut -d\; -f5 | sed s/^\"// | sed s/\"$//)
+        VERSION_FINDER=$(echo "$SFILE" | cut -d ":" -f2-3 | tr -dc '[:print:]')
+        get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN_PATH")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - zgrep$GREEN)."
+        write_csv_log "$BIN_PATH" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
+      done
+      echo "." | tr -d "\n"
+
+    else
+
+      # This is default mode!
 
       # check binwalk files sometimes we can find kernel version information or something else in it
       VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null)
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
-        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs (license: $ORANGE$LIC$GREEN)."
-        write_csv_log "binwalk logs" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
+        print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
+        get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+        write_csv_log "binwalk logs" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
         echo "." | tr -d "\n"
       fi
       
@@ -67,7 +118,8 @@ S09_firmware_base_version_check() {
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
           print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
-          write_csv_log "firmware" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
+          get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+          write_csv_log "firmware" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
         fi  
         echo "." | tr -d "\n"
       fi  
@@ -87,25 +139,8 @@ S09_firmware_base_version_check() {
       fi
 
       echo "." | tr -d "\n"
-    else
-      if [[ $RTOS -eq 1 ]]; then
-        continue
-      else
-        mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-        for BIN in "${STRICT_BINS[@]}"; do
-          # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-          if file "$BIN" | grep -q ELF ; then
-            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
-            if [[ -n $VERSION_FINDER ]]; then
-              echo ""
-              print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
-              write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
-              continue
-            fi
-          fi
-        done
-        echo "." | tr -d "\n"
-      fi
+
+
     fi
 
     if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
@@ -128,6 +163,16 @@ S09_firmware_base_version_check() {
   module_end_log "${FUNCNAME[0]}" "$VERSIONS_DETECTED"
 }
 
+get_csv_rule() {
+  local VERSION_STRING="$1"
+  local CSV_REGEX
+  CSV_REGEX=$(echo "$2" | sed 's/^\"//' | sed 's/\"$//')
+  export CSV_RULE
+  CSV_RULE="NA"
+
+  CSV_RULE="$(echo "$VERSION_STRING" | eval "$CSV_REGEX")"
+}
+
 bin_string_checker() {
   for BIN in "${FILE_ARR[@]}"; do
     if [[ $RTOS -eq 0 ]]; then
@@ -140,16 +185,18 @@ bin_string_checker() {
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
-          write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
+          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
+          get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+          write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
           continue
         fi
       elif [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* ]] ; then
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
-          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
-          write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
+          print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
+          get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+          write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
           continue
         fi
       fi
@@ -157,8 +204,9 @@ bin_string_checker() {
       VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
-        print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (static)."
-        write_csv_log "$BIN" "$VERSION_IDENTIFIER" "$VERSION_FINDER" "$LIC" "$TYPE"
+        print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
+        get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+        write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
         continue
       fi
     fi
