@@ -30,13 +30,14 @@ L15_emulated_checks_init() {
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
-    end_system_emulation "INIT" &
     check_live_nmap_basic
     check_live_snmp
-    check_live_nikto
+    # running into issues on different systems:
+    # check_live_nikto
     check_live_routersploit
-    end_system_emulation "END"
     MODULE_END=1
+    pkill -f "qemu-system-.*$IMAGE_NAME.*"
+    reset_network
 
   else
     MODULE_END=0
@@ -46,18 +47,6 @@ L15_emulated_checks_init() {
   write_log "[*] Statistics:${#NMAP_PORTS_SERVICES[@]}:$SNMP_UP:$NIKTO_UP"
   module_end_log "${FUNCNAME[0]}" "$MODULE_END"
 
-}
-
-end_system_emulation() {
-  if [[ "$1" == "INIT" ]]; then
-    sleep 1800
-  fi
-
-  pkill -f "qemu-system-.*$IMAGE_NAME.*"
-
-  if [[ "$1" == "END" ]]; then
-    reset_network
-  fi
 }
 
 check_live_nmap_basic() {
@@ -113,6 +102,8 @@ check_live_nikto() {
   sub_module_title "Nikto web checks for emulated system with IP $IP"
 
   NIKTO_UP=0
+  NIKTO_DONE=0
+
   if [[ "${#NMAP_PORTS[@]}" -gt 0 ]]; then
     for PORT in "${NMAP_PORTS[@]}"; do
       #PORT=$(echo "$SERVICE" | cut -d/ -f1 | tr -d "[:blank:]")
@@ -120,9 +111,14 @@ check_live_nikto() {
       if [[ "$SERVICE" == *"ssl|http"* ]];then
         #shellcheck disable=SC2086
         nikto $NIKTO_OPTS -ssl -port "$PORT" -host "$IP" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt
+        NIKTO_DONE=1
       elif [[ "$SERVICE" == *"http"* ]];then
         #shellcheck disable=SC2086
         nikto $NIKTO_OPTS -port "$PORT" -host "$IP" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt
+        NIKTO_DONE=1
+      fi
+      if [[ "$NIKTO_DONE" -eq 1 ]]; then
+        break
       fi
     done
     if [[ -f "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt ]]; then
