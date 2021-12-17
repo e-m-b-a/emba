@@ -157,7 +157,7 @@ print_file_info()
     echo -e "Description: ""${2}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
-  FILE_SIZE=$(($(wget "${3}" --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d')))
+  FILE_SIZE=$(($(wget "${3}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d')))
 
   if (( FILE_SIZE > 1048576 )) ; then
     echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
@@ -196,7 +196,7 @@ download_file()
     if [[ "$D_FILE" == "${1}" ]] ; then
       echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1}""$NC"
       if ! [[ -f "${3}" ]] ; then
-        wget "${2}" -O "${3}"
+        wget --no-check-certificate "${2}" -O "${3}"
       else
         echo -e "$GREEN""${1}"" is already downloaded - no further action performed.""$NC"
       fi
@@ -321,6 +321,7 @@ print_tool_info "ncurses-bin" 1
 # as we need it for multiple tools we can install it by default
 print_tool_info "git" 1
 print_tool_info "net-tools" 1
+print_tool_info "curl" 1
 
 if [[ "$FORCE" -eq 0 ]] && { [[ "$LIST_DEP" -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]];}; then
   echo -e "\\n""$MAGENTA""$BOLD""Do you want to install/update these applications?""$NC"
@@ -875,7 +876,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     
         if ! command -v unstuff > /dev/null ; then
           mkdir -p ./external/binwalk/unstuff
-          wget -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+          wget --no-check-certificate -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
           tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
           cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
         else
@@ -1186,7 +1187,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
       chown -R root:root external/freetz-ng
       userdel freetzuser
       if [[ -d external/freetz-ng/source ]]; then
-        rm external/freetz-ng/source
+        rm -r external/freetz-ng/source
       fi
       ;;
     esac
@@ -1254,7 +1255,7 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
           echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
       fi
       if [[ "$CVE_INST" -eq 1 ]]; then
-        wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+        wget --no-check-certificate -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
         echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
         apt-get update -y
         print_tool_info "mongodb-org" 1

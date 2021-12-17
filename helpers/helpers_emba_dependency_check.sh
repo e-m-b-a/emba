@@ -367,6 +367,9 @@ dependency_check()
     # pylint - currently not used
     # check_dep_tool "pylint"
 
+    check_dep_tool "ubireader image extractor" "ubireader_extract_images"
+    check_dep_tool "ubireader file extractor" "ubireader_extract_files"
+
     # bandit python security tester
     check_dep_tool "bandit - python vulnerability scanner" "bandit"
 

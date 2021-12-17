@@ -27,6 +27,7 @@ P02_firmware_bin_file_check() {
   export AVM_DETECTED=0
   export UBOOT_IMAGE=0
   export EXT_IMAGE=0
+  export UBI_IMAGE=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
@@ -37,6 +38,9 @@ P02_firmware_bin_file_check() {
 
     if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
       export VMDK_DETECTED=1
+    fi
+    if [[ "$FILE_BIN_OUT" == *"UBI image"* ]]; then
+      export UBI_IMAGE=1
     fi
     if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
       export DLINK_ENC_DETECTED=1
