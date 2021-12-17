@@ -469,10 +469,10 @@ output_cve_exploits() {
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
+      print_output ""
     fi
 
     if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
-      print_output ""
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
       write_link "f20#softwareinventoryinitialoverview"
       echo "versions_identified;\"${#VERSIONS_CLEANED[@]}\"" >> "$CSV_LOG_FILE"
