@@ -21,7 +21,7 @@ S06_distribution_identification()
   module_title "Linux identification"
 
   OUTPUT=0
-  write_csv_log "file" "type" "identifier" "csv-rule"
+  write_csv_log "file" "type" "identifier" "csv_rule"
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
       FILE="$(echo "$LINE" | cut -d\; -f2)"

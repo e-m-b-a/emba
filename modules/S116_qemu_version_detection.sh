@@ -63,58 +63,40 @@ version_detection_thread() {
 
   VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
+  BINARY_PATH=""
+  BINARY_PATHS=()
+
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
-  if [[ $STRICT != "strict" ]]; then
-    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null)
-  else
+  if [[ $STRICT == "strict" ]]; then
     if [[ -f "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt ]]; then
-      VERSION_STRICT=$(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | sort -u | head -1 2>/dev/null)
-      BINARY_PATH=$(grep -a "Emulating binary:" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u | head -1 2>/dev/null)
-      if [[ -n "$VERSION_STRICT" ]]; then
-        if [[ "$BINARY" == "smbd" ]]; then
-          # we log it as the original binary and the samba binary name
-          VERSION_="$BINARY $VERSION_STRICT"
-          VERSIONS_DETECTED+=("$VERSION_")
-          BINARY="samba"
-        fi
-        VERSION_="$BINARY_PATH:$BINARY $VERSION_STRICT"
-        VERSIONS_DETECTED+=("$VERSION_")
-      fi
+      mapfile -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | sort -u 2>/dev/null)
+      mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
+      TYPE="emulation/strict"
     fi
+  else
+    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null)
+    # VERSIONS_DETECTED:
+    # path_to_logfile:Version Identifier
+    #└─$ grep -a -o -H -E "Version: 1.8" /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt                                                    130 ⨯
+    # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
+    # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
+    mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
+    TYPE="emulation"
   fi
 
-  if [[ ${#VERSIONS_DETECTED[@]} -ne 0 ]]; then
-    for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
-      # if we have multiple detection of the same version details:
-      if [ "$VERSION_DETECTED" != "$VERS_DET_OLD" ]; then
-        VERS_DET_OLD="$VERSION_DETECTED"
 
-        # first field is the path of the qemu log file
-        LOG_PATH_="$(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1)")"
+  for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
+    LOG_PATH_="$(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u)")"
+    if [[ $STRICT != "strict" ]]; then
+      VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2- | sort -u)"
+    fi
 
-        VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2-)"
+    get_csv_rule "$VERSION_DETECTED" "$CSV_REGEX"
 
-        get_csv_rule "$VERSION_DETECTED" "$CSV_REGEX"
-
-        if [[ -n "$LOG_PATH_" ]]; then
-          mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
-        fi
-
-        if [[ ${#BINARY_PATHS[@]} -eq 0 ]]; then
-          print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in qemu log file $ORANGE$LOG_PATH_$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH_"
-          # this is just a temp solution. We can change the final behaviour after the complete transformation
-          write_csv_log "Qemu log $LOG_PATH_" "$BINARY" "$VERSION_DETECTED" "$CSV_RULE" "$LIC" "$TYPE"
-          continue
-        else
-          # binary path set in strict mode
-          for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-            print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}emulation$GREEN)." "" "$LOG_PATH_"
-            write_csv_log "$BINARY_PATH" "$BINARY" "$VERSION_DETECTED" "$CSV_RULE" "$LIC" "$TYPE"
-          done
-        fi
-        BINARY_PATH=""
-        BINARY_PATHS=()
-      fi
+    for BINARY_PATH in "${BINARY_PATHS[@]}"; do
+      print_output "[+] Version information found ${RED}""$VERSION_DETECTED""${NC}${GREEN} in binary $ORANGE$BINARY_PATH$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}$TYPE$GREEN)." "" "$LOG_PATH_"
+      write_csv_log "$BINARY_PATH" "$BINARY" "$VERSION_DETECTED" "$CSV_RULE" "$LIC" "$TYPE"
     done
-  fi
+  done
 }
+
