@@ -36,6 +36,8 @@ Author(s): Michael Messner, Pascal Eckmann
 
 *EMBA* is designed to assist penetration testers and not as a standalone tool without human interaction. *EMBA* should provide as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
 
+[![Watch EMBA](https://raw.githubusercontent.com/wiki/e-m-b-a/emba/images/youtube-emba.png)](https://youtu.be/_dvdy3klFFY "Watch EMBA")
+
 ----------------------
 
 #### Links to the wiki for more detailed information
