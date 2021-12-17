@@ -294,21 +294,11 @@ cve_extractor() {
   if [[ "$(echo "$VERSION_orig" | grep -o ":" | wc -l)" -eq 1 ]]; then
     BINARY="$(echo "$VERSION_orig" | cut -d ":" -f1)"
     VERSION="$(echo "$VERSION_orig" | cut -d ":" -f2)"
-  elif [[ "$(echo "$VERSION_orig" | grep -o ":" | wc -l)" -eq 2 ]]; then
-    DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
+  else
+    # DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
     BINARY="$(echo "$VERSION_orig" | cut -d ":" -f2)"
     VERSION="$(echo "$VERSION_orig" | cut -d ":" -f3)"
-  elif [[ "$(echo "$VERSION_orig" | grep -o ":" | wc -l)" -eq 3 ]]; then
-    DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
-    BINARY="$(echo "$VERSION_orig" | cut -d ":" -f2)"
-    VERSION="$(echo "$VERSION_orig" | cut -d ":" -f3-)"
-  else
-    DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
-    BINARY="$(echo "$VERSION_orig" | cut -d ":" -f2)"
-    VERSION="$(echo "$VERSION_orig" | cut -d ":" -f3-)"
-    print_output "[!] More fields as expected"
   fi
-  print_output "BINARY: $BINARY"
 
   AGG_LOG_FILE="$VERSION_PATH".txt
 
@@ -468,8 +458,6 @@ cve_extractor() {
 
   CVEs="$CVE_COUNTER_VERSION"
   EXPLOITS="$EXPLOIT_COUNTER_VERSION"
-  print_output "BINARY: $BINARY"
-  print_output "VERSION: $VERSION"
 
   if [[ "$CVE_COUNTER_VERSION" -gt 0 || "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
