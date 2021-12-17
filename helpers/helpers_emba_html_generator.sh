@@ -269,7 +269,6 @@ add_link_tags() {
     for LICENSE_LINE in "${LICENSE_LINES[@]}" ; do
       LICENSE_LINE_NUM="$(echo "$LICENSE_LINE" | cut -d: -f1)"
       LICENSE_STRING="$(echo "$LICENSE_LINE" | cut -d: -f3 | sed -e 's/<[^>]*>//g' )"
-      echo "x""${LICENSE_STRING:1}""x"
       LIC_URL=""
       for I in "${!LIC_CODE_ARR[@]}" ; do
         if [[ "${LIC_CODE_ARR[$I]}" == "${LICENSE_STRING:1}" ]] ; then
