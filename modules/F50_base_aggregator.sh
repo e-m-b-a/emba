@@ -464,18 +464,18 @@ binary_fct_output() {
 output_cve_exploits() {
 
   local DATA=0
-  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
-    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
+  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
       print_output ""
     fi
 
-    if [[ "${#VERSIONS_CLEANED[@]}" -gt 0 ]]; then
-      print_output "[+] Identified ""$ORANGE""${#VERSIONS_CLEANED[@]}""$GREEN"" software components with version details.\\n"
+    if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+      print_output "[+] Identified ""$ORANGE""${#VERSIONS_AGGREGATED[@]}""$GREEN"" software components with version details.\\n"
       write_link "f20#softwareinventoryinitialoverview"
-      echo "versions_identified;\"${#VERSIONS_CLEANED[@]}\"" >> "$CSV_LOG_FILE"
+      echo "versions_identified;\"${#VERSIONS_AGGREGATED[@]}\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
     if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
