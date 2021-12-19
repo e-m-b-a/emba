@@ -46,9 +46,11 @@ ubi_extractor() {
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_images$NC."
   print_output "[*] File details: $ORANGE$(file "$UBI_PATH_" | cut -d ':' -f2-)$NC"
   ubireader_extract_images -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE"
+
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
   ubireader_extract_files -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE"
   UBI_1st_ROUND="$(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image")"
+
   for UBI_DATA in "${UBI_1st_ROUND[@]}"; do
     UBI_FILE=$(echo "$UBI_DATA" | cut -d: -f1)
     UBI_INFO=$(echo "$UBI_DATA" | cut -d: -f2)
