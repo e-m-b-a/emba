@@ -23,27 +23,43 @@ P14_ext2_mounter() {
   if [[ "$EXT_IMAGE" -eq 1 ]]; then
     module_title "EXT filesystem extractor"
     print_output "[*] Connect to device $ORANGE$FIRMWARE_PATH$NC"
-    mkdir -p "$TMP_DIR"/ext_mount
-    print_output "[*] Trying to mount $ORANGE$FIRMWARE_PATH$NC to $ORANGE$TMP_DIR/ext_mount$NC directory"
-    mount "$FIRMWARE_PATH" "$TMP_DIR"/ext_mount
-    if mount | grep -q ext_mount; then
-      print_output "[*] Copying $ORANGE$TMP_DIR/ext_mount$NC to firmware tmp directory ($TMP_DIR/ext_mount)"
-      mkdir -p "$LOG_DIR"/firmware/ext_mount_filesystem/
-      cp -pri "$TMP_DIR"/ext_mount/* "$LOG_DIR"/firmware/ext_mount_filesystem/
-      print_output ""
-      print_output "[*] Using the following firmware directory ($ORANGE$LOG_DIR/firmware/ext_mount_filesystem$NC) as base directory:"
-      #shellcheck disable=SC2012
-      ls -lh "$LOG_DIR"/firmware/ext_mount_filesystem/ | tee -a "$LOG_FILE"
-      print_output ""
-      print_output "[*] Unmounting $ORANGE$TMP_DIR/ext_mount$NC directory"
-      FILES_EXT_MOUNT=$(find "$LOG_DIR"/firmware/ext_mount_filesystem/ -type f | wc -l)
-      DIRS_EXT_MOUNT=$(find "$LOG_DIR"/firmware/ext_mount_filesystem/ -type d | wc -l)
-      print_output "[*] Extracted $ORANGE$FILES_EXT_MOUNT$NC files and $ORANGE$DIRS_EXT_MOUNT$NC directories from the firmware image."
-      umount "$TMP_DIR"/ext_mount
-    fi
+
+    EXTRACTION_DIR="$LOG_DIR"/firmware/ext_mount_filesystem/
+
+    ext2_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
+
     export FIRMWARE_PATH="$LOG_DIR"/firmware/
-    rm -r "$TMP_DIR"/ext_mount
     NEG_LOG=1
   fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+}
+
+ext2_extractor() {
+  local EXT_PATH_="$1"
+  local EXTRACTION_DIR_="$2"
+  local TMP_EXT_MOUNT="$TMP_DIR""/ext_mount_$RANDOM"
+  local FILES_EXT_MOUNT
+  local DIRS_EXT_MOUNT
+
+  mkdir -p "$TMP_EXT_MOUNT"
+  print_output "[*] Trying to mount $ORANGE$EXT_PATH_$NC to $ORANGE$TMP_EXT_MOUNT$NC directory"
+  mount "$EXT_PATH_" "$TMP_EXT_MOUNT"
+  if mount | grep -q ext_mount; then
+    print_output "[*] Copying $ORANGE$TMP_EXT_MOUNT$NC to firmware tmp directory ($EXTRACTION_DIR_)"
+    mkdir -p "$EXTRACTION_DIR_"
+    cp -pri "$TMP_EXT_MOUNT"/* "$EXTRACTION_DIR_"
+    print_output ""
+    print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
+    #shellcheck disable=SC2012
+    ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
+    print_output ""
+    print_output "[*] Unmounting $ORANGE$TMP_EXT_MOUNT$NC directory"
+
+    FILES_EXT_MOUNT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
+    DIRS_EXT_MOUNT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
+    print_output "[*] Extracted $ORANGE$FILES_EXT_MOUNT$NC files and $ORANGE$DIRS_EXT_MOUNT$NC directories from the firmware image."
+    umount "$TMP_EXT_MOUNT"
+  fi
+  rm -r "$TMP_EXT_MOUNT"
+
 }
