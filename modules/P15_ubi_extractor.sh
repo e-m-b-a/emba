@@ -43,6 +43,8 @@ ubi_extractor() {
   local FILES_UBI_EXT
   local DIRS_UBI_EXT
 
+  sub_module_title "UBI filesystem extractor"
+
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_images$NC."
   print_output "[*] File details: $ORANGE$(file "$UBI_PATH_" | cut -d ':' -f2-)$NC"
   ubireader_extract_images -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE"

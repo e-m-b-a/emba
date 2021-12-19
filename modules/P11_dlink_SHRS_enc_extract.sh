@@ -39,6 +39,7 @@ P11_dlink_SHRS_enc_extract() {
 dlink_SHRS_enc_extractor() {
   local DLINK_ENC_PATH_="$1"
   local EXTRACTION_FILE_="$2"
+  sub_module_title "DLink encrypted firmware extractor"
 
   hexdump -C "$DLINK_ENC_PATH_" | head | tee -a "$LOG_FILE"
 

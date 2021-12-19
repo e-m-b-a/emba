@@ -40,6 +40,7 @@ vmdk_extractor() {
   local VMDK_FILES
   local VMDK_DIRS
   local TMP_VMDK_MNT="$TMP_DIR/vmdk_mount_$RANDOM"
+  sub_module_title "VMDK extractor"
 
   print_output "[*] Connect to device $ORANGE$VMDK_PATH_$NC"
   mkdir -p "$TMP_VMDK_MNT"

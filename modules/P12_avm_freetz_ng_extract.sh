@@ -39,6 +39,7 @@ avm_extractor() {
   local FRITZ_FILES
   local FRITZ_DIRS
   local FRITZ_VERSION
+  sub_module_title "AVM freetz-ng firmware extractor"
 
   "$EXT_DIR"/freetz-ng/fwmod -u -d "$EXTRACTION_DIR_" "$AVM_FW_PATH_" | tee -a "$LOG_FILE"
 

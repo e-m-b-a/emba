@@ -22,43 +22,14 @@ P02_firmware_bin_file_check() {
   module_title "Binary firmware file analyzer"
 
   local FILE_BIN_OUT
-  export VMDK_DETECTED=0
-  export DLINK_ENC_DETECTED=0
-  export AVM_DETECTED=0
-  export UBOOT_IMAGE=0
-  export EXT_IMAGE=0
-  export UBI_IMAGE=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
     MD5_CHECKSUM=$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')
-    FILE_BIN_OUT=$(file "$FIRMWARE_PATH")
-    DLINK_ENC_CHECK=$(hexdump -C "$FIRMWARE_PATH"| head -1)
-    AVM_CHECK=$(strings "$FIRMWARE_PATH" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
 
-    if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
-      export VMDK_DETECTED=1
-    fi
-    if [[ "$FILE_BIN_OUT" == *"UBI image"* ]]; then
-      export UBI_IMAGE=1
-    fi
-    if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
-      export DLINK_ENC_DETECTED=1
-    fi
-    if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
-      export DLINK_ENC_DETECTED=2
-    fi
-    if [[ "$AVM_CHECK" -gt 0 ]]; then
-      export AVM_DETECTED=1
-    fi
-    if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
-      export UBOOT_IMAGE=1
-    fi
-    if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
-      export EXT_IMAGE=1
-    fi
+    fw_bin_detector "$FIRMWARE_PATH"
 
-    # entropy checking on binary file
+     # entropy checking on binary file
     ENTROPY=$(ent "$FIRMWARE_PATH" | grep Entropy)
   fi
 
@@ -91,4 +62,44 @@ P02_firmware_bin_file_check() {
   write_csv_log "$(basename "$FIRMWARE_PATH")" "$SHA512_CHECKSUM" "$MD5_CHECKSUM" "$ENTROPY" "$DLINK_ENC_DETECTED" "$VMDK_DETECTED" "$UBOOT_IMAGE" "$EXT_IMAGE" "$AVM_DETECTED"
 
   module_end_log "${FUNCNAME[0]}" 1
+}
+
+fw_bin_detector() {
+  local CHECK_FILE="$1"
+  local FILE_BIN_OUT
+  local DLINK_ENC_CHECK
+  local AVM_CHECK
+
+  export VMDK_DETECTED=0
+  export DLINK_ENC_DETECTED=0
+  export AVM_DETECTED=0
+  export UBOOT_IMAGE=0
+  export EXT_IMAGE=0
+  export UBI_IMAGE=0
+
+  FILE_BIN_OUT=$(file "$CHECK_FILE")
+  DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE"| head -1)
+  AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
+
+  if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
+    export VMDK_DETECTED=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"UBI image"* ]]; then
+    export UBI_IMAGE=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
+    export DLINK_ENC_DETECTED=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
+    export DLINK_ENC_DETECTED=2
+  fi
+  if [[ "$AVM_CHECK" -gt 0 ]]; then
+    export AVM_DETECTED=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
+    export UBOOT_IMAGE=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
+    export EXT_IMAGE=1
+  fi
 }

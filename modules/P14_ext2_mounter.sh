@@ -40,6 +40,7 @@ ext2_extractor() {
   local TMP_EXT_MOUNT="$TMP_DIR""/ext_mount_$RANDOM"
   local FILES_EXT_MOUNT
   local DIRS_EXT_MOUNT
+  sub_module_title "EXT filesystem extractor"
 
   mkdir -p "$TMP_EXT_MOUNT"
   print_output "[*] Trying to mount $ORANGE$EXT_PATH_$NC to $ORANGE$TMP_EXT_MOUNT$NC directory"
