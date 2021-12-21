@@ -248,7 +248,7 @@ deb_extractor() {
 
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-  print_output "[*] Deep extraction with binwalk - 1st round"
+  print_output "[*] Deep extraction - 1st round"
   print_output "[*] Walking through all files and try to extract what ever possible"
   MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo)"))
 
@@ -260,17 +260,34 @@ deep_extractor() {
     FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
     readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
-      if [[ "$THREADED" -eq 1 ]]; then
-        binwalk_deep_extract_helper &
+      # do a quick check if EMBA should handle the file or we give it to binwalk:
+      fw_bin_detector "$FILE_TMP"
+
+      if [[ "$VMDK_DETECTED" -eq 1 ]]; then
+        vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$UBI_IMAGE" -eq 1 ]]; then
+        ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
+        dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$EXT_IMAGE" -eq 1 ]]; then
+        ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
         WAIT_PIDS_P20+=( "$!" )
       else
-        binwalk_deep_extract_helper
+        # default case to binwalk
+        binwalk_deep_extract_helper &
+        WAIT_PIDS_P20+=( "$!" )
       fi
+
       #let's build an array with all our unique md5 checksums of our files
       FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
       MD5_DONE_DEEP+=( "$FILE_MD5" )
       max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
+
       check_disk_space
+
       if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
         print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
         print_output "[!] $(date) - Ending extraction processes" "main"
@@ -285,7 +302,7 @@ deep_extractor() {
   fi
 
   if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
-    print_output "[*] Deep extraction with binwalk - 2nd round"
+    print_output "[*] Deep extraction - 2nd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
     readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )

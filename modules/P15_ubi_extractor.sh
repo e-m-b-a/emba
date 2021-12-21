@@ -22,29 +22,50 @@ P15_ubi_extractor() {
   NEG_LOG=0
   if [[ "$UBI_IMAGE" -eq 1 ]]; then
     module_title "UBI filesystem extractor"
-    mkdir -p "$LOG_DIR"/firmware/ubi_extracted
-    print_output "[*] Extracts UBI firmware image $ORANGE$FIRMWARE_PATH$NC with ${ORANGE}ubireader_extract_images$NC."
-    print_output "[*] File details: $ORANGE$(file "$FIRMWARE_PATH" | cut -d ':' -f2-)$NC"
-    ubireader_extract_images -i -v -w -o "$LOG_DIR"/firmware/ubi_extracted "$FIRMWARE_PATH" | tee -a "$LOG_FILE"
-    print_output "[*] Extracts UBI firmware image $ORANGE$FIRMWARE_PATH$NC with ${ORANGE}ubireader_extract_files$NC."
-    ubireader_extract_files -i -v -w -o "$LOG_DIR"/firmware/ubi_extracted/ "$FIRMWARE_PATH" | tee -a "$LOG_FILE"
-    UBI_1st_ROUND="$(find "$LOG_DIR"/firmware/ubi_extracted -type f -exec file {} \; | grep "UBI image")"
-    for UBI_DATA in "${UBI_1st_ROUND[@]}"; do
-      UBI_FILE=$(echo "$UBI_DATA" | cut -d: -f1)
-      UBI_INFO=$(echo "$UBI_DATA" | cut -d: -f2)
-      if [[ "$UBI_INFO" == *"UBIfs image"* ]]; then
-        sub_module_title "UBIfs deep extraction"
-        print_output "[*] Extracts UBIfs firmware image $ORANGE$FIRMWARE_PATH$NC with ${ORANGE}ubireader_extract_files$NC."
-        print_output "[*] File details: $ORANGE$(file "$UBI_FILE" | cut -d ':' -f2-)$NC"
-        ubireader_extract_files -l -i -v -o "$LOG_DIR"/firmware/ubi_extracted/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE"
-      fi
-    done
-    print_output ""
-    FILES_UBI_EXT=$(find "$LOG_DIR"/firmware/ubi_extracted/ -type f | wc -l)
-    DIRS_UBI_EXT=$(find "$LOG_DIR"/firmware/ubi_extracted/ -type d | wc -l)
-    print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image."
+    EXTRACTION_DIR="$LOG_DIR/firmware/ubi_extracted"
+    mkdir -p "$EXTRACTION_DIR"
+
+    ubi_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
+
     export FIRMWARE_PATH="$LOG_DIR"/firmware/
     NEG_LOG=1
   fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+}
+
+ubi_extractor() {
+  local UBI_PATH_="$1"
+  local EXTRACTION_DIR_="$2"
+  local UBI_FILE
+  local UBI_INFO
+  local UBI_1st_ROUND
+  local UBI_DATA
+  local FILES_UBI_EXT
+  local DIRS_UBI_EXT
+
+  sub_module_title "UBI filesystem extractor"
+
+  print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_images$NC."
+  print_output "[*] File details: $ORANGE$(file "$UBI_PATH_" | cut -d ':' -f2-)$NC"
+  ubireader_extract_images -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE"
+
+  print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
+  ubireader_extract_files -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE"
+  UBI_1st_ROUND="$(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image")"
+
+  for UBI_DATA in "${UBI_1st_ROUND[@]}"; do
+    UBI_FILE=$(echo "$UBI_DATA" | cut -d: -f1)
+    UBI_INFO=$(echo "$UBI_DATA" | cut -d: -f2)
+    if [[ "$UBI_INFO" == *"UBIfs image"* ]]; then
+      sub_module_title "UBIfs deep extraction"
+      print_output "[*] Extracts UBIfs firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
+      print_output "[*] File details: $ORANGE$(file "$UBI_FILE" | cut -d ':' -f2-)$NC"
+      ubireader_extract_files -l -i -v -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE"
+    fi
+  done
+
+  print_output ""
+  FILES_UBI_EXT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
+  DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
+  print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image."
 }
