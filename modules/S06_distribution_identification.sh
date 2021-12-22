@@ -110,7 +110,7 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
   # dd-wrt v24-sp2
-  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ v([0-9]+)-(sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ v([0-9]+)(-sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ \#([0-9]+)/dd-wrt:dd-wrt:\1/')"
   CSV_RULE="$VERSION_IDENTIFIER"
 }

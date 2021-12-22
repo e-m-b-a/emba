@@ -543,7 +543,7 @@ get_data() {
     STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
   fi
-  if [[ -f "$LOG_DIR"/"$S14_LOG" && "$STRCPY_CNT" -lt 1 ]]; then
+  if [[ -f "$LOG_DIR"/"$S14_LOG" ]]; then
     STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
   fi

@@ -266,27 +266,31 @@ analyze_kernel_module()
 }
 
 module_analyzer() {
-  LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
-  local M_PATH
-  M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
-  local LICENSE
-  LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
-  if file "$M_PATH" 2>/dev/null | grep -q 'not stripped'; then
-    if echo "$LINE" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
-      # kernel module is GPL/BSD license then not stripped is fine
-      print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
-    elif ! [[ $LICENSE =~ "License:" ]] ; then
-      print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+  if [[ "$LINE" == *".ko" ]]; then
+    LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
+    local M_PATH
+    M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
+    local LICENSE
+    LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
+    if file "$M_PATH" 2>/dev/null | grep -q 'not stripped'; then
+      if echo "$LINE" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
+        # kernel module is GPL/BSD license then not stripped is fine
+        print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""NOT STRIPPED""${NC}"
+      elif ! [[ $LICENSE =~ "License:" ]] ; then
+        print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""License not found""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+      else
+        # kernel module is NOT GPL license then not stripped is bad!
+        print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
+        KMOD_BAD=$((KMOD_BAD+1))
+      fi
     else
-      # kernel module is NOT GPL license then not stripped is bad!
-      print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
-      KMOD_BAD=$((KMOD_BAD+1))
+      print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
     fi
-  else
-    print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
-  fi
 
-  echo "$KMOD_BAD" >> "$TMP_DIR"/KMOD_BAD.tmp
+    echo "$KMOD_BAD" >> "$TMP_DIR"/KMOD_BAD.tmp
+  elif [[ "$LINE" == *".o" ]]; then
+    print_output "[-] No support for .o kernel modules - $ORANGE$LINE$NC"
+  fi
 }
 
 # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_usb
