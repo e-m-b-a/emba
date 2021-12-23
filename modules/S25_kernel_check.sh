@@ -266,7 +266,7 @@ analyze_kernel_module()
 }
 
 module_analyzer() {
-  if [[ "$LINE" == "*.ko" ]]; then
+  if [[ "$LINE" == *".ko" ]]; then
     LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
     local M_PATH
     M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
@@ -288,7 +288,7 @@ module_analyzer() {
     fi
 
     echo "$KMOD_BAD" >> "$TMP_DIR"/KMOD_BAD.tmp
-  elif [[ "$LINE" == "*.ko" ]]; then
+  elif [[ "$LINE" == *".o" ]]; then
     print_output "[-] No support for .o kernel modules - $ORANGE$LINE$NC"
   fi
 }
