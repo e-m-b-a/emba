@@ -65,6 +65,7 @@ version_detection_thread() {
 
   BINARY_PATH=""
   BINARY_PATHS=()
+  LOG_PATH_=""
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT == "strict" ]]; then
@@ -80,10 +81,19 @@ version_detection_thread() {
     #└─$ grep -a -o -H -E "Version: 1.8" /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt                                                    130 ⨯
     # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
     # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
-    mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
+    for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
+      mapfile -t LOG_PATHS < <(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u)")
+      for LOG_PATH_ in "${LOG_PATHS[@]}"; do
+        mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
+        for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
+          # BINARY_PATH is the final array which we are using further
+          print_output "binary path: $BINARY_PATH_"
+          BINARY_PATHS+=( "$BINARY_PATH_" )
+        done
+      done
+    done
     TYPE="emulation"
   fi
-
 
   for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
     LOG_PATH_="$(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u)")"
