@@ -290,7 +290,10 @@ dependency_check()
 
     # Freetz-NG
     check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
-    DEP_ERROR=0
+    #DEP_ERROR=0
+
+    # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
+    check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"
 
     # CVE-search
     # TODO change to portcheck and write one for external hosts

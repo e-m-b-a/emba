@@ -222,7 +222,7 @@ running_jobs() {
 
 kill_qemu_threader() {
   while true; do
-    pkill -O 240 -f .*qemu.*
+    pkill -9 -O 240 -f .*qemu.*
     sleep 20
   done
 }

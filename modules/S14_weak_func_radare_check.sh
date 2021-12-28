@@ -31,93 +31,94 @@ S14_weak_func_radare_check()
       done
     fi
 
-    if [[ $(grep "Statistics:" "$LOG_DIR"/s13_weak_func_check.txt 2>/dev/null | cut -d: -f2) -lt 50 || $(find "$LOG_DIR"/s13_weak_func_check/ -type f | wc -l) -lt 20 ]]; then
-      print_output "[*] Module S13 was not able to analyse the binaries. EMBA brings radare in place!"
-      # This module waits for S12 - binary protections
-      # check emba.log for S12_binary_protection starting
-      if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-        while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
-          sleep 1
-        done
-      fi
-
-      VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
-      print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-      IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"
-
-      STRCPY_CNT=0
-      write_csv_log "binary" "function" "function count" "common linux file" "networking"
-      for LINE in "${BINARIES[@]}" ; do
-        if ( file "$LINE" | grep -q ELF ) ; then
-          NAME=$(basename "$LINE" 2> /dev/null)
-  
-          if ( file "$LINE" | grep -q "x86-64" ) ; then
-            if [[ "$THREADED" -eq 1 ]]; then
-              radare_function_check_x86_64 &
-              WAIT_PIDS_S14+=( "$!" )
-            else
-              radare_function_check_x86_64
-            fi
-          elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
-            if [[ "$THREADED" -eq 1 ]]; then
-              radare_function_check_x86 &
-              WAIT_PIDS_S14+=( "$!" )
-            else
-              radare_function_check_x86
-            fi
-          elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
-            if [[ "$THREADED" -eq 1 ]]; then
-              radare_function_check_ARM32 &
-              WAIT_PIDS_S14+=( "$!" )
-            else
-              radare_function_check_ARM32
-            fi
-          elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
-            # ARM 64 code is in alpha state and nearly not tested!
-            if [[ "$THREADED" -eq 1 ]]; then
-              radare_function_check_ARM64 &
-              WAIT_PIDS_S14+=( "$!" )
-            else
-              radare_function_check_ARM64
-            fi
-          elif ( file "$LINE" | grep -q "MIPS" ) ; then
-            if [[ "$THREADED" -eq 1 ]]; then
-              radare_function_check_MIPS32 &
-              WAIT_PIDS_S14+=( "$!" )
-            else
-              radare_function_check_MIPS32
-            fi
-          elif ( file "$LINE" | grep -q "PowerPC" ) ; then
-            if [[ "$THREADED" -eq 1 ]]; then
-              radare_function_check_PPC32 &
-              WAIT_PIDS_S14+=( "$!" )
-            else
-              radare_function_check_PPC32
-            fi
-          else
-            print_output "[-] Something went wrong ... no supported architecture available"
-          fi
-        fi
+    # This module waits for S12 - binary protections
+    # check emba.log for S12_binary_protection starting
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+      while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+        sleep 1
       done
-
-      if [[ "$THREADED" -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS_S14[@]}"
-      fi
-
-      radare_print_top10_statistics
-
-      if [[ -f "$TMP_DIR"/S14_STRCPY_CNT.tmp ]]; then
-        while read -r STRCPY; do
-          (( STRCPY_CNT="$STRCPY_CNT"+"$STRCPY" ))
-        done < "$TMP_DIR"/S14_STRCPY_CNT.tmp
-      fi
-
-      # shellcheck disable=SC2129
-      write_log ""
-      write_log "[*] Statistics:$STRCPY_CNT"
-      write_log ""
-      write_log "[*] Statistics1:$ARCH"
     fi
+
+    VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
+    print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
+    IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"
+
+    STRCPY_CNT=0
+    write_csv_log "binary" "function" "function count" "common linux file" "networking"
+    for LINE in "${BINARIES[@]}" ; do
+      # we run throught the bins and check if the bin was already analysed via objdump:
+      if [[ "$(find "$LOG_DIR"/s13_weak_func_check/vul_func_*"$(basename "$LINE")".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
+        continue
+      fi
+      if ( file "$LINE" | grep -q ELF ) ; then
+        NAME=$(basename "$LINE" 2> /dev/null)
+
+        if ( file "$LINE" | grep -q "x86-64" ) ; then
+          if [[ "$THREADED" -eq 1 ]]; then
+            radare_function_check_x86_64 &
+            WAIT_PIDS_S14+=( "$!" )
+          else
+            radare_function_check_x86_64
+          fi
+        elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
+          if [[ "$THREADED" -eq 1 ]]; then
+            radare_function_check_x86 &
+            WAIT_PIDS_S14+=( "$!" )
+          else
+            radare_function_check_x86
+          fi
+        elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
+          if [[ "$THREADED" -eq 1 ]]; then
+            radare_function_check_ARM32 &
+            WAIT_PIDS_S14+=( "$!" )
+          else
+            radare_function_check_ARM32
+          fi
+        elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
+          # ARM 64 code is in alpha state and nearly not tested!
+          if [[ "$THREADED" -eq 1 ]]; then
+            radare_function_check_ARM64 &
+            WAIT_PIDS_S14+=( "$!" )
+          else
+            radare_function_check_ARM64
+          fi
+        elif ( file "$LINE" | grep -q "MIPS" ) ; then
+          if [[ "$THREADED" -eq 1 ]]; then
+            radare_function_check_MIPS32 &
+            WAIT_PIDS_S14+=( "$!" )
+          else
+            radare_function_check_MIPS32
+          fi
+        elif ( file "$LINE" | grep -q "PowerPC" ) ; then
+          if [[ "$THREADED" -eq 1 ]]; then
+            radare_function_check_PPC32 &
+            WAIT_PIDS_S14+=( "$!" )
+          else
+            radare_function_check_PPC32
+          fi
+        else
+          print_output "[-] Something went wrong ... no supported architecture available"
+        fi
+      fi
+    done
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      wait_for_pid "${WAIT_PIDS_S14[@]}"
+    fi
+
+    radare_print_top10_statistics
+
+    if [[ -f "$TMP_DIR"/S14_STRCPY_CNT.tmp ]]; then
+      while read -r STRCPY; do
+        (( STRCPY_CNT="$STRCPY_CNT"+"$STRCPY" ))
+      done < "$TMP_DIR"/S14_STRCPY_CNT.tmp
+    fi
+
+    # shellcheck disable=SC2129
+    write_log ""
+    write_log "[*] Statistics:$STRCPY_CNT"
+    write_log ""
+    write_log "[*] Statistics1:$ARCH"
   fi
 
   module_end_log "${FUNCNAME[0]}" "${#RESULTS[@]}"

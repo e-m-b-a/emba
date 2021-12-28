@@ -76,6 +76,7 @@ fw_bin_detector() {
   export UBOOT_IMAGE=0
   export EXT_IMAGE=0
   export UBI_IMAGE=0
+  export ENGENIUS_DETECTED=0
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE"| head -1)
@@ -89,6 +90,12 @@ fw_bin_detector() {
   fi
   if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
     export DLINK_ENC_DETECTED=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 0.\ ..\ \ 00\ 00\ 0.\ ..\ 31\ 32\ 33\ 00 ]]; then
+    export ENGENIUS_ENC_DETECTED=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
+    export ENGENIUS_ENC_DETECTED=1
   fi
   if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
     export DLINK_ENC_DETECTED=2
