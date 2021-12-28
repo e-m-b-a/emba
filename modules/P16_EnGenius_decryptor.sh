@@ -47,9 +47,12 @@ engenius_enc_extractor() {
     print_output "[-] Decryptor not found - check your installation"
   fi
 
+  print_output ""
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted EnGenius firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
+    file "$EXTRACTION_FILE_"
+    #export FIRMWARE_PATH="$LOG_DIR"/firmware
   else
     print_output "[-] Decryption of EnGenius firmware file failed"
   fi

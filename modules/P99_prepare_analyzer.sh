@@ -33,6 +33,7 @@ P99_prepare_analyzer() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Analysis preparation"
 
+  # we have a linux:
   if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
     export FIRMWARE=1
     export FIRMWARE_PATH
@@ -42,14 +43,14 @@ P99_prepare_analyzer() {
   print_output "[*] Quick check if it is a real Linux system"
   check_firmware
   print_output ""
-  prepare_binary_arr
-  print_output ""
 
   if [[ -d "$FIRMWARE_PATH" ]]; then
 
     export RTOS=0
 
     prepare_file_arr
+    print_output ""
+    prepare_binary_arr
     print_output ""
 
     if [[ $KERNEL -eq 0 ]] ; then
