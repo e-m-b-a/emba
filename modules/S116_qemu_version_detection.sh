@@ -87,7 +87,6 @@ version_detection_thread() {
         mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
         for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
           # BINARY_PATH is the final array which we are using further
-          print_output "binary path: $BINARY_PATH_"
           BINARY_PATHS+=( "$BINARY_PATH_" )
         done
       done
