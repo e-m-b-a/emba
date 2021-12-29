@@ -166,7 +166,7 @@ output_details() {
     echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  EMUL=$(grep -c "Version information found" "$LOG_DIR"/f05_qemu_version_detection.txt 2>/dev/null)
+  EMUL=$(grep -c "Version information found" "$LOG_DIR"/s116_qemu_version_detection.txt 2>/dev/null)
   if [[ "$EMUL" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "f05"
@@ -362,11 +362,6 @@ output_binaries() {
   local DATA=0
 
   if [[ "$STRCPY_CNT" -gt 0 ]] && [[ -d "$LOG_DIR""/s13_weak_func_check/" || -d "$LOG_DIR""/s14_weak_func_radare_check/" ]] ; then
-    if [[ $(find "$LOG_DIR""/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "$LOG_DIR""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
-      LDIR="$LOG_DIR""/s13_weak_func_check/"
-    else
-      LDIR="$LOG_DIR""/s14_weak_func_radare_check/"
-    fi
 
     # color codes for printf
     RED_="$(tput setaf 1)"
@@ -374,8 +369,8 @@ output_binaries() {
     ORANGE_="$(tput setaf 3)"
     NC_="$(tput sgr0)"
 
-    readarray -t RESULTS_STRCPY < <( find "$LDIR" -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
-    readarray -t RESULTS_SYSTEM < <( find "$LDIR" -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
 
     #strcpy:
     if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
@@ -449,15 +444,27 @@ binary_fct_output() {
     SYMBOLS="$ORANGE_""Symbols unknown$NC_"
   fi
 
+  # networking
+  if grep -q "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv 2>/dev/null; then
+    if grep "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
+      NETWORKING="$GREEN_""No Networking$NC_"
+    else
+      NETWORKING="$RED_""Networking   $NC_"
+    fi
+  else
+    NETWORKING="$ORANGE_""Networking unknown$NC_"
+  fi
+
+
   if [[ -f "$BASE_LINUX_FILES" ]]; then
     # if we have the base linux config file we are checking it:
     if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
-      printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+      printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
     else
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
     fi
   else
-    printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" | tee -a "$LOG_FILE"
+    printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
   fi
 }
 
@@ -547,9 +554,7 @@ get_data() {
     STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
   fi
-  if [[ "$STRCPY_CNT_14" -gt "$STRCPY_CNT" ]]; then
-    STRCPY_CNT="$STRCPY_CNT_14"
-  fi
+  (( STRCPY_CNT="$STRCPY_CNT_14"+"$STRCPY_CNT" ))
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
     S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3)
