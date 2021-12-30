@@ -162,7 +162,7 @@ aggregate_versions() {
       if [ -z "$VERSION" ]; then
         continue
       fi
-      if ! [ "$VERSION" == *[0-9]* ]; then
+      if ! [[ "$VERSION" == *[0-9]* ]]; then
         continue
       fi
       echo "$VERSION" >> "$LOG_PATH_MODULE"/versions.tmp

@@ -78,6 +78,7 @@ check_cve_search_job() {
         break
       fi
     fi
+    # shellcheck disable=SC2009
     if ! ps aux | grep -v grep | grep -q "$EMBA_PID"; then
       break
     fi
