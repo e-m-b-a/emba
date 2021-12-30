@@ -71,13 +71,14 @@ sort_modules()
 
 # lets check cve-search in a background job
 check_cve_search_job() {
+  EMBA_PID="$1"
   while true; do
     if [[ -f "$LOG_DIR"/emba.log ]]; then
       if grep -q "Test ended\|Emba failed" "$LOG_DIR"/emba.log 2>/dev/null; then
         break
       fi
     fi
-    if ! pgrep "$EMBA_PID"; then
+    if ! ps aux | grep -v grep | grep -q "$EMBA_PID"; then
       break
     fi
     check_cve_search
@@ -514,7 +515,7 @@ main()
   fi
 
   if [[ $IN_DOCKER -eq 0 ]] ; then
-    check_cve_search_job &
+    check_cve_search_job "$EMBA_PID" &
   fi
 
   #######################################################################################

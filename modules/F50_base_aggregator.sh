@@ -122,7 +122,7 @@ output_details() {
   fi
   ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
-    print_output "[+] Entropy analysis of binary firmware is:""$ORANGE""$ENTROPY"
+    print_output "[+] Entropy analysis of binary firmware is: ""$ORANGE""$ENTROPY"
     write_link "p02"
     echo "entropy_value;\"$ENTROPY\"" >> "$CSV_LOG_FILE"
     DATA=1
@@ -672,7 +672,7 @@ os_detector() {
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
     for OS_TO_CHECK in "${OSES[@]}"; do
-      mapfile -t SYSTEM_VERSION < <(grep -i "Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep -w "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep aggregated | grep "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
       if [[ "${#SYSTEM_VERSION[@]}" -gt 0 ]]; then
         if [[ "$OS_TO_CHECK" == "kernel" ]]; then
           SYSTEM="Linux"

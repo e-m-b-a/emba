@@ -102,13 +102,13 @@ check_cve_search() {
     if [[ "$IN_DOCKER" -eq 0 ]]; then
       print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
       service mongod restart
-      sleep 5
+      sleep 10
 
       # do a second try
       if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
         print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
         service mongod restart
-        sleep 5
+        sleep 10
 
         if [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_SEARCH=1

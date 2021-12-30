@@ -138,7 +138,7 @@ populate_karrays() {
   done
 
   # if we have found a kernel version in binary kernel:
-  if [[ -f "$LOG_DIR"/p25_kernel_bin_identifier.csv ]]; then
+  if [[ -f "$LOG_DIR"/s24_kernel_bin_identifier.csv ]]; then
     while IFS=";" read -r K_VER; do
       K_VER="$(echo "$K_VER" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
 
@@ -149,7 +149,7 @@ populate_karrays() {
       for V in "${KV_C_ARR[@]}" ; do
         KERNEL_VERSION_+=( "$V" )
       done
-    done < <(cut -d ";" -f1 "$LOG_DIR"/p25_kernel_bin_identifier.csv | tail -n +2)
+    done < <(cut -d ";" -f1 "$LOG_DIR"/s24_kernel_bin_identifier.csv | tail -n +2)
   fi
 
   # unique our results
