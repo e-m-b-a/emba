@@ -447,9 +447,9 @@ binary_fct_output() {
   # networking
   if grep -q "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv 2>/dev/null; then
     if grep "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
-      NETWORKING="$GREEN_""No Networking$NC_"
+      NETWORKING="$GREEN_""No Networking     $NC_"
     else
-      NETWORKING="$RED_""Networking   $NC_"
+      NETWORKING="$RED_""Networking        $NC_"
     fi
   else
     NETWORKING="$ORANGE_""Networking unknown$NC_"
@@ -547,14 +547,18 @@ get_data() {
     DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d 2>/dev/null | wc -l)
   fi
   if [[ -f "$LOG_DIR"/"$S13_LOG" ]]; then
-    STRCPY_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
+    STRCPY_CNT_13=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
+  else
+    STRCPY_CNT_13=0
   fi
   if [[ -f "$LOG_DIR"/"$S14_LOG" ]]; then
     STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
+    STRCPY_CNT=$(( "$STRCPY_CNT_14" + "$STRCPY_CNT_13" ))
+  else
+    STRCPY_CNT="$STRCPY_CNT_13"
   fi
-  (( STRCPY_CNT="$STRCPY_CNT_14"+"$STRCPY_CNT" ))
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
     S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3)
@@ -672,7 +676,7 @@ os_detector() {
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
     for OS_TO_CHECK in "${OSES[@]}"; do
-      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep aggregated | grep "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep aggregated | grep "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
       if [[ "${#SYSTEM_VERSION[@]}" -gt 0 ]]; then
         if [[ "$OS_TO_CHECK" == "kernel" ]]; then
           SYSTEM="Linux"

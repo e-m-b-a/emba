@@ -248,116 +248,107 @@ deb_extractor() {
 
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-  print_output "[*] Deep extraction - 1st round"
-  print_output "[*] Walking through all files and try to extract what ever possible"
   MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo)"))
 
   local FILE_ARR_TMP
   local FILE_MD5
   local MD5_DONE_DEEP
 
+  FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+
   if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
-    FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-    for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
-      # do a quick check if EMBA should handle the file or we give it to binwalk:
-      fw_bin_detector "$FILE_TMP"
+    print_output "[*] Deep extraction - 1st round"
+    print_output "[*] Walking through all files and try to extract what ever possible"
 
-      if [[ "$VMDK_DETECTED" -eq 1 ]]; then
-        vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      elif [[ "$UBI_IMAGE" -eq 1 ]]; then
-        ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
-        dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      elif [[ "$EXT_IMAGE" -eq 1 ]]; then
-        ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      else
-        # default case to binwalk
-        binwalk_deep_extract_helper &
-        WAIT_PIDS_P20+=( "$!" )
-      fi
-
-      #let's build an array with all our unique md5 checksums of our files
-      FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
-      MD5_DONE_DEEP+=( "$FILE_MD5" )
-      max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
-
-      check_disk_space
-
-      if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
-        print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-        print_output "[!] $(date) - Ending extraction processes" "main"
-        DISK_SPACE_CRIT=1
-        break
-      fi
-    done
-
-    if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_P20[@]}"
-    fi
+    deeper_extractor_helper
   fi
 
-  if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
+  linux_basic_identification_helper
+
+  if [[ $LINUX_PATH_COUNTER -lt 2 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
+  #if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
     print_output "[*] Deep extraction - 2nd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
-    readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-    for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
-      # do a quick check if EMBA should handle the file or we give it to binwalk:
-      fw_bin_detector "$FILE_TMP"
+    deeper_extractor_helper
+  fi
 
-      if [[ "$VMDK_DETECTED" -eq 1 ]]; then
-        vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      elif [[ "$UBI_IMAGE" -eq 1 ]]; then
-        ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
-        dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      elif [[ "$EXT_IMAGE" -eq 1 ]]; then
-        ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
-        WAIT_PIDS_P20+=( "$!" )
-      else
-        # default case to binwalk
-        binwalk_deep_extract_helper &
-        WAIT_PIDS_P20+=( "$!" )
-      fi
+  linux_basic_identification_helper
 
-      FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
-      # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
-      # already extracted stuff is now ignored
-      if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          binwalk_deep_extract_helper &
-          WAIT_PIDS_P20+=( "$!" )
-        else
-          binwalk_deep_extract_helper
-        fi
-        MD5_DONE_DEEP+=( "$FILE_MD5" )
-        max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
-      fi
-      check_disk_space
-      if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
-        print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-        print_output "[!] $(date) - Ending extraction processes" "main"
-        DISK_SPACE_CRIT=1
-        break
-      fi
-    done
+  if [[ $LINUX_PATH_COUNTER -lt 2 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
+    print_output "[*] Deep extraction - 3rd round"
+    print_output "[*] Walking through all files and try to extract what ever possible"
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_P20[@]}"
-    fi
+    deeper_extractor_helper
   fi
 
   FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
   print_output "[*] Before deep extraction we had $ORANGE$FILES_BEFORE_DEEP$NC files, after deep extraction we have now $ORANGE$FILES_AFTER_DEEP$NC files extracted."
+}
+
+deeper_extractor_helper() {
+
+  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
+    -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
+    -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \) \
+    -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+
+  for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
+
+    FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
+    # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
+    # already extracted stuff is now ignored
+
+    if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
+
+      # do a quick check if EMBA should handle the file or we give it to binwalk:
+      fw_bin_detector "$FILE_TMP"
+
+      if [[ "$VMDK_DETECTED" -eq 1 ]]; then
+        vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$UBI_IMAGE" -eq 1 ]]; then
+        ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
+        dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$EXT_IMAGE" -eq 1 ]]; then
+        ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
+        ext2_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      else
+        # default case to binwalk
+        binwalk_deep_extract_helper &
+        WAIT_PIDS_P20+=( "$!" )
+      fi
+
+      if [[ "$THREADED" -eq 1 ]]; then
+        binwalk_deep_extract_helper &
+        WAIT_PIDS_P20+=( "$!" )
+      else
+        binwalk_deep_extract_helper
+      fi
+      MD5_DONE_DEEP+=( "$FILE_MD5" )
+      max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
+    fi
+
+    check_disk_space
+
+    if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
+      print_output "[!] $(date) - Ending extraction processes" "main"
+      DISK_SPACE_CRIT=1
+      break
+    fi
+  done
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_P20[@]}"
+  fi
 }
 
 fact_extractor() {
@@ -474,5 +465,5 @@ extract_deb_extractor_helper(){
   dpkg-deb --extract "$DEB" "$R_PATH"
 }
 linux_basic_identification_helper() {
-  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 }
