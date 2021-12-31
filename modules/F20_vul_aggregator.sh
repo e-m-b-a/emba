@@ -68,6 +68,12 @@ F20_vul_aggregator() {
       print_output "[*] Waiting for the cve-search environment ..."
       sleep 120
       check_cve_search
+
+      if [[ "$CVE_SEARCH" -eq 0 ]]; then
+        print_output "[*] Waiting for the cve-search environment ..."
+        sleep 120
+        check_cve_search
+      fi
     fi
 
     if [[ "$CVE_SEARCH" -eq 1 ]]; then
@@ -154,6 +160,9 @@ aggregate_versions() {
   if [[ ${#VERSIONS_AGGREGATED[@]} -ne 0 ]]; then
     for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
       if [ -z "$VERSION" ]; then
+        continue
+      fi
+      if ! [[ "$VERSION" == *[0-9]* ]]; then
         continue
       fi
       echo "$VERSION" >> "$LOG_PATH_MODULE"/versions.tmp
