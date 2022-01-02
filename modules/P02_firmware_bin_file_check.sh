@@ -43,7 +43,7 @@ P02_firmware_bin_file_check() {
   if [[ -f "$FIRMWARE_PATH" ]]; then
     hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
     print_output ""
-    print_output "[*] SHA512 checksum: $ORANGE$CHECKSUM$NC"
+    print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
     print_output ""
     print_output "$(indent "$FILE_BIN_OUT")"
     print_output ""
@@ -77,10 +77,12 @@ fw_bin_detector() {
   export EXT_IMAGE=0
   export UBI_IMAGE=0
   export ENGENIUS_DETECTED=0
+  export GPG_COMPRESS=0
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE"| head -1)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
+  GPG_CHECK="$(gpg --list-packets "$FIRMWARE_PATH" | grep "compressed packet:")"
 
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     export VMDK_DETECTED=1
@@ -108,5 +110,8 @@ fw_bin_detector() {
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
     export EXT_IMAGE=1
+  fi
+  if [[ "$GPG_CHECK" == *"compressed packet: algo="* ]]; then
+    export GPG_COMPRESS=1
   fi
 }

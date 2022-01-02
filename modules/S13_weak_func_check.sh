@@ -17,6 +17,9 @@
 #               functions and to establish a ranking of areas to look at first.
 #               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg). 
 
+# Threading priority - if set to 1, these modules will be executed first
+export THREAD_PRIO=1
+
 S13_weak_func_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -364,7 +367,7 @@ print_top10_statistics() {
           F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
-            if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+            if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
             else
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"

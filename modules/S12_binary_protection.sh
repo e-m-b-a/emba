@@ -1,19 +1,22 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  This module looks for protection mechanisms in the binaries via checksec.
+
+# Threading priority - if set to 1, these modules will be executed first
+export THREAD_PRIO=1
 
 S12_binary_protection()
 {
