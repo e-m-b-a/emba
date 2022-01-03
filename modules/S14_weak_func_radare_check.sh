@@ -51,9 +51,7 @@ S14_weak_func_radare_check()
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
     for LINE in "${BINARIES[@]}" ; do
       # we run throught the bins and check if the bin was already analysed via objdump:
-      print_output "[*] Radare module for $LINE"
       if [[ "$(find "$LOG_DIR"/s13_weak_func_check/vul_func_*"$(basename "$LINE")".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
-        print_output "[*] Radare module not executed for $(basename "$LINE")"
         continue
       fi
       if ( file "$LINE" | grep -q ELF ) ; then
