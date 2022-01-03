@@ -82,7 +82,6 @@ fw_bin_detector() {
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE"| head -1)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
-  GPG_CHECK="$(gpg --list-packets "$FIRMWARE_PATH" | grep "compressed packet:")"
 
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     export VMDK_DETECTED=1
@@ -111,7 +110,12 @@ fw_bin_detector() {
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
     export EXT_IMAGE=1
   fi
-  if [[ "$GPG_CHECK" == *"compressed packet: algo="* ]]; then
-    export GPG_COMPRESS=1
+  # probably we need to take a deeper look to identify the gpg compressed firmware files better.
+  # Currently this detection mechanism works quite good on the known firmware images
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ a3\ 01\  ]]; then
+    GPG_CHECK="$(gpg --list-packets "$FIRMWARE_PATH" | grep "compressed packet:")"
+    if [[ "$GPG_CHECK" == *"compressed packet: algo="* ]]; then
+      export GPG_COMPRESS=1
+    fi
   fi
 }

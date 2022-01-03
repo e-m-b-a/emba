@@ -18,7 +18,8 @@
 #               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg). 
 
 # Threading priority - if set to 1, these modules will be executed first
-export THREAD_PRIO=1
+# do not prio s13 and s14 as the dependency check during runtime will fail!
+export THREAD_PRIO=0
 
 S13_weak_func_check()
 {
@@ -277,7 +278,7 @@ function_check_ARM32() {
 
 function_check_x86() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+    if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
@@ -314,7 +315,7 @@ function_check_x86() {
 
 function_check_x86_64() {
    for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+    if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call

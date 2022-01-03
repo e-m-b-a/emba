@@ -112,5 +112,7 @@ get_csv_rule_distri() {
   # dd-wrt v24-sp2
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ v([0-9]+)(-sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ \#([0-9]+)/dd-wrt:dd-wrt:\1/')"
+  # iotgoat v1.0
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/iotgoat\ v([0-9]\.[0-9]+)/iotgoat:\1/')"
   CSV_RULE="$VERSION_IDENTIFIER"
 }

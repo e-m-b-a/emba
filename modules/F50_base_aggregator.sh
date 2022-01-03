@@ -555,7 +555,7 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S14_LOG" ]]; then
     STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
     ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
-    STRCPY_CNT=$(( "$STRCPY_CNT_14" + "$STRCPY_CNT_13" ))
+    STRCPY_CNT=$((STRCPY_CNT_14+STRCPY_CNT_13))
   else
     STRCPY_CNT="$STRCPY_CNT_13"
   fi
