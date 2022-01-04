@@ -318,7 +318,7 @@ deeper_extractor_helper() {
         ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
         WAIT_PIDS_P20+=( "$!" )
       elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
-        ext2_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
+        engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
         WAIT_PIDS_P20+=( "$!" )
       else
         # default case to binwalk

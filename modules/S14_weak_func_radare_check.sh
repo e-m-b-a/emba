@@ -18,6 +18,10 @@
 #               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg). 
 #               As the module runs quite long with high CPU load it only gets executed when the objdump module fails.
 
+# Threading priority - if set to 1, these modules will be executed first
+# do not prio s13 and s14 as the dependency check during runtime will fail!
+export THREAD_PRIO=0
+
 S14_weak_func_radare_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -25,16 +29,16 @@ S14_weak_func_radare_check()
 
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
-    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while [[ $(grep -c S13_weak "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+    if [[ -f "$MAIN_LOG" ]]; then
+      while [[ $(grep -c S13_weak "$MAIN_LOG") -eq 1 ]]; do
         sleep 1
       done
     fi
 
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
-    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+    if [[ -f "$MAIN_LOG" ]]; then
+      while [[ $(grep -c S12_binary "$MAIN_LOG") -eq 1 ]]; do
         sleep 1
       done
     fi
@@ -248,7 +252,7 @@ radare_function_check_ARM32() {
 radare_function_check_x86() {
   NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+    if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "call.*$FUNCTION" 2> /dev/null)
@@ -278,7 +282,7 @@ radare_function_check_x86() {
 radare_function_check_x86_64() {
   NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+    if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "call.*$FUNCTION" 2> /dev/null)
@@ -322,7 +326,7 @@ radare_print_top10_statistics() {
           F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
-            if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+            if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
             else
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE"
