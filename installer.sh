@@ -765,6 +765,44 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
       ;;
     esac
   fi
+
+  # STACS - https://github.com/stacscan/stacs
+
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+
+    cd "$HOME_PATH" || exit 1
+
+    echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
+
+    print_pip_info "stacs"
+    print_git_info "stacs-rules" "stacscan/stacs-rules" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
+
+    if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download STACS and the default rules (if not already on the system)?""$NC"
+      read -p "(y/N)" -r ANSWER
+    elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+      ANSWER=("n")
+    else
+      echo -e "\\n""$MAGENTA""$BOLD""STACS and the default rules (if not already on the system) will be downloaded!""$NC"
+      ANSWER=("y")
+    fi
+    case ${ANSWER:0:1} in
+      y|Y )
+        git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
+        cd ./external/stacs-rules || exit 1
+        find rules -name *.yar | sed 's/rules\///' | xargs -I{} sh -c "\
+        mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
+        touch ./tests/fixtures/{}/{negative,positive}/.gitignore"
+        pip3 install stacs 2>/dev/null
+        cd "$HOME_PATH" || exit 1
+        if command -v stacs > /dev/null ; then
+          echo -e "$GREEN""STACS installed successfully""$NC"
+        else
+          echo -e "$ORANGE""STACS installation failed - check it manually""$NC"
+        fi
+      ;;
+    esac
+  fi
   
   # binwalk
   
