@@ -390,6 +390,9 @@ dependency_check()
 
     # yara
     check_dep_tool "yara"
+
+    # stacs - https://github.com/stacscan/stacs
+    check_dep_tool "STACS hash detection" "stacs"
   fi
   
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
