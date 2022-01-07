@@ -74,7 +74,7 @@ check_cve_search_job() {
   EMBA_PID="$1"
   while true; do
     if [[ -f "$LOG_DIR"/emba.log ]]; then
-      if grep -q "Test ended\|Emba failed" "$LOG_DIR"/emba.log 2>/dev/null; then
+      if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
         break
       fi
     fi
@@ -202,6 +202,7 @@ main()
   INVOCATION_PATH="$(dirname "$0")"
 
   export EMBA_PID="$$"
+  export MATRIX_MODE=0
   export FULL_EMULATION=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
@@ -267,7 +268,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:QrstxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrstxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -323,6 +324,9 @@ main()
         ;;
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
+        ;;
+      M)
+        export MATRIX_MODE=1
         ;;
       N)
         export FW_NOTES="$OPTARG"
@@ -519,6 +523,10 @@ main()
     check_cve_search_job "$EMBA_PID" &
   fi
 
+  if [[ "$MATRIX_MODE" -eq 1 && $IN_DOCKER -eq 0 ]]; then
+    matrix_mode &
+  fi
+
   #######################################################################################
   # Docker
   #######################################################################################
@@ -536,7 +544,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:N:op:QrstX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrstX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;

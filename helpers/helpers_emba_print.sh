@@ -455,6 +455,7 @@ print_help()
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"
+  echo -e "$CYAN""-M""$NC""                MATRIX mode (Warning: CPU intense)"
   echo -e "\\nFirmware details"
   echo -e "$CYAN""-X [version]""$NC""      Firmware version (double quote your input)"
   echo -e "$CYAN""-Y [vendor]""$NC""       Firmware vendor (double quote your input)"
@@ -559,4 +560,55 @@ module_end_log() {
 
 strip_color_codes() {
   echo "$1" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+}
+
+matrix_mode() {
+  # based on source: https://bruxy.regnet.cz/web/linux/EN/matrix-sh/
+  export MATRIX_PIDs=()
+
+  echo -e "\033[2J\033[?25l"
+
+  R=$(tput lines)
+  C=$(tput cols);: $((R--))
+
+  while true; do
+    (
+    j=$((RANDOM%C))
+    d=$((RANDOM%R))
+
+    for i in $(eval echo -e "{1..$R}"); do
+      # shellcheck disable=SC2006
+      c=`printf '\\\\0%o' $((RANDOM%57+33))` ### http://bruxy.regnet.cz/web/linux ###
+      echo -e "\033[$((i-1));${j}H\033[32m$c\033[$i;${j}H\033[37m""$c"
+      sleep 0.1
+
+      if [ "$i" -ge "$d" ]; then
+        echo -e "\033[$((i-d));${j}H "
+      fi
+    done
+
+    for i in $(eval echo -e "{$((i-d))..$R}"); do #[mat!rix]
+      echo -e "\033[$i;${j}f "
+      sleep 0.1
+    done)&
+
+    MATRIX_PIDs+=( "$!" )
+
+    if [[ "${#MATRIX_PIDs[@]}" -gt 200 ]]; then
+      for PID in "${MATRIX_PIDs[@]}"; do
+        kill "$PID" 2>/dev/null
+      done
+      MATRIX_PIDs=()
+    fi
+
+    if [[ -f "$LOG_DIR"/emba.log ]]; then
+      if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
+        break
+      fi
+    fi
+
+    sleep 0.1
+
+  done #(c) 2011 -- [ BruXy ]
+  reset
 }

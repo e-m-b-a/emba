@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2021 Siemens AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+#
+# Author(s): Michael Messner, Pascal Eckmann
+
+# Description:  Searches for password patterns within the firmware.
+#               This module uses the stacs engine - https://github.com/stacscan/stacs
+#               including the community ruleset - https://github.com/stacscan/stacs-rules
+
+S108_stacs_password_search()
+{
+  module_log_init "${FUNCNAME[0]}"
+  module_title "Stacs analysis of firmware for password hashes"
+
+  local STACS_RULES_DIR="$EXT_DIR"/stacs-rules
+  local STACS_LOG_FILE="$LOG_DIR"/etc/stacs_pw_hashes.json
+  local ELEMENTS=0
+  local ELEMENTS_=0
+  local PW_PATH
+  local PW_HASH
+
+  if command -v stacs > /dev/null ; then
+    stacs --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE"
+
+    if [[ -f "$STACS_LOG_FILE" && $(jq ".runs[0] .results[] | .message[]" "$STACS_LOG_FILE" | wc -l) -gt 0 ]]; then
+      ELEMENTS_="$(jq ".runs[0] .results[] .message.text" "$STACS_LOG_FILE" | wc -l)"
+      print_output "[+] Found $ORANGE$ELEMENTS_$GREEN password hash values:"
+      write_csv_log "Message" "PW_PATH" "PW_HASH" "PW_HASH_real"
+      ELEMENTS=$((ELEMENTS_-1))
+
+      for ELEMENT in $(seq 0 "$ELEMENTS"); do
+        MESSAGE=$(jq ".runs[0] .results[$ELEMENT] .message.text" "$STACS_LOG_FILE" | grep -v null)
+        PW_PATH=$(jq ".runs[0] .results[$ELEMENT] .locations[] .physicalLocation[].uri" "$STACS_LOG_FILE" \
+          | grep -v null | sed 's/^"//' | sed 's/"$//')
+        PW_HASH=$(jq ".runs[0] .results[$ELEMENT] .locations[] .physicalLocation[].snippet" "$STACS_LOG_FILE" \
+          | grep -v null | grep "text\|binary" | head -1 | cut -d: -f2- | sed 's/\\n//g' | tr -d '[:blank:]')
+        PW_HASH_REAL=$(jq ".runs[0] .results[$ELEMENT] .locations[] .physicalLocation[].snippet.text" "$STACS_LOG_FILE" \
+          | grep -v null | head -2 | tail -1 | sed 's/\\n//g' | tr -d '[:blank:]')
+
+        print_output "[+] PATH: $ORANGE/$PW_PATH$GREEN\t-\tHash: $ORANGE$PW_HASH_REAL$GREEN."
+        write_csv_log "$MESSAGE" "/$PW_PATH" "$PW_HASH" "$PW_HASH_REAL"
+      done
+
+      print_output ""
+      print_output "[*] Found $ORANGE$ELEMENTS_$NC password hashes."
+    fi
+    write_log ""
+    write_log "[*] Statistics:$ELEMENTS_"
+  fi
+
+  module_end_log "${FUNCNAME[0]}" "$ELEMENTS_"
+}

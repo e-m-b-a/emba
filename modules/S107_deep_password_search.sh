@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -27,10 +27,12 @@ S107_deep_password_search()
 
   if [[ $(wc -l "$TMP"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
     print_output "[+] Found the following password hash values:"
+    write_csv_log "PW_PATH" "PW_HASH"
     while read -r PW_HASH; do
       PW_PATH=$(echo "$PW_HASH" | cut -d: -f1)
       PW_HASH=$(echo "$PW_HASH" | cut -d: -f2- | sed -r "s/[[:blank:]]+/\ /g")
       print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
+      write_csv_log "$PW_PATH" "$PW_HASH"
       ((PW_COUNTER++))
     done < "$TMP"/pw_hashes.txt
 
