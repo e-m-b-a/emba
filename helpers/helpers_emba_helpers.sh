@@ -84,10 +84,6 @@ cleaner() {
   print_output "[*] User interrupt detected!" "no_log"
   print_output "[*] Final cleanup started." "no_log"
 
-  for PID in "${MATRIX_PIDs[@]}"; do
-    kill "$PID" 2>/dev/null
-  done
-
   # if S115 is found only once in main.log the module was started and we have to clean it up
   # additionally we need to check some variable from a running emba instance
   # otherwise the unmounter runs crazy in some corner cases

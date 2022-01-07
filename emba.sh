@@ -696,10 +696,6 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  for PID in "${MATRIX_PIDs[@]}"; do
-    kill "$PID" 2>/dev/null
-  done
-
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/firmware ]]; then
       print_output "[*] Removing temp firmware directory\\n" "no_log" 
