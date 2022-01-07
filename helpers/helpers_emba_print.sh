@@ -455,7 +455,7 @@ print_help()
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"
-  echo -e "$CYAN""-M""$NC""                MATRIX mode"
+  echo -e "$CYAN""-M""$NC""                MATRIX mode (Warning: CPU intense)"
   echo -e "\\nFirmware details"
   echo -e "$CYAN""-X [version]""$NC""      Firmware version (double quote your input)"
   echo -e "$CYAN""-Y [vendor]""$NC""       Firmware vendor (double quote your input)"
@@ -564,10 +564,26 @@ strip_color_codes() {
 
 matrix_mode() {
   # source: https://bruxy.regnet.cz/web/linux/EN/matrix-sh/
-  echo -e "\033[2J\033[?25l"; R=`tput lines` C=`tput cols`;: $[R--] ; while true
-  do ( e=echo\ -e s=sleep j=$[RANDOM%C] d=$[RANDOM%R];for i in `eval $e {1..$R}`;
-  do c=`printf '\\\\0%o' $[RANDOM%57+33]` ### http://bruxy.regnet.cz/web/linux ###
-  $e "\033[$[i-1];${j}H\033[32m$c\033[$i;${j}H\033[37m"$c; $s 0.1;if [ $i -ge $d ]
-  then $e "\033[$[i-d];${j}H ";fi;done;for i in `eval $e {$[i-d]..$R}`; #[mat!rix]
-  do echo -e "\033[$i;${j}f ";$s 0.1;done)& sleep 0.05;done #(c) 2011 -- [ BruXy ]
+  echo -e "\033[2J\033[?25l"
+
+  R=$(tput lines)
+  C=$(tput cols);: $((R--))
+
+  while true; do
+    (e=echo\ -e s=sleep j=$((RANDOM%C)) d=$((RANDOM%R))
+    for i in $(eval "$e" "{1..$R}"); do
+      # shellcheck disable=SC2006
+      c=`printf '\\\\0%o' $((RANDOM%57+33))` ### http://bruxy.regnet.cz/web/linux ###
+      $e "\033[$((i-1));${j}H\033[32m$c\033[$i;${j}H\033[37m""$c"
+      $s 0.1
+      if [ "$i" -ge "$d" ]; then
+        $e "\033[$((i-d));${j}H "
+      fi
+    done
+    for i in $(eval "$e" "{$((i-d))..$R}"); do #[mat!rix]
+      echo -e "\033[$i;${j}f "
+      $s 0.1
+    done)& sleep 0.05
+
+  done #(c) 2011 -- [ BruXy ]
 }

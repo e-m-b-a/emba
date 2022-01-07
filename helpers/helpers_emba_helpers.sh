@@ -84,6 +84,11 @@ cleaner() {
   print_output "[*] User interrupt detected!" "no_log"
   print_output "[*] Final cleanup started." "no_log"
 
+  if [[ -f "$LOG_DIR"/tmp/matrix.pid ]]; then
+    pkill -F "$LOG_DIR"/tmp/matrix.pid
+  fi
+
+
   # if S115 is found only once in main.log the module was started and we have to clean it up
   # additionally we need to check some variable from a running emba instance
   # otherwise the unmounter runs crazy in some corner cases
