@@ -563,27 +563,52 @@ strip_color_codes() {
 }
 
 matrix_mode() {
-  # source: https://bruxy.regnet.cz/web/linux/EN/matrix-sh/
+  # based on source: https://bruxy.regnet.cz/web/linux/EN/matrix-sh/
+  export MATRIX_PIDs=()
+
   echo -e "\033[2J\033[?25l"
 
   R=$(tput lines)
   C=$(tput cols);: $((R--))
 
   while true; do
-    (e=echo\ -e s=sleep j=$((RANDOM%C)) d=$((RANDOM%R))
-    for i in $(eval "$e" "{1..$R}"); do
+    (
+    j=$((RANDOM%C))
+    d=$((RANDOM%R))
+
+    for i in $(eval echo -e "{1..$R}"); do
       # shellcheck disable=SC2006
       c=`printf '\\\\0%o' $((RANDOM%57+33))` ### http://bruxy.regnet.cz/web/linux ###
-      $e "\033[$((i-1));${j}H\033[32m$c\033[$i;${j}H\033[37m""$c"
-      $s 0.1
+      echo -e "\033[$((i-1));${j}H\033[32m$c\033[$i;${j}H\033[37m""$c"
+      sleep 0.1
+
       if [ "$i" -ge "$d" ]; then
-        $e "\033[$((i-d));${j}H "
+        echo -e "\033[$((i-d));${j}H "
       fi
     done
-    for i in $(eval "$e" "{$((i-d))..$R}"); do #[mat!rix]
+
+    for i in $(eval echo -e "{$((i-d))..$R}"); do #[mat!rix]
       echo -e "\033[$i;${j}f "
-      $s 0.1
-    done)& sleep 0.05
+      sleep 0.1
+    done)&
+
+    MATRIX_PIDs+=( "$!" )
+
+    if [[ "${#MATRIX_PIDs[@]}" -gt 200 ]]; then
+      for PID in "${MATRIX_PIDs[@]}"; do
+        kill "$PID" 2>/dev/null
+      done
+      MATRIX_PIDs=()
+    fi
+
+    if [[ -f "$LOG_DIR"/emba.log ]]; then
+      if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
+        break
+      fi
+    fi
+
+    sleep 0.1
 
   done #(c) 2011 -- [ BruXy ]
+  reset
 }

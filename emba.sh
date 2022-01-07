@@ -74,7 +74,7 @@ check_cve_search_job() {
   EMBA_PID="$1"
   while true; do
     if [[ -f "$LOG_DIR"/emba.log ]]; then
-      if grep -q "Test ended\|Emba failed" "$LOG_DIR"/emba.log 2>/dev/null; then
+      if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
         break
       fi
     fi
@@ -525,12 +525,6 @@ main()
 
   if [[ "$MATRIX_MODE" -eq 1 && $IN_DOCKER -eq 0 ]]; then
     matrix_mode &
-    MATRIX_PID="$!"
-    if ! [[ -d "$LOG_DIR"/tmp ]]; then
-      mkdir "$LOG_DIR"/tmp
-    fi
-    # to kill only the matrix output we store the pid to matrix.pid
-    echo "$MATRIX_PID" > "$LOG_DIR"/tmp/matrix.pid
   fi
 
   #######################################################################################
@@ -702,9 +696,9 @@ main()
  
   run_modules "F" "0" "$HTML"
 
-  if [[ -f "$LOG_DIR"/tmp/matrix.pid ]]; then
-    pkill -F "$LOG_DIR"/tmp/matrix.pid
-  fi
+  for PID in "${MATRIX_PIDs[@]}"; do
+    kill "$PID" 2>/dev/null
+  done
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/firmware ]]; then
