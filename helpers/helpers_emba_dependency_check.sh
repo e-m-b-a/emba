@@ -94,8 +94,7 @@ check_docker_env() {
 check_cve_search() {
   TOOL_NAME="cve-search"
   print_output "    ""$TOOL_NAME"" - testing" "no_log"
-  export CVE_SEARCH
-  CVE_SEARCH=0
+  local CVE_SEARCH_=0 # local checker variable
   # check if the cve-search produces results:
   if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
     # we can restart the mongod database only in dev mode and not in docker mode:
@@ -111,17 +110,19 @@ check_cve_search() {
         sleep 10
 
         if [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-          CVE_SEARCH=1
+          CVE_SEARCH_=1
         fi
       else
-        CVE_SEARCH=1
+        CVE_SEARCH_=1
       fi
+    else
+      CVE_SEARCH_=1
     fi
   else
-    CVE_SEARCH=1
+    CVE_SEARCH_=1
   fi
 
-  if [[ "$CVE_SEARCH" -eq 0 ]]; then
+  if [[ "$CVE_SEARCH_" -eq 0 ]]; then
     print_output "    ""$TOOL_NAME"" - ""$RED""not ok""$NC" "no_log"
     print_output "[-] MongoDB not responding as expected." "no_log"
     print_output "[-] CVE checks not possible!" "no_log"
@@ -130,6 +131,7 @@ check_cve_search() {
     export CVE_SEARCH=0
   else
     print_output "    ""$TOOL_NAME"" - ""$GREEN""ok""$NC" "no_log"
+    export CVE_SEARCH=1
   fi
 }
 
