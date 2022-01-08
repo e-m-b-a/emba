@@ -407,7 +407,11 @@ setup_network() {
   sub_module_title "Setup networking - $IMAGE_NAME"
 
   # used for generating startup scripts for offline analysis
-  ARCHIVE_PATH="$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"/
+  ARCHIVE_PATH="$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"
+  if [[ -d "$ARCHIVE_PATH" ]]; then
+    ARCHIVE_PATH="$ARCHIVE_PATH-$RANDOM"
+  fi
+
   mkdir "$ARCHIVE_PATH"
   echo -e "#!/bin/bash\n" > "$ARCHIVE_PATH"/run.sh
 

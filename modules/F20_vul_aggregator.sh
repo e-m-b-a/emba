@@ -273,6 +273,7 @@ cve_db_lookup() {
 
   # CVE search:
   $PATH_CVE_SEARCH -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+  # shellcheck disable=SC2181
   if [[ "$?" -ne 0 ]]; then
     $PATH_CVE_SEARCH -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
   fi
