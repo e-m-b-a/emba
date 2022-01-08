@@ -273,6 +273,9 @@ cve_db_lookup() {
 
   # CVE search:
   $PATH_CVE_SEARCH -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+  if [[ "$?" -ne 0 ]]; then
+    $PATH_CVE_SEARCH -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+  fi
 
   if [[ "$VERSION" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
