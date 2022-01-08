@@ -435,7 +435,7 @@ extract_fact_helper() {
     rm -rf /tmp/extractor
   fi
 
-  ./external/fact_extractor/fact_extractor/fact_extract.py -d "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
+  "$EXT_DIR"/fact_extractor/fact_extractor/fact_extract.py -d "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
 
   if [[ -d /tmp/extractor/files ]]; then
     cat /tmp/extractor/reports/meta.json >> "$TMP_DIR"/FACTer.txt
