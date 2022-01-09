@@ -703,7 +703,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and be installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
     case ${ANSWER:0:1} in
@@ -829,7 +829,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and be installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
     case ${ANSWER:0:1} in
@@ -974,7 +974,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""The firmadyne dependencies (if not already on the system) will be downloaded and be installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""The firmadyne dependencies (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
     case ${ANSWER:0:1} in
@@ -1069,7 +1069,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""The routersploit dependencies (if not already on the system) will be downloaded and be installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""The routersploit dependencies (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
 
@@ -1162,7 +1162,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""The Freetz-NG dependencies (if not already on the system) will be downloaded and be installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""The Freetz-NG dependencies (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
     case ${ANSWER:0:1} in

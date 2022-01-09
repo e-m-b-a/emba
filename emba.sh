@@ -412,6 +412,7 @@ main()
   if [[ $IN_DOCKER -eq 1 ]] ; then
     # set external path new for docker
     export EXT_DIR="/external"
+    export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   fi
 
   # Check all dependencies of EMBA
@@ -561,7 +562,7 @@ main()
     echo
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
+#    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
 
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
       print_output "[-] EMBA docker build failed!" "no_log"
