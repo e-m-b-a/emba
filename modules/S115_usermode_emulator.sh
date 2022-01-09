@@ -657,10 +657,11 @@ emulate_strace_run() {
         write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
         cp "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null
         continue
-      else
-        write_log "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
-        touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
-        continue
+      #else
+      #  # disable this for now - have to rethink this
+      #  write_log "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+      #  touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
+      #  continue
       fi
     fi
   done
