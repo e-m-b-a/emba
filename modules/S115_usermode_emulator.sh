@@ -31,6 +31,9 @@ S115_usermode_emulator() {
     fi
 
     print_output "[*] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
+    # get the local interface ip address for later verification
+    # ensure that the emulator does not reconfigure the interface
+    get_local_ip
 
     # some processes are running long and logging a lot
     # to protect the host we are going to kill them on a KILL_SIZE limit
@@ -39,7 +42,7 @@ S115_usermode_emulator() {
     declare -a MISSING
     ROOT_CNT=0
 
-    ## load blacklist of binaries that could cause troubles during emulation:
+    # load blacklist of binaries that could cause troubles during emulation:
     readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
 
     # as we modify the firmware area, we copy it to the log directory and do the modifications in this area
@@ -166,6 +169,7 @@ S115_usermode_emulator() {
     s115_cleanup
     running_jobs
     print_filesystem_fixes
+    recover_local_ip "$IP_ETH0"
 
   else
     print_output ""
@@ -174,6 +178,22 @@ S115_usermode_emulator() {
   fi
 
   module_end_log "${FUNCNAME[0]}" "$QEMULATION"
+}
+
+get_local_ip() {
+  IP_ETH0=$(ifconfig eth0 2>/dev/null|awk '/inet / {print $2}')
+}
+
+recover_local_ip() {
+  # some firmware images (e.g. OpenWRT) reconfigure the network interface.
+  # We try to recover it now to access the CVE database
+  local IP_TO_CHECK_="$1"
+
+  if ! ifconfig eth0 | grep -q "$IP_TO_CHECK_"; then
+    print_output "[!] Warning: The emulation process of S115 has reconfigured your network interface."
+    print_output "[*] We try to recover the interface eth0 with address $IP_TO_CHECK_"
+    ifconfig eth0 "$IP_TO_CHECK_" up
+  fi
 }
 
 print_filesystem_fixes() {
