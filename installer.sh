@@ -1190,7 +1190,20 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
       chown -R root:root external/freetz-ng
       userdel freetzuser
       if [[ -d external/freetz-ng/source ]]; then
+        echo "[*] Removing freetz-ng source directory"
         rm -r external/freetz-ng/source
+      fi
+      if [[ -d external/freetz-ng/docs ]]; then
+        echo "[*] Removing freetz-ng docs directory"
+        rm -r external/freetz-ng/docs
+      fi
+      if [[ -d external/freetz-ng/toolchain ]]; then
+        echo "[*] Removing freetz-ng toolchain directory"
+        rm -r external/freetz-ng/toolchain
+      fi
+      if [[ -d external/freetz-ng/.git ]]; then
+        echo "[*] Removing freetz-ng .git directory"
+        rm -r external/freetz-ng/.git
       fi
       ;;
     esac
