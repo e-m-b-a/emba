@@ -766,6 +766,49 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
     esac
   fi
 
+  # QNAP decryptor
+
+  INSTALL_APP_LIST=()
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+    cd "$HOME_PATH" || exit 1
+    print_tool_info "gcc" 1
+    print_file_info "PC1.c" "Decryptor for QNAP firmware images" "https://gist.githubusercontent.com/galaxy4public/0420c7c9a8e3ff860c8d5dce430b2669/raw/1f8a42c0525efb188c0165c6a4cb205e82f851e2/pc1.c" "external/pc1.c"
+
+    if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
+      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the QNAP decryptor (if not already on the system)?""$NC"
+      read -p "(y/N)" -r ANSWER
+    elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+      ANSWER=("n")
+    else
+      echo -e "\\n""$MAGENTA""$BOLD""QNAP decryptor (if not already on the system) will be downloaded and installed!""$NC"
+      ANSWER=("y")
+    fi
+    case ${ANSWER:0:1} in
+      y|Y )
+        BINWALK_PRE_AVAILABLE=0
+
+        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        download_file "PC1.c" "https://gist.githubusercontent.com/galaxy4public/0420c7c9a8e3ff860c8d5dce430b2669/raw/1f8a42c0525efb188c0165c6a4cb205e82f851e2/pc1.c" "external/pc1.c"
+
+        if [[ -f "external/pc1.c" ]]; then
+          cd ./external || exit 1
+          echo "[*] Compiling QNAP decryptor"
+          gcc -pipe -Wall -O0 -ggdb -o PC1 pc1.c
+          chmod +x external/PC1
+
+          cd "$HOME_PATH" || exit 1
+
+          if [[ -f "external/PC1" ]] ; then
+            echo -e "$GREEN""QNAP decryptor installed successfully""$NC"
+          fi
+          if [[ -f "external/pc1.c" ]] ; then
+            rm "external/pc1.c"
+          fi
+        fi
+      ;;
+    esac
+  fi
+
   # binwalk
 
   INSTALL_APP_LIST=()
