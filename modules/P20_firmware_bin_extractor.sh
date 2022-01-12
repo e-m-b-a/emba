@@ -265,7 +265,7 @@ deep_extractor() {
 
   linux_basic_identification_helper
 
-  if [[ $LINUX_PATH_COUNTER -lt 2 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
+  if [[ $LINUX_PATH_COUNTER -lt 5 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
   #if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
     print_output "[*] Deep extraction - 2nd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
@@ -275,7 +275,7 @@ deep_extractor() {
 
   linux_basic_identification_helper
 
-  if [[ $LINUX_PATH_COUNTER -lt 2 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
+  if [[ $LINUX_PATH_COUNTER -lt 5 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
     print_output "[*] Deep extraction - 3rd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
