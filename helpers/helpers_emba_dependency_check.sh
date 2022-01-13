@@ -395,6 +395,8 @@ dependency_check()
 
     # stacs - https://github.com/stacscan/stacs
     check_dep_tool "STACS hash detection" "stacs"
+
+    check_dep_file "QNAP decryptor" "$EXT_DIR""/PC1"
   fi
   
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then

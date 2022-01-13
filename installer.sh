@@ -794,7 +794,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]]; then
           cd ./external || exit 1
           echo "[*] Compiling QNAP decryptor"
           gcc -pipe -Wall -O0 -ggdb -o PC1 pc1.c
-          chmod +x external/PC1
+          chmod +x ./PC1
 
           cd "$HOME_PATH" || exit 1
 
