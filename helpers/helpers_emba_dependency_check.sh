@@ -96,7 +96,7 @@ check_cve_search() {
   print_output "    ""$TOOL_NAME"" - testing" "no_log"
   local CVE_SEARCH_=0 # local checker variable
   # check if the cve-search produces results:
-  if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+  if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
     # we can restart the mongod database only in dev mode and not in docker mode:
     if [[ "$IN_DOCKER" -eq 0 ]]; then
       print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
@@ -104,12 +104,12 @@ check_cve_search() {
       sleep 10
 
       # do a second try
-      if ! [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+      if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
         print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
         service mongod restart
         sleep 10
 
-        if [[ $("$EXT_DIR"/cve-search/bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+        if [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_SEARCH_=1
         fi
       else
@@ -292,7 +292,6 @@ dependency_check()
 
     # Freetz-NG
     check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
-    #DEP_ERROR=0
 
     # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
     check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"
@@ -300,6 +299,7 @@ dependency_check()
     # CVE-search
     # TODO change to portcheck and write one for external hosts
     check_dep_file "cve-search script" "$EXT_DIR""/cve-search/bin/search.py"
+    check_cve_search
     # we have to ignore this warning, because shellcheck doesn't know, that this file will be imported
     # shellcheck disable=SC2309
     if [[ IN_DOCKER -eq 0 ]]; then 
@@ -395,6 +395,8 @@ dependency_check()
 
     # stacs - https://github.com/stacscan/stacs
     check_dep_tool "STACS hash detection" "stacs"
+
+    check_dep_file "QNAP decryptor" "$EXT_DIR""/PC1"
   fi
   
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then

@@ -45,12 +45,10 @@ P02_firmware_bin_file_check() {
     print_output ""
     print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
     print_output ""
-    print_output "$(indent "$FILE_BIN_OUT")"
-    print_output ""
     print_output "$(indent "$ENTROPY")"
     print_output ""
     if [[ -x "$EXT_DIR"/pixde ]]; then
-      print_output "[*] Visualized firmware file (first 2000 bytes):"
+      print_output "[*] Visualized firmware file (first 2000 bytes):\n"
       "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/p02_pixd.txt
       print_output ""
       python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null
@@ -72,6 +70,7 @@ fw_bin_detector() {
 
   export VMDK_DETECTED=0
   export DLINK_ENC_DETECTED=0
+  export QNAP_ENC_DETECTED=0
   export AVM_DETECTED=0
   export UBOOT_IMAGE=0
   export EXT_IMAGE=0
@@ -82,6 +81,7 @@ fw_bin_detector() {
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE"| head -1)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
+  QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
 
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     export VMDK_DETECTED=1
@@ -109,6 +109,9 @@ fw_bin_detector() {
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
     export EXT_IMAGE=1
+  fi
+  if [[ "$QNAP_ENC_CHECK" == *"QNAP encrypted firmware footer , model"* ]]; then
+    export QNAP_ENC_DETECTED=1
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
   # Currently this detection mechanism works quite good on the known firmware images

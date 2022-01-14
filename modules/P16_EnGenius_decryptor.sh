@@ -51,7 +51,7 @@ engenius_enc_extractor() {
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted EnGenius firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
-    file "$EXTRACTION_FILE_"
+    print_output "[*] Firmware file details $(file "$EXTRACTION_FILE_")"
     #export FIRMWARE_PATH="$LOG_DIR"/firmware
   else
     print_output "[-] Decryption of EnGenius firmware file failed"

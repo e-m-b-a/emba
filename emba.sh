@@ -412,6 +412,7 @@ main()
   if [[ $IN_DOCKER -eq 1 ]] ; then
     # set external path new for docker
     export EXT_DIR="/external"
+    export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   fi
 
   # Check all dependencies of EMBA
