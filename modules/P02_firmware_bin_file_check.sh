@@ -45,12 +45,10 @@ P02_firmware_bin_file_check() {
     print_output ""
     print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
     print_output ""
-    print_output "$(indent "$FILE_BIN_OUT")"
-    print_output ""
     print_output "$(indent "$ENTROPY")"
     print_output ""
     if [[ -x "$EXT_DIR"/pixde ]]; then
-      print_output "[*] Visualized firmware file (first 2000 bytes):"
+      print_output "[*] Visualized firmware file (first 2000 bytes):\n"
       "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/p02_pixd.txt
       print_output ""
       python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null

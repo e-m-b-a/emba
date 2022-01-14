@@ -125,7 +125,7 @@ S09_firmware_base_version_check() {
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S09=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
+        MAX_THREADS_S09=$((6*"$(grep -c ^processor /proc/cpuinfo)"))
         if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
           MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo)"))
         fi

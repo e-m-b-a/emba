@@ -47,6 +47,7 @@ dlink_SHRS_enc_extractor() {
 
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
+    print_output "[*] Firmware file details $(file "$EXTRACTION_FILE_")"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
   else
     print_output "[-] Decryption of D-Link firmware file failed"

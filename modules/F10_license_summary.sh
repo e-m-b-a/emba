@@ -24,7 +24,8 @@ F10_license_summary() {
   COUNT_LIC=0
 
   mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")
-  mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s115_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")
+  mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s116_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")
+  # TODO: Currently the final kernel details from s25 are missing
 
   # static version detection
   for ENTRY in "${LICENSE_DETECTION_STATIC[@]}"; do

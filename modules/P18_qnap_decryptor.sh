@@ -51,7 +51,7 @@ qnap_enc_extractor() {
   if [[ -f "$EXTRACTION_FILE_" && "$(file "$EXTRACTION_FILE_")" == *"gzip compressed data"* ]]; then
     print_output "[+] Decrypted QNAP firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
-    file "$EXTRACTION_FILE_"
+    print_output "[*] Firmware file details $(file "$EXTRACTION_FILE_")"
     #export FIRMWARE_PATH="$LOG_DIR"/firmware
     print_output ""
   else
