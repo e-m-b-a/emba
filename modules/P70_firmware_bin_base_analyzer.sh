@@ -79,7 +79,7 @@ os_identification() {
     DETECTED=0
     OS_COUNTER[$OS]=0
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null)"))
-    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p20_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p60_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
     OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS")" ))
 
     if [[ $OS == "VxWorks\|Wind" ]]; then
