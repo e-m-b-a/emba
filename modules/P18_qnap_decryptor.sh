@@ -27,7 +27,9 @@ P18_qnap_decryptor() {
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_qnap_dec.tgz
 
     qnap_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
-    qpkg_extractor "$FIRMWARE_PATH"
+    if [[ "$QNAP" -eq 1 ]]; then
+      qpkg_extractor "$FIRMWARE_PATH"
+    fi
 
     NEG_LOG=1
   fi
@@ -37,6 +39,7 @@ P18_qnap_decryptor() {
 qnap_enc_extractor() {
   local QNAP_ENC_PATH_="$1"
   local EXTRACTION_FILE_="$2"
+  export QNAP=0
   sub_module_title "QNAP encrypted firmware extractor"
 
   hexdump -C "$QNAP_ENC_PATH_" | head | tee -a "$LOG_FILE"
@@ -54,6 +57,7 @@ qnap_enc_extractor() {
   if [[ -f "$EXTRACTION_FILE_" && "$(file "$EXTRACTION_FILE_")" == *"gzip compressed data"* ]]; then
     print_output "[+] Decrypted QNAP firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
+    export QNAP=1
     print_output ""
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     print_output ""
