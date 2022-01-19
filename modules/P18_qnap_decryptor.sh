@@ -248,8 +248,13 @@ qpkg_extractor() {
   fi
 
   if [ -e "$ROOTFS2_BZ" ]; then
-    print_output "[*] Extracting $ORANGE$ROOTFS2_BZ$NC (bzip2, tar)."
-    tar -xvjf "$ROOTFS2_BZ" -C "$SYSROOT"
+    if file "$ROOTFS2_BZ" | grep -q "LZMA"; then
+      print_output "[*] Extracting $ORANGE$ROOTFS2_BZ$NC (LZMA)."
+      lzma -d <"$ROOTFS2_BZ" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
+    else
+      print_output "[*] Extracting $ORANGE$ROOTFS2_BZ$NC (bzip2, tar)."
+      tar -xvjf "$ROOTFS2_BZ" -C "$SYSROOT"
+    fi
     print_output ""
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
