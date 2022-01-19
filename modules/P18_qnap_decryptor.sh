@@ -87,6 +87,7 @@ qpkg_extractor() {
     print_output "[*] Extracted firmware structure ($ORANGE$QNAP_EXTRACTION_ROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$QNAP_EXTRACTION_ROOT" | tee -a "$LOG_FILE"
+    print_files_dirs
     print_bar ""
   else
     print_output "[-] No QNAP firmware file found"
@@ -120,6 +121,7 @@ qpkg_extractor() {
   mkdir "$SYSROOT"
 
   if [ -e "$UIMAGE" ]; then
+    print_output ""
     print_output "[*] Scanning $ORANGE$UIMAGE$NC for (gzipped) parts..."
 
     a=$(od -t x1 -w4 -Ad -v "$UIMAGE" | grep '1f 8b 08 00' | awk '{print $1}')
@@ -141,12 +143,14 @@ qpkg_extractor() {
         print_output "[*] Renamed $ORANGE$IMAGE.part$i$NC to $ORANGE$INITRAMFS$NC"
         rm "$IMAGE"
       fi
-
     fi
+    print_files_dirs
+    print_bar ""
   fi
 
   if [ -e "$UBI" ]; then
-    print_output "[*] Unpacking '$UBI'..."
+    print_output ""
+    print_output "[*] Unpacking $ORANGE$UBI$NC."
     # TODO: we should evaluate moving to the EMBA UBI extractor in the future
 
     # see http://trac.gateworks.com/wiki/linux/ubi
@@ -193,10 +197,12 @@ qpkg_extractor() {
     rm -r "$TMP_EXT_MOUNT"
     ubidetach /dev/ubi_ctrl -m0
     modprobe -r nandsim
+    print_files_dirs
     print_bar ""
   fi
 
   if [ -e "$INITRAMFS" ]; then
+    print_output ""
     print_output "[*] Extracting $ORANGE$INITRAMFS$NC."
     # shellcheck disable=SC2002
     cat "$INITRAMFS" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
@@ -204,10 +210,12 @@ qpkg_extractor() {
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    print_files_dirs
     print_bar ""
   fi
 
   if [ -e "$INITRD" ]; then
+    print_output ""
     if file "$INITRD" | grep -q LZMA ; then
       print_output "[*] Extracting $ORANGE$INITRD$NC (LZMA)."
       lzma -d <"$INITRD" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
@@ -215,10 +223,12 @@ qpkg_extractor() {
       print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
       #shellcheck disable=SC2012
       ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+      print_files_dirs
       print_bar ""
     fi
 
     if file "$INITRD" | grep -q gzip ; then
+      print_output ""
       print_output "[*] Extracting $ORANGE$INITRD$NC (gzip)."
       gzip -d <"$INITRD" >"$QNAP_EXTRACTION_ROOT_DST/initrd.$$"
       print_output "[*] Mounting $ORANGE$INITRD$NC."
@@ -237,21 +247,25 @@ qpkg_extractor() {
         print_output "[-] Something went wrong!"
       fi
       rm -r "$TMP_EXT_MOUNT"
+      print_files_dirs
       print_bar ""
     fi
   fi
 
   if [ -e "$ROOTFS2" ]; then
+    print_output ""
     print_output "[*] Extracting $ORANGE$ROOTFS2$NC (gzip, tar)."
     tar -xvzf "$ROOTFS2" -C "$SYSROOT"
     print_output ""
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    print_files_dirs
     print_bar ""
   fi
 
   if [ -e "$ROOTFS2_BZ" ]; then
+    print_output ""
     if file "$ROOTFS2_BZ" | grep -q "LZMA"; then
       print_output "[*] Extracting $ORANGE$ROOTFS2_BZ$NC (LZMA)."
       lzma -d <"$ROOTFS2_BZ" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
@@ -263,10 +277,12 @@ qpkg_extractor() {
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    print_files_dirs
     print_bar ""
   fi
 
   if [ -f "$ROOTFS2_IMG" ]; then
+    print_output ""
     print_output "[*] Extracting $ORANGE$ROOTFS2_IMG$NC (ext2)..."
     local TMP_EXT_MOUNT="$TMP_DIR""/ext_mount_$RANDOM"
     mkdir -p "$TMP_EXT_MOUNT"
@@ -282,10 +298,12 @@ qpkg_extractor() {
       print_output "[-] Something went wrong!"
     fi
     rm -r "$TMP_EXT_MOUNT"
+    print_files_dirs
     print_bar ""
   fi
 
   if [ -e "$ROOTFS_EXT" ]; then
+    print_output ""
     print_output "[*] Extracting EXT filesystem $ORANGE$ROOTFS_EXT$NC."
     tar xzvf "$ROOTFS_EXT" -C "$QNAP_EXTRACTION_ROOT_DST"
     print_output "[*] Mounting EXT filesystem $ORANGE$ROOTFS_EXT$NC."
@@ -303,19 +321,24 @@ qpkg_extractor() {
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    print_files_dirs
     print_bar ""
   fi
 
   USR_LOCAL=$(find "$SYSROOT/opt/source" -name "*.tgz" 2>/dev/null)
   if [[ "${#USR_LOCAL[@]}" -gt 0 ]]; then
+    print_output ""
     for f in "${USR_LOCAL[@]}"; do
       print_output "[*] Extracting $ORANGE$f$NC -> sysroot/usr/local..."
       mkdir -p "$SYSROOT/usr/local"
       tar xvzf "$f" -C "$SYSROOT/usr/local"
     done
+    print_files_dirs
+    print_bar ""
   fi
 
   if [ -e "$QPKG" ]; then
+    print_output ""
     print_output "[*] Extracting $ORANGE$QPKG$NC."
     mkdir -p "$QNAP_EXTRACTION_ROOT_DST/qpkg"
     tar xvf "$QPKG" -C "$QNAP_EXTRACTION_ROOT_DST/qpkg"
@@ -325,6 +348,8 @@ qpkg_extractor() {
         tar tvzf "$f" > "$f".txt
       fi
     done
+    print_files_dirs
+    print_bar ""
   fi
 
   for name in apache_php5 mysql5 mariadb5; do
@@ -335,6 +360,7 @@ qpkg_extractor() {
   done
 
   if [ -e "$QNAP_EXTRACTION_ROOT_DST"/qpkg/libboost.tgz ]; then
+    print_output ""
     print_output "[*] Extracting ${ORANGE}qpkg/libboost.tgz$NC -> ${ORANGE}sysroot/usr/lib$NC."
     mkdir -p "$SYSROOT/usr/lib"
     tar xvzf "$QNAP_EXTRACTION_ROOT_DST"/qpkg/libboost.tgz -C "$SYSROOT/usr/lib"
@@ -348,9 +374,13 @@ qpkg_extractor() {
     (cd "$SYSROOT/usr/lib" || exit; for f in libboost*.so.1.42.0; do ln -s "$f" "${f%.1.42.0}"; done)
     cd "$HOME_DIR" || exit
   fi
+  print_files_dirs
+  print_bar ""
+}
 
-  FILES_QNAP=$(find "$QNAP_EXTRACTION_ROOT_DST" -type f | wc -l)
-  DIRS_QNAP=$(find "$QNAP_EXTRACTION_ROOT_DST" -type d | wc -l)
+print_files_dirs() {
+  FILES_QNAP=$(find "$QNAP_EXTRACTION_ROOT" -type f | wc -l)
+  DIRS_QNAP=$(find "$QNAP_EXTRACTION_ROOT" -type d | wc -l)
   print_output ""
   print_output "[*] Extracted $ORANGE$FILES_QNAP$NC files and $ORANGE$DIRS_QNAP$NC directories from the QNAP firmware image.\n"
 }
