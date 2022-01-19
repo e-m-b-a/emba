@@ -28,7 +28,7 @@ P18_qnap_decryptor() {
 
     qnap_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
     if [[ "$QNAP" -eq 1 ]]; then
-      qpkg_extractor "$FIRMWARE_PATH"
+      qnap_extractor "$FIRMWARE_PATH"
     fi
 
     NEG_LOG=1
@@ -66,7 +66,7 @@ qnap_enc_extractor() {
   fi
 }
 
-qpkg_extractor() {
+qnap_extractor() {
   sub_module_title "QNAP firmware extraction"
   print_output "[!] WARNING: This module is in an very early alpha state."
   print_output "[!] WARNING: Some areas of this module are not tested."
