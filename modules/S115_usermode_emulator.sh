@@ -652,7 +652,9 @@ emulate_strace_run() {
   kill -0 -9 "$PID" 2> /dev/null
 
   # extract missing files, exclude *.so files:
-  mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_FILE_STRACER" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u | grep -v ".*\.so")
+  mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_FILE_STRACER" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u)
+  mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u)
+  MISSING_AREAS+=("${MISSING_AREAS_[@]}" )
 
   for MISSING_AREA in "${MISSING_AREAS[@]}"; do
     MISSING+=("$MISSING_AREA")
@@ -660,10 +662,10 @@ emulate_strace_run() {
       write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
   
       FILENAME_MISSING=$(basename "$MISSING_AREA")
-      write_log "[*] Trying to create this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+      write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
       PATH_MISSING=$(dirname "$MISSING_AREA")
 
-      FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -path "$R_PATH"/sys -prune -false -o -path "$R_PATH"/proc -prune -false -o -type f -name "$FILENAME_MISSING" 2>/dev/null)
+      FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1)
       if [[ -n "$FILENAME_FOUND" ]]; then
         write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
       fi
@@ -671,17 +673,19 @@ emulate_strace_run() {
       if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
         write_log "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC" "$LOG_FILE_STRACER"
         mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null
-        continue
+        #continue
       fi
       if [[ -n "$FILENAME_FOUND" ]]; then
         write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
-        cp "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null
+        cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null
         continue
-      #else
+      else
       #  # disable this for now - have to rethink this
+      #  # This can only be used on non library and non elf files. How can we identify them without knowing them?
       #  write_log "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+        write_log "[*] Missing file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
       #  touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
-      #  continue
+        continue
       fi
     fi
   done

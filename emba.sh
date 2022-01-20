@@ -467,9 +467,10 @@ main()
 
   # calculate the maximum modules are running in parallel
   if [[ $THREADED -eq 1 ]]; then
-    # the maximum modules in parallel -> after S09 is finished this value gets adjusted
-    # rule of thumb - per core one module
-    MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
+    # the maximum modules in parallel
+    # rule of thumb - per core half a module, minimum 2 modules
+    #MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
+    MAX_MODS="$(( $(grep -c ^processor /proc/cpuinfo) /2 +1))"
 
     # if we have only one core we run two modules in parallel
     if [[ "$MAX_MODS" -lt 2 ]]; then
