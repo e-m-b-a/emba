@@ -26,6 +26,7 @@ S22_php_check()
   S22_PHP_SCRIPTS=0
   S22_PHP_INI_ISSUES=0
   S22_PHP_INI_CONFIGS=0
+  S22_PHPINFO_ISSUES=0
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
@@ -33,13 +34,28 @@ S22_php_check()
 
     s22_check_php_ini
 
+    s22_phpinfo_check
+
     write_log ""
     write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_ISSUES:$S22_PHP_INI_CONFIGS"
 
   else
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}" "$(( "$S22_PHP_VULNS" + "$S22_PHP_INI_ISSUES" ))"
+  module_end_log "${FUNCNAME[0]}" "$(( "$S22_PHP_VULNS" + "$S22_PHP_INI_ISSUES" + "$S22_PHPINFO_ISSUES" ))"
+}
+
+s22_phpinfo_check() {
+  sub_module_title "PHPinfo file detection"
+
+  for PHPINFO in "${PHP_SCRIPTS[@]}" ; do
+    if grep -q "phpinfo()" "$PHPINFO"; then
+      print_output "[+] Found php file with debugging information: $ORANGE$PHPINFO$NC"
+      cat "$PHPINFO" | tee -a "$LOG_FILE"
+      ((S22_PHPINFO_ISSUES++))
+    fi
+  done
+  print_output ""
 }
 
 s22_vuln_check_caller() {
