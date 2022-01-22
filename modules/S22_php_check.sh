@@ -91,9 +91,17 @@ s22_vuln_check_caller() {
 }
 
 s22_vuln_check() {
+  # usually this memory limit is not needed, but sometimes it protects our machine
+  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}')"
+  MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
+
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
+
+  ulimit -Sv "$MEM_LIMIT"
   "$EXT_DIR"/progpilot "$LINE" > "$PHP_LOG" 2>&1
+  ulimit -Sv unlimited
+
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null)
 
   if [[ "$VULNS" -ne 0 ]] ; then
