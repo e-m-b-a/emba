@@ -544,6 +544,21 @@ module_end_log() {
 
   if [[ "$MODULE_REPORT_STATE" -eq 0 ]]; then
     print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
+  else
+    REPORT_TEMPLATE="$(basename -s ".sh" "$MODULE_MAIN_NAME")-post"
+    # We handle .txt and .sh files in report_template folder.
+    # .txt are just echoed on cli and report
+    # .sh are executed via source -> you can use variables, color codes, execute further commands
+    if [[ -f "report_templates/$REPORT_TEMPLATE.txt" ]]; then
+      print_bar ""
+      tee -a "$LOG_FILE" < "report_templates/$REPORT_TEMPLATE.txt"
+      print_bar ""
+    elif [[ -f "report_templates/$REPORT_TEMPLATE.sh" ]]; then
+      print_bar ""
+      # shellcheck disable=SC1090
+      source "./report_templates/$REPORT_TEMPLATE.sh"
+      print_bar ""
+    fi
   fi
   if [[ "$HTML" -eq 1 ]]; then
     run_web_reporter_mod_name "$MODULE_MAIN_NAME"

@@ -45,6 +45,7 @@ dlink_SHRS_enc_extractor() {
 
   dd if="$DLINK_ENC_PATH_" skip=1756 iflag=skip_bytes|openssl aes-128-cbc -d -p -nopad -nosalt -K "c05fbf1936c99429ce2a0781f08d6ad8" -iv "67c6697351ff4aec29cdbaabf2fbe346" --nosalt -in /dev/stdin -out "$EXTRACTION_FILE_" 2>&1 | tee -a "$LOG_FILE"
 
+  print_output ""
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     print_output ""
