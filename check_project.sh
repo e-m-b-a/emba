@@ -23,6 +23,7 @@ NC='\033[0m' # no color
 HELP_DIR="./helpers"
 MOD_DIR="./modules"
 CONF_DIR="./config"
+REP_DIR="./report_templates"
 
 SOURCES=()
 MODULES_TO_CHECK_ARR=()
@@ -40,6 +41,16 @@ import_config_scripts() {
 import_helper() {
   HELPERS=$(find "$HELP_DIR" -iname "*.sh" 2>/dev/null)
   for LINE in $HELPERS; do
+    if (file "$LINE" | grep -q "shell script"); then
+      echo "$LINE"
+      SOURCES+=("$LINE")
+    fi
+  done
+}
+
+import_reporting_templates() {
+  REP_TEMP=$(find "$REP_DIR" -iname "*.sh" 2>/dev/null)
+  for LINE in $REP_TEMP; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"
       SOURCES+=("$LINE")
@@ -85,6 +96,7 @@ check()
   echo "./emba.sh"
   import_helper
   import_config_scripts
+  import_reporting_templates
   import_module
 
   echo -e "\\n""$GREEN""Run shellcheck:""$NC""\\n"
