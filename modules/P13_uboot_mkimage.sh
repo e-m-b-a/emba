@@ -22,6 +22,7 @@ P13_uboot_mkimage() {
   NEG_LOG=0
   if [[ "$UBOOT_IMAGE" -eq 1 ]]; then
     module_title "Uboot image details"
+    pre_module_reporter "${FUNCNAME[0]}"
     mkimage -l "$FIRMWARE_PATH" | tee -a "$LOG_FILE"
     IMAGE_NAME=$(grep "Image Name" "$LOG_FILE" 2>/dev/null | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}')
     IMAGE_TYPE=$(grep "Image Type" "$LOG_FILE" 2>/dev/null | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}')

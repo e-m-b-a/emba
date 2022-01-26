@@ -535,6 +535,22 @@ module_start_log() {
   ((MOD_RUNNING++))
 }
 
+pre_module_reporter() {
+  MODULE_MAIN_NAME="$1"
+  REPORT_TEMPLATE="$(basename -s ".sh" "$MODULE_MAIN_NAME")-pre"
+  # We handle .txt and .sh files in report_template folder.
+  # .txt are just echoed on cli and report
+  # .sh are executed via source -> you can use variables, color codes, execute further commands
+  if [[ -f "report_templates/$REPORT_TEMPLATE.txt" ]]; then
+    tee -a "$LOG_FILE" < "report_templates/$REPORT_TEMPLATE.txt"
+    print_bar ""
+  elif [[ -f "report_templates/$REPORT_TEMPLATE.sh" ]]; then
+    # shellcheck disable=SC1090
+    source "./report_templates/$REPORT_TEMPLATE.sh"
+    print_bar ""
+  fi
+}
+
 # on module end we log that the module is finished in emba.log
 # additionally we log that EMBA has nothing found -> this is used for index generation of the web reporter
 # additionally we generate the HTML file of the web reporter if web reporting is enabled

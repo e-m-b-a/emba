@@ -19,6 +19,8 @@
 F20_vul_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final vulnerability aggregator"
+
+  pre_module_reporter "${FUNCNAME[0]}"
   
   mkdir "$LOG_PATH_MODULE"/cve_sum
   mkdir "$LOG_PATH_MODULE"/exploit

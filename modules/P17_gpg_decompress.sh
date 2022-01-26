@@ -25,6 +25,8 @@ P17_gpg_decompress() {
 
   if [[ "$GPG_COMPRESS" -eq 1 ]]; then
     module_title "GPG compressed firmware extractor"
+    pre_module_reporter "${FUNCNAME[0]}"
+
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_gpg_dec.bin
 
     gpg_decompress_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"

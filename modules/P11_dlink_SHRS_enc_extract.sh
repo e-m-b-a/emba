@@ -23,6 +23,7 @@ P11_dlink_SHRS_enc_extract() {
 
   if [[ "$DLINK_ENC_DETECTED" -ne 0 ]]; then
     module_title "DLink encrypted firmware extractor"
+    pre_module_reporter "${FUNCNAME[0]}"
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_dlink_dec.bin
 
     if [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then

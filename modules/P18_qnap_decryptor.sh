@@ -24,6 +24,8 @@ P18_qnap_decryptor() {
 
   if [[ "$QNAP_ENC_DETECTED" -ne 0 ]]; then
     module_title "QNAP encrypted firmware extractor"
+    pre_module_reporter "${FUNCNAME[0]}"
+
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_qnap_dec.tgz
 
     qnap_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"

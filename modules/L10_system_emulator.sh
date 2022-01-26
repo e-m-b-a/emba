@@ -27,6 +27,8 @@ L10_system_emulator() {
   module_title "System emulation of Linux based embedded devices with firmadyne."
 
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
+    pre_module_reporter "${FUNCNAME[0]}"
+
     export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
 
     if [[ $IN_DOCKER -eq 1 ]] ; then

@@ -23,6 +23,8 @@ export PRE_THREAD_ENA=0
 P60_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware extractor"
+  pre_module_reporter "${FUNCNAME[0]}"
+
   DISK_SPACE_CRIT=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then

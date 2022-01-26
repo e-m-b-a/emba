@@ -32,6 +32,7 @@ P99_prepare_analyzer() {
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Analysis preparation"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   # we have a linux:
   if [[ $LINUX_PATH_COUNTER -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then

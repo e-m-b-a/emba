@@ -22,6 +22,8 @@ P70_firmware_bin_base_analyzer() {
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware basic analyzer"
+  pre_module_reporter "${FUNCNAME[0]}"
+
   local NEG_LOG=0
   local WAIT_PIDS_P70=()
 

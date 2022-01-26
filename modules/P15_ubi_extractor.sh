@@ -22,6 +22,8 @@ P15_ubi_extractor() {
   NEG_LOG=0
   if [[ "$UBI_IMAGE" -eq 1 ]]; then
     module_title "UBI filesystem extractor"
+    pre_module_reporter "${FUNCNAME[0]}"
+
     EXTRACTION_DIR="$LOG_DIR/firmware/ubi_extracted"
     mkdir -p "$EXTRACTION_DIR"
 

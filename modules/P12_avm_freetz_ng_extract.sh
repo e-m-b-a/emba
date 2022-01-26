@@ -23,6 +23,7 @@ P12_avm_freetz_ng_extract() {
 
   if [[ "$AVM_DETECTED" -eq 1 ]]; then
     module_title "AVM freetz-ng firmware extractor"
+    pre_module_reporter "${FUNCNAME[0]}"
 
     EXTRACTION_DIR="$LOG_DIR"/firmware/freetz_ng_extractor
 

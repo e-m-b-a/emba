@@ -21,6 +21,8 @@
 F10_license_summary() {
   module_log_init "${FUNCNAME[0]}"
   module_title "License inventory"
+  pre_module_reporter "${FUNCNAME[0]}"
+
   COUNT_LIC=0
 
   mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")

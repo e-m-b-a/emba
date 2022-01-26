@@ -22,6 +22,8 @@ P14_ext2_mounter() {
   NEG_LOG=0
   if [[ "$EXT_IMAGE" -eq 1 ]]; then
     module_title "EXT filesystem extractor"
+    pre_module_reporter "${FUNCNAME[0]}"
+
     print_output "[*] Connect to device $ORANGE$FIRMWARE_PATH$NC"
 
     EXTRACTION_DIR="$LOG_DIR"/firmware/ext_mount_filesystem/
