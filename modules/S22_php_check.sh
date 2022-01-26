@@ -21,6 +21,7 @@ S22_php_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "PHP vulnerability checks"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0

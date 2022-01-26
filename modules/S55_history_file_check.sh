@@ -19,6 +19,7 @@ S55_history_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search history files"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local HIST_FILES
   mapfile -t HIST_FILES < <(config_find "$CONFIG_DIR""/history_files.cfg")

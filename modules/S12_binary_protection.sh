@@ -22,6 +22,7 @@ S12_binary_protection()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binary protection mechanisms"
+  pre_module_reporter "${FUNCNAME[0]}"
   local BIN_PROT_COUNTER=0
 
   if [[ -f "$EXT_DIR"/checksec ]] ; then

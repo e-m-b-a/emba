@@ -19,6 +19,7 @@
 S40_weak_perm_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search files with weak permissions"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
   local WEAK_PERM_COUNTER=0

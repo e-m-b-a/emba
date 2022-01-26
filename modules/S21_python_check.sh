@@ -19,6 +19,7 @@ S21_python_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check python scripts for security issues"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   S21_PY_VULNS=0
   S21_PY_SCRIPTS=0

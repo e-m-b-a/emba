@@ -23,6 +23,7 @@ export THREAD_PRIO=1
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Usermode emulation"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 

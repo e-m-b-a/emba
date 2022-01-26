@@ -19,6 +19,7 @@ S70_hidden_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search hidden files"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local HIDDEN_FILES
   IFS=" " read -r -a HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -name ".*" -type f | tr '\r\n' ' ')

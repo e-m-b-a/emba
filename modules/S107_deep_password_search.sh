@@ -19,6 +19,7 @@ S107_deep_password_search()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Deep analysis of files for password hashes"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
   local PW_COUNTER=0

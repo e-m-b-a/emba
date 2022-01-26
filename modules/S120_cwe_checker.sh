@@ -25,6 +25,7 @@ S120_cwe_checker()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries with cwe-checker"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ $CWE_CHECKER -eq 1 ]] ; then
     cwe_check

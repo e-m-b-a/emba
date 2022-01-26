@@ -19,6 +19,7 @@ S20_shell_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check scripts (shellchecker)"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   export S20_SHELL_VULNS=0
   export S20_SCRIPTS=0

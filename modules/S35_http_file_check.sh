@@ -19,6 +19,7 @@ S35_http_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check HTTP files"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   HTTP_COUNTER=0
 

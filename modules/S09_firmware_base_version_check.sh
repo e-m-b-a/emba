@@ -27,6 +27,7 @@ S09_firmware_base_version_check() {
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware versions detection"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   EXTRACTOR_LOG="$LOG_DIR"/p60_firmware_bin_extractor.txt
 

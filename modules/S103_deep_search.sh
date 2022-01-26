@@ -19,6 +19,7 @@ S103_deep_search()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Deep analysis of files for patterns"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local PATTERNS
   PATTERNS="$(config_list "$CONFIG_DIR""/deep_search.cfg" "")"

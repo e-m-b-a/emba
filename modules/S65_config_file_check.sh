@@ -19,6 +19,7 @@ S65_config_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search/scan config files"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   scan_config
   check_fstab

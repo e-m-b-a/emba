@@ -19,6 +19,7 @@ S06_distribution_identification()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Linux identification"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   OUTPUT=0
   write_csv_log "file" "type" "identifier" "csv_rule"

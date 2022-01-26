@@ -25,6 +25,7 @@ S13_weak_func_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries for weak functions (intense)"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ -n "$ARCH" ]] ; then
     # This module waits for S12 - binary protections

@@ -21,6 +21,7 @@ S108_stacs_password_search()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Stacs analysis of firmware for password hashes"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local STACS_RULES_DIR="$EXT_DIR"/stacs-rules
   local STACS_LOG_FILE="$LOG_DIR"/etc/stacs_pw_hashes.json

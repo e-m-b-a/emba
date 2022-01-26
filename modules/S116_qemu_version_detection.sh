@@ -18,6 +18,7 @@
 S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Identified software components - via usermode emulation."
+  pre_module_reporter "${FUNCNAME[0]}"
 
   # This module waits for S115_usermode_emulator
   # check emba.log for S115_usermode_emulator

@@ -20,6 +20,7 @@ S75_network_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search network configs"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   NET_CFG_FOUND=0
 

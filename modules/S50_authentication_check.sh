@@ -21,6 +21,7 @@
 S50_authentication_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check users, groups and authentication"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   AUTH_ISSUES=0
 

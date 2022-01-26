@@ -19,6 +19,7 @@ S24_kernel_bin_identifier()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Kernel Binary Identifier"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   NEG_LOG=0
 

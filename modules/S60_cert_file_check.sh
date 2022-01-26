@@ -19,7 +19,7 @@ S60_cert_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search certificates"
-
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local CERT_FILES_ARR
   readarray -t CERT_FILES_ARR < <(config_find "$CONFIG_DIR""/cert_files.cfg")

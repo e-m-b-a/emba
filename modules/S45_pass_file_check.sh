@@ -19,6 +19,7 @@ S45_pass_file_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search password files"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local PASSWD_STUFF
   PASS_FILES_FOUND=0

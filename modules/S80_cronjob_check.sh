@@ -19,6 +19,7 @@ S80_cronjob_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check cronjobs"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local RESULTS
   RESULTS=0

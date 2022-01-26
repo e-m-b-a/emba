@@ -19,6 +19,7 @@ S100_command_inj_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Search areas for command injections"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   local CMD_INJ_DIRS
   mapfile -t CMD_INJ_DIRS < <(config_find "$CONFIG_DIR""/check_command_inj_dirs.cfg")

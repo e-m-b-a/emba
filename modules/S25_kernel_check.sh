@@ -22,6 +22,7 @@ S25_kernel_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Identify and check kernel version"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   KERNEL_VERSION=()
   KERNEL_DESC=()

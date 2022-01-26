@@ -25,6 +25,7 @@ L15_emulated_checks_init() {
   module_title "Live tests of emulated device."
 
   if [[ "$SYS_ONLINE" -eq 1 ]]; then
+    pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."

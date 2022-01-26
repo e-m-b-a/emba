@@ -19,6 +19,7 @@ S95_interesting_binaries_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check interesting binaries"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ "$THREADED" -eq 1 ]]; then
     interesting_binaries &

@@ -19,6 +19,7 @@ S85_ssh_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check SSH"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   SSH_VUL_CNT=0
   SQUID_VUL_CNT=0
