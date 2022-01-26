@@ -1,22 +1,22 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens AG
-# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check all dependencies for emba
+# Description:  Check all dependencies for EMBA
 
-DEP_ERROR=0 # exit emba after dependency check, if ONLY_DEP and FORCE both zero
-DEP_EXIT=0  # exit emba after dependency check, regardless of which parameters have been set
+DEP_ERROR=0 # exit EMBA after dependency check, if ONLY_DEP and FORCE both zero
+DEP_EXIT=0  # exit EMBA after dependency check, regardless of which parameters have been set
 
 # $1=File name
 # $2=File path
@@ -160,13 +160,13 @@ dependency_check()
     if [[ $USE_DOCKER -eq 1 ]]; then
       echo -e "$RED""    With docker enabled this script needs root privileges""$NC"
     fi
-    echo -e "$RED""    Run emba with sudo""$NC"
+    echo -e "$RED""    Run EMBA with sudo""$NC"
     DEP_EXIT=1
   else
     echo -e "$GREEN""ok""$NC"
   fi
 
-  # emba is developed for and on KALI Linux
+  # EMBA is developed for and on KALI Linux
   # In our experience we can say that it runs on most Debian based systems without any problems 
   if [[ $USE_DOCKER -eq 0 ]] ; then
     print_output "    host distribution - \\c" "no_log"
@@ -208,7 +208,7 @@ dependency_check()
   print_output "[*] Necessary utils on system:" "no_log"
 
   #######################################################################################
-  # Docker for emba with docker
+  # Docker for EMBA with docker
   #######################################################################################
   if [[ $USE_DOCKER -eq 1 ]] ; then
     check_dep_tool "docker"
@@ -303,7 +303,7 @@ dependency_check()
     # we have to ignore this warning, because shellcheck doesn't know, that this file will be imported
     # shellcheck disable=SC2309
     if [[ IN_DOCKER -eq 0 ]]; then 
-      # really basic check, if cve-search database is running - no check, if populated and also no check, if emba in docker
+      # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
       check_dep_tool "mongo database" "mongod"
       # check_cve_search
     fi
@@ -402,7 +402,7 @@ dependency_check()
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
     print_output "\\n""$ORANGE""Some dependencies are missing - please check your installation\\n" "no_log"
     print_output "$ORANGE""To install all needed dependencies, run '""$NC""sudo ./installer.sh""$ORANGE""'." "no_log"
-    print_output "$ORANGE""Learn more about the installation on the emba wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
+    print_output "$ORANGE""Learn more about the installation on the EMBA wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
 
     if [[ $ONLY_DEP -eq 1 ]] || [[ $FORCE -eq 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
       exit 1
@@ -411,7 +411,7 @@ dependency_check()
     print_output "\\n" "no_log"
   fi
 
-  # If only dependency check, then exit emba after it
+  # If only dependency check, then exit EMBA after it
   if [[ $ONLY_DEP -eq 1 ]] ; then
     exit 0
   fi

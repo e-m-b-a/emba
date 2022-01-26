@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens AG
-# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -392,7 +392,7 @@ indent()
 format_log()
 {
   local LOG_STRING="$1"
-  # remove log formatting, even if emba is set to format it (for [REF] markers used)
+  # remove log formatting, even if EMBA is set to format it (for [REF] markers used)
   local OVERWRITE_SETTING="$2"
   if [[ $FORMAT_LOG -eq 0 ]] || [[ $OVERWRITE_SETTING -eq 1 ]] ; then
     echo "$LOG_STRING" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
@@ -536,7 +536,7 @@ module_start_log() {
 }
 
 # on module end we log that the module is finished in emba.log
-# additionally we log that emba has nothing found -> this is used for index generation of the web reporter
+# additionally we log that EMBA has nothing found -> this is used for index generation of the web reporter
 # additionally we generate the HTML file of the web reporter if web reporting is enabled
 module_end_log() {
   MODULE_MAIN_NAME="$1"
