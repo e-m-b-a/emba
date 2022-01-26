@@ -1,0 +1,2 @@
+The software inventory was detected with static analysis mechanism on all identified binaries.
+The shown details should be checked for known vulnerabilities and software components that are outdated and not maintained anymore.
