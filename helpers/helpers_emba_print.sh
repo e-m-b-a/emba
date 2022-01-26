@@ -543,11 +543,9 @@ pre_module_reporter() {
   # .sh are executed via source -> you can use variables, color codes, execute further commands
   if [[ -f "report_templates/$REPORT_TEMPLATE.txt" ]]; then
     tee -a "$LOG_FILE" < "report_templates/$REPORT_TEMPLATE.txt"
-    print_bar ""
   elif [[ -f "report_templates/$REPORT_TEMPLATE.sh" ]]; then
     # shellcheck disable=SC1090
     source "./report_templates/$REPORT_TEMPLATE.sh"
-    print_bar ""
   fi
 }
 
