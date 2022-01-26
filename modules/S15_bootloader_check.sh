@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens AG
-# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -20,6 +20,7 @@ S15_bootloader_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check bootloader and system startup"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   STARTUP_FINDS=0
 

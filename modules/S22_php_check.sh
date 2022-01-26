@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens Energy AG
-# Copyright 2020-2021 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -21,6 +21,7 @@ S22_php_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "PHP vulnerability checks"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
@@ -91,9 +92,17 @@ s22_vuln_check_caller() {
 }
 
 s22_vuln_check() {
+  # usually this memory limit is not needed, but sometimes it protects our machine
+  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}')"
+  MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
+
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
+
+  ulimit -Sv "$MEM_LIMIT"
   "$EXT_DIR"/progpilot "$LINE" > "$PHP_LOG" 2>&1
+  ulimit -Sv unlimited
+
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null)
 
   if [[ "$VULNS" -ne 0 ]] ; then

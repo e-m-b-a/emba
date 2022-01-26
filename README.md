@@ -1,8 +1,8 @@
 <!-- 
 EMBA - EMBEDDED LINUX ANALYZER
 
-Copyright 2020-2021 Siemens AG
-Copyright 2020-2021 Siemens Energy AG
+Copyright 2020-2022 Siemens AG
+Copyright 2020-2022 Siemens Energy AG
 
 EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 welcome to redistribute it under the terms of the GNU General Public License.
@@ -77,7 +77,7 @@ sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 ```console
 ./emba.sh -l ./log -f ./firmware -D
 ```
-*WARNING: Before using the developer mode you need a full installation of emba with `sudo ./installer.sh -F`. This installation mode needs more than 14gig of disk space.*
+*WARNING: Before using the developer mode you need a full installation of EMBA with `sudo ./installer.sh -F`. This installation mode needs around 15 gigabyte of disk space and is only recommend for development environments.*
 
 ---
 *EMBA* supports multiple testing and reporting [options](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).

@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens AG
-# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -19,6 +19,7 @@ S85_ssh_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check SSH"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   SSH_VUL_CNT=0
   SQUID_VUL_CNT=0
@@ -56,7 +57,7 @@ search_ssh_files()
             readarray SSHD_ISSUES < <("$EXT_DIR"/sshdcc -ns -nc -f "$LINE")
             for S_ISSUE in "${SSHD_ISSUES[@]}"; do
               if [[ "$S_ISSUE" == *RESULTS* || "$PRINTER" -eq 1 ]]; then
-                # print finding title as emba finding:
+                # print finding title as EMBA finding:
                 if [[ "$S_ISSUE" =~ ^\([0-9+]\)\ \[[A-Z]+\]\  ]]; then
                   print_output "[+] $S_ISSUE"
                   ((SSH_VUL_CNT++))

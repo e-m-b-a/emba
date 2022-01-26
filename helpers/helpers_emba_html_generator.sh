@@ -1,16 +1,16 @@
 #!/bin/bash
 # shellcheck disable=SC2001
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens AG
-# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
 
@@ -460,7 +460,7 @@ add_link_to_index() {
   readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep -a "$CLASS" )
 
   if [[ ${#INDEX_NAV_GROUP_ARR[@]} -eq 0 ]] ; then
-    # due the design of emba, which are already groups the modules (even threaded), it isn't necessary to check - 
+    # due the design of EMBA, which are already groups the modules (even threaded), it isn't necessary to check - 
     # insert new entry at bottom of the navigation
     insert_line "navigation end" "$MODUL_NAME"
   else
@@ -500,7 +500,7 @@ update_index()
 
 scan_report()
 {
-  # at the end of an emba run, we have to disable all non-valid links to modules
+  # at the end of an EMBA run, we have to disable all non-valid links to modules
   local LINK_ARR
   readarray -t LINK_ARR < <(grep -a -R -E "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH" | cut -d"\"" -f 4 | cut -d"#" -f 1 | sort -u)
   local LINK_FILE_ARR

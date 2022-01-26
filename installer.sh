@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens AG
-# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -1336,8 +1336,20 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]
 
     # shellcheck disable=SC2002
     cat requirements.txt | xargs -n 1 pip install 2>/dev/null
+    REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)"
+
+    echo -e "[*] Setting up CVE-search environment - ./etc/configuration.ini"
     sed -zE 's/localhost([^\n]*\n[^\n]*27017)/172.36.0.1\1/' ./etc/configuration.ini.sample | tee ./etc/configuration.ini &>/dev/null
-    sed -i 's/^\#\ requirepass\ foobared/requirepass\ RedisPassword/g' /etc/redis/redis.conf
+    # we do not use the web server. In case someone enables it we have a good default configuration in place:
+    sed -i "s/^Debug:\ True/Debug:\ False/g" ./etc/configuration.ini
+    sed -i "s/^LoginRequired:\ False/LoginRequired:\ True/g" ./etc/configuration.ini
+
+    echo -e "[*] Setting password for Redis environment - ./etc/configuration.ini"
+    sed -i "s/^Password:\ .*/Password:\ $REDIS_PW/g" ./etc/configuration.ini
+
+    echo -e "[*] Setting password for Redis environment - /etc/redis/redis.conf"
+    sed -i "s/^\#\ requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
+    sed -i "s/^requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
   fi
    
   case ${ANSWER:0:1} in

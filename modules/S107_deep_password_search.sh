@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens Energy AG
-# Copyright 2020-2021 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -19,6 +19,7 @@ S107_deep_password_search()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Deep analysis of files for password hashes"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
   local PW_COUNTER=0

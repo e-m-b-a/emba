@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens AG
-# Copyright 2020-2021 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
@@ -37,12 +37,12 @@ log_folder()
             print_output "[!] We found unmounted areas from a former emulation process in your log directory $LOG_DIR." "no_log"
             print_output "[!] You should unmount this stuff manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
-            echo -e "\\n${RED}Terminate emba${NC}\\n"
+            echo -e "\\n${RED}Terminate EMBA${NC}\\n"
             exit 1
           elif mount | grep "$LOG_DIR" > /dev/null; then
             echo
             print_output "[!] We found unmounted areas in your log directory $LOG_DIR." "no_log"
-            print_output "[!] If emba is failing check this manually:\\n" "no_log"
+            print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
             rm -R "${LOG_DIR:?}/"* 2>/dev/null
@@ -50,27 +50,27 @@ log_folder()
           fi
         ;;
         * )
-          echo -e "\\n${RED}Terminate emba${NC}\\n"
+          echo -e "\\n${RED}Terminate EMBA${NC}\\n"
           exit 1
         ;;
     esac
   fi
 
-  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config -o -path ./report_templates \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   if [[ $USE_DOCKER -eq 1 && ${#D_LOG_FILES[@]} -gt 0 ]] ; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
-    echo -e "    It appears that there are log files in the emba directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
+    echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
     for D_LOG_FILE in "${D_LOG_FILES[@]}" ; do
       echo -e "        ""$(print_path "$D_LOG_FILE")"
     done
-    echo -e "\\n${ORANGE}Continue to run emba and ignore this warning?${NC}\\n"
+    echo -e "\\n${ORANGE}Continue to run EMBA and ignore this warning?${NC}\\n"
     read -p "(Y/n)  " -r ANSWER
     case ${ANSWER:0:1} in
         y|Y|"" )
           echo
         ;;
         * )
-          echo -e "\\n${RED}Terminate emba${NC}\\n"
+          echo -e "\\n${RED}Terminate EMBA${NC}\\n"
           exit 1
         ;;
     esac

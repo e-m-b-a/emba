@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens Energy AG
-# Copyright 2020-2021 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -22,6 +22,7 @@ S12_binary_protection()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binary protection mechanisms"
+  pre_module_reporter "${FUNCNAME[0]}"
   local BIN_PROT_COUNTER=0
 
   if [[ -f "$EXT_DIR"/checksec ]] ; then

@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens Energy AG
-# Copyright 2020-2021 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -19,6 +19,7 @@ S24_kernel_bin_identifier()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Kernel Binary Identifier"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   NEG_LOG=0
 

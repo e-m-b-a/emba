@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens Energy AG
-# Copyright 2020-2021 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -23,6 +23,7 @@ export THREAD_PRIO=1
 S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Usermode emulation"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 
@@ -315,7 +316,7 @@ prepare_emulator() {
       echo
       print_output "[!] Is the qemu package installed?"
       print_output "$(indent "We can't find it!")"
-      print_output "$(indent "$(red "Terminating emba now.\\n")")"
+      print_output "$(indent "$(red "Terminating EMBA now.\\n")")"
       exit 1
     else
       cp "$(which $EMULATOR)" "$R_PATH"/

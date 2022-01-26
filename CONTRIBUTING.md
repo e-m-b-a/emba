@@ -1,5 +1,6 @@
-# Contributing to *emba*
-Contributions to *emba* are always welcome. This document explains the general requirements for contributions and the recommended preparation steps. 
+# Contributing to *EMBA*
+
+Contributions to *EMBA* are always welcome. This document explains the general requirements for contributions and the recommended preparation steps.
 It also sketches the typical integration process of patches.
 
 ## 1) Contribution Checklist
@@ -13,7 +14,7 @@ It also sketches the typical integration process of patches.
 - structure patches logically, in small steps [**required**]
     - one separable functionality/fix/refactoring = one patch
     - do not mix those three into a single patch (e.g., first refactor, then add a new functionality that builds onto the refactoring)
-    - after each patch, *emba* has to work. Do not add
+    - after each patch, *EMBA* has to work. Do not add
       even temporary breakages inside a patch series (helps when tracking down bugs)
     - use `git rebase -i` to restructure a patch series
 

@@ -3,8 +3,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens Energy AG
-# Copyright 2020-2021 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -26,6 +26,7 @@ S14_weak_func_radare_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries for weak functions (radare mode)"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected

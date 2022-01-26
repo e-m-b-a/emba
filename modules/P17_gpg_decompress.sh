@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2021 Siemens Energy AG
-# Copyright 2020-2021 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -25,6 +25,8 @@ P17_gpg_decompress() {
 
   if [[ "$GPG_COMPRESS" -eq 1 ]]; then
     module_title "GPG compressed firmware extractor"
+    pre_module_reporter "${FUNCNAME[0]}"
+
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_gpg_dec.bin
 
     gpg_decompress_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"

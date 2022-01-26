@@ -19,6 +19,8 @@
 F20_vul_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final vulnerability aggregator"
+
+  pre_module_reporter "${FUNCNAME[0]}"
   
   mkdir "$LOG_PATH_MODULE"/cve_sum
   mkdir "$LOG_PATH_MODULE"/exploit
@@ -389,7 +391,7 @@ cve_extractor() {
           EXPLOIT_NAME=$(basename -s .rb "$EXPLOIT_PATH")
           EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
           if [[ -f "$EXPLOIT_PATH" ]] ; then
-            # for the web reporter we copy the original metasploit module into the emba log directory
+            # for the web reporter we copy the original metasploit module into the EMBA log directory
             cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/msf_""$EXPLOIT_NAME".rb
           fi
           ((MSF_MODULE_CNT++))
