@@ -28,6 +28,32 @@ print_help()
   echo
 }
 
+import_installers()
+{
+  local INSTALLERS
+  local INSTALLER_COUNT
+  mapfile -t INSTALLERS < <(find "$INSTALLER_DIR" -iname "*.sh" 2> /dev/null)
+  for INSTALLER_FILE in "${INSTALLERS[@]}" ; do
+    if ( file "$INSTALLER_FILE" | grep -q "shell script" ) ; then
+      # https://github.com/koalaman/shellcheck/wiki/SC1090
+      # shellcheck source=/dev/null
+      source "$INSTALLER_FILE"
+      (( INSTALLER_COUNT+=1 ))
+    fi
+  done
+  echo ""
+  echo -e "==> ""$GREEN""Imported ""$INSTALLER_COUNT"" installer module files""$NC"
+}
+
+module_title()
+{
+  local MODULE_TITLE
+  MODULE_TITLE="$1"
+  local MODULE_TITLE_FORMAT
+  MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""$MODULE_TITLE""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+  echo -e "\\n\\n""$MODULE_TITLE_FORMAT"
+}
+
 # print_tool_info a b c
 # a = application name (by apt)
 # b = no update, if already installed -> 0

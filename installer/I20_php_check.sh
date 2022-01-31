@@ -16,25 +16,26 @@
 
 # Description:  Installs iniscan for PHP.ini checks
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+I20_php_check() {
+  module_title "${FUNCNAME[0]}"
 
-  cd "$HOME_PATH" || exit 1
-  INSTALL_APP_LIST=()
-
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  
+    cd "$HOME_PATH" || exit 1
+    INSTALL_APP_LIST=()
+  
     echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
-
+  
     print_tool_info "php" 1
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
-
-    if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download Composer and iniscan (if not already on the system)?""$NC"
-      read -p "(y/N)" -r ANSWER
-    elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  
+    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""Composer and iniscan (if not already on the system) will be downloaded!""$NC"
       ANSWER=("y")
     fi
+  
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y
@@ -49,5 +50,5 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         cp -r "/root/.config/composer/vendor/." "./external/iniscan/"
       ;;
     esac
-fi
-
+  fi
+} 

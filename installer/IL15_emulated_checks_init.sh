@@ -16,17 +16,17 @@
 
 # Description:  Installs routersploit - used for full system emulation
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+IL15_emulated_checks_init() {
+  module_title "${FUNCNAME[0]}"
+
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     INSTALL_APP_LIST=()
     cd "$HOME_PATH" || exit 1
     print_git_info "routersploit" "m-1-k-3/routersploit" "The RouterSploit Framework is an open-source exploitation framework dedicated to embedded devices. (EMBA fork)"
     print_tool_info "python3-pip" 1
     print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
 
-    if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install routersploit and the needed dependencies (if not already on the system)?""$NC"
-      read -p "(y/N)" -r ANSWER
-    elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""The routersploit dependencies (if not already on the system) will be downloaded and installed!""$NC"
@@ -55,4 +55,5 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
 
       ;;
     esac
-fi
+  fi
+}

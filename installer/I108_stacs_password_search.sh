@@ -16,21 +16,21 @@
 
 # Description:  Installs STACS - https://github.com/stacscan/stacs
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+I108_stacs_password_search() {
+  module_title "${FUNCNAME[0]}"
+
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     INSTALL_APP_LIST=()
-
+  
     cd "$HOME_PATH" || exit 1
-
+  
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
-
+  
     print_tool_info "libarchive-dev" 1
     print_pip_info "stacs"
     print_git_info "stacs-rules" "stacscan/stacs-rules" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
-
-    if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download STACS and the default rules (if not already on the system)?""$NC"
-      read -p "(y/N)" -r ANSWER
-    elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  
+    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""STACS and the default rules (if not already on the system) will be downloaded!""$NC"
@@ -53,5 +53,5 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         fi
       ;;
     esac
-fi
-
+  fi
+} 

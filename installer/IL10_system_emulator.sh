@@ -16,8 +16,11 @@
 
 # Description:  Installs firmadyne / full system emulation
 
-  INSTALL_APP_LIST=()
+IL10_system_emulator() {
+  module_title "${FUNCNAME[0]}"
+
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+    INSTALL_APP_LIST=()
     cd "$HOME_PATH" || exit 1
 
     print_tool_info "busybox-static" 1
@@ -50,15 +53,13 @@
     print_file_info "fixImage.sh" "Firmadyne fixImage script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/"
     print_file_info "preInit.sh" "Firmadyne preInit script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/"
 
-    if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download and install the firmadyne dependencies (if not already on the system)?""$NC"
-      read -p "(y/N)" -r ANSWER
-    elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""The firmadyne dependencies (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
+
     case ${ANSWER:0:1} in
       y|Y )
 
@@ -132,5 +133,6 @@
 
       ;;
     esac
-fi
+  fi
+}
 

@@ -23,8 +23,6 @@ export DOWNLOAD_FILE_LIST=()
 
 export INSTALLER_DIR="./installer"
 
-# force install everything
-FORCE=0
 # install docker EMBA
 IN_DOCKER=0
 # list dependencies
@@ -44,7 +42,7 @@ BOLD="\033[1m"
 # shellcheck source=/dev/null
 source "$INSTALLER_DIR"/helpers.sh
 
-echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
+echo -e "\\n""$ORANGE""$BOLD""EMBA - Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
 if [ "$#" -ne 1 ]; then
   echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
@@ -60,38 +58,21 @@ fi
 
 while getopts cCdDFhl OPT ; do
   case $OPT in
-    c)
-      export COMPLEMENT=1
-      export FORCE=1
-      export CVE_SEARCH=0
-      echo -e "$GREEN""$BOLD""Complement EMBA dependecies""$NC"
-      ;;
     d)
       export DOCKER_SETUP=1
-      export FORCE=1
-      export CVE_SEARCH=0
-      echo -e "$GREEN""$BOLD""Install all dependecies for EMBA in default/docker mode""$NC"
-      ;;
-    C)
-      export DOCKER_SETUP=0
-      export IN_DOCKER=0
-      export FULL=0
-      export FORCE=1
       export CVE_SEARCH=1
-      echo -e "$GREEN""$BOLD""Install CVE-search including the needed database - used for EMBArk installations""$NC"
+      echo -e "$GREEN""$BOLD""Install all dependecies for EMBA in default/docker mode""$NC"
       ;;
     D)
       export IN_DOCKER=1
       export DOCKER_SETUP=0
-      export FORCE=1
       export CVE_SEARCH=0
       echo -e "$GREEN""$BOLD""Install EMBA in docker image - used for building a docker image""$NC"
       ;;
     F)
-      export FORCE=1
       export FULL=1
       export DOCKER_SETUP=0
-      export CVE_SEARCH=0
+      export CVE_SEARCH=1
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
     h)
@@ -130,64 +111,52 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   apt-get -y update
 fi
 
-# shellcheck source=/dev/null
-source "$INSTALLER_DIR"/I01_default_apps_host.sh
+# import all the installation modules
+import_installers
+
+# initial installation of the host environment:
+I01_default_apps_host
 
 INSTALL_APP_LIST=()
 
-if [[ "$CVE_SEARCH" -ne 1 ]]; then
+if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -eq 1 ]]; then
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I01_default_apps.sh
+  I01_default_apps
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I05_emba_docker_image_dl.sh
-  
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I120_cwe_checker.sh
-  
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/IP60_fact_extractor.sh
+  I05_emba_docker_image_dl
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I13_objdump.sh
+  IP12_avm_freetz_ng_extract
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I199_default_tools_github.sh
+  IP18_qnap_decryptor
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I110_yara_check.sh
-  
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I30_version_vulnerability_check.sh
+  IP99_binwalk_default
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/IF50_aggregator_common.sh
+  IP60_fact_extractor
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I20_php_check.sh
+  I13_objdump
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/IP18_qnap_decryptor.sh
+  I20_php_check
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/IP99_binwalk_default.sh
+  I30_version_vulnerability_check
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/IL10_system_emulator.sh
+  I108_stacs_password_search
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/IL15_emulated_checks_init.sh
+  I110_yara_check
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/IP12_avm_freetz_ng_extract.sh
+  I199_default_tools_github
 
-  # shellcheck source=/dev/null
-  source "$INSTALLER_DIR"/I108_stacs_password_search.sh
+  I120_cwe_checker
+
+  IL10_system_emulator
+
+  IL15_emulated_checks_init
+
+  IF50_aggregator_common
+
 fi
 
-# shellcheck source=/dev/null
-source "$INSTALLER_DIR"/I20_cve_search.sh
+# cve-search is always installed on the host:
+IF20_cve_search
 
 cd "$HOME_PATH" || exit 1
 

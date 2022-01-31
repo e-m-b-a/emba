@@ -14,35 +14,38 @@
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
-# Description:  Installs binutils - objdump for EMBA
+# Description:  Installs binutils and other tools like radare2 for s12-14 
 
-if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+I13_objdump() {
+  module_title "${FUNCNAME[0]}"
+
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  
     BINUTIL_VERSION_NAME="binutils-2.35.1"
-
+  
     INSTALL_APP_LIST=()
-
+  
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
       print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
       print_tool_info "texinfo" 1
-      print_tool_info "gcc" 1
+      dprint_tool_info "gcc" 1
       print_tool_info "build-essential" 1
       print_tool_info "gawk" 1
       print_tool_info "bison" 1
       print_tool_info "debuginfod" 1
+      print_tool_info "radare2" 1
     fi
-
-    if [[ "$FORCE" -eq 0 ]] && [[ "$LIST_DEP" -eq 0 ]] ; then
-      echo -e "\\n""$MAGENTA""$BOLD""Do you want to download ""$BINUTIL_VERSION_NAME"" (if not already on the system) and compile objdump?""$NC"
-      read -p "(y/N)" -r ANSWER
-    elif [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+  
+    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
-      ANSWER=("y")
     fi
+  
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y
+  
         if ! [[ -f "external/objdump" ]] ; then
           download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
           if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
@@ -68,4 +71,5 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
         fi
       ;;
     esac
-fi
+  fi
+}
