@@ -20,6 +20,7 @@ ORANGE='\033[0;33m'
 BOLD='\033[1m'
 NC='\033[0m' # no color
 
+INSTALLER_DIR="./installer"
 HELP_DIR="./helpers"
 MOD_DIR="./modules"
 CONF_DIR="./config"
@@ -68,6 +69,17 @@ import_module() {
   done
 }
 
+import_installer() {
+  MODULES=$(find "$INSTALLER_DIR" -iname "*.sh" 2>/dev/null)
+  for LINE in $MODULES; do
+    if (file "$LINE" | grep -q "shell script"); then
+      echo "$LINE"
+      SOURCES+=("$LINE")
+    fi
+  done
+}
+
+
 check()
 {
   echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Shellcheck""$NC""\\n""$BOLD""=================================================================""$NC"
@@ -94,6 +106,7 @@ check()
 
   echo -e "\\n""$GREEN""Load all files for check:""$NC""\\n"
   echo "./emba.sh"
+  import_installer
   import_helper
   import_config_scripts
   import_reporting_templates

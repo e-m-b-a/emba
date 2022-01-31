@@ -17,7 +17,6 @@
 # Description: Download EMBA docker image (only for -d default and full installation)
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
-    INSTALL_APP_LIST=()
     print_tool_info "docker.io" 0 "docker"
 
     echo -e "\\n""$ORANGE""$BOLD""embeddedanalyzer/emba docker image""$NC"

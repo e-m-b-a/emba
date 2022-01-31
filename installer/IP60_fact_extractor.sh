@@ -17,7 +17,6 @@
 # Description:  Installs FACT-extractor for EMBA
 
 if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  INSTALL_APP_LIST=()
   print_git_info "fact-extractor" "m-1-k-3/fact_extractor" "Wraps FACT unpack plugins into standalone utility. Should be able to extract most of the common container formats. (EMBA fork)"
   echo -e "$ORANGE""fact_extractor will be downloaded.""$NC"
 

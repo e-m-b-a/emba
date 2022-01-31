@@ -33,8 +33,6 @@ if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        BINWALK_PRE_AVAILABLE=0
-
         apt-get install "${INSTALL_APP_LIST[@]}" -y
         download_file "PC1.c" "https://gist.githubusercontent.com/galaxy4public/0420c7c9a8e3ff860c8d5dce430b2669/raw/1f8a42c0525efb188c0165c6a4cb205e82f851e2/pc1.c" "external/pc1.c"
 
