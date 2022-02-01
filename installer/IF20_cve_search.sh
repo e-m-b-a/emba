@@ -109,7 +109,7 @@ IF20_cve_search() {
           fi
           # only update and install the database if we have no working database:
           if [[ "$CVE_INST" -eq 1 ]]; then
-            /etc/init.d/redis-server start
+            /etc/init.d/redis-server restart
             ./sbin/db_mgmt_cpe_dictionary.py -p || true
             ./sbin/db_mgmt_json.py -p || true
             ./sbin/db_updater.py -f || true

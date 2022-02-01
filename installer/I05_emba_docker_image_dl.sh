@@ -30,7 +30,7 @@ I05_emba_docker_image_dl() {
       echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
     fi
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""docker.io and the EMBA docker image (if not already on the system) will be downloaded and installed!""$NC"
