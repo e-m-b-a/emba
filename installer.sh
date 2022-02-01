@@ -37,9 +37,10 @@ if [[ "$STRICT" -eq 1 ]]; then
 fi
 
 # install docker EMBA
-IN_DOCKER=0
+export IN_DOCKER=0
 # list dependencies
-LIST_DEP=0
+export LIST_DEP=0
+export FULL=0
 
 ## Color definition
 export RED="\033[0;31m"
@@ -87,7 +88,7 @@ while getopts cCdDFhl OPT ; do
   case $OPT in
     d)
       export DOCKER_SETUP=1
-      export CVE_SEARCH=1
+      export CVE_SEARCH=0
       echo -e "$GREEN""$BOLD""Install all dependecies for EMBA in default/docker mode""$NC"
       ;;
     D)

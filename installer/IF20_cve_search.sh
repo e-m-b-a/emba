@@ -58,13 +58,13 @@ IF20_cve_search() {
       python3 -m pip install -r requirements.txt
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
   
-      echo -e "[*] Setting up CVE-search environment - ./etc/configuration.ini"
+      echo -e "[*] Setting up CVE-search environment - ./external/cve-search/etc/configuration.ini"
       sed -zE 's/localhost([^\n]*\n[^\n]*27017)/172.36.0.1\1/' ./etc/configuration.ini.sample | tee ./etc/configuration.ini &>/dev/null
       # we do not use the web server. In case someone enables it we have a good default configuration in place:
       sed -i "s/^Debug:\ True/Debug:\ False/g" ./etc/configuration.ini
       sed -i "s/^LoginRequired:\ False/LoginRequired:\ True/g" ./etc/configuration.ini
 
-      echo -e "[*] Setting password for Redis environment - ./etc/configuration.ini"
+      echo -e "[*] Setting password for Redis environment - ./external/cve-search/etc/configuration.ini"
       sed -i "s/^Password:\ .*/Password:\ $REDIS_PW/g" ./etc/configuration.ini
 
       echo -e "[*] Setting password for Redis environment - /etc/redis/redis.conf"

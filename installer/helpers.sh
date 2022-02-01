@@ -82,20 +82,26 @@ print_tool_info(){
 # c = description of tool
 
 print_git_info() {
-  GIT_NAME="$1"
-  GIT_URL="$2"
-  GIT_DESC="$3"
+  local GIT_NAME="$1"
+  local GIT_URL="$2"
+  local GIT_DESC="$3"
+  local GIT_SIZE=0
+
   echo -e "\\n""$ORANGE""$BOLD""$GIT_NAME""$NC"
   if [[ -n "$GIT_DESC" ]] ; then
     echo -e "Description: ""$GIT_DESC"
   fi
 
-  GIT_SIZE=$(curl https://api.github.com/repos/"$GIT_URL" 2> /dev/null | jq -r '.size' || 0)
+  if command -v jq >/dev/null ; then
+    GIT_SIZE=$(curl https://api.github.com/repos/"$GIT_URL" 2> /dev/null | jq -r '.size' || true)
 
-  if (( GIT_SIZE > 1024 )) ; then
-    echo -e "Download-Size: ""$(( GIT_SIZE / 1024 ))"" MB"
-  else
-    echo -e "Download-Size: ""$GIT_SIZE"" KB"
+    if [[ -n "${GIT_SIZE+0}" ]]; then
+      if (( GIT_SIZE > 1024 )) ; then
+        echo -e "Download-Size: ""$(( GIT_SIZE / 1024 ))"" MB"
+      else
+        echo -e "Download-Size: ""$GIT_SIZE"" KB"
+      fi
+    fi
   fi
 }
 
@@ -104,10 +110,10 @@ print_git_info() {
 # b = package version
 
 print_pip_info() {
-  PIP_NAME="$1"
+  local PIP_NAME="$1"
   local INSTALLED=0
   if [[ -n "${2+x}" ]] ; then
-    PACKAGE_VERSION="$2"
+    local PACKAGE_VERSION="$2"
   fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
   mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" 2>/dev/null)
