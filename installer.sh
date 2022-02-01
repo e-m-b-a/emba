@@ -16,12 +16,27 @@
 
 # Description:  Installs needed stuff for EMBA
 
+# it the installer fails you can try to change it to 0
+STRICT=1
+
 export DEBIAN_FRONTEND=noninteractive
 
 export INSTALL_APP_LIST=()
 export DOWNLOAD_FILE_LIST=()
 
 export INSTALLER_DIR="./installer"
+
+if [[ "$STRICT" -eq 1 ]]; then
+  # http://redsymbol.net/articles/unofficial-bash-strict-mode/
+  # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
+  set -e          # Exit immediately if a command exits with a non-zero status
+  set -u          # Exit and trigger the ERR trap when accessing an unset variable
+  set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+  set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+  shopt -s extdebug # Enable extended debugging
+  IFS=$'\n\t'     # Set the "internal field separator"
+  trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+fi
 
 # install docker EMBA
 IN_DOCKER=0
@@ -34,15 +49,28 @@ GREEN="\033[0;32m"
 ORANGE="\033[0;33m"
 MAGENTA="\033[0;35m"
 CYAN="\033[0;36m"
+BLUE="\033[0;34m"
 NC="\033[0m"  # no color
 
 ## Attribute definition
 BOLD="\033[1m"
 
-# shellcheck source=/dev/null
-source "$INSTALLER_DIR"/helpers.sh
-
 echo -e "\\n""$ORANGE""$BOLD""EMBA - Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
+
+# import all the installation modules
+mapfile -t INSTALLERS < <(find "$INSTALLER_DIR" -iname "*.sh" 2> /dev/null)
+INSTALLER_COUNT=0
+for INSTALLER_FILE in "${INSTALLERS[@]}" ; do
+  if ( file "$INSTALLER_FILE" | grep -q "shell script" ) ; then
+      # https://github.com/koalaman/shellcheck/wiki/SC1090
+      # shellcheck source=/dev/null
+      source "$INSTALLER_FILE"
+      (( INSTALLER_COUNT+=1 ))
+  fi
+done
+echo ""
+echo -e "==> ""$GREEN""Imported ""$INSTALLER_COUNT"" installer module files""$NC"
+echo ""
 
 if [ "$#" -ne 1 ]; then
   echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
@@ -111,8 +139,6 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   apt-get -y update
 fi
 
-# import all the installation modules
-import_installers
 
 # initial installation of the host environment:
 I01_default_apps_host

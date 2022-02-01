@@ -28,23 +28,6 @@ print_help()
   echo
 }
 
-import_installers()
-{
-  local INSTALLERS
-  local INSTALLER_COUNT
-  mapfile -t INSTALLERS < <(find "$INSTALLER_DIR" -iname "*.sh" 2> /dev/null)
-  for INSTALLER_FILE in "${INSTALLERS[@]}" ; do
-    if ( file "$INSTALLER_FILE" | grep -q "shell script" ) ; then
-      # https://github.com/koalaman/shellcheck/wiki/SC1090
-      # shellcheck source=/dev/null
-      source "$INSTALLER_FILE"
-      (( INSTALLER_COUNT+=1 ))
-    fi
-  done
-  echo ""
-  echo -e "==> ""$GREEN""Imported ""$INSTALLER_COUNT"" installer module files""$NC"
-}
-
 module_title()
 {
   local MODULE_TITLE
@@ -72,7 +55,7 @@ print_tool_info(){
     echo -e "$RED""$1"" was not identified and is not installable.""$NC"
   else
     COMMAND_=""
-    if [[ -z "$3" ]] ; then
+    if [[ -n ${3+x} ]] ; then
       COMMAND_="$3"
     else
       COMMAND_="$1"
@@ -121,13 +104,18 @@ print_git_info() {
 
 print_pip_info() {
   PIP_NAME="$1"
-  if [[ -n "${2}" ]] ; then
+  if [[ -n "${2+x}" ]] ; then
     PACKAGE_VERSION="$2"
   fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
   mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" 2>/dev/null)
   # in the error message of pip install we can find all available versions
-  PVERSION=$(pip3 install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION")
+  if [[ -n "${PACKAGE_VERSION+x}" ]] ; then
+    PVERSION=$(pip3 install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION")
+  else
+  #  PVERSION=$(pip3 install "$PIP_NAME" 2>&1 | grep -v "Requirement already satisfied")
+    PVERSION="NA"
+  fi
   for INFO in "${PIP_INFOS[@]}"; do
     if [[ "$INFO" == *"Summary"* ]]; then
       INFO=${INFO//Summary/Description}
@@ -183,7 +171,7 @@ print_file_info()
   fi
 
   if ! [[ -f "${4}" ]] ; then
-    if [[ -n "${5}" ]] ; then
+    if [[ -n "${5+x}" ]] ; then
       if [[ -f "${5}" ]] || ( command -v "${5}" > /dev/null) || ( dpkg -s "${5}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
         echo -e "$GREEN""$1"" is already installed - no further action performed.""$NC"
       else

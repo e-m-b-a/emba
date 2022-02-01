@@ -93,35 +93,44 @@ IP12_avm_freetz_ng_extract() {
         download_file "execstack" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/execstack_0.0.20131005-1+b10_amd64.deb"
         dpkg -i external/execstack_0.0.20131005-1+b10_amd64.deb
         rm external/execstack_0.0.20131005-1+b10_amd64.deb
-        mkdir external/freetz-ng
-        chown -R freetzuser:freetzuser external/freetz-ng
-        chmod 777 -R external/freetz-ng
-        su freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
-        cd external/freetz-ng || exit 1
-        if [[ $IN_DOCKER -eq 1 ]]; then
-          ln -s /usr/bin/python3 /usr/bin/python
-        fi
-        sudo -u freetzuser make allnoconfig
-        sudo -u freetzuser make
-        sudo -u freetzuser make tools
-        cd "$HOME_PATH" || exit 1
-        chown -R root:root external/freetz-ng
-        userdel freetzuser
-        if [[ -d external/freetz-ng/source ]]; then
-          echo "[*] Removing freetz-ng source directory"
-          rm -r external/freetz-ng/source
-        fi
-        if [[ -d external/freetz-ng/docs ]]; then
-          echo "[*] Removing freetz-ng docs directory"
-          rm -r external/freetz-ng/docs
-        fi
-        if [[ -d external/freetz-ng/toolchain ]]; then
-          echo "[*] Removing freetz-ng toolchain directory"
-          rm -r external/freetz-ng/toolchain
-        fi
-        if [[ -d external/freetz-ng/.git ]]; then
-          echo "[*] Removing freetz-ng .git directory"
-          rm -r external/freetz-ng/.git
+
+        if ! [[ -d external/freetz-ng ]]; then
+          mkdir external/freetz-ng
+
+          chown -R freetzuser:freetzuser external/freetz-ng
+          chmod 777 -R external/freetz-ng
+          su freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
+
+          cd external/freetz-ng || exit 1
+
+          if [[ $IN_DOCKER -eq 1 ]]; then
+            ln -s /usr/bin/python3 /usr/bin/python
+          fi
+
+          sudo -u freetzuser make allnoconfig
+          sudo -u freetzuser make
+          sudo -u freetzuser make tools
+          cd "$HOME_PATH" || exit 1
+          chown -R root:root external/freetz-ng
+          userdel freetzuser
+          if [[ -d external/freetz-ng/source ]]; then
+            echo "[*] Removing freetz-ng source directory"
+            rm -r external/freetz-ng/source
+          fi
+          if [[ -d external/freetz-ng/docs ]]; then
+            echo "[*] Removing freetz-ng docs directory"
+            rm -r external/freetz-ng/docs
+          fi
+          if [[ -d external/freetz-ng/toolchain ]]; then
+            echo "[*] Removing freetz-ng toolchain directory"
+            rm -r external/freetz-ng/toolchain
+          fi
+          if [[ -d external/freetz-ng/.git ]]; then
+            echo "[*] Removing freetz-ng .git directory"
+            rm -r external/freetz-ng/.git
+          fi
+        else
+          echo -e "${ORANGE}Found freetz directory ... Not touching it$NC"
         fi
         ;;
       esac
