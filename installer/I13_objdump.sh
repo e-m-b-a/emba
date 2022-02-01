@@ -28,7 +28,7 @@ I13_objdump() {
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
       print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
       print_tool_info "texinfo" 1
-      dprint_tool_info "gcc" 1
+      print_tool_info "gcc" 1
       print_tool_info "build-essential" 1
       print_tool_info "gawk" 1
       print_tool_info "bison" 1

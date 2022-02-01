@@ -39,7 +39,7 @@ IP18_qnap_decryptor() {
 
         if [[ -f "external/pc1.c" ]]; then
           cd ./external || exit 1
-          echo "[*] Compiling QNAP decryptor"
+          echo -e "[*] Compiling QNAP decryptor"
           gcc -pipe -Wall -O0 -ggdb -o PC1 pc1.c
           chmod +x ./PC1
 

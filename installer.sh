@@ -20,10 +20,8 @@
 STRICT=1
 
 export DEBIAN_FRONTEND=noninteractive
-
 export INSTALL_APP_LIST=()
 export DOWNLOAD_FILE_LIST=()
-
 export INSTALLER_DIR="./installer"
 
 if [[ "$STRICT" -eq 1 ]]; then
@@ -44,16 +42,16 @@ IN_DOCKER=0
 LIST_DEP=0
 
 ## Color definition
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-ORANGE="\033[0;33m"
-MAGENTA="\033[0;35m"
-CYAN="\033[0;36m"
-BLUE="\033[0;34m"
-NC="\033[0m"  # no color
+export RED="\033[0;31m"
+export GREEN="\033[0;32m"
+export ORANGE="\033[0;33m"
+export MAGENTA="\033[0;35m"
+export CYAN="\033[0;36m"
+export BLUE="\033[0;34m"
+export NC="\033[0m"  # no color
 
 ## Attribute definition
-BOLD="\033[1m"
+export BOLD="\033[1m"
 
 echo -e "\\n""$ORANGE""$BOLD""EMBA - Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
 
@@ -68,6 +66,7 @@ for INSTALLER_FILE in "${INSTALLERS[@]}" ; do
       (( INSTALLER_COUNT+=1 ))
   fi
 done
+
 echo ""
 echo -e "==> ""$GREEN""Imported ""$INSTALLER_COUNT"" installer module files""$NC"
 echo ""
@@ -109,6 +108,8 @@ while getopts cCdDFhl OPT ; do
       ;;
     l)
       export LIST_DEP=1
+      export CVE_SEARCH=0
+      export DOCKER_SETUP=0
       echo -e "$GREEN""$BOLD""List all dependecies""$NC"
       ;;
     *)

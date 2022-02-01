@@ -38,17 +38,19 @@ IL15_emulated_checks_init() {
   
       apt-get install "${INSTALL_APP_LIST[@]}" -y
  
-      git clone https://github.com/m-1-k-3/routersploit.git external/routersploit
+      if ! [[ -d external/routersploit ]]; then
+        git clone https://github.com/m-1-k-3/routersploit.git external/routersploit
+      fi
 
       cd external/routersploit || exit 1
 
-      if ! [[ -f "external/routersploit/docs/routersploit_patch" ]]; then
-        # is already applied in the used fork (leave this here for future usecases):
-        download_file "routersploit_patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "docs/routersploit_patch"
-        patch -f -p1 < docs/routersploit_patch
-      else
-        echo -e "$GREEN""routersploit_patch already downloaded""$NC"
-      fi
+      #if ! [[ -f "external/routersploit/docs/routersploit_patch" ]]; then
+      #  # is already applied in the used fork (leave this here for future usecases):
+      #  download_file "routersploit_patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "docs/routersploit_patch"
+      #  patch -f -p1 < docs/routersploit_patch
+      #else
+      #  echo -e "$GREEN""routersploit_patch already downloaded""$NC"
+      #fi
 
       python3 -m pip install -r requirements.txt
 

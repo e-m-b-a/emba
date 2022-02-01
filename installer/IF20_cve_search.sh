@@ -35,40 +35,41 @@ IF20_cve_search() {
       # we always need the cve-search stuff:
       if ! [[ -d external/cve-search ]]; then
         git clone https://github.com/cve-search/cve-search.git external/cve-search
-        cd ./external/cve-search/ || exit 1
-  
-        while read -r TOOL_NAME; do
-          print_tool_info "$TOOL_NAME" 1
-        done < requirements.system
-  
-        while read -r TOOL_NAME; do
-          PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
-          TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
-          print_pip_info "$PIP_NAME" "$TOOL_VERSION"
-        done < requirements.txt
-  
-        #xargs sudo apt-get install -y < requirements.system
-        while read -r TOOL_NAME; do
-          apt-get install -y "$TOOL_NAME"
-        done < requirements.system
-  
-        # shellcheck disable=SC2002
-        cat requirements.txt | xargs -n 1 pip install 2>/dev/null
-        REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)"
-  
-        echo -e "[*] Setting up CVE-search environment - ./etc/configuration.ini"
-        sed -zE 's/localhost([^\n]*\n[^\n]*27017)/172.36.0.1\1/' ./etc/configuration.ini.sample | tee ./etc/configuration.ini &>/dev/null
-        # we do not use the web server. In case someone enables it we have a good default configuration in place:
-        sed -i "s/^Debug:\ True/Debug:\ False/g" ./etc/configuration.ini
-        sed -i "s/^LoginRequired:\ False/LoginRequired:\ True/g" ./etc/configuration.ini
-  
-        echo -e "[*] Setting password for Redis environment - ./etc/configuration.ini"
-        sed -i "s/^Password:\ .*/Password:\ $REDIS_PW/g" ./etc/configuration.ini
-  
-        echo -e "[*] Setting password for Redis environment - /etc/redis/redis.conf"
-        sed -i "s/^\#\ requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
-        sed -i "s/^requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
       fi
+      cd ./external/cve-search/ || exit 1
+  
+      while read -r TOOL_NAME; do
+        print_tool_info "$TOOL_NAME" 1
+      done < requirements.system
+  
+      while read -r TOOL_NAME; do
+        PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
+        TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
+        print_pip_info "$PIP_NAME" "$TOOL_VERSION"
+      done < requirements.txt
+  
+      #xargs sudo apt-get install -y < requirements.system
+      while read -r TOOL_NAME; do
+        apt-get install -y "$TOOL_NAME"
+      done < requirements.system
+  
+      # shellcheck disable=SC2002
+      #cat requirements.txt | xargs -n 1 pip install 2>/dev/null
+      python3 -m pip install -r requirements.txt
+      REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
+  
+      echo -e "[*] Setting up CVE-search environment - ./etc/configuration.ini"
+      sed -zE 's/localhost([^\n]*\n[^\n]*27017)/172.36.0.1\1/' ./etc/configuration.ini.sample | tee ./etc/configuration.ini &>/dev/null
+      # we do not use the web server. In case someone enables it we have a good default configuration in place:
+      sed -i "s/^Debug:\ True/Debug:\ False/g" ./etc/configuration.ini
+      sed -i "s/^LoginRequired:\ False/LoginRequired:\ True/g" ./etc/configuration.ini
+
+      echo -e "[*] Setting password for Redis environment - ./etc/configuration.ini"
+      sed -i "s/^Password:\ .*/Password:\ $REDIS_PW/g" ./etc/configuration.ini
+
+      echo -e "[*] Setting password for Redis environment - /etc/redis/redis.conf"
+      sed -i "s/^\#\ requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
+      sed -i "s/^requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
     fi
   
     case ${ANSWER:0:1} in
@@ -109,9 +110,9 @@ IF20_cve_search() {
           # only update and install the database if we have no working database:
           if [[ "$CVE_INST" -eq 1 ]]; then
             /etc/init.d/redis-server start
-            ./sbin/db_mgmt_cpe_dictionary.py -p
-            ./sbin/db_mgmt_json.py -p
-            ./sbin/db_updater.py -f
+            ./sbin/db_mgmt_cpe_dictionary.py -p || true
+            ./sbin/db_mgmt_json.py -p || true
+            ./sbin/db_updater.py -f || true
           else
             echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
           fi

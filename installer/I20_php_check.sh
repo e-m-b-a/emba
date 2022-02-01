@@ -44,8 +44,8 @@ I20_php_check() {
         fi
         download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
         cd ./external/iniscan || exit 1
-        php composer.phar build --no-interaction
-        php composer.phar global require psecio/iniscan --no-interaction
+        php composer.phar build --no-interaction || true
+        php composer.phar global require psecio/iniscan --no-interaction || true
         cd "$HOME_PATH" || exit 1
         cp -r "/root/.config/composer/vendor/." "./external/iniscan/"
       ;;

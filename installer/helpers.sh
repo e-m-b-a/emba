@@ -22,7 +22,6 @@ print_help()
   echo -e "$CYAN""-d""$NC""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
   echo -e "$CYAN""-F""$NC""         Installation of EMBA with all dependencies (for running on your host - developer mode)"
   echo -e "$CYAN""-D""$NC""         Only used via docker-compose for building EMBA docker container"
-  echo -e "$CYAN""-C""$NC""         Installs only CVE-search incl. database on the host (used for EMBArk installations)"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
   echo
@@ -46,31 +45,33 @@ module_title()
 print_tool_info(){
   echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
   TOOL_INFO="$(apt show "${1}" 2> /dev/null)"
-  echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
-  SIZE=$(apt show "$1" 2>/dev/null | grep Download-Size | cut -d: -f2)
-  if [[ -n "$SIZE" ]]; then
-    echo -e "Download-Size:$SIZE"
-  fi
-  if echo "$TOOL_INFO" | grep -E "^E:\ "; then
-    echo -e "$RED""$1"" was not identified and is not installable.""$NC"
-  else
-    COMMAND_=""
-    if [[ -n ${3+x} ]] ; then
-      COMMAND_="$3"
-    else
-      COMMAND_="$1"
+  if echo "$TOOL_INFO" | grep -q "Description:" 2>/dev/null ; then
+    echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
+    SIZE=$(apt show "$1" 2>/dev/null | grep Download-Size | cut -d: -f2)
+    if [[ -n "$SIZE" ]]; then
+      echo -e "Download-Size:$SIZE"
     fi
-    if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-      UPDATE=$(apt-cache policy "$1" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
-      if [[ "$UPDATE" -eq 1 ]] ; then
-        echo -e "$GREEN""$1"" won't be updated.""$NC"
+    if echo "$TOOL_INFO" | grep -E "^E:\ "; then
+      echo -e "$RED""$1"" was not identified and is not installable.""$NC"
+    else
+      COMMAND_=""
+      if [[ -n ${3+x} ]] ; then
+        COMMAND_="$3"
       else
-        echo -e "$ORANGE""$1"" will be updated.""$NC"
+        COMMAND_="$1"
+      fi
+      if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+        UPDATE=$(apt-cache policy "$1" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
+        if [[ "$UPDATE" -eq 1 ]] ; then
+          echo -e "$GREEN""$1"" won't be updated.""$NC"
+        else
+          echo -e "$ORANGE""$1"" will be updated.""$NC"
+          INSTALL_APP_LIST+=("$1")
+        fi
+      else
+        echo -e "$ORANGE""$1"" will be newly installed.""$NC"
         INSTALL_APP_LIST+=("$1")
       fi
-    else
-      echo -e "$ORANGE""$1"" will be newly installed.""$NC"
-      INSTALL_APP_LIST+=("$1")
     fi
   fi
 }
@@ -89,7 +90,7 @@ print_git_info() {
     echo -e "Description: ""$GIT_DESC"
   fi
 
-  GIT_SIZE=$(curl https://api.github.com/repos/"$GIT_URL" 2> /dev/null | jq -r '.size')
+  GIT_SIZE=$(curl https://api.github.com/repos/"$GIT_URL" 2> /dev/null | jq -r '.size' || 0)
 
   if (( GIT_SIZE > 1024 )) ; then
     echo -e "Download-Size: ""$(( GIT_SIZE / 1024 ))"" MB"
@@ -104,6 +105,7 @@ print_git_info() {
 
 print_pip_info() {
   PIP_NAME="$1"
+  local INSTALLED=0
   if [[ -n "${2+x}" ]] ; then
     PACKAGE_VERSION="$2"
   fi
@@ -111,7 +113,7 @@ print_pip_info() {
   mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" 2>/dev/null)
   # in the error message of pip install we can find all available versions
   if [[ -n "${PACKAGE_VERSION+x}" ]] ; then
-    PVERSION=$(pip3 install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION")
+    PVERSION=$(pip3 install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION" || true)
   else
   #  PVERSION=$(pip3 install "$PIP_NAME" 2>&1 | grep -v "Requirement already satisfied")
     PVERSION="NA"
@@ -133,11 +135,13 @@ print_pip_info() {
   done
 
   # we need grep -c -> with -q we got errors
-  INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^${PIP_NAME}[[:space:]]+$PACKAGE_VERSION")
+  if [[ -n "${PACKAGE_VERSION+x}" ]]; then
+    INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^${PIP_NAME}[[:space:]]+$PACKAGE_VERSION" || true)
+  fi
   if [[ "$INSTALLED" -gt 0 ]]; then
     echo -e "$GREEN""$PIP_NAME"" is already installed - no further action performed.""$NC"
   else
-    INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^$PIP_NAME")
+    INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^$PIP_NAME" || true)
     if [[ "$INSTALLED" -gt 0 ]]; then
       echo -e "$ORANGE""$PIP_NAME"" is already installed and will be updated (if a newer version is available).""$NC"
     else
@@ -160,7 +164,7 @@ print_file_info()
     echo -e "Description: ""${2}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
-  FILE_SIZE=$(($(wget "${3}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d')))
+  FILE_SIZE=$(($(wget "${3}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d' || true)))
 
   if (( FILE_SIZE > 1048576 )) ; then
     echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
