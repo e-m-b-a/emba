@@ -42,7 +42,7 @@ wait_for_pid() {
       echo "." | tr -d "\n" 2>/dev/null
       # if S115 is running we have to kill old qemu processes
       if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
-        killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
+        killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
       fi
     done
   done

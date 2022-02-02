@@ -102,7 +102,7 @@ S09_firmware_base_version_check() {
       # This is default mode!
 
       # check binwalk files sometimes we can find kernel version information or something else in it
-      VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null)
+      VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null || true)
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
@@ -141,13 +141,14 @@ S09_firmware_base_version_check() {
 
       echo "." | tr -d "\n"
 
-
     fi
 
-    if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
-      recover_wait_pids "${WAIT_PIDS_S09[@]}"
+    if [[ "$THREADED" -eq 1 ]]; then
       if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
-        max_pids_protection "$MAX_THREADS_S09" "${WAIT_PIDS_S09[@]}"
+        recover_wait_pids "${WAIT_PIDS_S09[@]}"
+        if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
+          max_pids_protection "$MAX_THREADS_S09" "${WAIT_PIDS_S09[@]}"
+        fi
       fi
     fi
 
@@ -183,7 +184,7 @@ bin_string_checker() {
         continue
       fi
       if [[ "$BIN_FILE" == *ELF* ]] ; then
-        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
           print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
@@ -192,7 +193,7 @@ bin_string_checker() {
           continue
         fi
       elif [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* ]] ; then
-        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+        VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
           print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
@@ -202,7 +203,7 @@ bin_string_checker() {
         fi
       fi
     else
-      VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null)
+      VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
         print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."

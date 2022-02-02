@@ -62,7 +62,7 @@ S21_python_check()
     # W1505: Using deprecated method splitunc() (deprecated-method)
     # -> we only print one W1505
 
-    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "$LOG_PATH_MODULE"/pylint_* 2>/dev/null | cut -d: -f5- | sort -u -t: -k1,1)
+    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "$LOG_PATH_MODULE"/pylint_* 2>/dev/null || true | cut -d: -f5- | sort -u -t: -k1,1)
     for VTYPE in "${S21_VULN_TYPES[@]}" ; do
       print_output "$(indent "$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""$GREEN")"
     done

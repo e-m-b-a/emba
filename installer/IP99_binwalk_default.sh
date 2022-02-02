@@ -42,6 +42,7 @@ IP99_binwalk_default() {
     print_tool_info "arj" 1
     print_tool_info "lhasa" 1
     print_tool_info "p7zip" 1
+    print_tool_info "p7zip-rar" 1
     print_tool_info "p7zip-full" 1
     print_tool_info "cabextract" 1
     print_tool_info "cramfsswap" 1
@@ -189,6 +190,10 @@ IP99_binwalk_default() {
           echo -e "$GREEN""binwalk installed successfully""$NC"
         elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
           echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
+        fi
+        # currently this package gets somehow deinstalled ... lets try it this way:
+        if dpkg -l | grep p7zip-full | grep -q "^rc"; then
+          apt-get install p7zip-full
         fi
       ;;
     esac

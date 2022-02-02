@@ -41,7 +41,7 @@ P02_firmware_bin_file_check() {
   print_output "$(indent "$FILE_LS_OUT")"
   print_output ""
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
+    hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE" || true
     print_output ""
     print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
     print_output ""
@@ -63,7 +63,7 @@ P02_firmware_bin_file_check() {
 }
 
 fw_bin_detector() {
-  local CHECK_FILE="$1"
+  local CHECK_FILE="${1:-}"
   local FILE_BIN_OUT
   local DLINK_ENC_CHECK
   local AVM_CHECK
@@ -75,12 +75,12 @@ fw_bin_detector() {
   export UBOOT_IMAGE=0
   export EXT_IMAGE=0
   export UBI_IMAGE=0
-  export ENGENIUS_DETECTED=0
+  export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
-  DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE"| head -1)
-  AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
+  DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
+  AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
 
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
@@ -101,7 +101,7 @@ fw_bin_detector() {
   if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
     export DLINK_ENC_DETECTED=2
   fi
-  if [[ "$AVM_CHECK" -gt 0 ]]; then
+  if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
     export AVM_DETECTED=1
   fi
   if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then

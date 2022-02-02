@@ -238,11 +238,11 @@ main()
   export FW_VERSION=""
   export FW_DEVICE=""
   export FW_NOTES=""
+  export ARCH=""
   export EXLUDE=()
   export SELECT_MODULES=()
   export LOG_GREP=0
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
-  export MOD_RUNNING=0          # for tracking how many modules currently running
   export ONLY_DEP=0             # test only dependency
   export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
   export PHP_CHECK=1
@@ -589,7 +589,7 @@ main()
     echo
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
+#    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
 
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
       print_output "[-] EMBA docker build failed!" "no_log"

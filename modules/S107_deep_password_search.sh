@@ -24,9 +24,9 @@ S107_deep_password_search()
   PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
   local PW_COUNTER=0
 
-  find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP"/pw_hashes.txt
+  find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP_DIR"/pw_hashes.txt
 
-  if [[ $(wc -l "$TMP"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
+  if [[ $(wc -l "$TMP_DIR"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
     print_output "[+] Found the following password hash values:"
     write_csv_log "PW_PATH" "PW_HASH"
     while read -r PW_HASH; do

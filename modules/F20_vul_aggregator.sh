@@ -53,9 +53,11 @@ F20_vul_aggregator() {
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
     # [+] Found Version details (kernel): Linux kernel version 2.6.33.2
-    if [[ ${#VERSIONS_KERNEL[@]} -ne 0 ]]; then
-      # then we have found a kernel in our s25 kernel module
-      KERNELV=1
+    if [[ -v VERSIONS_KERNEL[@] ]]; then
+      if [[ ${#VERSIONS_KERNEL[@]} -ne 0 ]]; then
+        # then we have found a kernel in our s25 kernel module
+        KERNELV=1
+      fi
     fi
 
     get_firmware_details
@@ -114,7 +116,7 @@ F20_vul_aggregator() {
 aggregate_versions() {
   sub_module_title "Software inventory generation."
 
-  if [[ ${#VERSIONS_BASE_CHECK[@]} -gt 0 || ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 ]]; then
+  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
@@ -122,12 +124,6 @@ aggregate_versions() {
         continue
       fi
       print_output "[+] Found Version details (${ORANGE}firmware details check$GREEN): ""$ORANGE$VERSION$NC"
-    done
-    for VERSION in "${VERSIONS_BASE_CHECK[@]}"; do
-      if [ -z "$VERSION" ]; then
-        continue
-      fi
-      print_output "[+] Found Version details (${ORANGE}base check$GREEN): ""$ORANGE$VERSION$NC"
     done
     for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
       if [ -z "$VERSION" ]; then
@@ -155,7 +151,7 @@ aggregate_versions() {
     done
 
     print_output ""
-    VERSIONS_AGGREGATED=("${VERSIONS_BASE_CHECK[@]}" "${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}")
+    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}")
   fi
 
   # sorting and unique our versions array:

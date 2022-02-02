@@ -60,7 +60,7 @@ module_title()
   local MODULE_TITLE_FORMAT
   MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""$MODULE_TITLE""${NC}""\\n""${BOLD}""=================================================================""${NC}"
   echo -e "\\n\\n""$MODULE_TITLE_FORMAT"
-  if [[ "$2" != "no_log" ]] ; then
+  if [[ "${2:-}" != "no_log" ]] ; then
     echo -e "$(format_log "$MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
     if [[ $LOG_GREP -eq 1 ]] ; then
       write_grep_log "$MODULE_TITLE" "MODULE_TITLE"
@@ -91,9 +91,9 @@ print_output()
     local LOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
-  if [[ -n "${3+NA}" ]] ; then
-    local REF_LINK="${3:-}"
-  fi
+  #if [[ -n "${3+NA}" ]] ; then
+  local REF_LINK="${3:-}"
+  #fi
   local TYPE_CHECK
   TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
@@ -103,14 +103,14 @@ print_output()
     if [[ "$LOG_SETTING" == "main" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
-      if [[ -z "$REF_LINK" ]] ; then
+      if [[ -z "${REF_LINK:-}" ]] ; then
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       else
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "$LOG_FILE_MOD" ]]; then
           echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       fi
@@ -122,12 +122,12 @@ print_output()
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
         echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       else
         echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       fi
@@ -141,8 +141,8 @@ print_output()
 write_log()
 {
   readarray TEXT_ARR <<< "$1"
-  local LOG_FILE_ALT="$2"
-  local GREP_LOG_WRITE="$3"
+  local LOG_FILE_ALT="${2:-}"
+  local GREP_LOG_WRITE="${3:-}"
   if [[ "$LOG_FILE_ALT" == "" ]] ; then
     W_LOG_FILE="$LOG_FILE"
   else
@@ -534,7 +534,6 @@ module_start_log() {
   export LOG_PATH_MODULE
   LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
   if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" ; fi
-  ((MOD_RUNNING++))
 }
 
 pre_module_reporter() {
@@ -586,7 +585,6 @@ module_end_log() {
   fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
-  ((MOD_RUNNING--))
 }
 
 strip_color_codes() {

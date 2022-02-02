@@ -221,7 +221,7 @@ config_list() {
     if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
       local STRING_LIST
       readarray -t STRING_LIST <"$1"
-      local LIST
+      local LIST=""
       for STRING in "${STRING_LIST[@]}"; do
         LIST="$LIST""$STRING""\n"
       done

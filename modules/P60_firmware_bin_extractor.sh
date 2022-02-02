@@ -26,6 +26,9 @@ P60_firmware_bin_extractor() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   DISK_SPACE_CRIT=0
+  FILES_FACT=0
+  FILES_BINWALK=0
+  LINUX_PATH_COUNTER=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # we love binwalk ... this is our first chance for extracting everything
@@ -43,14 +46,14 @@ P60_firmware_bin_extractor() {
     fi
 
     FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
-    if [[ -n "$OUTPUT_DIR_fact" && -d "$OUTPUT_DIR_fact" ]]; then
+    if [[ -n "${OUTPUT_DIR_fact:-}" && -d "$OUTPUT_DIR_fact" ]]; then
       FILES_FACT=$(find "$OUTPUT_DIR_fact" -xdev -type f | wc -l )
     fi
     print_output ""
     print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
   fi
 
-  if [[ -n $FILES_FACT ]]; then
+  if [[ -n ${FILES_FACT} ]]; then
     print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
   fi
 

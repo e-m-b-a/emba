@@ -67,7 +67,7 @@ os_identification() {
   OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443")
   echo "." | tr -d "\n"
   declare -A OS_COUNTER=()
-  local COUNTER
+  local COUNTER=0
 
   if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
     echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/p70.tmp
@@ -80,15 +80,15 @@ os_identification() {
   for OS in "${OS_SEARCHER[@]}"; do
     DETECTED=0
     OS_COUNTER[$OS]=0
-    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null)"))
-    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p60_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null)" ))
-    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS")" ))
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null || true)"))
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p60_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null || true)" ))
+    OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS" || true)" ))
 
     if [[ $OS == "VxWorks\|Wind" ]]; then
       OS_COUNTER_VxWorks="${OS_COUNTER[$OS]}"
     fi
     if [[ $OS == *"CPU "* || $OS == "ADONIS" || $OS == "CP443" ]]; then
-      OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "Original Siemens Equipment")" ))
+      OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "Original Siemens Equipment" || true)" ))
     fi
 
     if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 && ${#ROOT_PATH[@]} -gt 1 ]] ; then

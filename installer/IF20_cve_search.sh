@@ -64,12 +64,15 @@ IF20_cve_search() {
       sed -i "s/^Debug:\ True/Debug:\ False/g" ./etc/configuration.ini
       sed -i "s/^LoginRequired:\ False/LoginRequired:\ True/g" ./etc/configuration.ini
 
-      echo -e "[*] Setting password for Redis environment - ./external/cve-search/etc/configuration.ini"
-      sed -i "s/^Password:\ .*/Password:\ $REDIS_PW/g" ./etc/configuration.ini
+      # if we setup a docker container we do not need to configure the redis passwords
+      if [[ $IN_DOCKER -ne 1 ]]; then
+        echo -e "[*] Setting password for Redis environment - ./external/cve-search/etc/configuration.ini"
+        sed -i "s/^Password:\ .*/Password:\ $REDIS_PW/g" ./etc/configuration.ini
 
-      echo -e "[*] Setting password for Redis environment - /etc/redis/redis.conf"
-      sed -i "s/^\#\ requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
-      sed -i "s/^requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
+        echo -e "[*] Setting password for Redis environment - /etc/redis/redis.conf"
+        sed -i "s/^\#\ requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
+        sed -i "s/^requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
+      fi
     fi
   
     case ${ANSWER:0:1} in

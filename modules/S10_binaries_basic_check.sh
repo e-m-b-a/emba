@@ -36,7 +36,7 @@ S10_binaries_basic_check()
       if ( file "$LINE" | grep -q "ELF" ) ; then
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
-        mapfile -t VUL_FUNC_RESULT < <(readelf -a --use-dynamic "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format")
+        mapfile -t VUL_FUNC_RESULT < <(readelf -a --use-dynamic "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
           print_output ""
           print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
@@ -49,7 +49,7 @@ S10_binaries_basic_check()
         fi
       fi
     done
-    print_output "[*] Found ""$COUNTER"" binaries with interesting functions in ""$BIN_COUNT"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
+    print_output "[*] Found ""$ORANGE$COUNTER$NC"" binaries with interesting functions in ""$ORANGE$BIN_COUNT$NC"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
 
   module_end_log "${FUNCNAME[0]}" "$COUNTER"
