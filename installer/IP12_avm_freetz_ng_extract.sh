@@ -104,9 +104,9 @@ IP12_avm_freetz_ng_extract() {
 
           cd external/freetz-ng || exit 1
 
-          if [[ $IN_DOCKER -eq 1 ]]; then
-            ln -s /usr/bin/python3 /usr/bin/python
-          fi
+          #if [[ $IN_DOCKER -eq 1 ]]; then
+          #  ln -s /usr/bin/python3 /usr/bin/python
+          #fi
 
           sudo -u freetzuser make allnoconfig
           # we currently running into an error that does not hinder us in using Freetz-NG
