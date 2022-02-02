@@ -60,12 +60,10 @@ echo -e "\\n""$ORANGE""$BOLD""EMBA - Embedded Linux Analyzer Installer""$NC""\\n
 mapfile -t INSTALLERS < <(find "$INSTALLER_DIR" -iname "*.sh" 2> /dev/null)
 INSTALLER_COUNT=0
 for INSTALLER_FILE in "${INSTALLERS[@]}" ; do
-  if ( file "$INSTALLER_FILE" | grep -q "shell script" ) ; then
-      # https://github.com/koalaman/shellcheck/wiki/SC1090
-      # shellcheck source=/dev/null
-      source "$INSTALLER_FILE"
-      (( INSTALLER_COUNT+=1 ))
-  fi
+  # https://github.com/koalaman/shellcheck/wiki/SC1090
+  # shellcheck source=/dev/null
+  source "$INSTALLER_FILE"
+  (( INSTALLER_COUNT+=1 ))
 done
 
 echo ""
