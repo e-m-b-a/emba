@@ -107,7 +107,7 @@ cleaner() {
       killall -9 --quiet -r .*cwe_checker.*
     fi
   fi
-  if [[ -n "$CHECK_CVE_JOB_PID" && "$CHECK_CVE_JOB_PID" -ne 0 ]]; then
+  if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
     kill -9 "$CHECK_CVE_JOB_PID"
   fi
 

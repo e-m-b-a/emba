@@ -17,11 +17,26 @@
 # Description:  Main script for load all necessary files and call main function of modules
 
 INVOCATION_PATH="."
+STRICT=0
+
+if [[ "$STRICT" -eq 1 ]]; then
+  # http://redsymbol.net/articles/unofficial-bash-strict-mode/
+  # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
+  # shellcheck disable=SC1091
+  source ./installer/wickStrictModeFail.sh
+  set -e          # Exit immediately if a command exits with a non-zero status
+  set -u          # Exit and trigger the ERR trap when accessing an unset variable
+  set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+  set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+  shopt -s extdebug # Enable extended debugging
+  IFS=$'\n\t'     # Set the "internal field separator"
+  trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+fi
 
 import_helper()
 {
   local HELPERS
-  local HELPER_COUNT
+  local HELPER_COUNT=0
   mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for HELPER_FILE in "${HELPERS[@]}" ; do
     if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
@@ -37,7 +52,7 @@ import_helper()
 import_module()
 {
   local MODULES
-  local MODULE_COUNT
+  local MODULE_COUNT=0
   mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
@@ -196,18 +211,6 @@ run_modules()
 
 main()
 {
-  STRICT=0
-  if [[ "$STRICT" -eq 1 ]]; then
-    # http://redsymbol.net/articles/unofficial-bash-strict-mode/
-    # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
-    set -e          # Exit immediately if a command exits with a non-zero status
-    set -u          # Exit and trigger the ERR trap when accessing an unset variable
-    set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
-    set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
-    shopt -s extdebug # Enable extended debugging
-    IFS=$'\n\t'     # Set the "internal field separator"
-    trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
-  fi
 
   set -a 
   trap cleaner INT
@@ -229,6 +232,14 @@ main()
   export IN_DOCKER=0
   export USE_DOCKER=1
   export KERNEL=0
+  export KERNEL_CONFIG=""
+  export FIRMWARE_PATH=""
+  export FW_VENDOR=""
+  export FW_VERSION=""
+  export FW_DEVICE=""
+  export FW_NOTES=""
+  export EXLUDE=()
+  export SELECT_MODULES=()
   export LOG_GREP=0
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export MOD_RUNNING=0          # for tracking how many modules currently running
@@ -398,7 +409,7 @@ main()
   fi
 
   # profile handling
-  if [[ -n "$PROFILE" ]]; then
+  if [[ -n "${PROFILE:-}" ]]; then
     if [[ -f "$PROFILE" ]]; then
       print_bar "no_log"
       if [[ $IN_DOCKER -ne 1 ]] ; then
@@ -564,10 +575,12 @@ main()
         D|f|i|l)
           ;;
         *)
-          if [[ "${#OPTARG[@]}" -gt 0 ]] ; then
-            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" "${OPTARG[@]}" )
-          else
-            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
+          if [[ -v OPTARG[@] ]] ; then
+            if [[ "${#OPTARG[@]}" -gt 0 ]] ; then
+              ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" "${OPTARG[@]}" )
+            else
+              ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
+            fi
           fi
           ;;
       esac

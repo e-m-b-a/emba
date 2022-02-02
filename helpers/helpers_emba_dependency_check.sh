@@ -39,8 +39,8 @@ check_dep_file()
 check_dep_tool()
 {
   TOOL_NAME="$1"
-  if [[ -n "$2" ]] ; then
-    TOOL_COMMAND="$2"
+  if [[ -n "${2:-}" ]] ; then
+    TOOL_COMMAND="${2:-}"
   else
     TOOL_COMMAND="$1"
   fi
@@ -258,9 +258,9 @@ dependency_check()
     # binwalk
     check_dep_tool "binwalk extractor" "binwalk"
     if command -v binwalk > /dev/null ; then
-      BINWALK_VER=$(binwalk 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//')
+      BINWALK_VER=$(binwalk 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
-        echo -e "$ORANGE""    binwalk version - not optimal""$NC"
+        echo -e "$ORANGE""    binwalk version "$BINWALK_VER" - not optimal""$NC"
         echo -e "$ORANGE""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
         export BINWALK_VER_CHECK=0
       else

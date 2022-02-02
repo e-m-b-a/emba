@@ -110,14 +110,16 @@ set_etc_path() {
 
 set_excluded_path() {
   local RET_PATHS
-  if [[ ${#EXCLUDE[@]} -gt 0 ]] ;  then
-    for LINE in "${EXCLUDE[@]}"; do
-      if [[ -n $LINE ]] ; then
-        RET_PATHS="$RET_PATHS""$(abs_path "$LINE")""\n"
-      fi
-    done
+  if [[ -v EXCLUDE[@] ]] ;  then
+    if [[ ${#EXCLUDE[@]} -gt 0 ]] ;  then
+      for LINE in "${EXCLUDE[@]}"; do
+        if [[ -n $LINE ]] ; then
+          RET_PATHS="$RET_PATHS""$(abs_path "$LINE")""\n"
+        fi
+      done
+    fi
   fi
-  echo -e "$RET_PATHS"
+  echo -e "${RET_PATHS:-}"
 }
 
 get_excluded_find() {
@@ -130,7 +132,7 @@ get_excluded_find() {
     RET_LEN=${#RET}
     RET="${RET::RET_LEN-3}"') '
   fi
-  echo "$RET"
+  echo "${RET:-}"
 }
 
 rm_proc_binary() {

@@ -85,13 +85,15 @@ sub_module_title()
 
 print_output()
 {
-  local OUTPUT="$1"
-  local LOG_SETTING="$2"
-  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" && "$LOG_FILE" != "$LOG_FILE_MOD" ]]; then
-    local LOG_FILE_MOD="$2"
+  local OUTPUT="${1:-}"
+  local LOG_SETTING="${2:-}"
+  if [[ -n "${LOG_SETTING}" && -d "$(dirname "${LOG_SETTING}")" && "${LOG_FILE:-}" != "${LOG_FILE_MOD:-}" ]]; then
+    local LOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
-  local REF_LINK="$3"
+  if [[ -n "${3+NA}" ]] ; then
+    local REF_LINK="${3:-}"
+  fi
   local TYPE_CHECK
   TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
@@ -263,7 +265,7 @@ reset_module_count()
 
 color_output()
 {
-  local TEXT
+  local TEXT=""
   readarray TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     local TYPE_CHECK
@@ -291,7 +293,7 @@ color_output()
 
 white()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$NC""$E""\\n"
@@ -301,7 +303,7 @@ white()
 
 red()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$RED""$E""$NC""\\n"
@@ -311,7 +313,7 @@ red()
 
 green()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$GREEN""$E""$NC""\\n"
@@ -321,7 +323,7 @@ green()
 
 blue()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$BLUE""$E""$NC""\\n"
@@ -331,7 +333,7 @@ blue()
 
 cyan()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$CYAN""$E""$NC""\\n"
@@ -341,7 +343,7 @@ cyan()
 
 magenta()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$MAGENTA""$E""$NC""\\n"
@@ -351,7 +353,7 @@ magenta()
 
 orange()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$ORANGE""$E""$NC""\\n"
@@ -361,7 +363,7 @@ orange()
 
 bold()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$BOLD""$E""$NC""\\n"
@@ -371,7 +373,7 @@ bold()
 
 italic()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$ITALIC""$E""$NC""\\n"
@@ -381,7 +383,7 @@ italic()
 
 indent()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""    ""$E""\\n"
@@ -393,7 +395,7 @@ format_log()
 {
   local LOG_STRING="$1"
   # remove log formatting, even if EMBA is set to format it (for [REF] markers used)
-  local OVERWRITE_SETTING="$2"
+  local OVERWRITE_SETTING="${2:-}"
   if [[ $FORMAT_LOG -eq 0 ]] || [[ $OVERWRITE_SETTING -eq 1 ]] ; then
     echo "$LOG_STRING" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
