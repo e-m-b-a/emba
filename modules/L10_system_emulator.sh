@@ -217,8 +217,8 @@ identify_networking() {
 
   tail -F "$LOG_PATH_MODULE/qemu.initial.serial.log" 2>/dev/null&
   sleep 60
-  pkill -f "qemu-system-.*$IMAGE_NAME.*"
-  pkill -f "tail.*$LOG_PATH_MODULE/qemu.initial.serial.log.*"
+  pkill -f "qemu-system-.*$IMAGE_NAME.*" || true
+  pkill -f "tail.*$LOG_PATH_MODULE/qemu.initial.serial.log.*" || true
 
   if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_FILE"
@@ -577,7 +577,7 @@ reset_network() {
   sub_module_title "Reset network environment"
 
   print_output "[*] Stopping Qemu emulation ..."
-  pkill -9 -f "qemu-system-.*$IMAGE_NAME.*"
+  pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true
 
   print_output "[*] Deleting route..."
   ip route flush dev "${HOSTNETDEV_0}"

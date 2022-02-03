@@ -108,7 +108,7 @@ cleaner() {
     fi
   fi
   if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
-    kill -9 "$CHECK_CVE_JOB_PID"
+    kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
 
   if [[ -d "$TMP_DIR" ]]; then

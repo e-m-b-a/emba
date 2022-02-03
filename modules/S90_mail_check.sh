@@ -25,7 +25,8 @@ S90_mail_check()
 
   local MAILS
   local MAILS_PATH
-  mapfile -t MAILS_PATH < <(mod_path "/var/mail")
+  #mapfile -t MAILS_PATH < <(mod_path "/var/mail")
+  mapfile -t MAILS_PATH < <(find "$FIRMWARE_PATH" -xdev -type d -iwholename "/var/mail")
   for ELEM in "${MAILS_PATH[@]}" ; do
     if [[ -e "$ELEM" ]] ; then
       MAILS="$(ls -la "$ELEM" 2>/dev/null)"
@@ -39,7 +40,8 @@ S90_mail_check()
 
   local MAILS_ROOT
   local MAILS_PATH_ROOT
-  mapfile -t MAILS_PATH_ROOT < <(mod_path "/var/mail/root")
+  #mapfile -t MAILS_PATH_ROOT < <(mod_path "/var/mail/root")
+  mapfile -t MAILS_PATH < <(find "$FIRMWARE_PATH" -xdev -type d -iwholename "/var/mail/root")
   for ELEM in "${MAILS_PATH_ROOT[@]}" ; do
     if [[ -e "$ELEM" ]] ; then
       MAILS_ROOT="$(head "$ELEM" 2>/dev/null)"

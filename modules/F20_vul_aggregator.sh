@@ -175,10 +175,12 @@ aggregate_versions() {
     mapfile -t KERNELS < <(grep kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u || true)
     grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u || true > "$LOG_PATH_MODULE"/versions1.tmp
     for KERNEL in "${KERNELS[@]}"; do
-      if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | cut -d" " -f1 ) -eq 0 ]] ; then
-        echo "$KERNEL" > "$LOG_PATH_MODULE"/versions1.tmp
-      else
-        sed -i "1s/^/$KERNEL\n/" "$LOG_PATH_MODULE"/versions1.tmp
+      if [[ -f "$LOG_PATH_MODULE"/versions1.tmp ]]; then
+        if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | cut -d" " -f1 ) -eq 0 ]] ; then
+          echo "$KERNEL" > "$LOG_PATH_MODULE"/versions1.tmp
+        else
+          sed -i "1s/^/$KERNEL\n/" "$LOG_PATH_MODULE"/versions1.tmp
+        fi
       fi
     done
     mapfile -t VERSIONS_AGGREGATED < <(cat "$LOG_PATH_MODULE"/versions1.tmp)
@@ -492,9 +494,9 @@ get_firmware_base_version_check() {
   if [[ -f "$S09_LOG" ]]; then
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
-      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | grep -v "kernel" | sort -u )
+      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | grep -v "kernel" | sort -u  || true)
     else
-      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | sort -u )
+      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | sort -u || true)
     fi
   else
     VERSIONS_STAT_CHECK=()
@@ -504,9 +506,9 @@ get_firmware_base_version_check() {
 get_kernel_check() {
   print_output "[*] Collect version details of module $(basename "$S25_LOG")."
   if [[ -f "$S25_LOG" ]]; then
-    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$S25_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g')
+    readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$S25_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g' || true)
     ## do a bit of sed modifications to have the same output as from the pre checker
-    readarray -t VERSIONS_KERNEL < <(grep -a "Statistics:" "$S25_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel:/' | sort -u)
+    readarray -t VERSIONS_KERNEL < <(grep -a "Statistics:" "$S25_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel:/' | sort -u || true)
   else
     VERSIONS_KERNEL=()
     KERNEL_CVE_EXPLOITS=()
@@ -516,7 +518,7 @@ get_kernel_check() {
 get_usermode_emulator() {
   print_output "[*] Collect version details of module $(basename "$S116_LOG")."
   if [[ -f "$S116_LOG" ]]; then
-    readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | grep -v "csv_rule" | sort -u)
+    readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | grep -v "csv_rule" | sort -u || true)
   else
     VERSIONS_EMULATOR=()
   fi
@@ -526,7 +528,7 @@ get_systemmode_emulator() {
   print_output "[*] Collect version details of module $(basename "$L15_LOG")."
   if [[ -f "$L15_LOG" ]]; then
     #readarray -t VERSIONS_SYS_EMULATOR < <(cut -d\; -f4 "$S15_LOG" | grep -v "csv_rule" | sort -u)
-    readarray -t VERSIONS_SYS_EMULATOR < <(grep -a "Version information found" "$L15_LOG" | cut -d\  -f5- | sed 's/ in .* scanning logs.//' | sort -u)
+    readarray -t VERSIONS_SYS_EMULATOR < <(grep -a "Version information found" "$L15_LOG" | cut -d\  -f5- | sed 's/ in .* scanning logs.//' | sort -u || true)
   else
     VERSIONS_SYS_EMULATOR=()
   fi
@@ -535,7 +537,7 @@ get_systemmode_emulator() {
 get_firmware_details() {
   print_output "[*] Collect version details of module $(basename "$S06_LOG")."
   if [[ -f "$S06_LOG" ]]; then
-    readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u)
+    readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u || true)
   else
     VERSIONS_S06_FW_DETAILS=()
   fi

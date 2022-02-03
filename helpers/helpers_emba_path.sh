@@ -162,7 +162,6 @@ mod_path() {
   local RET_PATHS
   RET_PATHS=()
 
-
   if [[ "$1" == "/ETC_PATHS"* ]] ; then
     for ETC_PATH_I in "${ETC_PATHS[@]}"; do
       NEW_ETC_PATH="$(echo -e "$1" | sed -e 's!/ETC_PATHS!'"$ETC_PATH_I"'!g')"

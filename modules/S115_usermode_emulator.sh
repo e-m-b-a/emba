@@ -268,7 +268,7 @@ s115_cleanup() {
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
     killall -9 "$EMULATOR" 2> /dev/null || true
   fi
-  kill "$PID_killer"
+  kill "$PID_killer" || true
 
   print_output "[*] Cleaning the emulation environment\\n"
   find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null

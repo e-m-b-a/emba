@@ -53,7 +53,7 @@ P60_firmware_bin_extractor() {
     print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
   fi
 
-  if [[ -n ${FILES_FACT:0} -gt 0 ]]; then
+  if [[ ${FILES_FACT-0} -gt 0 ]]; then
     print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
   fi
 
@@ -143,10 +143,10 @@ disk_space_protection() {
     echo ""
     print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
     print_output "[!] $(date) - Ending extraction processes" "main"
-    pgrep -a -f "binwalk.*$SEARCHER.*"
-    pkill -f ".*binwalk.*$SEARCHER.*"
-    pkill -f ".*extract\.py.*$SEARCHER.*"
-    kill -9 "$PID" 2>/dev/null
+    pgrep -a -f "binwalk.*$SEARCHER.*" || true
+    pkill -f ".*binwalk.*$SEARCHER.*" || true
+    pkill -f ".*extract\.py.*$SEARCHER.*" || true
+    kill -9 "$PID" 2>/dev/null || true
     DISK_SPACE_CRIT=1
   fi
 }

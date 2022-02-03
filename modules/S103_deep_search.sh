@@ -83,7 +83,7 @@ deep_pattern_searcher() {
       write_link "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
       print_output "$D_S_FINDINGS" 
       cat "$LOG_FILE" >> "$OLD_LOG_FILE"
-      rm "$LOG_FILE" 2> /dev/null
+      rm "$LOG_FILE" 2> /dev/null || true
       LOG_FILE="$OLD_LOG_FILE"
     fi
   fi

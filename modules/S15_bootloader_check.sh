@@ -62,7 +62,8 @@ check_bootloader()
 
   # Syslinux
   CHECK=0
-  mapfile -t SYSLINUX_PATHS < <(mod_path "/boot/syslinux/syslinux.cfg")
+  #mapfile -t SYSLINUX_PATHS < <(mod_path "/boot/syslinux/syslinux.cfg")
+  mapfile -t SYSLINUX_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/syslinux/syslinux.cfg")
   for SYSLINUX_FILE in "${SYSLINUX_PATHS[@]}" ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
       CHECK=1
@@ -77,7 +78,8 @@ check_bootloader()
 
   # Grub
   CHECK=0
-  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.conf")
+  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.conf")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -87,7 +89,8 @@ check_bootloader()
       ((STARTUP_FINDS+=1))
     fi
   done
-  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/menu.lst")
+  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/menu.lst")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/menu.lst")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -103,7 +106,8 @@ check_bootloader()
 
   # Grub2
   CHECK=0
-  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.cfg")
+  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.cfg")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.cfg")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -113,7 +117,8 @@ check_bootloader()
       ((STARTUP_FINDS+=1))
     fi
   done
-  mapfile -t GRUB_PATHS < <(mod_path "/boot/grub2/grub.conf")
+  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub2/grub.conf")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -158,9 +163,12 @@ check_bootloader()
   # FreeBSD or DragonFly
   CHECK=0
   local BOOT1 BOOT2 BOOTL
-  mapfile -t BOOT1 < <(mod_path "/boot/boot1")
-  mapfile -t BOOT2 < <(mod_path "/boot/boot2")
-  mapfile -t BOOTL < <(mod_path "/boot/loader")
+  #mapfile -t BOOT1 < <(mod_path "/boot/boot1")
+  mapfile -t BOOT1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot1")
+  #mapfile -t BOOT2 < <(mod_path "/boot/boot2")
+  mapfile -t BOOT2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot2")
+  #mapfile -t BOOTL < <(mod_path "/boot/loader")
+  mapfile -t BOOTL < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/loader")
 
   for B1 in "${BOOT1[@]}" ; do
     for B2 in "${BOOT2[@]}" ; do
@@ -180,6 +188,7 @@ check_bootloader()
 
   # LILO
   CHECK=0
+  #mapfile -t LILO_PATH < <(mod_path "/ETC_PATHS/lilo.conf")
   mapfile -t LILO_PATH < <(mod_path "/ETC_PATHS/lilo.conf")
   for LILO_FILE in "${LILO_PATH[@]}" ; do
     if [[ -f "$LILO_FILE" ]] ; then
@@ -230,8 +239,10 @@ check_bootloader()
   # OpenBSD
   CHECK=0
   local OBSD_PATH1 OBSD_PATH2
-  mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")
-  mapfile -t OBSD_PATH2 < <(mod_path "/boot")
+  #mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")
+  mapfile -t OBSD_PATH1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/usr/mdec/biosboot")
+  #mapfile -t OBSD_PATH2 < <(mod_path "/boot")
+  mapfile -t OBSD_PATH2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot")
   for OBSD_FILE1 in "${OBSD_PATH1[@]}" ; do
     for OBSD_FILE2 in "${OBSD_PATH2[@]}" ; do
       if [[ -f "$OBSD_FILE2" ]] && [[ -f "OBSD_FILE2" ]] ; then

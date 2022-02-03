@@ -37,7 +37,7 @@ L15_emulated_checks_init() {
     # check_live_nikto
     check_live_routersploit
     MODULE_END=1
-    pkill -f "qemu-system-.*$IMAGE_NAME.*"
+    pkill -f "qemu-system-.*$IMAGE_NAME.*" || true
     reset_network
 
   else

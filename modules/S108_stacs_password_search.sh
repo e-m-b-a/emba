@@ -31,7 +31,7 @@ S108_stacs_password_search()
   local PW_HASH
 
   if command -v stacs > /dev/null ; then
-    stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE"
+    stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE" || true
 
     if [[ -f "$STACS_LOG_FILE" && $(jq ".runs[0] .results[] | .message[]" "$STACS_LOG_FILE" | wc -l) -gt 0 ]]; then
       ELEMENTS_="$(jq ".runs[0] .results[] .message.text" "$STACS_LOG_FILE" | wc -l)"
