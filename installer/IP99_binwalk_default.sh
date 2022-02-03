@@ -191,10 +191,6 @@ IP99_binwalk_default() {
         elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
           echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
         fi
-        # currently this package gets somehow deinstalled ... lets try it this way:
-        if dpkg -l | grep p7zip-full | grep -q "^rc"; then
-          apt-get install p7zip-full
-        fi
       ;;
     esac
   fi

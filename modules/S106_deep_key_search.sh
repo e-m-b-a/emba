@@ -71,7 +71,7 @@ deep_key_searcher() {
       done
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt")
+        F_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt" || true)
         if [[ $F_COUNT -gt 0 ]] ; then
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
@@ -91,7 +91,7 @@ deep_key_searcher() {
 
 deep_key_reporter() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
-    P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* 2>/dev/null || true | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' )
+    P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
     OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
   done
 

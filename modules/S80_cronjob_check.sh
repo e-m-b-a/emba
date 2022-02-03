@@ -34,7 +34,7 @@ S80_cronjob_check()
       if [[ "$CRONJOBS" ]] ; then
         print_output "[+] Cronjobs:"
         print_output "$(indent "$CRONJOBS")"
-        ((RESULTS++))
+        ((RESULTS+=1))
       fi
     fi
   done
@@ -47,7 +47,7 @@ S80_cronjob_check()
       if [[ "$CRONJOBWWPERMS" ]] ; then
         print_output "[+] World-writable cron jobs and file contents:"
         print_output "$(indent "$CRONJOBWWPERMS")"
-        ((RESULTS++))
+        ((RESULTS+=1))
       fi
     fi
   done
@@ -61,7 +61,7 @@ S80_cronjob_check()
       if [[ "$CRONTABVALUE" ]] ; then
         print_output "[+] Crontab content:"
         print_output "$(indent "$CRONTABVALUE")"
-        ((RESULTS++))
+        ((RESULTS+=1))
       fi
     fi
   done
@@ -74,7 +74,7 @@ S80_cronjob_check()
     if [[ "$CRONTABVAR" ]] ; then
       print_output "[+] Anything interesting in ""$(print_path "$CT_VAR")"
       print_output "$(indent "$CRONTABVAR")"
-      ((RESULTS++))
+      ((RESULTS+=1))
     fi
   done
 
@@ -87,7 +87,7 @@ S80_cronjob_check()
       if [[ "$ANACRONJOBS" ]] ; then
         print_output "[+] Anacron jobs and associated file permissions:"
         print_output "$(indent "$ANACRONJOBS")"
-        ((RESULTS++))
+        ((RESULTS+=1))
       fi
     fi
   done
@@ -96,11 +96,11 @@ S80_cronjob_check()
   for CT_VAR in "${CJ_FILE_PATH[@]}"; do
     local ANACRONTAB
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-    ANACRONTAB=$(ls -la "$CT_VAR" 2>/dev/null)
+    ANACRONTAB=$(ls -la "$CT_VAR" 2>/dev/null || true)
     if [[ "$ANACRONTAB" ]] ; then
       print_output "[+] When were jobs last executed (""$(print_path "$CT_VAR")"")"
       print_output "$(indent "$ANACRONTAB")"
-      ((RESULTS++))
+      ((RESULTS+=1))
     fi
   done
 

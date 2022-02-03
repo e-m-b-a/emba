@@ -47,7 +47,7 @@ check_resolv()
       DNS_INFO=$(grep "nameserver" "$RES_INFO_P" 2>/dev/null)
       if [[ "$DNS_INFO" ]] ; then
           print_output "$(indent "$DNS_INFO")"
-          ((NET_CFG_FOUND++))
+          ((NET_CFG_FOUND+=1))
       fi
     fi
   done
@@ -67,7 +67,7 @@ check_iptables()
     if [[ -e "$IPT_INFO_P" ]] ; then
       CHECK=1
       print_output "[+] iptables config ""$(print_path "$IPT_INFO_P")"
-      ((NET_CFG_FOUND++))
+      ((NET_CFG_FOUND+=1))
     fi
   done
   if [[ $CHECK -eq 0 ]] ; then
@@ -92,7 +92,7 @@ check_snmp()
         print_output "[*] com2sec line/s:"
         for I in "${FIND[@]}"; do
           print_output "$(indent "$(orange "$I")")"
-          ((NET_CFG_FOUND++))
+          ((NET_CFG_FOUND+=1))
         done
       fi
     fi
@@ -109,12 +109,12 @@ check_network_configs()
   local NETWORK_CONFS
   readarray -t NETWORK_CONFS < <(printf '%s' "$(config_find "$CONFIG_DIR""/network_conf_files.cfg")")
 
-  if [[ "${NETWORK_CONFS[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${NETWORK_CONFS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#NETWORK_CONFS[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#NETWORK_CONFS[@]}"" possible network configs:"
     for LINE in "${NETWORK_CONFS[@]}" ; do
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-      ((NET_CFG_FOUND++))
+      ((NET_CFG_FOUND+=1))
     done
   else
     print_output "[-] No network configs found"

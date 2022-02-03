@@ -28,7 +28,7 @@ S21_python_check()
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
-        ((S21_PY_SCRIPTS++))
+        ((S21_PY_SCRIPTS+=1))
         if [[ "$THREADED" -eq 1 ]]; then
           s21_script_bandit &
           WAIT_PIDS_S21+=( "$!" )

@@ -26,7 +26,7 @@ S45_pass_file_check()
 
   mapfile -t PASSWD_STUFF < <(config_find "$CONFIG_DIR""/pass_files.cfg")
 
-  if [[ "${PASSWD_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${PASSWD_STUFF[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#PASSWD_STUFF[@]}" -ne 0 ]] ; then
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh

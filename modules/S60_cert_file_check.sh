@@ -27,13 +27,13 @@ S60_cert_file_check()
   CERT_CNT=0
   CERT_OUT_CNT=0
 
-  if [[ "${CERT_FILES_ARR[0]}" == "C_N_F" ]]; then print_output "[!] Config not found"
+  if [[ "${CERT_FILES_ARR[0]-}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then
     print_output "[+] Found ""${#CERT_FILES_ARR[@]}"" certification files:"
     CURRENT_DATE=$(date +%s)
     for LINE in "${CERT_FILES_ARR[@]}" ; do
       if [[ -f "$LINE" ]]; then
-        ((CERT_CNT++))
+        ((CERT_CNT+=1))
         if command -v openssl > /dev/null ; then
           CERT_DATE=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601)
           CERT_DATE_=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s)
@@ -42,7 +42,7 @@ S60_cert_file_check()
           openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG"
           if [[ $CERT_DATE_ -lt $CURRENT_DATE ]]; then
             print_output "  ${RED}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
-            ((CERT_OUT_CNT++))
+            ((CERT_OUT_CNT+=1))
           else
             print_output "  ${GREEN}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
           fi

@@ -94,7 +94,7 @@ S115_usermode_emulator() {
 
         THOLD=$(( 25*"$ROOT_CNT" ))
         # if we have already a log file with a lot of content we assume this binary was already emulated correct
-        if [[ $(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$MAIN_LOG_DIR"/qemu_init_"$BIN_EMU_NAME_".txt 2>/dev/null | grep -c -v -E "\[\*\]\ ") -gt "$THOLD" ]]; then
+        if [[ $(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_DIR"/s115_usermode_emulator/qemu_init_"$BIN_EMU_NAME_".txt 2>/dev/null | grep -c -v -E "\[\*\]\ " || true) -gt "$THOLD" ]]; then
           print_output "[!] BIN $BIN_EMU_NAME_ was already emulated ... skipping"
           continue
         fi
@@ -229,7 +229,7 @@ copy_firmware() {
 running_jobs() {
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
-    CJOBS=$(pgrep -a "$EMULATOR")
+    CJOBS=$(pgrep -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
       echo
       print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)"
@@ -243,7 +243,7 @@ running_jobs() {
 
 kill_qemu_threader() {
   while true; do
-    pkill -9 -O 240 -f .*qemu.*
+    pkill -9 -O 240 -f .*qemu.* || true
     sleep 20
   done
 }
@@ -260,13 +260,13 @@ s115_cleanup() {
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
     print_output "[*] Terminating qemu processes - check it with ps"
-    killall -9 --quiet -r .*qemu.*sta.*
+    killall -9 --quiet -r .*qemu.*sta.* || true
   fi
 
   CJOBS_=$(pgrep qemu-)
   if [[ -n "$CJOBS_" ]] ; then
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
-    killall -9 "$EMULATOR" 2> /dev/null
+    killall -9 "$EMULATOR" 2> /dev/null || true
   fi
   kill "$PID_killer"
 
@@ -453,77 +453,77 @@ creating_dev_area() {
   if ! [[ -d "$R_PATH"/dev/mtd ]]; then
     print_output "[*] Creating and populating /dev/mtd"
     mkdir -p "$R_PATH"/dev/mtd 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/0 c 90 0 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/1 c 90 2 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/2 c 90 4 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/3 c 90 6 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/4 c 90 8 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/5 c 90 10 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/6 c 90 12 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/7 c 90 14 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/8 c 90 16 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/9 c 90 18 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtd/10 c 90 20 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtd/0 c 90 0 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/1 c 90 2 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/2 c 90 4 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/3 c 90 6 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/4 c 90 8 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/5 c 90 10 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/6 c 90 12 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/7 c 90 14 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/8 c 90 16 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/9 c 90 18 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtd/10 c 90 20 2> /dev/null || true
   fi
 
-  mknod -m 644 "$R_PATH"/dev/mtd0 c 90 0 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr0 c 90 1 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd1 c 90 2 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr1 c 90 3 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd2 c 90 4 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr2 c 90 5 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd3 c 90 6 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr3 c 90 7 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd4 c 90 8 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr4 c 90 9 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd5 c 90 10 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr5 c 90 11 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd6 c 90 12 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr6 c 90 13 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd7 c 90 14 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr7 c 90 15 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd8 c 90 16 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr8 c 90 17 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd9 c 90 18 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr9 c 90 19 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtd10 c 90 20 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdr10 c 90 21 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtd0 c 90 0 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr0 c 90 1 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd1 c 90 2 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr1 c 90 3 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd2 c 90 4 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr2 c 90 5 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd3 c 90 6 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr3 c 90 7 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd4 c 90 8 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr4 c 90 9 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd5 c 90 10 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr5 c 90 11 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd6 c 90 12 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr6 c 90 13 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd7 c 90 14 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr7 c 90 15 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd8 c 90 16 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr8 c 90 17 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd9 c 90 18 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr9 c 90 19 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtd10 c 90 20 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdr10 c 90 21 2> /dev/null || true
 
   if ! [[ -d "$R_PATH"/dev/mtdblock ]]; then
     print_output "[*] Creating and populating /dev/mtdblock"
     mkdir -p "$R_PATH"/dev/mtdblock 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/0 b 31 0 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/1 b 31 1 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/2 b 31 2 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/3 b 31 3 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/4 b 31 4 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/5 b 31 5 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/6 b 31 6 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/7 b 31 7 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/8 b 31 8 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/9 b 31 9 2> /dev/null
-    mknod -m 644 "$R_PATH"/dev/mtdblock/10 b 31 10 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/mtdblock/0 b 31 0 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/1 b 31 1 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/2 b 31 2 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/3 b 31 3 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/4 b 31 4 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/5 b 31 5 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/6 b 31 6 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/7 b 31 7 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/8 b 31 8 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/9 b 31 9 2> /dev/null || true
+    mknod -m 644 "$R_PATH"/dev/mtdblock/10 b 31 10 2> /dev/null || true
   fi
 
-  mknod -m 644 "$R_PATH"/dev/mtdblock0 b 31 0 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock1 b 31 1 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock2 b 31 2 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock3 b 31 3 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock4 b 31 4 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock5 b 31 5 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock6 b 31 6 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock7 b 31 7 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock8 b 31 8 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock9 b 31 9 2> /dev/null
-  mknod -m 644 "$R_PATH"/dev/mtdblock10 b 31 10 2> /dev/null
+  mknod -m 644 "$R_PATH"/dev/mtdblock0 b 31 0 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock1 b 31 1 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock2 b 31 2 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock3 b 31 3 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock4 b 31 4 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock5 b 31 5 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock6 b 31 6 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock7 b 31 7 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock8 b 31 8 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock9 b 31 9 2> /dev/null || true
+  mknod -m 644 "$R_PATH"/dev/mtdblock10 b 31 10 2> /dev/null || true
 
   if ! [[ -d "$R_PATH"/dev/tts ]]; then
     print_output "[*] Creating and populating /dev/tts"
     mkdir -p "$R_PATH"/dev/tts 2> /dev/null
-    mknod -m 660 "$R_PATH"/dev/tts/0 c 4 64 2> /dev/null
-    mknod -m 660 "$R_PATH"/dev/tts/1 c 4 65 2> /dev/null
-    mknod -m 660 "$R_PATH"/dev/tts/2 c 4 66 2> /dev/null
-    mknod -m 660 "$R_PATH"/dev/tts/3 c 4 67 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/tts/0 c 4 64 2> /dev/null || true
+    mknod -m 660 "$R_PATH"/dev/tts/1 c 4 65 2> /dev/null || true
+    mknod -m 660 "$R_PATH"/dev/tts/2 c 4 66 2> /dev/null || true
+    mknod -m 660 "$R_PATH"/dev/tts/3 c 4 67 2> /dev/null || true
   fi
 
   chown -v root:tty "$R_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
@@ -611,7 +611,7 @@ run_init_qemu() {
 
   # wait a bit and then kill it
   sleep 1
-  kill -0 -9 "$PID" 2> /dev/null
+  kill -0 -9 "$PID" 2> /dev/null || true
   if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
     cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" >> "$LOG_FILE_INIT"
   fi
@@ -626,10 +626,10 @@ run_init_qemu_runner() {
 
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
   else
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
   fi
 }
 
@@ -650,7 +650,7 @@ emulate_strace_run() {
 
   # wait a second and then kill it
   sleep 1
-  kill -0 -9 "$PID" 2> /dev/null
+  kill -0 -9 "$PID" 2> /dev/null || true
 
   # extract missing files, exclude *.so files:
   mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_FILE_STRACER" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u)
@@ -700,7 +700,7 @@ check_disk_space() {
     if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
       print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
-      pkill -f "$EMULATOR.*$KILLER.*"
+      pkill -f "$EMULATOR.*$KILLER.*" || true
       #rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
     fi
   done
@@ -715,7 +715,7 @@ emulate_binary() {
   # now we should have CPU_CONFIG in log file from Binary
 
   local CPU_CONFIG_
-  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2 | sort -u | head -1)"
+  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2 | sort -u | head -1 || true)"
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)" "" "$LOG_FILE_BIN"
@@ -765,8 +765,8 @@ emulate_binary() {
 
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
-  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
-  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.*
+  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
+  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.* || true
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   
   # reset the terminal - after all the uncontrolled emulation it is typically broken!

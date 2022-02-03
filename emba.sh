@@ -17,21 +17,6 @@
 # Description:  Main script for load all necessary files and call main function of modules
 
 INVOCATION_PATH="."
-STRICT=0
-
-if [[ "$STRICT" -eq 1 ]]; then
-  # http://redsymbol.net/articles/unofficial-bash-strict-mode/
-  # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
-  # shellcheck disable=SC1091
-  source ./installer/wickStrictModeFail.sh
-  set -e          # Exit immediately if a command exits with a non-zero status
-  set -u          # Exit and trigger the ERR trap when accessing an unset variable
-  set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
-  set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
-  shopt -s extdebug # Enable extended debugging
-  IFS=$'\n\t'     # Set the "internal field separator"
-  trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
-fi
 
 import_helper()
 {
@@ -218,6 +203,7 @@ main()
   INVOCATION_PATH="$(dirname "$0")"
 
   export EMBA_PID="$$"
+  export STRICT=0
   export MATRIX_MODE=0
   export FULL_EMULATION=0
   export ARCH_CHECK=1
@@ -241,6 +227,7 @@ main()
   export ARCH=""
   export EXLUDE=()
   export SELECT_MODULES=()
+  export FILE_ARR=()
   export LOG_GREP=0
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0             # test only dependency
@@ -292,7 +279,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrstxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -371,6 +358,9 @@ main()
       s)
         export SHORT_PATH=1
         ;;
+      S)
+        export STRICT=1
+        ;;
       t)
         export THREADED=1
         ;;
@@ -405,6 +395,24 @@ main()
   if [[ $USE_DOCKER -eq 0 && $IN_DOCKER -eq 0 ]]; then
     print_bar "no_log"
     print_output "[!] WARNING: EMBA running in developer mode!" "no_log"
+    print_bar "no_log"
+  fi
+
+  if [[ "$STRICT" -eq 1 ]]; then
+    # http://redsymbol.net/articles/unofficial-bash-strict-mode/
+    # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
+    # shellcheck disable=SC1091
+    source ./installer/wickStrictModeFail.sh
+    set -e          # Exit immediately if a command exits with a non-zero status
+    set -u          # Exit and trigger the ERR trap when accessing an unset variable
+    set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+    set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+    shopt -s extdebug # Enable extended debugging
+    #IFS=$'\n\t'     # Set the "internal field separator"
+    trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+
+    print_bar "no_log"
+    print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
     print_bar "no_log"
   fi
 
@@ -581,6 +589,8 @@ main()
             else
               ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
             fi
+          else
+            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
           fi
           ;;
       esac

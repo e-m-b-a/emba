@@ -69,7 +69,7 @@ deep_pattern_searcher() {
       done
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt" )
+        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt" || true)
         if [[ $F_COUNT -gt 0 ]] ; then
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi

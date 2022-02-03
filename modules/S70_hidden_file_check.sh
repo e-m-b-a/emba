@@ -22,7 +22,9 @@ S70_hidden_file_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local HIDDEN_FILES
+  set +e
   IFS=" " read -r -a HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -name ".*" -type f | tr '\r\n' ' ')
+  set -e
 
   if [[ ${#HIDDEN_FILES[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#HIDDEN_FILES[@]}"" hidden files:"

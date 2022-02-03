@@ -45,7 +45,7 @@ check_dtb()
       if [[ $DTBDUMP -eq 1 ]] ; then
         write_log "$(fdtdump "$DTB_FILE" 2> /dev/null)" "$LOG_PATH_MODULE""/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt" "g"
         write_link "$LOG_PATH_MODULE""/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt"
-        ((STARTUP_FINDS++))
+        ((STARTUP_FINDS+=1))
       fi
     done
   else
@@ -130,11 +130,11 @@ check_bootloader()
   # Grub configuration
   if [[ -n "$GRUB" ]] ; then
     print_output "[*] Check Grub config: ""$(print_path "$GRUB")"
-    FIND=$(grep 'password --md5' "$GRUB"| grep -v '^#')
-    FIND2=$(grep 'password --encrypted' "$GRUB"| grep -v '^#')
-    FIND3=$(grep 'set superusers' "$GRUB"| grep -v '^#')
-    FIND4=$(grep 'password_pbkdf2' "$GRUB"| grep -v '^#')
-    FIND5=$(grep 'grub.pbkdf2' "$GRUB"| grep -v '^#')
+    FIND=$(grep 'password --md5' "$GRUB"| grep -v '^#' || true)
+    FIND2=$(grep 'password --encrypted' "$GRUB"| grep -v '^#' || true)
+    FIND3=$(grep 'set superusers' "$GRUB"| grep -v '^#' || true)
+    FIND4=$(grep 'password_pbkdf2' "$GRUB"| grep -v '^#' || true)
+    FIND5=$(grep 'grub.pbkdf2' "$GRUB"| grep -v '^#' || true)
     FOUND=0
     # GRUB1: Password should be set (MD5 or SHA1)
     if [[ -n "${FIND}" ]] || [[ -n "${FIND2}" ]] ; then
@@ -185,7 +185,7 @@ check_bootloader()
     if [[ -f "$LILO_FILE" ]] ; then
       CHECK=1
       print_output "[+] Found lilo.conf: ""$(print_path "$LILO_FILE")"" (LILO)"
-      FIND=$(grep 'password[[:space:]]?=' "$LILO_FILE" | grep -v "^#")
+      FIND=$(grep 'password[[:space:]]?=' "$LILO_FILE" | grep -v "^#" || true)
         if [[ -z "${FIND}" ]] ; then
           print_output "[+] LILO has password protection"
           ((STARTUP_FINDS+=1))
@@ -253,7 +253,7 @@ check_bootloader()
     if [[ -f "$OPENBSD" ]] ; then
       CHECK=1
       print_output "[+] Found ""$(print_path "$OPENBSD")"" (OpenBSD)"
-      FIND=$(grep '^boot' "$OPENBSD")
+      FIND=$(grep '^boot' "$OPENBSD" || true)
       if [[ -z "${FIND}" ]] ; then
         print_output "[+] System can be booted into single user mode without password"
         ((STARTUP_FINDS+=1))
@@ -261,7 +261,7 @@ check_bootloader()
       mapfile -t OPENBSD_PATH2 < <(mod_path "/ETC_PATHS/rc.conf")
       for OPENBSD2 in "${OPENBSD_PATH2[@]}" ; do
         if [[ -e "$OPENBSD2" ]] ; then
-          FIND=$(grep -v -i '^#|none' "$OPENBSD2" | grep-i '_enable.*(yes|on|1)' | sort | awk -F= '{ print $1 }' | sed 's/_enable//')
+          FIND=$(grep -v -i '^#|none' "$OPENBSD2" | grep-i '_enable.*(yes|on|1)' || true| sort | awk -F= '{ print $1 }' | sed 's/_enable//')
           print_output "[+] Found OpenBSD boot services ""$(print_path "$OPENBSD2")"
           if [[ -z "$FIND" ]] ; then
             print_output "$(indent "$(orange "$FIND")")"
@@ -299,7 +299,7 @@ find_boot_files()
   local BOOT_FILES
   mapfile -t BOOT_FILES < <(config_find "$CONFIG_DIR""/boot_files.cfg")
 
-  if [[ "${BOOT_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${BOOT_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#BOOT_FILES[@]}" -ne 0 ]] ; then
     print_output "[+] Found ""${#BOOT_FILES[@]}"" startup files:"
     for LINE in "${BOOT_FILES[@]}" ; do
@@ -325,7 +325,7 @@ find_runlevel()
       print_output "[*] Check runlevel in systemd directory: ""$(print_path "$SYSTEMD_P")"
       DEFAULT_TARGET_PATH="$SYSTEMD_P""/system/default.target"
       if [[ -L "$DEFAULT_TARGET_PATH" ]] ; then
-        FIND="$( read -r "$DEFAULT_TARGET_PATH"'' | grep "runlevel")"
+        FIND="$( read -r "$DEFAULT_TARGET_PATH"'' | grep "runlevel" || true)"
         if [[ -z "$FIND" ]] ; then
           print_output "[+] systemd run level information:"
           print_output "$(indent "$FIND")"
@@ -339,18 +339,20 @@ find_runlevel()
     fi
   done
 
-  if [[ ${#INITTAB_V[@]} -gt 0 ]] ; then
-    for INIT_TAB_F in "${INITTAB_V[@]}" ; do
-      print_output "[*] Check runlevel in ""$(print_path "$INIT_TAB_F")"
-      FIND=$(awk -F: '/^id/ { print $2; }' "$INIT_TAB_F" | head -n 1)
-      if [[ -z "$FIND" ]] ; then
-        print_output "[-] No default run level ""$(print_path "$INIT_TAB_F")"" found"
-      else
-        print_output "[+] Found default run level: ""$(orange "$FIND")"
-        ((STARTUP_FINDS+=1))
-      fi
-    done
-  else
-    print_output "[-] No default run level found"
+  if [[ -v INITTAB_V[@] ]] ; then
+    if [[ ${#INITTAB_V[@]} -gt 0 ]] ; then
+      for INIT_TAB_F in "${INITTAB_V[@]}" ; do
+        print_output "[*] Check runlevel in ""$(print_path "$INIT_TAB_F")"
+        FIND=$(awk -F: '/^id/ { print $2; }' "$INIT_TAB_F" | head -n 1)
+        if [[ -z "$FIND" ]] ; then
+          print_output "[-] No default run level ""$(print_path "$INIT_TAB_F")"" found"
+        else
+          print_output "[+] Found default run level: ""$(orange "$FIND")"
+          ((STARTUP_FINDS+=1))
+        fi
+      done
+    else
+      print_output "[-] No default run level found"
+    fi
   fi
 }

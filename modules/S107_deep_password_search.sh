@@ -34,7 +34,7 @@ S107_deep_password_search()
       PW_HASH=$(echo "$PW_HASH" | cut -d: -f2- | sed -r "s/[[:blank:]]+/\ /g")
       print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
       write_csv_log "$PW_PATH" "$PW_HASH"
-      ((PW_COUNTER++))
+      ((PW_COUNTER+=1))
     done < "$TMP"/pw_hashes.txt
 
     print_output ""

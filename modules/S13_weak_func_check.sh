@@ -111,7 +111,7 @@ S13_weak_func_check()
 
     if [[ -f "$TMP_DIR"/S11_STRCPY_CNT.tmp ]]; then
       while read -r STRCPY; do
-        (( STRCPY_CNT="$STRCPY_CNT"+"$STRCPY" ))
+        STRCPY_CNT=$((STRCPY_CNT+STRCPY))
       done < "$TMP_DIR"/S11_STRCPY_CNT.tmp
     fi
 
@@ -190,7 +190,7 @@ function_check_MIPS32() {
         COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG" 2> /dev/null || true)
-          (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+          STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
         elif [[ "$FUNCTION" == "mmap" ]] ; then
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           # Check this. This test is very rough:

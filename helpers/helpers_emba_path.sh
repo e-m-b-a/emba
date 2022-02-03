@@ -246,7 +246,7 @@ config_find() {
       for LINE in "${FIND_O[@]}"; do
         if [[ -L "$LINE" ]] ; then
           local REAL_PATH
-          REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
+          REAL_PATH="$(realpath "$LINE" 2>/dev/null || true)"
           if [[ -f  "$REAL_PATH" ]] ; then
             FIND_RESULTS+=( "$REAL_PATH" )
           fi

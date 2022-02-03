@@ -45,4 +45,5 @@ IF50_aggregator_common() {
       ;;
     esac
   fi
+  apt-get install p7zip-full -y
 } 

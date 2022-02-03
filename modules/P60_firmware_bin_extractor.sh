@@ -53,7 +53,7 @@ P60_firmware_bin_extractor() {
     print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
   fi
 
-  if [[ -n ${FILES_FACT} ]]; then
+  if [[ -n ${FILES_FACT:0} -gt 0 ]]; then
     print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
   fi
 

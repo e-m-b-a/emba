@@ -45,7 +45,7 @@ log_folder()
             print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
-            rm -R "${LOG_DIR:?}/"* 2>/dev/null
+            rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
           fi
         ;;
@@ -342,7 +342,7 @@ detect_root_dir_helper() {
 }
 
 check_init_size() {
-  SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}')
+  SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}' || true)
   if [[ $SIZE -gt 400000000 ]]; then
     print_output "" "no_log"
     print_output "[!] WARNING: Your firmware is very big!" "no_log"

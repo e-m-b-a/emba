@@ -64,7 +64,7 @@ S09_firmware_base_version_check() {
         for BIN in "${STRICT_BINS[@]}"; do
           # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
           if file "$BIN" | grep -q ELF ; then
-            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u)
+            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u || true)
             if [[ -n $VERSION_FINDER ]]; then
               echo ""
               print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
@@ -85,7 +85,7 @@ S09_firmware_base_version_check() {
       #   use regex (VERSION_IDENTIFIER) via zgrep on these files
       #   use csv-regex to get the csv-search string for csv lookup
 
-      mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \;)
+      mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \; || true)
       for SFILE in "${SPECIAL_FINDS[@]}"; do
         BIN_PATH=$(echo "$SFILE" | cut -d ":" -f1)
         BIN_NAME="$(basename "$(echo "$SFILE" | cut -d ":" -f1)")"
@@ -114,7 +114,7 @@ S09_firmware_base_version_check() {
       echo "." | tr -d "\n"
 
       if [[ $FIRMWARE -eq 0 || -f $FIRMWARE_PATH ]]; then
-        VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null)
+        VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null || true)
 
         if [[ -n $VERSION_FINDER ]]; then
           echo ""
@@ -126,9 +126,9 @@ S09_firmware_base_version_check() {
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S09=$((6*"$(grep -c ^processor /proc/cpuinfo)"))
-        if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
-          MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo)"))
+        MAX_THREADS_S09=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+        if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
+          MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo || true)"))
         fi
         #print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
 
@@ -160,7 +160,7 @@ S09_firmware_base_version_check() {
     wait_for_pid "${WAIT_PIDS_S09[@]}"
   fi
 
-  VERSIONS_DETECTED=$(grep -c "Version information found" "$LOG_FILE")
+  VERSIONS_DETECTED=$(grep -c "Version information found" "$LOG_FILE" || true)
 
   module_end_log "${FUNCNAME[0]}" "$VERSIONS_DETECTED"
 }

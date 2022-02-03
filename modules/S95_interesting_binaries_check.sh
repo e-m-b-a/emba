@@ -56,7 +56,7 @@ interesting_binaries()
   INT_COUNT=0
 
   mapfile -t INT_BIN < <(config_find "$CONFIG_DIR""/interesting_binaries.cfg")
-  if [[ "${INT_BIN[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${INT_BIN[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#INT_BIN[@]}" -ne 0 ]] ; then
     for LINE in "${INT_BIN[@]}" ; do
       if [[ -f "$LINE" ]] && file "$LINE" | grep -q "executable" ; then
@@ -68,7 +68,7 @@ interesting_binaries()
             COUNT=1
           fi
           print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-          ((INT_COUNT++))
+          ((INT_COUNT+=1))
           MD5_DONE_INT+=( "$BIN_MD5" )
         fi
       fi
@@ -102,7 +102,7 @@ post_exploitation()
             COUNT=1
           fi
           print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-          ((POST_COUNT++))
+          ((POST_COUNT+=1))
           MD5_DONE_POST+=( "$BIN_MD5" )
         fi
       fi

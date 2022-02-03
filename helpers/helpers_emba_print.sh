@@ -72,7 +72,7 @@ module_title()
 sub_module_title()
 {
   local SUB_MODULE_TITLE
-  SUB_MODULE_TITLE="$1"
+  SUB_MODULE_TITLE="${1:-}"
   local SUB_MODULE_TITLE_FORMAT
   SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""$SUB_MODULE_TITLE""${NC}""\\n-----------------------------------------------------------------"
   echo -e "$SUB_MODULE_TITLE_FORMAT"
@@ -110,7 +110,7 @@ print_output()
         fi
       else
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       fi
@@ -161,7 +161,7 @@ write_log()
     fi
   done
   if [[ "$GREP_LOG_WRITE" == "g" ]] ; then
-    write_grep_log "$1"
+    write_grep_log "${1:-}"
   fi
 }
 
@@ -229,7 +229,7 @@ write_link()
     local LINK
     LINK="$1"
     LINK="$(format_log "[REF] ""$LINK" 1)"
-    local LOG_FILE_ALT="$2"
+    local LOG_FILE_ALT="${2:-}"
     if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
       if [[ -f "$LOG_FILE_ALT" ]] ; then
         echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
@@ -246,7 +246,7 @@ write_anchor()
     local ANCHOR
     ANCHOR="$1"
     ANCHOR="$(format_log "[ANC] ""$ANCHOR" 1)"
-    local LOG_FILE_ALT="$2"
+    local LOG_FILE_ALT="${2:-}"
     if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
       if [[ -f "$LOG_FILE_ALT" ]] ; then
         echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
@@ -441,6 +441,7 @@ print_help()
   echo -e "$CYAN""-E""$NC""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
   echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
   echo -e "$CYAN""-D""$NC""                Developer mode - EMBA runs on the host without container protection"
+  echo -e "$CYAN""-S""$NC""                STRICT mode - developer option to improve code quality (not enabled by default)"
   echo -e "$CYAN""-i""$NC""                Ignores log path check"
   echo -e "$CYAN""-p [PROFILE]""$NC""      Emba starts with a pre-defined profile (stored in ./scan-profiles)"
   echo -e "\\nWeb reporter"
@@ -470,10 +471,10 @@ print_help()
 
 print_firmware_info()
 {
-  local _VENDOR="$1"
-  local _VERSION="$2"
-  local _DEVICE="$3"
-  local _NOTES="$4"
+  local _VENDOR="${1:-}"
+  local _VERSION="${2:-}"
+  local _DEVICE="${3:-}"
+  local _NOTES="${4:-}"
   if [[ -n "$_VENDOR" || -n "$_VERSION" || -n "$_DEVICE" || -n "$_NOTES" ]]; then
     print_bar "no_log"
     print_output "[*] Firmware information:" "no_log"
@@ -520,7 +521,7 @@ print_excluded()
 }
 
 print_bar() {
-  local LOG_SETTINGS="$1"
+  local LOG_SETTINGS="${1:-}"
   if [[ -n "$LOG_SETTINGS" ]]; then
     print_output "\\n-----------------------------------------------------------------\\n" "$LOG_SETTINGS"
   else
@@ -529,7 +530,7 @@ print_bar() {
 }
 
 module_start_log() {
-  MODULE_MAIN_NAME="$1"
+  MODULE_MAIN_NAME="${1:-}"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   export LOG_PATH_MODULE
   LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
@@ -537,7 +538,7 @@ module_start_log() {
 }
 
 pre_module_reporter() {
-  MODULE_MAIN_NAME="$1"
+  MODULE_MAIN_NAME="${1:-}"
   REPORT_TEMPLATE="$(basename -s ".sh" "$MODULE_MAIN_NAME")-pre"
   # We handle .txt and .sh files in report_template folder.
   # .txt are just echoed on cli and report
@@ -554,8 +555,8 @@ pre_module_reporter() {
 # additionally we log that EMBA has nothing found -> this is used for index generation of the web reporter
 # additionally we generate the HTML file of the web reporter if web reporting is enabled
 module_end_log() {
-  MODULE_MAIN_NAME="$1"
-  MODULE_REPORT_STATE="$2"
+  MODULE_MAIN_NAME="${1:-}"
+  MODULE_REPORT_STATE="${2:-}"
 
   if [[ "$MODULE_REPORT_STATE" -eq 0 ]]; then
     print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
@@ -588,7 +589,7 @@ module_end_log() {
 }
 
 strip_color_codes() {
-  echo "$1" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+  echo "${1:-}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
 }
 
 matrix_mode() {

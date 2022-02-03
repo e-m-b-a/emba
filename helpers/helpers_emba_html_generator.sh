@@ -362,9 +362,9 @@ generate_info_file()
 
 generate_report_file()
 {
-  REPORT_FILE=$1
+  REPORT_FILE=${1:-}
   # if set to 1, then generate file in supplementary folder and link to menu
-  SUPPL_FILE_GEN=$2
+  SUPPL_FILE_GEN=${2:-}
 
   if ! ( grep -a -o -i -q "$(basename "${REPORT_FILE%."${REPORT_FILE##*.}"}")"" nothing reported" "$REPORT_FILE" ) ; then
     HTML_FILE="$(basename "${REPORT_FILE%."${REPORT_FILE##*.}"}"".html")"
@@ -396,7 +396,7 @@ generate_report_file()
         # add module anchor to navigation
         NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$A_MODUL_NAME@g")"
         sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
-        ((LINE_NUMBER_REP_NAV++))
+        ((LINE_NUMBER_REP_NAV+=1))
       fi
     fi
 
@@ -412,7 +412,7 @@ generate_report_file()
           # Add anchor to file
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
           sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
-          ((LINE_NUMBER_REP_NAV++))
+          ((LINE_NUMBER_REP_NAV+=1))
         fi
       done
     fi
@@ -443,15 +443,15 @@ generate_report_file()
 add_link_to_index() {
 
   insert_line() {
-    SEARCH_VAL="$1"
-    MODUL_NAME="$2"
+    SEARCH_VAL="${1:-}"
+    MODUL_NAME="${2:-}"
     LINE_NUMBER_NAV_INSERT=$(grep -a -m 1 -n "$SEARCH_VAL" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
     REP_NAV_LINK="$(echo "$MODUL_INDEX_LINK" | sed -e "s@LINK@.\/$HTML_FILE@g" | sed -e "s@CLASS@$CLASS@g" | sed -e "s@DATA@$DATA@g")"
     sed -i "$LINE_NUMBER_NAV_INSERT""i""$REP_NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   }
 
-  HTML_FILE="$1"
-  MODUL_NAME="$2"
+  HTML_FILE="${1:-}"
+  MODUL_NAME="${2:-}"
   DATA="$( echo "$HTML_FILE" | cut -d "_" -f 1)"
   CLASS="${DATA:0:1}"
   C_NUMBER="$(echo "${DATA:1}" | sed -E 's@^0*@@g')"

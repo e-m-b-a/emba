@@ -32,7 +32,7 @@ S90_mail_check()
       if [[ -n "$MAILS" ]] ; then
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS")")"
-        ((FINDING++))
+        ((FINDING+=1))
       fi
     fi
   done
@@ -46,7 +46,7 @@ S90_mail_check()
       if [[ -n "$MAILS_ROOT" ]] ; then
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS_ROOT")")"
-        ((FINDING++))
+        ((FINDING+=1))
       fi
     fi
   done
