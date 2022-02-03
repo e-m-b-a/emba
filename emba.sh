@@ -553,7 +553,7 @@ main()
       exit 1
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
-        mkdir "$LOG_DIR"
+        mkdir "$LOG_DIR" || true
       fi
       S25_kernel_check
     fi

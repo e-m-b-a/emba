@@ -57,8 +57,8 @@ cwe_check() {
   for LINE in "${BINARIES[@]}" ; do
     if ( file "$LINE" | grep -q ELF ) ; then
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo)"))
-        if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+        MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo || true)"))
+        if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
           MAX_THREADS_S120=1
         fi
 
@@ -98,7 +98,7 @@ cwe_checker_threaded () {
     for CWE_LINE in "${CWE_OUT[@]}"; do
       CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
       CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-      CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null)"
+      CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null || true)"
       echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
       # (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
       print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
@@ -125,7 +125,7 @@ final_cwe_log() {
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -c "$CWE")"
+        CWE_CNT="$(cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_output ""

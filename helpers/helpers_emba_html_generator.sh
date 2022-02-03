@@ -122,7 +122,7 @@ add_link_tags() {
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
           local RES_PATH
           RES_PATH="$ABS_HTML_PATH""/""$(echo "$BACK_LINK" | cut -d"." -f1 )""/res"
-          if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null ; fi
+          if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")"
           HTML_LINK="$P_START""Archive: ""$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g")""$(basename "$REF_LINK")""$LINK_END""$P_END"
           LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""i""$HTML_LINK" )
@@ -217,7 +217,7 @@ add_link_tags() {
           # copy msf file
           local RES_PATH
           RES_PATH="$ABS_HTML_PATH""/""$(echo "$BACK_LINK" | cut -d"." -f1 )""/res"
-          if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null ; fi
+          if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true; fi
           cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")"
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY_ELEM""$LINK_END"
           LINK_COMMAND_ARR+=( '-e' "$MSF_KEY_LINE""s@""$MSF_KEY_ELEM""@""$HTML_LINK""@g" )
@@ -313,7 +313,7 @@ generate_info_file()
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
 
-  if [[ ! -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" ; fi
+  if [[ ! -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" || true ; fi
 
   if [[ ! -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE"
@@ -348,7 +348,7 @@ generate_info_file()
     readarray -t EXPLOIT_FILES < <(grep -a "File: " "$INFO_FILE" | cut -d ":" -f 2 | sed 's@^\ @@' | sort -u)
     for E_PATH in "${EXPLOIT_FILES[@]}" ; do
       if [[ -f "$E_PATH" ]] ; then
-        if [[ ! -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" > /dev/null ; fi
+        if [[ ! -d "$RES_PATH" ]] ; then mkdir "$RES_PATH" > /dev/null || true ; fi
         cp "$E_PATH" "$RES_PATH""/""$(basename "$E_PATH")"
         E_HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./res/$(basename "$E_PATH")@g")""$(basename "$E_PATH")""$LINK_END"
         printf "%s%sFile: %s%s\n" "$HR_MONO" "$P_START" "$E_HTML_LINK" "$P_END" >> "$TMP_INFO_FILE"
@@ -547,17 +547,17 @@ prepare_report()
   ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
   
   if [ ! -d "$ABS_HTML_PATH$STYLE_PATH" ] ; then
-    mkdir -p "$ABS_HTML_PATH$STYLE_PATH"
+    mkdir -p "$ABS_HTML_PATH$STYLE_PATH" || true
     cp "$HELP_DIR/style.css" "$ABS_HTML_PATH$STYLE_PATH/style.css"
     cp "$HELP_DIR/emba.svg" "$ABS_HTML_PATH$STYLE_PATH/emba.svg"
     cp "$HELP_DIR/embark.svg" "$ABS_HTML_PATH$STYLE_PATH/embark.svg"
     cp "$HELP_DIR/favicon.png" "$ABS_HTML_PATH$STYLE_PATH/favicon.png"
   fi
   if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
-    mkdir -p "$ABS_HTML_PATH$TEMP_PATH"
+    mkdir -p "$ABS_HTML_PATH$TEMP_PATH" || true
   fi
   if [ ! -d "$ABS_HTML_PATH$SUPPL_PATH_HTML" ] ; then
-    mkdir -p "$ABS_HTML_PATH$SUPPL_PATH_HTML"
+    mkdir -p "$ABS_HTML_PATH$SUPPL_PATH_HTML" || true
   fi
 
   cp "./helpers/base.html" "$ABS_HTML_PATH""/""$INDEX_FILE"

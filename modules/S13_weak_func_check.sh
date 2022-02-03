@@ -31,7 +31,7 @@ S13_weak_func_check()
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+      while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
         sleep 1
       done
     fi
@@ -448,7 +448,7 @@ output_function_details()
 
   LOG_FILE_LOC_OLD="$LOG_FILE_LOC"
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
-  mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
+  mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null || true
   
   if [[ "$NETWORKING" -gt 1 ]]; then
     NETWORKING_="${ORANGE}networking: yes${NC}"

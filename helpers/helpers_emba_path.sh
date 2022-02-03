@@ -191,21 +191,21 @@ mod_path_array() {
 
 create_log_dir() {
   if ! [[ -d "$LOG_DIR" ]] ; then
-      mkdir "$LOG_DIR" 2> /dev/null
+      mkdir "$LOG_DIR" 2> /dev/null || true
   fi
   if ! [[ -d "$TMP_DIR" ]] ; then
-      mkdir "$TMP_DIR" 2> /dev/null
+      mkdir "$TMP_DIR" 2> /dev/null || true
   fi
   if [[ $FIRMWARE -eq 1 ]] ; then
     export HTML_PATH="$LOG_DIR""/html-report"
     if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then
-      mkdir "$HTML_PATH" 2> /dev/null
+      mkdir "$HTML_PATH" 2> /dev/null || true
     fi
     export FIRMWARE_PATH_CP="$LOG_DIR""/firmware"
-    mkdir -p "$FIRMWARE_PATH_CP" 2> /dev/null
+    mkdir -p "$FIRMWARE_PATH_CP" 2> /dev/null || true
     export SUPPL_PATH="$LOG_DIR""/etc"
-    mkdir -p "$SUPPL_PATH" 2> /dev/null
-    mkdir -p "$TMP_DIR" 2> /dev/null
+    mkdir -p "$SUPPL_PATH" 2> /dev/null || true
+    mkdir -p "$TMP_DIR" 2> /dev/null || true
   fi
 }
 

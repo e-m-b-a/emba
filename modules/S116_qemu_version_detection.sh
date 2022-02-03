@@ -23,7 +23,8 @@ S116_qemu_version_detection() {
   # This module waits for S115_usermode_emulator
   # check emba.log for S115_usermode_emulator
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+    while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
+      echo "hanging"
       sleep 1
     done
   fi
@@ -40,7 +41,7 @@ S116_qemu_version_detection() {
         continue
       fi
 
-      if [[ $THREADING -eq 1 ]]; then
+      if [[ $THREADED -eq 1 ]]; then
         version_detection_thread &
         WAIT_PIDS_F05+=( "$!" )
       else

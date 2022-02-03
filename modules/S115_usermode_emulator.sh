@@ -40,7 +40,8 @@ S115_usermode_emulator() {
     # to protect the host we are going to kill them on a KILL_SIZE limit
     KILL_SIZE="50M"
 
-    declare -a MISSING
+    #declare -a MISSING
+    export MISSING=()
     ROOT_CNT=0
 
     # load blacklist of binaries that could cause troubles during emulation:
@@ -105,10 +106,10 @@ S115_usermode_emulator() {
         else
           if [[ "$THREADED" -eq 1 ]]; then
             # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
-            MAX_THREADS_S115=$((7*"$(grep -c ^processor /proc/cpuinfo)"))
-            if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+            MAX_THREADS_S115=$((7*"$(grep -c ^processor /proc/cpuinfo || true)"))
+            if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
               # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
-              MAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo)"))
+              MAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo || true)"))
             fi
           fi
           if [[ "$BIN_" != './qemu-'*'-static' ]]; then
@@ -255,7 +256,7 @@ s115_cleanup() {
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
 
-  rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null
+  rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
@@ -263,7 +264,7 @@ s115_cleanup() {
     killall -9 --quiet -r .*qemu.*sta.* || true
   fi
 
-  CJOBS_=$(pgrep qemu-)
+  CJOBS_=$(pgrep qemu- || true)
   if [[ -n "$CJOBS_" ]] ; then
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
     killall -9 "$EMULATOR" 2> /dev/null || true
@@ -271,7 +272,7 @@ s115_cleanup() {
   kill "$PID_killer" || true
 
   print_output "[*] Cleaning the emulation environment\\n"
-  find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
+  find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
 
   print_output ""
   print_output "[*] Umounting proc, sys and run"
@@ -289,7 +290,7 @@ s115_cleanup() {
     sub_module_title "Reporting phase"
     for FILE in "${FILES[@]}" ; do
       if [[ ! -s "$FILE" ]] ; then
-        rm "$FILE" 2> /dev/null
+        rm "$FILE" 2> /dev/null || true
       else
         BIN=$(basename "$FILE")
         BIN=$(echo "$BIN" | cut -d_ -f3 | sed 's/.txt$//')
@@ -301,7 +302,7 @@ s115_cleanup() {
   # lets delete it now
   if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
     print_output "[*] Remove firmware copy from emulation directory.\\n\\n"
-    rm -r "$EMULATION_PATH_BASE"
+    rm -r "$EMULATION_PATH_BASE" || true
   fi
 }
 
@@ -323,29 +324,29 @@ prepare_emulator() {
     fi
 
     if ! [[ -d "$R_PATH""/proc" ]] ; then
-      mkdir "$R_PATH""/proc" 2> /dev/null
+      mkdir "$R_PATH""/proc" 2> /dev/null || true
     fi
 
     if ! [[ -d "$R_PATH""/sys" ]] ; then
-      mkdir "$R_PATH""/sys" 2> /dev/null
+      mkdir "$R_PATH""/sys" 2> /dev/null || true
     fi
 
     if ! [[ -d "$R_PATH""/run" ]] ; then
-      mkdir "$R_PATH""/run" 2> /dev/null
+      mkdir "$R_PATH""/run" 2> /dev/null || true
     fi
 
     if ! [[ -d "$R_PATH""/dev/" ]] ; then
-      mkdir "$R_PATH""/dev/" 2> /dev/null
+      mkdir "$R_PATH""/dev/" 2> /dev/null || true
     fi
 
     if ! mount | grep "$R_PATH"/proc > /dev/null ; then
-      mount proc "$R_PATH""/proc" -t proc 2> /dev/null
+      mount proc "$R_PATH""/proc" -t proc 2> /dev/null || true
     fi
     if ! mount | grep "$R_PATH/run" > /dev/null ; then
-      mount -o bind /run "$R_PATH""/run" 2> /dev/null
+      mount -o bind /run "$R_PATH""/run" 2> /dev/null || true
     fi
     if ! mount | grep "$R_PATH/sys" > /dev/null ; then
-      mount -o bind /sys "$R_PATH""/sys" 2> /dev/null
+      mount -o bind /sys "$R_PATH""/sys" 2> /dev/null || true
     fi
 
     creating_dev_area
@@ -368,8 +369,8 @@ prepare_emulator() {
     cp "$(which busybox)" "$R_PATH"/
     chmod +x "$R_PATH"/busybox
     chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
-    rm "$R_PATH"/fixImage_user_mode_emulation.sh
-    rm "$R_PATH"/busybox
+    rm "$R_PATH"/fixImage_user_mode_emulation.sh || true
+    rm "$R_PATH"/busybox || true
     print_bar
   fi
 }
@@ -452,7 +453,7 @@ creating_dev_area() {
 
   if ! [[ -d "$R_PATH"/dev/mtd ]]; then
     print_output "[*] Creating and populating /dev/mtd"
-    mkdir -p "$R_PATH"/dev/mtd 2> /dev/null
+    mkdir -p "$R_PATH"/dev/mtd 2> /dev/null || true
     mknod -m 644 "$R_PATH"/dev/mtd/0 c 90 0 2> /dev/null || true
     mknod -m 644 "$R_PATH"/dev/mtd/1 c 90 2 2> /dev/null || true
     mknod -m 644 "$R_PATH"/dev/mtd/2 c 90 4 2> /dev/null || true
@@ -491,7 +492,7 @@ creating_dev_area() {
 
   if ! [[ -d "$R_PATH"/dev/mtdblock ]]; then
     print_output "[*] Creating and populating /dev/mtdblock"
-    mkdir -p "$R_PATH"/dev/mtdblock 2> /dev/null
+    mkdir -p "$R_PATH"/dev/mtdblock 2> /dev/null || true
     mknod -m 644 "$R_PATH"/dev/mtdblock/0 b 31 0 2> /dev/null || true
     mknod -m 644 "$R_PATH"/dev/mtdblock/1 b 31 1 2> /dev/null || true
     mknod -m 644 "$R_PATH"/dev/mtdblock/2 b 31 2 2> /dev/null || true
@@ -519,7 +520,7 @@ creating_dev_area() {
 
   if ! [[ -d "$R_PATH"/dev/tts ]]; then
     print_output "[*] Creating and populating /dev/tts"
-    mkdir -p "$R_PATH"/dev/tts 2> /dev/null
+    mkdir -p "$R_PATH"/dev/tts 2> /dev/null || true
     mknod -m 660 "$R_PATH"/dev/tts/0 c 4 64 2> /dev/null || true
     mknod -m 660 "$R_PATH"/dev/tts/1 c 4 65 2> /dev/null || true
     mknod -m 660 "$R_PATH"/dev/tts/2 c 4 66 2> /dev/null || true
@@ -539,7 +540,7 @@ run_init_test() {
   CPU_CONFIG_=""
   # get the most used cpu configuration for the initial check:
   if [[ -f "$LOG_PATH_MODULE""/qemu_init_cpu.txt" ]]; then
-    CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}')
+    CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}' || true)
   fi
 
   print_output "[*] Initial emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_FILE_INIT" "$LOG_FILE_INIT"
@@ -550,11 +551,11 @@ run_init_test() {
 
     write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
 
-    mapfile -t CPU_CONFIGS < <(chroot "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'")
+    mapfile -t CPU_CONFIGS < <(chroot "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
 
     for CPU_CONFIG_ in "${CPU_CONFIGS[@]}"; do
       if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
-        rm "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt"
+        rm "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" || true
       fi
 
       run_init_qemu "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT"
@@ -596,9 +597,9 @@ run_init_test() {
 
 run_init_qemu() {
 
-  local CPU_CONFIG_="$1"
-  local BIN_EMU_NAME_="$2"
-  local LOG_FILE_INIT="$3"
+  local CPU_CONFIG_="${1:-}"
+  local BIN_EMU_NAME_="${2:-}"
+  local LOG_FILE_INIT="${3:-}"
 
   # Enable the following echo output for debugging
   echo "BIN: $BIN_" | tee -a "$LOG_FILE_INIT"
@@ -657,8 +658,8 @@ emulate_strace_run() {
   kill -0 -9 "$PID" 2> /dev/null || true
 
   # extract missing files, exclude *.so files:
-  mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_FILE_STRACER" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u)
-  mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u)
+  mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_FILE_STRACER" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u || true)
+  mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u || true)
   MISSING_AREAS+=("${MISSING_AREAS_[@]}" )
 
   for MISSING_AREA in "${MISSING_AREAS[@]}"; do
@@ -677,12 +678,12 @@ emulate_strace_run() {
     
       if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
         write_log "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC" "$LOG_FILE_STRACER"
-        mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null
+        mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null || true
         #continue
       fi
       if [[ -n "$FILENAME_FOUND" ]]; then
         write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
-        cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null
+        cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null || true
         continue
       else
       #  # disable this for now - have to rethink this
@@ -755,17 +756,19 @@ emulate_binary() {
       PARAM="NONE"
     fi
 
+    set +e
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       #chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
       #chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     fi
     check_disk_space
   done
+  set -e
 
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...

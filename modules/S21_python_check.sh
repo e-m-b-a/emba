@@ -77,7 +77,7 @@ s21_script_bandit() {
   PY_LOG="$LOG_PATH_MODULE""/bandit""$NAME"".txt"
   bandit -r "$LINE" > "$PY_LOG" 2> /dev/null
 
-  VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null)
+  VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" ""  "$PY_LOG"
@@ -94,7 +94,7 @@ s21_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/pylint_""$NAME"".txt"
   pylint --max-line-length=240 -d C0115,C0114,C0116,W0511,E0401 "$LINE" > "$PY_LOG" 2> /dev/null
-  VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
+  VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND

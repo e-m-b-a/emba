@@ -138,7 +138,7 @@ check_live_nikto() {
       done
 
       print_output ""
-      if [[ $(grep -c "+ [1-9] host(s) tested" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt) -gt 0 ]]; then
+      if [[ $(grep -c "+ [1-9] host(s) tested" "$LOG_PATH_MODULE"/nikto-scan-"$IP".txt || true) -gt 0 ]]; then
         NIKTO_UP=1
       fi
     fi

@@ -43,17 +43,17 @@ vmdk_extractor() {
   sub_module_title "VMDK extractor"
 
   print_output "[*] Connect to device $ORANGE$VMDK_PATH_$NC"
-  mkdir -p "$TMP_VMDK_MNT"
+  mkdir -p "$TMP_VMDK_MNT" || true
 
   for MOUNT_DEV in /dev/sda{1..5}; do
     DEV_NAME=$(basename "$MOUNT_DEV")
     print_output "[*] Trying to mount $ORANGE$MOUNT_DEV$NC to $ORANGE$TMP_VMDK_MNT$NC directory"
     # if troubles ahead with vmdk mount, remove the error redirection
-    guestmount -a "$VMDK_PATH_" -m "$MOUNT_DEV" --ro "$TMP_VMDK_MNT" 2>/dev/null
+    guestmount -a "$VMDK_PATH_" -m "$MOUNT_DEV" --ro "$TMP_VMDK_MNT" 2>/dev/null || true
     if mount | grep -q vmdk_mount; then
       print_output "[*] Copying $ORANGE$MOUNT_DEV$NC to firmware directory $EXTRACTION_DIR_"
-      mkdir -p "$EXTRACTION_DIR"/"$DEV_NAME"/
-      cp -pri "$TMP_VMDK_MNT"/* "$EXTRACTION_DIR_"/"$DEV_NAME"/
+      mkdir -p "$EXTRACTION_DIR"/"$DEV_NAME"/ || true
+      cp -pri "$TMP_VMDK_MNT"/* "$EXTRACTION_DIR_"/"$DEV_NAME"/ || true
       umount "$TMP_VMDK_MNT"
     fi
   done
@@ -67,5 +67,5 @@ vmdk_extractor() {
     write_csv_log "Extractor" "files" "directories" "firmware dir"
     write_csv_log "VMDK extractor" "$VMDK_FILES" "$VMDK_DIRS" "$EXTRACTION_DIR_"
   fi
-  rm -r "$TMP_VMDK_MNT"
+  rm -r "$TMP_VMDK_MNT" || true
 }

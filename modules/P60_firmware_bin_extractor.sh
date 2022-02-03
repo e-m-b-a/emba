@@ -253,7 +253,7 @@ deb_extractor() {
 
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-  MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo)"))
+  MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo || true)"))
 
   local FILE_ARR_TMP
   local FILE_MD5
@@ -399,11 +399,11 @@ binwalking() {
     if [[ $IN_DOCKER -eq 1 ]] ; then
       cd / || return
       print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
     else
       print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
     fi
   fi
 
