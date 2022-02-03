@@ -205,6 +205,7 @@ main()
   export EMBA_PID="$$"
   export STRICT=0
   export MATRIX_MODE=0
+  export UPDATE=0
   export FULL_EMULATION=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
@@ -279,7 +280,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -364,6 +365,9 @@ main()
       t)
         export THREADED=1
         ;;
+      U)
+        export UPDATE=1
+        ;;
       x)
         export DEEP_EXTRACTOR=1
         ;;
@@ -391,6 +395,13 @@ main()
   done
 
   echo
+
+  if [[ "$UPDATE" -eq 1 ]]; then
+    print_output "[*] EMBA update starting ..."
+    git pull
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
+    exit 0
+  fi
 
   if [[ $USE_DOCKER -eq 0 && $IN_DOCKER -eq 0 ]]; then
     print_bar "no_log"
@@ -578,17 +589,13 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrstX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStUX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
         *)
           if [[ -v OPTARG[@] ]] ; then
-            if [[ "${#OPTARG[@]}" -gt 0 ]] ; then
-              ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" "${OPTARG[@]}" )
-            else
-              ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
-            fi
+            ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" "${OPTARG[@]}" )
           else
             ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
           fi
@@ -599,17 +606,22 @@ main()
     echo
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
-#    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
 
-    if ! docker images | grep -qE "emba[[:space:]]*latest"; then
-      print_output "[-] EMBA docker build failed!" "no_log"
-      exit 1
+    if [[ "$UPDATE" -eq 1 ]]; then
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
     fi
 
-    if docker images | grep -qE "emba[[:space:]]*latest"; then
+    if ! docker images | grep -qE "emba[[:space:]]*latest"; then
+      print_output "[*] Available docker images:" "no_log"
+      docker images | grep -E "emba[[:space:]]*latest"
+      print_output "[-] EMBA docker not available!" "no_log"
+      exit 1
+    else
       print_output "[*] EMBA initializes docker container.\\n" "no_log"
+      set +e
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
+      set -e
 
       if [[ $D_RETURN -eq 0 ]] ; then
         if [[ $ONLY_DEP -eq 0 ]] ; then
@@ -625,9 +637,6 @@ main()
         print_output "[-] EMBA failed in docker mode!" "main"
         exit 1
       fi
-    else
-      print_output "[-] EMBA failed in docker mode!" "main"
-      exit 1
     fi
   fi
 

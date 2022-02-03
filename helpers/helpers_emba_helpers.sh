@@ -112,7 +112,7 @@ cleaner() {
   fi
 
   if [[ -d "$TMP_DIR" ]]; then
-    rm -r "$TMP_DIR" 2>/dev/null
+    rm -r "$TMP_DIR" 2>/dev/null || true
   fi
   print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
   exit 1

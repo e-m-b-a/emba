@@ -183,7 +183,9 @@ aggregate_versions() {
         fi
       fi
     done
-    mapfile -t VERSIONS_AGGREGATED < <(cat "$LOG_PATH_MODULE"/versions1.tmp)
+    if [[ -f "$LOG_PATH_MODULE"/versions1.tmp ]]; then
+      mapfile -t VERSIONS_AGGREGATED < <(cat "$LOG_PATH_MODULE"/versions1.tmp)
+    fi
     rm "$LOG_PATH_MODULE"/versions*.tmp 2>/dev/null
 
     # leave this here for debugging reasons
@@ -273,12 +275,14 @@ cve_db_lookup() {
   print_output "[*] CVE database lookup with version information: ${ORANGE}$VERSION_SEARCH${NC}" "" "f19#cve_$VERSION_BINARY"
 
   # CVE search:
+  set +e
   "$PATH_CVE_SEARCH" -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
 
   # shellcheck disable=SC2181
   if [[ "$?" -ne 0 ]]; then
     "$PATH_CVE_SEARCH" -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
   fi
+  set -e
 
   if [[ "$VERSION" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link

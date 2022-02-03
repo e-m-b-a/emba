@@ -82,8 +82,10 @@ deep_key_searcher() {
       print_output "[+] $(print_path "$DEEP_S_FILE")"
       write_link "$LOG_PATH_MODULE""/deep_key_search_""$(basename "$DEEP_S_FILE")"".txt"
       print_output "$D_S_FINDINGS" 
-      cat "$LOG_FILE" >> "$OLD_LOG_FILE" || true
-      rm "$LOG_FILE" 2> /dev/null || true
+      if [[ -f "$LOG_FILE" ]]; then
+        cat "$LOG_FILE" >> "$OLD_LOG_FILE" || true
+        rm "$LOG_FILE" 2> /dev/null || true
+      fi
       LOG_FILE="$OLD_LOG_FILE"
     fi
   fi

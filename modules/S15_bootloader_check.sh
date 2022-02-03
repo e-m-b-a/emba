@@ -57,8 +57,8 @@ check_bootloader()
 {
   sub_module_title "Scan for bootloader"
 
-  local BOOTLOADER
-  local CHECK
+  local BOOTLOADER=0
+  local CHECK=0
 
   # Syslinux
   CHECK=0
@@ -133,7 +133,7 @@ check_bootloader()
   fi
   
   # Grub configuration
-  if [[ -n "$GRUB" ]] ; then
+  if [[ -n "${GRUB:-}" ]] ; then
     print_output "[*] Check Grub config: ""$(print_path "$GRUB")"
     FIND=$(grep 'password --md5' "$GRUB"| grep -v '^#' || true)
     FIND2=$(grep 'password --encrypted' "$GRUB"| grep -v '^#' || true)
@@ -298,7 +298,7 @@ check_bootloader()
     print_output "[-] No U-Boot image found"
   fi
 
-  if [[ -z "$BOOTLOADER" ]] ; then
+  if [[ -z "${BOOTLOADER:-}" ]] ; then
     print_output "[-] No bootloader found"
   fi
 }
