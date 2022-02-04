@@ -52,9 +52,13 @@ check_fstab()
 {
   sub_module_title "Scan fstab"
 
-  set +e
+  if [[ "$STRICT" -eq 1 ]]; then
+    set +e
+  fi
   IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
-  set -e
+  if [[ "$STRICT" -eq 1 ]]; then
+    set -e
+  fi
 
   if [[ ${#FSTAB_ARR[@]} -ne 0 ]] ; then
     readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "username" {} \; || true)")

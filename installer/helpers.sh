@@ -30,7 +30,7 @@ print_help()
 module_title()
 {
   local MODULE_TITLE
-  MODULE_TITLE="$1"
+  MODULE_TITLE="${1:-}"
   local MODULE_TITLE_FORMAT
   MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""$MODULE_TITLE""${NC}""\\n""${BOLD}""=================================================================""${NC}"
   echo -e "\\n\\n""$MODULE_TITLE_FORMAT"
@@ -43,34 +43,34 @@ module_title()
 # c = if given: check if this application is on the system instead of a
 
 print_tool_info(){
-  echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
-  TOOL_INFO="$(apt show "${1}" 2> /dev/null)"
+  echo -e "\\n""$ORANGE""$BOLD""${1:-}""$NC"
+  TOOL_INFO="$(apt show "${1:-}" 2> /dev/null)"
   if echo "$TOOL_INFO" | grep -q "Description:" 2>/dev/null ; then
     echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
-    SIZE=$(apt show "$1" 2>/dev/null | grep Download-Size | cut -d: -f2)
+    SIZE=$(apt show "${1:-}" 2>/dev/null | grep Download-Size | cut -d: -f2)
     if [[ -n "$SIZE" ]]; then
       echo -e "Download-Size:$SIZE"
     fi
     if echo "$TOOL_INFO" | grep -E "^E:\ "; then
-      echo -e "$RED""$1"" was not identified and is not installable.""$NC"
+      echo -e "$RED""${1:-}"" was not identified and is not installable.""$NC"
     else
       COMMAND_=""
       if [[ -n ${3+x} ]] ; then
-        COMMAND_="$3"
+        COMMAND_="${3:-}"
       else
-        COMMAND_="$1"
+        COMMAND_="${1:-}"
       fi
       if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
         UPDATE=$(apt-cache policy "$1" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
         if [[ "$UPDATE" -eq 1 ]] ; then
-          echo -e "$GREEN""$1"" won't be updated.""$NC"
+          echo -e "$GREEN""${1:-}"" won't be updated.""$NC"
         else
-          echo -e "$ORANGE""$1"" will be updated.""$NC"
-          INSTALL_APP_LIST+=("$1")
+          echo -e "$ORANGE""${1:-}"" will be updated.""$NC"
+          INSTALL_APP_LIST+=("${1:-}")
         fi
       else
-        echo -e "$ORANGE""$1"" will be newly installed.""$NC"
-        INSTALL_APP_LIST+=("$1")
+        echo -e "$ORANGE""${1:-}"" will be newly installed.""$NC"
+        INSTALL_APP_LIST+=("${1:-}")
       fi
     fi
   fi
@@ -82,9 +82,9 @@ print_tool_info(){
 # c = description of tool
 
 print_git_info() {
-  local GIT_NAME="$1"
-  local GIT_URL="$2"
-  local GIT_DESC="$3"
+  local GIT_NAME="${1:-}"
+  local GIT_URL="${2:-}"
+  local GIT_DESC="${3:-}"
   local GIT_SIZE=0
 
   echo -e "\\n""$ORANGE""$BOLD""$GIT_NAME""$NC"
@@ -110,10 +110,10 @@ print_git_info() {
 # b = package version
 
 print_pip_info() {
-  local PIP_NAME="$1"
+  local PIP_NAME="${1:-}"
   local INSTALLED=0
   if [[ -n "${2+x}" ]] ; then
-    local PACKAGE_VERSION="$2"
+    local PACKAGE_VERSION="${2:-}"
   fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
   mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" 2>/dev/null)
@@ -165,12 +165,12 @@ print_pip_info() {
 
 print_file_info()
 {
-  echo -e "\\n""$ORANGE""$BOLD""${1}""$NC"
-  if [[ -n "${2}" ]] ; then
-    echo -e "Description: ""${2}"
+  echo -e "\\n""$ORANGE""$BOLD""${1:-}""$NC"
+  if [[ -n "${2:-}" ]] ; then
+    echo -e "Description: ""${2:-}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
-  FILE_SIZE=$(($(wget "${3}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d' || true)))
+  FILE_SIZE=$(($(wget "${3:-}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d' || true)))
 
   if (( FILE_SIZE > 1048576 )) ; then
     echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
@@ -180,20 +180,20 @@ print_file_info()
     echo -e "Download-Size: ""$FILE_SIZE"" B"
   fi
 
-  if ! [[ -f "${4}" ]] ; then
+  if ! [[ -f "${4:-}" ]] ; then
     if [[ -n "${5+x}" ]] ; then
-      if [[ -f "${5}" ]] || ( command -v "${5}" > /dev/null) || ( dpkg -s "${5}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-        echo -e "$GREEN""$1"" is already installed - no further action performed.""$NC"
+      if [[ -f "${5:-}" ]] || ( command -v "${5:-}" > /dev/null) || ( dpkg -s "${5:-}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
+        echo -e "$GREEN""${1:-}"" is already installed - no further action performed.""$NC"
       else
-        echo -e "$ORANGE""$1"" will be downloaded.""$NC"
-        DOWNLOAD_FILE_LIST+=("$1")
+        echo -e "$ORANGE""${1:-}"" will be downloaded.""$NC"
+        DOWNLOAD_FILE_LIST+=("${1:-}")
       fi
     else
-      echo -e "$ORANGE""${1}"" will be downloaded.""$NC"
-      DOWNLOAD_FILE_LIST+=("${1}")
+      echo -e "$ORANGE""${1:-}"" will be downloaded.""$NC"
+      DOWNLOAD_FILE_LIST+=("${1:-}")
     fi
   else
-    echo -e "$ORANGE""${1}"" has already been downloaded.""$NC"
+    echo -e "$ORANGE""${1:-}"" has already been downloaded.""$NC"
   fi
 }
 
@@ -206,17 +206,17 @@ print_file_info()
 download_file()
 {
   for D_FILE in "${DOWNLOAD_FILE_LIST[@]}" ; do
-    if [[ "$D_FILE" == "${1}" ]] ; then
-      echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1}""$NC"
-      if ! [[ -f "${3}" ]] ; then
-        wget --no-check-certificate "${2}" -O "${3}"
+    if [[ "$D_FILE" == "${1:-}" ]] ; then
+      echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1:-}""$NC"
+      if ! [[ -f "${3:-}" ]] ; then
+        wget --no-check-certificate "${2:-}" -O "${3:-}"
       else
         echo -e "$GREEN""${1}"" is already downloaded - no further action performed.""$NC"
       fi
     fi
   done
-  if [[ -f "${3}" ]] && ! [[ -x "${3}" ]] ; then
-    chmod +x "${3}"
+  if [[ -f "${3:-}" ]] && ! [[ -x "${3:-}" ]] ; then
+    chmod +x "${3:-}"
   fi
 }
 

@@ -607,10 +607,14 @@ run_init_qemu() {
   echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
   echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
 
-  set +e
+  if [[ "$STRICT" -eq 1 ]]; then
+    set +e
+  fi
   run_init_qemu_runner "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT" &
   PID=$!
-  set -e
+  if [[ "$STRICT" -eq 1 ]]; then
+    set -e
+  fi
 
   # wait a bit and then kill it
   sleep 1
@@ -643,7 +647,9 @@ emulate_strace_run() {
   print_output "[*] Initial strace run on the command ${ORANGE}$BIN_${NC} to identify missing areas" "$LOG_FILE_STRACER" "$LOG_FILE_STRACER"
 
   # currently we only look for file errors (errno=2) and try to fix this
-  set +e
+  if [[ "$STRICT" -eq 1 ]]; then
+    set +e
+  fi
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
     timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
@@ -651,7 +657,9 @@ emulate_strace_run() {
     timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   fi
-  set -e
+  if [[ "$STRICT" -eq 1 ]]; then
+    set -e
+  fi
 
   # wait a second and then kill it
   sleep 1
@@ -756,7 +764,9 @@ emulate_binary() {
       PARAM="NONE"
     fi
 
-    set +e
+    if [[ "$STRICT" -eq 1 ]]; then
+      set +e
+    fi
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       #chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
@@ -766,9 +776,11 @@ emulate_binary() {
       #chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
       timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     fi
+    if [[ "$STRICT" -eq 1 ]]; then
+      set -e
+    fi
     check_disk_space
   done
-  set -e
 
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
