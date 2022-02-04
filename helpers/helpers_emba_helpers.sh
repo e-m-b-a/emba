@@ -94,7 +94,7 @@ cleaner() {
       print_output "[*] Cleaning the emulation environment\\n" "no_log"
       find "$FIRMWARE_PATH_CP" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
       print_output "[*] Umounting proc, sys and run" "no_log"
-      mapfile -t CHECK_MOUNTS < <(mount | grep "$FIRMWARE_PATH_CP")
+      mapfile -t CHECK_MOUNTS < <(mount | grep "$FIRMWARE_PATH_CP" 2>/dev/null || true)
       # now we can unmount the stuff from emulator and delete temporary stuff
       for MOUNT in "${CHECK_MOUNTS[@]}"; do
         print_output "[*] Unmounting $MOUNT" "no_log"

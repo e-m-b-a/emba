@@ -154,7 +154,7 @@ add_link_tags() {
           LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK""@" '-e' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END""@")
         fi
       else
-        LINE_NUMBER_INFO_PREV="$(grep -a -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1)"
+        LINE_NUMBER_INFO_PREV="$(grep -a -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
       fi
     done
   fi

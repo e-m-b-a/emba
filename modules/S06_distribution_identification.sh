@@ -78,7 +78,7 @@ dlink_image_sign() {
   # probably we can use this in the future. Currently there is no need for it:
   mapfile -t DLINK_BUILDREV < <(find "$FIRMWARE_PATH" -path "*config/buildrev")
   for DLINK_BREV in "${DLINK_BUILDREV[@]}"; do
-    DLINK_FW_VERx=$(grep -E "^[A-Z][0-9]+" "$DLINK_BREV")
+    DLINK_FW_VERx=$(grep -E "^[A-Z][0-9]+" "$DLINK_BREV" || true)
     # -> B01
     DLINK_FW_VER="$DLINK_FW_VER""$DLINK_FW_VERx"
     # -> v2.14B01
