@@ -22,8 +22,8 @@ DEP_EXIT=0  # exit EMBA after dependency check, regardless of which parameters h
 # $2=File path
 check_dep_file()
 {
-  FILE_NAME="$1"
-  FILE_PATH="$2"
+  FILE_NAME="${1:-}"
+  FILE_PATH="${2:-}"
   print_output "    ""$FILE_NAME"" - \\c" "no_log"
   if ! [[ -f "$FILE_PATH" ]] ; then
     echo -e "$RED""not ok""$NC"
@@ -38,11 +38,11 @@ check_dep_file()
 # $2=Tool command, but only if set
 check_dep_tool()
 {
-  TOOL_NAME="$1"
+  TOOL_NAME="${1:-}"
   if [[ -n "${2:-}" ]] ; then
     TOOL_COMMAND="${2:-}"
   else
-    TOOL_COMMAND="$1"
+    TOOL_COMMAND="${1:-}"
   fi
   print_output "    ""$TOOL_NAME"" - \\c" "no_log"
   if ! command -v "$TOOL_COMMAND" > /dev/null ; then
@@ -56,8 +56,8 @@ check_dep_tool()
 
 check_dep_port()
 {
-  TOOL_NAME="$1"
-  PORT_NR="$2"
+  TOOL_NAME="${1:-}"
+  PORT_NR="${2:-}"
   print_output "    ""$TOOL_NAME"" - \\c" "no_log"
   if ! netstat -anpt | grep -q "$PORT_NR"; then
     echo -e "$RED""not ok""$NC"

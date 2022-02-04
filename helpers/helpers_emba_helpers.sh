@@ -16,7 +16,7 @@
 # Description: Multiple useful helpers
 
 run_web_reporter_mod_name() {
-  MOD_NAME="$1"
+  MOD_NAME="${1:-}"
   if [[ $HTML -eq 1 ]]; then
     # usually we should only find one file:
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
@@ -49,11 +49,11 @@ wait_for_pid() {
 }
 
 max_pids_protection() {
-  if [[ -n "$1" ]]; then
-    local MAX_PIDS_="$1"
+  if [[ -n "${1:-}" ]]; then
+    local MAX_PIDS_="${1:-}"
     shift
   else
-    local MAX_PIDS_="$MAX_MODS"
+    local MAX_PIDS_="${MAX_MODS:1}"
   fi
   local WAIT_PIDS=("$@")
   local PID

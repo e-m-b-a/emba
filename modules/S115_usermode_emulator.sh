@@ -380,75 +380,75 @@ creating_dev_area() {
 
   if ! [[ -e "$R_PATH""/dev/console" ]] ; then
     print_output "[*] Creating /dev/console"
-    mknod -m 622 "$R_PATH""/dev/console" c 5 1 2> /dev/null
+    mknod -m 622 "$R_PATH""/dev/console" c 5 1 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/null" ]] ; then
     print_output "[*] Creating /dev/null"
-    mknod -m 666 "$R_PATH""/dev/null" c 1 3 2> /dev/null
+    mknod -m 666 "$R_PATH""/dev/null" c 1 3 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/zero" ]] ; then
     print_output "[*] Creating /dev/zero"
-    mknod -m 666 "$R_PATH""/dev/zero" c 1 5 2> /dev/null
+    mknod -m 666 "$R_PATH""/dev/zero" c 1 5 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/ptmx" ]] ; then
     print_output "[*] Creating /dev/ptmx"
-    mknod -m 666 "$R_PATH""/dev/ptmx" c 5 2 2> /dev/null
+    mknod -m 666 "$R_PATH""/dev/ptmx" c 5 2 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/tty" ]] ; then
     print_output "[*] Creating /dev/tty"
-    mknod -m 666 "$R_PATH""/dev/tty" c 5 0 2> /dev/null
+    mknod -m 666 "$R_PATH""/dev/tty" c 5 0 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/random" ]] ; then
     print_output "[*] Creating /dev/random"
-    mknod -m 444 "$R_PATH""/dev/random" c 1 8 2> /dev/null
+    mknod -m 444 "$R_PATH""/dev/random" c 1 8 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/urandom" ]] ; then
     print_output "[*] Creating /dev/urandom"
-    mknod -m 444 "$R_PATH""/dev/urandom" c 1 9 2> /dev/null
+    mknod -m 444 "$R_PATH""/dev/urandom" c 1 9 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/mem" ]] ; then
     print_output "[*] Creating /dev/mem"
-    mknod -m 660 "$R_PATH"/dev/mem c 1 1 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/mem c 1 1 2> /dev/null || true
   fi
   if ! [[ -e "$R_PATH""/dev/kmem" ]] ; then
     print_output "[*] Creating /dev/kmem"
-    mknod -m 640 "$R_PATH"/dev/kmem c 1 2 2> /dev/null
+    mknod -m 640 "$R_PATH"/dev/kmem c 1 2 2> /dev/null || true
   fi
   if ! [[ -e "$R_PATH""/dev/armem" ]] ; then
     print_output "[*] Creating /dev/armem"
-    mknod -m 666 "$R_PATH"/dev/armem c 1 13 2> /dev/null
+    mknod -m 666 "$R_PATH"/dev/armem c 1 13 2> /dev/null || true
   fi
   
   if ! [[ -e "$R_PATH""/dev/tty0" ]] ; then
     print_output "[*] Creating /dev/tty0"
-    mknod -m 622 "$R_PATH"/dev/tty0 c 4 0 2> /dev/null
+    mknod -m 622 "$R_PATH"/dev/tty0 c 4 0 2> /dev/null || true
   fi
   if ! [[ -e "$R_PATH""/dev/ttyS0" ]] ; then
     print_output "[*] Creating /dev/ttyS0 - ttyS3"
-    mknod -m 660 "$R_PATH"/dev/ttyS0 c 4 64 2> /dev/null
-    mknod -m 660 "$R_PATH"/dev/ttyS1 c 4 65 2> /dev/null
-    mknod -m 660 "$R_PATH"/dev/ttyS2 c 4 66 2> /dev/null
-    mknod -m 660 "$R_PATH"/dev/ttyS3 c 4 67 2> /dev/null
+    mknod -m 660 "$R_PATH"/dev/ttyS0 c 4 64 2> /dev/null || true
+    mknod -m 660 "$R_PATH"/dev/ttyS1 c 4 65 2> /dev/null || true
+    mknod -m 660 "$R_PATH"/dev/ttyS2 c 4 66 2> /dev/null || true
+    mknod -m 660 "$R_PATH"/dev/ttyS3 c 4 67 2> /dev/null || true
   fi
 
   if ! [[ -e "$R_PATH""/dev/adsl0" ]] ; then
     print_output "[*] Creating /dev/adsl0"
-    mknod -m 644 "$R_PATH"/dev/adsl0 c 100 0 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/adsl0 c 100 0 2> /dev/null || true
   fi
   if ! [[ -e "$R_PATH""/dev/ppp" ]] ; then
     print_output "[*] Creating /dev/ppp"
-    mknod -m 644 "$R_PATH"/dev/ppp c 108 0 2> /dev/null
+    mknod -m 644 "$R_PATH"/dev/ppp c 108 0 2> /dev/null || true
   fi
   if ! [[ -e "$R_PATH""/dev/hidraw0" ]] ; then
     print_output "[*] Creating /dev/hidraw0"
-    mknod -m 666 "$R_PATH"/dev/hidraw0 c 251 0 2> /dev/null
+    mknod -m 666 "$R_PATH"/dev/hidraw0 c 251 0 2> /dev/null || true
   fi
 
   if ! [[ -d "$R_PATH"/dev/mtd ]]; then
@@ -527,7 +527,7 @@ creating_dev_area() {
     mknod -m 660 "$R_PATH"/dev/tts/3 c 4 67 2> /dev/null || true
   fi
 
-  chown -v root:tty "$R_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1
+  chown -v root:tty "$R_PATH""/dev/"{console,ptmx,tty} > /dev/null 2>&1 || true
 }
 
 run_init_test() {
