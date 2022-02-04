@@ -157,7 +157,7 @@ write_log()
       COLOR_OUTPUT_STRING="$(color_output "$E")"
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$W_LOG_FILE" >/dev/null
     else
-      echo -e "$(format_log "$E")" | tee -a "$W_LOG_FILE" >/dev/null
+      echo -e "$(format_log "$E")" | tee -a "$W_LOG_FILE" >/dev/null || true
     fi
   done
   if [[ "$GREP_LOG_WRITE" == "g" ]] ; then

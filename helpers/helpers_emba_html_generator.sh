@@ -331,10 +331,10 @@ generate_info_file()
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE"
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE"
 
-    sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_INFO_FILE"
+    sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_INFO_FILE" || true
     # add html tags for style
     add_color_tags "$TMP_INFO_FILE"
-    sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_INFO_FILE"
+    sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_INFO_FILE" || true
     
     # add link tags to links/generate info files and link to them and write line to tmp file
     add_link_tags "$TMP_INFO_FILE" "$INFO_HTML_FILE"
