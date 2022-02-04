@@ -52,17 +52,12 @@ check_fstab()
 {
   sub_module_title "Scan fstab"
 
-  if [[ "$STRICT" -eq 1 ]]; then
-    set +e
-  fi
-  IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
-  if [[ "$STRICT" -eq 1 ]]; then
-    set -e
-  fi
+  #IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
+  mapfile -t FSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
 
   if [[ ${#FSTAB_ARR[@]} -ne 0 ]] ; then
-    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "username" {} \; || true)")
-    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "password" {} \; || true)")
+    readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "username" {} \; 2>/dev/null || true)")
+    readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "password" {} \; 2>/dev/null || true)")
   fi
 
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then

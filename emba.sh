@@ -82,6 +82,7 @@ check_cve_search_job() {
     if ! ps aux | grep -v grep | grep -q "$EMBA_PID"; then
       break
     fi
+    check_nw_interface
     check_cve_search
     sleep 90
   done
@@ -618,10 +619,14 @@ main()
       exit 1
     else
       print_output "[*] EMBA initializes docker container.\\n" "no_log"
-      set +e
+      if [[ "$STRICT" -eq 1 ]]; then
+        set +e
+      fi
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      set -e
+      if [[ "$STRICT" -eq 1 ]]; then
+        set -e
+      fi
 
       if [[ $D_RETURN -eq 0 ]] ; then
         if [[ $ONLY_DEP -eq 0 ]] ; then

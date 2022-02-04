@@ -91,6 +91,13 @@ check_docker_env() {
   fi
 }
 
+check_nw_interface() {
+  if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+    systemctl restart NetworkManager docker
+    echo "$(date +"%D %T")""retstarted docker-networks"
+  fi
+}
+
 check_cve_search() {
   TOOL_NAME="cve-search"
   print_output "    ""$TOOL_NAME"" - testing" "no_log"
