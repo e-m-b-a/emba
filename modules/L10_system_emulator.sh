@@ -527,7 +527,7 @@ run_qemu_final_emulation() {
   #shellcheck disable=SC2086
   $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \
     -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
-    -nographic $QEMU_NETWORK $QEMU_PARAMS | tee "$LOG_PATH_MODULE"/qemu.final.serial.log
+    -nographic $QEMU_NETWORK $QEMU_PARAMS | tee "$LOG_PATH_MODULE"/qemu.final.serial.log || true
 
   IMAGE_="./$IMAGE_NAME"
   { 
@@ -540,6 +540,7 @@ run_qemu_final_emulation() {
 
 check_online_stat() {
   # check for a maximum of 60 seconds
+  PING_CNT=0
   while [[ "$PING_CNT" -lt 12 ]]; do
     for IP in "${IPS[@]}"; do
       if ping -c 1 "$IP" &> /dev/null; then
@@ -554,11 +555,11 @@ check_online_stat() {
       fi
     done
     sleep 5
-    PING_CNT=("$PING_CNT"+1)
+    (( PING_CNT+=1 ))
   done
 
   print_output ""
-  cat "$LOG_PATH_MODULE"/qemu.final.serial.log >> "$LOG_FILE"
+  cat "$LOG_PATH_MODULE"/qemu.final.serial.log >> "$LOG_FILE" || true
 }
 
 create_emulation_archive() {

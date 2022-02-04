@@ -100,7 +100,7 @@ s22_vuln_check() {
   PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
 
   ulimit -Sv "$MEM_LIMIT"
-  "$EXT_DIR"/progpilot "$LINE" > "$PHP_LOG" 2>&1
+  "$EXT_DIR"/progpilot "$LINE" || true > "$PHP_LOG" 2>&1
   ulimit -Sv unlimited
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
