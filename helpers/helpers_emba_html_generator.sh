@@ -449,6 +449,8 @@ add_link_to_index() {
     REP_NAV_LINK="$(echo "$MODUL_INDEX_LINK" | sed -e "s@LINK@.\/$HTML_FILE@g" | sed -e "s@CLASS@$CLASS@g" | sed -e "s@DATA@$DATA@g")"
     sed -i "$LINE_NUMBER_NAV_INSERT""i""$REP_NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$INDEX_FILE"
   }
+  INDEX_NAV_GROUP_ARR=()
+  INDEX_NAV_ARR=()
 
   HTML_FILE="${1:-}"
   MODUL_NAME="${2:-}"
@@ -465,12 +467,18 @@ add_link_to_index() {
     insert_line "navigation end" "$MODUL_NAME"
   else
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
+      if [[ "$STRICT" -eq 1 ]]; then
+        set +u
+      fi
       if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
       elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
       elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
+      fi
+      if [[ "$STRICT" -eq 1 ]]; then
+        set -u
       fi
     done
   fi
