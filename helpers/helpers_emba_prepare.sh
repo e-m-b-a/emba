@@ -291,7 +291,7 @@ check_firmware()
 }
 
 detect_root_dir_helper() {
-  SEARCH_PATH="$1"
+  SEARCH_PATH="${1:-}"
   #if [[ -n "$2" ]];then
   #  LOGGER="$2"
   #else

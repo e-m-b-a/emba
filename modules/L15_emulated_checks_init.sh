@@ -24,6 +24,11 @@ L15_emulated_checks_init() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Live tests of emulated device."
 
+  SNMP_UP=0
+  NIKTO_UP=0
+  NMAP_PORTS_SERVICES=()
+  MODULE_END=0
+
   if [[ "$SYS_ONLINE" -eq 1 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -39,9 +44,6 @@ L15_emulated_checks_init() {
     MODULE_END=1
     pkill -f "qemu-system-.*$IMAGE_NAME.*" || true
     reset_network
-
-  else
-    MODULE_END=0
   fi
 
   write_log ""
@@ -54,14 +56,18 @@ check_live_nmap_basic() {
   sub_module_title "Nmap portscans for emulated system with IP $IP"
 
   nmap -sSV "$IP" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP" | tee -a "$LOG_FILE"
-  mapfile -t NMAP_PORTS_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $4,$5,$6}' | sort -u)
-  mapfile -t NMAP_PORTS < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u)
+  if [[ -f "$LOG_PATH_MODULE"/nmap-basic-"$IP" ]]; then
+    mapfile -t NMAP_PORTS_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $4,$5,$6}' | sort -u)
+    mapfile -t NMAP_PORTS < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u)
+  fi
 
-  print_output ""
-  for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
-    #VERSION=$(echo "$SERVICE" | sed -E 's/.*\/\///' | sed 's/^\ //')
-    print_output "[+] Version information found ${RED}""$SERVICE""${NC}${GREEN} in Nmap port scanning logs."
-  done
+  if [[ -v NMAP_PORTS_SERVICES[@] ]]; then
+    print_output ""
+    for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
+      #VERSION=$(echo "$SERVICE" | sed -E 's/.*\/\///' | sed 's/^\ //')
+      print_output "[+] Version information found ${RED}""$SERVICE""${NC}${GREEN} in Nmap port scanning logs."
+    done
+  fi
 
   print_output ""
   print_output "[*] Nmap portscans for emulated system with IP $IP finished"
@@ -73,19 +79,27 @@ check_live_snmp() {
   if command snmp-check > /dev/null; then
     print_output "[*] SNMP scan with community name public"
     snmp-check -w "$IP"| tee "$LOG_PATH_MODULE"/snmp-check-public-"$IP".txt
-    cat "$LOG_PATH_MODULE"/snmp-check-public-"$IP".txt >> "$LOG_FILE"
+    if [[ -f "$LOG_PATH_MODULE"/snmp-check-public-"$IP".txt ]]; then
+      cat "$LOG_PATH_MODULE"/snmp-check-public-"$IP".txt >> "$LOG_FILE"
+    fi
     print_output ""
     print_output "[*] SNMP scan with community name private"
     snmp-check -c private -w "$IP"| tee "$LOG_PATH_MODULE"/snmp-check-private-"$IP".txt
-    cat "$LOG_PATH_MODULE"/snmp-check-private-"$IP".txt >> "$LOG_FILE"
+    if [[ -f "$LOG_PATH_MODULE"/snmp-check-private-"$IP".txt ]]; then
+      cat "$LOG_PATH_MODULE"/snmp-check-private-"$IP".txt >> "$LOG_FILE"
+    fi
   else
     print_output "[*] SNMP scan with community name public"
     snmpwalk -v2c -c public "$IP" .iso | tee "$LOG_PATH_MODULE"/snmpwalk-public-"$IP".txt
-    cat "$LOG_PATH_MODULE"/snmpwalk-public-"$IP".txt >> "$LOG_FILE"
+    if [[ -f "$LOG_PATH_MODULE"/snmp-check-public-"$IP".txt ]]; then
+      cat "$LOG_PATH_MODULE"/snmpwalk-public-"$IP".txt >> "$LOG_FILE"
+    fi
     print_output ""
     print_output "[*] SNMP scan with community name private"
     snmpwalk -v2c -c private "$IP" .iso | tee "$LOG_PATH_MODULE"/snmapwalk-private-"$IP".txt
-    cat "$LOG_PATH_MODULE"/snmpwalk-private-"$IP".txt >> "$LOG_FILE"
+    if [[ -f "$LOG_PATH_MODULE"/snmp-check-private-"$IP".txt ]]; then
+      cat "$LOG_PATH_MODULE"/snmpwalk-private-"$IP".txt >> "$LOG_FILE"
+    fi
   fi
   SNMP_UP=$(wc -l "$LOG_PATH_MODULE"/snmp* | tail -1 | awk '{print $1}')
 

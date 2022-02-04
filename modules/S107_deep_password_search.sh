@@ -35,7 +35,7 @@ S107_deep_password_search()
       print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
       write_csv_log "$PW_PATH" "$PW_HASH"
       ((PW_COUNTER+=1))
-    done < "$TMP"/pw_hashes.txt
+    done < "$TMP_DIR"/pw_hashes.txt
 
     print_output ""
     print_output "[*] Found $ORANGE$PW_COUNTER$NC password hashes."

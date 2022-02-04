@@ -93,8 +93,9 @@ check_docker_env() {
 
 check_nw_interface() {
   if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+    echo -e "$RED""    Network interface not available"" - trying to restart now""$NC"
     systemctl restart NetworkManager docker
-    echo "$(date +"%D %T")""retstarted docker-networks"
+    echo -e "$GREEN""    docker-networks restarted""$NC"
   fi
 }
 

@@ -35,8 +35,8 @@ S60_cert_file_check()
       if [[ -f "$LINE" ]]; then
         ((CERT_CNT+=1))
         if command -v openssl > /dev/null ; then
-          CERT_DATE=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601)
-          CERT_DATE_=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s)
+          CERT_DATE=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601 || true)
+          CERT_DATE_=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s || true)
           CERT_NAME=$(basename "$LINE")
           CERT_LOG="$LOG_PATH_MODULE/cert_details_$CERT_NAME.txt"
           openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG"

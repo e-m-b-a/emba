@@ -180,7 +180,7 @@ write_grep_log()
   OLD_MESSAGE_TYPE=""
   if [[ $LOG_GREP -eq 1 ]] ; then
     readarray -t OUTPUT_ARR <<< "$1"
-    local MESSAGE_TYPE_PAR="$2"
+    local MESSAGE_TYPE_PAR="${2:-}"
     for E in "${OUTPUT_ARR[@]}" ; do
       if [[ -n "${E//[[:blank:]]/}" ]] && [[ "$E" != "\\n" ]] && [[ -n "$E" ]] ; then
         if [[ -n "$MESSAGE_TYPE_PAR" ]] ; then
@@ -227,7 +227,7 @@ write_link()
 {
   if [[ $HTML -eq 1 ]] ; then
     local LINK
-    LINK="$1"
+    LINK="${1:-}"
     LINK="$(format_log "[REF] ""$LINK" 1)"
     local LOG_FILE_ALT="${2:-}"
     if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
@@ -244,7 +244,7 @@ write_anchor()
 {
   if [[ $HTML -eq 1 ]] ; then
     local ANCHOR
-    ANCHOR="$1"
+    ANCHOR="${1:-}"
     ANCHOR="$(format_log "[ANC] ""$ANCHOR" 1)"
     local LOG_FILE_ALT="${2:-}"
     if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
@@ -393,7 +393,7 @@ indent()
 
 format_log()
 {
-  local LOG_STRING="$1"
+  local LOG_STRING="${1:-}"
   # remove log formatting, even if EMBA is set to format it (for [REF] markers used)
   local OVERWRITE_SETTING="${2:-}"
   if [[ $FORMAT_LOG -eq 0 ]] || [[ $OVERWRITE_SETTING -eq 1 ]] ; then
@@ -408,7 +408,7 @@ format_log()
 
 format_grep_log()
 {
-  local LOG_STRING="$1"
+  local LOG_STRING="${1:-}"
   echo "$LOG_STRING" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \

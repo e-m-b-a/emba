@@ -26,6 +26,7 @@ L10_system_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "System emulation of Linux based embedded devices with firmadyne."
 
+  SYS_ONLINE=0
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -101,11 +102,11 @@ L10_system_emulator() {
 pre_cleanup() {
   # this cleanup function is to ensure that we have no mounts from previous tests mounted
   print_output "[*] Checking for not unmounted proc, sys and run in log directory"
-  mapfile -t CHECK_MOUNTS < <(mount | grep "$LOG_DIR" | grep "proc\|sys\|run" )
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$LOG_DIR" | grep "proc\|sys\|run" || true)
   for MOUNT in "${CHECK_MOUNTS[@]}"; do
     print_output "[*] Unmounting $MOUNT"
     MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
-    umount -l "$MOUNT"
+    umount -l "$MOUNT" || true
   done
 }
 
@@ -114,8 +115,8 @@ create_emulation_filesystem() {
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/makeImage.sh
 
   sub_module_title "Create Qemu filesystem"
-  ROOT_PATH="$1"
-  ARCH_END="$2"
+  ROOT_PATH="${1:-}"
+  ARCH_END="${2:-}"
   export IMAGE_NAME
   FS_CREATED=1
   IMAGE_NAME="$(basename "$ROOT_PATH")_$ARCH_END-$RANDOM"
@@ -123,7 +124,7 @@ create_emulation_filesystem() {
   if [[ -d "$MNT_POINT" ]]; then
     MNT_POINT="$MNT_POINT"-"$RANDOM"
   fi
-  mkdir "$MNT_POINT"
+  mkdir "$MNT_POINT" || true
 
   print_output "[*] Create filesystem for emulation - $ROOT_PATH.\\n"
   IMAGE_SIZE="$(du -b --max-depth=0 "$ROOT_PATH" | awk '{print $1}')"
@@ -151,35 +152,35 @@ create_emulation_filesystem() {
   if mount | grep -q "$MNT_POINT"; then
     print_output "[*] Copy root filesystem to QEMU image"
     #rm -rf "${MNT_POINT:?}/"*
-    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/
+    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || true
 
     print_output "[*] Creating FIRMADYNE Directories"
-    mkdir -p "$MNT_POINT/firmadyne/libnvram/"
-    mkdir -p "$MNT_POINT/firmadyne/libnvram.override/"
+    mkdir -p "$MNT_POINT/firmadyne/libnvram/" || true
+    mkdir -p "$MNT_POINT/firmadyne/libnvram.override/" || true
 
     print_output "[*] Patching Filesystem (chroot)"
-    cp "$(which busybox)" "$MNT_POINT"
+    cp "$(which busybox)" "$MNT_POINT" || true
 
-    cp "$FIRMADYNE_DIR/scripts/fixImage_firmadyne.sh" "$MNT_POINT"/fixImage.sh
-    chroot "$MNT_POINT" /busybox ash /fixImage.sh
+    cp "$FIRMADYNE_DIR/scripts/fixImage_firmadyne.sh" "$MNT_POINT"/fixImage.sh || true
+    chroot "$MNT_POINT" /busybox ash /fixImage.sh || true
 
-    rm "$MNT_POINT/fixImage.sh"
-    rm "$MNT_POINT/busybox"
+    rm "$MNT_POINT/fixImage.sh" || true
+    rm "$MNT_POINT/busybox" || true
 
     print_output "[*] Setting up FIRMADYNE"
-    cp "${CONSOLE}" "$MNT_POINT/firmadyne/console"
+    cp "${CONSOLE}" "$MNT_POINT/firmadyne/console" || true
     chmod a+x "$MNT_POINT/firmadyne/console"
     mknod -m 666 "$MNT_POINT/firmadyne/ttyS1" c 4 65
 
-    cp "${LIBNVRAM}" "$MNT_POINT/firmadyne/libnvram.so"
+    cp "${LIBNVRAM}" "$MNT_POINT/firmadyne/libnvram.so" || true
     chmod a+x "$MNT_POINT/firmadyne/libnvram.so"
 
-    cp "$FIRMADYNE_DIR/scripts/preInit_firmadyne.sh" "$MNT_POINT/firmadyne/preInit.sh"
+    cp "$FIRMADYNE_DIR/scripts/preInit_firmadyne.sh" "$MNT_POINT/firmadyne/preInit.sh" || true
     chmod a+x "$MNT_POINT/firmadyne/preInit.sh"
 
     print_output "[*] Unmounting QEMU Image"
     sync
-    umount "${DEVICE}"
+    umount "${DEVICE}" || true
 
   else
     print_output "[!] Filesystem mount failed"
@@ -187,13 +188,13 @@ create_emulation_filesystem() {
   fi
   print_output "[*] Deleting device mapper"
   kpartx -v -d "$LOG_PATH_MODULE/$IMAGE_NAME"
-  losetup -d "${DEVICE}" &>/dev/null
+  losetup -d "${DEVICE}" &>/dev/null || true
   # just in case we check the output and remove our device:
   if losetup | grep -q "$(basename "$IMAGE_NAME")"; then
-    losetup -d "$(losetup | grep "$(basename "$IMAGE_NAME")" | awk '{print $1}')"
+    losetup -d "$(losetup | grep "$(basename "$IMAGE_NAME")" | awk '{print $1}' || true)"
   fi
-  dmsetup remove "$(basename "$DEVICE")" &>/dev/null
-  rm -rf "${MNT_POINT:?}/"*
+  dmsetup remove "$(basename "$DEVICE")" &>/dev/null || true
+  rm -rf "${MNT_POINT:?}/"* || true
 }
 
 identify_networking() {
@@ -201,8 +202,8 @@ identify_networking() {
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/inferNetwork.sh
   
   sub_module_title "Network identification"
-  IMAGE_NAME="$1"
-  ARCH_END="$2"
+  IMAGE_NAME="${1:-}"
+  ARCH_END="${2:-}"
 
   print_output "[*] Test basic emulation and identify network settings.\\n"
   print_output "[*] Running firmware $IMAGE_NAME: terminating after 60 secs..."
@@ -298,11 +299,11 @@ get_networking_details() {
     INT=()
     VLAN=()
   
-    mapfile -t MAC_CHANGES < <(grep -a "ioctl_SIOCSIFHWADDR" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log)
+    mapfile -t MAC_CHANGES < <(grep -a "ioctl_SIOCSIFHWADDR" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
   
     if [[ "${#MAC_CHANGES[@]}" -gt 0 || "${#INTERFACE_CANDIDATES[@]}" -gt 0 || "${#BRIDGE_INTERFACES[@]}" -gt 0 || "${#VLAN_INFOS[@]}" -gt 0 ]]; then
       BOOTED=1
@@ -414,7 +415,7 @@ setup_network() {
     ARCHIVE_PATH="$ARCHIVE_PATH-$RANDOM"
   fi
 
-  mkdir "$ARCHIVE_PATH"
+  mkdir "$ARCHIVE_PATH" || true
   echo -e "#!/bin/bash\n" > "$ARCHIVE_PATH"/run.sh
 
   TAP_ID=2 #temp
@@ -563,8 +564,8 @@ check_online_stat() {
 create_emulation_archive() {
   sub_module_title "Create scripts and archive to re-run the emulated system"
 
-  cp "$KERNEL" "$ARCHIVE_PATH"
-  cp "$IMAGE" "$ARCHIVE_PATH"
+  cp "$KERNEL" "$ARCHIVE_PATH" || true
+  cp "$IMAGE" "$ARCHIVE_PATH" || true
   chmod +x "$ARCHIVE_PATH"/run.sh
   tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz "$ARCHIVE_PATH"
   if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz ]]; then
