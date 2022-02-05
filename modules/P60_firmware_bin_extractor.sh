@@ -166,7 +166,7 @@ apk_extractor() {
         while read -r APK; do
           APK_NAME=$(basename "$APK")
           print_output "[*] Extracting $ORANGE$APK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar xpf "$APK" --directory "$R_PATH" 
+          tar xpf "$APK" --directory "$R_PATH" || true
         done < "$TMP_DIR"/apk_db.txt
       done
 
@@ -197,9 +197,9 @@ ipk_extractor() {
         while read -r IPK; do
           IPK_NAME=$(basename "$IPK")
           print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp
-          tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH"
-          rm -r "$LOG_DIR"/ipk_tmp/*
+          tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp || true
+          tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH" || true
+          rm -r "$LOG_DIR"/ipk_tmp/* || true
         done < "$TMP_DIR"/ipk_db.txt
       done
 
