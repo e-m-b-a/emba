@@ -27,6 +27,8 @@ L10_system_emulator() {
   module_title "System emulation of Linux based embedded devices with firmadyne."
 
   SYS_ONLINE=0
+  BOOTED=0
+  IPS=()
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -44,7 +46,6 @@ L10_system_emulator() {
 
       for R_PATH in "${ROOT_PATH[@]}" ; do
         KPANIC=0
-        BOOTED=0
 
         print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
 
@@ -295,7 +296,6 @@ get_networking_details() {
   sub_module_title "Network identification - $IMAGE_NAME"
 
   if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
-    IPS=()
     INT=()
     VLAN=()
   

@@ -328,8 +328,8 @@ generate_info_file()
     fi
 
     cp "$INFO_FILE" "$TMP_INFO_FILE" || true
-    sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE"
-    sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE"
+    sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
+    sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true
 
     sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_INFO_FILE" || true
     # add html tags for style

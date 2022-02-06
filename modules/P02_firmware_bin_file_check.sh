@@ -113,6 +113,9 @@ fw_bin_detector() {
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext3 filesystem data"* ]]; then
     export EXT_IMAGE=1
   fi
+  if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext4 filesystem data"* ]]; then
+    export EXT_IMAGE=1
+  fi
   if [[ "$QNAP_ENC_CHECK" == *"QNAP encrypted firmware footer , model"* ]]; then
     export QNAP_ENC_DETECTED=1
   fi
