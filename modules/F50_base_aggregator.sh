@@ -729,7 +729,7 @@ os_detector() {
 
   #### The following check is just in place if something went wrong
   if [[ $VERIFIED -eq 0 ]]; then
-    # usually the results of the kernel module checker are already used in f19 (first os check)
+    # usually the results of the kernel module checker are already used in f20 (first os check)
     # but just in case something went wrong we use it now
     os_kernel_module_detect
     if [[ $VERIFIED -eq 1 ]]; then

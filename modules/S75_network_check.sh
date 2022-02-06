@@ -44,7 +44,7 @@ check_resolv()
       CHECK=1
       print_output "[+] DNS config ""$(print_path "$RES_INFO_P")"
 
-      DNS_INFO=$(grep "nameserver" "$RES_INFO_P" 2>/dev/null)
+      DNS_INFO=$(grep "nameserver" "$RES_INFO_P" 2>/dev/null || true)
       if [[ "$DNS_INFO" ]] ; then
           print_output "$(indent "$DNS_INFO")"
           ((NET_CFG_FOUND+=1))
