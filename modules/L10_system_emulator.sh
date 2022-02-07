@@ -29,14 +29,11 @@ L10_system_emulator() {
   SYS_ONLINE=0
   BOOTED=0
   IPS=()
+
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
 
     export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
-
-    if [[ $IN_DOCKER -eq 1 ]] ; then
-      print_output "[!] This module is in an very early alpha state!"
-    fi
 
     print_output "[*] This module creates a full copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
@@ -66,13 +63,16 @@ L10_system_emulator() {
               setup_network
               run_emulated_system
               check_online_stat
+              EXECUTE=0
               if [[ "$SYS_ONLINE" -eq 1 ]]; then
                 print_output "[+] System emulation was successful."
                 print_output "[+] System should be available via IP $IP."
-              else
-                reset_network
+                EXECUTE=1
               fi
-              create_emulation_archive
+              reset_network "$EXECUTE"
+              if [[ "$SYS_ONLINE" -eq 1 ]]; then
+                create_emulation_archive
+              fi
               # if the emulation was successful, we stop here - no emulation of other detected rootfs
               break
             else
@@ -146,7 +146,7 @@ create_emulation_filesystem() {
 
   print_output "[*] Creating Filesystem"
   sync
-  mkfs.ext2 "${DEVICE}"
+  mkfs.ext2 "${DEVICE}" || true
 
   print_output "[*] Mounting QEMU Image Partition 1 to $MNT_POINT"
   mount "${DEVICE}" "$MNT_POINT"
@@ -247,7 +247,6 @@ run_mipsel_network_id() {
     -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 \
     -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 \
     -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
-
 }
 
 run_mipsbe_network_id() {
@@ -266,7 +265,6 @@ run_mipsbe_network_id() {
     -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 \
     -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 \
     -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
-
 }
 
 run_armel_network_id() {
@@ -286,7 +284,6 @@ run_armel_network_id() {
     -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 \
     -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4 \
     -audiodev driver=none,id=none
-
 }
 
 get_networking_details() {
@@ -416,7 +413,7 @@ setup_network() {
   fi
 
   mkdir "$ARCHIVE_PATH" || true
-  echo -e "#!/bin/bash\n" > "$ARCHIVE_PATH"/run.sh
+  #echo -e "#!/bin/bash\n" > "$ARCHIVE_PATH"/run.sh
 
   TAP_ID=2 #temp
 
@@ -424,18 +421,15 @@ setup_network() {
   TAPDEV_0=tap$TAP_ID"_0"
   HOSTNETDEV_0=$TAPDEV_0
   print_output "[*] Creating TAP device $ORANGE$TAPDEV_0$NC..."
-  tunctl -t $TAPDEV_0
-  echo "tunctl -t $TAPDEV_0" >> "$ARCHIVE_PATH"/run.sh
+  write_script_exec "tunctl -t $TAPDEV_0" "$ARCHIVE_PATH"/run.sh 1
 
   if [[ "${#VLAN[@]}" -gt 0 ]]; then
     for VLANID in "${VLAN[@]}"; do
       print_output "[*] Init VLAN $VLAN_ID ..."
       HOSTNETDEV_0x=$TAPDEV_0.$VLANID
       print_output "[*] Bringing up HOSTNETDEV $ORANGE$HOSTNETDEV_0x$NC"
-      ip link add link "$TAPDEV_0" name "$HOSTNETDEV_0x" type vlan id "$VLANID"
-      ip link set "$TAPDEV_0" up
-      echo "ip link add link $TAPDEV_0 name $HOSTNETDEV_0x type vlan id $VLANID" >> "$ARCHIVE_PATH"/run.sh
-      echo "ip link set $TAPDEV_0 up" >> "$ARCHIVE_PATH"/run.sh
+      write_script_exec "ip link add link $TAPDEV_0 name $HOSTNETDEV_0x type vlan id $VLANID" "$ARCHIVE_PATH"/run.sh 1
+      write_script_exec "ip link set $TAPDEV_0 up" "$ARCHIVE_PATH"/run.sh 1
     done
   fi
 
@@ -443,51 +437,42 @@ setup_network() {
     HOSTIP="$(echo "$IP" | sed 's/\./&\n/g' | sed -E 's/^[0-9]+$/2/' | tr -d '\n')"
     print_output "[*] Using HOSTIP: $ORANGE$HOSTIP$NC"
     print_output "[*] Possible IP address for emulated device: $ORANGE$IP$NC"
-    print_output "[*] Bringing up TAP device $ORANGE$TAPDEV_0$NC"
+    print_output "[*] Bringing up TAP device $ORANGE$TAPDEV_0$NC" || true
 
-    ip link set "${HOSTNETDEV_0}" up
-    ip addr add "$HOSTIP"/24 dev "${HOSTNETDEV_0}"
-    echo "ip link set ${HOSTNETDEV_0} up" >> "$ARCHIVE_PATH"/run.sh
-    echo "ip addr add $HOSTIP/24 dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+    write_script_exec "ip link set ${HOSTNETDEV_0} up" "$ARCHIVE_PATH"/run.sh 1
+    write_script_exec "ip addr add $HOSTIP/24 dev ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh 1
 
     print_output "Adding route to $IP..."
-    ip route add "$IP" via "$IP" dev "${HOSTNETDEV_0}"
-    echo "ip route add $IP via $IP dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+    write_script_exec "ip route add $IP via $IP dev ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh 1
   done
-
-
 }
+
 run_emulated_system() {
   sub_module_title "Final system emulation."
 
   IMAGE="$LOG_PATH_MODULE/$IMAGE_NAME"
   # IMAGE_ used for the script
-  IMAGE_="./$IMAGE_NAME"
   # SYS_ONLINE is used to check the network reachability
   SYS_ONLINE=0
 
+  KERNEL_="vmlinux"
   if [[ "$ARCH_END" == "mipsel" ]]; then
-    KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
-    KERNEL_="./vmlinux.$ARCH_END"
     QEMU_BIN="qemu-system-$ARCH_END"
     QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "mipseb" ]]; then
-    KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
-    KERNEL_="./vmlinux.$ARCH_END"
     QEMU_BIN="qemu-system-mips"
     QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "armel" ]]; then
-    KERNEL="$FIRMADYNE_DIR/binaries/zImage.$ARCH_END"
-    KERNEL_="./zImage.$ARCH_END"
+    KERNEL_="zImage"
     QEMU_BIN="qemu-system-arm"
     QEMU_MACHINE="virt"
   else
     QEMU_BIN="NA"
   fi
+  KERNEL="$FIRMADYNE_DIR/binaries/$KERNEL_.$ARCH_END"
 
   if [[ "$ARCH" == "ARM" ]]; then
     QEMU_DISK="-drive if=none,file=$IMAGE,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
-    QEMU_DISK_="-drive if=none,file=$IMAGE_,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     QEMU_PARAMS="-audiodev driver=none,id=none"
     QEMU_ROOTFS="/dev/vda1"
     NET_ID=0
@@ -499,7 +484,6 @@ run_emulated_system() {
 
   elif [[ "$ARCH" == "MIPS" ]]; then
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
-    QEMU_DISK_="-drive if=ide,format=raw,file=$IMAGE_"
     QEMU_PARAMS=""
     QEMU_ROOTFS="/dev/sda1"
     NET_ID=0
@@ -519,23 +503,16 @@ run_emulated_system() {
   fi
 
 }
+
 run_qemu_final_emulation() {
   # run this in the background to be able to test the system in parallel
   # kill it afterwards with something like
   # pkill -f "qemu-system-.*$IMAGE_NAME.*"
 
   #shellcheck disable=SC2086
-  $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \
-    -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
-    -nographic $QEMU_NETWORK $QEMU_PARAMS | tee "$LOG_PATH_MODULE"/qemu.final.serial.log || true
+  echo "echo \"[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit\"" >> "$ARCHIVE_PATH"/run.sh
+  write_script_exec "$QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0\" -nographic $QEMU_NETWORK $QEMU_PARAMS | tee \"$LOG_PATH_MODULE\"/qemu.final.serial.log || true" "$ARCHIVE_PATH"/run.sh 1
 
-  IMAGE_="./$IMAGE_NAME"
-  { 
-    echo "echo \"[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit\""
-    echo "$QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL_ $QEMU_DISK_ \\"
-    echo "-append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0\" \\"
-    echo "-nographic $QEMU_NETWORK $QEMU_PARAMS"
-  } >> "$ARCHIVE_PATH"/run.sh
 }
 
 check_online_stat() {
@@ -567,36 +544,75 @@ create_emulation_archive() {
 
   cp "$KERNEL" "$ARCHIVE_PATH" || true
   cp "$IMAGE" "$ARCHIVE_PATH" || true
-  chmod +x "$ARCHIVE_PATH"/run.sh
+  if [[ -f "$ARCHIVE_PATH"/run.sh ]];then
+    chmod +x "$ARCHIVE_PATH"/run.sh
+  else
+    print_output "[-] No run script created ..."
+  fi
   tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz "$ARCHIVE_PATH"
   if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz ]]; then
     print_output "[*] Qemu emulation archive created in $LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz" "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz"
-    print_output "[!] WARNING: Qemu run script is in an very early alpha state!"
+    print_output ""
   fi
 }
 
 reset_network() {
   sub_module_title "Reset network environment"
+  EXECUTE_="${1:0}"
 
   print_output "[*] Stopping Qemu emulation ..."
   pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true
 
-  print_output "[*] Deleting route..."
-  ip route flush dev "${HOSTNETDEV_0}"
-  echo "ip route flush dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "[*] Deleting route..."
+  fi
+  write_script_exec "ip route flush dev \"${HOSTNETDEV_0}\"" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
-  print_output "[*] Bringing down TAP device..."
-  ip link set "$TAPDEV_0" down
-  echo "ip link set $TAPDEV_0 down" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "[*] Bringing down TAP device..."
+  fi
+  write_script_exec "ip link set $TAPDEV_0 down" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
-  print_output "Removing VLAN..."
-  ip link delete "${HOSTNETDEV_0}"
-  echo "ip link delete ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "Removing VLAN..."
+  fi
+  write_script_exec "ip link delete ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
-  print_output "Deleting TAP device ${TAPDEV_0}..."
-  tunctl -d ${TAPDEV_0}
-  echo "tunctl -d ${TAPDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "Deleting TAP device ${TAPDEV_0}..."
+  fi
+  write_script_exec "tunctl -d ${TAPDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
+}
 
+write_script_exec() {
+  COMMAND="${1:-}"
+  SCRIPT_WRITE="${2:-}"
+  # EXECUTE: 0 -> just write script
+  # EXECUTE: 1 -> execute and write script
+  # EXECUTE: 2 -> just execute
+  EXECUTE="${3:0}"
+
+  if [[ "$EXECUTE" -ne 0 ]];then
+    eval "$COMMAND" &
+  fi
+
+  if [[ "$EXECUTE" -ne 2 ]];then
+    if ! [[ -f "$SCRIPT_WRITE" ]]; then
+      echo "#!/bin/bash" > "$SCRIPT_WRITE"
+    fi
+
+    # for the final script we need to adjust the paths:
+    if echo "$COMMAND" | grep -q qemu-system-; then
+      #shellcheck disable=SC2001
+      COMMAND=$(echo "$COMMAND" | sed "s#${KERNEL:-}#\.\/${KERNEL_:-}.${ARCH_END:-}#g")
+      #shellcheck disable=SC2001
+      COMMAND=$(echo "$COMMAND" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
+      #shellcheck disable=SC2001
+      COMMAND=$(echo "$COMMAND" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
+    fi
+
+    echo "$COMMAND" >> "$SCRIPT_WRITE"
+  fi
 }
 
 get_nvram () {

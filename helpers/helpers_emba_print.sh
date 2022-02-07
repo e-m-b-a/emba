@@ -550,6 +550,7 @@ pre_module_reporter() {
     # shellcheck disable=SC1090
     source "./report_templates/$REPORT_TEMPLATE.sh"
   fi
+  print_output ""
 }
 
 # on module end we log that the module is finished in emba.log

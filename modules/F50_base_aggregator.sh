@@ -182,19 +182,19 @@ output_details() {
       STATE="$STATE""$ORANGE / ""$GREEN""IP address detected"
       EMU_STATE="$EMU_STATE"";IP_DET"
     fi
-    if [[ "$SYS_ONLINE" -gt 0 ]]; then
+    if [[ "${SYS_ONLINE-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
       EMU_STATE="$EMU_STATE"";ICMP"
     fi
-    if [[ "$NMAP_UP" -gt 0 ]]; then
+    if [[ "${NMAP_UP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NMAP"
       EMU_STATE="$EMU_STATE"";NMAP"
     fi
-    if [[ "$SNMP_UP" -gt 0 ]]; then
+    if [[ "${SNMP_UP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""SNMP"
       EMU_STATE="$EMU_STATE"";SNMP"
     fi
-    if [[ "$NIKTO_UP" -gt 0 ]]; then
+    if [[ "${NIKTO_UP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NIKTO"
       EMU_STATE="$EMU_STATE"";NIKTO"
     fi

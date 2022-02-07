@@ -60,7 +60,7 @@ deep_pattern_search() {
 deep_pattern_searcher() {
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
-    readarray -t S_OUTPUT < <(grep -E -n -a -h -o -i "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0')
+    readarray -t S_OUTPUT < <(grep -E -n -a -h -o -i "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' || true)
     if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
       write_log "[+] ""$DEEP_S_FILE" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
       for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do
