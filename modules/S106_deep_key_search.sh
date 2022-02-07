@@ -30,12 +30,12 @@ S106_deep_key_search()
     print_output "[*] Pattern: $PATTERN"
   done
 
-  OCC_LIST=()
+  SORTED_OCC_LIST=()
 
   deep_key_search
   deep_key_reporter
 
-  module_end_log "${FUNCNAME[0]}" "${#OCC_LIST[@]}"
+  module_end_log "${FUNCNAME[0]}" "${#SORTED_OCC_LIST[@]}"
 }
 
 deep_key_search() {

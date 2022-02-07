@@ -706,7 +706,7 @@ emulate_strace_run() {
   cat "$LOG_FILE_STRACER"
 }
 
-check_disk_space() {
+check_disk_space_emu() {
 
   mapfile -t CRITICAL_FILES < <(find "$LOG_PATH_MODULE"/ -xdev -type f -size +"$KILL_SIZE" -exec basename {} \; 2>/dev/null| cut -d\. -f1 | cut -d_ -f2)
   for KILLER in "${CRITICAL_FILES[@]}"; do
@@ -779,7 +779,7 @@ emulate_binary() {
     if [[ "$STRICT" -eq 1 ]]; then
       set -e
     fi
-    check_disk_space
+    check_disk_space_emu
   done
 
   # now we kill all older qemu-processes:
