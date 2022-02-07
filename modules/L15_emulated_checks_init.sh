@@ -172,9 +172,9 @@ check_live_routersploit() {
 
   if [[ -f /tmp/routersploit.log ]]; then
     mv /tmp/routersploit.log "$LOG_PATH_MODULE"/routersploit-detail-"$IP".txt
-    cat "$LOG_PATH_MODULE"/routersploit-detail-"$IP".txt >> "$LOG_FILE"
   fi
 
+  cat "$LOG_PATH_MODULE"/routersploit-"$IP".txt >> "$LOG_FILE"
   print_output ""
   print_output "[*] Routersploit tests for emulated system with IP $IP finished"
 }
