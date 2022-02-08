@@ -22,6 +22,17 @@ P02_firmware_bin_file_check() {
   module_title "Binary firmware file analyzer"
 
   local FILE_BIN_OUT
+  export SHA512_CHECKSUM="NA"
+  export MD5_CHECKSUM="NA"
+  export ENTROPY="NA"
+  export DLINK_ENC_DETECTED=0
+  export VMDK_DETECTED=0
+  export UBOOT_IMAGE=0
+  export EXT_IMAGE=0 
+  export AVM_DETECTED=0
+  export UBI_IMAGE=0
+  export ENGENIUS_ENC_DETECTED=0
+  export GPG_COMPRESS=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
@@ -57,7 +68,7 @@ P02_firmware_bin_file_check() {
   fi
 
   write_csv_log "Firmware name" "SHA512 checksum" "MD5 checksum" "Entropy" "Dlink enc state" "VMDK detected" "UBOOT image" "EXT filesystem" "AVM system detected"
-  write_csv_log "$(basename "$FIRMWARE_PATH")" "$SHA512_CHECKSUM" "$MD5_CHECKSUM" "$ENTROPY" "$DLINK_ENC_DETECTED" "$VMDK_DETECTED" "$UBOOT_IMAGE" "$EXT_IMAGE" "$AVM_DETECTED"
+  write_csv_log "$(basename "$FIRMWARE_PATH")" "${SHA512_CHECKSUM:-}" "${MD5_CHECKSUM:-}" "${ENTROPY:-}" "${DLINK_ENC_DETECTED:-}" "${VMDK_DETECTED:-}" "${UBOOT_IMAGE:-}" "${EXT_IMAGE:-}" "${AVM_DETECTED:-}"
 
   module_end_log "${FUNCNAME[0]}" 1
 }
