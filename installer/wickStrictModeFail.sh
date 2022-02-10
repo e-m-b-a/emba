@@ -10,6 +10,7 @@
 # License: https://github.com/tests-always-included/wick/blob/master/LICENSE.md
 
 wickStrictModeFail() (
+  echo -e "------------------------------------------------------------------------------------------------"
   set +x
   local argsList argsLeft i nextArg
 
@@ -57,4 +58,5 @@ wickStrictModeFail() (
     (( i ++ ))
   done
   echo -e "\n${BLUE}${BOLD}Important: Consider filling out a bug report at https://github.com/e-m-b-a/emba/issues${NC}\n"
+  echo -e "------------------------------------------------------------------------------------------------"
 )

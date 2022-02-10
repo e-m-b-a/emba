@@ -422,7 +422,7 @@ main()
     set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
     shopt -s extdebug # Enable extended debugging
     #IFS=$'\n\t'     # Set the "internal field separator"
-    trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+    trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
 
     print_bar "no_log"
     print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"

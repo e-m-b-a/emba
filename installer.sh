@@ -33,7 +33,7 @@ if [[ "$STRICT_MODE" -eq 1 ]]; then
   set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
   shopt -s extdebug # Enable extended debugging
   IFS=$'\n\t'     # Set the "internal field separator"
-  trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
+  trap 'wickStrictModeFail $? | tee -a /tmp/emba_installer.log' ERR  # The ERR trap is triggered when a script catches an error
 fi
 
 # install docker EMBA
