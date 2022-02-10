@@ -20,7 +20,7 @@ INVOCATION_PATH="."
 
 import_helper()
 {
-  local HELPERS
+  local HELPERS=()
   local HELPER_COUNT=0
   mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for HELPER_FILE in "${HELPERS[@]}" ; do
@@ -36,7 +36,7 @@ import_helper()
 
 import_module()
 {
-  local MODULES
+  local MODULES=()
   local MODULE_COUNT=0
   mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
   for MODULE_FILE in "${MODULES[@]}" ; do
@@ -52,7 +52,7 @@ import_module()
 
 sort_modules()
 {
-  local SORTED_MODULES
+  local SORTED_MODULES=()
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       THREAD_PRIO=0
@@ -71,7 +71,7 @@ sort_modules()
 
 # lets check cve-search in a background job
 check_cve_search_job() {
-  EMBA_PID="$1"
+  EMBA_PID="${1:-}"
   while true; do
     if [[ -f "$LOG_DIR"/emba.log ]]; then
       if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
@@ -93,7 +93,7 @@ check_cve_search_job() {
 # $3: HTML=1 - generate html file
 run_modules()
 {
-  MODULE_GROUP="$1"
+  MODULE_GROUP="${1:-}"
   printf -v THREADING_SET '%d\n' "$2" 2>/dev/null
   THREADING_MOD_GROUP="$THREADING_SET"
 
@@ -106,7 +106,7 @@ run_modules()
   done
 
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
-    local MODULES
+    local MODULES=()
     mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
@@ -141,7 +141,7 @@ run_modules()
   else
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
       if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
-        local MODULE
+        local MODULE=""
         MODULE=$(find "$MOD_DIR" -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
         if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
           MODULE_BN=$(basename "$MODULE")
@@ -157,7 +157,7 @@ run_modules()
           reset_module_count
         fi
       elif [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
-        local MODULES
+        local MODULES=()
         mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
         if [[ $THREADING_SET -eq 1 ]] ; then
           sort_modules
