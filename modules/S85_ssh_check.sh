@@ -28,7 +28,7 @@ S85_ssh_check()
   check_squid
 
   write_log ""
-  write_log "[*] Statistics:$SSH_VUL_CNT"
+  write_log "[*] Statistics:$SSH_VUL_CNT:$SQUID_VUL_CNT"
 
   if [[ "$SQUID_VUL_CNT" -gt 0 || "$SSH_VUL_CNT" -gt 0 ]]; then
     NEG_LOG=1

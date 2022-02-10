@@ -20,7 +20,7 @@ export PRE_THREAD_ENA=0
 P10_vmdk_extractor() {
   module_log_init "${FUNCNAME[0]}"
   NEG_LOG=0
-  if [[ "$VMDK_DETECTED" -eq 1 ]]; then
+  if [[ "${VMDK_DETECTED-0}" -eq 1 ]]; then
     module_title "VMDK extractor"
     EXTRACTION_DIR="$LOG_DIR"/firmware/vmdk_extractor/
 

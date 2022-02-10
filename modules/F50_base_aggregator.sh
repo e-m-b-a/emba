@@ -517,6 +517,9 @@ output_cve_exploits() {
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
         write_link "f20#minimalreportofexploitsandcves"
       fi
+      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 ]]; then
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN")")"
+      fi
       # we report only software components with exploits to csv:
       grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
       DATA=1
@@ -528,6 +531,15 @@ output_cve_exploits() {
 }
 
 get_data() {
+  REMOTE_EXPLOIT_CNT=0
+  LOCAL_EXPLOIT_CNT=0
+  DOS_EXPLOIT_CNT=0
+  HIGH_CVE_COUNTER=0
+  MEDIUM_CVE_COUNTER=0
+  LOW_CVE_COUNTER=0
+  EXPLOIT_COUNTER=0
+  MSF_MODULE_CNT=0
+
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
   fi
@@ -633,30 +645,45 @@ get_data() {
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( HIGH_CVE_COUNTER="$HIGH_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/HIGH_CVE_COUNTER.tmp 
+    done < "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( MEDIUM_CVE_COUNTER="$MEDIUM_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp 
+    done < "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$MEDIUM_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/LOW_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( LOW_CVE_COUNTER="$LOW_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp 
+    done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$LOW_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/EXPLOIT_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( EXPLOIT_COUNTER="$EXPLOIT_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/EXPLOIT_COUNTER.tmp 
+    done < "$TMP_DIR"/EXPLOIT_COUNTER.tmp
   fi
   if [[ -f "$TMP_DIR"/MSF_MODULE_CNT.tmp ]]; then
     while read -r COUNTING; do
       (( MSF_MODULE_CNT="$MSF_MODULE_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/MSF_MODULE_CNT.tmp 
+    done < "$TMP_DIR"/MSF_MODULE_CNT.tmp
+  fi
+  if [[ -f "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp ]]; then
+    while read -r COUNTING; do
+      (( REMOTE_EXPLOIT_CNT="$REMOTE_EXPLOIT_CNT"+"$COUNTING" ))
+    done < "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp
+  fi
+  if [[ -f "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp ]]; then
+    while read -r COUNTING; do
+      (( LOCAL_EXPLOIT_CNT="$LOCAL_EXPLOIT_CNT"+"$COUNTING" ))
+    done < "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp
+  fi
+  if [[ -f "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp ]]; then
+    while read -r COUNTING; do
+      (( DOS_EXPLOIT_CNT="$DOS_EXPLOIT_CNT"+"$COUNTING" ))
+    done < "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
   fi
 }
 
@@ -778,7 +805,7 @@ print_os() {
 cwe_logging() {
   LOG_DIR_MOD="s120_cwe_checker"
   if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
-    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       write_link "s120"

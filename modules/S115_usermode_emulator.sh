@@ -607,12 +607,12 @@ run_init_qemu() {
   echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
   echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
 
-  if [[ "$STRICT" -eq 1 ]]; then
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
     set +e
   fi
   run_init_qemu_runner "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT" &
   PID=$!
-  if [[ "$STRICT" -eq 1 ]]; then
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
     set -e
   fi
 
@@ -647,7 +647,7 @@ emulate_strace_run() {
   print_output "[*] Initial strace run on the command ${ORANGE}$BIN_${NC} to identify missing areas" "$LOG_FILE_STRACER" "$LOG_FILE_STRACER"
 
   # currently we only look for file errors (errno=2) and try to fix this
-  if [[ "$STRICT" -eq 1 ]]; then
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
     set +e
   fi
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
@@ -657,7 +657,7 @@ emulate_strace_run() {
     timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   fi
-  if [[ "$STRICT" -eq 1 ]]; then
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
     set -e
   fi
 
@@ -708,7 +708,7 @@ emulate_strace_run() {
 
 check_disk_space_emu() {
 
-  mapfile -t CRITICAL_FILES < <(find "$LOG_PATH_MODULE"/ -xdev -type f -size +"$KILL_SIZE" -exec basename {} \; 2>/dev/null| cut -d\. -f1 | cut -d_ -f2)
+  mapfile -t CRITICAL_FILES < <(find "$LOG_PATH_MODULE"/ -xdev -type f -size +"$KILL_SIZE" -exec basename {} \; 2>/dev/null| cut -d\. -f1 | cut -d_ -f2 || true)
   for KILLER in "${CRITICAL_FILES[@]}"; do
     if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
@@ -764,7 +764,7 @@ emulate_binary() {
       PARAM="NONE"
     fi
 
-    if [[ "$STRICT" -eq 1 ]]; then
+    if [[ "$STRICT_MODE" -eq 1 ]]; then
       set +e
     fi
     if [[ -z "$CPU_CONFIG_" ]]; then
@@ -776,7 +776,7 @@ emulate_binary() {
       #chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
       timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     fi
-    if [[ "$STRICT" -eq 1 ]]; then
+    if [[ "$STRICT_MODE" -eq 1 ]]; then
       set -e
     fi
     check_disk_space_emu

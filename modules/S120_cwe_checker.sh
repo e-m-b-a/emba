@@ -81,8 +81,8 @@ cwe_checker_threaded () {
   OLD_LOG_FILE="$LOG_FILE"
   LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
   LINE=$(readlink -f "$LINE")
-  readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log )
-  print_output "[*] Tested ""$(print_path "$LINE")"
+  readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
+  print_output "[*] Tested $ORANGE""$(print_path "$LINE")""$NC"
   for ENTRY in "${TEST_OUTPUT[@]}" ; do
     if [[ -n "$ENTRY" ]] ; then
       if ! [[ "$ENTRY" == *"ERROR:"* || "$ENTRY" == *"DEBUG:"* || "$ENTRY" == *"INFO:"* ]] ; then
@@ -90,27 +90,32 @@ cwe_checker_threaded () {
       fi
     fi
   done
-  mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
-  # this is the logging after every tested file
-  if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
-    print_output ""
-    print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".log
-    for CWE_LINE in "${CWE_OUT[@]}"; do
-      CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
-      CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-      CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null || true)"
-      echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
-      # (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
-      print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
-    done
-    print_output ""
-  else
-    print_output ""
-    print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
+  if [[ -f "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
+    mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
+    # this is the logging after every tested file
+    if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
+      print_output ""
+      print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".log
+      for CWE_LINE in "${CWE_OUT[@]}"; do
+        CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
+        CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
+        CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null || true)"
+        echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
+        # (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
+        print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
+      done
+      print_output ""
+    else
+      print_output ""
+      print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
+    fi
   fi
   if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_output "" ; fi
-  cat "$LOG_FILE" >> "$OLD_LOG_FILE"
-  rm "$LOG_FILE" 2> /dev/null
+
+  if [[ -f "$LOG_FILE" ]]; then
+    cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+    rm "$LOG_FILE" 2> /dev/null
+  fi
   LOG_FILE="$OLD_LOG_FILE"
 }
 
@@ -118,7 +123,7 @@ final_cwe_log() {
   TOTAL_CWE_CNT="$1"
 
   if [[ -d "$LOG_PATH_MODULE" ]]; then
-    mapfile -t CWE_OUT < <( cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+    mapfile -t CWE_OUT < <( cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     print_output ""
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"

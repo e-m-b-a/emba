@@ -12,10 +12,15 @@
 wickStrictModeFail() (
   set +x
   local argsList argsLeft i nextArg
+  if [[ -n "${LOG_DIR:-}" ]]; then
+    ERROR_LOG="$LOG_DIR/emba_error.log"
+  else
+    ERROR_LOG="/tmp/emba_error.log"
+  fi
 
-  echo -e "Error detected - status code $ORANGE$1$NC"
-  echo -e "Command:  $ORANGE$BASH_COMMAND$NC"
-  echo -e "Location:  $ORANGE${BASH_SOURCE[1]:-unknown}$NC, line $ORANGE${BASH_LINENO[0]:-unknown}$NC"
+  echo -e "Error detected - status code $ORANGE$1$NC" | tee -a "$ERROR_LOG"
+  echo -e "Command:  $ORANGE$BASH_COMMAND$NC" | tee -a "$ERROR_LOG"
+  echo -e "Location:  $ORANGE${BASH_SOURCE[1]:-unknown}$NC, line $ORANGE${BASH_LINENO[0]:-unknown}$NC" | tee -a "$ERROR_LOG"
 
   if [[ ${#PIPESTATUS[@]} -gt 1 ]]; then
     echo "Pipe status: " "${PIPESTATUS[@]}"
@@ -25,9 +30,9 @@ wickStrictModeFail() (
   nextArg=$#
 
   if [[ $i -lt ${#BASH_LINENO[@]} ]]; then
-    echo "Stack Trace:"
+    echo "Stack Trace:" | tee -a "$ERROR_LOG"
   else
-    echo "Stack trace is unavailable"
+    echo "Stack trace is unavailable" | tee -a "$ERROR_LOG"
   fi
 
   while [[ $i -lt ${#BASH_LINENO[@]} ]]; do
@@ -41,20 +46,20 @@ wickStrictModeFail() (
       done
 
       if [[ ${#argsList[@]} -gt 0 ]]; then
-        printf -v argsList " %q" "${argsList[@]}"
+        printf -v argsList " %q" "${argsList[@]}" | tee -a "$ERROR_LOG"
       else
         argsList=""
       fi
 
-      if [[ ${#argsList} -gt 255 ]]; then
+      if [[ ${#argsList[@]} -gt 255 ]]; then
         argsList=${argsList:0:250}...
       fi
     else
       argsList=""
     fi
 
-    echo "    [$i] ${FUNCNAME[i]:+${FUNCNAME[i]}(): }${BASH_SOURCE[i]}, line ${BASH_LINENO[i - 1]} -> ${FUNCNAME[i]:-${BASH_SOURCE[i]##*/}}$argsList"
+    echo "    [$i] ${FUNCNAME[i]:+${FUNCNAME[i]}(): }${BASH_SOURCE[i]}, line ${BASH_LINENO[i - 1]} -> ${FUNCNAME[i]:-${BASH_SOURCE[i]##*/}}$argsList" | tee -a "$ERROR_LOG"
     (( i ++ ))
   done
-  echo -e "\n${BLUE}${BOLD}Important: Consider filling out a bug report at https://github.com/e-m-b-a/emba/issues${NC}\n"
+  echo -e "\n${BLUE}${BOLD}Important: Consider filling out a bug report at https://github.com/e-m-b-a/emba/issues${NC}\n" | tee -a "$ERROR_LOG"
 )

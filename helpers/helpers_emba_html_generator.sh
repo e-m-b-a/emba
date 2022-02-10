@@ -241,7 +241,7 @@ add_link_tags() {
 
   # CWE links
   if ( grep -a -q -E '(CWE)' "$LINK_FILE" ) ; then
-    readarray -t CWE_IDS < <( grep -a -n -E -o 'CWE[0-9]{3,4}' "$LINK_FILE" | sort -u)
+    readarray -t CWE_IDS < <( grep -a -n -E -o 'CWE[0-9]{3,4}' "$LINK_FILE" | sort -u || true)
     for CWE_ID in "${CWE_IDS[@]}" ; do
       CWE_ID_LINE="$(echo "$CWE_ID" | cut -d ":" -f 1)"
       CWE_ID_STRING="$(echo "$CWE_ID" | cut -d ":" -f 2-)"
@@ -345,7 +345,7 @@ generate_info_file()
 
     readarray -t EXPLOITS_IDS_INFO < <( grep -a 'Exploit DB Id:' "$INFO_FILE" | sed -e 's@[^0-9\ ]@@g ; s@\ @@g' | sort -u || true)
     for EXPLOIT_ID_INFO in "${EXPLOITS_IDS_INFO[@]}" ; do
-      ONLINE="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID_INFO@g" )""$EXPLOIT_ID_INFO""$LINK_END"
+      ONLINE="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID_INFO@g" || true)""$EXPLOIT_ID_INFO""$LINK_END"
       printf "%s%sOnline: %s%s\n" "$HR_MONO" "$P_START" "$ONLINE" "$P_END" >> "$TMP_INFO_FILE"
     done
 
@@ -470,10 +470,10 @@ add_link_to_index() {
     # insert new entry at bottom of the navigation
     insert_line "navigation end" "$MODUL_NAME"
   else
+    if [[ "$STRICT_MODE" -eq 1 ]]; then
+      set +u
+    fi
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
-      if [[ "$STRICT" -eq 1 ]]; then
-        set +u
-      fi
       if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
       elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
@@ -481,10 +481,10 @@ add_link_to_index() {
       elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
       fi
-      if [[ "$STRICT" -eq 1 ]]; then
-        set -u
-      fi
     done
+    if [[ "$STRICT_MODE" -eq 1 ]]; then
+      set -u
+    fi
   fi
 }
 
@@ -506,8 +506,10 @@ update_index()
   done
   scan_report
   add_arrows
+
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
+  rm -R "$ABS_HTML_PATH"/qemu_init*
 }
 
 scan_report()

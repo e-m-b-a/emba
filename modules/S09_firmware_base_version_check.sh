@@ -172,7 +172,7 @@ get_csv_rule() {
   export CSV_RULE
   CSV_RULE="NA"
 
-  CSV_RULE="$(echo "$VERSION_STRING" | eval "$CSV_REGEX")"
+  CSV_RULE="$(echo "$VERSION_STRING" | eval "$CSV_REGEX" || true)"
 }
 
 bin_string_checker() {

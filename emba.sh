@@ -204,7 +204,7 @@ main()
   INVOCATION_PATH="$(dirname "$0")"
 
   export EMBA_PID="$$"
-  export STRICT=0
+  export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
   export FULL_EMULATION=0
@@ -229,6 +229,7 @@ main()
   export ARCH=""
   export EXLUDE=()
   export SELECT_MODULES=()
+  export ROOT_PATH=()
   export FILE_ARR=()
   export LOG_GREP=0
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
@@ -361,7 +362,7 @@ main()
         export SHORT_PATH=1
         ;;
       S)
-        export STRICT=1
+        export STRICT_MODE=1
         ;;
       t)
         export THREADED=1
@@ -410,7 +411,7 @@ main()
     print_bar "no_log"
   fi
 
-  if [[ "$STRICT" -eq 1 ]]; then
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
     # http://redsymbol.net/articles/unofficial-bash-strict-mode/
     # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
     # shellcheck disable=SC1091
@@ -615,16 +616,16 @@ main()
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
       print_output "[*] Available docker images:" "no_log"
       docker images | grep -E "emba[[:space:]]*latest"
-      print_output "[-] EMBA docker not available!" "no_log"
+      print_output "[-] EMBA docker not ready!" "no_log"
       exit 1
     else
       print_output "[*] EMBA initializes docker container.\\n" "no_log"
-      if [[ "$STRICT" -eq 1 ]]; then
+      if [[ "$STRICT_MODE" -eq 1 ]]; then
         set +e
       fi
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      if [[ "$STRICT" -eq 1 ]]; then
+      if [[ "$STRICT_MODE" -eq 1 ]]; then
         set -e
       fi
 

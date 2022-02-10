@@ -38,7 +38,7 @@ L15_emulated_checks_init() {
 
     check_live_nmap_basic
     check_live_snmp
-    # running into issues on different systems:
+    # running into issues with nikto on different systems -> disabling for now:
     # check_live_nikto
     check_live_routersploit
     MODULE_END=1
@@ -56,16 +56,47 @@ check_live_nmap_basic() {
   sub_module_title "Nmap portscans for emulated system with IP $IP"
 
   nmap -sSV "$IP" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP" | tee -a "$LOG_FILE"
-  if [[ -f "$LOG_PATH_MODULE"/nmap-basic-"$IP" ]]; then
+  if [[ -f "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap ]]; then
     mapfile -t NMAP_PORTS_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $4,$5,$6}' | sort -u)
     mapfile -t NMAP_PORTS < <(grep "open" "$LOG_PATH_MODULE"/nmap-basic-"$IP".nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u)
   fi
 
+  TYPE="Nmap"
+
   if [[ -v NMAP_PORTS_SERVICES[@] ]]; then
+    write_csv_log "---" "---" "version_detected" "csv_rule" "license" "static/emulation/nmap"
     print_output ""
     for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
-      #VERSION=$(echo "$SERVICE" | sed -E 's/.*\/\///' | sed 's/^\ //')
-      print_output "[+] Version information found ${RED}""$SERVICE""${NC}${GREEN} in Nmap port scanning logs."
+      while read -r VERSION_LINE; do
+        if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
+          continue
+        fi
+        if echo "$VERSION_LINE" | grep -q "no_static"; then
+          continue
+        fi
+
+        STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
+
+        if [[ $STRICT == *"strict"* ]]; then
+          continue
+        elif [[ $STRICT == "zgrep" ]]; then
+          continue
+        fi
+
+        LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
+        # BIN_NAME="$(echo "$VERSION_LINE" | cut -d\; -f1)"
+        CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
+        VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+
+        VERSION_FINDER=$(echo "$SERVICE" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null || true)
+        if [[ -n $VERSION_FINDER ]]; then
+          print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in Nmap port scanning logs."
+          # use get_csv_rule from s09:
+          get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+          write_csv_log "---" "---" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
+          continue
+        fi
+      done  < "$CONFIG_DIR"/bin_version_strings.cfg
     done
   fi
 

@@ -44,9 +44,9 @@ I05_emba_docker_image_dl() {
         if command -v docker > /dev/null ; then
           export DOCKER_CLI_EXPERIMENTAL=enabled
           echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
-          docker pull embeddedanalyzer/emba
+          #docker pull embeddedanalyzer/emba
           export DOCKER_CLI_EXPERIMENTAL=disabled
-          docker-compose up --no-start
+          #docker-compose up --no-start
         else
           echo "Estimated download-Size: ~5500 MB"
           echo -e "$ORANGE""WARNING: docker command missing - no docker pull possible.""$NC"

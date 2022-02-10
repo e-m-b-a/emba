@@ -94,15 +94,21 @@ deep_key_searcher() {
 deep_key_reporter() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
-    OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
+    if [[ "$P_COUNT" -gt 0 ]]; then
+      OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
+    fi
   done
 
   if [[ "${#PATTERN_LIST[@]}" -gt 0 ]] ; then
-    print_output ""
-    print_output "[*] Occurences of pattern:"
-    SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
-    for OCC in "${SORTED_OCC_LIST[@]}"; do
-      print_output "$( indent "$(orange "$OCC" )")""\n"
-    done
+    if [[ "${#OCC_LIST[@]}" -gt 0 ]] ; then
+      print_output ""
+      print_output "[*] Occurences of pattern:"
+      SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
+      if [[ "${#SORTED_OCC_LIST[@]}" -gt 0 ]]; then
+        for OCC in "${SORTED_OCC_LIST[@]}"; do
+          print_output "$( indent "$(orange "$OCC" )")""\n"
+        done
+      fi
+    fi
   fi
 }

@@ -43,7 +43,7 @@ check_dtb()
     for DTB_FILE in "${DTB_ARR[@]}" ; do
       print_output "$(indent "$DTB_FILE")"
       if [[ $DTBDUMP -eq 1 ]] ; then
-        write_log "$(fdtdump "$DTB_FILE" 2> /dev/null)" "$LOG_PATH_MODULE""/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt" "g"
+        write_log "$(fdtdump "$DTB_FILE" 2> /dev/null || true)" "$LOG_PATH_MODULE""/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt" "g"
         write_link "$LOG_PATH_MODULE""/""$(basename "$DTB_FILE" .dtb)""-DUMP.txt"
         ((STARTUP_FINDS+=1))
       fi

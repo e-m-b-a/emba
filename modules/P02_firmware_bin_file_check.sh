@@ -33,6 +33,7 @@ P02_firmware_bin_file_check() {
   export UBI_IMAGE=0
   export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
+  export QNAP_ENC_DETECTED=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')

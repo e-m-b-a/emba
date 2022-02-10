@@ -29,10 +29,6 @@ IL10_system_emulator() {
     print_tool_info "git" 1
     print_tool_info "dmsetup" 1
     print_tool_info "kpartx" 1
-    print_tool_info "nmap" 1
-    print_tool_info "snmp" 1
-    print_tool_info "nikto" 1
-    print_tool_info "snmpcheck" 1
     print_tool_info "uml-utilities" 1
     print_tool_info "util-linux" 1
     print_tool_info "vlan" 1

@@ -578,7 +578,7 @@ write_script_exec() {
   EXECUTE="${3:0}"
 
   if [[ "$EXECUTE" -ne 0 ]];then
-    eval "$COMMAND" &
+    eval "$COMMAND" || true &
   fi
 
   if [[ "$EXECUTE" -ne 2 ]];then

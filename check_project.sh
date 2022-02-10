@@ -15,9 +15,9 @@
 
 # Description:  Check all shell scripts inside ./helpers, ./modules, emba.sh and itself with shellchecker
 
-STRICT=1
+STRICT_MODE=1
 
-if [[ "$STRICT" -eq 1 ]]; then
+if [[ "$STRICT_MODE" -eq 1 ]]; then
   # shellcheck disable=SC1091
   source ./installer/wickStrictModeFail.sh
   # http://redsymbol.net/articles/unofficial-bash-strict-mode/

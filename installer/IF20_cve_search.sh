@@ -79,7 +79,7 @@ IF20_cve_search() {
       y|Y )
   
         CVE_INST=1
-        echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
+        echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
         cd "$HOME_PATH" || exit 1
         cd ./external/cve-search/ || exit 1
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
@@ -102,7 +102,7 @@ IF20_cve_search() {
   
           echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
           CVE_INST=1
-          echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed.""$NC"
+          echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
           if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
             CVE_INST=0
             echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
@@ -123,7 +123,7 @@ IF20_cve_search() {
           sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
           chmod +x config/emba_updater
           echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for EMBA is located in config/emba_updater""$NC"
-          echo -e "$MAGENTA""$BOLD""For automatic updates it should be copied to /etc/cron.daily/""$NC"
+          echo -e "$MAGENTA""$BOLD""For automatic updates it should be checked and copied to /etc/cron.daily/""$NC"
         fi
         cd "$HOME_PATH" || exit 1
       ;;

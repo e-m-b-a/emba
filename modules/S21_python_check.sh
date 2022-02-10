@@ -75,7 +75,7 @@ S21_python_check()
 s21_script_bandit() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit""$NAME"".txt"
-  bandit -r "$LINE" > "$PY_LOG" 2> /dev/null
+  bandit -r "$LINE" > "$PY_LOG" 2> /dev/null || true
 
   VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then

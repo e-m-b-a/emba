@@ -23,8 +23,13 @@ IL15_emulated_checks_init() {
     INSTALL_APP_LIST=()
     cd "$HOME_PATH" || exit 1
     print_git_info "routersploit" "m-1-k-3/routersploit" "The RouterSploit Framework is an open-source exploitation framework dedicated to embedded devices. (EMBA fork)"
-    print_tool_info "python3-pip" 1
     print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
+
+    print_tool_info "nmap" 1
+    print_tool_info "snmp" 1
+    print_tool_info "nikto" 1
+    print_tool_info "snmpcheck" 1
+    print_tool_info "python3-pip" 1
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -39,18 +44,19 @@ IL15_emulated_checks_init() {
       apt-get install "${INSTALL_APP_LIST[@]}" -y
  
       if ! [[ -d external/routersploit ]]; then
-        git clone https://github.com/m-1-k-3/routersploit.git external/routersploit
+        # currently this gentle guy has started to update routersploit on this fork:
+        git clone --branch dev_rework https://github.com/GH0st3rs/routersploit.git external/routersploit
       fi
 
       cd external/routersploit || exit 1
 
-      #if ! [[ -f "external/routersploit/docs/routersploit_patch" ]]; then
-      #  # is already applied in the used fork (leave this here for future usecases):
-      #  download_file "routersploit_patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "docs/routersploit_patch"
-      #  patch -f -p1 < docs/routersploit_patch
-      #else
-      #  echo -e "$GREEN""routersploit_patch already downloaded""$NC"
-      #fi
+      if ! [[ -f "external/routersploit/docs/routersploit_patch" ]]; then
+        # is already applied in the used fork (leave this here for future usecases):
+        download_file "routersploit_patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "docs/routersploit_patch"
+        patch -f -p1 < docs/routersploit_patch || true
+      else
+        echo -e "$GREEN""routersploit_patch already downloaded""$NC"
+      fi
 
       python3 -m pip install -r requirements.txt
 

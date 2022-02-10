@@ -17,14 +17,14 @@
 # Description:  Installs needed stuff for EMBA
 
 # it the installer fails you can try to change it to 0
-STRICT=1
+STRICT_MODE=1
 
 export DEBIAN_FRONTEND=noninteractive
 export INSTALL_APP_LIST=()
 export DOWNLOAD_FILE_LIST=()
 export INSTALLER_DIR="./installer"
 
-if [[ "$STRICT" -eq 1 ]]; then
+if [[ "$STRICT_MODE" -eq 1 ]]; then
   # http://redsymbol.net/articles/unofficial-bash-strict-mode/
   # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
   set -e          # Exit immediately if a command exits with a non-zero status
@@ -174,6 +174,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
   I120_cwe_checker
 
   IL10_system_emulator
+  # for the future
+  # IL20_firmae_system_emulator
 
   IL15_emulated_checks_init
 

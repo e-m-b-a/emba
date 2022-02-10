@@ -32,7 +32,7 @@ S06_distribution_identification()
             PATTERN="$(echo "$LINE" | cut -d\; -f3 | sed s/^\"// | sed s/\"$//)"
             SED_COMMAND="$(echo "$LINE" | cut -d\; -f4)"
             # shellcheck disable=SC2086
-            OUT1="$(grep $PATTERN "$FILE")"
+            OUT1="$(grep $PATTERN "$FILE" || true)"
             # echo "SED command: $SED_COMMAND"
             # echo "identified: $OUT1"
             IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//')
