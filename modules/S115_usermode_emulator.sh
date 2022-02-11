@@ -211,6 +211,7 @@ print_filesystem_fixes() {
 }
 
 copy_firmware() {
+  EMULATION_PATH_BASE="$LOG_DIR"/firmware
   # we just create a backup if the original firmware path was a root directory
   # if it was a binary file we already have extracted it and it is already messed up
   # so we can mess it up a bit more ;)
@@ -253,6 +254,7 @@ kill_qemu_threader() {
 s115_cleanup() {
   print_output ""
   sub_module_title "Cleanup phase"
+  CHECK_MOUNTS=()
 
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
@@ -278,11 +280,13 @@ s115_cleanup() {
   print_output ""
   print_output "[*] Umounting proc, sys and run"
   mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH_BASE")
-  for MOUNT in "${CHECK_MOUNTS[@]}"; do
-    print_output "[*] Unmounting $MOUNT"
-    MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
-    umount -l "$MOUNT"
-  done
+  if [[ -v CHECK_MOUNTS[@] ]]; then
+    for MOUNT in "${CHECK_MOUNTS[@]}"; do
+      print_output "[*] Unmounting $MOUNT"
+      MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
+      umount -l "$MOUNT" || true
+    done
+  fi
 
   mapfile -t FILES < <(find "$LOG_PATH_MODULE""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
   if [[ "${#FILES[@]}" -gt 0 ]] ; then
@@ -667,7 +671,7 @@ emulate_strace_run() {
   kill -0 -9 "$PID" 2> /dev/null || true
 
   # extract missing files, exclude *.so files:
-  mapfile -t MISSING_AREAS < <(grep -a "open" "$LOG_FILE_STRACER" | grep -a "errno=2\ " 2>&1 | cut -d\" -f2 2>&1 | sort -u || true)
+  mapfile -t MISSING_AREAS < <(grep -a "open.*errno=2\ " "$LOG_FILE_STRACER" 2>&1 | cut -d\" -f2 2>&1 | sort -u || true)
   mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u || true)
   MISSING_AREAS+=("${MISSING_AREAS_[@]}" )
 
