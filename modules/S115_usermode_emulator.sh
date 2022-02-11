@@ -587,7 +587,7 @@ run_init_test() {
 
   # fallback solution - we use the most working configuration:
   if ! grep -q "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"; then
-    CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}')
+    CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}' || true)
     write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME_$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
     write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
     write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_FILE_INIT"

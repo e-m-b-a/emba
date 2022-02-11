@@ -26,7 +26,7 @@ S06_distribution_identification()
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
       FILE="$(echo "$LINE" | cut -d\; -f2)"
-      mapfile -t FILES < <(find "$FIRMWARE_PATH" -iwholename "*$FILE")
+      mapfile -t FILES < <(find "$FIRMWARE_PATH" -iwholename "*$FILE" || true)
       for FILE in "${FILES[@]}"; do
         if [[ -f "$FILE" ]]; then
             PATTERN="$(echo "$LINE" | cut -d\; -f3 | sed s/^\"// | sed s/\"$//)"

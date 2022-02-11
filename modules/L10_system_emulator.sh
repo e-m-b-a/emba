@@ -140,7 +140,7 @@ create_emulation_filesystem() {
   echo -e "o\nn\np\n1\n\n\nw" | /sbin/fdisk "$LOG_PATH_MODULE/$IMAGE_NAME"
 
   print_output "[*] Mounting QEMU Image"
-  DEVICE=$(get_device "$(kpartx -a -s -v "$LOG_PATH_MODULE/$IMAGE_NAME")")
+  DEVICE=$(get_device "$(kpartx -a -s -v "$LOG_PATH_MODULE/$IMAGE_NAME" || true)")
   sleep 1
   print_output "[*] Device mapper created at ${DEVICE}"
 
@@ -149,7 +149,7 @@ create_emulation_filesystem() {
   mkfs.ext2 "${DEVICE}" || true
 
   print_output "[*] Mounting QEMU Image Partition 1 to $MNT_POINT"
-  mount "${DEVICE}" "$MNT_POINT"
+  mount "${DEVICE}" "$MNT_POINT" || true
   if mount | grep -q "$MNT_POINT"; then
     print_output "[*] Copy root filesystem to QEMU image"
     #rm -rf "${MNT_POINT:?}/"*
