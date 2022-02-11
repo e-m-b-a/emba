@@ -34,6 +34,7 @@ P02_firmware_bin_file_check() {
   export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
   export QNAP_ENC_DETECTED=0
+  export BSD_UFS=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
@@ -89,6 +90,7 @@ fw_bin_detector() {
   export UBI_IMAGE=0
   export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
+  export BSD_UFS=0
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
@@ -127,6 +129,9 @@ fw_bin_detector() {
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext4 filesystem data"* ]]; then
     export EXT_IMAGE=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Unix Fast File system [v2]"* ]]; then
+    export BSD_UFS=1
   fi
   if [[ "$QNAP_ENC_CHECK" == *"QNAP encrypted firmware footer , model"* ]]; then
     export QNAP_ENC_DETECTED=1

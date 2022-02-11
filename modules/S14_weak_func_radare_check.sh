@@ -419,7 +419,7 @@ radare_output_function_details()
   LOG_FILE_LOC_OLD="$LOG_FILE_LOC"
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
 
-  if [[ -f "$LOG_FILE_LOC_OLD" ]]
+  if [[ -f "$LOG_FILE_LOC_OLD" ]]; then
     mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
   fi
   

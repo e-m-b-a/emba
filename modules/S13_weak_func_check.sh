@@ -31,7 +31,7 @@ S13_weak_func_check()
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
+      while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
         sleep 1
       done
     fi

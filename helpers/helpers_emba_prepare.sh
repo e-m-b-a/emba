@@ -234,11 +234,12 @@ prepare_binary_arr()
   # this is a slow fallback solution just to have something we can work with
   readarray -t BINARIES_TMP < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
   for BINARY in "${BINARIES_TMP[@]}"; do
-    echo "$BINARY"
-    BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
-    if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
-      BINARIES+=( "$BINARY" )
-      MD5_DONE_INT+=( "$BIN_MD5" )
+    if [[ -f "$BINARY" ]]; then
+      BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
+      if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
+        BINARIES+=( "$BINARY" )
+        MD5_DONE_INT+=( "$BIN_MD5" )
+      fi
     fi
   done
   print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables."
