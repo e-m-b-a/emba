@@ -30,6 +30,7 @@ S115_usermode_emulator() {
     if [[ $IN_DOCKER -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
+    EMULATOR="NA"
 
     print_output "[*] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
     # get the local interface ip address for later verification

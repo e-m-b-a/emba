@@ -97,7 +97,7 @@ print_output()
   local TYPE_CHECK
   TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
-    local COLOR_OUTPUT_STRING
+    local COLOR_OUTPUT_STRING=""
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
     echo -e "$COLOR_OUTPUT_STRING"
     if [[ "$LOG_SETTING" == "main" ]] ; then
@@ -266,12 +266,12 @@ reset_module_count()
 color_output()
 {
   local TEXT=""
-  readarray TEXT_ARR <<< "$1"
+  readarray TEXT_ARR <<< "${1:-}"
   for E in "${TEXT_ARR[@]}" ; do
     local TYPE_CHECK
     TYPE_CHECK="$( echo "$E" | cut -c1-3 )"
     if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
-      local STR
+      local STR=""
       STR="$( echo "$E" | cut -c 4- )"
       if [[ "$TYPE_CHECK" == "[-]" ]] ; then
         TEXT="$TEXT""[""$RED""-""$NC""]""$STR"
