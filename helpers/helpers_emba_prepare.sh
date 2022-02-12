@@ -173,7 +173,7 @@ architecture_check()
         print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n"
       fi
 
-      if [[ -n "${ARCH-NA}" ]] ; then
+      if [[ -n "${ARCH:-}" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
           print_output "[!] Your set architecture (""$ARCH"") is different from the automatically detected one. The set architecture will be used."
         fi

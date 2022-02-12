@@ -115,10 +115,11 @@ populate_karrays() {
   local KERNEL_VERSION_
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
-    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g' || true)" )
     if [[ "$K_MODULE" =~ .*\.o ]]; then
       KERNEL_VERSION+=( "$(strings "$K_MODULE" 2>/dev/null | grep "kernel_version=" | cut -d= -f2 || true)" )
+      continue
     fi
+    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g' || true)" )
     KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' || true)" )
   done
 
@@ -171,7 +172,7 @@ populate_karrays() {
   # if we have no kernel version identified -> we try to identify something via the path:
   if [[ "${#KERNEL_VERSION_[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
     # remove the first part of the path:
-    KERNEL_VERSION1=$(echo "${KERNEL_MODULES[1]}" | sed 's/.*\/lib\/modules\///')
+    KERNEL_VERSION1=$(echo "${KERNEL_MODULES[0]}" | sed 's/.*\/lib\/modules\///')
     KERNEL_VERSION_+=("$KERNEL_VERSION1")
     # demess_kv_version removes the unneeded stuff after the version:
     demess_kv_version "${KERNEL_VERSION_[@]}"

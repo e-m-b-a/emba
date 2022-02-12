@@ -59,9 +59,9 @@ filesystem_tree() {
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
     if [[ $FORMAT_LOG -eq 1 ]] ; then
-      tree -p -s -a -C "$LPATH" >> "$LOG_FILE"
+      tree -p -s -a -C "$LPATH" >> "$LOG_FILE" || true
     else
-      tree -p -s -a -n "$LPATH" >> "$LOG_FILE"
+      tree -p -s -a -n "$LPATH" >> "$LOG_FILE" || true
     fi
   else
     if [[ $FORMAT_LOG -eq 1 ]] ; then
