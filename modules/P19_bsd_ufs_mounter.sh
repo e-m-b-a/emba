@@ -44,14 +44,14 @@ ufs_extractor() {
   local DIRS_UFS_MOUNT
   sub_module_title "UFS filesystem extractor"
 
-  mkdir -p "$TMP_UFS_MOUNT"
+  mkdir -p "$TMP_UFS_MOUNT" 2>/dev/null || true
   print_output "[*] Trying to mount $ORANGE$UFS_PATH_$NC to $ORANGE$TMP_UFS_MOUNT$NC directory"
   modprobe ufs
   mount -r -t ufs -o ufstype=ufs2 "$UFS_PATH_" "$TMP_UFS_MOUNT"
   if mount | grep -q ufs_mount; then
     print_output "[*] Copying $ORANGE$TMP_UFS_MOUNT$NC to firmware tmp directory ($EXTRACTION_DIR_)"
-    mkdir -p "$EXTRACTION_DIR_"
-    cp -pri "$TMP_UFS_MOUNT"/* "$EXTRACTION_DIR_"
+    mkdir -p "$EXTRACTION_DIR_" 2>/dev/null || true
+    cp -pri "$TMP_UFS_MOUNT"/* "$EXTRACTION_DIR_" 2>/dev/null || true
     print_output ""
     print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
     #shellcheck disable=SC2012
@@ -62,7 +62,7 @@ ufs_extractor() {
     FILES_UFS_MOUNT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_UFS_MOUNT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_UFS_MOUNT$NC files and $ORANGE$DIRS_UFS_MOUNT$NC directories from the firmware image."
-    umount "$TMP_UFS_MOUNT"
+    umount "$TMP_UFS_MOUNT" 2>/dev/null || true
   fi
   rm -r "$TMP_UFS_MOUNT"
 

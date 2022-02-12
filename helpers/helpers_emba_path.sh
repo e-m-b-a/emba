@@ -111,13 +111,11 @@ set_etc_path() {
 set_excluded_path() {
   local RET_PATHS
   if [[ -v EXCLUDE[@] ]] ;  then
-    if [[ ${#EXCLUDE[@]} -gt 0 ]] ;  then
-      for LINE in "${EXCLUDE[@]}"; do
-        if [[ -n $LINE ]] ; then
-          RET_PATHS="$RET_PATHS""$(abs_path "$LINE")""\n"
-        fi
-      done
-    fi
+    for LINE in "${EXCLUDE[@]}"; do
+      if [[ -n $LINE ]] ; then
+        RET_PATHS="$RET_PATHS""$(abs_path "$LINE")""\n"
+      fi
+    done
   fi
   echo -e "${RET_PATHS:-}"
 }

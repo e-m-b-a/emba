@@ -399,9 +399,10 @@ main()
   echo
 
   if [[ "$UPDATE" -eq 1 ]]; then
-    print_output "[*] EMBA update starting ..."
+    print_output "[*] EMBA update starting ..." "no_log"
     git pull
     EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
+    print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
     exit 0
   fi
 

@@ -286,11 +286,11 @@ cve_db_lookup() {
 
   # CVE search:
   set +e
-  "$PATH_CVE_SEARCH" -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+  "$PATH_CVE_SEARCH" -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
 
   # shellcheck disable=SC2181
   if [[ "$?" -ne 0 ]]; then
-    "$PATH_CVE_SEARCH" -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+    "$PATH_CVE_SEARCH" -p "$VERSION" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
   fi
   set -e
 
