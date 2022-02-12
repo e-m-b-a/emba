@@ -19,7 +19,7 @@
 #                 binary array via ${BINARIES[@]}
 
 check_path_valid() {
-  C_PATH="$1"
+  C_PATH="${1:-}"
   if [[ -n "$C_PATH" ]] && { [[ "${C_PATH:0:1}" != "/" ]] && [[ "${C_PATH:0:2}" != "./" ]] && [[ "${C_PATH:0:3}" != "../" ]] ; } ; then
     print_output "[!] ""$C_PATH"" is not a valid path in the context of emba" "no_log"
     print_output "    Try it again with \"/\", \"./\" or \"../\" at the beginning of the path.\\n" "no_log"
@@ -29,19 +29,19 @@ check_path_valid() {
 }
 
 abs_path() {
-  if [[ -e "$1" ]] ; then
-    echo -e "$(realpath -s "$1")"
+  if [[ -e "${1:-}" ]] ; then
+    echo -e "$(realpath -s "${1:-}")"
   else
-    echo "$1"
+    echo "${1:-}"
   fi
 }
 
 print_path() {
-  echo -e "$(cut_path "$1")""$(path_attr "$1")"
+  echo -e "$(cut_path "${1:-}")""$(path_attr "${1:-}")"
 }
 
 cut_path() {
-  C_PATH="$(abs_path "$1")"
+  C_PATH="$(abs_path "${1:-}")"
   if [[ $SHORT_PATH -eq 1 ]] ;  then
     local SHORT
     local FIRST
@@ -76,27 +76,27 @@ cut_path() {
 }
 
 path_attr() {
-  if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
-    echo -e " ""$(find "$1" -xdev -maxdepth 0 -printf "(%M %u %g)")"
+  if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
+    echo -e " ""$(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g)")"
   elif [[ -L "$1" ]] ;  then
-    echo -e " ""$(find "$1" -xdev -maxdepth 0 -printf "(%M %u %g) -> %l")"
+    echo -e " ""$(find "${1:-}" -xdev -maxdepth 0 -printf "(%M %u %g) -> %l")"
   fi
 }
 
 permission_clean() {
-  if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
+  if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
     echo -e "$(find "$1" -xdev -maxdepth 0 -printf "%M")"
   fi
 }
 
 owner_clean() {
-  if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
+  if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
     echo -e "$(find "$1" -xdev -maxdepth 0 -printf "%U")"
   fi
 }
 
 group_clean() {
-  if [[ -f "$1" ]] || [[ -d "$1" ]] ;  then
+  if [[ -f "${1:-}" ]] || [[ -d "${1:-}" ]] ;  then
     echo -e "$(find "$1" -xdev -maxdepth 0 -printf "%G")"
   fi
 }
@@ -110,14 +110,14 @@ set_etc_path() {
 
 set_excluded_path() {
   local RET_PATHS
-  if [[ ${#EXCLUDE[@]} -gt 0 ]] ;  then
+  if [[ -v EXCLUDE[@] ]] ;  then
     for LINE in "${EXCLUDE[@]}"; do
       if [[ -n $LINE ]] ; then
         RET_PATHS="$RET_PATHS""$(abs_path "$LINE")""\n"
       fi
     done
   fi
-  echo -e "$RET_PATHS"
+  echo -e "${RET_PATHS:-}"
 }
 
 get_excluded_find() {
@@ -130,11 +130,11 @@ get_excluded_find() {
     RET_LEN=${#RET}
     RET="${RET::RET_LEN-3}"') '
   fi
-  echo "$RET"
+  echo "${RET:-}"
 }
 
 rm_proc_binary() {
-  local BIN_ARR
+  local BIN_ARR=()
   local COUNT=0
   BIN_ARR=("$@")
   for I in "${!BIN_ARR[@]}"; do
@@ -159,7 +159,6 @@ rm_proc_binary() {
 mod_path() {
   local RET_PATHS
   RET_PATHS=()
-
 
   if [[ "$1" == "/ETC_PATHS"* ]] ; then
     for ETC_PATH_I in "${ETC_PATHS[@]}"; do
@@ -190,21 +189,21 @@ mod_path_array() {
 
 create_log_dir() {
   if ! [[ -d "$LOG_DIR" ]] ; then
-      mkdir "$LOG_DIR" 2> /dev/null
+      mkdir "$LOG_DIR" 2> /dev/null || true
   fi
   if ! [[ -d "$TMP_DIR" ]] ; then
-      mkdir "$TMP_DIR" 2> /dev/null
+      mkdir "$TMP_DIR" 2> /dev/null || true
   fi
   if [[ $FIRMWARE -eq 1 ]] ; then
     export HTML_PATH="$LOG_DIR""/html-report"
     if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then
-      mkdir "$HTML_PATH" 2> /dev/null
+      mkdir "$HTML_PATH" 2> /dev/null || true
     fi
     export FIRMWARE_PATH_CP="$LOG_DIR""/firmware"
-    mkdir -p "$FIRMWARE_PATH_CP" 2> /dev/null
+    mkdir -p "$FIRMWARE_PATH_CP" 2> /dev/null || true
     export SUPPL_PATH="$LOG_DIR""/etc"
-    mkdir -p "$SUPPL_PATH" 2> /dev/null
-    mkdir -p "$TMP_DIR" 2> /dev/null
+    mkdir -p "$SUPPL_PATH" 2> /dev/null || true
+    mkdir -p "$TMP_DIR" 2> /dev/null || true
   fi
 }
 
@@ -215,11 +214,11 @@ create_grep_log() {
 }
 
 config_list() {
-  if [[ -f "$1" ]] ;  then
-    if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+  if [[ -f "${1:-}" ]] ;  then
+    if [[ "$(wc -l "${1:-}" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
       local STRING_LIST
-      readarray -t STRING_LIST <"$1"
-      local LIST
+      readarray -t STRING_LIST <"${1:-}"
+      local LIST=""
       for STRING in "${STRING_LIST[@]}"; do
         LIST="$LIST""$STRING""\n"
       done
@@ -236,15 +235,15 @@ config_find() {
   local FIND_RESULTS
   FIND_RESULTS=()
 
-  if [[ -f "$1" ]] ; then
-    if [[ "$( wc -l "$1" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
+  if [[ -f "${1:-}" ]] ; then
+    if [[ "$( wc -l "${1:-}" | cut -d \  -f1 2>/dev/null )" -gt 0 ]] ;  then
       local FIND_COMMAND
-      IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "$1" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
+      IFS=" " read -r -a FIND_COMMAND <<<"$(sed 's/^/-o -iwholename /g' "${1:-}" | tr '\r\n' ' ' | sed 's/^-o//' 2>/dev/null)"
       mapfile -t FIND_O < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" "${FIND_COMMAND[@]}")
       for LINE in "${FIND_O[@]}"; do
         if [[ -L "$LINE" ]] ; then
           local REAL_PATH
-          REAL_PATH="$(realpath "$LINE" 2>/dev/null)"
+          REAL_PATH="$(realpath "$LINE" 2>/dev/null || true)"
           if [[ -f  "$REAL_PATH" ]] ; then
             FIND_RESULTS+=( "$REAL_PATH" )
           fi
@@ -268,8 +267,8 @@ config_grep() {
   local GREP_FILE
   mapfile -t GREP_FILE < <(mod_path "$2")
 
-  if [[ -f "$1" ]] ;  then
-    if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+  if [[ -f "${1:-}" ]] ;  then
+    if [[ "$(wc -l "${1:-}" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
       local GREP_COMMAND
       IFS=" " read -r -a GREP_COMMAND <<<"$(sed 's/^/-Eo /g' "$1" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
       for G_LOC in "${GREP_FILE[@]}"; do
@@ -283,10 +282,10 @@ config_grep() {
 }
 
 config_grep_string() {
-  if [[ -f "$1" ]] ;  then
-    if [[ "$(wc -l "$1" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
+  if [[ -f "${1:-}" ]] ;  then
+    if [[ "$(wc -l "${1:-}" | cut -d\  -f1 2>/dev/null)" -gt 0 ]] ;  then
       local GREP_COMMAND
-      IFS=" " read -r -a GREP_COMMAND <<<"$(sed 's/^/-e /g' "$1" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
+      IFS=" " read -r -a GREP_COMMAND <<<"$(sed 's/^/-e /g' "${1:-}" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
       GREP_O=("${GREP_O[@]}" "$(echo "$2"| grep -a -D skip "${GREP_COMMAND[@]}" 2>/dev/null)")
       echo "${GREP_O[@]}"
     fi

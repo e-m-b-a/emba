@@ -28,7 +28,7 @@ S20_shell_check()
     mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${SH_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "shell script" ) ; then
-        ((S20_SCRIPTS++))
+        ((S20_SCRIPTS+=1))
         if [[ "$THREADED" -eq 1 ]]; then
           s20_script_check &
           WAIT_PIDS_S20+=( "$!" )
@@ -44,7 +44,7 @@ S20_shell_check()
 
     if [[ -f "$TMP_DIR"/S20_VULNS.tmp ]]; then
       while read -r VULNS; do
-        (( S20_SHELL_VULNS="$S20_SHELL_VULNS"+"$VULNS" ))
+        S20_SHELL_VULNS=$((S20_SHELL_VULNS+VULNS))
       done < "$TMP_DIR"/S20_VULNS.tmp
     fi
 
@@ -53,7 +53,7 @@ S20_shell_check()
     write_log ""
     write_log "[*] Statistics:$S20_SHELL_VULNS:$S20_SCRIPTS"
 
-    mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "$LOG_PATH_MODULE"/shellchecker_* | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1)
+    mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "$LOG_PATH_MODULE"/shellchecker_* 2>/dev/null | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1 || true)
     for VTYPE in "${S20_VULN_TYPES[@]}" ; do
       print_output "$(indent "$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""$NC")"
     done
@@ -67,8 +67,8 @@ S20_shell_check()
 s20_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   SHELL_LOG="$LOG_PATH_MODULE""/shellchecker_""$NAME"".txt"
-  shellcheck -C "$LINE" > "$SHELL_LOG" 2> /dev/null
-  VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null)
+  shellcheck -C "$LINE" > "$SHELL_LOG" 2> /dev/null || true
+  VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND

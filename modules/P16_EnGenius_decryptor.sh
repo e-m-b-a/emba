@@ -41,7 +41,7 @@ engenius_enc_extractor() {
   local EXTRACTION_FILE_="$2"
   sub_module_title "EnGenius encrypted firmware extractor"
 
-  hexdump -C "$ENGENIUS_ENC_PATH_" | head | tee -a "$LOG_FILE"
+  hexdump -C "$ENGENIUS_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
   if [[ -f "$EXT_DIR"/engenius-decrypt.py ]]; then
     python3 "$EXT_DIR"/engenius-decrypt.py "$ENGENIUS_ENC_PATH_" > "$EXTRACTION_FILE_"

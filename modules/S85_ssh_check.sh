@@ -28,7 +28,7 @@ S85_ssh_check()
   check_squid
 
   write_log ""
-  write_log "[*] Statistics:$SSH_VUL_CNT"
+  write_log "[*] Statistics:$SSH_VUL_CNT:$SQUID_VUL_CNT"
 
   if [[ "$SQUID_VUL_CNT" -gt 0 || "$SSH_VUL_CNT" -gt 0 ]]; then
     NEG_LOG=1
@@ -44,7 +44,7 @@ search_ssh_files()
   local SSH_FILES
   mapfile -t SSH_FILES < <(config_find "$CONFIG_DIR""/ssh_files.cfg")
 
-  if [[ "${SSH_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${SSH_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#SSH_FILES[@]}" -ne 0 ]] ; then
     print_output "[+] Found ""${#SSH_FILES[@]}"" ssh configuration files:"
     for LINE in "${SSH_FILES[@]}" ; do
@@ -60,7 +60,7 @@ search_ssh_files()
                 # print finding title as EMBA finding:
                 if [[ "$S_ISSUE" =~ ^\([0-9+]\)\ \[[A-Z]+\]\  ]]; then
                   print_output "[+] $S_ISSUE"
-                  ((SSH_VUL_CNT++))
+                  ((SSH_VUL_CNT+=1))
                 # print everything else (except RESULTS and done) as usual output
                 elif ! [[ "$S_ISSUE" == *RESULTS* || "$S_ISSUE" == *done* ]]; then
                   print_output "[*] $S_ISSUE"
@@ -88,7 +88,7 @@ check_squid()
   for BIN_FILE in "${BINARIES[@]}"; do
     if [[ "$BIN_FILE" == *"squid"* ]] && ( file "$BIN_FILE" | grep -q ELF ) ; then
       print_output "[+] Found possible squid executable: ""$(print_path "$BIN_FILE")"
-      ((SQUID_VUL_CNT++))
+      ((SQUID_VUL_CNT+=1))
     fi
   done
   if [[ $SQUID_VUL_CNT -eq 0 ]] ; then
@@ -98,18 +98,18 @@ check_squid()
   CHECK=0
   SQUID_DAEMON_CONFIG_LOCS=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
   mapfile -t SQUID_PATHS_ARR < <(mod_path_array "${SQUID_DAEMON_CONFIG_LOCS[@]}")
-  if [[ "${SQUID_PATHS_ARR[0]}" == "C_N_F" ]] ; then
+  if [[ "${SQUID_PATHS_ARR[0]-}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
   elif [[ "${#SQUID_PATHS_ARR[@]}" -ne 0 ]] ; then
     for SQUID_E in "${SQUID_PATHS_ARR[@]}"; do
       if [[ -f "$SQUID_E""/squid.conf" ]] ; then
         CHECK=1
         print_output "[+] Found squid config: ""$(print_path "$SQUID_E")"
-        ((SQUID_VUL_CNT++))
+        ((SQUID_VUL_CNT+=1))
       elif [[ -f "$SQUID_E""/squid3.conf" ]] ; then
         CHECK=1
         print_output "[+] Found squid config: ""$(print_path "$SQUID_E")"
-        ((SQUID_VUL_CNT++))
+        ((SQUID_VUL_CNT+=1))
       fi
       if [[ $CHECK -eq 1 ]] ; then
         print_output "[*] Check external access control list type:"

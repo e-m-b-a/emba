@@ -20,8 +20,8 @@ INVOCATION_PATH="."
 
 import_helper()
 {
-  local HELPERS
-  local HELPER_COUNT
+  local HELPERS=()
+  local HELPER_COUNT=0
   mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for HELPER_FILE in "${HELPERS[@]}" ; do
     if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
@@ -36,8 +36,8 @@ import_helper()
 
 import_module()
 {
-  local MODULES
-  local MODULE_COUNT
+  local MODULES=()
+  local MODULE_COUNT=0
   mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
@@ -52,7 +52,7 @@ import_module()
 
 sort_modules()
 {
-  local SORTED_MODULES
+  local SORTED_MODULES=()
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       THREAD_PRIO=0
@@ -71,7 +71,7 @@ sort_modules()
 
 # lets check cve-search in a background job
 check_cve_search_job() {
-  EMBA_PID="$1"
+  EMBA_PID="${1:-}"
   while true; do
     if [[ -f "$LOG_DIR"/emba.log ]]; then
       if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
@@ -82,6 +82,7 @@ check_cve_search_job() {
     if ! ps aux | grep -v grep | grep -q "$EMBA_PID"; then
       break
     fi
+    check_nw_interface
     check_cve_search
     sleep 90
   done
@@ -92,7 +93,7 @@ check_cve_search_job() {
 # $3: HTML=1 - generate html file
 run_modules()
 {
-  MODULE_GROUP="$1"
+  MODULE_GROUP="${1:-}"
   printf -v THREADING_SET '%d\n' "$2" 2>/dev/null
   THREADING_MOD_GROUP="$THREADING_SET"
 
@@ -105,7 +106,7 @@ run_modules()
   done
 
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
-    local MODULES
+    local MODULES=()
     mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
@@ -140,7 +141,7 @@ run_modules()
   else
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
       if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
-        local MODULE
+        local MODULE=""
         MODULE=$(find "$MOD_DIR" -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
         if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
           MODULE_BN=$(basename "$MODULE")
@@ -156,7 +157,7 @@ run_modules()
           reset_module_count
         fi
       elif [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
-        local MODULES
+        local MODULES=()
         mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
         if [[ $THREADING_SET -eq 1 ]] ; then
           sort_modules
@@ -196,13 +197,16 @@ run_modules()
 
 main()
 {
+
   set -a 
   trap cleaner INT
 
   INVOCATION_PATH="$(dirname "$0")"
 
   export EMBA_PID="$$"
+  export STRICT_MODE=0
   export MATRIX_MODE=0
+  export UPDATE=0
   export FULL_EMULATION=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
@@ -216,9 +220,19 @@ main()
   export IN_DOCKER=0
   export USE_DOCKER=1
   export KERNEL=0
+  export KERNEL_CONFIG=""
+  export FIRMWARE_PATH=""
+  export FW_VENDOR=""
+  export FW_VERSION=""
+  export FW_DEVICE=""
+  export FW_NOTES=""
+  export ARCH=""
+  export EXLUDE=()
+  export SELECT_MODULES=()
+  export ROOT_PATH=()
+  export FILE_ARR=()
   export LOG_GREP=0
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
-  export MOD_RUNNING=0          # for tracking how many modules currently running
   export ONLY_DEP=0             # test only dependency
   export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
   export PHP_CHECK=1
@@ -268,7 +282,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrstxX:Y:WzZ: OPT ; do
+  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -347,8 +361,14 @@ main()
       s)
         export SHORT_PATH=1
         ;;
+      S)
+        export STRICT_MODE=1
+        ;;
       t)
         export THREADED=1
+        ;;
+      U)
+        export UPDATE=1
         ;;
       x)
         export DEEP_EXTRACTOR=1
@@ -378,14 +398,40 @@ main()
 
   echo
 
+  if [[ "$UPDATE" -eq 1 ]]; then
+    print_output "[*] EMBA update starting ..." "no_log"
+    git pull
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
+    print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
+    exit 0
+  fi
+
   if [[ $USE_DOCKER -eq 0 && $IN_DOCKER -eq 0 ]]; then
     print_bar "no_log"
     print_output "[!] WARNING: EMBA running in developer mode!" "no_log"
     print_bar "no_log"
   fi
 
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    # http://redsymbol.net/articles/unofficial-bash-strict-mode/
+    # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
+    # shellcheck disable=SC1091
+    source ./installer/wickStrictModeFail.sh
+    set -e          # Exit immediately if a command exits with a non-zero status
+    set -u          # Exit and trigger the ERR trap when accessing an unset variable
+    set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+    set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+    shopt -s extdebug # Enable extended debugging
+    #IFS=$'\n\t'     # Set the "internal field separator"
+    trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
+
+    print_bar "no_log"
+    print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
+    print_bar "no_log"
+  fi
+
   # profile handling
-  if [[ -n "$PROFILE" ]]; then
+  if [[ -n "${PROFILE:-}" ]]; then
     if [[ -f "$PROFILE" ]]; then
       print_bar "no_log"
       if [[ $IN_DOCKER -ne 1 ]] ; then
@@ -510,7 +556,7 @@ main()
       exit 1
     else
       if ! [[ -d "$LOG_DIR" ]] ; then
-        mkdir "$LOG_DIR"
+        mkdir "$LOG_DIR" || true
       fi
       S25_kernel_check
     fi
@@ -546,12 +592,12 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrstX:Y:WxzZ: OPT ; do
+    while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStUX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
         *)
-          if [[ "${#OPTARG[@]}" -gt 0 ]] ; then
+          if [[ -v OPTARG[@] ]] ; then
             ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" "${OPTARG[@]}" )
           else
             ARGUMENTS=( "${ARGUMENTS[@]}" "-$OPT" )
@@ -563,17 +609,26 @@ main()
     echo
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
 
-    if ! docker images | grep -qE "emba[[:space:]]*latest"; then
-      print_output "[-] EMBA docker build failed!" "no_log"
-      exit 1
+    if [[ "$UPDATE" -eq 1 ]]; then
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
     fi
 
-    if docker images | grep -qE "emba[[:space:]]*latest"; then
+    if ! docker images | grep -qE "emba[[:space:]]*latest"; then
+      print_output "[*] Available docker images:" "no_log"
+      docker images | grep -E "emba[[:space:]]*latest"
+      print_output "[-] EMBA docker not ready!" "no_log"
+      exit 1
+    else
       print_output "[*] EMBA initializes docker container.\\n" "no_log"
+      if [[ "$STRICT_MODE" -eq 1 ]]; then
+        set +e
+      fi
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
+      if [[ "$STRICT_MODE" -eq 1 ]]; then
+        set -e
+      fi
 
       if [[ $D_RETURN -eq 0 ]] ; then
         if [[ $ONLY_DEP -eq 0 ]] ; then
@@ -589,9 +644,6 @@ main()
         print_output "[-] EMBA failed in docker mode!" "main"
         exit 1
       fi
-    else
-      print_output "[-] EMBA failed in docker mode!" "main"
-      exit 1
     fi
   fi
 

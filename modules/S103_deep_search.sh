@@ -60,7 +60,7 @@ deep_pattern_search() {
 deep_pattern_searcher() {
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
-    readarray -t S_OUTPUT < <(grep -E -n -a -h -o -i "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0')
+    readarray -t S_OUTPUT < <(grep -E -n -a -h -o -i "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' || true)
     if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
       write_log "[+] ""$DEEP_S_FILE" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
       for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do
@@ -69,7 +69,7 @@ deep_pattern_searcher() {
       done
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt" )
+        F_COUNT=$(grep -c -i "$PATTERN" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt" || true)
         if [[ $F_COUNT -gt 0 ]] ; then
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
@@ -82,8 +82,8 @@ deep_pattern_searcher() {
 
       write_link "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
       print_output "$D_S_FINDINGS" 
-      cat "$LOG_FILE" >> "$OLD_LOG_FILE"
-      rm "$LOG_FILE" 2> /dev/null
+      cat "$LOG_FILE" >> "$OLD_LOG_FILE" || true
+      rm "$LOG_FILE" 2> /dev/null || true
       LOG_FILE="$OLD_LOG_FILE"
     fi
   fi

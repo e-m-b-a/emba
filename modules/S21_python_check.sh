@@ -28,7 +28,7 @@ S21_python_check()
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
-        ((S21_PY_SCRIPTS++))
+        ((S21_PY_SCRIPTS+=1))
         if [[ "$THREADED" -eq 1 ]]; then
           s21_script_bandit &
           WAIT_PIDS_S21+=( "$!" )
@@ -62,7 +62,7 @@ S21_python_check()
     # W1505: Using deprecated method splitunc() (deprecated-method)
     # -> we only print one W1505
 
-    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "$LOG_PATH_MODULE"/pylint_* 2>/dev/null | cut -d: -f5- | sort -u -t: -k1,1)
+    mapfile -t S21_VULN_TYPES < <(grep "[A-Z][0-9][0-9][0-9]" "$LOG_PATH_MODULE"/pylint_* 2>/dev/null || true | cut -d: -f5- | sort -u -t: -k1,1)
     for VTYPE in "${S21_VULN_TYPES[@]}" ; do
       print_output "$(indent "$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""$GREEN")"
     done
@@ -75,9 +75,9 @@ S21_python_check()
 s21_script_bandit() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit""$NAME"".txt"
-  bandit -r "$LINE" > "$PY_LOG" 2> /dev/null
+  bandit -r "$LINE" > "$PY_LOG" 2> /dev/null || true
 
-  VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null)
+  VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" ""  "$PY_LOG"
@@ -94,7 +94,7 @@ s21_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/pylint_""$NAME"".txt"
   pylint --max-line-length=240 -d C0115,C0114,C0116,W0511,E0401 "$LINE" > "$PY_LOG" 2> /dev/null
-  VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null)
+  VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND

@@ -22,57 +22,62 @@ F10_license_summary() {
   module_log_init "${FUNCNAME[0]}"
   module_title "License inventory"
   pre_module_reporter "${FUNCNAME[0]}"
+  print_output ""
 
   COUNT_LIC=0
 
-  mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")
-  mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s116_*.txt 2>/dev/null | grep -v "unknown" | sort -u)")
+  mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
+  mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s116_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
   # TODO: Currently the final kernel details from s25 are missing
 
   # static version detection
-  for ENTRY in "${LICENSE_DETECTION_STATIC[@]}"; do
-    if [[ -z "$ENTRY" ]]; then
-      continue
-    fi
+  if [[ "${#LICENSE_DETECTION_STATIC[@]}" -gt 0 ]]; then
+    for ENTRY in "${LICENSE_DETECTION_STATIC[@]}"; do
+      if [[ -z "$ENTRY" ]]; then
+        continue
+      fi
 
-    if [[ "$ENTRY" == *"in binary"* ]]; then
-      BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
-      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
-      LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
-    elif [[ "$ENTRY" == *"binwalk logs"* ]]; then
-      BINARY="NA"
-      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binwalk logs.*//')"
-      LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//' | tr -d ")" | sed 's/\.$//')"
-    else
-      # shellcheck disable=SC2001
-      BINARY="$(echo "$ENTRY" | sed 's/.*Version information found //')"
-      VERSION="NA"
-      LICENSE="$(echo "$ENTRY" | sed 's/.*Version information found //' | grep -o "license: .*)" | tr -d ")" | sed 's/license\:\ //')"
-    fi
+      if [[ "$ENTRY" == *"in binary"* ]]; then
+        BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
+        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
+        LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
+      elif [[ "$ENTRY" == *"binwalk logs"* ]]; then
+        BINARY="NA"
+        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binwalk logs.*//')"
+        LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//' | tr -d ")" | sed 's/\.$//')"
+      else
+        # shellcheck disable=SC2001
+        BINARY="$(echo "$ENTRY" | sed 's/.*Version information found //')"
+        VERSION="NA"
+        LICENSE="$(echo "$ENTRY" | sed 's/.*Version information found //' | grep -o "license: .*)" | tr -d ")" | sed 's/license\:\ //' || true)"
+      fi
 
-    print_output "[+] Binary: $ORANGE$(basename "$BINARY" | cut -d\  -f1)$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
-    ((COUNT_LIC+=1))
-  done
+      print_output "[+] Binary: $ORANGE$(basename "$BINARY" | cut -d\  -f1)$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
+      ((COUNT_LIC+=1))
+    done
+  fi
 
   # Qemu version detection
-  for ENTRY in "${LICENSE_DETECTION_DYN[@]}"; do
-    if [[ -z "$ENTRY" ]]; then
-      continue
-    fi
+  if [[ "${#LICENSE_DETECTION_DYN[@]}" -gt 0 ]]; then
+    for ENTRY in "${LICENSE_DETECTION_DYN[@]}"; do
+      if [[ -z "$ENTRY" ]]; then
+        continue
+      fi
 
-    if [[ "$ENTRY" == *"in binary"* ]]; then
-      BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
-      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
-      LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
-    elif [[ "$ENTRY" == *"qemu log file"* ]]; then
-      BINARY="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/ (license: .*//')"
-      VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in qemu log file .*//')"
-      LICENSE="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
-    fi
+      if [[ "$ENTRY" == *"in binary"* ]]; then
+        BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
+        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
+        LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
+      elif [[ "$ENTRY" == *"qemu log file"* ]]; then
+        BINARY="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/ (license: .*//')"
+        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in qemu log file .*//')"
+        LICENSE="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
+      fi
 
-    print_output "[+] Binary: $ORANGE$(basename "$BINARY")$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
-    ((COUNT_LIC+=1))
-  done
+      print_output "[+] Binary: $ORANGE$(basename "$BINARY")$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
+      ((COUNT_LIC+=1))
+    done
+  fi
 
   module_end_log "${FUNCNAME[0]}" "$COUNT_LIC"
 }

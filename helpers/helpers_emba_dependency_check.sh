@@ -22,8 +22,8 @@ DEP_EXIT=0  # exit EMBA after dependency check, regardless of which parameters h
 # $2=File path
 check_dep_file()
 {
-  FILE_NAME="$1"
-  FILE_PATH="$2"
+  FILE_NAME="${1:-}"
+  FILE_PATH="${2:-}"
   print_output "    ""$FILE_NAME"" - \\c" "no_log"
   if ! [[ -f "$FILE_PATH" ]] ; then
     echo -e "$RED""not ok""$NC"
@@ -38,11 +38,11 @@ check_dep_file()
 # $2=Tool command, but only if set
 check_dep_tool()
 {
-  TOOL_NAME="$1"
-  if [[ -n "$2" ]] ; then
-    TOOL_COMMAND="$2"
+  TOOL_NAME="${1:-}"
+  if [[ -n "${2:-}" ]] ; then
+    TOOL_COMMAND="${2:-}"
   else
-    TOOL_COMMAND="$1"
+    TOOL_COMMAND="${1:-}"
   fi
   print_output "    ""$TOOL_NAME"" - \\c" "no_log"
   if ! command -v "$TOOL_COMMAND" > /dev/null ; then
@@ -56,8 +56,8 @@ check_dep_tool()
 
 check_dep_port()
 {
-  TOOL_NAME="$1"
-  PORT_NR="$2"
+  TOOL_NAME="${1:-}"
+  PORT_NR="${2:-}"
   print_output "    ""$TOOL_NAME"" - \\c" "no_log"
   if ! netstat -anpt | grep -q "$PORT_NR"; then
     echo -e "$RED""not ok""$NC"
@@ -88,6 +88,14 @@ check_docker_env() {
     DEP_ERROR=1
   else
     echo -e "$GREEN""ok""$NC"
+  fi
+}
+
+check_nw_interface() {
+  if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+    echo -e "$RED""    Network interface not available"" - trying to restart now""$NC"
+    systemctl restart NetworkManager docker
+    echo -e "$GREEN""    docker-networks restarted""$NC"
   fi
 }
 
@@ -258,9 +266,9 @@ dependency_check()
     # binwalk
     check_dep_tool "binwalk extractor" "binwalk"
     if command -v binwalk > /dev/null ; then
-      BINWALK_VER=$(binwalk 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//')
+      BINWALK_VER=$(binwalk 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
-        echo -e "$ORANGE""    binwalk version - not optimal""$NC"
+        echo -e "$ORANGE""    binwalk version $BINWALK_VER - not optimal""$NC"
         echo -e "$ORANGE""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
         export BINWALK_VER_CHECK=0
       else

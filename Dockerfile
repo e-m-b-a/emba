@@ -1,6 +1,7 @@
 FROM kalilinux/kali-rolling
 
-ADD ./installer.sh /
+COPY ./installer.sh /
+COPY ./installer /installer
 
 WORKDIR /
 

@@ -45,7 +45,7 @@ log_folder()
             print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
-            rm -R "${LOG_DIR:?}/"* 2>/dev/null
+            rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
           fi
         ;;
@@ -173,7 +173,7 @@ architecture_check()
         print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n"
       fi
 
-      if [[ -n "$ARCH" ]] ; then
+      if [[ -n "${ARCH-NA}" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
           print_output "[!] Your set architecture (""$ARCH"") is different from the automatically detected one. The set architecture will be used."
         fi
@@ -232,16 +232,16 @@ prepare_binary_arr()
 
   # in some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   # this is a slow fallback solution just to have something we can work with
-  if [[ "${#BINARIES[@]}" -eq 0 ]]; then
-    readarray -t BINARIES_TMP < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
-    for BINARY in "${BINARIES_TMP[@]}"; do
+  readarray -t BINARIES_TMP < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
+  for BINARY in "${BINARIES_TMP[@]}"; do
+    if [[ -f "$BINARY" ]]; then
       BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
       if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
         BINARIES+=( "$BINARY" )
         MD5_DONE_INT+=( "$BIN_MD5" )
       fi
-    done
-  fi
+    fi
+  done
   print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables."
 
   # remove ./proc/* executables (for live testing)
@@ -270,7 +270,7 @@ check_firmware()
     for R_PATH in "${ROOT_PATH[@]}"; do
       for L_PATH in "${LINUX_PATHS[@]}"; do
         if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
-          ((DIR_COUNT++))
+          ((DIR_COUNT+=1))
         fi
       done
     done
@@ -279,7 +279,7 @@ check_firmware()
     # in such a case the pre-checking modules are not executed and no RPATH is available
     for L_PATH in "${LINUX_PATHS[@]}"; do
       if [[ -d "$FIRMWARE_PATH"/"$L_PATH" ]] ; then
-        ((DIR_COUNT++))
+        ((DIR_COUNT+=1))
       fi
     done
   fi
@@ -293,7 +293,7 @@ check_firmware()
 }
 
 detect_root_dir_helper() {
-  SEARCH_PATH="$1"
+  SEARCH_PATH="${1:-}"
   #if [[ -n "$2" ]];then
   #  LOGGER="$2"
   #else
@@ -326,7 +326,7 @@ detect_root_dir_helper() {
   fi
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    print_output "[*] Root directory set to firmware path ... last resort" "$LOGGER"
+    print_output "[*] Root directory set to firmware path ... last resort"
     ROOT_PATH+=( "$SEARCH_PATH" )
   fi
 
@@ -334,17 +334,17 @@ detect_root_dir_helper() {
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
     #print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:"
-    write_link "s05#file_dirs" "$LOGGER"
+    write_link "s05#file_dirs"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
     #print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
     print_output "[+] Found the following root directory: $R_PATH"
-    write_link "s05#file_dirs" "$LOGGER"
+    write_link "s05#file_dirs"
   done
 }
 
 check_init_size() {
-  SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}')
+  SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}' || true)
   if [[ $SIZE -gt 400000000 ]]; then
     print_output "" "no_log"
     print_output "[!] WARNING: Your firmware is very big!" "no_log"
@@ -360,6 +360,6 @@ generate_msf_db() {
   if [[ $IN_DOCKER -eq 1 ]]; then
     export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
   fi
-  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E "'CVE'.*\]" {} \; | tr -d "\[\]\' " | sed -e 's/,$//g' | sed -e 's/CVE,/CVE-/g' | sort > "$MSF_DB_PATH"
+  find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" | sort > "$MSF_DB_PATH"
 }
 

@@ -26,6 +26,9 @@ P60_firmware_bin_extractor() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   DISK_SPACE_CRIT=0
+  FILES_FACT=0
+  FILES_BINWALK=0
+  LINUX_PATH_COUNTER=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # we love binwalk ... this is our first chance for extracting everything
@@ -43,14 +46,14 @@ P60_firmware_bin_extractor() {
     fi
 
     FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
-    if [[ -n "$OUTPUT_DIR_fact" && -d "$OUTPUT_DIR_fact" ]]; then
+    if [[ -n "${OUTPUT_DIR_fact:-}" && -d "$OUTPUT_DIR_fact" ]]; then
       FILES_FACT=$(find "$OUTPUT_DIR_fact" -xdev -type f | wc -l )
     fi
     print_output ""
     print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
   fi
 
-  if [[ -n $FILES_FACT ]]; then
+  if [[ ${FILES_FACT-0} -gt 0 ]]; then
     print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
   fi
 
@@ -131,7 +134,7 @@ wait_for_extractor() {
 }
 
 check_disk_space() {
-  DISK_SPACE=$(du -hm "$FIRMWARE_PATH_CP" --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1)
+  DISK_SPACE=$(du -hm "$FIRMWARE_PATH_CP" --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1 || true)
 }
 
 disk_space_protection() {
@@ -140,10 +143,10 @@ disk_space_protection() {
     echo ""
     print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
     print_output "[!] $(date) - Ending extraction processes" "main"
-    pgrep -a -f "binwalk.*$SEARCHER.*"
-    pkill -f ".*binwalk.*$SEARCHER.*"
-    pkill -f ".*extract\.py.*$SEARCHER.*"
-    kill -9 "$PID" 2>/dev/null
+    pgrep -a -f "binwalk.*$SEARCHER.*" || true
+    pkill -f ".*binwalk.*$SEARCHER.*" || true
+    pkill -f ".*extract\.py.*$SEARCHER.*" || true
+    kill -9 "$PID" 2>/dev/null || true
     DISK_SPACE_CRIT=1
   fi
 }
@@ -163,7 +166,7 @@ apk_extractor() {
         while read -r APK; do
           APK_NAME=$(basename "$APK")
           print_output "[*] Extracting $ORANGE$APK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar xpf "$APK" --directory "$R_PATH" 
+          tar xpf "$APK" --directory "$R_PATH" || true
         done < "$TMP_DIR"/apk_db.txt
       done
 
@@ -194,9 +197,9 @@ ipk_extractor() {
         while read -r IPK; do
           IPK_NAME=$(basename "$IPK")
           print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp
-          tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH"
-          rm -r "$LOG_DIR"/ipk_tmp/*
+          tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp || true
+          tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH" || true
+          rm -r "$LOG_DIR"/ipk_tmp/* || true
         done < "$TMP_DIR"/ipk_db.txt
       done
 
@@ -250,7 +253,7 @@ deb_extractor() {
 
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-  MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo)"))
+  MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo || true)"))
 
   local FILE_ARR_TMP
   local FILE_MD5
@@ -396,11 +399,11 @@ binwalking() {
     if [[ $IN_DOCKER -eq 1 ]] ; then
       cd / || return
       print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
     else
       print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
     fi
   fi
 

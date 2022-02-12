@@ -72,7 +72,7 @@ S50_authentication_check() {
 
   if [[ -f "$TMP_DIR"/S50_AUTH_ISSUES.tmp ]]; then
     while read -r ISSUES; do
-      (( AUTH_ISSUES="$AUTH_ISSUES"+"$ISSUES" ))
+      AUTH_ISSUES=$((AUTH_ISSUES+ISSUES))
     done < "$TMP_DIR"/S50_AUTH_ISSUES.tmp
   fi
   write_log ""
@@ -93,12 +93,12 @@ user_zero() {
   for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
     if [[ -f "$PASSWD_FILE" ]] ; then
       CHECK=1
-      local FIND
-      FIND=$(grep ':0:' "$PASSWD_FILE" | grep -v '^#|^root:|^(\+:\*)?:0:0:::' | cut -d ":" -f1,3 | grep ':0')
+      local FIND=""
+      FIND=$(grep ':0:' "$PASSWD_FILE" | grep -v '^#|^root:|^(\+:\*)?:0:0:::' | cut -d ":" -f1,3 | grep ':0' || true)
       if [[ -n "$FIND" ]] ; then
         print_output "[+] Found administrator account/s with UID 0 in ""$(print_path "$PASSWD_FILE")"
         print_output "$(indent "$(orange "Administrator account: $FIND")")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       else
         print_output "[-] Found no administrator account (root) with UID 0"
       fi
@@ -122,14 +122,14 @@ non_unique_acc() {
   for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
     if [[ -f "$PASSWD_FILE" ]] ; then
       CHECK=1
-      local FIND
-      FIND=$(grep -v '^#' "$PASSWD_FILE" | cut -d ':' -f3 | sort | uniq -d)
+      local FIND=""
+      FIND=$(grep -v '^#' "$PASSWD_FILE" | cut -d ':' -f3 | sort | uniq -d || true)
       if [[ "$FIND" = "" ]] ; then
         print_output "[-] All accounts found in ""$(print_path "$PASSWD_FILE")"" are unique"
       else
         print_output "[+] Non-unique accounts found in ""$(print_path "$PASSWD_FILE")"
         print_output "$(indent "$(orange "$FIND")")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
     fi
   done
@@ -151,14 +151,14 @@ non_unique_group_id() {
   for GROUP_PATH in "${GROUP_PATHS[@]}"; do
     if [[ -f "$GROUP_PATH" ]] ; then
       CHECK=1
-      local FIND
-      FIND=$(grep -v '^#' "$GROUP_PATH" | grep -v '^$' | awk -F: '{ print $3 }' | sort | uniq -d)
+      local FIND=""
+      FIND=$(grep -v '^#' "$GROUP_PATH" | grep -v '^$' | awk -F: '{ print $3 }' | sort | uniq -d || true)
       if [[ "$FIND" = "" ]] ; then
         print_output "[-] All group ID's found in ""$(print_path "$GROUP_PATH")"" are unique"
       else
         print_output "[+] Found the same group ID multiple times"
         print_output "$(indent "$(orange "Non-unique group id: ""$FIND")")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
     fi
   done
@@ -181,13 +181,13 @@ non_unique_group_name() {
     if [[ -f "$GROUP_PATH" ]] ; then
       CHECK=1
       local FIND
-      FIND=$(grep -v '^#' "$GROUP_PATH" | grep -v '^$' | awk -F: '{ print $1 }' | sort | uniq -d)
+      FIND=$(grep -v '^#' "$GROUP_PATH" | grep -v '^$' | awk -F: '{ print $1 }' | sort | uniq -d || true)
       if [[ "$FIND" = "" ]] ; then
         print_output "[-] All group names found in ""$(print_path "$GROUP_PATH")"" are unique"
       else
         print_output "[+] Found the same group name multiple times"
         print_output "$(indent "$(orange "Non-unique group name: ""$FIND")")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
     fi
   done
@@ -251,20 +251,20 @@ query_nis_plus_auth_supp() {
       CHECK=1
       print_output "[+] ""$(print_path "$NSS_PATH")"" exist"
       local FIND
-      FIND="$(grep "^passwd" "$NSS_PATH" | grep "compat|nis" | grep -v "nisplus")"
+      FIND="$(grep "^passwd" "$NSS_PATH" | grep "compat|nis" | grep -v "nisplus" || true)"
       if [[ -z "$FIND" ]] ; then
         print_output "[-] NIS/NIS+ authentication not enabled"
       else
         local FIND2, FIND3, FIND4, FIND5
-        FIND2=$(grep "^passwd_compat" "$NSS_PATH" | grep "nis" | grep -v "nisplus")
-        FIND3=$(grep "^passwd" "$NSS_PATH" | grep "nis" | grep -v "nisplus")
+        FIND2=$(grep "^passwd_compat" "$NSS_PATH" | grep "nis" | grep -v "nisplus" || true)
+        FIND3=$(grep "^passwd" "$NSS_PATH" | grep "nis" | grep -v "nisplus" || true)
         if [[ -n "$FIND2" ]] || [[ -n "$FIND3" ]] ; then
           print_output "[+] Result: NIS authentication enabled"
         else
           print_output "[+] Result: NIS authentication not enabled"
         fi
-        FIND4=$(grep "^passwd_compat" "$NSS_PATH" | grep "nisplus")
-        FIND5=$(grep "^passwd" "$NSS_PATH" | grep "nisplus")
+        FIND4=$(grep "^passwd_compat" "$NSS_PATH" | grep "nisplus" || true)
+        FIND5=$(grep "^passwd" "$NSS_PATH" | grep "nisplus" || true)
         if [[ -n "$FIND4" ]] || [[ -n "$FIND5" ]] ; then
           print_output "[+] Result: NIS+ authentication enabled"
         else
@@ -296,7 +296,7 @@ check_sudoers() {
           readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE" -r "$R_PATH" | grep -E "^E:\ ")
           for S_ISSUE in "${SUDOERS_ISSUES[@]}"; do
             print_output "[+] $S_ISSUE"
-            ((AUTH_ISSUES++))
+            ((AUTH_ISSUES+=1))
           done
         fi
       done
@@ -331,7 +331,7 @@ check_owner_perm_sudo_config() {
             print_output "[-] ""$(print_path "$SUDOERS_D")"" ownership OK"
           else
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
-            ((AUTH_ISSUES++))
+            ((AUTH_ISSUES+=1))
           fi
           ;;
         *)
@@ -340,7 +340,7 @@ check_owner_perm_sudo_config() {
             print_output "[-] ""$(print_path "$SUDOERS_D")"" ownership OK"
           else
             print_output "[+] ""$(print_path "$SUDOERS_D")"" ownership unsafe"
-            ((AUTH_ISSUES++))
+            ((AUTH_ISSUES+=1))
           fi
           ;;
         esac
@@ -358,7 +358,7 @@ check_owner_perm_sudo_config() {
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
-          ((AUTH_ISSUES++))
+          ((AUTH_ISSUES+=1))
         fi
         ;;
       *)
@@ -367,7 +367,7 @@ check_owner_perm_sudo_config() {
           print_output "[-] ""$(print_path "$FILE")"" ownership OK"
         else
           print_output "[+] ""$(print_path "$FILE")"" ownership unsafe"
-          ((AUTH_ISSUES++))
+          ((AUTH_ISSUES+=1))
         fi
         ;;
       esac
@@ -387,7 +387,7 @@ search_pam_testing_libs() {
   local AUTH_ISSUES=0
   mapfile -t FILE_PATH < <(mod_path_array "$(config_list "$CONFIG_DIR""/pam_files.cfg" "")")
 
-  if [[ "${FILE_PATH[0]}" == "C_N_F" ]] ; then
+  if [[ "${FILE_PATH[0]-}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"
   elif ! [[ "${#FILE_PATH[@]}" -eq 0 ]] ; then
     local FOUND=0
@@ -403,28 +403,28 @@ search_pam_testing_libs() {
         FOUND_CRACKLIB=1
         FOUND=1
         print_output "[+] Found pam_cracklib.so (crack library PAM) in ""$(print_path "$FULL_PATH")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
 
       if [[ -f "$FULL_PATH""/pam_passwdqc.so" ]] ; then
         FOUND_PASSWDQC=1
         FOUND=1
         print_output "[+] Found pam_passwdqc.so (passwd quality control PAM) in ""$(print_path "$FULL_PATH")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
 
       if [[ -f "$FULL_PATH""/pam_pwquality.so" ]] ; then
         FOUND_PWQUALITY=1
         FOUND=1
         print_output "[+] Found pam_pwquality.so (password quality control PAM) in ""$(print_path "$FULL_PATH")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
     done
 
     # Cracklib
     if [[ $FOUND_CRACKLIB -eq 1 ]] ; then
       print_output "[+] pam_cracklib.so found"
-      ((AUTH_ISSUES++))
+      ((AUTH_ISSUES+=1))
     else
       print_output "[-] pam_cracklib.so not found"
     fi
@@ -432,7 +432,7 @@ search_pam_testing_libs() {
     # Password quality control
     if [[ $FOUND_PASSWDQC -eq 1 ]] ; then
       print_output "[+] pam_passwdqc.so found"
-      ((AUTH_ISSUES++))
+      ((AUTH_ISSUES+=1))
     else
       print_output "[-] pam_passwdqc.so not found"
     fi
@@ -440,7 +440,7 @@ search_pam_testing_libs() {
     # pwquality module
     if [[ $FOUND_PWQUALITY -eq 1 ]] ; then
       print_output "[+] pam_pwquality.so found"
-      ((AUTH_ISSUES++))
+      ((AUTH_ISSUES+=1))
     else
       print_output "[-] pam_pwquality.so not found"
     fi
@@ -449,7 +449,7 @@ search_pam_testing_libs() {
       print_output "[-] No PAM modules for password strength testing found"
     else
       print_output "[-] Found at least one PAM module for password strength testing"
-      ((AUTH_ISSUES++))
+      ((AUTH_ISSUES+=1))
     fi
 
   else
@@ -470,7 +470,7 @@ scan_pam_conf() {
       CHECK=1
       print_output "[+] ""$(print_path "$PAM_PATH")"" exist"
       local FIND
-      FIND=$(grep -v "^#" "$PAM_PATH" | grep -v "^$" | sed 's/[[:space:]]/ /g' | sed 's/  / /g' | sed 's/ /:space:/g')
+      FIND=$(grep -v "^#" "$PAM_PATH" | grep -v "^$" | sed 's/[[:space:]]/ /g' | sed 's/  / /g' | sed 's/ /:space:/g' || true)
       if [[ -z "$FIND" ]] ; then
         print_output "[-] File has no configuration options defined (empty, or only filled with comments and empty lines)"
       else
@@ -478,7 +478,7 @@ scan_pam_conf() {
         local LINE
         LINE=$(echo "$FIND" | ${SEDBINARY} 's/:space:/ /g')
         print_output "$(indent "$(orange "$LINE")")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
     fi
   done
@@ -511,7 +511,7 @@ search_pam_configs() {
       for FILE in "${AUTH_FILES[@]}"; do
         print_output "[*] Check if LDAP support in PAM files"
         if [[ -f "$FILE" ]] ; then
-          ((AUTH_ISSUES++))
+          ((AUTH_ISSUES+=1))
           print_output "[+] ""$(print_path "$FILE")"" exist"
           local FIND2
           FIND2=$(grep "^auth.*ldap" "$FILE")
@@ -541,14 +541,14 @@ search_pam_files() {
   local PAM_FILES
   readarray -t PAM_FILES < <(config_find "$CONFIG_DIR""/pam_files.cfg")
 
-  if [[ "${PAM_FILES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${PAM_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#PAM_FILES[@]} -ne 0 ]] ; then
     print_output "[*] Found ""${#PAM_FILES[@]}"" possible interesting file/s and/or directory/ies for PAM:"
     for LINE in "${PAM_FILES[@]}" ; do
       if [[ -f "$LINE" ]] ; then
         CHECK=1
         print_output "$(indent "$(orange "$(print_path "$LINE")")")"
-        ((AUTH_ISSUES++))
+        ((AUTH_ISSUES+=1))
       fi
       if [[ -d "$LINE" ]] && [[ ! -L "$LINE" ]] ; then
         print_output "$(indent "$(print_path "$LINE")")"
@@ -557,7 +557,7 @@ search_pam_files() {
         for FIND_FILE in "${FIND[@]}"; do
           CHECK=1
           print_output "$(indent "$(orange "$FIND_FILE")")"
-          ((AUTH_ISSUES++))
+          ((AUTH_ISSUES+=1))
         done
       fi
     done

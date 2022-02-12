@@ -24,8 +24,8 @@ P13_uboot_mkimage() {
     module_title "Uboot image details"
     pre_module_reporter "${FUNCNAME[0]}"
     mkimage -l "$FIRMWARE_PATH" | tee -a "$LOG_FILE"
-    IMAGE_NAME=$(grep "Image Name" "$LOG_FILE" 2>/dev/null | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}')
-    IMAGE_TYPE=$(grep "Image Type" "$LOG_FILE" 2>/dev/null | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}')
+    IMAGE_NAME=$(grep "Image Name" "$LOG_FILE" 2>/dev/null | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}' || true)
+    IMAGE_TYPE=$(grep "Image Type" "$LOG_FILE" 2>/dev/null | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}' || true)
     write_csv_log "Identifier" "Value"
     write_csv_log "ImageName" "$IMAGE_NAME"
     write_csv_log "ImageType" "$IMAGE_TYPE"

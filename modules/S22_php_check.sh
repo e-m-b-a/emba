@@ -54,7 +54,7 @@ s22_phpinfo_check() {
       print_output "[+] Found php file with debugging information: $ORANGE$PHPINFO$NC"
       # shellcheck disable=SC2002
       cat "$PHPINFO" | tee -a "$LOG_FILE"
-      ((S22_PHPINFO_ISSUES++))
+      ((S22_PHPINFO_ISSUES+=1))
     fi
   done
   print_output ""
@@ -65,7 +65,7 @@ s22_vuln_check_caller() {
 
   for LINE in "${PHP_SCRIPTS[@]}" ; do
     if ( file "$LINE" | grep -q "PHP script" ) ; then
-      ((S22_PHP_SCRIPTS++))
+      ((S22_PHP_SCRIPTS+=1))
       if [[ "$THREADED" -eq 1 ]]; then
         s22_vuln_check &
         WAIT_PIDS_S22+=( "$!" )
@@ -93,17 +93,17 @@ s22_vuln_check_caller() {
 
 s22_vuln_check() {
   # usually this memory limit is not needed, but sometimes it protects our machine
-  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}')"
+  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
 
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
 
   ulimit -Sv "$MEM_LIMIT"
-  "$EXT_DIR"/progpilot "$LINE" > "$PHP_LOG" 2>&1
+  "$EXT_DIR"/progpilot "$LINE" > "$PHP_LOG" 2>&1 || true
   ulimit -Sv unlimited
 
-  VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null)
+  VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
 
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
@@ -127,13 +127,13 @@ s22_script_check() {
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   PHP_LOG="$LOG_PATH_MODULE""/php_""$NAME"".txt"
   php -l "$LINE" > "$PHP_LOG" 2>&1
-  VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null)
+  VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND
     if [[ -f "$BASE_LINUX_FILES" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
-      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null || true; then
         COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
       fi
     else
@@ -211,5 +211,4 @@ add_recommendations(){
      return 0
    fi
 }
-
 

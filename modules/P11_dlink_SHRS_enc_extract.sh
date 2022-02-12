@@ -42,7 +42,7 @@ dlink_SHRS_enc_extractor() {
   local EXTRACTION_FILE_="$2"
   sub_module_title "DLink encrypted firmware extractor"
 
-  hexdump -C "$DLINK_ENC_PATH_" | head | tee -a "$LOG_FILE"
+  hexdump -C "$DLINK_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
   print_output ""
 

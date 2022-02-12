@@ -31,7 +31,7 @@ S108_stacs_password_search()
   local PW_HASH
 
   if command -v stacs > /dev/null ; then
-    stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE"
+    stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE" || true
 
     if [[ -f "$STACS_LOG_FILE" && $(jq ".runs[0] .results[] | .message[]" "$STACS_LOG_FILE" | wc -l) -gt 0 ]]; then
       ELEMENTS_="$(jq ".runs[0] .results[] .message.text" "$STACS_LOG_FILE" | wc -l)"
@@ -40,13 +40,13 @@ S108_stacs_password_search()
       ELEMENTS=$((ELEMENTS_-1))
 
       for ELEMENT in $(seq 0 "$ELEMENTS"); do
-        MESSAGE=$(jq ".runs[0] .results[$ELEMENT] .message.text" "$STACS_LOG_FILE" | grep -v null)
+        MESSAGE=$(jq ".runs[0] .results[$ELEMENT] .message.text" "$STACS_LOG_FILE" | grep -v null || true)
         PW_PATH=$(jq ".runs[0] .results[$ELEMENT] .locations[] .physicalLocation[].uri" "$STACS_LOG_FILE" \
-          | grep -v null | sed 's/^"//' | sed 's/"$//')
+          | grep -v null | sed 's/^"//' | sed 's/"$//' || true)
         PW_HASH=$(jq ".runs[0] .results[$ELEMENT] .locations[] .physicalLocation[].snippet" "$STACS_LOG_FILE" \
-          | grep -v null | grep "text\|binary" | head -1 | cut -d: -f2- | sed 's/\\n//g' | tr -d '[:blank:]')
+          | grep -v null | grep "text\|binary" | head -1 | cut -d: -f2- | sed 's/\\n//g' | tr -d '[:blank:]' || true)
         PW_HASH_REAL=$(jq ".runs[0] .results[$ELEMENT] .locations[] .physicalLocation[].snippet.text" "$STACS_LOG_FILE" \
-          | grep -v null | head -2 | tail -1 | sed 's/\\n//g' | tr -d '[:blank:]')
+          | grep -v null | head -2 | tail -1 | sed 's/\\n//g' | tr -d '[:blank:]' || true)
 
         print_output "[+] PATH: $ORANGE/$PW_PATH$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
         write_csv_log "$MESSAGE" "/$PW_PATH" "$PW_HASH" "$PW_HASH_REAL"

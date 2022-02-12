@@ -22,6 +22,19 @@ P02_firmware_bin_file_check() {
   module_title "Binary firmware file analyzer"
 
   local FILE_BIN_OUT
+  export SHA512_CHECKSUM="NA"
+  export MD5_CHECKSUM="NA"
+  export ENTROPY="NA"
+  export DLINK_ENC_DETECTED=0
+  export VMDK_DETECTED=0
+  export UBOOT_IMAGE=0
+  export EXT_IMAGE=0 
+  export AVM_DETECTED=0
+  export UBI_IMAGE=0
+  export ENGENIUS_ENC_DETECTED=0
+  export GPG_COMPRESS=0
+  export QNAP_ENC_DETECTED=0
+  export BSD_UFS=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
@@ -41,7 +54,7 @@ P02_firmware_bin_file_check() {
   print_output "$(indent "$FILE_LS_OUT")"
   print_output ""
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE"
+    hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE" || true
     print_output ""
     print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
     print_output ""
@@ -57,13 +70,13 @@ P02_firmware_bin_file_check() {
   fi
 
   write_csv_log "Firmware name" "SHA512 checksum" "MD5 checksum" "Entropy" "Dlink enc state" "VMDK detected" "UBOOT image" "EXT filesystem" "AVM system detected"
-  write_csv_log "$(basename "$FIRMWARE_PATH")" "$SHA512_CHECKSUM" "$MD5_CHECKSUM" "$ENTROPY" "$DLINK_ENC_DETECTED" "$VMDK_DETECTED" "$UBOOT_IMAGE" "$EXT_IMAGE" "$AVM_DETECTED"
+  write_csv_log "$(basename "$FIRMWARE_PATH")" "${SHA512_CHECKSUM:-}" "${MD5_CHECKSUM:-}" "${ENTROPY:-}" "${DLINK_ENC_DETECTED:-}" "${VMDK_DETECTED:-}" "${UBOOT_IMAGE:-}" "${EXT_IMAGE:-}" "${AVM_DETECTED:-}"
 
   module_end_log "${FUNCNAME[0]}" 1
 }
 
 fw_bin_detector() {
-  local CHECK_FILE="$1"
+  local CHECK_FILE="${1:-}"
   local FILE_BIN_OUT
   local DLINK_ENC_CHECK
   local AVM_CHECK
@@ -75,12 +88,13 @@ fw_bin_detector() {
   export UBOOT_IMAGE=0
   export EXT_IMAGE=0
   export UBI_IMAGE=0
-  export ENGENIUS_DETECTED=0
+  export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
+  export BSD_UFS=0
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
-  DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE"| head -1)
-  AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM")
+  DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
+  AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
 
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
@@ -101,7 +115,7 @@ fw_bin_detector() {
   if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
     export DLINK_ENC_DETECTED=2
   fi
-  if [[ "$AVM_CHECK" -gt 0 ]]; then
+  if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
     export AVM_DETECTED=1
   fi
   if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
@@ -112,6 +126,12 @@ fw_bin_detector() {
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext3 filesystem data"* ]]; then
     export EXT_IMAGE=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext4 filesystem data"* ]]; then
+    export EXT_IMAGE=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Unix Fast File system [v2]"* ]]; then
+    export BSD_UFS=1
   fi
   if [[ "$QNAP_ENC_CHECK" == *"QNAP encrypted firmware footer , model"* ]]; then
     export QNAP_ENC_DETECTED=1

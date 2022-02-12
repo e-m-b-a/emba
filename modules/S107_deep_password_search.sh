@@ -24,9 +24,9 @@ S107_deep_password_search()
   PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
   local PW_COUNTER=0
 
-  find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP"/pw_hashes.txt
+  find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP_DIR"/pw_hashes.txt
 
-  if [[ $(wc -l "$TMP"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
+  if [[ $(wc -l "$TMP_DIR"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
     print_output "[+] Found the following password hash values:"
     write_csv_log "PW_PATH" "PW_HASH"
     while read -r PW_HASH; do
@@ -34,8 +34,8 @@ S107_deep_password_search()
       PW_HASH=$(echo "$PW_HASH" | cut -d: -f2- | sed -r "s/[[:blank:]]+/\ /g")
       print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
       write_csv_log "$PW_PATH" "$PW_HASH"
-      ((PW_COUNTER++))
-    done < "$TMP"/pw_hashes.txt
+      ((PW_COUNTER+=1))
+    done < "$TMP_DIR"/pw_hashes.txt
 
     print_output ""
     print_output "[*] Found $ORANGE$PW_COUNTER$NC password hashes."

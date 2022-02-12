@@ -23,7 +23,7 @@ S116_qemu_version_detection() {
   # This module waits for S115_usermode_emulator
   # check emba.log for S115_usermode_emulator
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+    while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
       sleep 1
     done
   fi
@@ -40,7 +40,7 @@ S116_qemu_version_detection() {
         continue
       fi
 
-      if [[ $THREADING -eq 1 ]]; then
+      if [[ $THREADED -eq 1 ]]; then
         version_detection_thread &
         WAIT_PIDS_F05+=( "$!" )
       else
@@ -71,21 +71,21 @@ version_detection_thread() {
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT == "strict" ]]; then
     if [[ -f "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt ]]; then
-      mapfile -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | sort -u 2>/dev/null)
-      mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
+      mapfile -t VERSIONS_DETECTED < <(grep -a -o -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | sort -u 2>/dev/null || true)
+      mapfile -t BINARY_PATHS < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_MODULE_S115"/qemu_tmp_"$BINARY".txt | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
       TYPE="emulation/strict"
     fi
   else
-    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null)
+    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null || true)
     # VERSIONS_DETECTED:
     # path_to_logfile:Version Identifier
     #└─$ grep -a -o -H -E "Version: 1.8" /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt                                                    130 ⨯
     # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
     # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
     for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
-      mapfile -t LOG_PATHS < <(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u)")
+      mapfile -t LOG_PATHS < <(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u || true)")
       for LOG_PATH_ in "${LOG_PATHS[@]}"; do
-        mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null)")
+        mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
         for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
           # BINARY_PATH is the final array which we are using further
           BINARY_PATHS+=( "$BINARY_PATH_" )
@@ -96,7 +96,7 @@ version_detection_thread() {
   fi
 
   for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
-    LOG_PATH_="$(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u)")"
+    LOG_PATH_="$(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u || true)")"
     if [[ $STRICT != "strict" ]]; then
       VERSION_DETECTED="$(echo "$VERSION_DETECTED" | cut -d: -f2- | sort -u)"
     fi

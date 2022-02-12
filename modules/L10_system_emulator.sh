@@ -26,14 +26,14 @@ L10_system_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "System emulation of Linux based embedded devices with firmadyne."
 
+  SYS_ONLINE=0
+  BOOTED=0
+  IPS=()
+
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
 
     export FIRMADYNE_DIR="$EXT_DIR""/firmadyne"
-
-    if [[ $IN_DOCKER -eq 1 ]] ; then
-      print_output "[!] This module is in an very early alpha state!"
-    fi
 
     print_output "[*] This module creates a full copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
 
@@ -43,7 +43,6 @@ L10_system_emulator() {
 
       for R_PATH in "${ROOT_PATH[@]}" ; do
         KPANIC=0
-        BOOTED=0
 
         print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
 
@@ -64,13 +63,16 @@ L10_system_emulator() {
               setup_network
               run_emulated_system
               check_online_stat
+              EXECUTE=1
               if [[ "$SYS_ONLINE" -eq 1 ]]; then
                 print_output "[+] System emulation was successful."
                 print_output "[+] System should be available via IP $IP."
-              else
-                reset_network
+                EXECUTE=0
               fi
-              create_emulation_archive
+              reset_network "$EXECUTE"
+              if [[ "$SYS_ONLINE" -eq 1 ]]; then
+                create_emulation_archive
+              fi
               # if the emulation was successful, we stop here - no emulation of other detected rootfs
               break
             else
@@ -101,11 +103,11 @@ L10_system_emulator() {
 pre_cleanup() {
   # this cleanup function is to ensure that we have no mounts from previous tests mounted
   print_output "[*] Checking for not unmounted proc, sys and run in log directory"
-  mapfile -t CHECK_MOUNTS < <(mount | grep "$LOG_DIR" | grep "proc\|sys\|run" )
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$LOG_DIR" | grep "proc\|sys\|run" || true)
   for MOUNT in "${CHECK_MOUNTS[@]}"; do
     print_output "[*] Unmounting $MOUNT"
     MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
-    umount -l "$MOUNT"
+    umount -l "$MOUNT" || true
   done
 }
 
@@ -114,8 +116,8 @@ create_emulation_filesystem() {
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/makeImage.sh
 
   sub_module_title "Create Qemu filesystem"
-  ROOT_PATH="$1"
-  ARCH_END="$2"
+  ROOT_PATH="${1:-}"
+  ARCH_END="${2:-}"
   export IMAGE_NAME
   FS_CREATED=1
   IMAGE_NAME="$(basename "$ROOT_PATH")_$ARCH_END-$RANDOM"
@@ -123,7 +125,7 @@ create_emulation_filesystem() {
   if [[ -d "$MNT_POINT" ]]; then
     MNT_POINT="$MNT_POINT"-"$RANDOM"
   fi
-  mkdir "$MNT_POINT"
+  mkdir "$MNT_POINT" || true
 
   print_output "[*] Create filesystem for emulation - $ROOT_PATH.\\n"
   IMAGE_SIZE="$(du -b --max-depth=0 "$ROOT_PATH" | awk '{print $1}')"
@@ -138,48 +140,48 @@ create_emulation_filesystem() {
   echo -e "o\nn\np\n1\n\n\nw" | /sbin/fdisk "$LOG_PATH_MODULE/$IMAGE_NAME"
 
   print_output "[*] Mounting QEMU Image"
-  DEVICE=$(get_device "$(kpartx -a -s -v "$LOG_PATH_MODULE/$IMAGE_NAME")")
+  DEVICE=$(get_device "$(kpartx -a -s -v "$LOG_PATH_MODULE/$IMAGE_NAME" || true)")
   sleep 1
   print_output "[*] Device mapper created at ${DEVICE}"
 
   print_output "[*] Creating Filesystem"
   sync
-  mkfs.ext2 "${DEVICE}"
+  mkfs.ext2 "${DEVICE}" || true
 
   print_output "[*] Mounting QEMU Image Partition 1 to $MNT_POINT"
-  mount "${DEVICE}" "$MNT_POINT"
+  mount "${DEVICE}" "$MNT_POINT" || true
   if mount | grep -q "$MNT_POINT"; then
     print_output "[*] Copy root filesystem to QEMU image"
     #rm -rf "${MNT_POINT:?}/"*
-    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/
+    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || true
 
     print_output "[*] Creating FIRMADYNE Directories"
-    mkdir -p "$MNT_POINT/firmadyne/libnvram/"
-    mkdir -p "$MNT_POINT/firmadyne/libnvram.override/"
+    mkdir -p "$MNT_POINT/firmadyne/libnvram/" || true
+    mkdir -p "$MNT_POINT/firmadyne/libnvram.override/" || true
 
     print_output "[*] Patching Filesystem (chroot)"
-    cp "$(which busybox)" "$MNT_POINT"
+    cp "$(which busybox)" "$MNT_POINT" || true
 
-    cp "$FIRMADYNE_DIR/scripts/fixImage_firmadyne.sh" "$MNT_POINT"/fixImage.sh
-    chroot "$MNT_POINT" /busybox ash /fixImage.sh
+    cp "$FIRMADYNE_DIR/scripts/fixImage_firmadyne.sh" "$MNT_POINT"/fixImage.sh || true
+    chroot "$MNT_POINT" /busybox ash /fixImage.sh || true
 
-    rm "$MNT_POINT/fixImage.sh"
-    rm "$MNT_POINT/busybox"
+    rm "$MNT_POINT/fixImage.sh" || true
+    rm "$MNT_POINT/busybox" || true
 
     print_output "[*] Setting up FIRMADYNE"
-    cp "${CONSOLE}" "$MNT_POINT/firmadyne/console"
+    cp "${CONSOLE}" "$MNT_POINT/firmadyne/console" || true
     chmod a+x "$MNT_POINT/firmadyne/console"
     mknod -m 666 "$MNT_POINT/firmadyne/ttyS1" c 4 65
 
-    cp "${LIBNVRAM}" "$MNT_POINT/firmadyne/libnvram.so"
+    cp "${LIBNVRAM}" "$MNT_POINT/firmadyne/libnvram.so" || true
     chmod a+x "$MNT_POINT/firmadyne/libnvram.so"
 
-    cp "$FIRMADYNE_DIR/scripts/preInit_firmadyne.sh" "$MNT_POINT/firmadyne/preInit.sh"
+    cp "$FIRMADYNE_DIR/scripts/preInit_firmadyne.sh" "$MNT_POINT/firmadyne/preInit.sh" || true
     chmod a+x "$MNT_POINT/firmadyne/preInit.sh"
 
     print_output "[*] Unmounting QEMU Image"
     sync
-    umount "${DEVICE}"
+    umount "${DEVICE}" || true
 
   else
     print_output "[!] Filesystem mount failed"
@@ -187,13 +189,13 @@ create_emulation_filesystem() {
   fi
   print_output "[*] Deleting device mapper"
   kpartx -v -d "$LOG_PATH_MODULE/$IMAGE_NAME"
-  losetup -d "${DEVICE}" &>/dev/null
+  losetup -d "${DEVICE}" &>/dev/null || true
   # just in case we check the output and remove our device:
   if losetup | grep -q "$(basename "$IMAGE_NAME")"; then
-    losetup -d "$(losetup | grep "$(basename "$IMAGE_NAME")" | awk '{print $1}')"
+    losetup -d "$(losetup | grep "$(basename "$IMAGE_NAME")" | awk '{print $1}' || true)"
   fi
-  dmsetup remove "$(basename "$DEVICE")" &>/dev/null
-  rm -rf "${MNT_POINT:?}/"*
+  dmsetup remove "$(basename "$DEVICE")" &>/dev/null || true
+  rm -rf "${MNT_POINT:?}/"* || true
 }
 
 identify_networking() {
@@ -201,24 +203,46 @@ identify_networking() {
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/inferNetwork.sh
   
   sub_module_title "Network identification"
-  IMAGE_NAME="$1"
-  ARCH_END="$2"
+  IMAGE_NAME="${1:-}"
+  IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
+
+  ARCH_END="${2:-}"
 
   print_output "[*] Test basic emulation and identify network settings.\\n"
   print_output "[*] Running firmware $IMAGE_NAME: terminating after 60 secs..."
 
+  QEMU_PARAMS=""
   if [[ "$ARCH_END" == "mipsel" ]]; then
-    run_mipsel_network_id &
+    KERNEL_="vmlinux"
+    QEMU="qemu-system-mipsel"
+    MACHINE="malta"
+    DRIVE="if=ide,format=raw,file=$IMAGE"
+    ROOT_DEV="/dev/sda1"
+    NETWORK="-netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3"
   elif [[ "$ARCH_END" == "mipseb" ]]; then
-    run_mipsbe_network_id &
+    KERNEL_="vmlinux"
+    QEMU="qemu-system-mips"
+    MACHINE="malta"
+    #DRIVE="if=ide,format=raw,file=\"$IMAGE\""
+    DRIVE="if=ide,format=raw,file=$IMAGE"
+    ROOT_DEV="/dev/sda1"
+    NETWORK="-netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3"
   elif [[ "$ARCH_END" == "armel" ]]; then
-    run_armel_network_id &
+    QEMU="qemu-system-arm"
+    KERNEL_="zImage"
+    MACHINE="virt"
+    DRIVE="if=none,file=$IMAGE,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
+    ROOT_DEV="/dev/vda1"
+    NETWORK="-device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4"
+    QEMU_PARAMS="-audiodev driver=none,id=none"
   fi
+
+  run_network_id &
 
   tail -F "$LOG_PATH_MODULE/qemu.initial.serial.log" 2>/dev/null&
   sleep 60
-  pkill -f "qemu-system-.*$IMAGE_NAME.*"
-  pkill -f "tail.*$LOG_PATH_MODULE/qemu.initial.serial.log.*"
+  pkill -f "qemu-system-.*$IMAGE_NAME.*" || true
+  pkill -f "tail.*$LOG_PATH_MODULE/qemu.initial.serial.log.*" || true
 
   if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_FILE"
@@ -229,62 +253,21 @@ identify_networking() {
   print_output "[*] Firmware $IMAGE_NAME finished for identification of the network configuration"
 }
 
-run_mipsel_network_id() {
-  # based on the original firmadyne script:
-  #https://github.com/firmadyne/firmadyne/blob/master/scripts/run.mipsel.sh
-
-  print_output "[*] Qemu run for $ARCH_END - $IMAGE_NAME"
-
-  KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
-  IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
-
-  qemu-system-mipsel -m 256 -M malta -kernel "$KERNEL" -drive if=ide,format=raw,file="$IMAGE" \
-    -append "firmadyne.syscall=1 root=/dev/sda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1" \
-    -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none \
-    -netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 \
-    -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 \
-    -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 \
-    -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
-
-}
-
-run_mipsbe_network_id() {
-  # based on the original firmadyne script:
+run_network_id() {
+  # based on the original firmadyne scripts:
+  # https://github.com/firmadyne/firmadyne/blob/master/scripts/run.mipsel.sh
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/run.mipseb.sh
-
-  print_output "[*] Qemu run for $ARCH_END - $IMAGE_NAME"
-
-  KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
-  IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
-
-  qemu-system-mips -m 256 -M malta -kernel "$KERNEL" -drive if=ide,format=raw,file="$IMAGE" \
-    -append "firmadyne.syscall=1 root=/dev/sda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1" \
-    -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none \
-    -netdev socket,id=s0,listen=:2000 -device e1000,netdev=s0 \
-    -netdev socket,id=s1,listen=:2001 -device e1000,netdev=s1 \
-    -netdev socket,id=s2,listen=:2002 -device e1000,netdev=s2 \
-    -netdev socket,id=s3,listen=:2003 -device e1000,netdev=s3
-
-}
-
-run_armel_network_id() {
-  # based on the original firmadyne script:
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/run.armel.sh
 
-  print_output "[*] Qemu run for $ARCH_END - $IMAGE_NAME"
+  print_output "[*] Qemu network identification run for $ARCH_END - $IMAGE_NAME"
 
-  KERNEL="$FIRMADYNE_DIR/binaries/zImage.$ARCH_END"
-  IMAGE=$(abs_path "$LOG_PATH_MODULE/$IMAGE_NAME")
+  KERNEL="$FIRMADYNE_DIR/binaries/$KERNEL_.$ARCH_END"
 
-  qemu-system-arm -m 256 -M virt -kernel "$KERNEL" -drive if=none,file="$IMAGE",format=raw,id=rootfs -device virtio-blk-device,drive=rootfs \
-    -append "firmadyne.syscall=1 root=/dev/vda1 console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31" \
-    -serial file:"$LOG_PATH_MODULE"/qemu.initial.serial.log -serial unix:/tmp/qemu."$IMAGE_NAME".S1,server,nowait -monitor unix:/tmp/qemu."$IMAGE_NAME",server,nowait -display none \
-    -device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 \
-    -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 \
-    -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 \
-    -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4 \
-    -audiodev driver=none,id=none
-
+  # shellcheck disable=SC2086
+  $QEMU -m 256 -M $MACHINE -kernel $KERNEL -drive $DRIVE \
+    -append "firmadyne.syscall=1 root=$ROOT_DEV console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31" \
+    -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait -display none \
+    $NETWORK $QEMU_PARAMS || true
 }
 
 get_networking_details() {
@@ -294,15 +277,14 @@ get_networking_details() {
   sub_module_title "Network identification - $IMAGE_NAME"
 
   if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
-    IPS=()
     INT=()
     VLAN=()
   
-    mapfile -t MAC_CHANGES < <(grep -a "ioctl_SIOCSIFHWADDR" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u)
-    mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log)
+    mapfile -t MAC_CHANGES < <(grep -a "ioctl_SIOCSIFHWADDR" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
   
     if [[ "${#MAC_CHANGES[@]}" -gt 0 || "${#INTERFACE_CANDIDATES[@]}" -gt 0 || "${#BRIDGE_INTERFACES[@]}" -gt 0 || "${#VLAN_INFOS[@]}" -gt 0 ]]; then
       BOOTED=1
@@ -414,8 +396,9 @@ setup_network() {
     ARCHIVE_PATH="$ARCHIVE_PATH-$RANDOM"
   fi
 
-  mkdir "$ARCHIVE_PATH"
-  echo -e "#!/bin/bash\n" > "$ARCHIVE_PATH"/run.sh
+  if ! [[ -d "$ARCHIVE_PATH" ]]; then
+    mkdir "$ARCHIVE_PATH"
+  fi
 
   TAP_ID=2 #temp
 
@@ -423,18 +406,15 @@ setup_network() {
   TAPDEV_0=tap$TAP_ID"_0"
   HOSTNETDEV_0=$TAPDEV_0
   print_output "[*] Creating TAP device $ORANGE$TAPDEV_0$NC..."
-  tunctl -t $TAPDEV_0
-  echo "tunctl -t $TAPDEV_0" >> "$ARCHIVE_PATH"/run.sh
+  write_script_exec "tunctl -t $TAPDEV_0" "$ARCHIVE_PATH"/run.sh 1
 
   if [[ "${#VLAN[@]}" -gt 0 ]]; then
     for VLANID in "${VLAN[@]}"; do
       print_output "[*] Init VLAN $VLAN_ID ..."
       HOSTNETDEV_0x=$TAPDEV_0.$VLANID
       print_output "[*] Bringing up HOSTNETDEV $ORANGE$HOSTNETDEV_0x$NC"
-      ip link add link "$TAPDEV_0" name "$HOSTNETDEV_0x" type vlan id "$VLANID"
-      ip link set "$TAPDEV_0" up
-      echo "ip link add link $TAPDEV_0 name $HOSTNETDEV_0x type vlan id $VLANID" >> "$ARCHIVE_PATH"/run.sh
-      echo "ip link set $TAPDEV_0 up" >> "$ARCHIVE_PATH"/run.sh
+      write_script_exec "ip link add link $TAPDEV_0 name $HOSTNETDEV_0x type vlan id $VLANID" "$ARCHIVE_PATH"/run.sh 1
+      write_script_exec "ip link set $TAPDEV_0 up" "$ARCHIVE_PATH"/run.sh 1
     done
   fi
 
@@ -444,49 +424,39 @@ setup_network() {
     print_output "[*] Possible IP address for emulated device: $ORANGE$IP$NC"
     print_output "[*] Bringing up TAP device $ORANGE$TAPDEV_0$NC"
 
-    ip link set "${HOSTNETDEV_0}" up
-    ip addr add "$HOSTIP"/24 dev "${HOSTNETDEV_0}"
-    echo "ip link set ${HOSTNETDEV_0} up" >> "$ARCHIVE_PATH"/run.sh
-    echo "ip addr add $HOSTIP/24 dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+    write_script_exec "ip link set ${HOSTNETDEV_0} up" "$ARCHIVE_PATH"/run.sh 1
+    write_script_exec "ip addr add $HOSTIP/24 dev ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh 1
 
     print_output "Adding route to $IP..."
-    ip route add "$IP" via "$IP" dev "${HOSTNETDEV_0}"
-    echo "ip route add $IP via $IP dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+    write_script_exec "ip route add $IP via $IP dev ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh 1
   done
-
-
 }
+
 run_emulated_system() {
   sub_module_title "Final system emulation."
 
   IMAGE="$LOG_PATH_MODULE/$IMAGE_NAME"
-  # IMAGE_ used for the script
-  IMAGE_="./$IMAGE_NAME"
   # SYS_ONLINE is used to check the network reachability
   SYS_ONLINE=0
 
+  KERNEL_="vmlinux"
   if [[ "$ARCH_END" == "mipsel" ]]; then
-    KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
-    KERNEL_="./vmlinux.$ARCH_END"
     QEMU_BIN="qemu-system-$ARCH_END"
     QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "mipseb" ]]; then
-    KERNEL="$FIRMADYNE_DIR/binaries/vmlinux.$ARCH_END"
-    KERNEL_="./vmlinux.$ARCH_END"
     QEMU_BIN="qemu-system-mips"
     QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "armel" ]]; then
-    KERNEL="$FIRMADYNE_DIR/binaries/zImage.$ARCH_END"
-    KERNEL_="./zImage.$ARCH_END"
+    KERNEL_="zImage"
     QEMU_BIN="qemu-system-arm"
     QEMU_MACHINE="virt"
   else
     QEMU_BIN="NA"
   fi
+  KERNEL="$FIRMADYNE_DIR/binaries/$KERNEL_.$ARCH_END"
 
   if [[ "$ARCH" == "ARM" ]]; then
     QEMU_DISK="-drive if=none,file=$IMAGE,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
-    QEMU_DISK_="-drive if=none,file=$IMAGE_,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     QEMU_PARAMS="-audiodev driver=none,id=none"
     QEMU_ROOTFS="/dev/vda1"
     NET_ID=0
@@ -498,7 +468,6 @@ run_emulated_system() {
 
   elif [[ "$ARCH" == "MIPS" ]]; then
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
-    QEMU_DISK_="-drive if=ide,format=raw,file=$IMAGE_"
     QEMU_PARAMS=""
     QEMU_ROOTFS="/dev/sda1"
     NET_ID=0
@@ -516,29 +485,20 @@ run_emulated_system() {
   else
     print_output "[-] No firmware emulation $ARCH / $IMAGE_NAME possible"
   fi
-
 }
+
 run_qemu_final_emulation() {
   # run this in the background to be able to test the system in parallel
   # kill it afterwards with something like
   # pkill -f "qemu-system-.*$IMAGE_NAME.*"
 
-  #shellcheck disable=SC2086
-  $QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK \
-    -append "root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0" \
-    -nographic $QEMU_NETWORK $QEMU_PARAMS | tee "$LOG_PATH_MODULE"/qemu.final.serial.log
-
-  IMAGE_="./$IMAGE_NAME"
-  { 
-    echo "echo \"[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit\""
-    echo "$QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL_ $QEMU_DISK_ \\"
-    echo "-append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0\" \\"
-    echo "-nographic $QEMU_NETWORK $QEMU_PARAMS"
-  } >> "$ARCHIVE_PATH"/run.sh
+  echo "echo \"[*] Starting firmware emulation $QEMU_BIN / $ARCH / $IMAGE_NAME ... use Ctrl-a + x to exit\"" >> "$ARCHIVE_PATH"/run.sh
+  write_script_exec "$QEMU_BIN -m 256 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 rdinit=/firmadyne/preInit.sh rw debug ignore_loglevel print-fatal-signals=1 user_debug=31 firmadyne.syscall=0\" -nographic $QEMU_NETWORK $QEMU_PARAMS | tee \"$LOG_PATH_MODULE\"/qemu.final.serial.log || true" "$ARCHIVE_PATH"/run.sh 1
 }
 
 check_online_stat() {
   # check for a maximum of 60 seconds
+  PING_CNT=0
   while [[ "$PING_CNT" -lt 12 ]]; do
     for IP in "${IPS[@]}"; do
       if ping -c 1 "$IP" &> /dev/null; then
@@ -553,48 +513,91 @@ check_online_stat() {
       fi
     done
     sleep 5
-    PING_CNT=("$PING_CNT"+1)
+    (( PING_CNT+=1 ))
   done
 
   print_output ""
-  cat "$LOG_PATH_MODULE"/qemu.final.serial.log >> "$LOG_FILE"
+  cat "$LOG_PATH_MODULE"/qemu.final.serial.log >> "$LOG_FILE" || true
 }
 
 create_emulation_archive() {
   sub_module_title "Create scripts and archive to re-run the emulated system"
 
-  cp "$KERNEL" "$ARCHIVE_PATH"
-  cp "$IMAGE" "$ARCHIVE_PATH"
-  chmod +x "$ARCHIVE_PATH"/run.sh
+  cp "$KERNEL" "$ARCHIVE_PATH" || true
+  cp "$IMAGE" "$ARCHIVE_PATH" || true
+  if [[ -f "$ARCHIVE_PATH"/run.sh ]];then
+    chmod +x "$ARCHIVE_PATH"/run.sh
+  else
+    print_output "[-] No run script created ..."
+  fi
   tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz "$ARCHIVE_PATH"
   if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME".tar.gz ]]; then
     print_output "[*] Qemu emulation archive created in $LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz" "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME.tar.gz"
-    print_output "[!] WARNING: Qemu run script is in an very early alpha state!"
+    print_output ""
   fi
 }
 
 reset_network() {
-  sub_module_title "Reset network environment"
+  EXECUTE_="${1:0}"
 
-  print_output "[*] Stopping Qemu emulation ..."
-  pkill -9 -f "qemu-system-.*$IMAGE_NAME.*"
+  if [[ "$EXECUTE" -ne 0 ]]; then
+    sub_module_title "Reset network environment"
+    print_output "[*] Stopping Qemu emulation ..."
+    pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true
+  else
+    sub_module_title "Create network environment startup script"
+  fi
 
-  print_output "[*] Deleting route..."
-  ip route flush dev "${HOSTNETDEV_0}"
-  echo "ip route flush dev ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "[*] Deleting route..."
+  fi
+  write_script_exec "ip route flush dev \"${HOSTNETDEV_0}\"" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
-  print_output "[*] Bringing down TAP device..."
-  ip link set "$TAPDEV_0" down
-  echo "ip link set $TAPDEV_0 down" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "[*] Bringing down TAP device..."
+  fi
+  write_script_exec "ip link set $TAPDEV_0 down" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
-  print_output "Removing VLAN..."
-  ip link delete "${HOSTNETDEV_0}"
-  echo "ip link delete ${HOSTNETDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "Removing VLAN..."
+  fi
+  write_script_exec "ip link delete ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
-  print_output "Deleting TAP device ${TAPDEV_0}..."
-  tunctl -d ${TAPDEV_0}
-  echo "tunctl -d ${TAPDEV_0}" >> "$ARCHIVE_PATH"/run.sh
+  if [[ "$EXECUTE" -eq 1 ]]; then
+    print_output "Deleting TAP device ${TAPDEV_0}..."
+  fi
+  write_script_exec "tunctl -d ${TAPDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
+}
 
+write_script_exec() {
+  COMMAND="${1:-}"
+  SCRIPT_WRITE="${2:-}"
+  # EXECUTE: 0 -> just write script
+  # EXECUTE: 1 -> execute and write script
+  # EXECUTE: 2 -> just execute
+  EXECUTE="${3:0}"
+
+  if [[ "$EXECUTE" -ne 0 ]];then
+    eval "$COMMAND" || true &
+  fi
+
+  if [[ "$EXECUTE" -ne 2 ]];then
+    if ! [[ -f "$SCRIPT_WRITE" ]]; then
+      echo "#!/bin/bash" > "$SCRIPT_WRITE"
+    fi
+
+    # for the final script we need to adjust the paths:
+    if echo "$COMMAND" | grep -q qemu-system-; then
+      #shellcheck disable=SC2001
+      COMMAND=$(echo "$COMMAND" | sed "s#${KERNEL:-}#\.\/${KERNEL_:-}.${ARCH_END:-}#g")
+      #shellcheck disable=SC2001
+      COMMAND=$(echo "$COMMAND" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
+      #shellcheck disable=SC2001
+      COMMAND=$(echo "$COMMAND" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
+    fi
+
+    echo "$COMMAND" >> "$SCRIPT_WRITE"
+  fi
 }
 
 get_nvram () {

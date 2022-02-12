@@ -62,25 +62,25 @@ F50_base_aggregator() {
 output_overview() {
 
   if [[ -n "$FW_VENDOR" ]]; then
-    print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR"
+    print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR""$NC"
     echo "Firmware_vendor;\"$FW_VENDOR\"" >> "$CSV_LOG_FILE"
   fi  
   if [[ -n "$FW_VERSION" ]]; then
-    print_output "[+] Tested Firmware version: ""$ORANGE""$FW_VERSION"
+    print_output "[+] Tested Firmware version: ""$ORANGE""$FW_VERSION""$NC"
     echo "Firmware_version;\"$FW_VERSION\"" >> "$CSV_LOG_FILE"
   fi  
   if [[ -n "$FW_DEVICE" ]]; then
-    print_output "[+] Tested Firmware from device: ""$ORANGE""$FW_DEVICE"
+    print_output "[+] Tested Firmware from device: ""$ORANGE""$FW_DEVICE""$NC"
     echo "Device;\"$FW_DEVICE\"" >> "$CSV_LOG_FILE"
   fi  
   if [[ -n "$FW_NOTES" ]]; then
-    print_output "[+] Additional notes: ""$ORANGE""$FW_NOTES"
+    print_output "[+] Additional notes: ""$ORANGE""$FW_NOTES""$NC"
     echo "FW_notes;\"$FW_NOTES\"" >> "$CSV_LOG_FILE"
   fi  
 
-  print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH"
+  print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH""$NC"
   echo "FW_path;\"$FIRMWARE_PATH\"" >> "$CSV_LOG_FILE"
-  print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND"
+  print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND""$NC"
   echo "emba_command;\"$EMBA_COMMAND\"" >> "$CSV_LOG_FILE"
 
   if [[ -n "$ARCH" ]]; then
@@ -133,48 +133,48 @@ output_details() {
     DATA=1
   fi
 
-  if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
+  if [[ "${S20_SHELL_VULNS-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts.""$NC"
     write_link "s20"
     echo "shell_scripts;\"$S20_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "shell_script_vulns;\"$S20_SHELL_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  if [[ "$S21_PY_VULNS" -gt 0 ]]; then
+  if [[ "${S21_PY_VULNS-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
     write_link "s21"
     echo "python_scripts;\"$S21_PY_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "python_vulns;\"$S21_PY_VULNS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
+  if [[ "${S22_PHP_VULNS-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
     write_link "s22"
     echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
     echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
   fi
-  if [[ "$S22_PHP_INI_ISSUES" -gt 0 ]]; then
+  if [[ "${S22_PHP_INI_ISSUES-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_INI_CONFIGS""$GREEN"" php configuration file.""$NC"
     write_link "s22"
     echo "php_ini_issues;\"$S22_PHP_INI_ISSUES\"" >> "$CSV_LOG_FILE"
     echo "php_ini_configs;\"$S22_PHP_INI_CONFIGS\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  if [[ "$YARA_CNT" -gt 0 ]]; then
+  if [[ "${YARA_CNT-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
     write_link "s110"
     echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
-  EMUL=$(grep -c "Version information found" "$LOG_DIR"/s116_qemu_version_detection.txt 2>/dev/null)
-  if [[ "$EMUL" -gt 0 ]]; then
+  EMUL=$(grep -c "Version information found" "$LOG_DIR"/s116_qemu_version_detection.txt 2>/dev/null || true)
+  if [[ "${EMUL-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "f05"
     echo "user_emulation_state;\"$EMUL\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
 
-  if [[ "$BOOTED" -gt 0 ]]; then
+  if [[ "${BOOTED-0}" -gt 0 ]]; then
 
     STATE="$ORANGE(""$GREEN""booted"
     EMU_STATE="booted"
@@ -182,19 +182,19 @@ output_details() {
       STATE="$STATE""$ORANGE / ""$GREEN""IP address detected"
       EMU_STATE="$EMU_STATE"";IP_DET"
     fi
-    if [[ "$SYS_ONLINE" -gt 0 ]]; then
+    if [[ "${SYS_ONLINE-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
       EMU_STATE="$EMU_STATE"";ICMP"
     fi
-    if [[ "$NMAP_UP" -gt 0 ]]; then
+    if [[ "${NMAP_UP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NMAP"
       EMU_STATE="$EMU_STATE"";NMAP"
     fi
-    if [[ "$SNMP_UP" -gt 0 ]]; then
+    if [[ "${SNMP_UP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""SNMP"
       EMU_STATE="$EMU_STATE"";SNMP"
     fi
-    if [[ "$NIKTO_UP" -gt 0 ]]; then
+    if [[ "${NIKTO_UP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NIKTO"
       EMU_STATE="$EMU_STATE"";NIKTO"
     fi
@@ -213,58 +213,58 @@ output_details() {
 output_config_issues() {
 
   local DATA=0
-  if [[ "$PW_COUNTER" -gt 0 || "$S85_SSH_VUL_CNT" -gt 0 || "$FILE_COUNTER" -gt 0 || "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 || "$MOD_DATA_COUNTER" -gt 0 || "$S40_WEAK_PERM_COUNTER" -gt 0 || "$S55_HISTORY_COUNTER" -gt 0 || "$S50_AUTH_ISSUES" -gt 0 || "$PASS_FILES_FOUND" -gt 0 || "$CERT_CNT" -gt 0 ]]; then
+  if [[ "${PW_COUNTER-0}" -gt 0 || "${S85_SSH_VUL_CNT-0}" -gt 0 || "${FILE_COUNTER-0}" -gt 0 || "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 || "${MOD_DATA_COUNTER-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER-0}" -gt 0 || "${S55_HISTORY_COUNTER-0}" -gt 0 || "${S50_AUTH_ISSUES-0}" -gt 0 || "${PASS_FILES_FOUND-0}" -gt 0 || "${CERT_CNT-0}" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
-    if [[ "$S40_WEAK_PERM_COUNTER" -gt 0 ]]; then
+    if [[ "${S40_WEAK_PERM_COUNTER-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
       write_link "s40"
       echo "weak_perm_count;\"$S40_WEAK_PERM_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$S55_HISTORY_COUNTER" -gt 0 ]]; then
+    if [[ "${S55_HISTORY_COUNTER-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S55_HISTORY_COUNTER$GREEN history files.")")"
       write_link "s55"
       echo "history_file_count;\"$S55_HISTORY_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$S50_AUTH_ISSUES" -gt 0 ]]; then
+    if [[ "${S50_AUTH_ISSUES-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S50_AUTH_ISSUES$GREEN authentication issues.")")"
       write_link "s50"
       echo "auth_issues;\"$S50_AUTH_ISSUES\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$S85_SSH_VUL_CNT" -gt 0 ]]; then
+    if [[ "${S85_SSH_VUL_CNT-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S85_SSH_VUL_CNT$GREEN SSHd issues.")")"
       write_link "s85"
       echo "ssh_issues;\"$S85_SSH_VUL_CNT\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$PW_COUNTER" -gt 0 ]]; then
+    if [[ "${PW_COUNTER-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password hashes.")")"
       write_link "s107"
       echo "password_hashes;\"$PW_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$CERT_CNT" -gt 0 ]]; then
+    if [[ "${CERT_CNT-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
       write_link "s60"
       echo "certificates;\"$CERT_CNT\"" >> "$CSV_LOG_FILE"
       echo "certificates_outdated;\"$CERT_OUT_CNT\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$MOD_DATA_COUNTER" -gt 0 ]]; then
+    if [[ "${MOD_DATA_COUNTER-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$MOD_DATA_COUNTER$GREEN kernel modules with $ORANGE$KMOD_BAD$GREEN licensing issues.")")"
       write_link "s25#kernel_modules"
       echo "kernel_modules;\"$MOD_DATA_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "kernel_modules_lic;\"$KMOD_BAD\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$FILE_COUNTER" -gt 0 ]]; then
+    if [[ "${FILE_COUNTER-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
       write_link "s11"
       DATA=1
     fi
-    if [[ "$INT_COUNT" -gt 0 || "$POST_COUNT" -gt 0 ]]; then
+    if [[ "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
       write_link "s95"
       echo "interesting_files;\"$INT_COUNT\"" >> "$CSV_LOG_FILE"
@@ -282,62 +282,62 @@ output_binaries() {
   local DATA=0
   if [[ "${#BINARIES[@]}" -gt 0 ]]; then
     if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
-      CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG")
-      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S12_LOG")
-      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$S12_LOG")
-      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S12_LOG")
-      STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$S12_LOG")
-      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$S12_LOG")
+      CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG" || true)
+      RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S12_LOG" || true)
+      NX=$(grep -c "NX disabled" "$LOG_DIR"/"$S12_LOG" || true)
+      PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S12_LOG" || true)
+      STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$S12_LOG" || true)
+      BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$S12_LOG" || true)
       # we have to remove the first line of the original output:
       (( BINS_CHECKED-- ))
     fi
   
-    if [[ "$CANARY" -gt 0 ]]; then
+    if [[ "${CANARY-0}" -gt 0 ]]; then
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
-      CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null)
+      CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
       echo "canary;\"$CANARY\"" >> "$CSV_LOG_FILE"
       echo "canary_per;\"$CAN_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$RELRO" -gt 0 ]]; then
+    if [[ "${RELRO-0}" -gt 0 ]]; then
       RELRO_PER=$(bc -l <<< "$RELRO/($BINS_CHECKED/100)" 2>/dev/null)
-      RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null)
+      RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
       echo "relro;\"$RELRO\"" >> "$CSV_LOG_FILE"
       echo "relro_per;\"$RELRO_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$NX" -gt 0 ]]; then
+    if [[ "${NX-0}" -gt 0 ]]; then
       NX_PER=$(bc -l <<< "$NX/($BINS_CHECKED/100)" 2>/dev/null)
-      NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null)
+      NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
       echo "nx;\"$NX\"" >> "$CSV_LOG_FILE"
       echo "nx_per;\"$NX_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$PIE" -gt 0 ]]; then
+    if [[ "${PIE-0}" -gt 0 ]]; then
       PIE_PER=$(bc -l <<< "$PIE/($BINS_CHECKED/100)" 2>/dev/null)
-      PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null)
+      PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
       echo "pie;\"$PIE\"" >> "$CSV_LOG_FILE"
       echo "pie_per;\"$PIE_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$STRIPPED" -gt 0 ]]; then
+    if [[ "${STRIPPED-0}" -gt 0 ]]; then
       STRIPPED_PER=$(bc -l <<< "$STRIPPED/($BINS_CHECKED/100)" 2>/dev/null)
-      STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null)
+      STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
       echo "stripped;\"$STRIPPED\"" >> "$CSV_LOG_FILE"
       echo "stripped_per;\"$STRIPPED_PER\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$BINS_CHECKED" -gt 0 ]]; then
+    if [[ "${BINS_CHECKED-0}" -gt 0 ]]; then
       echo "bins_checked;\"$BINS_CHECKED\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
@@ -348,7 +348,7 @@ output_binaries() {
 
   cwe_logging
 
-  if [[ "$STRCPY_CNT" -gt 0 ]]; then
+  if [[ "${STRCPY_CNT-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
     if [[ $(find "$LOG_DIR""/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "$LOG_DIR""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
       write_link "s13"
@@ -361,7 +361,7 @@ output_binaries() {
 
   local DATA=0
 
-  if [[ "$STRCPY_CNT" -gt 0 ]] && [[ -d "$LOG_DIR""/s13_weak_func_check/" || -d "$LOG_DIR""/s14_weak_func_radare_check/" ]] ; then
+  if [[ "${STRCPY_CNT-0}" -gt 0 ]] && [[ -d "$LOG_DIR""/s13_weak_func_check/" || -d "$LOG_DIR""/s14_weak_func_radare_check/" ]] ; then
 
     # color codes for printf
     RED_="$(tput setaf 1)"
@@ -471,8 +471,8 @@ binary_fct_output() {
 output_cve_exploits() {
 
   local DATA=0
-  if [[ "$S30_VUL_COUNTER" -gt 0 || "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
-    if [[ "$CVE_COUNTER" -gt 0 || "$EXPLOIT_COUNTER" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+  if [[ "${S30_VUL_COUNTER-0}" -gt 0 || "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+    if [[ "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
@@ -485,12 +485,12 @@ output_cve_exploits() {
       echo "versions_identified;\"${#VERSIONS_AGGREGATED[@]}\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "$S30_VUL_COUNTER" -gt 0 ]]; then
+    if [[ "${S30_VUL_COUNTER-0}" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S30_VUL_COUNTER""$GREEN"" CVE vulnerabilities in ""$ORANGE""${#BINARIES[@]}""$GREEN"" executables (without version checking).""$NC"
       write_link "s30"
       DATA=1
     fi
-    if [[ "$CVE_COUNTER" -gt 0 ]]; then
+    if [[ "${CVE_COUNTER-0}" -gt 0 ]]; then
       print_output "[+] Identified ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
       write_link "f20#collectcveandexploitdetails"
       print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
@@ -507,7 +507,7 @@ output_cve_exploits() {
       print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
       print_output ""
     fi
-    if [[ "$EXPLOIT_COUNTER" -gt 0 ]]; then
+    if [[ "${EXPLOIT_COUNTER-0}" -gt 0 ]]; then
       echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
       if [[ $MSF_MODULE_CNT -gt 0 ]]; then
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available ($MAGENTA$MSF_MODULE_CNT$GREEN Metasploit modules).")")"
@@ -516,6 +516,12 @@ output_cve_exploits() {
       else
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
         write_link "f20#minimalreportofexploitsandcves"
+      fi
+      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 ]]; then
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN")")"
+        write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
+        write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
+        write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT"
       fi
       # we report only software components with exploits to csv:
       grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
@@ -528,135 +534,159 @@ output_cve_exploits() {
 }
 
 get_data() {
+  REMOTE_EXPLOIT_CNT=0
+  LOCAL_EXPLOIT_CNT=0
+  DOS_EXPLOIT_CNT=0
+  HIGH_CVE_COUNTER=0
+  MEDIUM_CVE_COUNTER=0
+  LOW_CVE_COUNTER=0
+  EXPLOIT_COUNTER=0
+  MSF_MODULE_CNT=0
+
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
-    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //')
+    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
   fi
   if [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P70_LOG" | cut -d: -f2 | tr -d '[:space:]')
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P70_LOG" | cut -d: -f2 | tr -d '[:space:]' || true)
     PRE_ARCH=$(strip_color_codes "$PRE_ARCH")
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
-    FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2)
-    DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f3)
+    FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2 || true)
+    DETECTED_DIR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f3 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S06_LOG" ]]; then
-    mapfile -t LINUX_DISTRIS < <(grep "Version information found" "$LOG_DIR"/"$S06_LOG" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u )
+    mapfile -t LINUX_DISTRIS < <(grep "Version information found" "$LOG_DIR"/"$S06_LOG" | cut -d\  -f5- | sed 's/ in file .*//' | sort -u || true)
   fi
-  if ! [[ "$FILE_ARR_COUNT" -gt 0 ]]; then
-    FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f 2>/dev/null| wc -l)
-    DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d 2>/dev/null | wc -l)
+  if ! [[ "${FILE_ARR_COUNT-0}" -gt 0 ]]; then
+    FILE_ARR_COUNT=$(find "$FIRMWARE_PATH_CP" -type f 2>/dev/null| wc -l || true)
+    DETECTED_DIR=$(find "$FIRMWARE_PATH_CP" -type d 2>/dev/null | wc -l || true)
   fi
   if [[ -f "$LOG_DIR"/"$S13_LOG" ]]; then
-    STRCPY_CNT_13=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
-    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2)
+    STRCPY_CNT_13=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2 || true)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S13_LOG" | cut -d: -f2 || true)
   else
     STRCPY_CNT_13=0
   fi
   if [[ -f "$LOG_DIR"/"$S14_LOG" ]]; then
-    STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
-    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2)
+    STRCPY_CNT_14=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2 || true)
+    ARCH=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S14_LOG" | cut -d: -f2 || true)
     STRCPY_CNT=$((STRCPY_CNT_14+STRCPY_CNT_13))
   else
     STRCPY_CNT="$STRCPY_CNT_13"
   fi
   if [[ -f "$LOG_DIR"/"$S20_LOG" ]]; then
-    S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2)
-    S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3)
+    S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f2 || true)
+    S20_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S20_LOG" | cut -d: -f3 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S21_LOG" ]]; then
-    S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f2)
-    S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f3)
+    S21_PY_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f2 || true)
+    S21_PY_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S21_LOG" | cut -d: -f3 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S22_LOG" ]]; then
-    S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f2)
-    S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3)
-    S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f4)
-    S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f5)
+    S22_PHP_VULNS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f2 || true)
+    S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3 || true)
+    S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f4 || true)
+    S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f5 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
-    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2)
-    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3)
+    MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 || true)
+    KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
-    S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2)
+    S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S40_LOG" ]]; then
-    S40_WEAK_PERM_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S40_LOG" | cut -d: -f2)
+    S40_WEAK_PERM_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S40_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S45_LOG" ]]; then
-    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2)
+    PASS_FILES_FOUND=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S45_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S50_LOG" ]]; then
-    S50_AUTH_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S50_LOG" | cut -d: -f2)
+    S50_AUTH_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S50_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S55_LOG" ]]; then
-    S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S55_LOG" | cut -d: -f2)
+    S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S55_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S60_LOG" ]]; then
-    CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2)
-    CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3)
+    CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2 || true)
+    CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S85_LOG" ]]; then
-    S85_SSH_VUL_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S85_LOG" | cut -d: -f2)
+    S85_SSH_VUL_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S85_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S95_LOG" ]]; then
-    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2)
-    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3)
+    INT_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f2 || true)
+    POST_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S95_LOG" | cut -d: -f3 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S107_LOG" ]]; then
-    PW_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S107_LOG" | cut -d: -f2)
+    PW_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S107_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
-    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2)
-    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3)
+    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2 || true)
+    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
-    YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2)
+    YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S120_LOG" ]]; then
     export TOTAL_CWE_CNT
-    TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2)
+    TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$L10_LOG" ]]; then
-    SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f2)
-    IP_ADDR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f3)
-    BOOTED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f4)
+    SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f2 || true)
+    IP_ADDR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f3 || true)
+    BOOTED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f4 || true)
   fi
   if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
-    NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2)
-    SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f3)
-    NIKTO_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f4)
+    NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2 || true)
+    SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f3 || true)
+    NIKTO_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f4 || true)
   fi
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
-    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | cut -d: -f2)
+    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( HIGH_CVE_COUNTER="$HIGH_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/HIGH_CVE_COUNTER.tmp 
+    done < "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( MEDIUM_CVE_COUNTER="$MEDIUM_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp 
+    done < "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$MEDIUM_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/LOW_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( LOW_CVE_COUNTER="$LOW_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp 
+    done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$LOW_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/EXPLOIT_COUNTER.tmp ]]; then
     while read -r COUNTING; do
       (( EXPLOIT_COUNTER="$EXPLOIT_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/EXPLOIT_COUNTER.tmp 
+    done < "$TMP_DIR"/EXPLOIT_COUNTER.tmp
   fi
   if [[ -f "$TMP_DIR"/MSF_MODULE_CNT.tmp ]]; then
     while read -r COUNTING; do
       (( MSF_MODULE_CNT="$MSF_MODULE_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/MSF_MODULE_CNT.tmp 
+    done < "$TMP_DIR"/MSF_MODULE_CNT.tmp
+  fi
+  if [[ -f "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp ]]; then
+    while read -r COUNTING; do
+      (( REMOTE_EXPLOIT_CNT="$REMOTE_EXPLOIT_CNT"+"$COUNTING" ))
+    done < "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp
+  fi
+  if [[ -f "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp ]]; then
+    while read -r COUNTING; do
+      (( LOCAL_EXPLOIT_CNT="$LOCAL_EXPLOIT_CNT"+"$COUNTING" ))
+    done < "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp
+  fi
+  if [[ -f "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp ]]; then
+    while read -r COUNTING; do
+      (( DOS_EXPLOIT_CNT="$DOS_EXPLOIT_CNT"+"$COUNTING" ))
+    done < "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
   fi
 }
 
@@ -676,7 +706,7 @@ os_detector() {
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
     for OS_TO_CHECK in "${OSES[@]}"; do
-      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep aggregated | grep "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g')
+      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep aggregated | grep "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g' || true)
       if [[ "${#SYSTEM_VERSION[@]}" -gt 0 ]]; then
         if [[ "$OS_TO_CHECK" == "kernel" ]]; then
           SYSTEM="Linux"
@@ -729,7 +759,7 @@ os_detector() {
 
   #### The following check is just in place if something went wrong
   if [[ $VERIFIED -eq 0 ]]; then
-    # usually the results of the kernel module checker are already used in f19 (first os check)
+    # usually the results of the kernel module checker are already used in f20 (first os check)
     # but just in case something went wrong we use it now
     os_kernel_module_detect
     if [[ $VERIFIED -eq 1 ]]; then
@@ -778,14 +808,14 @@ print_os() {
 cwe_logging() {
   LOG_DIR_MOD="s120_cwe_checker"
   if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
-    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" )
+    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       write_link "s120"
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE")"
+        CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_output ""

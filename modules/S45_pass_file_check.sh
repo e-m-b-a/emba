@@ -26,7 +26,7 @@ S45_pass_file_check()
 
   mapfile -t PASSWD_STUFF < <(config_find "$CONFIG_DIR""/pass_files.cfg")
 
-  if [[ "${PASSWD_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${PASSWD_STUFF[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#PASSWD_STUFF[@]}" -ne 0 ]] ; then
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
@@ -51,15 +51,15 @@ S45_pass_file_check()
 	        local POSSIBLE_PASSWD
           # regex source: https://serverfault.com/questions/972572/regex-for-etc-passwd-content
           #POSSIBLE_PASSWD=$(grep -hIE '^([^:]*:){6}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
-          POSSIBLE_PASSWD=$(grep -hIE '^[a-zA-Z0-9]+:.:[0-9]+:[0-9]+([^:]*:){3}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
+          POSSIBLE_PASSWD=$(grep -hIE '^[a-zA-Z0-9]+:.:[0-9]+:[0-9]+([^:]*:){3}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null || true)
 
 	        local POSSIBLE_SHADOWS
           #POSSIBLE_SHADOWS=$(grep -hIE '^([^:]*:){8}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
-          POSSIBLE_SHADOWS=$(grep -hIE '^[a-zA-Z0-9]+:\$[0-9a-z]\$.*:[0-9]+:[0-9]+:[0-9]+([^:]*:){4}[^:]*' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
+          POSSIBLE_SHADOWS=$(grep -hIE '^[a-zA-Z0-9]+:\$[0-9a-z]\$.*:[0-9]+:[0-9]+:[0-9]+([^:]*:){4}[^:]*' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null || true)
 
           local ROOT_ACCOUNTS
           # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-          ROOT_ACCOUNTS=$(grep -v -E "^#" "$LINE" 2>/dev/null| awk -F: '$3 == 0 { print $1}' 2> /dev/null)
+          ROOT_ACCOUNTS=$(grep -v -E "^#" "$LINE" 2>/dev/null| awk -F: '$3 == 0 { print $1}' 2> /dev/null || true)
 
           local L_BREAK=0
           if [[ "$(echo "$ROOT_ACCOUNTS" | wc -w)" -gt 0 ]] ; then

@@ -69,8 +69,8 @@ S110_yara_check()
 
 yara_check() {
   if [[ -e "$YARA_S_FILE" ]] ; then
-    local S_OUTPUT
-    mapfile -t S_OUTPUT < <(yara -r -w "$DIR_COMB_YARA" "$YARA_S_FILE")
+    local S_OUTPUT=()
+    mapfile -t S_OUTPUT < <(yara -r -w "$DIR_COMB_YARA" "$YARA_S_FILE" || true)
     if [[ "${#S_OUTPUT[@]}" -gt 0 ]] ; then
       for YARA_OUT in "${S_OUTPUT[@]}"; do
         print_output "[+] ""$(echo -e "$YARA_OUT" | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"

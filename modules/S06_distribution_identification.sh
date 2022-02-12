@@ -26,13 +26,13 @@ S06_distribution_identification()
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
       FILE="$(echo "$LINE" | cut -d\; -f2)"
-      mapfile -t FILES < <(find "$FIRMWARE_PATH" -iwholename "*$FILE")
+      mapfile -t FILES < <(find "$FIRMWARE_PATH" -iwholename "*$FILE" || true)
       for FILE in "${FILES[@]}"; do
         if [[ -f "$FILE" ]]; then
             PATTERN="$(echo "$LINE" | cut -d\; -f3 | sed s/^\"// | sed s/\"$//)"
             SED_COMMAND="$(echo "$LINE" | cut -d\; -f4)"
             # shellcheck disable=SC2086
-            OUT1="$(grep $PATTERN "$FILE")"
+            OUT1="$(grep $PATTERN "$FILE" || true)"
             # echo "SED command: $SED_COMMAND"
             # echo "identified: $OUT1"
             IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//')
@@ -78,7 +78,7 @@ dlink_image_sign() {
   # probably we can use this in the future. Currently there is no need for it:
   mapfile -t DLINK_BUILDREV < <(find "$FIRMWARE_PATH" -path "*config/buildrev")
   for DLINK_BREV in "${DLINK_BUILDREV[@]}"; do
-    DLINK_FW_VERx=$(grep -E "^[A-Z][0-9]+" "$DLINK_BREV")
+    DLINK_FW_VERx=$(grep -E "^[A-Z][0-9]+" "$DLINK_BREV" || true)
     # -> B01
     DLINK_FW_VER="$DLINK_FW_VER""$DLINK_FW_VERx"
     # -> v2.14B01

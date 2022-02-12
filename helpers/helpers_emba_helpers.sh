@@ -16,7 +16,7 @@
 # Description: Multiple useful helpers
 
 run_web_reporter_mod_name() {
-  MOD_NAME="$1"
+  MOD_NAME="${1:-}"
   if [[ $HTML -eq 1 ]]; then
     # usually we should only find one file:
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
@@ -42,18 +42,18 @@ wait_for_pid() {
       echo "." | tr -d "\n" 2>/dev/null
       # if S115 is running we have to kill old qemu processes
       if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
-        killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
+        killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
       fi
     done
   done
 }
 
 max_pids_protection() {
-  if [[ -n "$1" ]]; then
-    local MAX_PIDS_="$1"
+  if [[ -n "${1:-}" ]]; then
+    local MAX_PIDS_="${1:-}"
     shift
   else
-    local MAX_PIDS_="$MAX_MODS"
+    local MAX_PIDS_="${MAX_MODS:1}"
   fi
   local WAIT_PIDS=("$@")
   local PID
@@ -67,8 +67,8 @@ max_pids_protection() {
       fi
     done
     # if S115 is running we have to kill old qemu processes
-    if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
-      killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.*
+    if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
+      killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
     fi
 
     #print_output "[!] really running pids: ${#TEMP_PIDS[@]}"
@@ -90,29 +90,29 @@ cleaner() {
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" && "${#FILE_ARR[@]}" -gt 0 ]]; then
     if [[ $(grep -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
-      killall -9 --quiet -r .*qemu.*sta.*
+      killall -9 --quiet -r .*qemu.*sta.* || true
       print_output "[*] Cleaning the emulation environment\\n" "no_log"
       find "$FIRMWARE_PATH_CP" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
       print_output "[*] Umounting proc, sys and run" "no_log"
-      mapfile -t CHECK_MOUNTS < <(mount | grep "$FIRMWARE_PATH_CP")
+      mapfile -t CHECK_MOUNTS < <(mount | grep "$FIRMWARE_PATH_CP" 2>/dev/null || true)
       # now we can unmount the stuff from emulator and delete temporary stuff
       for MOUNT in "${CHECK_MOUNTS[@]}"; do
         print_output "[*] Unmounting $MOUNT" "no_log"
         MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
-        umount -l "$MOUNT"
+        umount -l "$MOUNT" || true
       done
     fi
     if [[ $(grep -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
-      killall -9 --quiet -r .*cwe_checker.*
+      killall -9 --quiet -r .*cwe_checker.* || true
     fi
   fi
-  if [[ -n "$CHECK_CVE_JOB_PID" && "$CHECK_CVE_JOB_PID" -ne 0 ]]; then
-    kill -9 "$CHECK_CVE_JOB_PID"
+  if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
+    kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
 
   if [[ -d "$TMP_DIR" ]]; then
-    rm -r "$TMP_DIR" 2>/dev/null
+    rm -r "$TMP_DIR" 2>/dev/null || true
   fi
   print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
   exit 1

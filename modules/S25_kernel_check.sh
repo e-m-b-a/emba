@@ -31,7 +31,7 @@ S25_kernel_check()
   # This module waits for S24_kernel_bin_identifier
   # check emba.log for S24_kernel_bin_identifier starting
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S24_kernel_bin_identifier "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
+    while [[ $(grep -c S24_kernel_bin_identifier "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
       sleep 1
     done
   fi
@@ -115,11 +115,11 @@ populate_karrays() {
   local KERNEL_VERSION_
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
-    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g')" )
+    KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g' || true)" )
     if [[ "$K_MODULE" =~ .*\.o ]]; then
-      KERNEL_VERSION+=( "$(strings "$K_MODULE" 2>/dev/null | grep "kernel_version=" | cut -d= -f2)" )
+      KERNEL_VERSION+=( "$(strings "$K_MODULE" 2>/dev/null | grep "kernel_version=" | cut -d= -f2 || true)" )
     fi
-    KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_')" )
+    KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' || true)" )
   done
 
   for VER in "${KERNEL_VERSION[@]}" ; do
@@ -127,7 +127,7 @@ populate_karrays() {
 
     IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     for V in "${KV_C_ARR[@]}" ; do
-      if [[ -z "$i" ]]; then
+      if [[ -z "${i:-}" ]]; then
         # remove empty entries:
         continue
       fi
@@ -230,7 +230,7 @@ get_kernel_vulns()
       print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
     fi
   else
-      print_output "[-] No linux kernel version information found."
+    print_output "[-] No linux kernel version information found."
   fi
 }
 
@@ -261,7 +261,7 @@ analyze_kernel_module()
   # shellcheck disable=SC2153
   if [[ -f "$TMP_DIR"/KMOD_BAD.tmp ]]; then
     while read -r COUNTING; do
-      (( KMOD_BAD="$KMOD_BAD"+"$COUNTING" ))
+      KMOD_BAD=$((KMOD_BAD+COUNTING))
     done < "$TMP_DIR"/KMOD_BAD.tmp
   fi
 }

@@ -60,7 +60,7 @@ module_title()
   local MODULE_TITLE_FORMAT
   MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""$MODULE_TITLE""${NC}""\\n""${BOLD}""=================================================================""${NC}"
   echo -e "\\n\\n""$MODULE_TITLE_FORMAT"
-  if [[ "$2" != "no_log" ]] ; then
+  if [[ "${2:-}" != "no_log" ]] ; then
     echo -e "$(format_log "$MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
     if [[ $LOG_GREP -eq 1 ]] ; then
       write_grep_log "$MODULE_TITLE" "MODULE_TITLE"
@@ -72,7 +72,7 @@ module_title()
 sub_module_title()
 {
   local SUB_MODULE_TITLE
-  SUB_MODULE_TITLE="$1"
+  SUB_MODULE_TITLE="${1:-}"
   local SUB_MODULE_TITLE_FORMAT
   SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""$SUB_MODULE_TITLE""${NC}""\\n-----------------------------------------------------------------"
   echo -e "$SUB_MODULE_TITLE_FORMAT"
@@ -85,30 +85,32 @@ sub_module_title()
 
 print_output()
 {
-  local OUTPUT="$1"
-  local LOG_SETTING="$2"
-  if [[ -n "$LOG_SETTING" && -d "$(dirname "$LOG_SETTINGS")" && "$LOG_FILE" != "$LOG_FILE_MOD" ]]; then
-    local LOG_FILE_MOD="$2"
+  local OUTPUT="${1:-}"
+  local LOG_SETTING="${2:-}"
+  if [[ -n "${LOG_SETTING}" && -d "$(dirname "${LOG_SETTING}")" && "${LOG_FILE:-}" != "${LOG_FILE_MOD:-}" ]]; then
+    local LOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
-  local REF_LINK="$3"
+  #if [[ -n "${3+NA}" ]] ; then
+  local REF_LINK="${3:-}"
+  #fi
   local TYPE_CHECK
   TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
-    local COLOR_OUTPUT_STRING
+    local COLOR_OUTPUT_STRING=""
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
     echo -e "$COLOR_OUTPUT_STRING"
     if [[ "$LOG_SETTING" == "main" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
-      if [[ -z "$REF_LINK" ]] ; then
+      if [[ -z "${REF_LINK:-}" ]] ; then
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       else
         echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       fi
@@ -120,12 +122,12 @@ print_output()
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
         echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       else
         echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "$LOG_FILE_MOD" ]]; then 
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
         fi
       fi
@@ -139,8 +141,8 @@ print_output()
 write_log()
 {
   readarray TEXT_ARR <<< "$1"
-  local LOG_FILE_ALT="$2"
-  local GREP_LOG_WRITE="$3"
+  local LOG_FILE_ALT="${2:-}"
+  local GREP_LOG_WRITE="${3:-}"
   if [[ "$LOG_FILE_ALT" == "" ]] ; then
     W_LOG_FILE="$LOG_FILE"
   else
@@ -155,11 +157,11 @@ write_log()
       COLOR_OUTPUT_STRING="$(color_output "$E")"
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$W_LOG_FILE" >/dev/null
     else
-      echo -e "$(format_log "$E")" | tee -a "$W_LOG_FILE" >/dev/null
+      echo -e "$(format_log "$E")" | tee -a "$W_LOG_FILE" >/dev/null || true
     fi
   done
   if [[ "$GREP_LOG_WRITE" == "g" ]] ; then
-    write_grep_log "$1"
+    write_grep_log "${1:-}"
   fi
 }
 
@@ -178,7 +180,7 @@ write_grep_log()
   OLD_MESSAGE_TYPE=""
   if [[ $LOG_GREP -eq 1 ]] ; then
     readarray -t OUTPUT_ARR <<< "$1"
-    local MESSAGE_TYPE_PAR="$2"
+    local MESSAGE_TYPE_PAR="${2:-}"
     for E in "${OUTPUT_ARR[@]}" ; do
       if [[ -n "${E//[[:blank:]]/}" ]] && [[ "$E" != "\\n" ]] && [[ -n "$E" ]] ; then
         if [[ -n "$MESSAGE_TYPE_PAR" ]] ; then
@@ -225,9 +227,9 @@ write_link()
 {
   if [[ $HTML -eq 1 ]] ; then
     local LINK
-    LINK="$1"
+    LINK="${1:-}"
     LINK="$(format_log "[REF] ""$LINK" 1)"
-    local LOG_FILE_ALT="$2"
+    local LOG_FILE_ALT="${2:-}"
     if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
       if [[ -f "$LOG_FILE_ALT" ]] ; then
         echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
@@ -242,9 +244,9 @@ write_anchor()
 {
   if [[ $HTML -eq 1 ]] ; then
     local ANCHOR
-    ANCHOR="$1"
+    ANCHOR="${1:-}"
     ANCHOR="$(format_log "[ANC] ""$ANCHOR" 1)"
-    local LOG_FILE_ALT="$2"
+    local LOG_FILE_ALT="${2:-}"
     if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
       if [[ -f "$LOG_FILE_ALT" ]] ; then
         echo -e "$ANCHOR" | tee -a "$LOG_FILE_ALT" >/dev/null
@@ -263,13 +265,13 @@ reset_module_count()
 
 color_output()
 {
-  local TEXT
-  readarray TEXT_ARR <<< "$1"
+  local TEXT=""
+  readarray TEXT_ARR <<< "${1:-}"
   for E in "${TEXT_ARR[@]}" ; do
     local TYPE_CHECK
     TYPE_CHECK="$( echo "$E" | cut -c1-3 )"
     if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
-      local STR
+      local STR=""
       STR="$( echo "$E" | cut -c 4- )"
       if [[ "$TYPE_CHECK" == "[-]" ]] ; then
         TEXT="$TEXT""[""$RED""-""$NC""]""$STR"
@@ -291,7 +293,7 @@ color_output()
 
 white()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$NC""$E""\\n"
@@ -301,7 +303,7 @@ white()
 
 red()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$RED""$E""$NC""\\n"
@@ -311,7 +313,7 @@ red()
 
 green()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$GREEN""$E""$NC""\\n"
@@ -321,7 +323,7 @@ green()
 
 blue()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$BLUE""$E""$NC""\\n"
@@ -331,7 +333,7 @@ blue()
 
 cyan()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$CYAN""$E""$NC""\\n"
@@ -341,7 +343,7 @@ cyan()
 
 magenta()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$MAGENTA""$E""$NC""\\n"
@@ -351,7 +353,7 @@ magenta()
 
 orange()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$ORANGE""$E""$NC""\\n"
@@ -361,7 +363,7 @@ orange()
 
 bold()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$BOLD""$E""$NC""\\n"
@@ -371,7 +373,7 @@ bold()
 
 italic()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""$ITALIC""$E""$NC""\\n"
@@ -381,7 +383,7 @@ italic()
 
 indent()
 {
-  local TEXT
+  local TEXT=""
   readarray -t TEXT_ARR <<< "$1"
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="$TEXT""    ""$E""\\n"
@@ -391,9 +393,9 @@ indent()
 
 format_log()
 {
-  local LOG_STRING="$1"
+  local LOG_STRING="${1:-}"
   # remove log formatting, even if EMBA is set to format it (for [REF] markers used)
-  local OVERWRITE_SETTING="$2"
+  local OVERWRITE_SETTING="${2:-}"
   if [[ $FORMAT_LOG -eq 0 ]] || [[ $OVERWRITE_SETTING -eq 1 ]] ; then
     echo "$LOG_STRING" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
@@ -406,7 +408,7 @@ format_log()
 
 format_grep_log()
 {
-  local LOG_STRING="$1"
+  local LOG_STRING="${1:-}"
   echo "$LOG_STRING" | sed -r "s/\\\033\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\\\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
       | sed -r "s/\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,2})?)?)?[m|K]//g" \
@@ -439,13 +441,15 @@ print_help()
   echo -e "$CYAN""-E""$NC""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
   echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
   echo -e "$CYAN""-D""$NC""                Developer mode - EMBA runs on the host without container protection"
+  echo -e "$CYAN""-S""$NC""                STRICT mode - developer option to improve code quality (not enabled by default)"
   echo -e "$CYAN""-i""$NC""                Ignores log path check"
   echo -e "$CYAN""-p [PROFILE]""$NC""      Emba starts with a pre-defined profile (stored in ./scan-profiles)"
   echo -e "\\nWeb reporter"
   echo -e "$CYAN""-W""$NC""                Activates web report creation in log path (overwrites -z)"
-  echo -e "\\nDependency check"
+  echo -e "\\nSystem check"
   echo -e "$CYAN""-d""$NC""                Only checks dependencies"
   echo -e "$CYAN""-F""$NC""                Checks dependencies but ignore errors"
+  echo -e "$CYAN""-U""$NC""                Check and apply available updates and exit"
   echo -e "\\nSpecial tests"
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
@@ -468,10 +472,10 @@ print_help()
 
 print_firmware_info()
 {
-  local _VENDOR="$1"
-  local _VERSION="$2"
-  local _DEVICE="$3"
-  local _NOTES="$4"
+  local _VENDOR="${1:-}"
+  local _VERSION="${2:-}"
+  local _DEVICE="${3:-}"
+  local _NOTES="${4:-}"
   if [[ -n "$_VENDOR" || -n "$_VERSION" || -n "$_DEVICE" || -n "$_NOTES" ]]; then
     print_bar "no_log"
     print_output "[*] Firmware information:" "no_log"
@@ -518,7 +522,7 @@ print_excluded()
 }
 
 print_bar() {
-  local LOG_SETTINGS="$1"
+  local LOG_SETTINGS="${1:-}"
   if [[ -n "$LOG_SETTINGS" ]]; then
     print_output "\\n-----------------------------------------------------------------\\n" "$LOG_SETTINGS"
   else
@@ -527,16 +531,15 @@ print_bar() {
 }
 
 module_start_log() {
-  MODULE_MAIN_NAME="$1"
+  MODULE_MAIN_NAME="${1:-}"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   export LOG_PATH_MODULE
   LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
-  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" ; fi
-  ((MOD_RUNNING++))
+  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" || true; fi
 }
 
 pre_module_reporter() {
-  MODULE_MAIN_NAME="$1"
+  MODULE_MAIN_NAME="${1:-}"
   REPORT_TEMPLATE="$(basename -s ".sh" "$MODULE_MAIN_NAME")-pre"
   # We handle .txt and .sh files in report_template folder.
   # .txt are just echoed on cli and report
@@ -547,14 +550,15 @@ pre_module_reporter() {
     # shellcheck disable=SC1090
     source "./report_templates/$REPORT_TEMPLATE.sh"
   fi
+  print_output ""
 }
 
 # on module end we log that the module is finished in emba.log
 # additionally we log that EMBA has nothing found -> this is used for index generation of the web reporter
 # additionally we generate the HTML file of the web reporter if web reporting is enabled
 module_end_log() {
-  MODULE_MAIN_NAME="$1"
-  MODULE_REPORT_STATE="$2"
+  MODULE_MAIN_NAME="${1:-}"
+  MODULE_REPORT_STATE="${2:-}"
 
   if [[ "$MODULE_REPORT_STATE" -eq 0 ]]; then
     print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
@@ -584,11 +588,10 @@ module_end_log() {
   fi
 
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
-  ((MOD_RUNNING--))
 }
 
 strip_color_codes() {
-  echo "$1" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+  echo "${1:-}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
 }
 
 matrix_mode() {

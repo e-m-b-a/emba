@@ -25,28 +25,30 @@ S90_mail_check()
 
   local MAILS
   local MAILS_PATH
-  mapfile -t MAILS_PATH < <(mod_path "/var/mail")
+  #mapfile -t MAILS_PATH < <(mod_path "/var/mail")
+  mapfile -t MAILS_PATH < <(find "$FIRMWARE_PATH" -xdev -type d -iwholename "/var/mail")
   for ELEM in "${MAILS_PATH[@]}" ; do
     if [[ -e "$ELEM" ]] ; then
       MAILS="$(ls -la "$ELEM" 2>/dev/null)"
       if [[ -n "$MAILS" ]] ; then
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS")")"
-        ((FINDING++))
+        ((FINDING+=1))
       fi
     fi
   done
 
   local MAILS_ROOT
   local MAILS_PATH_ROOT
-  mapfile -t MAILS_PATH_ROOT < <(mod_path "/var/mail/root")
+  #mapfile -t MAILS_PATH_ROOT < <(mod_path "/var/mail/root")
+  mapfile -t MAILS_PATH < <(find "$FIRMWARE_PATH" -xdev -type d -iwholename "/var/mail/root")
   for ELEM in "${MAILS_PATH_ROOT[@]}" ; do
     if [[ -e "$ELEM" ]] ; then
       MAILS_ROOT="$(head "$ELEM" 2>/dev/null)"
       if [[ -n "$MAILS_ROOT" ]] ; then
         print_output "[+] Content of ""$(print_path "$ELEM")"":"
         print_output "$(indent "$(orange "$MAILS_ROOT")")"
-        ((FINDING++))
+        ((FINDING+=1))
       fi
     fi
   done

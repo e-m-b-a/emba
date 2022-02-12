@@ -31,7 +31,7 @@ S14_weak_func_radare_check()
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
     if [[ -f "$MAIN_LOG" ]]; then
-      while [[ $(grep -c S13_weak "$MAIN_LOG") -eq 1 ]]; do
+      while [[ $(grep -c S13_weak "$MAIN_LOG" || true) -eq 1 ]]; do
         sleep 1
       done
     fi
@@ -39,7 +39,7 @@ S14_weak_func_radare_check()
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
     if [[ -f "$MAIN_LOG" ]]; then
-      while [[ $(grep -c S12_binary "$MAIN_LOG") -eq 1 ]]; do
+      while [[ $(grep -c S12_binary "$MAIN_LOG" || true) -eq 1 ]]; do
         sleep 1
       done
     fi
@@ -115,7 +115,7 @@ S14_weak_func_radare_check()
 
     if [[ -f "$TMP_DIR"/S14_STRCPY_CNT.tmp ]]; then
       while read -r STRCPY; do
-        (( STRCPY_CNT="$STRCPY_CNT"+"$STRCPY" ))
+        STRCPY_CNT=$((STRCPY_CNT+STRCPY))
       done < "$TMP_DIR"/S14_STRCPY_CNT.tmp
     fi
 
@@ -130,26 +130,26 @@ S14_weak_func_radare_check()
 }
 
 radare_function_check_PPC32(){
-  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NAME=$(basename "$LINE" 2> /dev/null)
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "bl.*$FUNCTION" 2> /dev/null)
+        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "bl.*$FUNCTION" 2> /dev/null || true)
       else
-        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 2 -B 20 "bl.*$FUNCTION" 2> /dev/null)
+        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 2 -B 20 "bl.*$FUNCTION" 2> /dev/null || true)
       fi
       if [[ "${#R2_DUMPS_ARR[@]}" -gt 0 ]] ; then
         radare_write_log_header
 
-        COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+        COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
-          COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null)
-          (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+          COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null || true)
+          STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
         elif [[ "$FUNCTION" == "mmap" ]] ; then
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
-          COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null)
+          COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null || true)
         fi
         radare_log_func_footer
         radare_output_function_details
@@ -160,22 +160,22 @@ radare_function_check_PPC32(){
 }
 
 radare_function_check_MIPS32() {
-  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
       # For the mmap check we need the disasm after the call
-      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$LINE" 2>/dev/null | grep -A 20 "^lw .*$FUNCTION""(gp)" )
+      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$LINE" 2>/dev/null | grep -A 20 "^lw .*$FUNCTION""(gp)" || true)
     else
-      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$LINE" 2>/dev/null | grep -A 20 -B 25 "^lw .*$FUNCTION""(gp)" )
+      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$LINE" 2>/dev/null | grep -A 20 -B 25 "^lw .*$FUNCTION""(gp)" || true)
     fi
     if [[ "${#R2_DUMPS_ARR[@]}" -gt 0 ]] ; then
       radare_write_log_header
 
-      COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+      COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
-        COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG"  2> /dev/null)
-        (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+        COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG" 2> /dev/null || true)
+        STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       elif [[ "$FUNCTION" == "mmap" ]] ; then
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
         # Check this. This test is very rough:
@@ -191,21 +191,21 @@ radare_function_check_MIPS32() {
 }
 
 radare_function_check_ARM64() {
-  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 20 "bl.*$FUNCTION" 2> /dev/null)
+      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 20 "bl.*$FUNCTION" 2> /dev/null || true)
     else
-      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 2 -B 20 "bl.*$FUNCTION" 2> /dev/null)
+      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 2 -B 20 "bl.*$FUNCTION" 2> /dev/null || true)
     fi
     if [[ "${#R2_DUMPS_ARR[@]}" -gt 0 ]] ; then
       radare_write_log_header
 
-      COUNT_FUNC="$(grep -c "bl.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+      COUNT_FUNC="$(grep -c "bl.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
-        COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null)
-        (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+        COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null || true)
+        STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       elif [[ "$FUNCTION" == "mmap" ]] ; then
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
         # Test not implemented on ARM64
@@ -221,21 +221,21 @@ radare_function_check_ARM64() {
 }
 
 radare_function_check_ARM32() {
-  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NAME=$(basename "$LINE" 2> /dev/null)
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 20 "bl.*$FUNCTION" 2> /dev/null)
+      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 20 "bl.*$FUNCTION" 2> /dev/null || true)
     else
-      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 2 -B 20 "bl.*$FUNCTION" 2> /dev/null)
+      mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -A 2 -B 20 "bl.*$FUNCTION" 2> /dev/null || true)
     fi
     if [[ "${#R2_DUMPS_ARR[@]}" -gt 0 ]] ; then
       radare_write_log_header
 
-      COUNT_FUNC="$(grep -c "bl.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+      COUNT_FUNC="$(grep -c "bl.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
-        COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null)
-        (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+        COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null || true)
+        STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       elif [[ "$FUNCTION" == "mmap" ]] ; then
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
         # Check this testcase. Not sure if it works in all cases! 
@@ -251,26 +251,26 @@ radare_function_check_ARM32() {
 }
 
 radare_function_check_x86() {
-  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "call.*$FUNCTION" 2> /dev/null)
+        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "call.*$FUNCTION" 2> /dev/null || true)
       else
-        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 2 -B 20 "call.*$FUNCTION" 2> /dev/null)
+        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 2 -B 20 "call.*$FUNCTION" 2> /dev/null || true)
       fi
       if [[ "${#R2_DUMPS_ARR[@]}" -gt 0 ]] ; then
         radare_write_log_header
 
-        COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+        COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
-          COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null)
-          (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+          COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
+          STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
         elif [[ "$FUNCTION" == "mmap" ]] ; then
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           # TODO: check this in radare2
-          COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "$FUNC_LOG"  2> /dev/null)
+          COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "$FUNC_LOG"  2> /dev/null || true)
         fi
         radare_log_func_footer
         radare_output_function_details
@@ -281,22 +281,22 @@ radare_function_check_x86() {
 }
 
 radare_function_check_x86_64() {
-  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null)
+  NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "call.*$FUNCTION" 2> /dev/null)
+        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 20 "call.*$FUNCTION" 2> /dev/null || true)
       else
-        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 2 -B 20 "call.*$FUNCTION" 2> /dev/null)
+        mapfile -t R2_DUMPS_ARR < <(r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$LINE" | grep -E -A 2 -B 20 "call.*$FUNCTION" 2> /dev/null || true)
       fi
       if [[ "${#R2_DUMPS_ARR[@]}" -gt 0 ]] ; then
         radare_write_log_header
 
-        COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null)"
+        COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy"  ]] ; then
-          COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null)
-          (( STRCPY_CNT="$STRCPY_CNT"+"$COUNT_FUNC" ))
+          COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
+          STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
         elif [[ "$FUNCTION" == "mmap"  ]] ; then
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null)
@@ -419,7 +419,9 @@ radare_output_function_details()
   LOG_FILE_LOC_OLD="$LOG_FILE_LOC"
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
 
-  mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
+  if [[ -f "$LOG_FILE_LOC_OLD" ]]; then
+    mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
+  fi
   
   if [[ "$NETWORKING" -gt 1 ]]; then
     NETWORKING_="${ORANGE}networking: yes${NC}"

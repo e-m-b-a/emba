@@ -37,12 +37,12 @@ http_file_search()
   HTTP_STUFF=0
   mapfile -t HTTP_STUFF < <(config_find "$CONFIG_DIR""/http_files.cfg")
 
-  if [[ "${HTTP_STUFF[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${HTTP_STUFF[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#HTTP_STUFF[@]}" -ne 0 ]] ; then
     print_output "[+] Found http related files:"
     for LINE in "${HTTP_STUFF[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
-      ((HTTP_COUNTER++))
+      ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No http related files found"
@@ -63,7 +63,7 @@ webserver_check()
     print_output "[+] Found Apache related files:"
     for LINE in "${APACHE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
-      ((HTTP_COUNTER++))
+      ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No Apache related files found"
@@ -73,7 +73,7 @@ webserver_check()
     print_output "[+] Found nginx related files:"
     for LINE in "${NGINX_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
-      ((HTTP_COUNTER++))
+      ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No nginx related files found"
@@ -83,7 +83,7 @@ webserver_check()
     print_output "[+] Found Lighttpd related files:"
     for LINE in "${LIGHTTP_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
-      ((HTTP_COUNTER++))
+      ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No Lighttpd related files found"
@@ -93,7 +93,7 @@ webserver_check()
     print_output "[+] Found Cherokee related files:"
     for LINE in "${CHEROKEE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
-      ((HTTP_COUNTER++))
+      ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No Cherokee related files found"
@@ -103,7 +103,7 @@ webserver_check()
     print_output "[+] Found HTTPd related files:"
     for LINE in "${HTTPD_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
-      ((HTTP_COUNTER++))
+      ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No HTTPd related files found"
@@ -121,7 +121,7 @@ php_check()
     print_output "[+] Found php.ini:"
     for LINE in "${PHP_INI_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
-      ((HTTP_COUNTER++))
+      ((HTTP_COUNTER+=1))
     done
   else
     print_output "[-] No php.ini found"
