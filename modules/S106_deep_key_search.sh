@@ -92,6 +92,7 @@ deep_key_searcher() {
 }
 
 deep_key_reporter() {
+  OCC_LIST=()
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
     if [[ "$P_COUNT" -gt 0 ]]; then

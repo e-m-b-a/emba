@@ -467,7 +467,7 @@ binwalk_deep_extract_helper() {
 extract_deb_extractor_helper(){
   DEB_NAME=$(basename "$DEB")
   print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-  dpkg-deb --extract "$DEB" "$R_PATH"
+  dpkg-deb --extract "$DEB" "$R_PATH" || true
 }
 linux_basic_identification_helper() {
   LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"

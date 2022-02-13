@@ -280,7 +280,7 @@ output_config_issues() {
 output_binaries() {
 
   local DATA=0
-  if [[ "${#BINARIES[@]}" -gt 0 ]]; then
+  if [[ -v BINARIES[@]} ]]; then
     if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG" || true)
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S12_LOG" || true)

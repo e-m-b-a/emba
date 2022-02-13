@@ -137,8 +137,8 @@ binary_architecture_detection()
   print_output "[*] Architecture detection running on ""$FIRMWARE_PATH"
 
   # as Thumb is usually false positive we remove it from the results
-  mapfile -t PRE_ARCH_Y < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | grep -v "Thumb" | awk '{print $3}' | sort -u)
-  mapfile -t PRE_ARCH_A < <(binwalk -A "$FIRMWARE_PATH" | grep "\ instructions," | awk '{print $3}' | uniq -c | sort -n | tail -1 | awk '{print $2}')
+  mapfile -t PRE_ARCH_Y < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | grep -v "Thumb" | awk '{print $3}' | sort -u || true)
+  mapfile -t PRE_ARCH_A < <(binwalk -A "$FIRMWARE_PATH" | grep "\ instructions," | awk '{print $3}' | uniq -c | sort -n | tail -1 | awk '{print $2}' || true)
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
     print_output ""
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"

@@ -227,22 +227,23 @@ prepare_binary_arr()
 
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
-  export BINARIES
+  export BINARIES=()
   #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
-  # in some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
-  # this is a slow fallback solution just to have something we can work with
+  # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   readarray -t BINARIES_TMP < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
-  for BINARY in "${BINARIES_TMP[@]}"; do
-    if [[ -f "$BINARY" ]]; then
-      BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
-      if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
-        BINARIES+=( "$BINARY" )
-        MD5_DONE_INT+=( "$BIN_MD5" )
+  if [[ -v BINARIES_TMP[@] ]]; then
+    for BINARY in "${BINARIES_TMP[@]}"; do
+      if [[ -f "$BINARY" ]]; then
+        BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
+        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
+          BINARIES+=( "$BINARY" )
+          MD5_DONE_INT+=( "$BIN_MD5" )
+        fi
       fi
-    fi
-  done
-  print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables."
+    done
+    print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables."
+  fi
 
   # remove ./proc/* executables (for live testing)
   #rm_proc_binary "${BINARIES[@]}"
@@ -306,9 +307,9 @@ detect_root_dir_helper() {
   export ROOT_PATH
   local R_PATH
 
-  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null || true)
 
-  if [[ "${#INTERPRETER_FULL_PATH[@]}" -ne 0 ]]; then
+  if [[ "${#INTERPRETER_FULL_PATH[@]}" -gt 0 ]]; then
     for INTERPRETER_PATH in "${INTERPRETER_FULL_PATH[@]}"; do
       # now we have a result like this "/lib/ld-uClibc.so.0"
       # lets escape it

@@ -36,8 +36,8 @@ S95_interesting_binaries_check()
   fi
 
   if [[ -f "$TMP_DIR"/INT_COUNT.tmp || -f "$TMP_DIR"/POST_COUNT.tmp ]]; then
-    POST_COUNT=$(cat "$TMP_DIR"/POST_COUNT.tmp 2>/dev/null)
-    INT_COUNT=$(cat "$TMP_DIR"/INT_COUNT.tmp 2>/dev/null)
+    POST_COUNT=$(cat "$TMP_DIR"/POST_COUNT.tmp 2>/dev/null || true)
+    INT_COUNT=$(cat "$TMP_DIR"/INT_COUNT.tmp 2>/dev/null || true)
     if [[ "$POST_COUNT" -gt 0 || "$INT_COUNT" -gt 0 ]]; then
       NEG_LOG=1
     fi
@@ -90,6 +90,7 @@ post_exploitation()
   local COUNT=0
   declare -a MD5_DONE_POST
   POST_COUNT=0
+  INT_BIN_PE=()
 
   mapfile -t INT_BIN_PE < <(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg")
   if [[ "${INT_BIN_PE[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"

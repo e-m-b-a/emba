@@ -28,6 +28,7 @@ L10_system_emulator() {
 
   SYS_ONLINE=0
   BOOTED=0
+  MODULE_END=0
   IPS=()
 
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then

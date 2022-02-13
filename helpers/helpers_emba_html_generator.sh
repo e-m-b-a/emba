@@ -509,7 +509,7 @@ update_index()
 
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
-  rm -R "$ABS_HTML_PATH"/qemu_init*
+  rm -R "$ABS_HTML_PATH"/qemu_init* || true
 }
 
 scan_report()
