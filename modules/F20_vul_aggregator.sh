@@ -32,9 +32,11 @@ F20_vul_aggregator() {
   LOW_CVE_COUNTER=0
   CVE_SEARCHSPLOIT=0
   MSF_MODULE_CNT=0
+  TRICKEST_MODULE_CNT=0
   RS_MODULE_CNT=0
   RS_SEARCH=0
   MSF_SEARCH=0
+  TRICKEST_SEARCH=0
   CVE_SEARCHSPLOIT=0
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
@@ -91,6 +93,9 @@ F20_vul_aggregator() {
       fi
       if [[ -f "$MSF_DB_PATH" ]]; then
         MSF_SEARCH=1
+      fi
+      if [[ -f "$TRICKEST_DB_PATH" ]]; then
+        TRICKEST_SEARCH=1
       fi
       if [[ -f "$CONFIG_DIR"/routersploit_cve-db.txt || -f "$CONFIG_DIR"/routersploit_exploit-db.txt ]]; then
         RS_SEARCH=1
@@ -237,7 +242,7 @@ generate_special_log() {
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*[[:blank:]]CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
         print_output "$RED$EXPLOIT_$NC"
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
@@ -260,6 +265,7 @@ generate_cve_details() {
   REMOTE_EXPLOITS=0
   LOCAL_EXPLOITS=0
   DOS_EXPLOITS=0
+  UNKNOWN_EXPLOITS=0
 
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     if [[ "$THREADED" -eq 1 ]]; then
@@ -360,7 +366,7 @@ cve_extractor() {
         done
       fi
   
-      if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 ]] ; then
+      if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 || "$TRICKEST_SEARCH" -eq 1 ]] ; then
         if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null || true)
         fi
@@ -369,6 +375,10 @@ cve_extractor() {
           mapfile -t EXPLOIT_AVAIL_MSF < <(grep -E "$CVE_VALUE"$ "$MSF_DB_PATH" 2>/dev/null || true)
         fi
   
+        if [[ $TRICKEST_SEARCH -eq 1 ]]; then
+          mapfile -t EXPLOIT_AVAIL_TRICKEST < <(grep -E "$CVE_VALUE\.md" "$TRICKEST_DB_PATH" 2>/dev/null || true)
+        fi
+
         # routersploit db search
         if [[ $RS_SEARCH -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT < <(grep -E "$CVE_VALUE"$ "$CONFIG_DIR/routersploit_cve-db.txt" 2>/dev/null || true)
@@ -439,6 +449,7 @@ cve_extractor() {
           else
             EXPLOIT="$EXPLOIT"" ""/ MSF:"
           fi
+
           for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
             EXPLOIT_PATH=$(echo "$EXPLOIT_MSF" | cut -d: -f1)
             EXPLOIT_NAME=$(basename -s .rb "$EXPLOIT_PATH")
@@ -461,7 +472,7 @@ cve_extractor() {
             fi
             ((MSF_MODULE_CNT+=1))
           done
-  
+
           if [[ $EDB -eq 0 ]]; then
             # only count the msf exploit if we have not already count an EDB exploit
             # otherwise we count an exploit for one CVE twice
@@ -470,6 +481,40 @@ cve_extractor() {
             EDB=1
           fi
         fi
+
+        if [[ ${#EXPLOIT_AVAIL_TRICKEST[@]} -gt 0 ]]; then
+          if [[ "$EXPLOIT" == "No exploit available" ]]; then
+            EXPLOIT="Exploit (Github:"
+          else
+            EXPLOIT="$EXPLOIT"" ""/ Github:"
+          fi
+
+          for EXPLOIT_TRICKEST in "${EXPLOIT_AVAIL_TRICKEST[@]}" ; do
+            EXPLOIT_PATH=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f1)
+            EXPLOIT_NAME=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g')
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"" (U)"
+            # we remove slashes from the github url and use this as exploit name:
+            EXPLOIT_NAME_=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g' | tr '/' '_')
+            if [[ -f "$EXPLOIT_PATH" ]] ; then
+              # for the web reporter we copy the original metasploit module into the EMBA log directory
+              if ! [[ -d "$LOG_PATH_MODULE""/exploit/" ]]; then
+                mkdir "$LOG_PATH_MODULE""/exploit/"
+              fi
+              cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/trickest_""$EXPLOIT_NAME_".md
+            fi
+            ((UNKNOWN_EXPLOITS+=1))
+            ((TRICKEST_MODULE_CNT+=1))
+          done
+
+          if [[ $EDB -eq 0 ]]; then
+            # only count the msf exploit if we have not already count an EDB exploit
+            # otherwise we count an exploit for one CVE twice
+            ((EXPLOIT_COUNTER+=1))
+            ((EXPLOIT_COUNTER_VERSION+=1))
+            EDB=1
+          fi
+        fi
+  
         if [[ -v EXPLOIT_AVAIL_ROUTERSPLOIT[@] || -v EXPLOIT_AVAIL_ROUTERSPLOIT1[@] ]]; then
           if [[ "$EXPLOIT" == "No exploit available" ]]; then
             EXPLOIT="Exploit (Routersploit:"
@@ -510,21 +555,21 @@ cve_extractor() {
       #VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
       # we do not deal with output formatting the usual way -> we use printf
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${RED}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((HIGH_CVE_COUNTER+=1))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${ORANGE}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((MEDIUM_CVE_COUNTER+=1))
       else
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${GREEN}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -554,6 +599,9 @@ cve_extractor() {
   if [[ $MSF_MODULE_CNT -gt 0 ]]; then
     echo "$MSF_MODULE_CNT" >> "$TMP_DIR"/MSF_MODULE_CNT.tmp
   fi
+  if [[ $TRICKEST_MODULE_CNT -gt 0 ]]; then
+    echo "$TRICKEST_MODULE_CNT" >> "$TMP_DIR"/TRICKEST_MODULE_CNT.tmp
+  fi
   if [[ $REMOTE_EXPLOITS -gt 0 ]]; then
     echo "$REMOTE_EXPLOITS" >> "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp
   fi
@@ -562,6 +610,9 @@ cve_extractor() {
   fi
   if [[ $DOS_EXPLOITS -gt 0 ]]; then
     echo "$DOS_EXPLOITS" >> "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
+  fi
+  if [[ $UNKNOWN_EXPLOITS -gt 0 ]]; then
+    echo "$UNKNOWN_EXPLOITS" >> "$TMP_DIR"/UNKNOWN_EXPLOITS_CNT.tmp
   fi
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then

@@ -362,5 +362,12 @@ generate_msf_db() {
     export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
   fi
   find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" | sort > "$MSF_DB_PATH"
+
+  print_output "[*] Building the Trickest CVE/exploit database" "no_log"
+  # search all markdown files in the trickest directory and create a temporary file with the module path (including CVE) and github URL to exploit:
+  if [[ $IN_DOCKER -eq 1 ]]; then
+    export TRICKEST_DB_PATH="$TMP_DIR"/trickest_cve-db.txt
+  fi
+  #find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH"
 }
 

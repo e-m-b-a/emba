@@ -27,6 +27,7 @@ S25_kernel_check()
   KERNEL_VERSION=()
   KERNEL_DESC=()
   FOUND=0
+  KMOD_BAD=0
 
   # This module waits for S24_kernel_bin_identifier
   # check emba.log for S24_kernel_bin_identifier starting

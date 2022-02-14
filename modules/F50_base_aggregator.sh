@@ -280,7 +280,7 @@ output_config_issues() {
 output_binaries() {
 
   local DATA=0
-  if [[ -v BINARIES[@]} ]]; then
+  if [[ -v BINARIES[@] ]]; then
     if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG" || true)
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S12_LOG" || true)
@@ -471,15 +471,15 @@ binary_fct_output() {
 output_cve_exploits() {
 
   local DATA=0
-  if [[ "${S30_VUL_COUNTER-0}" -gt 0 || "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
-    if [[ "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+  if [[ "${S30_VUL_COUNTER-0}" -gt 0 || "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
+    if [[ "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
       print_output ""
     fi
 
-    if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+    if [[ -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_AGGREGATED[@]}""$GREEN"" software components with version details.\\n"
       write_link "f20#softwareinventoryinitialoverview"
       echo "versions_identified;\"${#VERSIONS_AGGREGATED[@]}\"" >> "$CSV_LOG_FILE"
@@ -518,10 +518,11 @@ output_cve_exploits() {
         write_link "f20#minimalreportofexploitsandcves"
       fi
       if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN")")"
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Unknown: $MAGENTA$BOLD$UNKNOWN_EXPLOIT_CNT$NC$GREEN")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
         write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT"
+        write_csv_log "unknown_exploits" "$UNKNOWN_EXPLOIT_CNT"
       fi
       # we report only software components with exploits to csv:
       grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
@@ -537,6 +538,7 @@ get_data() {
   REMOTE_EXPLOIT_CNT=0
   LOCAL_EXPLOIT_CNT=0
   DOS_EXPLOIT_CNT=0
+  UNKNOWN_EXPLOIT_CNT=0
   HIGH_CVE_COUNTER=0
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
@@ -687,6 +689,11 @@ get_data() {
     while read -r COUNTING; do
       (( DOS_EXPLOIT_CNT="$DOS_EXPLOIT_CNT"+"$COUNTING" ))
     done < "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
+  fi
+  if [[ -f "$TMP_DIR"/UNKNOWN_EXPLOITS_CNT.tmp ]]; then
+    while read -r COUNTING; do
+      (( UNKNOWN_EXPLOIT_CNT="$UNKNOWN_EXPLOIT_CNT"+"$COUNTING" ))
+    done < "$TMP_DIR"/UNKNOWN_EXPLOITS_CNT.tmp
   fi
 }
 
