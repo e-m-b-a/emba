@@ -210,7 +210,6 @@ add_link_tags() {
     readarray -t MSF_KEY_F < <( grep -a -n -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "$LINK_FILE" | sort -u || true)
     for MSF_KEY in "${MSF_KEY_F[@]}" ; do 
       MSF_KEY_LINE="$(echo "$MSF_KEY" | cut -d ":" -f 1)"
-      echo "[*] MSF_KEY_LINE: $MSF_KEY_LINE"
       MSF_KEY_STRING="$(echo "$MSF_KEY" | cut -d ":" -f 3- | sed -e 's/^[[:space:]]*//')"
       readarray -t MSF_KEY_STRING_ARR < <(echo "$MSF_KEY_STRING" | tr " " "\n" | sort -u)
       for MSF_KEY_ELEM in "${MSF_KEY_STRING_ARR[@]}" ; do
@@ -223,7 +222,6 @@ add_link_tags() {
           cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")" || true
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY_ELEM""$LINK_END"
           LINK_COMMAND_ARR+=( '-e' "$MSF_KEY_LINE""s@""$MSF_KEY_ELEM""@""$HTML_LINK""@g" )
-           echo "[*] MSF_LINK_COMMAND_ARR: $LINK_COMMAND_ARR"
         fi
       done
     done
@@ -232,18 +230,15 @@ add_link_tags() {
   # Trickest key links to Github -> TODO
   if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
     echo "[*] LINK_FILE: $LINK_FILE"
-    readarray -t TRICKEST_KEY_F < <( grep -a -o -E "Github: .*" "$LINK_FILE" | sed 's/ (U)//g' | sed 's/^Github: //' | sed 's/).*//' | sort -u || true)
+    readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (U)//g' | sed 's/Github: //' | sed 's/).*//' | sort -u || true)
     for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
-      echo "[*] TRICKEST_KEY: $TRICKEST_KEY"
-      readarray -t TRICKEST_KEY_STRING_ARR < <(echo "$TRICKEST_KEY" | tr " " "\n" | sort -u)
+      TRICKEST_ID_LINE="$(echo "$TRICKEST_KEY" | cut -d ":" -f 1)"
+      TRICKEST_ID_STRING="$(echo "$TRICKEST_KEY" | cut -d ":" -f 2-)"
+      readarray -t TRICKEST_KEY_STRING_ARR < <(echo "$TRICKEST_ID_STRING" | tr " " "\n" | sort -u)
       for TRICKEST_KEY_ELEM in "${TRICKEST_KEY_STRING_ARR[@]}" ; do
-        echo "[*] TRICKEST_KEY_ELEM: $TRICKEST_KEY_ELEM"
         TRICKEST_KEY_NAME="$(echo "$TRICKEST_KEY_ELEM" | tr "/" "_")"
-        echo "[*] TRICKEST_KEY_NAME: $TRICKEST_KEY_NAME"
         HTML_LINK="$(echo "$GITHUB_LINK" | sed -e "s@LINKNAME@$TRICKEST_KEY_NAME@g" | sed -e "s@LINK@$TRICKEST_KEY_ELEM@g")""$TRICKEST_KEY_NAME""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "$TRICKEST_KEY""s@""$TRICKEST_KEY_NAME""@""$HTML_LINK""@g" )
-        echo "[*] TRICKEST_KEY_LINK: $HTML_LINK"
-        echo "[*] TRICKEST_LINK_COMMAND_ARR: $LINK_COMMAND_ARR"
+        LINK_COMMAND_ARR+=( '-e' "$TRICKEST_ID_LINE""s@""$TRICKEST_KEY_ELEM""@""$HTML_LINK""@g" )
       done
     done
   fi 
@@ -256,7 +251,11 @@ add_link_tags() {
       CVE_ID_STRING="$(echo "$CVE_ID" | cut -d ":" -f 2-)"
       if [[ -n "$CVE_ID_STRING" ]] ; then
         HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID_STRING@g")""$CVE_ID_STRING""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""$CVE_ID_STRING""@""$HTML_LINK""@g" )
+        if [[ "$LINK_FILE" == *"f20_vul_aggregator"* ]]; then
+          LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""[[:blank:]]$CVE_ID_STRING""@""\t$HTML_LINK""@g" )
+        else
+          LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""$CVE_ID_STRING""@""$HTML_LINK""@g" )
+        fi
       fi
     done
   fi
