@@ -570,7 +570,8 @@ main()
     generate_msf_db &
   fi
 
-  # we create the trickest cve database
+  # we create the trickest cve database on the host - if the trickest-cve repo is here
+  # typically this is on installations in full mode
   if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
     generate_trickest_db &
   fi

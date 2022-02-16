@@ -238,6 +238,10 @@ generate_special_log() {
 
     print_output ""
     print_output "[*] Minimal exploit summary file stored in $EXPLOIT_OVERVIEW_LOG.\\n"
+
+    echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
+    grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true >> "$EXPLOIT_OVERVIEW_LOG"
+
     mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true)
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
@@ -251,8 +255,6 @@ generate_special_log() {
         print_output "$GREEN$EXPLOIT_$NC"
       fi
     done
-    echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
-    grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true >> "$EXPLOIT_OVERVIEW_LOG"
   fi
 }
 
@@ -261,11 +263,6 @@ generate_cve_details() {
   write_anchor "collectcveandexploitdetails"
 
   CVE_COUNTER=0
-  EXPLOIT_COUNTER=0
-  REMOTE_EXPLOITS=0
-  LOCAL_EXPLOITS=0
-  DOS_EXPLOITS=0
-  UNKNOWN_EXPLOITS=0
 
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     if [[ "$THREADED" -eq 1 ]]; then
@@ -359,7 +356,6 @@ cve_extractor() {
         for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
           if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
             EXPLOIT="Exploit (linux-exploit-suggester"
-            ((EXPLOIT_COUNTER+=1))
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
           fi
@@ -414,21 +410,17 @@ cve_extractor() {
               if [[ "$LINE" =~ "Platform: local" && "$LOCAL" -eq 0 ]]; then
                 EXPLOIT="$EXPLOIT"" (L)"
                 LOCAL=1
-                ((LOCAL_EXPLOITS+=1))
               fi
               if [[ "$LINE" =~ "Platform: remote" && "$REMOTE" -eq 0 ]]; then
                 EXPLOIT="$EXPLOIT"" (R)"
                 REMOTE=1
-                ((REMOTE_EXPLOITS+=1))
               fi
               if [[ "$LINE" =~ "Platform: dos" && "$DOS" -eq 0 ]]; then
                 EXPLOIT="$EXPLOIT"" (D)"
                 DOS=1
-                ((DOS_EXPLOITS+=1))
               fi
             done
             EDB=1
-            ((EXPLOIT_COUNTER+=1))
             ((EXPLOIT_COUNTER_VERSION+=1))
           done
   
@@ -459,24 +451,19 @@ cve_extractor() {
               cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/msf_""$EXPLOIT_NAME".rb
               if grep -q "< Msf::Exploit::Remote" "$EXPLOIT_PATH"; then
                 EXPLOIT="$EXPLOIT"" (R)"
-                ((REMOTE_EXPLOITS+=1))
               fi
               if grep -q "< Msf::Exploit::Local" "$EXPLOIT_PATH"; then
                 EXPLOIT="$EXPLOIT"" (L)"
-                ((LOCAL_EXPLOITS+=1))
               fi
               if grep -q "include Msf::Auxiliary::Dos" "$EXPLOIT_PATH"; then
                 EXPLOIT="$EXPLOIT"" (D)"
-                ((DOS_EXPLOITS+=1))
               fi
             fi
-            ((MSF_MODULE_CNT+=1))
           done
 
           if [[ $EDB -eq 0 ]]; then
             # only count the msf exploit if we have not already count an EDB exploit
             # otherwise we count an exploit for one CVE twice
-            ((EXPLOIT_COUNTER+=1))
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
           fi
@@ -492,7 +479,7 @@ cve_extractor() {
           for EXPLOIT_TRICKEST in "${EXPLOIT_AVAIL_TRICKEST[@]}" ; do
             EXPLOIT_PATH=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f1)
             EXPLOIT_NAME=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g')
-            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"" (U)"
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"" (G)"
             # we remove slashes from the github url and use this as exploit name:
             EXPLOIT_NAME_=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g' | tr '/' '_')
             if [[ -f "$EXPLOIT_PATH" ]] ; then
@@ -502,14 +489,11 @@ cve_extractor() {
               fi
               cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/trickest_""$EXPLOIT_NAME_".md
             fi
-            ((UNKNOWN_EXPLOITS+=1))
-            ((TRICKEST_MODULE_CNT+=1))
           done
 
           if [[ $EDB -eq 0 ]]; then
             # only count the msf exploit if we have not already count an EDB exploit
             # otherwise we count an exploit for one CVE twice
-            ((EXPLOIT_COUNTER+=1))
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
           fi
@@ -533,13 +517,11 @@ cve_extractor() {
                 EXPLOIT="$EXPLOIT"" (R)"
               fi
             fi
-            ((RS_MODULE_CNT+=1))
           done
   
           if [[ $EDB -eq 0 ]]; then
             # only count the msf exploit if we have not already count an EDB exploit
             # otherwise we count an exploit for one CVE twice
-            ((EXPLOIT_COUNTER+=1))
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
           fi
@@ -579,7 +561,6 @@ cve_extractor() {
     done
   fi
   
-  
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
   } >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -592,27 +573,6 @@ cve_extractor() {
   fi
   if [[ $HIGH_CVE_COUNTER -gt 0 ]]; then
     echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
-  fi
-  if [[ $EXPLOIT_COUNTER -gt 0 ]]; then
-    echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
-  fi
-  if [[ $MSF_MODULE_CNT -gt 0 ]]; then
-    echo "$MSF_MODULE_CNT" >> "$TMP_DIR"/MSF_MODULE_CNT.tmp
-  fi
-  if [[ $TRICKEST_MODULE_CNT -gt 0 ]]; then
-    echo "$TRICKEST_MODULE_CNT" >> "$TMP_DIR"/TRICKEST_MODULE_CNT.tmp
-  fi
-  if [[ $REMOTE_EXPLOITS -gt 0 ]]; then
-    echo "$REMOTE_EXPLOITS" >> "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp
-  fi
-  if [[ $LOCAL_EXPLOITS -gt 0 ]]; then
-    echo "$LOCAL_EXPLOITS" >> "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp
-  fi
-  if [[ $DOS_EXPLOITS -gt 0 ]]; then
-    echo "$DOS_EXPLOITS" >> "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
-  fi
-  if [[ $UNKNOWN_EXPLOITS -gt 0 ]]; then
-    echo "$UNKNOWN_EXPLOITS" >> "$TMP_DIR"/UNKNOWN_EXPLOITS_CNT.tmp
   fi
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then

@@ -41,10 +41,10 @@ IF50_aggregator_common() {
         pip3 install cve_searchsploit 2>/dev/null
 
         # get trickest repository
-        if ! [[ -d external/trickest_cve_db ]]; then
-          git clone https://github.com/trickest/cve.git external/trickest_cve_db
+        if ! [[ -d external/trickest-cve ]]; then
+          git clone https://github.com/trickest/cve.git external/trickest-cve
         else
-          cd external/trickest_cve_db || exit 1
+          cd external/trickest-cve || exit 1
           git pull
           cd "$HOME_PATH" || exit 1
         fi

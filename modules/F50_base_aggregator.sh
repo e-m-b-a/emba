@@ -21,6 +21,7 @@ F50_base_aggregator() {
   module_title "Final aggregator"
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
+  F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
   P02_LOG="p02_firmware_bin_file_check.txt"
   P70_LOG="p70_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
@@ -518,11 +519,11 @@ output_cve_exploits() {
         write_link "f20#minimalreportofexploitsandcves"
       fi
       if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Unknown: $MAGENTA$BOLD$UNKNOWN_EXPLOIT_CNT$NC$GREEN")")"
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
         write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT"
-        write_csv_log "unknown_exploits" "$UNKNOWN_EXPLOIT_CNT"
+        write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT"
       fi
       # we report only software components with exploits to csv:
       grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
@@ -538,7 +539,7 @@ get_data() {
   REMOTE_EXPLOIT_CNT=0
   LOCAL_EXPLOIT_CNT=0
   DOS_EXPLOIT_CNT=0
-  UNKNOWN_EXPLOIT_CNT=0
+  GITHUB_EXPLOIT_CNT=0
   HIGH_CVE_COUNTER=0
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
@@ -665,35 +666,13 @@ get_data() {
     done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$LOW_CVE_COUNTER" ))
   fi
-  if [[ -f "$TMP_DIR"/EXPLOIT_COUNTER.tmp ]]; then
-    while read -r COUNTING; do
-      (( EXPLOIT_COUNTER="$EXPLOIT_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/EXPLOIT_COUNTER.tmp
-  fi
-  if [[ -f "$TMP_DIR"/MSF_MODULE_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( MSF_MODULE_CNT="$MSF_MODULE_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/MSF_MODULE_CNT.tmp
-  fi
-  if [[ -f "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( REMOTE_EXPLOIT_CNT="$REMOTE_EXPLOIT_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp
-  fi
-  if [[ -f "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( LOCAL_EXPLOIT_CNT="$LOCAL_EXPLOIT_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp
-  fi
-  if [[ -f "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( DOS_EXPLOIT_CNT="$DOS_EXPLOIT_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
-  fi
-  if [[ -f "$TMP_DIR"/UNKNOWN_EXPLOITS_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( UNKNOWN_EXPLOIT_CNT="$UNKNOWN_EXPLOIT_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/UNKNOWN_EXPLOITS_CNT.tmp
+  if [[ -f "$F20_EXPLOITS_LOG" ]]; then
+    EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG")"
+    MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*\MSF" "$F20_EXPLOITS_LOG")"
+    REMOTE_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(R\)" "$F20_EXPLOITS_LOG")"
+    LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "$F20_EXPLOITS_LOG")"
+    DOS_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(D\)" "$F20_EXPLOITS_LOG")"
+    GITHUB_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(G\)" "$F20_EXPLOITS_LOG")"
   fi
 }
 
