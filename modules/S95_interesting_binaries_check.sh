@@ -21,6 +21,8 @@ S95_interesting_binaries_check()
   module_title "Check interesting binaries"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  NEG_LOG=0
+
   if [[ "$THREADED" -eq 1 ]]; then
     interesting_binaries &
     WAIT_PIDS_S95+=( "$!" )

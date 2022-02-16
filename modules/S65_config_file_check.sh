@@ -21,6 +21,8 @@ S65_config_file_check()
   module_title "Search/scan config files"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  NEG_LOG=0
+
   scan_config
   check_fstab
 

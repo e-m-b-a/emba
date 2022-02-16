@@ -724,7 +724,7 @@ os_detector() {
   #### The following check is needed if the aggreagator has failed till now
   if [[ $VERIFIED -eq 0 ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
-    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED_P70=1
