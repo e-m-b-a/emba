@@ -360,7 +360,9 @@ generate_msf_db() {
   print_output "[*] Building the Metasploit exploit database" "no_log"
   # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
   find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" | sort > "$MSF_DB_PATH"
-  print_output "[*] Metasploit exploit database now has $ORANGE$(wc -l "$MSF_DB_PATH")$NC exploit entries." "no_log"
+  if [[ -f "$MSF_DB_PATH" ]]; then
+    print_output "[*] Metasploit exploit database now has $ORANGE$(wc -l "$MSF_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+  fi
 }
 
 generate_trickest_db() {
@@ -373,6 +375,8 @@ generate_trickest_db() {
   cd ../.. || true
 
   find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH"
-  print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH")$NC exploit entries." "no_log"
+  if [[ -f "$TRICKEST_DB_PATH" ]]; then
+    print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+  fi
 }
 
