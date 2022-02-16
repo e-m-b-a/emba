@@ -230,7 +230,7 @@ add_link_tags() {
   # Trickest key links to Github
   # Todo: link to local trickest files, currently we link to the github link
   if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
-    readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (U)//g' | sed 's/Github: //' | sed 's/).*//' | sort -u || true)
+    readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (G)//g' | sed 's/Github: //' | sed 's/).*//' | sort -u || true)
     for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
       TRICKEST_ID_LINE="$(echo "$TRICKEST_KEY" | cut -d ":" -f 1)"
       TRICKEST_ID_STRING="$(echo "$TRICKEST_KEY" | cut -d ":" -f 2-)"
