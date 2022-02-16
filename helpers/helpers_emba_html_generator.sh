@@ -227,15 +227,17 @@ add_link_tags() {
     done
   fi 
 
-  # Trickest key links to Github -> TODO
+  # Trickest key links to Github
+  # Todo: link to local trickest files, currently we link to the github link
   if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
-    echo "[*] LINK_FILE: $LINK_FILE"
     readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (U)//g' | sed 's/Github: //' | sed 's/).*//' | sort -u || true)
     for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
       TRICKEST_ID_LINE="$(echo "$TRICKEST_KEY" | cut -d ":" -f 1)"
       TRICKEST_ID_STRING="$(echo "$TRICKEST_KEY" | cut -d ":" -f 2-)"
       readarray -t TRICKEST_KEY_STRING_ARR < <(echo "$TRICKEST_ID_STRING" | tr " " "\n" | sort -u)
       for TRICKEST_KEY_ELEM in "${TRICKEST_KEY_STRING_ARR[@]}" ; do
+        # we rename / to _ for the display name of the link -> in the cli report it is possible to just copy and paste the URL to github,
+        # in the web reporter you can click it
         TRICKEST_KEY_NAME="$(echo "$TRICKEST_KEY_ELEM" | tr "/" "_")"
         HTML_LINK="$(echo "$GITHUB_LINK" | sed -e "s@LINKNAME@$TRICKEST_KEY_NAME@g" | sed -e "s@LINK@$TRICKEST_KEY_ELEM@g")""$TRICKEST_KEY_NAME""$LINK_END"
         LINK_COMMAND_ARR+=( '-e' "$TRICKEST_ID_LINE""s@""$TRICKEST_KEY_ELEM""@""$HTML_LINK""@g" )

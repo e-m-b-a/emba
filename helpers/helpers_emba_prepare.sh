@@ -356,18 +356,23 @@ check_init_size() {
 }
 
 generate_msf_db() {
+  # only running on host in full installation (with metapsloit installed)
   print_output "[*] Building the Metasploit exploit database" "no_log"
   # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
-  if [[ $IN_DOCKER -eq 1 ]]; then
-    export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
-  fi
   find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" | sort > "$MSF_DB_PATH"
+  print_output "[*] Metasploit exploit database now has $ORANGE$(wc -l "$MSF_DB_PATH")$NC exploit entries." "no_log"
+}
 
-  print_output "[*] Building the Trickest CVE/exploit database" "no_log"
+generate_trickest_db() {
+  # only running on host in full installation (with trickest database installed)
+  print_output "[*] Update and build the Trickest CVE/exploit database" "no_log"
   # search all markdown files in the trickest directory and create a temporary file with the module path (including CVE) and github URL to exploit:
-  if [[ $IN_DOCKER -eq 1 ]]; then
-    export TRICKEST_DB_PATH="$TMP_DIR"/trickest_cve-db.txt
-  fi
-  #find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH"
+
+  cd "$EXT_DIR"/trickest-cve || true
+  git pull || true
+  cd ../.. || true
+
+  find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH"
+  print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH")$NC exploit entries." "no_log"
 }
 

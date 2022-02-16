@@ -566,8 +566,13 @@ main()
   fi
 
   # we use the metasploit path for exploit information from the metasploit framework
-  if [[ -d "$MSF_PATH" ]]; then
+  if [[ -d "$MSF_PATH" && "$IN_DOCKER" -eq 0 ]]; then
     generate_msf_db &
+  fi
+
+  # we create the trickest cve database
+  if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
+    generate_trickest_db &
   fi
 
   if [[ $IN_DOCKER -eq 0 ]] ; then

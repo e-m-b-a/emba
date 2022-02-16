@@ -53,7 +53,7 @@ IF20_cve_search() {
         apt-get install -y "$TOOL_NAME"
       done < requirements.system
   
-      # this is a temp solution - Mike-2022/02/15
+      # this is a temp solution - Currently needed to fulfill broken deps:
       python3 -m pip install -Iv crackmapexec==5.1.7.dev0
 
       # shellcheck disable=SC2002
