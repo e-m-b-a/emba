@@ -165,7 +165,7 @@ aggregate_versions() {
 
   # sorting and unique our versions array:
   eval "VERSIONS_AGGREGATED=($(for i in "${VERSIONS_AGGREGATED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  if [[ ${#VERSIONS_AGGREGATED[@]} -ne 0 ]]; then
+  if [[ -v VERSIONS_AGGREGATED[@] ]]; then
     for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
       if [ -z "$VERSION" ]; then
         continue
@@ -182,16 +182,18 @@ aggregate_versions() {
   if [[ -f "$LOG_PATH_MODULE"/versions.tmp ]]; then
     # on old kernels it takes a huge amount of time to query all kernel CVE's. So, we move the kernel entry to the begin of our versions array
     mapfile -t KERNELS < <(grep kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u || true)
-    grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u || true > "$LOG_PATH_MODULE"/versions1.tmp
+    grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u > "$LOG_PATH_MODULE"/versions1.tmp || true
+
     for KERNEL in "${KERNELS[@]}"; do
       if [[ -f "$LOG_PATH_MODULE"/versions1.tmp ]]; then
-        if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | cut -d" " -f1 ) -eq 0 ]] ; then
+        if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | awk '{print $1}') -eq 0 ]] ; then
           echo "$KERNEL" > "$LOG_PATH_MODULE"/versions1.tmp
         else
           sed -i "1s/^/$KERNEL\n/" "$LOG_PATH_MODULE"/versions1.tmp
         fi
       fi
     done
+
     if [[ -f "$LOG_PATH_MODULE"/versions1.tmp ]]; then
       mapfile -t VERSIONS_AGGREGATED < <(cat "$LOG_PATH_MODULE"/versions1.tmp)
     fi
@@ -237,7 +239,7 @@ generate_special_log() {
     print_output "[*] Minimal exploit summary file stored in $EXPLOIT_OVERVIEW_LOG.\\n"
 
     echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
-    grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true >> "$EXPLOIT_OVERVIEW_LOG"
+    grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "$EXPLOIT_OVERVIEW_LOG" || true
 
     mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true)
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do

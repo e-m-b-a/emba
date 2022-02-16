@@ -501,6 +501,9 @@ main()
       cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       export OUTPUT_DIR="$FIRMWARE_PATH_CP"
+    else
+      # need to set it as fallback:
+      export OUTPUT_DIR="$FIRMWARE_PATH"
     fi
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1

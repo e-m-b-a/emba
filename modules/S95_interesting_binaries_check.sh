@@ -97,7 +97,7 @@ post_exploitation()
   elif [[ "${#INT_BIN_PE[@]}" -ne 0 ]] ; then
     for LINE in "${INT_BIN_PE[@]}" ; do
       if [[ -f "$LINE" ]] && file "$LINE" | grep -q "executable" ; then
-        # we need every binary only once. So calculate the checksum and store it for checking
+        # we need every binary only once. Calculate the checksum and store it for checking
         BIN_MD5=$(md5sum "$LINE" | cut -d\  -f1)
         if [[ ! " ${MD5_DONE_POST[*]} " =~ ${BIN_MD5} ]]; then
           if [[ $COUNT -eq 0 ]] ; then

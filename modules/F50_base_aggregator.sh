@@ -668,7 +668,7 @@ get_data() {
   fi
   if [[ -f "$F20_EXPLOITS_LOG" ]]; then
     EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG" || true)"
-    MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*\MSF" "$F20_EXPLOITS_LOG" || true)"
+    MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*MSF" "$F20_EXPLOITS_LOG" || true)"
     REMOTE_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(R\)" "$F20_EXPLOITS_LOG" || true)"
     LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "$F20_EXPLOITS_LOG" || true)"
     DOS_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(D\)" "$F20_EXPLOITS_LOG" || true)"
