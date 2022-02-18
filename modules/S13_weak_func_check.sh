@@ -27,6 +27,7 @@ S13_weak_func_check()
   module_title "Check binaries for weak functions (intense)"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  STRCPY_CNT=0
   if [[ -n "$ARCH" ]] ; then
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
@@ -46,7 +47,6 @@ S13_weak_func_check()
     print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
     IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"
 
-    STRCPY_CNT=0
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q ELF ) ; then
@@ -356,7 +356,7 @@ print_top10_statistics() {
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM
       local F_COUNTER
-      readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null || true)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_output ""

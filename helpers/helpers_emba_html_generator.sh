@@ -43,6 +43,7 @@ REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"\_blank\" >"
 CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"\_blank\" >"
 CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"\_blank\" >"
+GITHUB_LINK="<a href=\"https://github.com/LINK\" title=\"LINKNAME\" target=\"\_blank\" >"
 LICENSE_LINK="<a href=\"LINK\" title=\"LINK\" target=\"\_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
@@ -226,6 +227,24 @@ add_link_tags() {
     done
   fi 
 
+  # Trickest key links to Github
+  # Todo: link to local trickest files, currently we link to the github link
+  if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
+    readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (G)//g' | sed 's/Github: //' | sed 's/).*//' | sort -u || true)
+    for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
+      TRICKEST_ID_LINE="$(echo "$TRICKEST_KEY" | cut -d ":" -f 1)"
+      TRICKEST_ID_STRING="$(echo "$TRICKEST_KEY" | cut -d ":" -f 2-)"
+      readarray -t TRICKEST_KEY_STRING_ARR < <(echo "$TRICKEST_ID_STRING" | tr " " "\n" | sort -u)
+      for TRICKEST_KEY_ELEM in "${TRICKEST_KEY_STRING_ARR[@]}" ; do
+        # we rename / to _ for the display name of the link -> in the cli report it is possible to just copy and paste the URL to github,
+        # in the web reporter you can click it
+        TRICKEST_KEY_NAME="$(echo "$TRICKEST_KEY_ELEM" | tr "/" "_")"
+        HTML_LINK="$(echo "$GITHUB_LINK" | sed -e "s@LINKNAME@$TRICKEST_KEY_NAME@g" | sed -e "s@LINK@$TRICKEST_KEY_ELEM@g")""$TRICKEST_KEY_NAME""$LINK_END"
+        LINK_COMMAND_ARR+=( '-e' "$TRICKEST_ID_LINE""s@""$TRICKEST_KEY_ELEM""@""$HTML_LINK""@g" )
+      done
+    done
+  fi 
+
   # CVE links
   if ( grep -a -q -E '(CVE)' "$LINK_FILE" ) ; then
     readarray -t CVE_IDS < <( grep -a -n -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$LINK_FILE" | sort -u || true)
@@ -234,7 +253,11 @@ add_link_tags() {
       CVE_ID_STRING="$(echo "$CVE_ID" | cut -d ":" -f 2-)"
       if [[ -n "$CVE_ID_STRING" ]] ; then
         HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID_STRING@g")""$CVE_ID_STRING""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""$CVE_ID_STRING""@""$HTML_LINK""@g" )
+        if [[ "$LINK_FILE" == *"f20_vul_aggregator"* ]]; then
+          LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""[[:blank:]]$CVE_ID_STRING""@""\t$HTML_LINK""@g" )
+        else
+          LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""$CVE_ID_STRING""@""$HTML_LINK""@g" )
+        fi
       fi
     done
   fi
@@ -371,7 +394,7 @@ generate_report_file()
   SUPPL_FILE_GEN=${2:-}
 
   if ! ( grep -a -o -i -q "$(basename "${REPORT_FILE%."${REPORT_FILE##*.}"}")"" nothing reported" "$REPORT_FILE" ) ; then
-    HTML_FILE="$(basename "${REPORT_FILE%."${REPORT_FILE##*.}"}"".html")"
+    HTML_FILE="$(basename "${REPORT_FILE%."${REPORT_FILE##*.}"}"".html" 2>/dev/null || true)"
     if [[ $SUPPL_FILE_GEN -eq 1 ]] ; then
       cp "./helpers/base.html" "$ABS_HTML_PATH$SUPPL_PATH_HTML""/""$HTML_FILE" || true
     else
@@ -509,7 +532,7 @@ update_index()
 
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
-  rm -R "$ABS_HTML_PATH"/qemu_init*
+  rm -R "$ABS_HTML_PATH"/qemu_init* 2>/dev/null || true
 }
 
 scan_report()

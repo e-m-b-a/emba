@@ -20,6 +20,8 @@ S116_qemu_version_detection() {
   module_title "Identified software components - via usermode emulation."
   pre_module_reporter "${FUNCNAME[0]}"
 
+  NEG_LOG=0
+
   # This module waits for S115_usermode_emulator
   # check emba.log for S115_usermode_emulator
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
@@ -51,9 +53,12 @@ S116_qemu_version_detection() {
     if [[ $THREADED -eq 1 ]]; then
       wait_for_pid "${WAIT_PIDS_F05[@]}"
     fi
+    if [[ $(wc -l "$LOG_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
+      NEG_LOG=1
+    fi
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$QEMULATION"
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 version_detection_thread() {

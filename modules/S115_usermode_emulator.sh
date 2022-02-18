@@ -279,7 +279,7 @@ s115_cleanup() {
 
   print_output ""
   print_output "[*] Umounting proc, sys and run"
-  mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH_BASE")
+  mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH_BASE" || true)
   if [[ -v CHECK_MOUNTS[@] ]]; then
     for MOUNT in "${CHECK_MOUNTS[@]}"; do
       print_output "[*] Unmounting $MOUNT"

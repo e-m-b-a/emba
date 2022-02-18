@@ -21,6 +21,7 @@ F50_base_aggregator() {
   module_title "Final aggregator"
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
+  F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
   P02_LOG="p02_firmware_bin_file_check.txt"
   P70_LOG="p70_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
@@ -280,7 +281,7 @@ output_config_issues() {
 output_binaries() {
 
   local DATA=0
-  if [[ "${#BINARIES[@]}" -gt 0 ]]; then
+  if [[ -v BINARIES[@] ]]; then
     if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG" || true)
       RELRO=$(grep -c "No RELRO" "$LOG_DIR"/"$S12_LOG" || true)
@@ -471,15 +472,15 @@ binary_fct_output() {
 output_cve_exploits() {
 
   local DATA=0
-  if [[ "${S30_VUL_COUNTER-0}" -gt 0 || "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
-    if [[ "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+  if [[ "${S30_VUL_COUNTER-0}" -gt 0 || "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
+    if [[ "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
       print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
       print_output ""
     fi
 
-    if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+    if [[ -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_AGGREGATED[@]}""$GREEN"" software components with version details.\\n"
       write_link "f20#softwareinventoryinitialoverview"
       echo "versions_identified;\"${#VERSIONS_AGGREGATED[@]}\"" >> "$CSV_LOG_FILE"
@@ -518,10 +519,11 @@ output_cve_exploits() {
         write_link "f20#minimalreportofexploitsandcves"
       fi
       if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN")")"
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
         write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT"
+        write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT"
       fi
       # we report only software components with exploits to csv:
       grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
@@ -537,6 +539,7 @@ get_data() {
   REMOTE_EXPLOIT_CNT=0
   LOCAL_EXPLOIT_CNT=0
   DOS_EXPLOIT_CNT=0
+  GITHUB_EXPLOIT_CNT=0
   HIGH_CVE_COUNTER=0
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
@@ -663,30 +666,13 @@ get_data() {
     done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$LOW_CVE_COUNTER" ))
   fi
-  if [[ -f "$TMP_DIR"/EXPLOIT_COUNTER.tmp ]]; then
-    while read -r COUNTING; do
-      (( EXPLOIT_COUNTER="$EXPLOIT_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/EXPLOIT_COUNTER.tmp
-  fi
-  if [[ -f "$TMP_DIR"/MSF_MODULE_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( MSF_MODULE_CNT="$MSF_MODULE_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/MSF_MODULE_CNT.tmp
-  fi
-  if [[ -f "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( REMOTE_EXPLOIT_CNT="$REMOTE_EXPLOIT_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp
-  fi
-  if [[ -f "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( LOCAL_EXPLOIT_CNT="$LOCAL_EXPLOIT_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp
-  fi
-  if [[ -f "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp ]]; then
-    while read -r COUNTING; do
-      (( DOS_EXPLOIT_CNT="$DOS_EXPLOIT_CNT"+"$COUNTING" ))
-    done < "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
+  if [[ -f "$F20_EXPLOITS_LOG" ]]; then
+    EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG" || true)"
+    MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*MSF" "$F20_EXPLOITS_LOG" || true)"
+    REMOTE_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(R\)" "$F20_EXPLOITS_LOG" || true)"
+    LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "$F20_EXPLOITS_LOG" || true)"
+    DOS_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(D\)" "$F20_EXPLOITS_LOG" || true)"
+    GITHUB_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(G\)" "$F20_EXPLOITS_LOG" || true)"
   fi
 }
 
@@ -738,7 +724,7 @@ os_detector() {
   #### The following check is needed if the aggreagator has failed till now
   if [[ $VERIFIED -eq 0 ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
-    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED_P70=1

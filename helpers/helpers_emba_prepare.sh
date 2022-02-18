@@ -173,7 +173,7 @@ architecture_check()
         print_output "$(indent "Detected architecture of the firmware: ""$ORANGE""$D_ARCH""$NC")""\\n"
       fi
 
-      if [[ -n "${ARCH-NA}" ]] ; then
+      if [[ -n "${ARCH:-}" ]] ; then
         if [[ "$ARCH" != "$D_ARCH" ]] ; then
           print_output "[!] Your set architecture (""$ARCH"") is different from the automatically detected one. The set architecture will be used."
         fi
@@ -227,22 +227,23 @@ prepare_binary_arr()
 
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
-  export BINARIES
+  export BINARIES=()
   #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
-  # in some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
-  # this is a slow fallback solution just to have something we can work with
+  # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   readarray -t BINARIES_TMP < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
-  for BINARY in "${BINARIES_TMP[@]}"; do
-    if [[ -f "$BINARY" ]]; then
-      BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
-      if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
-        BINARIES+=( "$BINARY" )
-        MD5_DONE_INT+=( "$BIN_MD5" )
+  if [[ -v BINARIES_TMP[@] ]]; then
+    for BINARY in "${BINARIES_TMP[@]}"; do
+      if [[ -f "$BINARY" ]]; then
+        BIN_MD5=$(md5sum "$BINARY" | cut -d\  -f1)
+        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
+          BINARIES+=( "$BINARY" )
+          MD5_DONE_INT+=( "$BIN_MD5" )
+        fi
       fi
-    fi
-  done
-  print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables."
+    done
+    print_output "[*] Found $ORANGE${#BINARIES[@]}$NC unique executables."
+  fi
 
   # remove ./proc/* executables (for live testing)
   #rm_proc_binary "${BINARIES[@]}"
@@ -306,9 +307,9 @@ detect_root_dir_helper() {
   export ROOT_PATH
   local R_PATH
 
-  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null)
+  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null || true)
 
-  if [[ "${#INTERPRETER_FULL_PATH[@]}" -ne 0 ]]; then
+  if [[ "${#INTERPRETER_FULL_PATH[@]}" -gt 0 ]]; then
     for INTERPRETER_PATH in "${INTERPRETER_FULL_PATH[@]}"; do
       # now we have a result like this "/lib/ld-uClibc.so.0"
       # lets escape it
@@ -355,11 +356,27 @@ check_init_size() {
 }
 
 generate_msf_db() {
+  # only running on host in full installation (with metapsloit installed)
   print_output "[*] Building the Metasploit exploit database" "no_log"
   # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
-  if [[ $IN_DOCKER -eq 1 ]]; then
-    export MSF_DB_PATH="$TMP_DIR"/msf_cve-db.txt
-  fi
   find "$MSF_PATH" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" | sort > "$MSF_DB_PATH"
+  if [[ -f "$MSF_DB_PATH" ]]; then
+    print_output "[*] Metasploit exploit database now has $ORANGE$(wc -l "$MSF_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+  fi
+}
+
+generate_trickest_db() {
+  # only running on host in full installation (with trickest database installed)
+  print_output "[*] Update and build the Trickest CVE/exploit database" "no_log"
+  # search all markdown files in the trickest directory and create a temporary file with the module path (including CVE) and github URL to exploit:
+
+  cd "$EXT_DIR"/trickest-cve || true
+  git pull || true
+  cd ../.. || true
+
+  find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH"
+  if [[ -f "$TRICKEST_DB_PATH" ]]; then
+    print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+  fi
 }
 

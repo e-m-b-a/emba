@@ -31,10 +31,9 @@ F20_vul_aggregator() {
   MEDIUM_CVE_COUNTER=0
   LOW_CVE_COUNTER=0
   CVE_SEARCHSPLOIT=0
-  MSF_MODULE_CNT=0
-  RS_MODULE_CNT=0
   RS_SEARCH=0
   MSF_SEARCH=0
+  TRICKEST_SEARCH=0
   CVE_SEARCHSPLOIT=0
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
@@ -91,6 +90,9 @@ F20_vul_aggregator() {
       fi
       if [[ -f "$MSF_DB_PATH" ]]; then
         MSF_SEARCH=1
+      fi
+      if [[ -f "$TRICKEST_DB_PATH" ]]; then
+        TRICKEST_SEARCH=1
       fi
       if [[ -f "$CONFIG_DIR"/routersploit_cve-db.txt || -f "$CONFIG_DIR"/routersploit_exploit-db.txt ]]; then
         RS_SEARCH=1
@@ -163,7 +165,7 @@ aggregate_versions() {
 
   # sorting and unique our versions array:
   eval "VERSIONS_AGGREGATED=($(for i in "${VERSIONS_AGGREGATED[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  if [[ ${#VERSIONS_AGGREGATED[@]} -ne 0 ]]; then
+  if [[ -v VERSIONS_AGGREGATED[@] ]]; then
     for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
       if [ -z "$VERSION" ]; then
         continue
@@ -180,16 +182,18 @@ aggregate_versions() {
   if [[ -f "$LOG_PATH_MODULE"/versions.tmp ]]; then
     # on old kernels it takes a huge amount of time to query all kernel CVE's. So, we move the kernel entry to the begin of our versions array
     mapfile -t KERNELS < <(grep kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u || true)
-    grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u || true > "$LOG_PATH_MODULE"/versions1.tmp
+    grep -v kernel "$LOG_PATH_MODULE"/versions.tmp | sort -u > "$LOG_PATH_MODULE"/versions1.tmp || true
+
     for KERNEL in "${KERNELS[@]}"; do
       if [[ -f "$LOG_PATH_MODULE"/versions1.tmp ]]; then
-        if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | cut -d" " -f1 ) -eq 0 ]] ; then
+        if [[ $( wc -l "$LOG_PATH_MODULE"/versions1.tmp | awk '{print $1}') -eq 0 ]] ; then
           echo "$KERNEL" > "$LOG_PATH_MODULE"/versions1.tmp
         else
           sed -i "1s/^/$KERNEL\n/" "$LOG_PATH_MODULE"/versions1.tmp
         fi
       fi
     done
+
     if [[ -f "$LOG_PATH_MODULE"/versions1.tmp ]]; then
       mapfile -t VERSIONS_AGGREGATED < <(cat "$LOG_PATH_MODULE"/versions1.tmp)
     fi
@@ -233,11 +237,15 @@ generate_special_log() {
 
     print_output ""
     print_output "[*] Minimal exploit summary file stored in $EXPLOIT_OVERVIEW_LOG.\\n"
+
+    echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
+    grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "$EXPLOIT_OVERVIEW_LOG" || true
+
     mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true)
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*[[:blank:]]CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
         print_output "$RED$EXPLOIT_$NC"
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
@@ -246,8 +254,6 @@ generate_special_log() {
         print_output "$GREEN$EXPLOIT_$NC"
       fi
     done
-    echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
-    grep "Exploit\ available" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true >> "$EXPLOIT_OVERVIEW_LOG"
   fi
 }
 
@@ -256,10 +262,6 @@ generate_cve_details() {
   write_anchor "collectcveandexploitdetails"
 
   CVE_COUNTER=0
-  EXPLOIT_COUNTER=0
-  REMOTE_EXPLOITS=0
-  LOCAL_EXPLOITS=0
-  DOS_EXPLOITS=0
 
   for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     if [[ "$THREADED" -eq 1 ]]; then
@@ -334,205 +336,230 @@ cve_extractor() {
   EXPLOIT_COUNTER_VERSION=0
   CVE_COUNTER_VERSION=0
   # extract the CVE numbers and the CVSS values and sort it:
-  readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r || true)
-
-  for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
-    ((CVE_COUNTER+=1))
-    ((CVE_COUNTER_VERSION+=1))
-    #extract the CVSS and CVE value (remove all spaces and tabs)
-    CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-    CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-
-    # default value
-    EXPLOIT="No exploit available"
-
-    EDB=0
-    # as we already know about a bunch of kernel exploits - lets search them first
-    if [[ "$VERSION_BINARY" == *kernel* ]]; then
-      for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
-        if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
-          EXPLOIT="Exploit (linux-exploit-suggester"
-          ((EXPLOIT_COUNTER+=1))
-          ((EXPLOIT_COUNTER_VERSION+=1))
-          EDB=1
+  if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
+    readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r || true)
+  
+    for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
+      ((CVE_COUNTER+=1))
+      ((CVE_COUNTER_VERSION+=1))
+      #extract the CVSS and CVE value (remove all spaces and tabs)
+      CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+      CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+  
+      # default value
+      EXPLOIT="No exploit available"
+  
+      EDB=0
+      # as we already know about a bunch of kernel exploits - lets search them first
+      if [[ "$VERSION_BINARY" == *kernel* ]]; then
+        for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
+          if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
+            EXPLOIT="Exploit (linux-exploit-suggester"
+            ((EXPLOIT_COUNTER_VERSION+=1))
+            EDB=1
+          fi
+        done
+      fi
+  
+      if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 || "$TRICKEST_SEARCH" -eq 1 ]] ; then
+        if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
+          mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null || true)
         fi
-      done
-    fi
+  
+        if [[ $MSF_SEARCH -eq 1 ]]; then
+          mapfile -t EXPLOIT_AVAIL_MSF < <(grep -E "$CVE_VALUE"$ "$MSF_DB_PATH" 2>/dev/null || true)
+        fi
+  
+        if [[ $TRICKEST_SEARCH -eq 1 ]]; then
+          mapfile -t EXPLOIT_AVAIL_TRICKEST < <(grep -E "$CVE_VALUE\.md" "$TRICKEST_DB_PATH" 2>/dev/null || true)
+        fi
 
-    if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 ]] ; then
-      if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
-        mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null || true)
-      fi
-
-      if [[ $MSF_SEARCH -eq 1 ]]; then
-        mapfile -t EXPLOIT_AVAIL_MSF < <(grep -E "$CVE_VALUE"$ "$MSF_DB_PATH" 2>/dev/null || true)
-      fi
-
-      # routersploit db search
-      if [[ $RS_SEARCH -eq 1 ]]; then
-        mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT < <(grep -E "$CVE_VALUE"$ "$CONFIG_DIR/routersploit_cve-db.txt" 2>/dev/null || true)
-
-        # now, we check the exploit-db results if we have a routersploit module:
+        # routersploit db search
+        if [[ $RS_SEARCH -eq 1 ]]; then
+          mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT < <(grep -E "$CVE_VALUE"$ "$CONFIG_DIR/routersploit_cve-db.txt" 2>/dev/null || true)
+  
+          # now, we check the exploit-db results if we have a routersploit module:
+          if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
+            for EID_VALUE in "${EXPLOIT_AVAIL[@]}"; do
+              if ! echo "$EID_VALUE" | grep -q "Exploit DB Id:"; then
+                continue
+              fi
+              EID_VALUE=$(echo "$EID_VALUE" | grep "Exploit DB Id:" | cut -d: -f2)
+              mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT1 < <(grep "$EID_VALUE" "$CONFIG_DIR/routersploit_exploit-db.txt" 2>/dev/null || true)
+            done
+          fi
+        fi
+  
         if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
-          for EID_VALUE in "${EXPLOIT_AVAIL[@]}"; do
-            if ! echo "$EID_VALUE" | grep -q "Exploit DB Id:"; then
-              continue
-            fi
-            EID_VALUE=$(echo "$EID_VALUE" | grep "Exploit DB Id:" | cut -d: -f2)
-            mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT1 < <(grep "$EID_VALUE" "$CONFIG_DIR/routersploit_exploit-db.txt" 2>/dev/null || true)
+          readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
+          if [[ "$EXPLOIT" == "No exploit available" ]]; then
+            EXPLOIT="Exploit (EDB ID:"
+          else
+            EXPLOIT="$EXPLOIT"" / EDB ID:"
+          fi
+  
+          for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
+            LOCAL=0
+            REMOTE=0
+            DOS=0
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_ID"
+            echo -e "[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_PATH_MODULE""/exploit/""$EXPLOIT_ID"".txt"
+            for LINE in "${EXPLOIT_AVAIL[@]}"; do
+              echo "$LINE" >> "$LOG_PATH_MODULE""/exploit/""$EXPLOIT_ID"".txt"
+              if [[ "$LINE" =~ "Platform: local" && "$LOCAL" -eq 0 ]]; then
+                EXPLOIT="$EXPLOIT"" (L)"
+                LOCAL=1
+              fi
+              if [[ "$LINE" =~ "Platform: remote" && "$REMOTE" -eq 0 ]]; then
+                EXPLOIT="$EXPLOIT"" (R)"
+                REMOTE=1
+              fi
+              if [[ "$LINE" =~ "Platform: dos" && "$DOS" -eq 0 ]]; then
+                EXPLOIT="$EXPLOIT"" (D)"
+                DOS=1
+              fi
+            done
+            EDB=1
+            ((EXPLOIT_COUNTER_VERSION+=1))
           done
-        fi
-      fi
-
-      if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
-        readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
-        if [[ "$EXPLOIT" == "No exploit available" ]]; then
-          EXPLOIT="Exploit (EDB ID:"
-        else
-          EXPLOIT="$EXPLOIT"" / EDB ID:"
-        fi
-
-        for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
-          LOCAL=0
-          REMOTE=0
-          DOS=0
-          EXPLOIT="$EXPLOIT"" ""$EXPLOIT_ID"
-          echo -e "[+] Exploit for $CVE_VALUE:\\n" >> "$LOG_PATH_MODULE""/exploit/""$EXPLOIT_ID"".txt"
+  
+          # copy the exploit-db exploits to the report
           for LINE in "${EXPLOIT_AVAIL[@]}"; do
-            echo "$LINE" >> "$LOG_PATH_MODULE""/exploit/""$EXPLOIT_ID"".txt"
-            if [[ "$LINE" =~ "Platform: local" && "$LOCAL" -eq 0 ]]; then
-              EXPLOIT="$EXPLOIT"" (L)"
-              LOCAL=1
-              ((LOCAL_EXPLOITS+=1))
-            fi
-            if [[ "$LINE" =~ "Platform: remote" && "$REMOTE" -eq 0 ]]; then
-              EXPLOIT="$EXPLOIT"" (R)"
-              REMOTE=1
-              ((REMOTE_EXPLOITS+=1))
-            fi
-            if [[ "$LINE" =~ "Platform: dos" && "$DOS" -eq 0 ]]; then
-              EXPLOIT="$EXPLOIT"" (D)"
-              DOS=1
-              ((DOS_EXPLOITS+=1))
+            if [[ "$LINE" =~ "File:" ]]; then
+              E_FILE=$(echo "$LINE" | awk '{print $2}')
+              if [[ -f "$E_FILE" ]] ; then
+                cp "$E_FILE" "$LOG_PATH_MODULE""/exploit/edb_""$(basename "$E_FILE")"
+              fi
             fi
           done
-          EDB=1
-          ((EXPLOIT_COUNTER+=1))
-          ((EXPLOIT_COUNTER_VERSION+=1))
-        done
-
-        # copy the exploit-db exploits to the report
-        for LINE in "${EXPLOIT_AVAIL[@]}"; do
-          if [[ "$LINE" =~ "File:" ]]; then
-            E_FILE=$(echo "$LINE" | awk '{print $2}')
-            if [[ -f "$E_FILE" ]] ; then
-              cp "$E_FILE" "$LOG_PATH_MODULE""/exploit/edb_""$(basename "$E_FILE")"
-            fi
+        fi
+  
+        if [[ ${#EXPLOIT_AVAIL_MSF[@]} -gt 0 ]]; then
+          if [[ "$EXPLOIT" == "No exploit available" ]]; then
+            EXPLOIT="Exploit (MSF:"
+          else
+            EXPLOIT="$EXPLOIT"" ""/ MSF:"
           fi
-        done
-      fi
 
-      if [[ ${#EXPLOIT_AVAIL_MSF[@]} -gt 0 ]]; then
-        if [[ "$EXPLOIT" == "No exploit available" ]]; then
-          EXPLOIT="Exploit (MSF:"
+          for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
+            EXPLOIT_PATH=$(echo "$EXPLOIT_MSF" | cut -d: -f1)
+            EXPLOIT_NAME=$(basename -s .rb "$EXPLOIT_PATH")
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
+            if [[ -f "$EXPLOIT_PATH" ]] ; then
+              # for the web reporter we copy the original metasploit module into the EMBA log directory
+              cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/msf_""$EXPLOIT_NAME".rb
+              if grep -q "< Msf::Exploit::Remote" "$EXPLOIT_PATH"; then
+                EXPLOIT="$EXPLOIT"" (R)"
+              fi
+              if grep -q "< Msf::Exploit::Local" "$EXPLOIT_PATH"; then
+                EXPLOIT="$EXPLOIT"" (L)"
+              fi
+              if grep -q "include Msf::Auxiliary::Dos" "$EXPLOIT_PATH"; then
+                EXPLOIT="$EXPLOIT"" (D)"
+              fi
+            fi
+          done
+
+          if [[ $EDB -eq 0 ]]; then
+            # only count the msf exploit if we have not already count an EDB exploit
+            # otherwise we count an exploit for one CVE twice
+            ((EXPLOIT_COUNTER_VERSION+=1))
+            EDB=1
+          fi
+        fi
+
+        if [[ ${#EXPLOIT_AVAIL_TRICKEST[@]} -gt 0 ]]; then
+          if [[ "$EXPLOIT" == "No exploit available" ]]; then
+            EXPLOIT="Exploit (Github:"
+          else
+            EXPLOIT="$EXPLOIT"" ""/ Github:"
+          fi
+
+          for EXPLOIT_TRICKEST in "${EXPLOIT_AVAIL_TRICKEST[@]}" ; do
+            EXPLOIT_PATH=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f1)
+            EXPLOIT_NAME=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g')
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"" (G)"
+            # we remove slashes from the github url and use this as exploit name:
+            EXPLOIT_NAME_=$(echo "$EXPLOIT_TRICKEST" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g' | tr '/' '_')
+            if [[ -f "$EXPLOIT_PATH" ]] ; then
+              # for the web reporter we copy the original metasploit module into the EMBA log directory
+              if ! [[ -d "$LOG_PATH_MODULE""/exploit/" ]]; then
+                mkdir "$LOG_PATH_MODULE""/exploit/"
+              fi
+              cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/trickest_""$EXPLOIT_NAME_".md
+            fi
+          done
+
+          if [[ $EDB -eq 0 ]]; then
+            # only count the msf exploit if we have not already count an EDB exploit
+            # otherwise we count an exploit for one CVE twice
+            ((EXPLOIT_COUNTER_VERSION+=1))
+            EDB=1
+          fi
+        fi
+  
+        if [[ -v EXPLOIT_AVAIL_ROUTERSPLOIT[@] || -v EXPLOIT_AVAIL_ROUTERSPLOIT1[@] ]]; then
+          if [[ "$EXPLOIT" == "No exploit available" ]]; then
+            EXPLOIT="Exploit (Routersploit:"
+          else
+            EXPLOIT="$EXPLOIT"" ""/ Routersploit:"
+          fi
+          EXPLOIT_ROUTERSPLOIT=("${EXPLOIT_AVAIL_ROUTERSPLOIT[@]}" "${EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}")
+          for EXPLOIT_RS in "${EXPLOIT_ROUTERSPLOIT[@]}" ; do
+            EXPLOIT_PATH=$(echo "$EXPLOIT_RS" | cut -d: -f1)
+            EXPLOIT_NAME=$(basename -s .py "$EXPLOIT_PATH")
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
+            if [[ -f "$EXPLOIT_PATH" ]] ; then
+              # for the web reporter we copy the original metasploit module into the EMBA log directory
+              cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/routersploit_""$EXPLOIT_NAME".py
+              if grep -q Port "$EXPLOIT_PATH"; then
+                EXPLOIT="$EXPLOIT"" (R)"
+              fi
+            fi
+          done
+  
+          if [[ $EDB -eq 0 ]]; then
+            # only count the msf exploit if we have not already count an EDB exploit
+            # otherwise we count an exploit for one CVE twice
+            ((EXPLOIT_COUNTER_VERSION+=1))
+            EDB=1
+          fi
+        fi
+      fi
+  
+      if [[ $EDB -eq 1 ]]; then
+        EXPLOIT="$EXPLOIT"")"
+      fi
+  
+      CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
+      #BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+      #VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
+      # we do not deal with output formatting the usual way -> we use printf
+      if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+          printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          EXPLOIT="$EXPLOIT"" ""/ MSF:"
+          printf "${RED}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
-        for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
-          EXPLOIT_PATH=$(echo "$EXPLOIT_MSF" | cut -d: -f1)
-          EXPLOIT_NAME=$(basename -s .rb "$EXPLOIT_PATH")
-          EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
-          if [[ -f "$EXPLOIT_PATH" ]] ; then
-            # for the web reporter we copy the original metasploit module into the EMBA log directory
-            cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/msf_""$EXPLOIT_NAME".rb
-            if grep -q "< Msf::Exploit::Remote" "$EXPLOIT_PATH"; then
-              EXPLOIT="$EXPLOIT"" (R)"
-              ((REMOTE_EXPLOITS+=1))
-            fi
-            if grep -q "< Msf::Exploit::Local" "$EXPLOIT_PATH"; then
-              EXPLOIT="$EXPLOIT"" (L)"
-              ((LOCAL_EXPLOITS+=1))
-            fi
-            if grep -q "include Msf::Auxiliary::Dos" "$EXPLOIT_PATH"; then
-              EXPLOIT="$EXPLOIT"" (D)"
-              ((DOS_EXPLOITS+=1))
-            fi
-          fi
-          ((MSF_MODULE_CNT+=1))
-        done
-
-        if [[ $EDB -eq 0 ]]; then
-          # only count the msf exploit if we have not already count an EDB exploit
-          # otherwise we count an exploit for one CVE twice
-          ((EXPLOIT_COUNTER+=1))
-          ((EXPLOIT_COUNTER_VERSION+=1))
-          EDB=1
-        fi
-      fi
-      if [[ -v EXPLOIT_AVAIL_ROUTERSPLOIT[@] || -v EXPLOIT_AVAIL_ROUTERSPLOIT1[@] ]]; then
-        if [[ "$EXPLOIT" == "No exploit available" ]]; then
-          EXPLOIT="Exploit (Routersploit:"
+        ((HIGH_CVE_COUNTER+=1))
+      elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+          printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          EXPLOIT="$EXPLOIT"" ""/ Routersploit:"
+          printf "${ORANGE}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
-        EXPLOIT_ROUTERSPLOIT=("${EXPLOIT_AVAIL_ROUTERSPLOIT[@]}" "${EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}")
-        for EXPLOIT_RS in "${EXPLOIT_ROUTERSPLOIT[@]}" ; do
-          EXPLOIT_PATH=$(echo "$EXPLOIT_RS" | cut -d: -f1)
-          EXPLOIT_NAME=$(basename -s .py "$EXPLOIT_PATH")
-          EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
-          if [[ -f "$EXPLOIT_PATH" ]] ; then
-            # for the web reporter we copy the original metasploit module into the EMBA log directory
-            cp "$EXPLOIT_PATH" "$LOG_PATH_MODULE""/exploit/routersploit_""$EXPLOIT_NAME".py
-            if grep -q Port "$EXPLOIT_PATH"; then
-              EXPLOIT="$EXPLOIT"" (R)"
-            fi
-          fi
-          ((RS_MODULE_CNT+=1))
-        done
-
-        if [[ $EDB -eq 0 ]]; then
-          # only count the msf exploit if we have not already count an EDB exploit
-          # otherwise we count an exploit for one CVE twice
-          ((EXPLOIT_COUNTER+=1))
-          ((EXPLOIT_COUNTER_VERSION+=1))
-          EDB=1
+        ((MEDIUM_CVE_COUNTER+=1))
+      else
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+          printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+        else
+          printf "${GREEN}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
+        ((LOW_CVE_COUNTER+=1))
       fi
-    fi
-
-    if [[ $EDB -eq 1 ]]; then
-      EXPLOIT="$EXPLOIT"")"
-    fi
-
-    CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
-    #BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-    #VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
-    # we do not deal with output formatting the usual way -> we use printf
-    if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* ]]; then
-        printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
-      else
-        printf "${RED}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
-      fi
-      ((HIGH_CVE_COUNTER+=1))
-    elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* ]]; then
-        printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
-      else
-        printf "${ORANGE}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
-      fi
-      ((MEDIUM_CVE_COUNTER+=1))
-    else
-      if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* ]]; then
-        printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
-      else
-        printf "${GREEN}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
-      fi
-      ((LOW_CVE_COUNTER+=1))
-    fi
-  done
-
-
+    done
+  fi
+  
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_SEARCH"
   } >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -545,21 +572,6 @@ cve_extractor() {
   fi
   if [[ $HIGH_CVE_COUNTER -gt 0 ]]; then
     echo "$HIGH_CVE_COUNTER" >> "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
-  fi
-  if [[ $EXPLOIT_COUNTER -gt 0 ]]; then
-    echo "$EXPLOIT_COUNTER" >> "$TMP_DIR"/EXPLOIT_COUNTER.tmp
-  fi
-  if [[ $MSF_MODULE_CNT -gt 0 ]]; then
-    echo "$MSF_MODULE_CNT" >> "$TMP_DIR"/MSF_MODULE_CNT.tmp
-  fi
-  if [[ $REMOTE_EXPLOITS -gt 0 ]]; then
-    echo "$REMOTE_EXPLOITS" >> "$TMP_DIR"/REMOTE_EXPLOITS_CNT.tmp
-  fi
-  if [[ $LOCAL_EXPLOITS -gt 0 ]]; then
-    echo "$LOCAL_EXPLOITS" >> "$TMP_DIR"/LOCAL_EXPLOITS_CNT.tmp
-  fi
-  if [[ $DOS_EXPLOITS -gt 0 ]]; then
-    echo "$DOS_EXPLOITS" >> "$TMP_DIR"/DOS_EXPLOITS_CNT.tmp
   fi
 
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then

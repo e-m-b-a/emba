@@ -26,7 +26,7 @@ S06_distribution_identification()
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
       FILE="$(echo "$LINE" | cut -d\; -f2)"
-      mapfile -t FILES < <(find "$FIRMWARE_PATH" -iwholename "*$FILE" || true)
+      mapfile -t FILES < <(find "$FIRMWARE_PATH" -xdev -iwholename "*$FILE" || true)
       for FILE in "${FILES[@]}"; do
         if [[ -f "$FILE" ]]; then
             PATTERN="$(echo "$LINE" | cut -d\; -f3 | sed s/^\"// | sed s/\"$//)"
@@ -66,7 +66,7 @@ S06_distribution_identification()
 
 dlink_image_sign() {
   # the firmware version can be found in /config/buildver
-  mapfile -t DLINK_BUILDVER < <(find "$FIRMWARE_PATH" -path "*config/buildver")
+  mapfile -t DLINK_BUILDVER < <(find "$FIRMWARE_PATH" -xdev -path "*config/buildver")
   for DLINK_BVER in "${DLINK_BUILDVER[@]}"; do
     DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "$DLINK_BVER")
     if ! [[ "$DLINK_FW_VER" =~ ^v.* ]]; then
@@ -76,7 +76,7 @@ dlink_image_sign() {
   done
 
   # probably we can use this in the future. Currently there is no need for it:
-  mapfile -t DLINK_BUILDREV < <(find "$FIRMWARE_PATH" -path "*config/buildrev")
+  mapfile -t DLINK_BUILDREV < <(find "$FIRMWARE_PATH" -xdev -path "*config/buildrev")
   for DLINK_BREV in "${DLINK_BUILDREV[@]}"; do
     DLINK_FW_VERx=$(grep -E "^[A-Z][0-9]+" "$DLINK_BREV" || true)
     # -> B01

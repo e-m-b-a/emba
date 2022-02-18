@@ -23,6 +23,7 @@ S85_ssh_check()
 
   SSH_VUL_CNT=0
   SQUID_VUL_CNT=0
+  NEG_LOG=0
 
   search_ssh_files
   check_squid

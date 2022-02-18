@@ -264,6 +264,9 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
+  if [[ -f "$CONFIG_DIR"/trickest_cve-db.txt ]]; then
+    export TRICKEST_DB_PATH="$CONFIG_DIR"/trickest_cve-db.txt
+  fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
 
   echo
@@ -498,6 +501,9 @@ main()
       cp -R "$FIRMWARE_PATH" "$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       FIRMWARE_PATH="$FIRMWARE_PATH_CP""/""$(basename "$FIRMWARE_PATH")"
       export OUTPUT_DIR="$FIRMWARE_PATH_CP"
+    else
+      # need to set it as fallback:
+      export OUTPUT_DIR="$FIRMWARE_PATH"
     fi
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
@@ -563,8 +569,14 @@ main()
   fi
 
   # we use the metasploit path for exploit information from the metasploit framework
-  if [[ -d "$MSF_PATH" ]]; then
+  if [[ -d "$MSF_PATH" && "$IN_DOCKER" -eq 0 ]]; then
     generate_msf_db &
+  fi
+
+  # we create the trickest cve database on the host - if the trickest-cve repo is here
+  # typically this is on installations in full mode
+  if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
+    generate_trickest_db &
   fi
 
   if [[ $IN_DOCKER -eq 0 ]] ; then

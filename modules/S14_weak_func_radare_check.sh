@@ -28,6 +28,8 @@ S14_weak_func_radare_check()
   module_title "Check binaries for weak functions (radare mode)"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  STRCPY_CNT=0
+  RESULTS=()
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
     if [[ -f "$MAIN_LOG" ]]; then
@@ -48,7 +50,6 @@ S14_weak_func_radare_check()
     print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
     IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"
 
-    STRCPY_CNT=0
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
     for LINE in "${BINARIES[@]}" ; do
       # we run throught the bins and check if the bin was already analysed via objdump:
