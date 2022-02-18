@@ -64,7 +64,7 @@ os_identification() {
   sub_module_title "OS detection"
 
   print_output "[*] Initial OS detection running ..." | tr -d "\n"
-  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443")
+  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics")
   echo "." | tr -d "\n"
   declare -A OS_COUNTER=()
   local COUNTER=0

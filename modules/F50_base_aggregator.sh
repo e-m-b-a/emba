@@ -757,7 +757,7 @@ os_detector() {
 os_kernel_module_detect() {
 
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
-    mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u)
+    mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u || true)
     if [[ "${#KERNELV[@]}" -ne 0 ]]; then
       # if we have found a kernel it is a Linux system:
       LINUX_VERSIONS="Linux"

@@ -319,15 +319,18 @@ detect_root_dir_helper() {
         # remove the interpreter path from the full path:
         R_PATH="${R_PATH//$INTERPRETER_ESCAPED/}"
         ROOT_PATH+=( "$R_PATH" )
+        export RTOS=0
       done
     done
   else
     # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
     mapfile -t ROOT_PATH < <(find "$SEARCH_PATH" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
+    export RTOS=0
   fi
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     print_output "[*] Root directory set to firmware path ... last resort"
+    export RTOS=1
     ROOT_PATH+=( "$SEARCH_PATH" )
   fi
 

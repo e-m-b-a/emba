@@ -45,33 +45,24 @@ P99_prepare_analyzer() {
   check_firmware
   print_output ""
 
-  if [[ -d "$FIRMWARE_PATH" ]]; then
+  prepare_file_arr
+  print_output ""
+  prepare_binary_arr
+  print_output ""
 
-    export RTOS=0
+  if [[ $KERNEL -eq 0 ]] ; then
+    architecture_check
+    architecture_dep_check
+  fi
 
-    prepare_file_arr
-    print_output ""
-    prepare_binary_arr
-    print_output ""
+  if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
+    detect_root_dir_helper "$FIRMWARE_PATH" "main"
+  fi
 
-    if [[ $KERNEL -eq 0 ]] ; then
-      architecture_check
-      architecture_dep_check
-    fi
-
-    if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
-      detect_root_dir_helper "$FIRMWARE_PATH" "main"
-    fi
-
-    set_etc_paths
-    echo
-
-  else
-    # here we can deal with other non linux things like RTOS specific checks
-
-    export RTOS=1
-
-    prepare_file_arr
+  set_etc_paths
+  echo
+  if [[ "$RTOS" -eq 1 ]]; then
+    print_output "[*] RTOS system detected"
   fi
 
   NEG_LOG=1

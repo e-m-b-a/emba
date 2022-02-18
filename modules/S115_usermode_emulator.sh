@@ -24,6 +24,7 @@ S115_usermode_emulator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Usermode emulation"
   pre_module_reporter "${FUNCNAME[0]}"
+  NEG_LOG=0
 
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 
@@ -31,6 +32,7 @@ S115_usermode_emulator() {
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
     EMULATOR="NA"
+    NEG_LOG=1
 
     print_output "[*] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
     # get the local interface ip address for later verification
@@ -180,7 +182,7 @@ S115_usermode_emulator() {
     print_output "[!] Enable it with the $ORANGE-E$MAGENTA switch.$NC"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$QEMULATION"
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 get_local_ip() {

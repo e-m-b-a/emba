@@ -459,9 +459,9 @@ extract_deb_helper() {
 }
 binwalk_deep_extract_helper() {
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
-    binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
+    binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" || true | tee -a "$LOG_FILE"
   else
-    binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
+    binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" || true | tee -a "$LOG_FILE"
   fi
 }
 extract_deb_extractor_helper(){
