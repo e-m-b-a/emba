@@ -23,7 +23,7 @@ F50_base_aggregator() {
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
   P02_LOG="p02_firmware_bin_file_check.txt"
-  P70_LOG="p70_firmware_bin_base_analyzer.txt"
+  P70_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
   S06_LOG="s06_distribution_identification.txt"
   S12_LOG="s12_binary_protection.txt"
@@ -735,7 +735,8 @@ os_detector() {
       done
     fi
 
-    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    # we print the unverified OS only if we have no verified results:
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2)
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
