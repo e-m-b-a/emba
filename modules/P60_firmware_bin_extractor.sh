@@ -330,15 +330,6 @@ extract_fact_helper() {
   fi
 }
 
-extract_ipk_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/ipk_db.txt
-}
-extract_apk_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.apk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/apk_db.txt
-}
-extract_deb_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
-}
 binwalk_deep_extract_helper() {
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" || true | tee -a "$LOG_FILE"
@@ -346,11 +337,7 @@ binwalk_deep_extract_helper() {
     binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" || true | tee -a "$LOG_FILE"
   fi
 }
-extract_deb_extractor_helper(){
-  DEB_NAME=$(basename "$DEB")
-  print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-  dpkg-deb --extract "$DEB" "$R_PATH" || true
-}
+
 linux_basic_identification_helper() {
   LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 }

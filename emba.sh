@@ -264,7 +264,6 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
-  export TRICKEST_DB_PATH="$CONFIG_DIR"/trickest_cve-db.txt
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
 
   echo
@@ -576,6 +575,8 @@ main()
   # we create the trickest cve database on the host - if the trickest-cve repo is here
   # typically this is on installations in full mode
   if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
+    # we update the trickest database on every scan and store the database in the tmp directory
+    export TRICKEST_DB_PATH="$TMP_DIR"/trickest_cve-db.txt
     generate_trickest_db &
   fi
 

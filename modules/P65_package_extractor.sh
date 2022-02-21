@@ -13,8 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Finds and extracts typical package archives - deb, apk, 
-#               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
+# Description:  Identification and extraction of typical package archives like deb, apk, ipk
+
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
 export PRE_THREAD_ENA=0
@@ -25,11 +25,12 @@ P65_package_extractor() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   DISK_SPACE_CRIT=0
-  FILES_EXT=0
+  NEG_LOG=0
+  FILES_PRE_PACKAGE=0
+  FILES_POST_PACKAGE=0
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 && "$RTOS" -eq 0 ]]; then
     FILES_PRE_PACKAGE=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-    print_output ""
     if [[ "$DISK_SPACE_CRIT" -ne 1 ]]; then
       deb_extractor
     else
@@ -51,20 +52,19 @@ P65_package_extractor() {
       print_output "[!] $(date) - Ending extraction processes - apk extraction performed" "main"
       DISK_SPACE_CRIT=1
     fi
+
+    FILES_POST_PACKAGE=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+
+    if [[ "$FILES_POST_PACKAGE" -gt "$FILES_PRE_PACKAGE" ]]; then
+      print_output ""
+      print_output "[*] Before package extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after package extraction we have now $ORANGE$FILES_POST_PACKAGE$NC files extracted."
+      NEG_LOG=1
+    fi
   else
     print_output "[*] As there is no root directory detected it is not possible to process package archives"
   fi
 
-  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f | wc -l )
-  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-  if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
-    print_output ""
-    print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all."
-  fi
-
-  FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-
-  module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 apk_extractor() {
@@ -166,3 +166,22 @@ deb_extractor() {
     print_output "[-] No deb packages extracted."
   fi
 }
+
+extract_ipk_helper() {
+  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/ipk_db.txt
+}
+
+extract_apk_helper() {
+  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.apk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/apk_db.txt
+}
+
+extract_deb_helper() {
+  find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
+}
+
+extract_deb_extractor_helper(){
+  DEB_NAME=$(basename "$DEB")
+  print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
+  dpkg-deb --extract "$DEB" "$R_PATH" || true
+}
+

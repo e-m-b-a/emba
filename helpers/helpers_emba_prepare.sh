@@ -355,7 +355,6 @@ check_init_size() {
     print_output "[!] WARNING: Analysing huge firmwares will take a lot of disk space, RAM and time!" "no_log"
     print_output "" "no_log"
   fi
-
 }
 
 generate_msf_db() {
@@ -370,16 +369,20 @@ generate_msf_db() {
 
 generate_trickest_db() {
   # only running on host in full installation (with trickest database installed)
-  print_output "[*] Update and build the Trickest CVE/exploit database" "no_log"
   # search all markdown files in the trickest directory and create a temporary file with the module path (including CVE) and github URL to exploit:
 
-  cd "$EXT_DIR"/trickest-cve || true
-  git pull || true
-  cd ../.. || true
+  if [[ -d "$EXT_DIR"/trickest-cve ]]; then
+    print_output "[*] Update and build the Trickest CVE/exploit database" "no_log"
+    cd "$EXT_DIR"/trickest-cve || true
+    git pull || true
+    cd ../.. || true
 
-  find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH"
-  if [[ -f "$TRICKEST_DB_PATH" ]]; then
-    print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+    find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH" || true
+    if [[ -f "$TRICKEST_DB_PATH" ]]; then
+      print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+    fi
+  else
+    print_output "[*] No update of the Trickest exploit database performed." "no_log"
   fi
 }
 
