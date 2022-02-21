@@ -264,9 +264,7 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
-  if [[ -f "$CONFIG_DIR"/trickest_cve-db.txt ]]; then
-    export TRICKEST_DB_PATH="$CONFIG_DIR"/trickest_cve-db.txt
-  fi
+  export TRICKEST_DB_PATH="$CONFIG_DIR"/trickest_cve-db.txt
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
 
   echo

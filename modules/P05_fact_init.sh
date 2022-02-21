@@ -60,12 +60,11 @@ fact_extractor() {
     print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
     #shellcheck disable=SC2012
     ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
+    print_output ""
 
     FILES_FACT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_FACT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_FACT$NC files and $ORANGE$DIRS_FACT$NC directories from the firmware image."
     print_output ""
   fi
-
-
 }

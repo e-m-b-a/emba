@@ -35,7 +35,7 @@ S108_stacs_password_search()
 
     if [[ -f "$STACS_LOG_FILE" && $(jq ".runs[0] .results[] | .message[]" "$STACS_LOG_FILE" | wc -l) -gt 0 ]]; then
       ELEMENTS_="$(jq ".runs[0] .results[] .message.text" "$STACS_LOG_FILE" | wc -l)"
-      print_output "[+] Found $ORANGE$ELEMENTS_$GREEN password hash values:"
+      print_output "[+] Found $ORANGE$ELEMENTS_$GREEN credential areas:"
       write_csv_log "Message" "PW_PATH" "PW_HASH" "PW_HASH_real"
       ELEMENTS=$((ELEMENTS_-1))
 
