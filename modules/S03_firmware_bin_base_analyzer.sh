@@ -94,8 +94,8 @@ os_identification() {
 os_detection_thread_per_os() {
   local DETECTED=0
   OS_COUNTER[$OS]=0
-  OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null || true)"))
-  OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -type f -name "p60_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null || true)" ))
+  OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -xdev -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null || true)"))
+  OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -xdev -type f -name "p60_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null || true)" ))
   OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(strings "$FIRMWARE_PATH" 2>/dev/null | grep -i -c "$OS" || true)" ))
 
   if [[ $OS == "VxWorks\|Wind" ]]; then
