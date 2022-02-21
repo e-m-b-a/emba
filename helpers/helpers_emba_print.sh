@@ -644,3 +644,11 @@ matrix_mode() {
   done #(c) 2011 -- [ BruXy ]
   reset
 }
+
+banner_printer() {
+  echo ""
+  BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f | shuf -n 1)
+  cat "$BANNER_TO_PRINT"
+  echo ""
+
+}

@@ -1,0 +1,53 @@
+
+MMMMMMMMMMMMMMMMMMx. .xMMMMMMMMMN:  ,KMMMMMMMMMO.   lWMMMMMMMMMd  .kMMMMMMMMMX;  ;XMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMx. .xMMMMMMMMMN:  ,KMMMMMMMMMO'   lWMMMMMMMMMd  .kMMMMMMMMMX;  ;XMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMx. .xMMMMMMMMMN:  ,KMMMMMMMMM0'   lWMMMMMMMMMd  .kMMMMMMMMMX;  ;XMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMM0lcl0MMMMMMMMMWkccxNMMMMMMMMMXdcccOMMMMMMMMMM0lcoKMMMMMMMMMNxccxWMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMWk:::;::;;;;;;;;;;;;;;;::;;;;;:;;:;;;:;;;;;::::;;;;;;;;;;;;;;;:::::;;;;;;:;;;:;;:;lKMMMMMMMM
+MMMMMMMMWc                                                                                .OMMMMMMMM
+MMMMMMMMWc   .'...............................'.    ....................................  .OMMMMMMMM
+MMMMMMMMWc   .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,'.  .OMMMMMMMM
+KKKKKXWMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMNKKKKK
+.....;0MWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMWd.....
+;;;;;lXMWc   ',,,,,,,,,''''''''''''''''''''''''.    .',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMWk;;;;;
+MMMMMMMMWc   ',,,,,,,,,'.                           .,,,,,,,,'....',,,,,,'....',,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,'.                           .,,,,,,,,'.   ',,,,,,'.  .',,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMMMMMMM
+;;;;;oXMWc   ',,,,,,,,,''''''...........''.''''.    .',,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMWk:;;;;
+.....;KMWc   ',,,,,,,,,'.                           .,,,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMWo.....
+K00K0XWMWc   ',,,,,,,,,'... ........... .  ....     .',,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMNKKKKK
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .',,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,'.   ',,,,,,'   .',,,,,,,,.  .OMMMMMMMM
+dddddkNMWc   ...................................     .........    ........    .........   .OMM0ddddd
+     '0MWc                                                                                .OMWl     
+dddddkNMWc   ...................................     ..................................   .OMM0ddddd
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,'',,,,,,,,',,,,,,,,,,,.    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+KKKK0XWMWc   ',,,,,,,,,'.           .',,,,,,,,,.    .,,,,,,,,,,,,,,'.. .',,,,,,,,,,,,,,.  .OMMNK0KKK
+.....;0MWc   ',,,,,,,,,'.           .',,,,,,,,,.    .,,,,,,,,,,,,,,'.  .',,,,,,,,,,,,,,.  .OMWd.....
+;;;;;oXMWc   ',,,,,,,,,,''''''''''''',,,,,,,,,,.    .,,,,,,,,,,,,,,''..'',,,,,,,,,,,,,,.  .OMWk:;;;;
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,...     .',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,'.       .',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,,,','''','','',,,,,,,'''.    .',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,'.           .',,,,,,,,,.    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   ',,,,,,,,,'.           .',,,,,,,,,.    .,,,,,,,,,,,,,,'....',,,,,,,,,,,,,,.  .OMMMMMMMM
+;;;;;lKMWc   ',,,,,,,,,,''''''''''''',,,,,,,,,,.    .,,,,,,,,,,,,,,'.   ',,,,,,,,,,,,,,.  .OMWk;;;;;
+.....;KMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,,,,,,,'    ',,,,,,,,,,,,,,.  .OMWd.....
+KKKKKXWMWc   .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .,,,,,,,,,,,,,,'.   ',,,,,,,,,,,,,,.  .OMMNKKKKK
+MMMMMMMMWc   ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    .',,,,,,,,,,,,,'.   ',,,,,,,,,,,,,,.  .OMMMMMMMM
+MMMMMMMMWc   .'..........................'....'.    ..'...........'.    .'..........''..  .OMMMMMMMM
+MMMMMMMMWc                                                                                .OMMMMMMMM
+MMMMMMMMWk:;::;;:;;;:;:;;;;;;;;;::::::;;;;;;;;;:;;:;;::;;;:;;;;:;;;;;;;;;;;;::;;::;::;;::;lKMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMKlcl0MMMMMMMMMWkccxNMMMMMMMMMXdcccOWMMMMMMMMM0lcoKMMMMMMMMMNxccxWMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMx. .xMMMMMMMMMN:  ,KMMMMMMMMM0'   lWMMMMMMMMMd  .kMMMMMMMMMX;  ;XMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMx. .xMMMMMMMMMN:  ,KMMMMMMMMM0'   lWMMMMMMMMMd  .kMMMMMMMMMX;  ;XMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMx. .xMMMMMMMMMN:  ,KMMMMMMMMM0'   lWMMMMMMMMMd  .kMMMMMMMMMX;  ;XMMMMMMMMMMMMMMMMM
+

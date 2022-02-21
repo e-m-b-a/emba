@@ -401,6 +401,8 @@ main()
 
   echo
 
+  banner_printer
+
   if [[ "$UPDATE" -eq 1 ]]; then
     print_output "[*] EMBA update starting ..." "no_log"
     git pull
