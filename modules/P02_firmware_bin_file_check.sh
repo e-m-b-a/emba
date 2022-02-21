@@ -81,6 +81,7 @@ fw_bin_detector() {
   local DLINK_ENC_CHECK
   local AVM_CHECK
 
+  export FACT_INIT=0
   export VMDK_DETECTED=0
   export DLINK_ENC_DETECTED=0
   export QNAP_ENC_DETECTED=0
@@ -97,6 +98,10 @@ fw_bin_detector() {
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
 
+  # if we have a zip, tgz, tar archive we are going to use the FACT extractor
+  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* ]]; then
+    export FACT_INIT=1
+  fi
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     export VMDK_DETECTED=1
   fi

@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware in the log directory. 
+# Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware to the log directory.
 #               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
@@ -30,6 +30,8 @@ P60_firmware_bin_extractor() {
   FILES_BINWALK=0
   LINUX_PATH_COUNTER=0
 
+  # typically FIRMWARE_PATH is only a file if none of the EMBA extractors were able to extract something
+  # This means we are using binwalk now
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # we love binwalk ... this is our first chance for extracting everything
     binwalking
@@ -37,6 +39,8 @@ P60_firmware_bin_extractor() {
 
   linux_basic_identification_helper
 
+  # Typically FIRMWARE_PATH is only a file if none of the EMBA extractors (including binwalk) were able
+  # to extract something - we try FACT extractor
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
     # shellcheck disable=SC2153
@@ -293,6 +297,7 @@ deep_extractor() {
 }
 
 deeper_extractor_helper() {
+  print_output "[*] FIRMWARE_PATH_CP: $FIRMWARE_PATH_CP"
 
   readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
@@ -307,6 +312,8 @@ deeper_extractor_helper() {
 
     if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
 
+      print_output "[*] Details of file: $FILE_TMP"
+      file "$FILE_TMP" | tee -a "$LOG_FILE"
       # do a quick check if EMBA should handle the file or we give it to binwalk:
       fw_bin_detector "$FILE_TMP"
 
@@ -324,6 +331,9 @@ deeper_extractor_helper() {
         WAIT_PIDS_P20+=( "$!" )
       elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
         engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$BSD_UFS" -ne 0 ]]; then
+        ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted" &
         WAIT_PIDS_P20+=( "$!" )
       else
         # default case to binwalk

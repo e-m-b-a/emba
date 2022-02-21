@@ -502,8 +502,7 @@ output_cve_exploits() {
       echo "cve_medium;\"$MEDIUM_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "cve_low;\"$LOW_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
-    fi
-    if [[ "$CVE_SEARCH" -ne 1 ]]; then
+    elif [[ "$CVE_SEARCH" -ne 1 ]]; then
       print_output ""
       print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
       print_output ""

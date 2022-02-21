@@ -362,10 +362,10 @@ radare_log_bin_hardening() {
     write_log "[*] Binary protection state of $ORANGE$NAME$NC" "$FUNC_LOG"
     write_log "" "$FUNC_LOG"
     # get headline:
-    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u)
+    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u || true)
     write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
     # get binary entry
-    BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u)
+    BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
     write_log "  $BIN_PROT" "$FUNC_LOG"
     write_log "" "$FUNC_LOG"
   fi
