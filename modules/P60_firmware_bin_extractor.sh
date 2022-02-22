@@ -168,7 +168,6 @@ deep_extractor() {
 }
 
 deeper_extractor_helper() {
-  print_output "[*] FIRMWARE_PATH_CP: $FIRMWARE_PATH_CP"
 
   readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \

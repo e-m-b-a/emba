@@ -301,11 +301,11 @@ detect_root_dir_helper() {
   #  LOGGER="no_log"
   #fi
 
-  #print_output "[*] Root directory auto detection (could take some time)\\n" "$LOGGER"
   print_output "[*] Root directory auto detection (could take some time)\\n"
   ROOT_PATH=()
   export ROOT_PATH
   local R_PATH
+  local MECHANISM=""
 
   mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null || true)
 
@@ -320,6 +320,7 @@ detect_root_dir_helper() {
         R_PATH="${R_PATH//$INTERPRETER_ESCAPED/}"
         ROOT_PATH+=( "$R_PATH" )
         export RTOS=0
+        MECHANISM="binary interpreter"
       done
     done
   else
@@ -331,18 +332,19 @@ detect_root_dir_helper() {
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     print_output "[*] Root directory set to firmware path ... last resort"
     export RTOS=1
+    FILE_NAMES=1
     ROOT_PATH+=( "$SEARCH_PATH" )
+    MECHANISM="last resort"
   fi
 
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
-    #print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:"
     write_link "s05#file_dirs"
+    MECHANISM="file names"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
-    #print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
-    print_output "[+] Found the following root directory: $R_PATH"
+    print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
     write_link "s05#file_dirs"
   done
 }

@@ -62,7 +62,7 @@ deep_key_search() {
 deep_key_searcher() {
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
-    readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" || true | tr -d '\0' | cut -c-100 || true)
+    readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-100 || true)
     if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
       echo "[+] $DEEP_S_FILE" >> "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
       for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do

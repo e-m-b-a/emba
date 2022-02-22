@@ -1,7 +1,7 @@
 #!/bin/bash
 
 print_output "[*] Exploitability notes:"
-print_output "$(indent "R - remote exploits")"
-print_output "$(indent "L - local exploits")"
-print_output "$(indent "D - DoS exploits")"
-print_output "$(indent "G - PoC code found on Github (unknown exploit vector)")"
+print_output "$(indent "${ORANGE}R$NC - remote exploits")"
+print_output "$(indent "${ORANGE}L$NC - local exploits")"
+print_output "$(indent "${ORANGE}D$NC - DoS exploits")"
+print_output "$(indent "${ORANGE}G$NC - PoC code found on Github (unknown exploit vector)")"

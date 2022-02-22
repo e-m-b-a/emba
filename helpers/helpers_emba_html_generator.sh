@@ -143,19 +143,23 @@ add_link_tags() {
         readarray -t MODUL_ARR_LINK < <( find . -iname "$REF_LINK""_*" || true )
         if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
           MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]' || true)"
+          echo "MODUL_ARR_LINK_E: $MODUL_ARR_LINK_E"
           if [[ -n "$REF_ANCHOR" ]] ; then
             HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html\#anchor_$REF_ANCHOR@g" || true)"
           else
             HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@g" || true)"
           fi
+          echo "HTML_LINK: $HTML_LINK"
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ "$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK""@" '-e' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END""@")
+          echo "LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
         fi
       else
         LINE_NUMBER_INFO_PREV="$(grep -a -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
+        echo "LINE_NUMBER_INFO_PREV: $LINE_NUMBER_INFO_PREV"
       fi
     done
   fi

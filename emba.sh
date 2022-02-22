@@ -508,6 +508,7 @@ main()
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
     print_output "    EMBA starts with the pre-testing phase." "no_log"
+    export OUTPUT_DIR="$FIRMWARE_PATH"
   elif [[ -f "$KERNEL_CONFIG" && "$KERNEL" -eq 1 ]]; then
     print_output "[*] Kernel configuration file detected." "no_log"
   else
@@ -574,9 +575,9 @@ main()
 
   # we create the trickest cve database on the host - if the trickest-cve repo is here
   # typically this is on installations in full mode
+  export TRICKEST_DB_PATH="$TMP_DIR"/trickest_cve-db.txt
   if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
     # we update the trickest database on every scan and store the database in the tmp directory
-    export TRICKEST_DB_PATH="$TMP_DIR"/trickest_cve-db.txt
     generate_trickest_db &
   fi
 
