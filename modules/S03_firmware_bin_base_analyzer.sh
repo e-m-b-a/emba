@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Identifies the operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, uC/OS and Linux. 
+# Description:  A rough guess of the used operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, uC/OS and Linux.
 #               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 #export PRE_THREAD_ENA=1
@@ -25,13 +25,13 @@ S03_firmware_bin_base_analyzer() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local NEG_LOG=0
-  local WAIT_PIDS_P70=()
+  local WAIT_PIDS_S03=()
 
   if [[ -d "$FIRMWARE_PATH_CP" ]] ; then
     export OUTPUT_DIR="$FIRMWARE_PATH_CP"
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
-      WAIT_PIDS_P70+=( "$!" )
+      WAIT_PIDS_S03+=( "$!" )
     else
       os_identification
     fi
@@ -42,7 +42,7 @@ S03_firmware_bin_base_analyzer() {
     if [[ $LINUX_PATH_COUNTER -eq 0 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
         binary_architecture_detection &
-        WAIT_PIDS_P70+=( "$!" )
+        WAIT_PIDS_S03+=( "$!" )
       else
         binary_architecture_detection
       fi
@@ -50,10 +50,10 @@ S03_firmware_bin_base_analyzer() {
   fi
 
   if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_P70[@]}"
+    wait_for_pid "${WAIT_PIDS_S03[@]}"
   fi
 
-  if [[ "$(wc -l "$TMP_DIR"/p70.tmp | awk '{print $1}')" -gt 0 ]] ; then
+  if [[ "$(wc -l "$TMP_DIR"/s03.tmp | awk '{print $1}')" -gt 0 ]] ; then
     NEG_LOG=1
   fi
 
@@ -70,8 +70,8 @@ os_identification() {
   local WAIT_PIDS_S03_1=()
 
   if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
-    echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/p70.tmp
-    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/p70.tmp
+    echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/s03.tmp
+    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/s03.tmp
   fi
 
   print_output ""
@@ -142,7 +142,7 @@ os_detection_thread_per_os() {
   fi
 
   if [[ "${OS_COUNTER[$OS]}" -gt 0 ]]; then
-    echo "${OS_COUNTER[$OS]}" >> "$TMP_DIR"/p70.tmp
+    echo "${OS_COUNTER[$OS]}" >> "$TMP_DIR"/s03.tmp
   fi
 }
 
@@ -157,11 +157,11 @@ binary_architecture_detection()
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
     print_output ""
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
-    echo "$PRE_ARCH_" >> "$TMP_DIR"/p70.tmp
+    echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done
   for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
     print_output ""
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
-    echo "$PRE_ARCH_" >> "$TMP_DIR"/p70.tmp
+    echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done
 }
