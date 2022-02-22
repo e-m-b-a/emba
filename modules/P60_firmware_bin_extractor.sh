@@ -314,6 +314,7 @@ extract_binwalk_helper() {
     binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
   fi
 }
+
 extract_fact_helper() {
   if [[ -d /tmp/extractor ]]; then
     # This directory is currently hard coded in FACT-extractor
@@ -331,9 +332,9 @@ extract_fact_helper() {
 
 binwalk_deep_extract_helper() {
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
-    binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" || true | tee -a "$LOG_FILE"
+    binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
   else
-    binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" || true | tee -a "$LOG_FILE"
+    binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
   fi
 }
 

@@ -41,8 +41,6 @@ P02_firmware_bin_file_check() {
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
     MD5_CHECKSUM=$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')
 
-    fw_bin_detector "$FIRMWARE_PATH"
-
      # entropy checking on binary file
     ENTROPY=$(ent "$FIRMWARE_PATH" | grep Entropy)
   fi
@@ -68,6 +66,8 @@ P02_firmware_bin_file_check() {
       python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null
       write_link "$LOG_DIR"/pixd.png
     fi
+
+    fw_bin_detector "$FIRMWARE_PATH"
   fi
 
   write_csv_log "Firmware name" "SHA512 checksum" "MD5 checksum" "Entropy" "Dlink enc state" "VMDK detected" "UBOOT image" "EXT filesystem" "AVM system detected"
@@ -101,45 +101,59 @@ fw_bin_detector() {
 
   # if we have a zip, tgz, tar archive we are going to use the FACT extractor
   if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* ]]; then
+    print_output "[*] Identified gzip/zip/tar archive file - using FACT extraction module"
     export FACT_INIT=1
   fi
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
+    print_output "[*] Identified VMWware VMDK archive file - using VMDK extraction module"
     export VMDK_DETECTED=1
   fi
   if [[ "$FILE_BIN_OUT" == *"UBI image"* ]]; then
+    print_output "[*] Identified UBI filesystem image - using UBI extraction module"
     export UBI_IMAGE=1
   fi
   if [[ "$DLINK_ENC_CHECK" == *"SHRS"* ]]; then
+    print_output "[*] Identified D-Link SHRS encrpyted firmware - using D-Link extraction module"
     export DLINK_ENC_DETECTED=1
   fi
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 0.\ ..\ \ 00\ 00\ 0.\ ..\ 31\ 32\ 33\ 00 ]]; then
+    print_output "[*] Identified Engenius encrpyted firmware - using Engenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
   fi
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
+    print_output "[*] Identified Engenius encrpyted firmware - using Engenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
   fi
   if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
+    print_output "[*] Identified D-Link encrpted_img encrpyted firmware - using D-Link extraction module"
     export DLINK_ENC_DETECTED=2
   fi
   if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
+    print_output "[*] Identified AVM firmware - using AVM extraction module"
     export AVM_DETECTED=1
   fi
   if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
+    print_output "[*] Identified u-boot firmware - using u-boot module"
     export UBOOT_IMAGE=1
   fi
+  if [[ "$FILE_BIN_OUT" == *"Unix Fast File system [v2]"* ]]; then
+    print_output "[*] Identified UFS filesytem - using UFS filesytem extraction module"
+    export BSD_UFS=1
+  fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
+    print_output "[*] Identified Linux ext2 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext3 filesystem data"* ]]; then
+    print_output "[*] Identified Linux ext3 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext4 filesystem data"* ]]; then
+    print_output "[*] Identified Linux ext4 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
   fi
-  if [[ "$FILE_BIN_OUT" == *"Unix Fast File system [v2]"* ]]; then
-    export BSD_UFS=1
-  fi
   if [[ "$QNAP_ENC_CHECK" == *"QNAP encrypted firmware footer , model"* ]]; then
+    print_output "[*] Identified QNAP encrpyted firmware - using QNAP extraction module"
     export QNAP_ENC_DETECTED=1
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
@@ -147,6 +161,7 @@ fw_bin_detector() {
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ a3\ 01\  ]]; then
     GPG_CHECK="$(gpg --list-packets "$FIRMWARE_PATH" | grep "compressed packet:")"
     if [[ "$GPG_CHECK" == *"compressed packet: algo="* ]]; then
+      print_output "[*] Identified GPG compressed firmware - using GPG extraction module"
       export GPG_COMPRESS=1
     fi
   fi
