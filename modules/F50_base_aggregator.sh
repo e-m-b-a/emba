@@ -266,10 +266,10 @@ output_config_issues() {
       DATA=1
     fi
     if [[ "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 ]]; then
-      print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
+      print_output "$(indent "$(green "Found $ORANGE${INT_COUNT}$GREEN interesting files and $ORANGE${POST_COUNT-0}$GREEN files that could be useful for post-exploitation.")")"
       write_link "s95"
-      echo "interesting_files;\"$INT_COUNT\"" >> "$CSV_LOG_FILE"
-      echo "post_files;\"$POST_COUNT\"" >> "$CSV_LOG_FILE"
+      echo "interesting_files;\"${INT_COUNT-0}\"" >> "$CSV_LOG_FILE"
+      echo "post_files;\"${POST_COUNT-0}\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
   fi
@@ -517,7 +517,7 @@ output_cve_exploits() {
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
         write_link "f20#minimalreportofexploitsandcves"
       fi
-      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 ]]; then
+      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 ]]; then
         print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
@@ -544,6 +544,8 @@ get_data() {
   LOW_CVE_COUNTER=0
   EXPLOIT_COUNTER=0
   MSF_MODULE_CNT=0
+  INT_COUNT=0
+  POST_COUNT=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)

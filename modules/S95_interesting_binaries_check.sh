@@ -22,6 +22,7 @@ S95_interesting_binaries_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   NEG_LOG=0
+  INT_COUNT=0
 
   if [[ "$THREADED" -eq 1 ]]; then
     interesting_binaries &

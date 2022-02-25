@@ -46,7 +46,7 @@ S25_kernel_check()
     if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
       print_output "Kernel version:"
       for LINE in "${KERNEL_VERSION[@]}" ; do
-        print_output "$(indent "$LINE")"
+        print_output "$(indent "$ORANGE$LINE$NC")"
         FOUND=1
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
@@ -215,7 +215,7 @@ get_kernel_vulns()
   if [[ "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
     print_output "[+] Found linux kernel version/s:"
     for VER in "${KERNEL_VERSION[@]}" ; do
-      print_output "$(indent "$VER")"
+      print_output "$(indent "$ORANGE$VER$NC")"
     done
   
     if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
@@ -243,7 +243,7 @@ analyze_kernel_module()
 
   KMOD_BAD=0
 
-  print_output "[*] Found ${#KERNEL_MODULES[@]} kernel modules."
+  print_output "[*] Found $ORANGE${#KERNEL_MODULES[@]}$NC kernel modules."
 
   for LINE in "${KERNEL_MODULES[@]}" ; do
     # modinfos can run in parallel:

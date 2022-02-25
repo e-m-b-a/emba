@@ -116,6 +116,9 @@ F20_vul_aggregator() {
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_FILE" | grep -c -E "\[\+\]\ Found\ " || true)
 
+  write_log ""
+  write_log "[*] Statistics:$CVE_SEARCH"
+
   module_end_log "${FUNCNAME[0]}" "$FOUND_CVE"
 }
 
@@ -247,7 +250,7 @@ generate_special_log() {
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*[[:blank:]]CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -E 's/.*[[:blank:]]CVE-[0-9]{4}-[0-9]+[[:blank:]]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
         print_output "$RED$EXPLOIT_$NC"
         ((EXPLOIT_HIGH+=1))
