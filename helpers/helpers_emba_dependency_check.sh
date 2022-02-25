@@ -318,7 +318,6 @@ dependency_check()
     check_dep_file "Routersploit EDB database" "$CONFIG_DIR""/routersploit_exploit-db.txt"
     check_dep_file "Routersploit CVE database" "$CONFIG_DIR""/routersploit_cve-db.txt"
     check_dep_file "Metasploit CVE database" "$CONFIG_DIR""/msf_cve-db.txt"
-    check_dep_file "Trickest CVE/Github database" "$CONFIG_DIR""/trickest_cve-db.txt"
 
     # firmadyne / FirmAE
     if [[ $FULL_EMULATION -eq 1 ]]; then

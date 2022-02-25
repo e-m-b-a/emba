@@ -544,11 +544,11 @@ pre_module_reporter() {
   # We handle .txt and .sh files in report_template folder.
   # .txt are just echoed on cli and report
   # .sh are executed via source -> you can use variables, color codes, execute further commands
-  if [[ -f "report_templates/$REPORT_TEMPLATE.txt" ]]; then
-    tee -a "$LOG_FILE" < "report_templates/$REPORT_TEMPLATE.txt"
-  elif [[ -f "report_templates/$REPORT_TEMPLATE.sh" ]]; then
+  if [[ -f "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.txt" ]]; then
+    tee -a "$LOG_FILE" < "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.txt"
+  elif [[ -f "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.sh" ]]; then
     # shellcheck disable=SC1090
-    source "./report_templates/$REPORT_TEMPLATE.sh"
+    source "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.sh"
   fi
   print_output ""
 }
@@ -567,14 +567,14 @@ module_end_log() {
     # We handle .txt and .sh files in report_template folder.
     # .txt are just echoed on cli and report
     # .sh are executed via source -> you can use variables, color codes, execute further commands
-    if [[ -f "report_templates/$REPORT_TEMPLATE.txt" ]]; then
+    if [[ -f "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.txt" ]]; then
       print_bar ""
-      tee -a "$LOG_FILE" < "report_templates/$REPORT_TEMPLATE.txt"
+      tee -a "$LOG_FILE" < "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.txt"
       print_bar ""
-    elif [[ -f "report_templates/$REPORT_TEMPLATE.sh" ]]; then
+    elif [[ -f "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.sh" ]]; then
       print_bar ""
       # shellcheck disable=SC1090
-      source "./report_templates/$REPORT_TEMPLATE.sh"
+      source "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.sh"
       print_bar ""
     fi
   fi
@@ -643,4 +643,12 @@ matrix_mode() {
 
   done #(c) 2011 -- [ BruXy ]
   reset
+}
+
+banner_printer() {
+  echo ""
+  BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f | shuf -n 1)
+  cat "$BANNER_TO_PRINT"
+  echo ""
+
 }

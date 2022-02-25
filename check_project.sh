@@ -40,7 +40,7 @@ INSTALLER_DIR="./installer"
 HELP_DIR="./helpers"
 MOD_DIR="./modules"
 CONF_DIR="./config"
-REP_DIR="./report_templates"
+REP_DIR="$CONF_DIR/report_templates"
 
 SOURCES=()
 MODULES_TO_CHECK_ARR=()

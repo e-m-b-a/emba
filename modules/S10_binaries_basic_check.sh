@@ -27,16 +27,16 @@ S10_binaries_basic_check()
   local VULNERABLE_FUNCTIONS
 
   VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
-  print_output "[*] Interesting functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
   IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ -e /g')"
 
   if [[ "$VULNERABLE_FUNCTIONS" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$VULNERABLE_FUNCTIONS" ]] ; then
+    print_output "[*] Interesting functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q "ELF" ) ; then
         local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
-        mapfile -t VUL_FUNC_RESULT < <(readelf -a --use-dynamic "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
+        mapfile -t VUL_FUNC_RESULT < <(readelf -s --use-dynamic "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
           print_output ""
           print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"

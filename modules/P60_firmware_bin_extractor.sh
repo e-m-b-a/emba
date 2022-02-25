@@ -13,12 +13,11 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware in the log directory. 
+# Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware to the log directory.
 #               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
 export PRE_THREAD_ENA=0
-
 
 P60_firmware_bin_extractor() {
   module_log_init "${FUNCNAME[0]}"
@@ -30,6 +29,8 @@ P60_firmware_bin_extractor() {
   FILES_BINWALK=0
   LINUX_PATH_COUNTER=0
 
+  # typically FIRMWARE_PATH is only a file if none of the EMBA extractors were able to extract something
+  # This means we are using binwalk now
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # we love binwalk ... this is our first chance for extracting everything
     binwalking
@@ -37,6 +38,8 @@ P60_firmware_bin_extractor() {
 
   linux_basic_identification_helper
 
+  # Typically FIRMWARE_PATH is only a file if none of the EMBA extractors (including binwalk) were able
+  # to extract something - we try FACT extractor
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
     # shellcheck disable=SC2153
@@ -73,42 +76,14 @@ P60_firmware_bin_extractor() {
   detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-
-  if [[ "${#ROOT_PATH[@]}" -gt 0 ]]; then
-    print_output ""
-    if [[ "$DISK_SPACE_CRIT" -ne 1 ]]; then
-      deb_extractor
-    else
-      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-      print_output "[!] $(date) - Ending extraction processes - no deb extraction performed" "main"
-      DISK_SPACE_CRIT=1
-    fi
-    if [[ "$DISK_SPACE_CRIT" -ne 1 ]]; then
-      ipk_extractor
-    else
-      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-      print_output "[!] $(date) - Ending extraction processes - no ipk extraction performed" "main"
-      DISK_SPACE_CRIT=1
-    fi
-    if [[ "$DISK_SPACE_CRIT" -ne 1 ]]; then
-      apk_extractor
-    else
-      print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
-      print_output "[!] $(date) - Ending extraction processes - apk extraction performed" "main"
-      DISK_SPACE_CRIT=1
-    fi
-  fi
-
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f | wc -l )
   UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all."
   fi
 
-  if [[ "$FILES_EXT" -eq 0 ]]; then
-    FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  fi
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
 }
 
@@ -148,106 +123,6 @@ disk_space_protection() {
     pkill -f ".*extract\.py.*$SEARCHER.*" || true
     kill -9 "$PID" 2>/dev/null || true
     DISK_SPACE_CRIT=1
-  fi
-}
-
-apk_extractor() {
-  sub_module_title "APK archive extraction mode"
-  print_output "[*] Identify apk archives and extracting it to the root directories ..."
-  extract_apk_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
-  if [[ -f "$TMP_DIR"/apk_db.txt ]] ; then
-    APK_ARCHIVES=$(wc -l "$TMP_DIR"/apk_db.txt | awk '{print $1}')
-    if [[ "$APK_ARCHIVES" -gt 0 ]]; then
-      print_output "[*] Found $ORANGE$APK_ARCHIVES$NC APK archives - extracting them to the root directories ..."
-      for R_PATH in "${ROOT_PATH[@]}"; do
-        while read -r APK; do
-          APK_NAME=$(basename "$APK")
-          print_output "[*] Extracting $ORANGE$APK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar xpf "$APK" --directory "$R_PATH" || true
-        done < "$TMP_DIR"/apk_db.txt
-      done
-
-      FILES_AFTER_APK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      echo ""
-      print_output "[*] Before apk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_APK$NC files extracted."
-    fi
-    check_disk_space
-  else
-    print_output "[-] No apk packages extracted."
-  fi
-}
-
-ipk_extractor() {
-  sub_module_title "IPK archive extraction mode"
-  print_output "[*] Identify ipk archives and extracting it to the root directories ..."
-  extract_ipk_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
-
-  if [[ -f "$TMP_DIR"/ipk_db.txt ]] ; then
-    IPK_ARCHIVES=$(wc -l "$TMP_DIR"/ipk_db.txt | awk '{print $1}')
-    if [[ "$IPK_ARCHIVES" -gt 0 ]]; then
-      print_output "[*] Found $ORANGE$IPK_ARCHIVES$NC IPK archives - extracting them to the root directories ..."
-      mkdir "$LOG_DIR"/ipk_tmp
-      for R_PATH in "${ROOT_PATH[@]}"; do
-        while read -r IPK; do
-          IPK_NAME=$(basename "$IPK")
-          print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp || true
-          tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH" || true
-          rm -r "$LOG_DIR"/ipk_tmp/* || true
-        done < "$TMP_DIR"/ipk_db.txt
-      done
-
-      FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      echo ""
-      print_output "[*] Before ipk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
-      rm -r "$LOG_DIR"/ipk_tmp
-    fi
-    check_disk_space
-  else
-    print_output "[-] No ipk packages extracted."
-  fi
-}
-
-deb_extractor() {
-  sub_module_title "Debian archive extraction mode"
-  print_output "[*] Identify debian archives and extracting it to the root directories ..."
-  extract_deb_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
-
-  if [[ -f "$TMP_DIR"/deb_db.txt ]] ; then
-    DEB_ARCHIVES=$(wc -l "$TMP_DIR"/deb_db.txt | awk '{print $1}')
-    if [[ "$DEB_ARCHIVES" -gt 0 ]]; then
-      print_output "[*] Found $ORANGE$DEB_ARCHIVES$NC debian archives - extracting them to the root directories ..."
-      for R_PATH in "${ROOT_PATH[@]}"; do
-        while read -r DEB; do
-          if [[ "$THREADED" -eq 1 ]]; then
-            extract_deb_extractor_helper &
-            WAIT_PIDS_P20+=( "$!" )
-          else
-            extract_deb_extractor_helper
-          fi
-        done < "$TMP_DIR"/deb_db.txt
-      done
-
-      if [[ "$THREADED" -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS_P20[@]}"
-      fi
-
-      FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      echo ""
-      print_output "[*] Before deb extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
-    fi
-    check_disk_space
-  else
-    print_output "[-] No deb packages extracted."
   fi
 }
 
@@ -307,6 +182,8 @@ deeper_extractor_helper() {
 
     if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
 
+      print_output "[*] Details of file: $FILE_TMP"
+      file "$FILE_TMP" | tee -a "$LOG_FILE"
       # do a quick check if EMBA should handle the file or we give it to binwalk:
       fw_bin_detector "$FILE_TMP"
 
@@ -324,6 +201,9 @@ deeper_extractor_helper() {
         WAIT_PIDS_P20+=( "$!" )
       elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
         engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$BSD_UFS" -ne 0 ]]; then
+        ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted" &
         WAIT_PIDS_P20+=( "$!" )
       else
         # default case to binwalk
@@ -434,6 +314,7 @@ extract_binwalk_helper() {
     binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
   fi
 }
+
 extract_fact_helper() {
   if [[ -d /tmp/extractor ]]; then
     # This directory is currently hard coded in FACT-extractor
@@ -448,27 +329,15 @@ extract_fact_helper() {
     rm -rf /tmp/extractor
   fi
 }
-extract_ipk_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.ipk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/ipk_db.txt
-}
-extract_apk_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f -name "*.apk" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/apk_db.txt
-}
-extract_deb_helper() {
-  find "$FIRMWARE_PATH_CP" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "$TMP_DIR"/deb_db.txt
-}
+
 binwalk_deep_extract_helper() {
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
-    binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
+    binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
   else
-    binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE"
+    binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
   fi
 }
-extract_deb_extractor_helper(){
-  DEB_NAME=$(basename "$DEB")
-  print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-  dpkg-deb --extract "$DEB" "$R_PATH" || true
-}
+
 linux_basic_identification_helper() {
   LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 }

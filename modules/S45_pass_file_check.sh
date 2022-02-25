@@ -68,7 +68,7 @@ S45_pass_file_check()
             L_BREAK=1
           fi
 
-	        if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_PASSWD" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_HASH" | wc -w)" -gt 0 ]] ; then
+	        if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_PASSWD" | wc -w)" -gt 0 ]] ; then
 	          print_output "$(indent "$(green "Found passwords or weak configuration:")")"
             PASS_FILES_FOUND=1
             export PASS_FILES_FOUND

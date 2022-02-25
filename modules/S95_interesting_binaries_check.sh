@@ -22,6 +22,7 @@ S95_interesting_binaries_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   NEG_LOG=0
+  INT_COUNT=0
 
   if [[ "$THREADED" -eq 1 ]]; then
     interesting_binaries &
@@ -58,9 +59,10 @@ interesting_binaries()
   local COUNT=0
   declare -a MD5_DONE_INT
   INT_COUNT=0
+  INT_BIN=()
 
   mapfile -t INT_BIN < <(config_find "$CONFIG_DIR""/interesting_binaries.cfg")
-  if [[ "${INT_BIN[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
+  if [[ "${INT_BIN[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#INT_BIN[@]}" -ne 0 ]] ; then
     for LINE in "${INT_BIN[@]}" ; do
       if [[ -f "$LINE" ]] && file "$LINE" | grep -q "executable" ; then

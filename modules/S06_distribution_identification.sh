@@ -82,6 +82,8 @@ dlink_image_sign() {
     # -> B01
     DLINK_FW_VER="$DLINK_FW_VER""$DLINK_FW_VERx"
     # -> v2.14B01
+    # if we have multiple files we only take the first one - this usually happens if we have some packed firmware
+    break
   done
 
   if [[ -n "$DLINK_FW_VER" ]]; then

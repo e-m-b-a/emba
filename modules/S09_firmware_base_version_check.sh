@@ -85,7 +85,7 @@ S09_firmware_base_version_check() {
       #   use regex (VERSION_IDENTIFIER) via zgrep on these files
       #   use csv-regex to get the csv-search string for csv lookup
 
-      mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \; || true)
+      mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -xdev -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \; || true)
       for SFILE in "${SPECIAL_FINDS[@]}"; do
         BIN_PATH=$(echo "$SFILE" | cut -d ":" -f1)
         BIN_NAME="$(basename "$(echo "$SFILE" | cut -d ":" -f1)")"

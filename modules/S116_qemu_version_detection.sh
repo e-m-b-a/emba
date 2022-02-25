@@ -17,44 +17,47 @@
 
 S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Identified software components - via usermode emulation."
-  pre_module_reporter "${FUNCNAME[0]}"
-
   NEG_LOG=0
 
-  # This module waits for S115_usermode_emulator
-  # check emba.log for S115_usermode_emulator
-  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
-      sleep 1
-    done
-  fi
+  if [[ "$RTOS" -eq 0 ]]; then
+    module_title "Identified software components - via usermode emulation."
+    pre_module_reporter "${FUNCNAME[0]}"
 
-  LOG_PATH_S115="$LOG_DIR"/s115_usermode_emulator.txt
-  if [[ -f "$LOG_PATH_S115" && -d "$LOG_DIR/s115_usermode_emulator" ]]; then
-    LOG_PATH_MODULE_S115="$LOG_DIR"/s115_usermode_emulator/
 
-    write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
-    TYPE="emulation"
-
-    while read -r VERSION_LINE; do 
-      if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
-        continue
-      fi
-
-      if [[ $THREADED -eq 1 ]]; then
-        version_detection_thread &
-        WAIT_PIDS_F05+=( "$!" )
-      else
-        version_detection_thread
-      fi
-    done < "$CONFIG_DIR"/bin_version_strings.cfg
-    echo
-    if [[ $THREADED -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_F05[@]}"
+    # This module waits for S115_usermode_emulator
+    # check emba.log for S115_usermode_emulator
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+      while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
+        sleep 1
+      done
     fi
-    if [[ $(wc -l "$LOG_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
-      NEG_LOG=1
+
+    LOG_PATH_S115="$LOG_DIR"/s115_usermode_emulator.txt
+    if [[ -f "$LOG_PATH_S115" && -d "$LOG_DIR/s115_usermode_emulator" ]]; then
+      LOG_PATH_MODULE_S115="$LOG_DIR"/s115_usermode_emulator/
+
+      write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
+      TYPE="emulation"
+
+      while read -r VERSION_LINE; do
+        if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
+          continue
+        fi
+
+        if [[ $THREADED -eq 1 ]]; then
+          version_detection_thread &
+          WAIT_PIDS_F05+=( "$!" )
+        else
+          version_detection_thread
+        fi
+      done < "$CONFIG_DIR"/bin_version_strings.cfg
+      echo
+      if [[ $THREADED -eq 1 ]]; then
+        wait_for_pid "${WAIT_PIDS_F05[@]}"
+      fi
+      if [[ $(wc -l "$LOG_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
+        NEG_LOG=1
+      fi
     fi
   fi
 

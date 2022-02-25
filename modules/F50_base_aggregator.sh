@@ -23,7 +23,7 @@ F50_base_aggregator() {
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
   P02_LOG="p02_firmware_bin_file_check.txt"
-  P70_LOG="p70_firmware_bin_base_analyzer.txt"
+  P70_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
   S06_LOG="s06_distribution_identification.txt"
   S12_LOG="s12_binary_protection.txt"
@@ -170,7 +170,7 @@ output_details() {
   EMUL=$(grep -c "Version information found" "$LOG_DIR"/s116_qemu_version_detection.txt 2>/dev/null || true)
   if [[ "${EMUL-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
-    write_link "f05"
+    write_link "s116"
     echo "user_emulation_state;\"$EMUL\"" >> "$CSV_LOG_FILE"
     DATA=1
   fi
@@ -266,10 +266,10 @@ output_config_issues() {
       DATA=1
     fi
     if [[ "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 ]]; then
-      print_output "$(indent "$(green "Found $ORANGE$INT_COUNT$GREEN interesting files and $ORANGE$POST_COUNT$GREEN files that could be useful for post-exploitation.")")"
+      print_output "$(indent "$(green "Found $ORANGE${INT_COUNT}$GREEN interesting files and $ORANGE${POST_COUNT-0}$GREEN files that could be useful for post-exploitation.")")"
       write_link "s95"
-      echo "interesting_files;\"$INT_COUNT\"" >> "$CSV_LOG_FILE"
-      echo "post_files;\"$POST_COUNT\"" >> "$CSV_LOG_FILE"
+      echo "interesting_files;\"${INT_COUNT-0}\"" >> "$CSV_LOG_FILE"
+      echo "post_files;\"${POST_COUNT-0}\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
   fi
@@ -494,16 +494,15 @@ output_cve_exploits() {
     if [[ "${CVE_COUNTER-0}" -gt 0 ]]; then
       print_output "[+] Identified ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
       write_link "f20#collectcveandexploitdetails"
-      print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries.")")"
-      print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries.")")"
-      print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries.")")"
+      print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries / Exploits: $ORANGE${EXPLOIT_HIGH_COUNT:0}$NC")")"
+      print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries / Exploits: $ORANGE${EXPLOIT_MEDIUM_COUNT:0}$NC")")"
+      print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries /Exploits: $ORANGE${EXPLOIT_LOW_COUNT:0}$NC")")"
       # shellcheck disable=SC2129
       echo "cve_high;\"$HIGH_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "cve_medium;\"$MEDIUM_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       echo "cve_low;\"$LOW_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
       DATA=1
-    fi
-    if [[ "$CVE_SEARCH" -ne 1 ]]; then
+    elif [[ "$CVE_SEARCH" -ne 1 ]]; then
       print_output ""
       print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
       print_output ""
@@ -518,7 +517,7 @@ output_cve_exploits() {
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
         write_link "f20#minimalreportofexploitsandcves"
       fi
-      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 ]]; then
+      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 ]]; then
         print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
@@ -545,6 +544,8 @@ get_data() {
   LOW_CVE_COUNTER=0
   EXPLOIT_COUNTER=0
   MSF_MODULE_CNT=0
+  INT_COUNT=0
+  POST_COUNT=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
@@ -673,6 +674,9 @@ get_data() {
     LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "$F20_EXPLOITS_LOG" || true)"
     DOS_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(D\)" "$F20_EXPLOITS_LOG" || true)"
     GITHUB_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(G\)" "$F20_EXPLOITS_LOG" || true)"
+    EXPLOIT_HIGH_COUNT="$(cat "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp || true)"
+    EXPLOIT_MEDIUM_COUNT="$(cat "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp || true)"
+    EXPLOIT_LOW_COUNT="$(cat "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp || true)"
   fi
 }
 
@@ -722,7 +726,7 @@ os_detector() {
   fi
 
   #### The following check is needed if the aggreagator has failed till now
-  if [[ $VERIFIED -eq 0 ]]; then
+  if [[ $VERIFIED -eq 0 && -f "$LOG_DIR"/"$P70_LOG" ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
     mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
@@ -733,7 +737,8 @@ os_detector() {
       done
     fi
 
-    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" )
+    # we print the unverified OS only if we have no verified results:
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2 || true)
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
@@ -757,7 +762,7 @@ os_detector() {
 os_kernel_module_detect() {
 
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
-    mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u)
+    mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u || true)
     if [[ "${#KERNELV[@]}" -ne 0 ]]; then
       # if we have found a kernel it is a Linux system:
       LINUX_VERSIONS="Linux"

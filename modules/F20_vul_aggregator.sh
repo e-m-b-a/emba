@@ -220,6 +220,10 @@ generate_special_log() {
     sub_module_title "Minimal report of exploits and CVE's."
     write_anchor "minimalreportofexploitsandcves"
 
+    EXPLOIT_HIGH=0
+    EXPLOIT_MEDIUM=0
+    EXPLOIT_LOW=0
+
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
     print_output ""
     print_output "[*] CVE log file stored in $CVE_MINIMAL_LOG.\\n"
@@ -242,18 +246,26 @@ generate_special_log() {
     grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "$EXPLOIT_OVERVIEW_LOG" || true
 
     mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true)
+
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -e 's/.*[[:blank:]]CVE-[0-9]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
+      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -E 's/.*[[:blank:]]CVE-[0-9]{4}-[0-9]+[[:blank:]]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g')
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
         print_output "$RED$EXPLOIT_$NC"
+        ((EXPLOIT_HIGH+=1))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
         print_output "$ORANGE$EXPLOIT_$NC"
+        ((EXPLOIT_MEDIUM+=1))
       else
         print_output "$GREEN$EXPLOIT_$NC"
+        ((EXPLOIT_LOW+=1))
       fi
     done
+
+    echo "$EXPLOIT_HIGH" > "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp
+    echo "$EXPLOIT_MEDIUM" > "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp
+    echo "$EXPLOIT_LOW" > "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp
   fi
 }
 

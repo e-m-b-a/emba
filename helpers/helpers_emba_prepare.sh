@@ -56,7 +56,7 @@ log_folder()
     esac
   fi
 
-  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config -o -path ./report_templates \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   if [[ $USE_DOCKER -eq 1 && ${#D_LOG_FILES[@]} -gt 0 ]] ; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
@@ -301,11 +301,11 @@ detect_root_dir_helper() {
   #  LOGGER="no_log"
   #fi
 
-  #print_output "[*] Root directory auto detection (could take some time)\\n" "$LOGGER"
   print_output "[*] Root directory auto detection (could take some time)\\n"
   ROOT_PATH=()
   export ROOT_PATH
   local R_PATH
+  local MECHANISM=""
 
   mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null || true)
 
@@ -319,27 +319,31 @@ detect_root_dir_helper() {
         # remove the interpreter path from the full path:
         R_PATH="${R_PATH//$INTERPRETER_ESCAPED/}"
         ROOT_PATH+=( "$R_PATH" )
+        export RTOS=0
+        MECHANISM="binary interpreter"
       done
     done
   else
     # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
     mapfile -t ROOT_PATH < <(find "$SEARCH_PATH" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
+    export RTOS=0
   fi
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     print_output "[*] Root directory set to firmware path ... last resort"
+    export RTOS=1
     ROOT_PATH+=( "$SEARCH_PATH" )
+    MECHANISM="last resort"
   fi
 
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
   if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
-    #print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:" "$LOGGER"
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:"
     write_link "s05#file_dirs"
+    MECHANISM="file names"
   fi
   for R_PATH in "${ROOT_PATH[@]}"; do
-    #print_output "[+] Found the following root directory: $R_PATH" "$LOGGER"
-    print_output "[+] Found the following root directory: $R_PATH"
+    print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
     write_link "s05#file_dirs"
   done
 }
@@ -352,7 +356,6 @@ check_init_size() {
     print_output "[!] WARNING: Analysing huge firmwares will take a lot of disk space, RAM and time!" "no_log"
     print_output "" "no_log"
   fi
-
 }
 
 generate_msf_db() {
@@ -367,16 +370,20 @@ generate_msf_db() {
 
 generate_trickest_db() {
   # only running on host in full installation (with trickest database installed)
-  print_output "[*] Update and build the Trickest CVE/exploit database" "no_log"
   # search all markdown files in the trickest directory and create a temporary file with the module path (including CVE) and github URL to exploit:
 
-  cd "$EXT_DIR"/trickest-cve || true
-  git pull || true
-  cd ../.. || true
+  if [[ -d "$EXT_DIR"/trickest-cve ]]; then
+    print_output "[*] Update and build the Trickest CVE/exploit database" "no_log"
+    cd "$EXT_DIR"/trickest-cve || true
+    git pull || true
+    cd ../.. || true
 
-  find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH"
-  if [[ -f "$TRICKEST_DB_PATH" ]]; then
-    print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+    find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH" || true
+    if [[ -f "$TRICKEST_DB_PATH" ]]; then
+      print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
+    fi
+  else
+    print_output "[*] No update of the Trickest exploit database performed." "no_log"
   fi
 }
 

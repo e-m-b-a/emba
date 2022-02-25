@@ -264,9 +264,6 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
-  if [[ -f "$CONFIG_DIR"/trickest_cve-db.txt ]]; then
-    export TRICKEST_DB_PATH="$CONFIG_DIR"/trickest_cve-db.txt
-  fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
 
   echo
@@ -401,6 +398,8 @@ main()
 
   echo
 
+  banner_printer
+
   if [[ "$UPDATE" -eq 1 ]]; then
     print_output "[*] EMBA update starting ..." "no_log"
     git pull
@@ -509,6 +508,7 @@ main()
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
     print_output "    EMBA starts with the pre-testing phase." "no_log"
+    export OUTPUT_DIR="$FIRMWARE_PATH"
   elif [[ -f "$KERNEL_CONFIG" && "$KERNEL" -eq 1 ]]; then
     print_output "[*] Kernel configuration file detected." "no_log"
   else
@@ -575,7 +575,9 @@ main()
 
   # we create the trickest cve database on the host - if the trickest-cve repo is here
   # typically this is on installations in full mode
+  export TRICKEST_DB_PATH="$TMP_DIR"/trickest_cve-db.txt
   if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
+    # we update the trickest database on every scan and store the database in the tmp directory
     generate_trickest_db &
   fi
 
