@@ -738,7 +738,7 @@ os_detector() {
     fi
 
     # we print the unverified OS only if we have no verified results:
-    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2)
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2 || true)
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
