@@ -29,7 +29,7 @@ S115_usermode_emulator() {
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
-      print_output "[!] This module should not be used in developer mode and could harm your host environment."
+      print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
     EMULATOR="NA"
     NEG_LOG=1
@@ -237,8 +237,8 @@ running_jobs() {
     CJOBS=$(pgrep -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
       echo
-      print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)"
-      print_output "$(indent "$CJOBS")""\\n"
+      print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)" "no_log"
+      print_output "$(indent "$CJOBS")""\\n" "no_log"
     else
       CJOBS="NA"
     fi
