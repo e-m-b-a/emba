@@ -282,7 +282,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
+  while getopts a:bA:cdDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -290,6 +290,10 @@ main()
       A)
         export ARCH="$OPTARG"
         export ARCH_CHECK=0
+        ;;
+      b)
+        banner_printer
+        exit 0
         ;;
       c)
         export CWE_CHECKER=1
@@ -398,7 +402,10 @@ main()
 
   echo
 
-  banner_printer
+  # print it only once per EMBA run - not again from started container
+  if [[ $IN_DOCKER -eq 0 ]]; then
+    banner_printer
+  fi
 
   if [[ "$UPDATE" -eq 1 ]]; then
     print_output "[*] EMBA update starting ..." "no_log"
@@ -772,7 +779,7 @@ main()
     echo
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
-      rm -r "$TMP_DIR" 2>/dev/null
+      rm -r "$TMP_DIR" 2>/dev/null || true
     else
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
     fi
