@@ -363,6 +363,8 @@ print_top10_statistics() {
         print_output "[+] ""$FUNCTION"" - top 10 results:"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           write_anchor "strcpysummary"
+        elif [[ "$FUNCTION" == "system" ]] ; then
+          write_anchor "systemsummary"
         fi
         for LINE in "${RESULTS[@]}" ; do
           SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"

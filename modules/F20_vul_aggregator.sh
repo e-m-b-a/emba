@@ -350,17 +350,17 @@ cve_extractor() {
   # extract the CVE numbers and the CVSS values and sort it:
   if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
     readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r || true)
-  
+
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
       #extract the CVSS and CVE value (remove all spaces and tabs)
       CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-  
+
       # default value
       EXPLOIT="No exploit available"
-  
+
       EDB=0
       # as we already know about a bunch of kernel exploits - lets search them first
       if [[ "$VERSION_BINARY" == *kernel* ]]; then
@@ -372,16 +372,16 @@ cve_extractor() {
           fi
         done
       fi
-  
+
       if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 || "$TRICKEST_SEARCH" -eq 1 ]] ; then
         if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null || true)
         fi
-  
+
         if [[ $MSF_SEARCH -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL_MSF < <(grep -E "$CVE_VALUE"$ "$MSF_DB_PATH" 2>/dev/null || true)
         fi
-  
+
         if [[ $TRICKEST_SEARCH -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL_TRICKEST < <(grep -E "$CVE_VALUE\.md" "$TRICKEST_DB_PATH" 2>/dev/null || true)
         fi
@@ -389,7 +389,7 @@ cve_extractor() {
         # routersploit db search
         if [[ $RS_SEARCH -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT < <(grep -E "$CVE_VALUE"$ "$CONFIG_DIR/routersploit_cve-db.txt" 2>/dev/null || true)
-  
+
           # now, we check the exploit-db results if we have a routersploit module:
           if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
             for EID_VALUE in "${EXPLOIT_AVAIL[@]}"; do
@@ -401,7 +401,7 @@ cve_extractor() {
             done
           fi
         fi
-  
+
         if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
           readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
           if [[ "$EXPLOIT" == "No exploit available" ]]; then
@@ -409,7 +409,7 @@ cve_extractor() {
           else
             EXPLOIT="$EXPLOIT"" / EDB ID:"
           fi
-  
+
           for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
             LOCAL=0
             REMOTE=0
@@ -434,7 +434,7 @@ cve_extractor() {
             EDB=1
             ((EXPLOIT_COUNTER_VERSION+=1))
           done
-  
+
           # copy the exploit-db exploits to the report
           for LINE in "${EXPLOIT_AVAIL[@]}"; do
             if [[ "$LINE" =~ "File:" ]]; then
@@ -445,7 +445,7 @@ cve_extractor() {
             fi
           done
         fi
-  
+
         if [[ ${#EXPLOIT_AVAIL_MSF[@]} -gt 0 ]]; then
           if [[ "$EXPLOIT" == "No exploit available" ]]; then
             EXPLOIT="Exploit (MSF:"
@@ -509,7 +509,7 @@ cve_extractor() {
             EDB=1
           fi
         fi
-  
+
         if [[ -v EXPLOIT_AVAIL_ROUTERSPLOIT[@] || -v EXPLOIT_AVAIL_ROUTERSPLOIT1[@] ]]; then
           if [[ "$EXPLOIT" == "No exploit available" ]]; then
             EXPLOIT="Exploit (Routersploit:"
@@ -529,7 +529,7 @@ cve_extractor() {
               fi
             fi
           done
-  
+
           if [[ $EDB -eq 0 ]]; then
             # only count the msf exploit if we have not already count an EDB exploit
             # otherwise we count an exploit for one CVE twice
@@ -538,11 +538,11 @@ cve_extractor() {
           fi
         fi
       fi
-  
+
       if [[ $EDB -eq 1 ]]; then
         EXPLOIT="$EXPLOIT"")"
       fi
-  
+
       CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$VERSION_SEARCH""/" | sed -e 's/\ \+/\t/g')
       #BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       #VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
@@ -604,16 +604,27 @@ cve_extractor() {
   EXPLOITS="$EXPLOIT_COUNTER_VERSION"
 
   if [[ "$CVE_COUNTER_VERSION" -gt 0 || "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
+    if ! [[ -f "$LOG_PATH_MODULE"/overview.csv ]]; then
+      echo "BINARY;VERSION;Number of CVEs;Number of EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
+    fi
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
-      printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.txt
+      write_link "f20#cve_$BINARY" "$LOG_PATH_MODULE"/overview.txt
+      echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
     else
-      printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+      printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.txt
+      write_link "f20#cve_$BINARY" "$LOG_PATH_MODULE"/overview.txt
+      echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
     fi
   elif [[ "$CVEs" -eq 0 && "$EXPLOITS" -eq 0 ]]; then
-    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.txt
+    write_link "f20#cve_$BINARY" "$LOG_PATH_MODULE"/overview.txt
+    echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
   else
     # this should never happen ...
-    printf "[+] Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" | tee -a "$LOG_DIR"/"$CVE_AGGREGATOR_LOG"
+    printf "[+] Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.txt
+    write_link "f20#cve_$BINARY" "$LOG_PATH_MODULE"/overview.txt
+    echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
   fi
 
 }

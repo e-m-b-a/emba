@@ -195,8 +195,9 @@ recover_local_ip() {
   local IP_TO_CHECK_="$1"
 
   if ! ifconfig eth0 | grep -q "$IP_TO_CHECK_"; then
+    print_output ""
     print_output "[!] Warning: The emulation process of S115 has reconfigured your network interface."
-    print_output "[*] We try to recover the interface eth0 with address $IP_TO_CHECK_"
+    print_output "[*] We try to recover the interface ${ORANGE}eth0$NC with address ${ORANGE}$IP_TO_CHECK_$NC"
     ifconfig eth0 "$IP_TO_CHECK_" up
   fi
 }

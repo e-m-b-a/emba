@@ -23,7 +23,7 @@ F50_base_aggregator() {
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
   P02_LOG="p02_firmware_bin_file_check.txt"
-  P70_LOG="s03_firmware_bin_base_analyzer.txt"
+  S03_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
   S06_LOG="s06_distribution_identification.txt"
   S12_LOG="s12_binary_protection.txt"
@@ -92,7 +92,7 @@ output_overview() {
     fi
     write_link "p99"
     echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
-  elif [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
+  elif [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH""$NC"
       write_link "p99"
@@ -395,9 +395,9 @@ output_binaries() {
       print_output ""
       print_output "[+] SYSTEM - top 10 results:"
       if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
-        write_link "s13#strcpysummary"
+        write_link "s13#systemsummary"
       else
-        write_link "s14#strcpysummary"
+        write_link "s14#systemsummary"
       fi
       DATA=1
       for LINE in "${RESULTS_SYSTEM[@]}" ; do
@@ -458,14 +458,33 @@ binary_fct_output() {
 
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
+    local S13_BIN=()
     # if we have the base linux config file we are checking it:
     if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
       printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+      mapfile -t S13_BIN < <(find "$LOG_DIR"/s13_weak_func_check/ -iname vul_func_*"$BINARY"*.txt || true)
+      if [[ -v S13_BIN[@] ]]; then
+        write_link "s13"
+      else
+        write_link "s14"
+      fi
     else
       printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+      mapfile -t S13_BIN < <(find "$LOG_DIR"/s13_weak_func_check/ -iname vul_func_*"$BINARY"*.txt || true)
+      if [[ -v S13_BIN[@] ]]; then
+        write_link "s13"
+      else
+        write_link "s14"
+      fi
     fi
   else
     printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+    mapfile -t S13_BIN < <(find "$LOG_DIR"/s13_weak_func_check/ -iname vul_func_*"$BINARY"*.txt || true)
+    if [[ -v S13_BIN[@] ]]; then
+      write_link "s13"
+    else
+      write_link "s14"
+    fi
   fi
 }
 
@@ -476,7 +495,11 @@ output_cve_exploits() {
     if [[ "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
-      print_output "$(grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" 2>/dev/null)"
+      # we write the overview.txt only in the log file (including REF markers)
+      cat "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null >> "$LOG_FILE"
+      echo -e "\n" >> "$LOG_FILE"
+      # Now we print only the printable areas to the screen:
+      grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null || true
       print_output ""
     fi
 
@@ -492,6 +515,7 @@ output_cve_exploits() {
       DATA=1
     fi
     if [[ "${CVE_COUNTER-0}" -gt 0 ]]; then
+      echo -e "\n" >> "$LOG_FILE"
       print_output "[+] Identified ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
       write_link "f20#collectcveandexploitdetails"
       print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries / Exploits: $ORANGE${EXPLOIT_HIGH_COUNT:0}$NC")")"
@@ -525,7 +549,7 @@ output_cve_exploits() {
         write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT"
       fi
       # we report only software components with exploits to csv:
-      grep " Found version details:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
+      sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_DIR/f20_vul_aggregator/overview.txt" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
       DATA=1
     fi
   fi
@@ -550,8 +574,8 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
   fi
-  if [[ -f "$LOG_DIR"/"$P70_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P70_LOG" | cut -d: -f2 | tr -d '[:space:]' || true)
+  if [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | tr -d '[:space:]' || true)
     PRE_ARCH=$(strip_color_codes "$PRE_ARCH")
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
@@ -690,7 +714,7 @@ distribution_detector() {
 os_detector() {
 
   VERIFIED=0
-  VERIFIED_P70=0
+  VERIFIED_S03=0
   OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
 
   #### The following check is based on the results of the aggregator:
@@ -726,19 +750,19 @@ os_detector() {
   fi
 
   #### The following check is needed if the aggreagator has failed till now
-  if [[ $VERIFIED -eq 0 && -f "$LOG_DIR"/"$P70_LOG" ]]; then
+  if [[ $VERIFIED -eq 0 && -f "$LOG_DIR"/"$S03_LOG" ]]; then
     # the OS was not verified in the first step (but we can try to verify it now with more data of other modules)
-    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
+    mapfile -t OS_DETECT < <(grep "verified.*operating\ system\ detected" "$LOG_DIR"/"$S03_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" || true)
     if [[ "${#OS_DETECT[@]}" -gt 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
-        VERIFIED_P70=1
+        VERIFIED_S03=1
         VERIFIED=1
         print_os
       done
     fi
 
     # we print the unverified OS only if we have no verified results:
-    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$P70_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2 || true)
+    mapfile -t OS_DETECT < <(grep "\ detected" "$LOG_DIR"/"$S03_LOG" 2>/dev/null | cut -d: -f1,2 | awk '{print $2 " - #" $5}' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sort -r -n -t '#' -k2 || true)
 
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
@@ -777,10 +801,10 @@ os_kernel_module_detect() {
 
 print_os() {
   if [[ $VERIFIED -eq 1 ]]; then
-    if [[ "$VERIFIED_P70" -eq 1 ]]; then
+    if [[ "$VERIFIED_S03" -eq 1 ]]; then
       SYSTEM=$(echo "$SYSTEM" | awk '{print $1}')
       print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM$NC"
-      write_link "p70"
+      write_link "s03"
     else
       print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM$NC"
       write_link "s25"
@@ -788,7 +812,7 @@ print_os() {
     echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM$NC"
-    write_link "p70"
+    write_link "s03"
     if [[ "$(grep -c os_verified "$CSV_LOG_FILE")" -lt 1 ]]; then
       echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
     fi
