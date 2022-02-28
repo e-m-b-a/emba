@@ -61,6 +61,7 @@ IL20_firmae_system_emulator() {
 
     print_file_info "fixImage.sh" "FirmAE fixImage script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/"
     print_file_info "preInit.sh" "FirmAE preInit script" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/preInit.sh" "external/firmae/scripts/"
+    print_file_info "network.sh" "FirmAE preInit script" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/network.sh" "external/firmae/scripts/"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -102,6 +103,7 @@ IL20_firmae_system_emulator() {
 
       download_file "fixImage.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/fixImage.sh"
       download_file "preInit.sh" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/preInit.sh" "external/firmae/scripts/preInit.sh"
+      download_file "network.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/network.sh"
 
       ;;
     esac

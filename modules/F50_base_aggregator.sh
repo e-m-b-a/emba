@@ -370,8 +370,8 @@ output_binaries() {
     ORANGE_="$(tput setaf 3)"
     NC_="$(tput sgr0)"
 
-    readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/  /" | sed "s/\.txt//" 2> /dev/null)
-    readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/  /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2> /dev/null)
 
     #strcpy:
     if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
@@ -414,8 +414,9 @@ output_binaries() {
 
 binary_fct_output() {
   BINARY_DETAILS="$1"
-  BINARY="$(echo "$BINARY_DETAILS" | cut -d\  -f3)"
   F_COUNTER="$(echo "$BINARY_DETAILS" | cut -d\  -f1)"
+  FCT="$(echo "$BINARY_DETAILS" | cut -d\  -f2)"
+  BINARY="$(echo "$BINARY_DETAILS" | cut -d\  -f3)"
 
   if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG" 2>/dev/null; then
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
@@ -458,33 +459,21 @@ binary_fct_output() {
 
 
   if [[ -f "$BASE_LINUX_FILES" ]]; then
-    local S13_BIN=()
+    local FCT_LINK=""
     # if we have the base linux config file we are checking it:
     if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
+      FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
       printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
-      mapfile -t S13_BIN < <(find "$LOG_DIR"/s13_weak_func_check/ -iname vul_func_*"$BINARY"*.txt || true)
-      if [[ -v S13_BIN[@] ]]; then
-        write_link "s13"
-      else
-        write_link "s14"
-      fi
+      write_link "$FCT_LINK"
     else
+      FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
       printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
-      mapfile -t S13_BIN < <(find "$LOG_DIR"/s13_weak_func_check/ -iname vul_func_*"$BINARY"*.txt || true)
-      if [[ -v S13_BIN[@] ]]; then
-        write_link "s13"
-      else
-        write_link "s14"
-      fi
+      write_link "$FCT_LINK"
     fi
   else
+    FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
     printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
-    mapfile -t S13_BIN < <(find "$LOG_DIR"/s13_weak_func_check/ -iname vul_func_*"$BINARY"*.txt || true)
-    if [[ -v S13_BIN[@] ]]; then
-      write_link "s13"
-    else
-      write_link "s14"
-    fi
+    write_link "$FCT_LINK"
   fi
 }
 
@@ -495,11 +484,18 @@ output_cve_exploits() {
     if [[ "${CVE_COUNTER-0}" -gt 0 || "${EXPLOIT_COUNTER-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
-      # we write the overview.txt only in the log file (including REF markers)
-      cat "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null >> "$LOG_FILE"
+
+      # run over overview.txt and add links - need to do this here and not in f20 as there bites us the threading mode
+      while read -r OVERVIEW_LINE; do
+        echo "$OVERVIEW_LINE" >> "$LOG_FILE"
+        BINARY_="$(echo "$OVERVIEW_LINE" | cut -d: -f2 | tr -d [:blank:])"
+        write_link "f20#cve_$BINARY_"
+      done < "$LOG_DIR/f20_vul_aggregator/overview.txt"
       echo -e "\n" >> "$LOG_FILE"
+
       # Now we print only the printable areas to the screen:
-      grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null || true
+      # grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null || true
+      cat "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null
       print_output ""
     fi
 
@@ -549,7 +545,7 @@ output_cve_exploits() {
         write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT"
       fi
       # we report only software components with exploits to csv:
-      sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "$LOG_DIR/f20_vul_aggregator/overview.txt" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE"
+      grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE" || true
       DATA=1
     fi
   fi
