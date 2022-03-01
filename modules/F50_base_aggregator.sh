@@ -491,11 +491,6 @@ output_cve_exploits() {
         print_output "$OVERVIEW_LINE"
         write_link "f20#cve_$BINARY_"
       done < "$LOG_DIR/f20_vul_aggregator/overview.txt"
-      echo -e "\n" >> "$LOG_FILE"
-
-      # Now we print only the printable areas to the screen:
-      # grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null || true
-      #cat "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null
       print_output ""
     fi
 

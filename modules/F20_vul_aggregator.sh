@@ -296,7 +296,6 @@ cve_db_lookup() {
   VERSION_SEARCH="$VERSION"
   VERSION_PATH="${VERSION//:/_}"
   VERSION_BINARY=$(echo "$VERSION" | cut -d: -f1)
-  #print_output "[*] CVE database lookup with version information: ${ORANGE}$VERSION_SEARCH${NC}" "" "f20#cve_$VERSION_BINARY"
   print_output "[*] CVE database lookup with version information: ${ORANGE}$VERSION_SEARCH${NC}" "no_log"
 
   # CVE search:
@@ -313,7 +312,6 @@ cve_db_lookup() {
     # dlink extrawurst: dlink vs d-link
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "$VERSION_SEARCH" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
-    #print_output "[*] CVE database lookup with version information: ${ORANGE}$VERSION_SEARCHx${NC}" "" "f20#cve_$VERSION_BINARY"
     print_output "[*] CVE database lookup with version information: ${ORANGE}$VERSION_SEARCHx${NC}" "no_log"
     $PATH_CVE_SEARCH -p "$VERSION_SEARCHx" >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
   fi
