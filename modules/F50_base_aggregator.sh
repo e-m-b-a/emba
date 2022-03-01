@@ -487,15 +487,15 @@ output_cve_exploits() {
 
       # run over overview.txt and add links - need to do this here and not in f20 as there bites us the threading mode
       while read -r OVERVIEW_LINE; do
-        echo "$OVERVIEW_LINE" >> "$LOG_FILE"
-        BINARY_="$(echo "$OVERVIEW_LINE" | cut -d: -f2 | tr -d [:blank:])"
+        BINARY_="$(echo "$OVERVIEW_LINE" | cut -d: -f2 | tr -d '[:blank:]')"
+        print_output "$OVERVIEW_LINE"
         write_link "f20#cve_$BINARY_"
       done < "$LOG_DIR/f20_vul_aggregator/overview.txt"
       echo -e "\n" >> "$LOG_FILE"
 
       # Now we print only the printable areas to the screen:
       # grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null || true
-      cat "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null
+      #cat "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null
       print_output ""
     fi
 

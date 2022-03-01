@@ -104,7 +104,7 @@ S115_usermode_emulator() {
         fi
 
         if [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
-          print_output "[!] Blacklist triggered ... $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
+          print_output "[*] Binary $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC) not emulated - blacklist triggered"
           continue
         else
           if [[ "$THREADED" -eq 1 ]]; then
@@ -262,7 +262,7 @@ s115_cleanup() {
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
 
-  rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
+  #rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
@@ -546,12 +546,17 @@ run_init_test() {
   LOG_FILE_INIT="$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME_"".txt"
   local CPU_CONFIG_
   CPU_CONFIG_=""
+
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_INIT"
+
   # get the most used cpu configuration for the initial check:
   if [[ -f "$LOG_PATH_MODULE""/qemu_init_cpu.txt" ]]; then
     CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}' || true)
   fi
 
-  print_output "[*] Initial emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_FILE_INIT" "$LOG_FILE_INIT"
+  print_output "[*] Initial CPU detection process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_FILE_INIT" "$LOG_FILE_INIT"
+  write_log "[*] Emulator used: $ORANGE$EMULATOR$NC" "$LOG_FILE_INIT"
+  write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_INIT"
 
   run_init_qemu "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT"
 
@@ -601,6 +606,7 @@ run_init_test() {
     write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_FILE_INIT"
     write_log "[*] Fallback to most found CPU configuration" "$LOG_FILE_INIT"
   fi
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_INIT"
 }
 
 run_init_qemu() {
@@ -652,17 +658,23 @@ emulate_strace_run() {
   local CPU_CONFIG_="$1"
   LOG_FILE_STRACER="$LOG_PATH_MODULE""/stracer_""$BIN_EMU_NAME"".txt"
 
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
+
   print_output "[*] Initial strace run on the command ${ORANGE}$BIN_${NC} to identify missing areas" "$LOG_FILE_STRACER" "$LOG_FILE_STRACER"
+  write_log "[*] Emulating binary name: $ORANGE$BIN_EMU_NAME$NC in ${ORANGE}strace$NC mode to identify missing areas" "$LOG_FILE_STRACER"
+  write_log "[*] Emulator used: $ORANGE$EMULATOR$NC" "$LOG_FILE_STRACER"
+  write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_STRACER"
+  write_log "[*] Using CPU config: $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_STRACER"
 
   # currently we only look for file errors (errno=2) and try to fix this
   if [[ "$STRICT_MODE" -eq 1 ]]; then
     set +e
   fi
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   else
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   fi
   if [[ "$STRICT_MODE" -eq 1 ]]; then
@@ -674,6 +686,7 @@ emulate_strace_run() {
   kill -0 -9 "$PID" 2> /dev/null || true
 
   # extract missing files, exclude *.so files:
+  write_log "[*] Identification of missing filesytem areas." "$LOG_FILE_STRACER"
   mapfile -t MISSING_AREAS < <(grep -a "open.*errno=2\ " "$LOG_FILE_STRACER" 2>&1 | cut -d\" -f2 2>&1 | sort -u || true)
   mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u || true)
   MISSING_AREAS+=("${MISSING_AREAS_[@]}" )
@@ -711,7 +724,9 @@ emulate_strace_run() {
       fi
     fi
   done
+  sed -i 's/.REF.*//' "$LOG_FILE_STRACER"
   cat "$LOG_FILE_STRACER"
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
 }
 
 check_disk_space_emu() {
