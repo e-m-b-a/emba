@@ -661,6 +661,7 @@ run_init_qemu_runner() {
 
 emulate_strace_run() {
   local CPU_CONFIG_="$1"
+  local MISSING_AREAS=()
   LOG_FILE_STRACER="$LOG_PATH_MODULE""/stracer_""$BIN_EMU_NAME"".txt"
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
@@ -699,40 +700,41 @@ emulate_strace_run() {
   mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u || true)
   MISSING_AREAS+=("${MISSING_AREAS_[@]}" )
 
-  for MISSING_AREA in "${MISSING_AREAS[@]}"; do
-    MISSING+=("$MISSING_AREA")
-    if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
-      write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
-  
-      FILENAME_MISSING=$(basename "$MISSING_AREA")
-      write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
-      PATH_MISSING=$(dirname "$MISSING_AREA")
+  if [[ "${#MISSING_AREAS[@]}" -gt 0 ]]; then
+    for MISSING_AREA in "${MISSING_AREAS[@]}"; do
+      MISSING+=("$MISSING_AREA")
+      if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
+        write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
 
-      FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
-      if [[ -n "$FILENAME_FOUND" ]]; then
-        write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
+        FILENAME_MISSING=$(basename "$MISSING_AREA")
+        write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+        PATH_MISSING=$(dirname "$MISSING_AREA")
+
+        FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
+        if [[ -n "$FILENAME_FOUND" ]]; then
+          write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
+        fi
+
+        if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
+          write_log "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC" "$LOG_FILE_STRACER"
+          mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null || true
+          #continue
+        fi
+        if [[ -n "$FILENAME_FOUND" ]]; then
+          write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
+          cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null || true
+          continue
+        else
+        #  # disabled this for now - have to rethink this feature
+        #  # This can only be used on non library and non elf files. How can we identify them without knowing them?
+        #  write_log "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+        #  touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
+          write_log "[*] Missing file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+          continue
+        fi
       fi
-    
-      if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
-        write_log "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC" "$LOG_FILE_STRACER"
-        mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null || true
-        #continue
-      fi
-      if [[ -n "$FILENAME_FOUND" ]]; then
-        write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
-        cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null || true
-        continue
-      else
-      #  # disable this for now - have to rethink this feature
-      #  # This can only be used on non library and non elf files. How can we identify them without knowing them?
-      #  write_log "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
-      #  touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
-        write_log "[*] Missing file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
-        continue
-      fi
-    fi
-  done
-  if ! [[ "${#MISSING_AREA[@]}" -gt 0 ]]; then
+    done
+  else
     write_log "[*] No missing areas found." "$LOG_FILE_STRACER"
   fi
   sed -i 's/.REF.*//' "$LOG_FILE_STRACER"
@@ -805,11 +807,9 @@ emulate_binary() {
     fi
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
-      #chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
       timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-      #chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
       timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     fi
     if [[ "$STRICT_MODE" -eq 1 ]]; then
