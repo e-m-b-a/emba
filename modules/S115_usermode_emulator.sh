@@ -29,7 +29,7 @@ S115_usermode_emulator() {
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
-      print_output "[!] This module should not be used in developer mode and could harm your host environment."
+      print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
     EMULATOR="NA"
     NEG_LOG=1
@@ -104,7 +104,7 @@ S115_usermode_emulator() {
         fi
 
         if [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
-          print_output "[!] Blacklist triggered ... $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)"
+          print_output "[*] Binary $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC) not emulated - blacklist triggered"
           continue
         else
           if [[ "$THREADED" -eq 1 ]]; then
@@ -195,8 +195,9 @@ recover_local_ip() {
   local IP_TO_CHECK_="$1"
 
   if ! ifconfig eth0 | grep -q "$IP_TO_CHECK_"; then
+    print_output ""
     print_output "[!] Warning: The emulation process of S115 has reconfigured your network interface."
-    print_output "[*] We try to recover the interface eth0 with address $IP_TO_CHECK_"
+    print_output "[*] We try to recover the interface ${ORANGE}eth0$NC with address ${ORANGE}$IP_TO_CHECK_$NC"
     ifconfig eth0 "$IP_TO_CHECK_" up
   fi
 }
@@ -237,8 +238,8 @@ running_jobs() {
     CJOBS=$(pgrep -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
       echo
-      print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)"
-      print_output "$(indent "$CJOBS")""\\n"
+      print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)" "no_log"
+      print_output "$(indent "$CJOBS")""\\n" "no_log"
     else
       CJOBS="NA"
     fi
@@ -261,7 +262,7 @@ s115_cleanup() {
   # reset the terminal - after all the uncontrolled emulation it is typically messed up!
   reset
 
-  rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
+  #rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
@@ -545,12 +546,18 @@ run_init_test() {
   LOG_FILE_INIT="$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME_"".txt"
   local CPU_CONFIG_
   CPU_CONFIG_=""
+
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_INIT"
+
   # get the most used cpu configuration for the initial check:
   if [[ -f "$LOG_PATH_MODULE""/qemu_init_cpu.txt" ]]; then
     CPU_CONFIG_=$(grep -a CPU_CONFIG "$LOG_PATH_MODULE""/qemu_init_cpu.txt" | cut -d\; -f2 | uniq -c | sort -nr | head -1 | awk '{print $2}' || true)
   fi
 
-  print_output "[*] Initial emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_FILE_INIT" "$LOG_FILE_INIT"
+  print_output "[*] Initial CPU detection process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC." "$LOG_FILE_INIT" "$LOG_FILE_INIT"
+  write_log "[*] Emulator used: $ORANGE$EMULATOR$NC" "$LOG_FILE_INIT"
+  write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_INIT"
+  write_log "" "$LOG_FILE_INIT"
 
   run_init_qemu "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT"
 
@@ -576,6 +583,7 @@ run_init_test() {
         continue
       fi
 
+      write_log "" "$LOG_FILE_INIT"
       write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME_$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
       write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
       write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_FILE_INIT"
@@ -600,6 +608,8 @@ run_init_test() {
     write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_FILE_INIT"
     write_log "[*] Fallback to most found CPU configuration" "$LOG_FILE_INIT"
   fi
+  sed -i 's/.REF.*//' "$LOG_FILE_INIT"
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_INIT"
 }
 
 run_init_qemu() {
@@ -609,10 +619,10 @@ run_init_qemu() {
   local LOG_FILE_INIT="${3:-}"
 
   # Enable the following echo output for debugging
-  echo "BIN: $BIN_" | tee -a "$LOG_FILE_INIT"
-  echo "EMULATOR: $EMULATOR" | tee -a "$LOG_FILE_INIT"
-  echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
-  echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
+  #echo "BIN: $BIN_" | tee -a "$LOG_FILE_INIT"
+  #echo "EMULATOR: $EMULATOR" | tee -a "$LOG_FILE_INIT"
+  #echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
+  #echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
 
   if [[ "$STRICT_MODE" -eq 1 ]]; then
     set +e
@@ -640,28 +650,38 @@ run_init_qemu_runner() {
 
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
+    write_log "" "$LOG_FILE_INIT"
     timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
   else
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
+    write_log "" "$LOG_FILE_INIT"
     timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
   fi
 }
 
 emulate_strace_run() {
   local CPU_CONFIG_="$1"
+  local MISSING_AREAS=()
   LOG_FILE_STRACER="$LOG_PATH_MODULE""/stracer_""$BIN_EMU_NAME"".txt"
 
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
+
   print_output "[*] Initial strace run on the command ${ORANGE}$BIN_${NC} to identify missing areas" "$LOG_FILE_STRACER" "$LOG_FILE_STRACER"
+  write_log "[*] Emulating binary name: $ORANGE$BIN_EMU_NAME$NC in ${ORANGE}strace$NC mode to identify missing areas" "$LOG_FILE_STRACER"
+  write_log "[*] Emulator used: $ORANGE$EMULATOR$NC" "$LOG_FILE_STRACER"
+  write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_STRACER"
+  write_log "[*] Using CPU config: $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_STRACER"
+  write_log "" "$LOG_FILE_STRACER"
 
   # currently we only look for file errors (errno=2) and try to fix this
   if [[ "$STRICT_MODE" -eq 1 ]]; then
     set +e
   fi
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   else
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" > "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   fi
   if [[ "$STRICT_MODE" -eq 1 ]]; then
@@ -673,44 +693,54 @@ emulate_strace_run() {
   kill -0 -9 "$PID" 2> /dev/null || true
 
   # extract missing files, exclude *.so files:
+  write_log "" "$LOG_FILE_STRACER"
+  write_log "[*] Identification of missing filesytem areas." "$LOG_FILE_STRACER"
+
   mapfile -t MISSING_AREAS < <(grep -a "open.*errno=2\ " "$LOG_FILE_STRACER" 2>&1 | cut -d\" -f2 2>&1 | sort -u || true)
   mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u || true)
   MISSING_AREAS+=("${MISSING_AREAS_[@]}" )
 
-  for MISSING_AREA in "${MISSING_AREAS[@]}"; do
-    MISSING+=("$MISSING_AREA")
-    if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
-      write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
-  
-      FILENAME_MISSING=$(basename "$MISSING_AREA")
-      write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
-      PATH_MISSING=$(dirname "$MISSING_AREA")
+  if [[ "${#MISSING_AREAS[@]}" -gt 0 ]]; then
+    for MISSING_AREA in "${MISSING_AREAS[@]}"; do
+      MISSING+=("$MISSING_AREA")
+      if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
+        write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
 
-      FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
-      if [[ -n "$FILENAME_FOUND" ]]; then
-        write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
+        FILENAME_MISSING=$(basename "$MISSING_AREA")
+        write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+        PATH_MISSING=$(dirname "$MISSING_AREA")
+
+        FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
+        if [[ -n "$FILENAME_FOUND" ]]; then
+          write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
+        fi
+
+        if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
+          write_log "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC" "$LOG_FILE_STRACER"
+          mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null || true
+          #continue
+        fi
+        if [[ -n "$FILENAME_FOUND" ]]; then
+          write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
+          cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null || true
+          continue
+        else
+        #  # disabled this for now - have to rethink this feature
+        #  # This can only be used on non library and non elf files. How can we identify them without knowing them?
+        #  write_log "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+        #  touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
+          write_log "[*] Missing file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
+          continue
+        fi
       fi
-    
-      if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
-        write_log "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC" "$LOG_FILE_STRACER"
-        mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null || true
-        #continue
-      fi
-      if [[ -n "$FILENAME_FOUND" ]]; then
-        write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
-        cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null || true
-        continue
-      else
-      #  # disable this for now - have to rethink this
-      #  # This can only be used on non library and non elf files. How can we identify them without knowing them?
-      #  write_log "[*] Creating empty file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
-        write_log "[*] Missing file $ORANGE$R_PATH$PATH_MISSING/$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
-      #  touch "$R_PATH""$PATH_MISSING"/"$FILENAME_MISSING" 2> /dev/null
-        continue
-      fi
-    fi
-  done
+    done
+  else
+    write_log "[*] No missing areas found." "$LOG_FILE_STRACER"
+  fi
+  sed -i 's/.REF.*//' "$LOG_FILE_STRACER"
+  # print it to the screen - we already have the output in the right log file
   cat "$LOG_FILE_STRACER"
+  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
 }
 
 check_disk_space_emu() {
@@ -746,6 +776,7 @@ emulate_binary() {
   #write_log "[*] Root path used: $ORANGE$R_PATH$NC" "$LOG_FILE_BIN"
   #shellcheck disable=SC2001
   write_log "[*] Emulating binary: $ORANGE$(echo "$BIN_" | sed 's/^\.//')$NC" "$LOG_FILE_BIN"
+  write_log "" "$LOG_FILE_BIN"
 
   # lets assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
   # we are going to give all ELF files exec permissions to execute it in the emulator
@@ -776,11 +807,9 @@ emulate_binary() {
     fi
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
-      #chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN"
       timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-      #chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" &
       timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
     fi
     if [[ "$STRICT_MODE" -eq 1 ]]; then

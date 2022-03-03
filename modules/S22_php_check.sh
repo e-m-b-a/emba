@@ -52,8 +52,7 @@ s22_phpinfo_check() {
   for PHPINFO in "${PHP_SCRIPTS[@]}" ; do
     if grep -q "phpinfo()" "$PHPINFO"; then
       print_output "[+] Found php file with debugging information: $ORANGE$PHPINFO$NC"
-      # shellcheck disable=SC2002
-      cat "$PHPINFO" | tee -a "$LOG_FILE"
+      tee -a "$LOG_FILE" < "$PHPINFO"
       ((S22_PHPINFO_ISSUES+=1))
     fi
   done

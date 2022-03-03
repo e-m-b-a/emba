@@ -26,12 +26,12 @@ S09_firmware_base_version_check() {
   # this module is designed for *x based systems
 
   module_log_init "${FUNCNAME[0]}"
-  module_title "Binary firmware versions detection"
+  module_title "Static binary firmware versions detection"
   pre_module_reporter "${FUNCNAME[0]}"
 
   EXTRACTOR_LOG="$LOG_DIR"/p60_firmware_bin_extractor.txt
 
-  print_output "[*] Static version detection running ..." | tr -d "\n"
+  print_output "[*] Static version detection running ..." "no_log" | tr -d "\n"
   write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
   TYPE="static"
 

@@ -88,7 +88,7 @@ check_squid()
 
   for BIN_FILE in "${BINARIES[@]}"; do
     if [[ "$BIN_FILE" == *"squid"* ]] && ( file "$BIN_FILE" | grep -q ELF ) ; then
-      print_output "[+] Found possible squid executable: ""$(print_path "$BIN_FILE")"
+      print_output "[+] Found possible squid executable: ""$ORANGE$(print_path "$BIN_FILE")$NC"
       ((SQUID_VUL_CNT+=1))
     fi
   done
@@ -105,11 +105,11 @@ check_squid()
     for SQUID_E in "${SQUID_PATHS_ARR[@]}"; do
       if [[ -f "$SQUID_E""/squid.conf" ]] ; then
         CHECK=1
-        print_output "[+] Found squid config: ""$(print_path "$SQUID_E")"
+        print_output "[+] Found squid config: ""$ORANGE$(print_path "$SQUID_E")$NC"
         ((SQUID_VUL_CNT+=1))
       elif [[ -f "$SQUID_E""/squid3.conf" ]] ; then
         CHECK=1
-        print_output "[+] Found squid config: ""$(print_path "$SQUID_E")"
+        print_output "[+] Found squid config: ""$ORANGE$(print_path "$SQUID_E")$NC"
         ((SQUID_VUL_CNT+=1))
       fi
       if [[ $CHECK -eq 1 ]] ; then

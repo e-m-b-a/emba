@@ -456,6 +456,7 @@ print_help()
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
   echo -e "$CYAN""-o""$NC""                Activate online checks (e.g. upload and test with VirusTotal)"
   echo -e "$CYAN""-r""$NC""                Remove temporary firmware directory after testing"
+  echo -e "$CYAN""-b""$NC""                Just print a random banner and exit"
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"
