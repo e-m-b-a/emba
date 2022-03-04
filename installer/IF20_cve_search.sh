@@ -20,39 +20,40 @@ IF20_cve_search() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $CVE_SEARCH -eq 1 ]] || [[ $FULL -eq 1 ]]; then
-  
+
+    print_git_info "trickest cve database" "trickest/cve" "Trickest CVE to github exploit database"
     print_git_info "cve-search" "cve-search/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
     echo -e "$ORANGE""cve-search will be downloaded.""$NC"
-  
+
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""trickest, cve-search and mongodb will be downloaded, installed and populated!""$NC"
       ANSWER=("y")
     fi
-  
+
     if [[ "$LIST_DEP" -ne 1 ]] ; then
       # we always need the cve-search stuff:
       if ! [[ -d external/cve-search ]]; then
         git clone https://github.com/cve-search/cve-search.git external/cve-search
       fi
       cd ./external/cve-search/ || exit 1
-  
+
       while read -r TOOL_NAME; do
         print_tool_info "$TOOL_NAME" 1
       done < requirements.system
-  
+
       while read -r TOOL_NAME; do
         PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
         TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
         print_pip_info "$PIP_NAME" "$TOOL_VERSION"
       done < requirements.txt
-  
+
       #xargs sudo apt-get install -y < requirements.system
       while read -r TOOL_NAME; do
         apt-get install -y "$TOOL_NAME"
       done < requirements.system
-  
+
       # this is a temp solution - Currently needed to fulfill broken deps:
       python3 -m pip install -Iv crackmapexec==5.1.7.dev0
 
@@ -60,7 +61,7 @@ IF20_cve_search() {
       #cat requirements.txt | xargs -n 1 pip install 2>/dev/null
       python3 -m pip install -r requirements.txt
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
-  
+
       echo -e "[*] Setting up CVE-search environment - ./external/cve-search/etc/configuration.ini"
       sed -zE 's/localhost([^\n]*\n[^\n]*27017)/172.36.0.1\1/' ./etc/configuration.ini.sample | tee ./etc/configuration.ini &>/dev/null
       # we do not use the web server. In case someone enables it we have a good default configuration in place:
@@ -77,13 +78,22 @@ IF20_cve_search() {
         sed -i "s/^requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
       fi
     fi
-  
+
     case ${ANSWER:0:1} in
       y|Y )
-  
+
+        cd "$HOME_PATH" || exit 1
+        # get trickest repository
+        if ! [[ -d external/trickest-cve ]]; then
+          git clone https://github.com/trickest/cve.git external/trickest-cve
+        else
+          cd external/trickest-cve || exit 1
+          git pull
+          cd "$HOME_PATH" || exit 1
+        fi
+
         CVE_INST=1
         echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
-        cd "$HOME_PATH" || exit 1
         cd ./external/cve-search/ || exit 1
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
             CVE_INST=0
@@ -102,7 +112,7 @@ IF20_cve_search() {
           systemctl enable mongod
           sed -i 's/bindIp\:\ 127.0.0.1/bindIp\:\ 172.36.0.1/g' /etc/mongod.conf
           systemctl restart mongod.service
-  
+
           echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
           CVE_INST=1
           echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
