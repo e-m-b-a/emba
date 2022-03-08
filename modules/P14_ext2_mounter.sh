@@ -30,7 +30,9 @@ P14_ext2_mounter() {
 
     ext2_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
-    export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    if [[ "$FILES_EXT_MOUNT" -gt 0 ]]; then
+      export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    fi
     NEG_LOG=1
   fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
@@ -40,8 +42,8 @@ ext2_extractor() {
   local EXT_PATH_="$1"
   local EXTRACTION_DIR_="$2"
   local TMP_EXT_MOUNT="$TMP_DIR""/ext_mount_$RANDOM"
-  local FILES_EXT_MOUNT
-  local DIRS_EXT_MOUNT
+  local DIRS_EXT_MOUNT=0
+  FILES_EXT_MOUNT=0
   sub_module_title "EXT filesystem extractor"
 
   mkdir -p "$TMP_EXT_MOUNT"

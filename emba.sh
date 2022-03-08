@@ -431,7 +431,7 @@ main()
     set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
     set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
     shopt -s extdebug # Enable extended debugging
-    #IFS=$'\n\t'     # Set the "internal field separator"
+    IFS=$'\n\t'     # Set the "internal field separator"
     trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
 
     print_bar "no_log"

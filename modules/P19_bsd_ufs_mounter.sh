@@ -30,7 +30,9 @@ P19_bsd_ufs_mounter() {
 
     ufs_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
-    export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    if [[ "$FILES_UFS_MOUNT" -gt 0 ]]; then
+      export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    fi
     NEG_LOG=1
   fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
@@ -40,8 +42,8 @@ ufs_extractor() {
   local UFS_PATH_="$1"
   local EXTRACTION_DIR_="$2"
   local TMP_UFS_MOUNT="$TMP_DIR""/ufs_mount_$RANDOM"
-  local FILES_UFS_MOUNT
-  local DIRS_UFS_MOUNT
+  local DIRS_UFS_MOUNT=0
+  FILES_UFS_MOUNT=0
   sub_module_title "UFS filesystem extractor"
 
   mkdir -p "$TMP_UFS_MOUNT" 2>/dev/null || true

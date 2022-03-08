@@ -44,8 +44,8 @@ ubi_extractor() {
   local UBI_INFO
   local UBI_1st_ROUND
   local UBI_DATA
+  local DIRS_UBI_EXT=0
   FILES_UBI_EXT=0
-  DIRS_UBI_EXT=0
 
   sub_module_title "UBI filesystem extractor"
 
