@@ -203,7 +203,7 @@ bin_string_checker() {
         fi
       fi
     else
-      VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)
+      VERSION_FINDER="$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)"
       if [[ -n $VERSION_FINDER ]]; then
         echo ""
         print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
