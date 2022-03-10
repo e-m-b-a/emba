@@ -325,17 +325,34 @@ detect_root_dir_helper() {
   fi
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
-    mapfile -t ROOT_PATH < <(find "$SEARCH_PATH" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
+    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      if [[ -d "$R_PATH" ]]; then
+        ROOT_PATH+=( "$R_PATH" )
+        MECHANISM="file names"
+      fi
+    done
   fi
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    mapfile -t ROOT_PATH < <(dirname "$(find "$SEARCH_PATH" -path "*bin/busybox" | sed 's/bin\/busybox//')")
+    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/busybox" | sed 's/bin\/busybox//')
+    for R_PATH in "${ROOTx_PATH[@]}"; do
+      if [[ -d "$R_PATH" ]]; then
+        ROOT_PATH+=( "$R_PATH" )
+        MECHANISM="file names"
+      fi
+    done
   fi
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    mapfile -t ROOT_PATH < <(dirname "$(find "$SEARCH_PATH" -path "*bin/bash" | sed 's/bin\/bash//')")
+    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/bash" | sed 's/bin\/bash//')
+    for R_PATH in "${ROOTx_PATH[@]}"; do
+      if [[ -d "$R_PATH" ]]; then
+        ROOT_PATH+=( "$R_PATH" )
+        MECHANISM="file names"
+      fi
+    done
   fi
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    print_output "[*] Root directory set to firmware path ... last resort"
     export RTOS=1
     ROOT_PATH+=( "$SEARCH_PATH" )
     MECHANISM="last resort"
@@ -344,11 +361,11 @@ detect_root_dir_helper() {
   fi
 
   eval "ROOT_PATH=($(for i in "${ROOT_PATH[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-  if [[ ${#ROOT_PATH[@]} -gt 1 ]]; then
+  if [[ -v ROOT_PATH[@] && "$RTOS" -eq 0 ]]; then
     print_output "[*] Found $ORANGE${#ROOT_PATH[@]}$NC different root directories:"
     write_link "s05#file_dirs"
-    MECHANISM="file names"
   fi
+
   for R_PATH in "${ROOT_PATH[@]}"; do
     print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
     write_link "s05#file_dirs"
