@@ -12,8 +12,10 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor: Benedikt Kuehne
 
-# Description: Extracts encrypted firmware images from D-Link (See https://github.com/0xricksanchez/dlink-decrypt)
+# Description: Extracts encrypted firmware images from D-Link
+# (See https://github.com/0xricksanchez/dlink-decrypt or TODO for more info)
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=0
 
@@ -29,7 +31,7 @@ P11_dlink_SHRS_enc_extract() {
     if [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
       dlink_SHRS_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
     elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
-      print_output "[-] Decryption of this file is currently not supported"
+      dlink_enc_img_extr "$FIRMWARE_PATH" "$EXTRACTION_FILE"
     fi
 
     NEG_LOG=1
@@ -48,6 +50,32 @@ dlink_SHRS_enc_extractor() {
 
   dd if="$DLINK_ENC_PATH_" skip=1756 iflag=skip_bytes|openssl aes-128-cbc -d -p -nopad -nosalt -K "c05fbf1936c99429ce2a0781f08d6ad8" -iv "67c6697351ff4aec29cdbaabf2fbe346" --nosalt -in /dev/stdin -out "$EXTRACTION_FILE_" 2>&1 | tee -a "$LOG_FILE"
 
+  print_output ""
+  if [[ -f "$EXTRACTION_FILE_" ]]; then
+    print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
+    print_output ""
+    print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
+    export FIRMWARE_PATH="$EXTRACTION_FILE_"
+  else
+    print_output "[-] Decryption of D-Link firmware file failed"
+  fi
+}
+
+dlink_enc_img_extr(){
+  local DLINK_ENC_PATH_="$1"
+  local EXTRACTION_FILE_="$2"
+  sub_module_title "DLink encrpted_image extractor"
+  hexdump -C "$DLINK_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
+  dd if="$DLINK_ENC_PATH_" skip=16 iflag=skip_bytes of=/tmp/image.bin 2>&1 | tee -a "$LOG_FILE"
+  IMAGE_SIZE=$(stat -c%s /tmp/image.bin)
+  let "ITERATIONS = $IMAGE_SIZE / 131072"
+  for ((ITERATION=0; ITERATION<$ITERATIONS; ITERATION++)); do
+    let "OFFSET = 131072 * $ITERATION"
+    dd if=/tmp/image.bin skip="$OFFSET" iflag=skip_bytes count=256| openssl aes-256-cbc -d -in /dev/stdin  -out /dev/stdout \
+    -K "6865392d342b4d212964363d6d7e7765312c7132613364316e26322a5a5e2538" -iv "4a253169516c38243d6c6d2d3b384145" --nopad \
+    --nosalt | dd if=/dev/stdin of="$EXTRACTION_FILE_" oflag=append conv=notrunc 2>&1 | tee -a "$LOG_FILE"
+  done
+# Now it should be a .ubi file thats somewhat readable and extractable via ubireader
   print_output ""
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
