@@ -334,7 +334,7 @@ detect_root_dir_helper() {
     done
   fi
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/busybox" | sed 's/bin\/busybox//')
+    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
     for R_PATH in "${ROOTx_PATH[@]}"; do
       if [[ -d "$R_PATH" ]]; then
         ROOT_PATH+=( "$R_PATH" )
@@ -343,7 +343,7 @@ detect_root_dir_helper() {
     done
   fi
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/bash" | sed 's/bin\/bash//')
+    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/bash" | sed -E 's/\/.?bin\/bash//')
     for R_PATH in "${ROOTx_PATH[@]}"; do
       if [[ -d "$R_PATH" ]]; then
         ROOT_PATH+=( "$R_PATH" )
