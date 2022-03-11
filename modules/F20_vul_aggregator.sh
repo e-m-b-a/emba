@@ -158,6 +158,7 @@ aggregate_versions() {
       fi
       print_output "[+] Found Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
       if [[ "$VERSION" =~ \.0$ ]]; then
+        # shellcheck disable=SC2001
         VERSION=$(echo "$VERSION" | sed 's/\.0$/:/')
         VERSIONS_KERNEL+=( "$VERSION" )
         print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
