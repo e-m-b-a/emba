@@ -26,7 +26,9 @@ P10_vmdk_extractor() {
 
     vmdk_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
-    export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    if [[ "$VMDK_FILES" -gt 0 ]]; then
+      export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    fi
     NEG_LOG=1
   fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
@@ -37,9 +39,9 @@ vmdk_extractor() {
   local EXTRACTION_DIR_="$2"
   local MOUNT_DEV
   local DEV_NAME
-  local VMDK_FILES
-  local VMDK_DIRS
   local TMP_VMDK_MNT="$TMP_DIR/vmdk_mount_$RANDOM"
+  local VMDK_DIRS=0
+  VMDK_FILES=0
   sub_module_title "VMDK extractor"
 
   print_output "[*] Connect to device $ORANGE$VMDK_PATH_$NC"

@@ -29,6 +29,7 @@ P18_qnap_decryptor() {
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_qnap_dec.tgz
 
     qnap_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
+
     if [[ "$QNAP" -eq 1 ]]; then
       qnap_extractor "$FIRMWARE_PATH"
     fi

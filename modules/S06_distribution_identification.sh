@@ -22,6 +22,7 @@ S06_distribution_identification()
   pre_module_reporter "${FUNCNAME[0]}"
 
   OUTPUT=0
+  DLINK_FW_VER=""
   write_csv_log "file" "type" "identifier" "csv_rule"
   while read -r LINE; do
     if echo "$LINE" | grep -q "^[^#*/;]"; then
@@ -29,32 +30,32 @@ S06_distribution_identification()
       mapfile -t FILES < <(find "$FIRMWARE_PATH" -xdev -iwholename "*$FILE" || true)
       for FILE in "${FILES[@]}"; do
         if [[ -f "$FILE" ]]; then
-            PATTERN="$(echo "$LINE" | cut -d\; -f3 | sed s/^\"// | sed s/\"$//)"
-            SED_COMMAND="$(echo "$LINE" | cut -d\; -f4)"
-            # shellcheck disable=SC2086
-            OUT1="$(grep $PATTERN "$FILE" || true)"
-            # echo "SED command: $SED_COMMAND"
-            # echo "identified: $OUT1"
-            IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//')
+          PATTERN="$(echo "$LINE" | cut -d\; -f3)"
+          SED_COMMAND="$(echo "$LINE" | cut -d\; -f4)"
+          # shellcheck disable=SC2086
+          OUT1="$(eval "$PATTERN" "$FILE" || true)"
+          # echo "SED command: $SED_COMMAND"
+          # echo "identified: $OUT1"
+          IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//')
 
-            if [[ $(basename "$FILE") == "image_sign" ]]; then
-              # dlink image_sign file handling
-              dlink_image_sign
-            fi
+          if [[ $(basename "$FILE") == "image_sign" ]]; then
+            # dlink image_sign file handling
+            dlink_image_sign
+          fi
 
-            # check if not zero and not only spaces
-            if [[ -n "${IDENTIFIER// }" ]]; then
-              if [[ -n "$DLINK_FW_VER" ]]; then
-                print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN for D-Link device."
-                get_csv_rule_distri "$IDENTIFIER"
-                write_csv_log "$FILE" "dlink" "$IDENTIFIER" "$CSV_RULE"
-              else
-                print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN with Linux distribution detection"
-                get_csv_rule_distri "$IDENTIFIER"
-                write_csv_log "$FILE" "Linux" "$IDENTIFIER" "$CSV_RULE"
-              fi
-              OUTPUT=1
+          # check if not zero and not only spaces
+          if [[ -n "${IDENTIFIER// }" ]]; then
+            if [[ -n "$DLINK_FW_VER" ]]; then
+              print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN for D-Link device."
+              get_csv_rule_distri "$IDENTIFIER"
+              write_csv_log "$FILE" "dlink" "$IDENTIFIER" "$CSV_RULE"
+            else
+              print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN with Linux distribution detection"
+              get_csv_rule_distri "$IDENTIFIER"
+              write_csv_log "$FILE" "Linux" "$IDENTIFIER" "$CSV_RULE"
             fi
+            OUTPUT=1
+          fi
         fi
       done
     fi

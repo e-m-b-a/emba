@@ -29,7 +29,9 @@ P15_ubi_extractor() {
 
     ubi_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
-    export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    if [[ "$FILES_UBI_EXT" -gt 0 ]]; then
+      export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    fi
     NEG_LOG=1
   fi
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
@@ -42,8 +44,8 @@ ubi_extractor() {
   local UBI_INFO
   local UBI_1st_ROUND
   local UBI_DATA
-  local FILES_UBI_EXT
-  local DIRS_UBI_EXT
+  local DIRS_UBI_EXT=0
+  FILES_UBI_EXT=0
 
   sub_module_title "UBI filesystem extractor"
 

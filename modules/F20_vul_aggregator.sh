@@ -157,6 +157,12 @@ aggregate_versions() {
         continue
       fi
       print_output "[+] Found Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
+      if [[ "$VERSION" =~ \.0$ ]]; then
+        # shellcheck disable=SC2001
+        VERSION=$(echo "$VERSION" | sed 's/\.0$/:/')
+        VERSIONS_KERNEL+=( "$VERSION" )
+        print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
+      fi
     done
 
     print_output ""
@@ -334,7 +340,7 @@ cve_extractor() {
   local VERSION
   local BINARY
 
-  if [[ "$(echo "$VERSION_orig" | grep -o ":" | wc -l || true)" -eq 1 ]]; then
+  if [[ "$(echo "$VERSION_orig" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
     BINARY="$(echo "$VERSION_orig" | cut -d ":" -f1)"
     VERSION="$(echo "$VERSION_orig" | cut -d ":" -f2)"
   else

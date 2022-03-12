@@ -29,7 +29,9 @@ P05_fact_init() {
 
     fact_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
-    export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    if [[ "$FILES_FACT" -gt 0 ]]; then
+      export FIRMWARE_PATH="$LOG_DIR"/firmware/
+    fi
 
     NEG_LOG=1
   fi
@@ -41,8 +43,8 @@ fact_extractor() {
 
   local FIRMWARE_PATH_="$1"
   local EXTRACTION_DIR_="$2"
-  local FILES_FACT
-  local DIRS_FACT
+  FILES_FACT=0
+  local DIRS_FACT=0
 
   if [[ -d /tmp/extractor ]]; then
     # This directory is currently hard coded in FACT-extractor
