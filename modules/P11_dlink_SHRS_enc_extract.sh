@@ -62,8 +62,7 @@ dlink_SHRS_enc_extractor() {
 }
 
 dlink_enc_img_extractor(){
-  export TMP_DIR="$LOG_DIR""/tmp"
-
+  local TMP_DIR="$LOG_DIR""/tmp"
   local DLINK_ENC_PATH_="$1"
   local EXTRACTION_FILE_="$2"
   local TMP_IMAGE_FILE="$TMP_DIR/image.bin"
