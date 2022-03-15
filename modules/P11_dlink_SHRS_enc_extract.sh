@@ -15,7 +15,7 @@
 # Contributor: Benedikt Kuehne
 
 # Description: Extracts encrypted firmware images from D-Link
-# (See https://github.com/0xricksanchez/dlink-decrypt or TODO for more info)
+# (See https://github.com/0xricksanchez/dlink-decrypt)
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=0
 
@@ -61,7 +61,7 @@ dlink_SHRS_enc_extractor() {
   fi
 }
 
-dlink_enc_img_extr(){
+dlink_enc_img_extractor(){
   export TMP_DIR="$LOG_DIR""/tmp"
 
   local DLINK_ENC_PATH_="$1"
@@ -69,7 +69,6 @@ dlink_enc_img_extr(){
   local TMP_IMAGE_FILE="$TMP_DIR/image.bin"
 
   sub_module_title "DLink encrpted_image extractor"
-
 
   hexdump -C "$DLINK_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
   dd if="$DLINK_ENC_PATH_" skip=16 iflag=skip_bytes of="$TMP_IMAGE_FILE" 2>&1 | tee -a "$LOG_FILE"
