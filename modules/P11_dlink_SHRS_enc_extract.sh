@@ -31,7 +31,7 @@ P11_dlink_SHRS_enc_extract() {
     if [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
       dlink_SHRS_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
     elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
-      dlink_enc_img_extr "$FIRMWARE_PATH" "$EXTRACTION_FILE"
+      dlink_enc_img_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
     fi
 
     NEG_LOG=1
