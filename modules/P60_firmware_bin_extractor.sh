@@ -196,6 +196,9 @@ deeper_extractor_helper() {
       elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
         dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
         WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
+        dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
       elif [[ "$EXT_IMAGE" -eq 1 ]]; then
         ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
         WAIT_PIDS_P20+=( "$!" )
