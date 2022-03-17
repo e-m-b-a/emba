@@ -307,10 +307,11 @@ dependency_check()
     # CVE-search
     # TODO change to portcheck and write one for external hosts
     check_dep_file "cve-search script" "$EXT_DIR""/cve-search/bin/search.py"
-    check_cve_search
-    # we have to ignore this warning, because shellcheck doesn't know, that this file will be imported
-    # shellcheck disable=SC2309
-    if [[ IN_DOCKER -eq 0 ]]; then 
+    # we have already checked it outside the docker - do not need it again
+    if [[ "$IN_DOCKER" -eq 0 ]]; then
+      check_cve_search
+    fi
+    if [[ "$IN_DOCKER" -eq 0 ]]; then
       # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
       check_dep_tool "mongo database" "mongod"
       # check_cve_search

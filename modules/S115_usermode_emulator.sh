@@ -369,6 +369,7 @@ prepare_emulator() {
       print_output ""
       print_output "[*] We disable core dumps to prevent wasting our disk space."
       ulimit -c 0
+      sysctl -w kernel.core_pattern=/dev/null
     fi
 
     print_output "[*] Final fixes of the root filesytem in a chroot environment"
