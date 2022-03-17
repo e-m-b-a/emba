@@ -63,7 +63,9 @@ S03_firmware_bin_base_analyzer() {
 os_identification() {
   sub_module_title "OS detection"
 
-  print_output "[*] Initial OS detection running ..." | tr -d "\n"
+  print_output "[*] Initial OS guessing running ..." "no_log" | tr -d "\n"
+  write_log "[*] Initial OS guessing."
+
   OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics")
   echo "." | tr -d "\n"
   declare -A OS_COUNTER=()
