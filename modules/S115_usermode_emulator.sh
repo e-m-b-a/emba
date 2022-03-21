@@ -279,6 +279,7 @@ s115_cleanup() {
 
   print_output "[*] Cleaning the emulation environment\\n"
   find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
+  find "$EMULATION_PATH_BASE" -xdev -iname "*.core" -exec rm {} \; 2>/dev/null || true
 
   print_output ""
   print_output "[*] Umounting proc, sys and run"
@@ -369,6 +370,8 @@ prepare_emulator() {
       print_output ""
       print_output "[*] We disable core dumps to prevent wasting our disk space."
       ulimit -c 0
+      sysctl -w kernel.core_pattern=/dev/null
+      ulimit -a
     fi
 
     print_output "[*] Final fixes of the root filesytem in a chroot environment"

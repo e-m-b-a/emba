@@ -22,11 +22,15 @@ S65_config_file_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   NEG_LOG=0
+  FSTAB_ARR=()
+  CONF_FILES_ARR=()
 
   scan_config
   check_fstab
 
-  if [[ "${#CONF_FILES_ARR[@]}" -gt 0 || "${#FSTAB_ARR[@]}" -ne 0 ]]; then
+  if [[ "${#CONF_FILES_ARR[@]}" -gt 0 ]] || [[ -v FSTAB_USER_FILES[@] ]] || [[ -v FSTAB_USER_FILES[@] ]]; then
+    echo "cfg ${#CONF_FILES_ARR[@]}"
+    echo "fstab ${#FSTAB_ARR[@]}"
     NEG_LOG=1
   fi
 
@@ -40,7 +44,7 @@ scan_config()
   readarray -t CONF_FILES_ARR < <(config_find "$CONFIG_DIR""/config_files.cfg")
 
   if [[ "${CONF_FILES_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
-  elif [[ ${#CONF_FILES_ARR[@]} -ne 0 ]] ; then
+  elif [[ ${#CONF_FILES_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
     for LINE in "${CONF_FILES_ARR[@]}" ; do
       print_output "$(indent "$(orange "$(print_path "$LINE")")")"
@@ -57,7 +61,7 @@ check_fstab()
   #IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
   mapfile -t FSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
 
-  if [[ ${#FSTAB_ARR[@]} -ne 0 ]] ; then
+  if [[ ${#FSTAB_ARR[@]} -gt 0 ]] ; then
     readarray -t FSTAB_USER_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "username" {} \; 2>/dev/null || true)")
     readarray -t FSTAB_PASS_FILES < <(printf '%s' "$(find "${FSTAB_ARR[@]}" "${EXCL_FIND[@]}" -xdev -exec grep "password" {} \; 2>/dev/null || true)")
   fi

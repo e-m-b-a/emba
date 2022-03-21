@@ -18,6 +18,10 @@ services:
       - SYS_ADMIN
     networks:
       - emba_runs
+    ulimits:
+      core:
+        hard: 0
+        soft: 0
 
 networks:
   emba_runs:

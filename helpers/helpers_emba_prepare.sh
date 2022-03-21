@@ -323,34 +323,34 @@ detect_root_dir_helper() {
       done
     done
   fi
-  if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
-    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*root/bin" -exec dirname {} \; 2>/dev/null)
-    for R_PATH in "${ROOT_PATH[@]}"; do
-      if [[ -d "$R_PATH" ]]; then
-        ROOT_PATH+=( "$R_PATH" )
-        MECHANISM="file names"
+  # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*root/bin" -exec dirname {} \; 2>/dev/null)
+  for R_PATH in "${ROOTx_PATH[@]}"; do
+    if [[ -d "$R_PATH" ]]; then
+      ROOT_PATH+=( "$R_PATH" )
+      if ! echo "$MECHANISM" | grep -q "file names"; then
+        MECHANISM="$MECHANISM / file names"
       fi
-    done
-  fi
-  if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
-    for R_PATH in "${ROOTx_PATH[@]}"; do
-      if [[ -d "$R_PATH" ]]; then
-        ROOT_PATH+=( "$R_PATH" )
-        MECHANISM="file names"
+    fi
+  done
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
+  for R_PATH in "${ROOTx_PATH[@]}"; do
+    if [[ -d "$R_PATH" ]]; then
+      ROOT_PATH+=( "$R_PATH" )
+      if ! echo "$MECHANISM" | grep -q "file names"; then
+        MECHANISM="$MECHANISM / file names"
       fi
-    done
-  fi
-  if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
-    mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -path "*bin/bash" | sed -E 's/\/.?bin\/bash//')
-    for R_PATH in "${ROOTx_PATH[@]}"; do
-      if [[ -d "$R_PATH" ]]; then
-        ROOT_PATH+=( "$R_PATH" )
-        MECHANISM="file names"
+    fi
+  done
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/bash" | sed -E 's/\/.?bin\/bash//')
+  for R_PATH in "${ROOTx_PATH[@]}"; do
+    if [[ -d "$R_PATH" ]]; then
+      ROOT_PATH+=( "$R_PATH" )
+      if ! echo "$MECHANISM" | grep -q "file names"; then
+        MECHANISM="$MECHANISM / file names"
       fi
-    done
-  fi
+    fi
+  done
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     export RTOS=1
