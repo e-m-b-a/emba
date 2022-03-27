@@ -46,6 +46,7 @@ F20_vul_aggregator() {
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
+  KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
     print_output "[*] Aggregate vulnerability details"
@@ -360,9 +361,18 @@ cve_extractor() {
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
+      KNOWN_EXPLOITED=0
       #extract the CVSS and CVE value (remove all spaces and tabs)
       CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+
+      # check if the CVE is known as a knwon exploited vulnerability:
+      if [[ -f "$KNOWN_EXP_CSV" ]]; then
+        if grep -q "${CVE_VALUE}," "$KNOWN_EXP_CSV"; then
+          print_output "[+] $ORANGEWARNING:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a known exploited vulnerability."
+          KNOWN_EXPLOITED=1
+        fi
+      fi
 
       # default value
       EXPLOIT="No exploit available"
@@ -545,6 +555,10 @@ cve_extractor() {
         fi
       fi
 
+      if [[ $KNOWN_EXPLOITED -eq 1 ]]; then
+        EXPLOIT="$EXPLOIT"" (X)"
+      fi
+
       if [[ $EDB -eq 1 ]]; then
         EXPLOIT="$EXPLOIT"")"
       fi
@@ -554,21 +568,21 @@ cve_extractor() {
       #VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
       # we do not deal with output formatting the usual way -> we use printf
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${RED}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((HIGH_CVE_COUNTER+=1))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${ORANGE}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((MEDIUM_CVE_COUNTER+=1))
       else
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${GREEN}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -617,7 +631,7 @@ cve_extractor() {
     if ! [[ -f "$LOG_PATH_MODULE"/overview.csv ]]; then
       echo "BINARY;VERSION;Number of CVEs;Number of EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
     fi
-    if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
+    if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 || "$KNOWN_EXPLOITED" -eq 1 ]]; then
       printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.txt
       echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
     else

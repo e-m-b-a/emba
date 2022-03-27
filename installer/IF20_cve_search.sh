@@ -19,6 +19,7 @@
 IF20_cve_search() {
   module_title "${FUNCNAME[0]}"
 
+
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $CVE_SEARCH -eq 1 ]] || [[ $FULL -eq 1 ]]; then
 
     print_git_info "trickest cve database" "trickest/cve" "Trickest CVE to github exploit database"
@@ -139,6 +140,26 @@ IF20_cve_search() {
           echo -e "$MAGENTA""$BOLD""For automatic updates it should be checked and copied to /etc/cron.daily/""$NC"
         fi
         cd "$HOME_PATH" || exit 1
+      ;;
+    esac
+  fi
+
+  # only in docker or full installations:
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+
+    # see https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+    print_file_info "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
+
+    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+      ANSWER=("n")
+    else
+      echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
+      ANSWER=("y")
+    fi
+
+    case ${ANSWER:0:1} in
+      y|Y )
+        download_file "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
       ;;
     esac
   fi
