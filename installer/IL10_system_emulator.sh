@@ -49,6 +49,8 @@ IL10_system_emulator() {
     print_file_info "fixImage.sh" "Firmadyne fixImage script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/"
     print_file_info "preInit.sh" "Firmadyne preInit script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/"
 
+    echo -e "\\n""$MAGENTA""$BOLD""This is a deprecated module which will be removed in the future without any further note!""$NC"
+
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else

@@ -181,7 +181,9 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IL10_system_emulator
   # for the future
-  # IL20_firmae_system_emulator
+  IL20_system_emulator
+  IL21_firmae_system_emulator
+  IL22_firmadyne_system_emulator
 
   IL15_emulated_checks_init
 

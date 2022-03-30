@@ -409,8 +409,30 @@ main()
 
   if [[ "$UPDATE" -eq 1 ]]; then
     print_output "[*] EMBA update starting ..." "no_log"
+
     git pull
+
     EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
+
+    if command -v cve_searchsploit > /dev/null ; then
+      print_output "[*] EMBA update - cve_searchsploit update" "no_log"
+      cve_searchsploit -u
+    fi
+
+    print_output "[*] EMBA update - cve-search update" "no_log"
+    /etc/init.d/redis-server start
+    "$EXT_DIR"/cve-search/sbin/db_updater.py -v
+
+    print_output "[*] EMBA update - trickest PoC update" "no_log"
+    if [[ -d "$EXT_DIR"/trickest-cve ]]; then
+      BASE_PATH=$(pwd)
+      cd "$EXT_DIR"/trickest-cve || exit
+      git pull
+      cd "$BASE_PATH" || exit
+    else
+      git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    fi
+
     print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
     exit 0
   fi

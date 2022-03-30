@@ -99,7 +99,7 @@ print_output()
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
     local COLOR_OUTPUT_STRING=""
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
-    echo -e "$COLOR_OUTPUT_STRING"
+    echo -e "$COLOR_OUTPUT_STRING" || true
     if [[ "$LOG_SETTING" == "main" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
