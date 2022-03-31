@@ -14,8 +14,9 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Installs firmadyne / full system emulation
+#               This is a temporary module which will be removed in the future without any further note!
 
-IL20_firmadyne_system_emulator() {
+IL22_firmadyne_system_emulator() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
@@ -35,14 +36,22 @@ IL20_firmadyne_system_emulator() {
     case ${ANSWER:0:1} in
       y|Y )
 
-        apt-get install busybox-static fakeroot git dmsetup kpartx netcat-openbsd nmap python-psycopg2 python3-psycopg2 snmp uml-utilities util-linux vlan
-        git clone --recursive https://github.com/firmadyne/firmadyne.git external/firmadyne_orig
-        cd external/firmadyne_orig || exit 1
-        apt-get install postgresql
-        sudo -u postgres createuser -P firmadyne
-        sudo -u postgres createdb -O firmadyne firmware
+        apt-get install busybox-static fakeroot git dmsetup kpartx netcat-openbsd nmap python3-psycopg2 snmp uml-utilities util-linux vlan
+
+        if ! [[ -d external/firmadyne_orig ]]; then
+          git clone --recursive https://github.com/firmadyne/firmadyne.git external/firmadyne_orig
+          cd external/firmadyne_orig || exit 1
+        else
+          cd external/firmadyne_orig || exit 1
+          git pull
+        fi
+
+        # this is already done via IL21 installer
+        #apt-get install postgresql
+        #sudo -u postgres createuser -P firmadyne
+        #sudo -u postgres createdb -O firmadyne firmware
         # shellcheck disable=SC2024
-        sudo -u postgres psql -d firmware < ./firmadyne/database/schema
+        #sudo -u postgres psql -d firmware < ./firmadyne/database/schema
 
         ./download.sh
 

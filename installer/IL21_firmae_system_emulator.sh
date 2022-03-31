@@ -14,6 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Installs FirmAE / full system emulation
+#               This is a temporary module which will be removed in the future without any further note!
 
 IL21_firmae_system_emulator() {
   module_title "${FUNCNAME[0]}"
@@ -23,7 +24,6 @@ IL21_firmae_system_emulator() {
 
     print_git_info "FirmAE system mode emulator" "pr0v3rbs/FirmAE" "FirmAE is a fully-automated framework that performs emulation and vulnerability analysis."
     echo -e "\\n""$MAGENTA""$BOLD""This is a temporary module which will be removed in the future without any further note!""$NC"
-
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -35,8 +35,13 @@ IL21_firmae_system_emulator() {
     case ${ANSWER:0:1} in
       y|Y )
 
-        git clone --recursive https://github.com/pr0v3rbs/FirmAE.git external/FirmAE_orig
-        cd external/FirmAE_orig || exit 1
+        if ! [[ -d external/FirmAE_orig ]]; then
+          git clone --recursive https://github.com/pr0v3rbs/FirmAE.git external/FirmAE_orig
+          cd external/FirmAE_orig || exit 1
+        else
+          cd external/FirmAE_orig || exit 1
+          git pull
+        fi
 
         ./download.sh
         ./install.sh
