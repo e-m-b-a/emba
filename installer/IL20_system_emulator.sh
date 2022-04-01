@@ -63,7 +63,7 @@ IL20_system_emulator() {
     print_file_info "fixImage.sh" "FirmAE fixImage script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/"
     print_file_info "preInit.sh" "FirmAE preInit script" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/preInit.sh" "external/firmae/scripts/"
     print_file_info "network.sh" "FirmAE preInit script" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/network.sh" "external/firmae/scripts/"
-    print_file_info "inferNetwork.sh" "FirmAE inferNetwork script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferNetwork.sh" "external/firmae/scripts/"
+    print_file_info "makeNetwork.sh" "FirmAE makeNetwork script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/makeNetwork.sh" "external/firmae/scripts/"
     print_file_info "run_service.sh" "FirmAE run_service script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
