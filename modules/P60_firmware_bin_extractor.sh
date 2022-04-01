@@ -314,7 +314,9 @@ extract_binwalk_helper() {
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
   else
-    #binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
+      binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
+    fi
     binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
   fi
 }
@@ -338,7 +340,9 @@ binwalk_deep_extract_helper() {
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
   else
-    #binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
+      binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
+    fi
     binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
   fi
 }

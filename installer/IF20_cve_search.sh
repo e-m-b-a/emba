@@ -146,9 +146,10 @@ IF20_cve_search() {
 
   # only in docker or full installations:
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+    cd "$HOME_PATH" || exit 1
 
     # see https://www.cisa.gov/known-exploited-vulnerabilities-catalog
-    print_file_info "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
+    print_file_info "known_exploited_vulnerabilities.csv" "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")

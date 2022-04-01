@@ -37,8 +37,8 @@ IL20_system_emulator() {
     print_tool_info "qemu-system-x86" 1
     print_tool_info "qemu-utils" 1
 
-    print_file_info "vmlinux.mipsel.2" "FirmAE - Linux kernel 2.6 - MIPSel" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
-    print_file_info "vmlinux.mipseb.2" "FirmAE - Linux kernel 2.6 - MIPSeb" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipseb.2" "external/firmae/binaries/vmlinux.mipseb.2"
+    #print_file_info "vmlinux.mipsel.2" "FirmAE - Linux kernel 2.6 - MIPSel" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
+    #print_file_info "vmlinux.mipseb.2" "FirmAE - Linux kernel 2.6 - MIPSeb" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipseb.2" "external/firmae/binaries/vmlinux.mipseb.2"
     print_file_info "vmlinux.mipsel.4" "FirmAE - Linux kernel 4.1 - MIPSel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipsel.4" "external/firmae/binaries/vmlinux.mipsel.4"
     print_file_info "vmlinux.mipseb.4" "FirmAE - Linux kernel 4.1 - MIPSeb" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipseb.4" "external/firmae/binaries/vmlinux.mipseb.4"
 
@@ -62,7 +62,7 @@ IL20_system_emulator() {
 
     print_file_info "fixImage.sh" "FirmAE fixImage script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/"
     print_file_info "preInit.sh" "FirmAE preInit script" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/preInit.sh" "external/firmae/scripts/"
-    print_file_info "network.sh" "FirmAE preInit script" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/network.sh" "external/firmae/scripts/"
+    print_file_info "network.sh" "FirmAE network script" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/network.sh" "external/firmae/scripts/"
     print_file_info "makeNetwork.sh" "FirmAE makeNetwork script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/makeNetwork.sh" "external/firmae/scripts/"
     print_file_info "run_service.sh" "FirmAE run_service script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/"
 
@@ -81,8 +81,8 @@ IL20_system_emulator() {
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y
 
-      download_file "vmlinux.mipsel.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
-      download_file "vmlinux.mipseb.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipseb.2" "external/firmae/binaries/vmlinux.mipseb.2"
+      #download_file "vmlinux.mipsel.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
+      #download_file "vmlinux.mipseb.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipseb.2" "external/firmae/binaries/vmlinux.mipseb.2"
       download_file "vmlinux.mipsel.4" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipsel.4" "external/firmae/binaries/vmlinux.mipsel.4"
       download_file "vmlinux.mipseb.4" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipseb.4" "external/firmae/binaries/vmlinux.mipseb.4"
 
