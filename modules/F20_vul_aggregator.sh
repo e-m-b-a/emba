@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens Energy AG
-# Copyright 2020 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -46,7 +46,9 @@ F20_vul_aggregator() {
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
-  KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
+  if ! [[ -f "$KNOWN_EXP_CSV" ]]; then
+    KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
+  fi
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
     print_output "[*] Aggregate vulnerability details"

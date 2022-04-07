@@ -610,6 +610,14 @@ main()
     generate_trickest_db &
   fi
 
+  # we update the known_exploited_vulnerabilities.csv file on the host - if the file is here
+  # typically this is on installations in full mode
+  export KNOWN_EXP_CSV="$TMP_DIR"/known_exploited_vulnerabilities.csv
+  if [[ -f "$EXT_DIR/known_exploited_vulnerabilities.csv" && "$IN_DOCKER" -eq 0 ]]; then
+    # we update the known_exploited_vulnerabilities.csv file on every scan and store the database in the tmp directory
+    update_known_exploitable &
+  fi
+
   if [[ $IN_DOCKER -eq 0 ]] ; then
     check_cve_search_job "$EMBA_PID" &
   fi
