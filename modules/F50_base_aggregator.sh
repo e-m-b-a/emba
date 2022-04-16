@@ -42,7 +42,7 @@ F50_base_aggregator() {
   S85_LOG="s85_ssh_check.txt"
   S95_LOG="s95_interesting_binaries_check.txt"
   S107_LOG="s107_deep_password_search.txt"
-  S108_LOG="s108_linux_common_file_checker.txt"
+  S108_LOG="s108_stacs_password_search.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
   L10_LOG="l10_system_emulator.txt"
@@ -214,7 +214,7 @@ output_details() {
 output_config_issues() {
 
   local DATA=0
-  if [[ "${PW_COUNTER-0}" -gt 0 || "${S85_SSH_VUL_CNT-0}" -gt 0 || "${FILE_COUNTER-0}" -gt 0 || "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 || "${MOD_DATA_COUNTER-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER-0}" -gt 0 || "${S55_HISTORY_COUNTER-0}" -gt 0 || "${S50_AUTH_ISSUES-0}" -gt 0 || "${PASS_FILES_FOUND-0}" -gt 0 || "${CERT_CNT-0}" -gt 0 ]]; then
+  if [[ "${PW_COUNTER-0}" -gt 0 || "${S85_SSH_VUL_CNT-0}" -gt 0 || "${STACS_HASHES-0}" -gt 0 || "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 || "${MOD_DATA_COUNTER-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER-0}" -gt 0 || "${S55_HISTORY_COUNTER-0}" -gt 0 || "${S50_AUTH_ISSUES-0}" -gt 0 || "${PASS_FILES_FOUND-0}" -gt 0 || "${CERT_CNT-0}" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "${S40_WEAK_PERM_COUNTER-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
@@ -240,10 +240,17 @@ output_config_issues() {
       echo "ssh_issues;\"$S85_SSH_VUL_CNT\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "${PW_COUNTER-0}" -gt 0 ]]; then
-      print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password hashes.")")"
-      write_link "s107"
-      echo "password_hashes;\"$PW_COUNTER\"" >> "$CSV_LOG_FILE"
+    if [[ "${PW_COUNTER-0}" -gt 0 || "${STACS_HASHES-0}" -gt 0 ]]; then
+      if [[ "${PW_COUNTER-0}" -gt 0 ]]; then
+        print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password related details.")")"
+        write_link "s107"
+        echo "password_hashes;\"$PW_COUNTER\"" >> "$CSV_LOG_FILE"
+      fi
+      if [[ "${STACS_HASHES-0}" -gt 0 ]]; then
+        print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
+        write_link "s108"
+        echo "password_hashes_stacs;\"$STACS_HASHES\"" >> "$CSV_LOG_FILE"
+      fi
       DATA=1
     fi
     if [[ "${CERT_CNT-0}" -gt 0 ]]; then
@@ -260,11 +267,11 @@ output_config_issues() {
       echo "kernel_modules_lic;\"$KMOD_BAD\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    if [[ "${FILE_COUNTER-0}" -gt 0 ]]; then
-      print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
-      write_link "s11"
-      DATA=1
-    fi
+    #if [[ "${FILE_COUNTER-0}" -gt 0 ]]; then
+    #  print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
+    #  write_link "s11"
+    #  DATA=1
+    #fi
     if [[ "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE${INT_COUNT}$GREEN interesting files and $ORANGE${POST_COUNT-0}$GREEN files that could be useful for post-exploitation.")")"
       write_link "s95"
@@ -641,8 +648,7 @@ get_data() {
     PW_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S107_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
-    FILE_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2 || true)
-    FILE_COUNTER_ALL=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f3 || true)
+    STACS_HASHES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2 || true)

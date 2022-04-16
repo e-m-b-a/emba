@@ -2,8 +2,13 @@ version: "3"
 services:
   emba:
     image: embeddedanalyzer/emba:latest
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /root
+      - /var/run
+      - /var/lock
     build: .
-    privileged: true
     volumes:
         - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/log

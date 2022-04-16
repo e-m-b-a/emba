@@ -211,6 +211,7 @@ main()
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
   export CWE_CHECKER=0
+  export CONTAINER_EXTRACT=0
   export DEEP_EXTRACTOR=0
   export FACT_EXTRACTOR=0
   export FIRMWARE=0
@@ -282,7 +283,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bA:cdDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
+  while getopts a:bA:cC:dDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -294,6 +295,12 @@ main()
       b)
         banner_printer
         exit 0
+        ;;
+      C)
+        # container extract only works outside the docker container
+        # lets extract it outside and afterwards start the EMBA docker
+        export CONTAINER_ID="$OPTARG"
+        export CONTAINER_EXTRACT=1
         ;;
       c)
         export CWE_CHECKER=1
@@ -408,32 +415,7 @@ main()
   fi
 
   if [[ "$UPDATE" -eq 1 ]]; then
-    print_output "[*] EMBA update starting ..." "no_log"
-
-    git pull
-
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
-
-    if command -v cve_searchsploit > /dev/null ; then
-      print_output "[*] EMBA update - cve_searchsploit update" "no_log"
-      cve_searchsploit -u
-    fi
-
-    print_output "[*] EMBA update - cve-search update" "no_log"
-    /etc/init.d/redis-server start
-    "$EXT_DIR"/cve-search/sbin/db_updater.py -v
-
-    print_output "[*] EMBA update - trickest PoC update" "no_log"
-    if [[ -d "$EXT_DIR"/trickest-cve ]]; then
-      BASE_PATH=$(pwd)
-      cd "$EXT_DIR"/trickest-cve || exit
-      git pull
-      cd "$BASE_PATH" || exit
-    else
-      git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
-    fi
-
-    print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
+    emba_updater
     exit 0
   fi
 
@@ -505,7 +487,7 @@ main()
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
-  if [[ "$KERNEL" -ne 1 ]]; then
+  if [[ "$KERNEL" -ne 1 && "$CONTAINER_EXTRACT" -ne 1 ]]; then
     check_init_size
   fi
 
@@ -533,6 +515,13 @@ main()
       # need to set it as fallback:
       export OUTPUT_DIR="$FIRMWARE_PATH"
     fi
+  elif [[ "$CONTAINER_EXTRACT" -eq 1 ]]; then
+    PRE_CHECK=1
+    print_output "[*] Firmware analysis of docker image starting." "no_log"
+    print_output "    EMBA starts with the extracting the docker image $ORANGE$CONTAINER_ID$NC." "no_log"
+    export FIRMWARE_PATH="$LOG_DIR"/firmware/firmware_docker_extracted.tar
+    export OUTPUT_DIR="$FIRMWARE_PATH"
+    export FIRMWARE=1
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
@@ -626,6 +615,13 @@ main()
     matrix_mode &
   fi
 
+  # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
+  # EMBA container into log directory
+  # we do this only outside of the EMBA container - otherwise we will not reach the docker environment
+  if [[ "$CONTAINER_EXTRACT" -eq 1 && "$IN_DOCKER" -eq 0 ]] ; then
+    docker_container_extractor "$CONTAINER_ID"
+  fi
+
   #######################################################################################
   # Docker
   #######################################################################################
@@ -643,7 +639,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStUX:Y:WxzZ: OPT ; do
+    while getopts a:A:cC:dDe:Ef:Fghik:l:m:MN:op:QrsStUX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;

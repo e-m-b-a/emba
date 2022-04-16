@@ -280,7 +280,7 @@ binwalking() {
     print_output "[*] Entropy testing with binwalk ... "
     # we have to change the working directory for binwalk, because /emba is read-only in the Docker container and binwalk fails to save the entropy picture there
     if [[ $IN_DOCKER -eq 1 ]] ; then
-      cd / || return
+      cd "$LOG_DIR" || return
       print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
       mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
@@ -316,8 +316,9 @@ extract_binwalk_helper() {
   else
     if [[ "$IN_DOCKER" -eq 1 ]]; then
       binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
+    else
+      binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
     fi
-    binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
   fi
 }
 
@@ -342,8 +343,9 @@ binwalk_deep_extract_helper() {
   else
     if [[ "$IN_DOCKER" -eq 1 ]]; then
       binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
+    else
+      binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
     fi
-    binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
   fi
 }
 

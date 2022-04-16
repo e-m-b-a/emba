@@ -144,8 +144,7 @@ IF20_cve_search() {
     esac
   fi
 
-  # only in docker or full installations:
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
     cd "$HOME_PATH" || exit 1
 
     # see https://www.cisa.gov/known-exploited-vulnerabilities-catalog

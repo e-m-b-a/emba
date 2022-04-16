@@ -452,6 +452,7 @@ print_help()
   echo -e "$CYAN""-U""$NC""                Check and apply available updates and exit"
   echo -e "\\nSpecial tests"
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
+  echo -e "$CYAN""-C [container id]""$NC"" Extract and analyze a local docker container via container id"
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
   echo -e "$CYAN""-o""$NC""                Activate online checks (e.g. upload and test with VirusTotal)"

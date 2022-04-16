@@ -1,17 +1,17 @@
-# emba - EMBEDDED LINUX ANALYZER
+# EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2021 Siemens Energy AG
 # Copyright 2020-2021 Siemens AG
 #
-# emba comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
 # See LICENSE file for usage of this software.
 #
-# emba is licensed under GPLv3
+# EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
 #
-# Description: This is a default emba profile. You can Use it as a template for your own profiles
+# Description: This is a default EMBA profile. You can Use it as a template for your own profiles
 #              or start emba with "-p default-scan.emba" to use it
 
 export FORMAT_LOG=1
@@ -31,6 +31,6 @@ if [[ $IN_DOCKER -ne 1 ]] ; then
   else
     print_output "$(indent "$(orange "Enables automated qemu emulation tests")")" "no_log"
   fi
-  print_output "$(indent "$(orange "Runs emba in docker container")")" "no_log"
+  print_output "$(indent "$(orange "Runs EMBA in docker container")")" "no_log"
   export USE_DOCKER=1
 fi
