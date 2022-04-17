@@ -40,6 +40,7 @@ ARROW_LINK="<a href=\"LINK\" title=\"LINK\" >"
 LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
+REFERENCE_MODUL_EXT_LINK="<a class=\"refmodulext\" href=\"LINK\" title=\"LINK\" target=\"\_blank\">"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"\_blank\" >"
 CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"\_blank\" >"
 CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"\_blank\" >"
@@ -154,6 +155,14 @@ add_link_tags() {
           done
           LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK""@" '-e' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END""@")
         fi
+      URL_REGEX='(www.|https?|ftp|file):\/\/'
+      elif [[ "$REF_LINK" =~ $URL_REGEX ]] ; then
+        LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
+        while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
+          LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
+        done
+        HTML_LINK="$(echo "$REFERENCE_MODUL_EXT_LINK" | sed -e "s@LINK@$REF_LINK@g")""$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")""$LINK_END"
+        LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""s@.*@""$HTML_LINK""@" )
       else
         LINE_NUMBER_INFO_PREV="$(grep -a -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
       fi
