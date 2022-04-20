@@ -36,6 +36,7 @@ P02_firmware_bin_file_check() {
   export QNAP_ENC_DETECTED=0
   export BSD_UFS=0
   export FACT_INIT=0
+  export ANDROID_OTA=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
@@ -93,6 +94,7 @@ fw_bin_detector() {
   export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
   export BSD_UFS=0
+  export ANDROID_OTA=0
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
@@ -165,4 +167,49 @@ fw_bin_detector() {
       export GPG_COMPRESS=1
     fi
   fi
+  if [[ "$DLINK_ENC_CHECK" == *"CrAU"* ]]; then
+    print_output "[*] Identified Android OTA payload.bin update file - using Android extraction module"
+    export ANDROID_OTA=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 0.\ ..\ \ 00\ 00\ 0.\ ..\ 31\ 32\ 33\ 00 ]]; then
+    print_output "[*] Identified Engenius encrpyted firmware - using Engenius extraction module"
+    export ENGENIUS_ENC_DETECTED=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
+    print_output "[*] Identified Engenius encrpyted firmware - using Engenius extraction module"
+    export ENGENIUS_ENC_DETECTED=1
+  fi
+  if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
+    print_output "[*] Identified D-Link encrpted_img encrpyted firmware - using D-Link extraction module"
+    export DLINK_ENC_DETECTED=2
+  fi
+  if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
+    print_output "[*] Identified AVM firmware - using AVM extraction module"
+    export AVM_DETECTED=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
+    print_output "[*] Identified u-boot firmware - using u-boot module"
+    export UBOOT_IMAGE=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Unix Fast File system [v2]"* ]]; then
+    print_output "[*] Identified UFS filesytem - using UFS filesytem extraction module"
+    export BSD_UFS=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
+    print_output "[*] Identified Linux ext2 filesytem - using EXT filesytem extraction module"
+    export EXT_IMAGE=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext3 filesystem data"* ]]; then
+    print_output "[*] Identified Linux ext3 filesytem - using EXT filesytem extraction module"
+    export EXT_IMAGE=1
+  fi
+  if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext4 filesystem data"* ]]; then
+    print_output "[*] Identified Linux ext4 filesytem - using EXT filesytem extraction module"
+    export EXT_IMAGE=1
+  fi
+  if [[ "$QNAP_ENC_CHECK" == *"QNAP encrypted firmware footer , model"* ]]; then
+    print_output "[*] Identified QNAP encrpyted firmware - using QNAP extraction module"
+    export QNAP_ENC_DETECTED=1
+  fi
+  # probably we need to take a deeper look to identify the gpg compressed firmware files better.
 }
