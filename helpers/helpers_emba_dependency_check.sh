@@ -323,10 +323,10 @@ dependency_check()
     # firmadyne / FirmAE
     if [[ $FULL_EMULATION -eq 1 ]]; then
       # check only some of the needed files
-      check_dep_file "console.mipsel" "$EXT_DIR""/firmadyne/binaries/console.mipsel"
-      check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmadyne/binaries/vmlinux.mipseb"
-      check_dep_file "fixImage.sh" "$EXT_DIR""/firmadyne/scripts/fixImage_firmadyne.sh"
-      check_dep_file "preInit.sh" "$EXT_DIR""/firmadyne/scripts/preInit_firmadyne.sh"
+      check_dep_file "console.mipsel" "$EXT_DIR""/firmae/binaries/console.mipsel"
+      check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
+      check_dep_file "fixImage.sh" "$EXT_DIR""/firmae/scripts/fixImage.sh"
+      check_dep_file "preInit.sh" "$EXT_DIR""/firmae/scripts/preInit.sh"
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"

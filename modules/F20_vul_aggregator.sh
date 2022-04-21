@@ -272,9 +272,20 @@ generate_special_log() {
       fi
     done
 
+    mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true)
+    if [[ -v KNOWN_EXPLOITED_VULNS[@] ]]; then
+      print_output ""
+      print_output "[*] Vulnerability summary on known exploited vulnerabilities stored in $LOG_PATH_MODULE/exploit/known_exploited_vulns.log.\\n"
+      for KNOWN_EXPLOITED_VULN in "${KNOWN_EXPLOITED_VULNS[@]}"; do
+        print_output "$KNOWN_EXPLOITED_VULN"
+      done
+      print_output ""
+    fi
+
     echo "$EXPLOIT_HIGH" > "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp
     echo "$EXPLOIT_MEDIUM" > "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp
     echo "$EXPLOIT_LOW" > "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp
+    echo "${#KNOWN_EXPLOITED_VULNS[@]}" > "$TMP_DIR"/KNOWN_EXPLOITED_COUNTER.tmp
   fi
 }
 
@@ -372,6 +383,7 @@ cve_extractor() {
       if [[ -f "$KNOWN_EXP_CSV" ]]; then
         if grep -q "${CVE_VALUE}," "$KNOWN_EXP_CSV"; then
           print_output "[+] ${ORANGE}WARNING:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a known exploited vulnerability."
+          echo -e "[+] ${ORANGE}WARNING:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a known exploited vulnerability." >> "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log
           KNOWN_EXPLOITED=1
         fi
       fi

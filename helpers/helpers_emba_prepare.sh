@@ -329,7 +329,9 @@ detect_root_dir_helper() {
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
       if ! echo "$MECHANISM" | grep -q "file names"; then
-        MECHANISM="$MECHANISM / file names"
+        MECHANISM="$MECHANISM / dir names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="dir names"
       fi
     fi
   done
@@ -339,6 +341,8 @@ detect_root_dir_helper() {
       ROOT_PATH+=( "$R_PATH" )
       if ! echo "$MECHANISM" | grep -q "file names"; then
         MECHANISM="$MECHANISM / file names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="file names"
       fi
     fi
   done
@@ -348,6 +352,8 @@ detect_root_dir_helper() {
       ROOT_PATH+=( "$R_PATH" )
       if ! echo "$MECHANISM" | grep -q "file names"; then
         MECHANISM="$MECHANISM / file names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="file names"
       fi
     fi
   done

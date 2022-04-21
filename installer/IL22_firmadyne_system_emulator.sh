@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2022 Siemens AG
 # Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Installs firmadyne / full system emulation
+# Description:  Installs firmadyne full system emulation
 #               This is a temporary module which will be removed in the future without any further note!
 
 IL22_firmadyne_system_emulator() {

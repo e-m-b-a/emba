@@ -2,7 +2,8 @@ version: "3"
 services:
   emba:
     image: embeddedanalyzer/emba:latest
-    read_only: true
+    read_only: false
+    privileged: true
     tmpfs:
       - /tmp
       - /root

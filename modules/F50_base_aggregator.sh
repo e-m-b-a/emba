@@ -539,12 +539,13 @@ output_cve_exploits() {
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
         write_link "f20#minimalreportofexploitsandcves"
       fi
-      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN")")"
+      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 || "$KNOWN_EXPLOITED_COUNTER" -gt 0 ]]; then
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited exploits: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$NC")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
         write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT"
         write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT"
+        write_csv_log "known_exploited" "$KNOWN_EXPLOITED_COUNTER"
       fi
       # we report only software components with exploits to csv:
       grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE" || true
@@ -568,6 +569,7 @@ get_data() {
   MSF_MODULE_CNT=0
   INT_COUNT=0
   POST_COUNT=0
+  KNOWN_EXPLOITED_COUNTER=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
@@ -687,6 +689,9 @@ get_data() {
       (( LOW_CVE_COUNTER="$LOW_CVE_COUNTER"+"$COUNTING" ))
     done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp
     (( CVE_COUNTER="$CVE_COUNTER"+"$LOW_CVE_COUNTER" ))
+  fi
+  if [[ -f "$TMP_DIR"/KNOWN_EXPLOITED_COUNTER.tmp ]]; then
+    KNOWN_EXPLOITED_COUNTER=$(cat "$TMP_DIR"/KNOWN_EXPLOITED_COUNTER.tmp)
   fi
   if [[ -f "$F20_EXPLOITS_LOG" ]]; then
     EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG" || true)"

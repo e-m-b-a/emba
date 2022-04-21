@@ -48,7 +48,7 @@ ext2_extractor() {
 
   mkdir -p "$TMP_EXT_MOUNT"
   print_output "[*] Trying to mount $ORANGE$EXT_PATH_$NC to $ORANGE$TMP_EXT_MOUNT$NC directory"
-  mount "$EXT_PATH_" "$TMP_EXT_MOUNT"
+  mount -o ro "$EXT_PATH_" "$TMP_EXT_MOUNT"
   if mount | grep -q ext_mount; then
     print_output "[*] Copying $ORANGE$TMP_EXT_MOUNT$NC to firmware tmp directory ($EXTRACTION_DIR_)"
     mkdir -p "$EXTRACTION_DIR_"
