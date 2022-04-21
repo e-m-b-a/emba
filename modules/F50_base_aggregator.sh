@@ -267,11 +267,6 @@ output_config_issues() {
       echo "kernel_modules_lic;\"$KMOD_BAD\"" >> "$CSV_LOG_FILE"
       DATA=1
     fi
-    #if [[ "${FILE_COUNTER-0}" -gt 0 ]]; then
-    #  print_output "$(indent "$(green "Found $ORANGE$FILE_COUNTER$GREEN not common Linux files with $ORANGE$FILE_COUNTER_ALL$GREEN files at all.")")"
-    #  write_link "s11"
-    #  DATA=1
-    #fi
     if [[ "${INT_COUNT-0}" -gt 0 || "${POST_COUNT-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE${INT_COUNT}$GREEN interesting files and $ORANGE${POST_COUNT-0}$GREEN files that could be useful for post-exploitation.")")"
       write_link "s95"
