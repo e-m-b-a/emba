@@ -106,7 +106,7 @@ IL20_system_emulator() {
       download_file "libnvram_ioctl.so.mipsel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipsel" "external/firmae/binaries/libnvram_ioctl.so.mipsel"
 
       download_file "fixImage.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/fixImage.sh"
-      download_file "preInit.sh" "https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/preInit.sh" "external/firmae/scripts/preInit.sh"
+      download_file "preInit.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/preInit.sh" "external/firmae/scripts/preInit.sh"
       download_file "network.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/network.sh"
       download_file "inferNetwork.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferNetwork.sh" "external/firmae/scripts/inferNetwork.sh"
       download_file "run_service.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/run_service.sh"
