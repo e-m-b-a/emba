@@ -39,6 +39,7 @@ NC='\033[0m' # no color
 INSTALLER_DIR="./installer"
 HELP_DIR="./helpers"
 MOD_DIR="./modules"
+MOD_DIR_LOCAL="./modules_local"
 CONF_DIR="./config"
 REP_DIR="$CONF_DIR/report_templates"
 
@@ -46,8 +47,8 @@ SOURCES=()
 MODULES_TO_CHECK_ARR=()
 
 import_config_scripts() {
-  HELPERS=$(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
-  for LINE in $HELPERS; do
+  mapfile -t HELPERS < <(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
+  for LINE in "${HELPERS[@]}"; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"
       SOURCES+=("$LINE")
@@ -56,8 +57,8 @@ import_config_scripts() {
 }
 
 import_helper() {
-  HELPERS=$(find "$HELP_DIR" -iname "*.sh" 2>/dev/null)
-  for LINE in $HELPERS; do
+  mapfile -t HELPERS < <(find "$HELP_DIR" -iname "*.sh" 2>/dev/null)
+  for LINE in "${HELPERS[@]}"; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"
       SOURCES+=("$LINE")
@@ -66,8 +67,8 @@ import_helper() {
 }
 
 import_reporting_templates() {
-  REP_TEMP=$(find "$REP_DIR" -iname "*.sh" 2>/dev/null)
-  for LINE in $REP_TEMP; do
+  mapfile -t REP_TEMP < <(find "$REP_DIR" -iname "*.sh" 2>/dev/null)
+  for LINE in "${REP_TEMP[@]}"; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"
       SOURCES+=("$LINE")
@@ -76,8 +77,11 @@ import_reporting_templates() {
 }
 
 import_module() {
-  MODULES=$(find "$MOD_DIR" -iname "*.sh" 2>/dev/null)
-  for LINE in $MODULES; do
+  MODULES=()
+  mapfile -t MODULES_ < <(find "$MOD_DIR" -iname "*.sh" 2>/dev/null)
+  mapfile -t MODULES_LOCAL < <(find "$MOD_DIR_LOCAL" -iname "*.sh" 2>/dev/null)
+  MODULES=( "${MODULES_[@]}" "${MODULES_LOCAL[@]}")
+  for LINE in "${MODULES[@]}"; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"
       SOURCES+=("$LINE")
@@ -86,8 +90,9 @@ import_module() {
 }
 
 import_installer() {
-  MODULES=$(find "$INSTALLER_DIR" -iname "*.sh" 2>/dev/null)
-  for LINE in $MODULES; do
+  MODULES=()
+  mapfile -t MODULES < <(find "$INSTALLER_DIR" -iname "*.sh" 2>/dev/null)
+  for LINE in "${MODULES[@]}"; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"
       SOURCES+=("$LINE")
