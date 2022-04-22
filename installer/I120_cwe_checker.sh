@@ -70,8 +70,6 @@ I120_cwe_checker() {
           mkdir external/cwe_checker 2>/dev/null
           git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || exit 1
-          apt-get autoclean
-          apt-get autoremove
           make all GHIDRA_PATH=external/ghidra/ghidra_10.1.2_PUBLIC
           cd "$HOME_PATH" || exit 1
 
