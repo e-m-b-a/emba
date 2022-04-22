@@ -22,7 +22,12 @@ IL21_firmae_system_emulator() {
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     cd "$HOME_PATH" || exit 1
 
+    print_tool_info "xdg-utils" 1
+    print_tool_info "fonts-liberation" 1
+    print_tool_info "openjdk-11-jdk" 1
+
     print_git_info "FirmAE system mode emulator" "pr0v3rbs/FirmAE" "FirmAE is a fully-automated framework that performs emulation and vulnerability analysis."
+
     echo -e "\\n""$MAGENTA""$BOLD""This is a temporary module which will be removed in the future without any further note!""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
@@ -34,6 +39,8 @@ IL21_firmae_system_emulator() {
 
     case ${ANSWER:0:1} in
       y|Y )
+
+        apt-get install "${INSTALL_APP_LIST[@]}" -y
 
         if ! [[ -d external/FirmAE_orig ]]; then
           git clone --recursive https://github.com/pr0v3rbs/FirmAE.git external/FirmAE_orig

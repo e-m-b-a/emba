@@ -37,8 +37,12 @@ import_helper()
 import_module()
 {
   local MODULES=()
+  local MODULES_LOCAL=()
+  local MODULES_EMBA=()
   local MODULE_COUNT=0
-  mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
+  mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
+  mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "*.sh" | sort -V 2> /dev/null)
+  MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
@@ -107,7 +111,11 @@ run_modules()
 
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
     local MODULES=()
-    mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+    local MODULES_LOCAL=()
+    local MODULES_EMBA=()
+    mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" | sort -V 2> /dev/null)
+    MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
@@ -158,7 +166,11 @@ run_modules()
         fi
       elif [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
         local MODULES=()
-        mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+        local MODULES_LOCAL=()
+        local MODULES_EMBA=()
+        mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+        mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" | sort -V 2> /dev/null)
+        MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
         if [[ $THREADING_SET -eq 1 ]] ; then
           sort_modules
         fi
