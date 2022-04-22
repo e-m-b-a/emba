@@ -181,10 +181,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I120_cwe_checker
 
-  # deprecated - will be removed in the future:
-  #IL10_system_emulator
-
-  # will be the only one in the future
   IL20_system_emulator
 
   # deprecated - just for testing:

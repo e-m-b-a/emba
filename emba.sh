@@ -530,7 +530,7 @@ main()
   elif [[ "$CONTAINER_EXTRACT" -eq 1 ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware analysis of docker image starting." "no_log"
-    print_output "    EMBA starts with the extracting the docker image $ORANGE$CONTAINER_ID$NC." "no_log"
+    print_output "    EMBA starts with extracting the docker image $ORANGE$CONTAINER_ID$NC." "no_log"
     export FIRMWARE_PATH="$LOG_DIR"/firmware/firmware_docker_extracted.tar
     export OUTPUT_DIR="$FIRMWARE_PATH"
     export FIRMWARE=1

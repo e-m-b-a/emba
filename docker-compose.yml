@@ -4,11 +4,13 @@ services:
     image: embeddedanalyzer/emba:latest
     read_only: true
     privileged: false
+    # /root is needed for binwalk
+    # /tmp is needed for FACT extractor
+    # /run is needed for postgresql and others
     tmpfs:
       - /tmp
       - /root
-      - /var/run
-      - /var/lock
+      - /run
     build: .
     volumes:
         - ${FIRMWARE}/:/firmware:ro
