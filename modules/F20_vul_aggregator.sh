@@ -272,7 +272,7 @@ generate_special_log() {
       fi
     done
 
-    mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true)
+    mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true 2>/dev/null)
     if [[ -v KNOWN_EXPLOITED_VULNS[@] ]]; then
       print_output ""
       print_output "[*] Vulnerability summary on known exploited vulnerabilities stored in $LOG_PATH_MODULE/exploit/known_exploited_vulns.log.\\n"

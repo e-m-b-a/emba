@@ -41,7 +41,9 @@ import_module()
   local MODULES_EMBA=()
   local MODULE_COUNT=0
   mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
-  mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
+  if [[ -d "${MOD_DIR}_local" ]]; then
+    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
+  fi
   MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
@@ -114,7 +116,9 @@ run_modules()
     local MODULES_LOCAL=()
     local MODULES_EMBA=()
     mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+    if [[ -d "${MOD_DIR}_local" ]]; then
+      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+    fi
     MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
@@ -169,7 +173,9 @@ run_modules()
         local MODULES_LOCAL=()
         local MODULES_EMBA=()
         mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-        mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+        if [[ -d "${MOD_DIR}_local" ]]; then
+          mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+        fi
         MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
         if [[ $THREADING_SET -eq 1 ]] ; then
           sort_modules

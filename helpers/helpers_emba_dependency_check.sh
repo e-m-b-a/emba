@@ -305,7 +305,7 @@ dependency_check()
     check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"
 
     # Android payload.bin extractor
-    check_dep_file "Android payload.bin extractor" "$EXT_DIR""/payload_dumper/payload_dumper.py"
+    #check_dep_file "Android payload.bin extractor" "$EXT_DIR""/payload_dumper/payload_dumper.py"
 
     # CVE-search
     # TODO change to portcheck and write one for external hosts

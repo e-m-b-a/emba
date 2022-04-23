@@ -112,6 +112,7 @@ IL20_system_emulator() {
       download_file "run_service.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/run_service.sh"
 
       # patch network.sh:
+      # shellcheck disable=SC2016
       sed 's/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS"`/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS" -o -name "rc.sysinit"`/' external/firmae/scripts/network.sh
 
       ;;
