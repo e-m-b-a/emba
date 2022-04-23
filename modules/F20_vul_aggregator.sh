@@ -272,14 +272,16 @@ generate_special_log() {
       fi
     done
 
-    mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true 2>/dev/null)
-    if [[ -v KNOWN_EXPLOITED_VULNS[@] ]]; then
-      print_output ""
-      print_output "[*] Vulnerability summary on known exploited vulnerabilities stored in $LOG_PATH_MODULE/exploit/known_exploited_vulns.log.\\n"
-      for KNOWN_EXPLOITED_VULN in "${KNOWN_EXPLOITED_VULNS[@]}"; do
-        print_output "$KNOWN_EXPLOITED_VULN"
-      done
-      print_output ""
+    if [[ -f "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log ]]; then
+      mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true 2>/dev/null)
+      if [[ -v KNOWN_EXPLOITED_VULNS[@] ]]; then
+        print_output ""
+        print_output "[*] Vulnerability summary on known exploited vulnerabilities stored in $LOG_PATH_MODULE/exploit/known_exploited_vulns.log.\\n"
+        for KNOWN_EXPLOITED_VULN in "${KNOWN_EXPLOITED_VULNS[@]}"; do
+          print_output "$KNOWN_EXPLOITED_VULN"
+        done
+        print_output ""
+      fi
     fi
 
     echo "$EXPLOIT_HIGH" > "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp

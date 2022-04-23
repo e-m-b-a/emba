@@ -150,7 +150,7 @@ IF20_cve_search() {
     # see https://www.cisa.gov/known-exploited-vulnerabilities-catalog
     print_file_info "known_exploited_vulnerabilities.csv" "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "$LIST_DEP" -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
@@ -159,7 +159,9 @@ IF20_cve_search() {
 
     case ${ANSWER:0:1} in
       y|Y )
-        download_file "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
+
+        download_file "known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
+
       ;;
     esac
   fi
