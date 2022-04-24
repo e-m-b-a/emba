@@ -183,10 +183,10 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IL20_system_emulator
 
-  # deprecated - just for testing:
+  # deprecated - for testing only:
   IL21_firmae_system_emulator
-  # deprecated - not fully working:
-  #IL22_firmadyne_system_emulator
+  # deprecated - for testing only:
+  IL22_firmadyne_system_emulator
 
   IL15_emulated_checks_init
 
