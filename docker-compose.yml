@@ -3,7 +3,8 @@ services:
   emba:
     image: embeddedanalyzer/emba:latest
     read_only: true
-    privileged: false
+    # all pre-checker mount modules need privileged mode
+    privileged: true
     # /root is needed for binwalk
     # /tmp is needed for FACT extractor
     # /run is needed for postgresql and others

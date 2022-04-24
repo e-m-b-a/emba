@@ -42,7 +42,10 @@ avm_extractor() {
   local FRITZ_VERSION
   sub_module_title "AVM freetz-ng firmware extractor"
 
-  "$EXT_DIR"/freetz-ng/fwmod -u -d "$EXTRACTION_DIR_" "$AVM_FW_PATH_" || true | tee -a "$LOG_FILE"
+  # read only filesystem bypass:
+  cp "$EXT_DIR"/freetz-ng/.config "$TMP_DIR"/.config
+  "$EXT_DIR"/freetz-ng/fwmod -u -i "$TMP_DIR"/.config -d "$EXTRACTION_DIR_" "$AVM_FW_PATH_" || true | tee -a "$LOG_FILE"
+
 
   FRITZ_FILES=$(find "$EXTRACTION_DIR_" -type f | wc -l)
   FRITZ_DIRS=$(find "$EXTRACTION_DIR_" -type d | wc -l)

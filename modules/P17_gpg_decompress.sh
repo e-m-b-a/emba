@@ -42,7 +42,7 @@ gpg_decompress_extractor() {
   sub_module_title "GPG compressed firmware extractor"
 
   gpg --list-packets "$GPG_FILE_PATH_" 2>/dev/null | tee -a "$LOG_FILE"
-  gpg --decrypt "$GPG_FILE_PATH_" > "$EXTRACTION_FILE_"
+  gpg --decrypt "$GPG_FILE_PATH_" > "$EXTRACTION_FILE_" || true
 
   print_output ""
   if [[ -f "$EXTRACTION_FILE_" ]]; then

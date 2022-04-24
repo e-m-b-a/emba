@@ -26,6 +26,7 @@ S25_kernel_check()
 
   KERNEL_VERSION=()
   KERNEL_DESC=()
+  KERNEL_MODULES=()
   FOUND=0
   KMOD_BAD=0
 
@@ -73,6 +74,8 @@ S25_kernel_check()
     print_output "[*] Check kernel configuration ""$(print_path "$KERNEL_CONFIG" )"" via checksec.sh"
     print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
     FOUND=1
+    export LOG_PATH_MODULE
+    LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
 
   elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 1 ]] ; then
 

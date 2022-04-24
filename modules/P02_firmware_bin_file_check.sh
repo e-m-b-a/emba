@@ -101,10 +101,17 @@ fw_bin_detector() {
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
 
+  if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
+    print_output "[*] Identified AVM firmware - using AVM extraction module"
+    export AVM_DETECTED=1
+  fi
   # if we have a zip, tgz, tar archive we are going to use the FACT extractor
   if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* ]]; then
-    print_output "[*] Identified gzip/zip/tar archive file - using FACT extraction module"
-    export FACT_INIT=1
+    # as the AVM images are also zip files we need to bypass it here:
+    if [[ "$AVM_DETECTED" -ne 1 ]]; then
+      print_output "[*] Identified gzip/zip/tar archive file - using FACT extraction module"
+      export FACT_INIT=1
+    fi
   fi
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     print_output "[*] Identified VMWware VMDK archive file - using VMDK extraction module"
@@ -129,10 +136,6 @@ fw_bin_detector() {
   if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
     print_output "[*] Identified D-Link encrpted_img encrpyted firmware - using D-Link extraction module"
     export DLINK_ENC_DETECTED=2
-  fi
-  if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
-    print_output "[*] Identified AVM firmware - using AVM extraction module"
-    export AVM_DETECTED=1
   fi
   if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
     print_output "[*] Identified u-boot firmware - using u-boot module"
