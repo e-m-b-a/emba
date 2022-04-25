@@ -17,6 +17,7 @@ services:
       - /run
       - /var/run
       - /external/FirmAE_orig/scratch
+      - /external/firmadyne_orig/scratch
     build: .
     volumes:
         - ${FIRMWARE}/:/firmware:ro
