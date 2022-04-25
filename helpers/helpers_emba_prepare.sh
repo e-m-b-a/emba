@@ -328,7 +328,7 @@ detect_root_dir_helper() {
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "file names"; then
+      if ! echo "$MECHANISM" | grep -q "dir names"; then
         MECHANISM="$MECHANISM / dir names"
       elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
         MECHANISM="dir names"
