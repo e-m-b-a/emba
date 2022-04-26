@@ -41,8 +41,8 @@ import_module()
   local MODULES_EMBA=()
   local MODULE_COUNT=0
   mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
-  if [[ -d "${MOD_DIR}_local" ]]; then
-    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
+  if [[ -d "${MOD_DIR_LOCAL}" ]]; then
+    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
   fi
   MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
   for MODULE_FILE in "${MODULES[@]}" ; do
@@ -116,8 +116,8 @@ run_modules()
     local MODULES_LOCAL=()
     local MODULES_EMBA=()
     mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-    if [[ -d "${MOD_DIR}_local" ]]; then
-      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+    if [[ -d "${MOD_DIR_LOCAL}" ]]; then
+      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
     fi
     MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
@@ -173,8 +173,8 @@ run_modules()
         local MODULES_LOCAL=()
         local MODULES_EMBA=()
         mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
-        if [[ -d "${MOD_DIR}_local" ]]; then
-          mapfile -t MODULES_LOCAL < <(find "${MOD_DIR}_local" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+        if [[ -d "${MOD_DIR_LOCAL}" ]]; then
+          mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
         fi
         MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
         if [[ $THREADING_SET -eq 1 ]] ; then
@@ -276,6 +276,7 @@ main()
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
+  export MOD_DIR_LOCAL="$INVOCATION_PATH""/modules_local"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   export MSF_PATH="/usr/share/metasploit-framework/modules/"
