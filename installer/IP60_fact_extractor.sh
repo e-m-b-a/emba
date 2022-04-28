@@ -33,6 +33,28 @@ IP60_fact_extractor() {
     case ${ANSWER:0:1} in
       y|Y )
         if ! [[ -d ./external/fact_extractor ]]; then
+
+          # This is a temporary solution as long as the installation via pip does not work
+          cd "$HOME_PATH" || exit 1
+          apt-get install curl
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup
+          chmod +x rustup
+          ./rustup -y
+
+          git clone https://github.com/fkie-cad/entropython.git
+          cd entropython || exit 1
+
+          /root/.cargo/bin/cargo build --release
+          mv target/release/libentropython.so entropython.so
+          cp entropython.so /usr/local/lib/python3.10/dist-packages/
+          cd "$HOME_PATH" || exit 1
+
+          git clone https://github.com/fkie-cad/common_helper_unpacking_classifier.git
+          cd common_helper_unpacking_classifier/ || exit 1
+          sed -i "s/'entropython/#'entropython/" setup.py
+          pip install .
+          cd "$HOME_PATH" || exit 1
+
           # this is a temporary solution until the official fact repo supports a current kali linux
           git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
           cd ./external/fact_extractor/fact_extractor/ || exit 1

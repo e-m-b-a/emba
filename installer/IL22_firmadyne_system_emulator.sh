@@ -22,6 +22,23 @@ IL22_firmadyne_system_emulator() {
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     cd "$HOME_PATH" || exit 1
 
+    print_tool_info "busybox-static" 1
+    print_tool_info "fakeroot" 1
+    print_tool_info "git" 1
+    print_tool_info "dmsetup" 1
+    print_tool_info "kpartx" 1
+    print_tool_info "netcat-openbsd" 1
+    print_tool_info "nmap" 1
+    print_tool_info "python3-psycopg2" 1
+    print_tool_info "snmp" 1
+    print_tool_info "uml-utilities" 1
+    print_tool_info "util-linux" 1
+    print_tool_info "vlan" 1
+    print_tool_info "qemu-system-arm" 1
+    print_tool_info "qemu-system-mips" 1
+    print_tool_info "qemu-system-x86" 1
+    print_tool_info "qemu-utils" 1
+
     print_git_info "Firmadyne system mode emulator" "firmadyne/firmadyne" "FIRMADYNE is an automated and scalable system for performing emulation and dynamic analysis of Linux-based embedded firmware"
     echo -e "\\n""$MAGENTA""$BOLD""This is a temporary module which will be removed in the future without any further note!""$NC"
 
@@ -36,7 +53,7 @@ IL22_firmadyne_system_emulator() {
     case ${ANSWER:0:1} in
       y|Y )
 
-        apt-get install busybox-static fakeroot git dmsetup kpartx netcat-openbsd nmap python3-psycopg2 snmp uml-utilities util-linux vlan
+        apt-get install "${INSTALL_APP_LIST[@]}" -y
 
         if ! [[ -d external/firmadyne_orig ]]; then
           git clone --recursive https://github.com/firmadyne/firmadyne.git external/firmadyne_orig
@@ -57,8 +74,6 @@ IL22_firmadyne_system_emulator() {
           sed -i 's/^FIRMWARE_DIR.*/FIRMWARE_DIR=\/external\/firmadyne_orig\//g' /external/firmadyne_orig/firmadyne.config
         fi
         ./download.sh
-
-        apt-get install qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 
         cd "$HOME_PATH" || exit 1
 

@@ -54,6 +54,8 @@ IL21_firmae_system_emulator() {
         ./install.sh
         ./init.sh
 
+        /etc/init.d/postgresql stop
+
         cd "$HOME_PATH" || exit 1
 
       ;;
