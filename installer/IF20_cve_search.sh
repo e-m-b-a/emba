@@ -19,7 +19,6 @@
 IF20_cve_search() {
   module_title "${FUNCNAME[0]}"
 
-
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $CVE_SEARCH -eq 1 ]] || [[ $FULL -eq 1 ]]; then
 
     print_git_info "trickest cve database" "trickest/cve" "Trickest CVE to github exploit database"
