@@ -5,11 +5,9 @@ services:
     read_only: true
     # all pre-checker mount modules need privileged mode
     privileged: true
-    # future:
-    # privileged: false
     # /root is needed for binwalk
     # /tmp is needed for FACT extractor
-    # /run is needed for postgresql and others
+    # /run is needed for postgresql (currently only working with rw) and others
     # /external/FirmAE_orig/scratch is needed for FirmAE - this is temp and will be removed in the future
     tmpfs:
       - /tmp
