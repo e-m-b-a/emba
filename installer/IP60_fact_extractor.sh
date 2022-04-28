@@ -15,6 +15,7 @@
 # Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
 # Description:  Installs FACT-extractor for EMBA
+#               FACT will be completely removed in the future
 
 IP60_fact_extractor() {
   module_title "${FUNCNAME[0]}"
@@ -36,6 +37,8 @@ IP60_fact_extractor() {
 
           # This is a temporary solution as long as the installation via pip does not work
           cd "$HOME_PATH" || exit 1
+          cd external || exit 1
+
           apt-get install curl
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup
           chmod +x rustup
@@ -47,20 +50,23 @@ IP60_fact_extractor() {
           /root/.cargo/bin/cargo build --release
           mv target/release/libentropython.so entropython.so
           cp entropython.so /usr/local/lib/python3.10/dist-packages/
-          cd "$HOME_PATH" || exit 1
+          cd .. || exit 1
 
           git clone https://github.com/fkie-cad/common_helper_unpacking_classifier.git
           cd common_helper_unpacking_classifier/ || exit 1
           sed -i "s/'entropython/#'entropython/" setup.py
           pip install .
-          cd "$HOME_PATH" || exit 1
+          cd .. || exit 1
 
-          # this is a temporary solution until the official fact repo supports a current kali linux
+          # this is a temporary solution until the official FACT repo supports a current kali linux
           git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
           cd ./external/fact_extractor/fact_extractor/ || exit 1
           ./install/pre_install.sh
           python3 ./install.py
+
           cd "$HOME_PATH" || exit 1
+          # cleanup
+          rm ./external/rustup
         fi
   
         if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then
