@@ -536,7 +536,7 @@ module_start_log() {
   MODULE_MAIN_NAME="${1:-}"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   export LOG_PATH_MODULE
-  if [[ "$(echo ${LOG_DIR: -1})" == "/" ]]; then
+  if [[ "${LOG_DIR: -1}" == "/" ]]; then
     #strip final slash from log dir
     LOG_DIR="${LOG_DIR:: -1}"
   fi
