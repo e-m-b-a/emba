@@ -35,15 +35,22 @@ IP60_fact_extractor() {
       y|Y )
         if ! [[ -d ./external/fact_extractor ]]; then
 
-          # This is a temporary solution as long as the installation via pip does not work
+          # Note: This is a temporary solution until the official FACT repo supports a current kali linux
+          # Note: This is a temporary solution as long as the installation via pip does not work
           cd "$HOME_PATH" || exit 1
           cd external || exit 1
 
           apt-get install curl
+          # get the FACT base repository:
+          git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
+          cd ./external/fact_extractor/ || exit 1
+
+          # for entropython we need rust:
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup
           chmod +x rustup
           ./rustup -y
 
+          # entropython is currently not available via pip:
           git clone https://github.com/fkie-cad/entropython.git
           cd entropython || exit 1
 
@@ -52,21 +59,19 @@ IP60_fact_extractor() {
           cp entropython.so /usr/local/lib/python3.10/dist-packages/
           cd .. || exit 1
 
+          # now it is possible to build conmmon_helper_unpacking_classifier (without entropython - which is already installed):
           git clone https://github.com/fkie-cad/common_helper_unpacking_classifier.git
           cd common_helper_unpacking_classifier/ || exit 1
           sed -i "s/'entropython/#'entropython/" setup.py
           pip install .
-          cd .. || exit 1
 
-          # this is a temporary solution until the official FACT repo supports a current kali linux
-          git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
+          cd "$HOME_PATH" || exit 1
           cd ./external/fact_extractor/fact_extractor/ || exit 1
           ./install/pre_install.sh
           python3 ./install.py
+          rm rustup
 
           cd "$HOME_PATH" || exit 1
-          # cleanup
-          rm ./external/rustup
         fi
   
         if python3 ./external/fact_extractor/fact_extractor/fact_extract.py -h | grep -q "FACT extractor - Standalone extraction utility"; then

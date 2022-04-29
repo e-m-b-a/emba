@@ -21,6 +21,7 @@ IP00_extractors(){
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]] ; then
 
     print_tool_info "python3-pip" 1
+    print_tool_info "patool" 1
     print_pip_info "protobuf"
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "vm03/payload_dumper" "Android OTA payload.bin extractor"

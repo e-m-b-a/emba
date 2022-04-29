@@ -71,7 +71,7 @@ IL22_firmadyne_system_emulator() {
         #sudo -u postgres psql -d firmware < ./firmadyne/database/schema
 
         if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f /external/firmadyne_orig/firmadyne.config ]]; then
-          sed -i 's/^FIRMWARE_DIR.*/FIRMWARE_DIR=\/external\/firmadyne_orig\//g' /external/firmadyne_orig/firmadyne.config
+          sed -i 's/^#FIRMWARE_DIR.*/FIRMWARE_DIR=\/external\/firmadyne_orig\//g' /external/firmadyne_orig/firmadyne.config
         fi
         ./download.sh
 

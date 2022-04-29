@@ -114,9 +114,9 @@ IL10_system_emulator() {
       download_file "run_service.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/run_service.sh"
       download_file "inferFile.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferFile.sh" "external/firmae/scripts/inferFile.sh"
 
-      # patch network.sh:
+      # patch inferFile.sh:
       # shellcheck disable=SC2016
-      sed -i 's/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS"`/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS" -o -name "rc.sysinit"`/' external/firmae/scripts/network.sh
+      sed -i 's/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS"`/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS" -o -name "rc.sysinit"`/' external/firmae/scripts/inferFile.sh
 
       ;;
     esac

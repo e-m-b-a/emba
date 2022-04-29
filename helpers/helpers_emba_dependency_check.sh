@@ -305,7 +305,7 @@ dependency_check()
     check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"
 
     # Android payload.bin extractor
-    #check_dep_file "Android payload.bin extractor" "$EXT_DIR""/payload_dumper/payload_dumper.py"
+    check_dep_file "Android payload.bin extractor" "$EXT_DIR""/payload_dumper/payload_dumper.py"
 
     # CVE-search
     # TODO change to portcheck and write one for external hosts
@@ -335,7 +335,7 @@ dependency_check()
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
 
       # routersploit for full system emulation
-      #check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
+      check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
     fi
 
     # CVE searchsploit
@@ -407,6 +407,9 @@ dependency_check()
 
     # yara
     check_dep_tool "yara"
+
+    # patool extractor - https://wummel.github.io/patool/
+    check_dep_tool "patool"
 
     # stacs - https://github.com/stacscan/stacs
     check_dep_tool "STACS hash detection" "stacs"

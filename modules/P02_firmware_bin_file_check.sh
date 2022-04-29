@@ -35,7 +35,7 @@ P02_firmware_bin_file_check() {
   export GPG_COMPRESS=0
   export QNAP_ENC_DETECTED=0
   export BSD_UFS=0
-  export FACT_INIT=0
+  export PATOOLS_INIT=0
   export ANDROID_OTA=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
@@ -83,7 +83,7 @@ fw_bin_detector() {
   local DLINK_ENC_CHECK
   local AVM_CHECK
 
-  export FACT_INIT=0
+  export PATOOLS_INIT=0
   export VMDK_DETECTED=0
   export DLINK_ENC_DETECTED=0
   export QNAP_ENC_DETECTED=0
@@ -105,12 +105,12 @@ fw_bin_detector() {
     print_output "[*] Identified AVM firmware - using AVM extraction module"
     export AVM_DETECTED=1
   fi
-  # if we have a zip, tgz, tar archive we are going to use the FACT extractor
-  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* ]]; then
+  # if we have a zip, tgz, tar archive we are going to use the patools extractor
+  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "$AVM_DETECTED" -ne 1 ]]; then
-      print_output "[*] Identified gzip/zip/tar archive file - using FACT extraction module"
-      export FACT_INIT=1
+      print_output "[*] Identified gzip/zip/tar/iso archive file - using patools extraction module"
+      export PATOOLS_INIT=1
     fi
   fi
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
