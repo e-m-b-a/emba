@@ -144,5 +144,14 @@ emba_updater() {
     git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
   fi
 
+  print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"
   print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
+}
+
+# this checks if a function is available
+function_exists() {
+
+  FCT_TO_CHECK="${1:-}"
+  declare -f -F "$FCT_TO_CHECK" > /dev/null
+  return $?
 }

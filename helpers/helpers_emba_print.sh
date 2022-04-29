@@ -536,6 +536,10 @@ module_start_log() {
   MODULE_MAIN_NAME="${1:-}"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   export LOG_PATH_MODULE
+  if [[ "$(echo ${LOG_DIR: -1})" == "/" ]]; then
+    #strip final slash from log dir
+    LOG_DIR="${LOG_DIR:: -1}"
+  fi
   LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
   if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" || true; fi
 }

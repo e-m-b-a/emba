@@ -37,13 +37,13 @@ IP60_fact_extractor() {
 
           # Note: This is a temporary solution until the official FACT repo supports a current kali linux
           # Note: This is a temporary solution as long as the installation via pip does not work
-          cd "$HOME_PATH" || exit 1
-          cd external || exit 1
-
           apt-get install curl
+
+          cd "$HOME_PATH" || exit 1
+
           # get the FACT base repository:
           git clone https://github.com/m-1-k-3/fact_extractor.git external/fact_extractor
-          cd ./external/fact_extractor/ || exit 1
+          cd external/fact_extractor/ || exit 1
 
           # for entropython we need rust:
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup
@@ -66,9 +66,10 @@ IP60_fact_extractor() {
           pip install .
 
           cd "$HOME_PATH" || exit 1
-          cd ./external/fact_extractor/fact_extractor/ || exit 1
+          cd external/fact_extractor/fact_extractor/ || exit 1
           ./install/pre_install.sh
           python3 ./install.py
+          cd .. || exit 1
           rm rustup
 
           cd "$HOME_PATH" || exit 1
