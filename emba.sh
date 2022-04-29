@@ -37,8 +37,14 @@ import_helper()
 import_module()
 {
   local MODULES=()
+  local MODULES_LOCAL=()
+  local MODULES_EMBA=()
   local MODULE_COUNT=0
-  mapfile -t MODULES < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
+  mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
+  if [[ -d "${MOD_DIR_LOCAL}" ]]; then
+    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
+  fi
+  MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       # https://github.com/koalaman/shellcheck/wiki/SC1090
@@ -107,7 +113,13 @@ run_modules()
 
   if [[ ${#SELECT_MODULES[@]} -eq 0 ]] || [[ $SELECT_PRE_MODULES_COUNT -eq 0 ]]; then
     local MODULES=()
-    mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+    local MODULES_LOCAL=()
+    local MODULES_EMBA=()
+    mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+    if [[ -d "${MOD_DIR_LOCAL}" ]]; then
+      mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+    fi
+    MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
@@ -158,7 +170,13 @@ run_modules()
         fi
       elif [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1} ]]; then
         local MODULES=()
-        mapfile -t MODULES < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+        local MODULES_LOCAL=()
+        local MODULES_EMBA=()
+        mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
+        if [[ -d "${MOD_DIR_LOCAL}" ]]; then
+          mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
+        fi
+        MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
         if [[ $THREADING_SET -eq 1 ]] ; then
           sort_modules
         fi
@@ -211,6 +229,7 @@ main()
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
   export CWE_CHECKER=0
+  export CONTAINER_EXTRACT=0
   export DEEP_EXTRACTOR=0
   export FACT_EXTRACTOR=0
   export FIRMWARE=0
@@ -257,6 +276,7 @@ main()
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
+  export MOD_DIR_LOCAL="$INVOCATION_PATH""/modules_local"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   export MSF_PATH="/usr/share/metasploit-framework/modules/"
@@ -282,7 +302,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bA:cdDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
+  while getopts a:bA:cC:dDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -294,6 +314,12 @@ main()
       b)
         banner_printer
         exit 0
+        ;;
+      C)
+        # container extract only works outside the docker container
+        # lets extract it outside and afterwards start the EMBA docker
+        export CONTAINER_ID="$OPTARG"
+        export CONTAINER_EXTRACT=1
         ;;
       c)
         export CWE_CHECKER=1
@@ -408,10 +434,7 @@ main()
   fi
 
   if [[ "$UPDATE" -eq 1 ]]; then
-    print_output "[*] EMBA update starting ..." "no_log"
-    git pull
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
-    print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
+    emba_updater
     exit 0
   fi
 
@@ -483,7 +506,7 @@ main()
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
-  if [[ "$KERNEL" -ne 1 ]]; then
+  if [[ "$KERNEL" -ne 1 && "$CONTAINER_EXTRACT" -ne 1 ]]; then
     check_init_size
   fi
 
@@ -511,6 +534,13 @@ main()
       # need to set it as fallback:
       export OUTPUT_DIR="$FIRMWARE_PATH"
     fi
+  elif [[ "$CONTAINER_EXTRACT" -eq 1 ]]; then
+    PRE_CHECK=1
+    print_output "[*] Firmware analysis of docker image starting." "no_log"
+    print_output "    EMBA starts with extracting the docker image $ORANGE$CONTAINER_ID$NC." "no_log"
+    export FIRMWARE_PATH="$LOG_DIR"/firmware/firmware_docker_extracted.tar
+    export OUTPUT_DIR="$FIRMWARE_PATH"
+    export FIRMWARE=1
   elif [[ -f "$FIRMWARE_PATH" ]]; then
     PRE_CHECK=1
     print_output "[*] Firmware binary detected." "no_log"
@@ -572,6 +602,7 @@ main()
         mkdir "$LOG_DIR" || true
       fi
       S25_kernel_check
+      exit 0
     fi
   fi
 
@@ -588,12 +619,26 @@ main()
     generate_trickest_db &
   fi
 
+  # we update the known_exploited_vulnerabilities.csv file on the host - if the file is here
+  export KNOWN_EXP_CSV="$TMP_DIR"/known_exploited_vulnerabilities.csv
+  if [[ -f "$EXT_DIR/known_exploited_vulnerabilities.csv" && "$IN_DOCKER" -eq 0 ]]; then
+    # we update the known_exploited_vulnerabilities.csv file on every scan and store the database in the tmp directory
+    update_known_exploitable &
+  fi
+
   if [[ $IN_DOCKER -eq 0 ]] ; then
     check_cve_search_job "$EMBA_PID" &
   fi
 
   if [[ "$MATRIX_MODE" -eq 1 && $IN_DOCKER -eq 0 ]]; then
     matrix_mode &
+  fi
+
+  # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
+  # EMBA container into log directory
+  # we do this only outside of the EMBA container - otherwise we will not reach the docker environment
+  if [[ "$CONTAINER_EXTRACT" -eq 1 && "$IN_DOCKER" -eq 0 ]] ; then
+    docker_container_extractor "$CONTAINER_ID"
   fi
 
   #######################################################################################
@@ -613,7 +658,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cdDe:Ef:Fghik:l:m:MN:op:QrsStUX:Y:WxzZ: OPT ; do
+    while getopts a:A:cC:dDe:Ef:Fghik:l:m:MN:op:QrsStUX:Y:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -645,8 +690,16 @@ main()
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set +e
       fi
-      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-      D_RETURN=$?
+      if [[ "$FULL_EMULATION" -eq 1 && -f ./docker-compose-insecure.yml ]]; then
+        # in full system emulation we currently need rw filesystem for FirmAE and firmadyne
+        # we will remove this in final system emulation mode
+        print_output "[!] Warning: Starting docker environment with insecure settings (Full system emulation)!" "no_log"
+        EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose -f ./docker-compose-insecure.yml run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+        D_RETURN=$?
+      else
+        EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+        D_RETURN=$?
+      fi
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set -e
       fi

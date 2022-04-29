@@ -48,7 +48,7 @@ dlink_SHRS_enc_extractor() {
 
   print_output ""
 
-  dd if="$DLINK_ENC_PATH_" skip=1756 iflag=skip_bytes|openssl aes-128-cbc -d -p -nopad -nosalt -K "c05fbf1936c99429ce2a0781f08d6ad8" -iv "67c6697351ff4aec29cdbaabf2fbe346" --nosalt -in /dev/stdin -out "$EXTRACTION_FILE_" 2>&1 | tee -a "$LOG_FILE"
+  dd if="$DLINK_ENC_PATH_" skip=1756 iflag=skip_bytes|openssl aes-128-cbc -d -p -nopad -nosalt -K "c05fbf1936c99429ce2a0781f08d6ad8" -iv "67c6697351ff4aec29cdbaabf2fbe346" --nosalt -in /dev/stdin -out "$EXTRACTION_FILE_" 2>&1 || true | tee -a "$LOG_FILE"
 
   print_output ""
   if [[ -f "$EXTRACTION_FILE_" ]]; then
@@ -75,12 +75,16 @@ dlink_enc_img_extractor(){
   IMAGE_SIZE=$(stat -c%s "$TMP_IMAGE_FILE")
   (( ROOF=IMAGE_SIZE/131072 ))
   for ((ITERATION=0; ITERATION<ROOF; ITERATION++)); do
-    (( OFFSET=131072*ITERATION ))
+    if [[ "$ITERATION" -eq 0 ]]; then
+      OFFSET=0
+    else
+      (( OFFSET=131072*ITERATION ))
+    fi
     dd if="$TMP_IMAGE_FILE" skip="$OFFSET" iflag=skip_bytes count=256| openssl aes-256-cbc -d -in /dev/stdin  -out /dev/stdout \
     -K "6865392d342b4d212964363d6d7e7765312c7132613364316e26322a5a5e2538" -iv "4a253169516c38243d6c6d2d3b384145" --nopad \
     --nosalt | dd if=/dev/stdin of="$EXTRACTION_FILE_" oflag=append conv=notrunc 2>&1 | tee -a "$LOG_FILE"
   done
-# Now it should be a .ubi file thats somewhat readable and extractable via ubireader
+  # Now it should be a .ubi file thats somewhat readable and extractable via ubireader
   print_output ""
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"

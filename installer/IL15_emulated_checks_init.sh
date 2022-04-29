@@ -59,6 +59,7 @@ IL15_emulated_checks_init() {
       fi
 
       python3 -m pip install -r requirements.txt
+      sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
 
       cd "$HOME_PATH" || exit 1
 

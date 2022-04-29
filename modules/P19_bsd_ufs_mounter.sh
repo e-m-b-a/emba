@@ -51,7 +51,7 @@ ufs_extractor() {
   modprobe ufs
   mount -r -t ufs -o ufstype=ufs2 "$UFS_PATH_" "$TMP_UFS_MOUNT"
   if mount | grep -q ufs_mount; then
-    print_output "[*] Copying $ORANGE$TMP_UFS_MOUNT$NC to firmware tmp directory ($EXTRACTION_DIR_)"
+    print_output "[*] Copying $ORANGE$TMP_UFS_MOUNT$NC to firmware tmp directory ($ORANGE$EXTRACTION_DIR_$NC)"
     mkdir -p "$EXTRACTION_DIR_" 2>/dev/null || true
     cp -pri "$TMP_UFS_MOUNT"/* "$EXTRACTION_DIR_" 2>/dev/null || true
     print_output ""

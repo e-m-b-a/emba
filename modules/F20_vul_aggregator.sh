@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020 Siemens Energy AG
-# Copyright 2020 Siemens AG
+# Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -46,6 +46,9 @@ F20_vul_aggregator() {
 
   CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
+  if ! [[ -f "$KNOWN_EXP_CSV" ]]; then
+    KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
+  fi
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
     print_output "[*] Aggregate vulnerability details"
@@ -269,9 +272,22 @@ generate_special_log() {
       fi
     done
 
+    if [[ -f "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log ]]; then
+      mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true 2>/dev/null)
+      if [[ -v KNOWN_EXPLOITED_VULNS[@] ]]; then
+        print_output ""
+        print_output "[*] Vulnerability summary on known exploited vulnerabilities stored in $LOG_PATH_MODULE/exploit/known_exploited_vulns.log.\\n"
+        for KNOWN_EXPLOITED_VULN in "${KNOWN_EXPLOITED_VULNS[@]}"; do
+          print_output "$KNOWN_EXPLOITED_VULN"
+        done
+        print_output ""
+      fi
+    fi
+
     echo "$EXPLOIT_HIGH" > "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp
     echo "$EXPLOIT_MEDIUM" > "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp
     echo "$EXPLOIT_LOW" > "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp
+    echo "${#KNOWN_EXPLOITED_VULNS[@]}" > "$TMP_DIR"/KNOWN_EXPLOITED_COUNTER.tmp
   fi
 }
 
@@ -360,9 +376,19 @@ cve_extractor() {
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
+      KNOWN_EXPLOITED=0
       #extract the CVSS and CVE value (remove all spaces and tabs)
       CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
       CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+
+      # check if the CVE is known as a knwon exploited vulnerability:
+      if [[ -f "$KNOWN_EXP_CSV" ]]; then
+        if grep -q "${CVE_VALUE}," "$KNOWN_EXP_CSV"; then
+          print_output "[+] ${ORANGE}WARNING:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a known exploited vulnerability."
+          echo -e "[+] ${ORANGE}WARNING:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a known exploited vulnerability." >> "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log
+          KNOWN_EXPLOITED=1
+        fi
+      fi
 
       # default value
       EXPLOIT="No exploit available"
@@ -545,6 +571,10 @@ cve_extractor() {
         fi
       fi
 
+      if [[ $KNOWN_EXPLOITED -eq 1 ]]; then
+        EXPLOIT="$EXPLOIT"" (X)"
+      fi
+
       if [[ $EDB -eq 1 ]]; then
         EXPLOIT="$EXPLOIT"")"
       fi
@@ -554,21 +584,21 @@ cve_extractor() {
       #VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
       # we do not deal with output formatting the usual way -> we use printf
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${RED}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((HIGH_CVE_COUNTER+=1))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${ORANGE}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((MEDIUM_CVE_COUNTER+=1))
       else
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${GREEN}\t%-20.20s\t:\t%-15.15s\t:\t%-15.15s\t:\t%-8.8s:\t%s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -617,7 +647,7 @@ cve_extractor() {
     if ! [[ -f "$LOG_PATH_MODULE"/overview.csv ]]; then
       echo "BINARY;VERSION;Number of CVEs;Number of EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
     fi
-    if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
+    if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 || "$KNOWN_EXPLOITED" -eq 1 ]]; then
       printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s\t:\t%-15.15s\t:\tCVEs: %-8.8s\t:\tExploits: %-8.8s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.txt
       echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/overview.csv
     else

@@ -362,17 +362,19 @@ prepare_emulator() {
 
     print_output ""
     print_output "[*] Currently mounted areas:"
-    print_output "$(indent "$(mount | grep "$R_PATH" 2> /dev/null )")""\\n"
+    print_output "$(indent "$(mount | grep "$R_PATH" 2> /dev/null || true)")""\\n"
 
+    # temp code - currently core dumps are disabled via docker-compose file
     # we disable core dumps in our docker environment. If running on the host without docker
     # the user is responsible for useful settings
-    if [[ $IN_DOCKER -eq 1 ]] ; then
-      print_output ""
-      print_output "[*] We disable core dumps to prevent wasting our disk space."
-      ulimit -c 0
-      sysctl -w kernel.core_pattern=/dev/null
-      ulimit -a
-    fi
+    #if [[ $IN_DOCKER -eq 1 ]] ; then
+    #  print_output ""
+    #  print_output "[*] We disable core dumps to prevent wasting our disk space."
+    #  ulimit -c 0
+    #  # this does not work inside of docker without "privileged: true":
+    #  sysctl -w kernel.core_pattern=/dev/null
+    #  ulimit -a
+    #fi
 
     print_output "[*] Final fixes of the root filesytem in a chroot environment"
     cp ./helpers/fixImage_user_mode_emulation.sh "$R_PATH"/

@@ -328,8 +328,10 @@ detect_root_dir_helper() {
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "file names"; then
-        MECHANISM="$MECHANISM / file names"
+      if ! echo "$MECHANISM" | grep -q "dir names"; then
+        MECHANISM="$MECHANISM / dir names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="dir names"
       fi
     fi
   done
@@ -339,6 +341,8 @@ detect_root_dir_helper() {
       ROOT_PATH+=( "$R_PATH" )
       if ! echo "$MECHANISM" | grep -q "file names"; then
         MECHANISM="$MECHANISM / file names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="file names"
       fi
     fi
   done
@@ -348,6 +352,8 @@ detect_root_dir_helper() {
       ROOT_PATH+=( "$R_PATH" )
       if ! echo "$MECHANISM" | grep -q "file names"; then
         MECHANISM="$MECHANISM / file names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="file names"
       fi
     fi
   done
@@ -393,7 +399,7 @@ generate_msf_db() {
 }
 
 generate_trickest_db() {
-  # only running on host in full installation (with trickest database installed)
+  # only running on host with trickest database installed
   # search all markdown files in the trickest directory and create a temporary file with the module path (including CVE) and github URL to exploit:
 
   if [[ -d "$EXT_DIR"/trickest-cve ]]; then
@@ -411,3 +417,17 @@ generate_trickest_db() {
   fi
 }
 
+update_known_exploitable() {
+  # only running on host with known_exploited_vulnerabilities.csv installed
+
+  if [[ -f "$EXT_DIR"/known_exploited_vulnerabilities.csv ]]; then
+    print_output "[*] Update the known_exploited_vulnerabilities file" "no_log"
+    wget https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv -O "$EXT_DIR"/known_exploited_vulnerabilities.csv || true
+    cp "$EXT_DIR"/known_exploited_vulnerabilities.csv "$KNOWN_EXP_CSV"
+    if [[ -f "$KNOWN_EXP_CSV" ]]; then
+      print_output "[*] Known exploit database now has $ORANGE$(wc -l "$KNOWN_EXP_CSV" | awk '{print $1}')$NC exploit entries." "no_log"
+    fi
+  else
+    print_output "[*] No update of the known_exploited_vulnerabilities.csv file performed." "no_log"
+  fi
+}

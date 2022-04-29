@@ -2,8 +2,8 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2022 Siemens AG
 # Copyright 2020-2022 Siemens Energy AG
+# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -12,9 +12,9 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
-# Description:  Installs firmadyne / full system emulation
+# Description:  Installs full system emulation dependencies
+#               Module is based on FirmAE and firmadyne
 
 IL10_system_emulator() {
   module_title "${FUNCNAME[0]}"
@@ -36,96 +36,87 @@ IL10_system_emulator() {
     print_tool_info "qemu-system-mips" 1
     print_tool_info "qemu-system-x86" 1
     print_tool_info "qemu-utils" 1
+    print_tool_info "hping3" 1
 
-    print_file_info "vmlinux.mipsel" "Firmadyne - Linux kernel 2.6 - MIPSel" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipsel" "external/firmadyne/binaries/vmlinux.mipsel"
-    print_file_info "vmlinux.mipseb" "Firmadyne - Linux kernel 2.6 - MIPSeb" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipseb" "external/firmadyne/binaries/vmlinux.mipseb"
-    print_file_info "zImage.armel" "Firmadyne - Linux kernel 4.1 - ARMel" "https://github.com/firmadyne/kernel-v4.1/releases/download/v1.1/zImage.armel" "external/firmadyne/binaries/zImage.armel"
-    print_file_info "console.armel" "Firmadyne - Console - ARMel" "https://github.com/firmadyne/console/releases/download/v1.0/console.armel" "external/firmadyne/binaries/console.armel"
-    print_file_info "console.mipseb" "Firmadyne - Console - MIPSeb" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipseb" "external/firmadyne/binaries/console.mipseb"
-    print_file_info "console.mipsel" "Firmadyne - Console - MIPSel" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipsel" "external/firmadyne/binaries/console.mipsel"
-    print_file_info "libnvram.so.armel" "Firmadyne - libnvram - ARMel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.armel" "external/firmadyne/binaries/libnvram.so.armel"
-    print_file_info "libnvram.so.mipseb" "Firmadyne - libnvram - MIPSeb" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipseb" "external/firmadyne/binaries/libnvram.so.mipseb"
-    print_file_info "libnvram.so.mipsel" "Firmadyne - libnvram - MIPSel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipsel" "external/firmadyne/binaries/libnvram.so.mipsel"
-    print_file_info "fixImage.sh" "Firmadyne fixImage script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/"
-    print_file_info "preInit.sh" "Firmadyne preInit script" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/"
+    # future use:
+    print_file_info "vmlinux.mipsel.2" "FirmAE - Linux kernel 2.6 - MIPSel" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
+    print_file_info "vmlinux.mipseb.2" "FirmAE - Linux kernel 2.6 - MIPSeb" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipseb.2" "external/firmae/binaries/vmlinux.mipseb.2"
+    print_file_info "vmlinux.mipsel.4" "FirmAE - Linux kernel 4.1 - MIPSel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipsel.4" "external/firmae/binaries/vmlinux.mipsel.4"
+    print_file_info "vmlinux.mipseb.4" "FirmAE - Linux kernel 4.1 - MIPSeb" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipseb.4" "external/firmae/binaries/vmlinux.mipseb.4"
+
+    print_file_info "zImage.armel" "FirmAE - Linux kernel 4.1 - ARMel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/zImage.armel" "external/firmae/binaries/zImage.armel"
+    print_file_info "vmlinux.armel" "FirmAE - Linux kernel 4.1 - ARMel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.armel" "external/firmae/binaries/vmlinux.armel"
+
+    print_file_info "busybox.armel" "FirmAE - busybox - ARMel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.armel" "external/firmae/binaries/console.armel"
+    print_file_info "busybox.mipseb" "FirmAE - busybox - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipseb" "external/firmae/binaries/console.mipseb"
+    print_file_info "busybox.mipsel" "FirmAE - busybox - MIPSel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipsel" "external/firmae/binaries/console.mipsel"
+
+    print_file_info "console.armel" "FirmAE - Console - ARMel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.armel" "external/firmae/binaries/console.armel"
+    print_file_info "console.mipseb" "FirmAE - Console - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.mipseb" "external/firmae/binaries/console.mipseb"
+    print_file_info "console.mipsel" "FirmAE - Console - MIPSel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.mipsel" "external/firmae/binaries/console.mipsel"
+
+    print_file_info "libnvram.so.armel" "FirmAE - libnvram - ARMel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram.so.armel" "external/firmae/binaries/libnvram.so.armel"
+    print_file_info "libnvram.so.mipseb" "FirmAE - libnvram - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram.so.mipseb" "external/firmae/binaries/libnvram.so.mipseb"
+    print_file_info "libnvram.so.mipsel" "FirmAE - libnvram - MIPSel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram.so.mipsel" "external/firmae/binaries/libnvram.so.mipsel"
+    print_file_info "libnvram_ioctl.so.armel" "FirmAE - libnvram_ioctl - ARMel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.armel" "external/firmae/binaries/libnvram_ioctl.so.armel"
+    print_file_info "libnvram_ioctl.so.mipseb" "FirmAE - libnvram_ioctl - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipseb" "external/firmae/binaries/libnvram_ioctl.so.mipseb"
+    print_file_info "libnvram_ioctl.so.mipsel" "FirmAE - libnvram_ioctl - MIPSel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipsel" "external/firmae/binaries/libnvram_ioctl.so.mipsel"
+
+    print_file_info "fixImage.sh" "FirmAE fixImage script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/"
+    print_file_info "preInit.sh" "FirmAE preInit script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/preInit.sh" "external/firmae/scripts/"
+    print_file_info "network.sh" "FirmAE network script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/"
+    print_file_info "makeNetwork.sh" "FirmAE makeNetwork script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/makeNetwork.sh" "external/firmae/scripts/"
+    print_file_info "run_service.sh" "FirmAE run_service script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/"
+    print_file_info "inferFile.sh" "FirmAE inferFile script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferFile.sh" "external/firmae/scripts/"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""The firmadyne dependencies (if not already on the system) will be downloaded and installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""The system emulation dependencies (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
 
     case ${ANSWER:0:1} in
       y|Y )
 
-      mkdir -p external/firmadyne/binaries
-      mkdir -p external/firmadyne/binaries_FirmAE
-      mkdir -p external/firmadyne/scripts
+      mkdir -p external/firmae/binaries
+      mkdir -p external/firmae/scripts
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y
 
-      # Firmadyne stuff:
-      if ! [[ -f "external/firmadyne/binaries/vmlinux.mipsel" ]]; then
-        download_file "vmlinux.mipsel" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipsel" "external/firmadyne/binaries/vmlinux.mipsel"
-      else
-        echo -e "$GREEN""vmlinux.mipsel already installed""$NC"
-      fi
+      download_file "vmlinux.mipsel.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
+      download_file "vmlinux.mipseb.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipseb.2" "external/firmae/binaries/vmlinux.mipseb.2"
+      download_file "vmlinux.mipsel.4" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipsel.4" "external/firmae/binaries/vmlinux.mipsel.4"
+      download_file "vmlinux.mipseb.4" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.mipseb.4" "external/firmae/binaries/vmlinux.mipseb.4"
 
-      if ! [[ -f "external/firmadyne/binaries/vmlinux.mipseb" ]]; then
-        download_file "vmlinux.mipseb" "https://github.com/firmadyne/kernel-v2.6/releases/download/v1.1/vmlinux.mipseb" "external/firmadyne/binaries/vmlinux.mipseb"
-      else
-        echo -e "$GREEN""vmlinux.mipseb already installed""$NC"
-      fi
+      download_file "zImage.armel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/zImage.armel" "external/firmae/binaries/zImage.armel"
+      download_file "vmlinux.armel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.armel" "external/firmae/binaries/vmlinux.armel"
 
-      if ! [[ -f "external/firmadyne/binaries/zImage.armel" ]]; then
-        download_file "zImage.armel" "https://github.com/firmadyne/kernel-v4.1/releases/download/v1.1/zImage.armel" "external/firmadyne/binaries/zImage.armel"
-      else
-        echo -e "$GREEN""zImage.armel already installed""$NC"
-      fi
+      download_file "busybox.armel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.armel" "external/firmae/binaries/busybox.armel"
+      download_file "busybox.mipseb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipseb" "external/firmae/binaries/busybox.mipseb"
+      download_file "busybox.mipsel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipsel" "external/firmae/binaries/busybox.mipsel"
 
-      if ! [[ -f "external/firmadyne/binaries/console.armel" ]]; then
-        download_file "console.armel" "https://github.com/firmadyne/console/releases/download/v1.0/console.armel" "external/firmadyne/binaries/console.armel"
-      else
-        echo -e "$GREEN""console.armel already installed""$NC"
-      fi
-      if ! [[ -f "external/firmadyne/binaries/console.mipseb" ]]; then
-        download_file "console.mipseb" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipseb" "external/firmadyne/binaries/console.mipseb"
-      else
-        echo -e "$GREEN""console.mipseb already installed""$NC"
-      fi
-      if ! [[ -f "external/firmadyne/binaries/console.mipsel" ]]; then
-        download_file "console.mipsel" "https://github.com/firmadyne/console/releases/download/v1.0/console.mipsel" "external/firmadyne/binaries/console.mipsel"
-      else
-        echo -e "$GREEN""console.mipsel already installed""$NC"
-      fi
+      download_file "console.armel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.armel" "external/firmae/binaries/console.armel"
+      download_file "console.mipseb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.mipseb" "external/firmae/binaries/console.mipseb"
+      download_file "console.mipsel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.mipsel" "external/firmae/binaries/console.mipsel"
 
-      if ! [[ -f "external/firmadyne/binaries/libnvram.so.armel" ]]; then
-        download_file "libnvram.so.armel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.armel" "external/firmadyne/binaries/libnvram.so.armel"
-      else
-        echo -e "$GREEN""libnvram.so.armel already installed""$NC"
-      fi
-      if ! [[ -f "external/firmadyne/binaries/libnvram.so.mipseb" ]]; then
-        download_file "libnvram.so.mipseb" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipseb" "external/firmadyne/binaries/libnvram.so.mipseb"
-      else
-        echo -e "$GREEN""libnvram.so.mipseb already installed""$NC"
-      fi
-      if ! [[ -f "external/firmadyne/binaries/libnvram.so.mipsel" ]]; then
-        download_file "libnvram.so.mipsel" "https://github.com/firmadyne/libnvram/releases/download/v1.0c/libnvram.so.mipsel" "external/firmadyne/binaries/libnvram.so.mipsel"
-      else
-        echo -e "$GREEN""libnvram.so.mipsel already installed""$NC"
-      fi
+      download_file "libnvram.so.armel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram.so.armel" "external/firmae/binaries/libnvram.so.armel"
+      download_file "libnvram.so.mipseb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram.so.mipseb" "external/firmae/binaries/libnvram.so.mipseb"
+      download_file "libnvram.so.mipsel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram.so.mipsel" "external/firmae/binaries/libnvram.so.mipsel"
+      download_file "libnvram_ioctl.so.armel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.armel" "external/firmae/binaries/libnvram_ioctl.so.armel"
+      download_file "libnvram_ioctl.so.mipseb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipseb" "external/firmae/binaries/libnvram_ioctl.so.mipseb"
+      download_file "libnvram_ioctl.so.mipsel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipsel" "external/firmae/binaries/libnvram_ioctl.so.mipsel"
 
-      if ! [[ -f "external/firmadyne/scripts/fixImage_firmadyne.sh" ]]; then
-        download_file "fixImage.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/fixImage.sh" "external/firmadyne/scripts/fixImage_firmadyne.sh"
-      else
-        echo -e "$GREEN""firmadyne fixImage.sh already installed""$NC"
-      fi
-      if ! [[ -f "external/firmadyne/scripts/preInit_firmadyne.sh" ]]; then
-        download_file "preInit.sh" "https://raw.githubusercontent.com/firmadyne/firmadyne/master/scripts/preInit.sh" "external/firmadyne/scripts/preInit_firmadyne.sh"
-      else
-        echo -e "$GREEN""firmadyne preInit.sh already installed""$NC"
-      fi
+      download_file "fixImage.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/fixImage.sh"
+      download_file "preInit.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/preInit.sh" "external/firmae/scripts/preInit.sh"
+      download_file "network.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/network.sh"
+      download_file "inferNetwork.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferNetwork.sh" "external/firmae/scripts/inferNetwork.sh"
+      download_file "run_service.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/run_service.sh"
+      download_file "inferFile.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferFile.sh" "external/firmae/scripts/inferFile.sh"
+
+      # patch inferFile.sh:
+      # shellcheck disable=SC2016
+      sed -i 's/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS"`/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS" -o -name "rc.sysinit"`/' external/firmae/scripts/inferFile.sh
 
       ;;
     esac

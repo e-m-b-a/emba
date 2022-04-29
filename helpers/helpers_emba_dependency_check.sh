@@ -304,6 +304,9 @@ dependency_check()
     # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
     check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"
 
+    # Android payload.bin extractor
+    check_dep_file "Android payload.bin extractor" "$EXT_DIR""/payload_dumper/payload_dumper.py"
+
     # CVE-search
     # TODO change to portcheck and write one for external hosts
     check_dep_file "cve-search script" "$EXT_DIR""/cve-search/bin/search.py"
@@ -323,16 +326,16 @@ dependency_check()
     # firmadyne / FirmAE
     if [[ $FULL_EMULATION -eq 1 ]]; then
       # check only some of the needed files
-      check_dep_file "console.mipsel" "$EXT_DIR""/firmadyne/binaries/console.mipsel"
-      check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmadyne/binaries/vmlinux.mipseb"
-      check_dep_file "fixImage.sh" "$EXT_DIR""/firmadyne/scripts/fixImage_firmadyne.sh"
-      check_dep_file "preInit.sh" "$EXT_DIR""/firmadyne/scripts/preInit_firmadyne.sh"
+      check_dep_file "console.mipsel" "$EXT_DIR""/firmae/binaries/console.mipsel"
+      check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
+      check_dep_file "fixImage.sh" "$EXT_DIR""/firmae/scripts/fixImage.sh"
+      check_dep_file "preInit.sh" "$EXT_DIR""/firmae/scripts/preInit.sh"
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
 
       # routersploit for full system emulation
-      #check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
+      check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
     fi
 
     # CVE searchsploit
@@ -404,6 +407,9 @@ dependency_check()
 
     # yara
     check_dep_tool "yara"
+
+    # patool extractor - https://wummel.github.io/patool/
+    check_dep_tool "patool"
 
     # stacs - https://github.com/stacscan/stacs
     check_dep_tool "STACS hash detection" "stacs"

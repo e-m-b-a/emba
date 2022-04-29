@@ -333,7 +333,7 @@ qnap_extractor() {
   if [[ -v USR_LOCAL[@] ]]; then
     print_output ""
     for f in "${USR_LOCAL[@]}"; do
-      print_output "[*] Extracting $ORANGE$f$NC -> sysroot/usr/local..."
+      print_output "[*] Extracting $ORANGE$f$NC -> ${ORANGE}sysroot/usr/local$NC ..."
       mkdir -p "$SYSROOT/usr/local" || true
       tar xvzf "$f" -C "$SYSROOT/usr/local"
     done
@@ -358,7 +358,7 @@ qnap_extractor() {
 
   for name in apache_php5 mysql5 mariadb5; do
     if [ -e "$QNAP_EXTRACTION_ROOT_DST/qpkg/$name.tgz" ]; then
-      print_output "[*] Extracting ${ORANGE}qpkg/$name.tgz$NC -> sysroot/usr/local..."
+      print_output "[*] Extracting ${ORANGE}qpkg/$name.tgz$NC -> ${ORANGE}sysroot/usr/local$NC ..."
       tar xvzf "$QNAP_EXTRACTION_ROOT_DST/qpkg/$name.tgz" -C "$SYSROOT/usr/local"
     fi
   done

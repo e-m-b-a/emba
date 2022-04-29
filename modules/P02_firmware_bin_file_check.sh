@@ -35,7 +35,8 @@ P02_firmware_bin_file_check() {
   export GPG_COMPRESS=0
   export QNAP_ENC_DETECTED=0
   export BSD_UFS=0
-  export FACT_INIT=0
+  export PATOOLS_INIT=0
+  export ANDROID_OTA=0
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
@@ -82,7 +83,7 @@ fw_bin_detector() {
   local DLINK_ENC_CHECK
   local AVM_CHECK
 
-  export FACT_INIT=0
+  export PATOOLS_INIT=0
   export VMDK_DETECTED=0
   export DLINK_ENC_DETECTED=0
   export QNAP_ENC_DETECTED=0
@@ -93,16 +94,24 @@ fw_bin_detector() {
   export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
   export BSD_UFS=0
+  export ANDROID_OTA=0
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
 
-  # if we have a zip, tgz, tar archive we are going to use the FACT extractor
-  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* ]]; then
-    print_output "[*] Identified gzip/zip/tar archive file - using FACT extraction module"
-    export FACT_INIT=1
+  if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
+    print_output "[*] Identified AVM firmware - using AVM extraction module"
+    export AVM_DETECTED=1
+  fi
+  # if we have a zip, tgz, tar archive we are going to use the patools extractor
+  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* ]]; then
+    # as the AVM images are also zip files we need to bypass it here:
+    if [[ "$AVM_DETECTED" -ne 1 ]]; then
+      print_output "[*] Identified gzip/zip/tar/iso archive file - using patools extraction module"
+      export PATOOLS_INIT=1
+    fi
   fi
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     print_output "[*] Identified VMWware VMDK archive file - using VMDK extraction module"
@@ -127,10 +136,6 @@ fw_bin_detector() {
   if [[ "$DLINK_ENC_CHECK" == *"encrpted_img"* ]]; then
     print_output "[*] Identified D-Link encrpted_img encrpyted firmware - using D-Link extraction module"
     export DLINK_ENC_DETECTED=2
-  fi
-  if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
-    print_output "[*] Identified AVM firmware - using AVM extraction module"
-    export AVM_DETECTED=1
   fi
   if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
     print_output "[*] Identified u-boot firmware - using u-boot module"
@@ -164,5 +169,9 @@ fw_bin_detector() {
       print_output "[*] Identified GPG compressed firmware - using GPG extraction module"
       export GPG_COMPRESS=1
     fi
+  fi
+  if [[ "$DLINK_ENC_CHECK" == *"CrAU"* ]]; then
+    print_output "[*] Identified Android OTA payload.bin update file - using Android extraction module"
+    export ANDROID_OTA=1
   fi
 }

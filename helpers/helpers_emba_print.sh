@@ -99,7 +99,7 @@ print_output()
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
     local COLOR_OUTPUT_STRING=""
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
-    echo -e "$COLOR_OUTPUT_STRING"
+    echo -e "$COLOR_OUTPUT_STRING" || true
     if [[ "$LOG_SETTING" == "main" ]] ; then
       echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
@@ -452,6 +452,7 @@ print_help()
   echo -e "$CYAN""-U""$NC""                Check and apply available updates and exit"
   echo -e "\\nSpecial tests"
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
+  echo -e "$CYAN""-C [container id]""$NC"" Extract and analyze a local docker container via container id"
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
   echo -e "$CYAN""-o""$NC""                Activate online checks (e.g. upload and test with VirusTotal)"
@@ -535,6 +536,10 @@ module_start_log() {
   MODULE_MAIN_NAME="${1:-}"
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   export LOG_PATH_MODULE
+  if [[ "${LOG_DIR: -1}" == "/" ]]; then
+    #strip final slash from log dir
+    LOG_DIR="${LOG_DIR:: -1}"
+  fi
   LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
   if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" || true; fi
 }

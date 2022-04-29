@@ -157,6 +157,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I05_emba_docker_image_dl
 
+  IP00_extractors
+
   IP12_avm_freetz_ng_extract
 
   IP18_qnap_decryptor
@@ -180,8 +182,11 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
   I120_cwe_checker
 
   IL10_system_emulator
-  # for the future
-  # IL20_firmae_system_emulator
+
+  # for testing only:
+  IL21_firmae_system_emulator
+  # for testing only:
+  IL22_firmadyne_system_emulator
 
   IL15_emulated_checks_init
 
