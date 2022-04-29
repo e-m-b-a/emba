@@ -45,7 +45,8 @@ patools_extractor() {
   local EXTRACTION_DIR_="$2"
   FILES_PATOOLS=0
   local DIRS_PATOOLS=0
-  local FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
+  local FIRMWARE_NAME_
+  FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
 
   patool -v test "$FIRMWARE_PATH_" | tee -a "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log
 
