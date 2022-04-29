@@ -690,8 +690,16 @@ main()
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set +e
       fi
-      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-      D_RETURN=$?
+      if [[ "$FULL_EMULATION" -eq 1 && -f ./docker-compose-insecure.yml ]]; then
+        # in full system emulation we currently need rw filesystem for FirmAE and firmadyne
+        # we will remove this in final system emulation mode
+        print_output "[!] Warning: Starting docker environment with insecure settings (Full system emulation)!" "no_log"
+        EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose -f ./docker-compose-insecure.yml run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+        D_RETURN=$?
+      else
+        EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+        D_RETURN=$?
+      fi
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set -e
       fi

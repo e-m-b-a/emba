@@ -70,6 +70,9 @@ IL22_firmadyne_system_emulator() {
         # shellcheck disable=SC2024
         #sudo -u postgres psql -d firmware < ./firmadyne/database/schema
 
+        # as we are currently using the old binwalk version, we need to downgrade the extractor:
+        wget https://raw.githubusercontent.com/firmadyne/extractor/6e05a6a8e5d553da70e27c2a653a40f992378557/extractor.py -O ./extractor/extractor.py
+
         sed -i "s/^#FIRMWARE_DIR.*/FIRMWARE_DIR=$(pwd)/g" firmadyne.config
 
         ./download.sh
