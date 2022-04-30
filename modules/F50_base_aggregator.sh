@@ -79,7 +79,7 @@ output_overview() {
     echo "FW_notes;\"$FW_NOTES\"" >> "$CSV_LOG_FILE"
   fi  
 
-  if [[ "$IN_DOCKER" -eq 1 ]]; then
+  if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/fw_name.log ]] && [[ -f "$TMP_DIR"/emba_command.log ]]; then
     # we need to rewrite this firmware path to the original path
     FW_PATH_ORIG="$(cat "$TMP_DIR"/fw_name.log)"
     EMBA_COMMAND_ORIG="$(cat "$TMP_DIR"/emba_command.log)"

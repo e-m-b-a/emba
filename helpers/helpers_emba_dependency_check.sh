@@ -421,7 +421,7 @@ dependency_check()
       else
         echo -e "$RED""not ok""$NC"
         echo -e "$RED""    Missing cwe-checker start script - check your installation""$NC"
-        CWE_CHECKER=0
+        export CWE_CHECKER=0
         DEP_ERROR=1
       fi
     fi
