@@ -36,8 +36,11 @@ IF20_cve_search() {
       # we always need the cve-search stuff:
       if ! [[ -d external/cve-search ]]; then
         git clone https://github.com/cve-search/cve-search.git external/cve-search
+        cd ./external/cve-search/ || exit 1
+      else
+        cd ./external/cve-search/ || exit 1
+        git pull
       fi
-      cd ./external/cve-search/ || exit 1
 
       while read -r TOOL_NAME; do
         print_tool_info "$TOOL_NAME" 1
