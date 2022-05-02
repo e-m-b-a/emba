@@ -79,10 +79,20 @@ output_overview() {
     echo "FW_notes;\"$FW_NOTES\"" >> "$CSV_LOG_FILE"
   fi  
 
-  print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH""$NC"
-  echo "FW_path;\"$FIRMWARE_PATH\"" >> "$CSV_LOG_FILE"
-  print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND""$NC"
-  echo "emba_command;\"$EMBA_COMMAND\"" >> "$CSV_LOG_FILE"
+  if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/fw_name.log ]] && [[ -f "$TMP_DIR"/emba_command.log ]]; then
+    # we need to rewrite this firmware path to the original path
+    FW_PATH_ORIG="$(cat "$TMP_DIR"/fw_name.log)"
+    EMBA_COMMAND_ORIG="$(cat "$TMP_DIR"/emba_command.log)"
+    print_output "[+] Tested firmware:""$ORANGE"" ""$FW_PATH_ORIG""$NC"
+    echo "FW_path;\"$FW_PATH_ORIG\"" >> "$CSV_LOG_FILE"
+    print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND_ORIG""$NC"
+    echo "emba_command;\"$EMBA_COMMAND_ORIG\"" >> "$CSV_LOG_FILE"
+  else
+    print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH""$NC"
+    echo "FW_path;\"$FIRMWARE_PATH\"" >> "$CSV_LOG_FILE"
+    print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND""$NC"
+    echo "emba_command;\"$EMBA_COMMAND\"" >> "$CSV_LOG_FILE"
+  fi
 
   if [[ -n "$ARCH" ]]; then
     if [[ -n "$D_END" ]]; then
@@ -535,7 +545,7 @@ output_cve_exploits() {
         write_link "f20#minimalreportofexploitsandcves"
       fi
       if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 || "$KNOWN_EXPLOITED_COUNTER" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited exploits: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$NC")")"
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited vulnerabilities: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$NC")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
         write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT"

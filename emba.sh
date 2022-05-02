@@ -687,6 +687,12 @@ main()
       exit 1
     else
       print_output "[*] EMBA initializes docker container.\\n" "no_log"
+
+      # store some details that we do not have in the docker container:
+      echo "$FIRMWARE_PATH" >> "$TMP_DIR"/fw_name.log
+      echo "$LOG_DIR" >> "$TMP_DIR"/emba_log_dir.log
+      echo "$EMBA_COMMAND" >> "$TMP_DIR"/emba_command.log
+
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set +e
       fi
