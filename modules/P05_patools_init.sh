@@ -39,7 +39,7 @@ P05_patools_init() {
 }
 
 patools_extractor() {
-  sub_module_title "Patools filesystem extractor"
+  sub_module_title "Patool filesystem extractor"
 
   local FIRMWARE_PATH_="$1"
   local EXTRACTION_DIR_="$2"
@@ -49,6 +49,7 @@ patools_extractor() {
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
 
   patool -v test "$FIRMWARE_PATH_" | tee -a "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log
+  cat "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
 
   if grep -q "patool: ... tested ok." "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log ; then
 
@@ -56,6 +57,7 @@ patools_extractor() {
     print_output "[*] Valid compressed file detected - extraction process via patool started"
 
     patool -v extract "$FIRMWARE_PATH_" --outdir "$EXTRACTION_DIR_" | tee -a "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log
+    cat "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
 
     print_output ""
     print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
