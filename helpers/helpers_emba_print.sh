@@ -653,7 +653,11 @@ matrix_mode() {
 
 banner_printer() {
   echo ""
-  BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f | shuf -n 1)
+  if [[ "$RELEASE" -ne 1 ]]; then
+    BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f | shuf -n 1)
+  else
+    BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f -name "*$VERSION*"| shuf -n 1)
+  fi
   cat "$BANNER_TO_PRINT"
   echo ""
 
