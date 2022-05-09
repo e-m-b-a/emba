@@ -656,7 +656,7 @@ banner_printer() {
   if [[ "$RELEASE" -ne 1 ]]; then
     BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f | shuf -n 1)
   else
-    BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f -name "*$VERSION*"| shuf -n 1)
+    BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f -name "*$EMBA_VERSION*"| shuf -n 1)
   fi
   cat "$BANNER_TO_PRINT"
   echo ""
