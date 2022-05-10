@@ -226,7 +226,6 @@ aggregate_versions() {
 }
 
 generate_special_log() {
-  local KNOWN_EXPLOITED_VULNS=()
   if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE" || true) -gt 0 ]]; then
     sub_module_title "Minimal report of exploits and CVE's."
     write_anchor "minimalreportofexploitsandcves"
@@ -234,6 +233,7 @@ generate_special_log() {
     EXPLOIT_HIGH=0
     EXPLOIT_MEDIUM=0
     EXPLOIT_LOW=0
+    local KNOWN_EXPLOITED_VULNS=()
 
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
     print_output ""
@@ -364,6 +364,7 @@ cve_extractor() {
   local EXPLOIT_AVAIL_TRICKEST=()
   local EXPLOIT_AVAIL_ROUTERSPLOIT=()
   local EXPLOIT_AVAIL_ROUTERSPLOIT1=()
+  local KNOWN_EXPLOITED=0
   local LOCAL=0
   local REMOTE=0
   local DOS=0
