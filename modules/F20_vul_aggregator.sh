@@ -101,6 +101,7 @@ F20_vul_aggregator() {
         RS_SEARCH=1
       fi
 
+      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit"
       generate_cve_details
       generate_special_log
     else
@@ -225,6 +226,7 @@ aggregate_versions() {
 }
 
 generate_special_log() {
+  local KNOWN_EXPLOITED_VULNS=()
   if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE" || true) -gt 0 ]]; then
     sub_module_title "Minimal report of exploits and CVE's."
     write_anchor "minimalreportofexploitsandcves"
@@ -355,6 +357,16 @@ cve_extractor() {
   VERSION_orig="$1"
   local VERSION
   local BINARY
+  local CVE_VALUE=""
+  local CVSS_VALUE=""
+  local EXPLOIT_AVAIL=()
+  local EXPLOIT_AVAIL_MSF=()
+  local EXPLOIT_AVAIL_TRICKEST=()
+  local EXPLOIT_AVAIL_ROUTERSPLOIT=()
+  local EXPLOIT_AVAIL_ROUTERSPLOIT1=()
+  local LOCAL=0
+  local REMOTE=0
+  local DOS=0
 
   if [[ "$(echo "$VERSION_orig" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
     BINARY="$(echo "$VERSION_orig" | cut -d ":" -f1)"
@@ -605,6 +617,7 @@ cve_extractor() {
         fi
         ((LOW_CVE_COUNTER+=1))
       fi
+      write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "$LOCAL" "$REMOTE" "$DOS"
     done
   fi
   
