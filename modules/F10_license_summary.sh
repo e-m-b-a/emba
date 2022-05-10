@@ -30,8 +30,13 @@ F10_license_summary() {
   mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s116_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
   # TODO: Currently the final kernel details from s25 are missing
 
+  write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
+  VERSION_RULE="NA"
+  CSV_RULE="NA"
+
   # static version detection
   if [[ "${#LICENSE_DETECTION_STATIC[@]}" -gt 0 ]]; then
+    TYPE="static"
     for ENTRY in "${LICENSE_DETECTION_STATIC[@]}"; do
       if [[ -z "$ENTRY" ]]; then
         continue
@@ -53,12 +58,14 @@ F10_license_summary() {
       fi
 
       print_output "[+] Binary: $ORANGE$(basename "$BINARY" | cut -d\  -f1)$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
+      write_csv_log "$BINARY" "$VERSION_RULE" "$VERSION" "$CSV_RULE" "$LICENSE" "$TYPE"
       ((COUNT_LIC+=1))
     done
   fi
 
   # Qemu version detection
   if [[ "${#LICENSE_DETECTION_DYN[@]}" -gt 0 ]]; then
+    TYPE="emulation"
     for ENTRY in "${LICENSE_DETECTION_DYN[@]}"; do
       if [[ -z "$ENTRY" ]]; then
         continue
@@ -75,6 +82,7 @@ F10_license_summary() {
       fi
 
       print_output "[+] Binary: $ORANGE$(basename "$BINARY")$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
+      write_csv_log "$BINARY" "$VERSION_RULE" "$VERSION" "$CSV_RULE" "$LICENSE" "$TYPE"
       ((COUNT_LIC+=1))
     done
   fi
