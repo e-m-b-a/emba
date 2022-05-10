@@ -101,7 +101,7 @@ F20_vul_aggregator() {
         RS_SEARCH=1
       fi
 
-      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit"
+      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
       generate_cve_details
       generate_special_log
     else
@@ -617,7 +617,7 @@ cve_extractor() {
         fi
         ((LOW_CVE_COUNTER+=1))
       fi
-      write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "$LOCAL" "$REMOTE" "$DOS"
+      write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "$LOCAL" "$REMOTE" "$DOS" "${#KNOWN_EXPLOITED_VULNS[@]}"
     done
   fi
   
