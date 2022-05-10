@@ -49,11 +49,14 @@ P02_firmware_bin_file_check() {
   local FILE_LS_OUT
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
-  print_output "[*] Details of the binary file:"
+  print_output "[*] Details of the firmware file:"
   print_output ""
   print_output "$(indent "$FILE_LS_OUT")"
   print_output ""
   if [[ -f "$FIRMWARE_PATH" ]]; then
+    print_output ""
+    print_output "$(indent "$(file "$FIRMWARE_PATH")")"
+    print_output ""
     hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE" || true
     print_output ""
     print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"

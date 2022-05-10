@@ -38,10 +38,10 @@ S24_kernel_bin_identifier()
       print_output "$(indent "$(orange "$K_VER")")"
       print_output ""
 
-      if strings "$FILE" 2>/dev/null | grep -E -q "^init=\/"; then
+      if strings "$FILE" 2>/dev/null | grep -E -q "init=\/"; then
         print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
         print_output ""
-        K_INIT="$(strings "$FILE" 2>/dev/null | grep -E "^init=\/" | sort -u)"
+        K_INIT="$(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sort -u)"
         print_output "$(indent "$(orange "$K_INIT")")"
         print_output ""
       fi

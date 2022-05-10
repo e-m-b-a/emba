@@ -439,7 +439,7 @@ print_help()
   echo -e "$CYAN""-g""$NC""                Create grep-able log file in [log_path]/fw_grep.log"
   echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
   echo -e "$CYAN""-E""$NC""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
-  echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
+#  echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
   echo -e "$CYAN""-D""$NC""                Developer mode - EMBA runs on the host without container protection"
   echo -e "$CYAN""-S""$NC""                STRICT mode - developer option to improve code quality (not enabled by default)"
   echo -e "$CYAN""-i""$NC""                Ignores log path check"
@@ -653,7 +653,11 @@ matrix_mode() {
 
 banner_printer() {
   echo ""
-  BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f | shuf -n 1)
+  if [[ "$RELEASE" -ne 1 ]]; then
+    BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f | shuf -n 1)
+  else
+    BANNER_TO_PRINT=$(find "$CONFIG_DIR"/banner/ -type f -name "*$EMBA_VERSION*"| shuf -n 1)
+  fi
   cat "$BANNER_TO_PRINT"
   echo ""
 
