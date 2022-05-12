@@ -364,6 +364,7 @@ cve_extractor() {
   local EXPLOIT_AVAIL_TRICKEST=()
   local EXPLOIT_AVAIL_ROUTERSPLOIT=()
   local EXPLOIT_AVAIL_ROUTERSPLOIT1=()
+  local KNOWN_EXPLOITED_VULNS=()
   local KNOWN_EXPLOITED=0
   local LOCAL=0
   local REMOTE=0

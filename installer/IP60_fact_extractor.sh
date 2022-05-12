@@ -21,6 +21,7 @@ IP60_fact_extractor() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+    print_tool_info "curl" 1
     print_git_info "fact-extractor" "m-1-k-3/fact_extractor" "Wraps FACT unpack plugins into standalone utility. Should be able to extract most of the common container formats. (EMBA fork)"
     echo -e "$ORANGE""fact_extractor will be downloaded.""$NC"
   
@@ -37,7 +38,7 @@ IP60_fact_extractor() {
 
           # Note: This is a temporary solution until the official FACT repo supports a current kali linux
           # Note: This is a temporary solution as long as the installation via pip does not work
-          apt-get install curl
+          apt-get install "${INSTALL_APP_LIST[@]}" -y
 
           cd "$HOME_PATH" || exit 1
 
