@@ -20,7 +20,7 @@ print_help()
 {
   echo -e "\\n""$CYAN""USAGE""$NC"
   echo -e "$CYAN""-d""$NC""         Default installation of all dependencies needed for EMBA in default/docker mode (typical initial installation)"
-  echo -e "$CYAN""-F""$NC""         Installation of EMBA with all dependencies (for running on your host - developer mode)"
+  echo -e "$CYAN""-F""$NC""         Developer installation (for running on your host in developer mode)"
   echo -e "$CYAN""-D""$NC""         Only used via docker-compose for building EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
