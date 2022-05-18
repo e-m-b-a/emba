@@ -288,19 +288,6 @@ dependency_check()
     # progpilot for php code checks
     check_dep_file "progpilot php ini checker" "$EXT_DIR""/progpilot"
 
-    # Check if fact extractor is on the system - disable, if not
-    export FACT_EXTRACTOR=1 
-
-    print_output "    fact-extractor start script - \\c" "no_log"
-    if [[ -f "$EXT_DIR""/fact_extractor/fact_extractor/fact_extract.py" ]] ; then
-      echo -e "$GREEN""ok""$NC"
-    else
-      echo -e "$RED""not ok""$NC"
-      echo -e "$RED""    Missing fact-extractor start script - check your installation""$NC"
-      FACT_EXTRACTOR=0
-      DEP_ERROR=1
-    fi
-
     # patool extractor - https://wummel.github.io/patool/
     check_dep_tool "patool"
 

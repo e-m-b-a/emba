@@ -14,7 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware to the log directory.
-#               If binwalk fails to extract the firmware, it will be extracted with FACT-extractor.
+
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
 export PRE_THREAD_ENA=0
@@ -25,8 +25,6 @@ P60_firmware_bin_extractor() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   DISK_SPACE_CRIT=0
-  FILES_FACT=0
-  FILES_BINWALK=0
   LINUX_PATH_COUNTER=0
 
   # typically FIRMWARE_PATH is only a file if none of the EMBA extractors were able to extract something
@@ -37,28 +35,6 @@ P60_firmware_bin_extractor() {
   fi
 
   linux_basic_identification_helper
-
-  # Typically FIRMWARE_PATH is only a file if none of the EMBA extractors (including binwalk) were able
-  # to extract something - we try FACT extractor
-  if [[ -f "$FIRMWARE_PATH" ]]; then
-    # if we have not found a linux filesystem we try to extract the firmware again with FACT-extractor
-    # shellcheck disable=SC2153
-    if [[ $FACT_EXTRACTOR -eq 1 && $LINUX_PATH_COUNTER -lt 2 ]]; then
-      fact_extractor
-      linux_basic_identification_helper
-    fi
-
-    FILES_BINWALK=$(find "$OUTPUT_DIR_binwalk" -xdev -type f | wc -l )
-    if [[ -n "${OUTPUT_DIR_fact:-}" && -d "$OUTPUT_DIR_fact" ]]; then
-      FILES_FACT=$(find "$OUTPUT_DIR_fact" -xdev -type f | wc -l )
-    fi
-    print_output ""
-    print_output "[*] Default binwalk extractor extracted $ORANGE$FILES_BINWALK$NC files."
-  fi
-
-  if [[ ${FILES_FACT-0} -gt 0 ]]; then
-    print_output "[*] Default FACT-extractor extracted $ORANGE$FILES_FACT$NC files."
-  fi
 
   # If we have not found a linux filesystem we try to do a binwalk -e -M on every file for two times
   # Manual activation via -x switch:
@@ -242,30 +218,6 @@ deeper_extractor_helper() {
   fi
 }
 
-fact_extractor() {
-  sub_module_title "Extracting binary firmware blob with FACT-extractor"
-
-  export OUTPUT_DIR_fact
-  OUTPUT_DIR_fact=$(basename "$FIRMWARE_PATH")
-  OUTPUT_DIR_fact="$FIRMWARE_PATH_CP""/""$OUTPUT_DIR_fact"_fact_emba
-
-  print_output "[*] Extracting firmware to directory $OUTPUT_DIR_fact"
-
-  # this is not working in background. I have created a new function that gets executed in the background
-  # probably there is a more elegant way
-  #mapfile -t FACT_EXTRACT < <(./external/extract.py -o "$OUTPUT_DIR_fact" "$FIRMWARE_PATH" 2>/dev/null &)
-  extract_fact_helper &
-  WAIT_PIDS+=( "$!" )
-  wait_for_extractor
-  WAIT_PIDS=( )
-
-  # as we probably kill FACT and to not loose the results we need to execute FACT in a function 
-  # and read the results from the caller
-  if [[ -f "$TMP_DIR"/FACTer.txt ]] ; then
-    tee -a "$LOG_FILE" < "$TMP_DIR"/FACTer.txt 
-  fi
-}
-
 binwalking() {
   sub_module_title "Analyze binary firmware blob with binwalk"
 
@@ -319,21 +271,6 @@ extract_binwalk_helper() {
     binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
   else
     binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
-  fi
-}
-
-extract_fact_helper() {
-  if [[ -d /tmp/extractor ]]; then
-    # This directory is currently hard coded in FACT-extractor
-    rm -rf /tmp/extractor
-  fi
-
-  "$EXT_DIR"/fact_extractor/fact_extractor/fact_extract.py -d "$FIRMWARE_PATH" >> "$TMP_DIR"/FACTer.txt
-
-  if [[ -d /tmp/extractor/files ]]; then
-    cat /tmp/extractor/reports/meta.json >> "$TMP_DIR"/FACTer.txt
-    cp -r /tmp/extractor/files "$OUTPUT_DIR_fact"
-    rm -rf /tmp/extractor
   fi
 }
 
