@@ -208,6 +208,9 @@ deeper_extractor_helper() {
       elif [[ "$BSD_UFS" -ne 0 ]]; then
         ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted" &
         WAIT_PIDS_P20+=( "$!" )
+      elif [[ "$ANDROID_OTA" -ne 0 ]]; then
+        android_ota_extractor "$FILE_TMP" "${FILE_TMP}_android_ota_extracted" &
+        WAIT_PIDS_P20+=( "$!" )
       else
         # default case to binwalk
         binwalk_deep_extract_helper &
