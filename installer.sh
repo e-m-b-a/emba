@@ -146,7 +146,9 @@ I01_default_apps_host
 DOCKER_COMP_VER=$(docker-compose -v | grep version | awk '{print $3}' | tr -d ',')
 if [[ $(version "$DOCKER_COMP_VER") -lt $(version "1.29.0") ]]; then
   echo -e "\n${ORANGE}WARNING: compatibility of the used docker-compose version is unknown!$NC"
-  read -p "Press any key to continue..." -n1 -s -r
+  echo -e "\n${ORANGE}Please consider updating your docker-compose installation to a version 1.29.0 or later.$NC"
+  echo -e "\n${ORANGE}Please check the EMBA wiki for further details: https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites$NC"
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 fi
 
 INSTALL_APP_LIST=()
@@ -164,8 +166,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
   IP18_qnap_decryptor
 
   IP99_binwalk_default
-
-  IP60_fact_extractor
 
   I13_objdump
 
