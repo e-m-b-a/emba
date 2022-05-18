@@ -23,7 +23,7 @@ S06_distribution_identification()
 
   OUTPUT=0
   DLINK_FW_VER=""
-  local FILE_quoted
+  local FILE_QUOTED
 
   write_csv_log "file" "type" "identifier" "csv_rule"
 
@@ -36,8 +36,8 @@ S06_distribution_identification()
           PATTERN="$(echo "$LINE" | cut -d\; -f3)"
           SED_COMMAND="$(echo "$LINE" | cut -d\; -f4)"
           # shellcheck disable=SC2086
-          FILE_quoted=$(printf "%q" "$FILE")
-          OUT1="$(eval "$PATTERN" "$FILE_quoted" || true)"
+          FILE_QUOTED=$(printf "%q" "$FILE")
+          OUT1="$(eval "$PATTERN" "$FILE_QUOTED" || true)"
           # echo "SED command: $SED_COMMAND"
           # echo "identified: $OUT1"
           IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//')
