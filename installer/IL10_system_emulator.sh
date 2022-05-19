@@ -37,6 +37,7 @@ IL10_system_emulator() {
     print_tool_info "qemu-system-x86" 1
     print_tool_info "qemu-utils" 1
     print_tool_info "hping3" 1
+    print_tool_info "traceroute" 1
 
     # future use:
     print_file_info "vmlinux.mipsel.2" "FirmAE - Linux kernel 2.6 - MIPSel" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
