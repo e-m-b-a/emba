@@ -593,6 +593,12 @@ module_end_log() {
     fi
   fi
 
+  # check if there is some content in the csv log file. If there is only
+  # one entry line we remove the file at all
+  if [[ $(wc -l "$CSV_LOG" | awk '{print $1}') -lt 2 ]]; then
+    rm "$CSV_LOG"
+  fi
+
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
 }
 

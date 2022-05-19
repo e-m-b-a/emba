@@ -24,12 +24,16 @@ S12_binary_protection()
   module_title "Check binary protection mechanisms"
   pre_module_reporter "${FUNCNAME[0]}"
   local BIN_PROT_COUNTER=0
+  local CSV_LOG
+  CSV_LOG="${LOG_FILE/\.txt/\.csv}"
 
   if [[ -f "$EXT_DIR"/checksec ]] ; then
     print_output "RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified  Fortifiable  FILE"
+    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY Fortified;Fortifiable;FILE" > "$CSV_LOG"
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q ELF ) ; then
         print_output "$( "$EXT_DIR"/checksec --file="$LINE" | grep -v "CANARY" | rev | cut -f 2- | rev )""\\t""$NC""$(print_path "$LINE")"
+        "$EXT_DIR"/checksec --format=csv --file="$LINE" >> "$CSV_LOG"
         BIN_PROT_COUNTER=$((BIN_PROT_COUNTER+1))
       fi
     done

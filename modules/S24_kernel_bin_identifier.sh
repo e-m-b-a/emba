@@ -31,6 +31,8 @@ S24_kernel_bin_identifier()
   write_csv_log "Kernel version" "file" "identified init"
 
   for FILE in "${FILE_ARR_TMP[@]}" ; do
+    local K_VER=""
+    local K_INIT=""
     if strings "$FILE" 2>/dev/null | grep -q -E "^Linux version [0-9]+\.[0-9]+"; then
 	    print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
       print_output ""

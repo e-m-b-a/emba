@@ -42,9 +42,6 @@ S05_firmware_details()
   write_log ""
   write_log "[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR"
 
-  write_csv_log files directories
-  write_csv_log "${#FILE_ARR[@]}" "$DETECTED_DIR"
-
   module_end_log "${FUNCNAME[0]}" "${#FILE_ARR[@]}"
 }
 

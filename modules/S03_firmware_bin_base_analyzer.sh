@@ -65,6 +65,7 @@ os_identification() {
 
   print_output "[*] Initial OS guessing running ..." "no_log" | tr -d "\n"
   write_log "[*] Initial OS guessing:"
+  write_csv_log "Guessed OS" "confidential rating" "verified" "Linux root filesystems found"
 
   OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics")
   echo "." | tr -d "\n"
@@ -95,6 +96,7 @@ os_identification() {
 
 os_detection_thread_per_os() {
   local DETECTED=0
+  local OS_=""
   OS_COUNTER[$OS]=0
   OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -xdev -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null || true)"))
   OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -xdev -type f -name "p60_firmware*" -exec grep -i -c "$OS" {} \; 2> /dev/null || true)" ))
@@ -109,37 +111,50 @@ os_detection_thread_per_os() {
 
   if [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 && ${#ROOT_PATH[@]} -gt 1 ]] ; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected (root filesystem)${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+    write_csv_log "$OS" "${OS_COUNTER[$OS]}" "verified" "${#ROOT_PATH[@]}"
     DETECTED=1
   elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 && $LINUX_PATH_COUNTER -gt 2 ]] ; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified Linux operating system detected (root filesystem)${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+    write_csv_log "$OS" "${OS_COUNTER[$OS]}" "verified" "${#ROOT_PATH[@]}"
     DETECTED=1
   elif [[ $OS == "Linux" && ${OS_COUNTER[$OS]} -gt 5 ]] ; then
     printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+    write_csv_log "$OS" "${OS_COUNTER[$OS]}" "not verified" "${#ROOT_PATH[@]}"
     DETECTED=1
   fi
 
   if [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified SIPROTEC system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+    write_csv_log "$OS" "${OS_COUNTER[$OS]}" "verified" "NA"
     DETECTED=1
   elif [[ $OS == "SIPROTEC" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
     printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "SIPROTEC detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+    write_csv_log "$OS" "${OS_COUNTER[$OS]}" "not verified" "NA"
     DETECTED=1
   fi
   if [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 100 && $OS_COUNTER_VxWorks -gt 20 ]] ; then
     printf "${GREEN}\t%-20.20s\t:\t%-15s\t:\tverified S7-CP443 system detected${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+    write_csv_log "$OS" "${OS_COUNTER[$OS]}" "verified" "NA"
     DETECTED=1
   elif [[ $OS == "CP443" && ${OS_COUNTER[$OS]} -gt 10 ]] ; then
     printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "S7-CP443 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+    write_csv_log "$OS" "${OS_COUNTER[$OS]}" "not verified" "NA"
     DETECTED=1
   fi
 
   if [[ ${OS_COUNTER[$OS]} -gt 5 ]] ; then
     if [[ $OS == "VxWorks\|Wind" ]]; then
-      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "VxWorks detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      OS_="VxWorks"
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS_ detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      write_csv_log "$OS_" "${OS_COUNTER[$OS]}" "not verified" "NA"
     elif [[ $OS == "CPU\ [34][12][0-9]-[0-9]" ]]; then
-      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "S7-CPU400 detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      OS_="S7-CPU400"
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS_ detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      write_csv_log "$OS_" "${OS_COUNTER[$OS]}" "not verified" "NA"
     elif [[ $DETECTED -eq 0 ]]; then
-      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      OS_="$OS"
+      printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "$OS_ detected" "${OS_COUNTER[$OS]}" | tee -a "$LOG_FILE"
+      write_csv_log "$OS_" "${OS_COUNTER[$OS]}" "not verified" "NA"
     fi
   fi
 

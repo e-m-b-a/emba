@@ -45,8 +45,9 @@ F50_base_aggregator() {
   S108_LOG="s108_stacs_password_search.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
-  L10_LOG="l10_system_emulator.txt"
+  #L10_LOG="l10_system_emulator.txt"
   L15_LOG="l15_emulated_checks_init.txt"
+  SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
 
   CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$LOG_FILE")".csv
 
@@ -185,19 +186,19 @@ output_details() {
     DATA=1
   fi
 
-  if [[ "${BOOTED-0}" -gt 0 ]]; then
+  if [[ "${BOOTED-0}" -gt 0 ]] || [[ "${IP_ADDR-0}" -gt 0 ]] || [[ "${ICMP-0}" -gt 0 ]] || [[ "${TCP_0-0}" -gt 0 ]] || [[ "${TCP-0}" -gt 0 ]]; then
 
     STATE="$ORANGE(""$GREEN""booted"
     EMU_STATE="booted"
     if [[ "$IP_ADDR" -gt 0 ]]; then
-      STATE="$STATE""$ORANGE / ""$GREEN""IP address detected"
+      STATE="$STATE""$ORANGE / ""$GREEN""IP address detected (mode: $MODE)"
       EMU_STATE="$EMU_STATE"";IP_DET"
     fi
-    if [[ "${SYS_ONLINE-0}" -gt 0 ]]; then
+    if [[ "${ICMP-0}" -gt 0 || "${TCP_0-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""ICMP"
       EMU_STATE="$EMU_STATE"";ICMP"
     fi
-    if [[ "${NMAP_UP-0}" -gt 0 ]]; then
+    if [[ "${TCP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NMAP"
       EMU_STATE="$EMU_STATE"";NMAP"
     fi
@@ -208,6 +209,10 @@ output_details() {
     if [[ "${NIKTO_UP-0}" -gt 0 ]]; then
       STATE="$STATE""$ORANGE / ""$GREEN""NIKTO"
       EMU_STATE="$EMU_STATE"";NIKTO"
+    fi
+    if [[ "${ROUTERSPLOIT_VULN-0}" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""Routersploit"
+      EMU_STATE="$EMU_STATE"";Routersploit"
     fi
     STATE="$STATE$ORANGE"")$NC"
 
@@ -497,12 +502,12 @@ output_cve_exploits() {
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
 
-      # run over overview.txt and add links - need to do this here and not in f20 as there bites us the threading mode
+      # run over F20_summary.txt and add links - need to do this here and not in f20 as there bites us the threading mode
       while read -r OVERVIEW_LINE; do
         BINARY_="$(echo "$OVERVIEW_LINE" | cut -d: -f2 | tr -d '[:blank:]')"
         print_output "$OVERVIEW_LINE"
         write_link "f20#cve_$BINARY_"
-      done < "$LOG_DIR/f20_vul_aggregator/overview.txt"
+      done < "$LOG_DIR/f20_vul_aggregator/F20_summary.txt"
       print_output ""
     fi
 
@@ -553,7 +558,7 @@ output_cve_exploits() {
         write_csv_log "known_exploited" "$KNOWN_EXPLOITED_COUNTER"
       fi
       # we report only software components with exploits to csv:
-      grep "Found version details" "$LOG_DIR/f20_vul_aggregator/overview.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE" || true
+      grep "Found version details" "$LOG_DIR/f20_vul_aggregator/F20_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE" || true
       DATA=1
     fi
   fi
@@ -664,15 +669,20 @@ get_data() {
     export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S120_LOG" | cut -d: -f2 || true)
   fi
-  if [[ -f "$LOG_DIR"/"$L10_LOG" ]]; then
-    SYS_ONLINE=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f2 || true)
-    IP_ADDR=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f3 || true)
-    BOOTED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L10_LOG" | cut -d: -f4 || true)
+  if [[ -f "$SYS_EMU_RESULTS" ]]; then
+    BOOTED=$(grep -c "Booted yes;" "$SYS_EMU_RESULTS" || true)
+    ICMP=$(grep -c "ICMP ok;" "$SYS_EMU_RESULTS" || true)
+    TCP_0=$(grep -c "TCP-0 ok;" "$SYS_EMU_RESULTS" || true)
+    TCP=$(grep -c "TCP ok;" "$SYS_EMU_RESULTS" || true)
+    IP_ADDR=$(grep -E -c "IP\ address:\ [0-9]+" "$SYS_EMU_RESULTS" || true)
+    # we make something like this: "bridge-default-normal"
+    MODE=$(grep -e "ICMP ok;\|TCP-0 ok;\|TCP ok" "$SYS_EMU_RESULTS" | cut -d\; -f8 | sort -u | sed 's/Network mode: //g' | tr -d '[:blank:]' | tr '\n' '-' | sed 's/-$//g' || true)
   fi
   if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
-    NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2 || true)
+    #NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2 || true)
     SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f3 || true)
     NIKTO_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f4 || true)
+    ROUTERSPLOIT_VULN=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f5 || true)
   fi
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
     CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | cut -d: -f2 || true)

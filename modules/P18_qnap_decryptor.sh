@@ -64,6 +64,8 @@ qnap_enc_extractor() {
     print_output ""
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     print_output ""
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "QNAP decryptor" "$QNAP_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "gzip compressed data"
   else
     print_output "[-] Decryption of QNAP firmware file failed"
   fi
@@ -387,4 +389,6 @@ print_files_dirs() {
   DIRS_QNAP=$(find "$QNAP_EXTRACTION_ROOT" -type d | wc -l)
   print_output ""
   print_output "[*] Extracted $ORANGE$FILES_QNAP$NC files and $ORANGE$DIRS_QNAP$NC directories from the QNAP firmware image.\n"
+  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+  write_csv_log "QNAP extractor" "$DECRYPTED_FW_" "$QNAP_EXTRACTION_ROOT" "$FILES_QNAP" "$DIRS_QNAP" "NA"
 }

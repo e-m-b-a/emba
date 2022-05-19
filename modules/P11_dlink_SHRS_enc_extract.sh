@@ -55,6 +55,8 @@ dlink_SHRS_enc_extractor() {
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     print_output ""
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "DLink SHRS decryptor" "$DLINK_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
   else
     print_output "[-] Decryption of D-Link firmware file failed"
@@ -90,6 +92,8 @@ dlink_enc_img_extractor(){
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     print_output ""
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "DLink enc_img decryptor" "$DLINK_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
   else
     print_output "[-] Decryption of D-Link firmware file failed"
