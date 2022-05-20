@@ -207,10 +207,10 @@ prepare_file_arr()
   print_output "[*] Unique files auto detection (could take some time)\\n"
 
   export FILE_ARR
-  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f $FIRMWARE_PATH && $RTOS -eq 1 ]]; then
-    readarray -t FILE_ARR < <(find "$OUTPUT_DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    readarray -t FILE_ARR < <(find "$OUTPUT_DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
     FILE_ARR+=( "$FIRMWARE_PATH" )
   fi
   print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files."

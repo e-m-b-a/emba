@@ -148,11 +148,11 @@ deeper_extractor_helper() {
   readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
     -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \) \
-    -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
 
   for FILE_TMP in "${FILE_ARR_TMP[@]}"; do
 
-    FILE_MD5=$(md5sum "$FILE_TMP" | cut -d\  -f1)
+    FILE_MD5="$(md5sum "$FILE_TMP" | awk '{print $1}')"
     # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
     # already extracted stuff is now ignored
 

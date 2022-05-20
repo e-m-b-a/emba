@@ -41,15 +41,15 @@ P02_firmware_bin_file_check() {
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    SHA512_CHECKSUM=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
+    SHA512_CHECKSUM="$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')"
     write_csv_log "SHA512" "${SHA512_CHECKSUM:-}" "NA"
-    SHA1_CHECKSUM=$(sha1sum "$FIRMWARE_PATH" | awk '{print $1}')
+    SHA1_CHECKSUM="$(sha1sum "$FIRMWARE_PATH" | awk '{print $1}')"
     write_csv_log "SHA1" "${SHA1_CHECKSUM:-}" "NA"
-    MD5_CHECKSUM=$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')
+    MD5_CHECKSUM="$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')"
     write_csv_log "MD5" "${MD5_CHECKSUM:-}" "NA"
 
      # entropy checking on binary file
-    ENTROPY=$(ent "$FIRMWARE_PATH" | grep Entropy)
+    ENTROPY="$(ent "$FIRMWARE_PATH" | grep Entropy)"
     write_csv_log "Entropy" "${ENTROPY:-}" "NA"
   fi
 
