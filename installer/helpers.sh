@@ -116,7 +116,7 @@ print_pip_info() {
     local PACKAGE_VERSION="${2:-}"
   fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
-  mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" || true)
+  mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" 2>/dev/null || true)
   # in the error message of pip install we can find all available versions
   if [[ -n "${PACKAGE_VERSION+x}" ]] ; then
     PVERSION=$(pip3 install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION" || true)
@@ -125,6 +125,9 @@ print_pip_info() {
     PVERSION="NA"
   fi
   for INFO in "${PIP_INFOS[@]}"; do
+    if [[ "$INFO" == *"WARNING: "* ]]; then
+      continue
+    fi
     if [[ "$INFO" == *"Summary"* ]]; then
       INFO=${INFO//Summary/Description}
       if [[ -n "$PVERSION" ]]; then
