@@ -138,12 +138,12 @@ fw_bin_detector() {
     write_csv_log "D-Link SHRS" "yes" "NA"
   fi
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 0.\ ..\ \ 00\ 00\ 0.\ ..\ 31\ 32\ 33\ 00 ]]; then
-    print_output "[*] Identified EnGenius encrpyted firmware - using Engenius extraction module"
+    print_output "[*] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
     write_csv_log "EnGenius encrypted" "yes" "NA"
   fi
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
-    print_output "[*] Identified Engenius encrpyted firmware - using Engenius extraction module"
+    print_output "[*] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
     write_csv_log "EnGenius encrypted" "yes" "NA"
   fi
