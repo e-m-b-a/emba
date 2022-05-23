@@ -743,12 +743,9 @@ get_firmware_details() {
 
 get_package_details() {
   print_output "[*] Collect version details of module $(basename "$S08_LOG")."
-  print_output "[-] This import is in an early alpha state and will not work as expected!"
-  print_output "[-] It is currently disabled"
-  return
 
   if [[ -f "$S08_LOG" ]]; then
-    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3-4 "$S08_LOG" | grep -v "package\;version" | sort -u | tr ';' ':'|| true)
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "$S08_LOG" | grep -v "package\;stripped version" | sort -u | tr ';' ':'|| true)
   else
     VERSIONS_S08_PACKAGE_DETAILS=()
   fi

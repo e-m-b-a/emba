@@ -66,6 +66,10 @@ qnap_enc_extractor() {
     print_output ""
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "QNAP decryptor" "$QNAP_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "gzip compressed data"
+    if [[ -z "${FW_VENDOR:-}" ]]; then
+      FW_VENDOR="QNAP"
+    fi
+
   else
     print_output "[-] Decryption of QNAP firmware file failed"
   fi

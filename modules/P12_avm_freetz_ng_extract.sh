@@ -61,5 +61,13 @@ avm_extractor() {
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "Freetz-NG" "$AVM_FW_PATH_" "$EXTRACTION_DIR_" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
     export DEEP_EXTRACTOR=1
+
+    if [[ -z "${FW_VENDOR:-}" ]]; then
+      FW_VENDOR="AVM"
+    fi
+    if [[ -z "${FW_VERSION:-}" ]]; then
+      FW_VENDOR="$FRITZ_VERSION"
+    fi
+
   fi
 }

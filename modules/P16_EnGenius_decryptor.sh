@@ -58,6 +58,9 @@ engenius_enc_extractor() {
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "EnGenius decryptor" "$ENGENIUS_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
     #export FIRMWARE_PATH="$LOG_DIR"/firmware
+    if [[ -z "${FW_VENDOR:-}" ]]; then
+      FW_VENDOR="EnGenius"
+    fi
   else
     print_output "[-] Decryption of EnGenius firmware file failed"
   fi
