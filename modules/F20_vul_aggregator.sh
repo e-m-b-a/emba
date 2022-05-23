@@ -39,6 +39,7 @@ F20_vul_aggregator() {
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
 
   S06_LOG="$LOG_DIR"/s06_distribution_identification.csv
+  S08_LOG="$LOG_DIR"/s08_package_mgmt_extractor.csv
   S09_LOG="$LOG_DIR"/s09_firmware_base_version_check.csv
   S25_LOG="$LOG_DIR"/s25_kernel_check.txt
   S116_LOG="$LOG_DIR"/s116_qemu_version_detection.csv
@@ -67,6 +68,7 @@ F20_vul_aggregator() {
     fi
 
     get_firmware_details
+    get_package_details
     get_firmware_base_version_check
     get_usermode_emulator
     get_systemmode_emulator
@@ -138,6 +140,12 @@ aggregate_versions() {
       fi
       print_output "[+] Found Version details (${ORANGE}firmware details check$GREEN): ""$ORANGE$VERSION$NC"
     done
+    for VERSION in "${VERSIONS_S08_PACKAGE_DETAILS[@]}"; do
+      if [ -z "$VERSION" ]; then
+        continue
+      fi
+      print_output "[+] Found Version details (${ORANGE}package management system check$GREEN): ""$ORANGE$VERSION$NC"
+    done
     for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
       if [ -z "$VERSION" ]; then
         continue
@@ -170,7 +178,7 @@ aggregate_versions() {
     done
 
     print_output ""
-    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}")
+    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" )
   fi
 
   # sorting and unique our versions array:
@@ -730,5 +738,18 @@ get_firmware_details() {
     readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u || true)
   else
     VERSIONS_S06_FW_DETAILS=()
+  fi
+}
+
+get_package_details() {
+  print_output "[*] Collect version details of module $(basename "$S08_LOG")."
+  print_output "[-] This import is in an early alpha state and will not work as expected!"
+  print_output "[-] It is currently disabled"
+  return
+
+  if [[ -f "$S08_LOG" ]]; then
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3-4 "$S08_LOG" | grep -v "package\;version" | sort -u | tr ';' ':'|| true)
+  else
+    VERSIONS_S08_PACKAGE_DETAILS=()
   fi
 }

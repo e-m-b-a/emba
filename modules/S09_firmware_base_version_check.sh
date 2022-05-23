@@ -39,7 +39,10 @@ S09_firmware_base_version_check() {
     if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
       continue
     fi
-    if echo "$VERSION_LINE" | grep -q "no_static"; then
+    if echo "$VERSION_LINE" | grep -q ";no_static;"; then
+      continue
+    fi
+    if echo "$VERSION_LINE" | grep -q ";live;"; then
       continue
     fi
 
