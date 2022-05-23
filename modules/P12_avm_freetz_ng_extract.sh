@@ -65,8 +65,8 @@ avm_extractor() {
     if [[ -z "${FW_VENDOR:-}" ]]; then
       FW_VENDOR="AVM"
     fi
-    if [[ -z "${FW_VERSION:-}" ]]; then
-      FW_VENDOR="$FRITZ_VERSION"
+    if [[ -z "${FW_VERSION:-}" && "$FRITZ_VERSION" != "NA" ]]; then
+      FW_VERSION="$FRITZ_VERSION"
     fi
 
   fi
