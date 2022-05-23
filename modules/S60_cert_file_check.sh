@@ -29,6 +29,7 @@ S60_cert_file_check()
 
   if [[ "${CERT_FILES_ARR[0]-}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then
+    write_csv_log "Certificate file" "Certificate expire on" "Certificate expired"
     print_output "[+] Found ""${#CERT_FILES_ARR[@]}"" possible certification files:"
     CURRENT_DATE=$(date +%s)
     for LINE in "${CERT_FILES_ARR[@]}" ; do
@@ -43,12 +44,15 @@ S60_cert_file_check()
           openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG" || true
           if [[ $CERT_DATE_ -lt $CURRENT_DATE ]]; then
             print_output "  ${RED}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
+            write_csv_log "$LINE" "$CERT_DATE_" "yes"
             ((CERT_OUT_CNT+=1))
           else
             print_output "  ${GREEN}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
+            write_csv_log "$LINE" "$CERT_DATE_" "no"
           fi
         else
           print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+          write_csv_log "$LINE" "unknown" "unknown"
         fi
       fi
     done

@@ -72,4 +72,6 @@ ubi_extractor() {
   FILES_UBI_EXT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
   DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
   print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image."
+  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+  write_csv_log "UBI filesystem extractor" "$UBI_PATH_" "$EXTRACTION_DIR_" "$FILES_UBI_EXT" "$DIRS_UBI_EXT" "NA"
 }

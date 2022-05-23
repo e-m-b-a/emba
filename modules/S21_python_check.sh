@@ -25,6 +25,7 @@ S21_python_check()
   S21_PY_SCRIPTS=0
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
+    write_csv_log "Script path" "Python issues detected" "common linux file"
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
@@ -79,14 +80,28 @@ s21_script_bandit() {
 
   VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
+    #check if this is common linux file:
+    local COMMON_FILES_FOUND
+    local CFF
+    if [[ -f "$BASE_LINUX_FILES" ]]; then
+      COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
+      CFF="no"
+      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+        COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
+        CFF="yes"
+      fi
+    else
+      COMMON_FILES_FOUND=""
+      CFF="NA"
+    fi
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" ""  "$PY_LOG"
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$PY_LOG"
     fi
+    write_csv_log "$(print_path "$LINE")" "$VULNS" "$CFF"
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi
-
 }
 
 # lets leave this here for reasons ;)

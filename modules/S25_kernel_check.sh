@@ -228,7 +228,7 @@ get_kernel_vulns()
       demess_kv_version "${KERNEL_VERSION[@]}"
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
       for V in "${KV_C_ARR[@]}" ; do
-        print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" -f -d -k "$V")"
+        print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" --skip-more-checks -f -d -k "$V")"
       done
     else
       print_output "[-] linux-exploit-suggester.sh is not installed"

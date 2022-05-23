@@ -25,6 +25,7 @@ S20_shell_check()
   export S20_SCRIPTS=0
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
+    write_csv_log "Script path" "Shell issues detected" "common linux file"
     mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for LINE in "${SH_SCRIPTS[@]}" ; do
       if ( file "$LINE" | grep -q "shell script" ) ; then
@@ -65,6 +66,7 @@ S20_shell_check()
 }
 
 s20_script_check() {
+  local CFF
   NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
   SHELL_LOG="$LOG_PATH_MODULE""/shellchecker_""$NAME"".txt"
   shellcheck -C "$LINE" > "$SHELL_LOG" 2> /dev/null || true
@@ -74,8 +76,10 @@ s20_script_check() {
     local COMMON_FILES_FOUND
     if [[ -f "$BASE_LINUX_FILES" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
+      CFF="no"
       if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
         COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
+        CFF="yes"
       fi
     else
       COMMON_FILES_FOUND=""
@@ -86,6 +90,7 @@ s20_script_check() {
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$SHELL_LOG"
     fi
+    write_csv_log "$(print_path "$LINE")" "$VULNS" "$CFF"
     
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi

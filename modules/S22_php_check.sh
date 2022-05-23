@@ -61,6 +61,7 @@ s22_phpinfo_check() {
 
 s22_vuln_check_caller() {
   sub_module_title "PHP script vulnerabilities"
+  write_csv_log "Script path" "PHP issues detected" "common linux file"
 
   for LINE in "${PHP_SCRIPTS[@]}" ; do
     if ( file "$LINE" | grep -q "PHP script" ) ; then
@@ -107,15 +108,20 @@ s22_vuln_check() {
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND
+    local CFF
     if [[ -f "$BASE_LINUX_FILES" ]]; then
       COMMON_FILES_FOUND=" (""${RED}""common linux file: no""${GREEN}"")"
+      CFF="no"
       if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
         COMMON_FILES_FOUND=" (""${CYAN}""common linux file: yes""${GREEN}"")"
+        CFF="yes"
       fi
     else
       COMMON_FILES_FOUND=""
+      CFF="NA"
     fi
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$LINE")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
+    write_csv_log "$(print_path "$LINE")" "$VULNS" "$CFF"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   fi
 }

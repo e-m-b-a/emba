@@ -68,6 +68,8 @@ patools_extractor() {
     FILES_PATOOLS=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_PATOOLS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_PATOOLS$NC files and $ORANGE$DIRS_PATOOLS$NC directories from the firmware image."
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "Patool extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_PATOOLS" "$DIRS_PATOOLS" "NA"
     print_output ""
   fi
 }

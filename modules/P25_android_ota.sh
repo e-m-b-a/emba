@@ -53,6 +53,8 @@ android_ota_extractor() {
     FILES_OTA=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_OTA=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_OTA$NC files and $ORANGE$DIRS_OTA$NC directories from the firmware image."
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "Android OTA extractor" "$OTA_INIT_PATH_" "$EXTRACTION_DIR_" "$FILES_OTA" "$DIRS_OTA" "via payload_dumper.py"
   else
     print_output "[-] Android OTA payload.bin extractor not found - check your installation"
   fi

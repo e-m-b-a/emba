@@ -66,8 +66,8 @@ vmdk_extractor() {
   if [[ "$VMDK_FILES" -gt 0 ]]; then
     print_output ""
     print_output "[*] Extracted $ORANGE$VMDK_FILES$NC files and $ORANGE$VMDK_DIRS$NC directories from the firmware image."
-    write_csv_log "Extractor" "files" "directories" "firmware dir"
-    write_csv_log "VMDK extractor" "$VMDK_FILES" "$VMDK_DIRS" "$EXTRACTION_DIR_"
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "VMDK extractor" "$VMDK_PATH_" "$EXTRACTION_DIR_" "$VMDK_FILES" "$VMDK_DIRS" "NA"
   fi
   rm -r "$TMP_VMDK_MNT" || true
 }

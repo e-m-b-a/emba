@@ -155,3 +155,14 @@ function_exists() {
   declare -f -F "$FCT_TO_CHECK" > /dev/null
   return $?
 }
+
+# used by CSV search to get the search rule for csv search:
+get_csv_rule() {
+  local VERSION_STRING="$1"
+  local CSV_REGEX
+  CSV_REGEX=$(echo "$2" | sed 's/^\"//' | sed 's/\"$//')
+  export CSV_RULE
+  CSV_RULE="NA"
+
+  CSV_RULE="$(echo "$VERSION_STRING" | eval "$CSV_REGEX" || true)"
+}

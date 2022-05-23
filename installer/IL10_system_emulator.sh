@@ -122,6 +122,8 @@ IL10_system_emulator() {
       # patch preInit.sh:
       # shellcheck disable=SC2016
       sed -i 's/| mkdir /| ${BUSYBOX} mkdir /g' external/firmae/scripts/preInit.sh
+      # shellcheck disable=SC2016
+      sed -i 's/^mkdir /${BUSYBOX} mkdir /g' external/firmae/scripts/preInit.sh
 
       ;;
     esac

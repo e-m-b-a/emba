@@ -63,6 +63,8 @@ ext2_extractor() {
     FILES_EXT_MOUNT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_EXT_MOUNT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_EXT_MOUNT$NC files and $ORANGE$DIRS_EXT_MOUNT$NC directories from the firmware image."
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "EXT filesystem extractor" "$EXT_PATH_" "$EXTRACTION_DIR_" "$FILES_EXT_MOUNT" "$DIRS_EXT_MOUNT" "NA"
     umount "$TMP_EXT_MOUNT"
   fi
   rm -r "$TMP_EXT_MOUNT"

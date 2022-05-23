@@ -39,7 +39,10 @@ S09_firmware_base_version_check() {
     if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
       continue
     fi
-    if echo "$VERSION_LINE" | grep -q "no_static"; then
+    if echo "$VERSION_LINE" | grep -q ";no_static;"; then
+      continue
+    fi
+    if echo "$VERSION_LINE" | grep -q ";live;"; then
       continue
     fi
 
@@ -163,16 +166,6 @@ S09_firmware_base_version_check() {
   VERSIONS_DETECTED=$(grep -c "Version information found" "$LOG_FILE" || true)
 
   module_end_log "${FUNCNAME[0]}" "$VERSIONS_DETECTED"
-}
-
-get_csv_rule() {
-  local VERSION_STRING="$1"
-  local CSV_REGEX
-  CSV_REGEX=$(echo "$2" | sed 's/^\"//' | sed 's/\"$//')
-  export CSV_RULE
-  CSV_RULE="NA"
-
-  CSV_RULE="$(echo "$VERSION_STRING" | eval "$CSV_REGEX" || true)"
 }
 
 bin_string_checker() {

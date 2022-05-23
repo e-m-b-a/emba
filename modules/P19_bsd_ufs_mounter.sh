@@ -64,6 +64,8 @@ ufs_extractor() {
     FILES_UFS_MOUNT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_UFS_MOUNT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_UFS_MOUNT$NC files and $ORANGE$DIRS_UFS_MOUNT$NC directories from the firmware image."
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "UFS filesystem extractor" "$UFS_PATH_" "$EXTRACTION_DIR_" "$FILES_UFS_MOUNT" "$DIRS_UFS_MOUNT" "NA"
     umount "$TMP_UFS_MOUNT" 2>/dev/null || true
   fi
   rm -r "$TMP_UFS_MOUNT"
