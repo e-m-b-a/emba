@@ -116,6 +116,7 @@ get_csv_rule_distri() {
   # OpenWrt 18.06.2 r7676-cddd7b4c77
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ ([0-9]+\.[0-9]+\.[0-9])\ (r[0-9]+\-)([a-z0-9]+).*/openwrt:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/lede\ ([0-9]+\.[0-9]+\.[0-9]+)(-)?(rc[0-9])?.*/openwrt:\1:\3/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/openwrt\ ([0-9]+\.[0-9]+)/openwrt:\1/')"
   # d-link dir-300 v2.14b01
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
