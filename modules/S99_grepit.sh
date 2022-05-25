@@ -38,6 +38,14 @@ S99_grepit() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Intelligent grepit module"
   print_output "Running intelligent grepit module for identification of interesting spots within the firmware ..." "no_log"
+
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    # TODO: but currently I'm running out of time
+    print_output "[!] Warning: This module is not STRICT mode compatible - module is not executed."
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   pre_module_reporter "${FUNCNAME[0]}"
 
   local WAIT_PIDS_S99=()
