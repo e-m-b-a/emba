@@ -26,8 +26,10 @@ F10_license_summary() {
 
   COUNT_LIC=0
 
-  mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
-  mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s116_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
+  #mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
+  #mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s116_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
+  mapfile -t LICENSE_DETECTION_STATIC < <(grep -v "version_rule" "$LOG_DIR"/s09_*.csv 2>/dev/null | cut -d\; -f1,4,5 | sort -u || true)
+  mapfile -t LICENSE_DETECTION_DYN < <(grep -v "version_rule" "$LOG_DIR"/s116_*.csv 2>/dev/null | cut -d\; -f1,4,5 |sort -u || true)
   # TODO: Currently the final kernel details from s25 are missing
 
   write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
@@ -42,20 +44,9 @@ F10_license_summary() {
         continue
       fi
 
-      if [[ "$ENTRY" == *"in binary"* ]]; then
-        BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
-        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
-        LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
-      elif [[ "$ENTRY" == *"binwalk logs"* ]]; then
-        BINARY="NA"
-        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binwalk logs.*//')"
-        LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//' | tr -d ")" | sed 's/\.$//')"
-      else
-        # shellcheck disable=SC2001
-        BINARY="$(echo "$ENTRY" | sed 's/.*Version information found //')"
-        VERSION="NA"
-        LICENSE="$(echo "$ENTRY" | sed 's/.*Version information found //' | grep -o "license: .*)" | tr -d ")" | sed 's/license\:\ //' || true)"
-      fi
+      BINARY="$(echo "$ENTRY" | cut -d\; -f1)"
+      VERSION="$(echo "$ENTRY" | cut -d\; -f2)" 
+      LICENSE="$(echo "$ENTRY" |  cut -d\; -f3)"
 
       print_output "[+] Binary: $ORANGE$(basename "$BINARY" | cut -d\  -f1)$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
       write_csv_log "$BINARY" "$VERSION_RULE" "$VERSION" "$CSV_RULE" "$LICENSE" "$TYPE"
@@ -71,15 +62,9 @@ F10_license_summary() {
         continue
       fi
 
-      if [[ "$ENTRY" == *"in binary"* ]]; then
-        BINARY="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/ (license: .*//')"
-        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in binary .*//')"
-        LICENSE="$(echo "$ENTRY" | sed 's/.*in binary //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
-      elif [[ "$ENTRY" == *"qemu log file"* ]]; then
-        BINARY="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/ (license: .*//')"
-        VERSION="$(echo "$ENTRY" | sed 's/.*Version information found //' | sed 's/ in qemu log file .*//')"
-        LICENSE="$(echo "$ENTRY" | sed 's/.*in qemu log file //' | sed 's/.* (license: //' | sed 's/) (.*).*//')"
-      fi
+      BINARY="$(echo "$ENTRY" | cut -d\; -f1)"
+      VERSION="$(echo "$ENTRY" | cut -d\; -f2)" 
+      LICENSE="$(echo "$ENTRY" |  cut -d\; -f3)"
 
       print_output "[+] Binary: $ORANGE$(basename "$BINARY")$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
       write_csv_log "$BINARY" "$VERSION_RULE" "$VERSION" "$CSV_RULE" "$LICENSE" "$TYPE"
