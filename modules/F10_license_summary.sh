@@ -26,8 +26,6 @@ F10_license_summary() {
 
   COUNT_LIC=0
 
-  #mapfile -t LICENSE_DETECTION_STATIC < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s09_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
-  #mapfile -t LICENSE_DETECTION_DYN < <(strip_color_codes "$(grep "Version information found" "$LOG_DIR"/s116_*.txt 2>/dev/null | grep -v "unknown" | sort -u || true)")
   mapfile -t LICENSE_DETECTION_STATIC < <(grep -v "version_rule" "$LOG_DIR"/s09_*.csv 2>/dev/null | cut -d\; -f1,4,5 | sort -u || true)
   mapfile -t LICENSE_DETECTION_DYN < <(grep -v "version_rule" "$LOG_DIR"/s116_*.csv 2>/dev/null | cut -d\; -f1,4,5 |sort -u || true)
   # TODO: Currently the final kernel details from s25 are missing
@@ -45,7 +43,7 @@ F10_license_summary() {
       fi
 
       BINARY="$(echo "$ENTRY" | cut -d\; -f1)"
-      VERSION="$(echo "$ENTRY" | cut -d\; -f2)" 
+      VERSION="$(echo "$ENTRY" | cut -d\; -f2 | cut -d: -f2-)"
       LICENSE="$(echo "$ENTRY" |  cut -d\; -f3)"
 
       print_output "[+] Binary: $ORANGE$(basename "$BINARY" | cut -d\  -f1)$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
@@ -63,7 +61,7 @@ F10_license_summary() {
       fi
 
       BINARY="$(echo "$ENTRY" | cut -d\; -f1)"
-      VERSION="$(echo "$ENTRY" | cut -d\; -f2)" 
+      VERSION="$(echo "$ENTRY" | cut -d\; -f2 | cut -d: -f2-)"
       LICENSE="$(echo "$ENTRY" |  cut -d\; -f3)"
 
       print_output "[+] Binary: $ORANGE$(basename "$BINARY")$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
