@@ -126,35 +126,32 @@ grepit_search() {
   if [[ "$ENABLE_LEAST_LIKELY" -eq 0 ]] && [[ "$OUTFILE" == 9_* ]]; then
     print_output "[-] Skipping searching for $OUTFILE with regex $SEARCH_REGEX. Set ENABLE_LEAST_LIKELY in the module options to 1 if you would like to." "no_log"
   else
-	  write_log "[*] Searching (args for grep: $ORANGE$ARGS_FOR_GREP$NC) for $ORANGE$SEARCH_REGEX$NC." "$LOG_PATH_MODULE/$OUTFILE"
+    write_log "[*] Searching (args for grep: $ORANGE$ARGS_FOR_GREP$NC) for $ORANGE$SEARCH_REGEX$NC." "$LOG_PATH_MODULE/$OUTFILE"
 
-	  if [[ "$LOG_DETAILS" -eq 1 ]]; then
-	    write_log "[*] Grepit state info - comment: $ORANGE$COMMENT$NC" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Filename $ORANGE$OUTFILE$NC" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Example: $ORANGE$EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - False positive example: $ORANGE$FALSE_POSITIVES_EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Grep args: $ORANGE$ARGS_FOR_GREP$NC" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Search regex: $ORANGE$SEARCH_REGEX$NC" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "" "$LOG_PATH_MODULE/$OUTFILE"
-	  fi
+    if [[ "$LOG_DETAILS" -eq 1 ]]; then
+      write_log "[*] Grepit state info - comment: $ORANGE$COMMENT$NC" "$LOG_PATH_MODULE/$OUTFILE"
+      write_log "[*] Grepit state info - Filename $ORANGE$OUTFILE$NC" "$LOG_PATH_MODULE/$OUTFILE"
+      write_log "[*] Grepit state info - Example: $ORANGE$EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
+      write_log "[*] Grepit state info - False positive example: $ORANGE$FALSE_POSITIVES_EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
+      write_log "[*] Grepit state info - Grep args: $ORANGE$ARGS_FOR_GREP$NC" "$LOG_PATH_MODULE/$OUTFILE"
+      write_log "[*] Grepit state info - Search regex: $ORANGE$SEARCH_REGEX$NC" "$LOG_PATH_MODULE/$OUTFILE"
+      write_log "" "$LOG_PATH_MODULE/$OUTFILE"
+    fi
 
     # shellcheck disable=SC2086
-	  $GREP_COMMAND $ARGS_FOR_GREP $STANDARD_GREP_ARGUMENTS -- "$SEARCH_REGEX" "$FIRMWARE_PATH" >> "$LOG_PATH_MODULE/$OUTFILE" 2>&1 || true
+    $GREP_COMMAND $ARGS_FOR_GREP $STANDARD_GREP_ARGUMENTS -- "$SEARCH_REGEX" "$FIRMWARE_PATH" >> "$LOG_PATH_MODULE/$OUTFILE" 2>&1 || true
 
-	  if [[ "$LOG_DETAILS" -eq 1 ]]; then
-      # -gt 7 -> LOG_DETAILS=1
+    if [[ "$LOG_DETAILS" -eq 1 ]]; then
       if [[ -f "$LOG_PATH_MODULE/$OUTFILE" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null) -gt 7 ]]; then
-	      #echo "Last grep didn't have a result, removing $OUTFILE"
-	      rm "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null
+        rm "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null
       fi
     else
       if [[ -f "$LOG_PATH_MODULE/$OUTFILE" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null) -gt 0 ]]; then
-	      #echo "Last grep didn't have a result, removing $OUTFILE"
-	      rm "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null
+        rm "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null
       fi
     fi
     if [[ -f "$LOG_PATH_MODULE/$OUTFILE" ]]; then
-	    if [[ "$LOG_DETAILS" -eq 1 ]]; then
+      if [[ "$LOG_DETAILS" -eq 1 ]]; then
         LINES_OF_OUTPUT=$(( "$(wc -l "$LOG_PATH_MODULE/$OUTFILE" | awk '{print $1}')" -8 ))
       else
         LINES_OF_OUTPUT=$(( "$(wc -l "$LOG_PATH_MODULE/$OUTFILE" | awk '{print $1}')" -1 ))
@@ -1762,7 +1759,7 @@ grepit_html() {
   "mayscript" \
   "4_js_mayscript.txt"
 
-	# Node JS stuff
+  # Node JS stuff
   grepit_search "The use function with a string with a slash at the start is usually the entry point definition for an absolute path" \
   'app.use("/api/", router_1.default);' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4271,7 +4268,7 @@ grepit_general() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "impersonate" \
   "4_general_impersonate.txt" \
-	"-i"
+  "-i"
 
   grepit_search "Denying is often used for filtering, etc." \
   'deny' \
