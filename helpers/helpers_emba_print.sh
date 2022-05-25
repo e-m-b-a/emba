@@ -595,6 +595,7 @@ module_end_log() {
 
   # check if there is some content in the csv log file. If there is only
   # one entry line we remove the file at all
+  CSV_LOG="${LOG_FILE/\.txt/\.csv}"
   if [[ -f "$CSV_LOG" ]]; then
     if [[ $(wc -l "$CSV_LOG" | awk '{print $1}') -lt 2 ]]; then
       rm "$CSV_LOG"

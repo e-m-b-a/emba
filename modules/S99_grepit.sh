@@ -80,7 +80,7 @@ S99_grepit() {
 
   GREPIT_RESULTS=$(grep -v -c -E "\ Searching\ \(" "$LOG_PATH_MODULE"/[0-9]_* | cut -d: -f2 | paste -sd+ | bc)
   print_output ""
-  print_output "[*] Found $ORANGE$GREPIT_RESULTS$NC results via grepit"
+  print_output "[*] Found $ORANGE$GREPIT_RESULTS$NC results via grepit."
 
   module_end_log "${FUNCNAME[0]}" "$GREPIT_RESULTS"
 }
@@ -109,24 +109,29 @@ grepit_search() {
   local FALSE_POSITIVES_EXAMPLE="$3"
   local SEARCH_REGEX="$4"
   local OUTFILE="$5"
-  local ARGS_FOR_GREP="${6-}" #usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
+  if [[ -v 6 ]]; then
+    local ARGS_FOR_GREP="${6}" #usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
+  else
+    local ARGS_FOR_GREP=""
+  fi
 
   if [[ "$ENABLE_LEAST_LIKELY" -eq 0 ]] && [[ "$OUTFILE" == 9_* ]]; then
     print_output "[-] Skipping searching for $OUTFILE with regex $SEARCH_REGEX. Set ENABLE_LEAST_LIKELY in the module options to 1 if you would like to." "no_log"
   else
-	  write_log "[*] Searching (args for grep:$ORANGE$ARGS_FOR_GREP$NC) for $ORANGE$SEARCH_REGEX$NC" "$LOG_PATH_MODULE/$OUTFILE"
+	  write_log "[*] Searching (args for grep: $ORANGE$ARGS_FOR_GREP$NC) for $ORANGE$SEARCH_REGEX$NC." "$LOG_PATH_MODULE/$OUTFILE"
+
 	  if [[ "$LOG_DETAILS" -eq 1 ]]; then
-	    write_log "[*] Grepit state info - comment: $COMMENT" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Filename $OUTFILE" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Example: $EXAMPLE" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - False positive example: $FALSE_POSITIVES_EXAMPLE" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Grep args: $ARGS_FOR_GREP" "$LOG_PATH_MODULE/$OUTFILE"
-	    write_log "[*] Grepit state info - Search regex: $SEARCH_REGEX" "$LOG_PATH_MODULE/$OUTFILE"
+	    write_log "[*] Grepit state info - comment: $ORANGE$COMMENT$NC" "$LOG_PATH_MODULE/$OUTFILE"
+	    write_log "[*] Grepit state info - Filename $ORANGE$OUTFILE$NC" "$LOG_PATH_MODULE/$OUTFILE"
+	    write_log "[*] Grepit state info - Example: $ORANGE$EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
+	    write_log "[*] Grepit state info - False positive example: $ORANGE$FALSE_POSITIVES_EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
+	    write_log "[*] Grepit state info - Grep args: $ORANGE$ARGS_FOR_GREP$NC" "$LOG_PATH_MODULE/$OUTFILE"
+	    write_log "[*] Grepit state info - Search regex: $ORANGE$SEARCH_REGEX$NC" "$LOG_PATH_MODULE/$OUTFILE"
 	    write_log "" "$LOG_PATH_MODULE/$OUTFILE"
 	  fi
 
     # shellcheck disable=SC2086
-	  $GREP_COMMAND $ARGS_FOR_GREP $STANDARD_GREP_ARGUMENTS -- "$SEARCH_REGEX" "$FIRMWARE_PATH" >> "$LOG_PATH_MODULE/$OUTFILE" 2>&1
+	  $GREP_COMMAND $ARGS_FOR_GREP $STANDARD_GREP_ARGUMENTS -- "$SEARCH_REGEX" "$FIRMWARE_PATH" >> "$LOG_PATH_MODULE/$OUTFILE" 2>&1 || true
 
 	  if [[ "$LOG_DETAILS" -eq 1 ]]; then
       # -gt 7 -> LOG_DETAILS=1
@@ -150,7 +155,7 @@ grepit_search() {
       # this is the output to the terminal. For the final report we wait till all tests are finished and then we 
       # parse the csv output file and sort it according the test priority - 1-9, where 1 is more interesting
       # (low false positive rate, certainty of "vulnerability") and 9 is only "you might want to have a look when you are desperately looking for vulns")
-      print_output "[*] $ORANGE$LINES_OF_OUTPUT$NC results of grepit module $ORANGE$CURRENT_TEST$NC" "no_log"
+      print_output "[*] $ORANGE$LINES_OF_OUTPUT$NC results of grepit module $ORANGE$CURRENT_TEST$NC." "no_log"
       write_csv_log "$CURRENT_TEST" "$LINES_OF_OUTPUT" "$ARGS_FOR_GREP" "$SEARCH_REGEX" "$COMMENT"
     fi
   fi
