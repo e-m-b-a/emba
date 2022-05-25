@@ -11,7 +11,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# The original code from the CRASS project is licensed the following
+# The original code from the CRASS project is licensed the following way:
 # ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
 # <floyd at floyd dot ch> wrote this file. As long as you retain this notice you
@@ -166,9 +166,12 @@ grepit_search() {
   fi
 }
 
+# The following code is 1 by 1 copy of the original source from here:
+# https://github.com/floyd-fuh/crass/blob/f2da104b073f530fbadeda7578c39a377ebd296b/grep-it.sh#L307
+# We have only moved every checker area to its own function
+# Todo: Move this to a module helper file
 grepit_java() {
   print_output "[*] Starting Grepit Java module" "no_log"
-  # source: https://github.com/floyd-fuh/crass/blob/f2da104b073f530fbadeda7578c39a377ebd296b/grep-it.sh#L307
 
   grepit_search "All Strings between double quotes. Like the command line tool 'strings' for Java code, but only catches direct declaration and initialization, because otherwise this regex would take forever." \
   'String bla = "This is a Java String";' \
