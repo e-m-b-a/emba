@@ -710,6 +710,7 @@ get_data() {
   fi
   if [[ -f "$F20_EXPLOITS_LOG" ]]; then
     #EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG" || true)"
+    # shellcheck disable=SC2126
     EXPLOIT_COUNTER="$(grep -E "Exploit\ .*" "$F20_EXPLOITS_LOG" | grep -v "Exploit summary" | wc -l || true)"
     MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*MSF" "$F20_EXPLOITS_LOG" || true)"
     REMOTE_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(R\)" "$F20_EXPLOITS_LOG" || true)"
