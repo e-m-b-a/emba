@@ -132,15 +132,18 @@ check_cve_search() {
 
   if [[ "$CVE_SEARCH_" -eq 0 ]]; then
     print_output "    ""$TOOL_NAME"" - ""$RED""not ok""$NC" "no_log"
-    print_output "[-] MongoDB not responding as expected." "no_log"
-    print_output "[-] CVE checks not possible!" "no_log"
-    print_output "[-] Have you installed all the needed dependencies?" "no_log"
-    print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation" "no_log"
+    print_cve_search_failure
     export CVE_SEARCH=0
   else
     print_output "    ""$TOOL_NAME"" - ""$GREEN""ok""$NC" "no_log"
     export CVE_SEARCH=1
   fi
+}
+print_cve_search_failure() {
+  print_output "[-] The needed CVE database is not responding as expected." "no_log"
+  print_output "[-] CVE checks are currently not possible!" "no_log"
+  print_output "[-] Please check the following documentation on Github: https://github.com/e-m-b-a/emba/issues/187" "no_log"
+  print_output "[-] If this does not help, open a new issue here: https://github.com/e-m-b-a/emba/issues" "no_log"
 }
 
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash

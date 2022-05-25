@@ -107,10 +107,7 @@ F20_vul_aggregator() {
       generate_cve_details
       generate_special_log
     else
-      print_output "[-] MongoDB not responding as expected."
-      print_output "[-] CVE checks not possible!"
-      print_output "[-] Have you installed all the needed dependencies?"
-      print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
+      print_cve_search_failure
       CVE_SEARCH=0
     fi
   else
