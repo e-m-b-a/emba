@@ -47,7 +47,7 @@ vmdk_extractor() {
   print_output "[*] Connect to device $ORANGE$VMDK_PATH_$NC"
   mkdir -p "$TMP_VMDK_MNT" || true
 
-  for MOUNT_DEV in /dev/sda{1..5}; do
+  for MOUNT_DEV in /dev/sda{1..6}; do
     DEV_NAME=$(basename "$MOUNT_DEV")
     print_output "[*] Trying to mount $ORANGE$MOUNT_DEV$NC to $ORANGE$TMP_VMDK_MNT$NC directory"
     # if troubles ahead with vmdk mount, remove the error redirection
@@ -60,8 +60,10 @@ vmdk_extractor() {
     fi
   done
 
-  VMDK_FILES=$(find "$EXTRACTION_DIR_" -type f | wc -l)
-  VMDK_DIRS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
+  if [[ -d "$EXTRACTION_DIR_" ]]; then
+    VMDK_FILES=$(find "$EXTRACTION_DIR_" -type f | wc -l)
+    VMDK_DIRS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
+  fi
 
   if [[ "$VMDK_FILES" -gt 0 ]]; then
     print_output ""

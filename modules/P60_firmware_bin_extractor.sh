@@ -106,9 +106,8 @@ deep_extractor() {
   sub_module_title "Deep extraction mode"
   MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo || true)"))
 
-  local FILE_ARR_TMP
-  local FILE_MD5
-  local MD5_DONE_DEEP
+  FILE_ARR_TMP=()
+  FILE_MD5=""
 
   FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
@@ -272,6 +271,7 @@ extract_binwalk_helper() {
   else
     binwalk -e -M -C "$OUTPUT_DIR_binwalk" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
   fi
+  MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
 }
 
 binwalk_deep_extract_helper() {

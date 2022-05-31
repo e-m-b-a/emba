@@ -30,6 +30,7 @@ P05_patools_init() {
     patools_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
     if [[ "$FILES_PATOOLS" -gt 0 ]]; then
+      MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
     fi
 
@@ -56,6 +57,9 @@ patools_extractor() {
     print_output ""
     print_output "[*] Valid compressed file detected - extraction process via patool started"
 
+    if ! [[ -d "$EXTRACTION_DIR_" ]]; then
+      mkdir "$EXTRACTION_DIR_"
+    fi
     patool -v extract "$FIRMWARE_PATH_" --outdir "$EXTRACTION_DIR_" | tee -a "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log
     cat "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
 

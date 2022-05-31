@@ -37,6 +37,7 @@ P02_firmware_bin_file_check() {
   export BSD_UFS=0
   export PATOOLS_INIT=0
   export ANDROID_OTA=0
+  export MD5_DONE_DEEP=()
 
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"

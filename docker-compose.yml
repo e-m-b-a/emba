@@ -18,6 +18,7 @@ services:
         - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/log
         - ${EMBA}/:/emba:ro
+        - ${EMBA}/external/firmae/scripts:/external/firmae/scripts:ro
         - /etc/timezone:/etc/timezone:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev

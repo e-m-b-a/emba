@@ -63,7 +63,7 @@ S99_grepit() {
   STANDARD_GREP_ARGUMENTS="$GREP_ARGUMENTS $COLOR_ARGUMENTS"
   ENABLE_LEAST_LIKELY=0
 
-  mapfile -t GREPIT_MODULES < <(grep -E "^grepit_.*\(\) " "$MOD_DIR"/"${FUNCNAME[0]}".sh | grep -v grepit_search | sed -e 's/()\ .*//g' | sort -u)
+  mapfile -t GREPIT_MODULES < <(grep -E "^grepit_module.*\(\) " "$MOD_DIR"/"${FUNCNAME[0]}".sh | sed -e 's/()\ .*//g' | sort -u)
   print_output "[*] Loaded $ORANGE${#GREPIT_MODULES[@]}$NC grepit modules\n"
 
   write_csv_log "Grepit test" "Number of results" "Used args for grep" "Regex used" "Grepit comment"
@@ -170,7 +170,7 @@ grepit_search() {
 # https://github.com/floyd-fuh/crass/blob/f2da104b073f530fbadeda7578c39a377ebd296b/grep-it.sh#L307
 # We have only moved every checker area to its own function
 # Todo: Move this to a module helper file
-grepit_java() {
+grepit_module_java() {
   print_output "[*] Starting Grepit Java module" "no_log"
 
   grepit_search "All Strings between double quotes. Like the command line tool 'strings' for Java code, but only catches direct declaration and initialization, because otherwise this regex would take forever." \
@@ -816,7 +816,7 @@ grepit_java() {
   "3_java_jwt_setSigningKey.txt"
 }
 
-grepit_jsp() {
+grepit_module_jsp() {
   print_output "[*] Starting Grepit JSP module" "no_log"
 
   grepit_search "JSP redirect" \
@@ -880,7 +880,7 @@ grepit_jsp() {
   "-i"
 }
 
-grepit_java_spring() {
+grepit_module_java_spring() {
   print_output "[*] Starting Grepit Java Spring module" "no_log"
 
   grepit_search "DataBinder.setAllowedFields. See e.g. http://blog.fortify.com/blog/2012/03/23/Mass-Assignment-Its-Not-Just-For-Rails-Anymore ." \
@@ -948,7 +948,7 @@ grepit_java_spring() {
   "2_java_spring_view_manipulation.txt"
 }
 
-grepit_java_struts() {
+grepit_module_java_struts() {
   print_output "[*] Starting Grepit Java Struts module" "no_log"
 
   grepit_search "Action mappings for struts where the validation is disabled" \
@@ -966,7 +966,7 @@ grepit_java_struts() {
   "-i"
 }
 
-grepit_flex_flash() {
+grepit_module_flex_flash() {
   print_output "[*] Starting Grepit FLEX Flash module" "no_log"
 
   grepit_search 'Flex Flash has Security.allowDomain that should be tightly set and for sure not to *, see https://sonarqube.com/coding_rules#types=VULNERABILITY|languages=flex' \
@@ -1006,7 +1006,7 @@ grepit_flex_flash() {
   "4_flex_exactSettings.txt"
 }
 
-grepit_dot_net() {
+grepit_module_dot_net() {
   print_output "[*] Starting Grepit .NET module" "no_log"
 
   grepit_search ".NET View state enable" \
@@ -1187,7 +1187,7 @@ grepit_dot_net() {
 
 # - php functions are case insensitive: ImAgEcReAtEfRoMpNg()
 # - whitespaces can occur everywhere, eg. 5.5 (-> 5.5) is different from 5 . 5 (-> "55"), see http://stackoverflow.com/questions/4884987/php-whitespaces-that-do-matter
-grepit_php() {
+grepit_module_php() {
   print_output "[*] Starting Grepit PHP module" "no_log"
 
   grepit_search "Tainted input, GET URL parameter" \
@@ -1529,7 +1529,7 @@ grepit_php() {
 }
 
 #The HTML/JavaScript specific stuff
-grepit_html() {
+grepit_module_html() {
   print_output "[*] Starting Grepit HTML module" "no_log"
 
   grepit_search "HTML upload." \
@@ -1601,7 +1601,7 @@ grepit_html() {
   "-i"
 }
 
-grepit_html() {
+grepit_module_html() {
   print_output "[*] Starting Grepit JavaScript module" "no_log"
 
   grepit_search "Location hash: DOM-based XSS source/sink." \
@@ -1812,7 +1812,7 @@ grepit_html() {
   "2_js_electron_BrowserWindow.txt"
 }
 
-grepit_modsecurity() {
+grepit_module_modsecurity() {
   print_output "[*] Starting Grepit Modsecurity module" "no_log"
 
   #grepit_search "Block is not recommended to use because it is depending on default action, use deny (or allow)" \
@@ -1887,7 +1887,7 @@ grepit_modsecurity() {
   "-i"
 }
 
-grepit_mobile_device() {
+grepit_module_mobile_device() {
   print_output "[*] Starting Grepit Mobile device module" "no_log"
 
   grepit_search "Root detection." \
@@ -1933,7 +1933,7 @@ grepit_mobile_device() {
   "-i"
 }
 
-grepit_android() {
+grepit_module_android() {
   print_output "[*] Starting Grepit Android module" "no_log"
   #For interesting inputs see:
   # http://developer.android.com/training/articles/security-tips.html
@@ -2280,7 +2280,7 @@ grepit_android() {
   "3_android_AttestationResult.txt"
 }
 
-grepit_ios() {
+grepit_module_ios() {
   print_output "[*] Starting Grepit Apple iOS module" "no_log"
 
   #Rule triggers for Objective-C and SWIFT
@@ -2930,7 +2930,7 @@ grepit_ios() {
   "4_ios_UnsafeCollection.txt"
 }
 
-grepit_python() {
+grepit_module_python() {
   print_output "[*] Starting Grepit Python module" "no_log"
 
   #Python language specific stuff
@@ -3077,7 +3077,7 @@ grepit_python() {
   "2_python_extra_index_url.txt"
 }
 
-grepit_ruby() {
+grepit_module_ruby() {
   print_output "[*] Starting Grepit Ruby module" "no_log"
 
   #ruby is case sensitive in general
@@ -3168,7 +3168,7 @@ grepit_ruby() {
   "3_ruby_validates_format_of.txt"
 }
 
-grepit_azure() {
+grepit_module_azure() {
   print_output "[*] Starting Grepit Azure Cloud module" "no_log"
 
   grepit_search "Azure has an Azure Resource Manager PowerShell cmdlet to store credentials in a JSON file. TokenCache is one of the keywords." \
@@ -3190,7 +3190,7 @@ grepit_azure() {
   "3_azure_ManagementPortalUrl.txt"
 }
 
-grepit_c_lang() {
+grepit_module_c_lang() {
   print_output "[*] Starting Grepit C language module" "no_log"
 
   grepit_search "malloc. Rather rare bug, but see issues CVE-2010-0041 and CVE-2010-0042. Uninitialized memory access issues? Could also happen in java/android native code. Also developers should check return codes." \
@@ -3290,7 +3290,7 @@ grepit_c_lang() {
   "5_c_random.txt"
 }
 
-grepit_malware() {
+grepit_module_malware() {
   print_output "[*] Starting Grepit Malware module" "no_log"
 
   grepit_search "Viagra search" \
@@ -3322,7 +3322,7 @@ grepit_malware() {
   "-i"
 }
 
-grepit_crypto_creds() {
+grepit_module_crypto_creds() {
   print_output "[*] Starting Grepit Crypto and Credential module" "no_log"
 
   grepit_search "Crypt (the method itself) can be dangerous, also matches any calls to decrypt(, encrypt( or whatevercrypt(, which is desired" \
@@ -3819,7 +3819,7 @@ grepit_crypto_creds() {
   "3_cryptocred_openssl_s_server.txt"
 }
 
-grepit_api_keys() {
+grepit_module_api_keys() {
   print_output "[*] Starting Grepit API keys module" "no_log"
 
   grepit_search "Slack API keys" \
@@ -4207,7 +4207,7 @@ grepit_api_keys() {
   "2_apikeys_kubeconfig.txt"
 }
 
-grepit_asm_native() {
+grepit_module_asm_native() {
   print_output "[*] Starting Grepit Assembly native module" "no_log"
   #Whatever you can usually find in a disassembly
   #This is a very experimental section...
@@ -4219,7 +4219,7 @@ grepit_asm_native() {
   "4_assembly_GetTickCount.txt"
 }
 
-grepit_general() {
+grepit_module_general() {
   print_output "[*] Starting Grepit General module" "no_log"
 
   grepit_search "A generic templating pattern that is used in HTML generation of Java (JSP), Ruby and client-side JavaScript libraries." \
