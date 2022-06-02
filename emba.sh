@@ -40,9 +40,12 @@ import_module()
   local MODULES_LOCAL=()
   local MODULES_EMBA=()
   local MODULE_COUNT=0
-  mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "*.sh" | sort -V 2> /dev/null)
+  # to ensure we are only auto load modules from the modules main directory we set maxdepth
+  # with this in place we can create sub directories per module. For using/loading stuff from
+  # these sub directories the modules are responsible!
+  mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -maxdepth 1 -name "*.sh" | sort -V 2> /dev/null)
   if [[ -d "${MOD_DIR_LOCAL}" ]]; then
-    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
+    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -maxdepth 1 -name "*.sh" 2>/dev/null | sort -V 2> /dev/null)
   fi
   MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
   for MODULE_FILE in "${MODULES[@]}" ; do

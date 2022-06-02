@@ -394,8 +394,9 @@ dependency_check()
       # check only some of the needed files
       check_dep_file "console.mipsel" "$EXT_DIR""/firmae/binaries/console.mipsel"
       check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
-      check_dep_file "fixImage.sh" "$EXT_DIR""/firmae/scripts/fixImage.sh"
-      check_dep_file "preInit.sh" "$EXT_DIR""/firmae/scripts/preInit.sh"
+      # re-enable this with the correct path!
+      #check_dep_file "fixImage.sh" "$EXT_DIR""/firmae/scripts/fixImage.sh"
+      #check_dep_file "preInit.sh" "$EXT_DIR""/firmae/scripts/preInit.sh"
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
