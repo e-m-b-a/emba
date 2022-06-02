@@ -176,7 +176,7 @@ deeper_extractor_helper() {
     if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
 
       print_output "[*] Details of file: $ORANGE$FILE_TMP$NC"
-      print_output "$(indent $(file "$FILE_TMP"))"
+      print_output "$(indent "$(file "$FILE_TMP")")"
       # do a quick check if EMBA should handle the file or we give it to binwalk:
       fw_bin_detector "$FILE_TMP"
 
