@@ -302,12 +302,6 @@ binwalking() {
   WAIT_PIDS=( )
 
   MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
-
-  # as we probably kill binwalk and to not loose the results we need to execute binwalk in a function 
-  # and read the results from the caller
-  #if [[ -f "$TMP_DIR"/binwalker.txt ]] ; then
-  #  tee -a "$LOG_FILE" < "$TMP_DIR"/binwalker.txt 
-  #fi
 }
 
 extract_binwalk_helper() {

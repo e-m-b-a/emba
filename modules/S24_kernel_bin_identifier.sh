@@ -37,7 +37,6 @@ S24_kernel_bin_identifier()
     if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
 	    print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
       print_output ""
-      #K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
       print_output "$(indent "$(orange "$K_VER")")"
       print_output ""
 
@@ -45,7 +44,6 @@ S24_kernel_bin_identifier()
       if [[ "$K_INIT" =~ init=\/.* ]]; then
         print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
         print_output ""
-        #K_INIT="$(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sort -u || true)"
         print_output "$(indent "$(orange "$K_INIT")")"
         print_output ""
       fi
