@@ -46,8 +46,14 @@ IL15_emulated_checks_init() {
       apt-get install "${INSTALL_APP_LIST[@]}" -y
  
       download_file "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz"
+      if ! [[ -d external/arachni/ ]]; then
+        mkdir external/arachni/
+      fi
       tar -xzf external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz -C external/arachni/
-      useradd arachni
+      rm external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz
+      if ! grep -q arachni /etc/passwd; then
+        useradd arachni
+      fi
       chown arachni external/arachni -R
       chown arachni external/arachni -R
 
