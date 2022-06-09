@@ -63,12 +63,12 @@ IL10_system_emulator() {
     print_file_info "libnvram_ioctl.so.mipseb" "FirmAE - libnvram_ioctl - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipseb" "external/firmae/binaries/libnvram_ioctl.so.mipseb"
     print_file_info "libnvram_ioctl.so.mipsel" "FirmAE - libnvram_ioctl - MIPSel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipsel" "external/firmae/binaries/libnvram_ioctl.so.mipsel"
 
-    print_file_info "fixImage.sh" "FirmAE fixImage script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/"
-    print_file_info "preInit.sh" "FirmAE preInit script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/preInit.sh" "external/firmae/scripts/"
-    print_file_info "network.sh" "FirmAE network script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/"
-    print_file_info "makeNetwork.sh" "FirmAE makeNetwork script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/makeNetwork.sh" "external/firmae/scripts/"
-    print_file_info "run_service.sh" "FirmAE run_service script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/"
-    print_file_info "inferFile.sh" "FirmAE inferFile script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferFile.sh" "external/firmae/scripts/"
+    #print_file_info "fixImage.sh" "FirmAE fixImage script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/"
+    #print_file_info "preInit.sh" "FirmAE preInit script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/preInit.sh" "external/firmae/scripts/"
+    #print_file_info "network.sh" "FirmAE network script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/"
+    #print_file_info "makeNetwork.sh" "FirmAE makeNetwork script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/makeNetwork.sh" "external/firmae/scripts/"
+    #print_file_info "run_service.sh" "FirmAE run_service script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/"
+    #print_file_info "inferFile.sh" "FirmAE inferFile script" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferFile.sh" "external/firmae/scripts/"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -81,7 +81,7 @@ IL10_system_emulator() {
       y|Y )
 
       mkdir -p external/firmae/binaries
-      mkdir -p external/firmae/scripts
+      #mkdir -p external/firmae/scripts
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y
 
@@ -108,22 +108,22 @@ IL10_system_emulator() {
       download_file "libnvram_ioctl.so.mipseb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipseb" "external/firmae/binaries/libnvram_ioctl.so.mipseb"
       download_file "libnvram_ioctl.so.mipsel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/libnvram_ioctl.so.mipsel" "external/firmae/binaries/libnvram_ioctl.so.mipsel"
 
-      download_file "fixImage.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/fixImage.sh"
-      download_file "preInit.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/preInit.sh" "external/firmae/scripts/preInit.sh"
-      download_file "network.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/network.sh"
-      download_file "inferNetwork.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferNetwork.sh" "external/firmae/scripts/inferNetwork.sh"
-      download_file "run_service.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/run_service.sh"
-      download_file "inferFile.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferFile.sh" "external/firmae/scripts/inferFile.sh"
+      #download_file "fixImage.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/fixImage.sh" "external/firmae/scripts/fixImage.sh"
+      #download_file "preInit.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/preInit.sh" "external/firmae/scripts/preInit.sh"
+      #download_file "network.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/network.sh" "external/firmae/scripts/network.sh"
+      #download_file "inferNetwork.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferNetwork.sh" "external/firmae/scripts/inferNetwork.sh"
+      #download_file "run_service.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/run_service.sh" "external/firmae/scripts/run_service.sh"
+      #download_file "inferFile.sh" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/scripts/inferFile.sh" "external/firmae/scripts/inferFile.sh"
 
       # patch inferFile.sh:
       # shellcheck disable=SC2016
-      sed -i 's/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS"`/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS" -o -name "rc.sysinit"`/' external/firmae/scripts/inferFile.sh
+      #sed -i 's/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS"`/for FILE in `${BUSYBOX} find \/ -name "preinitMT" -o -name "preinit" -o -name "rcS" -o -name "rc.sysinit"`/' external/firmae/scripts/inferFile.sh
 
       # patch preInit.sh:
       # shellcheck disable=SC2016
-      sed -i 's/| mkdir /| ${BUSYBOX} mkdir /g' external/firmae/scripts/preInit.sh
+      #sed -i 's/| mkdir /| ${BUSYBOX} mkdir /g' external/firmae/scripts/preInit.sh
       # shellcheck disable=SC2016
-      sed -i 's/^mkdir /${BUSYBOX} mkdir /g' external/firmae/scripts/preInit.sh
+      #sed -i 's/^mkdir /${BUSYBOX} mkdir /g' external/firmae/scripts/preInit.sh
 
       ;;
     esac

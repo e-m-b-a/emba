@@ -157,7 +157,6 @@ check_emulation_port() {
   if netstat -anpt | grep -q "$PORT_NR"; then
     echo -e "$RED""not ok""$NC"
     echo -e "$RED""    System emulation services detected - check for running Qemu processes""$NC"
-    DEP_ERROR=1
   else
     echo -e "$GREEN""ok""$NC"
   fi
