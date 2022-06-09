@@ -139,6 +139,7 @@ check_cve_search() {
     export CVE_SEARCH=1
   fi
 }
+
 print_cve_search_failure() {
   print_output "[-] The needed CVE database is not responding as expected." "no_log"
   print_output "[-] CVE checks are currently not possible!" "no_log"
@@ -148,6 +149,19 @@ print_cve_search_failure() {
 
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+
+check_emulation_port() {
+  TOOL_NAME="${1:-}"
+  PORT_NR="${2:-}"
+  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
+  if netstat -anpt | grep -q "$PORT_NR"; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    System emulation services detected - check for running Qemu processes""$NC"
+    DEP_ERROR=1
+  else
+    echo -e "$GREEN""ok""$NC"
+  fi
+}
 
 dependency_check() 
 {
@@ -389,7 +403,7 @@ dependency_check()
       check_dep_tool "STACS hash detection" "stacs"
     fi
 
-    # firmadyne / FirmAE
+    # Full system emulation modules (L*)
     if [[ $FULL_EMULATION -eq 1 ]]; then
       # check only some of the needed files
       check_dep_file "console.mipsel" "$EXT_DIR""/firmae/binaries/console.mipsel"
@@ -403,6 +417,7 @@ dependency_check()
 
       # routersploit for full system emulation
       check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
+      check_emulation_port "Running Qemu service" "2001"
     fi
 
     if function_exists S120_cwe_checker; then
