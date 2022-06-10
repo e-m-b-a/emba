@@ -321,10 +321,6 @@ dependency_check()
     check_dep_tool "ubireader image extractor" "ubireader_extract_images"
     check_dep_tool "ubireader file extractor" "ubireader_extract_files"
 
-    # CVE and CVSS databases
-    check_dep_file "CVE database" "$EXT_DIR""/allitems.csv"
-    check_dep_file "CVSS database" "$EXT_DIR""/allitemscvss.csv"
-
     if function_exists F20_vul_aggregator; then
       # CVE-search
       # TODO change to portcheck and write one for external hosts
@@ -382,12 +378,6 @@ dependency_check()
       check_dep_tool "radare2" "r2"
     fi
 
-    # php - currently not used
-    # check_dep_tool "php"
-
-    # pylint - currently not used
-    # check_dep_tool "pylint"
-
     # bandit python security tester
     check_dep_tool "bandit - python vulnerability scanner" "bandit"
 
@@ -404,18 +394,36 @@ dependency_check()
 
     # Full system emulation modules (L*)
     if [[ $FULL_EMULATION -eq 1 ]]; then
-      # check only some of the needed files
-      check_dep_file "console.mipsel" "$EXT_DIR""/firmae/binaries/console.mipsel"
-      check_dep_file "vmlinux.mipseb" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
-      # re-enable this with the correct path!
-      #check_dep_file "fixImage.sh" "$EXT_DIR""/firmae/scripts/fixImage.sh"
-      #check_dep_file "preInit.sh" "$EXT_DIR""/firmae/scripts/preInit.sh"
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
 
+      # check only some of the needed files
+      check_dep_file "console.*" "$EXT_DIR""/firmae/binaries/console.mipsel"
+      check_dep_file "busybox.*" "$EXT_DIR""/firmae/binaries/busybox.mipsel"
+      check_dep_file "libnvram.*" "$EXT_DIR""/firmae/binaries/libnvram.so.armel"
+      check_dep_file "vmlinux.mips*" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
+      check_dep_file "vmlinux.armel" "$EXT_DIR""/firmae/binaries/vmlinux.armel"
+
+      # re-enable this with the PR
+      #check_dep_file "fixImage.sh" "$MOD_DIR""/L10_system_emulation/fixImage.sh"
+      #check_dep_file "preInit.sh" "$MOD_DIR""/L10_system_emulation/preInit.sh"
+      #check_dep_file "inferFile.sh" "$MOD_DIR""/L10_system_emulation/inferFile.sh"
+      #check_dep_file "inferService.sh" "$MOD_DIR""/L10_system_emulation/inferService.sh"
+
       # routersploit for full system emulation
       check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"
+
+      #check_dep_file "Arachni web scanner installation" "$EXT_DIR""/arachni/arachni-1.6.1.3-0.6.1.1/bin/arachni"
+      #check_dep_file "TestSSL.sh installation" "$EXT_DIR""/testssl.sh/testssl.sh"
+      #check_dep_tool "Nikto web server analyzer" "nikto"
+      #check_dep_tool "Cutycapt screenshot tool" "cutycapt"
+      #check_dep_tool "snmp-check tool" "snmp-check"
+      #check_dep_tool "Nmap portscanner" "nmap"
+      #check_dep_tool "hping3" "hping3"
+      #check_dep_tool "ping" "ping"
+      # This port is used by our Qemu installation and should not be used by another process.
+      # This check is not a blocker for the test. It is checked again by the emulation module:
       check_emulation_port "Running Qemu service" "2001"
     fi
 
@@ -430,7 +438,6 @@ dependency_check()
         DEP_ERROR=1
       fi
     fi
- 
   fi
   
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
