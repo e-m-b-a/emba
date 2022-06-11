@@ -304,13 +304,13 @@ binwalking() {
   MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
 }
 
+# Todo: remove duplicate function and call it via parameter for output directory and path to extract
 extract_binwalk_helper() {
 
-  local MATRYOSHKA_="$1"
+  local MATRYOSHKA_="${1:-}"
 
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      # binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_BINWALK" "$FIRMWARE_PATH" >> "$TMP_DIR"/binwalker.txt
       binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_BINWALK" "$FIRMWARE_PATH" | tee -a "$LOG_FILE" || true
     else
       # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
@@ -327,13 +327,13 @@ extract_binwalk_helper() {
 
 binwalk_deep_extract_helper() {
 
-  local MATRYOSHKA_="$1"
+  local MATRYOSHKA_="${1:-}"
 
-  # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
       binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
     else
+      # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
       binwalk --run-as=root --preserve-symlinks -e -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
     fi
   else

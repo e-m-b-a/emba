@@ -540,7 +540,7 @@ module_start_log() {
     #strip final slash from log dir
     LOG_DIR="${LOG_DIR:: -1}"
   fi
-  LOG_PATH_MODULE="$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')"
+  LOG_PATH_MODULE=$(abs_path "$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')")
   if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" || true; fi
 }
 
