@@ -287,13 +287,12 @@ module_analyzer() {
       else
         # kernel module is NOT GPL license then not stripped is bad!
         print_output "[+] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${RED}""NOT STRIPPED""${NC}"
-        KMOD_BAD=$((KMOD_BAD+1))
+        echo "1" >> "$TMP_DIR"/KMOD_BAD.tmp
       fi
     else
       print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
     fi
 
-    echo "$KMOD_BAD" >> "$TMP_DIR"/KMOD_BAD.tmp
   elif [[ "$LINE" == *".o" ]]; then
     print_output "[-] No support for .o kernel modules - $ORANGE$LINE$NC"
   fi

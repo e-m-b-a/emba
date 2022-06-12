@@ -95,7 +95,7 @@ print_git_info() {
   if command -v jq >/dev/null ; then
     GIT_SIZE=$(curl https://api.github.com/repos/"$GIT_URL" 2> /dev/null | jq -r '.size' || true)
 
-    if [[ -n "${GIT_SIZE+0}" ]]; then
+    if [[ -n "${GIT_SIZE+0}" ]] && [[ "$GIT_SIZE" =~ [0-9]+ ]]; then
       if (( GIT_SIZE > 1024 )) ; then
         echo -e "Download-Size: ""$(( GIT_SIZE / 1024 ))"" MB"
       else
