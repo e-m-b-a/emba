@@ -29,9 +29,20 @@ IL15_emulated_checks_init() {
     print_tool_info "nmap" 1
     print_tool_info "snmp" 1
     print_tool_info "nikto" 1
-    print_tool_info "cutycapt" 1
     print_tool_info "snmpcheck" 1
     print_tool_info "python3-pip" 1
+    print_tool_info "cutycapt" 1
+
+    # needed for cutycapt
+    #print_tool_info "xvfb" 1
+    #print_tool_info "libqt5webkit5" 1
+    #print_tool_info "xfonts-100dpi" 1
+    #print_tool_info "xfonts-75dpi" 1
+    #print_tool_info "xfonts-cyrillic" 1
+    #print_tool_info "xorg" 1
+    #print_tool_info "dbus-x11" 1
+    #print_tool_info "g++" 1
+    # needed for cutycapt
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")

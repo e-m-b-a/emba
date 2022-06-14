@@ -23,11 +23,33 @@ S35_http_file_check()
 
   HTTP_COUNTER=0
 
+  write_csv_log "type" "filename" "file"
+  web_file_search
   http_file_search
   webserver_check
   php_check
 
   module_end_log "${FUNCNAME[0]}" "$HTTP_COUNTER"
+}
+
+web_file_search()
+{
+  sub_module_title "Search web served files"
+
+  WEB_STUFF=0
+  mapfile -t WEB_STUFF < <(find "$FIRMWARE_PATH" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
+    -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+
+  if [[ -v WEB_STUFF[@] ]] ; then
+    print_output "[+] Found web related files:"
+    for LINE in "${WEB_STUFF[@]}" ; do
+      print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "Web served files" "$(basename "$LINE")" "$LINE"
+      ((HTTP_COUNTER+=1))
+    done
+  else
+    print_output "[-] No web related files found"
+  fi
 }
 
 http_file_search()
@@ -42,6 +64,7 @@ http_file_search()
     print_output "[+] Found http related files:"
     for LINE in "${HTTP_STUFF[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "HTTP server files" "$(basename "$LINE")" "$LINE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -63,6 +86,7 @@ webserver_check()
     print_output "[+] Found Apache related files:"
     for LINE in "${APACHE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "Apache web server file" "$(basename "$LINE")" "$LINE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -73,6 +97,7 @@ webserver_check()
     print_output "[+] Found nginx related files:"
     for LINE in "${NGINX_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "Nginx web server file" "$(basename "$LINE")" "$LINE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -83,6 +108,7 @@ webserver_check()
     print_output "[+] Found Lighttpd related files:"
     for LINE in "${LIGHTTP_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "Lighttpd web server file" "$(basename "$LINE")" "$LINE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -93,6 +119,7 @@ webserver_check()
     print_output "[+] Found Cherokee related files:"
     for LINE in "${CHEROKEE_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "Cherokee web server file" "$(basename "$LINE")" "$LINE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -103,6 +130,7 @@ webserver_check()
     print_output "[+] Found HTTPd related files:"
     for LINE in "${HTTPD_FILE_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "HTTPd web server file" "$(basename "$LINE")" "$LINE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -121,6 +149,7 @@ php_check()
     print_output "[+] Found php.ini:"
     for LINE in "${PHP_INI_ARR[@]}" ; do
       print_output "$(indent "$(print_path "$LINE")")"
+      write_csv_log "php.ini file" "$(basename "$LINE")" "$LINE"
       ((HTTP_COUNTER+=1))
     done
   else

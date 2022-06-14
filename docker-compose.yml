@@ -6,12 +6,12 @@ services:
     # all pre-checker mount modules need privileged mode
     privileged: true
     # /root is needed for binwalk
-    # /tmp is needed for FACT extractor
     tmpfs:
       - /tmp
       - /root
       - /run
       - /var/run
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system
     build: .
     # dev is needed for the system emulator (L10)
     volumes:
