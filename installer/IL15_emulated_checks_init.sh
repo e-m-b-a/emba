@@ -34,7 +34,7 @@ IL15_emulated_checks_init() {
     print_tool_info "cutycapt" 1
 
     # needed for cutycapt
-    #print_tool_info "xvfb" 1
+    print_tool_info "xvfb" 1
     #print_tool_info "libqt5webkit5" 1
     #print_tool_info "xfonts-100dpi" 1
     #print_tool_info "xfonts-75dpi" 1
