@@ -36,7 +36,7 @@ P03_firmware_virustotal_check() {
 
     # based on code from vt-scan: https://github.com/sevsec/vt-scan
     local FSIZE
-    FSIZE=$(stat "$FIRMWARE_PATH" | grep "Size:\|Größe:" | awk '{print $2}')
+    FSIZE=$(stat -c %s "$FIRMWARE_PATH")
     if [[ $FSIZE -lt 33554431 ]]; then
       VT_UPLOAD_ID=$(curl -s --request POST --url "https://www.virustotal.com/api/v3/files" --header "x-apikey: $VT_API_KEY" --form "file=@$FIRMWARE_PATH" | jq -r '.data.id')
     else
