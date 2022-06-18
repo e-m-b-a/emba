@@ -15,12 +15,18 @@
 
 # Description: Uploads the firmware to virustotal
 # Important:   This module needs a VT API key in the config file ./config/vt_api_key.txt
-#              This key is avilable via your VT profile
+#              This key is avilable via your VT profile - https://www.virustotal.com/gui/my-apikey
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=1
 
 P03_firmware_virustotal_check() {
   module_log_init "${FUNCNAME[0]}"
+
+  if [[ "$IN_DOCKER" -eq 1 ]]; then
+    print_output "[-] The docker container has no access to the Internet -> no virustotal query possible!"
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
   module_title "Binary firmware VirusTotal analyzer"
 
   if [[ -f "$VT_API_KEY_FILE" && "$ONLINE_CHECKS" -eq 1 && -f "$FIRMWARE_PATH" ]]; then
@@ -30,7 +36,7 @@ P03_firmware_virustotal_check() {
 
     # based on code from vt-scan: https://github.com/sevsec/vt-scan
     local FSIZE
-    FSIZE=$(stat "$FIRMWARE_PATH" | grep "Size:" | awk '{print $2}')
+    FSIZE=$(stat -c %s "$FIRMWARE_PATH")
     if [[ $FSIZE -lt 33554431 ]]; then
       VT_UPLOAD_ID=$(curl -s --request POST --url "https://www.virustotal.com/api/v3/files" --header "x-apikey: $VT_API_KEY" --form "file=@$FIRMWARE_PATH" | jq -r '.data.id')
     else

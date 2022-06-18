@@ -6,7 +6,6 @@ services:
     # all pre-checker mount modules need privileged mode
     privileged: true
     # /root is needed for binwalk
-    # /tmp is needed for FACT extractor
     tmpfs:
       - /tmp
       - /root

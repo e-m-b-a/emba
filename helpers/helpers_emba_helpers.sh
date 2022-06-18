@@ -102,9 +102,18 @@ cleaner() {
         umount -l "$MOUNT" || true
       done
     fi
+
     if [[ $(grep -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
       killall -9 --quiet -r .*cwe_checker.* || true
+    fi
+
+    # IF SYS_ONLINE is 1, the live system tester (system mode emulator) was able to setup the box
+    # we need to do a cleanup
+    if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+      print_output "[*] Resetting system emulation environment" "no_log"
+      stopping_emulation_process
+      reset_network_emulation 2
     fi
   fi
   if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then

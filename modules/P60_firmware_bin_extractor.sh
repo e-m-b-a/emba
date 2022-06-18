@@ -239,10 +239,10 @@ deeper_extractor_helper() {
       else
         # default case to binwalk
         if [[ "$THREADED" -eq 1 ]]; then
-          binwalk_deep_extract_helper "$MATRYOSHKA" &
+          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "$FIRMWARE_PATH_CP" &
           WAIT_PIDS_P20+=( "$!" )
         else
-          binwalk_deep_extract_helper "$MATRYOSHKA"
+          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "$FIRMWARE_PATH_CP"
         fi
       fi
 
@@ -296,7 +296,8 @@ binwalking() {
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_BINWALK$NC"
   # this is not working in background. I have created a new function that gets executed in the background
   # probably there is a more elegant way
-  extract_binwalk_helper 1 &
+  # binwalk is executed in Matryoshka mode
+  binwalk_deep_extract_helper 1 "$FIRMWARE_PATH" "$OUTPUT_DIR_BINWALK" &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
@@ -304,43 +305,24 @@ binwalking() {
   MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
 }
 
-# Todo: remove duplicate function and call it via parameter for output directory and path to extract
-extract_binwalk_helper() {
-
-  local MATRYOSHKA_="${1:-}"
-
-  if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
-    if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk --run-as=root --preserve-symlinks -e -M -C "$OUTPUT_DIR_BINWALK" "$FIRMWARE_PATH" | tee -a "$LOG_FILE" || true
-    else
-      # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
-      binwalk --run-as=root --preserve-symlinks -e -C "$OUTPUT_DIR_BINWALK" "$FIRMWARE_PATH" | tee -a "$LOG_FILE" || true
-    fi
-  else
-    if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk -e -M -C "$OUTPUT_DIR_BINWALK" "$FIRMWARE_PATH" | tee -a "$LOG_FILE" || true
-    else
-      binwalk -e -C "$OUTPUT_DIR_BINWALK" "$FIRMWARE_PATH" | tee -a "$LOG_FILE" || true
-    fi
-  fi
-}
-
 binwalk_deep_extract_helper() {
-
-  local MATRYOSHKA_="${1:-}"
+  # Matryoshka mode is first parameter: 1 - enable, 0 - disable
+  local MATRYOSHKA_="${1:-0}"
+  local FILE_TO_EXTRACT_="${2:-}"
+  local DEST_FILE_="${3:-$FIRMWARE_PATH_CP}"
 
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk --run-as=root --preserve-symlinks -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
+      binwalk --run-as=root --preserve-symlinks -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     else
       # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
-      binwalk --run-as=root --preserve-symlinks -e -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
+      binwalk --run-as=root --preserve-symlinks -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     fi
   else
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk -e -M -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
+      binwalk -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     else
-      binwalk -e -C "$FIRMWARE_PATH_CP" "$FILE_TMP" | tee -a "$LOG_FILE" || true
+      binwalk -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     fi
   fi
 }
