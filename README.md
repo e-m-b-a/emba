@@ -65,7 +65,7 @@ sudo ./installer.sh -d
 ```console
 sudo ./emba.sh -l ./log -f /firmware
 ```
-
+*Note: During installation at least 20GB of disk space is needed*
 ---   
 ### Profile support:
 ```console
