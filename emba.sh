@@ -231,7 +231,6 @@ main()
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
-  export FULL_EMULATION=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
   export CWE_CHECKER=0
@@ -265,6 +264,7 @@ main()
                                 # afterwards do a default EMBA scan
   export PYTHON_CHECK=1
   export QEMULATION=0
+  export FULL_EMULATION=0
   # to get rid of all the running stuff we are going to kill it after RUNTIME
   export QRUNTIME="20s"
 
@@ -450,23 +450,7 @@ main()
     print_bar "no_log"
   fi
 
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    # http://redsymbol.net/articles/unofficial-bash-strict-mode/
-    # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
-    # shellcheck disable=SC1091
-    source ./installer/wickStrictModeFail.sh
-    set -e          # Exit immediately if a command exits with a non-zero status
-    set -u          # Exit and trigger the ERR trap when accessing an unset variable
-    set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
-    set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
-    shopt -s extdebug # Enable extended debugging
-    IFS=$'\n\t'     # Set the "internal field separator"
-    trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
-
-    print_bar "no_log"
-    print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
-    print_bar "no_log"
-  fi
+  enable_strict_mode "$STRICT_MODE"
 
   # profile handling
   if [[ -n "${PROFILE:-}" ]]; then

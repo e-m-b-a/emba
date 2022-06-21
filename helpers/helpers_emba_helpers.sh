@@ -175,3 +175,51 @@ get_csv_rule() {
 
   CSV_RULE="$(echo "$VERSION_STRING" | eval "$CSV_REGEX" || true)"
 }
+
+enable_strict_mode() {
+  local STRICT_MODE_="${1:-0}"
+
+  if [[ "$STRICT_MODE_" -eq 1 ]]; then
+    # http://redsymbol.net/articles/unofficial-bash-strict-mode/
+    # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
+    # shellcheck disable=SC1091
+    source ./installer/wickStrictModeFail.sh
+    set -e          # Exit immediately if a command exits with a non-zero status
+    set -u          # Exit and trigger the ERR trap when accessing an unset variable
+    set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+    set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+    shopt -s extdebug # Enable extended debugging
+    IFS=$'\n\t'     # Set the "internal field separator"
+    trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
+
+    print_bar "no_log"
+    print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
+    print_bar "no_log"
+  fi
+}
+
+# INFO: This was created for the S99 module but was not fully working.
+# Todo: Find the problem!
+disable_strict_mode() {
+  local STRICT_MODE_="${1:-0}"
+
+  if [[ "$STRICT_MODE_" -eq 1 ]]; then
+    # disable all STRICT_MODE settings - can be used for modules that are not compatible
+    # WARNING: this should only be a temporary solution. The goal is to make modules
+    # STRICT_MODE compatible
+
+    unset -f wickStrictModeFail
+    set +e          # Exit immediately if a command exits with a non-zero status
+    set +u          # Exit and trigger the ERR trap when accessing an unset variable
+    set +o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+    set +E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+    shopt -u extdebug # Enable extended debugging
+    unset IFS
+    trap - ERR
+    set +x
+
+    print_bar "no_log"
+    print_output "[!] WARNING: EMBA STRICT mode disabled!" "no_log"
+    print_bar "no_log"
+  fi
+}

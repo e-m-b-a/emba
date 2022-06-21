@@ -44,30 +44,32 @@ avm_extractor() {
 
   # read only filesystem bypass:
   cp "$EXT_DIR"/freetz-ng/.config "$TMP_DIR"/.config
-  "$EXT_DIR"/freetz-ng/fwmod -u -i "$TMP_DIR"/.config -d "$EXTRACTION_DIR_" "$AVM_FW_PATH_" || true | tee -a "$LOG_FILE"
+  "$EXT_DIR"/freetz-ng/fwmod -u -i "$TMP_DIR"/.config -d "$EXTRACTION_DIR_" "$AVM_FW_PATH_" | tee -a "$LOG_FILE" || true
 
+  if [[ -d "$EXTRACTION_DIR_" ]]; then
+    FRITZ_FILES=$(find "$EXTRACTION_DIR_" -type f | wc -l)
+    FRITZ_DIRS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
 
-  FRITZ_FILES=$(find "$EXTRACTION_DIR_" -type f | wc -l)
-  FRITZ_DIRS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
-
-  FRITZ_VERSION=$(grep "detected firmware version:" "$LOG_FILE" || true | cut -d ":" -f2-)
-  if [[ -n "$FRITZ_VERSION" ]]; then
-    FRITZ_VERSION="NA"
-  fi
-
-  if [[ "$FRITZ_FILES" -gt 0 ]]; then
-    print_output ""
-    print_output "[*] Extracted $ORANGE$FRITZ_FILES$NC files and $ORANGE$FRITZ_DIRS$NC directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "Freetz-NG" "$AVM_FW_PATH_" "$EXTRACTION_DIR_" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
-    export DEEP_EXTRACTOR=1
-
-    if [[ -z "${FW_VENDOR:-}" ]]; then
-      FW_VENDOR="AVM"
-    fi
-    if [[ -z "${FW_VERSION:-}" && "$FRITZ_VERSION" != "NA" ]]; then
-      FW_VERSION="$FRITZ_VERSION"
+    FRITZ_VERSION=$(grep "detected firmware version:" "$LOG_FILE" | cut -d ":" -f2-)
+    if [[ -z "$FRITZ_VERSION" ]]; then
+      FRITZ_VERSION="NA"
+    else
+      print_output "[+] Detected Fritz version: $ORANGE$FRITZ_VERSION$NC"
     fi
 
+    if [[ "$FRITZ_FILES" -gt 0 ]]; then
+      print_output ""
+      print_output "[*] Extracted $ORANGE$FRITZ_FILES$NC files and $ORANGE$FRITZ_DIRS$NC directories from the firmware image."
+      write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+      write_csv_log "Freetz-NG" "$AVM_FW_PATH_" "$EXTRACTION_DIR_" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
+      export DEEP_EXTRACTOR=1
+
+      if [[ -z "${FW_VENDOR:-}" ]]; then
+        FW_VENDOR="AVM"
+      fi
+      if [[ -z "${FW_VERSION:-}" && "$FRITZ_VERSION" != "NA" ]]; then
+        FW_VERSION="$FRITZ_VERSION"
+      fi
+    fi
   fi
 }
