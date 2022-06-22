@@ -204,13 +204,14 @@ architecture_check()
 prepare_file_arr()
 {
   echo ""
-  print_output "[*] Unique files auto detection (could take some time)\\n"
+  print_output "[*] Unique files auto detection for $ORANGE$FIRMWARE_PATH$NC (could take some time)\\n"
 
   export FILE_ARR
   readarray -t FILE_ARR < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f $FIRMWARE_PATH && $RTOS -eq 1 ]]; then
-    readarray -t FILE_ARR < <(find "$OUTPUT_DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+    readarray -t FILE_ARR_RTOS < <(find "$OUTPUT_DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+    FILE_ARR+=( "${FILE_ARR_RTOS[@]}" )
     FILE_ARR+=( "$FIRMWARE_PATH" )
   fi
   print_output "[*] Found $ORANGE${#FILE_ARR[@]}$NC unique files."
@@ -223,7 +224,7 @@ prepare_file_arr()
 prepare_binary_arr()
 {
   echo ""
-  print_output "[*] Unique binary auto detection (could take some time)\\n"
+  print_output "[*] Unique binary auto detection for $ORANGE$FIRMWARE_PATH$NC (could take some time)\\n"
 
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
@@ -324,7 +325,7 @@ detect_root_dir_helper() {
     done
   fi
   # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
-  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*root/bin" -exec dirname {} \; 2>/dev/null)
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
