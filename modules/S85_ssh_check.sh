@@ -72,7 +72,7 @@ search_ssh_files()
               fi
             done
           elif [[ "$(basename "$LINE")" == *"authorized_key"*  ]]; then
-            print_output "[+] Warning: Possible $ORANGEauthorized_key$GREEN backdoor detected: $ORANGE$LINE$NC"
+            print_output "[+] Warning: Possible ${ORANGE}authorized_key${GREEN} backdoor detected: ${ORANGE}$LINE${NC}"
             ((SSH_VUL_CNT+=1))
           fi
         fi
