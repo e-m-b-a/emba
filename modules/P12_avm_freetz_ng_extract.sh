@@ -50,7 +50,7 @@ avm_extractor() {
     FRITZ_FILES=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     FRITZ_DIRS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
 
-    FRITZ_VERSION=$(grep "detected firmware version:" "$LOG_FILE" | cut -d ":" -f2-)
+    FRITZ_VERSION=$(grep "detected firmware version:" "$LOG_FILE" | cut -d ":" -f2- || true)
     if [[ -z "$FRITZ_VERSION" ]]; then
       FRITZ_VERSION="NA"
     else
