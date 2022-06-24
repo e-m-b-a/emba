@@ -101,6 +101,12 @@ while getopts cCdDFhl OPT ; do
       export CVE_SEARCH=1
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
+    c)
+      export OTHER_OS=1
+      export DOCKER_SETUP=1
+      export CVE_SEARCH=0
+      echo -e "$GREEN""$BOLD""Install all dependecies for custom os in docker-mode""$NC"
+      ;;
     h)
       print_help
       exit 0
@@ -149,6 +155,10 @@ if [[ $(version "$DOCKER_COMP_VER") -lt $(version "1.28.5") ]]; then
   echo -e "\n${ORANGE}Please consider updating your docker-compose installation to version 1.28.5 or later.$NC"
   echo -e "\n${ORANGE}Please check the EMBA wiki for further details: https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites$NC"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+fi
+
+if [[ "$OTHER_OS" -eq 1 ]]; then
+  I02_custom_os
 fi
 
 INSTALL_APP_LIST=()
