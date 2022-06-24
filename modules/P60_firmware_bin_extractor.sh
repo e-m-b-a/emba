@@ -60,6 +60,11 @@ P60_firmware_bin_extractor() {
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_output ""
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all."
+    #shellcheck disable=SC2012
+    ls -l "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
+
+    # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
+    export FIRMWARE_PATH="$FIRMWARE_PATH_CP"
   fi
 
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"

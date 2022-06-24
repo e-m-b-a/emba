@@ -21,6 +21,13 @@ I120_cwe_checker() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     export INSTALL_APP_LIST=()
+
+    print_tool_info "unzip" 1
+    print_tool_info "git" 1
+    print_tool_info "gcc" 1
+    print_tool_info "curl" 1
+    print_tool_info "make" 1
+
     print_git_info "cwe-checker" "fkie-cad/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
     echo -e "$ORANGE""cwe-checker will be downloaded.""$NC"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
@@ -43,12 +50,23 @@ I120_cwe_checker() {
           rm "$HOME"/.config -r -f
           rm external/rustup -r -f
 
-          curl https://sh.rustup.rs -sSf | sudo RUSTUP_HOME=external/rustup sh -s -- -y
+          curl https://sh.rustup.rs -sSf | RUSTUP_HOME=external/rustup sh -s -- -y
           # shellcheck disable=SC1090
           # shellcheck disable=SC1091
           source "$HOME/.cargo/env"
           RUSTUP_HOME=external/rustup rustup default stable
           export RUSTUP_TOOLCHAIN=stable
+
+          if external/rustup toolchain list | grep -q "no installed toolchains"; then
+            echo "[*] Warning: Rust toolchain installation failed ... trying manually"
+            external/rustup install stable
+            external/rustup default stable
+            # shellcheck disable=SC1090
+            # shellcheck disable=SC1091
+            source "$HOME/.cargo/env"
+            RUSTUP_HOME=external/rustup rustup default stable
+            export RUSTUP_TOOLCHAIN=stable
+          fi
 
           # Java SDK for ghidra
           if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
@@ -59,7 +77,6 @@ I120_cwe_checker() {
 
           # Ghidra
           if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
-          #curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.1.2_build/ghidra_10.1.2_PUBLIC_20210804.zip -Sf -o external/ghidra.zip
           curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.1.2_build/ghidra_10.1.2_PUBLIC_20220125.zip -Sf -o external/ghidra.zip
           mkdir external/ghidra 2>/dev/null
           unzip -qo external/ghidra.zip -d external/ghidra
@@ -74,7 +91,7 @@ I120_cwe_checker() {
           cd "$HOME_PATH" || exit 1
 
           mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
-          rm -r -f "$HOME""/.cargo/"
+          #rm -r -f "$HOME""/.cargo/"
           rm -r ./external/rustup
         else
           echo -e "\\n""$GREEN""cwe-checker already installed - no further action performed.""$NC"
