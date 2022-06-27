@@ -24,7 +24,6 @@ I02_custom_os() {
   echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
   apt-get update
   apt-get install libssl1.1
-  # other requirements.system
 }
 
 

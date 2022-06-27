@@ -41,6 +41,8 @@ export IN_DOCKER=0
 # list dependencies
 export LIST_DEP=0
 export FULL=0
+# other os stuff
+export OTHER_OS=0
 
 ## Color definition
 export RED="\033[0;31m"
