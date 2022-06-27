@@ -20,7 +20,7 @@ I02_custom_os() {
   module_title "${FUNCNAME[0]}"
   # mongodb / cve-search
   echo -e "\\n""$MAGENTA""$BOLD""Installing libssl1.1 for mongodb!""$NC"
-  if $( apt-get search libssl1.1 2>/dev/null | grep -qE libssl1.1 ); then
+  if apt-get search libssl1.1 2>/dev/null | grep -qE libssl1.1; then
     # libssl1.1 missing
     echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
     apt-get update
