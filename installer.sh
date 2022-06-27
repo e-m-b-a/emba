@@ -42,7 +42,7 @@ export IN_DOCKER=0
 export LIST_DEP=0
 export FULL=0
 # other os stuff
-export OTHER_OS=0
+export OTHER_OS=1
 
 ## Color definition
 export RED="\033[0;31m"
@@ -103,12 +103,6 @@ while getopts cCdDFhl OPT ; do
       export CVE_SEARCH=1
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
-    c)
-      export OTHER_OS=1
-      export DOCKER_SETUP=1
-      export CVE_SEARCH=0
-      echo -e "$GREEN""$BOLD""Install all dependecies for custom os in docker-mode""$NC"
-      ;;
     h)
       print_help
       exit 0
@@ -126,6 +120,11 @@ while getopts cCdDFhl OPT ; do
       ;;
   esac
 done
+
+# check for kali distribution
+if grep -q "kali" /etc/debian_version 2>/dev/null ; then
+    OTHER_OS=0
+fi
 
 if ! [[ $EUID -eq 0 ]] && [[ $LIST_DEP -eq 0 ]] ; then
   echo -e "\\n""$RED""Run EMBA installation script with root permissions!""$NC\\n"
