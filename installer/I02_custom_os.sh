@@ -20,11 +20,7 @@ I02_custom_os() {
   module_title "${FUNCNAME[0]}"
   # mongodb / cve-search
   echo -e "\\n""$MAGENTA""$BOLD""Installations for Ubuntu:jammy!""$NC"
-  wget --no-check-certificate -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-  echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-  apt-get update -y 
-  apt-get install -y -q mongodb-org 2>/dev/null
-  if dpkg -l libssl1.1 &>/dev/null; then
+  if ! dpkg -l libssl1.1 &>/dev/null; then
     # libssl1.1 missing
     echo -e "\\n""$YELLOW""$BOLD""Installing libssl1.1 for mongodb!""$NC"
     echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
