@@ -22,7 +22,7 @@ I02_custom_os() {
   echo -e "\\n""$MAGENTA""$BOLD""Installations for Ubuntu:jammy!""$NC"
   if ! dpkg -l libssl1.1 &>/dev/null; then
     # libssl1.1 missing
-    echo -e "\\n""$YELLOW""$BOLD""Installing libssl1.1 for mongodb!""$NC"
+    echo -e "\\n""$BOLD""Installing libssl1.1 for mongodb!""$NC"
     echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
     apt-get update
     apt-get install libssl1.1
