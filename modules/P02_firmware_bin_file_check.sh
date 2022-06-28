@@ -37,6 +37,7 @@ P02_firmware_bin_file_check() {
   export BSD_UFS=0
   export PATOOLS_INIT=0
   export ANDROID_OTA=0
+  export MD5_DONE_DEEP=()
 
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"
@@ -165,17 +166,17 @@ fw_bin_detector() {
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
     print_output "[*] Identified Linux ext2 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
-    write_csv_log "Ext2 filesystem" "yes" "NA"
+    write_csv_log "EXT2 filesystem" "yes" "NA"
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext3 filesystem data"* ]]; then
     print_output "[*] Identified Linux ext3 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
-    write_csv_log "Ext3 filesystem" "yes" "NA"
+    write_csv_log "EXT3 filesystem" "yes" "NA"
   fi
   if [[ "$FILE_BIN_OUT" == *"Linux rev 1.0 ext4 filesystem data"* ]]; then
     print_output "[*] Identified Linux ext4 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
-    write_csv_log "Ext4 filesystem" "yes" "NA"
+    write_csv_log "EXT4 filesystem" "yes" "NA"
   fi
   if [[ "$QNAP_ENC_CHECK" == *"QNAP encrypted firmware footer , model"* ]]; then
     print_output "[*] Identified QNAP encrpyted firmware - using QNAP extraction module"

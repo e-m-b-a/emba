@@ -30,6 +30,7 @@ P05_patools_init() {
     patools_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
     if [[ "$FILES_PATOOLS" -gt 0 ]]; then
+      MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
     fi
 
@@ -48,8 +49,14 @@ patools_extractor() {
   local FIRMWARE_NAME_
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
 
+  set +e
   patool -v test "$FIRMWARE_PATH_" | tee -a "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log
+  set -e
   cat "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
+
+  if ! [[ -d "$EXTRACTION_DIR_" ]]; then
+    mkdir "$EXTRACTION_DIR_"
+  fi
 
   if grep -q "patool: ... tested ok." "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log ; then
 
@@ -59,17 +66,29 @@ patools_extractor() {
     patool -v extract "$FIRMWARE_PATH_" --outdir "$EXTRACTION_DIR_" | tee -a "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log
     cat "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
 
+  else
+    # Fallback if unzip does not work:
     print_output ""
-    print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
-    #shellcheck disable=SC2012
-    ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
-    print_output ""
+    print_output "[*] No valid compressed file detected - extraction process via binwalk started"
 
-    FILES_PATOOLS=$(find "$EXTRACTION_DIR_" -type f | wc -l)
-    DIRS_PATOOLS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
-    print_output "[*] Extracted $ORANGE$FILES_PATOOLS$NC files and $ORANGE$DIRS_PATOOLS$NC directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "Patool extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_PATOOLS" "$DIRS_PATOOLS" "NA"
-    print_output ""
+    if [[ "$BINWALK_VER_CHECK" -eq 1 ]]; then
+      binwalk --run-as=root --preserve-symlinks -e -C "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
+    else
+      binwalk -e -C "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
+    fi
   fi
+
+  print_output ""
+  print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
+  #shellcheck disable=SC2012
+  ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
+  print_output ""
+
+  FILES_PATOOLS=$(find "$EXTRACTION_DIR_" -type f | wc -l)
+  DIRS_PATOOLS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
+  print_output "[*] Extracted $ORANGE$FILES_PATOOLS$NC files and $ORANGE$DIRS_PATOOLS$NC directories from the firmware image."
+  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+  write_csv_log "Patool extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_PATOOLS" "$DIRS_PATOOLS" "NA"
+  print_output ""
+
 }

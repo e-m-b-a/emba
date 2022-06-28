@@ -102,9 +102,18 @@ cleaner() {
         umount -l "$MOUNT" || true
       done
     fi
+
     if [[ $(grep -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
       killall -9 --quiet -r .*cwe_checker.* || true
+    fi
+
+    # IF SYS_ONLINE is 1, the live system tester (system mode emulator) was able to setup the box
+    # we need to do a cleanup
+    if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+      print_output "[*] Resetting system emulation environment" "no_log"
+      stopping_emulation_process
+      reset_network_emulation 2
     fi
   fi
   if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
@@ -165,4 +174,52 @@ get_csv_rule() {
   CSV_RULE="NA"
 
   CSV_RULE="$(echo "$VERSION_STRING" | eval "$CSV_REGEX" || true)"
+}
+
+enable_strict_mode() {
+  local STRICT_MODE_="${1:-0}"
+
+  if [[ "$STRICT_MODE_" -eq 1 ]]; then
+    # http://redsymbol.net/articles/unofficial-bash-strict-mode/
+    # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
+    # shellcheck disable=SC1091
+    source ./installer/wickStrictModeFail.sh
+    set -e          # Exit immediately if a command exits with a non-zero status
+    set -u          # Exit and trigger the ERR trap when accessing an unset variable
+    set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+    set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+    shopt -s extdebug # Enable extended debugging
+    IFS=$'\n\t'     # Set the "internal field separator"
+    trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
+
+    print_bar "no_log"
+    print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
+    print_bar "no_log"
+  fi
+}
+
+# INFO: This was created for the S99 module but was not fully working.
+# Todo: Find the problem!
+disable_strict_mode() {
+  local STRICT_MODE_="${1:-0}"
+
+  if [[ "$STRICT_MODE_" -eq 1 ]]; then
+    # disable all STRICT_MODE settings - can be used for modules that are not compatible
+    # WARNING: this should only be a temporary solution. The goal is to make modules
+    # STRICT_MODE compatible
+
+    unset -f wickStrictModeFail
+    set +e          # Exit immediately if a command exits with a non-zero status
+    set +u          # Exit and trigger the ERR trap when accessing an unset variable
+    set +o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
+    set +E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
+    shopt -u extdebug # Enable extended debugging
+    unset IFS
+    trap - ERR
+    set +x
+
+    print_bar "no_log"
+    print_output "[!] WARNING: EMBA STRICT mode disabled!" "no_log"
+    print_bar "no_log"
+  fi
 }

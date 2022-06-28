@@ -33,17 +33,17 @@ S24_kernel_bin_identifier()
   for FILE in "${FILE_ARR_TMP[@]}" ; do
     local K_VER=""
     local K_INIT=""
-    if strings "$FILE" 2>/dev/null | grep -q -E "^Linux version [0-9]+\.[0-9]+"; then
+    K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
+    if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
 	    print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
       print_output ""
-      K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+")
       print_output "$(indent "$(orange "$K_VER")")"
       print_output ""
 
-      if strings "$FILE" 2>/dev/null | grep -E -q "init=\/"; then
+      K_INIT=$(strings "$FILE" 2>/dev/null | grep -E "init=\/" || true)
+      if [[ "$K_INIT" =~ init=\/.* ]]; then
         print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
         print_output ""
-        K_INIT="$(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sort -u)"
         print_output "$(indent "$(orange "$K_INIT")")"
         print_output ""
       fi
