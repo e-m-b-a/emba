@@ -45,12 +45,12 @@ vmdk_extractor() {
   sub_module_title "VMDK (Virtual Machine Disk) extractor"
 
   print_output "[*] Enumeration of devices in VMDK images $ORANGE$VMDK_PATH_$NC"
+  mapfile -t VMDK_VIRT_FS < <(virt-filesystems -a "$VMDK_PATH_")
   for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
     print_output "[*] Found device $ORANGE$MOUNT_DEV$NC"
   done
-  mkdir -p "$TMP_VMDK_MNT" || true
 
-  mapfile -t VMDK_VIRT_FS < <(virt-filesystems -a "$VMDK_PATH_")
+  mkdir -p "$TMP_VMDK_MNT" || true
 
   for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
     DEV_NAME=$(basename "$MOUNT_DEV")
