@@ -21,7 +21,7 @@ P10_vmdk_extractor() {
   module_log_init "${FUNCNAME[0]}"
   NEG_LOG=0
   if [[ "${VMDK_DETECTED-0}" -eq 1 ]]; then
-    module_title "VMDK extractor"
+    module_title "VMDK (Virtual Machine Disk) extractor"
     EXTRACTION_DIR="$LOG_DIR"/firmware/vmdk_extractor/
 
     vmdk_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
@@ -35,26 +35,31 @@ P10_vmdk_extractor() {
 }
 
 vmdk_extractor() {
-  local VMDK_PATH_="$1"
-  local EXTRACTION_DIR_="$2"
+  local VMDK_PATH_="${1:-}"
+  local EXTRACTION_DIR_="${2:-}"
   local MOUNT_DEV
   local DEV_NAME
   local TMP_VMDK_MNT="$TMP_DIR/vmdk_mount_$RANDOM"
   local VMDK_DIRS=0
   VMDK_FILES=0
-  sub_module_title "VMDK extractor"
+  sub_module_title "VMDK (Virtual Machine Disk) extractor"
 
-  print_output "[*] Connect to device $ORANGE$VMDK_PATH_$NC"
+  print_output "[*] Enumeration of devices in VMDK images $ORANGE$VMDK_PATH_$NC"
+  for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
+    print_output "[*] Found device $ORANGE$MOUNT_DEV$NC"
+  done
   mkdir -p "$TMP_VMDK_MNT" || true
 
-  for MOUNT_DEV in /dev/sda{1..6}; do
+  mapfile -t VMDK_VIRT_FS < <(virt-filesystems -a "$VMDK_PATH_")
+
+  for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
     DEV_NAME=$(basename "$MOUNT_DEV")
     print_output "[*] Trying to mount $ORANGE$MOUNT_DEV$NC to $ORANGE$TMP_VMDK_MNT$NC directory"
     # if troubles ahead with vmdk mount, remove the error redirection
     guestmount -a "$VMDK_PATH_" -m "$MOUNT_DEV" --ro "$TMP_VMDK_MNT" 2>/dev/null || true
     if mount | grep -q vmdk_mount; then
-      print_output "[*] Copying $ORANGE$MOUNT_DEV$NC to firmware directory $EXTRACTION_DIR_"
-      mkdir -p "$EXTRACTION_DIR"/"$DEV_NAME"/ || true
+      print_output "[*] Copying $ORANGE$MOUNT_DEV$NC to firmware directory $ORANGE$EXTRACTION_DIR_/$DEV_NAME$NC"
+      mkdir -p "$EXTRACTION_DIR_"/"$DEV_NAME"/ || true
       cp -pri "$TMP_VMDK_MNT"/* "$EXTRACTION_DIR_"/"$DEV_NAME"/ || true
       umount "$TMP_VMDK_MNT"
     fi
