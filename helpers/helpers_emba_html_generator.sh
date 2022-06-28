@@ -314,6 +314,8 @@ add_link_tags() {
     done
   fi
 
+  printf "%s\n" "${LINK_COMMAND_ARR[@]}" > ./dump/x_$(basename "$LINK_FILE").txt
+
   if [[ "${#LINK_COMMAND_ARR[@]}" -gt 0 ]] ; then
     if [[ -f "$LINK_FILE" ]]; then
       sed -i "${LINK_COMMAND_ARR[@]}" "$LINK_FILE" || true
