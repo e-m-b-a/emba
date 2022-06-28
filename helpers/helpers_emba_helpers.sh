@@ -198,8 +198,6 @@ enable_strict_mode() {
   fi
 }
 
-# INFO: This was created for the S99 module but was not fully working.
-# Todo: Find the problem!
 disable_strict_mode() {
   local STRICT_MODE_="${1:-0}"
 

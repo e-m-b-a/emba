@@ -62,7 +62,6 @@ check_bootloader()
 
   # Syslinux
   CHECK=0
-  #mapfile -t SYSLINUX_PATHS < <(mod_path "/boot/syslinux/syslinux.cfg")
   mapfile -t SYSLINUX_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/syslinux/syslinux.cfg")
   for SYSLINUX_FILE in "${SYSLINUX_PATHS[@]}" ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
@@ -78,7 +77,6 @@ check_bootloader()
 
   # Grub
   CHECK=0
-  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.conf")
   mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
@@ -89,7 +87,6 @@ check_bootloader()
       ((STARTUP_FINDS+=1))
     fi
   done
-  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/menu.lst")
   mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/menu.lst")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
@@ -106,7 +103,6 @@ check_bootloader()
 
   # Grub2
   CHECK=0
-  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub/grub.cfg")
   mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.cfg")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
@@ -117,7 +113,6 @@ check_bootloader()
       ((STARTUP_FINDS+=1))
     fi
   done
-  #mapfile -t GRUB_PATHS < <(mod_path "/boot/grub2/grub.conf")
   mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
@@ -188,7 +183,6 @@ check_bootloader()
 
   # LILO
   CHECK=0
-  #mapfile -t LILO_PATH < <(mod_path "/ETC_PATHS/lilo.conf")
   mapfile -t LILO_PATH < <(mod_path "/ETC_PATHS/lilo.conf")
   for LILO_FILE in "${LILO_PATH[@]}" ; do
     if [[ -f "$LILO_FILE" ]] ; then

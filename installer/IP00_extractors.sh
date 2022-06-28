@@ -25,6 +25,8 @@ IP00_extractors(){
     print_pip_info "protobuf"
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "vm03/payload_dumper" "Android OTA payload.bin extractor"
+    # ubireader:
+    print_tool_info "python3-lzo" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
