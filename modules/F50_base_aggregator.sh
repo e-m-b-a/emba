@@ -52,8 +52,6 @@ F50_base_aggregator() {
   L30_LOG="l30_routersploit.txt"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
 
-  CSV_LOG_FILE="$LOG_DIR""/""$(basename -s .txt "$LOG_FILE")".csv
-
   get_data
   output_overview
   output_details
@@ -68,19 +66,19 @@ output_overview() {
 
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR""$NC"
-    echo "Firmware_vendor;\"$FW_VENDOR\"" >> "$CSV_LOG_FILE"
+    write_csv_log "Firmware_vendor" "$FW_VENDOR" "NA"
   fi  
   if [[ -n "$FW_VERSION" ]]; then
     print_output "[+] Tested Firmware version: ""$ORANGE""$FW_VERSION""$NC"
-    echo "Firmware_version;\"$FW_VERSION\"" >> "$CSV_LOG_FILE"
+    write_csv_log "Firmware_version" "$FW_VERSION" "NA"
   fi  
   if [[ -n "$FW_DEVICE" ]]; then
     print_output "[+] Tested Firmware from device: ""$ORANGE""$FW_DEVICE""$NC"
-    echo "Device;\"$FW_DEVICE\"" >> "$CSV_LOG_FILE"
+    write_csv_log "Device" "$FW_DEVICE" "NA"
   fi  
   if [[ -n "$FW_NOTES" ]]; then
     print_output "[+] Additional notes: ""$ORANGE""$FW_NOTES""$NC"
-    echo "FW_notes;\"$FW_NOTES\"" >> "$CSV_LOG_FILE"
+    write_csv_log "FW_notes" "$FW_NOTES" "NA"
   fi  
 
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/fw_name.log ]] && [[ -f "$TMP_DIR"/emba_command.log ]]; then
@@ -88,14 +86,14 @@ output_overview() {
     FW_PATH_ORIG="$(cat "$TMP_DIR"/fw_name.log)"
     EMBA_COMMAND_ORIG="$(cat "$TMP_DIR"/emba_command.log)"
     print_output "[+] Tested firmware:""$ORANGE"" ""$FW_PATH_ORIG""$NC"
-    echo "FW_path;\"$FW_PATH_ORIG\"" >> "$CSV_LOG_FILE"
+    write_csv_log "FW_path" "$FW_PATH_ORIG" "NA"
     print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND_ORIG""$NC"
-    echo "emba_command;\"$EMBA_COMMAND_ORIG\"" >> "$CSV_LOG_FILE"
+    write_csv_log "emba_command" "$EMBA_COMMAND_ORIG" "NA"
   else
     print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH""$NC"
-    echo "FW_path;\"$FIRMWARE_PATH\"" >> "$CSV_LOG_FILE"
+    write_csv_log "FW_path" "$FIRMWARE_PATH" "NA"
     print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND""$NC"
-    echo "emba_command;\"$EMBA_COMMAND\"" >> "$CSV_LOG_FILE"
+    write_csv_log "emba_command" "$EMBA_COMMAND" "NA"
   fi
 
   if [[ -n "$ARCH" ]]; then
@@ -105,16 +103,16 @@ output_overview() {
       print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH""$NC"
     fi
     write_link "p99"
-    echo "architecture_verified;\"$ARCH\"" >> "$CSV_LOG_FILE"
+    write_csv_log "architecture_verified" "$ARCH" "NA"
   elif [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH""$NC"
       write_link "p99"
-      echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
-      echo "architecture_unverified;\"$PRE_ARCH\"" >> "$CSV_LOG_FILE"
+      write_csv_log "architecture_verified" "unknown" "NA"
+      write_csv_log "architecture_unverified" "$PRE_ARCH" "NA"
     fi
   else
-    echo "architecture_verified;\"unknown\"" >> "$CSV_LOG_FILE"
+    write_csv_log "architecture_verified" "unknown" "NA"
   fi
   os_detector
   distribution_detector
@@ -131,15 +129,15 @@ output_details() {
     else
       write_link "p20"
     fi
-    echo "files;\"$FILE_ARR_COUNT\"" >> "$CSV_LOG_FILE"
-    echo "directories;\"$DETECTED_DIR\"" >> "$CSV_LOG_FILE"
+    write_csv_log "files" "$FILE_ARR_COUNT" "NA"
+    write_csv_log "directories" "$DETECTED_DIR" "NA"
     DATA=1
   fi
   ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is: ""$ORANGE""$ENTROPY"
     write_link "p02"
-    echo "entropy_value;\"$ENTROPY\"" >> "$CSV_LOG_FILE"
+    write_csv_log "entropy_value" "$ENTROPY" "NA"
     DATA=1
   fi
   if [[ -n "$ENTROPY_PIC" ]]; then
@@ -151,41 +149,41 @@ output_details() {
   if [[ "${S20_SHELL_VULNS:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts.""$NC"
     write_link "s20"
-    echo "shell_scripts;\"$S20_SCRIPTS\"" >> "$CSV_LOG_FILE"
-    echo "shell_script_vulns;\"$S20_SHELL_VULNS\"" >> "$CSV_LOG_FILE"
+    write_csv_log "shell_scripts" "$S20_SCRIPTS" "NA"
+    write_csv_log "shell_script_vulns" "$S20_SHELL_VULNS" "NA"
     DATA=1
   fi
   if [[ "${S21_PY_VULNS:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files.""$NC"
     write_link "s21"
-    echo "python_scripts;\"$S21_PY_SCRIPTS\"" >> "$CSV_LOG_FILE"
-    echo "python_vulns;\"$S21_PY_VULNS\"" >> "$CSV_LOG_FILE"
+    write_csv_log "python_scripts" "$S21_PY_SCRIPTS" "NA"
+    write_csv_log "python_vulns" "$S21_PY_VULNS" "NA"
     DATA=1
   fi
   if [[ "${S22_PHP_VULNS:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
     write_link "s22"
-    echo "php_scripts;\"$S22_PHP_SCRIPTS\"" >> "$CSV_LOG_FILE"
-    echo "php_vulns;\"$S22_PHP_VULNS\"" >> "$CSV_LOG_FILE"
+    write_csv_log "php_scripts" "$S22_PHP_SCRIPTS" "NA"
+    write_csv_log "php_vulns" "$S22_PHP_VULNS" "NA"
   fi
   if [[ "${S22_PHP_INI_ISSUES:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_INI_CONFIGS""$GREEN"" php configuration file.""$NC"
     write_link "s22"
-    echo "php_ini_issues;\"$S22_PHP_INI_ISSUES\"" >> "$CSV_LOG_FILE"
-    echo "php_ini_configs;\"$S22_PHP_INI_CONFIGS\"" >> "$CSV_LOG_FILE"
+    write_csv_log "php_ini_issues" "$S22_PHP_INI_ISSUES" "NA"
+    write_csv_log "php_ini_configs" "$S22_PHP_INI_CONFIGS" "NA"
     DATA=1
   fi
   if [[ "${YARA_CNT:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$YARA_CNT""$GREEN"" yara rule matches in $ORANGE${#FILE_ARR[@]}$GREEN files.""$NC"
     write_link "s110"
-    echo "yara_rules_match;\"$YARA_CNT\"" >> "$CSV_LOG_FILE"
+    write_csv_log "yara_rules_match" "$YARA_CNT" "NA"
     DATA=1
   fi
   EMUL=$(grep -c "Version information found" "$LOG_DIR"/s116_qemu_version_detection.txt 2>/dev/null || true)
   if [[ "${EMUL:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "s116"
-    echo "user_emulation_state;\"$EMUL\"" >> "$CSV_LOG_FILE"
+    write_csv_log "user_emulation_state" "$EMUL" "NA"
     DATA=1
   fi
 
@@ -194,7 +192,7 @@ output_details() {
     STATE="$ORANGE(""$GREEN""booted"
     EMU_STATE="booted"
     if [[ "$IP_ADDR" -gt 0 ]]; then
-      STATE="$STATE""$ORANGE / ""$GREEN""IP address detected (mode: $ORANGE$MODE$NC)"
+      STATE="$STATE""$ORANGE / ""$GREEN""IP address detected (mode: $ORANGE$MODE$GREEN)"
       EMU_STATE="$EMU_STATE"";IP_DET"
     fi
     if [[ "${ICMP:-0}" -gt 0 || "${TCP_0:-0}" -gt 0 ]]; then
@@ -220,7 +218,7 @@ output_details() {
     STATE="$STATE$ORANGE"")$NC"
 
     print_output "[+] System emulation was successful $STATE" "" "l10"
-    echo "system_emulation_state;\"$EMU_STATE\"" >> "$CSV_LOG_FILE"
+    write_csv_log "system_emulation_state" "$EMU_STATE" "NA"
     DATA=1
   fi
 
@@ -237,59 +235,59 @@ output_config_issues() {
     if [[ "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
       write_link "s40"
-      echo "weak_perm_count;\"$S40_WEAK_PERM_COUNTER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "weak_perm_count" "$S40_WEAK_PERM_COUNTER" "NA"
       DATA=1
     fi
     if [[ "${S55_HISTORY_COUNTER:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S55_HISTORY_COUNTER$GREEN history files.")")"
       write_link "s55"
-      echo "history_file_count;\"$S55_HISTORY_COUNTER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "history_file_count" "$S55_HISTORY_COUNTER" "NA"
       DATA=1
     fi
     if [[ "${S50_AUTH_ISSUES:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S50_AUTH_ISSUES$GREEN authentication issues.")")"
       write_link "s50"
-      echo "auth_issues;\"$S50_AUTH_ISSUES\"" >> "$CSV_LOG_FILE"
+      write_csv_log "auth_issues" "$S50_AUTH_ISSUES" "NA"
       DATA=1
     fi
     if [[ "${S85_SSH_VUL_CNT:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S85_SSH_VUL_CNT$GREEN SSHd issues.")")"
       write_link "s85"
-      echo "ssh_issues;\"$S85_SSH_VUL_CNT\"" >> "$CSV_LOG_FILE"
+      write_csv_log "ssh_issues" "$S85_SSH_VUL_CNT" "NA"
       DATA=1
     fi
     if [[ "${PW_COUNTER:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 ]]; then
       if [[ "${PW_COUNTER:-0}" -gt 0 ]]; then
         print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password related details.")")"
         write_link "s107"
-        echo "password_hashes;\"$PW_COUNTER\"" >> "$CSV_LOG_FILE"
+        write_csv_log "password_hashes" "$PW_COUNTER" "NA"
       fi
       if [[ "${STACS_HASHES:-0}" -gt 0 ]]; then
         print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
         write_link "s108"
-        echo "password_hashes_stacs;\"$STACS_HASHES\"" >> "$CSV_LOG_FILE"
+        write_csv_log "password_hashes_stacs" "$STACS_HASHES" "NA"
       fi
       DATA=1
     fi
     if [[ "${CERT_CNT:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
       write_link "s60"
-      echo "certificates;\"$CERT_CNT\"" >> "$CSV_LOG_FILE"
-      echo "certificates_outdated;\"$CERT_OUT_CNT\"" >> "$CSV_LOG_FILE"
+      write_csv_log "certificates" "$CERT_CNT" "NA"
+      write_csv_log "certificates_outdated" "$CERT_OUT_CNT" "NA"
       DATA=1
     fi
     if [[ "${MOD_DATA_COUNTER:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$MOD_DATA_COUNTER$GREEN kernel modules with $ORANGE$KMOD_BAD$GREEN licensing issues.")")"
       write_link "s25#kernel_modules"
-      echo "kernel_modules;\"$MOD_DATA_COUNTER\"" >> "$CSV_LOG_FILE"
-      echo "kernel_modules_lic;\"$KMOD_BAD\"" >> "$CSV_LOG_FILE"
+      write_csv_log "kernel_modules" "$MOD_DATA_COUNTER" "NA"
+      write_csv_log "kernel_modules_lic" "$KMOD_BAD" "NA"
       DATA=1
     fi
     if [[ "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE${INT_COUNT}$GREEN interesting files and $ORANGE${POST_COUNT:-0}$GREEN files that could be useful for post-exploitation.")")"
       write_link "s95"
-      echo "interesting_files;\"${INT_COUNT:-0}\"" >> "$CSV_LOG_FILE"
-      echo "post_files;\"${POST_COUNT:-0}\"" >> "$CSV_LOG_FILE"
+      write_csv_log "interesting_files" "${INT_COUNT:-0}" "NA"
+      write_csv_log "post_files" "${POST_COUNT:-0}" "NA"
       DATA=1
     fi
   fi
@@ -318,8 +316,8 @@ output_binaries() {
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$CANARY"" (""$CAN_PER""%)""$GREEN"" binaries without enabled stack canaries in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
-      echo "canary;\"$CANARY\"" >> "$CSV_LOG_FILE"
-      echo "canary_per;\"$CAN_PER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "canary" "$CANARY" "NA"
+      write_csv_log "canary_per" "$CAN_PER" "NA"
       DATA=1
     fi
     if [[ "${RELRO:-0}" -gt 0 ]]; then
@@ -327,8 +325,8 @@ output_binaries() {
       RELRO_PER=$(printf "%.0f" "$RELRO_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$RELRO"" (""$RELRO_PER""%)""$GREEN"" binaries without enabled RELRO in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
-      echo "relro;\"$RELRO\"" >> "$CSV_LOG_FILE"
-      echo "relro_per;\"$RELRO_PER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "relro" "$RELRO" "NA"
+      write_csv_log "relro_per" "$RELRO_PER" "NA"
       DATA=1
     fi
     if [[ "${NX:-0}" -gt 0 ]]; then
@@ -336,8 +334,8 @@ output_binaries() {
       NX_PER=$(printf "%.0f" "$NX_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$NX"" (""$NX_PER""%)""$GREEN"" binaries without enabled NX in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
-      echo "nx;\"$NX\"" >> "$CSV_LOG_FILE"
-      echo "nx_per;\"$NX_PER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "nx" "$NX" "NA"
+      write_csv_log "nx_per" "$NX_PER" "NA"
       DATA=1
     fi
     if [[ "${PIE:-0}" -gt 0 ]]; then
@@ -345,8 +343,8 @@ output_binaries() {
       PIE_PER=$(printf "%.0f" "$PIE_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$PIE"" (""$PIE_PER""%)""$GREEN"" binaries without enabled PIE in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
-      echo "pie;\"$PIE\"" >> "$CSV_LOG_FILE"
-      echo "pie_per;\"$PIE_PER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "pie" "$PIE" "NA"
+      write_csv_log "pie_per" "$PIE_PER" "NA"
       DATA=1
     fi
     if [[ "${STRIPPED:-0}" -gt 0 ]]; then
@@ -354,12 +352,12 @@ output_binaries() {
       STRIPPED_PER=$(printf "%.0f" "$STRIPPED_PER" 2>/dev/null || true)
       print_output "[+] Found ""$ORANGE""$STRIPPED"" (""$STRIPPED_PER""%)""$GREEN"" stripped binaries without symbols in $ORANGE""$BINS_CHECKED""$GREEN binaries."
       write_link "s12"
-      echo "stripped;\"$STRIPPED\"" >> "$CSV_LOG_FILE"
-      echo "stripped_per;\"$STRIPPED_PER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "stripped" "$STRIPPED" "NA"
+      write_csv_log "stripped_per" "$STRIPPED_PER" "NA"
       DATA=1
     fi
     if [[ "${BINS_CHECKED:-0}" -gt 0 ]]; then
-      echo "bins_checked;\"$BINS_CHECKED\"" >> "$CSV_LOG_FILE"
+      write_csv_log "bins_checked" "$BINS_CHECKED" "NA"
       DATA=1
     fi
   fi
@@ -377,7 +375,7 @@ output_binaries() {
       write_link "s14"
     fi
     print_output ""
-    echo "strcpy;\"$STRCPY_CNT\"" >> "$CSV_LOG_FILE"
+    write_csv_log "strcpy" "$STRCPY_CNT" "NA"
   fi
 
   local DATA=0
@@ -405,7 +403,7 @@ output_binaries() {
       DATA=1
       for LINE in "${RESULTS_STRCPY[@]}" ; do
         binary_fct_output "$LINE"
-        echo "strcpy_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
+        write_csv_log "strcpy_bin" "$BINARY" "$F_COUNTER"
       done
       print_output "$NC"
     fi
@@ -422,7 +420,7 @@ output_binaries() {
       DATA=1
       for LINE in "${RESULTS_SYSTEM[@]}" ; do
         binary_fct_output "$LINE"
-        echo "system_bin;\"$BINARY\";\"$F_COUNTER\"" >> "$CSV_LOG_FILE"
+        write_csv_log "system_bin" "$BINARY" "$F_COUNTER"
       done
       print_output "$NC"
     fi
@@ -517,7 +515,7 @@ output_cve_exploits() {
     if [[ -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[+] Identified ""$ORANGE""${#VERSIONS_AGGREGATED[@]}""$GREEN"" software components with version details.\\n"
       write_link "f20#softwareinventoryinitialoverview"
-      echo "versions_identified;\"${#VERSIONS_AGGREGATED[@]}\"" >> "$CSV_LOG_FILE"
+      write_csv_log "versions_identified" "${#VERSIONS_AGGREGATED[@]}" "NA"
       DATA=1
     fi
     if [[ "${S30_VUL_COUNTER:-0}" -gt 0 ]]; then
@@ -533,9 +531,9 @@ output_cve_exploits() {
       print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries / Exploits: $ORANGE${EXPLOIT_MEDIUM_COUNT:0}$NC")")"
       print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries /Exploits: $ORANGE${EXPLOIT_LOW_COUNT:0}$NC")")"
       # shellcheck disable=SC2129
-      echo "cve_high;\"$HIGH_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
-      echo "cve_medium;\"$MEDIUM_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
-      echo "cve_low;\"$LOW_CVE_COUNTER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "cve_high" "$HIGH_CVE_COUNTER" "NA"
+      write_csv_log "cve_medium" "$MEDIUM_CVE_COUNTER" "NA"
+      write_csv_log "cve_low" "$LOW_CVE_COUNTER" "NA"
       DATA=1
     elif [[ "$CVE_SEARCH" -ne 1 ]]; then
       print_output ""
@@ -543,25 +541,25 @@ output_cve_exploits() {
       print_output ""
     fi
     if [[ "${EXPLOIT_COUNTER:-0}" -gt 0 ]]; then
-      echo "exploits;\"$EXPLOIT_COUNTER\"" >> "$CSV_LOG_FILE"
+      write_csv_log "exploits" "$EXPLOIT_COUNTER" "NA"
       if [[ $MSF_MODULE_CNT -gt 0 ]]; then
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available ($MAGENTA$MSF_MODULE_CNT$GREEN Metasploit modules).")")"
         write_link "f20#minimalreportofexploitsandcves"
-        echo "metasploit_modules;\"$MSF_MODULE_CNT\"" >> "$CSV_LOG_FILE"
+        write_csv_log "metasploit_modules" "$MSF_MODULE_CNT" "NA"
       else
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
         write_link "f20#minimalreportofexploitsandcves"
       fi
       if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 || "$KNOWN_EXPLOITED_COUNTER" -gt 0 ]]; then
         print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited vulnerabilities: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$NC")")"
-        write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT"
-        write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT"
-        write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT"
-        write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT"
-        write_csv_log "known_exploited" "$KNOWN_EXPLOITED_COUNTER"
+        write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT" "NA"
+        write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT" "NA"
+        write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT" "NA"
+        write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT" "NA"
+        write_csv_log "known_exploited" "$KNOWN_EXPLOITED_COUNTER" "NA"
       fi
       # we report only software components with exploits to csv:
-      grep "Found version details" "$LOG_DIR/f20_vul_aggregator/F20_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG_FILE" || true
+      grep "Found version details" "$LOG_DIR/f20_vul_aggregator/F20_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG" || true
       DATA=1
     fi
   fi
@@ -832,14 +830,14 @@ print_os() {
       print_output "[+] Operating system detected (""$ORANGE""verified$GREEN): $ORANGE$SYSTEM$NC"
       write_link "s25"
     fi
-    echo "os_verified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
+    write_csv_log "os_verified" "$SYSTEM" "NA"
   else
     print_output "[+] Possible operating system detected (""$ORANGE""unverified$GREEN): $ORANGE$SYSTEM$NC"
     write_link "s03"
-    if [[ "$(grep -c os_verified "$CSV_LOG_FILE")" -lt 1 ]]; then
-      echo "os_verified;\"unknown\"" >> "$CSV_LOG_FILE"
+    if [[ "$(grep -c os_verified "$CSV_LOG")" -lt 1 ]]; then
+      write_csv_log "os_verified" "unknown" "NA"
     fi
-    echo "os_unverified;\"$SYSTEM\"" >> "$CSV_LOG_FILE"
+    write_csv_log "os_unverified" "$SYSTEM" "NA"
   fi
 }
 
@@ -857,7 +855,7 @@ cwe_logging() {
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_output ""
-      echo "cwe_issues;\"$TOTAL_CWE_CNT\"" >> "$CSV_LOG_FILE"
+      write_csv_log "cwe_issues" "$TOTAL_CWE_CNT" "NA"
     fi
   fi
 }
