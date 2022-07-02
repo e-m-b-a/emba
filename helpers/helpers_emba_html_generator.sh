@@ -18,6 +18,7 @@ INDEX_FILE="index.html"
 MAIN_LOG="./emba.log"
 STYLE_PATH="/style"
 TEMP_PATH="/tmp"
+ERR_PATH="/err"
 SUPPL_PATH_HTML="/etc"
 
 # variables for html style
@@ -35,17 +36,17 @@ SPAN_END="</span>"
 HR_MONO="<hr class=\"mono\" />"
 HR_DOUBLE="<hr class=\"double\" />"
 BR="<br />"
-LINK="<a href=\"LINK\" title=\"LINK\" target=\"\_blank\" >"
+LINK="<a href=\"LINK\" title=\"LINK\" target=\"_blank\" >"
 ARROW_LINK="<a href=\"LINK\" title=\"LINK\" >"
 LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
-REFERENCE_MODUL_EXT_LINK="<a class=\"refmodulext\" href=\"LINK\" title=\"LINK\" target=\"\_blank\">"
-EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"\_blank\" >"
-CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"\_blank\" >"
-CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"\_blank\" >"
-GITHUB_LINK="<a href=\"https://github.com/LINK\" title=\"LINKNAME\" target=\"\_blank\" >"
-LICENSE_LINK="<a href=\"LINK\" title=\"LINK\" target=\"\_blank\" >"
+REFERENCE_MODUL_EXT_LINK="<a class=\"refmodulext\" href=\"LINK\" title=\"LINK\" target=\"_blank\">"
+EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"_blank\" >"
+CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"_blank\" >"
+CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"_blank\" >"
+GITHUB_LINK="<a href=\"https://github.com/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
+LICENSE_LINK="<a href=\"LINK\" title=\"LINK\" target=\"_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
 ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
@@ -53,7 +54,7 @@ SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
 ANCHOR="<a class=\"anc\" id=\"ANCHOR\">"
 TITLE_ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
-IMAGE_LINK="<img class=\"image\" src=\".$STYLE_PATH\/PICTURE\">"
+IMAGE_LINK="<img class=\"image\" src=\".$STYLE_PATH/PICTURE\">"
 
 
 add_color_tags()
@@ -110,7 +111,7 @@ add_link_tags() {
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
-          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK""@" '-e' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END""@")
+          LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
         elif [[ "${REF_LINK: -7}" == ".tar.gz" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           local RES_PATH
@@ -118,12 +119,12 @@ add_link_tags() {
           if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
           HTML_LINK="$P_START""Archive: ""$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""$(basename "$REF_LINK")""$LINK_END""$P_END"
-          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""i""$HTML_LINK" )
+          LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true
-          HTML_LINK="$(echo "$IMAGE_LINK" | sed -e "s@PICTURE@$(basename "$REF_LINK")@g" || true)"
-          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""i""$HTML_LINK" )
+          HTML_LINK="$(echo "$IMAGE_LINK" | sed -e 's@PICTURE@'"$(basename "$REF_LINK")"'@' || true)"
+          LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
         fi
       elif [[ ("$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
         REF_ANCHOR=""
@@ -136,15 +137,15 @@ add_link_tags() {
         if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
           MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]' || true)"
           if [[ -n "$REF_ANCHOR" ]] ; then
-            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html\#anchor_$REF_ANCHOR@g" || true)"
+            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html\#anchor_$REF_ANCHOR@" || true)"
           else
-            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@g" || true)"
+            HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@" || true)"
           fi
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ "$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
-          LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK""@" '-e' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END""@")
+          LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
         fi
       URL_REGEX='(www.|https?|ftp|file):\/\/'
       elif [[ "$REF_LINK" =~ $URL_REGEX ]] ; then
@@ -152,8 +153,8 @@ add_link_tags() {
         while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
           LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
         done
-        HTML_LINK="$(echo "$REFERENCE_MODUL_EXT_LINK" | sed -e "s@LINK@$REF_LINK@g")""$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "$LINE_NUMBER_INFO_PREV""s@.*@""$HTML_LINK""@" )
+        HTML_LINK="$(echo "$REFERENCE_MODUL_EXT_LINK" | sed -e "s@LINK@$REF_LINK@")""$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")""$LINK_END"
+        LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@.*@'"$HTML_LINK"'@' )
       else
         LINE_NUMBER_INFO_PREV="$(grep -a -n -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
       fi
@@ -163,23 +164,23 @@ add_link_tags() {
   if [[ $IGNORE_LINKS -eq 0 ]] ; then 
     # web links
     if ( grep -a -q -E '(https?|ftp|file):\/\/' "$LINK_FILE" ) ; then
-      readarray -t WEB_LINKS < <( grep -a -n -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' "$LINK_FILE" | sort -u || true)
+      readarray -t WEB_LINKS < <( grep -a -n -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' "$LINK_FILE" | uniq || true)
       for WEB_LINK in "${WEB_LINKS[@]}" ; do
         WEB_LINK_LINE_NUM="$(echo "$WEB_LINK" | cut -d ":" -f 1 || true)"
         WEB_LINK_URL="$(echo "$WEB_LINK" | cut -d ":" -f 2- || true)"
         if [[ -n "$WEB_LINK" ]] ; then
           HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$WEB_LINK_URL@g")""$WEB_LINK_URL""$LINK_END" || true
-          LINK_COMMAND_ARR+=( '-e' "$WEB_LINK_LINE_NUM""s@""$WEB_LINK_URL""@""$HTML_LINK""@" )
+          LINK_COMMAND_ARR+=( "$WEB_LINK_LINE_NUM"'s@'"$WEB_LINK_URL"'@'"$HTML_LINK"'@' )
         fi
       done
     fi
 
     # linux exploit suggester links
-    if ( grep -a -q -E 'Exploit.*linux-exploit-suggester' "$LINK_FILE" ) ; then
-      readarray -t LES_LINE_ARR < <( grep -a -o -n -E "Exploit.*linux-exploit-suggester" "$LINK_FILE" | cut -d":" -f1)
+    if ( grep -a -q -E 'Exploit \(linux-exploit-suggester' "$LINK_FILE" ) ; then
+      readarray -t LES_LINE_ARR < <( grep -a -o -n -E 'Exploit \(linux-exploit-suggester' "$LINK_FILE" | cut -d":" -f1)
       for LES_LINE in "${LES_LINE_ARR[@]}" ; do 
         HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./s25_kernel_check.html@g")""linux-exploit-suggester""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "$LES_LINE""s@linux-exploit-suggester@""$HTML_LINK""@" )
+        LINK_COMMAND_ARR+=( "$LES_LINE""s@linux-exploit-suggester@""$HTML_LINK"'@' )
       done
     fi
 
@@ -189,13 +190,13 @@ add_link_tags() {
       for ANC_NUMBER in "${ANC_ARR[@]}" ; do
         ANC="$(sed "$ANC_NUMBER""q;d" "$LINK_FILE" | cut -c12- | cut -d'<' -f1 || true)"
         ANC_LINE="$(echo "$ANCHOR" | sed -e "s@ANCHOR@anchor_$ANC@g" || true)""$LINK_END"
-        LINK_COMMAND_ARR+=( '-e' "$ANC_NUMBER""i""$ANC_LINE" )
+        LINK_COMMAND_ARR+=( "$ANC_NUMBER"'s@$@'"$ANC_LINE"'@' )
       done
     fi
 
     # Exploit links and additional files
     if ( grep -a -q -E 'EDB ID:' "$LINK_FILE" ) ; then
-      readarray -t EXPLOITS_IDS < <( grep -a -n -o -E ".*EDB ID: ([0-9]*)[\ ]?*.*" "$LINK_FILE" | sort -u)
+      readarray -t EXPLOITS_IDS < <( grep -a -n -o -E ".*EDB ID: ([0-9]*)[\ ]?*.*" "$LINK_FILE" | uniq )
       for EXPLOIT_ID in "${EXPLOITS_IDS[@]}" ; do
         EXPLOIT_ID_LINE="$(echo "$EXPLOIT_ID" | cut -d ":" -f 1)"
         EXPLOIT_ID_STRING="$(echo "$EXPLOIT_ID" | cut -d ":" -f 2-)"
@@ -214,18 +215,18 @@ add_link_tags() {
           else
             HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
           fi
-          LINK_COMMAND_ARR+=( '-e' "$EXPLOIT_ID_LINE""s@""$EXPLOIT_ID""@""$HTML_LINK""@g" )
+          LINK_COMMAND_ARR+=( "$EXPLOIT_ID_LINE"'s@'"$EXPLOIT_ID"'@'"$HTML_LINK"'@' )
         fi
       done
     fi
 
     # MSF key links and additional files
     if ( grep -a -q -E 'Exploit.*MSF' "$LINK_FILE" ) ; then
-      readarray -t MSF_KEY_F < <( grep -a -n -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "$LINK_FILE" | sort -u || true)
+      readarray -t MSF_KEY_F < <( grep -a -n -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "$LINK_FILE" | uniq || true)
       for MSF_KEY in "${MSF_KEY_F[@]}" ; do 
         MSF_KEY_LINE="$(echo "$MSF_KEY" | cut -d ":" -f 1)"
         MSF_KEY_STRING="$(echo "$MSF_KEY" | cut -d ":" -f 3- | sed -e 's/^[[:space:]]*//')"
-        readarray -t MSF_KEY_STRING_ARR < <(echo "$MSF_KEY_STRING" | tr " " "\n" | sort -u)
+        readarray -t MSF_KEY_STRING_ARR < <(echo "$MSF_KEY_STRING" | tr " " "\n" | uniq )
         for MSF_KEY_ELEM in "${MSF_KEY_STRING_ARR[@]}" ; do
           MSF_KEY_FILE="$LOG_DIR""/f20_vul_aggregator/exploit/msf_""$MSF_KEY_ELEM"".rb"
           if [[ -f "$MSF_KEY_FILE" ]] ; then
@@ -235,7 +236,7 @@ add_link_tags() {
             if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true; fi
             cp "$MSF_KEY_FILE" "$RES_PATH""/""$(basename "$MSF_KEY_FILE")" || true
             HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$MSF_KEY_FILE")@g")""$MSF_KEY_ELEM""$LINK_END"
-            LINK_COMMAND_ARR+=( '-e' "$MSF_KEY_LINE""s@""$MSF_KEY_ELEM""@""$HTML_LINK""@g" )
+            LINK_COMMAND_ARR+=( "$MSF_KEY_LINE"'s@'"$MSF_KEY_ELEM"'@'"$HTML_LINK"'@' )
           fi
         done
       done
@@ -244,33 +245,33 @@ add_link_tags() {
     # Trickest key links to Github
     # Todo: link to local trickest files, currently we link to the github link
     if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
-      readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (G)//g' | sed 's/Github: //' | sed 's/).*//' | sort -u || true)
+      readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (G)//g' | sed 's/Github: //' | sed 's/).*//' | uniq || true)
       for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
         TRICKEST_ID_LINE="$(echo "$TRICKEST_KEY" | cut -d ":" -f 1)"
         TRICKEST_ID_STRING="$(echo "$TRICKEST_KEY" | cut -d ":" -f 2-)"
-        readarray -t TRICKEST_KEY_STRING_ARR < <(echo "$TRICKEST_ID_STRING" | tr " " "\n" | sort -u)
+        readarray -t TRICKEST_KEY_STRING_ARR < <(echo "$TRICKEST_ID_STRING" | tr " " "\n" | uniq)
         for TRICKEST_KEY_ELEM in "${TRICKEST_KEY_STRING_ARR[@]}" ; do
           # we rename / to _ for the display name of the link -> in the cli report it is possible to just copy and paste the URL to github,
           # in the web reporter you can click it
           TRICKEST_KEY_NAME="$(echo "$TRICKEST_KEY_ELEM" | tr "/" "_")"
           HTML_LINK="$(echo "$GITHUB_LINK" | sed -e "s@LINKNAME@$TRICKEST_KEY_NAME@g" | sed -e "s@LINK@$TRICKEST_KEY_ELEM@g")""$TRICKEST_KEY_NAME""$LINK_END"
-          LINK_COMMAND_ARR+=( '-e' "$TRICKEST_ID_LINE""s@""$TRICKEST_KEY_ELEM""@""$HTML_LINK""@g" )
+          LINK_COMMAND_ARR+=( "$TRICKEST_ID_LINE"'s@'"$TRICKEST_KEY_ELEM"'@'"$HTML_LINK"'@' )
         done
       done
     fi 
 
     # CVE links
     if ( grep -a -q -E '(CVE)' "$LINK_FILE" ) ; then
-      readarray -t CVE_IDS < <( grep -a -n -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$LINK_FILE" | sort -u || true)
+      readarray -t CVE_IDS < <( grep -a -n -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$LINK_FILE" | uniq || true)
       for CVE_ID in "${CVE_IDS[@]}" ; do
         CVE_ID_LINE="$(echo "$CVE_ID" | cut -d ":" -f 1)"
         CVE_ID_STRING="$(echo "$CVE_ID" | cut -d ":" -f 2-)"
         if [[ -n "$CVE_ID_STRING" ]] ; then
           HTML_LINK="$(echo "$CVE_LINK" | sed -e "s@LINK@$CVE_ID_STRING@g")""$CVE_ID_STRING""$LINK_END"
           if [[ "$LINK_FILE" == *"f20_vul_aggregator"* ]]; then
-            LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""[[:blank:]]$CVE_ID_STRING""@""\t$HTML_LINK""@g" )
+            LINK_COMMAND_ARR+=( "$CVE_ID_LINE"'s@'"[[:blank:]]$CVE_ID_STRING"'@'"\t$HTML_LINK""@" )
           else
-            LINK_COMMAND_ARR+=( '-e' "$CVE_ID_LINE""s@""$CVE_ID_STRING""@""$HTML_LINK""@g" )
+            LINK_COMMAND_ARR+=( "$CVE_ID_LINE"'s@'"$CVE_ID_STRING"'@'"$HTML_LINK"'@' )
           fi
         fi
       done
@@ -278,14 +279,14 @@ add_link_tags() {
 
     # CWE links
     if ( grep -a -q -E '(CWE)' "$LINK_FILE" ) ; then
-      readarray -t CWE_IDS < <( grep -a -n -E -o 'CWE[0-9]{3,4}' "$LINK_FILE" | sort -u || true)
+      readarray -t CWE_IDS < <( grep -a -n -E -o 'CWE[0-9]{3,4}' "$LINK_FILE" | uniq || true)
       for CWE_ID in "${CWE_IDS[@]}" ; do
         CWE_ID_LINE="$(echo "$CWE_ID" | cut -d ":" -f 1)"
         CWE_ID_STRING="$(echo "$CWE_ID" | cut -d ":" -f 2-)"
         CWE_ID_NUMBER="${CWE_ID_STRING:3}"
         if [[ -n "$CWE_ID_STRING" ]] ; then
           HTML_LINK="$(echo "$CWE_LINK" | sed -e "s@LINK@$CWE_ID_NUMBER@g")""$CWE_ID_STRING""$LINK_END"
-          LINK_COMMAND_ARR+=( '-e' "$CWE_ID_LINE""s@""$CWE_ID_STRING""@""$HTML_LINK""@g" )
+          LINK_COMMAND_ARR+=( "$CWE_ID_LINE"'s@'"$CWE_ID_STRING"'@'"$HTML_LINK"'@' )
         fi
       done
     fi
@@ -302,7 +303,7 @@ add_link_tags() {
         LIC_URL_ARR=( "${LIC_URL_ARR[@]}" "$(echo "$LICENSE_LINK_LINE" | cut -d';' -f2-)")
       done  < "$CONFIG_DIR"/bin_version_strings_links.cfg
 
-      readarray -t LICENSE_LINES < <( grep -a -n -E -o 'License: .*$' "$LINK_FILE" | sort -u)
+      readarray -t LICENSE_LINES < <( grep -a -n -E -o 'License: .*$' "$LINK_FILE" | uniq)
       for LICENSE_LINE in "${LICENSE_LINES[@]}" ; do
         LICENSE_LINE_NUM="$(echo "$LICENSE_LINE" | cut -d: -f1)"
         LICENSE_STRING="$(echo "$LICENSE_LINE" | cut -d: -f3 | sed -e 's/<[^>]*>//g' )"
@@ -314,17 +315,39 @@ add_link_tags() {
         done
         if [[ -n "$LIC_URL" ]] ; then
           HTML_LINK="$(echo "$LICENSE_LINK" | sed -e "s@LINK@$LIC_URL@g")""${LICENSE_STRING:1}""$LINK_END"
-          LINK_COMMAND_ARR+=( '-e' "$LICENSE_LINE_NUM""s@""${LICENSE_STRING:1}""@""$HTML_LINK""@g" )
+          LINK_COMMAND_ARR+=( "$LICENSE_LINE_NUM"'s@'"${LICENSE_STRING:1}"'@'"$HTML_LINK"'@' )
         fi
       done
     fi
   fi
 
-  printf "%s\n" "${LINK_COMMAND_ARR[@]}" > ./dump/x_$(basename "$LINK_FILE").txt
-
   if [[ "${#LINK_COMMAND_ARR[@]}" -gt 0 ]] ; then
     if [[ -f "$LINK_FILE" ]]; then
-      sed -i "${LINK_COMMAND_ARR[@]}" "$LINK_FILE" || true
+      local INSERT_ARR=()
+      local LOCAL_ARR=()
+      local INSERT_SIZE=100
+      for (( X=0; X<${#LINK_COMMAND_ARR[@]}; X++ )) ; do
+        LOCAL_ARR+=("${LINK_COMMAND_ARR[$X]}")
+        INSERT_ARR+=('-e' "${LINK_COMMAND_ARR[$X]}")
+        if [[ ( ( $(($X%$INSERT_SIZE)) -eq 0 ) && $X -ne 0 ) || ( $((${#LINK_COMMAND_ARR[@]}-1)) -eq $X ) ]] ; then
+          SED_ERROR="$(sed -i "${INSERT_ARR[@]}" "$LINK_FILE" 2>&1 >/dev/null)"
+          if [[ ! -z "$SED_ERROR" ]] ; then
+            printf "ERROR:\nInsertion of Chunk failed:\n%s\n\nError message:\n%s\n" "${INSERT_ARR[@]}" "$SED_ERROR" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+            SED_ERROR=""
+            printf "SINGLE_INSERTION:\n" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+            for LINE in "${LOCAL_ARR[@]}" ; do
+              printf "%s\n" "$LINE" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+              SED_ERROR=$(sed -i "$LINE" "$LINK_FILE" 2>&1 >/dev/null)
+              if [[ ! -z "$SED_ERROR" ]] ; then
+                printf "ERROR:\nInsertion of single link failed:\n%s\n" "$SED_ERROR" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+              fi
+            done
+          fi
+          INSERT_ARR=()
+          LOCAL_ARR=()
+          SED_ERROR=""
+        fi
+      done
     fi
   fi
 
@@ -332,7 +355,7 @@ add_link_tags() {
     wait_for_pid "${WAIT_PIDS_WR[@]}"
   fi
   if [[ -f "$LINK_FILE" ]]; then
-    sed -i -E -e '/^<pre>(\[REF\])|(\[ANC\]).*$/d' "$LINK_FILE" || true
+    sed -i -E 's@^<pre>((\[REF\])|(\[ANC\])).*</pre>@@g' "$LINK_FILE" || true
   fi
 }
 
@@ -439,7 +462,7 @@ generate_report_file()
         add_link_to_index "$HTML_FILE" "$MODUL_NAME"
         # add module anchor to navigation
         NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$A_MODUL_NAME@g")"
-        sed -i "$LINE_NUMBER_REP_NAV""i""$NAV_LINK""$MODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
+        sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$NAV_LINK""$MODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
         ((LINE_NUMBER_REP_NAV+=1))
       fi
     fi
@@ -455,7 +478,7 @@ generate_report_file()
           sed -i -E "s@$SUBMODUL_NAME@$LINE@" "$TMP_FILE"
           # Add anchor to file
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
-          sed -i "$LINE_NUMBER_REP_NAV""i""$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END" "$ABS_HTML_PATH""/""$HTML_FILE"
+          sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
           ((LINE_NUMBER_REP_NAV+=1))
         fi
       done
@@ -554,6 +577,7 @@ update_index()
 
   # remove tempory files from web report
   rm -R "$ABS_HTML_PATH$TEMP_PATH"
+  rmdir "$ABS_HTML_PATH$ERR_PATH" 2>/dev/null || true
   rm -R "$ABS_HTML_PATH"/qemu_init* 2>/dev/null || true
 }
 
@@ -614,6 +638,9 @@ prepare_report()
   fi
   if [ ! -d "$ABS_HTML_PATH$TEMP_PATH" ] ; then
     mkdir -p "$ABS_HTML_PATH$TEMP_PATH" || true
+  fi
+  if [ ! -d "$ABS_HTML_PATH$ERR_PATH" ] ; then
+    mkdir -p "$ABS_HTML_PATH$ERR_PATH" || true
   fi
   if [ ! -d "$ABS_HTML_PATH$SUPPL_PATH_HTML" ] ; then
     mkdir -p "$ABS_HTML_PATH$SUPPL_PATH_HTML" || true
