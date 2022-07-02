@@ -329,17 +329,17 @@ add_link_tags() {
       for (( X=0; X<${#LINK_COMMAND_ARR[@]}; X++ )) ; do
         LOCAL_ARR+=("${LINK_COMMAND_ARR[$X]}")
         INSERT_ARR+=('-e' "${LINK_COMMAND_ARR[$X]}")
-        if [[ ( ( $(($X%$INSERT_SIZE)) -eq 0 ) && $X -ne 0 ) || ( $((${#LINK_COMMAND_ARR[@]}-1)) -eq $X ) ]] ; then
+        if [[ ( ( $((X%INSERT_SIZE)) -eq 0 ) && $X -ne 0 ) || ( $((${#LINK_COMMAND_ARR[@]}-1)) -eq $X ) ]] ; then
           SED_ERROR="$(sed -i "${INSERT_ARR[@]}" "$LINK_FILE" 2>&1 >/dev/null)"
-          if [[ ! -z "$SED_ERROR" ]] ; then
-            printf "ERROR:\nInsertion of Chunk failed:\n%s\n\nError message:\n%s\n" "${INSERT_ARR[@]}" "$SED_ERROR" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+          if [[ -n "$SED_ERROR" ]] ; then
+            printf "ERROR:\nInsertion of Chunk failed:\n%s\n\nError message:\n%s\n" "${INSERT_ARR[@]}" "$SED_ERROR" >> "$ABS_HTML_PATH$ERR_PATH/web_report_error_$(basename "$LINK_FILE").txt"
             SED_ERROR=""
-            printf "SINGLE_INSERTION:\n" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+            printf "SINGLE_INSERTION:\n" >> "$ABS_HTML_PATH$ERR_PATH/web_report_error_$(basename "$LINK_FILE").txt"
             for LINE in "${LOCAL_ARR[@]}" ; do
-              printf "%s\n" "$LINE" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+              printf "%s\n" "$LINE" >> "$ABS_HTML_PATH$ERR_PATH/web_report_error_$(basename "$LINK_FILE").txt"
               SED_ERROR=$(sed -i "$LINE" "$LINK_FILE" 2>&1 >/dev/null)
-              if [[ ! -z "$SED_ERROR" ]] ; then
-                printf "ERROR:\nInsertion of single link failed:\n%s\n" "$SED_ERROR" >> "$ABS_HTML_PATH$ERR_PATH"/web_report_error_$(basename "$LINK_FILE").txt
+              if [[ -n "$SED_ERROR" ]] ; then
+                printf "ERROR:\nInsertion of single link failed:\n%s\n" "$SED_ERROR" >> "$ABS_HTML_PATH$ERR_PATH/web_report_error_$(basename "$LINK_FILE").txt"
               fi
             done
           fi
