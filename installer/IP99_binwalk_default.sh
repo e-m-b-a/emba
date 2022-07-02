@@ -31,8 +31,9 @@ IP99_binwalk_default() {
     print_tool_info "python3-pyqt5.qtopengl" 1
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
+    print_tool_info "python3-lzo" 1
     # python2 is needed for ubireader installation
-    print_tool_info "python2" 1
+    #print_tool_info "python2" 1
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "mtd-utils" 1
@@ -166,8 +167,9 @@ IP99_binwalk_default() {
             git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
           fi
           cd ./external/binwalk/ubi_reader || exit 1
-          git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
-          python2 setup.py install
+          #git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
+          #python2 setup.py install
+          python3 setup.py install
           cd "$HOME_PATH" || exit 1
         else
           echo -e "$GREEN""ubi_reader already installed""$NC"

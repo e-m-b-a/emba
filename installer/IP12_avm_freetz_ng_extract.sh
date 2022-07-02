@@ -27,20 +27,21 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "python3" 1
     print_tool_info "python-is-python3" 1
     print_tool_info "pv" 1
+    print_tool_info "cpio" 1
     print_tool_info "rsync" 1
     print_tool_info "kmod" 1
+    # print_tool_info "execstack" 1
     print_tool_info "libzstd-dev" 1
-    print_tool_info "cmake" 1
-    print_tool_info "lib32z1-dev" 1
     print_tool_info "unar" 1
     print_tool_info "inkscape" 1
     print_tool_info "imagemagick" 1
+    print_tool_info "graphicsmagick" 1
     print_tool_info "subversion" 1
     print_tool_info "git" 1
     print_tool_info "bc" 1
+    print_tool_info "unrar" 1
     print_tool_info "wget" 1
     print_tool_info "sudo" 1
-    print_tool_info "ccache" 1
     print_tool_info "gcc" 1
     print_tool_info "g++" 1
     print_tool_info "binutils" 1
@@ -66,6 +67,7 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "libstring-crc32-perl" 1
     print_tool_info "ruby" 1
     print_tool_info "gawk" 1
+    print_tool_info "python2" 1
     print_tool_info "libusb-dev" 1
     print_tool_info "unzip" 1
     print_tool_info "intltool" 1
@@ -74,8 +76,15 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "libc6-dev-i386" 1
     print_tool_info "lib32ncurses5-dev" 1
     print_tool_info "gcc-multilib" 1
+    print_tool_info "bsdmainutils" 1
     print_tool_info "lib32stdc++6" 1
     print_tool_info "libglib2.0-dev" 1
+    print_tool_info "ccache" 1
+    print_tool_info "cmake" 1
+    print_tool_info "lib32z1-dev" 1
+    print_tool_info "libssl-dev" 1
+    print_tool_info "uuid-dev" 1
+    print_tool_info "libgnutls28-dev" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
