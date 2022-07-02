@@ -40,10 +40,7 @@ S99_grepit() {
   print_output "Running intelligent grepit module for identification of interesting spots within the firmware ..." "no_log"
 
   if [[ "$STRICT_MODE" -eq 1 ]]; then
-    # TODO: but currently I'm running out of time
-    print_output "[!] Warning: This module is not STRICT mode compatible - module is not executed."
-    module_end_log "${FUNCNAME[0]}" 0
-    return
+    disable_strict_mode "$STRICT_MODE"
   fi
 
   pre_module_reporter "${FUNCNAME[0]}"
@@ -85,6 +82,10 @@ S99_grepit() {
 
   if [[ $THREADED -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_S99[@]}"
+  fi
+
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    enable_strict_mode "$STRICT_MODE"
   fi
 
   grepit_reporter

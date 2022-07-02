@@ -51,27 +51,31 @@ ubi_extractor() {
 
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_images$NC."
   print_output "[*] File details: $ORANGE$(file "$UBI_PATH_" | cut -d ':' -f2-)$NC"
-  ubireader_extract_images -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE"
+  ubireader_extract_images -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE" || true
 
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
-  ubireader_extract_files -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE"
-  UBI_1st_ROUND="$(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image")"
+  ubireader_extract_files -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE" || true
+  if [[ -d "$EXTRACTION_DIR_" ]]; then
+    UBI_1st_ROUND="$(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image" || true)"
 
-  for UBI_DATA in "${UBI_1st_ROUND[@]}"; do
-    UBI_FILE=$(echo "$UBI_DATA" | cut -d: -f1)
-    UBI_INFO=$(echo "$UBI_DATA" | cut -d: -f2)
-    if [[ "$UBI_INFO" == *"UBIfs image"* ]]; then
-      sub_module_title "UBIfs deep extraction"
-      print_output "[*] Extracts UBIfs firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
-      print_output "[*] File details: $ORANGE$(file "$UBI_FILE" | cut -d ':' -f2-)$NC"
-      ubireader_extract_files -l -i -v -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE"
-    fi
-  done
+    for UBI_DATA in "${UBI_1st_ROUND[@]}"; do
+      UBI_FILE=$(echo "$UBI_DATA" | cut -d: -f1)
+      UBI_INFO=$(echo "$UBI_DATA" | cut -d: -f2)
+      if [[ "$UBI_INFO" == *"UBIfs image"* ]]; then
+        sub_module_title "UBIfs deep extraction"
+        print_output "[*] Extracts UBIfs firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
+        print_output "[*] File details: $ORANGE$(file "$UBI_FILE" | cut -d ':' -f2-)$NC"
+        ubireader_extract_files -l -i -v -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE" || true
+      fi
+    done
 
-  print_output ""
-  FILES_UBI_EXT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
-  DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
-  print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image."
-  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-  write_csv_log "UBI filesystem extractor" "$UBI_PATH_" "$EXTRACTION_DIR_" "$FILES_UBI_EXT" "$DIRS_UBI_EXT" "NA"
+    print_output ""
+    FILES_UBI_EXT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
+    DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
+    print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image."
+    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+    write_csv_log "UBI filesystem extractor" "$UBI_PATH_" "$EXTRACTION_DIR_" "$FILES_UBI_EXT" "$DIRS_UBI_EXT" "NA"
+  else
+    print_output "[-] First round UBI extractor failed!"
+  fi
 }
