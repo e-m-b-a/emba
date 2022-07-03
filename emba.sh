@@ -273,6 +273,8 @@ main()
   export THREADED=0             # 0 -> single thread
                                 # 1 -> multi threaded
   export YARA=1
+  export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
+  export JUMP_OVER_CVESEARCH_CHECK=0 # ignore long CVEsearch check in dep check
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
@@ -308,7 +310,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bA:cC:dDe:Ef:Fghik:l:m:MN:op:QrsStUxX:Y:WzZ: OPT ; do
+  while getopts a:bA:cC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUxX:yY:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -364,6 +366,9 @@ main()
         export IN_DOCKER=1
         export USE_DOCKER=0
         ;;
+      j)
+        export JUMP_OVER_CVESEARCH_CHECK=1
+        ;;
       k)
         export KERNEL=1
         export KERNEL_CONFIG="$OPTARG"
@@ -414,6 +419,9 @@ main()
         ;;
       X)
         export FW_VERSION="$OPTARG"
+        ;;
+      y)
+        export OVERWRITE_LOG=1
         ;;
       Y)
         export FW_VENDOR="$OPTARG"
@@ -648,7 +656,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cC:dDe:Ef:Fghik:l:m:MN:op:QrsStUX:Y:WxzZ: OPT ; do
+    while getopts a:A:cC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUX:yY:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;

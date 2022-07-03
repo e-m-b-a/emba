@@ -29,7 +29,11 @@ log_folder()
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    There are files in the specified directory: ""$LOG_DIR""\\n    You can now delete the content here or start the tool again and specify a different directory."
     echo -e "\\n${ORANGE}Delete content of log directory: $LOG_DIR ?${NC}\\n"
-    read -p "(Y/n)  " -r ANSWER
+    if [[ $OVERWRITE_LOG -eq 1 ]] ; then
+      ANSWER="y"
+    else
+      read -p "(Y/n)  " -r ANSWER
+    fi
     case ${ANSWER:0:1} in
         y|Y|"" )
           if mount | grep "$LOG_DIR" | grep -e "proc\|sys\|run" > /dev/null; then
