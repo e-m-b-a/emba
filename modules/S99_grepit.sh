@@ -49,13 +49,16 @@ S99_grepit() {
   MAX_THREADS_S99=$((2*"$(grep -c ^processor /proc/cpuinfo || true )"))
 
   # grepit options:
-  #Sometimes we look for composite words with wildcard, eg. root.{0,20}detection, this is the maximum
-  #of random characters that can be in between. The higher the value the more strings will potentially be flagged.
+  # Sometimes we look for composite words with wildcard, eg. root.{0,20}detection, this is the maximum
+  # of random characters that can be in between. The higher the value the more strings will potentially be flagged.
   WILDCARD_SHORT=20
   WILDCARD_LONG=200
-  #Do not remove -rP if you don't know what you are doing, otherwise you probably break this script
+  # Weird grep behaviour with clearing to the end of line -.-
+  # This variable prevents this behaviour
+  export GREP_COLORS=ne
+  # Do not remove -rP if you don't know what you are doing, otherwise you probably break this script
   GREP_ARGUMENTS="-a -n -A 1 -B 3 -rP"
-  #Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)
+  # Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)
   COLOR_ARGUMENTS="--color=always"
   STANDARD_GREP_ARGUMENTS="$GREP_ARGUMENTS $COLOR_ARGUMENTS"
   ENABLE_LEAST_LIKELY=0
@@ -119,7 +122,7 @@ grepit_search() {
   local SEARCH_REGEX="$4"
   local OUTFILE="$5"
   if [[ -v 6 ]]; then
-    local ARGS_FOR_GREP="${6}" #usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
+    local ARGS_FOR_GREP="${6}" # usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
   else
     local ARGS_FOR_GREP=""
   fi
