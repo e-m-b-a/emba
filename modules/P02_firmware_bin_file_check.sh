@@ -78,7 +78,6 @@ P02_firmware_bin_file_check() {
       print_output ""
       python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null
       write_link "$LOG_DIR"/pixd.png
-      print_output ""
     fi
 
     fw_bin_detector "$FIRMWARE_PATH"
@@ -206,4 +205,5 @@ fw_bin_detector() {
     export OPENSSL_ENC_DETECTED=1
     write_csv_log "OpenSSL encrypted" "yes" "NA"
   fi
+  print_output ""
 }
