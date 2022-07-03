@@ -31,6 +31,7 @@ P02_firmware_bin_file_check() {
   export EXT_IMAGE=0 
   export AVM_DETECTED=0
   export UBI_IMAGE=0
+  export OPENSSL_ENC_DETECTED=0
   export ENGENIUS_ENC_DETECTED=0
   export GPG_COMPRESS=0
   export QNAP_ENC_DETECTED=0
