@@ -8,7 +8,7 @@ print_output "$(indent "${ORANGE}G$NC - PoC code found on Github (unknown exploi
 write_link "https://github.com/trickest/cve"
 print_output "$(indent "${ORANGE}X$NC - Vulnerability is known as exploited")"
 write_link "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
-
+print_output ""
 print_output ""
 print_output "[*] Source notes:"
 print_output "$(indent "${ORANGE}STAT$NC - Details found by static modules (S06, S09, S24, S25)")"

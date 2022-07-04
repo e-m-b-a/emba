@@ -136,7 +136,7 @@ check()
   echo -e "\\n""$GREEN""Run shellcheck:""$NC""\\n"
   for SOURCE in "${SOURCES[@]}"; do
     echo -e "\\n""$GREEN""Run shellcheck on $SOURCE""$NC""\\n"
-    if shellcheck -P "$HELP_DIR":"$MOD_DIR" -a ./emba.sh "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
+    if shellcheck -P "$HELP_DIR":"$MOD_DIR":"$MOD_DIR_LOCAL" -a ./emba.sh "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
       echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
     else
       echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
