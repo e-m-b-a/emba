@@ -467,7 +467,7 @@ cve_extractor() {
 
       # check if the CVE is known as a knwon exploited vulnerability:
       if [[ -f "$KNOWN_EXP_CSV" ]]; then
-        if grep -q "${CVE_VALUE}," "$KNOWN_EXP_CSV"; then
+        if grep -q \""${CVE_VALUE}"\", "$KNOWN_EXP_CSV"; then
           print_output "[+] ${ORANGE}WARNING:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a known exploited vulnerability."
           echo -e "[+] ${ORANGE}WARNING:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a known exploited vulnerability." >> "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log
           KNOWN_EXPLOITED=1
