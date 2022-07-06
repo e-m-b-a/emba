@@ -85,6 +85,8 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "libssl-dev" 1
     print_tool_info "uuid-dev" 1
     print_tool_info "libgnutls28-dev" 1
+    print_tool_info "libsqlite3-dev" 1
+    print_tool_info "sqlite3" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
