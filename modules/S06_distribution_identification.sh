@@ -107,6 +107,8 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(debian) [0-9]+\ \([a-z]+\)\ -\ installer\ build\ [0-9]+\+deb([0-9]+)u([0-9])/\1:\1_linux:\2\.\3/')"
   # Fedora 17 (Beefy Miracle)
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(fedora)\ ([0-9]+).*/\1project:\1:\2/')"
+  # CentOS
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/centos\ linux\ ([0-9]+(\.[0-9]+)+?).*/centos:centos:\1/')"
   # Ubuntu
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(ubuntu)\ ([0-9]+\,[0-9]+).*/\1_linux:\1:\2/')"
   # OpenWRT KAMIKAZE r18* -> 8.09.2
@@ -125,5 +127,8 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ \#([0-9]+)/dd-wrt:dd-wrt:\1/')"
   # iotgoat v1.0
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/iotgoat\ v([0-9]\.[0-9]+)/iotgoat:\1/')"
+  # F5 BigIP
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/big-ip\ ltm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_local_traffic_manager:\1/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/big-ip\ asm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_application_security_manager:\1/')"
   CSV_RULE="$VERSION_IDENTIFIER"
 }
