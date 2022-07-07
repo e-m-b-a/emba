@@ -99,7 +99,7 @@ I120_cwe_checker() {
           rm -r ./external/rustup
 
           if [[ "$IN_DOCKER" -eq 1 ]]; then
-            echo "{"ghidra_path":"/external/ghidra/ghidra_10.1.2_PUBLIC"}" > /root/.config/cwe_checker/ghidra.json
+            echo '{"ghidra_path":"/external/ghidra/ghidra_10.1.2_PUBLIC"}' > /root/.config/cwe_checker/ghidra.json
           fi
           # save .config as we remount /root with tempfs -> now we can restore it in the module
           mv /root/.config /external/cwe_checker/
