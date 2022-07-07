@@ -246,7 +246,7 @@ deeper_extractor_helper() {
           foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted" &
           WAIT_PIDS_P20+=( "$!" )
         else
-          android_ota_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted"
+          foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted"
         fi
       elif [[ "$BUFFALO_ENC_DETECTED" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
