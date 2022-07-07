@@ -29,6 +29,9 @@ S120_cwe_checker()
   CWE_CNT_=0
 
   if [[ $CWE_CHECKER -eq 1 ]] ; then
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
+      cwe_container_prepare
+    fi
     cwe_check
 
     if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
@@ -47,6 +50,14 @@ S120_cwe_checker()
   fi
 
   module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
+}
+
+cwe_container_prepare() {
+  if [[ -d "$EXT_DIR"/cwe_checker/.config ]]; then
+    print_output "[*] Restoring config directory in read-only container"
+    cp -r "$EXT_DIR"/cwe_checker/.config /root/
+    cp -r "$EXT_DIR"/cwe_checker/.local /root/
+  fi
 }
 
 cwe_check() {

@@ -21,25 +21,9 @@ P02_firmware_bin_file_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware file analyzer"
 
-  local FILE_BIN_OUT
-  export SHA512_CHECKSUM="NA"
-  export MD5_CHECKSUM="NA"
-  export ENTROPY="NA"
-  export DLINK_ENC_DETECTED=0
-  export VMDK_DETECTED=0
-  export UBOOT_IMAGE=0
-  export EXT_IMAGE=0 
-  export AVM_DETECTED=0
-  export UBI_IMAGE=0
-  export OPENSSL_ENC_DETECTED=0
-  export ENGENIUS_ENC_DETECTED=0
-  export GPG_COMPRESS=0
-  export QNAP_ENC_DETECTED=0
-  export BSD_UFS=0
-  export PATOOLS_INIT=0
-  export ANDROID_OTA=0
-  export MD5_DONE_DEEP=()
+  set_p02_default_exports
 
+  local FILE_BIN_OUT
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"
   if [[ -f "$FIRMWARE_PATH" ]]; then
@@ -86,25 +70,34 @@ P02_firmware_bin_file_check() {
   module_end_log "${FUNCNAME[0]}" 1
 }
 
+set_p02_default_exports() {
+  export SHA512_CHECKSUM="NA"
+  export MD5_CHECKSUM="NA"
+  export ENTROPY="NA"
+  export PATOOLS_INIT=0
+  export DLINK_ENC_DETECTED=0
+  export VMDK_DETECTED=0
+  export UBOOT_IMAGE=0
+  export EXT_IMAGE=0 
+  export AVM_DETECTED=0
+  export UBI_IMAGE=0
+  export OPENSSL_ENC_DETECTED=0
+  export ENGENIUS_ENC_DETECTED=0
+  export BUFFALO_ENC_DETECTED=0
+  export QNAP_ENC_DETECTED=0
+  export GPG_COMPRESS=0
+  export BSD_UFS=0
+  export ANDROID_OTA=0
+  export MD5_DONE_DEEP=()
+}
+
 fw_bin_detector() {
   local CHECK_FILE="${1:-}"
   local FILE_BIN_OUT
   local DLINK_ENC_CHECK
   local AVM_CHECK
 
-  export PATOOLS_INIT=0
-  export VMDK_DETECTED=0
-  export DLINK_ENC_DETECTED=0
-  export QNAP_ENC_DETECTED=0
-  export AVM_DETECTED=0
-  export UBOOT_IMAGE=0
-  export EXT_IMAGE=0
-  export UBI_IMAGE=0
-  export ENGENIUS_ENC_DETECTED=0
-  export OPENSSL_ENC_DETECTED=0
-  export GPG_COMPRESS=0
-  export BSD_UFS=0
-  export ANDROID_OTA=0
+  set_p02_default_exports
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
@@ -204,6 +197,12 @@ fw_bin_detector() {
     print_output "[+] Identified OpenSSL encrypted file - trying OpenSSL module for Foscam firmware"
     export OPENSSL_ENC_DETECTED=1
     write_csv_log "OpenSSL encrypted" "yes" "NA"
+  fi
+  # This check is currently only tested on one firmware - further tests needed:
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\ b9\ 01\  ]]; then
+    print_output "[+] Identified Buffalo encrpyted firmware - using Buffalo extraction module"
+    export BUFFALO_ENC_DETECTED=1
+    write_csv_log "Buffalo encrypted" "yes" "NA"
   fi
   print_output ""
 }

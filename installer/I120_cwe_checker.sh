@@ -80,19 +80,30 @@ I120_cwe_checker() {
           curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.1.2_build/ghidra_10.1.2_PUBLIC_20220125.zip -Sf -o external/ghidra.zip
           mkdir external/ghidra 2>/dev/null
           unzip -qo external/ghidra.zip -d external/ghidra
-          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.1.2_PUBLIC/support/launch.properties
+          if [[ "$IN_DOCKER" -eq 1 ]]; then
+            sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.1.2_PUBLIC/support/launch.properties
+          else
+            sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.1.2_PUBLIC/support/launch.properties
+          fi
           rm external/ghidra.zip
 
           if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
-          mkdir external/cwe_checker 2>/dev/null
+          mkdir ./external/cwe_checker 2>/dev/null
           git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || exit 1
-          make all GHIDRA_PATH=external/ghidra/ghidra_10.1.2_PUBLIC
+          make all GHIDRA_PATH=./external/ghidra/ghidra_10.1.2_PUBLIC
           cd "$HOME_PATH" || exit 1
 
           mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
           #rm -r -f "$HOME""/.cargo/"
           rm -r ./external/rustup
+
+          if [[ "$IN_DOCKER" -eq 1 ]]; then
+            echo "{"ghidra_path":"/external/ghidra/ghidra_10.1.2_PUBLIC"}" > /root/.config/cwe_checker/ghidra.json
+          fi
+          # save .config as we remount /root with tempfs -> now we can restore it in the module
+          mv /root/.config /external/cwe_checker/
+          mv /root/.local /external/cwe_checker/
         else
           echo -e "\\n""$GREEN""cwe-checker already installed - no further action performed.""$NC"
         fi

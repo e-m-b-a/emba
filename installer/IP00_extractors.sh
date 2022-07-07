@@ -29,6 +29,11 @@ IP00_extractors(){
     print_tool_info "python3-lzo" 1
     # vmdk extractor:
     print_tool_info "guestfs-tools" 1
+    # Buffalo decryptor
+    print_file_info "buffalo-enc.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-enc.c" "external/buffalo-enc.c"
+    print_file_info "buffalo-lib.c" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.c"
+    print_file_info "buffalo-lib.h" "Decryptor for Buffalo firmware images" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.h"
+    print_tool_info "gcc" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -51,6 +56,23 @@ IP00_extractors(){
           cd external/payload_dumper || exit 1 
           git pull
           cd "$HOME_PATH" || exit 1
+        fi
+
+        if ! [[ -f "./external/buffalo-enc.elf" ]] ; then
+          # Buffalo decryptor:
+          download_file "buffalo-enc.c" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-enc.c" "external/buffalo-enc.c"
+          download_file "buffalo-lib.c" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.c"
+          download_file "buffalo-lib.h" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.h" "external/buffalo-lib.h"
+          cd ./external || exit 1
+          sed -i 's/#include "buffalo-lib.h"/#include "buffalo-lib.h"\n#include "buffalo-lib.c"/g' buffalo-enc.c
+          gcc -o buffalo-enc.elf buffalo-enc.c
+          rm buffalo-enc.c buffalo-lib.c buffalo-lib.h
+          cd "$HOME_PATH" || exit 1
+        fi
+        if [[ -f "./external/buffalo-enc.elf" ]] ; then
+          echo -e "$GREEN""Buffalo decryptor installed successfully""$NC"
+        else
+          echo -e "$ORANGE""Buffalo decryptor installation failed - check it manually""$NC"
         fi
       ;;
     esac

@@ -7,12 +7,14 @@ services:
     privileged: true
     # /root is needed for binwalk
     # /external/arachni/... needed by arachni (full system emulator modules)
+    # /external/freetz-ng/.fakeroot-cache needed by freetz-ng (AVM extractor)
     tmpfs:
       - /tmp
       - /root
       - /run
       - /var/run
       - /var/tmp
+      - /external/freetz-ng/.fakeroot-cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp
