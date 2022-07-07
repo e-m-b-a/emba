@@ -257,7 +257,7 @@ generate_special_log() {
 
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
     print_output ""
-    print_output "[*] CVE log file stored in $CVE_MINIMAL_LOG."
+    print_output "[*] CVE log file generated."
     write_link "$CVE_MINIMAL_LOG"
     print_output ""
 
@@ -274,7 +274,7 @@ generate_special_log() {
     done
 
     print_output ""
-    print_output "[*] Minimal exploit summary file stored in $EXPLOIT_OVERVIEW_LOG."
+    print_output "[*] Minimal exploit summary file generated."
     write_link "$EXPLOIT_OVERVIEW_LOG"
     print_output ""
 

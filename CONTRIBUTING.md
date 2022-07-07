@@ -28,6 +28,9 @@ It also sketches the typical integration process of patches.
 - test your code with shellcheck [**required**] 
     -  see the included [shellchecker script](./check_project.sh)
 
+- test your code in strict mode (EMBA parameter -S) [**required**]
+    - all code should be strict mode compatible
+
 - send reminder if nothing happens after about a week
 
 - the code needs to work on the latest Kali Linux (other distributions are welcome but currently not tested)
@@ -38,6 +41,9 @@ It also sketches the typical integration process of patches.
 
 - Comments: use # sign followed by a space. When needed, create a comment block. Blank lines: allowed
 
+- If you are using an additional binary make sure it's available on the system before calling it
+  - Include it into the dependency check and in the installer
+
 - All functions use snake_case (e.g. `test_xyz()`). One blank lines between functions.
 
 - Variables: Variables should be capitalized, with underscore as word separator (e.g. `PROCESS_EXISTS=1`)
@@ -46,9 +52,21 @@ It also sketches the typical integration process of patches.
 
 - Scope of variables: Use local variables if possible
 
+- Use parameters to functions
+    - work with local variables inside the functions
+    - do not rely on globals if not needed
+
 - Use `export` for variables which aren't only used in one file - it isn't necessary, but helps for readability
 
+- Don't use backticks anymore, use $(..) instead
+
+- Use double square [[]] brackets (conditional expressions) instead of single square [] brackets
+
+- Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](http://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). It is slower as it forks, fopens and pipes back the result.
+
 - Code tests: Use shellcheck to test your code (./check_project.sh)
+
+- Code tests: Run EMBA in STRICT mode (parameter -S) to ensure everything is correct
 
 ## 3) Developer's Certificate of Origin 1.1
 
