@@ -52,6 +52,9 @@ It also sketches the typical integration process of patches.
 
 - Scope of variables: Use local variables if possible
 
+- Variables always need to be initialized
+  - e.g., local VARIABLE=""
+
 - Use parameters to functions
     - work with local variables inside the functions
     - do not rely on globals if not needed
@@ -63,6 +66,8 @@ It also sketches the typical integration process of patches.
 - Use double square [[]] brackets (conditional expressions) instead of single square [] brackets
 
 - Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](http://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). It is slower as it forks, fopens and pipes back the result.
+
+- At least ["weak quoting"](https://wiki.bash-hackers.org/syntax/quoting#weak_quoting) is required - unquoted variable processing is not permitted
 
 - Code tests: Use shellcheck to test your code (./check_project.sh)
 
