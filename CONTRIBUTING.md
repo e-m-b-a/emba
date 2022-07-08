@@ -65,7 +65,7 @@ It also sketches the typical integration process of patches.
 
 - Use double square [[]] brackets (conditional expressions) instead of single square [] brackets
 
-- Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](http://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). It is slower as it forks, fopens and pipes back the result.
+- Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](http://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). Using bash internals is faster as it does not fork, fopen and pipes the results back.
 
 - At least ["weak quoting"](https://wiki.bash-hackers.org/syntax/quoting#weak_quoting) is required - unquoted variable processing is not permitted
 
