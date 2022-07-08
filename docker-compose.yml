@@ -7,28 +7,32 @@ services:
     privileged: true
     # /root is needed for binwalk
     # /external/arachni/... needed by arachni (full system emulator modules)
+    # /external/freetz-ng/.fakeroot-cache needed by freetz-ng (AVM extractor)
     tmpfs:
       - /tmp
       - /root
       - /run
       - /var/run
       - /var/tmp
+      - /external/freetz-ng/.fakeroot-cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/../logs
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/home
     build: .
-    # dev is needed for the system emulator (L10)
+    # /dev is needed for the system emulator (L10)
     # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
+    # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
         - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/log
         - ${EMBA}/:/emba:ro
         - /etc/timezone:/etc/timezone:ro
         - /etc/localtime:/etc/localtime:ro
-        - /lib/modules:/lib/modules:ro
         - /dev:/dev
+        - /lib/modules:/lib/modules:ro
+        - /boot:/boot:ro
     environment:
         - USER
     devices:

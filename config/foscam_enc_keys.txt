@@ -1,0 +1,45 @@
+ID;KEY;Note - see https://github.com/mcw0/PoC/blob/master/decrypt-foscam.py
+0;'Wxift*';Decrypt: HI3518A_ddr256M_sys_ver 1.4.1.7 / 1.4.1.8 + FI9x Ver 1, recovertool
+1;'Wxift*v2';FW Decrypt 'B' AKA 'FosBaby'
+2;'WWxift*';
+3;'WWxift*v2';FW Decrypt 'B' AKA 'FosBaby'
+4;'Wyift*';
+5;'Wyift*v2';FW Decrypt 'C' AKA FI9903P
+6;'WWyift*';
+7;'WWyift*v2';FW Decrypt 'C' AKA FI9903P
+8;'Wzift*';
+9;'Wzift*v2';
+10;'WWzift*';
+11;'WWzift*v2';FW Decrypt 'E' AKA 'C1'
+12;'Weift*';
+13;'Weift*v2';
+14;'WWeift*';
+15;'WWeift*v2';FW Decrypt 'G' AKA 'C1-Lite'
+16;'Pxift*';exist (config)
+17;'Pxift*v2';
+18;'PPxift*';
+19;'PPxift*v2';
+20;'Xti1f*';recovertool
+21;'Xti1f*v2';
+22;'XXti1f*',;
+23;'XXti1f*v2';
+24;'Ktf1g*';exist (config)
+25;'Ktf1g*v2';
+26;'KKtf1g*';
+27;'KKtf1g*v2';
+28;'WT8Nk*';Decyrypt: HI3518A_ddr256M_sys_onvif_ver1.4.1.8.bin  + FI9x Ver 1, recovertool
+29;'WT8Nk*v2';FW Decrypt 'A', recovertool
+30;'WWT8Nk*';
+31;'WWT8Nk*v2';FW Decrypt 'A'
+32;'XT8Nk*';FW Decrypt: FI9x Ver1 'One To All', recovertool
+33;'XT8Nk*v2';FW Decrypt: FI9x Ver2
+34;'XXT8Nk*';
+35;'XXT8Nk*v2';
+36;'U0i*P2jK_';exist (config) - encrypt/decrypt
+37;'M0i*P2jK_';exist (config) - encrypt/decrypt
+38;'BpP+2R9*Q';exist (config) - encrypt/decrypt
+39;'Ak47@99';l: factory~, p: Ak47@99 @ webService
+40;'rizhi6789';dd if=ipcLog.bin | openssl des3 -d -k rizhi6789 [...]
+41;'foscam';l: admin, p: foscam @ UDTMediaServer
+42;'WWzift*v4';'F' model AKA R4, R2, C2
+43;'WWjift*v2';'K' model (C2M)

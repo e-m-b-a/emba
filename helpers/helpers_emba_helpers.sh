@@ -167,9 +167,9 @@ function_exists() {
 
 # used by CSV search to get the search rule for csv search:
 get_csv_rule() {
-  local VERSION_STRING="$1"
+  local VERSION_STRING="${1:-}"
   local CSV_REGEX
-  CSV_REGEX=$(echo "$2" | sed 's/^\"//' | sed 's/\"$//')
+  CSV_REGEX=$(echo "${2:-}" | sed 's/^\"//' | sed 's/\"$//')
   export CSV_RULE
   CSV_RULE="NA"
 

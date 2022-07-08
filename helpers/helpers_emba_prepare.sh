@@ -427,8 +427,12 @@ update_known_exploitable() {
 
   if [[ -f "$EXT_DIR"/known_exploited_vulnerabilities.csv ]]; then
     print_output "[*] Update the known_exploited_vulnerabilities file" "no_log"
-    wget https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv -O "$EXT_DIR"/known_exploited_vulnerabilities.csv || true
-    cp "$EXT_DIR"/known_exploited_vulnerabilities.csv "$KNOWN_EXP_CSV"
+    wget https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv -O "$EXT_DIR"/known_exploited_vulnerabilities_new.csv || true
+    if [[ $(wc -l "$EXT_DIR"/known_exploited_vulnerabilities_new.csv | awk '{print $1}') -ge $(wc -l "$EXT_DIR"/known_exploited_vulnerabilities.csv | awk '{print $1}') ]]; then
+      # copy it only if the updated file is bigger then the installed one
+      cp "$EXT_DIR"/known_exploited_vulnerabilities_new.csv "$KNOWN_EXP_CSV"
+      mv "$EXT_DIR"/known_exploited_vulnerabilities_new.csv "$EXT_DIR"/known_exploited_vulnerabilities.csv
+    fi
     if [[ -f "$KNOWN_EXP_CSV" ]]; then
       print_output "[*] Known exploit database now has $ORANGE$(wc -l "$KNOWN_EXP_CSV" | awk '{print $1}')$NC exploit entries." "no_log"
     fi

@@ -55,6 +55,7 @@ ANCHOR="<a class=\"anc\" id=\"ANCHOR\">"
 TITLE_ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
 IMAGE_LINK="<img class=\"image\" src=\".$STYLE_PATH/PICTURE\">"
+ARACHNI_LINK="<a href=\"./l25_web_checks/arachni_report/index.html\" title=\"Arachni web report\" target=\"_blank\" >"
 
 
 add_color_tags()
@@ -318,6 +319,23 @@ add_link_tags() {
           LINK_COMMAND_ARR+=( "$LICENSE_LINE_NUM"'s@'"${LICENSE_STRING:1}"'@'"$HTML_LINK"'@' )
         fi
       done
+    fi
+
+    # Arachni report
+    if [[ "$LINK_FILE" == *"l25_web_checks"* ]]; then
+      if [[ -d "$LOG_DIR/l25_web_checks/arachni_report/" ]]; then
+        print_output "[*] Arachni report found ... copy it to $ABS_HTML_PATH/l25_web_checks" "no_log"
+        # copy arachni report to report directory
+        if ! [[ -d "$ABS_HTML_PATH/l25_web_checks" ]]; then
+          mkdir "$ABS_HTML_PATH/l25_web_checks"
+        fi
+        cp -r "$LOG_DIR/l25_web_checks/arachni_report/" "$ABS_HTML_PATH/l25_web_checks/"
+        # generate a html link
+        if [[ -f "$LINK_FILE" ]]; then
+          print_output "[*] Generating Arachni linking $LINK_FILE" "no_log"
+          LINK_COMMAND_ARR+=( 's@'"Arachni report created"'@'"$ARACHNI_LINK""Arachni web application report""$LINK_END"'@' )
+        fi
+      fi
     fi
   fi
 

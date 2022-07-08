@@ -323,6 +323,8 @@ dependency_check()
 
     check_dep_file "QNAP decryptor" "$EXT_DIR""/PC1"
 
+    check_dep_file "Buffalo decryptor" "$EXT_DIR""/buffalo-enc.elf"
+
     check_dep_tool "ubireader image extractor" "ubireader_extract_images"
     check_dep_tool "ubireader file extractor" "ubireader_extract_files"
 
