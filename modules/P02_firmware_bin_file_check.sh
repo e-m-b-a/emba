@@ -110,7 +110,9 @@ fw_bin_detector() {
     write_csv_log "AVM firmware detected" "yes" "NA"
   fi
   # if we have a zip, tgz, tar archive we are going to use the patools extractor
-  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* ]]; then
+  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || \
+    "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* || \
+    "$FILE_BIN_OUT" == *"7-zip archive data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "$AVM_DETECTED" -ne 1 ]]; then
       print_output "[+] Identified gzip/zip/tar/iso archive file - using patools extraction module"

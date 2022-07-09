@@ -43,6 +43,7 @@ F50_base_aggregator() {
   S95_LOG="s95_interesting_binaries_check.txt"
   S107_LOG="s107_deep_password_search.txt"
   S108_LOG="s108_stacs_password_search.txt"
+  S109_LOG="s109_jtr_local_pw_cracking.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
   #L10_LOG="l10_system_emulator.txt"
@@ -263,9 +264,15 @@ output_config_issues() {
         write_csv_log "password_hashes" "$PW_COUNTER" "NA"
       fi
       if [[ "${STACS_HASHES:-0}" -gt 0 ]]; then
-        print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
-        write_link "s108"
         write_csv_log "password_hashes_stacs" "$STACS_HASHES" "NA"
+        if [[ "${HASHES_CRACKED:-0}" -gt 0 ]]; then
+          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS ($ORANGE$HASHES_CRACKED$GREEN passwords cracked.)")")"
+          write_link "s109"
+          write_csv_log "password_hashes_cracked" "$HASHES_CRACKED" "NA"
+        else
+          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
+          write_link "s108"
+        fi
       fi
       DATA=1
     fi
@@ -662,6 +669,9 @@ get_data() {
   fi
   if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
     STACS_HASHES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2 || true)
+  fi
+  if [[ -f "$LOG_DIR"/"$S109_LOG" ]]; then
+    HASHES_CRACKED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S109_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2 || true)

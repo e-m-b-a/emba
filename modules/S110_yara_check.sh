@@ -36,10 +36,10 @@ S110_yara_check()
 
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
       if [[ "$THREADED" -eq 1 ]]; then
-        yara_check &
+        yara_check "$YARA_S_FILE" "$DIR_COMB_YARA" &
         WAIT_PIDS_S110+=( "$!" )
       else
-        yara_check 
+        yara_check "$YARA_S_FILE" "$DIR_COMB_YARA"
       fi
     done
 
@@ -53,7 +53,7 @@ S110_yara_check()
       done < "$TMP_DIR"/YARA_CNT.tmp
     fi
 
-    print_output ""
+    print_output "\\n"
     print_output "[*] Found $ORANGE$YARA_CNT$NC yara rule matches in $ORANGE${#FILE_ARR[@]}$NC files."
     write_log ""
     write_log "[*] Statistics:$YARA_CNT"
@@ -68,14 +68,42 @@ S110_yara_check()
 }
 
 yara_check() {
-  if [[ -e "$YARA_S_FILE" ]] ; then
-    local S_OUTPUT=()
-    mapfile -t S_OUTPUT < <(yara -r -w "$DIR_COMB_YARA" "$YARA_S_FILE" || true)
-    if [[ "${#S_OUTPUT[@]}" -gt 0 ]] ; then
-      for YARA_OUT in "${S_OUTPUT[@]}"; do
-        print_output "[+] ""$(echo -e "$YARA_OUT" | cut -d " " -f1)"" ""$(white "$(print_path "$YARA_S_FILE")")"
-        echo "1" >> "$TMP_DIR"/YARA_CNT.tmp
-      done
-    fi
+  local YARA_S_FILE_="${1:-}"
+  local DIR_COMB_YARA_="${2:-}"
+  local S_OUTPUT=()
+  local YARA_OUT
+  local Y_LOG=""
+  local MATCHED_RULES=()
+  local MATCHED_RULE=""
+
+  if ! [[ -f "$YARA_S_FILE_" ]] ; then
+    return
+  fi
+  if ! [[ -f "$DIR_COMB_YARA_" ]] ; then
+    print_output "[-] Missing Yara rules file - something bad happened"
+    return
+  fi
+
+  Y_LOG="$LOG_PATH_MODULE/$(basename "$YARA_S_FILE_").txt"
+  yara -r -w -s -m -L -g "$DIR_COMB_YARA_" "$YARA_S_FILE_" >> "$Y_LOG"
+
+  # remove empty logfiles
+  if [[ -f "$Y_LOG" ]]; then
+    [[ -s "$Y_LOG" ]] || rm "$Y_LOG" 2>/dev/null || true
+  fi
+
+  if [[ -f "$Y_LOG" ]]; then
+    # as multiple rules can match per file, we need to extract the matching rules
+    mapfile -t MATCHED_RULES < <(grep ".*\ \[\]\ \[.*\]\ \/" "$Y_LOG")
+    # iteratre through all matching rules and print success
+    for MATCHED_RULE in "${MATCHED_RULES[@]}"; do
+      MATCHED_RULE=$(echo "$MATCHED_RULE" | awk '{print $1}')
+      if [[ "$MATCHED_RULE" =~ .*IsSuspicious.* ]]; then
+        # this rule does not help us a lot ... remove it from results
+        continue
+      fi
+      print_output "[+] Yara rule $ORANGE$MATCHED_RULE$GREEN matched in $ORANGE$YARA_S_FILE_$NC" "" "$Y_LOG"
+      echo "1" >> "$TMP_DIR"/YARA_CNT.tmp
+    done
   fi
 }

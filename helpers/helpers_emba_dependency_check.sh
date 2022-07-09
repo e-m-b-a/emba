@@ -300,6 +300,9 @@ dependency_check()
       fi
     fi
 
+    # jtr
+    check_dep_tool "john"
+
     # pixd
     check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
 
