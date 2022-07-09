@@ -70,8 +70,6 @@ S110_yara_check()
 yara_check() {
   local YARA_S_FILE_="${1:-}"
   local DIR_COMB_YARA_="${2:-}"
-  local S_OUTPUT=()
-  local YARA_OUT
   local Y_LOG=""
   local MATCHED_RULES=()
   local MATCHED_RULE=""
