@@ -20,7 +20,7 @@ export PRE_THREAD_ENA=0
 
 P21_buffalo_decryptor() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$BUFFALO_ENC_DETECTED" -ne 0 ]]; then
     module_title "Buffalo encrypted firmware extractor"
@@ -40,12 +40,12 @@ buffalo_enc_extractor() {
   local EXTRACTION_FILE_="${2:-}"
   local BUFFALO_FILE_CHECK=""
 
-  sub_module_title "Buffalo encrypted firmware extractor"
-
   if ! [[ -f "$BUFFALO_ENC_PATH_" ]]; then
     print_output "[-] No file for decryption provided"
     return
   fi
+
+  sub_module_title "Buffalo encrypted firmware extractor"
 
   hexdump -C "$BUFFALO_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
   print_output ""
@@ -69,6 +69,7 @@ buffalo_enc_extractor() {
     if [[ "$BUFFALO_FILE_CHECK" =~ .*u-boot\ legacy\ uImage,\ .* ]]; then
       print_output ""
       print_output "[+] Decrypted Buffalo firmware file to $ORANGE$EXTRACTION_FILE_$NC"
+      MD5_DONE_DEEP+=( "$(md5sum "$BUFFALO_ENC_PATH_" | awk '{print $1}')" )
       export FIRMWARE_PATH="$EXTRACTION_FILE_"
       print_output ""
       print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"

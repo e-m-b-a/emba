@@ -213,7 +213,7 @@ prepare_emulator() {
 
     print_output "[*] Preparing the environment for usermode emulation"
     if ! command -v "$EMULATOR" > /dev/null ; then
-      echo
+      print_output "" "no_log"
       print_output "[!] Is the qemu package installed?"
       print_output "$(indent "We can't find it!")"
       print_output "$(indent "$(red "Terminating EMBA now.\\n")")"
@@ -563,7 +563,7 @@ running_jobs() {
   if [[ -n "$EMULATOR" ]]; then
     CJOBS=$(pgrep -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
-      echo
+      print_output "" "no_log"
       print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)" "no_log"
       print_output "$(indent "$CJOBS")""\\n" "no_log"
     else

@@ -93,9 +93,10 @@ set_p02_default_exports() {
 
 fw_bin_detector() {
   local CHECK_FILE="${1:-}"
-  local FILE_BIN_OUT
-  local DLINK_ENC_CHECK
-  local AVM_CHECK
+  local FILE_BIN_OUT=""
+  local DLINK_ENC_CHECK=""
+  local QNAP_ENC_CHECK=""
+  local AVM_CHECK=0
 
   set_p02_default_exports
 

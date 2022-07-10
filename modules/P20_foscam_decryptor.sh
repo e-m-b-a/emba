@@ -22,7 +22,7 @@ export PRE_THREAD_ENA=0
 
 P20_foscam_decryptor() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$OPENSSL_ENC_DETECTED" -ne 0 ]]; then
     module_title "Foscam encrypted firmware extractor"
@@ -41,9 +41,7 @@ foscam_enc_extractor() {
   local FOSCAM_ENC_PATH_="${1:-}"
   local EXTRACTION_FILE_="${2:-}"
   local FOSCAM_FILE_CHECK=""
-  KEY_FILE="$CONFIG_DIR/foscam_enc_keys.txt"
-
-  sub_module_title "Foscam encrypted firmware extractor"
+  local KEY_FILE="$CONFIG_DIR/foscam_enc_keys.txt"
 
   if ! [[ -f "$FOSCAM_ENC_PATH_" ]]; then
     print_output "[-] No file for decryption provided"
@@ -53,6 +51,8 @@ foscam_enc_extractor() {
     print_output "[-] No key file found in config directory"
     return
   fi
+
+  sub_module_title "Foscam encrypted firmware extractor"
 
   hexdump -C "$FOSCAM_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
@@ -78,7 +78,9 @@ foscam_enc_extractor() {
           FW_VENDOR="Foscam"
         fi
 
+        MD5_DONE_DEEP+=( "$(md5sum "$FOSCAM_ENC_PATH_" | awk '{print $1}')" )
         foscam_ubi_extractor "$EXTRACTION_FILE_"
+        # as we have already found a working key we can now exit the loop
         break
       fi
     fi

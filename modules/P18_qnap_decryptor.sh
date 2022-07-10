@@ -20,7 +20,7 @@ export PRE_THREAD_ENA=0
 
 P18_qnap_decryptor() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$QNAP_ENC_DETECTED" -ne 0 ]]; then
     module_title "QNAP encrypted firmware extractor"
@@ -40,9 +40,15 @@ P18_qnap_decryptor() {
 }
 
 qnap_enc_extractor() {
-  local QNAP_ENC_PATH_="$1"
-  local EXTRACTION_FILE_="$2"
+  local QNAP_ENC_PATH_="${1:-}"
+  local EXTRACTION_FILE_="${2:-}"
   export QNAP=0
+
+  if ! [[ -f "$QNAP_ENC_PATH_" ]]; then
+    print_output "[-] No file for decryption provided"
+    return
+  fi
+
   sub_module_title "QNAP encrypted firmware extractor"
 
   hexdump -C "$QNAP_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
@@ -59,6 +65,7 @@ qnap_enc_extractor() {
   print_output ""
   if [[ -f "$EXTRACTION_FILE_" && "$(file "$EXTRACTION_FILE_")" == *"gzip compressed data"* ]]; then
     print_output "[+] Decrypted QNAP firmware file to $ORANGE$EXTRACTION_FILE_$NC"
+    MD5_DONE_DEEP+=( "$(md5sum "$QNAP_ENC_PATH_" | awk '{print $1}')" )
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
     export QNAP=1
     print_output ""
@@ -76,10 +83,14 @@ qnap_enc_extractor() {
 }
 
 qnap_extractor() {
+  local DECRYPTED_FW_="${1:-}"
+  if ! [[ -f "$DECRYPTED_FW_" ]]; then
+    return
+  fi
+
   sub_module_title "QNAP firmware extraction"
   print_output "[!] WARNING: This module is in an very early alpha state."
   print_output "[!] WARNING: Some areas of this module are not tested."
-  DECRYPTED_FW_="$1"
 
   # This module is a full copy of https://github.com/max-boehm/qnap-utils/blob/master/extract_qnap_fw.sh
   # some areas of this code are completely untested. Please report bugs via https://github.com/e-m-b-a/emba/issues

@@ -60,12 +60,12 @@ P99_prepare_analyzer() {
   fi
 
   set_etc_paths
-  echo
+  print_output "" "no_log"
   if [[ "$RTOS" -eq 1 ]]; then
     print_output "[*] RTOS system detected"
   fi
 
-  NEG_LOG=1
+  local NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 

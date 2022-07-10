@@ -74,6 +74,8 @@ filesystem_tree() {
 release_info()
 {
   sub_module_title "Release/Version information"
+  local R_INFO=""
+  local RELEASE=""
 
   declare -a RELEASE_STUFF=()
   mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg")

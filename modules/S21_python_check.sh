@@ -21,20 +21,24 @@ S21_python_check()
   module_title "Check python scripts for security issues"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  S21_PY_VULNS=0
-  S21_PY_SCRIPTS=0
+  local S21_PY_VULNS=0
+  local S21_PY_SCRIPTS=0
+  local PY_SCRIPT=""
+  local PYTHON_SCRIPTS=()
+  local S21_VULN_TYPES=()
+  local VTYPE=""
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
     write_csv_log "Script path" "Python issues detected" "common linux file"
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-    for LINE in "${PYTHON_SCRIPTS[@]}" ; do
-      if ( file "$LINE" | grep -q "Python script.*executable" ) ; then
+    for PY_SCRIPT in "${PYTHON_SCRIPTS[@]}" ; do
+      if ( file "$PY_SCRIPT" | grep -q "Python script.*executable" ) ; then
         ((S21_PY_SCRIPTS+=1))
         if [[ "$THREADED" -eq 1 ]]; then
-          s21_script_bandit &
+          s21_script_bandit "$PY_SCRIPT" &
           WAIT_PIDS_S21+=( "$!" )
         else
-          s21_script_bandit
+          s21_script_bandit "$PY_SCRIPT"
         fi
       fi
     done
@@ -74,9 +78,14 @@ S21_python_check()
 }
 
 s21_script_bandit() {
-  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  local PY_SCRIPT_="${1:-}"
+  local NAME=""
+  local PY_LOG=""
+  local VULNS=""
+
+  NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit""$NAME"".txt"
-  bandit -r "$LINE" > "$PY_LOG" 2> /dev/null || true
+  bandit -r "$PY_SCRIPT_" > "$PY_LOG" 2> /dev/null || true
 
   VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
@@ -106,9 +115,11 @@ s21_script_bandit() {
 
 # lets leave this here for reasons ;)
 s21_script_check() {
-  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  local PY_SCRIPT_="${1:-}"
+
+  NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/pylint_""$NAME"".txt"
-  pylint --max-line-length=240 -d C0115,C0114,C0116,W0511,E0401 "$LINE" > "$PY_LOG" 2> /dev/null
+  pylint --max-line-length=240 -d C0115,C0114,C0116,W0511,E0401 "$PY_SCRIPT_" > "$PY_LOG" 2> /dev/null
   VULNS=$(cut -d: -f4 "$PY_LOG" | grep -c "[A-Z][0-9][0-9][0-9]" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:

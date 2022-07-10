@@ -24,15 +24,15 @@ P60_firmware_bin_extractor() {
   module_title "Binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  DISK_SPACE_CRIT=0
-  LINUX_PATH_COUNTER=0
+  export DISK_SPACE_CRIT=0
+  export LINUX_PATH_COUNTER=0
 
   # typically FIRMWARE_PATH is only a file if none of the EMBA extractors were able to extract something
   # This means we are using binwalk in Matryoshka mode here
   # if we have a directory with multiple files in it we automatically pass here and run into the deep extractor
   if [[ -f "$FIRMWARE_PATH" ]]; then
     # we love binwalk ... this is our first chance for extracting everything
-    binwalking
+    binwalking "$FIRMWARE_PATH"
   fi
 
   linux_basic_identification_helper
@@ -51,6 +51,8 @@ P60_firmware_bin_extractor() {
     fi
   fi
 
+  # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
+  # shellcheck disable=SC2153
   detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
@@ -72,6 +74,7 @@ P60_firmware_bin_extractor() {
 
 wait_for_extractor() {
   export OUTPUT_DIR="$FIRMWARE_PATH_CP"
+  local SEARCHER=""
   SEARCHER=$(basename "$FIRMWARE_PATH")
 
   # this is not solid and we probably have to adjust it in the future
@@ -79,26 +82,29 @@ wait_for_extractor() {
   SEARCHER="$(echo "$SEARCHER" | tr "(" "." | tr ")" ".")"
 
   for PID in "${WAIT_PIDS[@]}"; do
-    running=1
+    local running=1
     while [[ $running -eq 1 ]]; do
       echo "." | tr -d "\n"
       if ! pgrep -v grep | grep -q "$PID"; then
         running=0
       fi
-      disk_space_protection
+      disk_space_protection "$SEARCHER"
       sleep 1
     done
   done
 }
 
 check_disk_space() {
+  export DISK_SPACE
   DISK_SPACE=$(du -hm "$FIRMWARE_PATH_CP" --max-depth=1 --exclude="proc" 2>/dev/null | awk '{ print $1 }' | sort -hr | head -1 || true)
 }
 
 disk_space_protection() {
+  local SEARCHER="${1:-}"
+
   check_disk_space
   if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
-    echo ""
+    print_output "" "no_log"
     print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
     print_output "[!] $(date) - Ending extraction processes" "main"
     pgrep -a -f "binwalk.*$SEARCHER.*" || true
@@ -165,6 +171,9 @@ deeper_extractor_helper() {
   else
     local MATRYOSHKA=0
   fi
+  local FILE_ARR_TMP=()
+  local FILE_TMP=""
+  local FILE_MD5=""
 
   readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
@@ -183,6 +192,7 @@ deeper_extractor_helper() {
       print_output "[*] Details of file: $ORANGE$FILE_TMP$NC"
       print_output "$(indent "$(file "$FILE_TMP")")"
       # do a quick check if EMBA should handle the file or we give it to binwalk:
+      # fw_bin_detector is a function from p02
       fw_bin_detector "$FILE_TMP"
 
       if [[ "$VMDK_DETECTED" -eq 1 ]]; then
@@ -215,10 +225,10 @@ deeper_extractor_helper() {
         fi
       elif [[ "$EXT_IMAGE" -eq 1 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
-          ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
+          ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
           WAIT_PIDS_P20+=( "$!" )
         else
-          ext2_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted"
+          ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted"
         fi
       elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
@@ -286,12 +296,20 @@ deeper_extractor_helper() {
 }
 
 binwalking() {
+  local FIRMWARE_PATH_="${1:-}"
+  export OUTPUT_DIR_BINWALK=""
+
+  if ! [[ -f "$FIRMWARE_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   sub_module_title "Analyze binary firmware blob with binwalk"
 
   print_output "[*] Basic analysis with binwalk"
-  binwalk "$FIRMWARE_PATH" | tee -a "$LOG_FILE"
+  binwalk "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
 
-  echo
+  print_output "" "no_log"
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
   if [[ -f $FIRMWARE_PATH_BAK ]] ; then
     print_output "[*] Entropy testing with binwalk ... "
@@ -300,29 +318,28 @@ binwalking() {
     if [[ $IN_DOCKER -eq 1 ]] ; then
       cd "$LOG_DIR" || return
       print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+      mv "$(basename "$FIRMWARE_PATH_".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
     else
       print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+      mv "$(basename "$FIRMWARE_PATH_".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
     fi
   fi
 
-  export OUTPUT_DIR_BINWALK
-  OUTPUT_DIR_BINWALK=$(basename "$FIRMWARE_PATH")
+  OUTPUT_DIR_BINWALK=$(basename "$FIRMWARE_PATH_")
   OUTPUT_DIR_BINWALK="$FIRMWARE_PATH_CP""/""$OUTPUT_DIR_BINWALK"_binwalk_emba
 
-  echo
+  print_output "" "no_log"
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_BINWALK$NC"
   # this is not working in background. I have created a new function that gets executed in the background
   # probably there is a more elegant way
   # binwalk is executed in Matryoshka mode
-  binwalk_deep_extract_helper 1 "$FIRMWARE_PATH" "$OUTPUT_DIR_BINWALK" &
+  binwalk_deep_extract_helper 1 "$FIRMWARE_PATH_" "$OUTPUT_DIR_BINWALK" &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
 
-  MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
+  MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH_" | awk '{print $1}')" )
 }
 
 binwalk_deep_extract_helper() {
@@ -330,6 +347,11 @@ binwalk_deep_extract_helper() {
   local MATRYOSHKA_="${1:-0}"
   local FILE_TO_EXTRACT_="${2:-}"
   local DEST_FILE_="${3:-$FIRMWARE_PATH_CP}"
+
+  if ! [[ -f "$FILE_TO_EXTRACT_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
 
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then

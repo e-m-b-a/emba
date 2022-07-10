@@ -19,8 +19,10 @@ export PRE_THREAD_ENA=0
 
 P13_uboot_mkimage() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
   if [[ "$UBOOT_IMAGE" -eq 1 ]]; then
+    local IMAGE_NAME=""
+    local IMAGE_TYPE=""
     module_title "Uboot image details"
     pre_module_reporter "${FUNCNAME[0]}"
     mkimage -l "$FIRMWARE_PATH" | tee -a "$LOG_FILE"

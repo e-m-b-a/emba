@@ -19,7 +19,7 @@ export PRE_THREAD_ENA=0
 
 P05_patools_init() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$PATOOLS_INIT" -eq 1 ]]; then
     module_title "Initial extractor of different archive types via patools"
@@ -42,11 +42,17 @@ P05_patools_init() {
 patools_extractor() {
   sub_module_title "Patool filesystem extractor"
 
-  local FIRMWARE_PATH_="$1"
-  local EXTRACTION_DIR_="$2"
+  local FIRMWARE_PATH_="${1:-}"
+  local EXTRACTION_DIR_="${2:-}"
   FILES_PATOOLS=0
   local DIRS_PATOOLS=0
-  local FIRMWARE_NAME_
+  local FIRMWARE_NAME_=""
+
+  if ! [[ -f "$FIRMWARE_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
 
   set +e

@@ -21,20 +21,29 @@ S06_distribution_identification()
   module_title "Linux identification"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  OUTPUT=0
-  DLINK_FW_VER=""
+  export DLINK_FW_VER=""
+  local OUTPUT=0
   local FILE_QUOTED
+  local PATTERN=""
+  local IDENTIFIER=""
+  local OUT1=""
+  local SED_COMMAND=""
+  local FILE_QUOTED=""
+  local CONFIG=""
+  local FILE=""
+  local SEARCH_FILE=""
+  local FOUND_FILES=()
 
   write_csv_log "file" "type" "identifier" "csv_rule"
 
-  while read -r LINE; do
-    if echo "$LINE" | grep -q "^[^#*/;]"; then
-      FILE="$(echo "$LINE" | cut -d\; -f2)"
-      mapfile -t FILES < <(find "$FIRMWARE_PATH" -xdev -iwholename "*$FILE" || true)
-      for FILE in "${FILES[@]}"; do
+  while read -r CONFIG; do
+    if echo "$CONFIG" | grep -q "^[^#*/;]"; then
+      SEARCH_FILE="$(echo "$CONFIG" | cut -d\; -f2)"
+      mapfile -t FOUND_FILES < <(find "$FIRMWARE_PATH" -xdev -iwholename "*$SEARCH_FILE" || true)
+      for FILE in "${FOUND_FILES[@]}"; do
         if [[ -f "$FILE" ]]; then
-          PATTERN="$(echo "$LINE" | cut -d\; -f3)"
-          SED_COMMAND="$(echo "$LINE" | cut -d\; -f4)"
+          PATTERN="$(echo "$CONFIG" | cut -d\; -f3)"
+          SED_COMMAND="$(echo "$CONFIG" | cut -d\; -f4)"
           # shellcheck disable=SC2086
           FILE_QUOTED=$(printf "%q" "$FILE")
           OUT1="$(eval "$PATTERN" "$FILE_QUOTED" || true)"
@@ -71,6 +80,7 @@ S06_distribution_identification()
 
 dlink_image_sign() {
   # the firmware version can be found in /config/buildver
+  local DLINK_BUILDVER=()
   mapfile -t DLINK_BUILDVER < <(find "$FIRMWARE_PATH" -xdev -path "*config/buildver")
   for DLINK_BVER in "${DLINK_BUILDVER[@]}"; do
     DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "$DLINK_BVER")
@@ -80,6 +90,7 @@ dlink_image_sign() {
     # -> v2.14
   done
 
+  local DLINK_BUILDREV=()
   # probably we can use this in the future. Currently there is no need for it:
   mapfile -t DLINK_BUILDREV < <(find "$FIRMWARE_PATH" -xdev -path "*config/buildrev")
   for DLINK_BREV in "${DLINK_BUILDREV[@]}"; do
@@ -99,7 +110,7 @@ dlink_image_sign() {
 
 get_csv_rule_distri() {
   # this is a temp solution. If this list grows we are going to solve it via a configuration file
-  VERSION_IDENTIFIER="$1"
+  local VERSION_IDENTIFIER="${1:-}"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | tr '[:upper:]' '[:lower:]')"
 
   ### handle versions of linux distributions:

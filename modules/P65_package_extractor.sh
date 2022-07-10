@@ -24,10 +24,10 @@ P65_package_extractor() {
   module_title "Package extractor"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  DISK_SPACE_CRIT=0
-  NEG_LOG=0
-  FILES_PRE_PACKAGE=0
-  FILES_POST_PACKAGE=0
+  local DISK_SPACE_CRIT=0
+  local NEG_LOG=0
+  export FILES_PRE_PACKAGE=0
+  local FILES_POST_PACKAGE=0
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 && "$RTOS" -eq 0 ]]; then
     FILES_PRE_PACKAGE=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
@@ -69,11 +69,16 @@ P65_package_extractor() {
 
 apk_extractor() {
   sub_module_title "APK archive extraction mode"
+  local APK_ARCHIVES=0
+  local APK_NAME=""
+  local FILES_AFTER_APK=0
+
   print_output "[*] Identify apk archives and extracting it to the root directories ..."
   extract_apk_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
   WAIT_PIDS=( )
+
   if [[ -f "$TMP_DIR"/apk_db.txt ]] ; then
     APK_ARCHIVES=$(wc -l "$TMP_DIR"/apk_db.txt | awk '{print $1}')
     if [[ "$APK_ARCHIVES" -gt 0 ]]; then
@@ -87,8 +92,8 @@ apk_extractor() {
       done
 
       FILES_AFTER_APK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      echo ""
-      print_output "[*] Before apk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_APK$NC files extracted."
+      print_output "" "no_log"
+      print_output "[*] Before apk extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after deep extraction we have $ORANGE$FILES_AFTER_APK$NC files extracted."
     fi
     check_disk_space
   else
@@ -98,6 +103,10 @@ apk_extractor() {
 
 ipk_extractor() {
   sub_module_title "IPK archive extraction mode"
+  local IPK_ARCHIVES=0
+  local IPK_NAME=""
+  local FILES_AFTER_IPK=0
+
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
   extract_ipk_helper &
   WAIT_PIDS+=( "$!" )
@@ -120,8 +129,8 @@ ipk_extractor() {
       done
 
       FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      echo ""
-      print_output "[*] Before ipk extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
+      print_output "" "no_log"
+      print_output "[*] Before ipk extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
       rm -r "$LOG_DIR"/ipk_tmp
     fi
     check_disk_space
@@ -132,6 +141,9 @@ ipk_extractor() {
 
 deb_extractor() {
   sub_module_title "Debian archive extraction mode"
+  local DEB_ARCHIVES=0
+  local FILES_AFTER_DEB=0
+
   print_output "[*] Identify debian archives and extracting it to the root directories ..."
   extract_deb_helper &
   WAIT_PIDS+=( "$!" )
@@ -145,10 +157,10 @@ deb_extractor() {
       for R_PATH in "${ROOT_PATH[@]}"; do
         while read -r DEB; do
           if [[ "$THREADED" -eq 1 ]]; then
-            extract_deb_extractor_helper &
+            extract_deb_extractor_helper "$DEB" &
             WAIT_PIDS_P20+=( "$!" )
           else
-            extract_deb_extractor_helper
+            extract_deb_extractor_helper "$DEB"
           fi
         done < "$TMP_DIR"/deb_db.txt
       done
@@ -158,8 +170,8 @@ deb_extractor() {
       fi
 
       FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      echo ""
-      print_output "[*] Before deb extraction we had $ORANGE$FILES_EXT$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
+      print_output "" "no_log"
+      print_output "[*] Before deb extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
     fi
     check_disk_space
   else
@@ -180,6 +192,8 @@ extract_deb_helper() {
 }
 
 extract_deb_extractor_helper(){
+  local DEB="${1:-}"
+  local DEB_NAME
   DEB_NAME=$(basename "$DEB")
   print_output "[*] Extracting $ORANGE$DEB_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
   dpkg-deb --extract "$DEB" "$R_PATH" || true

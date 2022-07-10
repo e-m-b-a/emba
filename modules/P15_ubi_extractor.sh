@@ -19,17 +19,18 @@ export PRE_THREAD_ENA=0
 
 P15_ubi_extractor() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
   if [[ "$UBI_IMAGE" -eq 1 ]]; then
     module_title "UBI filesystem extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
     EXTRACTION_DIR="$LOG_DIR/firmware/ubi_extracted"
-    mkdir -p "$EXTRACTION_DIR"
+    mkdir -p "$EXTRACTION_DIR" || true
 
     ubi_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
     if [[ "$FILES_UBI_EXT" -gt 0 ]]; then
+      MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
     fi
     NEG_LOG=1
@@ -38,14 +39,18 @@ P15_ubi_extractor() {
 }
 
 ubi_extractor() {
-  local UBI_PATH_="$1"
-  local EXTRACTION_DIR_="$2"
-  local UBI_FILE
-  local UBI_INFO
-  local UBI_1st_ROUND
-  local UBI_DATA
+  local UBI_PATH_="${1:-}"
+  local EXTRACTION_DIR_="${2:-}"
+  local UBI_FILE=""
+  local UBI_INFO=""
+  local UBI_1st_ROUND=""
+  local UBI_DATA=""
   local DIRS_UBI_EXT=0
   FILES_UBI_EXT=0
+  if ! [[ -f "$UBI_PATH_" ]]; then
+    print_output "[-] No file for decryption provided"
+    return
+  fi
 
   sub_module_title "UBI filesystem extractor"
 
@@ -55,8 +60,9 @@ ubi_extractor() {
 
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
   ubireader_extract_files -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE" || true
+
   if [[ -d "$EXTRACTION_DIR_" ]]; then
-    UBI_1st_ROUND="$(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image" || true)"
+    mapfile -t UBI_1st_ROUND < <(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image" || true)
 
     for UBI_DATA in "${UBI_1st_ROUND[@]}"; do
       UBI_FILE=$(echo "$UBI_DATA" | cut -d: -f1)

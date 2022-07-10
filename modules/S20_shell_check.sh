@@ -23,18 +23,22 @@ S20_shell_check()
 
   export S20_SHELL_VULNS=0
   export S20_SCRIPTS=0
+  local SH_SCRIPTS=()
+  local SH_SCRIPT=""
+  local S20_VULN_TYPES=()
+  local VTYPE=""
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
     write_csv_log "Script path" "Shell issues detected" "common linux file"
     mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-    for LINE in "${SH_SCRIPTS[@]}" ; do
-      if ( file "$LINE" | grep -q "shell script" ) ; then
+    for SH_SCRIPT in "${SH_SCRIPTS[@]}" ; do
+      if ( file "$SH_SCRIPT" | grep -q "shell script" ) ; then
         ((S20_SCRIPTS+=1))
         if [[ "$THREADED" -eq 1 ]]; then
-          s20_script_check &
+          s20_script_check "$SH_SCRIPT" &
           WAIT_PIDS_S20+=( "$!" )
         else
-          s20_script_check
+          s20_script_check "$SH_SCRIPT"
         fi
      fi
     done
@@ -66,11 +70,17 @@ S20_shell_check()
 }
 
 s20_script_check() {
-  local CFF
-  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
+  local SH_SCRIPT_="${1:-}"
+  local CFF=""
+  local NAME=""
+  local SHELL_LOG=""
+  local VULNS=""
+
+  NAME=$(basename "$SH_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   SHELL_LOG="$LOG_PATH_MODULE""/shellchecker_""$NAME"".txt"
-  shellcheck -C "$LINE" > "$SHELL_LOG" 2> /dev/null || true
+  shellcheck -C "$SH_SCRIPT_" > "$SHELL_LOG" 2> /dev/null || true
   VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null || true)
+
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -86,11 +96,11 @@ s20_script_check() {
     fi
 
     if [[ "$VULNS" -gt 20 ]] ; then
-      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$SHELL_LOG"
+      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     else
-      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")" "" "$SHELL_LOG"
+      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     fi
-    write_csv_log "$(print_path "$LINE")" "$VULNS" "$CFF"
+    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF"
     
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi

@@ -21,7 +21,7 @@ export PRE_THREAD_ENA=0
 
 P11_dlink_SHRS_enc_extract() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$DLINK_ENC_DETECTED" -ne 0 ]]; then
     module_title "DLink encrypted firmware extractor"
@@ -40,8 +40,13 @@ P11_dlink_SHRS_enc_extract() {
 }
 
 dlink_SHRS_enc_extractor() {
-  local DLINK_ENC_PATH_="$1"
-  local EXTRACTION_FILE_="$2"
+  local DLINK_ENC_PATH_="${1:-}"
+  local EXTRACTION_FILE_="${2:-}"
+  if ! [[ -f "$DLINK_ENC_PATH_" ]]; then
+    print_output "[-] No file for decryption provided"
+    return
+  fi
+
   sub_module_title "DLink encrypted firmware extractor"
 
   hexdump -C "$DLINK_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
@@ -68,9 +73,16 @@ dlink_SHRS_enc_extractor() {
 
 dlink_enc_img_extractor(){
   local TMP_DIR="$LOG_DIR""/tmp"
-  local DLINK_ENC_PATH_="$1"
-  local EXTRACTION_FILE_="$2"
+  local DLINK_ENC_PATH_="${1:-}"
+  local EXTRACTION_FILE_="${2:-}"
   local TMP_IMAGE_FILE="$TMP_DIR/image.bin"
+  if ! [[ -f "$DLINK_ENC_PATH_" ]]; then
+    print_output "[-] No file for decryption provided"
+    return
+  fi
+  local IMAGE_SIZE=0
+  local OFFSET=0
+  local ITERATION=0
 
   sub_module_title "DLink encrpted_image extractor"
 

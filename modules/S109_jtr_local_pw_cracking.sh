@@ -15,8 +15,6 @@
 
 # Description:  Cracks password hashes from S109 (STACS module) with jtr
 #               jtr runtime is 60 minutes
-#               Note: Currently we only try to brute MD5 password hashes, we are going
-#               to extend this in the future
 
 
 S109_jtr_local_pw_cracking()
@@ -24,8 +22,8 @@ S109_jtr_local_pw_cracking()
   module_log_init "${FUNCNAME[0]}"
 
   local PW_FILE="$LOG_DIR"/s108_stacs_password_search.csv
-  local MD5_HASHES=()
-  local MD5_HASH=""
+  local HASHES=()
+  local HASH=""
   local HASH_SOURCE=""
   local HASH=""
   local CRACKED_HASHES=()
@@ -45,10 +43,10 @@ S109_jtr_local_pw_cracking()
   pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ -f "$PW_FILE" ]]; then
-    mapfile -t MD5_HASHES < <(grep MD5 "$PW_FILE" | cut -d\; -f2,3 | sort -k 2 -t \; -u)
-    for MD5_HASH in "${MD5_HASHES[@]}"; do
-      HASH_SOURCE=$(basename "$(echo "$MD5_HASH" | cut -d\; -f1)")
-      HASH=$(echo "$MD5_HASH" | cut -d\; -f2 | tr -d \")
+    mapfile -t HASHES < <(cut -d\; -f2,3 "$PW_FILE" | sort -k 2 -t \; -u)
+    for HASH in "${HASHES[@]}"; do
+      HASH_SOURCE=$(basename "$(echo "$HASH" | cut -d\; -f1)")
+      HASH=$(echo "$HASH" | cut -d\; -f2 | tr -d \")
       echo "$HASH_SOURCE:$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
     done
 

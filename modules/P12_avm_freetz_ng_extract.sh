@@ -19,7 +19,7 @@ export PRE_THREAD_ENA=0
 
 P12_avm_freetz_ng_extract() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$AVM_DETECTED" -eq 1 ]]; then
     module_title "AVM freetz-ng firmware extractor"
@@ -35,15 +35,20 @@ P12_avm_freetz_ng_extract() {
 }
 
 avm_extractor() {
-  local AVM_FW_PATH_="$1"
-  local EXTRACTION_DIR_="$2"
-  local FRITZ_FILES
-  local FRITZ_DIRS
-  local FRITZ_VERSION
+  local AVM_FW_PATH_="${1:-}"
+  local EXTRACTION_DIR_="${2:-}"
+  if ! [[ -f "$AVM_FW_PATH_" ]]; then
+    return
+  fi
+  local FRITZ_FILES=0
+  local FRITZ_DIRS=0
+  local FRITZ_VERSION=""
+
   sub_module_title "AVM freetz-ng firmware extractor"
 
   # read only filesystem bypass:
   cp "$EXT_DIR"/freetz-ng/.config "$TMP_DIR"/.config
+
   "$EXT_DIR"/freetz-ng/fwmod -u -i "$TMP_DIR"/.config -d "$EXTRACTION_DIR_" "$AVM_FW_PATH_" | tee -a "$LOG_FILE" || true
 
   if [[ -d "$EXTRACTION_DIR_" ]]; then
@@ -63,6 +68,7 @@ avm_extractor() {
       write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
       write_csv_log "Freetz-NG" "$AVM_FW_PATH_" "$EXTRACTION_DIR_" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
       export DEEP_EXTRACTOR=1
+      MD5_DONE_DEEP+=( "$(md5sum "$AVM_FW_PATH_" | awk '{print $1}')" )
 
       if [[ -z "${FW_VENDOR:-}" ]]; then
         FW_VENDOR="AVM"

@@ -20,7 +20,10 @@ S08_package_mgmt_extractor()
   module_log_init "${FUNCNAME[0]}"
   module_title "Search package management details"
   pre_module_reporter "${FUNCNAME[0]}"
-  NEG_LOG=0
+
+  local NEG_LOG=0
+  export DEBIAN_MGMT_STATUS=()
+  export OPENWRT_MGMT_CONTROL=()
 
   debian_status_files_search
   openwrt_control_files_search
@@ -35,11 +38,16 @@ S08_package_mgmt_extractor()
 
 debian_status_files_search() {
   sub_module_title "Debian package management identification"
+
+  local PACKAGING_SYSTEM="debian"
+  local PACKAGE_FILE=""
+  local DEBIAN_PACKAGES=()
+  local PACKAGE_VERSION=""
+  local PACKAGE=""
+  local VERSION=""
+
   mapfile -t DEBIAN_MGMT_STATUS < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -path "*dpkg/status" -type f)
 
-  PACKAGING_SYSTEM="debian"
-  local PACKAGE_FILE=""
-  local STRIPPED_VERSION=""
   if [[ -v DEBIAN_MGMT_STATUS[@] ]] ; then
     write_csv_log "Packaging system" "package file" "package" "original version" "stripped version"
     print_output "[*] Found $ORANGE${#DEBIAN_MGMT_STATUS[@]}$NC debian package management files:"
@@ -75,11 +83,16 @@ debian_status_files_search() {
 
 openwrt_control_files_search() {
   sub_module_title "OpenWRT package management identification"
+
+  local PACKAGING_SYSTEM="OpenWRT"
+  local PACKAGE_FILE=""
+  local OPENWRT_PACKAGES=()
+  local PACKAGE_VERSION=""
+  local PACKAGE=""
+  local VERSION=""
+
   mapfile -t OPENWRT_MGMT_CONTROL < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -path "*opkg/info/*.control" -type f)
 
-  PACKAGING_SYSTEM="OpenWRT"
-  local PACKAGE_FILE=""
-  local STRIPPED_VERSION=""
   if [[ -v OPENWRT_MGMT_CONTROL[@] ]] ; then
     write_csv_log "Packaging system" "package file" "package" "version"
     print_output "[*] Found $ORANGE${#OPENWRT_MGMT_CONTROL[@]}$NC OpenWRT package management files."
@@ -106,6 +119,8 @@ openwrt_control_files_search() {
 
 clean_package_versions() {
   local VERSION_="${1:-}"
+  export STRIPPED_VERSION=""
+
   # usually we get a version like 1.2.3-4 or 1.2.3-0kali1bla or 1.2.3-unknown
   # this is a quick approach to clean this version identifier
   # there is a lot of room for future improvement

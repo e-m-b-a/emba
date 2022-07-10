@@ -21,7 +21,7 @@ export PRE_THREAD_ENA=0
 
 P17_gpg_decompress() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$GPG_COMPRESS" -eq 1 ]]; then
     module_title "GPG compressed firmware extractor"
@@ -37,8 +37,14 @@ P17_gpg_decompress() {
 }
 
 gpg_decompress_extractor() {
-  local GPG_FILE_PATH_="$1"
-  local EXTRACTION_FILE_="$2"
+  local GPG_FILE_PATH_="${1:-}"
+  local EXTRACTION_FILE_="${2:-}"
+
+  if ! [[ -f "$GPG_FILE_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   sub_module_title "GPG compressed firmware extractor"
 
   gpg --list-packets "$GPG_FILE_PATH_" 2>/dev/null | tee -a "$LOG_FILE"

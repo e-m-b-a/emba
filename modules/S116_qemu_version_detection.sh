@@ -51,7 +51,7 @@ S116_qemu_version_detection() {
           version_detection_thread
         fi
       done < "$CONFIG_DIR"/bin_version_strings.cfg
-      echo
+      print_output "" "no_log"
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid "${WAIT_PIDS_F05[@]}"
       fi
