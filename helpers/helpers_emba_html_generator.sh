@@ -121,6 +121,8 @@ add_link_tags() {
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
           HTML_LINK="$P_START""Archive: ""$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""$(basename "$REF_LINK")""$LINK_END""$P_END"
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
+          #LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@Qemu emulation archive created in log directory.@'"$HTML_LINK"'@' )
+          echo "[*] LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true
@@ -169,6 +171,7 @@ add_link_tags() {
       for WEB_LINK in "${WEB_LINKS[@]}" ; do
         WEB_LINK_LINE_NUM="$(echo "$WEB_LINK" | cut -d ":" -f 1 || true)"
         WEB_LINK_URL="$(echo "$WEB_LINK" | cut -d ":" -f 2- || true)"
+        WEB_LINK_URL="${WEB_LINK_URL%\\}"
         if [[ -n "$WEB_LINK" ]] ; then
           HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$WEB_LINK_URL@g")""$WEB_LINK_URL""$LINK_END" || true
           LINK_COMMAND_ARR+=( "$WEB_LINK_LINE_NUM"'s@'"$WEB_LINK_URL"'@'"$HTML_LINK"'@' )
@@ -344,6 +347,7 @@ add_link_tags() {
       local INSERT_ARR=()
       local LOCAL_ARR=()
       local INSERT_SIZE=100
+      disable_strict_mode "$STRICT_MODE" 0
       for (( X=0; X<${#LINK_COMMAND_ARR[@]}; X++ )) ; do
         LOCAL_ARR+=("${LINK_COMMAND_ARR[$X]}")
         INSERT_ARR+=('-e' "${LINK_COMMAND_ARR[$X]}")
@@ -366,6 +370,7 @@ add_link_tags() {
           SED_ERROR=""
         fi
       done
+      enable_strict_mode "$STRICT_MODE" 0
     fi
   fi
 

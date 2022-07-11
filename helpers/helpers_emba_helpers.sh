@@ -178,6 +178,7 @@ get_csv_rule() {
 
 enable_strict_mode() {
   local STRICT_MODE_="${1:-0}"
+  local PRINTER="${2:-1}"
 
   if [[ "$STRICT_MODE_" -eq 1 ]]; then
     # http://redsymbol.net/articles/unofficial-bash-strict-mode/
@@ -192,14 +193,17 @@ enable_strict_mode() {
     IFS=$'\n\t'     # Set the "internal field separator"
     trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
 
-    print_bar "no_log"
-    print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
-    print_bar "no_log"
+    if [[ "$PRINTER" -eq 1 ]]; then
+      print_bar "no_log"
+      print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
+      print_bar "no_log"
+    fi
   fi
 }
 
 disable_strict_mode() {
   local STRICT_MODE_="${1:-0}"
+  local PRINTER="${2:-1}"
 
   if [[ "$STRICT_MODE_" -eq 1 ]]; then
     # disable all STRICT_MODE settings - can be used for modules that are not compatible
@@ -216,8 +220,10 @@ disable_strict_mode() {
     trap - ERR
     set +x
 
-    print_bar "no_log"
-    print_output "[!] WARNING: EMBA STRICT mode disabled!" "no_log"
-    print_bar "no_log"
+    if [[ "$PRINTER" -eq 1 ]]; then
+      print_bar "no_log"
+      print_output "[!] WARNING: EMBA STRICT mode disabled!" "no_log"
+      print_bar "no_log"
+    fi
   fi
 }
