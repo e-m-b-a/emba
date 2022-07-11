@@ -22,9 +22,12 @@ S10_binaries_basic_check()
   module_title "Check binaries for critical functions"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  COUNTER=0
+  local COUNTER=0
   local BIN_COUNT=0
   local VULNERABLE_FUNCTIONS
+  local LINE=""
+  local VUL_FUNC_RESULT=()
+  local VUL_FUNC=""
 
   VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
   IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ -e /g')"
@@ -34,7 +37,6 @@ S10_binaries_basic_check()
     print_output "[*] Interesting functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
     for LINE in "${BINARIES[@]}" ; do
       if ( file "$LINE" | grep -q "ELF" ) ; then
-        local VUL_FUNC_RESULT
         BIN_COUNT=$((BIN_COUNT+1))
         mapfile -t VUL_FUNC_RESULT < <(readelf -s --use-dynamic "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then

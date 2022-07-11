@@ -23,9 +23,11 @@ S110_yara_check()
   module_title "Check for code patterns with yara"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  YARA_CNT=0
+  local YARA_CNT=0
   local WAIT_PIDS_S110=()
   local DIR_COMB_YARA="$TMP_DIR""/dir-combined.yara"
+  local YARA_S_FILE=""
+  local COUNTING=0
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it

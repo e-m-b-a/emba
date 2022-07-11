@@ -22,7 +22,7 @@ S75_network_check()
   module_title "Search network configs"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  NET_CFG_FOUND=0
+  export NET_CFG_FOUND=0
 
   check_resolv
   check_iptables
@@ -37,7 +37,10 @@ check_resolv()
   sub_module_title "Search resolv.conf"
 
   local CHECK=0
-  local RES_CONF_PATHS
+  local RES_CONF_PATHS=()
+  local RES_INFO_P=""
+  local DNS_INFO=""
+
   mapfile -t RES_CONF_PATHS < <(mod_path "/ETC_PATHS/resolv.conf")
   for RES_INFO_P in "${RES_CONF_PATHS[@]}"; do
     if [[ -e "$RES_INFO_P" ]] ; then
@@ -61,7 +64,9 @@ check_iptables()
   sub_module_title "Search iptables.conf"
 
   local CHECK=0
-  local IPT_CONF_PATHS
+  local IPT_CONF_PATHS=()
+  local IPT_INFO_P=""
+
   mapfile -t IPT_CONF_PATHS < <(mod_path "/ETC_PATHS/iptables")
   for IPT_INFO_P in "${IPT_CONF_PATHS[@]}"; do
     if [[ -e "$IPT_INFO_P" ]] ; then
@@ -81,7 +86,11 @@ check_snmp()
   sub_module_title "Check SNMP configuration"
 
   local CHECK=0
-  local SNMP_CONF_PATHS
+  local SNMP_CONF_PATHS=()
+  local SNMP_CONF_P=""
+  local FIND=()
+  local I=""
+
   mapfile -t SNMP_CONF_PATHS < <(mod_path "/ETC_PATHS/snmp/snmpd.conf")
   for SNMP_CONF_P in "${SNMP_CONF_PATHS[@]}"; do
     if [[ -e "$SNMP_CONF_P" ]] ; then
@@ -106,7 +115,9 @@ check_network_configs()
 {
   sub_module_title "Check for other network configurations"
 
-  local NETWORK_CONFS
+  local NETWORK_CONFS=()
+  local LINE=""
+
   readarray -t NETWORK_CONFS < <(printf '%s' "$(config_find "$CONFIG_DIR""/network_conf_files.cfg")")
 
   if [[ "${NETWORK_CONFS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"

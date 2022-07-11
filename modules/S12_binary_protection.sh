@@ -26,6 +26,7 @@ S12_binary_protection()
   local BIN_PROT_COUNTER=0
   local CSV_LOG
   CSV_LOG="${LOG_FILE/\.txt/\.csv}"
+  local LINE=""
 
   if [[ -f "$EXT_DIR"/checksec ]] ; then
     print_output "RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified  Fortifiable  FILE"

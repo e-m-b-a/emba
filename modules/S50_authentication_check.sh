@@ -23,7 +23,7 @@ S50_authentication_check() {
   module_title "Check users, groups and authentication"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  AUTH_ISSUES=0
+  local AUTH_ISSUES=0
 
   # disabled internal module threading as the output is not readable anymore
   if [[ "$THREADED" -eq 9 ]]; then
@@ -87,7 +87,7 @@ user_zero() {
   print_output "[*] Searching accounts with UID 0"
   local CHECK=0
   local AUTH_ISSUES=0
-  local PASSWD_FILE_PATHS
+  local PASSWD_FILE_PATHS=()
   mapfile -t PASSWD_FILE_PATHS < <(mod_path "/ETC_PATHS/passwd")
 
   for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
@@ -116,7 +116,9 @@ non_unique_acc() {
   print_output "[*] Searching non-unique accounts"
   local CHECK=0
   local AUTH_ISSUES=0
-  local PASSWD_FILE_PATHS
+  local PASSWD_FILE_PATHS=()
+  local PASSWD_FILE=""
+
   mapfile -t PASSWD_FILE_PATHS < <(mod_path "/ETC_PATHS/passwd")
 
   for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
@@ -145,7 +147,9 @@ non_unique_group_id() {
   print_output "[*] Searching non-unique group ID's"
   local CHECK=0
   local AUTH_ISSUES=0
-  local GROUP_PATHS
+  local GROUP_PATHS=()
+  local GROUP_PATH=""
+
   mapfile -t GROUP_PATHS < <(mod_path "/ETC_PATHS/group")
 
   for GROUP_PATH in "${GROUP_PATHS[@]}"; do
@@ -174,10 +178,11 @@ non_unique_group_name() {
   print_output "[*] Searching non-unique group names"
   local CHECK=0
   local AUTH_ISSUES=0
-  local GROUP_PATHS
+  local GROUP_PATHS=()
+  local GROUP_PATH=""
   mapfile -t GROUP_PATHS < <(mod_path "/ETC_PATHS/group")
 
-  for GROUP_PATHS in "${GROUP_PATHS[@]}"; do
+  for GROUP_PATH in "${GROUP_PATHS[@]}"; do
     if [[ -f "$GROUP_PATH" ]] ; then
       CHECK=1
       local FIND
@@ -203,7 +208,8 @@ query_user_acc() {
   print_output "[*] Reading system users"
   local CHECK=0
   local AUTH_ISSUES=0
-  local PASSWD_FILE_PATHS
+  local PASSWD_FILE_PATHS=()
+  local PASSWD_FILE=""
   mapfile -t PASSWD_FILE_PATHS < <(mod_path "/ETC_PATHS/passwd")
 
   for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
@@ -244,8 +250,10 @@ query_nis_plus_auth_supp() {
   print_output "[*] Check nsswitch.conf"
   local CHECK=0
   local AUTH_ISSUES=0
-  local NSS_PATH_L
+  local NSS_PATH_L=()
+  local NSS_PATH=""
   mapfile -t NSS_PATH_L < <(mod_path "/ETC_PATHS/nsswitch.conf")
+
   for NSS_PATH in "${NSS_PATH_L[@]}"; do
     if [[ -f "$NSS_PATH" ]] ; then
       CHECK=1
@@ -281,9 +289,12 @@ query_nis_plus_auth_supp() {
 
 check_sudoers() {
   sub_module_title "Scan and test sudoers files"
-  local SUDOERS_ISSUES
+  local SUDOERS_ISSUES=()
   local AUTH_ISSUES=0
-  local S_ISSUE
+  local S_ISSUE=""
+  local R_PATH=""
+  export SUDOERS_FILES_ARR=()
+  local SUDOERS_FILE=""
 
   for R_PATH in "${ROOT_PATH[@]}"; do
     # as we only have one search term we can handle it like this:
@@ -311,6 +322,8 @@ check_owner_perm_sudo_config() {
   sub_module_title "Ownership and permissions for sudo configuration files"
 
   local AUTH_ISSUES=0
+  local FILE=""
+
   if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
     for FILE in "${SUDOERS_FILES_ARR[@]}"; do
       local SUDOERS_D

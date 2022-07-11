@@ -21,7 +21,9 @@ S55_history_file_check()
   module_title "Search history files"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local HIST_FILES
+  local HIST_FILES=()
+  local LINE=""
+
   mapfile -t HIST_FILES < <(config_find "$CONFIG_DIR""/history_files.cfg")
   
   if [[ "${HIST_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"

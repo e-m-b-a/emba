@@ -21,10 +21,11 @@ S80_cronjob_check()
   module_title "Check cronjobs"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local RESULTS
-  RESULTS=0
+  local RESULTS=0
+  local CJ_FILE_PATH=()
+  local CJ_FILE=""
+  local CT_VAR=""
 
-  local CJ_FILE_PATH
   mapfile -t CJ_FILE_PATH < <(mod_path "/ETC_PATHS/cron")
   for CJ_FILE in "${CJ_FILE_PATH[@]}"; do
     if [[ -e "$CJ_FILE" ]] ; then

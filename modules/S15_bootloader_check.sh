@@ -22,7 +22,7 @@ S15_bootloader_check()
   module_title "Check bootloader and system startup"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  STARTUP_FINDS=0
+  export STARTUP_FINDS=0
 
   check_dtb
   check_bootloader

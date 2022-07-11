@@ -23,6 +23,7 @@ S40_weak_perm_check() {
 
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
   local WEAK_PERM_COUNTER=0
+  local LINE=""
 
   local ETC_ARR
   ETC_ARR=("$(mod_path "/ETC_PATHS")")

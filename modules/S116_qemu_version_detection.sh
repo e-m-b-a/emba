@@ -17,12 +17,12 @@
 
 S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
+  local VERSION_LINE=""
 
   if [[ "$RTOS" -eq 0 ]]; then
     module_title "Identified software components - via usermode emulation."
     pre_module_reporter "${FUNCNAME[0]}"
-
 
     # This module waits for S115_usermode_emulator
     # check emba.log for S115_usermode_emulator
@@ -45,10 +45,10 @@ S116_qemu_version_detection() {
         fi
 
         if [[ $THREADED -eq 1 ]]; then
-          version_detection_thread &
+          version_detection_thread "$VERSION_LINE" &
           WAIT_PIDS_F05+=( "$!" )
         else
-          version_detection_thread
+          version_detection_thread "$VERSION_LINE"
         fi
       done < "$CONFIG_DIR"/bin_version_strings.cfg
       print_output "" "no_log"
@@ -65,16 +65,23 @@ S116_qemu_version_detection() {
 }
 
 version_detection_thread() {
+  local VERSION_LINE="${1:-}"
+
+  local BINARY
   BINARY="$(echo "$VERSION_LINE" | cut -d\; -f1)"
+  local STRICT
   STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
+  local LIC
   LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
+  local CSV_REGEX
   CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
 
+  local VERSION_IDENTIFIER
   VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
-  BINARY_PATH=""
-  BINARY_PATHS=()
-  LOG_PATH_=""
+  local BINARY_PATH=""
+  local BINARY_PATHS=()
+  local LOG_PATH_=""
 
   # if we have the key strict this version identifier only works for the defined binary and is not generic!
   if [[ $STRICT == "strict" ]]; then

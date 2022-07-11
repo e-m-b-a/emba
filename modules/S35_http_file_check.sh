@@ -21,7 +21,7 @@ S35_http_file_check()
   module_title "Check HTTP files"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  HTTP_COUNTER=0
+  export HTTP_COUNTER=0
 
   write_csv_log "type" "filename" "file"
   web_file_search
@@ -36,15 +36,17 @@ web_file_search()
 {
   sub_module_title "Search web served files"
 
-  WEB_STUFF=0
+  local WEB_STUFF=()
+  local WEB_FILE=""
+
   mapfile -t WEB_STUFF < <(find "$FIRMWARE_PATH" -xdev -type f \( -iname "*.htm" -o -iname "*.html" -o -iname "*.cgi" \
     -o -iname "*.asp" -o -iname "*.php" -o -iname "*.xml" -o -iname "*.rg" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
 
   if [[ -v WEB_STUFF[@] ]] ; then
     print_output "[+] Found web related files:"
-    for LINE in "${WEB_STUFF[@]}" ; do
-      print_output "$(indent "$(print_path "$LINE")")"
-      write_csv_log "Web served files" "$(basename "$LINE")" "$LINE"
+    for WEB_FILE in "${WEB_STUFF[@]}" ; do
+      print_output "$(indent "$(print_path "$WEB_FILE")")"
+      write_csv_log "Web served files" "$(basename "$WEB_FILE")" "$WEB_FILE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -56,15 +58,16 @@ http_file_search()
 {
   sub_module_title "Search http files"
 
-  HTTP_STUFF=0
+  local HTTP_STUFF=()
+  local HTTP_FILE=""
   mapfile -t HTTP_STUFF < <(config_find "$CONFIG_DIR""/http_files.cfg")
 
   if [[ "${HTTP_STUFF[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#HTTP_STUFF[@]}" -ne 0 ]] ; then
     print_output "[+] Found http related files:"
-    for LINE in "${HTTP_STUFF[@]}" ; do
-      print_output "$(indent "$(print_path "$LINE")")"
-      write_csv_log "HTTP server files" "$(basename "$LINE")" "$LINE"
+    for HTTP_FILE in "${HTTP_STUFF[@]}" ; do
+      print_output "$(indent "$(print_path "$HTTP_FILE")")"
+      write_csv_log "HTTP server files" "$(basename "$HTTP_FILE")" "$HTTP_FILE"
       ((HTTP_COUNTER+=1))
     done
   else
@@ -75,6 +78,13 @@ http_file_search()
 webserver_check()
 {
   sub_module_title "Check for apache or nginx related files"
+
+  local APACHE_FILE_ARR=()
+  local NGINX_FILE_ARR=()
+  local LIGHTTP_FILE_ARR=()
+  local CHEROKEE_FILE_ARR=()
+  local HTTPD_FILE_ARR=()
+  local LINE=""
 
   readarray -t APACHE_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*apache*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   readarray -t NGINX_FILE_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*nginx*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
@@ -136,20 +146,21 @@ webserver_check()
   else
     print_output "[-] No HTTPd related files found"
   fi
-
 }
 
 php_check()
 {
   sub_module_title "Check for php.ini"
+  local PHP_INI_ARR=()
+  local PHP_INI_ENTRY=""
 
   readarray -t PHP_INI_ARR < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   if [[ ${#PHP_INI_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found php.ini:"
-    for LINE in "${PHP_INI_ARR[@]}" ; do
-      print_output "$(indent "$(print_path "$LINE")")"
-      write_csv_log "php.ini file" "$(basename "$LINE")" "$LINE"
+    for PHP_INI_ENTRY in "${PHP_INI_ARR[@]}" ; do
+      print_output "$(indent "$(print_path "$PHP_INI_ENTRY")")"
+      write_csv_log "php.ini file" "$(basename "$PHP_INI_ENTRY")" "$PHP_INI_ENTRY"
       ((HTTP_COUNTER+=1))
     done
   else

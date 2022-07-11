@@ -189,7 +189,8 @@ populate_karrays() {
 }
 
 demess_kv_version() {
-  K_VERSION=("$@")
+  local K_VERSION=("$@")
+
   # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
   for VER in "${K_VERSION[@]}" ; do
     if ! [[ "$VER" == *[0-9]* ]]; then
@@ -245,16 +246,17 @@ analyze_kernel_module()
   write_anchor "kernel_modules"
 
   KMOD_BAD=0
+  local KMODULE=""
 
   print_output "[*] Found $ORANGE${#KERNEL_MODULES[@]}$NC kernel modules."
 
-  for LINE in "${KERNEL_MODULES[@]}" ; do
+  for KMODULE in "${KERNEL_MODULES[@]}" ; do
     # modinfos can run in parallel:
     if [[ "$THREADED" -eq 1 ]]; then
-      module_analyzer &
+      module_analyzer "$KMODULE" &
       WAIT_PIDS_S25+=( "$!" )
     else
-      module_analyzer
+      module_analyzer "$KMODULE"
     fi
   done
 
@@ -272,12 +274,16 @@ analyze_kernel_module()
 }
 
 module_analyzer() {
-  if [[ "$LINE" == *".ko" ]]; then
-    LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
+  local KMODULE="${1:-}"
+  local LINE=""
+
+  if [[ "$KMODULE" == *".ko" ]]; then
+    LINE=$(modinfo "$KMODULE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
     local M_PATH
     M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
     local LICENSE
     LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
+
     if file "$M_PATH" 2>/dev/null | grep -q 'not stripped'; then
       if echo "$LINE" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
         # kernel module is GPL/BSD license then not stripped is fine
@@ -293,8 +299,8 @@ module_analyzer() {
       print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
     fi
 
-  elif [[ "$LINE" == *".o" ]]; then
-    print_output "[-] No support for .o kernel modules - $ORANGE$LINE$NC"
+  elif [[ "$KMODULE" == *".o" ]]; then
+    print_output "[-] No support for .o kernel modules - $ORANGE$KMODULE$NC"
   fi
 }
 
@@ -305,6 +311,9 @@ check_modprobe()
   sub_module_title "Check modprobe.d directory and content"
 
   local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0
+  local MODPROBE_D_DIRS=()
+  local MP_DIR=""
+
   readarray -t MODPROBE_D_DIRS < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for MP_DIR in "${MODPROBE_D_DIRS[@]}"; do
     if [[ -d "$MP_DIR" ]] ; then
