@@ -21,8 +21,10 @@ S107_deep_password_search()
   module_title "Deep analysis of files for password hashes"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
+  local PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
   local PW_COUNTER=0
+  local PW_PATH=""
+  local PW_HASH=""
 
   find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP_DIR"/pw_hashes.txt
 

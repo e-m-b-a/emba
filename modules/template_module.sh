@@ -38,11 +38,16 @@ template_module() {
     # $FILE_ARR - all valid files of the provided firmware (Array)
     # $BINARIES - all executable binaries of the provided firmware (Array)
 
+  # Setup variables
+
+  local TESTVAR1=""
+  local TESTVAR2=""
+
   # Prints everything to CLI, more information in function print_examples
   print_output "[*] Empty module output"
 
-  # Submodule inside of module - only for better structure
-  sub_module
+  # Call a submodule inside of module with a parameter
+  sub_module "$TESTVAR1"
 
   # How to use print_output
   print_examples
@@ -68,6 +73,8 @@ template_module() {
 }
 
 sub_module() {
+  # setup local TESTVAR1_ in function
+  local TESTVAR1_="${1:-}"
   # Create submodules inside of a module for better structure
   sub_module_title "Submodule example"
 
@@ -145,7 +152,7 @@ path_handling() {
   # Before using a path in your module!
   # Option 1: Search with find and loop trough results / don't use mod_path!
   # Insert "${EXCL_FIND[@]}" in your search-command to automatically remove excluded paths
-  CHECK=0
+  local CHECK=0
   readarray -t TEST < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*xy*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for TEST_E in "${TEST[@]}"; do
     if [[ -f "$MP_DIR" ]] ; then
@@ -191,6 +198,8 @@ path_handling() {
 
 iterate_binary() {
   # BINARIES is an array, which is project wide available and contains all paths of binary files
+  local BIN_FILE=""
+
   for BIN_FILE in "${BINARIES[@]}"; do
     print_output "$BIN_FILE"
   done
@@ -218,6 +227,8 @@ webreport_functions() {
 
 load_from_config() {
   # config_grep.cfg contains grep statements, these will be all used for grepping "$FILE_PATH"
+  local OUTPUT=""
+  local OUTPUT_LINES=()
   mapfile -t OUTPUT_LINES < <(config_grep "$CONFIG_DIR""/config_grep.cfg" "$FILE_PATH")
 
   if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then
@@ -237,6 +248,7 @@ load_from_config() {
 
 
   # config_list.cfg contains text, you get an array
+  local OUTPUT_LINES=()
   mapfile -t OUTPUT_LINES < <(config_list "$CONFIG_DIR""/config_list.cfg")
 
   if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then
@@ -256,7 +268,8 @@ load_from_config() {
 
 
   # Find files with search parameters (wildcard * is allowed)
-  local OUTPUT_LINES
+  local OUTPUT_LINES=()
+  local LINE=""
   readarray -t OUTPUT_LINES < <(printf '%s' "$(config_find "$CONFIG_DIR""/config_find.cfg")")
 
   if [[ "${OUTPUT_LINES[0]}" == "C_N_F" ]] ; then print_output "[!] Config not found"

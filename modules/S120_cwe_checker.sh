@@ -26,7 +26,7 @@ S120_cwe_checker()
   module_log_init "${FUNCNAME[0]}"
   module_title "Check binaries with cwe-checker"
   pre_module_reporter "${FUNCNAME[0]}"
-  CWE_CNT_=0
+  local CWE_CNT_=0
 
   if [[ $CWE_CHECKER -eq 1 ]] ; then
     if [[ "$IN_DOCKER" -eq 1 ]]; then
@@ -61,23 +61,23 @@ cwe_container_prepare() {
 }
 
 cwe_check() {
-  TOTAL_CWE_CNT=0
+  local BINARY=""
 
   export PATH=$EXT_DIR/cwe_checker/bin:$PATH # needed for docker setup
 
-  for LINE in "${BINARIES[@]}" ; do
-    if ( file "$LINE" | grep -q ELF ) ; then
+  for BINARY in "${BINARIES[@]}" ; do
+    if ( file "$BINARY" | grep -q ELF ) ; then
       if [[ "$THREADED" -eq 1 ]]; then
         MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo || true)"))
         if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
           MAX_THREADS_S120=1
         fi
 
-        cwe_checker_threaded &
+        cwe_checker_threaded "$BINARY" &
         WAIT_PIDS_S120+=( "$!" )
         max_pids_protection "$MAX_THREADS_S120" "${WAIT_PIDS_S120[@]}"
       else
-        cwe_checker_threaded
+        cwe_checker_threaded "$BINARY"
       fi
     fi
   done
@@ -88,12 +88,21 @@ cwe_check() {
 }
 
 cwe_checker_threaded () {
-  NAME=$(basename "$LINE")
-  OLD_LOG_FILE="$LOG_FILE"
-  LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
-  LINE=$(readlink -f "$LINE")
+  local BINARY_="${1:-}"
+  local TEST_OUTPUT=()
+  local CWE_OUT=()
+  local CWE_LINE=""
+  local CWE=""
+  local CWE_DESC=""
+  local CWE_CNT=0
+
+  local NAME=""
+  NAME=$(basename "$BINARY_")
+  local OLD_LOG_FILE="$LOG_FILE"
+  local LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
+  BINARY_=$(readlink -f "$BINARY_")
   readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
-  print_output "[*] Tested $ORANGE""$(print_path "$LINE")""$NC"
+  print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
   for ENTRY in "${TEST_OUTPUT[@]}" ; do
     if [[ -n "$ENTRY" ]] ; then
       if ! [[ "$ENTRY" == *"ERROR:"* || "$ENTRY" == *"DEBUG:"* || "$ENTRY" == *"INFO:"* ]] ; then
@@ -112,7 +121,6 @@ cwe_checker_threaded () {
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
         CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null || true)"
         echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
-        # (( TOTAL_CWE_CNT="$TOTAL_CWE_CNT"+"$CWE_CNT" ))
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_output ""
@@ -131,7 +139,12 @@ cwe_checker_threaded () {
 }
 
 final_cwe_log() {
-  TOTAL_CWE_CNT="$1"
+  local TOTAL_CWE_CNT="${1:-}"
+  local CWE_OUT=()
+  local CWE_LINE=""
+  local CWE=""
+  local CWE_DESC=""
+  local CWE_CNT=""
 
   if [[ -d "$LOG_PATH_MODULE" ]]; then
     mapfile -t CWE_OUT < <( cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)

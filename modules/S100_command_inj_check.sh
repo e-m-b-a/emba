@@ -23,6 +23,11 @@ S100_command_inj_check()
 
   local CMD_INJ_DIRS
   mapfile -t CMD_INJ_DIRS < <(config_find "$CONFIG_DIR""/check_command_inj_dirs.cfg")
+  local DIR=""
+  local FILE_ARRX=()
+  local FILE_S=""
+  local QUERY=""
+  local CHECK=()
 
   if [[ "${CMD_INJ_DIRS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#CMD_INJ_DIRS[@]}" -ne 0 ]] ; then

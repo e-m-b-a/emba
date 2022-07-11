@@ -28,27 +28,31 @@ S103_deep_search()
   
   readarray -t PATTERN_LIST < <(printf '%s' "$PATTERNS")
 
-  OCC_LIST=()
+  export OCC_LIST=()
 
-  deep_pattern_search
-  deep_pattern_reporter
+  deep_pattern_search "${PATTERN_LIST[@]}"
+  deep_pattern_reporter "${PATTERN_LIST[@]}"
 
   module_end_log "${FUNCNAME[0]}" "${#OCC_LIST[@]}"
 }
 
 deep_pattern_search() {
+  local PATTERN_LIST=("$@")
+  local PATTERN=""
+  export GREP_PATTERN_COMMAND=()
+  local DEEP_S_FILE=""
   local WAIT_PIDS_S103=()
-  GREP_PATTERN_COMMAND=()
+
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
   done
   print_output "" "no_log"
   for DEEP_S_FILE in "${FILE_ARR[@]}"; do
     if [[ $THREADED -eq 1 ]]; then
-      deep_pattern_searcher &
+      deep_pattern_searcher "$DEEP_S_FILE" &
       WAIT_PIDS_S103+=( "$!" )
     else
-      deep_pattern_searcher
+      deep_pattern_searcher "$DEEP_S_FILE"
     fi
   done
 
@@ -58,8 +62,19 @@ deep_pattern_search() {
 }
 
 deep_pattern_searcher() {
+  local DEEP_S_FILE="${1:-}"
+  local DEEP_S_LINE=""
+  local PATTERN=""
+  local F_COUNT=0
+  local OLD_LOG_FILE=""
+
+  if ! [[ -f "$DEEP_S_FILE" ]]; then
+    print_output "[-] No file for pattern analysis provided"
+    return
+  fi
+
   if [[ -e "$DEEP_S_FILE" ]] ; then
-    local S_OUTPUT
+    local S_OUTPUT=()
     readarray -t S_OUTPUT < <(grep -E -n -a -h -o -i "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' || true)
     if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
       write_log "[+] ""$DEEP_S_FILE" "$LOG_PATH_MODULE""/deep_search_""$(basename "$DEEP_S_FILE")"".txt"
@@ -74,7 +89,6 @@ deep_pattern_searcher() {
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
       done
-      #COUNT=((COUNT+${#S_OUTPUT[@]}))
       # we have to write the file link manually, because threading is messing with the file (wrong order of entries and such awful stuff)
       OLD_LOG_FILE="$LOG_FILE"
       LOG_FILE="$LOG_PATH_MODULE""/deep_search_tmp_""$(basename "$DEEP_S_FILE")"".txt"
@@ -90,6 +104,12 @@ deep_pattern_searcher() {
 }
 
 deep_pattern_reporter() {
+  local PATTERN_LIST=("$@")
+  local PATTERN=""
+  local OCC=""
+  local P_COUNT=0
+  local SORTED_OCC_LIST=()
+
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     P_COUNT=$(grep -i "$PATTERN" "$LOG_FILE" | cut -f 1 | sed 's/\ //g' | awk '{ SUM += $1} END { print SUM }' )
     OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )

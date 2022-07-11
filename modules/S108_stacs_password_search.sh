@@ -27,8 +27,10 @@ S108_stacs_password_search()
   local STACS_LOG_FILE="$LOG_DIR"/etc/stacs_pw_hashes.json
   local ELEMENTS=0
   local ELEMENTS_=0
-  local PW_PATH
-  local PW_HASH
+  local PW_PATH=""
+  local PW_HASH=""
+  local PW_HASH_REAL=""
+  local MESSAGE=""
 
   if command -v stacs > /dev/null ; then
     stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE" || true

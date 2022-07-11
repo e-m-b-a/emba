@@ -40,17 +40,19 @@ S106_deep_key_search()
 
 deep_key_search() {
   local WAIT_PIDS_S106=()
+  local DEEP_S_FILE=""
   GREP_PATTERN_COMMAND=()
+
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
   done
   print_output "" "no_log"
   for DEEP_S_FILE in "${FILE_ARR[@]}"; do
     if [[ $THREADED -eq 1 ]]; then
-      deep_key_searcher &
+      deep_key_searcher "$DEEP_S_FILE" &
       WAIT_PIDS_S106+=( "$!" )
     else
-      deep_key_searcher
+      deep_key_searcher "$DEEP_S_FILE"
     fi
   done
 
@@ -60,6 +62,8 @@ deep_key_search() {
 }
 
 deep_key_searcher() {
+  local DEEP_S_FILE="${1:-}"
+
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
     readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-100 || true)
