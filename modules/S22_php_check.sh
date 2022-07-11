@@ -23,7 +23,7 @@ S22_php_check()
   module_title "PHP vulnerability checks"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  export PHP_SCRIPTS=()
+  local PHP_SCRIPTS=()
   export S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
   S22_PHP_INI_ISSUES=0
@@ -32,11 +32,11 @@ S22_php_check()
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-    s22_vuln_check_caller
+    s22_vuln_check_caller "${PHP_SCRIPTS[@]}"
 
     s22_check_php_ini
 
-    s22_phpinfo_check
+    s22_phpinfo_check "${PHP_SCRIPTS[@]}"
 
     write_log ""
     write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_ISSUES:$S22_PHP_INI_CONFIGS"
@@ -49,6 +49,7 @@ S22_php_check()
 
 s22_phpinfo_check() {
   sub_module_title "PHPinfo file detection"
+  local PHP_SCRIPTS=("$@")
   local PHPINFO=""
 
   for PHPINFO in "${PHP_SCRIPTS[@]}" ; do
@@ -64,6 +65,7 @@ s22_phpinfo_check() {
 s22_vuln_check_caller() {
   sub_module_title "PHP script vulnerabilities"
   write_csv_log "Script path" "PHP issues detected" "common linux file"
+  local PHP_SCRIPTS=("$@")
   local VULNS=0
   local PHP_SCRIPT=""
 
@@ -156,13 +158,14 @@ s22_check_php_ini(){
 
   mapfile -t PHP_INI_FILE < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
+  disable_strict_mode "$STRICT_MODE"
   for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
     #print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
     mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" 2>/dev/null || true)
     for LINE in "${INISCAN_RESULT[@]}" ; do  
       local LIMIT_CHECK
       IFS='|' read -ra LINE_ARR <<< "$LINE"
-      # TODO: check this in strict mode:
+      # TODO: STRICT mode not working here:
       add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
       LIMIT_CHECK="$?"
       if [[ "$LIMIT_CHECK" -eq 1 ]]; then
@@ -193,6 +196,7 @@ s22_check_php_ini(){
     print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES""$GREEN"" PHP configuration issues in php config file :""$ORANGE"" ""$(print_path "$PHP_FILE")"
     print_output ""
   done
+  enable_strict_mode "$STRICT_MODE"
 }
 
 add_recommendations(){

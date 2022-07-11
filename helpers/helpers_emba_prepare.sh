@@ -151,6 +151,8 @@ architecture_check()
         D_ARCH="x86"
       elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
         D_ARCH="PPC"
+      else
+        D_ARCH="unknown"
       fi
 
       if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
