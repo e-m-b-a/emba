@@ -300,7 +300,8 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
-  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
+  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
+  export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
 
   import_helper
   print_output "" "no_log"
