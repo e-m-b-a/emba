@@ -24,9 +24,9 @@ S25_kernel_check()
   module_title "Identify and check kernel version"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  KERNEL_VERSION=()
-  KERNEL_DESC=()
-  KERNEL_MODULES=()
+  export KERNEL_VERSION=()
+  export KERNEL_DESC=()
+  export KERNEL_MODULES=()
   FOUND=0
   KMOD_BAD=0
 
@@ -116,7 +116,11 @@ S25_kernel_check()
 
 populate_karrays() {
   mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  local KERNEL_VERSION_
+  local KERNEL_VERSION_=()
+  local K_MODULE=""
+  local VER=""
+  local K_VER=""
+  local V=""
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     if [[ "$K_MODULE" =~ .*\.o ]]; then
@@ -185,11 +189,13 @@ populate_karrays() {
   fi
 
   KERNEL_VERSION=("${KERNEL_VERSION_[@]}")
-
 }
 
 demess_kv_version() {
   local K_VERSION=("$@")
+  local KV=""
+  local VER=""
+  export KV_ARR=()
 
   # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
   for VER in "${K_VERSION[@]}" ; do
@@ -197,7 +203,6 @@ demess_kv_version() {
       continue;
     fi
 
-    local KV
     KV=$(echo "$VER" | tr "-" " ")
     KV=$(echo "$KV" | tr "+" " ")
     KV=$(echo "$KV" | tr "_" " ")
@@ -215,6 +220,9 @@ demess_kv_version() {
 get_kernel_vulns()
 {
   sub_module_title "Kernel vulnerabilities"
+
+  local VER=""
+  local V=""
 
   if [[ "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
     print_output "[+] Found linux kernel version/s:"

@@ -498,11 +498,16 @@ generate_report_file()
       for SUBMODUL_NAME in "${SUBMODUL_NAMES[@]}" ; do
         if [[ -n "$SUBMODUL_NAME" ]] ; then
           SUBMODUL_NAME="$( strip_color_tags "$SUBMODUL_NAME" | cut -d" " -f 2- )"
+          echo "[*] LINE_NUMBER_REP_NAV: $LINE_NUMBER_REP_NAV"
+          echo "[*] SUBMODUL_NAME: $SUBMODUL_NAME"
           A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s@[^a-zA-Z0-9]@@g" | tr "[:upper:]" "[:lower:]")"
+          echo "[*] A_SUBMODUL_NAME: $A_SUBMODUL_NAME"
           LINE="$(echo "$TITLE_ANCHOR" | sed -e "s@ANCHOR@$A_SUBMODUL_NAME@g")""$SUBMODUL_NAME""$LINK_END"
+          echo "[*] LINE: $LINE"
           sed -i -E "s@$SUBMODUL_NAME@$LINE@" "$TMP_FILE"
           # Add anchor to file
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
+          echo "[*] SUB_NAV_LINK: $SUB_NAV_LINK"
           sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
           ((LINE_NUMBER_REP_NAV+=1))
         fi
@@ -563,21 +568,21 @@ add_link_to_index() {
     # insert new entry at bottom of the navigation
     insert_line "navigation end" "$MODUL_NAME"
   else
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set +u
-    fi
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
       if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
-      elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
-        insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
+        continue
       elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
+        continue
+      fi
+      # COUNT+1 is not available on the last element - we need to check the array for this:
+      if [[ -v INDEX_NAV_GROUP_ARR[$COUNT] ]] && [[ -v INDEX_NAV_GROUP_ARR[$((COUNT+1))] ]]; then
+        if [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
+          insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
+        fi
       fi
     done
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set -u
-    fi
   fi
 }
 
@@ -592,6 +597,7 @@ update_index()
     sed -i 's@expand_njs hidden@expand_njs@g' "$ABS_HTML_PATH""/""$INDEX_FILE"
   fi
   for S_FILE in "${SUPPL_FILES[@]}" ; do
+    echo "[*] S_FILE reached $S_FILE"
     generate_info_file "$S_FILE" "" "$SUPPL_PATH_HTML"
     LINE_NUMBER_NAV=$(grep -a -n "etc start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
     REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_PATH_HTML/$(basename "${S_FILE%."${S_FILE##*.}"}"".html")@g")"
