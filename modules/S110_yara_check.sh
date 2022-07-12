@@ -94,7 +94,7 @@ yara_check() {
 
   if [[ -f "$Y_LOG" ]]; then
     # as multiple rules can match per file, we need to extract the matching rules
-    mapfile -t MATCHED_RULES < <(grep ".*\ \[\]\ \[.*\]\ \/" "$Y_LOG")
+    mapfile -t MATCHED_RULES < <(grep ".*\ \[\]\ \[.*\]\ \/" "$Y_LOG" || true)
     # iteratre through all matching rules and print success
     for MATCHED_RULE in "${MATCHED_RULES[@]}"; do
       MATCHED_RULE=$(echo "$MATCHED_RULE" | awk '{print $1}')

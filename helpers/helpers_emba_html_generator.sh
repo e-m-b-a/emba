@@ -12,7 +12,8 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
+# Author(s): Pascal Eckmann,
+# Contributors: Michael Messner, Stefan Haboeck
 
 INDEX_FILE="index.html"
 MAIN_LOG="./emba.log"
@@ -114,15 +115,16 @@ add_link_tags() {
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
         elif [[ "${REF_LINK: -7}" == ".tar.gz" ]] ; then
-          LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
+          # LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           local RES_PATH
           RES_PATH="$ABS_HTML_PATH""/""$(echo "$BACK_LINK" | cut -d"." -f1 )""/res"
           if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
-          HTML_LINK="$P_START""Archive: ""$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""$(basename "$REF_LINK")""$LINK_END""$P_END"
-          LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
-          #LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@Qemu emulation archive created in log directory.@'"$HTML_LINK"'@' )
-          echo "[*] LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
+          # HTML_LINK="$P_START""Archive: ""$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""$(basename "$REF_LINK")""$LINK_END""$P_END"
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""Download Qemu emulation archive.""$LINK_END"
+          # LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
+          # LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@Qemu emulation archive created in log directory.@'"$HTML_LINK"'@' )
+          sed -i "s@Qemu emulation archive created in log directory.@$HTML_LINK@" "$LINK_FILE"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true

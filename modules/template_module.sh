@@ -43,6 +43,9 @@ template_module() {
   local TESTVAR1=""
   local TESTVAR2=""
 
+  print_output "[*] TESTVAR1: $TESTVAR1"
+  print_output "[*] TESTVAR2: $TESTVAR2"
+
   # Prints everything to CLI, more information in function print_examples
   print_output "[*] Empty module output"
 
@@ -77,6 +80,8 @@ sub_module() {
   local TESTVAR1_="${1:-}"
   # Create submodules inside of a module for better structure
   sub_module_title "Submodule example"
+
+  print_output "[*] local TESTVAR1_: $TESTVAR1_"
 
   # Analyze stuff ...
 }

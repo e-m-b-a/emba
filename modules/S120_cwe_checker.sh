@@ -12,6 +12,7 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Chao Yang - firmianay
 
 # Description:  Runs a Docker container with cwe-checker on Ghidra to check binary for
 #               common bug classes such as vicious functions or integer overflows.
