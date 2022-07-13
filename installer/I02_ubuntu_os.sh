@@ -16,7 +16,7 @@
 # Description: Helper/preinstaller module for (unix)-OS other than kali
 # 
 
-I02_custom_os() {
+I02_ubuntu_os() {
   module_title "${FUNCNAME[0]}"
   # mongodb / cve-search
   echo -e "\\n""$MAGENTA""$BOLD""Installations for Ubuntu:jammy!""$NC"
@@ -25,7 +25,8 @@ I02_custom_os() {
     echo -e "\\n""$BOLD""Installing libssl1.1 for mongodb!""$NC"
     echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
     apt-get update
-    apt-get install libssl1.1
+    print_tool_info "libssl1.1" 1
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
   fi
 }
 
