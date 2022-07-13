@@ -498,16 +498,11 @@ generate_report_file()
       for SUBMODUL_NAME in "${SUBMODUL_NAMES[@]}" ; do
         if [[ -n "$SUBMODUL_NAME" ]] ; then
           SUBMODUL_NAME="$( strip_color_tags "$SUBMODUL_NAME" | cut -d" " -f 2- )"
-          echo "[*] LINE_NUMBER_REP_NAV: $LINE_NUMBER_REP_NAV"
-          echo "[*] SUBMODUL_NAME: $SUBMODUL_NAME"
           A_SUBMODUL_NAME="$(echo "$SUBMODUL_NAME" | sed -e "s@[^a-zA-Z0-9]@@g" | tr "[:upper:]" "[:lower:]")"
-          echo "[*] A_SUBMODUL_NAME: $A_SUBMODUL_NAME"
           LINE="$(echo "$TITLE_ANCHOR" | sed -e "s@ANCHOR@$A_SUBMODUL_NAME@g")""$SUBMODUL_NAME""$LINK_END"
-          echo "[*] LINE: $LINE"
           sed -i -E "s@$SUBMODUL_NAME@$LINE@" "$TMP_FILE"
           # Add anchor to file
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
-          echo "[*] SUB_NAV_LINK: $SUB_NAV_LINK"
           sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
           ((LINE_NUMBER_REP_NAV+=1))
         fi
@@ -597,7 +592,6 @@ update_index()
     sed -i 's@expand_njs hidden@expand_njs@g' "$ABS_HTML_PATH""/""$INDEX_FILE"
   fi
   for S_FILE in "${SUPPL_FILES[@]}" ; do
-    echo "[*] S_FILE reached $S_FILE"
     generate_info_file "$S_FILE" "" "$SUPPL_PATH_HTML"
     LINE_NUMBER_NAV=$(grep -a -n "etc start" "$ABS_HTML_PATH""/""$INDEX_FILE" | cut -d ":" -f 1)
     REP_NAV_LINK="$(echo "$ETC_INDEX_LINK" | sed -e "s@LINK@./$SUPPL_PATH_HTML/$(basename "${S_FILE%."${S_FILE##*.}"}"".html")@g")"
