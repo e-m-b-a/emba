@@ -51,6 +51,7 @@ S10_binaries_basic_check()
         fi
       fi
     done
+    print_output ""
     print_output "[*] Found ""$ORANGE$COUNTER$NC"" binaries with interesting functions in ""$ORANGE$BIN_COUNT$NC"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
 
