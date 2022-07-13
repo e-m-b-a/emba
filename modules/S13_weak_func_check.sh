@@ -51,6 +51,11 @@ S13_weak_func_check()
     IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS_VAR" | sed ':a;N;$!ba;s/\n/ /g' )"
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
+
+    if [[ "$THREADED" -eq 1 ]]; then
+      MAX_THREADS_S13=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+    fi
+
     for BINARY in "${BINARIES[@]}" ; do
       if ( file "$BINARY" | grep -q ELF ) ; then
         NAME=$(basename "$BINARY" 2> /dev/null)
@@ -58,21 +63,21 @@ S13_weak_func_check()
         if ( file "$BINARY" | grep -q "x86-64" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             function_check_x86_64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S11+=( "$!" )
+            WAIT_PIDS_S13+=( "$!" )
           else
             function_check_x86_64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "Intel 80386" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             function_check_x86 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S11+=( "$!" )
+            WAIT_PIDS_S13+=( "$!" )
           else
             function_check_x86 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "32-bit.*ARM" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             function_check_ARM32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S11+=( "$!" )
+            WAIT_PIDS_S13+=( "$!" )
           else
             function_check_ARM32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
@@ -80,21 +85,21 @@ S13_weak_func_check()
           # ARM 64 code is in alpha state and nearly not tested!
           if [[ "$THREADED" -eq 1 ]]; then
             function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S11+=( "$!" )
+            WAIT_PIDS_S13+=( "$!" )
           else
             function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "MIPS" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S11+=( "$!" )
+            WAIT_PIDS_S13+=( "$!" )
           else
             function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "PowerPC" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S11+=( "$!" )
+            WAIT_PIDS_S13+=( "$!" )
           else
             function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
@@ -103,18 +108,21 @@ S13_weak_func_check()
           print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
         fi
       fi
+      if [[ "$THREADED" -eq 1 ]]; then
+        max_pids_protection "$MAX_THREADS_S13" "${WAIT_PIDS_S13[@]}"
+      fi
     done
 
     if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S11[@]}"
+      wait_for_pid "${WAIT_PIDS_S13[@]}"
     fi
 
     print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
-    if [[ -f "$TMP_DIR"/S11_STRCPY_CNT.tmp ]]; then
+    if [[ -f "$TMP_DIR"/S13_STRCPY_CNT.tmp ]]; then
       while read -r STRCPY; do
         STRCPY_CNT=$((STRCPY_CNT+STRCPY))
-      done < "$TMP_DIR"/S11_STRCPY_CNT.tmp
+      done < "$TMP_DIR"/S13_STRCPY_CNT.tmp
     fi
 
     # shellcheck disable=SC2129
@@ -129,6 +137,7 @@ S13_weak_func_check()
 
 function_check_PPC32(){
   local BINARY_="${1:-}"
+  shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   if ! [[ -f "$BINARY_" ]]; then
@@ -159,15 +168,16 @@ function_check_PPC32(){
           COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null || true)
         fi
         log_func_footer "$NAME" "$FUNCTION"
-        output_function_details "$BINARY_"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_MIPS32() {
   local BINARY_="${1:-}"
+  shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   if ! [[ -f "$BINARY_" ]]; then
@@ -200,15 +210,16 @@ function_check_MIPS32() {
           COUNT_MMAP_OK=$(grep -c ",-1$" "$FUNC_LOG"  2> /dev/null || true)
         fi
         log_func_footer "$NAME" "$FUNCTION"
-        output_function_details "$BINARY_"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_ARM64() {
   local BINARY_="${1:-}"
+  shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   if ! [[ -f "$BINARY_" ]]; then
@@ -238,14 +249,15 @@ function_check_ARM64() {
         COUNT_MMAP_OK="NA"
       fi
       log_func_footer "$NAME" "$FUNCTION"
-      output_function_details "$BINARY_"
+      output_function_details "$BINARY_" "$FUNCTION"
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_ARM32() {
   local BINARY_="${1:-}"
+  shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   if ! [[ -f "$BINARY_" ]]; then
@@ -274,14 +286,15 @@ function_check_ARM32() {
         COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null || true)
       fi
       log_func_footer "$NAME" "$FUNCTION"
-      output_function_details "$BINARY_"
+      output_function_details "$BINARY_" "$FUNCTION"
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_x86() {
   local BINARY_="${1:-}"
+  shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   if ! [[ -f "$BINARY_" ]]; then
@@ -310,15 +323,16 @@ function_check_x86() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "$FUNC_LOG"  2> /dev/null || true)
         fi
         log_func_footer "$NAME" "$FUNCTION"
-        output_function_details "$BINARY_"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_x86_64() {
   local BINARY_="${1:-}"
+  shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   if ! [[ -f "$BINARY_" ]]; then
@@ -347,11 +361,11 @@ function_check_x86_64() {
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null || true)
         fi
         log_func_footer "$NAME" "$FUNCTION"
-        output_function_details "$BINARY_"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 print_top10_statistics() {
@@ -450,6 +464,7 @@ output_function_details()
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
+  local FUNCTION="${2:-}"
   local NAME=""
   NAME=$(basename "$BINARY_")
 

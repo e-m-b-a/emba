@@ -58,7 +58,7 @@ max_pids_protection() {
   local WAIT_PIDS=("$@")
   local PID
   while [[ ${#WAIT_PIDS[@]} -gt "$MAX_PIDS_" ]]; do
-    TEMP_PIDS=()
+    local TEMP_PIDS=()
     # check for really running PIDs and re-create the array
     for PID in "${WAIT_PIDS[@]}"; do
       #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"

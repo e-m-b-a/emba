@@ -209,7 +209,7 @@ bin_string_checker() {
 
 recover_wait_pids() {
   local TEMP_PIDS=()
-  local PID
+  local PID=""
   # check for really running PIDs and re-create the array
   for PID in "${WAIT_PIDS_S09[@]}"; do
     #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
@@ -219,7 +219,7 @@ recover_wait_pids() {
   done
   #print_output "[!] S09 - really running pids: ${#TEMP_PIDS[@]}"
 
-  # recreate the arry with the current running PIDS
+  # recreate the array with the current running PIDS
   WAIT_PIDS_S09=()
   WAIT_PIDS_S09=("${TEMP_PIDS[@]}")
 }

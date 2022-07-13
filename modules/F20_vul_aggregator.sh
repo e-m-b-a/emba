@@ -39,13 +39,13 @@ F20_vul_aggregator() {
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
 
-  S06_LOG="$LOG_DIR"/s06_distribution_identification.csv
-  S08_LOG="$LOG_DIR"/s08_package_mgmt_extractor.csv
-  S09_LOG="$LOG_DIR"/s09_firmware_base_version_check.csv
-  S25_LOG="$LOG_DIR"/s25_kernel_check.txt
-  S116_LOG="$LOG_DIR"/s116_qemu_version_detection.csv
-  L15_LOG="$LOG_DIR"/l15_emulated_checks_nmap.csv
-  L25_LOG="$LOG_DIR"/l25_web_checks.csv
+  local S06_LOG="$LOG_DIR"/s06_distribution_identification.csv
+  local S08_LOG="$LOG_DIR"/s08_package_mgmt_extractor.csv
+  local S09_LOG="$LOG_DIR"/s09_firmware_base_version_check.csv
+  local S25_LOG="$LOG_DIR"/s25_kernel_check.txt
+  local S116_LOG="$LOG_DIR"/s116_qemu_version_detection.csv
+  local L15_LOG="$LOG_DIR"/l15_emulated_checks_nmap.csv
+  local L25_LOG="$LOG_DIR"/l25_web_checks.csv
 
   local CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   local EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
@@ -131,6 +131,9 @@ F20_vul_aggregator() {
 
 aggregate_versions() {
   sub_module_title "Software inventory generation."
+
+  local VERSION=""
+  export VERSIONS_AGGREGATED=()
 
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
@@ -249,10 +252,17 @@ generate_special_log() {
     sub_module_title "Minimal report of exploits and CVE's."
     write_anchor "minimalreportofexploitsandcves"
 
-    EXPLOIT_HIGH=0
-    EXPLOIT_MEDIUM=0
-    EXPLOIT_LOW=0
+    local EXPLOIT_HIGH=0
+    local EXPLOIT_MEDIUM=0
+    local EXPLOIT_LOW=0
     local KNOWN_EXPLOITED_VULNS=()
+    local KNOWN_EXPLOITED_VULN=""
+    local FILES=()
+    local FILE=""
+    local NAME=""
+    local CVE_VALUES=""
+    local EXPLOIT_=""
+    local EXPLOITS_AVAIL=()
 
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
     print_output ""
@@ -326,6 +336,7 @@ generate_cve_details() {
 
   CVE_COUNTER=0
   local VERSIONS_AGGREGATED=("$@")
+  local BIN_VERSION=""
 
   for BIN_VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # BIN_VERSION is something like "binary:1.2.3"
@@ -386,8 +397,8 @@ cve_db_lookup() {
 
 cve_extractor() {
   local VERSION_orig="${1:-}"
-  local VERSION
-  local BINARY
+  local VERSION=""
+  local BINARY=""
   local CVE_VALUE=""
   local CVSS_VALUE=""
   local VSOURCE="unknown"
@@ -401,6 +412,8 @@ cve_extractor() {
   local LOCAL=0
   local REMOTE=0
   local DOS=0
+  local CVEs_OUTPUT=()
+  local CVE_OUTPUT=""
 
   if [[ "$(echo "$VERSION_orig" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
     BINARY="$(echo "$VERSION_orig" | cut -d ":" -f1)"
