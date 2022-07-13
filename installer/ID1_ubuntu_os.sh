@@ -18,7 +18,7 @@
 
 ID1_ubuntu_os() {
   module_title "${FUNCNAME[0]}"
-  if [[ OTHER_OS -eq 1 ]] && [[ UBUNTU_OS -eq 1 ]]; then
+  if [[ "$OTHER_OS" -eq 1 ]] && [[ "$UBUNTU_OS" -eq 1 ]]; then
     # mongodb / cve-search
     echo -e "\\n""$MAGENTA""$BOLD""Installations for Ubuntu:jammy!""$NC"
     if ! dpkg -l libssl1.1 &>/dev/null; then
