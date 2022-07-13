@@ -140,6 +140,7 @@ function_check_PPC32(){
       NAME=$(basename "$BINARY_" 2> /dev/null)
       NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
@@ -147,7 +148,6 @@ function_check_PPC32(){
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        log_bin_hardening "$NAME"
         log_func_header "$NAME" "$FUNCTION"
         sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
@@ -180,6 +180,7 @@ function_check_MIPS32() {
     if [[ -n "$FUNC_ADDR" ]] ; then
       NAME=$(basename "$BINARY_" 2> /dev/null)
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         "$OBJDUMP" -d "$BINARY_" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ >> "$FUNC_LOG" || true
@@ -187,7 +188,6 @@ function_check_MIPS32() {
         "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        log_bin_hardening "$NAME"
         log_func_header "$NAME" "$FUNCTION"
         sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
@@ -218,13 +218,13 @@ function_check_ARM64() {
     NAME=$(basename "$BINARY_" 2> /dev/null)
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+    log_bin_hardening "$NAME"
     if [[ "$FUNCTION" == "mmap" ]] ; then
       "$OBJDUMP" -d "$BINARY_" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     else
       "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-      log_bin_hardening "$NAME"
       log_func_header "$NAME" "$FUNCTION"
       sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
@@ -255,13 +255,13 @@ function_check_ARM32() {
     NAME=$(basename "$BINARY_" 2> /dev/null)
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+    log_bin_hardening "$NAME"
     if [[ "$FUNCTION" == "mmap" ]] ; then
       "$OBJDUMP" -d "$BINARY_" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     else
       "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-      log_bin_hardening "$NAME"
       log_func_header "$NAME" "$FUNCTION"
       sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
@@ -291,6 +291,7 @@ function_check_x86() {
     if ( readelf -r --use-dynamic "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
@@ -298,7 +299,6 @@ function_check_x86() {
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        log_bin_hardening "$NAME"
         log_func_header "$NAME" "$FUNCTION"
         sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
@@ -328,6 +328,7 @@ function_check_x86_64() {
     if ( readelf -r --use-dynamic "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
@@ -335,7 +336,6 @@ function_check_x86_64() {
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        log_bin_hardening "$NAME"
         log_func_header "$NAME" "$FUNCTION"
         sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
