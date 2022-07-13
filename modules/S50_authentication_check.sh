@@ -77,7 +77,6 @@ S50_authentication_check() {
   fi
   write_log ""
   write_log "[*] Statistics:$AUTH_ISSUES"
-
   module_end_log "${FUNCNAME[0]}" "$AUTH_ISSUES"
 }
 

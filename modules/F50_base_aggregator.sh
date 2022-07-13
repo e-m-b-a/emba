@@ -852,15 +852,21 @@ print_os() {
 }
 
 cwe_logging() {
-  LOG_DIR_MOD="s120_cwe_checker"
+  local LOG_DIR_MOD="s120_cwe_checker"
+  local CWE_OUT=()
+  local CWE_ENTRY=""
+  local CWE=""
+  local CWE_DESC=""
+  local CWE_CNT=""
+
   if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
     mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       write_link "s120"
-      for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
-        CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
+      for CWE_ENTRY in "${CWE_OUT[@]}"; do
+        CWE="$(echo "$CWE_ENTRY" | cut -d\  -f1)"
+        CWE_DESC="$(echo "$CWE_ENTRY" | cut -d\  -f2-)"
         CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
