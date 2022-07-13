@@ -43,6 +43,9 @@ deep_key_search() {
   local DEEP_S_FILE=""
   GREP_PATTERN_COMMAND=()
 
+  if [[ "$THREADED" -eq 1 ]]; then
+    MAX_THREADS_S106=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+  fi
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
   done
@@ -53,6 +56,9 @@ deep_key_search() {
       WAIT_PIDS_S106+=( "$!" )
     else
       deep_key_searcher "$DEEP_S_FILE"
+    fi
+    if [[ "$THREADED" -eq 1 ]]; then
+      max_pids_protection "$MAX_THREADS_S106" "${WAIT_PIDS_S106[@]}"
     fi
   done
 
