@@ -304,8 +304,8 @@ output_config_issues() {
 }
 
 output_binaries() {
-
   local DATA=0
+
   if [[ -v BINARIES[@] ]]; then
     if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG" || true)
@@ -503,8 +503,8 @@ binary_fct_output() {
 }
 
 output_cve_exploits() {
-
   local DATA=0
+
   if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
     if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
@@ -735,6 +735,8 @@ get_data() {
 }
 
 distribution_detector() {
+  local DISTRI=""
+
   for DISTRI in "${LINUX_DISTRIS[@]}"; do
     print_output "[+] Linux distribution detected: $ORANGE$DISTRI$NC"
     write_link "s06"
@@ -742,7 +744,6 @@ distribution_detector() {
 }
 
 os_detector() {
-
   VERIFIED=0
   VERIFIED_S03=0
   OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
@@ -774,7 +775,7 @@ os_detector() {
           VERIFIED=1
         done
         if [[ $VERIFIED -eq 1 ]]; then
-          print_os
+          print_os "$SYSTEM"
         fi
       fi
     done
@@ -788,7 +789,7 @@ os_detector() {
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED_S03=1
         VERIFIED=1
-        print_os
+        print_os "$SYSTEM"
       done
     fi
 
@@ -798,7 +799,7 @@ os_detector() {
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED=0
-        print_os
+        print_os "$SYSTEM"
       done
     fi
   fi
@@ -809,12 +810,13 @@ os_detector() {
     # but just in case something went wrong we use it now
     os_kernel_module_detect
     if [[ $VERIFIED -eq 1 ]]; then
-      print_os
+      print_os "$SYSTEM"
     fi
   fi
 }
 
 os_kernel_module_detect() {
+  local LINUX_VERSIONS=""
 
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u || true)
@@ -831,6 +833,8 @@ os_kernel_module_detect() {
 }
 
 print_os() {
+  SYSTEM="${1:-}"
+
   if [[ $VERIFIED -eq 1 ]]; then
     if [[ "$VERIFIED_S03" -eq 1 ]]; then
       SYSTEM=$(echo "$SYSTEM" | awk '{print $1}')
