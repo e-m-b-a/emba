@@ -176,7 +176,7 @@ fi
 if [[ "$OTHER_OS" -eq 1 ]]; then
   # UBUNTU
   if [[ "$UBUNTU_OS" -eq 1 ]]; then
-    I02_ubuntu_os
+    ID1_ubuntu_os
   fi
 fi
 
