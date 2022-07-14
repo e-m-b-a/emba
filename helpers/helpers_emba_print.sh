@@ -141,7 +141,7 @@ print_output()
 print_ln()
 {
   local LOG_SETTING="${1:-}"
-  print_ln "$LOG_SETTING"
+  print_output "" "$LOG_SETTING"
 }
 
 write_log()
