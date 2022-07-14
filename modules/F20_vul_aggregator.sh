@@ -199,7 +199,16 @@ aggregate_versions() {
       if [ -z "$VERSION" ]; then
         continue
       fi
+      if [[ "$VERSION" == *" "* ]]; then
+        print_output "[-] WARNING: Broken version identifier found: $ORANGE$VERSION$NC"
+        continue
+      fi
       if ! [[ "$VERSION" == *[0-9]* ]]; then
+        print_output "[-] WARNING: Broken version identifier found: $ORANGE$VERSION$NC"
+        continue
+      fi
+      if ! [[ "$VERSION" == *":"* ]]; then
+        print_output "[-] WARNING: Broken version identifier found: $ORANGE$VERSION$NC"
         continue
       fi
       echo "$VERSION" >> "$LOG_PATH_MODULE"/versions.tmp

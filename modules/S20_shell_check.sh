@@ -29,6 +29,9 @@ S20_shell_check()
   local VTYPE=""
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
+    if [[ "$THREADED" -eq 1 ]]; then
+      MAX_THREADS_S20=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+    fi
     write_csv_log "Script path" "Shell issues detected" "common linux file"
     mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for SH_SCRIPT in "${SH_SCRIPTS[@]}" ; do
@@ -40,7 +43,10 @@ S20_shell_check()
         else
           s20_script_check "$SH_SCRIPT"
         fi
-     fi
+      fi
+      if [[ "$THREADED" -eq 1 ]]; then
+        max_pids_protection "$MAX_THREADS_S20" "${WAIT_PIDS_S20[@]}"
+      fi
     done
 
     if [[ "$THREADED" -eq 1 ]]; then
