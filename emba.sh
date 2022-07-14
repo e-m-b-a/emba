@@ -304,7 +304,7 @@ main()
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
 
   import_helper
-  print_output "" "no_log"
+  print_ln "no_log"
   import_module
 
   welcome  # Print EMBA welcome message
@@ -448,7 +448,7 @@ main()
     esac
   done
 
-  print_output "" "no_log"
+  print_ln "no_log"
 
   # print it only once per EMBA run - not again from started container
   if [[ $IN_DOCKER -eq 0 ]]; then
@@ -678,7 +678,7 @@ main()
       esac
     done
 
-    print_output "" "no_log"
+    print_ln "no_log"
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
@@ -730,7 +730,7 @@ main()
   #######################################################################################
   if [[ $PRE_CHECK -eq 1 ]] ; then
 
-    print_output "" "no_log"
+    print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
     else
@@ -747,7 +747,7 @@ main()
       wait_for_pid "${WAIT_PIDS[@]}"
     fi
 
-    print_output "" "no_log"
+    print_ln "no_log"
 
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
@@ -783,7 +783,7 @@ main()
       wait_for_pid "${WAIT_PIDS[@]}"
     fi
 
-    print_output "" "no_log"
+    print_ln "no_log"
 
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
@@ -809,7 +809,7 @@ main()
     # these modules are not threaded!
     run_modules "L" "0" "$HTML"
 
-    print_output "" "no_log"
+    print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
     else
@@ -833,7 +833,7 @@ main()
       print_output "[*] Removing temp firmware directory\\n" "no_log" 
       rm -r "$LOG_DIR"/firmware 2>/dev/null
     fi
-    print_output "" "no_log"
+    print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
       rm -r "$TMP_DIR" 2>/dev/null || true

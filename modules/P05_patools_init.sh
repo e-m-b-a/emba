@@ -65,7 +65,7 @@ patools_extractor() {
 
   if grep -q "patool: ... tested ok." "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log ; then
 
-    print_output ""
+    print_ln
     print_output "[*] Valid compressed file detected - extraction process via patool started"
 
     patool -v extract "$FIRMWARE_PATH_" --outdir "$EXTRACTION_DIR_" | tee -a "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log
@@ -73,7 +73,7 @@ patools_extractor() {
 
   else
     # Fallback if unzip does not work:
-    print_output ""
+    print_ln
     print_output "[*] No valid compressed file detected - extraction process via binwalk started"
 
     if [[ "$BINWALK_VER_CHECK" -eq 1 ]]; then
@@ -83,17 +83,17 @@ patools_extractor() {
     fi
   fi
 
-  print_output ""
+  print_ln
   print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
   #shellcheck disable=SC2012
   ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
-  print_output ""
+  print_ln
 
   FILES_PATOOLS=$(find "$EXTRACTION_DIR_" -type f | wc -l)
   DIRS_PATOOLS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
   print_output "[*] Extracted $ORANGE$FILES_PATOOLS$NC files and $ORANGE$DIRS_PATOOLS$NC directories from the firmware image."
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
   write_csv_log "Patool extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_PATOOLS" "$DIRS_PATOOLS" "NA"
-  print_output ""
+  print_ln
 
 }

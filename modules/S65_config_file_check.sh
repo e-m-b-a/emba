@@ -73,7 +73,7 @@ check_fstab()
     for LINE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No fstab files with user details found"
   fi
@@ -83,7 +83,7 @@ check_fstab()
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No fstab files with passwords found"
   fi

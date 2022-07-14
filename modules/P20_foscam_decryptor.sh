@@ -65,10 +65,10 @@ foscam_enc_extractor() {
     if [[ -f "$EXTRACTION_FILE_" ]]; then
       FOSCAM_FILE_CHECK=$(file "$EXTRACTION_FILE_")
       if [[ "$FOSCAM_FILE_CHECK" =~ .*gzip\ compressed\ data.* ]]; then
-        print_output ""
+        print_ln
         print_output "[+] Decrypted Foscam firmware file to $ORANGE$EXTRACTION_FILE_$NC"
         export FIRMWARE_PATH="$EXTRACTION_FILE_"
-        print_output ""
+        print_ln
         print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
         write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
         write_csv_log "Foscam decryptor" "$FOSCAM_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
@@ -168,7 +168,7 @@ foscam_ubi_extractor() {
     fi
 
     if [[ "$FOSCAM_UBI_FILES" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[*] Extracted $ORANGE$FOSCAM_UBI_FILES$NC files and $ORANGE$FOSCAM_UBI_DIRS$NC directories from the firmware image."
       write_csv_log "Foscam UBI extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FOSCAM_UBI_FILES" "$FOSCAM_UBI_DIRS" "NA"
       export FIRMWARE_PATH="$LOG_DIR"/firmware

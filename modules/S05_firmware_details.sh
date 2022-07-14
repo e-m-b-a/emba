@@ -88,7 +88,7 @@ release_info()
           print_output "\\n""$( print_path "$R_INFO")"
           RELEASE="$( cat "$R_INFO" )"
           if [[ "$RELEASE" ]] ; then
-            print_output ""
+            print_ln
             print_output "$(indent "$(magenta "$RELEASE")")"
           fi
         fi

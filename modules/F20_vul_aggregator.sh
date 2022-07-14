@@ -21,7 +21,7 @@ F20_vul_aggregator() {
   module_title "Final vulnerability aggregator"
 
   pre_module_reporter "${FUNCNAME[0]}"
-  print_output ""
+  print_ln
   
   mkdir "$LOG_PATH_MODULE"/cve_sum
   mkdir "$LOG_PATH_MODULE"/exploit
@@ -188,7 +188,7 @@ aggregate_versions() {
       fi
     done
 
-    print_output ""
+    print_ln
     VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
   fi
 
@@ -274,10 +274,10 @@ generate_special_log() {
     local EXPLOITS_AVAIL=()
 
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
-    print_output ""
+    print_ln
     print_output "[*] CVE log file generated."
     write_link "$CVE_MINIMAL_LOG"
-    print_output ""
+    print_ln
 
     for FILE in "${FILES[@]}"; do
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
@@ -287,14 +287,14 @@ generate_special_log() {
         print_output "$CVE_VALUES"
         echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
         echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
-        print_output ""
+        print_ln
       fi
     done
 
-    print_output ""
+    print_ln
     print_output "[*] Minimal exploit summary file generated."
     write_link "$EXPLOIT_OVERVIEW_LOG"
-    print_output ""
+    print_ln
 
     echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
     grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "$EXPLOIT_OVERVIEW_LOG" || true
@@ -322,13 +322,13 @@ generate_special_log() {
     if [[ -f "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log ]]; then
       mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true 2>/dev/null)
       if [[ -v KNOWN_EXPLOITED_VULNS[@] ]]; then
-        print_output ""
+        print_ln
         print_output "[*] Vulnerability summary off known exploited vulnerabilities:"
         write_link "$LOG_PATH_MODULE/exploit/known_exploited_vulns.log"
         for KNOWN_EXPLOITED_VULN in "${KNOWN_EXPLOITED_VULNS[@]}"; do
           print_output "$KNOWN_EXPLOITED_VULN"
         done
-        print_output ""
+        print_ln
       fi
     fi
 
@@ -732,19 +732,19 @@ cve_extractor() {
   print_output "[*] Vulnerability details for ${ORANGE}$BINARY$NC / version ${ORANGE}$VERSION$NC / source ${ORANGE}$VSOURCE$NC:"
   write_anchor "cve_$BINARY"
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
-    print_output ""
+    print_ln
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
-    print_output ""
+    print_ln
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
-    print_output ""
+    print_ln
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
-    print_output ""
+    print_ln
   else
-    print_output ""
+    print_ln
     print_output "[+] Found $ORANGE${BOLD}NO$NC$GREEN CVEs and $ORANGE${BOLD}NO$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
-    print_output ""
+    print_ln
   fi
 
   CVEs="$CVE_COUNTER_VERSION"

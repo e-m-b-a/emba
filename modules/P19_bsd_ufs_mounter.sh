@@ -61,11 +61,11 @@ ufs_extractor() {
     print_output "[*] Copying $ORANGE$TMP_UFS_MOUNT$NC to firmware tmp directory ($ORANGE$EXTRACTION_DIR_$NC)"
     mkdir -p "$EXTRACTION_DIR_" 2>/dev/null || true
     cp -pri "$TMP_UFS_MOUNT"/* "$EXTRACTION_DIR_" 2>/dev/null || true
-    print_output ""
+    print_ln
     print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
     #shellcheck disable=SC2012
     ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
-    print_output ""
+    print_ln
     print_output "[*] Unmounting $ORANGE$TMP_UFS_MOUNT$NC directory"
 
     FILES_UFS_MOUNT=$(find "$EXTRACTION_DIR_" -type f | wc -l)

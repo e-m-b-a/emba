@@ -40,7 +40,7 @@ S10_binaries_basic_check()
         BIN_COUNT=$((BIN_COUNT+1))
         mapfile -t VUL_FUNC_RESULT < <(readelf -s --use-dynamic "$BINARY" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
-          print_output ""
+          print_ln
           print_output "[+] Interesting function in ""$(print_path "$BINARY")"" found:"
           for VUL_FUNC in "${VUL_FUNC_RESULT[@]}" ; do
             # shellcheck disable=SC2001
@@ -51,7 +51,7 @@ S10_binaries_basic_check()
         fi
       fi
     done
-    print_output ""
+    print_ln
     print_output "[*] Found ""$ORANGE$COUNTER$NC"" binaries with interesting functions in ""$ORANGE$BIN_COUNT$NC"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
 

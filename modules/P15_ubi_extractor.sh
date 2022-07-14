@@ -74,7 +74,7 @@ ubi_extractor() {
       fi
     done
 
-    print_output ""
+    print_ln
     FILES_UBI_EXT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image."

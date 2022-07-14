@@ -49,7 +49,7 @@ deep_key_search() {
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
   done
-  print_output "" "no_log"
+  print_ln "no_log"
   for DEEP_S_FILE in "${FILE_ARR[@]}"; do
     if [[ $THREADED -eq 1 ]]; then
       deep_key_searcher "$DEEP_S_FILE" &
@@ -112,7 +112,7 @@ deep_key_reporter() {
 
   if [[ "${#PATTERN_LIST[@]}" -gt 0 ]] ; then
     if [[ "${#OCC_LIST[@]}" -gt 0 ]] ; then
-      print_output ""
+      print_ln
       print_output "[*] Occurences of pattern:"
       SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
       if [[ "${#SORTED_OCC_LIST[@]}" -gt 0 ]]; then

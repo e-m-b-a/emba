@@ -95,7 +95,7 @@ S99_grepit() {
   grepit_reporter
 
   GREPIT_RESULTS=$(grep -v -c -E "\ Searching\ \(" "$LOG_PATH_MODULE"/[0-9]_* | cut -d: -f2 | paste -sd+ | bc)
-  print_output ""
+  print_ln
   print_output "[*] Found $ORANGE$GREPIT_RESULTS$NC results via grepit."
 
   module_end_log "${FUNCNAME[0]}" "$GREPIT_RESULTS"

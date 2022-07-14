@@ -85,7 +85,7 @@ S45_pass_file_check()
             L_BREAK=1
 	        fi
 	        if ! [[ $L_BREAK -eq 0 ]] ; then
-            print_output ""
+            print_ln
           fi
         fi
       done

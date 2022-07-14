@@ -55,7 +55,7 @@ P65_package_extractor() {
     FILES_POST_PACKAGE=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
     if [[ "$FILES_POST_PACKAGE" -gt "$FILES_PRE_PACKAGE" ]]; then
-      print_output ""
+      print_ln
       print_output "[*] Before package extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after package extraction we have now $ORANGE$FILES_POST_PACKAGE$NC files extracted."
       NEG_LOG=1
     fi
@@ -91,7 +91,7 @@ apk_extractor() {
       done
 
       FILES_AFTER_APK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      print_output "" "no_log"
+      print_ln "no_log"
       print_output "[*] Before apk extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after deep extraction we have $ORANGE$FILES_AFTER_APK$NC files extracted."
     fi
     check_disk_space
@@ -128,7 +128,7 @@ ipk_extractor() {
       done
 
       FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      print_output "" "no_log"
+      print_ln "no_log"
       print_output "[*] Before ipk extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
       rm -r "$LOG_DIR"/ipk_tmp
     fi
@@ -169,7 +169,7 @@ deb_extractor() {
       fi
 
       FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-      print_output "" "no_log"
+      print_ln "no_log"
       print_output "[*] Before deb extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after deep extraction we have $ORANGE$FILES_AFTER_DEB$NC files extracted."
     fi
     check_disk_space

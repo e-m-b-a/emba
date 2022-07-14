@@ -59,7 +59,7 @@ P60_firmware_bin_extractor() {
   UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
 
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all."
     #shellcheck disable=SC2012
     ls -l "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
@@ -103,7 +103,7 @@ disk_space_protection() {
 
   check_disk_space
   if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
-    print_output "" "no_log"
+    print_ln "no_log"
     print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
     print_output "[!] $(date) - Ending extraction processes" "main"
     pgrep -a -f "binwalk.*$SEARCHER.*" || true
@@ -308,7 +308,7 @@ binwalking() {
   print_output "[*] Basic analysis with binwalk"
   binwalk "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
 
-  print_output "" "no_log"
+  print_ln "no_log"
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
   if [[ -f $FIRMWARE_PATH_BAK ]] ; then
     print_output "[*] Entropy testing with binwalk ... "
@@ -328,7 +328,7 @@ binwalking() {
   OUTPUT_DIR_BINWALK=$(basename "$FIRMWARE_PATH_")
   OUTPUT_DIR_BINWALK="$FIRMWARE_PATH_CP""/""$OUTPUT_DIR_BINWALK"_binwalk_emba
 
-  print_output "" "no_log"
+  print_ln "no_log"
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_BINWALK$NC"
   # this is not working in background. I have created a new function that gets executed in the background
   # probably there is a more elegant way

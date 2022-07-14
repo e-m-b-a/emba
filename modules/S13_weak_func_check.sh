@@ -383,7 +383,7 @@ print_top10_statistics() {
       readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null || true)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
-        print_output ""
+        print_ln
         print_output "[+] ""$FUNCTION"" - top 10 results:"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           write_anchor "strcpysummary"

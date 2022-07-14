@@ -43,23 +43,23 @@ P02_firmware_bin_file_check() {
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
   print_output "[*] Details of the firmware file:"
-  print_output ""
+  print_ln
   print_output "$(indent "$FILE_LS_OUT")"
-  print_output ""
+  print_ln
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    print_output ""
+    print_ln
     print_output "$(indent "$(file "$FIRMWARE_PATH")")"
-    print_output ""
+    print_ln
     hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE" || true
-    print_output ""
+    print_ln
     print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
-    print_output ""
+    print_ln
     print_output "$(indent "$ENTROPY")"
-    print_output ""
+    print_ln
     if [[ -x "$EXT_DIR"/pixde ]]; then
       print_output "[*] Visualized firmware file (first 2000 bytes):\n"
       "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/p02_pixd.txt
-      print_output ""
+      print_ln
       python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null
       write_link "$LOG_DIR"/pixd.png
     fi
@@ -207,5 +207,5 @@ fw_bin_detector() {
     export BUFFALO_ENC_DETECTED=1
     write_csv_log "Buffalo encrypted" "yes" "NA"
   fi
-  print_output ""
+  print_ln
 }

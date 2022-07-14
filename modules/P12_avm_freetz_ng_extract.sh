@@ -62,7 +62,7 @@ avm_extractor() {
     fi
 
     if [[ "$FRITZ_FILES" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[*] Extracted $ORANGE$FRITZ_FILES$NC files and $ORANGE$FRITZ_DIRS$NC directories from the firmware image."
       write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
       write_csv_log "Freetz-NG" "$AVM_FW_PATH_" "$EXTRACTION_DIR_" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"

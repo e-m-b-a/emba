@@ -60,7 +60,7 @@ S21_python_check()
     fi
 
     if [[ "$S21_PY_VULNS" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[+] Found ""$ORANGE""$S21_PY_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S21_PY_SCRIPTS""$GREEN"" python files:""$NC""\\n"
     fi
 

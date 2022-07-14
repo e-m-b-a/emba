@@ -115,7 +115,7 @@ cwe_checker_threaded () {
     mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
-      print_output ""
+      print_ln
       print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".log
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
@@ -124,13 +124,13 @@ cwe_checker_threaded () {
         echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
-      print_output ""
+      print_ln
     else
-      print_output ""
+      print_ln
       print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
     fi
   fi
-  if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_output "" ; fi
+  if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_ln ; fi
 
   if [[ -f "$LOG_FILE" ]]; then
     cat "$LOG_FILE" >> "$OLD_LOG_FILE"
@@ -149,7 +149,7 @@ final_cwe_log() {
 
   if [[ -d "$LOG_PATH_MODULE" ]]; then
     mapfile -t CWE_OUT < <( cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
-    print_output ""
+    print_ln
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       for CWE_LINE in "${CWE_OUT[@]}"; do
@@ -158,7 +158,7 @@ final_cwe_log() {
         CWE_CNT="$(cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
-      print_output ""
+      print_ln
     fi
   fi
 }

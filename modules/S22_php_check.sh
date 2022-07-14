@@ -62,7 +62,7 @@ s22_phpinfo_check() {
       ((S22_PHPINFO_ISSUES+=1))
     fi
   done
-  print_output ""
+  print_ln
 }
 
 s22_vuln_check_caller() {
@@ -97,7 +97,7 @@ s22_vuln_check_caller() {
     done < "$TMP_DIR"/S22_VULNS.tmp
   fi
  
-  print_output ""
+  print_ln
   if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
   fi
@@ -198,9 +198,9 @@ s22_check_php_ini(){
         fi
       fi
     done
-    print_output ""
+    print_ln
     print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES""$GREEN"" PHP configuration issues in php config file :""$ORANGE"" ""$(print_path "$PHP_FILE")"
-    print_output ""
+    print_ln
   done
   enable_strict_mode "$STRICT_MODE"
 }

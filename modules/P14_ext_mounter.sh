@@ -59,11 +59,11 @@ ext_extractor() {
     print_output "[*] Copying $ORANGE$TMP_EXT_MOUNT$NC to firmware tmp directory ($EXTRACTION_DIR_)"
     mkdir -p "$EXTRACTION_DIR_"
     cp -pri "$TMP_EXT_MOUNT"/* "$EXTRACTION_DIR_"
-    print_output ""
+    print_ln
     print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
     #shellcheck disable=SC2012
     ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
-    print_output ""
+    print_ln
     print_output "[*] Unmounting $ORANGE$TMP_EXT_MOUNT$NC directory"
 
     FILES_EXT_MOUNT=$(find "$EXTRACTION_DIR_" -type f | wc -l)

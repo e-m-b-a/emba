@@ -53,23 +53,23 @@ qnap_enc_extractor() {
   hexdump -C "$QNAP_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
   if [[ -f "$EXT_DIR"/PC1 ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Decrypting QNAP firmware with leaked key material ..."
-    print_output ""
+    print_ln
     "$EXT_DIR"/PC1 d QNAPNASVERSION4 "$QNAP_ENC_PATH_" "$EXTRACTION_FILE_" | tee -a "$LOG_FILE"
   else
     print_output "[-] QNAP decryptor not found - check your installation"
   fi
 
-  print_output ""
+  print_ln
   if [[ -f "$EXTRACTION_FILE_" && "$(file "$EXTRACTION_FILE_")" == *"gzip compressed data"* ]]; then
     print_output "[+] Decrypted QNAP firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     MD5_DONE_DEEP+=( "$(md5sum "$QNAP_ENC_PATH_" | awk '{print $1}')" )
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
     export QNAP=1
-    print_output ""
+    print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
-    print_output ""
+    print_ln
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "QNAP decryptor" "$QNAP_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "gzip compressed data"
     if [[ -z "${FW_VENDOR:-}" ]]; then
@@ -102,7 +102,7 @@ qnap_extractor() {
     print_output "[*] Extracting $ORANGE$DECRYPTED_FW_$NC into $ORANGE$QNAP_EXTRACTION_ROOT$NC."
     mkdir -p "$QNAP_EXTRACTION_ROOT" || true
     tar xvf "$DECRYPTED_FW_" -C "$QNAP_EXTRACTION_ROOT" 2>/dev/null || true | tee -a "$LOG_FILE"
-    print_output ""
+    print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$QNAP_EXTRACTION_ROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$QNAP_EXTRACTION_ROOT" | tee -a "$LOG_FILE"
@@ -140,7 +140,7 @@ qnap_extractor() {
   mkdir "$SYSROOT"
 
   if [ -e "$UIMAGE" ]; then
-    print_output ""
+    print_ln
     print_output "[*] Scanning $ORANGE$UIMAGE$NC for (gzipped) parts..."
 
     a=$(od -t x1 -w4 -Ad -v "$UIMAGE" | grep '1f 8b 08 00' | awk '{print $1}')
@@ -168,7 +168,7 @@ qnap_extractor() {
   fi
 
   if [ -e "$UBI" ]; then
-    print_output ""
+    print_ln
     print_output "[*] Unpacking $ORANGE$UBI$NC."
     # TODO: we should evaluate moving to the EMBA UBI extractor in the future
 
@@ -203,7 +203,7 @@ qnap_extractor() {
     if mount | grep -q ext_mount; then
       print_output "[*] Copying contents from UBI mount"
       cp -a "$TMP_EXT_MOUNT"/boot/* "$QNAP_EXTRACTION_ROOT_DST" || true
-      print_output ""
+      print_ln
       print_output "[*] Extracted firmware structure ($ORANGE$QNAP_EXTRACTION_ROOT_DST$NC):"
       #shellcheck disable=SC2012
       ls -lh "$QNAP_EXTRACTION_ROOT_DST" | tee -a "$LOG_FILE"
@@ -221,11 +221,11 @@ qnap_extractor() {
   fi
 
   if [ -e "$INITRAMFS" ]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting $ORANGE$INITRAMFS$NC."
     # shellcheck disable=SC2002
     cat "$INITRAMFS" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
-    print_output ""
+    print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
@@ -234,11 +234,11 @@ qnap_extractor() {
   fi
 
   if [ -e "$INITRD" ]; then
-    print_output ""
+    print_ln
     if file "$INITRD" | grep -q LZMA ; then
       print_output "[*] Extracting $ORANGE$INITRD$NC (LZMA)."
       lzma -d <"$INITRD" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
-      print_output ""
+      print_ln
       print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
       #shellcheck disable=SC2012
       ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
@@ -247,7 +247,7 @@ qnap_extractor() {
     fi
 
     if file "$INITRD" | grep -q gzip ; then
-      print_output ""
+      print_ln
       print_output "[*] Extracting $ORANGE$INITRD$NC (gzip)."
       gzip -d <"$INITRD" >"$QNAP_EXTRACTION_ROOT_DST/initrd.$$"
       print_output "[*] Mounting $ORANGE$INITRD$NC."
@@ -257,7 +257,7 @@ qnap_extractor() {
       if mount | grep -q ext_mount; then
         cp -a "$TMP_EXT_MOUNT"/* "$SYSROOT" || true
         umount "$TMP_EXT_MOUNT"
-        print_output ""
+        print_ln
         print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
         #shellcheck disable=SC2012
         ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
@@ -272,10 +272,10 @@ qnap_extractor() {
   fi
 
   if [ -e "$ROOTFS2" ]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting $ORANGE$ROOTFS2$NC (gzip, tar)."
     tar -xvzf "$ROOTFS2" -C "$SYSROOT"
-    print_output ""
+    print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
@@ -284,7 +284,7 @@ qnap_extractor() {
   fi
 
   if [ -e "$ROOTFS2_BZ" ]; then
-    print_output ""
+    print_ln
     if file "$ROOTFS2_BZ" | grep -q "LZMA"; then
       print_output "[*] Extracting $ORANGE$ROOTFS2_BZ$NC (LZMA)."
       lzma -d <"$ROOTFS2_BZ" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
@@ -292,7 +292,7 @@ qnap_extractor() {
       print_output "[*] Extracting $ORANGE$ROOTFS2_BZ$NC (bzip2, tar)."
       tar -xvjf "$ROOTFS2_BZ" -C "$SYSROOT"
     fi
-    print_output ""
+    print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
@@ -301,14 +301,14 @@ qnap_extractor() {
   fi
 
   if [ -f "$ROOTFS2_IMG" ]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting $ORANGE$ROOTFS2_IMG$NC (ext2)..."
     local TMP_EXT_MOUNT="$TMP_DIR""/ext_mount_$RANDOM"
     mkdir -p "$TMP_EXT_MOUNT" || true
     mount -t ext2 "$ROOTFS2_IMG" "$TMP_EXT_MOUNT" -oro,loop
     if mount | grep -q ext_mount; then
       tar -xvjf "$TMP_EXT_MOUNT"/rootfs2.bz -C "$SYSROOT"
-      print_output ""
+      print_ln
       print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
       #shellcheck disable=SC2012
       ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
@@ -322,7 +322,7 @@ qnap_extractor() {
   fi
 
   if [ -e "$ROOTFS_EXT" ]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting EXT filesystem $ORANGE$ROOTFS_EXT$NC."
     tar xzvf "$ROOTFS_EXT" -C "$QNAP_EXTRACTION_ROOT_DST"
     print_output "[*] Mounting EXT filesystem $ORANGE$ROOTFS_EXT$NC."
@@ -336,7 +336,7 @@ qnap_extractor() {
     print_output "[*] Removing EXT filesystem ${ORANGE}rootfs_ext.img$NC."
     rm "$QNAP_EXTRACTION_ROOT_DST"/rootfs_ext.img || true
     rm -r "$TMP_EXT_MOUNT" || true
-    print_output ""
+    print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
     #shellcheck disable=SC2012
     ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
@@ -347,7 +347,7 @@ qnap_extractor() {
   USR_LOCAL=$(find "$SYSROOT/opt/source" -name "*.tgz" 2>/dev/null)
   #if [[ "${#USR_LOCAL[@]}" -gt 0 ]]; then
   if [[ -v USR_LOCAL[@] ]]; then
-    print_output ""
+    print_ln
     for f in "${USR_LOCAL[@]}"; do
       print_output "[*] Extracting $ORANGE$f$NC -> ${ORANGE}sysroot/usr/local$NC ..."
       mkdir -p "$SYSROOT/usr/local" || true
@@ -358,7 +358,7 @@ qnap_extractor() {
   fi
 
   if [ -e "$QPKG" ]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting $ORANGE$QPKG$NC."
     mkdir -p "$QNAP_EXTRACTION_ROOT_DST/qpkg" || true
     tar xvf "$QPKG" -C "$QNAP_EXTRACTION_ROOT_DST/qpkg"
@@ -380,7 +380,7 @@ qnap_extractor() {
   done
 
   if [ -e "$QNAP_EXTRACTION_ROOT_DST"/qpkg/libboost.tgz ]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting ${ORANGE}qpkg/libboost.tgz$NC -> ${ORANGE}sysroot/usr/lib$NC."
     mkdir -p "$SYSROOT/usr/lib" || true
     tar xvzf "$QNAP_EXTRACTION_ROOT_DST"/qpkg/libboost.tgz -C "$SYSROOT/usr/lib"
@@ -401,7 +401,7 @@ qnap_extractor() {
 print_files_dirs() {
   FILES_QNAP=$(find "$QNAP_EXTRACTION_ROOT" -type f | wc -l)
   DIRS_QNAP=$(find "$QNAP_EXTRACTION_ROOT" -type d | wc -l)
-  print_output ""
+  print_ln
   print_output "[*] Extracted $ORANGE$FILES_QNAP$NC files and $ORANGE$DIRS_QNAP$NC directories from the QNAP firmware image.\n"
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
   write_csv_log "QNAP extractor" "$DECRYPTED_FW_" "$QNAP_EXTRACTION_ROOT" "$FILES_QNAP" "$DIRS_QNAP" "NA"

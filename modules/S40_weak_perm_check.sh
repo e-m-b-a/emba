@@ -54,7 +54,7 @@ S40_weak_perm_check() {
       fi
       ((WEAK_PERM_COUNTER+=1))
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No setuid files found"
   fi
@@ -65,7 +65,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No setgid files found"
   fi
@@ -76,7 +76,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No world writable files found"
   fi
@@ -87,7 +87,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No shadow files found"
   fi
@@ -98,7 +98,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No rc.d files with weak permissions found"
   fi
@@ -109,7 +109,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    print_output "" "no_log"
+    print_ln "no_log"
   else
     print_output "[-] No init.d files with weak permissions found"
   fi

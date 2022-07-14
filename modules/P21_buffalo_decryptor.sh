@@ -47,7 +47,7 @@ buffalo_enc_extractor() {
   sub_module_title "Buffalo encrypted firmware extractor"
 
   hexdump -C "$BUFFALO_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
-  print_output ""
+  print_ln
 
   BUFFALO_DECRYTED=0
   local BUFFALO_ENC_PATH_STRIPPED
@@ -56,21 +56,21 @@ buffalo_enc_extractor() {
   print_output "[*] Removing initial 208 bytes from header to prepare firmware for decryption"
   dd bs=208 skip=1 if="$BUFFALO_ENC_PATH_" of="$BUFFALO_ENC_PATH_STRIPPED"
   hexdump -C "$BUFFALO_ENC_PATH_STRIPPED" | head | tee -a "$LOG_FILE" || true
-  print_output ""
+  print_ln
 
   print_output "[*] Decrypting firmware ..."
   "$EXT_DIR"/buffalo-enc.elf -d -i "$BUFFALO_ENC_PATH_STRIPPED" -o "$EXTRACTION_FILE_"
   hexdump -C "$EXTRACTION_FILE_" | head | tee -a "$LOG_FILE" || true
-  print_output ""
+  print_ln
 
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     BUFFALO_FILE_CHECK=$(file "$EXTRACTION_FILE_")
     if [[ "$BUFFALO_FILE_CHECK" =~ .*u-boot\ legacy\ uImage,\ .* ]]; then
-      print_output ""
+      print_ln
       print_output "[+] Decrypted Buffalo firmware file to $ORANGE$EXTRACTION_FILE_$NC"
       MD5_DONE_DEEP+=( "$(md5sum "$BUFFALO_ENC_PATH_" | awk '{print $1}')" )
       export FIRMWARE_PATH="$EXTRACTION_FILE_"
-      print_output ""
+      print_ln
       print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
       write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
       write_csv_log "Buffalo decryptor" "$BUFFALO_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"

@@ -52,9 +52,9 @@ android_ota_extractor() {
   hexdump -C "$OTA_INIT_PATH_" | head | tee -a "$LOG_FILE" || true
 
   if [[ -d "$EXT_DIR"/payload_dumper ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting Android OTA payload.bin file ..."
-    print_output ""
+    print_ln
 
     python3 "$EXT_DIR"/payload_dumper/payload_dumper.py --out "$EXTRACTION_DIR_" "$OTA_INIT_PATH_" | tee -a "$LOG_FILE"
 

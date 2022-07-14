@@ -156,7 +156,7 @@ architecture_check()
       fi
 
       if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
-        print_output ""
+        print_ln
         print_output "$(indent "$(orange "Endianness  Count")")"
         if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" ; fi
         if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" ; fi
@@ -170,7 +170,7 @@ architecture_check()
         D_END="NA"
       fi
 
-      print_output ""
+      print_ln
 
       if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
         print_output "$(indent "Detected architecture and endianness of the firmware: ""$ORANGE""$D_ARCH"" / ""$D_END""$NC")""\\n"
@@ -388,10 +388,10 @@ detect_root_dir_helper() {
 check_init_size() {
   SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}' || true)
   if [[ $SIZE -gt 400000000 ]]; then
-    print_output "" "no_log"
+    print_ln "no_log"
     print_output "[!] WARNING: Your firmware is very big!" "no_log"
     print_output "[!] WARNING: Analysing huge firmwares will take a lot of disk space, RAM and time!" "no_log"
-    print_output "" "no_log"
+    print_ln "no_log"
   fi
 }
 

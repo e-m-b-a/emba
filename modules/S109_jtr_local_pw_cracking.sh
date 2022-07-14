@@ -53,9 +53,9 @@ S109_jtr_local_pw_cracking()
     if [[ -f "$LOG_PATH_MODULE"/jtr_hashes.txt ]]; then
       print_output "[*] Starting jtr for the following hashes (runtime: $ORANGE$JTR_TIMEOUT$NC):"
       tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jtr_hashes.txt
-      print_output ""
+      print_ln
       timeout --preserve-status --signal SIGINT "$JTR_TIMEOUT" john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt | tee -a "$LOG_FILE" || true
-      print_output ""
+      print_ln
       NEG_LOG=1
     fi
 

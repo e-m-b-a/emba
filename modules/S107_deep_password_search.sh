@@ -38,7 +38,7 @@ S107_deep_password_search()
       ((PW_COUNTER+=1))
     done < "$TMP_DIR"/pw_hashes.txt
 
-    print_output ""
+    print_ln
     print_output "[*] Found $ORANGE$PW_COUNTER$NC password hashes."
   fi
   write_log ""

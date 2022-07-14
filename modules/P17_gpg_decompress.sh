@@ -49,11 +49,11 @@ gpg_decompress_extractor() {
   gpg --list-packets "$GPG_FILE_PATH_" 2>/dev/null | tee -a "$LOG_FILE"
   gpg --decrypt "$GPG_FILE_PATH_" > "$EXTRACTION_FILE_" || true
 
-  print_output ""
+  print_ln
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Extracted GPG compressed firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
-    print_output ""
+    print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "GPG decompression" "$GPG_FILE_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"

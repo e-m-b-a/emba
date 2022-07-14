@@ -56,7 +56,7 @@ debian_status_files_search() {
     for PACKAGE_FILE in "${DEBIAN_MGMT_STATUS[@]}" ; do
       if grep -q "Package: " "$PACKAGE_FILE"; then
         mapfile -t DEBIAN_PACKAGES < <(grep "^Package: \|^Status: \|^Version: " "$PACKAGE_FILE" | sed -z 's/\nVersion: / - Version: /g' | sed -z 's/\nStatus: / - Status: /g')
-        print_output ""
+        print_ln
         print_output "[*] Found debian package details:"
         for PACKAGE_VERSION in "${DEBIAN_PACKAGES[@]}" ; do
           # Package: xxd - Status: install ok installed - 2:8.2.3995-1+b3
@@ -98,7 +98,7 @@ openwrt_control_files_search() {
     for PACKAGE_FILE in "${OPENWRT_MGMT_CONTROL[@]}" ; do
       if grep -q "Package: " "$PACKAGE_FILE"; then
         mapfile -t OPENWRT_PACKAGES < <(grep "^Package: \|^Version: " "$PACKAGE_FILE" | sed -z 's/\nVersion: / - Version: /g')
-        print_output ""
+        print_ln
         for PACKAGE_VERSION in "${OPENWRT_PACKAGES[@]}" ; do
           PACKAGE=$(echo "$PACKAGE_VERSION" | awk '{print $2}')
           # shellcheck disable=SC2001

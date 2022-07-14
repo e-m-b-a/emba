@@ -23,7 +23,7 @@ docker_container_extractor() {
   if docker container ls -a | grep -q "$CONT_ID"; then
     print_output "[*] Found docker container for extraction:"
     docker container ls -a | grep "$CONT_ID" | tee -a "$LOG_FILE"
-    print_output ""
+    print_ln
   else
     print_output "[-] Warning: Docker container with ID $ORANGE$CONT_ID$NC not found"
     exit 1

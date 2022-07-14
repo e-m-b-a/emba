@@ -50,14 +50,14 @@ dlink_SHRS_enc_extractor() {
 
   hexdump -C "$DLINK_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
-  print_output ""
+  print_ln
 
   dd if="$DLINK_ENC_PATH_" skip=1756 iflag=skip_bytes|openssl aes-128-cbc -d -p -nopad -nosalt -K "c05fbf1936c99429ce2a0781f08d6ad8" -iv "67c6697351ff4aec29cdbaabf2fbe346" --nosalt -in /dev/stdin -out "$EXTRACTION_FILE_" 2>&1 || true | tee -a "$LOG_FILE"
 
-  print_output ""
+  print_ln
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
-    print_output ""
+    print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "DLink SHRS decryptor" "$DLINK_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
@@ -101,10 +101,10 @@ dlink_enc_img_extractor(){
     --nosalt | dd if=/dev/stdin of="$EXTRACTION_FILE_" oflag=append conv=notrunc 2>&1 | tee -a "$LOG_FILE"
   done
   # Now it should be a .ubi file thats somewhat readable and extractable via ubireader
-  print_output ""
+  print_ln
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
-    print_output ""
+    print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "DLink enc_img decryptor" "$DLINK_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"

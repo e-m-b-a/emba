@@ -177,7 +177,7 @@ S115_usermode_emulator() {
     recover_local_ip "$IP_ETH0"
 
   else
-    print_output ""
+    print_ln
     print_output "[!] Automated emulation is disabled."
     print_output "[!] Enable it with the $ORANGE-E$MAGENTA switch.$NC"
   fi
@@ -213,7 +213,7 @@ prepare_emulator() {
 
     print_output "[*] Preparing the environment for usermode emulation"
     if ! command -v "$EMULATOR" > /dev/null ; then
-      print_output "" "no_log"
+      print_ln "no_log"
       print_output "[!] Is the qemu package installed?"
       print_output "$(indent "We can't find it!")"
       print_output "$(indent "$(red "Terminating EMBA now.\\n")")"
@@ -250,7 +250,7 @@ prepare_emulator() {
 
     creating_dev_area
 
-    print_output ""
+    print_ln
     print_output "[*] Currently mounted areas:"
     print_output "$(indent "$(mount | grep "$R_PATH" 2> /dev/null || true)")""\\n"
 
@@ -563,7 +563,7 @@ running_jobs() {
   if [[ -n "$EMULATOR" ]]; then
     CJOBS=$(pgrep -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
-      print_output "" "no_log"
+      print_ln "no_log"
       print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)" "no_log"
       print_output "$(indent "$CJOBS")""\\n" "no_log"
     else
@@ -592,7 +592,7 @@ recover_local_ip() {
   local IP_TO_CHECK_="$1"
 
   if ! ifconfig eth0 | grep -q "$IP_TO_CHECK_"; then
-    print_output ""
+    print_ln
     print_output "[!] Warning: The emulation process of S115 has reconfigured your network interface."
     print_output "[*] We try to recover the interface ${ORANGE}eth0$NC with address ${ORANGE}$IP_TO_CHECK_$NC"
     ifconfig eth0 "$IP_TO_CHECK_" up
@@ -613,7 +613,7 @@ print_filesystem_fixes() {
 
 s115_cleanup() {
 
-  print_output ""
+  print_ln
   sub_module_title "Cleanup phase"
   CHECK_MOUNTS=()
 
@@ -639,7 +639,7 @@ s115_cleanup() {
   find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
   find "$EMULATION_PATH_BASE" -xdev -iname "*.core" -exec rm {} \; 2>/dev/null || true
 
-  print_output ""
+  print_ln
   print_output "[*] Umounting proc, sys and run"
   mapfile -t CHECK_MOUNTS < <(mount | grep "$EMULATION_PATH_BASE" || true)
   if [[ -v CHECK_MOUNTS[@] ]]; then

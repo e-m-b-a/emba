@@ -400,7 +400,7 @@ output_binaries() {
     else
       write_link "s14"
     fi
-    print_output ""
+    print_ln
     write_csv_log "strcpy" "$STRCPY_CNT" "NA"
   fi
 
@@ -423,7 +423,7 @@ output_binaries() {
 
     #strcpy:
     if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[+] STRCPY - top 10 results:"
       if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
         write_link "s13#strcpysummary"
@@ -440,7 +440,7 @@ output_binaries() {
 
     #system:
     if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[+] SYSTEM - top 10 results:"
       if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
         write_link "s13#systemsummary"
@@ -548,7 +548,7 @@ output_cve_exploits() {
         print_output "$OVERVIEW_LINE"
         write_link "f20#cve_$BINARY_"
       done < "$LOG_DIR/f20_vul_aggregator/F20_summary.txt"
-      print_output ""
+      print_ln
     fi
 
     if [[ -v VERSIONS_AGGREGATED[@] ]]; then
@@ -575,9 +575,9 @@ output_cve_exploits() {
       write_csv_log "cve_low" "$LOW_CVE_COUNTER" "NA"
       DATA=1
     elif [[ "$CVE_SEARCH" -ne 1 ]]; then
-      print_output ""
+      print_ln
       print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
-      print_output ""
+      print_ln
     fi
     if [[ "${EXPLOIT_COUNTER:-0}" -gt 0 ]]; then
       write_csv_log "exploits" "$EXPLOIT_COUNTER" "NA"
@@ -951,7 +951,7 @@ cwe_logging() {
         CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
-      print_output ""
+      print_ln
       write_csv_log "cwe_issues" "$TOTAL_CWE_CNT" "NA"
     fi
   fi

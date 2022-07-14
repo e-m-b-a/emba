@@ -53,7 +53,7 @@ S108_stacs_password_search()
         write_csv_log "$MESSAGE" "/$PW_PATH" "$PW_HASH" "$PW_HASH_REAL"
       done
 
-      print_output ""
+      print_ln
       print_output "[*] Found $ORANGE$ELEMENTS_$NC password hashes."
     fi
     write_log ""

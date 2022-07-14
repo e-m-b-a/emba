@@ -96,23 +96,23 @@ vt_analysis() {
   curl -s --request GET --url "https://www.virustotal.com/api/v3/analyses/$VT_UPLOAD_ID" --header "x-apikey: $VT_API_KEY" >> "$TMP_DIR"/vt_response.json
 
   if [[ $(wc -l "$TMP_DIR"/vt_response.json | awk '{print $1}') -gt 1 ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Firmware metadata reported by VirusTotal:"
     jq -r '.meta' "$TMP_DIR"/vt_response.json | tee -a "$LOG_FILE"
     VT_SUSP=$(jq -r '.data.attributes.stats.suspicious' "$TMP_DIR"/vt_response.json)
     VT_MAL=$(jq -r '.data.attributes.stats.malicious' "$TMP_DIR"/vt_response.json)
 
-    print_output ""
+    print_ln
     if [[ "$VT_SUSP" -gt 0 || "$VT_MAL" -gt 0 ]]; then
       print_output "[+] Infection via malicious code detected!"
     else
       print_output "[-] No infection via malicious code detected."
     fi
 
-    print_output ""
+    print_ln
     print_output "[*] VirusTotal test overview:"
     jq -r '.data.attributes' "$TMP_DIR"/vt_response.json | tee -a "$LOG_FILE"
-    print_output ""
+    print_ln
   fi
 }
 
@@ -123,7 +123,7 @@ vt_analysis_beh() {
   curl -s --request GET --url "https://www.virustotal.com/api/v3/files/$VT_UPLOAD_ID/behaviour_summary" --header "x-apikey: $VT_API_KEY" >> "$TMP_DIR"/vt_response_behaviour.json
 
   if [[ $(wc -l "$TMP_DIR"/vt_response_behaviour.json | awk '{print $1}') -gt 0 ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Firmware behaviour analysis by VirusTotal:"
     jq -r '.meta' "$TMP_DIR"/vt_response.json | tee -a "$LOG_FILE"
   fi

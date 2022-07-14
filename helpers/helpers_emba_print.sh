@@ -138,6 +138,12 @@ print_output()
   fi
 }
 
+print_ln()
+{
+  local LOG_SETTING="${1:-}"
+  print_ln "$LOG_SETTING"
+}
+
 write_log()
 {
   readarray TEXT_ARR <<< "$1"
@@ -559,7 +565,7 @@ pre_module_reporter() {
     # shellcheck disable=SC1090
     source "$CONFIG_DIR/report_templates/$REPORT_TEMPLATE.sh"
   fi
-  print_output ""
+  print_ln
 }
 
 # on module end we log that the module is finished in emba.log
