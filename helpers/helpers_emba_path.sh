@@ -148,7 +148,7 @@ rm_proc_binary() {
     NEW_ARRAY+=("${BIN_ARR[I]}")
   done
   if [[ $COUNT -gt 0 ]] ;  then
-    echo
+    print_ln "no_log"
     print_output "[!] ""$COUNT"" executable/s removed (./proc/*)" "no_log"
   fi
   export BINARIES

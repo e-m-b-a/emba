@@ -37,14 +37,14 @@ log_folder()
     case ${ANSWER:0:1} in
         y|Y|"" )
           if mount | grep "$LOG_DIR" | grep -e "proc\|sys\|run" > /dev/null; then
-            echo
+            print_ln "no_log"
             print_output "[!] We found unmounted areas from a former emulation process in your log directory $LOG_DIR." "no_log"
             print_output "[!] You should unmount this stuff manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
             echo -e "\\n${RED}Terminate EMBA${NC}\\n"
             exit 1
           elif mount | grep "$LOG_DIR" > /dev/null; then
-            echo
+            print_ln "no_log"
             print_output "[!] We found unmounted areas in your log directory $LOG_DIR." "no_log"
             print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
@@ -71,7 +71,7 @@ log_folder()
     read -p "(Y/n)  " -r ANSWER
     case ${ANSWER:0:1} in
         y|Y|"" )
-          echo
+          print_ln "no_log"
         ;;
         * )
           echo -e "\\n${RED}Terminate EMBA${NC}\\n"
@@ -90,7 +90,7 @@ set_exclude()
     print_output "[!] Apparently you want to test your live system. This can lead to errors. Please report the bugs so the software can be fixed." "no_log"
   fi
 
-  echo
+  print_ln "no_log"
 
   # exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
   EXCLUDE_PATHS="$(set_excluded_path)"
@@ -293,7 +293,7 @@ check_firmware()
   fi
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
-    echo
+    print_ln "no_log"
     print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?"
   else
     print_output "[+] Your firmware looks like a regular Linux system."

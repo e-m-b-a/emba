@@ -509,7 +509,7 @@ print_firmware_info()
 print_etc()
 {
   if [[ ${#ETC_PATHS[@]} -gt 1 ]] ; then
-    echo
+    print_ln "no_log"
     print_output "[*] Found more paths for etc (these are automatically taken into account):" "no_log"
     for ETC in "${ETC_PATHS[@]}" ; do
       if [[ "$ETC" != "$FIRMWARE_PATH""/etc" ]] ; then
@@ -523,12 +523,12 @@ print_excluded()
 {
   readarray -t EXCLUDE_PATHS_ARR < <(printf '%s' "$EXCLUDE_PATHS")
   if [[ ${#EXCLUDE_PATHS_ARR[@]} -gt 0 ]] ; then
-    echo
+    print_ln "no_log"
     print_output "[*] Excluded: " "no_log"
     for EXCL in "${EXCLUDE_PATHS_ARR[@]}" ; do
       print_output ".""$(indent "$(orange "$(print_path "$EXCL")")")" "no_log"
     done
-    echo
+    print_ln "no_log"
   fi
 }
 
