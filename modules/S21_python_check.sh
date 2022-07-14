@@ -45,7 +45,7 @@ S21_python_check()
         fi
       fi
       if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_THREADS_S14" "${WAIT_PIDS_S14[@]}"
+        max_pids_protection "$MAX_THREADS_S21" "${WAIT_PIDS_S21[@]}"
       fi
     done
 
