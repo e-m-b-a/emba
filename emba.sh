@@ -702,11 +702,10 @@ main()
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set +e
       fi
+      disable_strict_mode "$STRICT_MODE" 0
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      if [[ "$STRICT_MODE" -eq 1 ]]; then
-        set -e
-      fi
+      enable_strict_mode "$STRICT_MODE" 0
 
       if [[ $D_RETURN -eq 0 ]] ; then
         if [[ $ONLY_DEP -eq 0 ]] ; then

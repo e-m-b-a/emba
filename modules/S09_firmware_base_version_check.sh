@@ -128,9 +128,9 @@ S09_firmware_base_version_check() {
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S09=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+        MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
         if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
-          MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo || true)"))
+          MAX_THREADS_S09=$((2*"$(grep -c ^processor /proc/cpuinfo || true)"))
         fi
         #print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
 

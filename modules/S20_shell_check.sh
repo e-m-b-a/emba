@@ -30,7 +30,7 @@ S20_shell_check()
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
     if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S20=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+      MAX_THREADS_S20=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
     fi
     write_csv_log "Script path" "Shell issues detected" "common linux file"
     mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )

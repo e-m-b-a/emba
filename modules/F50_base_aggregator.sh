@@ -121,8 +121,12 @@ output_overview() {
 }
 
 output_details() {
-
   local DATA=0
+  local STATE=""
+  local EMU_STATE=""
+  local EMUL=0
+  local ENTROPY_PIC=""
+
   if [[ "${FILE_ARR_COUNT:-0}" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
     if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
@@ -229,8 +233,8 @@ output_details() {
 }
 
 output_config_issues() {
-
   local DATA=0
+
   if [[ "${PW_COUNTER:-0}" -gt 0 || "${S85_SSH_VUL_CNT:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 || "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 || "${MOD_DATA_COUNTER:-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 || "${S55_HISTORY_COUNTER:-0}" -gt 0 || "${S50_AUTH_ISSUES:-0}" -gt 0 || "${PASS_FILES_FOUND:-0}" -gt 0 || "${CERT_CNT:-0}" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 ]]; then
@@ -305,6 +309,21 @@ output_config_issues() {
 
 output_binaries() {
   local DATA=0
+  local CANARY=0
+  local RELRO=0
+  local NX=0
+  local PIE=0
+  local STRIPPED=0
+  local BINS_CHECKED=0
+  local CAN_PER=0
+  local RELRO_PER=0
+  local NX_PER=0
+  local PIE_PER=0
+  local STRIPPED_PER=0
+  local RESULTS_STRCPY=()
+  local RESULTS_SYSTEM=()
+  local DETAIL_STRCPY=0
+  local DETAIL_SYSTEM=0
 
   if [[ -v BINARIES[@] ]]; then
     if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
@@ -390,9 +409,13 @@ output_binaries() {
   if [[ "${STRCPY_CNT:-0}" -gt 0 ]] && [[ -d "$LOG_DIR""/s13_weak_func_check/" || -d "$LOG_DIR""/s14_weak_func_radare_check/" ]] ; then
 
     # color codes for printf
+    local RED_=""
     RED_="$(tput setaf 1)"
+    local GREEN_=""
     GREEN_="$(tput setaf 2)"
+    local ORANGE_=""
     ORANGE_="$(tput setaf 3)"
+    local NC_=""
     NC_="$(tput sgr0)"
 
     readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null)
@@ -408,8 +431,8 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
-      for LINE in "${RESULTS_STRCPY[@]}" ; do
-        binary_fct_output "$LINE"
+      for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
+        binary_fct_output "$DETAIL_STRCPY"
         write_csv_log "strcpy_bin" "$BINARY" "$F_COUNTER"
       done
       print_output "$NC"
@@ -425,8 +448,8 @@ output_binaries() {
         write_link "s14#systemsummary"
       fi
       DATA=1
-      for LINE in "${RESULTS_SYSTEM[@]}" ; do
-        binary_fct_output "$LINE"
+      for DETAIL_SYSTEM in "${RESULTS_SYSTEM[@]}" ; do
+        binary_fct_output "$DETAIL_SYSTEM"
         write_csv_log "system_bin" "$BINARY" "$F_COUNTER"
       done
       print_output "$NC"
@@ -438,10 +461,18 @@ output_binaries() {
 }
 
 binary_fct_output() {
-  BINARY_DETAILS="$1"
+  local BINARY_DETAILS="${1:-}"
+  export F_COUNTER=""
   F_COUNTER="$(echo "$BINARY_DETAILS" | cut -d\  -f1)"
-  FCT="$(echo "$BINARY_DETAILS" | cut -d\  -f2)"
+  export BINARY=""
   BINARY="$(echo "$BINARY_DETAILS" | cut -d\  -f3)"
+  local FCT=""
+  FCT="$(echo "$BINARY_DETAILS" | cut -d\  -f2)"
+  local RELRO=""
+  local CANARY=""
+  local NX=""
+  local SYMBOLS=""
+  local NETWORKING=""
 
   if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG" 2>/dev/null; then
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
@@ -504,6 +535,7 @@ binary_fct_output() {
 
 output_cve_exploits() {
   local DATA=0
+  local BINARY_=""
 
   if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
     if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
@@ -576,18 +608,60 @@ output_cve_exploits() {
 }
 
 get_data() {
-  REMOTE_EXPLOIT_CNT=0
-  LOCAL_EXPLOIT_CNT=0
-  DOS_EXPLOIT_CNT=0
-  GITHUB_EXPLOIT_CNT=0
-  HIGH_CVE_COUNTER=0
-  MEDIUM_CVE_COUNTER=0
-  LOW_CVE_COUNTER=0
-  EXPLOIT_COUNTER=0
-  MSF_MODULE_CNT=0
-  INT_COUNT=0
-  POST_COUNT=0
-  KNOWN_EXPLOITED_COUNTER=0
+  export REMOTE_EXPLOIT_CNT=0
+  export LOCAL_EXPLOIT_CNT=0
+  export DOS_EXPLOIT_CNT=0
+  export GITHUB_EXPLOIT_CNT=0
+  export HIGH_CVE_COUNTER=0
+  export MEDIUM_CVE_COUNTER=0
+  export LOW_CVE_COUNTER=0
+  export EXPLOIT_COUNTER=0
+  export MSF_MODULE_CNT=0
+  export INT_COUNT=0
+  export POST_COUNT=0
+  export KNOWN_EXPLOITED_COUNTER=0
+  export ENTROPY=""
+  export PRE_ARCH=""
+  export FILE_ARR_COUNT=0
+  export DETECTED_DIR=0
+  export LINUX_DISTRIS=()
+  export STRCPY_CNT_13=0
+  export ARCH=""
+  export STRCPY_CNT_14=0
+  export STRCPY_CNT=0
+  export S20_SHELL_VULNS=0
+  export S20_SCRIPTS=0
+  export S21_PY_VULNS=0
+  export S21_PY_SCRIPTS=0
+  export S22_PHP_VULNS=0
+  export S22_PHP_SCRIPTS=0
+  export S22_PHP_INI_ISSUES=0
+  export S22_PHP_INI_CONFIGS=0
+  export MOD_DATA_COUNTER=0
+  export KMOD_BAD=0
+  export S40_WEAK_PERM_COUNTER=0
+  export PASS_FILES_FOUND=0
+  export S50_AUTH_ISSUES=0
+  export S55_HISTORY_COUNTER=0
+  export CERT_CNT=0
+  export CERT_OUT_CNT=0
+  export S85_SSH_VUL_CNT=0
+  export INT_COUNT=0
+  export POST_COUNT=0
+  export PW_COUNTER=0
+  export STACS_HASHES=0
+  export HASHES_CRACKED=0
+  export YARA_CNT=0
+  export BOOTED=0
+  export ICMP=0
+  export TCP_0=0
+  export IP_ADDR=0
+  export MODE=""
+  export SNMP_UP=0
+  export WEB_UP=0
+  export ROUTERSPLOIT_VULN=0
+  export CVE_COUNTER=0
+  export CVE_SEARCH=""
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
@@ -744,9 +818,11 @@ distribution_detector() {
 }
 
 os_detector() {
-  VERIFIED=0
-  VERIFIED_S03=0
-  OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
+  export VERIFIED=0
+  export VERIFIED_S03=0
+  export SYSTEM=""
+  local OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
+  local OS_TO_CHECK=""
 
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
@@ -817,6 +893,7 @@ os_detector() {
 
 os_kernel_module_detect() {
   local LINUX_VERSIONS=""
+  local KV=""
 
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u || true)
@@ -833,7 +910,7 @@ os_kernel_module_detect() {
 }
 
 print_os() {
-  SYSTEM="${1:-}"
+  local SYSTEM="${1:-}"
 
   if [[ $VERIFIED -eq 1 ]]; then
     if [[ "$VERIFIED_S03" -eq 1 ]]; then

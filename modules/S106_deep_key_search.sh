@@ -44,7 +44,7 @@ deep_key_search() {
   GREP_PATTERN_COMMAND=()
 
   if [[ "$THREADED" -eq 1 ]]; then
-    MAX_THREADS_S106=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+    MAX_THREADS_S106=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
   fi
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )

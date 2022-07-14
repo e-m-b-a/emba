@@ -21,13 +21,14 @@ S109_jtr_local_pw_cracking()
   module_log_init "${FUNCNAME[0]}"
 
   local PW_FILE="$LOG_DIR"/s108_stacs_password_search.csv
+  local NEG_LOG=0
   local HASHES=()
   local HASH=""
   local HASH_SOURCE=""
-  local HASH=""
   local CRACKED_HASHES=()
   local JTR_FINAL_STAT=""
   local CRACKED_HASH=""
+  local CRACKED=0
   local JTR_TIMEOUT="60m"
 
   # This module waits for S108_stacs_password_search
@@ -55,6 +56,7 @@ S109_jtr_local_pw_cracking()
       print_output ""
       timeout --preserve-status --signal SIGINT "$JTR_TIMEOUT" john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt | tee -a "$LOG_FILE" || true
       print_output ""
+      NEG_LOG=1
     fi
 
     mapfile -t CRACKED_HASHES < <(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep -v "password hash cracked" | grep -v "^$")
@@ -62,15 +64,17 @@ S109_jtr_local_pw_cracking()
     CRACKED=$(echo "$JTR_FINAL_STAT" | awk '{print $1}')
     if [[ -n "$JTR_FINAL_STAT" ]]; then
       print_output "[*] John the ripper final status: $ORANGE$JTR_FINAL_STAT$NC"
+      NEG_LOG=1
     fi
 
     if [[ "$CRACKED" -gt 0 ]]; then
       for CRACKED_HASH in "${CRACKED_HASHES[@]}"; do
         print_output "[+] Password hash cracked: $ORANGE$CRACKED_HASH$NC"
+        NEG_LOG=1
       done
     fi
   fi
 
-  write_log "[*] Statistics:${#CRACKED_HASHES[@]}"
-  module_end_log "${FUNCNAME[0]}" "${#CRACKED_HASHES[@]}"
+  write_log "[*] Statistics:$CRACKED"
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }

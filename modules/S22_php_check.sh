@@ -32,7 +32,7 @@ S22_php_check()
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
     if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S22=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+      MAX_THREADS_S22=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
     fi
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     s22_vuln_check_caller "${PHP_SCRIPTS[@]}"

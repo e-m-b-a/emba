@@ -109,7 +109,7 @@ S115_usermode_emulator() {
         else
           if [[ "$THREADED" -eq 1 ]]; then
             # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
-            MAX_THREADS_S115=$((7*"$(grep -c ^processor /proc/cpuinfo || true)"))
+            MAX_THREADS_S115=$((5*"$(grep -c ^processor /proc/cpuinfo || true)"))
             if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
               # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
               MAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo || true)"))

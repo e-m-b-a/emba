@@ -30,7 +30,7 @@ S21_python_check()
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
     if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S21=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+      MAX_THREADS_S21=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
     fi
     write_csv_log "Script path" "Python issues detected" "common linux file"
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )

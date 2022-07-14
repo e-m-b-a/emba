@@ -36,7 +36,7 @@ S110_yara_check()
       find "$EXT_DIR""/yara" -xdev -iname '*.yar*' -printf 'include "%p"\n' | sort -n > "$DIR_COMB_YARA"
     fi
     if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S110=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+      MAX_THREADS_S110=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
     fi
 
     for YARA_S_FILE in "${FILE_ARR[@]}"; do

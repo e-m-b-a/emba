@@ -443,7 +443,7 @@ radare_log_bin_hardening() {
     write_log "" "$FUNC_LOG"
   fi
 
-  write_log "" "$FUNC_LOG"
+  write_log "$NC" "$FUNC_LOG"
   write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
   write_log "" "$FUNC_LOG"
 }
