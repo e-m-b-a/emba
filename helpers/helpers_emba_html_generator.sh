@@ -488,7 +488,6 @@ generate_report_file()
         # add module anchor to navigation
         NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$A_MODUL_NAME@g")"
         sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$NAV_LINK""$MODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
-        ((LINE_NUMBER_REP_NAV+=1))
       fi
     fi
 
@@ -504,7 +503,6 @@ generate_report_file()
           # Add anchor to file
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
           sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
-          ((LINE_NUMBER_REP_NAV+=1))
         fi
       done
     fi
