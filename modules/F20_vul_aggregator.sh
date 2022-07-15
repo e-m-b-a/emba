@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description:  Aggregates all found version numbers together from S06, S08, S09, S25, S115/S116 and L15.
 #               The versions are used for identification of known vulnerabilities cve-search,
@@ -22,7 +21,7 @@ F20_vul_aggregator() {
   module_title "Final vulnerability aggregator"
 
   pre_module_reporter "${FUNCNAME[0]}"
-  print_output ""
+  print_ln
   
   mkdir "$LOG_PATH_MODULE"/cve_sum
   mkdir "$LOG_PATH_MODULE"/exploit
@@ -40,13 +39,13 @@ F20_vul_aggregator() {
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
 
-  S06_LOG="$LOG_DIR"/s06_distribution_identification.csv
-  S08_LOG="$LOG_DIR"/s08_package_mgmt_extractor.csv
-  S09_LOG="$LOG_DIR"/s09_firmware_base_version_check.csv
-  S25_LOG="$LOG_DIR"/s25_kernel_check.txt
-  S116_LOG="$LOG_DIR"/s116_qemu_version_detection.csv
-  L15_LOG="$LOG_DIR"/l15_emulated_checks_nmap.csv
-  L25_LOG="$LOG_DIR"/l25_web_checks.csv
+  local S06_LOG="$LOG_DIR"/s06_distribution_identification.csv
+  local S08_LOG="$LOG_DIR"/s08_package_mgmt_extractor.csv
+  local S09_LOG="$LOG_DIR"/s09_firmware_base_version_check.csv
+  local S25_LOG="$LOG_DIR"/s25_kernel_check.txt
+  local S116_LOG="$LOG_DIR"/s116_qemu_version_detection.csv
+  local L15_LOG="$LOG_DIR"/l15_emulated_checks_nmap.csv
+  local L25_LOG="$LOG_DIR"/l25_web_checks.csv
 
   local CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   local EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
@@ -133,6 +132,9 @@ F20_vul_aggregator() {
 aggregate_versions() {
   sub_module_title "Software inventory generation."
 
+  local VERSION=""
+  export VERSIONS_AGGREGATED=()
+
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
@@ -186,7 +188,7 @@ aggregate_versions() {
       fi
     done
 
-    print_output ""
+    print_ln
     VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
   fi
 
@@ -197,7 +199,16 @@ aggregate_versions() {
       if [ -z "$VERSION" ]; then
         continue
       fi
+      if [[ "$VERSION" == *" "* ]]; then
+        print_output "[-] WARNING: Broken version identifier found: $ORANGE$VERSION$NC"
+        continue
+      fi
       if ! [[ "$VERSION" == *[0-9]* ]]; then
+        print_output "[-] WARNING: Broken version identifier found: $ORANGE$VERSION$NC"
+        continue
+      fi
+      if ! [[ "$VERSION" == *":"* ]]; then
+        print_output "[-] WARNING: Broken version identifier found: $ORANGE$VERSION$NC"
         continue
       fi
       echo "$VERSION" >> "$LOG_PATH_MODULE"/versions.tmp
@@ -250,16 +261,23 @@ generate_special_log() {
     sub_module_title "Minimal report of exploits and CVE's."
     write_anchor "minimalreportofexploitsandcves"
 
-    EXPLOIT_HIGH=0
-    EXPLOIT_MEDIUM=0
-    EXPLOIT_LOW=0
+    local EXPLOIT_HIGH=0
+    local EXPLOIT_MEDIUM=0
+    local EXPLOIT_LOW=0
     local KNOWN_EXPLOITED_VULNS=()
+    local KNOWN_EXPLOITED_VULN=""
+    local FILES=()
+    local FILE=""
+    local NAME=""
+    local CVE_VALUES=""
+    local EXPLOIT_=""
+    local EXPLOITS_AVAIL=()
 
     readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
-    print_output ""
+    print_ln
     print_output "[*] CVE log file generated."
     write_link "$CVE_MINIMAL_LOG"
-    print_output ""
+    print_ln
 
     for FILE in "${FILES[@]}"; do
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
@@ -269,14 +287,14 @@ generate_special_log() {
         print_output "$CVE_VALUES"
         echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
         echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
-        print_output ""
+        print_ln
       fi
     done
 
-    print_output ""
+    print_ln
     print_output "[*] Minimal exploit summary file generated."
     write_link "$EXPLOIT_OVERVIEW_LOG"
-    print_output ""
+    print_ln
 
     echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
     grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "$EXPLOIT_OVERVIEW_LOG" || true
@@ -304,13 +322,13 @@ generate_special_log() {
     if [[ -f "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log ]]; then
       mapfile -t KNOWN_EXPLOITED_VULNS < <(grep -E "known exploited" "$LOG_PATH_MODULE"/exploit/known_exploited_vulns.log || true 2>/dev/null)
       if [[ -v KNOWN_EXPLOITED_VULNS[@] ]]; then
-        print_output ""
-        print_output "[*] Vulnerability summary on known exploited vulnerabilities:"
+        print_ln
+        print_output "[*] Summary of known exploited vulnerabilities:"
         write_link "$LOG_PATH_MODULE/exploit/known_exploited_vulns.log"
         for KNOWN_EXPLOITED_VULN in "${KNOWN_EXPLOITED_VULNS[@]}"; do
           print_output "$KNOWN_EXPLOITED_VULN"
         done
-        print_output ""
+        print_ln
       fi
     fi
 
@@ -327,6 +345,7 @@ generate_cve_details() {
 
   CVE_COUNTER=0
   local VERSIONS_AGGREGATED=("$@")
+  local BIN_VERSION=""
 
   for BIN_VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # BIN_VERSION is something like "binary:1.2.3"
@@ -387,8 +406,8 @@ cve_db_lookup() {
 
 cve_extractor() {
   local VERSION_orig="${1:-}"
-  local VERSION
-  local BINARY
+  local VERSION=""
+  local BINARY=""
   local CVE_VALUE=""
   local CVSS_VALUE=""
   local VSOURCE="unknown"
@@ -402,6 +421,8 @@ cve_extractor() {
   local LOCAL=0
   local REMOTE=0
   local DOS=0
+  local CVEs_OUTPUT=()
+  local CVE_OUTPUT=""
 
   if [[ "$(echo "$VERSION_orig" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
     BINARY="$(echo "$VERSION_orig" | cut -d ":" -f1)"
@@ -441,6 +462,15 @@ cve_extractor() {
       VSOURCE="$VSOURCE""/UEMU"
     fi
   fi
+
+  if grep -q "$VERSION_orig" "$S08_LOG" 2>/dev/null; then
+    if [[ "$VSOURCE" == "unknown" ]]; then
+      VSOURCE="PACK"
+    else
+      VSOURCE="$VSOURCE""/PACK"
+    fi
+  fi
+
 
   if grep -q "$VERSION_orig" "$L15_LOG" 2>/dev/null || grep -q "$VERSION_orig" "$L25_LOG" 2>/dev/null; then
     if [[ "$VSOURCE" == "unknown" ]]; then
@@ -711,19 +741,19 @@ cve_extractor() {
   print_output "[*] Vulnerability details for ${ORANGE}$BINARY$NC / version ${ORANGE}$VERSION$NC / source ${ORANGE}$VSOURCE$NC:"
   write_anchor "cve_$BINARY"
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
-    print_output ""
+    print_ln
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
-    print_output ""
+    print_ln
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
-    print_output ""
+    print_ln
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
-    print_output ""
+    print_ln
   else
-    print_output ""
+    print_ln
     print_output "[+] Found $ORANGE${BOLD}NO$NC$GREEN CVEs and $ORANGE${BOLD}NO$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
-    print_output ""
+    print_ln
   fi
 
   CVEs="$CVE_COUNTER_VERSION"

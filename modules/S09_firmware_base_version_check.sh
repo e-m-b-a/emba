@@ -62,23 +62,22 @@ S09_firmware_base_version_check() {
 
       if [[ $RTOS -eq 1 ]]; then
         continue
-      else
-        mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
-        for BIN in "${STRICT_BINS[@]}"; do
-          # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
-          if file "$BIN" | grep -q ELF ; then
-            VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u || true)
-            if [[ -n $VERSION_FINDER ]]; then
-              echo ""
-              print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
-              get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
-              write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
-              continue
-            fi
-          fi
-        done
-        echo "." | tr -d "\n"
       fi
+
+      mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      for BIN in "${STRICT_BINS[@]}"; do
+        # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
+        if file "$BIN" | grep -q ELF ; then
+          VERSION_FINDER=$(strings "$BIN" | grep -E "$VERSION_IDENTIFIER" | sort -u || true)
+          if [[ -n $VERSION_FINDER ]]; then
+            print_ln "no_log"
+            print_output "[+] Version information found ${RED}$BIN_NAME $VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - strict$GREEN)."
+            get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+            write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
+            continue
+          fi
+        fi
+      done
       echo "." | tr -d "\n"
 
     elif [[ $STRICT == "zgrep" ]]; then
@@ -107,7 +106,7 @@ S09_firmware_base_version_check() {
       # check binwalk files sometimes we can find kernel version information or something else in it
       VERSION_FINDER=$(grep -o -a -E "$VERSION_IDENTIFIER" "$EXTRACTOR_LOG" 2>/dev/null | head -1 2>/dev/null || true)
       if [[ -n $VERSION_FINDER ]]; then
-        echo ""
+        print_ln "no_log"
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
         get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
         write_csv_log "binwalk logs" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
@@ -120,7 +119,7 @@ S09_firmware_base_version_check() {
         VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null || true)
 
         if [[ -n $VERSION_FINDER ]]; then
-          echo ""
+          print_ln "no_log"
           print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
           get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
           write_csv_log "firmware" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
@@ -129,9 +128,9 @@ S09_firmware_base_version_check() {
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S09=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+        MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
         if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
-          MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo || true)"))
+          MAX_THREADS_S09=$((2*"$(grep -c ^processor /proc/cpuinfo || true)"))
         fi
         #print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
 
@@ -179,7 +178,7 @@ bin_string_checker() {
       if [[ "$BIN_FILE" == *ELF* ]] ; then
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)
         if [[ -n $VERSION_FINDER ]]; then
-          echo ""
+          print_ln "no_log"
           print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
           get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
           write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
@@ -188,7 +187,7 @@ bin_string_checker() {
       elif [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* ]] ; then
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)
         if [[ -n $VERSION_FINDER ]]; then
-          echo ""
+          print_ln "no_log"
           print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in kernel image $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
           get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
           write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
@@ -198,7 +197,7 @@ bin_string_checker() {
     else
       VERSION_FINDER="$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)"
       if [[ -n $VERSION_FINDER ]]; then
-        echo ""
+        print_ln "no_log"
         print_output "[+] Version information found ${RED}$VERSION_FINDER${NC}${GREEN} in binary $ORANGE$(print_path "$BIN")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static${GREEN})."
         get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
         write_csv_log "$BIN" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
@@ -210,7 +209,7 @@ bin_string_checker() {
 
 recover_wait_pids() {
   local TEMP_PIDS=()
-  local PID
+  local PID=""
   # check for really running PIDs and re-create the array
   for PID in "${WAIT_PIDS_S09[@]}"; do
     #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
@@ -220,7 +219,7 @@ recover_wait_pids() {
   done
   #print_output "[!] S09 - really running pids: ${#TEMP_PIDS[@]}"
 
-  # recreate the arry with the current running PIDS
+  # recreate the array with the current running PIDS
   WAIT_PIDS_S09=()
   WAIT_PIDS_S09=("${TEMP_PIDS[@]}")
 }

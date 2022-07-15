@@ -23,6 +23,11 @@ S45_pass_file_check()
 
   local PASSWD_STUFF
   PASS_FILES_FOUND=0
+  local SUDOERS_FILE_PATH=()
+  local SUDOERS_FILE=""
+  local WHO_HAS_BEEN_SUDO=""
+  local LINE=""
+  local PASSWD_STUFF=()
 
   mapfile -t PASSWD_STUFF < <(config_find "$CONFIG_DIR""/pass_files.cfg")
 
@@ -30,8 +35,7 @@ S45_pass_file_check()
   elif [[ "${#PASSWD_STUFF[@]}" -ne 0 ]] ; then
     # pull out vital sudoers info
     # This test is based on the source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-    local SUDOERS
-    SUDOERS=""
+    local SUDOERS=""
     mapfile -t SUDOERS_FILE_PATH < <(mod_path "/ETC_PATHS/sudoers")
 
     for SUDOERS_FILE in "${SUDOERS_FILE_PATH[@]}" ; do
@@ -81,7 +85,7 @@ S45_pass_file_check()
             L_BREAK=1
 	        fi
 	        if ! [[ $L_BREAK -eq 0 ]] ; then
-            print_output ""
+            print_ln
           fi
         fi
       done

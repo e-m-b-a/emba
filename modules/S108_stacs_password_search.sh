@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description:  Searches for password patterns within the firmware.
 #               This module uses the stacs engine - https://github.com/stacscan/stacs
@@ -27,8 +26,10 @@ S108_stacs_password_search()
   local STACS_LOG_FILE="$LOG_DIR"/etc/stacs_pw_hashes.json
   local ELEMENTS=0
   local ELEMENTS_=0
-  local PW_PATH
-  local PW_HASH
+  local PW_PATH=""
+  local PW_HASH=""
+  local PW_HASH_REAL=""
+  local MESSAGE=""
 
   if command -v stacs > /dev/null ; then
     stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE" || true
@@ -52,7 +53,7 @@ S108_stacs_password_search()
         write_csv_log "$MESSAGE" "/$PW_PATH" "$PW_HASH" "$PW_HASH_REAL"
       done
 
-      print_output ""
+      print_ln
       print_output "[*] Found $ORANGE$ELEMENTS_$NC password hashes."
     fi
     write_log ""

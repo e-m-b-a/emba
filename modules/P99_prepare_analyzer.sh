@@ -43,12 +43,12 @@ P99_prepare_analyzer() {
 
   print_output "[*] Quick check if it is a real Linux system"
   check_firmware
-  print_output ""
+  print_ln
 
   prepare_file_arr
-  print_output ""
+  print_ln
   prepare_binary_arr
-  print_output ""
+  print_ln
 
   if [[ $KERNEL -eq 0 ]] ; then
     architecture_check
@@ -60,12 +60,12 @@ P99_prepare_analyzer() {
   fi
 
   set_etc_paths
-  echo
+  print_ln "no_log"
   if [[ "$RTOS" -eq 1 ]]; then
     print_output "[*] RTOS system detected"
   fi
 
-  NEG_LOG=1
+  local NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 

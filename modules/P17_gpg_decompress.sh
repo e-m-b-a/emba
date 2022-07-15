@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description:  Extracts gpg compressed (not encrypted) firmware images
 #               This technique is used by Linksys/Belkin
@@ -21,7 +20,7 @@ export PRE_THREAD_ENA=0
 
 P17_gpg_decompress() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$GPG_COMPRESS" -eq 1 ]]; then
     module_title "GPG compressed firmware extractor"
@@ -37,18 +36,24 @@ P17_gpg_decompress() {
 }
 
 gpg_decompress_extractor() {
-  local GPG_FILE_PATH_="$1"
-  local EXTRACTION_FILE_="$2"
+  local GPG_FILE_PATH_="${1:-}"
+  local EXTRACTION_FILE_="${2:-}"
+
+  if ! [[ -f "$GPG_FILE_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   sub_module_title "GPG compressed firmware extractor"
 
   gpg --list-packets "$GPG_FILE_PATH_" 2>/dev/null | tee -a "$LOG_FILE"
   gpg --decrypt "$GPG_FILE_PATH_" > "$EXTRACTION_FILE_" || true
 
-  print_output ""
+  print_ln
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Extracted GPG compressed firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
-    print_output ""
+    print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "GPG decompression" "$GPG_FILE_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"

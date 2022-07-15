@@ -21,16 +21,23 @@ S60_cert_file_check()
   module_title "Search certificates"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local CERT_FILES_ARR
+  local CERT_FILES_ARR=()
   readarray -t CERT_FILES_ARR < <(config_find "$CONFIG_DIR""/cert_files.cfg")
 
-  CERT_CNT=0
-  CERT_OUT_CNT=0
+  local CERT_CNT=0
+  local CERT_OUT_CNT=0
+  local CURRENT_DATE=""
+  local LINE=""
+  local CERT_DATE=""
+  local CERT_DATE_=""
+  local CERT_NAME=""
+  local CERT_LOG=""
 
   if [[ "${CERT_FILES_ARR[0]-}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then
     write_csv_log "Certificate file" "Certificate expire on" "Certificate expired"
-    print_output "[+] Found ""${#CERT_FILES_ARR[@]}"" possible certification files:"
+    print_output "[+] Found ""$ORANGE${#CERT_FILES_ARR[@]}$GREEN"" possible certification files:"
+    print_ln
     CURRENT_DATE=$(date +%s)
     for LINE in "${CERT_FILES_ARR[@]}" ; do
       if [[ -f "$LINE" && $(wc -l "$LINE" | awk '{print $1}'|| true) -gt 1 ]]; then

@@ -46,22 +46,26 @@ S99_grepit() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local WAIT_PIDS_S99=()
+  local GREPIT_MODULES=()
+  local GREPIT_RESULTS=0
+
+  local MAX_THREADS_S99
   MAX_THREADS_S99=$((2*"$(grep -c ^processor /proc/cpuinfo || true )"))
 
   # grepit options:
   # Sometimes we look for composite words with wildcard, eg. root.{0,20}detection, this is the maximum
   # of random characters that can be in between. The higher the value the more strings will potentially be flagged.
-  WILDCARD_SHORT=20
-  WILDCARD_LONG=200
+  export WILDCARD_SHORT=20
+  export WILDCARD_LONG=200
   # Weird grep behaviour with clearing to the end of line -.-
   # This variable prevents this behaviour
   export GREP_COLORS=ne
   # Do not remove -rP if you don't know what you are doing, otherwise you probably break this script
-  GREP_ARGUMENTS="-a -n -A 1 -B 3 -rP"
+  local GREP_ARGUMENTS="-a -n -A 1 -B 3 -rP"
   # Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)
-  COLOR_ARGUMENTS="--color=always"
-  STANDARD_GREP_ARGUMENTS="$GREP_ARGUMENTS $COLOR_ARGUMENTS"
-  ENABLE_LEAST_LIKELY=0
+  local COLOR_ARGUMENTS="--color=always"
+  export STANDARD_GREP_ARGUMENTS="$GREP_ARGUMENTS $COLOR_ARGUMENTS"
+  export ENABLE_LEAST_LIKELY=0
 
   mapfile -t GREPIT_MODULES < <(grep -E "^grepit_module.*\(\) " "$MOD_DIR"/"${FUNCNAME[0]}".sh | sed -e 's/()\ .*//g' | sort -u)
   print_output "[*] Loaded $ORANGE${#GREPIT_MODULES[@]}$NC grepit modules\n"
@@ -91,14 +95,21 @@ S99_grepit() {
   grepit_reporter
 
   GREPIT_RESULTS=$(grep -v -c -E "\ Searching\ \(" "$LOG_PATH_MODULE"/[0-9]_* | cut -d: -f2 | paste -sd+ | bc)
-  print_output ""
+  print_ln
   print_output "[*] Found $ORANGE$GREPIT_RESULTS$NC results via grepit."
 
   module_end_log "${FUNCNAME[0]}" "$GREPIT_RESULTS"
 }
 
 grepit_reporter() {
-  CSV_LOG="${LOG_FILE/\.txt/\.csv}"
+  local CSV_LOG="${LOG_FILE/\.txt/\.csv}"
+  local GREPIT_RESULTS_DETAILS=()
+  local RESULT=""
+  local CURRENT_TEST=""
+  local LINES_OF_OUTPUT=""
+  local COMMENT=""
+  local OUTFILE=""
+
   if [[ -f "$CSV_LOG" ]]; then
     readarray -t GREPIT_RESULTS_DETAILS < <(cut -d\; -f1,2,5 "$CSV_LOG" | grep -v "Grepit test" | sort -u)
     for RESULT in "${GREPIT_RESULTS_DETAILS[@]}"; do

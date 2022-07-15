@@ -40,17 +40,25 @@ S106_deep_key_search()
 
 deep_key_search() {
   local WAIT_PIDS_S106=()
+  local DEEP_S_FILE=""
   GREP_PATTERN_COMMAND=()
+
+  if [[ "$THREADED" -eq 1 ]]; then
+    MAX_THREADS_S106=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
+  fi
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
   done
-  echo
+  print_ln "no_log"
   for DEEP_S_FILE in "${FILE_ARR[@]}"; do
     if [[ $THREADED -eq 1 ]]; then
-      deep_key_searcher &
+      deep_key_searcher "$DEEP_S_FILE" &
       WAIT_PIDS_S106+=( "$!" )
     else
-      deep_key_searcher
+      deep_key_searcher "$DEEP_S_FILE"
+    fi
+    if [[ "$THREADED" -eq 1 ]]; then
+      max_pids_protection "$MAX_THREADS_S106" "${WAIT_PIDS_S106[@]}"
     fi
   done
 
@@ -60,6 +68,8 @@ deep_key_search() {
 }
 
 deep_key_searcher() {
+  local DEEP_S_FILE="${1:-}"
+
   if [[ -e "$DEEP_S_FILE" ]] ; then
     local S_OUTPUT
     readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-100 || true)
@@ -102,7 +112,7 @@ deep_key_reporter() {
 
   if [[ "${#PATTERN_LIST[@]}" -gt 0 ]] ; then
     if [[ "${#OCC_LIST[@]}" -gt 0 ]] ; then
-      print_output ""
+      print_ln
       print_output "[*] Occurences of pattern:"
       SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
       if [[ "${#SORTED_OCC_LIST[@]}" -gt 0 ]]; then

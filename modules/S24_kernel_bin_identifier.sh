@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description:  This module tries to identify the kernel file and the init command line
 
@@ -21,7 +20,11 @@ S24_kernel_bin_identifier()
   module_title "Kernel Binary Identifier"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  NEG_LOG=0
+  local NEG_LOG=0
+  local FILE_ARR_TMP=()
+  local FILE=""
+  local K_VER=""
+  local K_INIT=""
 
   readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
@@ -31,21 +34,19 @@ S24_kernel_bin_identifier()
   write_csv_log "Kernel version" "file" "identified init"
 
   for FILE in "${FILE_ARR_TMP[@]}" ; do
-    local K_VER=""
-    local K_INIT=""
     K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
     if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
 	    print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
-      print_output ""
+      print_ln
       print_output "$(indent "$(orange "$K_VER")")"
-      print_output ""
+      print_ln
 
       K_INIT=$(strings "$FILE" 2>/dev/null | grep -E "init=\/" || true)
       if [[ "$K_INIT" =~ init=\/.* ]]; then
         print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
-        print_output ""
+        print_ln
         print_output "$(indent "$(orange "$K_INIT")")"
-        print_output ""
+        print_ln
       fi
 
       write_csv_log "$K_VER" "$FILE" "$K_INIT"

@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description: Extracts zip, tar, tgz archives with patools
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -19,7 +18,7 @@ export PRE_THREAD_ENA=0
 
 P05_patools_init() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$PATOOLS_INIT" -eq 1 ]]; then
     module_title "Initial extractor of different archive types via patools"
@@ -42,11 +41,17 @@ P05_patools_init() {
 patools_extractor() {
   sub_module_title "Patool filesystem extractor"
 
-  local FIRMWARE_PATH_="$1"
-  local EXTRACTION_DIR_="$2"
+  local FIRMWARE_PATH_="${1:-}"
+  local EXTRACTION_DIR_="${2:-}"
   FILES_PATOOLS=0
   local DIRS_PATOOLS=0
-  local FIRMWARE_NAME_
+  local FIRMWARE_NAME_=""
+
+  if ! [[ -f "$FIRMWARE_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
 
   set +e
@@ -60,7 +65,7 @@ patools_extractor() {
 
   if grep -q "patool: ... tested ok." "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log ; then
 
-    print_output ""
+    print_ln
     print_output "[*] Valid compressed file detected - extraction process via patool started"
 
     patool -v extract "$FIRMWARE_PATH_" --outdir "$EXTRACTION_DIR_" | tee -a "$LOG_PATH_MODULE"/paextract_extract_"$FIRMWARE_NAME_".log
@@ -68,7 +73,7 @@ patools_extractor() {
 
   else
     # Fallback if unzip does not work:
-    print_output ""
+    print_ln
     print_output "[*] No valid compressed file detected - extraction process via binwalk started"
 
     if [[ "$BINWALK_VER_CHECK" -eq 1 ]]; then
@@ -78,17 +83,17 @@ patools_extractor() {
     fi
   fi
 
-  print_output ""
+  print_ln
   print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
   #shellcheck disable=SC2012
   ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
-  print_output ""
+  print_ln
 
   FILES_PATOOLS=$(find "$EXTRACTION_DIR_" -type f | wc -l)
   DIRS_PATOOLS=$(find "$EXTRACTION_DIR_" -type d | wc -l)
   print_output "[*] Extracted $ORANGE$FILES_PATOOLS$NC files and $ORANGE$DIRS_PATOOLS$NC directories from the firmware image."
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
   write_csv_log "Patool extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_PATOOLS" "$DIRS_PATOOLS" "NA"
-  print_output ""
+  print_ln
 
 }

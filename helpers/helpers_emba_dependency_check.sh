@@ -171,7 +171,7 @@ dependency_check()
 {
   module_title "Dependency check" "no_log"
 
-  echo
+  print_ln "no_log"
   #######################################################################################
   # Elementary checks
   #######################################################################################
@@ -233,7 +233,7 @@ dependency_check()
   fi
 
 
-  echo
+  print_ln "no_log"
   print_output "[*] Necessary utils on system:" "no_log"
 
   #######################################################################################
@@ -272,7 +272,7 @@ dependency_check()
     # Check external tools
     #######################################################################################
 
-    echo
+    print_ln "no_log"
     print_output "[*] External utils:" "no_log"
   
     # bc
@@ -299,6 +299,9 @@ dependency_check()
         export BINWALK_VER_CHECK=1
       fi
     fi
+
+    # jtr
+    check_dep_tool "john"
 
     # pixd
     check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
@@ -466,7 +469,7 @@ dependency_check()
 }
 
 architecture_dep_check() {
-  echo
+  print_ln "no_log"
   if [[ "$ARCH" == "MIPS" ]] ; then
     ARCH_STR="mips"
   elif [[ "$ARCH" == "ARM" ]] ; then

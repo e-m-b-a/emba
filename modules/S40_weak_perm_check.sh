@@ -23,6 +23,9 @@ S40_weak_perm_check() {
 
   local SETUID_FILES SETGID_FILES WORLD_WRITE_FILES WEAK_SHADOW_FILES WEAK_RC_FILES WEAK_INIT_FILES
   local WEAK_PERM_COUNTER=0
+  local LINE=""
+  local SETUID_NAME=""
+  local GTFO_LINK=""
 
   local ETC_ARR
   ETC_ARR=("$(mod_path "/ETC_PATHS")")
@@ -41,10 +44,17 @@ S40_weak_perm_check() {
   if [[ ${#SETUID_FILES[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#SETUID_FILES[@]}"" setuid files:"
     for LINE in "${SETUID_FILES[@]}" ; do
-      print_output "$(indent "$(print_path "$LINE")")"
+      SETUID_NAME=$(basename "$LINE")
+      GTFO_LINK=$(grep "/$SETUID_NAME/" "$GTFO_CFG" || true)
+      if [[ "$GTFO_LINK" == "https://"* ]]; then
+        print_output "$(indent "$GREEN$(print_path "$LINE")$NC")"
+        write_link "$GTFO_LINK"
+      else
+        print_output "$(indent "$(print_path "$LINE")")"
+      fi
       ((WEAK_PERM_COUNTER+=1))
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No setuid files found"
   fi
@@ -55,7 +65,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No setgid files found"
   fi
@@ -66,7 +76,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No world writable files found"
   fi
@@ -77,7 +87,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No shadow files found"
   fi
@@ -88,7 +98,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No rc.d files with weak permissions found"
   fi
@@ -99,7 +109,7 @@ S40_weak_perm_check() {
       print_output "$(indent "$(print_path "$LINE")")"
       ((WEAK_PERM_COUNTER+=1))
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No init.d files with weak permissions found"
   fi

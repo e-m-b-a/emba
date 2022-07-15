@@ -62,6 +62,8 @@ S03_firmware_bin_base_analyzer() {
 
 os_identification() {
   sub_module_title "OS detection"
+  local OS=""
+  local OS_SEARCHER=()
 
   print_output "[*] Initial OS guessing running ..." "no_log" | tr -d "\n"
   write_log "[*] Initial OS guessing:"
@@ -77,15 +79,15 @@ os_identification() {
     echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/s03.tmp
   fi
 
-  print_output ""
+  print_ln
   print_output "$(indent "$(orange "Operating system detection:")")"
 
   for OS in "${OS_SEARCHER[@]}"; do
     if [[ $THREADED -eq 1 ]]; then
-      os_detection_thread_per_os &
+      os_detection_thread_per_os "$OS" &
       WAIT_PIDS_S03_1+=( "$!" )
     else
-      os_detection_thread_per_os
+      os_detection_thread_per_os "$OS"
     fi
   done
 
@@ -95,8 +97,10 @@ os_identification() {
 }
 
 os_detection_thread_per_os() {
+  local OS="${1:-}"
   local DETECTED=0
   local OS_=""
+
   OS_COUNTER[$OS]=0
   OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -xdev -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null || true)"))
   OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$LOG_DIR" -maxdepth 1 -xdev -type f -name "p60_firmware_bin_extractor.txt" -exec grep -i -c "$OS" {} \; 2> /dev/null || true)" ))
@@ -168,16 +172,20 @@ binary_architecture_detection()
   sub_module_title "Architecture detection"
   print_output "[*] Architecture detection running on ""$FIRMWARE_PATH"
 
+  local PRE_ARCH_Y=()
+  local PRE_ARCH_A=()
+  local PRE_ARCH_=""
+
   # as Thumb is usually false positive we remove it from the results
   mapfile -t PRE_ARCH_Y < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | grep -v "Thumb" | awk '{print $3}' | sort -u || true)
   mapfile -t PRE_ARCH_A < <(binwalk -A "$FIRMWARE_PATH" | grep "\ instructions," | awk '{print $3}' | uniq -c | sort -n | tail -1 | awk '{print $2}' || true)
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
-    print_output ""
+    print_ln
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done
   for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
-    print_output ""
+    print_ln
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done

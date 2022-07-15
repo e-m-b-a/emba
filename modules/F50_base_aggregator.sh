@@ -43,6 +43,7 @@ F50_base_aggregator() {
   S95_LOG="s95_interesting_binaries_check.txt"
   S107_LOG="s107_deep_password_search.txt"
   S108_LOG="s108_stacs_password_search.txt"
+  S109_LOG="s109_jtr_local_pw_cracking.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
   #L10_LOG="l10_system_emulator.txt"
@@ -120,8 +121,12 @@ output_overview() {
 }
 
 output_details() {
-
   local DATA=0
+  local STATE=""
+  local EMU_STATE=""
+  local EMUL=0
+  local ENTROPY_PIC=""
+
   if [[ "${FILE_ARR_COUNT:-0}" -gt 0 ]]; then
     print_output "[+] ""$ORANGE""$FILE_ARR_COUNT""$GREEN"" files and ""$ORANGE""$DETECTED_DIR"" ""$GREEN""directories detected."
     if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
@@ -228,8 +233,8 @@ output_details() {
 }
 
 output_config_issues() {
-
   local DATA=0
+
   if [[ "${PW_COUNTER:-0}" -gt 0 || "${S85_SSH_VUL_CNT:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 || "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 || "${MOD_DATA_COUNTER:-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 || "${S55_HISTORY_COUNTER:-0}" -gt 0 || "${S50_AUTH_ISSUES:-0}" -gt 0 || "${PASS_FILES_FOUND:-0}" -gt 0 || "${CERT_CNT:-0}" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 ]]; then
@@ -263,9 +268,15 @@ output_config_issues() {
         write_csv_log "password_hashes" "$PW_COUNTER" "NA"
       fi
       if [[ "${STACS_HASHES:-0}" -gt 0 ]]; then
-        print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
-        write_link "s108"
         write_csv_log "password_hashes_stacs" "$STACS_HASHES" "NA"
+        if [[ "${HASHES_CRACKED:-0}" -gt 0 ]]; then
+          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS ($ORANGE$HASHES_CRACKED$GREEN passwords cracked.)")")"
+          write_link "s109"
+          write_csv_log "password_hashes_cracked" "$HASHES_CRACKED" "NA"
+        else
+          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
+          write_link "s108"
+        fi
       fi
       DATA=1
     fi
@@ -297,8 +308,23 @@ output_config_issues() {
 }
 
 output_binaries() {
-
   local DATA=0
+  local CANARY=0
+  local RELRO=0
+  local NX=0
+  local PIE=0
+  local STRIPPED=0
+  local BINS_CHECKED=0
+  local CAN_PER=0
+  local RELRO_PER=0
+  local NX_PER=0
+  local PIE_PER=0
+  local STRIPPED_PER=0
+  local RESULTS_STRCPY=()
+  local RESULTS_SYSTEM=()
+  local DETAIL_STRCPY=0
+  local DETAIL_SYSTEM=0
+
   if [[ -v BINARIES[@] ]]; then
     if [[ -f "$LOG_DIR"/"$S12_LOG" ]]; then
       CANARY=$(grep -c "No canary" "$LOG_DIR"/"$S12_LOG" || true)
@@ -374,7 +400,7 @@ output_binaries() {
     else
       write_link "s14"
     fi
-    print_output ""
+    print_ln
     write_csv_log "strcpy" "$STRCPY_CNT" "NA"
   fi
 
@@ -383,9 +409,13 @@ output_binaries() {
   if [[ "${STRCPY_CNT:-0}" -gt 0 ]] && [[ -d "$LOG_DIR""/s13_weak_func_check/" || -d "$LOG_DIR""/s14_weak_func_radare_check/" ]] ; then
 
     # color codes for printf
+    local RED_=""
     RED_="$(tput setaf 1)"
+    local GREEN_=""
     GREEN_="$(tput setaf 2)"
+    local ORANGE_=""
     ORANGE_="$(tput setaf 3)"
+    local NC_=""
     NC_="$(tput sgr0)"
 
     readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null)
@@ -393,7 +423,7 @@ output_binaries() {
 
     #strcpy:
     if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[+] STRCPY - top 10 results:"
       if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
         write_link "s13#strcpysummary"
@@ -401,8 +431,8 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
-      for LINE in "${RESULTS_STRCPY[@]}" ; do
-        binary_fct_output "$LINE"
+      for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
+        binary_fct_output "$DETAIL_STRCPY"
         write_csv_log "strcpy_bin" "$BINARY" "$F_COUNTER"
       done
       print_output "$NC"
@@ -410,7 +440,7 @@ output_binaries() {
 
     #system:
     if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[+] SYSTEM - top 10 results:"
       if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
         write_link "s13#systemsummary"
@@ -418,8 +448,8 @@ output_binaries() {
         write_link "s14#systemsummary"
       fi
       DATA=1
-      for LINE in "${RESULTS_SYSTEM[@]}" ; do
-        binary_fct_output "$LINE"
+      for DETAIL_SYSTEM in "${RESULTS_SYSTEM[@]}" ; do
+        binary_fct_output "$DETAIL_SYSTEM"
         write_csv_log "system_bin" "$BINARY" "$F_COUNTER"
       done
       print_output "$NC"
@@ -431,10 +461,18 @@ output_binaries() {
 }
 
 binary_fct_output() {
-  BINARY_DETAILS="$1"
+  local BINARY_DETAILS="${1:-}"
+  export F_COUNTER=""
   F_COUNTER="$(echo "$BINARY_DETAILS" | cut -d\  -f1)"
-  FCT="$(echo "$BINARY_DETAILS" | cut -d\  -f2)"
+  export BINARY=""
   BINARY="$(echo "$BINARY_DETAILS" | cut -d\  -f3)"
+  local FCT=""
+  FCT="$(echo "$BINARY_DETAILS" | cut -d\  -f2)"
+  local RELRO=""
+  local CANARY=""
+  local NX=""
+  local SYMBOLS=""
+  local NETWORKING=""
 
   if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG" 2>/dev/null; then
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
@@ -496,8 +534,9 @@ binary_fct_output() {
 }
 
 output_cve_exploits() {
-
   local DATA=0
+  local BINARY_=""
+
   if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
     if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
@@ -509,7 +548,7 @@ output_cve_exploits() {
         print_output "$OVERVIEW_LINE"
         write_link "f20#cve_$BINARY_"
       done < "$LOG_DIR/f20_vul_aggregator/F20_summary.txt"
-      print_output ""
+      print_ln
     fi
 
     if [[ -v VERSIONS_AGGREGATED[@] ]]; then
@@ -536,9 +575,9 @@ output_cve_exploits() {
       write_csv_log "cve_low" "$LOW_CVE_COUNTER" "NA"
       DATA=1
     elif [[ "$CVE_SEARCH" -ne 1 ]]; then
-      print_output ""
+      print_ln
       print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
-      print_output ""
+      print_ln
     fi
     if [[ "${EXPLOIT_COUNTER:-0}" -gt 0 ]]; then
       write_csv_log "exploits" "$EXPLOIT_COUNTER" "NA"
@@ -569,18 +608,60 @@ output_cve_exploits() {
 }
 
 get_data() {
-  REMOTE_EXPLOIT_CNT=0
-  LOCAL_EXPLOIT_CNT=0
-  DOS_EXPLOIT_CNT=0
-  GITHUB_EXPLOIT_CNT=0
-  HIGH_CVE_COUNTER=0
-  MEDIUM_CVE_COUNTER=0
-  LOW_CVE_COUNTER=0
-  EXPLOIT_COUNTER=0
-  MSF_MODULE_CNT=0
-  INT_COUNT=0
-  POST_COUNT=0
-  KNOWN_EXPLOITED_COUNTER=0
+  export REMOTE_EXPLOIT_CNT=0
+  export LOCAL_EXPLOIT_CNT=0
+  export DOS_EXPLOIT_CNT=0
+  export GITHUB_EXPLOIT_CNT=0
+  export HIGH_CVE_COUNTER=0
+  export MEDIUM_CVE_COUNTER=0
+  export LOW_CVE_COUNTER=0
+  export EXPLOIT_COUNTER=0
+  export MSF_MODULE_CNT=0
+  export INT_COUNT=0
+  export POST_COUNT=0
+  export KNOWN_EXPLOITED_COUNTER=0
+  export ENTROPY=""
+  export PRE_ARCH=""
+  export FILE_ARR_COUNT=0
+  export DETECTED_DIR=0
+  export LINUX_DISTRIS=()
+  export STRCPY_CNT_13=0
+  export ARCH=""
+  export STRCPY_CNT_14=0
+  export STRCPY_CNT=0
+  export S20_SHELL_VULNS=0
+  export S20_SCRIPTS=0
+  export S21_PY_VULNS=0
+  export S21_PY_SCRIPTS=0
+  export S22_PHP_VULNS=0
+  export S22_PHP_SCRIPTS=0
+  export S22_PHP_INI_ISSUES=0
+  export S22_PHP_INI_CONFIGS=0
+  export MOD_DATA_COUNTER=0
+  export KMOD_BAD=0
+  export S40_WEAK_PERM_COUNTER=0
+  export PASS_FILES_FOUND=0
+  export S50_AUTH_ISSUES=0
+  export S55_HISTORY_COUNTER=0
+  export CERT_CNT=0
+  export CERT_OUT_CNT=0
+  export S85_SSH_VUL_CNT=0
+  export INT_COUNT=0
+  export POST_COUNT=0
+  export PW_COUNTER=0
+  export STACS_HASHES=0
+  export HASHES_CRACKED=0
+  export YARA_CNT=0
+  export BOOTED=0
+  export ICMP=0
+  export TCP_0=0
+  export IP_ADDR=0
+  export MODE=""
+  export SNMP_UP=0
+  export WEB_UP=0
+  export ROUTERSPLOIT_VULN=0
+  export CVE_COUNTER=0
+  export CVE_SEARCH=""
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
@@ -663,6 +744,9 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S108_LOG" ]]; then
     STACS_HASHES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S108_LOG" | cut -d: -f2 || true)
   fi
+  if [[ -f "$LOG_DIR"/"$S109_LOG" ]]; then
+    HASHES_CRACKED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S109_LOG" | cut -d: -f2 || true)
+  fi
   if [[ -f "$LOG_DIR"/"$S110_LOG" ]]; then
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S110_LOG" | cut -d: -f2 || true)
   fi
@@ -725,6 +809,8 @@ get_data() {
 }
 
 distribution_detector() {
+  local DISTRI=""
+
   for DISTRI in "${LINUX_DISTRIS[@]}"; do
     print_output "[+] Linux distribution detected: $ORANGE$DISTRI$NC"
     write_link "s06"
@@ -732,10 +818,11 @@ distribution_detector() {
 }
 
 os_detector() {
-
-  VERIFIED=0
-  VERIFIED_S03=0
-  OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
+  export VERIFIED=0
+  export VERIFIED_S03=0
+  export SYSTEM=""
+  local OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
+  local OS_TO_CHECK=""
 
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
@@ -764,7 +851,7 @@ os_detector() {
           VERIFIED=1
         done
         if [[ $VERIFIED -eq 1 ]]; then
-          print_os
+          print_os "$SYSTEM"
         fi
       fi
     done
@@ -778,7 +865,7 @@ os_detector() {
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED_S03=1
         VERIFIED=1
-        print_os
+        print_os "$SYSTEM"
       done
     fi
 
@@ -788,7 +875,7 @@ os_detector() {
     if [[ "${#OS_DETECT[@]}" -gt 0 && "$VERIFIED" -eq 0 ]]; then
       for SYSTEM in "${OS_DETECT[@]}"; do
         VERIFIED=0
-        print_os
+        print_os "$SYSTEM"
       done
     fi
   fi
@@ -799,12 +886,14 @@ os_detector() {
     # but just in case something went wrong we use it now
     os_kernel_module_detect
     if [[ $VERIFIED -eq 1 ]]; then
-      print_os
+      print_os "$SYSTEM"
     fi
   fi
 }
 
 os_kernel_module_detect() {
+  local LINUX_VERSIONS=""
+  local KV=""
 
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     mapfile -t KERNELV < <(grep "Statistics:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 | sort -u || true)
@@ -821,6 +910,8 @@ os_kernel_module_detect() {
 }
 
 print_os() {
+  local SYSTEM="${1:-}"
+
   if [[ $VERIFIED -eq 1 ]]; then
     if [[ "$VERIFIED_S03" -eq 1 ]]; then
       SYSTEM=$(echo "$SYSTEM" | awk '{print $1}')
@@ -842,19 +933,25 @@ print_os() {
 }
 
 cwe_logging() {
-  LOG_DIR_MOD="s120_cwe_checker"
+  local LOG_DIR_MOD="s120_cwe_checker"
+  local CWE_OUT=()
+  local CWE_ENTRY=""
+  local CWE=""
+  local CWE_DESC=""
+  local CWE_CNT=""
+
   if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
     mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       write_link "s120"
-      for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
-        CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
+      for CWE_ENTRY in "${CWE_OUT[@]}"; do
+        CWE="$(echo "$CWE_ENTRY" | cut -d\  -f1)"
+        CWE_DESC="$(echo "$CWE_ENTRY" | cut -d\  -f2-)"
         CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
-      print_output ""
+      print_ln
       write_csv_log "cwe_issues" "$TOTAL_CWE_CNT" "NA"
     fi
   fi

@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description: Extracts encrypted firmware images from EnGenius reported by @ryancdotorg
 #              See https://twitter.com/ryancdotorg/status/1473807312242442240 and
@@ -21,7 +20,7 @@ export PRE_THREAD_ENA=0
 
 P16_EnGenius_decryptor() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
     module_title "EnGenius encrypted firmware extractor"
@@ -37,8 +36,14 @@ P16_EnGenius_decryptor() {
 }
 
 engenius_enc_extractor() {
-  local ENGENIUS_ENC_PATH_="$1"
-  local EXTRACTION_FILE_="$2"
+  local ENGENIUS_ENC_PATH_="${1:-}"
+  local EXTRACTION_FILE_="${2:-}"
+
+  if ! [[ -f "$ENGENIUS_ENC_PATH_" ]]; then
+    print_output "[-] No file for decryption provided"
+    return
+  fi
+
   sub_module_title "EnGenius encrypted firmware extractor"
 
   hexdump -C "$ENGENIUS_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
@@ -49,15 +54,15 @@ engenius_enc_extractor() {
     print_output "[-] Decryptor not found - check your installation"
   fi
 
-  print_output ""
+  print_ln
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Decrypted EnGenius firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
-    print_output ""
+    MD5_DONE_DEEP+=( "$(md5sum "$ENGENIUS_ENC_PATH_" | awk '{print $1}')" )
+    print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "EnGenius decryptor" "$ENGENIUS_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
-    #export FIRMWARE_PATH="$LOG_DIR"/firmware
     if [[ -z "${FW_VENDOR:-}" ]]; then
       FW_VENDOR="EnGenius"
     fi

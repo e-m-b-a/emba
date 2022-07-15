@@ -21,7 +21,9 @@ S70_hidden_file_check()
   module_title "Search hidden files"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local HIDDEN_FILES
+  local HIDDEN_FILES=()
+  local LINE=""
+
   mapfile -t HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -name ".*" -type f)
 
   if [[ ${#HIDDEN_FILES[@]} -gt 0 ]] ; then

@@ -74,6 +74,8 @@ filesystem_tree() {
 release_info()
 {
   sub_module_title "Release/Version information"
+  local R_INFO=""
+  local RELEASE=""
 
   declare -a RELEASE_STUFF=()
   mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg")
@@ -86,7 +88,7 @@ release_info()
           print_output "\\n""$( print_path "$R_INFO")"
           RELEASE="$( cat "$R_INFO" )"
           if [[ "$RELEASE" ]] ; then
-            print_output ""
+            print_ln
             print_output "$(indent "$(magenta "$RELEASE")")"
           fi
         fi

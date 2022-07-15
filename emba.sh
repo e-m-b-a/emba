@@ -22,6 +22,7 @@ import_helper()
 {
   local HELPERS=()
   local HELPER_COUNT=0
+  local HELPER_FILE=""
   mapfile -d '' HELPERS < <(find "$HELP_DIR" -iname "helpers_emba_*.sh" -print0 2> /dev/null)
   for HELPER_FILE in "${HELPERS[@]}" ; do
     if ( file "$HELPER_FILE" | grep -q "shell script" ) && ! [[ "$HELPER_FILE" =~ \ |\' ]] ; then
@@ -40,6 +41,7 @@ import_module()
   local MODULES_LOCAL=()
   local MODULES_EMBA=()
   local MODULE_COUNT=0
+  local MODULE_FILE=""
   # to ensure we are only auto load modules from the modules main directory we set maxdepth
   # with this in place we can create sub directories per module. For using/loading stuff from
   # these sub directories the modules are responsible!
@@ -62,6 +64,7 @@ import_module()
 sort_modules()
 {
   local SORTED_MODULES=()
+  local MODULE_FILE=""
   for MODULE_FILE in "${MODULES[@]}" ; do
     if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
       THREAD_PRIO=0
@@ -80,7 +83,13 @@ sort_modules()
 
 # lets check cve-search in a background job
 check_cve_search_job() {
-  EMBA_PID="${1:-}"
+  local EMBA_PID="${1:-}"
+
+  if ! [[ "$EMBA_PID" =~ [0-9]+ ]]; then
+    print_output "[-] WARNING: No EMBA PID detected ... are we really running?!?"
+    return
+  fi
+
   while true; do
     if [[ -f "$LOG_DIR"/emba.log ]]; then
       if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
@@ -227,7 +236,7 @@ main()
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=1
-  export EMBA_VERSION="1.0.2"
+  export EMBA_VERSION="1.0.3"
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
@@ -292,11 +301,11 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
-  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt    # virustotal API key for P03 module
-
-  echo
+  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
+  export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
 
   import_helper
+  print_ln "no_log"
   import_module
 
   welcome  # Print EMBA welcome message
@@ -440,7 +449,7 @@ main()
     esac
   done
 
-  echo
+  print_ln "no_log"
 
   # print it only once per EMBA run - not again from started container
   if [[ $IN_DOCKER -eq 0 ]]; then
@@ -670,7 +679,7 @@ main()
       esac
     done
 
-    echo
+    print_ln "no_log"
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
@@ -694,11 +703,10 @@ main()
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set +e
       fi
+      disable_strict_mode "$STRICT_MODE" 0
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      if [[ "$STRICT_MODE" -eq 1 ]]; then
-        set -e
-      fi
+      enable_strict_mode "$STRICT_MODE" 0
 
       if [[ $D_RETURN -eq 0 ]] ; then
         if [[ $ONLY_DEP -eq 0 ]] ; then
@@ -723,7 +731,7 @@ main()
   #######################################################################################
   if [[ $PRE_CHECK -eq 1 ]] ; then
 
-    echo
+    print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "main"
     else
@@ -733,7 +741,6 @@ main()
     # 'main' functions of imported modules
     # in the pre-check phase we execute all modules with P[Number]_Name.sh
 
-    #run_modules "P" "0" "0"
     run_modules "P" "$THREADED" "0"
 
     # if we running threaded we ware going to wait for the slow guys here
@@ -741,7 +748,8 @@ main()
       wait_for_pid "${WAIT_PIDS[@]}"
     fi
 
-    echo
+    print_ln "no_log"
+
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
     else
@@ -776,7 +784,8 @@ main()
       wait_for_pid "${WAIT_PIDS[@]}"
     fi
 
-    echo
+    print_ln "no_log"
+
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
     else
@@ -801,7 +810,7 @@ main()
     # these modules are not threaded!
     run_modules "L" "0" "$HTML"
 
-    echo
+    print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
     else
@@ -825,7 +834,7 @@ main()
       print_output "[*] Removing temp firmware directory\\n" "no_log" 
       rm -r "$LOG_DIR"/firmware 2>/dev/null
     fi
-    echo
+    print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
       rm -r "$TMP_DIR" 2>/dev/null || true
@@ -836,13 +845,13 @@ main()
     write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
   else
     print_output "[!] No extracted firmware found" "no_log"
-    print_output "$(indent "Try using binwalk or something else to extract the Linux operating system")"
+    print_output "$(indent "Try using binwalk or something else to extract the firmware")"
     exit 1
   fi
   if [[ "$HTML" -eq 1 ]]; then
     update_index
   fi
-  if [[ -f "$HTML_PATH"/index.html ]]; then
+  if [[ -f "$HTML_PATH"/index.html ]] && [[ "$IN_DOCKER" -eq 0 ]]; then
     print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main" 
     print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
   fi

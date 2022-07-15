@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description: Extracts vmdk images
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -19,7 +18,7 @@ export PRE_THREAD_ENA=0
 
 P10_vmdk_extractor() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
   if [[ "${VMDK_DETECTED-0}" -eq 1 ]]; then
     module_title "VMDK (Virtual Machine Disk) extractor"
     EXTRACTION_DIR="$LOG_DIR"/firmware/vmdk_extractor/
@@ -27,6 +26,7 @@ P10_vmdk_extractor() {
     vmdk_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
     if [[ "$VMDK_FILES" -gt 0 ]]; then
+      MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
     fi
     NEG_LOG=1
@@ -37,11 +37,17 @@ P10_vmdk_extractor() {
 vmdk_extractor() {
   local VMDK_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
-  local MOUNT_DEV
-  local DEV_NAME
+  local MOUNT_DEV=""
+  local DEV_NAME=""
   local TMP_VMDK_MNT="$TMP_DIR/vmdk_mount_$RANDOM"
   local VMDK_DIRS=0
   VMDK_FILES=0
+
+  if ! [[ -f "$VMDK_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   sub_module_title "VMDK (Virtual Machine Disk) extractor"
 
   print_output "[*] Enumeration of devices in VMDK images $ORANGE$VMDK_PATH_$NC"
@@ -71,7 +77,7 @@ vmdk_extractor() {
   fi
 
   if [[ "$VMDK_FILES" -gt 0 ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracted $ORANGE$VMDK_FILES$NC files and $ORANGE$VMDK_DIRS$NC directories from the firmware image."
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "VMDK extractor" "$VMDK_PATH_" "$EXTRACTION_DIR_" "$VMDK_FILES" "$VMDK_DIRS" "NA"

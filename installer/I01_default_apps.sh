@@ -34,6 +34,9 @@ I01_default_apps(){
     print_tool_info "u-boot-tools" 1
     print_tool_info "python3-bandit" 1
     print_tool_info "iputils-ping" 1
+    # john password cracker
+    print_tool_info "john" 1
+    print_tool_info "john-data" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")

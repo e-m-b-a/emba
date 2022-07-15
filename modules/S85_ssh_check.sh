@@ -21,9 +21,9 @@ S85_ssh_check()
   module_title "Check SSH"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  SSH_VUL_CNT=0
-  SQUID_VUL_CNT=0
-  NEG_LOG=0
+  export SSH_VUL_CNT=0
+  export SQUID_VUL_CNT=0
+  local NEG_LOG=0
 
   search_ssh_files
   check_squid
@@ -42,7 +42,11 @@ search_ssh_files()
 {
   sub_module_title "Search ssh files"
 
-  local SSH_FILES
+  local SSH_FILES=()
+  local LINE=""
+  local SSHD_ISSUES=()
+  local S_ISSUE=""
+
   mapfile -t SSH_FILES < <(config_find "$CONFIG_DIR""/ssh_files.cfg")
 
   if [[ "${SSH_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
@@ -88,6 +92,9 @@ search_ssh_files()
 check_squid()
 {
   sub_module_title "Check squid"
+  local BIN_FILE=""
+  local CHECK=0
+  local SQUID_E=""
 
   for BIN_FILE in "${BINARIES[@]}"; do
     if [[ "$BIN_FILE" == *"squid"* ]] && ( file "$BIN_FILE" | grep -q ELF ) ; then
@@ -99,8 +106,7 @@ check_squid()
     print_output "[-] No possible squid executable found"
   fi
 
-  CHECK=0
-  SQUID_DAEMON_CONFIG_LOCS=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
+  local SQUID_DAEMON_CONFIG_LOCS=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
   mapfile -t SQUID_PATHS_ARR < <(mod_path_array "${SQUID_DAEMON_CONFIG_LOCS[@]}")
   if [[ "${SQUID_PATHS_ARR[0]-}" == "C_N_F" ]] ; then
     print_output "[!] Config not found"

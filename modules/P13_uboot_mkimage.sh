@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Benedikt Kuehne
+# Author(s): Michael Messner
 
 # Description: Shows internals of Uboot images
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -19,8 +18,10 @@ export PRE_THREAD_ENA=0
 
 P13_uboot_mkimage() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
   if [[ "$UBOOT_IMAGE" -eq 1 ]]; then
+    local IMAGE_NAME=""
+    local IMAGE_TYPE=""
     module_title "Uboot image details"
     pre_module_reporter "${FUNCNAME[0]}"
     mkimage -l "$FIRMWARE_PATH" | tee -a "$LOG_FILE"

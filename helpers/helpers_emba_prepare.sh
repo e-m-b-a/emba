@@ -37,14 +37,14 @@ log_folder()
     case ${ANSWER:0:1} in
         y|Y|"" )
           if mount | grep "$LOG_DIR" | grep -e "proc\|sys\|run" > /dev/null; then
-            echo
+            print_ln "no_log"
             print_output "[!] We found unmounted areas from a former emulation process in your log directory $LOG_DIR." "no_log"
             print_output "[!] You should unmount this stuff manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
             echo -e "\\n${RED}Terminate EMBA${NC}\\n"
             exit 1
           elif mount | grep "$LOG_DIR" > /dev/null; then
-            echo
+            print_ln "no_log"
             print_output "[!] We found unmounted areas in your log directory $LOG_DIR." "no_log"
             print_output "[!] If EMBA is failing check this manually:\\n" "no_log"
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
@@ -60,7 +60,7 @@ log_folder()
     esac
   fi
 
-  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config -o -path ./licenses \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   if [[ $USE_DOCKER -eq 1 && ${#D_LOG_FILES[@]} -gt 0 ]] ; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
@@ -71,7 +71,7 @@ log_folder()
     read -p "(Y/n)  " -r ANSWER
     case ${ANSWER:0:1} in
         y|Y|"" )
-          echo
+          print_ln "no_log"
         ;;
         * )
           echo -e "\\n${RED}Terminate EMBA${NC}\\n"
@@ -90,7 +90,7 @@ set_exclude()
     print_output "[!] Apparently you want to test your live system. This can lead to errors. Please report the bugs so the software can be fixed." "no_log"
   fi
 
-  echo
+  print_ln "no_log"
 
   # exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
   EXCLUDE_PATHS="$(set_excluded_path)"
@@ -151,10 +151,12 @@ architecture_check()
         D_ARCH="x86"
       elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
         D_ARCH="PPC"
+      else
+        D_ARCH="unknown"
       fi
 
       if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
-        print_output ""
+        print_ln
         print_output "$(indent "$(orange "Endianness  Count")")"
         if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" ; fi
         if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" ; fi
@@ -168,7 +170,7 @@ architecture_check()
         D_END="NA"
       fi
 
-      print_output ""
+      print_ln
 
       if [[ $((D_END_BE+D_END_LE)) -gt 0 ]] ; then
         print_output "$(indent "Detected architecture and endianness of the firmware: ""$ORANGE""$D_ARCH"" / ""$D_END""$NC")""\\n"
@@ -291,7 +293,7 @@ check_firmware()
   fi
 
   if [[ $DIR_COUNT -lt 5 ]] ; then
-    echo
+    print_ln "no_log"
     print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?"
   else
     print_output "[+] Your firmware looks like a regular Linux system."
@@ -386,10 +388,10 @@ detect_root_dir_helper() {
 check_init_size() {
   SIZE=$(du -b --max-depth=0 "$FIRMWARE_PATH"| awk '{print $1}' || true)
   if [[ $SIZE -gt 400000000 ]]; then
-    print_output "" "no_log"
+    print_ln "no_log"
     print_output "[!] WARNING: Your firmware is very big!" "no_log"
     print_output "[!] WARNING: Analysing huge firmwares will take a lot of disk space, RAM and time!" "no_log"
-    print_output "" "no_log"
+    print_ln "no_log"
   fi
 }
 

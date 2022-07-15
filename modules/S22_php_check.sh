@@ -23,19 +23,23 @@ S22_php_check()
   module_title "PHP vulnerability checks"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  S22_PHP_VULNS=0
+  local PHP_SCRIPTS=()
+  export S22_PHP_VULNS=0
   S22_PHP_SCRIPTS=0
   S22_PHP_INI_ISSUES=0
   S22_PHP_INI_CONFIGS=0
   S22_PHPINFO_ISSUES=0
 
   if [[ $PHP_CHECK -eq 1 ]] ; then
+    if [[ "$THREADED" -eq 1 ]]; then
+      MAX_THREADS_S22=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
+    fi
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-    s22_vuln_check_caller
+    s22_vuln_check_caller "${PHP_SCRIPTS[@]}"
 
     s22_check_php_ini
 
-    s22_phpinfo_check
+    s22_phpinfo_check "${PHP_SCRIPTS[@]}"
 
     write_log ""
     write_log "[*] Statistics:$S22_PHP_VULNS:$S22_PHP_SCRIPTS:$S22_PHP_INI_ISSUES:$S22_PHP_INI_CONFIGS"
@@ -48,6 +52,8 @@ S22_php_check()
 
 s22_phpinfo_check() {
   sub_module_title "PHPinfo file detection"
+  local PHP_SCRIPTS=("$@")
+  local PHPINFO=""
 
   for PHPINFO in "${PHP_SCRIPTS[@]}" ; do
     if grep -q "phpinfo()" "$PHPINFO"; then
@@ -56,22 +62,28 @@ s22_phpinfo_check() {
       ((S22_PHPINFO_ISSUES+=1))
     fi
   done
-  print_output ""
+  print_ln
 }
 
 s22_vuln_check_caller() {
   sub_module_title "PHP script vulnerabilities"
   write_csv_log "Script path" "PHP issues detected" "common linux file"
+  local PHP_SCRIPTS=("$@")
+  local VULNS=0
+  local PHP_SCRIPT=""
 
-  for LINE in "${PHP_SCRIPTS[@]}" ; do
-    if ( file "$LINE" | grep -q "PHP script" ) ; then
+  for PHP_SCRIPT in "${PHP_SCRIPTS[@]}" ; do
+    if ( file "$PHP_SCRIPT" | grep -q "PHP script" ) ; then
       ((S22_PHP_SCRIPTS+=1))
       if [[ "$THREADED" -eq 1 ]]; then
-        s22_vuln_check &
+        s22_vuln_check "$PHP_SCRIPT" &
         WAIT_PIDS_S22+=( "$!" )
       else
-        s22_vuln_check
+        s22_vuln_check "$PHP_SCRIPT"
       fi
+    fi
+    if [[ "$THREADED" -eq 1 ]]; then
+      max_pids_protection "$MAX_THREADS_S22" "${WAIT_PIDS_S22[@]}"
     fi
   done
 
@@ -85,22 +97,33 @@ s22_vuln_check_caller() {
     done < "$TMP_DIR"/S22_VULNS.tmp
   fi
  
-  print_output ""
+  print_ln
   if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"
   fi
 }
 
 s22_vuln_check() {
-  # usually this memory limit is not needed, but sometimes it protects our machine
-  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
-  MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
+  local PHP_SCRIPT_="${1:-}"
 
-  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-  PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
+  if ! [[ -f "$PHP_SCRIPT_" ]]; then
+    print_output "[-] No PHP script for analysis provided"
+    return
+  fi
+
+  # usually this memory limit is not needed, but sometimes it protects our machine
+  local TOTAL_MEMORY
+  local NAME
+  local VULNS
+
+  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
+
+  NAME=$(basename "$PHP_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
+  local PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
 
   ulimit -Sv "$MEM_LIMIT"
-  "$EXT_DIR"/progpilot "$LINE" > "$PHP_LOG" 2>&1 || true
+  "$EXT_DIR"/progpilot "$PHP_SCRIPT_" > "$PHP_LOG" 2>&1 || true
   ulimit -Sv unlimited
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
@@ -120,31 +143,8 @@ s22_vuln_check() {
       COMMON_FILES_FOUND=""
       CFF="NA"
     fi
-    print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$LINE")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
-    write_csv_log "$(print_path "$LINE")" "$VULNS" "$CFF"
-    echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
-  fi
-}
-
-# lets leave this here. Probably it is of interest for dev teams
-# for this you need to call it (see line 32/35)
-s22_script_check() {
-  NAME=$(basename "$LINE" 2> /dev/null | sed -e 's/:/_/g')
-  PHP_LOG="$LOG_PATH_MODULE""/php_""$NAME"".txt"
-  php -l "$LINE" > "$PHP_LOG" 2>&1
-  VULNS=$(grep -c "PHP Parse error" "$PHP_LOG" 2> /dev/null || true)
-  if [[ "$VULNS" -ne 0 ]] ; then
-    #check if this is common linux file:
-    local COMMON_FILES_FOUND
-    if [[ -f "$BASE_LINUX_FILES" ]]; then
-      COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
-      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null || true; then
-        COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
-      fi
-    else
-      COMMON_FILES_FOUND=""
-    fi
-    print_output "[+] Found ""$ORANGE""parsing issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LINE")"
+    print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
+    write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   fi
 }
@@ -154,16 +154,24 @@ s22_check_php_ini(){
   local PHP_INI_FAILURE
   local PHP_INI_LIMIT_EXCEEDED
   local PHP_INI_WARNINGS
+  local PHP_INI_FILE=()
+  local PHP_FILE=""
+  local INISCAN_RESULT=()
+  local LINE=""
   PHP_INI_FAILURE=0
   PHP_INI_LIMIT_EXCEEDED=0
   PHP_INI_WARNINGS=0
+
   mapfile -t PHP_INI_FILE < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+
+  disable_strict_mode "$STRICT_MODE"
   for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
     #print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
     mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" 2>/dev/null || true)
     for LINE in "${INISCAN_RESULT[@]}" ; do  
       local LIMIT_CHECK
       IFS='|' read -ra LINE_ARR <<< "$LINE"
+      # TODO: STRICT mode not working here:
       add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
       LIMIT_CHECK="$?"
       if [[ "$LIMIT_CHECK" -eq 1 ]]; then
@@ -190,17 +198,16 @@ s22_check_php_ini(){
         fi
       fi
     done
-    print_output ""
+    print_ln
     print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES""$GREEN"" PHP configuration issues in php config file :""$ORANGE"" ""$(print_path "$PHP_FILE")"
-    print_output ""
+    print_ln
   done
+  enable_strict_mode "$STRICT_MODE"
 }
 
 add_recommendations(){
-   local VALUE
-   local KEY
-   VALUE="$1"
-   KEY="$2"
+   local VALUE="${1:-}"
+   local KEY="${2:-}"
 
    if [[ $VALUE == *"M"* ]]; then
       LIMIT="${VALUE//M/}"

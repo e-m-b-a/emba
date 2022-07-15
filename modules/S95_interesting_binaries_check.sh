@@ -21,8 +21,9 @@ S95_interesting_binaries_check()
   module_title "Check interesting binaries"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  NEG_LOG=0
-  INT_COUNT=0
+  local NEG_LOG=0
+  local INT_COUNT=0
+  local POST_COUNT=0
 
   if [[ "$THREADED" -eq 1 ]]; then
     interesting_binaries &
@@ -60,13 +61,13 @@ S95_interesting_binaries_check()
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
-interesting_binaries()
-{
-
+interesting_binaries() {
   local COUNT=0
-  declare -a MD5_DONE_INT
-  INT_COUNT=0
-  INT_BIN=()
+  local INT_COUNT=0
+  local INT_BIN=()
+  local LINE=""
+  local MD5_DONE_INT=()
+  local BIN_MD5=""
 
   mapfile -t INT_BIN < <(config_find "$CONFIG_DIR""/interesting_binaries.cfg")
   if [[ "${INT_BIN[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
@@ -94,13 +95,14 @@ interesting_binaries()
   echo "$INT_COUNT" >> "$TMP_DIR"/INT_COUNT.tmp
 }
 
-post_exploitation()
-{
-
+post_exploitation() {
   local COUNT=0
-  declare -a MD5_DONE_POST
-  POST_COUNT=0
-  INT_BIN_PE=()
+  local MD5_DONE_POST=()
+  local POST_COUNT=0
+  local INT_BIN_PE=()
+  local LINE=""
+  local BIN_MD5=""
+  local MD5_DONE_POST=()
 
   mapfile -t INT_BIN_PE < <(config_find "$CONFIG_DIR""/interesting_post_binaries.cfg")
   if [[ "${INT_BIN_PE[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"

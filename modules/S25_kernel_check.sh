@@ -24,9 +24,9 @@ S25_kernel_check()
   module_title "Identify and check kernel version"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  KERNEL_VERSION=()
-  KERNEL_DESC=()
-  KERNEL_MODULES=()
+  export KERNEL_VERSION=()
+  export KERNEL_DESC=()
+  export KERNEL_MODULES=()
   FOUND=0
   KMOD_BAD=0
 
@@ -51,7 +51,7 @@ S25_kernel_check()
         FOUND=1
       done
       if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
-        print_output ""
+        print_ln
         print_output "Kernel details:"
         for LINE in "${KERNEL_DESC[@]}" ; do
           print_output "$(indent "$LINE")"
@@ -116,7 +116,11 @@ S25_kernel_check()
 
 populate_karrays() {
   mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  local KERNEL_VERSION_
+  local KERNEL_VERSION_=()
+  local K_MODULE=""
+  local VER=""
+  local K_VER=""
+  local V=""
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     if [[ "$K_MODULE" =~ .*\.o ]]; then
@@ -185,18 +189,20 @@ populate_karrays() {
   fi
 
   KERNEL_VERSION=("${KERNEL_VERSION_[@]}")
-
 }
 
 demess_kv_version() {
-  K_VERSION=("$@")
+  local K_VERSION=("$@")
+  local KV=""
+  local VER=""
+  export KV_ARR=()
+
   # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
   for VER in "${K_VERSION[@]}" ; do
     if ! [[ "$VER" == *[0-9]* ]]; then
       continue;
     fi
 
-    local KV
     KV=$(echo "$VER" | tr "-" " ")
     KV=$(echo "$KV" | tr "+" " ")
     KV=$(echo "$KV" | tr "_" " ")
@@ -214,6 +220,9 @@ demess_kv_version() {
 get_kernel_vulns()
 {
   sub_module_title "Kernel vulnerabilities"
+
+  local VER=""
+  local V=""
 
   if [[ "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
     print_output "[+] Found linux kernel version/s:"
@@ -245,16 +254,17 @@ analyze_kernel_module()
   write_anchor "kernel_modules"
 
   KMOD_BAD=0
+  local KMODULE=""
 
   print_output "[*] Found $ORANGE${#KERNEL_MODULES[@]}$NC kernel modules."
 
-  for LINE in "${KERNEL_MODULES[@]}" ; do
+  for KMODULE in "${KERNEL_MODULES[@]}" ; do
     # modinfos can run in parallel:
     if [[ "$THREADED" -eq 1 ]]; then
-      module_analyzer &
+      module_analyzer "$KMODULE" &
       WAIT_PIDS_S25+=( "$!" )
     else
-      module_analyzer
+      module_analyzer "$KMODULE"
     fi
   done
 
@@ -272,12 +282,16 @@ analyze_kernel_module()
 }
 
 module_analyzer() {
-  if [[ "$LINE" == *".ko" ]]; then
-    LINE=$(modinfo "$LINE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
+  local KMODULE="${1:-}"
+  local LINE=""
+
+  if [[ "$KMODULE" == *".ko" ]]; then
+    LINE=$(modinfo "$KMODULE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
     local M_PATH
     M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
     local LICENSE
     LICENSE="$( echo "$LINE" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
+
     if file "$M_PATH" 2>/dev/null | grep -q 'not stripped'; then
       if echo "$LINE" | grep -q -e 'license:*GPL' -e 'license:.*BSD' ; then
         # kernel module is GPL/BSD license then not stripped is fine
@@ -293,8 +307,8 @@ module_analyzer() {
       print_output "[-] Found kernel module ""${NC}""$(print_path "$M_PATH")""  ${ORANGE}""$LICENSE""${NC}"" - ""${GREEN}""STRIPPED""${NC}"
     fi
 
-  elif [[ "$LINE" == *".o" ]]; then
-    print_output "[-] No support for .o kernel modules - $ORANGE$LINE$NC"
+  elif [[ "$KMODULE" == *".o" ]]; then
+    print_output "[-] No support for .o kernel modules - $ORANGE$KMODULE$NC"
   fi
 }
 
@@ -305,6 +319,9 @@ check_modprobe()
   sub_module_title "Check modprobe.d directory and content"
 
   local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0
+  local MODPROBE_D_DIRS=()
+  local MP_DIR=""
+
   readarray -t MODPROBE_D_DIRS < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for MP_DIR in "${MODPROBE_D_DIRS[@]}"; do
     if [[ -d "$MP_DIR" ]] ; then

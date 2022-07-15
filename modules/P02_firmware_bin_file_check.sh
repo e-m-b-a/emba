@@ -43,23 +43,23 @@ P02_firmware_bin_file_check() {
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
   print_output "[*] Details of the firmware file:"
-  print_output ""
+  print_ln
   print_output "$(indent "$FILE_LS_OUT")"
-  print_output ""
+  print_ln
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    print_output ""
+    print_ln
     print_output "$(indent "$(file "$FIRMWARE_PATH")")"
-    print_output ""
+    print_ln
     hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE" || true
-    print_output ""
+    print_ln
     print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
-    print_output ""
+    print_ln
     print_output "$(indent "$ENTROPY")"
-    print_output ""
+    print_ln
     if [[ -x "$EXT_DIR"/pixde ]]; then
       print_output "[*] Visualized firmware file (first 2000 bytes):\n"
       "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/p02_pixd.txt
-      print_output ""
+      print_ln
       python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null
       write_link "$LOG_DIR"/pixd.png
     fi
@@ -93,9 +93,10 @@ set_p02_default_exports() {
 
 fw_bin_detector() {
   local CHECK_FILE="${1:-}"
-  local FILE_BIN_OUT
-  local DLINK_ENC_CHECK
-  local AVM_CHECK
+  local FILE_BIN_OUT=""
+  local DLINK_ENC_CHECK=""
+  local QNAP_ENC_CHECK=""
+  local AVM_CHECK=0
 
   set_p02_default_exports
 
@@ -110,7 +111,9 @@ fw_bin_detector() {
     write_csv_log "AVM firmware detected" "yes" "NA"
   fi
   # if we have a zip, tgz, tar archive we are going to use the patools extractor
-  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* ]]; then
+  if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || \
+    "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* || \
+    "$FILE_BIN_OUT" == *"7-zip archive data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "$AVM_DETECTED" -ne 1 ]]; then
       print_output "[+] Identified gzip/zip/tar/iso archive file - using patools extraction module"
@@ -204,5 +207,5 @@ fw_bin_detector() {
     export BUFFALO_ENC_DETECTED=1
     write_csv_log "Buffalo encrypted" "yes" "NA"
   fi
-  print_output ""
+  print_ln
 }

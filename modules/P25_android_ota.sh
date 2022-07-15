@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description: Extracts Android OTA update files - see https://github.com/e-m-b-a/emba/issues/233
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -19,7 +18,7 @@ export PRE_THREAD_ENA=0
 
 P25_android_ota() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
   if [[ "$ANDROID_OTA" -eq 1 ]]; then
     module_title "Android OTA payload.bin extractor"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -29,6 +28,7 @@ P25_android_ota() {
     android_ota_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
     if [[ "$FILES_OTA" -gt 0 ]]; then
+      MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
     fi
     NEG_LOG=1
@@ -41,15 +41,23 @@ android_ota_extractor() {
   local EXTRACTION_DIR_="$2"
   local DIRS_OTA=0
   FILES_OTA=0
+
+  if ! [[ -f "$OTA_INIT_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   sub_module_title "Android OTA extractor"
 
   hexdump -C "$OTA_INIT_PATH_" | head | tee -a "$LOG_FILE" || true
 
   if [[ -d "$EXT_DIR"/payload_dumper ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Extracting Android OTA payload.bin file ..."
-    print_output ""
+    print_ln
+
     python3 "$EXT_DIR"/payload_dumper/payload_dumper.py --out "$EXTRACTION_DIR_" "$OTA_INIT_PATH_" | tee -a "$LOG_FILE"
+
     FILES_OTA=$(find "$EXTRACTION_DIR_" -type f | wc -l)
     DIRS_OTA=$(find "$EXTRACTION_DIR_" -type d | wc -l)
     print_output "[*] Extracted $ORANGE$FILES_OTA$NC files and $ORANGE$DIRS_OTA$NC directories from the firmware image."

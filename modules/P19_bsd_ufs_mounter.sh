@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description: Mounts and extracts BSD UFS images
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -19,7 +18,7 @@ export PRE_THREAD_ENA=0
 
 P19_bsd_ufs_mounter() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
   if [[ "$BSD_UFS" -eq 1 ]]; then
     module_title "BSD UFS filesystem extractor"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -31,6 +30,7 @@ P19_bsd_ufs_mounter() {
     ufs_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
     if [[ "$FILES_UFS_MOUNT" -gt 0 ]]; then
+      MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
     fi
     NEG_LOG=1
@@ -39,26 +39,33 @@ P19_bsd_ufs_mounter() {
 }
 
 ufs_extractor() {
-  local UFS_PATH_="$1"
-  local EXTRACTION_DIR_="$2"
+  local UFS_PATH_="${1:-}"
+  local EXTRACTION_DIR_="${2:-}"
   local TMP_UFS_MOUNT="$TMP_DIR""/ufs_mount_$RANDOM"
   local DIRS_UFS_MOUNT=0
   FILES_UFS_MOUNT=0
+
+  if ! [[ -f "$UFS_PATH_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
   sub_module_title "UFS filesystem extractor"
 
   mkdir -p "$TMP_UFS_MOUNT" 2>/dev/null || true
   print_output "[*] Trying to mount $ORANGE$UFS_PATH_$NC to $ORANGE$TMP_UFS_MOUNT$NC directory"
   modprobe ufs
   mount -r -t ufs -o ufstype=ufs2 "$UFS_PATH_" "$TMP_UFS_MOUNT"
+
   if mount | grep -q ufs_mount; then
     print_output "[*] Copying $ORANGE$TMP_UFS_MOUNT$NC to firmware tmp directory ($ORANGE$EXTRACTION_DIR_$NC)"
     mkdir -p "$EXTRACTION_DIR_" 2>/dev/null || true
     cp -pri "$TMP_UFS_MOUNT"/* "$EXTRACTION_DIR_" 2>/dev/null || true
-    print_output ""
+    print_ln
     print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
     #shellcheck disable=SC2012
     ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
-    print_output ""
+    print_ln
     print_output "[*] Unmounting $ORANGE$TMP_UFS_MOUNT$NC directory"
 
     FILES_UFS_MOUNT=$(find "$EXTRACTION_DIR_" -type f | wc -l)
@@ -69,5 +76,4 @@ ufs_extractor() {
     umount "$TMP_UFS_MOUNT" 2>/dev/null || true
   fi
   rm -r "$TMP_UFS_MOUNT"
-
 }

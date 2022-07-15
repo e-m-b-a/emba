@@ -22,9 +22,12 @@ S10_binaries_basic_check()
   module_title "Check binaries for critical functions"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  COUNTER=0
+  local COUNTER=0
   local BIN_COUNT=0
   local VULNERABLE_FUNCTIONS
+  local BINARY=""
+  local VUL_FUNC_RESULT=()
+  local VUL_FUNC=""
 
   VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
   IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ -e /g')"
@@ -32,14 +35,13 @@ S10_binaries_basic_check()
   if [[ "$VULNERABLE_FUNCTIONS" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "$VULNERABLE_FUNCTIONS" ]] ; then
     print_output "[*] Interesting functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-    for LINE in "${BINARIES[@]}" ; do
-      if ( file "$LINE" | grep -q "ELF" ) ; then
-        local VUL_FUNC_RESULT
+    for BINARY in "${BINARIES[@]}" ; do
+      if ( file "$BINARY" | grep -q "ELF" ) ; then
         BIN_COUNT=$((BIN_COUNT+1))
-        mapfile -t VUL_FUNC_RESULT < <(readelf -s --use-dynamic "$LINE" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
+        mapfile -t VUL_FUNC_RESULT < <(readelf -s --use-dynamic "$BINARY" 2> /dev/null | grep -we "${VUL_FUNC_GREP[@]}" | grep -v "file format" || true)
         if [[ "${#VUL_FUNC_RESULT[@]}" -ne 0 ]] ; then
-          print_output ""
-          print_output "[+] Interesting function in ""$(print_path "$LINE")"" found:"
+          print_ln
+          print_output "[+] Interesting function in ""$(print_path "$BINARY")"" found:"
           for VUL_FUNC in "${VUL_FUNC_RESULT[@]}" ; do
             # shellcheck disable=SC2001
             VUL_FUNC="$(echo "$VUL_FUNC" | sed -e 's/[[:space:]]\+/\t/g')"
@@ -49,6 +51,7 @@ S10_binaries_basic_check()
         fi
       fi
     done
+    print_ln
     print_output "[*] Found ""$ORANGE$COUNTER$NC"" binaries with interesting functions in ""$ORANGE$BIN_COUNT$NC"" files (vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"")"
   fi
 

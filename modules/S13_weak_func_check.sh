@@ -28,6 +28,9 @@ S13_weak_func_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   STRCPY_CNT=0
+  local BINARY=""
+  local VULNERABLE_FUNCTIONS=()
+  local VULNERABLE_FUNCTIONS_VAR=""
   if [[ -n "$ARCH" ]] ; then
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
@@ -43,76 +46,83 @@ S13_weak_func_check()
     # OBJDMP_ARCH, READELF are set in dependency check
     # Test source: https://security.web.cern.ch/security/recommendations/en/codetools/c.shtml
 
-    VULNERABLE_FUNCTIONS="$(config_list "$CONFIG_DIR""/functions.cfg")"
-    print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-    IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS" | sed ':a;N;$!ba;s/\n/ /g' )"
+    VULNERABLE_FUNCTIONS_VAR="$(config_list "$CONFIG_DIR""/functions.cfg")"
+    print_output "[*] Vulnerable functions: ""$( echo -e "$VULNERABLE_FUNCTIONS_VAR" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
+    IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS_VAR" | sed ':a;N;$!ba;s/\n/ /g' )"
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
-    for LINE in "${BINARIES[@]}" ; do
-      if ( file "$LINE" | grep -q ELF ) ; then
-        NAME=$(basename "$LINE" 2> /dev/null)
-        # create disassembly of every binary file:
-        #"$OBJDUMP" -d "$LINE" > "$OBJDUMP_LOG"
 
-        if ( file "$LINE" | grep -q "x86-64" ) ; then
+    if [[ "$THREADED" -eq 1 ]]; then
+      MAX_THREADS_S13=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
+    fi
+
+    for BINARY in "${BINARIES[@]}" ; do
+      if ( file "$BINARY" | grep -q ELF ) ; then
+        NAME=$(basename "$BINARY" 2> /dev/null)
+
+        if ( file "$BINARY" | grep -q "x86-64" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
-            function_check_x86_64 &
-            WAIT_PIDS_S11+=( "$!" )
+            function_check_x86_64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S13+=( "$!" )
           else
-            function_check_x86_64
+            function_check_x86_64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
-        elif ( file "$LINE" | grep -q "Intel 80386" ) ; then
+        elif ( file "$BINARY" | grep -q "Intel 80386" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
-            function_check_x86 &
-            WAIT_PIDS_S11+=( "$!" )
+            function_check_x86 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S13+=( "$!" )
           else
-            function_check_x86
+            function_check_x86 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
-        elif ( file "$LINE" | grep -q "32-bit.*ARM" ) ; then
+        elif ( file "$BINARY" | grep -q "32-bit.*ARM" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
-            function_check_ARM32 &
-            WAIT_PIDS_S11+=( "$!" )
+            function_check_ARM32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S13+=( "$!" )
           else
-            function_check_ARM32
+            function_check_ARM32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
-        elif ( file "$LINE" | grep -q "64-bit.*ARM" ) ; then
+        elif ( file "$BINARY" | grep -q "64-bit.*ARM" ) ; then
           # ARM 64 code is in alpha state and nearly not tested!
           if [[ "$THREADED" -eq 1 ]]; then
-            function_check_ARM64 &
-            WAIT_PIDS_S11+=( "$!" )
+            function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S13+=( "$!" )
           else
-            function_check_ARM64
+            function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
-        elif ( file "$LINE" | grep -q "MIPS" ) ; then
+        elif ( file "$BINARY" | grep -q "MIPS" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
-            function_check_MIPS32 &
-            WAIT_PIDS_S11+=( "$!" )
+            function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S13+=( "$!" )
           else
-            function_check_MIPS32
+            function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
-        elif ( file "$LINE" | grep -q "PowerPC" ) ; then
+        elif ( file "$BINARY" | grep -q "PowerPC" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
-            function_check_PPC32 &
-            WAIT_PIDS_S11+=( "$!" )
+            function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S13+=( "$!" )
           else
-            function_check_PPC32
+            function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         else
           print_output "[-] Something went wrong ... no supported architecture available"
+          print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
         fi
+      fi
+      if [[ "$THREADED" -eq 1 ]]; then
+        max_pids_protection "$MAX_THREADS_S13" "${WAIT_PIDS_S13[@]}"
       fi
     done
 
     if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S11[@]}"
+      wait_for_pid "${WAIT_PIDS_S13[@]}"
     fi
 
-    print_top10_statistics
+    print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
-    if [[ -f "$TMP_DIR"/S11_STRCPY_CNT.tmp ]]; then
+    if [[ -f "$TMP_DIR"/S13_STRCPY_CNT.tmp ]]; then
       while read -r STRCPY; do
         STRCPY_CNT=$((STRCPY_CNT+STRCPY))
-      done < "$TMP_DIR"/S11_STRCPY_CNT.tmp
+      done < "$TMP_DIR"/S13_STRCPY_CNT.tmp
     fi
 
     # shellcheck disable=SC2129
@@ -126,27 +136,29 @@ S13_weak_func_check()
 }
 
 function_check_PPC32(){
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
+
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r "$LINE" --use-dynamic | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
-      NAME=$(basename "$LINE" 2> /dev/null)
-      NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    if ( readelf -r "$BINARY_" --use-dynamic | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+      NAME=$(basename "$BINARY_" 2> /dev/null)
+      NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
+      log_func_header "$NAME" "$FUNCTION"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 20 "bl.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       else
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
-      if [[ "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
-        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
-        log_bin_hardening
-        log_func_header
-        for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          if [[ "$E" == *"$FUNCTION"* ]]; then
-            # we need the hex codes for sed here -> red output of the important line:
-            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
-          fi
-          write_log "$E" "$FUNC_LOG"
-        done
+      if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -155,38 +167,39 @@ function_check_PPC32(){
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null || true)
         fi
-        log_func_footer
-        output_function_details
+        log_func_footer "$NAME" "$FUNCTION"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_MIPS32() {
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    FUNC_ADDR=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
-    STRLEN_ADDR=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
-    NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    FUNC_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    STRLEN_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     if [[ -n "$FUNC_ADDR" ]] ; then
-      NAME=$(basename "$LINE" 2> /dev/null)
+      NAME=$(basename "$BINARY_" 2> /dev/null)
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
+      log_func_header "$NAME" "$FUNCTION"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -A 20 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ >> "$FUNC_LOG" || true
       else
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ >> "$FUNC_LOG" || true
       fi
-      if [[ "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
-        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
-        log_bin_hardening
-        log_func_header
-        for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          if [[ "$E" == *"$FUNCTION"* ]]; then
-            # we need the hex codes for sed here -> red output of the important line:
-            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
-          fi
-          write_log "$E" "$FUNC_LOG"
-        done
+      if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG" 2> /dev/null || true)
@@ -196,34 +209,35 @@ function_check_MIPS32() {
           # Check this. This test is very rough:
           COUNT_MMAP_OK=$(grep -c ",-1$" "$FUNC_LOG"  2> /dev/null || true)
         fi
-        log_func_footer
-        output_function_details
+        log_func_footer "$NAME" "$FUNCTION"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_ARM64() {
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    NAME=$(basename "$LINE" 2> /dev/null)
-    NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    NAME=$(basename "$BINARY_" 2> /dev/null)
+    NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+    log_bin_hardening "$NAME"
+    log_func_header "$NAME" "$FUNCTION"
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null || true)
+      "$OBJDUMP" -d "$BINARY_" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     else
-      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null || true)
+      "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
-    if [[ "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
-      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
-      log_bin_hardening
-      log_func_header
-      for E in "${OBJ_DUMPS_ARR[@]}" ; do
-        if [[ "$E" == *"$FUNCTION"* ]]; then
-          # we need the hex codes for sed here -> red output of the important line:
-          E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
-        fi
-        write_log "$E" "$FUNC_LOG"
-      done
+    if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+      sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -234,33 +248,34 @@ function_check_ARM64() {
         #COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
-      log_func_footer
-      output_function_details
+      log_func_footer "$NAME" "$FUNCTION"
+      output_function_details "$BINARY_" "$FUNCTION"
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_ARM32() {
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    NAME=$(basename "$LINE" 2> /dev/null)
-    NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    NAME=$(basename "$BINARY_" 2> /dev/null)
+    NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+    log_bin_hardening "$NAME"
+    log_func_header "$NAME" "$FUNCTION"
     if [[ "$FUNCTION" == "mmap" ]] ; then
-      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null || true)
+      "$OBJDUMP" -d "$BINARY_" | grep -A 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     else
-      mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null || true)
+      "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
-    if [[ "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
-      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
-      log_bin_hardening
-      log_func_header
-      for E in "${OBJ_DUMPS_ARR[@]}" ; do
-        if [[ "$E" == *"$FUNCTION"* ]]; then
-          # we need the hex codes for sed here -> red output of the important line:
-          E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
-        fi
-        write_log "$E" "$FUNC_LOG"
-      done
+    if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+      sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -270,34 +285,35 @@ function_check_ARM32() {
         # Check this testcase. Not sure if it works in all cases! 
         COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null || true)
       fi
-      log_func_footer
-      output_function_details
+      log_func_footer "$NAME" "$FUNCTION"
+      output_function_details "$BINARY_" "$FUNCTION"
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_x86() {
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
-      NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+    if ( readelf -r --use-dynamic "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
+      log_func_header "$NAME" "$FUNCTION"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       else
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
-      if [[ "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
-        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
-        log_bin_hardening
-        log_func_header
-        for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          if [[ "$E" == *"$FUNCTION"* ]]; then
-            # we need the hex codes for sed here -> red output of the important line:
-            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
-          fi
-          write_log "$E" "$FUNC_LOG"
-        done
+      if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -306,35 +322,36 @@ function_check_x86() {
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "$FUNC_LOG"  2> /dev/null || true)
         fi
-        log_func_footer
-        output_function_details
+        log_func_footer "$NAME" "$FUNCTION"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_x86_64() {
-   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    if ( readelf -r --use-dynamic "$LINE" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
-      NETWORKING=$(readelf -a "$LINE" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
+  for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
+    if ( readelf -r --use-dynamic "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      log_bin_hardening "$NAME"
+      log_func_header "$NAME" "$FUNCTION"
       if [[ "$FUNCTION" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       else
-        mapfile -t OBJ_DUMPS_ARR < <("$OBJDUMP" -d "$LINE" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null || true)
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
-      if [[ "${#OBJ_DUMPS_ARR[@]}" -gt 0 ]] ; then
-        FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
-        log_bin_hardening
-        log_func_header
-        for E in "${OBJ_DUMPS_ARR[@]}" ; do
-          if [[ "$E" == *"$FUNCTION"* ]]; then
-            # we need the hex codes for sed here -> red output of the important line:
-            E="$(echo "$E" | sed -r "s/^(.*)($FUNCTION)(.*)/\x1b[31m&\x1b[0m/")"
-          fi
-          write_log "$E" "$FUNC_LOG"
-        done
+      if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy"  ]] ; then
           COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -343,32 +360,39 @@ function_check_x86_64() {
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null || true)
         fi
-        output_function_details
-        log_func_footer
+        log_func_footer "$NAME" "$FUNCTION"
+        output_function_details "$BINARY_" "$FUNCTION"
       fi
     fi
   done
-  echo "$STRCPY_CNT" >> "$TMP_DIR"/S11_STRCPY_CNT.tmp
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 print_top10_statistics() {
+  local VULNERABLE_FUNCTIONS=("$@")
+  local FUNCTION=""
+  local RESULTS=()
+  local BINARY=""
+  local SEARCH_TERM=""
+  local F_COUNTER=""
+
   if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-      local SEARCH_TERM
-      local F_COUNTER
+      local SEARCH_TERM=""
+      local F_COUNTER=0
       readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null || true)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
-        print_output ""
+        print_ln
         print_output "[+] ""$FUNCTION"" - top 10 results:"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           write_anchor "strcpysummary"
         elif [[ "$FUNCTION" == "system" ]] ; then
           write_anchor "systemsummary"
         fi
-        for LINE in "${RESULTS[@]}" ; do
-          SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
-          F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
+        for BINARY in "${RESULTS[@]}" ; do
+          SEARCH_TERM="$(echo "$BINARY" | cut -d\  -f3)"
+          F_COUNTER="$(echo "$BINARY" | cut -d\  -f1)"
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
             if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then
@@ -383,12 +407,15 @@ print_top10_statistics() {
       fi  
     done
   else
-    #print_output "$LOG_PATH_MODULE"" ""$FUNCTION"
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
 } 
 
 log_bin_hardening() {
+  local NAME="${1:-}"
+  local HEAD_BIN_PROT=""
+  local BIN_PROT=""
+
   if [[ -f "$LOG_DIR"/s12_binary_protection.txt ]]; then
     write_log "[*] Binary protection state of $ORANGE$NAME$NC" "$FUNC_LOG"
     write_log "" "$FUNC_LOG"
@@ -403,12 +430,18 @@ log_bin_hardening() {
 }
 
 log_func_header() {
-  write_log "" "$FUNC_LOG"
+  local NAME="${1:-}"
+  local FUNCTION="${2:-}"
+
+  write_log "$NC" "$FUNC_LOG"
   write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
   write_log "" "$FUNC_LOG"
 }
 
 log_func_footer() {
+  local NAME="${1:-}"
+  local FUNCTION="${2:-}"
+
   write_log "" "$FUNC_LOG"
   write_log "[*] Function $ORANGE$FUNCTION$NC used $ORANGE$COUNT_FUNC$NC times $ORANGE$NAME$NC" "$FUNC_LOG"
   write_log "" "$FUNC_LOG"
@@ -427,6 +460,14 @@ output_function_details()
     LOG_FILE="$OLD_LOG_FILE"
   }
 
+  local BINARY_="${1:-}"
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
+  local FUNCTION="${2:-}"
+  local NAME=""
+  NAME=$(basename "$BINARY_")
+
   local LOG_FILE_LOC
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$FUNCTION"-"$NAME".txt
 
@@ -434,13 +475,13 @@ output_function_details()
   local COMMON_FILES_FOUND
   local SEARCH_TERM
   if [[ -f "$BASE_LINUX_FILES" ]]; then
-    SEARCH_TERM=$(basename "$LINE")
+    SEARCH_TERM=$(basename "$BINARY_")
     if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
       COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
-      write_log "[+] File $(print_path "$LINE") found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
+      write_log "[+] File $(print_path "$BINARY_") found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
       CFF_CSV="true"
     else
-      write_log "[+] File $(print_path "$LINE") not found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
+      write_log "[+] File $(print_path "$BINARY_") not found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
       COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
       CFF_CSV="false"
     fi
@@ -465,16 +506,14 @@ output_function_details()
 
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$BINARY_")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$BINARY_")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
     else
-      OUTPUT="[+] ""$(print_path "$LINE")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "$BINARY_")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     fi
     write_s13_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
-    write_csv_log "$(print_path "$LINE")" "$FUNCTION" "$COUNT_FUNC" "$CFF_CSV" "$NW_CSV"
+    write_csv_log "$(print_path "$BINARY_")" "$FUNCTION" "$COUNT_FUNC" "$CFF_CSV" "$NW_CSV"
   fi
-
-  
 }
 

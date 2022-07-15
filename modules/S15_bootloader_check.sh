@@ -22,7 +22,7 @@ S15_bootloader_check()
   module_title "Check bootloader and system startup"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  STARTUP_FINDS=0
+  export STARTUP_FINDS=0
 
   check_dtb
   check_bootloader
@@ -35,6 +35,9 @@ S15_bootloader_check()
 check_dtb()
 {
   sub_module_title "Scan for device tree blobs"
+
+  local DTB_ARR=()
+  local DTB_FILE=""
 
   readarray -t DTB_ARR < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -iname "*.dtb" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
@@ -61,7 +64,8 @@ check_bootloader()
   local CHECK=0
 
   # Syslinux
-  CHECK=0
+  local SYSLINUX_PATHS=()
+  local SYSLINUX_FILE=""
   mapfile -t SYSLINUX_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/syslinux/syslinux.cfg")
   for SYSLINUX_FILE in "${SYSLINUX_PATHS[@]}" ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
@@ -77,6 +81,8 @@ check_bootloader()
 
   # Grub
   CHECK=0
+  local GRUB_PATHS=()
+  local GRUB_FILE=""
   mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf")
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
@@ -128,6 +134,12 @@ check_bootloader()
   fi
   
   # Grub configuration
+  local FIND=""
+  local FIND2=""
+  local FIND3=""
+  local FIND4=""
+  local FIND5=""
+  local FOUND=0
   if [[ -n "${GRUB:-}" ]] ; then
     print_output "[*] Check Grub config: ""$(print_path "$GRUB")"
     FIND=$(grep 'password --md5' "$GRUB"| grep -v '^#' || true)
@@ -135,7 +147,6 @@ check_bootloader()
     FIND3=$(grep 'set superusers' "$GRUB"| grep -v '^#' || true)
     FIND4=$(grep 'password_pbkdf2' "$GRUB"| grep -v '^#' || true)
     FIND5=$(grep 'grub.pbkdf2' "$GRUB"| grep -v '^#' || true)
-    FOUND=0
     # GRUB1: Password should be set (MD5 or SHA1)
     if [[ -n "${FIND}" ]] || [[ -n "${FIND2}" ]] ; then
       FOUND=1
@@ -181,8 +192,10 @@ check_bootloader()
     print_output "[-] No FreeBSD or DragonFly bootloader files found"
   fi
 
-  # LILO
+  # LILO=""
   CHECK=0
+  local LILO_PATH=()
+  local LILO_FILE
   mapfile -t LILO_PATH < <(mod_path "/ETC_PATHS/lilo.conf")
   for LILO_FILE in "${LILO_PATH[@]}" ; do
     if [[ -f "$LILO_FILE" ]] ; then
@@ -202,6 +215,8 @@ check_bootloader()
 
   # SILO
   CHECK=0
+  local SILO_PATH=()
+  local SILO_FILE=""
   mapfile -t SILO_PATH < <(mod_path "/ETC_PATHS/silo.conf")
   for SILO_FILE in "${SILO_PATH[@]}" ; do
     if [[ -f "$SILO_FILE" ]] ; then
@@ -217,6 +232,8 @@ check_bootloader()
 
   # YABOOT
   CHECK=0
+  local YABOOT_PATH=()
+  local YABOOT_FILE=""
   mapfile -t YABOOT_PATH < <(mod_path "/ETC_PATHS/yaboot.conf")
   for YABOOT_FILE in "${YABOOT_PATH[@]}" ; do
     if [[ -f "$YABOOT_FILE" ]] ; then
@@ -233,6 +250,8 @@ check_bootloader()
   # OpenBSD
   CHECK=0
   local OBSD_PATH1 OBSD_PATH2
+  local OBSD_FILE1=""
+  local OBSD_FILE2=""
   #mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")
   mapfile -t OBSD_PATH1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/usr/mdec/biosboot")
   #mapfile -t OBSD_PATH2 < <(mod_path "/boot")
@@ -253,6 +272,10 @@ check_bootloader()
 
   # OpenBSD boot configuration
   CHECK=0
+  local OPENBSD_PATH=()
+  local OPENBSD_PATH2=()
+  local OPENBSD=""
+  local OPENBSD2=""
   mapfile -t OPENBSD_PATH < <(mod_path "/ETC_PATHS/boot.conf")
   for OPENBSD in "${OPENBSD_PATH[@]}" ; do
     if [[ -f "$OPENBSD" ]] ; then
@@ -301,7 +324,8 @@ find_boot_files()
 {
   sub_module_title "Scan for startup files"
 
-  local BOOT_FILES
+  local BOOT_FILES=()
+  local LINE=""
   mapfile -t BOOT_FILES < <(config_find "$CONFIG_DIR""/boot_files.cfg")
 
   if [[ "${BOOT_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
@@ -323,7 +347,12 @@ find_runlevel()
 {
   sub_module_title "Check default run level"
 
-  local SYSTEMD_PATH
+  local SYSTEMD_PATH=()
+  local SYSTEMD_P=""
+  local DEFAULT_TARGET_PATH=""
+  local FIND=""
+  local INIT_TAB_F=""
+
   mapfile -t SYSTEMD_PATH < <(mod_path "/ETC_PATHS/systemd")
   for SYSTEMD_P in "${SYSTEMD_PATH[@]}" ; do
     if [[ -d "$SYSTEMD_P" ]] ; then

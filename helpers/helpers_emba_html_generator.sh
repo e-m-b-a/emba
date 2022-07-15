@@ -12,7 +12,8 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann, Stefan Haboeck
+# Author(s): Pascal Eckmann,
+# Contributors: Michael Messner, Stefan Haboeck
 
 INDEX_FILE="index.html"
 MAIN_LOG="./emba.log"
@@ -114,13 +115,16 @@ add_link_tags() {
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
         elif [[ "${REF_LINK: -7}" == ".tar.gz" ]] ; then
-          LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
+          # LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           local RES_PATH
           RES_PATH="$ABS_HTML_PATH""/""$(echo "$BACK_LINK" | cut -d"." -f1 )""/res"
           if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
-          HTML_LINK="$P_START""Archive: ""$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""$(basename "$REF_LINK")""$LINK_END""$P_END"
-          LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
+          # HTML_LINK="$P_START""Archive: ""$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""$(basename "$REF_LINK")""$LINK_END""$P_END"
+          HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""Download Qemu emulation archive.""$LINK_END"
+          # LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
+          # LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@Qemu emulation archive created in log directory.@'"$HTML_LINK"'@' )
+          sed -i "s@Qemu emulation archive created in log directory.@$HTML_LINK@" "$LINK_FILE"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true
@@ -169,6 +173,7 @@ add_link_tags() {
       for WEB_LINK in "${WEB_LINKS[@]}" ; do
         WEB_LINK_LINE_NUM="$(echo "$WEB_LINK" | cut -d ":" -f 1 || true)"
         WEB_LINK_URL="$(echo "$WEB_LINK" | cut -d ":" -f 2- || true)"
+        WEB_LINK_URL="${WEB_LINK_URL%\\}"
         if [[ -n "$WEB_LINK" ]] ; then
           HTML_LINK="$(echo "$LINK" | sed -e "s@LINK@$WEB_LINK_URL@g")""$WEB_LINK_URL""$LINK_END" || true
           LINK_COMMAND_ARR+=( "$WEB_LINK_LINE_NUM"'s@'"$WEB_LINK_URL"'@'"$HTML_LINK"'@' )
@@ -344,6 +349,7 @@ add_link_tags() {
       local INSERT_ARR=()
       local LOCAL_ARR=()
       local INSERT_SIZE=100
+      disable_strict_mode "$STRICT_MODE" 0
       for (( X=0; X<${#LINK_COMMAND_ARR[@]}; X++ )) ; do
         LOCAL_ARR+=("${LINK_COMMAND_ARR[$X]}")
         INSERT_ARR+=('-e' "${LINK_COMMAND_ARR[$X]}")
@@ -366,6 +372,7 @@ add_link_tags() {
           SED_ERROR=""
         fi
       done
+      enable_strict_mode "$STRICT_MODE" 0
     fi
   fi
 
@@ -481,7 +488,6 @@ generate_report_file()
         # add module anchor to navigation
         NAV_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@#$A_MODUL_NAME@g")"
         sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$NAV_LINK""$MODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
-        ((LINE_NUMBER_REP_NAV+=1))
       fi
     fi
 
@@ -497,7 +503,6 @@ generate_report_file()
           # Add anchor to file
           SUB_NAV_LINK="$(echo "$SUBMODUL_LINK" | sed -e "s@LINK@#$A_SUBMODUL_NAME@g")"
           sed -i "$LINE_NUMBER_REP_NAV"'s@$@'"$SUB_NAV_LINK""$SUBMODUL_NAME""$LINK_END"'@' "$ABS_HTML_PATH""/""$HTML_FILE"
-          ((LINE_NUMBER_REP_NAV+=1))
         fi
       done
     fi
@@ -556,21 +561,21 @@ add_link_to_index() {
     # insert new entry at bottom of the navigation
     insert_line "navigation end" "$MODUL_NAME"
   else
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set +u
-    fi
     for (( COUNT=0; COUNT<=${#INDEX_NAV_GROUP_ARR[@]}; COUNT++ )) ; do
       if [[ $COUNT -eq 0 ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "${INDEX_NAV_GROUP_ARR[$COUNT]}" "$MODUL_NAME"
-      elif [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
-        insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
+        continue
       elif [[ $COUNT -eq $(( ${#INDEX_NAV_GROUP_ARR[@]}-1 )) ]] && [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
         insert_line "navigation end" "$MODUL_NAME"
+        continue
+      fi
+      # COUNT+1 is not available on the last element - we need to check the array for this:
+      if [[ -v INDEX_NAV_GROUP_ARR[$COUNT] ]] && [[ -v INDEX_NAV_GROUP_ARR[$((COUNT+1))] ]]; then
+        if [[ $C_NUMBER -gt $( echo "${INDEX_NAV_GROUP_ARR[$COUNT]:1}" | sed -E 's@^0*@@g' || true) ]] && [[ $C_NUMBER -lt $( echo "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]:1}" | sed -E 's@^0*@@g' || true) ]] ; then
+          insert_line "${INDEX_NAV_GROUP_ARR[$((COUNT+1))]}" "$MODUL_NAME"
+        fi
       fi
     done
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set -u
-    fi
   fi
 }
 

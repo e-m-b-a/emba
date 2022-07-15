@@ -3,7 +3,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
+# Author(s): Michael Messner
 
 # Description: Extracts encrypted firmware images from the vendor Foscam
 #              See https://github.com/pr0v3rbs/FirmAE/issues/21
@@ -22,7 +21,7 @@ export PRE_THREAD_ENA=0
 
 P20_foscam_decryptor() {
   module_log_init "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$OPENSSL_ENC_DETECTED" -ne 0 ]]; then
     module_title "Foscam encrypted firmware extractor"
@@ -41,9 +40,7 @@ foscam_enc_extractor() {
   local FOSCAM_ENC_PATH_="${1:-}"
   local EXTRACTION_FILE_="${2:-}"
   local FOSCAM_FILE_CHECK=""
-  KEY_FILE="$CONFIG_DIR/foscam_enc_keys.txt"
-
-  sub_module_title "Foscam encrypted firmware extractor"
+  local KEY_FILE="$CONFIG_DIR/foscam_enc_keys.txt"
 
   if ! [[ -f "$FOSCAM_ENC_PATH_" ]]; then
     print_output "[-] No file for decryption provided"
@@ -53,6 +50,8 @@ foscam_enc_extractor() {
     print_output "[-] No key file found in config directory"
     return
   fi
+
+  sub_module_title "Foscam encrypted firmware extractor"
 
   hexdump -C "$FOSCAM_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
@@ -66,10 +65,10 @@ foscam_enc_extractor() {
     if [[ -f "$EXTRACTION_FILE_" ]]; then
       FOSCAM_FILE_CHECK=$(file "$EXTRACTION_FILE_")
       if [[ "$FOSCAM_FILE_CHECK" =~ .*gzip\ compressed\ data.* ]]; then
-        print_output ""
+        print_ln
         print_output "[+] Decrypted Foscam firmware file to $ORANGE$EXTRACTION_FILE_$NC"
         export FIRMWARE_PATH="$EXTRACTION_FILE_"
-        print_output ""
+        print_ln
         print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
         write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
         write_csv_log "Foscam decryptor" "$FOSCAM_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
@@ -78,7 +77,9 @@ foscam_enc_extractor() {
           FW_VENDOR="Foscam"
         fi
 
+        MD5_DONE_DEEP+=( "$(md5sum "$FOSCAM_ENC_PATH_" | awk '{print $1}')" )
         foscam_ubi_extractor "$EXTRACTION_FILE_"
+        # as we have already found a working key we can now exit the loop
         break
       fi
     fi
@@ -167,7 +168,7 @@ foscam_ubi_extractor() {
     fi
 
     if [[ "$FOSCAM_UBI_FILES" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[*] Extracted $ORANGE$FOSCAM_UBI_FILES$NC files and $ORANGE$FOSCAM_UBI_DIRS$NC directories from the firmware image."
       write_csv_log "Foscam UBI extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FOSCAM_UBI_FILES" "$FOSCAM_UBI_DIRS" "NA"
       export FIRMWARE_PATH="$LOG_DIR"/firmware

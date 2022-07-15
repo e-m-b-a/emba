@@ -21,9 +21,9 @@ S65_config_file_check()
   module_title "Search/scan config files"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  NEG_LOG=0
-  FSTAB_ARR=()
-  CONF_FILES_ARR=()
+  local NEG_LOG=0
+  export FSTAB_ARR=()
+  export CONF_FILES_ARR=()
 
   scan_config
   check_fstab
@@ -40,6 +40,7 @@ S65_config_file_check()
 scan_config()
 {
   sub_module_title "Search for config file"
+  local LINE=""
 
   readarray -t CONF_FILES_ARR < <(config_find "$CONFIG_DIR""/config_files.cfg")
 
@@ -57,6 +58,7 @@ scan_config()
 check_fstab()
 {
   sub_module_title "Scan fstab"
+  local LINE=""
 
   #IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
   mapfile -t FSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
@@ -71,7 +73,7 @@ check_fstab()
     for LINE in "${FSTAB_USER_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No fstab files with user details found"
   fi
@@ -81,7 +83,7 @@ check_fstab()
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
       print_output "$(indent "$(print_path "$LINE")")"
     done
-    echo
+    print_ln "no_log"
   else
     print_output "[-] No fstab files with passwords found"
   fi
