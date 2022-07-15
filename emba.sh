@@ -85,7 +85,8 @@ sort_modules()
 check_cve_search_job() {
   local EMBA_PID="${1:-}"
 
-  if ! [[ "$EMBA_PID" =~ .*[0-9].* ]]; then
+  if ! [[ "$EMBA_PID" =~ [0-9]+ ]]; then
+    print_output "[-] WARNING: No EMBA PID detected ... are we really running?!?"
     return
   fi
 
@@ -234,8 +235,8 @@ main()
 
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=0
-  export EMBA_VERSION="1.0.x"
+  export RELEASE=1
+  export EMBA_VERSION="1.0.3"
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0

@@ -59,7 +59,7 @@ S14_weak_func_radare_check()
 
     # needed to protect the host from radare2 memory exhaustion caused by to many r2 processes:
     if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S14=$((6*"$(grep -c ^processor /proc/cpuinfo || true )"))
+      MAX_THREADS_S14=$((2*"$(grep -c ^processor /proc/cpuinfo || true )"))
     fi
 
     for BINARY in "${BINARIES[@]}" ; do

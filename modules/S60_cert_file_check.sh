@@ -36,7 +36,8 @@ S60_cert_file_check()
   if [[ "${CERT_FILES_ARR[0]-}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then
     write_csv_log "Certificate file" "Certificate expire on" "Certificate expired"
-    print_output "[+] Found ""${#CERT_FILES_ARR[@]}"" possible certification files:"
+    print_output "[+] Found ""$ORANGE${#CERT_FILES_ARR[@]}$GREEN"" possible certification files:"
+    print_ln
     CURRENT_DATE=$(date +%s)
     for LINE in "${CERT_FILES_ARR[@]}" ; do
       if [[ -f "$LINE" && $(wc -l "$LINE" | awk '{print $1}'|| true) -gt 1 ]]; then

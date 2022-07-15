@@ -463,6 +463,15 @@ cve_extractor() {
     fi
   fi
 
+  if grep -q "$VERSION_orig" "$S08_LOG" 2>/dev/null; then
+    if [[ "$VSOURCE" == "unknown" ]]; then
+      VSOURCE="PACK"
+    else
+      VSOURCE="$VSOURCE""/PACK"
+    fi
+  fi
+
+
   if grep -q "$VERSION_orig" "$L15_LOG" 2>/dev/null || grep -q "$VERSION_orig" "$L25_LOG" 2>/dev/null; then
     if [[ "$VSOURCE" == "unknown" ]]; then
       VSOURCE="SEMU"
