@@ -41,6 +41,9 @@ export IN_DOCKER=0
 # list dependencies
 export LIST_DEP=0
 export FULL=0
+# other os stuff
+export OTHER_OS=0
+export UBUNTU_OS=0
 
 ## Color definition
 export RED="\033[0;31m"
@@ -119,6 +122,25 @@ while getopts cCdDFhl OPT ; do
   esac
 done
 
+# distribution check
+if ! grep -q "ID_LIKE=debian" /etc/os-release 2>/dev/null ; then
+  echo -e "\\n""$RED""EMBA only supports debian based distributions!""$NC\\n"
+  print_help
+  exit 1
+elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
+  if grep -q "PRETTY_NAME=\"Ubuntu 22.04 LTS\"" /etc/os-release 2>/dev/null ; then
+    OTHER_OS=1
+    UBUNTU_OS=1
+  else
+    echo -e "\n${ORANGE}WARNING: compatibility of distribution/version unknown!$NC"
+    OTHER_OS=1
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
+else
+  OTHER_OS=0
+  UBUNTU_OS=0
+fi
+
 if ! [[ $EUID -eq 0 ]] && [[ $LIST_DEP -eq 0 ]] ; then
   echo -e "\\n""$RED""Run EMBA installation script with root permissions!""$NC\\n"
   print_help
@@ -149,6 +171,13 @@ if [[ $(version "$DOCKER_COMP_VER") -lt $(version "1.28.5") ]]; then
   echo -e "\n${ORANGE}Please consider updating your docker-compose installation to version 1.28.5 or later.$NC"
   echo -e "\n${ORANGE}Please check the EMBA wiki for further details: https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites$NC"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+fi
+
+if [[ "$OTHER_OS" -eq 1 ]]; then
+  # UBUNTU
+  if [[ "$UBUNTU_OS" -eq 1 ]]; then
+    ID1_ubuntu_os
+  fi
 fi
 
 INSTALL_APP_LIST=()
