@@ -57,11 +57,6 @@ S14_weak_func_radare_check()
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
-    # needed to protect the host from radare2 memory exhaustion caused by to many r2 processes:
-    if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S14=$((2*"$(grep -c ^processor /proc/cpuinfo || true )"))
-    fi
-
     for BINARY in "${BINARIES[@]}" ; do
       # we run throught the bins and check if the bin was already analysed via objdump:
       if [[ "$(find "$LOG_DIR"/s13_weak_func_check/vul_func_*"$(basename "$BINARY")".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
@@ -120,7 +115,7 @@ S14_weak_func_radare_check()
       fi
 
       if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_THREADS_S14" "${WAIT_PIDS_S14[@]}"
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S14[@]}"
       fi
     done
 

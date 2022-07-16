@@ -120,6 +120,9 @@ cleaner() {
     kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
 
+  # stop inotifywait on host
+  pkill -f "inotifywait.*$LOG_DIR.*"
+
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
   fi
@@ -195,7 +198,7 @@ enable_strict_mode() {
 
     if [[ "$PRINTER" -eq 1 ]]; then
       print_bar "no_log"
-      print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
+      print_output "[!] INFO: EMBA running in STRICT mode!" "no_log"
       print_bar "no_log"
     fi
   fi
@@ -222,7 +225,7 @@ disable_strict_mode() {
 
     if [[ "$PRINTER" -eq 1 ]]; then
       print_bar "no_log"
-      print_output "[!] WARNING: EMBA STRICT mode disabled!" "no_log"
+      print_output "[!] INFO: EMBA STRICT mode disabled!" "no_log"
       print_bar "no_log"
     fi
   fi

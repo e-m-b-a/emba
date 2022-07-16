@@ -69,14 +69,14 @@ cwe_check() {
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo || true)"))
+        local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)"))
         if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
-          MAX_THREADS_S120=1
+          local MAX_MOD_THREADS=1
         fi
 
         cwe_checker_threaded "$BINARY" &
         WAIT_PIDS_S120+=( "$!" )
-        max_pids_protection "$MAX_THREADS_S120" "${WAIT_PIDS_S120[@]}"
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S120[@]}"
       else
         cwe_checker_threaded "$BINARY"
       fi

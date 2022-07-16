@@ -52,10 +52,6 @@ S13_weak_func_check()
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S13=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
-    fi
-
     for BINARY in "${BINARIES[@]}" ; do
       if ( file "$BINARY" | grep -q ELF ) ; then
         NAME=$(basename "$BINARY" 2> /dev/null)
@@ -109,7 +105,7 @@ S13_weak_func_check()
         fi
       fi
       if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_THREADS_S13" "${WAIT_PIDS_S13[@]}"
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S13[@]}"
       fi
     done
 

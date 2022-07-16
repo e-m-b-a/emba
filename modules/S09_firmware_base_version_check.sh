@@ -128,12 +128,6 @@ S09_firmware_base_version_check() {
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S09=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
-        if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
-          MAX_THREADS_S09=$((2*"$(grep -c ^processor /proc/cpuinfo || true)"))
-        fi
-        #print_output "[*] Max threads for static version detection: $MAX_THREADS_S09"
-
         # this will burn the CPU but in most cases the time of testing is cut into half
         bin_string_checker &
         WAIT_PIDS_S09+=( "$!" )
@@ -146,10 +140,10 @@ S09_firmware_base_version_check() {
     fi
 
     if [[ "$THREADED" -eq 1 ]]; then
-      if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
+      if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_MOD_THREADS" ]]; then
         recover_wait_pids "${WAIT_PIDS_S09[@]}"
-        if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_THREADS_S09" ]]; then
-          max_pids_protection "$MAX_THREADS_S09" "${WAIT_PIDS_S09[@]}"
+        if [[ "${#WAIT_PIDS_S09[@]}" -gt "$MAX_MOD_THREADS" ]]; then
+          max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S09[@]}"
         fi
       fi
     fi

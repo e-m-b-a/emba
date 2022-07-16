@@ -551,6 +551,10 @@ module_start_log() {
   fi
   LOG_PATH_MODULE=$(abs_path "$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')")
   if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" || true; fi
+
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 0 ]]; then
+    write_notification "Module $MODULE_MAIN_NAME started"
+  fi
 }
 
 pre_module_reporter() {
@@ -611,6 +615,9 @@ module_end_log() {
     fi
   fi
 
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 0 ]]; then
+    write_notification "Module $MODULE_MAIN_NAME finished"
+  fi
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
 }
 
@@ -680,5 +687,34 @@ banner_printer() {
     cat "$BANNER_TO_PRINT"
     echo ""
   fi
+}
 
+write_notification(){
+  local MESSAGE="${1:-}"
+  local EMBA_ICON="$HELP_DIR"/emba.svg
+
+  if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$TMP_DIR" ]]; then
+    local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
+    echo "$MESSAGE" > "$NOTIFICATION_LOCATION" || true
+  else
+    notify-send --icon="$EMBA_ICON""EMBA" "$MESSAGE" -t 2
+  fi
+}
+
+print_notification(){
+  local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
+  local EMBA_ICON="$HELP_DIR"/emba.svg
+  local CURRENT=$(<"$NOTIFICATION_LOCATION")
+
+  until [[ -f "$NOTIFICATION_LOCATION" ]]; do
+    sleep 1
+  done
+
+  inotifywait -m -e modify "$NOTIFICATION_LOCATION" --format "%e" | while read -r EVENT; do
+    if [[ "$EVENT" == "MODIFY" ]]; then
+      local PREV="$CURRENT"
+      CURRENT=$(<"$NOTIFICATION_LOCATION")
+      [ "$CURRENT" == "$PREV" ] || notify-send --icon="$EMBA_ICON" "EMBA" "$CURRENT" -t 2
+    fi
+  done
 }

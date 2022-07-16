@@ -43,9 +43,6 @@ deep_pattern_search() {
   local DEEP_S_FILE=""
   local WAIT_PIDS_S103=()
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    MAX_THREADS_S103=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
-  fi
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
   done
@@ -58,7 +55,7 @@ deep_pattern_search() {
       deep_pattern_searcher "$DEEP_S_FILE"
     fi
     if [[ "$THREADED" -eq 1 ]]; then
-      max_pids_protection "$MAX_THREADS_S103" "${WAIT_PIDS_S103[@]}"
+      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S103[@]}"
     fi
   done
 

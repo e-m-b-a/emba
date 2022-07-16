@@ -56,7 +56,6 @@ P03_firmware_virustotal_check() {
       vt_analysis_beh "$VT_UPLOAD_ID" "$VT_API_KEY"
       NEG_LOG=1
     fi
-
   else
     if [[ "$ONLINE_CHECKS" -eq 0 ]]; then
       print_output "[-] Online checks are disabled."

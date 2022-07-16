@@ -116,7 +116,6 @@ disk_space_protection() {
 
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-  MAX_THREADS_P20=$((2*"$(grep -c ^processor /proc/cpuinfo || true)"))
 
   FILE_ARR_TMP=()
   FILE_MD5=""
@@ -276,7 +275,7 @@ deeper_extractor_helper() {
       fi
 
       MD5_DONE_DEEP+=( "$FILE_MD5" )
-      max_pids_protection "$MAX_THREADS_P20" "${WAIT_PIDS_P20[@]}"
+      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_P20[@]}"
     fi
 
     check_disk_space
