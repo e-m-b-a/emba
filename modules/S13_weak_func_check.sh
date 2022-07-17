@@ -113,6 +113,9 @@ S13_weak_func_check()
       wait_for_pid "${WAIT_PIDS_S13[@]}"
     fi
 
+    # ensure that we do not have result files without real results:
+    find "$LOG_DIR"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; || true
+
     print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
     if [[ -f "$TMP_DIR"/S13_STRCPY_CNT.tmp ]]; then

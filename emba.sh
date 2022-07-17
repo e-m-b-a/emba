@@ -452,10 +452,6 @@ main()
 
   print_ln "no_log"
 
-  if [[ "$IN_DOCKER" -eq 0 ]]; then
-    print_notification &
-  fi
-
 
   write_notification "EMBA starting"
   # print it only once per EMBA run - not again from started container
@@ -520,6 +516,10 @@ main()
   # create log directory, if not exists and needed subdirectories
   create_log_dir
 
+  if [[ "$IN_DOCKER" -eq 0 ]]; then
+    print_notification &
+  fi
+
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
   if [[ "$KERNEL" -ne 1 && "$CONTAINER_EXTRACT" -ne 1 ]]; then
@@ -577,7 +577,7 @@ main()
     MAX_MODS="$(( $(grep -c ^processor /proc/cpuinfo) /2 +1))"
     # the maximum threads per modules - if this value does not match adjust it via
     # local MAX_MOD_THREADS=123 in module area
-    MAX_MOD_THREADS="$(( 2* $(grep -c ^processor /proc/cpuinfo) ))"
+    export MAX_MOD_THREADS="$(( 3* $(grep -c ^processor /proc/cpuinfo) ))"
 
     # if we have only one core we run two modules in parallel
     if [[ "$MAX_MODS" -lt 2 ]]; then

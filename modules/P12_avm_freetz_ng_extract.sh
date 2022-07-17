@@ -17,10 +17,10 @@
 export PRE_THREAD_ENA=0
 
 P12_avm_freetz_ng_extract() {
-  module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
 
   if [[ "$AVM_DETECTED" -eq 1 ]]; then
+    module_log_init "${FUNCNAME[0]}"
     module_title "AVM freetz-ng firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -29,8 +29,8 @@ P12_avm_freetz_ng_extract() {
     avm_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
     NEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
   fi
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 avm_extractor() {

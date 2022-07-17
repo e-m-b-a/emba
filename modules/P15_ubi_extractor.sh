@@ -17,9 +17,9 @@
 export PRE_THREAD_ENA=0
 
 P15_ubi_extractor() {
-  module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
   if [[ "$UBI_IMAGE" -eq 1 ]]; then
+    module_log_init "${FUNCNAME[0]}"
     module_title "UBI filesystem extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -33,8 +33,8 @@ P15_ubi_extractor() {
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
     fi
     NEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
   fi
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 ubi_extractor() {

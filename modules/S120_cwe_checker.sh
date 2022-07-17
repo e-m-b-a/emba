@@ -24,12 +24,12 @@ export THREAD_PRIO=1
 
 S120_cwe_checker()
 {
-  module_log_init "${FUNCNAME[0]}"
-  module_title "Check binaries with cwe-checker"
-  pre_module_reporter "${FUNCNAME[0]}"
-  local CWE_CNT_=0
-
   if [[ $CWE_CHECKER -eq 1 ]] ; then
+    module_log_init "${FUNCNAME[0]}"
+    module_title "Check binaries with cwe-checker"
+    pre_module_reporter "${FUNCNAME[0]}"
+    local CWE_CNT_=0
+
     if [[ "$IN_DOCKER" -eq 1 ]]; then
       cwe_container_prepare
     fi
@@ -45,12 +45,11 @@ S120_cwe_checker()
 
     write_log ""
     write_log "[*] Statistics:$CWE_CNT_"
+    module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
   else
     print_output "[!] Check with cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
   fi
-
-  module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
 }
 
 cwe_container_prepare() {

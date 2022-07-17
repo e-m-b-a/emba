@@ -18,10 +18,10 @@
 export PRE_THREAD_ENA=0
 
 P18_qnap_decryptor() {
-  module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
 
   if [[ "$QNAP_ENC_DETECTED" -ne 0 ]]; then
+    module_log_init "${FUNCNAME[0]}"
     module_title "QNAP encrypted firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -34,8 +34,8 @@ P18_qnap_decryptor() {
     fi
 
     NEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
   fi
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 qnap_enc_extractor() {

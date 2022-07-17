@@ -54,7 +54,7 @@ search_ssh_files()
     print_output "[+] Found ""${#SSH_FILES[@]}"" ssh configuration files:"
     for LINE in "${SSH_FILES[@]}" ; do
       if [[ -f "$LINE" ]] ; then
-        print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        print_output "$(indent "$(orange "$(print_path "$LINE")")")" "" "$LINE"
         if [[ -f "$EXT_DIR"/sshdcc ]]; then
           local PRINTER=0
           if [[ "$(basename "$LINE")" == "sshd_config"  ]]; then
