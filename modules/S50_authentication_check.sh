@@ -550,13 +550,13 @@ search_pam_files() {
 
   local CHECK=0
   local AUTH_ISSUES=0
-  local PAM_FILES
+  local PAM_FILES=()
   local PAM_FILE=""
   readarray -t PAM_FILES < <(config_find "$CONFIG_DIR""/pam_files.cfg")
 
   if [[ "${PAM_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#PAM_FILES[@]} -ne 0 ]] ; then
-    print_output "[*] Found ""$ORANGE${#PAM_FILES[@]}$NC"" possible interesting file/s and/or directory/ies for PAM:"
+    print_output "[*] Found ""$ORANGE${#PAM_FILES[@]}$NC"" possible interesting areas for PAM:"
     for PAM_FILE in "${PAM_FILES[@]}" ; do
       if [[ -f "$PAM_FILE" ]] ; then
         CHECK=1
@@ -570,8 +570,8 @@ search_pam_files() {
         for FIND_FILE in "${FIND[@]}"; do
           CHECK=1
           print_output "$(indent "$(orange "$FIND_FILE")")"
-          ((AUTH_ISSUES+=1))
         done
+        ((AUTH_ISSUES+=1))
       fi
     done
     if [[ $CHECK -eq 0 ]] ; then
