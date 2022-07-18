@@ -452,7 +452,6 @@ main()
 
   print_ln "no_log"
 
-
   write_notification "EMBA starting"
   # print it only once per EMBA run - not again from started container
   if [[ $IN_DOCKER -eq 0 ]]; then

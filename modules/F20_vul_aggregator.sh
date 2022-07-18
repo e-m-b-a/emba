@@ -463,7 +463,7 @@ cve_extractor() {
     fi
   fi
 
-  if grep -q "$BINARY;$VERSION" "$S08_LOG" 2>/dev/null; then
+  if grep -q "$BINARY;.*$VERSION" "$S08_LOG" 2>/dev/null; then
     if [[ "$VSOURCE" == "unknown" ]]; then
       VSOURCE="PACK"
     else

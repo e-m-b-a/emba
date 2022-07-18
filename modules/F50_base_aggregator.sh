@@ -184,7 +184,7 @@ output_details() {
     write_csv_log "yara_rules_match" "$YARA_CNT" "NA"
     DATA=1
   fi
-  EMUL=$(grep -c "Version information found" "$LOG_DIR"/s116_qemu_version_detection.txt 2>/dev/null || true)
+  EMUL=$(cut -d\; -f1 "$LOG_DIR"/s116_qemu_version_detection.csv 2>/dev/null | sort -u | wc -l || true)
   if [[ "${EMUL:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "s116"
@@ -394,7 +394,7 @@ output_binaries() {
   cwe_logging
 
   if [[ "${STRCPY_CNT:-0}" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""${#BINARIES[@]}""$GREEN"" binaries.""$NC"
+    print_output "[+] Found ""$ORANGE""$STRCPY_CNT""$GREEN"" usages of strcpy in ""$ORANGE""$BINS_CHECKED""$GREEN"" binaries.""$NC"
     if [[ $(find "$LOG_DIR""/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "$LOG_DIR""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
       write_link "s13"
     else
@@ -418,8 +418,8 @@ output_binaries() {
     local NC_=""
     NC_="$(tput sgr0)"
 
-    readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null)
-    readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2> /dev/null)
+    readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null || true)
+    readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2> /dev/null || true)
 
     #strcpy:
     if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then

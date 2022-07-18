@@ -551,21 +551,22 @@ search_pam_files() {
   local CHECK=0
   local AUTH_ISSUES=0
   local PAM_FILES
+  local PAM_FILE=""
   readarray -t PAM_FILES < <(config_find "$CONFIG_DIR""/pam_files.cfg")
 
   if [[ "${PAM_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#PAM_FILES[@]} -ne 0 ]] ; then
-    print_output "[*] Found ""${#PAM_FILES[@]}"" possible interesting file/s and/or directory/ies for PAM:"
-    for LINE in "${PAM_FILES[@]}" ; do
-      if [[ -f "$LINE" ]] ; then
+    print_output "[*] Found ""$ORANGE${#PAM_FILES[@]}$NC"" possible interesting file/s and/or directory/ies for PAM:"
+    for PAM_FILE in "${PAM_FILES[@]}" ; do
+      if [[ -f "$PAM_FILE" ]] ; then
         CHECK=1
-        print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        print_output "$(indent "$(orange "$(print_path "$PAM_FILE")")")"
         ((AUTH_ISSUES+=1))
       fi
-      if [[ -d "$LINE" ]] && [[ ! -L "$LINE" ]] ; then
-        print_output "$(indent "$(print_path "$LINE")")"
+      if [[ -d "$PAM_FILE" ]] && [[ ! -L "$PAM_FILE" ]] ; then
+        print_output "$(indent "$(print_path "$PAM_FILE")")"
         local FIND
-        mapfile -t FIND < <(find "$LINE" -xdev -maxdepth 1 -type f -name "pam_*.so" -print | sort)
+        mapfile -t FIND < <(find "$PAM_FILE" -xdev -maxdepth 1 -type f -name "pam_*.so" -print | sort)
         for FIND_FILE in "${FIND[@]}"; do
           CHECK=1
           print_output "$(indent "$(orange "$FIND_FILE")")"
