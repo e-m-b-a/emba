@@ -244,6 +244,8 @@ dependency_check()
     check_dep_tool "docker-compose"
     check_docker_env
     check_cve_search
+    check_dep_tool "inotifywait"
+    check_dep_tool "notify-send"
   fi
 
   #######################################################################################
