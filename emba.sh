@@ -304,6 +304,7 @@ main()
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
+  export EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
 
   import_helper
   print_ln "no_log"
@@ -453,6 +454,7 @@ main()
   print_ln "no_log"
 
   write_notification "EMBA starting"
+
   # print it only once per EMBA run - not again from started container
   if [[ $IN_DOCKER -eq 0 ]]; then
     banner_printer

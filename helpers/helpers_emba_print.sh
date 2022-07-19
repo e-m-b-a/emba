@@ -689,19 +689,27 @@ banner_printer() {
   fi
 }
 
+# write notfication is the central notification area
+# if you want to print a notification via the notification system
+# call this function with the message as parameter
 write_notification(){
   local MESSAGE="${1:-}"
-  local EMBA_ICON=""
-  EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
 
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$TMP_DIR" ]]; then
+    # we are in the docker container and so we need to write the
+    # notification to a temp file which is checked via print_notification
     local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
     echo "$MESSAGE" > "$NOTIFICATION_LOCATION" || true
   else
+    # if we are on the host (e.g., in developer mode) we can directly handle
+    # the notification
     notify-send --icon="$EMBA_ICON" "EMBA" "$MESSAGE" -t 2
   fi
 }
 
+# print_notification handles the monitoring of the notification tmp file
+# from the docker container. If someone prints something into this file
+# this function will handle it and generate a desktop notification
 print_notification(){
   local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
 
@@ -709,8 +717,6 @@ print_notification(){
     sleep 1
   done
 
-  local EMBA_ICON=""
-  EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
   local CURRENT=""
   CURRENT=$(<"$NOTIFICATION_LOCATION")
 

@@ -76,7 +76,7 @@ max_pids_protection() {
     # recreate the arry with the current running PIDS
     WAIT_PIDS=()
     WAIT_PIDS=("${TEMP_PIDS[@]}")
-    echo "." | tr -d "\n" 2>/dev/null
+    echo "." | tr -d "\n" 2>/dev/null || true
   done
 }
 
