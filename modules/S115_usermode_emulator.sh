@@ -466,10 +466,12 @@ emulate_strace_run() {
   else
     write_log "[*] No missing areas found." "$LOG_FILE_STRACER"
   fi
-  sed -i 's/.REF.*//' "$LOG_FILE_STRACER"
-  # print it to the screen - we already have the output in the right log file
-  cat "$LOG_FILE_STRACER"
-  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
+  if [[ -f "$LOG_FILE_STRACER" ]]; then
+    sed -i 's/.REF.*//' "$LOG_FILE_STRACER"
+    # print it to the screen - we already have the output in the right log file
+    cat "$LOG_FILE_STRACER" || true
+    write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
+  fi
 }
 
 emulate_binary() {
