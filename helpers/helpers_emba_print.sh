@@ -693,6 +693,10 @@ banner_printer() {
 # if you want to print a notification via the notification system
 # call this function with the message as parameter
 write_notification(){
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
+    return
+  fi
+
   local MESSAGE="${1:-}"
 
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$TMP_DIR" ]]; then
@@ -711,6 +715,9 @@ write_notification(){
 # from the docker container. If someone prints something into this file
 # this function will handle it and generate a desktop notification
 print_notification(){
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
+    return
+  fi
   local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
 
   until [[ -f "$NOTIFICATION_LOCATION" ]]; do
