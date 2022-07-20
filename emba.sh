@@ -725,6 +725,8 @@ main()
     fi
   fi
 
+  # Start status bar
+  emba_status_bar
 
   #######################################################################################
   # Pre-Check (P-modules)
