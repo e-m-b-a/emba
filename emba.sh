@@ -17,6 +17,7 @@
 # Description:  Main script for load all necessary files and call main function of modules
 
 INVOCATION_PATH="."
+MODULE_COUNT=0
 
 import_helper()
 {
@@ -725,8 +726,12 @@ main()
     fi
   fi
 
+  #######################################################################################
   # Start status bar
-  emba_status_bar
+  initial_status_bar
+  box_updaters
+  # Trap the window resize signal (handle window resize events).
+  trap 'initial_status_bar' WINCH
 
   #######################################################################################
   # Pre-Check (P-modules)
@@ -837,6 +842,8 @@ main()
       rm -r "$LOG_DIR"/firmware 2>/dev/null
     fi
     print_ln "no_log"
+    # clear status bar
+    remove_status_bar
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
       rm -r "$TMP_DIR" 2>/dev/null || true

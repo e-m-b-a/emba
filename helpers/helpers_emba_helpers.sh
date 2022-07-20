@@ -120,6 +120,9 @@ cleaner() {
     kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
 
+  # Remove status bar and reset screen
+  remove_status_bar
+
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
   fi
