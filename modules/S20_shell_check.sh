@@ -37,12 +37,11 @@ S20_shell_check()
         if [[ "$THREADED" -eq 1 ]]; then
           s20_script_check "$SH_SCRIPT" &
           WAIT_PIDS_S20+=( "$!" )
+          max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S20[@]}"
+          continue
         else
           s20_script_check "$SH_SCRIPT"
         fi
-      fi
-      if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S20[@]}"
       fi
     done
 

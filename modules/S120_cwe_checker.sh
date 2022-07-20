@@ -76,6 +76,7 @@ cwe_check() {
         cwe_checker_threaded "$BINARY" &
         WAIT_PIDS_S120+=( "$!" )
         max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S120[@]}"
+        continue
       else
         cwe_checker_threaded "$BINARY"
       fi

@@ -75,12 +75,11 @@ s22_vuln_check_caller() {
       if [[ "$THREADED" -eq 1 ]]; then
         s22_vuln_check "$PHP_SCRIPT" &
         WAIT_PIDS_S22+=( "$!" )
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S22[@]}"
+        continue
       else
         s22_vuln_check "$PHP_SCRIPT"
       fi
-    fi
-    if [[ "$THREADED" -eq 1 ]]; then
-      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S22[@]}"
     fi
   done
 

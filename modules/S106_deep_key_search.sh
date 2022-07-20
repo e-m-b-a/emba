@@ -51,11 +51,10 @@ deep_key_search() {
     if [[ $THREADED -eq 1 ]]; then
       deep_key_searcher "$DEEP_S_FILE" &
       WAIT_PIDS_S106+=( "$!" )
+      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S106[@]}"
+      continue
     else
       deep_key_searcher "$DEEP_S_FILE"
-    fi
-    if [[ "$THREADED" -eq 1 ]]; then
-      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S106[@]}"
     fi
   done
 

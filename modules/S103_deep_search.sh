@@ -51,11 +51,10 @@ deep_pattern_search() {
     if [[ $THREADED -eq 1 ]]; then
       deep_pattern_searcher "$DEEP_S_FILE" &
       WAIT_PIDS_S103+=( "$!" )
+      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S103[@]}"
+      continue
     else
       deep_pattern_searcher "$DEEP_S_FILE"
-    fi
-    if [[ "$THREADED" -eq 1 ]]; then
-      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S103[@]}"
     fi
   done
 

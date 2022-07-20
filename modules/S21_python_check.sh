@@ -37,12 +37,11 @@ S21_python_check()
         if [[ "$THREADED" -eq 1 ]]; then
           s21_script_bandit "$PY_SCRIPT" &
           WAIT_PIDS_S21+=( "$!" )
+          max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S21[@]}"
+          continue
         else
           s21_script_bandit "$PY_SCRIPT"
         fi
-      fi
-      if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S21[@]}"
       fi
     done
 

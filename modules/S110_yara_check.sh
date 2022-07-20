@@ -40,11 +40,10 @@ S110_yara_check()
       if [[ "$THREADED" -eq 1 ]]; then
         yara_check "$YARA_S_FILE" "$DIR_COMB_YARA" &
         WAIT_PIDS_S110+=( "$!" )
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S110[@]}"
+        continue
       else
         yara_check "$YARA_S_FILE" "$DIR_COMB_YARA"
-      fi
-      if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S110[@]}"
       fi
     done
 
