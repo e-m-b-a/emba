@@ -273,7 +273,7 @@ generate_special_log() {
     local EXPLOIT_=""
     local EXPLOITS_AVAIL=()
 
-    readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
+    readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f -name "*.txt")
     print_ln
     print_output "[*] CVE log file generated."
     write_link "$CVE_MINIMAL_LOG"
@@ -281,7 +281,7 @@ generate_special_log() {
 
     for FILE in "${FILES[@]}"; do
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
-      CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //' || true)
+      CVE_VALUES=$(cut -d ":" -f1 "$FILE" | paste -s -d ',' || true)
       if [[ -n $CVE_VALUES ]]; then
         print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
         print_output "$CVE_VALUES"
