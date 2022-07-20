@@ -86,6 +86,7 @@ update_box_system_load() {
     local DISK_PERCENTAGE_STR="$(system_load_util_str $(df "$LOG_DIR" | tail -1 | awk '{print substr($5, 1, length($5)-1)}') 2)"
     printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( $LINES - 3 ))" "$(head -n 1 "$TMP_DIR""/cpu")" "$(( $LINES - 2 ))" "$MEM_PERCENTAGE_STR" "$(( $LINES - 1 ))" "$DISK_PERCENTAGE_STR" "$LINES"
     system_load_util_str $((100-$(vmstat 1 2 | tail -1 | awk '{print $15}'))) 0 > "$TMP_DIR""/cpu" &
+    WAIT_PIDS+=( "$!" )
     sleep .2
   done
 }
