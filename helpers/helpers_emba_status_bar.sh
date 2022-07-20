@@ -37,17 +37,6 @@ draw_box() {
   echo -e "$BOX"
 }
 
-update_system_load() {
-  system_load_util_str $((100-$(vmstat 1 2 | tail -1 | awk '{print $15}'))) 0 > "$TMP_DIR""/cpu"
-  while true; do
-    local MEM_PERCENTAGE_STR="$(system_load_util_str $(free | grep Mem | awk '{print int($3/$2 * 100)}') 1)"
-    local DISK_PERCENTAGE_STR="$(system_load_util_str $(df "$LOG_DIR" | tail -1 | awk '{print substr($5, 1, length($5)-1)}') 2)"
-    printf '\e[s\e[%s;2f%s\e[%s;2f%s\e[%s;2f%s\e[u' "$(( $LINES - 4 ))" "$(head -n 1 "$TMP_DIR""/cpu")" "$(( $LINES - 3 ))" "$MEM_PERCENTAGE_STR" "$(( $LINES - 2 ))" "$DISK_PERCENTAGE_STR" "$LINES"
-    system_load_util_str $((100-$(vmstat 1 2 | tail -1 | awk '{print $15}'))) 0 > "$TMP_DIR""/cpu" &
-    sleep .2
-  done
-}
-
 system_load_util_str() {
   local PERCENTAGE="${1:0}"
   local UTIL_TYPE_NO="${2:0}"
@@ -90,6 +79,17 @@ system_load_util_str() {
   echo -e "$UTIL_STR$UTIL_BAR_COLOR$UTIL_BAR_BLANK $PERCENTAGE"
 }
 
+update_system_load() {
+  system_load_util_str $((100-$(vmstat 1 2 | tail -1 | awk '{print $15}'))) 0 > "$TMP_DIR""/cpu"
+  while true; do
+    local MEM_PERCENTAGE_STR="$(system_load_util_str $(free | grep Mem | awk '{print int($3/$2 * 100)}') 1)"
+    local DISK_PERCENTAGE_STR="$(system_load_util_str $(df "$LOG_DIR" | tail -1 | awk '{print substr($5, 1, length($5)-1)}') 2)"
+    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( $LINES - 3 ))" "$(head -n 1 "$TMP_DIR""/cpu")" "$(( $LINES - 2 ))" "$MEM_PERCENTAGE_STR" "$(( $LINES - 1 ))" "$DISK_PERCENTAGE_STR" "$LINES"
+    system_load_util_str $((100-$(vmstat 1 2 | tail -1 | awk '{print $15}'))) 0 > "$TMP_DIR""/cpu" &
+    sleep .2
+  done
+}
+
 emba_status_bar() {
   shopt -s checkwinsize; (:;:)
   if [[ $LINES -gt 20 && $COLUMNS -gt 80 ]] ; then
@@ -100,6 +100,6 @@ emba_status_bar() {
     printf "\e[${LINE_POS};1f\e[0J\e[0;${LINE_POS}r\e[${LINE_POS};1f$(draw_box 26 "SYSTEM LOAD" 0)$(draw_box 26 "STATUS" 27)$(draw_box 26 "MODULES" 54)\e[H" 
     printf "%s" "$INITIAL_STR"
     # start threaded updater
-    update_bar &
+    update_system_load &
   fi
 }
