@@ -19,7 +19,7 @@ repeat_char(){
   local REP_COUNT="$2"
   local RET=""
   local A=0
-	for ((A=1; A<=$REP_COUNT; A++)) ; do RET+="$REP_CHAR"; done
+	for ((A=1; A<=REP_COUNT; A++)) ; do RET+="$REP_CHAR"; done
   echo -e "$RET"
 }
 
@@ -28,11 +28,11 @@ draw_box() {
   local BOX_TITLE=" $2 "
   local BOX_L="$3"
   local BOX=""
-  BOX+="\e[$(($LINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[1m$(repeat_char "─" $(($BOX_W - ${#BOX_TITLE} - 2)))┐"
-  BOX+="\e[$(($LINES - 3));${BOX_L}f│""$(repeat_char " " $(($BOX_W - 2)))""│"
-  BOX+="\e[$(($LINES - 2));${BOX_L}f│$(repeat_char " " $(($BOX_W - 2)))│"
-  BOX+="\e[$(($LINES - 1));${BOX_L}f│$(repeat_char " " $(($BOX_W - 2)))│"
-  BOX+="\e[${LINES};${BOX_L}f└$(repeat_char "─" $(($BOX_W - 2)))┘"
+  BOX+="\e[$((LINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[1m$(repeat_char "─" $((BOX_W - ${#BOX_TITLE} - 2)))┐"
+  BOX+="\e[$((LINES - 3));${BOX_L}f│""$(repeat_char " " $((BOX_W - 2)))""│"
+  BOX+="\e[$((LINES - 2));${BOX_L}f│$(repeat_char " " $((BOX_W - 2)))│"
+  BOX+="\e[$((LINES - 1));${BOX_L}f│$(repeat_char " " $((BOX_W - 2)))│"
+  BOX+="\e[${LINES};${BOX_L}f└$(repeat_char "─" $((BOX_W - 2)))┘"
   echo -e "$BOX"
 }
 
@@ -43,18 +43,18 @@ system_load_util_str() {
   local UTIL_STR="${UTIL_TYPES[$UTIL_TYPE_NO]}"
   local UTIL_BAR_COLOR=""
   local UTIL_BAR_BLANK=""
-  local UTIL_PERCENTAGE=$(($PERCENTAGE/(100/12)))
+  local UTIL_PERCENTAGE=$((PERCENTAGE/(100/12)))
 
   local A=0
   local BAR_COUNT=0
-  for ((A=1; A<=$UTIL_PERCENTAGE; A++)) ; do
+  for ((A=1; A<=UTIL_PERCENTAGE; A++)) ; do
     UTIL_BAR_COLOR+="■"
-    BAR_COUNT=$(($BAR_COUNT + 1))
+    BAR_COUNT=$((BAR_COUNT + 1))
   done
 
   local B=0
-  local B_LEN=$((12-$BAR_COUNT))
-  for ((B=1; B<=$B_LEN; B++)) ; do
+  local B_LEN=$((12-BAR_COUNT))
+  for ((B=1; B<=B_LEN; B++)) ; do
     UTIL_BAR_BLANK+="■"
   done
 
@@ -82,9 +82,11 @@ update_box_system_load() {
   shopt -s checkwinsize; (:;:)
   system_load_util_str $((100-$(vmstat 1 2 | tail -1 | awk '{print $15}'))) 0 > "$TMP_DIR""/cpu"
   while true; do
-    local MEM_PERCENTAGE_STR="$(system_load_util_str $(free | grep Mem | awk '{print int($3/$2 * 100)}') 1)"
-    local DISK_PERCENTAGE_STR="$(system_load_util_str $(df "$LOG_DIR" | tail -1 | awk '{print substr($5, 1, length($5)-1)}') 2)"
-    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( $LINES - 3 ))" "$(head -n 1 "$TMP_DIR""/cpu")" "$(( $LINES - 2 ))" "$MEM_PERCENTAGE_STR" "$(( $LINES - 1 ))" "$DISK_PERCENTAGE_STR" "$LINES"
+    local MEM_PERCENTAGE_STR=""
+    MEM_PERCENTAGE_STR="$(system_load_util_str "$(free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
+    local DISK_PERCENTAGE_STR=""
+    DISK_PERCENTAGE_STR="$(system_load_util_str "$(df "$LOG_DIR" | tail -1 | awk '{print substr($5, 1, length($5)-1)}')" 2)"
+    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( LINES - 3 ))" "$(head -n 1 "$TMP_DIR""/cpu")" "$(( LINES - 2 ))" "$MEM_PERCENTAGE_STR" "$(( LINES - 1 ))" "$DISK_PERCENTAGE_STR"
     system_load_util_str $((100-$(vmstat 1 2 | tail -1 | awk '{print $15}'))) 0 > "$TMP_DIR""/cpu" &
     WAIT_PIDS+=( "$!" )
     sleep .2
@@ -100,7 +102,7 @@ status_util_str() {
 
   local UTIL_LEN=$((22-${#UTIL_STR}-${#UTIL_VALUE}))
   local U=0
-  for ((U=1; U<=$UTIL_LEN; U++)) ; do
+  for ((U=1; U<=UTIL_LEN; U++)) ; do
     UTIL_BAR_BLANK+=" "
   done
 
@@ -115,10 +117,10 @@ update_box_status() {
   local RUN_EMBA_PROCESSES=0
   while true; do
     local RUNTIME=0
-    RUNTIME=$(date -d@$(( $(date +%s) - $START_TIME )) -u +%H:%M:%S)
+    RUNTIME=$(date -d@$(( $(date +%s) - START_TIME )) -u +%H:%M:%S)
     LOG_DIR_SIZE="$(du -sh "$LOG_DIR" | cut -d$'\t' -f1)"
     RUN_EMBA_PROCESSES="$(ps -C emba.sh | wc -l)"
-    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( $LINES - 3 ))" "$(status_util_str 0 "$RUNTIME")" "$(( $LINES - 2 ))" "$(status_util_str 1 "$LOG_DIR_SIZE")" "$(( $LINES - 1 ))" "$(status_util_str 2 "$RUN_EMBA_PROCESSES")" "$LINES"
+    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( LINES - 3 ))" "$(status_util_str 0 "$RUNTIME")" "$(( LINES - 2 ))" "$(status_util_str 1 "$LOG_DIR_SIZE")" "$(( LINES - 1 ))" "$(status_util_str 2 "$RUN_EMBA_PROCESSES")" "$LINES"
     sleep .5
   done
 }
@@ -132,7 +134,7 @@ module_util_str() {
 
   local UTIL_LEN=$((22-${#UTIL_STR}-${#UTIL_VALUE}))
   local U=0
-  for ((U=1; U<=$UTIL_LEN; U++)) ; do
+  for ((U=1; U<=UTIL_LEN; U++)) ; do
     UTIL_BAR_BLANK+=" "
   done
 
@@ -162,10 +164,10 @@ update_box_modules() {
   done
 
   while true; do
-    STARTED_MODULE_STR="$(grep "starting" "$LOG_DIR/emba.log" 2> /dev/null | wc -l || true )"
-    FINISHED_MODULE_STR="$(grep "finished" "$LOG_DIR/emba.log" 2> /dev/null | wc -l || true )"
+    STARTED_MODULE_STR="$(grep -c "starting" "$LOG_DIR/emba.log" 2> /dev/null || true )"
+    FINISHED_MODULE_STR="$(grep -c "finished" "$LOG_DIR/emba.log" 2> /dev/null || true )"
     LAST_FINISHED_MODULE_STR="$(grep "finished" "$LOG_DIR/emba.log" 2> /dev/null | tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
-    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( $LINES - 3 ))" "$(module_util_str 0 $(($STARTED_MODULE_STR - $FINISHED_MODULE_STR)))" "$(( $LINES - 2 ))" "$(module_util_str 1 "$LAST_FINISHED_MODULE_STR")" "$(( $LINES - 1 ))" "$(module_util_str 2 "$FINISHED_MODULE_STR/$COUNT_MODULES")" "$LINES"
+    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 $((STARTED_MODULE_STR - FINISHED_MODULE_STR)))" "$(( LINES - 2 ))" "$(module_util_str 1 "$LAST_FINISHED_MODULE_STR")" "$(( LINES - 1 ))" "$(module_util_str 2 "$FINISHED_MODULE_STR/$COUNT_MODULES")"
     sleep 1
   done
 }
@@ -179,7 +181,7 @@ status_2_util_str() {
 
   local UTIL_LEN=$((22-${#UTIL_STR}-${#UTIL_VALUE}))
   local U=0
-  for ((U=1; U<=$UTIL_LEN; U++)) ; do
+  for ((U=1; U<=UTIL_LEN; U++)) ; do
     UTIL_BAR_BLANK+=" "
   done
 
@@ -200,18 +202,20 @@ update_box_status_2() {
   local ERROR_STR=0
   while true; do
     PHASE_STR=$(grep 'phase started' "$LOG_DIR/emba.log" 2> /dev/null | tail -1 | cut -d" " -f2- | grep -Eo '^.*phase' | cut -d" " -f-1 || true  )
-    ERROR_STR="/$(grep 'Error detected' "$LOG_DIR/emba_error.log" 2> /dev/null | wc -l || true )"
-    if [[ "$ERROR_STR" == "/0" ]] ; then
+    ERROR_STR="/$(grep -c 'Error detected' "$LOG_DIR/emba_error.log" 2> /dev/null || true )"
+    if [[ "$ERROR_STR" == "/0" || "$ERROR_STR" == "/" ]] ; then
       ERROR_STR=""
     fi
-    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( $LINES - 3 ))" "$(status_2_util_str 0 "$PHASE_STR")" "$(( $LINES - 2 ))" "$(status_2_util_str 1 "$MODE_STR$ERROR_STR")" "$(( $LINES - 1 ))" "$(status_2_util_str 2 "")" "$LINES"
+    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( LINES - 3 ))" "$(status_2_util_str 0 "$PHASE_STR")" "$(( LINES - 2 ))" "$(status_2_util_str 1 "$MODE_STR$ERROR_STR")" "$(( LINES - 1 ))" "$(status_2_util_str 2 "")"
     sleep .5
   done
 }
 
 remove_status_bar() {
-  local LINE_POS="$(( $LINES - 6 ))"
-  local RM_STR="\e[;r\e[""$LINE_POS"";1f\e[0J\e[""$LINE_POS"";1f"
+  local LINE_POS=""
+  LINE_POS="$(( LINES - 6 ))"
+  local RM_STR=""
+  RM_STR="\e[;r\e[""$LINE_POS"";1f\e[0J\e[""$LINE_POS"";1f"
   printf "%b" "$RM_STR"
 }
 
@@ -230,10 +234,10 @@ box_updaters() {
 initial_status_bar() {
   shopt -s checkwinsize; (:;:)
   if [[ $LINES -gt 20 && $COLUMNS -gt 105 ]] ; then
-    local LINE_POS="$(( $LINES - 6 ))"
+    local LINE_POS="$(( LINES - 6 ))"
     # set cursor and boxes
-    local INITIAL_STR="\e[""$LINE_POS"";1f\e[0J\e[0;""$LINE_POS""r\e[""$LINE_POS"";1f$(draw_box 26 "SYSTEM LOAD" 0)$(draw_box 26 "STATUS" 27)$(draw_box 26 "MODULES" 53)$(draw_box 26 "STATUS 2" 79)\e[H" 
+    local INITIAL_STR=""
+    INITIAL_STR="\e[${LINE_POS};1f\e[0J\e[0;${LINE_POS}r\e[${LINE_POS};1f$(draw_box 26 "SYSTEM LOAD" 0)$(draw_box 26 "STATUS" 27)$(draw_box 26 "MODULES" 53)$(draw_box 26 "STATUS 2" 79)\e[H" 
     printf "%b" "$INITIAL_STR"
-
   fi
 }
