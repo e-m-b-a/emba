@@ -372,8 +372,8 @@ print_top10_statistics() {
   local FUNCTION=""
   local RESULTS=()
   local BINARY=""
-  local SEARCH_TERM=""
-  local F_COUNTER=""
+
+  sub_module_title "Top 10 legacy C functions"
 
   if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
