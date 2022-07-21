@@ -53,6 +53,7 @@ P60_firmware_bin_extractor() {
   # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
   # shellcheck disable=SC2153
   detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
+  print_ln
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f | wc -l )
@@ -60,7 +61,7 @@ P60_firmware_bin_extractor() {
 
   if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
     print_ln
-    print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all."
+    print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all:"
     #shellcheck disable=SC2012
     ls -l "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
 
@@ -327,7 +328,7 @@ binwalking() {
   OUTPUT_DIR_BINWALK=$(basename "$FIRMWARE_PATH_")
   OUTPUT_DIR_BINWALK="$FIRMWARE_PATH_CP""/""$OUTPUT_DIR_BINWALK"_binwalk_emba
 
-  print_ln "no_log"
+  print_ln
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_BINWALK$NC"
   # this is not working in background. I have created a new function that gets executed in the background
   # probably there is a more elegant way

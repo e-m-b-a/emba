@@ -693,16 +693,15 @@ s115_cleanup() {
   mapfile -t LOG_FILES < <(find "$LOG_PATH_MODULE""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
   if [[ "${#LOG_FILES[@]}" -gt 0 ]] ; then
     print_output "[*] Cleanup empty log files.\\n"
-    print_bar
     sub_module_title "Reporting phase"
     for LOG_FILE in "${LOG_FILES[@]}" ; do
       if [[ ! -s "$LOG_FILE" ]] ; then
         rm "$LOG_FILE" 2> /dev/null || true
-      else
-        BIN=$(basename "$LOG_FILE")
-        BIN=$(echo "$BIN" | cut -d_ -f3 | sed 's/.txt$//')
-        print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$LOG_FILE""${NC}""." "" "$LOG_FILE"
+        continue
       fi
+      BIN=$(basename "$LOG_FILE")
+      BIN=$(echo "$BIN" | cut -d_ -f3 | sed 's/.txt$//')
+      print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$LOG_FILE""${NC}""." "" "$LOG_FILE"
     done
   fi
   # if we got a firmware directory then we have created a backup for emulation

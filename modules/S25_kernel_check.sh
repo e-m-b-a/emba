@@ -229,6 +229,7 @@ get_kernel_vulns()
     for VER in "${KERNEL_VERSION[@]}" ; do
       print_output "$(indent "$ORANGE$VER$NC")"
     done
+    print_ln
   
     if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
       print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"

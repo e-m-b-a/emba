@@ -56,7 +56,8 @@ S20_shell_check()
     fi
 
     print_ln
-    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts:""$NC""\\n"
+    sub_module_title "Summary of shell issues"
+    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts""$NC""\\n"
     write_log ""
     write_log "[*] Statistics:$S20_SHELL_VULNS:$S20_SCRIPTS"
 
