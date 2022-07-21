@@ -76,7 +76,7 @@ S99_grepit() {
     for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do 
       "$GREPIT_MODULE" &
       WAIT_PIDS_S99+=( "$!" )
-      max_pids_protection "$MAX_THREADS_S99" "${WAIT_PIDS_S99[@]}"
+      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S99[@]}"
     done
   else
     for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do 
