@@ -114,7 +114,7 @@ S13_weak_func_check()
     fi
 
     # ensure that we do not have result files without real results:
-    find "$LOG_DIR"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; || true
+    find "$LOG_DIR"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; 2>/dev/null || true
 
     print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 

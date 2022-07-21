@@ -729,6 +729,9 @@ print_notification(){
 
   inotifywait -m -e modify "$NOTIFICATION_LOCATION" --format "%e" | while read -r EVENT; do
     if [[ "$EVENT" == "MODIFY" ]]; then
+      if ! [[ -f "$NOTIFICATION_LOCATION" ]]; then
+        return
+      fi
       local PREV="$CURRENT"
       CURRENT=$(<"$NOTIFICATION_LOCATION")
       [ "$CURRENT" == "$PREV" ] || notify-send --icon="$EMBA_ICON" "EMBA" "$CURRENT" -t 2
