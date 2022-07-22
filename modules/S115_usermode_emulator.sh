@@ -541,7 +541,9 @@ emulate_binary() {
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   
   # reset the terminal - after all the uncontrolled emulation it is typically broken!
+  # We have to draw the status bar again
   reset
+  initial_status_bar
 }
 
 check_disk_space_emu() {
@@ -617,8 +619,10 @@ s115_cleanup() {
   sub_module_title "Cleanup phase"
   CHECK_MOUNTS=()
 
-  # reset the terminal - after all the uncontrolled emulation it is typically messed up!
+  # reset the terminal - after all the uncontrolled emulation it is typically broken!
+  # We have to draw the status bar again
   reset
+  initial_status_bar
 
   #rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
 

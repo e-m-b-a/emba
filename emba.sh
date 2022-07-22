@@ -304,6 +304,7 @@ main()
   fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
+  export DISABLE_STATUS_BAR=0
 
   import_helper
   print_ln "no_log"
@@ -728,10 +729,11 @@ main()
 
   #######################################################################################
   # Start status bar
-  initial_status_bar
-  box_updaters
-  # Trap the window resize signal (handle window resize events).
-  trap 'initial_status_bar' WINCH
+  if [[ $DISABLE_STATUS_BAR -eq 0 ]] ; then
+    initial_status_bar
+    # Trap the window resize signal (handle window resize events).
+    trap 'initial_status_bar' WINCH
+  fi
 
   #######################################################################################
   # Pre-Check (P-modules)
@@ -836,14 +838,14 @@ main()
  
   run_modules "F" "0" "$HTML"
 
+  remove_status_bar
+
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/firmware ]]; then
       print_output "[*] Removing temp firmware directory\\n" "no_log" 
       rm -r "$LOG_DIR"/firmware 2>/dev/null
     fi
     print_ln "no_log"
-    # clear status bar
-    remove_status_bar
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
       rm -r "$TMP_DIR" 2>/dev/null || true
