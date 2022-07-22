@@ -361,14 +361,16 @@ box_updaters() {
 }
 
 initial_status_bar() {
+  shopt -s checkwinsize; (:;:)
+  local LINE_POS="$(( LINES - 6 ))"
+  printf "\e[${LINE_POS};1f\e[0J\e[${LINE_POS};1f"
+  reset
+
   # create new tmp file with empty lines
   STATUS_TMP_PATH="$TMP_DIR/status"
   if [[ ! -f "$STATUS_TMP_PATH" && -d "$TMP_DIR" ]] ; then
     echo -e "\\n\\n\\n\\n" > "$STATUS_TMP_PATH" 
   fi
-  shopt -s checkwinsize; (:;:)
-  #if [[ $LINES -gt 20 && $COLUMNS -gt 105 ]] ; then
-  local LINE_POS="$(( LINES - 6 ))"
   # calculate boxes fitting and draw them
   local INITIAL_STR=""
   INITIAL_STR="\e[${LINE_POS};1f\e[0J\e[0;${LINE_POS}r\e[${LINE_POS};1f" 

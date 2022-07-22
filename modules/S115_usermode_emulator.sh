@@ -259,7 +259,7 @@ prepare_emulator() {
     chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
     cp "$(which busybox)" "$R_PATH"/
     chmod +x "$R_PATH"/busybox
-    chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
+    chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh >> "$LOG_PATH_MODULE"/chroot_fixes.txt
     rm "$R_PATH"/fixImage_user_mode_emulation.sh || true
     rm "$R_PATH"/busybox || true
     print_bar
@@ -523,10 +523,10 @@ emulate_binary() {
     fi
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" 2>&1 | tee -a "$LOG_FILE_BIN" || true &
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
     fi
     if [[ "$STRICT_MODE" -eq 1 ]]; then
       set -e
@@ -539,11 +539,6 @@ emulate_binary() {
   killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
   killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.* || true
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
-  
-  # reset the terminal - after all the uncontrolled emulation it is typically broken!
-  # We have to draw the status bar again
-  reset
-  initial_status_bar
 }
 
 check_disk_space_emu() {
@@ -618,11 +613,6 @@ s115_cleanup() {
   print_ln
   sub_module_title "Cleanup phase"
   CHECK_MOUNTS=()
-
-  # reset the terminal - after all the uncontrolled emulation it is typically broken!
-  # We have to draw the status bar again
-  reset
-  initial_status_bar
 
   #rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
 
