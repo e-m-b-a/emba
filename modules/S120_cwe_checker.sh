@@ -24,12 +24,12 @@ export THREAD_PRIO=1
 
 S120_cwe_checker()
 {
-  module_log_init "${FUNCNAME[0]}"
-  module_title "Check binaries with cwe-checker"
-  pre_module_reporter "${FUNCNAME[0]}"
-  local CWE_CNT_=0
-
   if [[ $CWE_CHECKER -eq 1 ]] ; then
+    module_log_init "${FUNCNAME[0]}"
+    module_title "Check binaries with cwe-checker"
+    pre_module_reporter "${FUNCNAME[0]}"
+    local CWE_CNT_=0
+
     if [[ "$IN_DOCKER" -eq 1 ]]; then
       cwe_container_prepare
     fi
@@ -45,12 +45,11 @@ S120_cwe_checker()
 
     write_log ""
     write_log "[*] Statistics:$CWE_CNT_"
+    module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
   else
     print_output "[!] Check with cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
   fi
-
-  module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
 }
 
 cwe_container_prepare() {
@@ -69,14 +68,15 @@ cwe_check() {
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
       if [[ "$THREADED" -eq 1 ]]; then
-        MAX_THREADS_S120=$((1*"$(grep -c ^processor /proc/cpuinfo || true)"))
+        local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)"))
         if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
-          MAX_THREADS_S120=1
+          local MAX_MOD_THREADS=1
         fi
 
         cwe_checker_threaded "$BINARY" &
         WAIT_PIDS_S120+=( "$!" )
-        max_pids_protection "$MAX_THREADS_S120" "${WAIT_PIDS_S120[@]}"
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S120[@]}"
+        continue
       else
         cwe_checker_threaded "$BINARY"
       fi

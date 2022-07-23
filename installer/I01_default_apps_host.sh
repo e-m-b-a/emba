@@ -28,6 +28,8 @@ I01_default_apps_host() {
   print_tool_info "bc" 1
   print_tool_info "coreutils" 1
   print_tool_info "ncurses-bin" 1
+  print_tool_info "libnotify-bin" 1
+  print_tool_info "inotify-tools" 1
   # as we need it for multiple tools we can install it by default
   print_tool_info "git" 1
   print_tool_info "net-tools" 1

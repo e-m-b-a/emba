@@ -52,10 +52,6 @@ S13_weak_func_check()
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S13=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
-    fi
-
     for BINARY in "${BINARIES[@]}" ; do
       if ( file "$BINARY" | grep -q ELF ) ; then
         NAME=$(basename "$BINARY" 2> /dev/null)
@@ -109,13 +105,16 @@ S13_weak_func_check()
         fi
       fi
       if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_THREADS_S13" "${WAIT_PIDS_S13[@]}"
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S13[@]}"
       fi
     done
 
     if [[ "$THREADED" -eq 1 ]]; then
       wait_for_pid "${WAIT_PIDS_S13[@]}"
     fi
+
+    # ensure that we do not have result files without real results:
+    find "$LOG_DIR"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; 2>/dev/null || true
 
     print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
@@ -373,8 +372,8 @@ print_top10_statistics() {
   local FUNCTION=""
   local RESULTS=()
   local BINARY=""
-  local SEARCH_TERM=""
-  local F_COUNTER=""
+
+  sub_module_title "Top 10 legacy C functions"
 
   if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do

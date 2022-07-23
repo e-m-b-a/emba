@@ -273,7 +273,7 @@ generate_special_log() {
     local EXPLOIT_=""
     local EXPLOITS_AVAIL=()
 
-    readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f)
+    readarray -t FILES < <(find "$LOG_PATH_MODULE"/ -maxdepth 1 -type f -name "*.txt")
     print_ln
     print_output "[*] CVE log file generated."
     write_link "$CVE_MINIMAL_LOG"
@@ -281,7 +281,7 @@ generate_special_log() {
 
     for FILE in "${FILES[@]}"; do
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
-      CVE_VALUES=$(grep ^CVE "$FILE" | cut -d: -f2 | tr -d '\n' | sed -r 's/[[:space:]]+/, /g' | sed -e 's/^,\ //' || true)
+      CVE_VALUES=$(cut -d ":" -f1 "$FILE" | paste -s -d ',' || true)
       if [[ -n $CVE_VALUES ]]; then
         print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
         print_output "$CVE_VALUES"
@@ -305,7 +305,7 @@ generate_special_log() {
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
       # extract CVSS value:
-      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -E 's/.*[[:blank:]]CVE-[0-9]{4}-[0-9]+[[:blank:]]//g' | cut -d: -f2 | sed -e 's/[[:blank:]]//g' | tr -dc '[:print:]')
+      CVSS_VALUE=$(echo "$EXPLOIT_" | sed -E 's/.*[[:blank:]]CVE-[0-9]{4}-[0-9]+[[:blank:]]//g' | cut -d: -f2 | sed -E 's/\ \(v2\)//g' | sed -e 's/[[:blank:]]//g' | tr -dc '[:print:]')
 
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
         print_output "$RED$EXPLOIT_$NC"
@@ -376,11 +376,11 @@ cve_db_lookup() {
 
   # CVE search:
   set +e
-  "$PATH_CVE_SEARCH" -p "$BIN_VERSION_" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
+  "$PATH_CVE_SEARCH" -p "$BIN_VERSION_" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
 
   # shellcheck disable=SC2181
   if [[ "$?" -ne 0 ]]; then
-    "$PATH_CVE_SEARCH" -p "$BIN_VERSION_" > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
+    "$PATH_CVE_SEARCH" -p "$BIN_VERSION_" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
   fi
   set -e
 
@@ -389,7 +389,7 @@ cve_db_lookup() {
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "$BIN_VERSION_" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${ORANGE}$VERSION_SEARCHx${NC}" "no_log"
-    $PATH_CVE_SEARCH -p "$VERSION_SEARCHx" >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+    $PATH_CVE_SEARCH -p "$VERSION_SEARCHx" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
   fi
 
   if [[ "$THREADED" -eq 1 ]]; then
@@ -463,7 +463,7 @@ cve_extractor() {
     fi
   fi
 
-  if grep -q "$VERSION_orig" "$S08_LOG" 2>/dev/null; then
+  if grep -q "$BINARY;.*$VERSION" "$S08_LOG" 2>/dev/null; then
     if [[ "$VSOURCE" == "unknown" ]]; then
       VSOURCE="PACK"
     else
@@ -486,15 +486,16 @@ cve_extractor() {
   CVE_COUNTER_VERSION=0
   # extract the CVE numbers and the CVSS values and sort it:
   if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
-    readarray -t CVEs_OUTPUT < <(grep -A2 -e "[[:blank:]]:\ CVE-" "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" | grep -v "DATE" | grep -v "\-\-" | sed -e 's/^\ //' | sed ':a;N;$!ba;s/\nCVSS//g' | sed -e 's/: /\ :\ /g' | sort -k4 -V -r || true)
+    readarray -t CVEs_OUTPUT < "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" || true
 
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
+      local CVEv2_TMP=0
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
       KNOWN_EXPLOITED=0
-      #extract the CVSS and CVE value (remove all spaces and tabs)
-      CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-      CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
+      CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f1)
+      CVSSv2_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2)
+      CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3)
 
       # check if the CVE is known as a knwon exploited vulnerability:
       if [[ -f "$KNOWN_EXP_CSV" ]]; then
@@ -694,29 +695,37 @@ cve_extractor() {
         EXPLOIT="$EXPLOIT"")"
       fi
 
-      #CVE_OUTPUT=$(echo "$CVE_OUTPUT" | sed -e "s/^CVE/""$BIN_VERSION_""/" | sed -e 's/\ \+/\t/g')
-      #BINARY=$(echo "$CVE_OUTPUT" | cut -d: -f1 | sed -e 's/\t//g' | sed -e 's/\ \+//g')
-      #VERSION=$(echo "$CVE_OUTPUT" | cut -d: -f2- | sed -e 's/\t//g' | sed -e 's/\ \+//g' | sed -e 's/:CVE-[0-9].*//')
+      # just in case CVSSv3 value is missing -> switch to CVSSv2
+      if [[ "$CVSS_VALUE" == "null" ]]; then
+        print_output "[*] Missing CVSSv3 value for vulnerability $ORANGE$CVE_VALUE$NC - setting default CVSS to CVSSv2 $ORANGE$CVSSv2_VALUE$NC"
+        CVSS_VALUE="$CVSSv2_VALUE"
+        CVEv2_TMP=1
+      fi
+
       # we do not deal with output formatting the usual way -> we use printf
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
+        # put a note in the output if we have switched to CVSSv2
+        if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
         if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-5.5s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          printf "${RED}\t%-20.20s:   %-12.12s:   %-17.17s:   %-5.5s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${RED}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((HIGH_CVE_COUNTER+=1))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
+        if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
         if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-5.5s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-17.17s:   %-5.5s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((MEDIUM_CVE_COUNTER+=1))
       else
+        if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
         if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-5.5s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          printf "${GREEN}\t%-20.20s:   %-12.12s:   %-17.17s:   %-5.5s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${GREEN}\t%-20.20s:   %-12.12s:   %-17.17s:   %-9.9s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((LOW_CVE_COUNTER+=1))
       fi

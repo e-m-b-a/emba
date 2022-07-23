@@ -19,10 +19,10 @@
 export PRE_THREAD_ENA=0
 
 P11_dlink_SHRS_enc_extract() {
-  module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
 
   if [[ "$DLINK_ENC_DETECTED" -ne 0 ]]; then
+    module_log_init "${FUNCNAME[0]}"
     module_title "DLink encrypted firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
     EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_dlink_dec.bin
@@ -34,8 +34,8 @@ P11_dlink_SHRS_enc_extract() {
     fi
 
     NEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
   fi
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 dlink_SHRS_enc_extractor() {

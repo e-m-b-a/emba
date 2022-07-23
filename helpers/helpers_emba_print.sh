@@ -46,11 +46,15 @@ welcome()
 module_log_init()
 {
   local LOG_FILE_NAME
-  LOG_FILE_NAME="$1"
+  LOG_FILE_NAME="${1:-}"
   local FILE_NAME
   MODULE_NUMBER="$(echo "$LOG_FILE_NAME" | cut -d "_" -f1 | cut -c2- )"
   FILE_NAME=$(echo "$LOG_FILE_NAME" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
   LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
+
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 0 ]]; then
+    write_notification "Module $FILE_NAME started"
+  fi
 }
 
 module_title()
@@ -611,6 +615,9 @@ module_end_log() {
     fi
   fi
 
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 0 ]]; then
+    write_notification "Module $MODULE_MAIN_NAME finished"
+  fi
   print_output "[*] $(date) - $MODULE_MAIN_NAME finished" "main"
 }
 
@@ -680,5 +687,54 @@ banner_printer() {
     cat "$BANNER_TO_PRINT"
     echo ""
   fi
+}
 
+# write notfication is the central notification area
+# if you want to print a notification via the notification system
+# call this function with the message as parameter
+write_notification(){
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
+    return
+  fi
+
+  local MESSAGE="${1:-}"
+
+  if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$TMP_DIR" ]]; then
+    # we are in the docker container and so we need to write the
+    # notification to a temp file which is checked via print_notification
+    local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
+    echo "$MESSAGE" > "$NOTIFICATION_LOCATION" || true
+  else
+    # if we are on the host (e.g., in developer mode) we can directly handle
+    # the notification
+    notify-send --icon="$EMBA_ICON" "EMBA" "$MESSAGE" -t 2
+  fi
+}
+
+# print_notification handles the monitoring of the notification tmp file
+# from the docker container. If someone prints something into this file
+# this function will handle it and generate a desktop notification
+print_notification(){
+  if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
+    return
+  fi
+  local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
+
+  until [[ -f "$NOTIFICATION_LOCATION" ]]; do
+    sleep 1
+  done
+
+  local CURRENT=""
+  CURRENT=$(<"$NOTIFICATION_LOCATION")
+
+  inotifywait -m -e modify "$NOTIFICATION_LOCATION" --format "%e" | while read -r EVENT; do
+    if [[ "$EVENT" == "MODIFY" ]]; then
+      if ! [[ -f "$NOTIFICATION_LOCATION" ]]; then
+        return
+      fi
+      local PREV="$CURRENT"
+      CURRENT=$(<"$NOTIFICATION_LOCATION")
+      [ "$CURRENT" == "$PREV" ] || notify-send --icon="$EMBA_ICON" "EMBA" "$CURRENT" -t 2
+    fi
+  done
 }
