@@ -363,7 +363,7 @@ box_updaters() {
 initial_status_bar() {
   shopt -s checkwinsize; (:;:)
   local LINE_POS="$(( LINES - 6 ))"
-  printf "\e[${LINE_POS};1f\e[0J\e[${LINE_POS};1f"
+  printf "\e[%s;1f\e[0J\e[%s;1f" "$LINE_POS" "$LINE_POS"
   reset
 
   # create new tmp file with empty lines
