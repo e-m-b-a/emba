@@ -110,11 +110,17 @@ IF20_cve_search() {
           apt-get update -y
           print_tool_info "mongodb-org" 1
           apt-get install mongodb-org -y
-          systemctl daemon-reload
-          systemctl start mongod
-          systemctl enable mongod
           sed -i 's/bindIp\:\ 127.0.0.1/bindIp\:\ 172.36.0.1/g' /etc/mongod.conf
-          systemctl restart mongod.service
+
+          if [[ "$WSL" -eq 0 ]]; then
+            systemctl daemon-reload
+            systemctl start mongod
+            systemctl enable mongod
+            systemctl restart mongod.service
+          else
+            # WSL environment
+            sudo mongod --config /etc/mongod.conf &
+          fi
 
           echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
           CVE_INST=1
