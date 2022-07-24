@@ -124,7 +124,7 @@ while getopts cCdDFhl OPT ; do
 done
 
 # WSL support - currently experimental!
-if grep -i wsl /proc/version; then
+if grep -q -i wsl /proc/version; then
   echo -e "\n${ORANGE}INFO: System running in WSL environment!$NC"
   echo -e "\n${ORANGE}INFO: WSL is currently experimental!$NC"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
@@ -140,7 +140,7 @@ elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
   if grep -q "PRETTY_NAME=\"Ubuntu 22.04 LTS\"" /etc/os-release 2>/dev/null ; then
     OTHER_OS=1
     UBUNTU_OS=1
-  if grep -q "PRETTY_NAME=\"Ubuntu 20.04 LTS\"" /etc/os-release 2>/dev/null ; then
+  elif grep -q "PRETTY_NAME=\"Ubuntu 20.04 LTS\"" /etc/os-release 2>/dev/null ; then
     echo -e "\\n""$RED""EMBA is not fully supported on Ubuntu 20.04 LTS.""$NC"
     echo -e "$RED""For EMBA installation you need to update docker-compose manually. See also https://github.com/e-m-b-a/emba/issues/247""$NC"
     read -p "If you have updated docker-compose you can press any key to continue ..." -n1 -s -r
