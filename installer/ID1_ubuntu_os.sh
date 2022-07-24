@@ -45,11 +45,6 @@ ID1_ubuntu_os() {
 
       sudo apt-get update
       sudo apt-get install docker-ce -y
-
-      # need to start dockerd manually in WSL environments:
-      sudo dockerd --iptables=false &
-      sleep 3
-      reset
     fi
   fi
 }

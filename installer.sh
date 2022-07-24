@@ -197,6 +197,13 @@ fi
 
 INSTALL_APP_LIST=()
 
+if [[ "$WSL" -eq 1 ]]; then
+  # start dockerd manually in wsl environments
+  dockerd --iptables=false &
+  sleep 3
+  reset
+fi
+
 if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -eq 1 ]]; then
 
   I01_default_apps

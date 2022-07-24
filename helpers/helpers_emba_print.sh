@@ -120,7 +120,7 @@ print_output()
       fi
     fi
   else
-    echo -e "$OUTPUT"
+    echo -e "$OUTPUT" || true
     if [[ "$LOG_SETTING" == "main" ]] ; then
       echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_FILE" >/dev/null
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
