@@ -35,7 +35,7 @@ ID1_ubuntu_os() {
 
     if [[ "$WSL" -eq 1 ]]; then
       # docker installation on Ubuntu jammy in WSL environment is somehow broken
-      echo -e "\\n""$MAGENTA""$BOLD""Docker installation for Ubuntu:jammy!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""Docker installation for Ubuntu:jammy in WSL environment!""$NC"
 
       sudo apt-get install lsb-release ca-certificates apt-transport-https software-properties-common -y
 
@@ -48,6 +48,8 @@ ID1_ubuntu_os() {
 
       # need to start dockerd manually in WSL environments:
       sudo dockerd --iptables=false &
+      sleep 3
+      reset
     fi
   fi
 }
