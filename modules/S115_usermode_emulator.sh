@@ -259,7 +259,7 @@ prepare_emulator() {
     chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
     cp "$(which busybox)" "$R_PATH"/
     chmod +x "$R_PATH"/busybox
-    chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh >> "$LOG_PATH_MODULE"/chroot_fixes.txt
+    chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
     rm "$R_PATH"/fixImage_user_mode_emulation.sh || true
     rm "$R_PATH"/busybox || true
     print_bar

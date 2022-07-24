@@ -14,27 +14,13 @@
 
 # Description: Show stats about EMBA run on the bottom of the terminal window
 
-
-# PID for box updater threads
-export PID_SYSTEM_LOAD=""
-export PID_STATUS=""
-export PID_MODULES=""
-export PID_STATUS_2=""
-# Path to status tmp file
-# each line is dedicated to a specific function
-# 1: Count of boxes visible
-# 2: CPU load string (needs to be cached, because it takes about a second to get the information)
-# 3: Start time of status bar - not exactly the same as the EMBA timer, but near enough to get an idea
-# 4: Count modules
-export STATUS_TMP_PATH=""
-
 # helper for box drawing
 repeat_char(){
-  local REP_CHAR="$1"
-  local REP_COUNT="$2"
+  local REP_CHAR="${1:-}"
+  local REP_COUNT="${2:0}"
   local RET=""
   local A=0
-	for ((A=1; A<=REP_COUNT; A++)) ; do RET+="$REP_CHAR"; done
+  for ((A=1; A<=REP_COUNT; A++)) ; do RET+="$REP_CHAR"; done
   echo -e "$RET"
 }
 
@@ -361,6 +347,20 @@ box_updaters() {
 }
 
 initial_status_bar() {
+  # PID for box updater threads
+  export PID_SYSTEM_LOAD=""
+  export PID_STATUS=""
+  export PID_MODULES=""
+  export PID_STATUS_2=""
+  # Path to status tmp file
+  # each line is dedicated to a specific function
+  # 1: Count of boxes visible
+  # 2: CPU load string (needs to be cached, because it takes about a second to get the information)
+  # 3: Start time of status bar - not exactly the same as the EMBA timer, but near enough to get an idea
+  # 4: Count modules
+  export STATUS_TMP_PATH=""
+
+  # overwrites $LINES and "$COLUMNS" with the actual values of the window
   shopt -s checkwinsize; (:;:)
   local LINE_POS="$(( LINES - 6 ))"
   printf "\e[%s;1f\e[0J\e[%s;1f" "$LINE_POS" "$LINE_POS"
