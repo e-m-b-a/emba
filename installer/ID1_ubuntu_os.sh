@@ -2,7 +2,6 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2022 Siemens AG
 # Copyright 2020-2022 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
@@ -12,6 +11,7 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Benedikt Kuehne
+# Contributor(s): Michael Messner
 
 # Description: Helper/preinstaller module for (unix)-OS other than kali
 # 
@@ -44,8 +44,10 @@ ID1_ubuntu_os() {
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
       sudo apt update
-      sudo apt install docker-ce
-      sudo dockerd &
+      sudo apt install docker-ce -Y
+
+      # need to start dockerd manually in WSL environments:
+      sudo dockerd --iptables=false &
     fi
   fi
 }
