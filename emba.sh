@@ -461,11 +461,11 @@ main()
   # WSL support - currently experimental!
   if [[ $IN_DOCKER -eq 0 ]]; then
     if grep -q -i wsl /proc/version; then
-      print_ln
-      print_output "[*] INFO: System running in WSL environment!"
-      print_output "[*] INFO: WSL is currently experimental."
-      print_output "[*] INFO: Please report issues to https://github.com/e-m-b-a/emba/issues."
-      print_ln
+      print_ln "no_log"
+      print_output "[*] INFO: System running in WSL environment!" "no_log"
+      print_output "[*] INFO: WSL is currently experimental." "no_log"
+      print_output "[*] INFO: Please report issues to https://github.com/e-m-b-a/emba/issues." "no_log"
+      print_ln "no_log"
     fi
   fi
 
