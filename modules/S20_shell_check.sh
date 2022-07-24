@@ -29,9 +29,6 @@ S20_shell_check()
   local VTYPE=""
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
-    if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S20=$((4*"$(grep -c ^processor /proc/cpuinfo || true )"))
-    fi
     write_csv_log "Script path" "Shell issues detected" "common linux file"
     mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for SH_SCRIPT in "${SH_SCRIPTS[@]}" ; do
@@ -40,12 +37,11 @@ S20_shell_check()
         if [[ "$THREADED" -eq 1 ]]; then
           s20_script_check "$SH_SCRIPT" &
           WAIT_PIDS_S20+=( "$!" )
+          max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S20[@]}"
+          continue
         else
           s20_script_check "$SH_SCRIPT"
         fi
-      fi
-      if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_THREADS_S20" "${WAIT_PIDS_S20[@]}"
       fi
     done
 
@@ -60,7 +56,8 @@ S20_shell_check()
     fi
 
     print_ln
-    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts:""$NC""\\n"
+    sub_module_title "Summary of shell issues"
+    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts""$NC""\\n"
     write_log ""
     write_log "[*] Statistics:$S20_SHELL_VULNS:$S20_SCRIPTS"
 

@@ -19,7 +19,6 @@
 export PRE_THREAD_ENA=1
 
 P03_firmware_virustotal_check() {
-  module_log_init "${FUNCNAME[0]}"
 
   if [[ "$IN_DOCKER" -eq 1 ]]; then
     print_output "[-] The docker container has no access to the Internet -> no virustotal query possible!"
@@ -27,6 +26,7 @@ P03_firmware_virustotal_check() {
     return
   fi
   module_title "Binary firmware VirusTotal analyzer"
+  module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
   local VT_UPLOAD_ID=""
   local VT_API_KEY=""
@@ -56,7 +56,6 @@ P03_firmware_virustotal_check() {
       vt_analysis_beh "$VT_UPLOAD_ID" "$VT_API_KEY"
       NEG_LOG=1
     fi
-
   else
     if [[ "$ONLINE_CHECKS" -eq 0 ]]; then
       print_output "[-] Online checks are disabled."

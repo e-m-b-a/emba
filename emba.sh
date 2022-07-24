@@ -236,8 +236,8 @@ main()
 
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
-  export EMBA_VERSION="1.0.3"
+  export RELEASE=0
+  export EMBA_VERSION="1.1.x"
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
@@ -305,6 +305,9 @@ main()
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_STATUS_BAR=0
+  export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
+  export EMBA_ICON=""
+  EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
 
   import_helper
   print_ln "no_log"
@@ -453,12 +456,15 @@ main()
 
   print_ln "no_log"
 
+  write_notification "EMBA starting"
+
   # print it only once per EMBA run - not again from started container
   if [[ $IN_DOCKER -eq 0 ]]; then
     banner_printer
   fi
 
   if [[ "$UPDATE" -eq 1 ]]; then
+    write_notification "EMBA starts with update"
     emba_updater
     exit 0
   fi
@@ -466,6 +472,7 @@ main()
   if [[ $USE_DOCKER -eq 0 && $IN_DOCKER -eq 0 ]]; then
     print_bar "no_log"
     print_output "[!] WARNING: EMBA running in developer mode!" "no_log"
+    write_notification "WARNING: EMBA running in developer mode"
     print_bar "no_log"
   fi
 
@@ -512,6 +519,10 @@ main()
 
   # create log directory, if not exists and needed subdirectories
   create_log_dir
+
+  if [[ "$IN_DOCKER" -eq 0 ]]; then
+    print_notification &
+  fi
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
   print_firmware_info "$FW_VENDOR" "$FW_VERSION" "$FW_DEVICE" "$FW_NOTES"
@@ -567,8 +578,10 @@ main()
   if [[ $THREADED -eq 1 ]]; then
     # the maximum modules in parallel
     # rule of thumb - per core half a module, minimum 2 modules
-    #MAX_MODS="$(grep -c ^processor /proc/cpuinfo)"
     MAX_MODS="$(( $(grep -c ^processor /proc/cpuinfo) /2 +1))"
+    # the maximum threads per modules - if this value does not match adjust it via
+    # local MAX_MOD_THREADS=123 in module area
+    export MAX_MOD_THREADS="$(( 3* $(grep -c ^processor /proc/cpuinfo) ))"
 
     # if we have only one core we run two modules in parallel
     if [[ "$MAX_MODS" -lt 2 ]]; then
@@ -701,6 +714,7 @@ main()
       echo "$FIRMWARE_PATH" >> "$TMP_DIR"/fw_name.log
       echo "$LOG_DIR" >> "$TMP_DIR"/emba_log_dir.log
       echo "$EMBA_COMMAND" >> "$TMP_DIR"/emba_command.log
+      write_notification "EMBA starting docker container"
 
       if [[ "$STRICT_MODE" -eq 1 ]]; then
         set +e
@@ -713,6 +727,7 @@ main()
       if [[ $D_RETURN -eq 0 ]] ; then
         if [[ $ONLY_DEP -eq 0 ]] ; then
           print_output "[*] EMBA finished analysis in docker container.\\n" "no_log"
+          write_notification "EMBA finished analysis in default mode"
           print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
           print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
           if [[ -f "$HTML_PATH"/index.html ]]; then
@@ -722,6 +737,7 @@ main()
         fi
       else
         print_output "[-] EMBA failed in docker mode!" "main"
+        write_notification "EMBA failed analysis in default mode"
         exit 1
       fi
     fi
@@ -746,6 +762,7 @@ main()
     else
       print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "$NC""Firmware binary path: ""$FIRMWARE_PATH")" "no_log"
     fi
+    write_notification "Pre-checking phase started"
 
     # 'main' functions of imported modules
     # in the pre-check phase we execute all modules with P[Number]_Name.sh
@@ -764,6 +781,7 @@ main()
     else
       print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
     fi
+    write_notification "Pre-checking phase finished"
 
     # useful prints for debugging:
     # print_output "[!] Firmware value: $FIRMWARE"
@@ -785,6 +803,7 @@ main()
     else
       print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
     fi
+    write_notification "Testing phase finished"
     write_grep_log "$(date)" "TIMESTAMP"
 
     run_modules "S" "$THREADED" "$HTML"
@@ -800,6 +819,7 @@ main()
     else
       print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
     fi
+    write_notification "Testing phase ended"
 
     TESTING_DONE=1
   fi
@@ -814,6 +834,7 @@ main()
     else
       print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "$NC""Firmware path: ""$FIRMWARE_PATH")" "no_log"
     fi
+    write_notification "System emulation phase started"
 
     write_grep_log "$(date)" "TIMESTAMP"
     # these modules are not threaded!
@@ -825,6 +846,7 @@ main()
     else
       print_output "[!] System emulation ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
     fi
+    write_notification "System emulation phase ended"
   fi
 
   #######################################################################################
@@ -835,10 +857,13 @@ main()
   else
     print_output "[!] Reporting phase started on ""$(date)""\\n" "no_log" 
   fi
+  write_notification "Reporting phase started"
  
   run_modules "F" "0" "$HTML"
 
   remove_status_bar
+
+  write_notification "Reporting phase ended"
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
     if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/firmware ]]; then
@@ -848,6 +873,7 @@ main()
     print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+      write_notification "EMBA finished analysis"
       rm -r "$TMP_DIR" 2>/dev/null || true
     else
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
@@ -861,6 +887,10 @@ main()
   fi
   if [[ "$HTML" -eq 1 ]]; then
     update_index
+  fi
+  if [[ "$IN_DOCKER" -eq 0 ]]; then
+    # stop inotifywait on host
+    pkill -f "inotifywait.*$LOG_DIR.*"
   fi
   if [[ -f "$HTML_PATH"/index.html ]] && [[ "$IN_DOCKER" -eq 0 ]]; then
     print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main" 

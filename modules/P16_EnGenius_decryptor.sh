@@ -19,10 +19,10 @@
 export PRE_THREAD_ENA=0
 
 P16_EnGenius_decryptor() {
-  module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
 
   if [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
+    module_log_init "${FUNCNAME[0]}"
     module_title "EnGenius encrypted firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -31,8 +31,8 @@ P16_EnGenius_decryptor() {
     engenius_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
 
     NEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
   fi
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 engenius_enc_extractor() {

@@ -19,10 +19,10 @@
 export PRE_THREAD_ENA=0
 
 P17_gpg_decompress() {
-  module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
 
   if [[ "$GPG_COMPRESS" -eq 1 ]]; then
+    module_log_init "${FUNCNAME[0]}"
     module_title "GPG compressed firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
@@ -31,8 +31,8 @@ P17_gpg_decompress() {
     gpg_decompress_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
 
     NEG_LOG=1
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
   fi
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 gpg_decompress_extractor() {

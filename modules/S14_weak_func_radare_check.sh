@@ -57,11 +57,6 @@ S14_weak_func_radare_check()
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
-    # needed to protect the host from radare2 memory exhaustion caused by to many r2 processes:
-    if [[ "$THREADED" -eq 1 ]]; then
-      MAX_THREADS_S14=$((2*"$(grep -c ^processor /proc/cpuinfo || true )"))
-    fi
-
     for BINARY in "${BINARIES[@]}" ; do
       # we run throught the bins and check if the bin was already analysed via objdump:
       if [[ "$(find "$LOG_DIR"/s13_weak_func_check/vul_func_*"$(basename "$BINARY")".txt 2>/dev/null | wc -l)" -gt 0 ]]; then
@@ -120,7 +115,7 @@ S14_weak_func_radare_check()
       fi
 
       if [[ "$THREADED" -eq 1 ]]; then
-        max_pids_protection "$MAX_THREADS_S14" "${WAIT_PIDS_S14[@]}"
+        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S14[@]}"
       fi
     done
 
@@ -388,12 +383,18 @@ radare_function_check_x86_64() {
 
 radare_print_top10_statistics() {
   local VULNERABLE_FUNCTIONS=("$@")
+  local FUNCTION=""
+  local RESULTS=()
+  local BINARY=""
+
+  sub_module_title "Top 10 legacy C functions"
+
 
   if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-      local SEARCH_TERM
-      local F_COUNTER
-      readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null)
+      local SEARCH_TERM=""
+      local F_COUNTER=0
+      readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null || true)
   
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_ln
@@ -401,9 +402,9 @@ radare_print_top10_statistics() {
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           write_anchor "strcpysummary"
         fi
-        for LINE in "${RESULTS[@]}" ; do
-          SEARCH_TERM="$(echo "$LINE" | cut -d\  -f3)"
-          F_COUNTER="$(echo "$LINE" | cut -d\  -f1)"
+        for BINARY in "${RESULTS[@]}" ; do
+          SEARCH_TERM="$(echo "$BINARY" | cut -d\  -f3)"
+          F_COUNTER="$(echo "$BINARY" | cut -d\  -f1)"
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
             if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then

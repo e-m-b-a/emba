@@ -21,18 +21,24 @@
 export THREAD_PRIO=1
 
 S115_usermode_emulator() {
-  module_log_init "${FUNCNAME[0]}"
-  module_title "Usermode emulation"
-  pre_module_reporter "${FUNCNAME[0]}"
-  NEG_LOG=0
+  local NEG_LOG=0
 
   if [[ "$QEMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
+    module_log_init "${FUNCNAME[0]}"
+    module_title "Qemu user-mode emulation"
+    pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
-    EMULATOR="NA"
-    NEG_LOG=1
+    local EMULATOR="NA"
+    local BIN_EMU_ARR=()
+    local BIN_EMU_TMP=()
+    local WAIT_PIDS_S115=()
+    local MAX_THREADS_S115=1
+    local BINARY=""
+    local BIN_BLACKLIST=()
+    export MISSING_AREAS=()
 
     print_output "[*] This module creates a working copy of the firmware filesystem in the log directory $LOG_DIR.\\n"
     # get the local interface ip address for later verification
@@ -43,8 +49,6 @@ S115_usermode_emulator() {
     # to protect the host we are going to kill them on a KILL_SIZE limit
     KILL_SIZE="50M"
 
-    #declare -a MISSING
-    export MISSING=()
     ROOT_CNT=0
 
     # load blacklist of binaries that could cause troubles during emulation:
@@ -63,6 +67,7 @@ S115_usermode_emulator() {
 
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
+      NEG_LOG=1
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
       # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
       MD5_DONE_INT=()
@@ -72,9 +77,9 @@ S115_usermode_emulator() {
 
       DIR=$(pwd)
       mapfile -t BIN_EMU_TMP < <(cd "$R_PATH" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file {} \; 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "$DIR" || exit)
-      # we re-create the BIN_EMU array with all unique binaries for every root directory
+      # we re-create the BIN_EMU_ARR array with all unique binaries for every root directory
       # as we have all tested MD5s in MD5_DONE_INT (for all root dirs) we test every bin only once
-      BIN_EMU=()
+      BIN_EMU_ARR=()
 
       print_output "[*] Create unique binary array for $ORANGE$R_PATH$NC root path ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
 
@@ -82,18 +87,18 @@ S115_usermode_emulator() {
         # we emulate every binary only once. So calculate the checksum and store it for checking
         BIN_MD5_=$(md5sum "$R_PATH"/"$BINARY" | cut -d\  -f1)
         if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5_} ]]; then
-          BIN_EMU+=( "$BINARY" )
+          BIN_EMU_ARR+=( "$BINARY" )
           MD5_DONE_INT+=( "$BIN_MD5_" )
         fi
       done
 
-      print_output "[*] Testing $ORANGE${#BIN_EMU[@]}$NC unique executables in root dirctory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
+      print_output "[*] Testing $ORANGE${#BIN_EMU_ARR[@]}$NC unique executables in root dirctory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)."
 
-      for BIN_ in "${BIN_EMU[@]}" ; do
+      for BIN_ in "${BIN_EMU_ARR[@]}" ; do
         ((BIN_CNT=BIN_CNT+1))
         FULL_BIN_PATH="$R_PATH"/"$BIN_"
 
-        local BIN_EMU_NAME_
+        local BIN_EMU_NAME_=""
         BIN_EMU_NAME_=$(basename "$FULL_BIN_PATH")
 
         THOLD=$(( 25*"$ROOT_CNT" ))
@@ -104,7 +109,7 @@ S115_usermode_emulator() {
         fi
 
         if [[ "${BIN_BLACKLIST[*]}" == *"$(basename "$FULL_BIN_PATH")"* ]]; then
-          print_output "[*] Binary $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC) not emulated - blacklist triggered"
+          print_output "[*] Binary $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU_ARR[@]}$NC) not emulated - blacklist triggered"
           continue
         else
           if [[ "$THREADED" -eq 1 ]]; then
@@ -152,13 +157,13 @@ S115_usermode_emulator() {
             fi
 
             if [[ "$EMULATOR" != "NA" ]]; then
-              prepare_emulator
+              prepare_emulator "$R_PATH" "$EMULATOR"
               if [[ "$THREADED" -eq 1 ]]; then
-                emulate_binary &
-                WAIT_PIDS_S115_x+=( "$!" )
-                max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115_x[@]}"
+                emulate_binary "$EMULATOR" "$R_PATH" "$BIN_" &
+                WAIT_PIDS_S115+=( "$!" )
+                max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115[@]}"
               else
-                emulate_binary
+                emulate_binary "$EMULATOR" "$R_PATH" "$BIN_" &
               fi
             fi
           fi
@@ -168,10 +173,10 @@ S115_usermode_emulator() {
     done
 
     if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S115_x[@]}"
+      wait_for_pid "${WAIT_PIDS_S115[@]}"
     fi
 
-    s115_cleanup
+    s115_cleanup "$EMULATOR"
     running_jobs
     print_filesystem_fixes
     recover_local_ip "$IP_ETH0"
@@ -194,7 +199,7 @@ copy_firmware() {
   # shellcheck disable=SC2154
   if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
-    cp -pri "$FIRMWARE_PATH" "$LOG_PATH_MODULE"/ 2> /dev/null
+    cp -pri "$FIRMWARE_PATH" "$LOG_PATH_MODULE" 2> /dev/null
     EMULATION_DIR=$(basename "$FIRMWARE_PATH")
     EMULATION_PATH_BASE="$LOG_PATH_MODULE"/"$EMULATION_DIR"
     print_output "[*] Firmware backup for emulation created in $ORANGE$EMULATION_PATH_BASE$NC"
@@ -206,6 +211,8 @@ copy_firmware() {
 }
 
 prepare_emulator() {
+  local R_PATH="${1:-}"
+  local EMULATOR="${2:-}"
 
   if [[ ! -e "$R_PATH""/""$EMULATOR" ]]; then
 
@@ -219,7 +226,7 @@ prepare_emulator() {
       print_output "$(indent "$(red "Terminating EMBA now.\\n")")"
       exit 1
     else
-      cp "$(which $EMULATOR)" "$R_PATH"/
+      cp "$(which "$EMULATOR")" "$R_PATH"
     fi
 
     if ! [[ -d "$R_PATH""/proc" ]] ; then
@@ -248,16 +255,16 @@ prepare_emulator() {
       mount -o bind /sys "$R_PATH""/sys" 2> /dev/null || true
     fi
 
-    creating_dev_area
+    creating_dev_area "$R_PATH"
 
     print_ln
     print_output "[*] Currently mounted areas:"
     print_output "$(indent "$(mount | grep "$R_PATH" 2> /dev/null || true)")""\\n"
 
     print_output "[*] Final fixes of the root filesytem in a chroot environment"
-    cp ./helpers/fixImage_user_mode_emulation.sh "$R_PATH"/
+    cp "$HELP_DIR"/fixImage_user_mode_emulation.sh "$R_PATH"
     chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
-    cp "$(which busybox)" "$R_PATH"/
+    cp "$(which busybox)" "$R_PATH"
     chmod +x "$R_PATH"/busybox
     chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
     rm "$R_PATH"/fixImage_user_mode_emulation.sh || true
@@ -266,14 +273,16 @@ prepare_emulator() {
   fi
 }
 
+# Iterates through possible qemu CPU configs
+# this is a jumper function for further processing and at the end running
+# emulation with the CPU config in strace mode
 run_init_test() {
-
-  local BIN_EMU_NAME_
+  local FULL_BIN_PATH="${1:-}"
+  local BIN_EMU_NAME_=""
   BIN_EMU_NAME_=$(basename "$FULL_BIN_PATH")
-  local LOG_FILE_INIT
-  LOG_FILE_INIT="$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME_"".txt"
-  local CPU_CONFIG_
-  CPU_CONFIG_=""
+  local LOG_FILE_INIT="$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME_"".txt"
+  local CPU_CONFIGS=()
+  local CPU_CONFIG_=""
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_INIT"
 
@@ -340,8 +349,9 @@ run_init_test() {
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_INIT"
 }
 
+# jump function for run_init_qemu_runner -> runs emulation process with stracer
+# The goal is to find a working CPU configuration for qemu
 run_init_qemu() {
-
   local CPU_CONFIG_="${1:-}"
   local BIN_EMU_NAME_="${2:-}"
   local LOG_FILE_INIT="${3:-}"
@@ -370,11 +380,11 @@ run_init_qemu() {
 
 }
 
+# runs emulation process with stracer - for CPU config detection
 run_init_qemu_runner() {
-
-  local CPU_CONFIG_="$1"
-  local BIN_EMU_NAME_="$2"
-  local LOG_FILE_INIT="$3"
+  local CPU_CONFIG_="${1:-}"
+  local BIN_EMU_NAME_="${2:-}"
+  local LOG_FILE_INIT="${3:-}"
 
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
@@ -387,11 +397,17 @@ run_init_qemu_runner() {
   fi
 }
 
+# runs emulation process with stracer for detection of missing filesystem areas
+# the goal is to search these missing areas within the extracted firmware
+# sometimes we can find them and copy to the right area
 emulate_strace_run() {
-
-  local CPU_CONFIG_="$1"
-  local MISSING_AREAS=()
+  local CPU_CONFIG_="${1:-}"
+  local BIN_EMU_NAME="${2:-}"
+  local MISSING_AREAS_TMP=()
   LOG_FILE_STRACER="$LOG_PATH_MODULE""/stracer_""$BIN_EMU_NAME"".txt"
+  local FILENAME_MISSING=""
+  local PATH_MISSING=""
+  local FILENAME_FOUND=""
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
 
@@ -426,12 +442,11 @@ emulate_strace_run() {
   write_log "[*] Identification of missing filesytem areas." "$LOG_FILE_STRACER"
 
   mapfile -t MISSING_AREAS < <(grep -a "open.*errno=2\ " "$LOG_FILE_STRACER" 2>&1 | cut -d\" -f2 2>&1 | sort -u || true)
-  mapfile -t MISSING_AREAS_ < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u || true)
-  MISSING_AREAS+=("${MISSING_AREAS_[@]}" )
+  mapfile -t MISSING_AREAS_TMP < <(grep -a "^qemu.*: Could not open" "$LOG_FILE_STRACER" | cut -d\' -f2 2>&1 | sort -u || true)
+  MISSING_AREAS+=("${MISSING_AREAS_TMP[@]}" )
 
   if [[ "${#MISSING_AREAS[@]}" -gt 0 ]]; then
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
-      MISSING+=("$MISSING_AREA")
       if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
         write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
 
@@ -451,7 +466,7 @@ emulate_strace_run() {
         fi
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
-          cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING"/ 2> /dev/null || true
+          cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING" 2> /dev/null || true
           continue
         else
         #  # disabled this for now - have to rethink this feature
@@ -466,25 +481,40 @@ emulate_strace_run() {
   else
     write_log "[*] No missing areas found." "$LOG_FILE_STRACER"
   fi
-  sed -i 's/.REF.*//' "$LOG_FILE_STRACER"
-  # print it to the screen - we already have the output in the right log file
-  cat "$LOG_FILE_STRACER"
-  write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
+
+  if [[ -f "$LOG_FILE_STRACER" ]]; then
+    # remove the REF entries for printing the log file to the screen
+    sed -i 's/.REF.*//' "$LOG_FILE_STRACER"
+    # print it to the screen - we already have the output in the right log file
+    cat "$LOG_FILE_STRACER" || true
+    write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
+  fi
 }
 
 emulate_binary() {
+  local EMULATOR="${1:-}"
+  local R_PATH="${2:-}"
+  local BIN_="${3:-}"
+
+  FULL_BIN_PATH="$R_PATH"/"$BIN_"
+
+  if ! [[ -f "$FULL_BIN_PATH" ]]; then
+    print_output "[-] $ORANGE$FULL_BIN_PATH$NC not found"
+    return
+  fi
+  local EMULATION_PARAMS=()
+  local PARAM=""
 
   BIN_EMU_NAME=$(basename "$FULL_BIN_PATH")
   LOG_FILE_BIN="$LOG_PATH_MODULE""/qemu_tmp_""$BIN_EMU_NAME"".txt"
 
-  run_init_test
+  run_init_test "$FULL_BIN_PATH"
   # now we should have CPU_CONFIG in log file from Binary
 
-  local CPU_CONFIG_
+  local CPU_CONFIG_=""
   CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2 | sort -u | head -1 || true)"
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
-  print_output "[*] Emulating binary: $ORANGE$BIN_$NC ($ORANGE$BIN_CNT/${#BIN_EMU[@]}$NC)" "" "$LOG_FILE_BIN"
   write_log "[*] Emulating binary name: $ORANGE$BIN_EMU_NAME$NC" "$LOG_FILE_BIN"
   write_log "[*] Emulator used: $ORANGE$EMULATOR$NC" "$LOG_FILE_BIN"
   write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_BIN"
@@ -500,7 +530,7 @@ emulate_binary() {
     write_log "[*] Change permissions +x to $ORANGE$FULL_BIN_PATH$NC." "$LOG_FILE_BIN"
     chmod +x "$FULL_BIN_PATH"
   fi
-  emulate_strace_run "$CPU_CONFIG_"
+  emulate_strace_run "$CPU_CONFIG_" "$BIN_EMU_NAME"
   
   # emulate binary with different command line parameters:
   if [[ "$BIN_" == *"bash"* ]]; then
@@ -536,12 +566,15 @@ emulate_binary() {
 
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
+  # This is very ugly and should only be used in docker environment!
   killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
   killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.* || true
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
 }
 
 check_disk_space_emu() {
+  local CRITICAL_FILES=()
+  local KILLER=""
 
   mapfile -t CRITICAL_FILES < <(find "$LOG_PATH_MODULE"/ -xdev -type f -size +"$KILL_SIZE" -exec basename {} \; 2>/dev/null| cut -d\. -f1 | cut -d_ -f2 || true)
   for KILLER in "${CRITICAL_FILES[@]}"; do
@@ -555,6 +588,7 @@ check_disk_space_emu() {
 }
 
 running_jobs() {
+  local CJOBS=""
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
@@ -570,7 +604,8 @@ running_jobs() {
 }
 
 kill_qemu_threader() {
-
+  # WARNING: This is so *** ugly! FIX IT!
+  # Currently this should only used in docker environment!
   while true; do
     pkill -9 -O 240 -f .*qemu.* || true
     sleep 20
@@ -578,15 +613,14 @@ kill_qemu_threader() {
 }
 
 get_local_ip() {
-
+  export IP_ETH0=""
   IP_ETH0=$(ifconfig eth0 2>/dev/null|awk '/inet / {print $2}')
 }
 
 recover_local_ip() {
-
   # some firmware images (e.g. OpenWRT) reconfigure the network interface.
   # We try to recover it now to access the CVE database
-  local IP_TO_CHECK_="$1"
+  local IP_TO_CHECK_="${1:-}"
 
   if ! ifconfig eth0 | grep -q "$IP_TO_CHECK_"; then
     print_ln
@@ -597,22 +631,28 @@ recover_local_ip() {
 }
 
 print_filesystem_fixes() {
+  local MISSING_FILE=""
 
-  if [[ "${#MISSING[@]}" -ne 0 ]]; then
+  # MISSING_AREAS array from emulate_strace_run
+  if [[ "${#MISSING_AREAS[@]}" -ne 0 ]]; then
     sub_module_title "Filesystem fixes"
     print_output "[*] Emba has auto-generated the files during runtime."
     print_output "[*] For persistence you could generate it manually in your filesystem.\\n"
-    for MISSING_FILE in "${MISSING[@]}"; do
+    for MISSING_FILE in "${MISSING_AREAS[@]}"; do
       print_output "[*] Missing file: $ORANGE$MISSING_FILE$NC"
     done
   fi
 }
 
 s115_cleanup() {
-
   print_ln
   sub_module_title "Cleanup phase"
-  CHECK_MOUNTS=()
+  local EMULATOR="${1:-}"
+  local CHECK_MOUNTS=()
+  local MOUNT=""
+  local CJOBS_=""
+  local LOG_FILES=()
+  local BIN=""
 
   #rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
 
@@ -644,19 +684,18 @@ s115_cleanup() {
     done
   fi
 
-  mapfile -t FILES < <(find "$LOG_PATH_MODULE""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
-  if [[ "${#FILES[@]}" -gt 0 ]] ; then
+  mapfile -t LOG_FILES < <(find "$LOG_PATH_MODULE""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
+  if [[ "${#LOG_FILES[@]}" -gt 0 ]] ; then
     print_output "[*] Cleanup empty log files.\\n"
-    print_bar
     sub_module_title "Reporting phase"
-    for FILE in "${FILES[@]}" ; do
-      if [[ ! -s "$FILE" ]] ; then
-        rm "$FILE" 2> /dev/null || true
-      else
-        BIN=$(basename "$FILE")
-        BIN=$(echo "$BIN" | cut -d_ -f3 | sed 's/.txt$//')
-        print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$FILE""${NC}""." "" "$FILE"
+    for LOG_FILE in "${LOG_FILES[@]}" ; do
+      if [[ ! -s "$LOG_FILE" ]] ; then
+        rm "$LOG_FILE" 2> /dev/null || true
+        continue
       fi
+      BIN=$(basename "$LOG_FILE")
+      BIN=$(echo "$BIN" | cut -d_ -f3 | sed 's/.txt$//')
+      print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$LOG_FILE""${NC}""." "" "$LOG_FILE"
     done
   fi
   # if we got a firmware directory then we have created a backup for emulation
@@ -668,6 +707,11 @@ s115_cleanup() {
 }
 
 creating_dev_area() {
+  local R_PATH="${1:-}"
+  if ! [[ -d "$R_PATH" ]]; then
+    print_output "[-] No R_PATH found ..."
+    return
+  fi
 
   print_output "[*] Creating dev area for user mode emulation"
 

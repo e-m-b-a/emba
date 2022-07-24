@@ -49,8 +49,8 @@ S99_grepit() {
   local GREPIT_MODULES=()
   local GREPIT_RESULTS=0
 
-  local MAX_THREADS_S99
-  MAX_THREADS_S99=$((2*"$(grep -c ^processor /proc/cpuinfo || true )"))
+  local MAX_MOD_THREADS
+  MAX_MOD_THREADS=$((1*"$(grep -c ^processor /proc/cpuinfo || true )"))
 
   # grepit options:
   # Sometimes we look for composite words with wildcard, eg. root.{0,20}detection, this is the maximum
@@ -76,7 +76,7 @@ S99_grepit() {
     for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do 
       "$GREPIT_MODULE" &
       WAIT_PIDS_S99+=( "$!" )
-      max_pids_protection "$MAX_THREADS_S99" "${WAIT_PIDS_S99[@]}"
+      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S99[@]}"
     done
   else
     for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do 

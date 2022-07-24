@@ -76,7 +76,7 @@ max_pids_protection() {
     # recreate the arry with the current running PIDS
     WAIT_PIDS=()
     WAIT_PIDS=("${TEMP_PIDS[@]}")
-    echo "." | tr -d "\n" 2>/dev/null
+    echo "." | tr -d "\n" 2>/dev/null || true
   done
 }
 
@@ -122,6 +122,8 @@ cleaner() {
 
   # Remove status bar and reset screen
   remove_status_bar
+  # stop inotifywait on host
+  pkill -f "inotifywait.*$LOG_DIR.*"
 
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
@@ -198,7 +200,7 @@ enable_strict_mode() {
 
     if [[ "$PRINTER" -eq 1 ]]; then
       print_bar "no_log"
-      print_output "[!] WARNING: EMBA running in STRICT mode!" "no_log"
+      print_output "[!] INFO: EMBA running in STRICT mode!" "no_log"
       print_bar "no_log"
     fi
   fi
@@ -225,7 +227,7 @@ disable_strict_mode() {
 
     if [[ "$PRINTER" -eq 1 ]]; then
       print_bar "no_log"
-      print_output "[!] WARNING: EMBA STRICT mode disabled!" "no_log"
+      print_output "[!] INFO: EMBA STRICT mode disabled!" "no_log"
       print_bar "no_log"
     fi
   fi
