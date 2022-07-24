@@ -120,6 +120,8 @@ cleaner() {
     kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
 
+  # Remove status bar and reset screen
+  remove_status_bar
   # stop inotifywait on host
   pkill -f "inotifywait.*$LOG_DIR.*"
 

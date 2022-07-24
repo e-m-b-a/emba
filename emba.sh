@@ -17,6 +17,7 @@
 # Description:  Main script for load all necessary files and call main function of modules
 
 INVOCATION_PATH="."
+MODULE_COUNT=0
 
 import_helper()
 {
@@ -303,6 +304,7 @@ main()
   fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
+  export DISABLE_STATUS_BAR=0
   export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
@@ -752,6 +754,13 @@ main()
     fi
   fi
 
+  #######################################################################################
+  # Start status bar
+  if [[ $DISABLE_STATUS_BAR -eq 0 ]] ; then
+    initial_status_bar
+    # Trap the window resize signal (handle window resize events).
+    trap 'initial_status_bar' WINCH
+  fi
 
   #######################################################################################
   # Pre-Check (P-modules)
@@ -862,6 +871,8 @@ main()
   write_notification "Reporting phase started"
  
   run_modules "F" "0" "$HTML"
+
+  remove_status_bar
 
   write_notification "Reporting phase ended"
 

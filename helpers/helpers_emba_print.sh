@@ -674,6 +674,8 @@ matrix_mode() {
 
   done #(c) 2011 -- [ BruXy ]
   reset
+  # We have to draw the status bar again
+  initial_status_bar
 }
 
 banner_printer() {
