@@ -246,6 +246,9 @@ if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
 
   echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of EMBA at https://github.com/e-m-b-a.""$NC"
 fi
+if [[ "$WSL" -eq 1 ]]; then
+  echo -e "\\n""$MAGENTA""INFO: In the current WSL installation the docker and mongod services started manually!""$NC"
+fi
 
 if [[ "$LIST_DEP" -eq 0 ]]; then
   echo -e "$GREEN""EMBA installation finished ""$NC"
