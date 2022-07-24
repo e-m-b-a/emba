@@ -114,6 +114,7 @@ check_cve_search() {
       if [[ "$IN_DOCKER" -eq 0 ]]; then
         print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
         if [[ "$WSL" -eq 1 ]]; then
+          pkill -f mongod
           mongod --config /etc/mongod.conf &
         else
           service mongod restart
@@ -124,6 +125,7 @@ check_cve_search() {
         if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
           if [[ "$WSL" -eq 1 ]]; then
+            pkill -f mongod
             mongod --config /etc/mongod.conf &
           else
             service mongod restart
