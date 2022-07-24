@@ -43,12 +43,12 @@ S60_cert_file_check()
       if [[ -f "$LINE" && $(wc -l "$LINE" | awk '{print $1}'|| true) -gt 1 ]]; then
         ((CERT_CNT+=1))
         if command -v openssl > /dev/null ; then
-          CERT_DATE=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601 || true)
-          CERT_DATE_=$(date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s || true)
+          CERT_DATE=$(timeout --preserve-status --signal SIGINT 10 date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" --iso-8601 || true)
+          CERT_DATE_=$(timeout --preserve-status --signal SIGINT 10 date --date="$(openssl x509 -enddate -noout -in "$LINE" 2>/dev/null | cut -d= -f2)" +%s || true)
           CERT_NAME=$(basename "$LINE")
           CERT_LOG="$LOG_PATH_MODULE/cert_details_$CERT_NAME.txt"
           write_log "[*] Cert file: $LINE\n" "$CERT_LOG"
-          openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG" || true
+          timeout --preserve-status --signal SIGINT 10 openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG" || true
           if [[ $CERT_DATE_ -lt $CURRENT_DATE ]]; then
             print_output "  ${RED}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
             write_csv_log "$LINE" "$CERT_DATE_" "yes"
