@@ -119,7 +119,7 @@ IF20_cve_search() {
             systemctl restart mongod.service
           else
             # WSL environment
-            sudo mongod --config /etc/mongod.conf &
+            mongod --config /etc/mongod.conf &
           fi
 
           echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
