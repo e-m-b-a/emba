@@ -144,8 +144,8 @@ elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
     echo -e "\\n""$RED""EMBA is not fully supported on Ubuntu 20.04 LTS.""$NC"
     echo -e "$RED""For EMBA installation you need to update docker-compose manually. See also https://github.com/e-m-b-a/emba/issues/247""$NC"
     read -p "If you have updated docker-compose you can press any key to continue ..." -n1 -s -r
-    OTHER_OS=0  # installation procedure as kali install
-    UBUNTU_OS=0 # installation procedure as kali install
+    OTHER_OS=0  # installation procedure identical to kali install
+    UBUNTU_OS=0 # installation procedure identical to kali install
   else
     echo -e "\n${ORANGE}WARNING: compatibility of distribution/version unknown!$NC"
     OTHER_OS=1
