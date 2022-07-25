@@ -44,6 +44,7 @@ export FULL=0
 # other os stuff
 export OTHER_OS=0
 export UBUNTU_OS=0
+export WSL=0
 
 ## Color definition
 export RED="\033[0;31m"
@@ -122,6 +123,14 @@ while getopts cCdDFhl OPT ; do
   esac
 done
 
+# WSL support - currently experimental!
+if grep -q -i wsl /proc/version; then
+  echo -e "\n${ORANGE}INFO: System running in WSL environment!$NC"
+  echo -e "\n${ORANGE}INFO: WSL is currently experimental!$NC"
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  WSL=1
+fi
+
 # distribution check
 if ! grep -q "ID_LIKE=debian" /etc/os-release 2>/dev/null ; then
   echo -e "\\n""$RED""EMBA only supports debian based distributions!""$NC\\n"
@@ -131,6 +140,12 @@ elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
   if grep -q "PRETTY_NAME=\"Ubuntu 22.04 LTS\"" /etc/os-release 2>/dev/null ; then
     OTHER_OS=1
     UBUNTU_OS=1
+  elif grep -q "PRETTY_NAME=\"Ubuntu 20.04 LTS\"" /etc/os-release 2>/dev/null ; then
+    echo -e "\\n""$RED""EMBA is not fully supported on Ubuntu 20.04 LTS.""$NC"
+    echo -e "$RED""For EMBA installation you need to update docker-compose manually. See also https://github.com/e-m-b-a/emba/issues/247""$NC"
+    read -p "If you have updated docker-compose you can press any key to continue ..." -n1 -s -r
+    OTHER_OS=0  # installation procedure identical to kali install
+    UBUNTU_OS=0 # installation procedure identical to kali install
   else
     echo -e "\n${ORANGE}WARNING: compatibility of distribution/version unknown!$NC"
     OTHER_OS=1
@@ -182,6 +197,13 @@ fi
 
 INSTALL_APP_LIST=()
 
+if [[ "$WSL" -eq 1 ]]; then
+  echo "[*] Starting dockerd manually in wsl environments:"
+  dockerd --iptables=false &
+  sleep 3
+  reset
+fi
+
 if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -eq 1 ]]; then
 
   I01_default_apps
@@ -230,6 +252,9 @@ if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]
   echo -e "\\n""$MAGENTA""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""$NC"
 
   echo -e "\\n""$MAGENTA""INFO: Do not forget to checkout current development of EMBA at https://github.com/e-m-b-a.""$NC"
+fi
+if [[ "$WSL" -eq 1 ]]; then
+  echo -e "\\n""$MAGENTA""INFO: In the current WSL installation the docker and mongod services started manually!""$NC"
 fi
 
 if [[ "$LIST_DEP" -eq 0 ]]; then

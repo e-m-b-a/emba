@@ -60,7 +60,7 @@ S115_usermode_emulator() {
 
     # we only need to detect the root directory again if we have copied it before
     if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
-      detect_root_dir_helper "$EMULATION_PATH_BASE" "$LOG_FILE"
+      detect_root_dir_helper "$EMULATION_PATH_BASE"
     fi
     kill_qemu_threader &
     PID_killer+="$!"
@@ -688,14 +688,14 @@ s115_cleanup() {
   if [[ "${#LOG_FILES[@]}" -gt 0 ]] ; then
     print_output "[*] Cleanup empty log files.\\n"
     sub_module_title "Reporting phase"
-    for LOG_FILE in "${LOG_FILES[@]}" ; do
-      if [[ ! -s "$LOG_FILE" ]] ; then
-        rm "$LOG_FILE" 2> /dev/null || true
+    for LOG_FILE_ in "${LOG_FILES[@]}" ; do
+      if [[ ! -s "$LOG_FILE_" ]] ; then
+        rm "$LOG_FILE_" 2> /dev/null || true
         continue
       fi
-      BIN=$(basename "$LOG_FILE")
+      BIN=$(basename "$LOG_FILE_")
       BIN=$(echo "$BIN" | cut -d_ -f3 | sed 's/.txt$//')
-      print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$LOG_FILE""${NC}""." "" "$LOG_FILE"
+      print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$LOG_FILE_""${NC}""." "" "$LOG_FILE_"
     done
   fi
   # if we got a firmware directory then we have created a backup for emulation

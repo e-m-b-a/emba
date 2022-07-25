@@ -78,9 +78,11 @@ import_reporting_templates() {
 
 import_module() {
   MODULES=()
-  mapfile -t MODULES_ < <(find "$MOD_DIR" -iname "*.sh" 2>/dev/null)
-  mapfile -t MODULES_LOCAL < <(find "$MOD_DIR_LOCAL" -iname "*.sh" 2>/dev/null)
-  MODULES=( "${MODULES_[@]}" "${MODULES_LOCAL[@]}")
+  mapfile -t MODULES < <(find "$MOD_DIR" -iname "*.sh" 2>/dev/null)
+  if [[ -d "$MOD_DIR_LOCAL" ]]; then
+    mapfile -t MODULES_LOCAL < <(find "$MOD_DIR_LOCAL" -iname "*.sh" 2>/dev/null)
+    MODULES=( "${MODULES_[@]}" "${MODULES_LOCAL[@]}")
+  fi
   for LINE in "${MODULES[@]}"; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"

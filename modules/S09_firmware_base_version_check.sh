@@ -46,7 +46,7 @@ S09_firmware_base_version_check() {
       continue
     fi
 
-    echo "." | tr -d "\n"
+    echo "." | tr -d "\n" || true
 
     STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
     LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
@@ -78,7 +78,7 @@ S09_firmware_base_version_check() {
           fi
         fi
       done
-      echo "." | tr -d "\n"
+      echo "." | tr -d "\n" || true
 
     elif [[ $STRICT == "zgrep" ]]; then
 
@@ -97,7 +97,7 @@ S09_firmware_base_version_check() {
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN_PATH")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - zgrep$GREEN)."
         write_csv_log "$BIN_PATH" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
       done
-      echo "." | tr -d "\n"
+      echo "." | tr -d "\n" || true
 
     else
 
@@ -110,10 +110,10 @@ S09_firmware_base_version_check() {
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binwalk logs (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
         get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
         write_csv_log "binwalk logs" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
-        echo "." | tr -d "\n"
+        echo "." | tr -d "\n" || true
       fi
       
-      echo "." | tr -d "\n"
+      echo "." | tr -d "\n" || true
 
       if [[ $FIRMWARE -eq 0 || -f $FIRMWARE_PATH ]]; then
         VERSION_FINDER=$(find "$FIRMWARE_PATH" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null || true)
@@ -124,7 +124,7 @@ S09_firmware_base_version_check() {
           get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
           write_csv_log "firmware" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
         fi  
-        echo "." | tr -d "\n"
+        echo "." | tr -d "\n" || true
       fi  
 
       if [[ "$THREADED" -eq 1 ]]; then
@@ -135,7 +135,7 @@ S09_firmware_base_version_check() {
         bin_string_checker
       fi
 
-      echo "." | tr -d "\n"
+      echo "." | tr -d "\n" || true
 
     fi
 
@@ -150,7 +150,7 @@ S09_firmware_base_version_check() {
 
   done  < "$CONFIG_DIR"/bin_version_strings.cfg
 
-  echo "." | tr -d "\n"
+  echo "." | tr -d "\n" || true
 
   if [[ "$THREADED" -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_S09[@]}"

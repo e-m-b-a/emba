@@ -84,7 +84,11 @@ check_docker_env() {
   if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
     # echo -e "$RED""not ok""$NC"
     echo -e "$RED""    Missing ""Docker-Interface"" - check your installation""$NC"
-    echo -e "$RED""    run \$docker-compose up --no-start to start or reset it otherwise (\$ docker network rm emba_runs)""$NC"
+    if [[ "$WSL" -eq 1 ]]; then
+      echo -e "$RED""    Is dockerd running (e.g., sudo dockerd --iptables=false &)""$NC"
+    else
+      echo -e "$RED""    run \$docker-compose up --no-start to start or reset it otherwise (\$ docker network rm emba_runs)""$NC"
+    fi
     DEP_ERROR=1
   else
     echo -e "$GREEN""ok""$NC"
@@ -109,13 +113,23 @@ check_cve_search() {
       # we can restart the mongod database only in dev mode and not in docker mode:
       if [[ "$IN_DOCKER" -eq 0 ]]; then
         print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
-        service mongod restart
+        if [[ "$WSL" -eq 1 ]]; then
+          pkill -f mongod
+          mongod --config /etc/mongod.conf &
+        else
+          service mongod restart
+        fi
         sleep 10
 
         # do a second try
         if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
-          service mongod restart
+          if [[ "$WSL" -eq 1 ]]; then
+            pkill -f mongod
+            mongod --config /etc/mongod.conf &
+          else
+            service mongod restart
+          fi
           sleep 10
 
           if [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
