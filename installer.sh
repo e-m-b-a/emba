@@ -198,7 +198,7 @@ fi
 INSTALL_APP_LIST=()
 
 if [[ "$WSL" -eq 1 ]]; then
-  # start dockerd manually in wsl environments
+  echo "[*] Starting dockerd manually in wsl environments:"
   dockerd --iptables=false &
   sleep 3
   reset

@@ -41,6 +41,10 @@ I05_emba_docker_image_dl() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y
   
+        if ! pgrep dockerd; then
+          echo -e "\\n""$RED""$BOLD""Docker daemon not running! Please check it manually and try again""$NC"
+          exit 1
+        fi
         if command -v docker > /dev/null ; then
           export DOCKER_CLI_EXPERIMENTAL=enabled
           echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
