@@ -52,6 +52,8 @@ module_log_init()
   FILE_NAME=$(echo "$LOG_FILE_NAME" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
   LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
 
+  module_start_log "${FILE_NAME^}"
+
   if [[ "$DISABLE_NOTIFICATIONS" -eq 0 ]]; then
     write_notification "Module $FILE_NAME started"
   fi

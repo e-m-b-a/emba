@@ -149,7 +149,7 @@ run_modules()
         fi
         MODULE_BN=$(basename "$MODULE_FILE")
         MODULE_MAIN=${MODULE_BN%.*}
-        module_start_log "$MODULE_MAIN"
+        # module_start_log "$MODULE_MAIN"
         if [[ $THREADING_SET -eq 1 ]]; then
           $MODULE_MAIN &
           WAIT_PIDS+=( "$!" )
@@ -171,7 +171,7 @@ run_modules()
         if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
           MODULE_BN=$(basename "$MODULE")
           MODULE_MAIN=${MODULE_BN%.*}
-          module_start_log "$MODULE_MAIN"
+          # module_start_log "$MODULE_MAIN"
           if [[ $THREADING_SET -eq 1 ]]; then
             $MODULE_MAIN &
             WAIT_PIDS+=( "$!" )
@@ -207,7 +207,7 @@ run_modules()
 
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
-            module_start_log "$MODULE_MAIN"
+            # module_start_log "$MODULE_MAIN"
             if [[ $THREADING_SET -eq 1 ]]; then
               $MODULE_MAIN &
               WAIT_PIDS+=( "$!" )

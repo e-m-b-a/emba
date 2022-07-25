@@ -22,7 +22,7 @@ P03_firmware_virustotal_check() {
 
   if [[ "$IN_DOCKER" -eq 1 ]]; then
     print_output "[-] The docker container has no access to the Internet -> no virustotal query possible!"
-    module_end_log "${FUNCNAME[0]}" 0
+    # module_end_log "${FUNCNAME[0]}" 0
     return
   fi
   module_title "Binary firmware VirusTotal analyzer"
