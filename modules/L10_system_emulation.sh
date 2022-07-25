@@ -653,8 +653,7 @@ umount_qemu_image() {
   local DEVICE_=${1:-}
   sync
   disable_strict_mode "$STRICT_MODE" 0
-  umount "${DEVICE_}"
-  if [[ "$?" -ne 0 ]]; then
+  if ! umount "${DEVICE_}"; then
     print_output "[*] Warning: Normal umount was not successful. Trying to enforce unmounting of $ORANGE$DEVICE_$NC."
     umount -l "${DEVICE_}"
     umount -f "${DEVICE_}"
