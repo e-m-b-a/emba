@@ -58,7 +58,7 @@ check_live_snmp() {
     if [[ -f "$LOG_PATH_MODULE"/snmp-check-public-"$IP_ADDRESS_".txt ]]; then
       cat "$LOG_PATH_MODULE"/snmp-check-public-"$IP_ADDRESS_".txt >> "$LOG_FILE"
     fi
-    print_output ""
+    print_ln
     print_output "[*] SNMP scan with community name ${ORANGE}private$NC"
     snmp-check -c private -w "$IP_ADDRESS_"| tee "$LOG_PATH_MODULE"/snmp-check-private-"$IP_ADDRESS_".txt
     if [[ -f "$LOG_PATH_MODULE"/snmp-check-private-"$IP_ADDRESS_".txt ]]; then
@@ -70,7 +70,7 @@ check_live_snmp() {
     if [[ -f "$LOG_PATH_MODULE"/snmp-check-public-"$IP_ADDRESS_".txt ]]; then
       cat "$LOG_PATH_MODULE"/snmpwalk-public-"$IP_ADDRESS_".txt >> "$LOG_FILE"
     fi
-    print_output ""
+    print_ln
     print_output "[*] SNMP scan with community name ${ORANGE}private$NC"
     snmpwalk -v2c -c private "$IP_ADDRESS_" .iso | tee "$LOG_PATH_MODULE"/snmapwalk-private-"$IP_ADDRESS_".txt || true
     if [[ -f "$LOG_PATH_MODULE"/snmp-check-private-"$IP_ADDRESS_".txt ]]; then
@@ -85,7 +85,7 @@ check_live_snmp() {
     SNMP_UP=0
   fi
 
-  print_output ""
+  print_ln
   print_output "[*] SNMP tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
 }
 

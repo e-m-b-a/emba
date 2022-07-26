@@ -71,13 +71,13 @@ check_live_nmap_basic() {
     for NMAP_RESULTF in "${NMAP_RESULT_FILES[@]}"; do
       print_output "[*] Found Nmap results $ORANGE$(basename "$NMAP_RESULTF")$NC:"
       tee -a "$LOG_FILE" < "$NMAP_RESULTF"
-      print_output ""
+      print_ln
     done
   else
     # if no Nmap results are found we initiate a scan
     nmap -Pn -n -sSV -A "$IP_ADDRESS_" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP_ADDRESS_" | tee -a "$LOG_FILE"
   fi
-  print_output ""
+  print_ln
 
   # extract only the service details from gnmap output file:
   mapfile -t NMAP_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/*.gnmap | cut -d: -f2- | sed s/'\t'/'\n\t'/g | sed s/'\/, '/'\n\t\t'/g | sed s/'Ports: '/'Ports:\n\t\t'/g | grep -v "/closed/\|filtered/" | grep -v "Host: \|Ports:\|Ignored State:\|OS: \|Seq Index: \|Status: \|IP ID Seq: \|^# " | sed 's/^[[:blank:]].*\/\///' | sed 's/\/$//g'| sort -u || true)
@@ -140,7 +140,7 @@ check_live_nmap_basic() {
   fi
 
   if [[ "${#NMAP_SERVICES[@]}" -gt 0 ]]; then
-    print_output ""
+    print_ln
     for SERVICE in "${NMAP_SERVICES[@]}"; do
       if ! echo "$SERVICE" | grep -q "[0-9]"; then
         continue
@@ -149,7 +149,7 @@ check_live_nmap_basic() {
     done
   fi
 
-  print_output ""
+  print_ln
   print_output "[*] Nmap portscans for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
 }
 

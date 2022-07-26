@@ -135,7 +135,7 @@ main_web_check() {
     done
 
     if [[ -f "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt ]]; then
-      print_output ""
+      print_ln
       mapfile -t VERSIONS < <(grep "+ Server: " "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt | cut -d: -f2 | sort -u | grep -v "null" | grep -e "[0-9]" | sed 's/^\ //' || true)
       for VERSION in "${VERSIONS[@]}"; do
         if [[ "$VERSION" != *"Server banner has changed from"* ]]; then
@@ -148,7 +148,7 @@ main_web_check() {
         l15_version_detector "$VERSION" "Nikto web server scanning log"
       done
 
-      print_output ""
+      print_ln
       if [[ $(grep -c "+ [1-9] host(s) tested" "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt || true) -gt 0 ]]; then
         WEB_RESULTS=1
       fi
@@ -179,10 +179,10 @@ testssl_check() {
 
     TESTSSL_VULNERABLE=$(grep -c "VULNERABLE\|NOT\ ok" "$LOG_PATH_MODULE"/testssl-"$IP_"-"$PORT".txt)
     if [[ "$TESTSSL_VULNERABLE" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[+] Weaknesses in the SSL service of system $ORANGE$IP_:$PORT$GREEN found."
       write_link "$LOG_PATH_MODULE/testssl-$IP_-$PORT.txt"
-      print_output ""
+      print_ln
     fi
   fi
 
@@ -205,7 +205,7 @@ web_access_crawler() {
   fi
 
   sub_module_title "Starting web server crawling for $ORANGE$IP_:$PORT$NC"
-  print_output ""
+  print_ln
 
   for WEB_PATH in "${FILE_ARR[@]}"; do
     if ! ping -c 1 "$IP_" &> /dev/null; then
@@ -293,14 +293,14 @@ arachni_scan() {
     fi
     ARACHNI_ISSUES=$(grep "With issues" "$LOG_PATH_MODULE"/arachni_report.tmp | awk '{print $4}' || true)
     if [[ "$ARACHNI_ISSUES" -gt 0 ]]; then
-      print_output ""
+      print_ln
       print_output "[+] Web application weaknesses in system $ORANGE$IP_:$PORT_$GREEN found."
-      print_output ""
+      print_ln
     fi
     if [[ -f "$LOG_PATH_MODULE"/arachni_report/index.html ]]; then
-      print_output ""
+      print_ln
       print_output "[*] Arachni report created" "" "$LOG_PATH_MODULE/arachni_report/index.html"
-      print_output ""
+      print_ln
       WEB_RESULTS=1
     fi
   fi

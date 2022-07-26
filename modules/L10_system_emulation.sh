@@ -374,16 +374,16 @@ main_emulation() {
     print_output "[*] Current init file: $ORANGE$INIT_OUT$NC"
     tee -a "$LOG_FILE" < "$INIT_OUT"
 
-    print_output ""
+    print_ln
     print_output "[*] FirmAE filesytem:"
     # shellcheck disable=SC2012
     ls -l "$MNT_POINT" | tee -a "$LOG_FILE"
 
-    print_output ""
+    print_ln
     print_output "[*] FirmAE firmadyne directory:"
     # shellcheck disable=SC2012
     ls -l "$MNT_POINT/firmadyne" | tee -a "$LOG_FILE"
-    print_output ""
+    print_ln
 
     ### set default network values for network identification mode
     IP_ADDRESS_="192.168.0.1"
@@ -421,7 +421,7 @@ main_emulation() {
     else
       print_output "[-] No Qemu log file generated ... some weird error occured"
     fi
-    print_output ""
+    print_ln
 
     ###############################################################################################
     # if we were running into issues with the network identification we poke with rdinit vs init:
@@ -454,7 +454,7 @@ main_emulation() {
         else
           print_output "[-] No Qemu log file generated ... some weird error occured"
         fi
-        print_output ""
+        print_ln
 
       # #IPS_INT_VLAN is always at least 1 for the default configuration
       elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" && "${#IPS_INT_VLAN[@]}" -lt 2 ]]; then
@@ -496,7 +496,7 @@ main_emulation() {
         else
           print_output "[-] No Qemu log file generated ... some weird error occured"
         fi
-        print_output ""
+        print_ln
 
         PANICS=()
       fi
@@ -525,7 +525,7 @@ main_emulation() {
         SYS_ONLINE=0
 
         IPS_INT_VLAN_CFG_MOD=$(echo "$IPS_INT_VLAN_CFG" | tr ';' '-')
-        print_output ""
+        print_ln
         print_output "[*] Testing system emulation with configuration: $ORANGE$IPS_INT_VLAN_CFG_MOD$NC."
 
         cleanup_tap
@@ -599,14 +599,14 @@ main_emulation() {
         fi
 
         if [[ "$SYS_ONLINE" -eq 1 ]]; then
-          print_output ""
+          print_ln
           print_output "[+] System emulation was successful."
           if [[ -f "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod".log ]]; then
             print_output "[+] System should be available via IP $ORANGE$IP_ADDRESS_$GREEN." "" "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod".log
           else
             print_output "[+] System should be available via IP $ORANGE$IP_ADDRESS_$GREEN."
           fi
-          print_output ""
+          print_ln
 
           if [[ "$TCP" == "ok" ]]; then
             print_output "[+] Network services are available." "" "$LOG_PATH_MODULE/$NMAP_LOG"
@@ -888,9 +888,9 @@ run_network_id_emulation() {
   print_output "$(indent "QEMU binary: $ORANGE$QEMU_BIN$NC")"
   print_output "$(indent "NETWORK: $ORANGE$QEMU_NETWORK$NC")"
   print_output "$(indent "Init file: $ORANGE$INIT_FILE$NC")"
-  print_output ""
+  print_ln
   print_output "[*] Starting firmware emulation for network identification - $ORANGE$QEMU_BIN / $ARCH_END / $IMAGE_NAME$NC ... use Ctrl-a + x to exit"
-  print_output ""
+  print_ln
 
   write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait" /tmp/do_not_create_run.sh 3
 }
@@ -939,7 +939,7 @@ get_networking_details_emulation() {
         fi
       done
       print_output "[*] NVRAM access detected $ORANGE${#NVRAMS[@]}$NC times."
-      print_output ""
+      print_ln
     fi
 
     if [[ -v PORTS[@] ]]; then
@@ -984,7 +984,7 @@ get_networking_details_emulation() {
       eval "BRIDGE_INTERFACES=($(for i in "${BRIDGE_INTERFACES[@]}" ; do echo "\"$i\"" ; done | sort -u))"
     fi
 
-    print_output ""
+    print_ln
     for INTERFACE_CAND in "${INTERFACE_CANDIDATES[@]}"; do
       print_output "[*] Possible interface candidate detected: $ORANGE$INTERFACE_CAND$NC"
       # INTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001
@@ -1011,7 +1011,7 @@ get_networking_details_emulation() {
 
       # filter for non usable IP addresses:
       if ! [[ "$IP_ADDRESS_" == "127."* ]] && ! [[ "$IP_ADDRESS_" == "0.0.0.0" ]]; then
-        print_output ""
+        print_ln
         print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC"
         # get the network device
         NETWORK_DEVICE="$(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 | tr -dc '[:print:]')"
@@ -1133,7 +1133,7 @@ get_networking_details_emulation() {
   else
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
   fi
-  print_output ""
+  print_ln
 }
 
 iterate_vlans() {
@@ -1237,10 +1237,10 @@ setup_network_emulation() {
     write_script_exec "ip addr add $HOSTIP/24 dev ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh 1
   fi
 
-  print_output ""
+  print_ln
   print_output "[*] Current host network:"
   ifconfig | tee -a "$LOG_FILE"
-  print_output ""
+  print_ln
   write_network_config_to_filesystem
 }
 
@@ -1303,7 +1303,6 @@ nvram_check() {
  
     if [[ -f "$LOG_PATH_MODULE"/nvram/nvram_files_final ]]; then
       if [[ "$(wc -l "$LOG_PATH_MODULE"/nvram/nvram_files_final | awk '{print $1}')" -gt 0 ]]; then
-        #print_output ""
         #print_output "[*] Identified the following NVRAM files:"
         #tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/nvram/nvram_files_final
 
@@ -1311,7 +1310,7 @@ nvram_check() {
         # store a copy in the log dir
         cp "$MNT_POINT"/firmadyne/nvram_files "$LOG_PATH_MODULE"/nvram/nvram_files_final_
 
-        print_output ""
+        print_ln
         print_output "[*] Setting up ${ORANGE}nvram_files${NC} in target filesystem:"
         tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/nvram/nvram_files_final_
       fi
@@ -1443,9 +1442,9 @@ run_qemu_final_emulation() {
   print_output "$(indent "QEMU: $ORANGE$QEMU_BIN$NC")"
   print_output "$(indent "NETWORK: $ORANGE$QEMU_NETWORK$NC")"
   print_output "$(indent "Init file $ORANGE$INIT_FILE$NC")"
-  print_output ""
+  print_ln
   print_output "[*] Starting firmware emulation $ORANGE$QEMU_BIN / $ARCH_END / $IMAGE_NAME / $IP_ADDRESS_$NC ... use Ctrl-a + x to exit"
-  print_output ""
+  print_ln
 
   write_script_exec "echo -e \"[*] Starting firmware emulation $QEMU_BIN / $ARCH_END / $IMAGE_NAME / $IP_ADDRESS_ ... use Ctrl-a + x to exit\n\"" "$ARCHIVE_PATH"/run.sh 0
  
@@ -1466,7 +1465,7 @@ check_online_stat() {
     if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
       print_output "[+] Host with $ORANGE$IP_ADDRESS_$GREEN is reachable via ICMP."
       ping -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE" || true
-      print_output ""
+      print_ln
       echo -e "${GREEN}[+] Host with $ORANGE$IP_ADDRESS_$GREEN is reachable via ICMP." >> "$TMP_DIR"/online_stats.tmp
       SYS_ONLINE=1
     fi
@@ -1474,16 +1473,16 @@ check_online_stat() {
     if [[ "$(hping3 -n -c 1 "$IP_ADDRESS_" 2>/dev/null | grep -c "^len=")" -gt 0 ]]; then
       print_output "[+] Host with $ORANGE$IP_ADDRESS_$GREEN is reachable on TCP port 0 via hping."
       hping3 -n -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE" || true
-      print_output ""
+      print_ln
       if [[ "$SYS_ONLINE" -ne 1 ]]; then
         if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
           print_output "[+] Host with $ORANGE$IP_ADDRESS_$GREEN is reachable via ICMP."
           ping -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE"
-          print_output ""
+          print_ln
           echo -e "${GREEN}[+] Host with $ORANGE$IP_ADDRESS_$GREEN is reachable via ICMP." >> "$TMP_DIR"/online_stats.tmp
         fi
       fi
-      print_output ""
+      print_ln
       echo -e "${GREEN}[+] Host with $ORANGE$IP_ADDRESS_$GREEN is reachable on TCP port 0 via hping." >> "$TMP_DIR"/online_stats.tmp
       SYS_ONLINE=1
     fi
@@ -1501,7 +1500,7 @@ check_online_stat() {
     sleep 130
     print_output "[*] Starting Nmap portscan for $ORANGE$IP_ADDRESS_$NC"
     write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
-    print_output ""
+    print_ln
     ping -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE" || true
     nmap -Pn -n -A -sSV -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG"
 
@@ -1520,7 +1519,7 @@ check_online_stat() {
       local PORTS_TO_SCAN=""
 
       # write all services into a one liner for output:
-      print_output ""
+      print_ln
       if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
         TCP_SERV=$(IFS=$' '; echo "${TCP_SERVICES_STARTUP[*]}")
         TCP_SERV_STARTUP=${TCP_SERV//\ /,}
@@ -1542,7 +1541,7 @@ check_online_stat() {
         UDP_SERV_NETSTAT=${UDP_SERV//\ /,}
         print_output "[*] UDP Services detected via netstat: $ORANGE$UDP_SERV_NETSTAT$NC"
       fi
-      print_output ""
+      print_ln
 
       # work with this:
       TCP_SERV_ARR=( "${TCP_SERVICES_STARTUP[@]}" "${TCP_SERV_NETSTAT_ARR[@]}" )
@@ -1598,7 +1597,7 @@ check_online_stat() {
   pkill -9 -f "tail -F $LOG_PATH_MODULE/qemu.final.serial.log" || true &>/dev/null
 
   if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]] && [[ "$SYS_ONLINE" -eq 1 ]]; then
-    print_output ""
+    print_ln
     print_output "[*] Nmap scanning results for $ORANGE$IP_ADDRESS_$NC: "
     write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
     tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/"$NMAP_LOG"
@@ -1630,9 +1629,9 @@ create_emulation_archive() {
     RANDOM_ID="$RANDOM"
     tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz "$ARCHIVE_PATH"
     if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz ]]; then
-      print_output ""
+      print_ln
       print_output "[*] Qemu emulation archive created in log directory." "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME-$RANDOM_ID.tar.gz"
-      print_output ""
+      print_ln
     fi
   else
     print_output "[-] No run script created ..."
