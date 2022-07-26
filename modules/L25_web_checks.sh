@@ -212,7 +212,7 @@ web_access_crawler() {
       print_output "[-] System not responding - Stopping crawling"
       break
     fi
-    echo "." | tr -d "\n" 2>/dev/null ||true
+    print_dot
     WEB_FILE="$(basename "$WEB_PATH")"
     echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/$WEB_FILE$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
     timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true

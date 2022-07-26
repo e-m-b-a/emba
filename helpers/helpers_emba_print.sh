@@ -150,6 +150,11 @@ print_ln()
   print_output "" "$LOG_SETTING"
 }
 
+print_dot()
+{
+  echo "." | tr -d "\n" 2>/dev/null ||true
+}
+
 write_log()
 {
   readarray TEXT_ARR <<< "$1"

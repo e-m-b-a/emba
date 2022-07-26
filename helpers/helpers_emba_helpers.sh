@@ -33,13 +33,13 @@ wait_for_pid() {
   #print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
   for PID in "${WAIT_PIDS[@]}"; do
     #print_output "[*] wait pid protection: $PID"
-    echo "." | tr -d "\n" 2>/dev/null ||true
+    print_dot
     if ! [[ -e /proc/"$PID" ]]; then
       continue
     fi
     while [[ -e /proc/"$PID" ]]; do
       #print_output "[*] wait pid protection - running pid: $PID"
-      echo "." | tr -d "\n" 2>/dev/null ||true
+      print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
         killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
@@ -76,7 +76,7 @@ max_pids_protection() {
     # recreate the arry with the current running PIDS
     WAIT_PIDS=()
     WAIT_PIDS=("${TEMP_PIDS[@]}")
-    echo "." | tr -d "\n" 2>/dev/null || true
+    print_dot
   done
 }
 
