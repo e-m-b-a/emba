@@ -123,7 +123,7 @@ cleaner() {
   # Remove status bar and reset screen
   remove_status_bar
   # stop inotifywait on host
-  pkill -f "inotifywait.*$LOG_DIR.*"
+  pkill -f "inotifywait.*$LOG_DIR.*" || true
 
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
