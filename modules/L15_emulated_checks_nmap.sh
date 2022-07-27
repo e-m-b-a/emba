@@ -75,7 +75,7 @@ check_live_nmap_basic() {
     done
   else
     # if no Nmap results are found we initiate a scan
-    nmap -Pn -n -sSV -A "$IP_ADDRESS_" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP_ADDRESS_" | tee -a "$LOG_FILE"
+    nmap -Pn -n -sSV -A --host-timeout 30m "$IP_ADDRESS_" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP_ADDRESS_" | tee -a "$LOG_FILE"
   fi
   print_ln
 

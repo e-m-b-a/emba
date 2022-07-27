@@ -1502,7 +1502,7 @@ check_online_stat() {
     write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
     print_ln
     ping -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE" || true
-    nmap -Pn -n -A -sSV -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG"
+    nmap -Pn -n -A -sSV --host-timeout 30m -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG"
 
     mapfile -t TCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t UDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
@@ -1583,7 +1583,7 @@ check_online_stat() {
       if [[ "$TCP_SERV" =~ ^T:[0-9].* ]] || [[ "$UDP_SERV" =~ ^U:[0-9].* ]]; then
         print_output "[*] Starting Nmap portscan for detected services ($ORANGE$PORTS_TO_SCAN$NC) started during system init on $ORANGE$IP_ADDRESS_$NC"
         write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
-        nmap -Pn -n -sSUV -p "$PORTS_TO_SCAN" -oA "$LOG_PATH_MODULE"/nmap_emba_"$IPS_INT_VLAN_CFG_mod"_dedicated "$IP_ADDRESS_" | tee -a "$LOG_PATH_MODULE"/"$NMAP_LOG" || true
+        nmap -Pn -n -sSUV --host-timeout 30m -p "$PORTS_TO_SCAN" -oA "$LOG_PATH_MODULE"/nmap_emba_"$IPS_INT_VLAN_CFG_mod"_dedicated "$IP_ADDRESS_" | tee -a "$LOG_PATH_MODULE"/"$NMAP_LOG" || true
       fi
     fi
   fi

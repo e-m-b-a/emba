@@ -55,7 +55,7 @@ if (${FIRMAE_BOOT}); then
       if [ -d "${FILE}" ]; then
         continue
       fi
-      if [ ! -e "${FILE}" ]; then # can't found original file (symbolic link or just file)
+      if [ ! -e "${FILE}" ]; then # could not find original file (symbolic link or just file)
         if [ -h "${FILE}" ]; then # remove old symbolic link
           ${BUSYBOX} rm "${FILE}"
         fi
