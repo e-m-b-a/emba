@@ -304,7 +304,7 @@ main()
   fi
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
-  export DISABLE_STATUS_BAR=0
+  export DISABLE_STATUS_BAR=1
   export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
@@ -325,7 +325,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bA:cC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUxX:yY:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -337,6 +337,9 @@ main()
       b)
         banner_printer
         exit 0
+        ;;
+      B)
+        export DISABLE_STATUS_BAR=0
         ;;
       C)
         # container extract only works outside the docker container
@@ -695,7 +698,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:cC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUX:yY:WxzZ: OPT ; do
+    while getopts a:BA:cC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUX:yY:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
