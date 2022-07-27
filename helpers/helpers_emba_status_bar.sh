@@ -303,7 +303,7 @@ update_box_status_2() {
 }
 
 remove_status_bar() {
-  if [[ -f "$STATUS_TMP_PATH" ]] ; then
+  if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "$STATUS_TMP_PATH" 2> /dev/null || true
   fi
   sleep 1
