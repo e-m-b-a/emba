@@ -87,7 +87,7 @@ check_docker_env() {
     if [[ "$WSL" -eq 1 ]]; then
       echo -e "$RED""    Is dockerd running (e.g., sudo dockerd --iptables=false &)""$NC"
     else
-      echo -e "$RED""    run   \$systemctl restart NetworkManager docker   to restart or reset it otherwise (\$ docker network rm emba_runs)""$NC"
+      echo -e "$RED""    Use  \$systemctl restart NetworkManager docker or reset the docker interface manually (\$ docker network rm emba_runs)""$NC"
     fi
     DEP_ERROR=1
   else
