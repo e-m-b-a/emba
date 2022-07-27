@@ -153,7 +153,7 @@ create_emulation_filesystem() {
 
   print_output "[*] Create Qemu filesystem for emulation - $ROOT_PATH.\\n"
   IMAGE_SIZE="$(du -b --max-depth=0 "$ROOT_PATH" | awk '{print $1}')"
-  IMAGE_SIZE=$((IMAGE_SIZE + 50 * 1024 * 1024))
+  IMAGE_SIZE=$((IMAGE_SIZE + 200 * 1024 * 1024))
 
   print_output "[*] Size of filesystem for emulation - $ORANGE$IMAGE_SIZE$NC.\\n"
   print_output "[*] Name of filesystem for emulation - $ORANGE$IMAGE_NAME$NC.\\n"
