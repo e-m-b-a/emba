@@ -88,12 +88,12 @@ output_overview() {
     EMBA_COMMAND_ORIG="$(cat "$TMP_DIR"/emba_command.log)"
     print_output "[+] Tested firmware:""$ORANGE"" ""$FW_PATH_ORIG""$NC"
     write_csv_log "FW_path" "$FW_PATH_ORIG" "NA"
-    print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND_ORIG""$NC"
+    print_output "[+] EMBA start command:""$ORANGE"" ""$EMBA_COMMAND_ORIG""$NC"
     write_csv_log "emba_command" "$EMBA_COMMAND_ORIG" "NA"
   else
     print_output "[+] Tested firmware:""$ORANGE"" ""$FIRMWARE_PATH""$NC"
     write_csv_log "FW_path" "$FIRMWARE_PATH" "NA"
-    print_output "[+] Emba start command:""$ORANGE"" ""$EMBA_COMMAND""$NC"
+    print_output "[+] EMBA start command:""$ORANGE"" ""$EMBA_COMMAND""$NC"
     write_csv_log "emba_command" "$EMBA_COMMAND" "NA"
   fi
 
