@@ -103,14 +103,22 @@ dlink_enc_img_extractor(){
   # Now it should be a .ubi file thats somewhat readable and extractable via ubireader
   print_ln
   if [[ -f "$EXTRACTION_FILE_" ]]; then
-    print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
-    print_ln
-    print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "DLink enc_img decryptor" "$DLINK_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
-    export FIRMWARE_PATH="$EXTRACTION_FILE_"
-    if [[ -z "${FW_VENDOR:-}" ]]; then
-      FW_VENDOR="D-Link"
+    UBI_OUT=$(file "$EXTRACTION_FILE_")
+    if [[ "$UBI_OUT" == *"UBI image, version"* ]]; then
+      print_output "[+] Decrypted D-Link firmware file to $ORANGE$EXTRACTION_FILE_$NC"
+      print_ln
+      print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
+      write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+      write_csv_log "DLink enc_img decryptor" "$DLINK_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
+      export FIRMWARE_PATH="$EXTRACTION_FILE_"
+      if [[ -z "${FW_VENDOR:-}" ]]; then
+        FW_VENDOR="D-Link"
+      fi
+      EXTRACTION_DIR="$LOG_DIR/firmware/dlink_ubi_extracted"
+      mkdir -p "$EXTRACTION_DIR" || true
+      ubi_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
+    else
+      print_output "[-] Further extraction of D-Link firmware file via deep extraction"
     fi
   else
     print_output "[-] Decryption of D-Link firmware file failed"

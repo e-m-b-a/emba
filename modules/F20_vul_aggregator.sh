@@ -751,7 +751,7 @@ cve_extractor() {
   write_anchor "cve_$BINARY"
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_ln
-    grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
+    grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE" || true
     print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
     print_ln
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then

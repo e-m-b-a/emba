@@ -655,8 +655,8 @@ umount_qemu_image() {
   disable_strict_mode "$STRICT_MODE" 0
   if ! umount "${DEVICE_}"; then
     print_output "[*] Warning: Normal umount was not successful. Trying to enforce unmounting of $ORANGE$DEVICE_$NC."
-    umount -l "${DEVICE_}"
-    umount -f "${DEVICE_}"
+    umount -l "${DEVICE_}" || true
+    umount -f "${DEVICE_}" || true
     sleep 5
   fi
   enable_strict_mode "$STRICT_MODE" 0
