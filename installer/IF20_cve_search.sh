@@ -36,9 +36,9 @@ IF20_cve_search() {
       # we always need the cve-search stuff:
       if ! [[ -d external/cve-search ]]; then
         git clone https://github.com/cve-search/cve-search.git external/cve-search
-        cd ./external/cve-search/ || exit 1
+        cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
       else
-        cd ./external/cve-search/ || exit 1
+        cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
         git pull
       fi
 
@@ -85,19 +85,19 @@ IF20_cve_search() {
     case ${ANSWER:0:1} in
       y|Y )
 
-        cd "$HOME_PATH" || exit 1
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
         # get trickest repository
         if ! [[ -d external/trickest-cve ]]; then
           git clone https://github.com/trickest/cve.git external/trickest-cve
         else
-          cd external/trickest-cve || exit 1
+          cd external/trickest-cve || ( echo "Could not install EMBA component Trickest" && exit 1 )
           git pull
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
         fi
 
         CVE_INST=1
         echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
-        cd ./external/cve-search/ || exit 1
+        cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
             CVE_INST=0
             echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
@@ -141,19 +141,19 @@ IF20_cve_search() {
           else
             echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
           fi
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
           sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
           chmod +x config/emba_updater
           echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for EMBA is located in config/emba_updater""$NC"
           echo -e "$MAGENTA""$BOLD""For automatic updates it should be checked and copied to /etc/cron.daily/""$NC"
         fi
-        cd "$HOME_PATH" || exit 1
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
       ;;
     esac
   fi
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component CISA.gov database" && exit 1 )
 
     # see https://www.cisa.gov/known-exploited-vulnerabilities-catalog
     print_file_info "known_exploited_vulnerabilities.csv" "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"

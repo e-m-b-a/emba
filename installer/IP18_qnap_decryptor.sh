@@ -20,7 +20,7 @@ IP18_qnap_decryptor() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component QNAP decryptor" && exit 1 )
     INSTALL_APP_LIST=()
     print_tool_info "gcc" 1
     print_file_info "PC1.c" "Decryptor for QNAP firmware images" "https://gist.githubusercontent.com/galaxy4public/0420c7c9a8e3ff860c8d5dce430b2669/raw/1f8a42c0525efb188c0165c6a4cb205e82f851e2/pc1.c" "external/pc1.c"
@@ -38,12 +38,12 @@ IP18_qnap_decryptor() {
         download_file "PC1.c" "https://gist.githubusercontent.com/galaxy4public/0420c7c9a8e3ff860c8d5dce430b2669/raw/1f8a42c0525efb188c0165c6a4cb205e82f851e2/pc1.c" "external/pc1.c"
 
         if [[ -f "external/pc1.c" ]]; then
-          cd ./external || exit 1
+          cd ./external || ( echo "Could not install EMBA component QNAP decryptor" && exit 1 )
           echo -e "[*] Compiling QNAP decryptor"
           gcc -pipe -Wall -O0 -ggdb -o PC1 pc1.c
           chmod +x ./PC1
 
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component QNAP decryptor" && exit 1 )
 
           if [[ -f "external/PC1" ]] ; then
             echo -e "$GREEN""QNAP decryptor installed successfully""$NC"

@@ -51,11 +51,11 @@ I199_default_tools_github() {
         pip3 install pillow 2>/dev/null
         echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"
         git clone https://github.com/p4cx/pixd_image external/pixd
-        cd ./external/pixd/ || exit 1
+        cd ./external/pixd/ || ( echo "Could not install EMBA component pixd" && exit 1 )
         make
         mv pixd ../pixde
         mv pixd_png.py ../pixd_png.py
-        cd "$HOME_PATH" || exit 1
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component pixd" && exit 1 )
         rm -r ./external/pixd/
         # pixd installation finished
       ;;

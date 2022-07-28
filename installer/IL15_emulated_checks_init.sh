@@ -20,7 +20,7 @@ IL15_emulated_checks_init() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     INSTALL_APP_LIST=()
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component system emulator" && exit 1 )
     print_git_info "routersploit" "m-1-k-3/routersploit" "The RouterSploit Framework is an open-source exploitation framework dedicated to embedded devices. (EMBA fork)"
     print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
     print_git_info "testssl" "drwetter/testssl.sh.git" "TestSSL.sh"
@@ -77,7 +77,7 @@ IL15_emulated_checks_init() {
         git clone --branch dev_rework https://github.com/GH0st3rs/routersploit.git external/routersploit
       fi
 
-      cd external/routersploit || exit 1
+      cd external/routersploit || ( echo "Could not install EMBA component routersploit" && exit 1 )
 
       if ! [[ -f "external/routersploit/docs/routersploit_patch" ]]; then
         # is already applied in the used fork (leave this here for future usecases):
@@ -90,7 +90,7 @@ IL15_emulated_checks_init() {
       python3 -m pip install -r requirements.txt
       sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
 
-      cd "$HOME_PATH" || exit 1
+      cd "$HOME_PATH" || ( echo "Could not install EMBA component routersploit" && exit 1 )
 
       ;;
     esac

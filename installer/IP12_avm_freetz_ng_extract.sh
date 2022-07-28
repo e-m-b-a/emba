@@ -21,7 +21,7 @@ IP12_avm_freetz_ng_extract() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     INSTALL_APP_LIST=()
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
   
     print_file_info "execstack" "execstack for Freetz-NG" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/freetz-ng/execstack_0.0.20131005-1+b10_amd64.deb"
     print_tool_info "python3" 1
@@ -113,7 +113,7 @@ IP12_avm_freetz_ng_extract() {
           chmod 777 -R external/freetz-ng
           su freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
 
-          cd external/freetz-ng || exit 1
+          cd external/freetz-ng || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
 
           #if [[ $IN_DOCKER -eq 1 ]]; then
           #  ln -s /usr/bin/python3 /usr/bin/python
@@ -123,7 +123,7 @@ IP12_avm_freetz_ng_extract() {
           # we currently running into an error that does not hinder us in using Freetz-NG
           sudo -u freetzuser make || true
           sudo -u freetzuser make tools
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
           chown -R root:root external/freetz-ng
           userdel freetzuser
           if [[ -d external/freetz-ng/source ]]; then

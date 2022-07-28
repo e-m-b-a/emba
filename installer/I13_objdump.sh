@@ -50,11 +50,11 @@ I13_objdump() {
           download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
           if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
             tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
-            cd external/"$BINUTIL_VERSION_NAME"/ || exit 1
+            cd external/"$BINUTIL_VERSION_NAME"/ || ( echo "Could not install EMBA component binutils" && exit 1 )
             echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
             ./configure --enable-targets=all
             make
-            cd "$HOME_PATH" || exit 1
+            cd "$HOME_PATH" || ( echo "Could not install EMBA component binutils" && exit 1 )
           fi
           if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
             mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"

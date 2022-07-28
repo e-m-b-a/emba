@@ -53,9 +53,9 @@ IP00_extractors(){
         if ! [[ -d external/payload_dumper ]]; then
           git clone https://github.com/vm03/payload_dumper.git external/payload_dumper
         else
-          cd external/payload_dumper || exit 1 
+          cd external/payload_dumper || ( echo "Could not install EMBA component payload dumper" && exit 1 )
           git pull
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component payload dumper" && exit 1 )
         fi
 
         if ! [[ -f "./external/buffalo-enc.elf" ]] ; then
@@ -63,11 +63,12 @@ IP00_extractors(){
           download_file "buffalo-enc.c" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-enc.c" "external/buffalo-enc.c"
           download_file "buffalo-lib.c" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.c" "external/buffalo-lib.c"
           download_file "buffalo-lib.h" "https://git-us.netdef.org/projects/OSR/repos/openwrt-buildroot/raw/tools/firmware-utils/src/buffalo-lib.h" "external/buffalo-lib.h"
-          cd ./external || exit 1
+          cd ./external || ( echo "Could not install EMBA component buffalo decryptor" && exit 1 )
           sed -i 's/#include "buffalo-lib.h"/#include "buffalo-lib.h"\n#include "buffalo-lib.c"/g' buffalo-enc.c
           gcc -o buffalo-enc.elf buffalo-enc.c
           rm buffalo-enc.c buffalo-lib.c buffalo-lib.h
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component buffalo decryptor" && exit 1 )
+
         fi
         if [[ -f "./external/buffalo-enc.elf" ]] ; then
           echo -e "$GREEN""Buffalo decryptor installed successfully""$NC"
