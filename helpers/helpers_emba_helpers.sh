@@ -235,5 +235,5 @@ disable_strict_mode() {
 
 restore_permissions() {
   print_output "[*] Restoring directory permissions" "no_log"
-  chown ${SUDO_USER:-${USER}}:$(id "${SUDO_USER:-${USER}}" -g ) "$LOG_DIR" -R
+  chown "${SUDO_USER:-${USER}}":"$(id "${SUDO_USER:-${USER}}" -g)" "$LOG_DIR" -R
 }
