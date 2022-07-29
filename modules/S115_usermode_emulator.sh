@@ -636,7 +636,7 @@ print_filesystem_fixes() {
   # MISSING_AREAS array from emulate_strace_run
   if [[ "${#MISSING_AREAS[@]}" -ne 0 ]]; then
     sub_module_title "Filesystem fixes"
-    print_output "[*] Emba has auto-generated the files during runtime."
+    print_output "[*] EMBA has auto-generated the files during runtime."
     print_output "[*] For persistence you could generate it manually in your filesystem.\\n"
     for MISSING_FILE in "${MISSING_AREAS[@]}"; do
       print_output "[*] Missing file: $ORANGE$MISSING_FILE$NC"

@@ -122,7 +122,7 @@ update_box_system_load() {
     else
       ACTUAL_CPU=0
     fi
-    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( LINES - 3 ))" "$ACTUAL_CPU" "$(( LINES - 2 ))" "$MEM_PERCENTAGE_STR" "$(( LINES - 1 ))" "$DISK_PERCENTAGE_STR"
+    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( LINES - 3 ))" "$ACTUAL_CPU" "$(( LINES - 2 ))" "$MEM_PERCENTAGE_STR" "$(( LINES - 1 ))" "$DISK_PERCENTAGE_STR" || true
     update_cpu &
     sleep .2
     if [[ -f "$STATUS_TMP_PATH" ]] ; then
@@ -177,7 +177,7 @@ update_box_status() {
     RUNTIME="$(date -d@$(( $(date +%s) - "$DATE_STR" )) -u +%H:%M:%S)"
     LOG_DIR_SIZE="$(du -sh "$LOG_DIR" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
     RUN_EMBA_PROCESSES="$(ps -C emba.sh | wc -l || true)"
-    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( LINES - 3 ))" "$(status_util_str 0 "$RUNTIME")" "$(( LINES - 2 ))" "$(status_util_str 1 "$LOG_DIR_SIZE")" "$(( LINES - 1 ))" "$(status_util_str 2 "$RUN_EMBA_PROCESSES")"
+    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( LINES - 3 ))" "$(status_util_str 0 "$RUNTIME")" "$(( LINES - 2 ))" "$(status_util_str 1 "$LOG_DIR_SIZE")" "$(( LINES - 1 ))" "$(status_util_str 2 "$RUN_EMBA_PROCESSES")" || true
     sleep .5
     if [[ -f "$STATUS_TMP_PATH" ]] ; then
       BOX_SIZE="$(sed '1q;d' "$STATUS_TMP_PATH" 2> /dev/null || true)"
@@ -244,7 +244,7 @@ update_box_modules() {
     STARTED_MODULE_STR="$(grep -c "starting" "$LOG_DIR/emba.log" 2> /dev/null || true )"
     FINISHED_MODULE_STR="$(grep -c "finished" "$LOG_DIR/emba.log" 2> /dev/null || true )"
     LAST_FINISHED_MODULE_STR="$(grep "finished" "$LOG_DIR/emba.log" 2> /dev/null | tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
-    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 $((STARTED_MODULE_STR - FINISHED_MODULE_STR)))" "$(( LINES - 2 ))" "$(module_util_str 1 "$LAST_FINISHED_MODULE_STR")" "$(( LINES - 1 ))" "$(module_util_str 2 "$FINISHED_MODULE_STR/$COUNT_MODULES")"
+    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 $((STARTED_MODULE_STR - FINISHED_MODULE_STR)))" "$(( LINES - 2 ))" "$(module_util_str 1 "$LAST_FINISHED_MODULE_STR")" "$(( LINES - 1 ))" "$(module_util_str 2 "$FINISHED_MODULE_STR/$COUNT_MODULES")" || true
     sleep 1
     if [[ -f "$STATUS_TMP_PATH" ]] ; then
       BOX_SIZE="$(sed '1q;d' "$STATUS_TMP_PATH" 2> /dev/null || true)"
@@ -294,7 +294,7 @@ update_box_status_2() {
     if [[ "$ERROR_STR" == "/0" || "$ERROR_STR" == "/" ]] ; then
       ERROR_STR=""
     fi
-    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( LINES - 3 ))" "$(status_2_util_str 0 "$PHASE_STR")" "$(( LINES - 2 ))" "$(status_2_util_str 1 "$MODE_STR$ERROR_STR")" "$(( LINES - 1 ))" "$(status_2_util_str 2 "")"
+    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( LINES - 3 ))" "$(status_2_util_str 0 "$PHASE_STR")" "$(( LINES - 2 ))" "$(status_2_util_str 1 "$MODE_STR$ERROR_STR")" "$(( LINES - 1 ))" "$(status_2_util_str 2 "")" || true
     sleep .5
     if [[ -f "$STATUS_TMP_PATH" ]] ; then
       BOX_SIZE="$(sed '1q;d' "$STATUS_TMP_PATH" 2> /dev/null || true)"

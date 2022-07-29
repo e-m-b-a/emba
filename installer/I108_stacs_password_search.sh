@@ -22,7 +22,7 @@ I108_stacs_password_search() {
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     INSTALL_APP_LIST=()
   
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
   
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
   
@@ -42,12 +42,12 @@ I108_stacs_password_search() {
         if ! [[ -d external/stacs-rules ]]; then
           git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
         fi
-        cd ./external/stacs-rules || exit 1
+        cd ./external/stacs-rules || ( echo "Could not install EMBA component STACS" && exit 1 )
         find rules -name "*.yar" | sed 's/rules\///' | xargs -I{} sh -c "\
         mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
         touch ./tests/fixtures/{}/{negative,positive}/.gitignore || true"
         pip3 install stacs 2>/dev/null
-        cd "$HOME_PATH" || exit 1
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
         if command -v stacs > /dev/null ; then
           echo -e "$GREEN""STACS installed successfully""$NC"
         else

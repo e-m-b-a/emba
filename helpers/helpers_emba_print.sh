@@ -150,6 +150,11 @@ print_ln()
   print_output "" "$LOG_SETTING"
 }
 
+print_dot()
+{
+  echo "." | tr -d "\n" 2>/dev/null ||true
+}
+
 write_log()
 {
   readarray TEXT_ARR <<< "$1"
@@ -451,8 +456,8 @@ print_help()
   echo -e "$CYAN""-g""$NC""                Create grep-able log file in [log_path]/fw_grep.log"
   echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
   echo -e "$CYAN""-E""$NC""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
-  echo -e "$CYAN""-p [PROFILE]""$NC""      Emba starts with a pre-defined profile (stored in ./scan-profiles)"
-#  echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
+  echo -e "$CYAN""-p [PROFILE]""$NC""      EMBA starts with a pre-defined profile (stored in ./scan-profiles)"
+  echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
   echo -e "\\nDeveloper options"
   echo -e "$CYAN""-D""$NC""                Developer mode - EMBA runs on the host without container protection"
   echo -e "$CYAN""-S""$NC""                STRICT mode - developer option to improve code quality (not enabled by default)"

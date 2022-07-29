@@ -33,13 +33,13 @@ wait_for_pid() {
   #print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
   for PID in "${WAIT_PIDS[@]}"; do
     #print_output "[*] wait pid protection: $PID"
-    echo "." | tr -d "\n" 2>/dev/null ||true
+    print_dot
     if ! [[ -e /proc/"$PID" ]]; then
       continue
     fi
     while [[ -e /proc/"$PID" ]]; do
       #print_output "[*] wait pid protection - running pid: $PID"
-      echo "." | tr -d "\n" 2>/dev/null ||true
+      print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
         killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
@@ -76,13 +76,19 @@ max_pids_protection() {
     # recreate the arry with the current running PIDS
     WAIT_PIDS=()
     WAIT_PIDS=("${TEMP_PIDS[@]}")
-    echo "." | tr -d "\n" 2>/dev/null || true
+    print_dot
   done
 }
 
 cleaner() {
   print_output "[*] User interrupt detected!" "no_log"
   print_output "[*] Final cleanup started." "no_log"
+
+  # stop inotifywait on host
+  pkill -f "inotifywait.*$LOG_DIR.*" || true
+
+  # Remove status bar and reset screen
+  remove_status_bar
 
   # if S115 is found only once in main.log the module was started and we have to clean it up
   # additionally we need to check some variable from a running EMBA instance
@@ -119,11 +125,6 @@ cleaner() {
   if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
     kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
-
-  # Remove status bar and reset screen
-  remove_status_bar
-  # stop inotifywait on host
-  pkill -f "inotifywait.*$LOG_DIR.*"
 
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true

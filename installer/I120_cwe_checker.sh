@@ -90,9 +90,9 @@ I120_cwe_checker() {
           if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
           mkdir ./external/cwe_checker 2>/dev/null
           git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
-          cd external/cwe_checker || exit 1
+          cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
           make all GHIDRA_PATH=./external/ghidra/ghidra_10.1.2_PUBLIC
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
           #rm -r -f "$HOME""/.cargo/"

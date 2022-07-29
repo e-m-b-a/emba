@@ -202,12 +202,12 @@ add_link_tags() {
 
     # Exploit links and additional files
     if ( grep -a -q -E 'EDB ID:' "$LINK_FILE" ) ; then
-      readarray -t EXPLOITS_IDS < <( grep -a -n -o -E ".*EDB ID: ([0-9]*)[\ ]?*.*" "$LINK_FILE" | uniq )
+      readarray -t EXPLOITS_IDS < <( grep -a -n -o -E ".*EDB ID: ([0-9]*)[\ ]?*.*" "$LINK_FILE" | uniq || true)
       for EXPLOIT_ID in "${EXPLOITS_IDS[@]}" ; do
         EXPLOIT_ID_LINE="$(echo "$EXPLOIT_ID" | cut -d ":" -f 1)"
         EXPLOIT_ID_STRING="$(echo "$EXPLOIT_ID" | cut -d ":" -f 2-)"
         if [[ -n "$EXPLOIT_ID_STRING" ]] ; then
-          EXPLOIT_ID="$(echo "$EXPLOIT_ID_STRING" | grep -a -o -E "EDB ID: ([0-9]*)" | cut -d ":" -f 2 | sed -e 's/^[[:space:]]*//')"
+          EXPLOIT_ID="$(echo "$EXPLOIT_ID_STRING" | grep -a -o -E "EDB ID: ([0-9]*)" | cut -d ":" -f 2 | sed -e 's/^[[:space:]]*//' || true)"
           EXPLOIT_FILE="$LOG_DIR""/f20_vul_aggregator/exploit/""$EXPLOIT_ID"".txt"
           if [[ -f "$EXPLOIT_FILE" ]] ; then
             # generate exploit file

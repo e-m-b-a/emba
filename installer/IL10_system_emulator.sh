@@ -21,7 +21,7 @@ IL10_system_emulator() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     INSTALL_APP_LIST=()
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component system emulator" && exit 1 )
 
     print_tool_info "busybox-static" 1
     print_tool_info "bash-static" 1

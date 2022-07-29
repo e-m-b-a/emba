@@ -78,7 +78,7 @@ wait_vt_analysis() {
   while [[ "$VT_ANALYSIS_RESP" != "completed" ]]; do
     VT_ANALYSIS_RESP=$(curl -m 10 -s --request GET --url "https://www.virustotal.com/api/v3/analyses/$VT_UPLOAD_ID" --header "x-apikey: $VT_API_KEY"  | jq -r '.data.attributes.status')
     if [[ "$VT_ANALYSIS_RESP" != "completed" && "$VT_ANALYSIS_RESP" == "queued" ]]; then
-      echo "." | tr -d "\n" 2>/dev/null
+      print_dot
     else
       print_output "[*] Analysis of file $ORANGE$FIRMWARE_PATH$NC is $VT_ANALYSIS_RESP."
     fi

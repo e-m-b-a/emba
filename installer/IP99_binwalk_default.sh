@@ -20,7 +20,7 @@ IP99_binwalk_default() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
     INSTALL_APP_LIST=()
 
     # currently we use the debian package of binwalk:
@@ -105,9 +105,9 @@ IP99_binwalk_default() {
           if ! [[ -d external/binwalk/yaffshiv ]]; then
             git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
           fi
-          cd ./external/binwalk/yaffshiv/ || exit 1
+          cd ./external/binwalk/yaffshiv/ || ( echo "Could not install EMBA component yaffshiv" && exit 1 )
           python3 setup.py install
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component yaffshiv" && exit 1 )
         else
           echo -e "$GREEN""yaffshiv already installed""$NC"
         fi
@@ -131,9 +131,9 @@ IP99_binwalk_default() {
           done < ./external/binwalk/jefferson/requirements.txt
 
           pip3 install -r ./external/binwalk/jefferson/requirements.txt
-          cd ./external/binwalk/jefferson/ || exit 1
+          cd ./external/binwalk/jefferson/ || ( echo "Could not install EMBA component jefferson" && exit 1 )
           python3 ./setup.py install
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component jefferson" && exit 1 )
         else
           echo -e "$GREEN""jefferson already installed""$NC"
         fi
@@ -166,19 +166,19 @@ IP99_binwalk_default() {
           if ! [[ -d external/binwalk/ubi_reader ]]; then
             git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
           fi
-          cd ./external/binwalk/ubi_reader || exit 1
+          cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
           #git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
           #python2 setup.py install
           python3 setup.py install
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
         else
           echo -e "$GREEN""ubi_reader already installed""$NC"
         fi
 
         if ! command -v binwalk > /dev/null ; then
-          cd ./external/binwalk || exit 1
+          cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
           python3 setup.py install
-          cd "$HOME_PATH" || exit 1
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
         else
           echo -e "$GREEN""binwalk already installed""$NC"
           BINWALK_PRE_AVAILABLE=1

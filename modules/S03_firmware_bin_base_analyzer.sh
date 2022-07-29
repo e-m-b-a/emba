@@ -70,7 +70,7 @@ os_identification() {
   write_csv_log "Guessed OS" "confidential rating" "verified" "Linux root filesystems found"
 
   OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics")
-  echo "." | tr -d "\n"
+  print_dot
   declare -A OS_COUNTER=()
   local WAIT_PIDS_S03_1=()
 

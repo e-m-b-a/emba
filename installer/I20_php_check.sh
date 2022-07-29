@@ -21,7 +21,7 @@ I20_php_check() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
   
-    cd "$HOME_PATH" || exit 1
+    cd "$HOME_PATH" || ( echo "Could not install EMBA component iniscan" && exit 1 )
     INSTALL_APP_LIST=()
   
     echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
@@ -43,10 +43,10 @@ I20_php_check() {
           mkdir external/iniscan
         fi
         download_file "iniscan/composer.phar" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
-        cd ./external/iniscan || exit 1
+        cd ./external/iniscan || ( echo "Could not install EMBA component iniscan" && exit 1 )
         php composer.phar build --no-interaction || true
         php composer.phar global require psecio/iniscan --no-interaction || true
-        cd "$HOME_PATH" || exit 1
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component iniscan" && exit 1 )
         cp -r "/root/.config/composer/vendor/." "./external/iniscan/"
       ;;
     esac

@@ -84,7 +84,7 @@ wait_for_extractor() {
   for PID in "${WAIT_PIDS[@]}"; do
     local running=1
     while [[ $running -eq 1 ]]; do
-      echo "." | tr -d "\n"
+      print_dot
       if ! pgrep -v grep | grep -q "$PID"; then
         running=0
       fi

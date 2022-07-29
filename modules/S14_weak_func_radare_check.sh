@@ -403,8 +403,8 @@ radare_print_top10_statistics() {
           write_anchor "strcpysummary"
         fi
         for BINARY in "${RESULTS[@]}" ; do
-          SEARCH_TERM="$(echo "$BINARY" | cut -d\  -f3)"
-          F_COUNTER="$(echo "$BINARY" | cut -d\  -f1)"
+          SEARCH_TERM="$(echo "$BINARY" | awk '{print $2}')"
+          F_COUNTER="$(echo "$BINARY" | awk '{print $1}')"
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
             if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then
@@ -414,7 +414,10 @@ radare_print_top10_statistics() {
             fi  
           else
             print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM")")"
-          fi  
+          fi
+          if [[ -f "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt" ]]; then
+            write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
+          fi
         done
       fi  
     done
