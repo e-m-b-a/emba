@@ -33,7 +33,7 @@ S110_yara_check()
     # if multiple instances are running we can't overwrite it
     # after updating yara rules we should remove this file and it gets regenerated
     if [[ ! -f "$DIR_COMB_YARA" ]]; then
-      find "$EXT_DIR""/yara" -xdev -iname '*.yar*' -printf 'include "%p"\n' | sort -n > "$DIR_COMB_YARA"
+      find "$EXT_DIR""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n'| sort -n > "$DIR_COMB_YARA"
     fi
 
     for YARA_S_FILE in "${FILE_ARR[@]}"; do
