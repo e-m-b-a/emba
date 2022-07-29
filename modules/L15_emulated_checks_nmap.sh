@@ -93,9 +93,10 @@ check_live_nmap_basic() {
       NMAP_CPES=$(echo "$NMAP_CPES" | grep -o "cpe:.*")
       # rewrite the string into an array:
       # NMAP_CPES_ARR=( $(echo "$NMAP_CPES" | tr "," "\n") )
-      IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
+      #IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
+      readarray -d ', ' -t NMAP_CPES_ARR < <(printf "%s" "$NMAP_CPES")
       for NMAP_CPE in "${NMAP_CPES_ARR[@]}"; do
-        #NMAP_CPE=${NMAP_CPE//\ cpe:\/}
+        NMAP_CPE=${NMAP_CPE/ /}
         NMAP_CPE=${NMAP_CPE//cpe:\/}
         # just to ensure there is some kind of version information in our entry
         if [[ "$NMAP_CPE" =~ .*[0-9].* ]]; then

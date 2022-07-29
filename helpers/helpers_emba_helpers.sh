@@ -84,6 +84,12 @@ cleaner() {
   print_output "[*] User interrupt detected!" "no_log"
   print_output "[*] Final cleanup started." "no_log"
 
+  # stop inotifywait on host
+  pkill -f "inotifywait.*$LOG_DIR.*" || true
+
+  # Remove status bar and reset screen
+  remove_status_bar
+
   # if S115 is found only once in main.log the module was started and we have to clean it up
   # additionally we need to check some variable from a running EMBA instance
   # otherwise the unmounter runs crazy in some corner cases
@@ -119,11 +125,6 @@ cleaner() {
   if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
     kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
-
-  # Remove status bar and reset screen
-  remove_status_bar
-  # stop inotifywait on host
-  pkill -f "inotifywait.*$LOG_DIR.*" || true
 
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
