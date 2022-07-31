@@ -266,6 +266,8 @@ main()
   export ROOT_PATH=()
   export FILE_ARR=()
   export LOG_GREP=0
+  export MAX_MODS=0
+  export MAX_MOD_THREADS=0
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0             # test only dependency
   export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
@@ -325,7 +327,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:op:P:QrsStT:UxX:yY:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -410,6 +412,9 @@ main()
       p)
         export PROFILE="$OPTARG"
        ;;
+      P)
+        export MAX_MODS="$OPTARG"
+        ;;
       Q)
         # this is for experimental system emulation module
         export FULL_EMULATION=1
@@ -425,6 +430,9 @@ main()
         ;;
       t)
         export THREADED=1
+        ;;
+      T)
+        export MAX_MOD_THREADS="$OPTARG"
         ;;
       U)
         export UPDATE=1
@@ -593,21 +601,25 @@ main()
   fi
 
   # calculate the maximum modules are running in parallel
-  if [[ $THREADED -eq 1 ]]; then
+  if [[ $THREADED -eq 1 ]] && [[ "$MAX_MODS" -eq 0 ]]; then
     # the maximum modules in parallel
     # rule of thumb - per core half a module, minimum 2 modules
     MAX_MODS="$(( $(grep -c ^processor /proc/cpuinfo) /2 +1))"
-    # the maximum threads per modules - if this value does not match adjust it via
-    # local MAX_MOD_THREADS=123 in module area
-    export MAX_MOD_THREADS="$(( 3* $(grep -c ^processor /proc/cpuinfo) ))"
 
     # if we have only one core we run two modules in parallel
     if [[ "$MAX_MODS" -lt 2 ]]; then
       MAX_MODS=2
     fi
     export MAX_MODS
-    print_output "    EMBA is running with $ORANGE$MAX_MODS$NC modules in parallel." "no_log"
   fi
+
+  # calculate the maximum threads per module
+  if [[ $THREADED -eq 1 ]] && [[ "$MAX_MOD_THREADS" -eq 0 ]]; then
+    # the maximum threads per modules - if this value does not match adjust it via
+    # local MAX_MOD_THREADS=123 in module area
+    export MAX_MOD_THREADS="$(( 2* $(grep -c ^processor /proc/cpuinfo) ))"
+  fi
+  print_output "    EMBA is running with $ORANGE$MAX_MODS$NC modules in parallel and $ORANGE$MAX_MOD_THREADS$NC threads per module." "no_log"
 
   # Change log output to color for web report and prepare report
   if [[ $HTML -eq 1 ]] ; then
@@ -698,7 +710,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:dDe:Ef:Fghijk:l:m:MN:op:QrsStUX:yY:WxzZ: OPT ; do
+    while getopts a:A:BcC:dDe:Ef:Fghijk:l:m:MN:op:P:QrsStT:UX:yY:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;

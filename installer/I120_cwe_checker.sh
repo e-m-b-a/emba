@@ -102,8 +102,8 @@ I120_cwe_checker() {
             echo '{"ghidra_path":"/external/ghidra/ghidra_10.1.2_PUBLIC"}' > /root/.config/cwe_checker/ghidra.json
           fi
           # save .config as we remount /root with tempfs -> now we can restore it in the module
-          mv /root/.config /external/cwe_checker/
-          mv /root/.local /external/cwe_checker/
+          mv /root/.config ./external/cwe_checker/
+          mv /root/.local ./external/cwe_checker/
         else
           echo -e "\\n""$GREEN""cwe-checker already installed - no further action performed.""$NC"
         fi

@@ -29,7 +29,6 @@ S14_weak_func_radare_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   STRCPY_CNT=0
-  RESULTS=()
 
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
@@ -138,7 +137,7 @@ S14_weak_func_radare_check()
     write_log "[*] Statistics1:$ARCH"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${#RESULTS[@]}"
+  module_end_log "${FUNCNAME[0]}" "$STRCPY_CNT"
 }
 
 radare_function_check_PPC32(){

@@ -14,11 +14,12 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Searches for files with a specified string pattern inside.
+export THREAD_PRIO=1
 
 S106_deep_key_search()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Deep analysis of files for private keys"
+  module_title "Deep analysis of files for interesting key material"
   pre_module_reporter "${FUNCNAME[0]}"
 
   local PATTERNS
@@ -39,61 +40,44 @@ S106_deep_key_search()
 }
 
 deep_key_search() {
-  local WAIT_PIDS_S106=()
-  local DEEP_S_FILE=""
-  GREP_PATTERN_COMMAND=()
+  local GREP_PATTERN_COMMAND=()
+  local PATTERN=""
+  local MATCH_FILES=()
+  local MATCH_FILE=""
+  local FILE_NAME=""
 
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
   done
-  print_ln "no_log"
-  for DEEP_S_FILE in "${FILE_ARR[@]}"; do
-    if [[ $THREADED -eq 1 ]]; then
-      deep_key_searcher "$DEEP_S_FILE" &
-      WAIT_PIDS_S106+=( "$!" )
-      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S106[@]}"
-      continue
-    else
-      deep_key_searcher "$DEEP_S_FILE"
-    fi
-  done
+  print_ln
+  readarray -t MATCH_FILES < <(grep -E -l -R "${GREP_PATTERN_COMMAND[@]}" -D skip "$LOG_DIR"/firmware 2>/dev/null || true)
+  if [[ ${#MATCH_FILES[@]} -gt 0 ]] ; then
+    for MATCH_FILE in "${MATCH_FILES[@]}" ; do
+      if ! [[ -f "$MATCH_FILE" ]]; then
+        continue
+      fi
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S106[@]}"
-  fi
-}
-
-deep_key_searcher() {
-  local DEEP_S_FILE="${1:-}"
-
-  if [[ -e "$DEEP_S_FILE" ]] ; then
-    local S_OUTPUT
-    readarray -t S_OUTPUT < <(grep -A 2 -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$DEEP_S_FILE" | tr -d '\0' | cut -c-100 || true)
-    if [[ ${#S_OUTPUT[@]} -gt 0 ]] ; then
-      echo "[+] $DEEP_S_FILE" >> "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
-      for DEEP_S_LINE in "${S_OUTPUT[@]}" ; do
-        DEEP_S_LINE="$( echo "$DEEP_S_LINE" | tr "\000-\037\177-\377" "." )"
-        echo "$DEEP_S_LINE" >> "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt"
-      done
+      FILE_NAME=$(basename "$MATCH_FILE")
+      # we just write the FILE_PATH in the beginning to the file (e.g., the log file is not available -> we create it)
+      if ! [[ -f "$LOG_PATH_MODULE"/deep_key_search_"$FILE_NAME".txt ]]; then
+        write_log "[*] FILE_PATH: $(print_path "$MATCH_FILE")" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
+        write_log "" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
+      fi
+      grep -A 2 --no-group-separator -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$MATCH_FILE" 2>/dev/null | tr -d '\0' >> "$LOG_PATH_MODULE"/deep_key_search_"$FILE_NAME".txt || true
+      print_output "[+] $(print_path "$MATCH_FILE")"
+      write_link "$LOG_PATH_MODULE""/deep_key_search_""$FILE_NAME"".txt"
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_"$(basename "$DEEP_S_FILE")"".txt" || true)
+        F_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_"$FILE_NAME"".txt" || true)
         if [[ $F_COUNT -gt 0 ]] ; then
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
       done
-      # we have to write the file link manually, because threading is messing with the file (wrong order of entries and such awful stuff)
-      OLD_LOG_FILE="$LOG_FILE"
-      LOG_FILE="$LOG_PATH_MODULE""/deep_key_search_tmp_""$(basename "$DEEP_S_FILE")"".txt"
-      print_output "[+] $(print_path "$DEEP_S_FILE")"
-      write_link "$LOG_PATH_MODULE""/deep_key_search_""$(basename "$DEEP_S_FILE")"".txt"
       print_output "$D_S_FINDINGS" 
-      if [[ -f "$LOG_FILE" ]]; then
-        cat "$LOG_FILE" >> "$OLD_LOG_FILE" 2> /dev/null || true
-        rm "$LOG_FILE" 2> /dev/null || true
-      fi
-      LOG_FILE="$OLD_LOG_FILE"
-    fi
+      write_log "" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
+      write_log "[*] Deep search results:" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
+      write_log "$D_S_FINDINGS" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
+    done
   fi
 }
 
