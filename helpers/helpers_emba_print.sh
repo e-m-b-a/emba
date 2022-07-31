@@ -289,7 +289,7 @@ color_output()
     TYPE_CHECK="$( echo "$E" | cut -c1-3 )"
     if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
       local STR=""
-      STR="$( echo "$E" | cut -c 4- )"
+      STR="$( echo "$E" | cut -c 4- || true)"
       if [[ "$TYPE_CHECK" == "[-]" ]] ; then
         TEXT="$TEXT""[""$RED""-""$NC""]""$STR"
       elif [[ "$TYPE_CHECK" == "[*]" ]] ; then

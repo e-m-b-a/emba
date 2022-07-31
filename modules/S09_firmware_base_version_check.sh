@@ -164,7 +164,7 @@ S09_firmware_base_version_check() {
 bin_string_checker() {
   for BIN in "${FILE_ARR[@]}"; do
     if [[ $RTOS -eq 0 ]]; then
-      BIN_FILE=$(file "$BIN")
+      BIN_FILE=$(file "$BIN" || true)
       # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
       if ! [[ "$BIN_FILE" == *uImage* || "$BIN_FILE" == *Kernel\ Image* || "$BIN_FILE" == *ELF* ]] ; then
         continue
