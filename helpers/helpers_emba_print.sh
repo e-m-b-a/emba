@@ -458,6 +458,8 @@ print_help()
   echo -e "$CYAN""-E""$NC""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
   echo -e "$CYAN""-p [PROFILE]""$NC""      EMBA starts with a pre-defined profile (stored in ./scan-profiles)"
   echo -e "$CYAN""-Q""$NC""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
+  echo -e "$CYAN""-P""$NC""                Overwrite auto MAX_MODS (maximum modules in parallel) configuration"
+  echo -e "$CYAN""-T""$NC""                Overwrite auto MAX_MOD_THREADS (maximum threads per module) configuration"
   echo -e "\\nDeveloper options"
   echo -e "$CYAN""-D""$NC""                Developer mode - EMBA runs on the host without container protection"
   echo -e "$CYAN""-S""$NC""                STRICT mode - developer option to improve code quality (not enabled by default)"
