@@ -893,6 +893,8 @@ main()
 
   remove_status_bar
 
+  restore_permissions
+
   write_notification "Reporting phase ended"
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
@@ -924,9 +926,6 @@ main()
   fi
   if [[ -f "$HTML_PATH"/index.html ]] && [[ "$IN_DOCKER" -eq 0 ]]; then
     print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main"
-    if grep -q "PRETTY_NAME=\"Ubuntu" /etc/os-release 2>/dev/null && [[ "$LOG_DIR" = /home/* ]]; then
-      print_output "[!] Use $BLUE changeown <USER> $ORANGE$LOG_DIR $BLUE -R $NC\\n" "main"
-    fi
     print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
   fi
 }
