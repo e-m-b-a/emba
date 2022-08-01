@@ -137,7 +137,8 @@ if ! grep -q "ID_LIKE=debian" /etc/os-release 2>/dev/null ; then
   print_help
   exit 1
 elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
-  if grep -q "PRETTY_NAME=\"Ubuntu 22.04 LTS\"" /etc/os-release 2>/dev/null ; then
+  if grep -q "VERSION_ID=\"22.04\"" /etc/os-release 2>/dev/null ; then 
+  # How to handle sub-versioning ? if grep -q -E "PRETTY_NAME=\"Ubuntu\ 22\.04(\.[0-9]+)?\ LTS\"" /etc/os-release 2>/dev/null ; then
     OTHER_OS=1
     UBUNTU_OS=1
   elif grep -q "PRETTY_NAME=\"Ubuntu 20.04 LTS\"" /etc/os-release 2>/dev/null ; then
