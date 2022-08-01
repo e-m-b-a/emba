@@ -234,6 +234,6 @@ disable_strict_mode() {
 }
 
 restore_permissions() {
-  print_output "[*] Restoring directory permissions for user:"${SUDO_USER:-${USER}}"" "no_log"
+  print_output "[*] Restoring directory permissions for user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
   chown "${SUDO_USER:-${USER}}":"$(id "${SUDO_USER:-${USER}}" -g)" "$LOG_DIR" -R
 }
