@@ -375,7 +375,7 @@ run_init_qemu() {
   sleep 1
   kill -0 -9 "$PID" 2> /dev/null || true
   if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
-    cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" >> "$LOG_FILE_INIT"
+    cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" >> "$LOG_FILE_INIT" || true
   fi
 
 }
