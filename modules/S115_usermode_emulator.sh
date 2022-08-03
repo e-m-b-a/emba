@@ -140,6 +140,8 @@ S115_usermode_emulator() {
               EMULATOR="qemu-aarch64_be-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit LSB.*MIPS" ) ; then
               EMULATOR="qemu-mipsel-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1" ) ; then
+              EMULATOR="qemu-mipsn32-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*MIPS" ) ; then
               EMULATOR="qemu-mips-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "64-bit LSB.*MIPS" ) ; then
