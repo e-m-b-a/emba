@@ -145,6 +145,7 @@ radare_function_check_PPC32(){
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -152,7 +153,6 @@ radare_function_check_PPC32(){
   NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
-      NAME=$(basename "$BINARY_" 2> /dev/null)
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       radare_log_bin_hardening "$NAME" "$FUNCTION"
       if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -185,13 +185,13 @@ radare_function_check_MIPS32() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
 
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
-    NAME=$(basename "$BINARY_" 2> /dev/null)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
     radare_log_bin_hardening "$NAME" "$FUNCTION"
     if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -226,13 +226,13 @@ radare_function_check_ARM64() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
 
   NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    NAME=$(basename "$BINARY_" 2> /dev/null)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
     radare_log_bin_hardening "$NAME" "$FUNCTION"
     if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -266,13 +266,13 @@ radare_function_check_ARM32() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
 
   NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    NAME=$(basename "$BINARY_" 2> /dev/null)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
     radare_log_bin_hardening "$NAME" "$FUNCTION"
     if [[ "$FUNCTION" == "mmap" ]] ; then
@@ -306,6 +306,7 @@ radare_function_check_x86() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -346,6 +347,7 @@ radare_function_check_x86_64() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
