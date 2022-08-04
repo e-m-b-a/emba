@@ -193,7 +193,6 @@ S115_usermode_emulator() {
 }
 
 copy_firmware() {
-
   EMULATION_PATH_BASE="$LOG_DIR"/firmware
   # we just create a backup if the original firmware path was a root directory
   # if it was a binary file we already have extracted it and it is already messed up
@@ -691,7 +690,10 @@ s115_cleanup() {
     print_output "[*] Cleanup empty log files.\\n"
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do
-      if [[ ! -s "$LOG_FILE_" ]] ; then
+      LINES_OF_LOG=$(grep -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -v "\[\*\] " | grep -v "\-\-\-\-\-\-\-\-\-\-\-" | wc -l || true)
+      print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
+      if ! [[ -s "$LOG_FILE_" ]] || [[ "$LINES_OF_LOG" -eq 0 ]]; then
+        print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"
         rm "$LOG_FILE_" 2> /dev/null || true
         continue
       fi

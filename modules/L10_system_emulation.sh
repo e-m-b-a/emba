@@ -302,6 +302,8 @@ main_emulation() {
   INDEX=1
   BAK_INIT_BACKUP=""
   BAK_INIT_ORIG=""
+  local INIT_OUT=""
+
   for INIT_FILE in "${INIT_FILES[@]}"; do
     # this is the main init entry - we modify it later for special cases:
     KINIT="rdinit=/firmadyne/preInit.sh"
@@ -326,6 +328,8 @@ main_emulation() {
     print_output "[*] Init file details:"
     file "$MNT_POINT""$INIT_FILE" | tee -a "$LOG_FILE"
 
+    # This is just as backup:
+    INIT_OUT="$MNT_POINT""/firmadyne/preInit.sh"
     # we deal with something which is not a script:
     if file "$MNT_POINT""$INIT_FILE" | grep -q "symbolic link\|ELF"; then
       # e.g. netgear R6200
@@ -344,14 +348,18 @@ main_emulation() {
     fi
 
     # we deal with a startup script
-    if file "$MNT_POINT""$INIT_FILE" | grep -q "text executable"; then
+    if file "$MNT_POINT""$INIT_FILE" | grep -q "text executable\|ASCII text"; then
       INIT_OUT="$MNT_POINT""$INIT_FILE"
+      ls -l "$INIT_OUT"
       print_output "[*] Backup original init file $ORANGE$INIT_OUT$NC"
       BAK_INIT_ORIG="$INIT_OUT"
       BAK_INIT_BACKUP="$LOG_PATH_MODULE"/"$(basename "$INIT_OUT".init)"
       cp -pr "$INIT_OUT" "$BAK_INIT_BACKUP"
 
       mapfile -t FS_MOUNTS < <(grep -E "^mount\ -t\ .*\ .*mtd.* /.*" "$INIT_OUT" || true)
+
+      # just in case we have issues with permissions
+      chmod +x "$INIT_OUT"
     fi
 
     handle_fs_mounts

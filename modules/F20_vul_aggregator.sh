@@ -280,6 +280,12 @@ generate_special_log() {
     print_ln
 
     for FILE in "${FILES[@]}"; do
+      if [[ "$FILE" == *"F20_summary"* ]]; then
+        continue
+      fi
+      if [[ "$FILE" == *"exploits-overview"* ]]; then
+        continue
+      fi
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
       CVE_VALUES=$(cut -d ":" -f1 "$FILE" | paste -s -d ',' || true)
       if [[ -n $CVE_VALUES ]]; then
