@@ -140,6 +140,8 @@ S115_usermode_emulator() {
               EMULATOR="qemu-aarch64_be-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit LSB.*MIPS" ) ; then
               EMULATOR="qemu-mipsel-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1" ) ; then
+              EMULATOR="qemu-mipsn32-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*MIPS" ) ; then
               EMULATOR="qemu-mips-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "64-bit LSB.*MIPS" ) ; then
@@ -191,7 +193,6 @@ S115_usermode_emulator() {
 }
 
 copy_firmware() {
-
   EMULATION_PATH_BASE="$LOG_DIR"/firmware
   # we just create a backup if the original firmware path was a root directory
   # if it was a binary file we already have extracted it and it is already messed up
@@ -375,7 +376,7 @@ run_init_qemu() {
   sleep 1
   kill -0 -9 "$PID" 2> /dev/null || true
   if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
-    cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" >> "$LOG_FILE_INIT"
+    cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" >> "$LOG_FILE_INIT" || true
   fi
 
 }
@@ -689,7 +690,10 @@ s115_cleanup() {
     print_output "[*] Cleanup empty log files.\\n"
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do
-      if [[ ! -s "$LOG_FILE_" ]] ; then
+      LINES_OF_LOG=$(grep -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -v "\[\*\] " | grep -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
+      print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
+      if ! [[ -s "$LOG_FILE_" ]] || [[ "$LINES_OF_LOG" -eq 0 ]]; then
+        print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"
         rm "$LOG_FILE_" 2> /dev/null || true
         continue
       fi

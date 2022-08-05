@@ -139,13 +139,13 @@ function_check_PPC32(){
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
 
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "$BINARY_" --use-dynamic | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
-      NAME=$(basename "$BINARY_" 2> /dev/null)
       NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       log_bin_hardening "$NAME"
@@ -179,6 +179,7 @@ function_check_MIPS32() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -187,7 +188,6 @@ function_check_MIPS32() {
     STRLEN_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     if [[ -n "$FUNC_ADDR" ]] ; then
-      NAME=$(basename "$BINARY_" 2> /dev/null)
       FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
       log_bin_hardening "$NAME"
       log_func_header "$NAME" "$FUNCTION"
@@ -221,11 +221,11 @@ function_check_ARM64() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    NAME=$(basename "$BINARY_" 2> /dev/null)
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
     log_bin_hardening "$NAME"
@@ -259,11 +259,11 @@ function_check_ARM32() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    NAME=$(basename "$BINARY_" 2> /dev/null)
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
     log_bin_hardening "$NAME"
@@ -296,6 +296,7 @@ function_check_x86() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -334,6 +335,7 @@ function_check_x86_64() {
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi

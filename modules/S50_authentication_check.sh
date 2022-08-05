@@ -29,6 +29,8 @@ S50_authentication_check() {
   if [[ "$THREADED" -eq 9 ]]; then
     user_zero &
     WAIT_PIDS_S50+=( "$!" )
+    search_shadow &
+    WAIT_PIDS_S50+=( "$!" )
     non_unique_acc &
     WAIT_PIDS_S50+=( "$!" )
     non_unique_group_id &
@@ -53,6 +55,7 @@ S50_authentication_check() {
     WAIT_PIDS_S50+=( "$!" )
   else
     user_zero
+    search_shadow
     non_unique_acc
     non_unique_group_id
     non_unique_group_name
@@ -78,6 +81,51 @@ S50_authentication_check() {
   write_log ""
   write_log "[*] Statistics:$AUTH_ISSUES"
   module_end_log "${FUNCNAME[0]}" "$AUTH_ISSUES"
+}
+
+search_shadow() {
+  sub_module_title "Shadow file identification"
+
+  print_output "[*] Searching shadow files"
+  local AUTH_ISSUES=0
+  local SHADOW_FILE_PATHS=()
+  local HASHES=()
+  local SHADOW_FILE=""
+  local HASH=""
+  local CHECK=0
+
+  mapfile -t SHADOW_FILE_PATHS < <(find "$LOG_DIR"/firmware -xdev -name "*shadow*" -exec file {} \; | grep "ASCII text" | cut -d: -f1)
+  for SHADOW_FILE in "${SHADOW_FILE_PATHS[@]}"; do
+    if [[ -f "$SHADOW_FILE" ]] ; then
+      mapfile -t HASHES < <(grep -E '\$[1-6][ay]?\$' "$SHADOW_FILE" || true)
+      for HASH in "${HASHES[@]}"; do
+        local HTYPE="unknown"
+        if [[ "$HASH" =~ .*\$1\$.* ]]; then
+          HTYPE="MD5"
+        elif [[ "$HASH" =~ .*\$2a\$.* ]]; then
+          HTYPE="Blowfish"
+        elif [[ "$HASH" =~ .*\$2y\$.* ]]; then
+          HTYPE="Eksblowfish"
+        elif [[ "$HASH" =~ .*\$5\$.* ]]; then
+          HTYPE="SHA-256"
+        elif [[ "$HASH" =~ .*\$6\$.* ]]; then
+          HTYPE="SHA-512"
+        fi
+        if [[ "$HTYPE" == "unknown" ]]; then
+          print_output "[+] Found shadow file ""$ORANGE$(print_path "$SHADOW_FILE")$GREEN with possible hash $ORANGE$HASH$NC"
+          ((AUTH_ISSUES+=1))
+          continue
+        fi
+        print_output "[+] Found shadow file ""$ORANGE$(print_path "$SHADOW_FILE")$GREEN with possible hash $ORANGE$HASH$GREEN of hashtype: $ORANGE$HTYPE$NC"
+        ((AUTH_ISSUES+=1))
+      done
+      CHECK=1
+    fi
+  done
+  if [[ $CHECK -eq 0 ]] ; then
+    print_output "[-] shadow file not available"
+  fi
+  echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
 user_zero() {

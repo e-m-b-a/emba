@@ -236,8 +236,8 @@ main()
 
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
-  export EMBA_VERSION="1.1.0"
+  export RELEASE=0
+  export EMBA_VERSION="1.1.x"
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
@@ -548,6 +548,8 @@ main()
 
   if [[ "$IN_DOCKER" -eq 0 ]]; then
     print_notification &
+    print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
+    echo "${SUDO_USER:-${USER}}" > "$TMP_DIR"/orig_user.log
   fi
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
@@ -618,6 +620,12 @@ main()
     # the maximum threads per modules - if this value does not match adjust it via
     # local MAX_MOD_THREADS=123 in module area
     export MAX_MOD_THREADS="$(( 2* $(grep -c ^processor /proc/cpuinfo) ))"
+  fi
+
+  # setup non threaded mode:
+  if [[ $THREADED -eq 0 ]]; then
+    export MAX_MODS=1
+    export MAX_MOD_THREADS=1
   fi
   print_output "    EMBA is running with $ORANGE$MAX_MODS$NC modules in parallel and $ORANGE$MAX_MOD_THREADS$NC threads per module." "no_log"
 
