@@ -90,7 +90,7 @@ check_live_nmap_basic() {
 
   if [[ "${#NMAP_CPE_DETECTION[@]}" -gt 0 ]]; then
     for NMAP_CPES in "${NMAP_CPE_DETECTION[@]}"; do
-      NMAP_CPES=$(echo "$NMAP_CPES" | grep -o "cpe:.*")
+      NMAP_CPES=$(echo "$NMAP_CPES" | grep -o "cpe:.*" || true)
       # rewrite the string into an array:
       # NMAP_CPES_ARR=( $(echo "$NMAP_CPES" | tr "," "\n") )
       #IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
