@@ -739,7 +739,8 @@ print_notification(){
   local CURRENT=""
   CURRENT=$(<"$NOTIFICATION_LOCATION")
 
-  inotifywait -m -e modify "$NOTIFICATION_LOCATION" --format "%e" | while read -r EVENT; do
+  disable_strict_mode "$STRICT_MODE" 0
+  inotifywait -q -m -e modify "$NOTIFICATION_LOCATION" --format "%e" | while read -r EVENT; do
     if [[ "$EVENT" == "MODIFY" ]]; then
       if ! [[ -f "$NOTIFICATION_LOCATION" ]]; then
         return

@@ -549,7 +549,7 @@ main()
   if [[ "$IN_DOCKER" -eq 0 ]]; then
     print_notification &
     print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
-    echo "${SUDO_USER:-${USER}}" > "$TMP_DIR"/orig_user.log
+    echo "${SUDO_USER:-${USER}}" > "$LOG_DIR"/orig_user.log
   fi
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
@@ -773,10 +773,10 @@ main()
           fi
 
           if [[ "$IN_DOCKER" -eq 0 ]]; then
-            # stop inotifywait on host
-            pkill -f "inotifywait.*$LOG_DIR.*" || true
-            ls -l "$TMP_DIR"
             restore_permissions
+            if ! [[ -d "$TMP_DIR" ]]; then
+              pkill -f "inotifywait.*$LOG_DIR" 2>/dev/null || true
+            fi
           fi
 
           exit
