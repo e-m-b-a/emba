@@ -23,6 +23,10 @@ ID1_ubuntu_os() {
     echo -e "\\n""$MAGENTA""$BOLD""Installations for Ubuntu:jammy!""$NC"
 
     print_tool_info "notification-daemon" 1
+    print_tool_info "dbus" 1
+    print_tool_info "dbus-x11" 1
+    print_tool_info "libnotify-cil-dev" 1
+
     apt-get install "${INSTALL_APP_LIST[@]}" -y
 
     if ! [[ -f "/usr/share/dbus-1/services/org.freedesktop.Notifications.service" ]] && [[ -f "/usr/lib/notification-daemon/notification-daemon" ]]; then

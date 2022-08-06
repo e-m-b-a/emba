@@ -771,6 +771,14 @@ main()
           if [[ -f "$HTML_PATH"/index.html ]]; then
             print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
           fi
+
+          if [[ "$IN_DOCKER" -eq 0 ]]; then
+            # stop inotifywait on host
+            pkill -f "inotifywait.*$LOG_DIR.*" || true
+            ls -l "$TMP_DIR"
+            restore_permissions
+          fi
+
           exit
         fi
       else
@@ -901,8 +909,6 @@ main()
 
   remove_status_bar
 
-  restore_permissions
-
   write_notification "Reporting phase ended"
 
   if [[ "$TESTING_DONE" -eq 1 ]]; then
@@ -927,10 +933,6 @@ main()
   fi
   if [[ "$HTML" -eq 1 ]]; then
     update_index
-  fi
-  if [[ "$IN_DOCKER" -eq 0 ]]; then
-    # stop inotifywait on host
-    pkill -f "inotifywait.*$LOG_DIR.*"
   fi
   if [[ -f "$HTML_PATH"/index.html ]] && [[ "$IN_DOCKER" -eq 0 ]]; then
     print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main"
