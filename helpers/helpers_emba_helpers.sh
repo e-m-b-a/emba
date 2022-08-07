@@ -235,11 +235,10 @@ disable_strict_mode() {
 }
 
 restore_permissions() {
-  local ORIG_USER="root"
-  if [[ -f "$TMP_DIR"/orig_user.log ]]; then
-    ORIG_USER="$(cat "$TMP_DIR"/orig_user.log)"
+  if [[ -f "$LOG_DIR"/orig_user.log ]]; then
+    ORIG_USER=$(cat "$LOG_DIR"/orig_user.log)
     print_output "[*] Restoring directory permissions for user: $ORANGE$ORIG_USER$NC" "no_log"
-    #chown "$ORIG_USER":"$ORIG_USER" "$LOG_DIR" -R || true
-    chown "$ORIG_USER" "$LOG_DIR" -R || true
+    chown "$ORIG_USER":"$ORIG_USER" "$LOG_DIR" -R || true
+    rm "$LOG_DIR"/orig_user.log || true
   fi
 }

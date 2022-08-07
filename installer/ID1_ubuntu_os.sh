@@ -21,6 +21,20 @@ ID1_ubuntu_os() {
   if [[ "$OTHER_OS" -eq 1 ]] && [[ "$UBUNTU_OS" -eq 1 ]]; then
     # mongodb / cve-search
     echo -e "\\n""$MAGENTA""$BOLD""Installations for Ubuntu:jammy!""$NC"
+
+    print_tool_info "notification-daemon" 1
+    print_tool_info "dbus" 1
+    print_tool_info "dbus-x11" 1
+    print_tool_info "libnotify-cil-dev" 1
+
+    apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+    if ! [[ -f "/usr/share/dbus-1/services/org.freedesktop.Notifications.service" ]] && [[ -f "/usr/lib/notification-daemon/notification-daemon" ]]; then
+      echo "[D-BUS Service]" > /usr/share/dbus-1/services/org.freedesktop.Notifications.service
+      echo "Name=org.freedesktop.Notifications" >> /usr/share/dbus-1/services/org.freedesktop.Notifications.service
+      echo "Exec=/usr/lib/notification-daemon/notification-daemon" >> /usr/share/dbus-1/services/org.freedesktop.Notifications.service
+    fi
+
     if ! dpkg -l libssl1.1 &>/dev/null; then
         # libssl1.1 missing
         echo -e "\\n""$BOLD""Installing libssl1.1 for mongodb!""$NC"

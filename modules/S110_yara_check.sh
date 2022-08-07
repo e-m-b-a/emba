@@ -14,7 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Checks files with yara for suspicious patterns.
-export THREAD_PRIO=1
+export THREAD_PRIO=0
 
 
 S110_yara_check()
@@ -36,7 +36,7 @@ S110_yara_check()
       find "$EXT_DIR""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n'| sort -n > "$DIR_COMB_YARA"
     fi
 
-    yara -r -w -s -m -L -g "$DIR_COMB_YARA" "$LOG_DIR"/firmware > "$LOG_PATH_MODULE"/yara_complete_output.txt || true
+    yara -p "$MAX_MOD_THREADS" -r -w -s -m -L -g "$DIR_COMB_YARA" "$LOG_DIR"/firmware > "$LOG_PATH_MODULE"/yara_complete_output.txt || true
 
     while read -r YARA_OUT_LINE; do
       if [[ "$YARA_OUT_LINE" == *" [] [author="* ]]; then
