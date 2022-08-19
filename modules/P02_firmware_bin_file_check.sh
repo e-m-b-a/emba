@@ -37,6 +37,19 @@ P02_firmware_bin_file_check() {
      # entropy checking on binary file
     ENTROPY="$(ent "$FIRMWARE_PATH" | grep Entropy)"
     write_csv_log "Entropy" "${ENTROPY:-}" "NA"
+
+    print_output "[*] Entropy testing with binwalk ... "
+    # we have to change the working directory for binwalk, because everything except the log directory is read-only in
+    # Docker container and binwalk fails to save the entropy picture there
+    if [[ $IN_DOCKER -eq 1 ]] ; then
+      cd "$LOG_DIR" || return
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+      cd /emba || return
+    else
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+    fi
   fi
 
   local FILE_LS_OUT

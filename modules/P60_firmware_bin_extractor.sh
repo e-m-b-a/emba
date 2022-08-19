@@ -310,7 +310,7 @@ binwalking() {
 
   print_ln "no_log"
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
-  if [[ -f $FIRMWARE_PATH_BAK ]] ; then
+  if [[ -f $FIRMWARE_PATH_BAK ]] && ! [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
     print_output "[*] Entropy testing with binwalk ... "
     # we have to change the working directory for binwalk, because everything except the log directory is read-only in
     # Docker container and binwalk fails to save the entropy picture there

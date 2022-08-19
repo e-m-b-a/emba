@@ -28,9 +28,9 @@ Author(s): Michael Messner, Pascal Eckmann
 </p>
 
 # EMBA
-## The security analyzer for embedded device firmware
+## The security analyzer for firmware of embedded devices
 
-*EMBA* is designed as the central firmware analysis tool for penetration testers. It supports the complete security analysis process starting with the *firmware extraction* process, doing *static analysis* and *dynamic analysis* via emulation and finally generating a report. *EMBA* automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts or hard-coded passwords. *EMBA* is a command line tool with the option to generate an easy to use web report for further analysis.
+*EMBA* is designed as the central firmware analysis tool for penetration testers. It supports the complete security analysis process starting with the *firmware extraction* process, doing *static analysis* and *dynamic analysis* via emulation and finally generating a web report. *EMBA* automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts or hard-coded passwords. *EMBA* is a command line tool with the option to generate an easy to use web report for further analysis.
 
 *EMBA* combines multiple established analysis tools and can be started with one simple command. Afterwards it tests the firmware for possible security risks and interesting areas for further investigation. No manual installation of all helpers, once the integrated installation script has been executed, you are ready to test your firmware.
 
@@ -61,25 +61,11 @@ sudo ./installer.sh -d
 ## Usage
 
 ---   
-### Classic (Docker mode):
-```console
-sudo ./emba.sh -l ./log -f /firmware
-```
-*Note: During installation at least 20GB of disk space is needed*
-
----   
-### Profile support:
+### Quick start with default scan profile:
 ```console
 sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 
 ```
----
-### Developer mode (WARNING: EMBA runs on your host and could harm your host!):
-```console
-./emba.sh -l ./log -f ./firmware -D
-```
-*WARNING: Before using the developer mode you need a full installation of EMBA with `sudo ./installer.sh -F`. This installation mode needs around 15 gigabyte of disk space and is only recommend for development environments.*
-
 ---
 *EMBA* supports multiple testing and reporting [options](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
 

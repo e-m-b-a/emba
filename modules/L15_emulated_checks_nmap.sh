@@ -84,7 +84,7 @@ check_live_nmap_basic() {
   mapfile -t NMAP_PORTS_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/*.nmap | cut -d: -f2- | awk '{print $1,$3}' | sort -u || true)
   # extract cpe information like the following:
   #	Service Info: OS: Linux; Device: WAP; CPE: cpe:/h:dlink:dir-300:2.14, cpe:/o:linux:linux_kernel, cpe:/h:d-link:dir-300
-  mapfile -t NMAP_CPE_DETECTION < <(grep -ah "Service Info: " "$LOG_PATH_MODULE"/*.nmap | grep -a "CPE: .*" | sort -u)
+  mapfile -t NMAP_CPE_DETECTION < <(grep -ah "Service Info: " "$LOG_PATH_MODULE"/*.nmap | grep -a "CPE: .*" | sort -u || true)
 
   TYPE="Nmap scan (Scan info)"
 
