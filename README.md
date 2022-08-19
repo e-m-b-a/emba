@@ -58,10 +58,7 @@ cd emba
 sudo ./installer.sh -d
 ```
 
-## Usage
-
----   
-### Quick start with default scan profile:
+## Quick start with default scan profile:
 ```console
 sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 
