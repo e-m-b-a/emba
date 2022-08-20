@@ -33,7 +33,9 @@ I24_25_kernel_tools() {
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y
-        git clone https://github.com/marin-m/vmlinux-to-elf external/vmlinux-to-elf
+        if ! [[ -d external/vmlinux-to-elf ]]; then
+          git clone https://github.com/marin-m/vmlinux-to-elf external/vmlinux-to-elf
+        fi
 
         cd external/vmlinux-to-elf || ( echo "Could not install EMBA component vmlinux-to-elf" && exit 1 )
         pip3 install --upgrade lz4 zstandard git+https://github.com/clubby789/python-lzo@b4e39df

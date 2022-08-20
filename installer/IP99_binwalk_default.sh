@@ -185,22 +185,25 @@ IP99_binwalk_default() {
           echo -e "$GREEN""ubi_reader already installed""$NC"
         fi
 
+        if command -v binwalk > /dev/null ; then
+          cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
+          python3 setup.py uninstall
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
+        fi
+
         if ! command -v binwalk > /dev/null ; then
           cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
           python3 setup.py install
           cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
-        else
-          echo -e "$GREEN""binwalk already installed""$NC"
-          BINWALK_PRE_AVAILABLE=1
         fi
 
         if [[ -d ./external/binwalk ]]; then
           rm ./external/binwalk -r
         fi
 
-        if [[ -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+        if [[ -f "/usr/local/bin/binwalk" ]] ; then
           echo -e "$GREEN""binwalk installed successfully""$NC"
-        elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+        elif [[ ! -f "/usr/local/bin/binwalk" ]] ; then
           echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
         fi
       ;;
