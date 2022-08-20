@@ -71,8 +71,8 @@ IP99_binwalk_default() {
     print_pip_info "capstone"
     print_pip_info "cstruct"
 
-    print_git_info "binwalk" "ReFirmLabs/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
-    echo -e "$ORANGE""cve-search will be downloaded.""$NC"
+    print_git_info "binwalk" "m-1-k-3/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
+    echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
     print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
     echo -e "$ORANGE""binwalk will be downloaded.""$NC"
     print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
@@ -103,8 +103,10 @@ IP99_binwalk_default() {
         pip3 install capstone 2>/dev/null
         pip3 install cstruct 2>/dev/null
 
+
         if ! [[ -d external/binwalk ]]; then
-          git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+          #git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+          git clone https://github.com/m-1-k-3/binwalk.git external/binwalk
         fi
 
         if ! command -v yaffshiv > /dev/null ; then
@@ -186,7 +188,9 @@ IP99_binwalk_default() {
         fi
 
         if command -v binwalk > /dev/null ; then
+          echo "WARNING: Uninstalling binwalk version"
           cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
+          sudo apt remove binwalk python3-binwalk
           python3 setup.py uninstall
           cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
         fi
