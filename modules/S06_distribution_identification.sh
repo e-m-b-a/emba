@@ -130,6 +130,8 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ ([0-9]+\.[0-9]+\.[0-9])\ (r[0-9]+\-)([a-z0-9]+).*/openwrt:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/lede\ ([0-9]+\.[0-9]+\.[0-9]+)(-)?(rc[0-9])?.*/openwrt:\1:\3/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/openwrt\ ([0-9]+\.[0-9]+)/openwrt:\1/')"
+  # OpenWrt Attitude Adjustment r7549 -> 12.09
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/openwrt\ attitude\ adjustment\ r([0-9]+).*/openwrt:12\.09/')"
   # d-link dir-300 v2.14b01
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+)/dlink:\1_firmware:\2/')"

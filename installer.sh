@@ -223,6 +223,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I20_php_check
 
+  I24_25_kernel_tools
+
   I108_stacs_password_search
 
   I110_yara_check

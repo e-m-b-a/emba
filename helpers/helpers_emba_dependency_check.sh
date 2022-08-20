@@ -413,6 +413,8 @@ dependency_check()
     # yara
     check_dep_tool "yara"
 
+    check_dep_file "vmlinux-to-elf" "$EXT_DIR""/vmlinux-to-elf/vmlinux-to-elf"
+
     if function_exists S108_stacs_password_search; then
       # stacs - https://github.com/stacscan/stacs
       check_dep_tool "STACS hash detection" "stacs"

@@ -22,7 +22,7 @@ F50_base_aggregator() {
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
-  P02_LOG="p02_firmware_bin_file_check.txt"
+  P02_LOG="p02_firmware_bin_file_check.csv"
   S03_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
   S06_LOG="s06_distribution_identification.txt"
@@ -664,7 +664,7 @@ get_data() {
   export CVE_SEARCH=""
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
-    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
+    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
   fi
   if [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
     PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | tr -d '[:space:]' || true)
