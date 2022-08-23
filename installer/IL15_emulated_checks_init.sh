@@ -88,7 +88,7 @@ IL15_emulated_checks_init() {
       fi
 
       python3 -m pip install -r requirements.txt
-      if ! grep -q "/tmp/routersploit.log"; then
+      if ! grep -q "/tmp/routersploit.log" rsf.py; then
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
       fi
 
