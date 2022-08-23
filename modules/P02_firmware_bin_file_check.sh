@@ -24,6 +24,9 @@ P02_firmware_bin_file_check() {
   set_p02_default_exports
 
   local FILE_BIN_OUT
+  # we set this var global to 1 if we find something UEFI related
+  export UEFI_DETECTED=0
+
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"
   if [[ -f "$FIRMWARE_PATH" ]]; then
@@ -55,6 +58,7 @@ P02_firmware_bin_file_check() {
   local FILE_LS_OUT
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
+  print_ln
   print_output "[*] Details of the firmware file:"
   print_ln
   print_output "$(indent "$FILE_LS_OUT")"
@@ -102,7 +106,8 @@ set_p02_default_exports() {
   export BSD_UFS=0
   export ANDROID_OTA=0
   export MD5_DONE_DEEP=()
-  export UEFI_DETECTED=0
+  # Note: we do not set UEFI_DETECTED in this function. If so, we are going to reset it and we only need
+  #       an indicator if this could be some UEFI firmware for further processing
 }
 
 fw_bin_detector() {

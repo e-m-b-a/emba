@@ -103,7 +103,6 @@ IP99_binwalk_default() {
         pip3 install cstruct 2>/dev/null
         pip3 install matplotlib 2>/dev/null
 
-
         if ! [[ -d external/binwalk ]]; then
           #git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
           git clone https://github.com/m-1-k-3/binwalk.git external/binwalk
