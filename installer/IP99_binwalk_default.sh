@@ -70,6 +70,7 @@ IP99_binwalk_default() {
     print_pip_info "pyqtgraph"
     print_pip_info "capstone"
     print_pip_info "cstruct"
+    print_pip_info "matplotlib"
 
     print_git_info "binwalk" "m-1-k-3/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
     echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
@@ -100,6 +101,7 @@ IP99_binwalk_default() {
         pip3 install pyqtgraph 2>/dev/null
         pip3 install capstone 2>/dev/null
         pip3 install cstruct 2>/dev/null
+        pip3 install matplotlib 2>/dev/null
 
 
         if ! [[ -d external/binwalk ]]; then
