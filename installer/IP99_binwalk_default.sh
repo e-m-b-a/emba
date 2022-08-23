@@ -93,8 +93,6 @@ IP99_binwalk_default() {
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        BINWALK_PRE_AVAILABLE=0
-
         apt-get install "${INSTALL_APP_LIST[@]}" -y
 
         pip3 install nose 2>/dev/null
