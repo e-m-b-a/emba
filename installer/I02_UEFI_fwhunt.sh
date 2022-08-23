@@ -57,9 +57,10 @@ I02_UEFI_fwhunt() {
 
         git clone https://github.com/binarly-io/fwhunt-scan.git external/fwhunt-scan
         cd external/fwhunt-scan || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
-        python3 setup.py install
         git clone https://github.com/binarly-io/FwHunt.git rules
-        echo "Installed $(find rules/ -iname BRLY-* | wc -l) fwhunt rules"
+        echo "Installed $(find rules/ -iname "BRLY-*" | wc -l) fwhunt rules"
+        # currently the following installation step is failing:
+        python3 setup.py install || true
         cd "$HOME_PATH" || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
       ;;
     esac
