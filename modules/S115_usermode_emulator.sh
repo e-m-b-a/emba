@@ -691,9 +691,9 @@ s115_cleanup() {
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do
       LINES_OF_LOG=$(grep -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -v "\[\*\] " | grep -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
-      print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
+      #print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
       if ! [[ -s "$LOG_FILE_" ]] || [[ "$LINES_OF_LOG" -eq 0 ]]; then
-        print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"
+        #print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"
         rm "$LOG_FILE_" 2> /dev/null || true
         continue
       fi

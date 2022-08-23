@@ -54,6 +54,12 @@ S24_kernel_bin_identifier()
         print_output "[*] Testing possible Linux kernel file $ORANGE$FILE$NC with ${ORANGE}vmlinux-to-elf:$NC"
         print_ln
         "$EXT_DIR"/vmlinux-to-elf/vmlinux-to-elf "$FILE" "$FILE".elf | tee -a "$LOG_FILE" || true
+        if [[ -f "$FILE".elf ]]; then
+          K_ELF=$(file "$FILE".elf)
+          if [[ "$K_ELF" == *"ELF "* ]]; then
+            print_output "[+] Successfully generated Linux kernel elf file: $ORANGE$FILE.elf$NC"
+          fi
+        fi
         print_ln
       fi
 

@@ -54,7 +54,7 @@ check_live_routersploit() {
     rm /tmp/routersploit.log
   fi
 
-  timeout --preserve-status --signal SIGINT 300 "$EXT_DIR"/routersploit/rsf.py "$IP_ADDRESS_" 2>&1 | tee -a "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt
+  timeout --preserve-status --signal SIGINT 300 "$EXT_DIR"/routersploit/rsf.py "$IP_ADDRESS_" 2>&1 | tee -a "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt || true
 
   if [[ -f /tmp/routersploit.log ]]; then
     mv /tmp/routersploit.log "$LOG_PATH_MODULE"/routersploit-detail-"$IP_ADDRESS_".txt
