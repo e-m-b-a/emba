@@ -108,6 +108,7 @@ set_p02_default_exports() {
   export MD5_DONE_DEEP=()
   # Note: we do not set UEFI_DETECTED in this function. If so, we are going to reset it and we only need
   #       an indicator if this could be some UEFI firmware for further processing
+  export UEFI_AMI_CAPSULE=0
 }
 
 fw_bin_detector() {
@@ -124,11 +125,16 @@ fw_bin_detector() {
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
-  UEFI_CHECK=$(binwalk "$CHECK_FILE" | grep -c "UEFI" || true)
+  binwalk "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
+  UEFI_CHECK=$(grep -c "UEFI" "$TMP_DIR"/s02_binwalk_output.txt || true)
 
   if [[ "$UEFI_CHECK" -gt 0 ]]; then
     print_output "[+] Identified possible UEFI firmware - using fwhunt-scan vulnerability scanning module"
     export UEFI_DETECTED=1
+    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "$TMP_DIR"/s02_binwalk_output.txt || true)
+    if [[ "$UEFI_AMI_CAPSULE" -gt 0 ]]; then
+      print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
+    fi
     write_csv_log "UEFI firmware detected" "yes" "NA"
   fi
   if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then

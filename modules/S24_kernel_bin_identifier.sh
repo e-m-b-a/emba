@@ -57,6 +57,7 @@ S24_kernel_bin_identifier()
         if [[ -f "$FILE".elf ]]; then
           K_ELF=$(file "$FILE".elf)
           if [[ "$K_ELF" == *"ELF "* ]]; then
+            print_ln
             print_output "[+] Successfully generated Linux kernel elf file: $ORANGE$FILE.elf$NC"
           fi
         fi

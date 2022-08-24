@@ -76,10 +76,9 @@ fwhunter_logging() {
   print_ln
   for FWHUNTER_RESULT in "${FWHUNTER_RESULTS[@]}"; do
     FWHUNTER_RESULT_FILE=$(echo "$FWHUNTER_RESULT" | cut -d: -f1)
+    FWHUNTER_RESULT=$(echo "$FWHUNTER_RESULT" | cut -d: -f2-)
     if [[ "$FWHUNTER_RESULT" == *"rule has been triggered and threat detected"* ]]; then
       print_output "[+] $FWHUNTER_RESULT_FILE $ORANGE:$GREEN $FWHUNTER_RESULT"
-    else
-      print_output "[*] $FWHUNTER_RESULT_FILE $ORANGE:$NC $FWHUNTER_RESULT"
     fi
   done
   print_ln

@@ -29,6 +29,7 @@ I02_UEFI_fwhunt() {
     print_git_info "rizin" "rizinorg/rizin" ""
     print_git_info "fwhunt-scan" "binarly-io/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
     print_git_info "fwhunt-rules" "binarly-io/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
+    print_git_info "BIOSUtilities" "platomav/BIOSUtilities" "Various BIOS Utilities for Modding/Research"
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -47,6 +48,7 @@ I02_UEFI_fwhunt() {
 
         # rizin:
         apt-get install "${INSTALL_APP_LIST[@]}" -y
+        echo -e "$ORANGE""$BOLD""Installing rizin""$NC"
         git clone https://github.com/rizinorg/rizin.git external/rizin
         cd external/rizin || ( echo "Could not install EMBA component rizin" && exit 1 )
         meson build
@@ -54,7 +56,11 @@ I02_UEFI_fwhunt() {
         ninja -C build install
         cd "$HOME_PATH" || ( echo "Could not install EMBA component rizin" && exit 1 )
 
+        # BIOSUtilities
+        echo -e "$ORANGE""$BOLD""Installing BIOSUtilities""$NC"
+        git clone --branch refactor https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
 
+        echo -e "$ORANGE""$BOLD""Installing FwHunt""$NC"
         git clone https://github.com/binarly-io/fwhunt-scan.git external/fwhunt-scan
         cd external/fwhunt-scan || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
         git clone https://github.com/binarly-io/FwHunt.git rules
