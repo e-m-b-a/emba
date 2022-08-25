@@ -27,6 +27,8 @@ S02_UEFI_FwHunt() {
 
   local NEG_LOG=0
   local WAIT_PIDS_S02=()
+  local MAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
+  local EXTRACTED_FILE=""
 
   if [[ "$UEFI_DETECTED" -eq 1 ]] ; then
     print_output "[*] Starting FwHunter"
@@ -36,7 +38,7 @@ S02_UEFI_FwHunt() {
         WAIT_PIDS_S02+=( "$!" )
         max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S02[@]}"
       else
-        os_identification
+        fwhunter "$EXTRACTED_FILE"
       fi
     done
   fi
@@ -59,7 +61,7 @@ fwhunter() {
   local FWHUNTER_CHECK_FILE_NAME=$(basename "$FWHUNTER_CHECK_FILE")
 
   print_output "[*] Running FwHunt on $ORANGE$FWHUNTER_CHECK_FILE$NC"
-  python3 "$EXT_DIR"/fwhunt-scan/fwhunt_scan_analyzer.py scan-firmware "$FWHUNTER_CHECK_FILE" --rules_dir "$EXT_DIR"/fwhunt-scan/rules/ >> "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" || true
+  python3 "$EXT_DIR"/fwhunt-scan/fwhunt_scan_analyzer.py scan-firmware "$FWHUNTER_CHECK_FILE" --rules_dir "$EXT_DIR"/fwhunt-scan/rules/ | tee -a "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" || true
 }
 
 fwhunter_logging() {

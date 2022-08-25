@@ -413,6 +413,9 @@ dependency_check()
     # yara
     check_dep_tool "yara"
 
+    # cyclonedx - converting csv sbom to json sbom
+    check_dep_tool "cyclonedx"
+
     check_dep_file "vmlinux-to-elf" "$EXT_DIR""/vmlinux-to-elf/vmlinux-to-elf"
 
     if function_exists S108_stacs_password_search; then

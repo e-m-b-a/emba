@@ -28,6 +28,7 @@ S110_yara_check()
   local YRULE=""
   local MATCH_FILE=""
   local MATCH_FILE_NAME=""
+  local MAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it
