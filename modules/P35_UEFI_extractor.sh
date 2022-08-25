@@ -58,7 +58,9 @@ ami_extractor() {
 
   echo -ne '\n' | python3 "$EXT_DIR"/BIOSUtilities/AMI_PFAT_Extract.py -o "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" &> "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log
 
-  cat "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
+  if [[ -f "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log ]]; then
+    cat "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log | tee -a "$LOG_FILE"
+  fi
 
   print_ln
   print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"

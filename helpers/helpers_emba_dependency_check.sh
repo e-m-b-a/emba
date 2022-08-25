@@ -414,6 +414,9 @@ dependency_check()
     check_dep_tool "yara"
 
     # cyclonedx - converting csv sbom to json sbom
+    if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
+      export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/
+    fi
     check_dep_tool "cyclonedx"
 
     check_dep_file "vmlinux-to-elf" "$EXT_DIR""/vmlinux-to-elf/vmlinux-to-elf"

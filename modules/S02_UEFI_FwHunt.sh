@@ -31,7 +31,7 @@ S02_UEFI_FwHunt() {
   local EXTRACTED_FILE=""
 
   if [[ "$UEFI_DETECTED" -eq 1 ]] ; then
-    print_output "[*] Starting FwHunter"
+    print_output "[*] Starting FwHunter UEFI firmware vulnerability detection"
     for EXTRACTED_FILE in "${FILE_ARR[@]}"; do
       if [[ $THREADED -eq 1 ]]; then
         fwhunter "$EXTRACTED_FILE" &
@@ -61,7 +61,7 @@ fwhunter() {
   local FWHUNTER_CHECK_FILE_NAME=""
   FWHUNTER_CHECK_FILE_NAME=$(basename "$FWHUNTER_CHECK_FILE")
 
-  print_output "[*] Running FwHunt on $ORANGE$FWHUNTER_CHECK_FILE$NC"
+  print_output "[*] Running FwHunt on $ORANGE$FWHUNTER_CHECK_FILE$NC" "" "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt"
   python3 "$EXT_DIR"/fwhunt-scan/fwhunt_scan_analyzer.py scan-firmware "$FWHUNTER_CHECK_FILE" --rules_dir "$EXT_DIR"/fwhunt-scan/rules/ | tee -a "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" || true
 }
 
@@ -69,20 +69,29 @@ fwhunter_logging() {
   export FWHUNTER_RESULTS=()
   local FWHUNTER_RESULT=""
   local FWHUNTER_RESULT_FILE=""
+  local FWHUNTER_CNT=0
 
   mapfile -t FWHUNTER_RESULTS < <(find "$LOG_PATH_MODULE" -type f -exec grep -H "Scanner result" {} \;)
   if ! [[ "${#FWHUNTER_RESULTS[@]}" -gt 0 ]]; then
     return
   fi
-  print_ln
-  print_output "[+] FwHunt UEFI vulnerability details:"
-  print_ln
+
+  sub_module_title "FwHunt UEFI vulnerability details"
+
   for FWHUNTER_RESULT in "${FWHUNTER_RESULTS[@]}"; do
     FWHUNTER_RESULT_FILE=$(echo "$FWHUNTER_RESULT" | cut -d: -f1)
     FWHUNTER_RESULT=$(echo "$FWHUNTER_RESULT" | cut -d: -f2-)
+    BINARLY_RULE=$(echo "$FWHUNTER_RESULT" | sed -e 's/.*\ BRLY/BRLY/' | sed -e 's/\ .variant\:\ .*//')
     if [[ "$FWHUNTER_RESULT" == *"rule has been triggered and threat detected"* ]]; then
-      print_output "[+] $FWHUNTER_RESULT_FILE $ORANGE:$GREEN $FWHUNTER_RESULT"
+      print_output "[+] $FWHUNTER_RESULT_FILE $ORANGE:$GREEN $FWHUNTER_RESULT" "" "https://binarly.io/advisories/$BINARLY_RULE"
+      FWHUNTER_CNT=$((FWHUNTER_CNT+1))
     fi
   done
+
   print_ln
+  print_output "[*] Detected $ORANGE$FWHUNTER_CNT$NC firmware issues in UEFI firmware"
+  print_ln
+
+  write_log ""
+  write_log "[*] Statistics:$FWHUNTER_CNT"
 }

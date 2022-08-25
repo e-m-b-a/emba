@@ -2,6 +2,7 @@ version: "3"
 services:
   emba:
     image: embeddedanalyzer/emba:latest
+    hostname: emba
     read_only: true
     # all pre-checker mount modules need privileged mode
     privileged: true
@@ -45,6 +46,12 @@ services:
       core:
         hard: 0
         soft: 0
+    # adjust the following limits to protect your host
+    deploy:
+      resources:
+        limits:
+          memory: 14g
+          cpus: 7
 
 networks:
   emba_runs:
