@@ -34,6 +34,6 @@ F21_cyclonedx_sbom() {
       VERSION=$(echo "$BIN_VER_SBOM_ENTRY" | cut -d\; -f2)
       write_csv_log "" "" "" "" "" "" "$BINARY" "$VERSION" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
     done
-    cyclonedx convert --input-file "$LOG_DIR"/f21_cyclonedx_sbom.csv --output-file f21_cyclonedx_sbom.json
+    cyclonedx convert --input-file "$LOG_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
   fi
 }

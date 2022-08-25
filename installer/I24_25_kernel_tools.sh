@@ -12,7 +12,7 @@
 #
 # Author(s): Michael Messner
 
-# Description:  Installs vmlinux-to-elf
+# Description:  Installs vmlinux-to-elf - https://github.com/marin-m/vmlinux-to-elf
 
 I24_25_kernel_tools() {
   module_title "${FUNCNAME[0]}"
