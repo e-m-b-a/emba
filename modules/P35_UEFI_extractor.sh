@@ -11,6 +11,7 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner
+# Credits:   Binarly for support
 
 # Description: Extracts UEFI images with BIOSUtilities - https://github.com/platomav/BIOSUtilities/tree/refactor
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
@@ -41,7 +42,7 @@ P35_UEFI_extractor() {
 }
 
 ami_extractor() {
-  sub_module_title "AMI UEFI extractor"
+  sub_module_title "AMI capsule extractor"
 
   local FIRMWARE_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
@@ -59,7 +60,7 @@ ami_extractor() {
   echo -ne '\n' | python3 "$EXT_DIR"/BIOSUtilities/AMI_PFAT_Extract.py -o "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" &> "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log
 
   if [[ -f "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log ]]; then
-    cat "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log | tee -a "$LOG_FILE"
+    tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log
   fi
 
   print_ln

@@ -29,7 +29,7 @@ F50_base_aggregator() {
   S12_LOG="s12_binary_protection.txt"
   S13_LOG="s13_weak_func_check.txt"
   S14_LOG="s14_weak_func_radare_check.txt"
-  S02_LOG="s02_UEFI_FwHunt.txt"
+  S02_LOG="s02_uefi_fwhunt.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
