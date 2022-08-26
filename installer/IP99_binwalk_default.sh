@@ -189,7 +189,7 @@ IP99_binwalk_default() {
         if command -v binwalk > /dev/null ; then
           echo "WARNING: Uninstalling binwalk version"
           cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
-          sudo apt remove binwalk python3-binwalk
+          sudo apt remove binwalk python3-binwalk -y
           python3 setup.py uninstall
           cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
         fi

@@ -58,9 +58,15 @@ I02_UEFI_fwhunt() {
 
         # BIOSUtilities
         echo -e "$ORANGE""$BOLD""Installing BIOSUtilities""$NC"
+        if ! [[ -d external/BIOSUtilities ]]; then
+          rm -r external/BIOSUtilities
+        fi
         git clone --branch refactor https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
 
         echo -e "$ORANGE""$BOLD""Installing FwHunt""$NC"
+        if ! [[ -d external/fwhunt-scan ]]; then
+          rm -r external/fwhunt-scan
+        fi
         git clone https://github.com/binarly-io/fwhunt-scan.git external/fwhunt-scan
         cd external/fwhunt-scan || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
         git clone https://github.com/binarly-io/FwHunt.git rules

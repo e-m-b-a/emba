@@ -40,7 +40,7 @@ IF20_cve_search() {
       if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
         export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
         export NONINTERACTIVE=1
-        brew install cyclonedx/cyclonedx/cyclonedx-cli
+        sudo -u linuxbrew brew install cyclonedx/cyclonedx/cyclonedx-cli
       else
         echo -e "$ORANGE""WARNING: Brew installation not found - skipping cyclonedx installation.""$NC"
       fi

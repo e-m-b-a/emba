@@ -47,11 +47,11 @@ services:
         hard: 0
         soft: 0
     # adjust the following limits to protect your host
-    deploy:
-      resources:
-        limits:
-          memory: 14g
-          cpus: 7
+    #    deploy:
+    #  resources:
+    #    limits:
+    #      memory: 14g
+    #     cpus: 7
 
 networks:
   emba_runs:

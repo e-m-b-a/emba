@@ -55,11 +55,16 @@ I01_default_apps(){
 
         # install brew installer - used later for cyclonex in IF20 installer
         echo "[*] Installing linuxbrew ..."
-        useradd -m -s /bin/bash linuxbrew
+        if ! grep -q linuxbrew /etc/passwd; then
+          useradd -m -s /bin/bash linuxbrew
+        fi
         usermod -aG sudo linuxbrew
+        if [[ -d /home/linuxbrew/.linuxbrew ]]; then
+          rm -r /home/linuxbrew/.linuxbrew
+        fi
         mkdir -p /home/linuxbrew/.linuxbrew
         chown -R linuxbrew: /home/linuxbrew/.linuxbrew
-        sudo -u linuxbrew /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+        sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
       ;;
     esac
   fi
