@@ -91,19 +91,20 @@ I120_cwe_checker() {
           mkdir ./external/cwe_checker 2>/dev/null
           git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
-          make all GHIDRA_PATH=./external/ghidra/ghidra_10.1.2_PUBLIC
+          make all GHIDRA_PATH="$HOME_PATH""/external/ghidra/ghidra_10.1.2_PUBLIC"
           cd "$HOME_PATH" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
-          mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
-          #rm -r -f "$HOME""/.cargo/"
-          rm -r ./external/rustup
 
           if [[ "$IN_DOCKER" -eq 1 ]]; then
+            mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
             echo '{"ghidra_path":"/external/ghidra/ghidra_10.1.2_PUBLIC"}' > /root/.config/cwe_checker/ghidra.json
+
+            # save .config as we remount /root with tempfs -> now we can restore it in the module
+            mv /root/.config ./external/cwe_checker/
+            mv /root/.local ./external/cwe_checker/
           fi
-          # save .config as we remount /root with tempfs -> now we can restore it in the module
-          mv /root/.config ./external/cwe_checker/
-          mv /root/.local ./external/cwe_checker/
+          #rm -r -f "$HOME""/.cargo/"
+          rm -r ./external/rustup
         else
           echo -e "\\n""$GREEN""cwe-checker already installed - no further action performed.""$NC"
         fi
