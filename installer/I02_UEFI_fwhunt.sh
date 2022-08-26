@@ -49,6 +49,9 @@ I02_UEFI_fwhunt() {
         # rizin:
         apt-get install "${INSTALL_APP_LIST[@]}" -y
         echo -e "$ORANGE""$BOLD""Installing rizin""$NC"
+        if [[ -d external/rizin ]]; then
+          rm -r external/rizin
+        fi
         git clone https://github.com/rizinorg/rizin.git external/rizin
         cd external/rizin || ( echo "Could not install EMBA component rizin" && exit 1 )
         meson build
@@ -58,13 +61,13 @@ I02_UEFI_fwhunt() {
 
         # BIOSUtilities
         echo -e "$ORANGE""$BOLD""Installing BIOSUtilities""$NC"
-        if ! [[ -d external/BIOSUtilities ]]; then
+        if [[ -d external/BIOSUtilities ]]; then
           rm -r external/BIOSUtilities
         fi
         git clone --branch refactor https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
 
         echo -e "$ORANGE""$BOLD""Installing FwHunt""$NC"
-        if ! [[ -d external/fwhunt-scan ]]; then
+        if [[ -d external/fwhunt-scan ]]; then
           rm -r external/fwhunt-scan
         fi
         git clone https://github.com/binarly-io/fwhunt-scan.git external/fwhunt-scan
