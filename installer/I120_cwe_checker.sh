@@ -94,7 +94,6 @@ I120_cwe_checker() {
           make all GHIDRA_PATH="$HOME_PATH""/external/ghidra/ghidra_10.1.2_PUBLIC"
           cd "$HOME_PATH" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
-
           if [[ "$IN_DOCKER" -eq 1 ]]; then
             mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
             echo '{"ghidra_path":"/external/ghidra/ghidra_10.1.2_PUBLIC"}' > /root/.config/cwe_checker/ghidra.json

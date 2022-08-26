@@ -58,12 +58,25 @@ cwe_container_prepare() {
     cp -r "$EXT_DIR"/cwe_checker/.config /root/
     cp -r "$EXT_DIR"/cwe_checker/.local /root/
   fi
+  if ! [[ -d /root/.cargo ]]; then
+    mkdir -p /root/.cargo
+  fi
+  if [[ -d "$EXT_DIR"/cwe_checker/bin ]]; then
+    cp -r "$EXT_DIR"/cwe_checker/bin /root/.cargo/
+  else
+    print_output "[!] CWE checker installation broken ... please check it manually!"
+  fi
 }
 
 cwe_check() {
   local BINARY=""
 
-  export PATH=$EXT_DIR/cwe_checker/bin:$PATH # needed for docker setup
+  if [[ -d /root/.cargo/bin ]]; then
+    export PATH=$PATH:/root/.cargo/bin # needed for docker setup
+  else
+    print_output "[!] CWE checker installation broken ... please check it manually!"
+    return
+  fi
 
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
