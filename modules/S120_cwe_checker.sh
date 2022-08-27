@@ -59,14 +59,15 @@ cwe_container_prepare() {
   # on every run from scratch:
   if [[ -d "$EXT_DIR"/cwe_checker/.config ]]; then
     print_output "[*] Restoring config directory in read-only container"
-    cp -r "$EXT_DIR"/cwe_checker/.config /root/
-    cp -r "$EXT_DIR"/cwe_checker/.local /root/
+    cp -pr "$EXT_DIR"/cwe_checker/.config /root/
+    cp -pr "$EXT_DIR"/cwe_checker/.local /root/
   fi
   if ! [[ -d /root/.cargo ]]; then
     mkdir -p /root/.cargo
   fi
   if [[ -d "$EXT_DIR"/cwe_checker/bin ]]; then
-    cp -r "$EXT_DIR"/cwe_checker/bin /root/.cargo/
+    print_output "[*] Restoring cargo bin directory in read-only container"
+    cp -pr "$EXT_DIR"/cwe_checker/bin /root/.cargo/
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
   fi
@@ -119,7 +120,7 @@ cwe_checker_threaded () {
   local OLD_LOG_FILE="$LOG_FILE"
   local LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
   BINARY_=$(readlink -f "$BINARY_")
-  readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
+  readarray -t TEST_OUTPUT < <(/root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
   for ENTRY in "${TEST_OUTPUT[@]}" ; do
     if [[ -n "$ENTRY" ]] ; then
@@ -145,6 +146,7 @@ cwe_checker_threaded () {
     else
       print_ln
       print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
+      rm "$LOG_PATH_MODULE"/cwe_"$NAME".log
     fi
   fi
   if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_ln ; fi
