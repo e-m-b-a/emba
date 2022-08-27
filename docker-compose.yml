@@ -12,6 +12,7 @@ services:
     tmpfs:
       - /tmp
       - /root
+      - /root/.cargo/bin:exec
       - /run
       - /var/run
       - /var/tmp

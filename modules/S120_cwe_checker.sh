@@ -33,6 +33,7 @@ S120_cwe_checker()
     if [[ "$IN_DOCKER" -eq 1 ]]; then
       cwe_container_prepare
     fi
+
     cwe_check
 
     if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
@@ -53,6 +54,9 @@ S120_cwe_checker()
 }
 
 cwe_container_prepare() {
+  # as we are in a read only docker environment we need to trick a bit:
+  # /root is mounted as a writable tempfs. With this we need to set it up
+  # on every run from scratch:
   if [[ -d "$EXT_DIR"/cwe_checker/.config ]]; then
     print_output "[*] Restoring config directory in read-only container"
     cp -r "$EXT_DIR"/cwe_checker/.config /root/
@@ -72,7 +76,7 @@ cwe_check() {
   local BINARY=""
 
   if [[ -d /root/.cargo/bin ]]; then
-    export PATH=$PATH:/root/.cargo/bin # needed for docker setup
+    export PATH=$PATH:/root/.cargo/bin
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
     return
