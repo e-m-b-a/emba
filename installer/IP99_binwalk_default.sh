@@ -75,7 +75,7 @@ IP99_binwalk_default() {
     print_git_info "binwalk" "m-1-k-3/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
     echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
     print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
-    echo -e "$ORANGE""binwalk will be downloaded.""$NC"
+    echo -e "$ORANGE""yaffshiv will be downloaded.""$NC"
     print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
     echo -e "$ORANGE""sasquatch will be downloaded.""$NC"
     print_git_info "jefferson" "sviehb/jefferson" "JFFS2 filesystem extraction tool"
