@@ -36,7 +36,7 @@ F21_cyclonedx_sbom() {
     done
     if [[ -f "$LOG_DIR"/f21_cyclonedx_sbom.csv ]]; then
       # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick and dirty tranlation
-      sed -r 's/\;/,/g' "$LOG_DIR"/f21_cyclonedx_sbom.csv
+      sed -i 's/\;/,/g' "$LOG_DIR"/f21_cyclonedx_sbom.csv
       cyclonedx convert --input-file "$LOG_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
     fi
   fi
