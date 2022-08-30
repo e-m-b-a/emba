@@ -703,7 +703,7 @@ cve_extractor() {
 
       # just in case CVSSv3 value is missing -> switch to CVSSv2
       if [[ "$CVSS_VALUE" == "null" ]]; then
-        print_output "[*] Missing CVSSv3 value for vulnerability $ORANGE$CVE_VALUE$NC - setting default CVSS to CVSSv2 $ORANGE$CVSSv2_VALUE$NC"
+        print_output "[*] Missing CVSSv3 value for vulnerability $ORANGE$CVE_VALUE$NC - setting default CVSS to CVSSv2 $ORANGE$CVSSv2_VALUE$NC" "no_log"
         CVSS_VALUE="$CVSSv2_VALUE"
         CVEv2_TMP=1
       fi

@@ -37,6 +37,9 @@ I01_default_apps(){
     # john password cracker
     print_tool_info "john" 1
     print_tool_info "john-data" 1
+    # linuxbrew
+    print_tool_info "curl" 1
+    print_tool_info "git" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -49,6 +52,19 @@ I01_default_apps(){
       y|Y )
         echo
         apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+        # install brew installer - used later for cyclonex in IF20 installer
+        echo "[*] Installing linuxbrew ..."
+        if ! grep -q linuxbrew /etc/passwd; then
+          useradd -m -s /bin/bash linuxbrew
+        fi
+        usermod -aG sudo linuxbrew
+        if [[ -d /home/linuxbrew/.linuxbrew ]]; then
+          rm -r /home/linuxbrew/.linuxbrew
+        fi
+        mkdir -p /home/linuxbrew/.linuxbrew
+        chown -R linuxbrew: /home/linuxbrew/.linuxbrew
+        sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
       ;;
     esac
   fi

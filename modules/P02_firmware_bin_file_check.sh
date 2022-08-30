@@ -24,6 +24,9 @@ P02_firmware_bin_file_check() {
   set_p02_default_exports
 
   local FILE_BIN_OUT
+  # we set this var global to 1 if we find something UEFI related
+  export UEFI_DETECTED=0
+
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"
   if [[ -f "$FIRMWARE_PATH" ]]; then
@@ -37,11 +40,25 @@ P02_firmware_bin_file_check() {
      # entropy checking on binary file
     ENTROPY="$(ent "$FIRMWARE_PATH" | grep Entropy)"
     write_csv_log "Entropy" "${ENTROPY:-}" "NA"
+
+    print_output "[*] Entropy testing with binwalk ... "
+    # we have to change the working directory for binwalk, because everything except the log directory is read-only in
+    # Docker container and binwalk fails to save the entropy picture there
+    if [[ $IN_DOCKER -eq 1 ]] ; then
+      cd "$LOG_DIR" || return
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+      cd /emba || return
+    else
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+    fi
   fi
 
   local FILE_LS_OUT
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
   
+  print_ln
   print_output "[*] Details of the firmware file:"
   print_ln
   print_output "$(indent "$FILE_LS_OUT")"
@@ -89,6 +106,9 @@ set_p02_default_exports() {
   export BSD_UFS=0
   export ANDROID_OTA=0
   export MD5_DONE_DEEP=()
+  # Note: we do not set UEFI_DETECTED in this function. If so, we are going to reset it and we only need
+  #       an indicator if this could be some UEFI firmware for further processing
+  export UEFI_AMI_CAPSULE=0
 }
 
 fw_bin_detector() {
@@ -97,6 +117,7 @@ fw_bin_detector() {
   local DLINK_ENC_CHECK=""
   local QNAP_ENC_CHECK=""
   local AVM_CHECK=0
+  local UEFI_CHECK=0
 
   set_p02_default_exports
 
@@ -104,7 +125,18 @@ fw_bin_detector() {
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
+  binwalk "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
+  UEFI_CHECK=$(grep -c "UEFI" "$TMP_DIR"/s02_binwalk_output.txt || true)
 
+  if [[ "$UEFI_CHECK" -gt 0 ]]; then
+    print_output "[+] Identified possible UEFI firmware - using fwhunt-scan vulnerability scanning module"
+    export UEFI_DETECTED=1
+    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "$TMP_DIR"/s02_binwalk_output.txt || true)
+    if [[ "$UEFI_AMI_CAPSULE" -gt 0 ]]; then
+      print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
+    fi
+    write_csv_log "UEFI firmware detected" "yes" "NA"
+  fi
   if [[ "$AVM_CHECK" -gt 0 ]] || [[ "$FW_VENDOR" == *"AVM"* ]]; then
     print_output "[+] Identified AVM firmware - using AVM extraction module"
     export AVM_DETECTED=1

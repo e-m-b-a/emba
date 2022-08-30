@@ -22,13 +22,14 @@ F50_base_aggregator() {
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
-  P02_LOG="p02_firmware_bin_file_check.txt"
+  P02_LOG="p02_firmware_bin_file_check.csv"
   S03_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
   S06_LOG="s06_distribution_identification.txt"
   S12_LOG="s12_binary_protection.txt"
   S13_LOG="s13_weak_func_check.txt"
   S14_LOG="s14_weak_func_radare_check.txt"
+  S02_LOG="s02_uefi_fwhunt.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
@@ -184,6 +185,13 @@ output_details() {
     write_csv_log "yara_rules_match" "$YARA_CNT" "NA"
     DATA=1
   fi
+  if [[ "${FWHUNTER_CNT:-0}" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$FWHUNTER_CNT""$GREEN"" UEFI vulnerabilities.""$NC"
+    write_link "s02"
+    write_csv_log "uefi_vulns" "$FWHUNTER_CNT" "NA"
+    DATA=1
+  fi
+
   EMUL=$(cut -d\; -f1 "$LOG_DIR"/s116_qemu_version_detection.csv 2>/dev/null | sort -u | wc -l || true)
   if [[ "${EMUL:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
@@ -662,9 +670,13 @@ get_data() {
   export ROUTERSPLOIT_VULN=0
   export CVE_COUNTER=0
   export CVE_SEARCH=""
+  export FWHUNTER_CNT=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
-    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d= -f2 | sed 's/^\ //' || true)
+    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
+  fi
+  if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
+    FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
     PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | tr -d '[:space:]' || true)

@@ -24,7 +24,34 @@ IP99_binwalk_default() {
     INSTALL_APP_LIST=()
 
     # currently we use the debian package of binwalk:
-    print_tool_info "binwalk" 1
+    #print_tool_info "binwalk" 1
+    print_tool_info "git" 1
+    print_tool_info "locales" 1
+    print_tool_info "qtbase5-dev" 1
+    print_tool_info "build-essential" 1
+    print_tool_info "mtd-utils" 1
+    print_tool_info "gzip" 1
+    print_tool_info "bzip2" 1
+    print_tool_info "tar" 1
+    print_tool_info "arj" 1
+    print_tool_info "lhasa" 1
+    print_tool_info "p7zip" 1
+    print_tool_info "p7zip-rar" 1
+    print_tool_info "p7zip-full" 1
+    print_tool_info "cabextract" 1
+    print_tool_info "util-linux" 1
+    # firmware-mod-kit is only available on Kali Linux
+    print_tool_info "firmware-mod-kit" 1
+    print_tool_info "cramfsswap" 1
+    print_tool_info "squashfs-tools" 1
+    print_tool_info "zlib1g-dev" 1
+    print_tool_info "liblzma-dev" 1
+    print_tool_info "liblzo2-dev" 1
+    print_tool_info "sleuthkit" 1
+    print_tool_info "default-jdk" 1
+    print_tool_info "lzop" 1
+    print_tool_info "cpio" 1
+
     print_tool_info "python3-pip" 1
     print_tool_info "python3-opengl" 1
     print_tool_info "python3-pyqt5" 1
@@ -36,39 +63,19 @@ IP99_binwalk_default() {
     #print_tool_info "python2" 1
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
-    print_tool_info "mtd-utils" 1
-    print_tool_info "gzip" 1
-    print_tool_info "bzip2" 1
-    print_tool_info "tar" 1
-    print_tool_info "arj" 1
-    print_tool_info "lhasa" 1
-    print_tool_info "p7zip" 1
-    print_tool_info "p7zip-rar" 1
-    print_tool_info "p7zip-full" 1
-    print_tool_info "cabextract" 1
-    print_tool_info "cramfsswap" 1
-    print_tool_info "squashfs-tools" 1
-    print_tool_info "sleuthkit" 1
-    print_tool_info "default-jdk" 1
-    print_tool_info "lzop" 1
     print_tool_info "srecord" 1
-    print_tool_info "build-essential" 1
-    print_tool_info "zlib1g-dev" 1
-    print_tool_info "liblzma-dev" 1
-    print_tool_info "liblzo2-dev" 1
-    # firmware-mod-kit is only available on Kali Linux
-    print_tool_info "firmware-mod-kit" 1
 
     print_pip_info "nose"
     print_pip_info "coverage"
     print_pip_info "pyqtgraph"
     print_pip_info "capstone"
     print_pip_info "cstruct"
+    print_pip_info "matplotlib"
 
-    print_git_info "binwalk" "ReFirmLabs/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
-    echo -e "$ORANGE""cve-search will be downloaded.""$NC"
+    print_git_info "binwalk" "m-1-k-3/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
+    echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
     print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
-    echo -e "$ORANGE""binwalk will be downloaded.""$NC"
+    echo -e "$ORANGE""yaffshiv will be downloaded.""$NC"
     print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
     echo -e "$ORANGE""sasquatch will be downloaded.""$NC"
     print_git_info "jefferson" "sviehb/jefferson" "JFFS2 filesystem extraction tool"
@@ -87,8 +94,6 @@ IP99_binwalk_default() {
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        BINWALK_PRE_AVAILABLE=0
-
         apt-get install "${INSTALL_APP_LIST[@]}" -y
 
         pip3 install nose 2>/dev/null
@@ -96,9 +101,11 @@ IP99_binwalk_default() {
         pip3 install pyqtgraph 2>/dev/null
         pip3 install capstone 2>/dev/null
         pip3 install cstruct 2>/dev/null
+        pip3 install matplotlib 2>/dev/null
 
         if ! [[ -d external/binwalk ]]; then
-          git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+          #git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
+          git clone https://github.com/m-1-k-3/binwalk.git external/binwalk
         fi
 
         if ! command -v yaffshiv > /dev/null ; then
@@ -116,7 +123,11 @@ IP99_binwalk_default() {
           if ! [[ -d external/binwalk/sasquatch ]]; then
             git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
           fi
-          CFLAGS="-fcommon -Wno-misleading-indentation" ./external/binwalk/sasquatch/build.sh -y
+          cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+          wget https://github.com/devttys0/sasquatch/pull/47.patch
+          patch -p1 < 47.patch
+          CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
         else
           echo -e "$GREEN""sasquatch already installed""$NC"
         fi
@@ -175,22 +186,27 @@ IP99_binwalk_default() {
           echo -e "$GREEN""ubi_reader already installed""$NC"
         fi
 
+        if command -v binwalk > /dev/null ; then
+          echo "WARNING: Uninstalling binwalk version"
+          cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
+          sudo apt remove binwalk python3-binwalk -y
+          python3 setup.py uninstall
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
+        fi
+
         if ! command -v binwalk > /dev/null ; then
           cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
           python3 setup.py install
           cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
-        else
-          echo -e "$GREEN""binwalk already installed""$NC"
-          BINWALK_PRE_AVAILABLE=1
         fi
 
         if [[ -d ./external/binwalk ]]; then
           rm ./external/binwalk -r
         fi
 
-        if [[ -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+        if [[ -f "/usr/local/bin/binwalk" ]] ; then
           echo -e "$GREEN""binwalk installed successfully""$NC"
-        elif [[ ! -f "/usr/local/bin/binwalk" && "$BINWALK_PRE_AVAILABLE" -eq 0 ]] ; then
+        elif [[ ! -f "/usr/local/bin/binwalk" ]] ; then
           echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
         fi
       ;;

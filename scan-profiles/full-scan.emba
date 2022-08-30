@@ -20,6 +20,7 @@ export SHORT_PATH=1
 export HTML=1
 export CWE_CHECKER=1
 export QEMULATION=1
+export FULL_EMULATION=1
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
@@ -28,6 +29,7 @@ if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Activates web report creation in log path")")" "no_log"
   print_output "$(indent "$(orange "Enable cwe-checker")")" "no_log"
   print_output "$(indent "$(orange "Enables automated qemu emulation tests (WARNING this module could harm your host!)")")" "no_log"
+  print_output "$(indent "$(orange "Activates full-system mode emulation tests")")" "no_log"
   print_output "$(indent "$(orange "Runs EMBA in docker container")")" "no_log"
   export USE_DOCKER=1
 fi

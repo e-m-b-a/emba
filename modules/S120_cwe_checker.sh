@@ -33,6 +33,7 @@ S120_cwe_checker()
     if [[ "$IN_DOCKER" -eq 1 ]]; then
       cwe_container_prepare
     fi
+
     cwe_check
 
     if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
@@ -53,17 +54,34 @@ S120_cwe_checker()
 }
 
 cwe_container_prepare() {
+  # as we are in a read only docker environment we need to trick a bit:
+  # /root is mounted as a writable tempfs. With this we need to set it up
+  # on every run from scratch:
   if [[ -d "$EXT_DIR"/cwe_checker/.config ]]; then
     print_output "[*] Restoring config directory in read-only container"
-    cp -r "$EXT_DIR"/cwe_checker/.config /root/
-    cp -r "$EXT_DIR"/cwe_checker/.local /root/
+    cp -pr "$EXT_DIR"/cwe_checker/.config /root/
+    cp -pr "$EXT_DIR"/cwe_checker/.local /root/
+  fi
+  if ! [[ -d /root/.cargo ]]; then
+    mkdir -p /root/.cargo
+  fi
+  if [[ -d "$EXT_DIR"/cwe_checker/bin ]]; then
+    print_output "[*] Restoring cargo bin directory in read-only container"
+    cp -pr "$EXT_DIR"/cwe_checker/bin /root/.cargo/
+  else
+    print_output "[!] CWE checker installation broken ... please check it manually!"
   fi
 }
 
 cwe_check() {
   local BINARY=""
 
-  export PATH=$EXT_DIR/cwe_checker/bin:$PATH # needed for docker setup
+  if [[ -d /root/.cargo/bin ]]; then
+    export PATH=$PATH:/root/.cargo/bin
+  else
+    print_output "[!] CWE checker installation broken ... please check it manually!"
+    return
+  fi
 
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
@@ -102,7 +120,7 @@ cwe_checker_threaded () {
   local OLD_LOG_FILE="$LOG_FILE"
   local LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
   BINARY_=$(readlink -f "$BINARY_")
-  readarray -t TEST_OUTPUT < <( cwe_checker "$LINE" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
+  readarray -t TEST_OUTPUT < <(/root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
   for ENTRY in "${TEST_OUTPUT[@]}" ; do
     if [[ -n "$ENTRY" ]] ; then
@@ -128,6 +146,7 @@ cwe_checker_threaded () {
     else
       print_ln
       print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
+      rm "$LOG_PATH_MODULE"/cwe_"$NAME".log
     fi
   fi
   if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_ln ; fi

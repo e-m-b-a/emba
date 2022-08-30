@@ -219,9 +219,13 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IP99_binwalk_default
 
+  I02_UEFI_fwhunt
+
   I13_objdump
 
   I20_php_check
+
+  I24_25_kernel_tools
 
   I108_stacs_password_search
 

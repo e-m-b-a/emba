@@ -308,6 +308,7 @@ main()
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_STATUS_BAR=1
   export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
+  export NOTIFICATION_PID="NA"
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
   export WSL=0    # wsl environment detected
@@ -548,6 +549,7 @@ main()
 
   if [[ "$IN_DOCKER" -eq 0 ]]; then
     print_notification &
+    NOTIFICATION_PID="$?"
     print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
     echo "${SUDO_USER:-${USER}}" > "$LOG_DIR"/orig_user.log
   fi
@@ -773,6 +775,9 @@ main()
           fi
 
           if [[ "$IN_DOCKER" -eq 0 ]]; then
+            if [[ "$NOTIFICATION_PID" != "NA" ]]; then
+              kill "$NOTIFICATION_PID" 2>/dev/null || true
+            fi
             restore_permissions
             if ! [[ -d "$TMP_DIR" ]]; then
               pkill -f "inotifywait.*$LOG_DIR" 2>/dev/null || true
@@ -923,6 +928,9 @@ main()
       rm -r "$TMP_DIR" 2>/dev/null || true
     else
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+    fi
+    if [[ "$NOTIFICATION_PID" != "NA" ]]; then
+      kill "$NOTIFICATION_PID" 2>/dev/null || true
     fi
     write_grep_log "$(date)" "TIMESTAMP"
     write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"

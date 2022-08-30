@@ -13,6 +13,7 @@
 # Author(s): Michael Messner
 
 # Description:  This module tries to identify the kernel file and the init command line
+#               The identified kernel binary file is extracted with vmlinux-to-elf
 
 S24_kernel_bin_identifier()
 {
@@ -46,6 +47,20 @@ S24_kernel_bin_identifier()
         print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
         print_ln
         print_output "$(indent "$(orange "$K_INIT")")"
+        print_ln
+      fi
+
+      if [[ -e "$EXT_DIR"/vmlinux-to-elf/vmlinux-to-elf ]]; then
+        print_output "[*] Testing possible Linux kernel file $ORANGE$FILE$NC with ${ORANGE}vmlinux-to-elf:$NC"
+        print_ln
+        "$EXT_DIR"/vmlinux-to-elf/vmlinux-to-elf "$FILE" "$FILE".elf | tee -a "$LOG_FILE" || true
+        if [[ -f "$FILE".elf ]]; then
+          K_ELF=$(file "$FILE".elf)
+          if [[ "$K_ELF" == *"ELF "* ]]; then
+            print_ln
+            print_output "[+] Successfully generated Linux kernel elf file: $ORANGE$FILE.elf$NC"
+          fi
+        fi
         print_ln
       fi
 

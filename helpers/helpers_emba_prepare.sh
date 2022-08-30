@@ -238,7 +238,7 @@ prepare_binary_arr()
   #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
-  readarray -t BINARIES_TMP < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
+  readarray -t BINARIES_TMP < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1 || true)
   if [[ -v BINARIES_TMP[@] ]]; then
     for BINARY in "${BINARIES_TMP[@]}"; do
       if [[ -f "$BINARY" ]]; then
