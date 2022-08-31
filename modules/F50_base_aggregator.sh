@@ -418,13 +418,22 @@ output_binaries() {
 
     # color codes for printf
     local RED_=""
-    RED_="$(tput setaf 1)"
     local GREEN_=""
-    GREEN_="$(tput setaf 2)"
     local ORANGE_=""
-    ORANGE_="$(tput setaf 3)"
     local NC_=""
-    NC_="$(tput sgr0)"
+
+    # this is needed for EMBArk:
+    if [[ -z "$TERM" ]] || [[ "$TERM" == "dumb" ]]; then
+      RED_="$(tput -T xterm setaf 1)"
+      GREEN_="$(tput -T xterm setaf 2)"
+      ORANGE_="$(tput -T xterm setaf 3)"
+      NC_="$(tput -T xterm sgr0)"
+    else
+      RED_="$(tput setaf 1)"
+      GREEN_="$(tput setaf 2)"
+      ORANGE_="$(tput setaf 3)"
+      NC_="$(tput sgr0)"
+    fi
 
     readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null || true)
     readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2> /dev/null || true)
@@ -481,6 +490,7 @@ binary_fct_output() {
   local NX=""
   local SYMBOLS=""
   local NETWORKING=""
+  local CWE_CNT=0
 
   if grep -q "$BINARY" "$LOG_DIR"/"$S12_LOG" 2>/dev/null; then
     if grep "$BINARY" "$LOG_DIR"/"$S12_LOG" | grep -o -q "No RELRO"; then
@@ -521,23 +531,49 @@ binary_fct_output() {
     NETWORKING="$ORANGE_""Networking unknown$NC_"
   fi
 
-
-  if [[ -f "$BASE_LINUX_FILES" ]]; then
-    local FCT_LINK=""
-    # if we have the base linux config file we are checking it:
-    if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
-      FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-      printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
-      write_link "$FCT_LINK"
+  # CWE checker enabled:
+  if [[ "$CWE_CHECKER" -eq 1 ]]; then
+    # cwe-checker results per binary
+    if [[ -f "$LOG_DIR"/s120_cwe_checker/cwe_"$BINARY".log ]]; then
+      CWE_CNT=$(grep -Ec "CWE[0-9]+" "$LOG_DIR""/s120_cwe_checker/cwe_""$BINARY"".log" || true)
+    fi
+    if [[ -f "$BASE_LINUX_FILES" ]]; then
+      local FCT_LINK=""
+      # if we have the base linux config file we are checking it:
+      if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
+        FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
+        printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  CWE-check: %-2.2s  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+        write_link "$FCT_LINK"
+      else
+        FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
+        printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  CWE-check: %-2.2s  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+        write_link "$FCT_LINK"
+      fi
     else
-      FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+      FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  CWE-check: %-2.2s  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       write_link "$FCT_LINK"
     fi
   else
-    FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-    printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
-    write_link "$FCT_LINK"
+    if [[ -f "$BASE_LINUX_FILES" ]]; then
+      # No CWE checker was enabled
+      local FCT_LINK=""
+      # if we have the base linux config file we are checking it:
+      if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
+        FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
+        printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+        write_link "$FCT_LINK"
+      else
+        FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
+        printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+        write_link "$FCT_LINK"
+      fi
+    else
+      FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+      write_link "$FCT_LINK"
+    fi
+
   fi
 }
 
