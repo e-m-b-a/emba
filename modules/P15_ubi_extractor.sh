@@ -70,7 +70,7 @@ ubi_extractor() {
         sub_module_title "UBIfs deep extraction"
         print_output "[*] Extracts UBIfs firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
         print_output "[*] File details: $ORANGE$(file "$UBI_FILE" | cut -d ':' -f2-)$NC"
-        ubireader_extract_files -l -i -v -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE" || true
+        ubireader_extract_files -l -i -v -w -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE" || true
       fi
     done
 

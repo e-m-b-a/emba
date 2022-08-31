@@ -542,16 +542,16 @@ binary_fct_output() {
       # if we have the base linux config file we are checking it:
       if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  CWE-check: %-2.2s  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+        printf "$GREEN_\t%-5.5s: %-15.15s : common linux file: yes | CWE-check: %-2.2s | %-15.15s | %-16.16s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       else
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  CWE-check: %-2.2s  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+        printf "$ORANGE_\t%-5.5s: %-15.15s : common linux file: no  | CWE-check: %-2.2s | %-15.15s | %-16.16s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       fi
     else
       FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  CWE-check: %-2.2s  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+      printf "$ORANGE_\t%-5.5s: %-15.15s : common linux file: NA  | CWE-check: %-2.2s | %-15.15s | %-16.16s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       write_link "$FCT_LINK"
     fi
   else
@@ -561,16 +561,16 @@ binary_fct_output() {
       # if we have the base linux config file we are checking it:
       if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+        printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes |  %-15.15s  |  %-16.16s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       else
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no   |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+        printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no  |  %-15.15s  |  %-16.16s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       fi
     else
       FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: unknown |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-20.20s  |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: NA  |  %-15.15s  |  %-16.16s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       write_link "$FCT_LINK"
     fi
 
