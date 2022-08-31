@@ -4,8 +4,6 @@ services:
     image: embeddedanalyzer/emba:latest
     #hostname: emba
     read_only: true
-    # ensure that EMBA is killed first on out of memory:
-    #oom_score_adj: -999
     # all pre-checker mount modules need privileged mode
     privileged: true
     # /root is needed for binwalk
@@ -49,12 +47,16 @@ services:
       core:
         hard: 0
         soft: 0
+    # mem_limit: 12g
     # adjust the following limits to protect your host
     #deploy:
     #  resources:
     #    limits:
-    #      memory: 14g
+    #      memory: 12G
     #      cpus: 7
+    #    reservations:
+    #      cpus: 2
+    #      memory: 4G
 
 networks:
   emba_runs:
