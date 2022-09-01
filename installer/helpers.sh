@@ -61,7 +61,7 @@ print_tool_info(){
         COMMAND_="${1:-}"
       fi
       if ( command -v "$COMMAND_" > /dev/null) || ( dpkg -s "${1}" 2> /dev/null | grep -q "Status: install ok installed" ) ; then
-        UPDATE=$(apt-cache policy "$1" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
+        UPDATE=$(LANG=en apt-cache policy "$1" | grep -i install | cut -d: -f2 | tr -d "^[:blank:]" | uniq | wc -l)
         if [[ "$UPDATE" -eq 1 ]] ; then
           echo -e "$GREEN""${1:-}"" won't be updated.""$NC"
         else
