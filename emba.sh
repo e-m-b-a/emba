@@ -128,6 +128,7 @@ run_modules()
     local MODULES=()
     local MODULES_LOCAL=()
     local MODULES_EMBA=()
+
     mapfile -t MODULES_EMBA < <(find "$MOD_DIR" -name "${MODULE_GROUP^^}""*_*.sh" | sort -V 2> /dev/null)
     if [[ -d "${MOD_DIR_LOCAL}" ]]; then
       mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
@@ -137,6 +138,7 @@ run_modules()
       sort_modules
     fi
     for MODULE_FILE in "${MODULES[@]}" ; do
+      local MOD_FIN=0
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
         if [[ "${MODULE_GROUP^^}" == "P" ]]; then
           # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
@@ -150,12 +152,31 @@ run_modules()
         MODULE_BN=$(basename "$MODULE_FILE")
         MODULE_MAIN=${MODULE_BN%.*}
         # module_start_log "$MODULE_MAIN"
-        if [[ $THREADING_SET -eq 1 ]]; then
-          $MODULE_MAIN &
-          WAIT_PIDS+=( "$!" )
-          max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
-        else
-          $MODULE_MAIN
+        if [[ "$RESTART" -eq 1 ]]; then
+          if [[ $(grep -i -c "$MODULE_MAIN finished" "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+            if [[ "$MODULE_MAIN" == "P99_"* ]]; then
+              print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "no_log"
+              MOD_FIN=0
+            else
+              print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "no_log"
+              MOD_FIN=1
+            fi
+          fi
+        fi
+        #if [[ "$MOD_FIN" -ne 1 ]]; then
+        #  $MODULE_MAIN
+        #  WAIT_PIDS+=( "$!" )
+        #  print_output "[!] MAX_MODS: $MAX_MODS, WAIT_PIDS: ${#WAIT_PIDS[@]}" "no_log"
+        #  max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
+        #fi
+        if [[ "$MOD_FIN" -eq 0 ]]; then
+          if [[ $THREADING_SET -eq 1 ]]; then
+            $MODULE_MAIN &
+            WAIT_PIDS+=( "$!" )
+            max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
+          else
+            $MODULE_MAIN
+          fi
         fi
         reset_module_count
       fi
@@ -165,6 +186,7 @@ run_modules()
     done
   else
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
+      local MOD_FIN=0
       if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
         local MODULE=""
         MODULE=$(find "$MOD_DIR" -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
@@ -172,12 +194,32 @@ run_modules()
           MODULE_BN=$(basename "$MODULE")
           MODULE_MAIN=${MODULE_BN%.*}
           # module_start_log "$MODULE_MAIN"
-          if [[ $THREADING_SET -eq 1 ]]; then
-            $MODULE_MAIN &
-            WAIT_PIDS+=( "$!" )
-            max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
-          else
-            $MODULE_MAIN
+          if [[ "$RESTART" -eq 1 ]]; then
+            if [[ $(grep -i -c "$MODULE_MAIN finished" "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+              if [[ "$MODULE_MAIN" == "P99_"* ]]; then
+                print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "no_log"
+                MOD_FIN=0
+              else
+                print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "no_log"
+                MOD_FIN=1
+              fi
+            fi
+          fi
+          #if [[ "$MOD_FIN" -ne 1 ]]; then
+          #  $MODULE_MAIN
+          #  WAIT_PIDS+=( "$!" )
+          #  print_output "[!] MAX_MODS: $MAX_MODS, WAIT_PIDS: ${#WAIT_PIDS[@]}" "no_log"
+          #  max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
+          #fi
+
+          if [[ "$MOD_FIN" -eq 0 ]]; then
+            if [[ $THREADING_SET -eq 1 ]]; then
+              $MODULE_MAIN &
+              WAIT_PIDS+=( "$!" )
+              max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
+            else
+              $MODULE_MAIN
+            fi
           fi
           reset_module_count
         fi
@@ -194,6 +236,7 @@ run_modules()
           sort_modules
         fi
         for MODULE_FILE in "${MODULES[@]}" ; do
+          local MOD_FIN=0
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             if [[ "${MODULE_GROUP^^}" == "P" ]]; then
               # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
@@ -208,12 +251,32 @@ run_modules()
             MODULE_BN=$(basename "$MODULE_FILE")
             MODULE_MAIN=${MODULE_BN%.*}
             # module_start_log "$MODULE_MAIN"
-            if [[ $THREADING_SET -eq 1 ]]; then
-              $MODULE_MAIN &
-              WAIT_PIDS+=( "$!" )
-              max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
-            else
-              $MODULE_MAIN
+            if [[ "$RESTART" -eq 1 ]]; then
+              if [[ $(grep -i -c "$MODULE_MAIN finished" "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+                if [[ "$MODULE_MAIN" == "P99_"* ]]; then
+                  print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "no_log"
+                  MOD_FIN=0
+                else
+                  print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "no_log"
+                  MOD_FIN=1
+                fi
+              fi
+            fi
+            #if [[ "$MOD_FIN" -ne 1 ]]; then
+            #  $MODULE_MAIN
+            #  WAIT_PIDS+=( "$!" )
+            #  print_output "[!] MAX_MODS: $MAX_MODS, WAIT_PIDS: ${#WAIT_PIDS[@]}" "no_log"
+            #  max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
+            #fi
+
+            if [[ "$MOD_FIN" -eq 0 ]]; then
+              if [[ $THREADING_SET -eq 1 ]]; then
+                $MODULE_MAIN &
+                WAIT_PIDS+=( "$!" )
+                max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
+              else
+                $MODULE_MAIN
+              fi
             fi
             reset_module_count
           fi
@@ -236,8 +299,8 @@ main()
 
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
-  export EMBA_VERSION="1.1.1"
+  export RELEASE=0
+  export EMBA_VERSION="1.1.x"
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
@@ -268,6 +331,7 @@ main()
   export LOG_GREP=0
   export MAX_MODS=0
   export MAX_MOD_THREADS=0
+  export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0             # test only dependency
   export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
@@ -536,6 +600,14 @@ main()
     export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   fi
 
+  # restart file gets generated during startup if old log dir is found:
+  if [[ -f "$TMP_DIR"/restart ]]; then
+    print_output "[!] Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
+    export RESTART=1
+    rm "$TMP_DIR"/restart
+    source "$LOG_DIR""/backup_vars.log"
+  fi
+
   # Check all dependencies of EMBA
   dependency_check
 
@@ -546,6 +618,10 @@ main()
 
   # create log directory, if not exists and needed subdirectories
   create_log_dir
+
+  if [[ $IN_DOCKER -eq 0 ]] ; then
+    echo "$LOG_DIR" > "$TMP_DIR"/orig_logdir
+  fi
 
   if [[ "$IN_DOCKER" -eq 0 ]]; then
     print_notification &
@@ -754,6 +830,7 @@ main()
       echo "$FIRMWARE_PATH" >> "$TMP_DIR"/fw_name.log
       echo "$LOG_DIR" >> "$TMP_DIR"/emba_log_dir.log
       echo "$EMBA_COMMAND" >> "$TMP_DIR"/emba_command.log
+
       write_notification "EMBA starting docker container"
 
       if [[ "$STRICT_MODE" -eq 1 ]]; then
@@ -774,20 +851,13 @@ main()
             print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
           fi
 
-          if [[ "$IN_DOCKER" -eq 0 ]]; then
-            if [[ "$NOTIFICATION_PID" != "NA" ]]; then
-              kill "$NOTIFICATION_PID" 2>/dev/null || true
-            fi
-            restore_permissions
-            if ! [[ -d "$TMP_DIR" ]]; then
-              pkill -f "inotifywait.*$LOG_DIR" 2>/dev/null || true
-            fi
-          fi
-
-          exit
+          cleaner
+          restore_permissions
+          exit 0
         fi
       else
         print_output "[-] EMBA failed in docker mode!" "main"
+        cleaner
         write_notification "EMBA failed analysis in default mode"
         exit 1
       fi

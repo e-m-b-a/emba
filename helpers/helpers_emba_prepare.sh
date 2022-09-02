@@ -26,9 +26,34 @@
 log_folder()
 {
   if [[ $ONLY_DEP -eq 0 ]] && [[ -d "$LOG_DIR" ]] ; then
+    export RESTART=0
+    local NOT_FINISHED=0
+
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    There are files in the specified directory: ""$LOG_DIR""\\n    You can now delete the content here or start the tool again and specify a different directory."
+
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+      if grep -q "Test ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A finished EMBA firmware test was found in the log directory" "no_log"
+      elif grep -q "System emulation phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - system emulation phase already finished" "no_log"
+        NOT_FINISHED=1
+      elif grep -q "Testing phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - testing phase already finished" "no_log"
+        NOT_FINISHED=1
+      elif grep -q "Pre-checking phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - pre-checking phase already finished" "no_log"
+        NOT_FINISHED=1
+      else
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory" "no_log"
+        NOT_FINISHED=1
+      fi
+    fi
     echo -e "\\n${ORANGE}Delete content of log directory: $LOG_DIR ?${NC}\\n"
+    if [[ "$NOT_FINISHED" -eq 1 ]]; then
+      print_output "[*] If you answer with ${ORANGE}no${NC}, EMBA tries to process the unfinished test${NC}" "no_log"
+    fi
+
     if [[ $OVERWRITE_LOG -eq 1 ]] ; then
       ANSWER="y"
     else
@@ -51,6 +76,18 @@ log_folder()
           else
             rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
+          fi
+        ;;
+        n|N|"" )
+          if [[ "$NOT_FINISHED" -eq 1 ]] && [[ -f "$LOG_DIR"/backup_vars.log ]]; then
+            print_output "[*] EMBA tries to process the unfinished test" "no_log"
+            if ! [[ -d "$TMP_DIR" ]]; then
+              mkdir "$TMP_DIR"
+            fi
+            touch "$TMP_DIR"/restart
+          else
+            echo -e "\\n${RED}Terminate EMBA${NC}\\n"
+            exit 1
           fi
         ;;
         * )
@@ -196,6 +233,8 @@ architecture_check()
         print_output "[!] Since no architecture could be detected, you should set one."
       fi
     fi
+    backup_var "ARCH" "$ARCH"
+    backup_var "D_END" "$D_END"
 
   else
     print_output "[*] Architecture auto detection disabled\\n"

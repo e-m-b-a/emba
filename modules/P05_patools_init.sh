@@ -31,6 +31,7 @@ P05_patools_init() {
     if [[ "$FILES_PATOOLS" -gt 0 ]]; then
       MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
+      backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
     fi
 
     NEG_LOG=1

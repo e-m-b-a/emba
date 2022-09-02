@@ -19,6 +19,9 @@
 # it the installer fails you can try to change it to 0
 STRICT_MODE=1
 
+ORIG_USER="${SUDO_USER:-${USER}}"
+ORIG_GROUP=$(groups "$ORIG_USER" | cut -d: -f2 | awk '{print $1}')
+
 export DEBIAN_FRONTEND=noninteractive
 export INSTALL_APP_LIST=()
 export DOWNLOAD_FILE_LIST=()
@@ -171,6 +174,10 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   if ! [[ -d "external" ]] ; then
     echo -e "\\n""$ORANGE""Created external directory: ./external""$NC"
     mkdir external
+    # currently this is needed for full install on Ubuntu
+    # the freetz installation is running as freetzuser and needs write access:
+    chown "$ORIG_USER":"$ORIG_GROUP" ./external
+    chmod 777 ./external
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
@@ -247,6 +254,9 @@ fi
 IF20_cve_search
 
 cd "$HOME_PATH" || exit 1
+
+# we reset the permissions of external from 777 back to 755:
+chmod 755 ./external
 
 if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"

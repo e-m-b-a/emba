@@ -370,4 +370,5 @@ binwalk_deep_extract_helper() {
 
 linux_basic_identification_helper() {
   LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  backup_var "LINUX_PATH_COUNTER" "$LINUX_PATH_COUNTER"
 }

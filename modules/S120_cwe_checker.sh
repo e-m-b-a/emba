@@ -120,16 +120,12 @@ cwe_checker_threaded () {
   local OLD_LOG_FILE="$LOG_FILE"
   local LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
   BINARY_=$(readlink -f "$BINARY_")
-  readarray -t TEST_OUTPUT < <(/root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
+
+  /root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
-  for ENTRY in "${TEST_OUTPUT[@]}" ; do
-    if [[ -n "$ENTRY" ]] ; then
-      if ! [[ "$ENTRY" == *"ERROR:"* || "$ENTRY" == *"DEBUG:"* || "$ENTRY" == *"INFO:"* ]] ; then
-        print_output "$(indent "$ENTRY")"
-      fi
-    fi
-  done
+
   if [[ -f "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
+    grep -v "ERROR:\|DEBUG:\|INFO:" "$LOG_PATH_MODULE"/cwe_"$NAME".log
     mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then

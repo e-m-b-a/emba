@@ -61,7 +61,7 @@ max_pids_protection() {
     local TEMP_PIDS=()
     # check for really running PIDs and re-create the array
     for PID in "${WAIT_PIDS[@]}"; do
-      #print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
+      # print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
       if [[ -e /proc/"$PID" ]]; then
         TEMP_PIDS+=( "$PID" )
       fi
@@ -71,7 +71,7 @@ max_pids_protection() {
       killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
     fi
 
-    #print_output "[!] really running pids: ${#TEMP_PIDS[@]}"
+    # print_output "[!] really running pids: ${#TEMP_PIDS[@]}"
 
     # recreate the arry with the current running PIDS
     WAIT_PIDS=()
@@ -122,6 +122,15 @@ cleaner() {
       reset_network_emulation 2
     fi
   fi
+
+  if [[ "$NOTIFICATION_PID" != "NA" ]]; then
+    kill "$NOTIFICATION_PID" 2>/dev/null || true
+  fi
+  if [[ -f "$TMP_DIR"/orig_logdir ]]; then
+    LOG_DIR_HOST=$(cat "$TMP_DIR"/orig_logdir)
+    pkill -f "inotifywait.*$LOG_DIR_HOST" 2>/dev/null || true
+  fi
+
   if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
     kill -9 "$CHECK_CVE_JOB_PID" || true
   fi
@@ -241,4 +250,12 @@ restore_permissions() {
     chown "$ORIG_USER":"$ORIG_USER" "$LOG_DIR" -R || true
     rm "$LOG_DIR"/orig_user.log || true
   fi
+}
+
+backup_var() {
+  local VAR_NAME="${1:-}"
+  local VAR_VALUE="${2:-}"
+  local BACKUP_FILE="$LOG_DIR""/backup_vars.log"
+
+  echo "export ${VAR_NAME}=\"${VAR_VALUE}\"" >> "$BACKUP_FILE"
 }

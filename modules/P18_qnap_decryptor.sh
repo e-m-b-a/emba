@@ -66,6 +66,7 @@ qnap_enc_extractor() {
     print_output "[+] Decrypted QNAP firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     MD5_DONE_DEEP+=( "$(md5sum "$QNAP_ENC_PATH_" | awk '{print $1}')" )
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
+    backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
     export QNAP=1
     print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
@@ -74,6 +75,7 @@ qnap_enc_extractor() {
     write_csv_log "QNAP decryptor" "$QNAP_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "gzip compressed data"
     if [[ -z "${FW_VENDOR:-}" ]]; then
       FW_VENDOR="QNAP"
+      backup_var "FW_VENDOR" "$FW_VENDOR"
     fi
 
   else

@@ -30,7 +30,6 @@ I01_default_apps(){
     print_tool_info "ent" 1
     # needed for sshdcc:
     print_tool_info "tcllib" 1
-    print_tool_info "metasploit-framework" 1
     print_tool_info "u-boot-tools" 1
     print_tool_info "python3-bandit" 1
     print_tool_info "iputils-ping" 1
@@ -40,6 +39,11 @@ I01_default_apps(){
     # linuxbrew
     print_tool_info "curl" 1
     print_tool_info "git" 1
+
+    # tools only available on Kali Linux:
+    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+      print_tool_info "metasploit-framework" 1
+    fi
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")

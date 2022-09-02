@@ -39,6 +39,7 @@ P99_prepare_analyzer() {
     export FIRMWARE=1
     export FIRMWARE_PATH
     FIRMWARE_PATH="$(abs_path "$OUTPUT_DIR")"
+    backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
   fi
 
   print_output "[*] Quick check if it is a real Linux system"

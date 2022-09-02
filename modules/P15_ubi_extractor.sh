@@ -31,6 +31,7 @@ P15_ubi_extractor() {
     if [[ "$FILES_UBI_EXT" -gt 0 ]]; then
       MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
+      backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
     fi
     NEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "$NEG_LOG"

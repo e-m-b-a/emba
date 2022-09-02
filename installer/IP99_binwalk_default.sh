@@ -23,8 +23,6 @@ IP99_binwalk_default() {
     cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
     INSTALL_APP_LIST=()
 
-    # currently we use the debian package of binwalk:
-    #print_tool_info "binwalk" 1
     print_tool_info "git" 1
     print_tool_info "locales" 1
     print_tool_info "qtbase5-dev" 1
@@ -40,8 +38,13 @@ IP99_binwalk_default() {
     print_tool_info "p7zip-full" 1
     print_tool_info "cabextract" 1
     print_tool_info "util-linux" 1
-    # firmware-mod-kit is only available on Kali Linux
-    print_tool_info "firmware-mod-kit" 1
+
+    # tools only available on Kali Linux:
+    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+      # firmware-mod-kit is only available on Kali Linux
+      print_tool_info "firmware-mod-kit" 1
+    fi
+
     print_tool_info "cramfsswap" 1
     print_tool_info "squashfs-tools" 1
     print_tool_info "zlib1g-dev" 1
@@ -59,8 +62,6 @@ IP99_binwalk_default() {
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
     print_tool_info "python3-lzo" 1
-    # python2 is needed for ubireader installation
-    #print_tool_info "python2" 1
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "srecord" 1
