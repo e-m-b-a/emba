@@ -163,12 +163,6 @@ run_modules()
             fi
           fi
         fi
-        #if [[ "$MOD_FIN" -ne 1 ]]; then
-        #  $MODULE_MAIN
-        #  WAIT_PIDS+=( "$!" )
-        #  print_output "[!] MAX_MODS: $MAX_MODS, WAIT_PIDS: ${#WAIT_PIDS[@]}" "no_log"
-        #  max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
-        #fi
         if [[ "$MOD_FIN" -eq 0 ]]; then
           if [[ $THREADING_SET -eq 1 ]]; then
             $MODULE_MAIN &
@@ -205,13 +199,6 @@ run_modules()
               fi
             fi
           fi
-          #if [[ "$MOD_FIN" -ne 1 ]]; then
-          #  $MODULE_MAIN
-          #  WAIT_PIDS+=( "$!" )
-          #  print_output "[!] MAX_MODS: $MAX_MODS, WAIT_PIDS: ${#WAIT_PIDS[@]}" "no_log"
-          #  max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
-          #fi
-
           if [[ "$MOD_FIN" -eq 0 ]]; then
             if [[ $THREADING_SET -eq 1 ]]; then
               $MODULE_MAIN &
@@ -262,13 +249,6 @@ run_modules()
                 fi
               fi
             fi
-            #if [[ "$MOD_FIN" -ne 1 ]]; then
-            #  $MODULE_MAIN
-            #  WAIT_PIDS+=( "$!" )
-            #  print_output "[!] MAX_MODS: $MAX_MODS, WAIT_PIDS: ${#WAIT_PIDS[@]}" "no_log"
-            #  max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
-            #fi
-
             if [[ "$MOD_FIN" -eq 0 ]]; then
               if [[ $THREADING_SET -eq 1 ]]; then
                 $MODULE_MAIN &
