@@ -78,7 +78,7 @@ log_folder()
             echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
           fi
         ;;
-        n|N|"" )
+        n|N )
           if [[ "$NOT_FINISHED" -eq 1 ]] && [[ -f "$LOG_DIR"/backup_vars.log ]]; then
             print_output "[*] EMBA tries to process the unfinished test" "no_log"
             if ! [[ -d "$TMP_DIR" ]]; then
