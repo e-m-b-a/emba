@@ -23,7 +23,14 @@ F20_vul_aggregator() {
   pre_module_reporter "${FUNCNAME[0]}"
   print_ln
   
+  if [[ -d "$LOG_PATH_MODULE"/cve_sum ]]; then
+    rm -r "$LOG_PATH_MODULE"/cve_sum
+  fi
   mkdir "$LOG_PATH_MODULE"/cve_sum
+
+  if [[ -d "$LOG_PATH_MODULE"/exploit ]]; then
+    rm -r "$LOG_PATH_MODULE"/exploit
+  fi
   mkdir "$LOG_PATH_MODULE"/exploit
 
   KERNELV=0
@@ -39,13 +46,13 @@ F20_vul_aggregator() {
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
 
-  local S06_LOG="$LOG_DIR"/s06_distribution_identification.csv
-  local S08_LOG="$LOG_DIR"/s08_package_mgmt_extractor.csv
-  local S09_LOG="$LOG_DIR"/s09_firmware_base_version_check.csv
+  local S06_LOG="$CSV_DIR"/s06_distribution_identification.csv
+  local S08_LOG="$CSV_DIR"/s08_package_mgmt_extractor.csv
+  local S09_LOG="$CSV_DIR"/s09_firmware_base_version_check.csv
   local S25_LOG="$LOG_DIR"/s25_kernel_check.txt
-  local S116_LOG="$LOG_DIR"/s116_qemu_version_detection.csv
-  local L15_LOG="$LOG_DIR"/l15_emulated_checks_nmap.csv
-  local L25_LOG="$LOG_DIR"/l25_web_checks.csv
+  local S116_LOG="$CSV_DIR"/s116_qemu_version_detection.csv
+  local L15_LOG="$CSV_DIR"/l15_emulated_checks_nmap.csv
+  local L25_LOG="$CSV_DIR"/l25_web_checks.csv
 
   local CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   local EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt

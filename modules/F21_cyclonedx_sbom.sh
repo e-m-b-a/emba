@@ -24,8 +24,14 @@ F21_cyclonedx_sbom() {
   local BINARY=""
   local VERSION=""
 
-
   if [[ -f "$F20_LOG" ]]; then
+    if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
+      rm "$CSV_DIR"/f21_cyclonedx_sbom.csv
+    fi
+    if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.json ]]; then
+      rm "$CSV_DIR"/f21_cyclonedx_sbom.json
+    fi
+
     write_csv_log "Type" "MimeType" "Supplier" "Author" "Publisher" "Group" "Name" "Version" "Scope" "LicenseExpressions" "LicenseNames" "Copyright" "Cpe" "Purl" "Modified" "SwidTagId" "SwidName" "SwidVersion" "SwidTagVersion" "SwidPatch" "SwidTextContentType" "SwidTextEncoding" "SwidTextContent" "SwidUrl" "MD5" "SHA-1" "SHA-256" "SHA-512" "BLAKE2b-256" "BLAKE2b-384" "BLAKE2b-512" "SHA-384" "SHA3-256" "SHA3-384" "SHA3-512" "BLAKE3" "Description"
     print_output "[*] Collect SBOM details of module $(basename "$F20_LOG")."
     mapfile -t BIN_VER_SBOM_ARR < <(cut -d\; -f1,2 "$F20_LOG" | grep -v "BINARY;VERSION" | sort -u)
@@ -34,10 +40,10 @@ F21_cyclonedx_sbom() {
       VERSION=$(echo "$BIN_VER_SBOM_ENTRY" | cut -d\; -f2)
       write_csv_log "" "" "" "" "" "" "$BINARY" "$VERSION" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
     done
-    if [[ -f "$LOG_DIR"/f21_cyclonedx_sbom.csv ]]; then
+    if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
       # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick and dirty tranlation
-      sed -i 's/\;/,/g' "$LOG_DIR"/f21_cyclonedx_sbom.csv
-      cyclonedx convert --input-file "$LOG_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
+      sed -i 's/\;/,/g' "$CSV_DIR"/f21_cyclonedx_sbom.csv
+      cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
     fi
   fi
 }

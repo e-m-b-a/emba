@@ -355,6 +355,7 @@ main()
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="$INVOCATION_PATH""/logs"
   export TMP_DIR="$LOG_DIR""/tmp"
+  export CSV_DIR="$LOG_DIR""/csv_logs"
   export MAIN_LOG_FILE="emba.log"
   export CONFIG_DIR="$INVOCATION_PATH""/config"
   export EXT_DIR="$INVOCATION_PATH""/external"
@@ -461,6 +462,7 @@ main()
       l)
         export LOG_DIR="$OPTARG"
         export TMP_DIR="$LOG_DIR""/tmp"
+        export CSV_DIR="$LOG_DIR""/csv_logs"
         ;;
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
@@ -601,11 +603,14 @@ main()
   fi
 
   # restart file gets generated during startup if old log dir is found:
-  if [[ -f "$TMP_DIR"/restart ]]; then
-    print_output "[!] Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
-    export RESTART=1
-    rm "$TMP_DIR"/restart
-    source "$LOG_DIR""/backup_vars.log"
+  if [[ $USE_DOCKER -eq 1 && $IN_DOCKER -eq 1 ]] || [[ "$USE_DOCKER" -eq 0 ]]; then
+    if [[ -f "$TMP_DIR"/restart ]]; then
+      print_output "[!] Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
+      export RESTART=1
+      rm "$TMP_DIR"/restart
+      # shellcheck disable=SC1091
+      source "$LOG_DIR""/backup_vars.log"
+    fi
   fi
 
   # Check all dependencies of EMBA
@@ -837,7 +842,7 @@ main()
         set +e
       fi
       disable_strict_mode "$STRICT_MODE" 0
-      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /log -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       enable_strict_mode "$STRICT_MODE" 0
 

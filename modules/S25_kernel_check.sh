@@ -136,11 +136,11 @@ populate_karrays() {
 
     IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     for V in "${KV_C_ARR[@]}" ; do
-      if [[ -z "${i:-}" ]]; then
+      if [[ -z "${V:-}" ]]; then
         # remove empty entries:
         continue
       fi
-      if ! [[ "$i" =~ .*[0-9]\.[0-9].* ]]; then
+      if ! [[ "$V" =~ .*[0-9]\.[0-9].* ]]; then
         continue
       fi
       KERNEL_VERSION_+=( "$V" )
@@ -148,7 +148,7 @@ populate_karrays() {
   done
 
   # if we have found a kernel version in binary kernel:
-  if [[ -f "$LOG_DIR"/s24_kernel_bin_identifier.csv ]]; then
+  if [[ -f "$CSV_DIR"/s24_kernel_bin_identifier.csv ]]; then
     while IFS=";" read -r K_VER; do
       K_VER="$(echo "$K_VER" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
 
@@ -159,7 +159,7 @@ populate_karrays() {
       for V in "${KV_C_ARR[@]}" ; do
         KERNEL_VERSION_+=( "$V" )
       done
-    done < <(cut -d ";" -f1 "$LOG_DIR"/s24_kernel_bin_identifier.csv | tail -n +2)
+    done < <(cut -d ";" -f1 "$CSV_DIR"/s24_kernel_bin_identifier.csv | tail -n +2)
   fi
 
   # unique our results

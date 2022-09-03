@@ -102,7 +102,9 @@ S99_grepit() {
 }
 
 grepit_reporter() {
-  local CSV_LOG="${LOG_FILE/\.txt/\.csv}"
+  local CSV_LOG=""
+  CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
+  CSV_LOG="$CSV_DIR""/""$CSV_LOG"
   local GREPIT_RESULTS_DETAILS=()
   local RESULT=""
   local CURRENT_TEST=""

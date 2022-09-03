@@ -28,7 +28,7 @@ services:
     # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
         - ${FIRMWARE}/:/firmware:ro
-        - ${LOG}/:/log
+        - ${LOG}/:/logs
         - ${EMBA}/:/emba:ro
         - /etc/timezone:/etc/timezone:ro
         - /etc/localtime:/etc/localtime:ro

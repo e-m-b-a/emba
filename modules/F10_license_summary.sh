@@ -34,8 +34,8 @@ F10_license_summary() {
   local LICENSE=""
   local TYPE=""
 
-  mapfile -t LICENSE_DETECTION_STATIC < <(grep -v "version_rule" "$LOG_DIR"/s09_*.csv 2>/dev/null | cut -d\; -f1,4,5 | sort -u || true)
-  mapfile -t LICENSE_DETECTION_DYN < <(grep -v "version_rule" "$LOG_DIR"/s116_*.csv 2>/dev/null | cut -d\; -f1,4,5 |sort -u || true)
+  mapfile -t LICENSE_DETECTION_STATIC < <(grep -v "version_rule" "$CSV_DIR"/s09_*.csv 2>/dev/null | cut -d\; -f1,4,5 | sort -u || true)
+  mapfile -t LICENSE_DETECTION_DYN < <(grep -v "version_rule" "$CSV_DIR"/s116_*.csv 2>/dev/null | cut -d\; -f1,4,5 |sort -u || true)
   # TODO: Currently the final kernel details from s25 are missing
 
   write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"

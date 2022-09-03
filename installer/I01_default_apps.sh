@@ -68,7 +68,8 @@ I01_default_apps(){
         fi
         mkdir -p /home/linuxbrew/.linuxbrew
         chown -R linuxbrew: /home/linuxbrew/.linuxbrew
-        sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+        #sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+        sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       ;;
     esac
   fi

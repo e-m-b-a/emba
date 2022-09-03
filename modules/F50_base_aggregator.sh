@@ -85,8 +85,8 @@ output_overview() {
 
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/fw_name.log ]] && [[ -f "$TMP_DIR"/emba_command.log ]]; then
     # we need to rewrite this firmware path to the original path
-    FW_PATH_ORIG="$(cat "$TMP_DIR"/fw_name.log)"
-    EMBA_COMMAND_ORIG="$(cat "$TMP_DIR"/emba_command.log)"
+    FW_PATH_ORIG="$(sort -u "$TMP_DIR"/fw_name.log)"
+    EMBA_COMMAND_ORIG="$(sort -u "$TMP_DIR"/emba_command.log)"
     print_output "[+] Tested firmware:""$ORANGE"" ""$FW_PATH_ORIG""$NC"
     write_csv_log "FW_path" "$FW_PATH_ORIG" "NA"
     print_output "[+] EMBA start command:""$ORANGE"" ""$EMBA_COMMAND_ORIG""$NC"
@@ -192,7 +192,7 @@ output_details() {
     DATA=1
   fi
 
-  EMUL=$(cut -d\; -f1 "$LOG_DIR"/s116_qemu_version_detection.csv 2>/dev/null | sort -u | wc -l || true)
+  EMUL=$(cut -d\; -f1 "$CSV_DIR"/s116_qemu_version_detection.csv 2>/dev/null | sort -u | wc -l || true)
   if [[ "${EMUL:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "s116"
@@ -521,8 +521,8 @@ binary_fct_output() {
   fi
 
   # networking
-  if grep -q "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv 2>/dev/null; then
-    if grep "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
+  if grep -q "/${BINARY} " "$CSV_DIR"/s1[34]_*.csv 2>/dev/null; then
+    if grep "/${BINARY} " "$CSV_DIR"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
       NETWORKING="$GREEN_""No Networking     $NC_"
     else
       NETWORKING="$RED_""Networking        $NC_"

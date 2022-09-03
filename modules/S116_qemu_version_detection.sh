@@ -54,7 +54,7 @@ S116_qemu_version_detection() {
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid "${WAIT_PIDS_F05[@]}"
       fi
-      if [[ $(wc -l "$LOG_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
+      if [[ $(wc -l "$CSV_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
         NEG_LOG=1
       fi
     fi

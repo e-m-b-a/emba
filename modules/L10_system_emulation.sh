@@ -200,11 +200,11 @@ create_emulation_filesystem() {
     cp "$(which busybox)" "$MNT_POINT" || true
     cp "$(which bash-static)" "$MNT_POINT" || true
 
-    if [[ -f "$LOG_DIR"/s24_kernel_bin_identifier.csv ]]; then
+    if [[ -f "$CSV_DIR"/s24_kernel_bin_identifier.csv ]]; then
       # kernelInit is getting the output of the init command line we get from s24
-      if grep -q "init=" "$LOG_DIR"/s24_kernel_bin_identifier.csv; then
+      if grep -q "init=" "$CSV_DIR"/s24_kernel_bin_identifier.csv; then
         print_output "[*] Found init entry for kernel - see $ORANGE$LOG_DIR/s24_kernel_bin_identifier.txt$NC:"
-        grep "init=/" "$LOG_DIR"/s24_kernel_bin_identifier.csv | cut -d\; -f3 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+        grep "init=/" "$CSV_DIR"/s24_kernel_bin_identifier.csv | cut -d\; -f3 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "$LOG_FILE" < "${MNT_POINT}"/kernelInit
       fi
     else

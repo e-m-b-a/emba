@@ -20,7 +20,7 @@ S109_jtr_local_pw_cracking()
 {
   module_log_init "${FUNCNAME[0]}"
 
-  local PW_FILE="$LOG_DIR"/s108_stacs_password_search.csv
+  local PW_FILE="$CSV_DIR"/s108_stacs_password_search.csv
   local NEG_LOG=0
   local HASHES=()
   local HASH=""
