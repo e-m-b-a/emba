@@ -29,7 +29,10 @@ IL15_emulated_checks_init() {
     print_tool_info "nmap" 1
     print_tool_info "snmp" 1
     print_tool_info "nikto" 1
-    print_tool_info "snmpcheck" 1
+    # tools only available on Kali Linux:
+    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+      print_tool_info "snmpcheck" 1
+    fi
     print_tool_info "python3-pip" 1
     print_tool_info "cutycapt" 1
 
