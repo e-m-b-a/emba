@@ -88,7 +88,9 @@ cleaner() {
   pkill -f "inotifywait.*$LOG_DIR.*" || true
 
   # Remove status bar and reset screen
-  remove_status_bar
+  if [[ "$DISABLE_STATUS_BAR" -eq 0 ]]; then
+    remove_status_bar
+  fi
 
   # if S115 is found only once in main.log the module was started and we have to clean it up
   # additionally we need to check some variable from a running EMBA instance
