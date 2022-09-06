@@ -85,6 +85,9 @@ cwe_check() {
 
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
+      if [[ "$BINARY" == *".ko" ]]; then
+        continue
+      fi
       if [[ "$THREADED" -eq 1 ]]; then
         local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)"))
         if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then

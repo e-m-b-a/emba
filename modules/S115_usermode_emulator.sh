@@ -150,8 +150,10 @@ S115_usermode_emulator() {
               EMULATOR="qemu-mips64-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*PowerPC" ) ; then
               EMULATOR="qemu-ppc-static"
-            elif ( file "$FULL_BIN_PATH" | grep -q "64-bit MSB.*PowerPC" ) ; then
+            elif ( file "$FULL_BIN_PATH" | grep -q "ELF 32-bit LSB executable, Altera Nios II" ) ; then
               EMULATOR="qemu-ppc64-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "" ) ; then
+              EMULATOR="qemu-nios2-static"
             else
               print_output "[-] No working emulator found for $BIN_"
               EMULATOR="NA"

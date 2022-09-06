@@ -99,6 +99,14 @@ S13_weak_func_check()
           else
             function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
+       elif ( file "$BINARY" | grep -q "Altera Nios II" ) ; then
+          if [[ "$THREADED" -eq 1 ]]; then
+            function_check_NIOS2 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S13+=( "$!" )
+          else
+            function_check_NIOS2 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+          fi
+
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
@@ -132,6 +140,53 @@ S13_weak_func_check()
   fi
 
   module_end_log "${FUNCNAME[0]}" "$STRCPY_CNT"
+}
+
+function_check_NIOS2(){
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
+
+  for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
+    if ( readelf -r "$BINARY_" --use-dynamic | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
+      NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      FUNC_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "$FUNCTION" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2> /dev/null || true)
+      if [[ -z "$FUNC_ADDR" ]] || [[ "$FUNC_ADDR" == "00000000" ]]; then
+        continue
+      fi
+      STRLEN_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep -m1 UND | cut -d: -f2 | awk '{print $1}' | sed -e 's/^[0]*//' 2> /dev/null || true)
+
+      log_bin_hardening "$NAME"
+      log_func_header "$NAME" "$FUNCTION"
+      if [[ "$FUNCTION" == "mmap" ]] ; then
+        # For the mmap check we need the disasm after the call
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 20 "call.*$FUNC_ADDR" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ 2> /dev/null >> "$FUNC_LOG" || true
+      else
+        "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*$FUNC_ADDR" 2> /dev/null >> "$FUNC_LOG" || true
+      fi
+      if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+        sed -i -r "s/^.*($FUNC_ADDR).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        COUNT_FUNC="$(grep -c "call.*""$FUNC_ADDR" "$FUNC_LOG"  2> /dev/null || true)"
+        if [[ "$FUNCTION" == "strcpy" ]] ; then
+          COUNT_STRLEN=$(grep -c "call.*$STRLEN_ADDR" "$FUNC_LOG"  2> /dev/null || true)
+          STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
+        elif [[ "$FUNCTION" == "mmap" ]] ; then
+          # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
+          # COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "$FUNC_LOG"  2> /dev/null || true)
+          COUNT_MMAP_OK="NA"
+        fi
+        log_func_footer "$NAME" "$FUNCTION"
+        output_function_details "$BINARY_" "$FUNCTION"
+      fi
+    fi
+  done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
 function_check_PPC32(){
@@ -185,6 +240,9 @@ function_check_MIPS32() {
   fi
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     FUNC_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
+    if [[ -z "$FUNC_ADDR" ]] || [[ "$FUNC_ADDR" == "00000000" ]]; then
+      continue
+    fi
     STRLEN_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "strlen" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     if [[ -n "$FUNC_ADDR" ]] ; then
