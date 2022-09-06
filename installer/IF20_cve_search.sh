@@ -38,7 +38,9 @@ IF20_cve_search() {
 
       echo -e "[*] Installing cyclonedx-cli for converting SBOMs"
       if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
+        cd /home/linuxbrew/ || ( echo "Could not install EMBA component cyclonedx-cli" && exit 1 )
         sudo -u linuxbrew NONINTERACTIVE=1 /home/linuxbrew/.linuxbrew/bin/brew install cyclonedx/cyclonedx/cyclonedx-cli
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component cyclonedx-cli" && exit 1 )
       else
         echo -e "$ORANGE""WARNING: Brew installation not found - skipping cyclonedx installation.""$NC"
       fi

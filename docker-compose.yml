@@ -47,7 +47,7 @@ services:
       core:
         hard: 0
         soft: 0
-    mem_limit: 4g
+    #mem_limit: 4g
     # adjust the following limits to protect your host
     #deploy:
     #  resources:
