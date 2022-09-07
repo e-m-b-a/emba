@@ -67,6 +67,7 @@ S115_usermode_emulator() {
 
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
+      print_ln
       NEG_LOG=1
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
       # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
@@ -580,8 +581,8 @@ check_disk_space_emu() {
   mapfile -t CRITICAL_FILES < <(find "$LOG_PATH_MODULE"/ -xdev -type f -size +"$KILL_SIZE" -exec basename {} \; 2>/dev/null| cut -d\. -f1 | cut -d_ -f2 || true)
   for KILLER in "${CRITICAL_FILES[@]}"; do
     if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
-      print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
-      print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
+      print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"
+      print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}" "no_log"
       pkill -f "$EMULATOR.*$KILLER.*" || true
       #rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
     fi

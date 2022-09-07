@@ -85,7 +85,9 @@ cleaner() {
   print_output "[*] Final cleanup started." "no_log"
 
   # stop inotifywait on host
-  pkill -f "inotifywait.*$LOG_DIR.*" || true
+  if pgrep -f "inotifywait.*$LOG_DIR.*" &> /dev/null 2>&1; then
+    pkill -f "inotifywait.*$LOG_DIR.*" || true
+  fi
 
   # Remove status bar and reset screen
   if [[ "$DISABLE_STATUS_BAR" -eq 0 ]]; then
@@ -123,6 +125,10 @@ cleaner() {
       stopping_emulation_process
       reset_network_emulation 2
     fi
+  fi
+
+  if pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
+    pkill -f "find ./external/trickest" 2>/dev/null || true
   fi
 
   if [[ "$NOTIFICATION_PID" != "NA" ]]; then

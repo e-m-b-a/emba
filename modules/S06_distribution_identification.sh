@@ -143,5 +143,7 @@ get_csv_rule_distri() {
   # F5 BigIP
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/big-ip\ ltm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_local_traffic_manager:\1/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/big-ip\ asm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_application_security_manager:\1/')"
+  # Buildroot 2022.01.01
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/buildroot\ ([0-9]+(\.[0-9]+)+?)/buildroot:\1/')"
   CSV_RULE="$VERSION_IDENTIFIER"
 }
