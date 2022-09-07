@@ -49,7 +49,7 @@ S06_distribution_identification()
           OUT1="$(eval "$PATTERN" "$FILE_QUOTED" || true)"
           # echo "SED command: $SED_COMMAND"
           # echo "identified: $OUT1"
-          IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//')
+          IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//' || true)
 
           if [[ $(basename "$FILE") == "image_sign" ]]; then
             # dlink image_sign file handling

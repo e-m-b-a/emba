@@ -463,7 +463,7 @@ dependency_check()
 
     if function_exists S120_cwe_checker; then
       print_output "    cwe-checker environment - \\c" "no_log"
-      if [[ -f "$EXT_DIR""/cwe_checker/bin/cwe_checker" ]] ; then
+      if [[ -f "$EXT_DIR""/cwe_checker/bin/cwe_checker" ]] || [[ -f "/root/.cargo/bin/cwe_checker" ]]; then
         echo -e "$GREEN""ok""$NC"
       else
         echo -e "$RED""not ok""$NC"

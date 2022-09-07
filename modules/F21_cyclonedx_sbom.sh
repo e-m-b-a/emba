@@ -18,11 +18,21 @@
 F21_cyclonedx_sbom() {
   module_log_init "${FUNCNAME[0]}"
   module_title "CycloneDX SBOM converter"
+
   local F20_LOG="$LOG_DIR""/f20_vul_aggregator.csv"
   local BIN_VER_SBOM_ARR=()
   local BIN_VER_SBOM_ENTRY=""
   local BINARY=""
   local VERSION=""
+  local NEG_LOG=0
+
+  if ! [[ -f /home/linuxbrew/.linuxbrew/bin/cyclonedx ]]; then
+    print_output "[-] Cyclonedx installation missing"
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+    return
+  fi
+
+  PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/
 
   if [[ -f "$F20_LOG" ]]; then
     if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
@@ -44,6 +54,9 @@ F21_cyclonedx_sbom() {
       # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick and dirty tranlation
       sed -i 's/\;/,/g' "$CSV_DIR"/f21_cyclonedx_sbom.csv
       cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
+      local NEG_LOG=1
     fi
   fi
+
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }

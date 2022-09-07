@@ -448,6 +448,7 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
+      #printf "$GREEN_\tCOUNT : component name  : common linux file: y/n |  CWE-check    |  RELRO  |  CANARY  |     NX      |   SYMBOLS  |  NETWORKING   |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
         binary_fct_output "$DETAIL_STRCPY"
         write_csv_log "strcpy_bin" "$BINARY" "$F_COUNTER"

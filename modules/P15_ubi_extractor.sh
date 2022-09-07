@@ -48,7 +48,7 @@ ubi_extractor() {
   local DIRS_UBI_EXT=0
   FILES_UBI_EXT=0
   if ! [[ -f "$UBI_PATH_" ]]; then
-    print_output "[-] No file for decryption provided"
+    print_output "[-] No file for extraction provided"
     return
   fi
 
@@ -71,7 +71,7 @@ ubi_extractor() {
         sub_module_title "UBIfs deep extraction"
         print_output "[*] Extracts UBIfs firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
         print_output "[*] File details: $ORANGE$(file "$UBI_FILE" | cut -d ':' -f2-)$NC"
-        ubireader_extract_files -l -i -v -w -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE" || true
+        ubireader_extract_files -l -i -w -v -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE" || true
       fi
     done
 
