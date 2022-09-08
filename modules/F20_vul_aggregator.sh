@@ -49,7 +49,7 @@ F20_vul_aggregator() {
   local S06_LOG="$CSV_DIR"/s06_distribution_identification.csv
   local S08_LOG="$CSV_DIR"/s08_package_mgmt_extractor.csv
   local S09_LOG="$CSV_DIR"/s09_firmware_base_version_check.csv
-  local S25_LOG="$LOG_DIR"/s25_kernel_check.txt
+  local S25_LOG="$CSV_DIR"/s25_kernel_check.csv
   local S116_LOG="$CSV_DIR"/s116_qemu_version_detection.csv
   local L15_LOG="$CSV_DIR"/l15_emulated_checks_nmap.csv
   local L25_LOG="$CSV_DIR"/l25_web_checks.csv
@@ -379,6 +379,7 @@ generate_cve_details() {
 }
 
 cve_db_lookup() {
+  # BIN_VERSION_ is something like "binary:1.2.3"
   local BIN_VERSION_="${1:-}"
 
   # we create something like "binary_1.2.3" for log paths
@@ -459,7 +460,7 @@ cve_extractor() {
   fi
 
   if [[ "$BINARY" == *"kernel"* ]]; then
-    if grep -q "Statistics:$VERSION" "$S25_LOG" 2>/dev/null; then
+    if grep -q "kernel;$VERSION;" "$S25_LOG" 2>/dev/null; then
       if [[ "$VSOURCE" == "unknown" ]]; then
         VSOURCE="STAT"
       elif ! [[ "$VSOURCE" =~ .*STAT.* ]]; then
@@ -484,7 +485,6 @@ cve_extractor() {
     fi
   fi
 
-
   if grep -q "$VERSION_orig" "$L15_LOG" 2>/dev/null || grep -q "$VERSION_orig" "$L25_LOG" 2>/dev/null; then
     if [[ "$VSOURCE" == "unknown" ]]; then
       VSOURCE="SEMU"
@@ -497,10 +497,26 @@ cve_extractor() {
 
   EXPLOIT_COUNTER_VERSION=0
   CVE_COUNTER_VERSION=0
-  # extract the CVE numbers and the CVSS values and sort it:
   if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
+    # extract the CVE numbers and the CVSS values and sort it:
     readarray -t CVEs_OUTPUT < "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" || true
+  fi
 
+  # if cve-search does not show results we could use the results of linux-exploit-suggester
+  # but in our experience these results are less accurate as the results from cve-search.
+  # Show me that I'm wrong and we could include and adjust the imports from s25 here:
+  # On the other hand, do not forget that we are also using the s25 results if we can find the
+  # same CVE here via version detection.
+
+  #if [[ "$BINARY" == *kernel* ]]; then
+  #  if [[ -f "$S25_LOG" ]]; then
+  #    for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
+  #      KCVE_VALUE=$(echo "$KERNEL_CVE_EXPLOIT" | cut -d\; -f3)
+  #    done
+  #  fi
+  #fi
+
+  if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       local CVEv2_TMP=0
       ((CVE_COUNTER+=1))
@@ -526,6 +542,7 @@ cve_extractor() {
       # as we already know about a bunch of kernel exploits - lets search them first
       if [[ "$BINARY" == *kernel* ]]; then
         for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
+          KERNEL_CVE_EXPLOIT=$(echo "$KERNEL_CVE_EXPLOIT" | cut -d\; -f3)
           if [[ "$KERNEL_CVE_EXPLOIT" == "$CVE_VALUE" ]]; then
             EXPLOIT="Exploit (linux-exploit-suggester"
             ((EXPLOIT_COUNTER_VERSION+=1))
@@ -808,28 +825,22 @@ get_firmware_base_version_check() {
   VERSIONS_STAT_CHECK=()
   if [[ -f "$S09_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S09_LOG")."
-    if [[ -f "$S09_LOG" ]]; then
-      # if we have already kernel information:
-      if [[ "$KERNELV" -eq 1 ]]; then
-        readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | grep -v "kernel" | sort -u  || true)
-      else
-        readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | sort -u || true)
-      fi
+    # if we have already kernel information:
+    if [[ "$KERNELV" -eq 1 ]]; then
+      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | grep -v "kernel" | sort -u  || true)
+    else
+      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | sort -u || true)
     fi
   fi
 }
 
 get_kernel_check() {
   local S25_LOG="${1:-}"
-  VERSIONS_KERNEL=()
   KERNEL_CVE_EXPLOITS=()
   if [[ -f "$S25_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S25_LOG")."
-    if [[ -f "$S25_LOG" ]]; then
-      readarray -t KERNEL_CVE_EXPLOITS < <(grep "\[+\].*\[CVE-" "$S25_LOG" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | cut -d\[ -f3 | cut -d\] -f1 | sed -e 's/,/\r\n/g' || true)
-      ## do a bit of sed modifications to have the same output as from the pre checker
-      readarray -t VERSIONS_KERNEL < <(grep -a "Statistics:" "$S25_LOG" | sed -e 's/\[\*\]\ Statistics\:/kernel:/' | sort -u || true)
-    fi
+    readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "$S25_LOG" | grep -v "CVE identifier" | sort -u || true)
+    # we get something like this: "kernel;5.10.59;CVE-2021-3490"
   fi
 }
 
@@ -838,9 +849,7 @@ get_usermode_emulator() {
   VERSIONS_EMULATOR=()
   if [[ -f "$S116_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S116_LOG")."
-    if [[ -f "$S116_LOG" ]]; then
-      readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | grep -v "csv_rule" | sort -u || true)
-    fi
+    readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | grep -v "csv_rule" | sort -u || true)
   fi
 }
 
@@ -849,9 +858,7 @@ get_systemmode_emulator() {
   VERSIONS_SYS_EMULATOR=()
   if [[ -f "$L15_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$L15_LOG")."
-    if [[ -f "$L15_LOG" ]]; then
-      readarray -t VERSIONS_SYS_EMULATOR < <(cut -d\; -f4 "$L15_LOG" | grep -v "csv_rule" | sort -u || true)
-    fi
+    readarray -t VERSIONS_SYS_EMULATOR < <(cut -d\; -f4 "$L15_LOG" | grep -v "csv_rule" | sort -u || true)
   fi
 }
 
@@ -860,9 +867,7 @@ get_systemmode_webchecks() {
   VERSIONS_SYS_EMULATOR_WEB=()
   if [[ -f "$L25_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$L25_LOG")."
-    if [[ -f "$L25_LOG" ]]; then
-      readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | grep -v "csv_rule" | sort -u || true)
-    fi
+    readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | grep -v "csv_rule" | sort -u || true)
   fi
 }
 
@@ -872,9 +877,7 @@ get_firmware_details() {
   VERSIONS_S06_FW_DETAILS=()
   if [[ -f "$S06_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S06_LOG")."
-    if [[ -f "$S06_LOG" ]]; then
-      readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u || true)
-    fi
+    readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u || true)
   fi
 }
 
@@ -883,9 +886,6 @@ get_package_details() {
   VERSIONS_S08_PACKAGE_DETAILS=()
   if [[ -f "$S08_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S08_LOG")."
-
-    if [[ -f "$S08_LOG" ]]; then
-      readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "$S08_LOG" | grep -v "package\;stripped version" | sort -u | tr ';' ':'|| true)
-    fi
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "$S08_LOG" | grep -v "package\;stripped version" | sort -u | tr ';' ':'|| true)
   fi
 }
