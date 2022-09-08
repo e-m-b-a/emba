@@ -214,9 +214,6 @@ fi
 
 if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -eq 1 ]]; then
 
-  IP61_unblob
-  exit
-
   I01_default_apps
 
   I05_emba_docker_image_dl
@@ -226,6 +223,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
   IP12_avm_freetz_ng_extract
 
   IP18_qnap_decryptor
+
+  IP61_unblob
 
   IP99_binwalk_default
 

@@ -46,7 +46,7 @@ IP61_unblob() {
 
         if command -v nix > /dev/null ; then
           if ! [[ -d ~/.config/nix/ ]]; then
-            mkdir ~/.config/nix/
+            mkdir -p ~/.config/nix/
           fi
           echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
@@ -61,7 +61,7 @@ IP61_unblob() {
           echo
         elif nix profile list | grep -q unblob; then
           UNBLOB_PATH=$(nix profile list | grep unblob | awk '{print $4}' | sort -u)
-          "$UNBLOB_PATH"/unblob --show-external-dependencies
+          "$UNBLOB_PATH"/bin/unblob --show-external-dependencies
           echo -e "$GREEN""unblob installed successfully""$NC"
         else
           echo -e "$ORANGE""unblob installation failed - check it manually""$NC"
