@@ -214,6 +214,9 @@ fi
 
 if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -eq 1 ]]; then
 
+  IP61_unblob
+  exit
+
   I01_default_apps
 
   I05_emba_docker_image_dl
