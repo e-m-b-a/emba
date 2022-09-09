@@ -300,6 +300,9 @@ dependency_check()
     # unzip
     check_dep_tool "unzip"
 
+    # 7zip
+    check_dep_tool "7z"
+
     # mkimage (uboot)
     check_dep_tool "uboot mkimage" "mkimage"
 
