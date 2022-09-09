@@ -59,6 +59,9 @@ S24_kernel_bin_identifier()
           if [[ "$K_ELF" == *"ELF "* ]]; then
             print_ln
             print_output "[+] Successfully generated Linux kernel elf file: $ORANGE$FILE.elf$NC"
+          else
+            print_ln
+            print_output "[-] No Linux kernel elf file was created."
           fi
         fi
         print_ln
