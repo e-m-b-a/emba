@@ -13,8 +13,8 @@
 # Author(s): Michael Messner
 
 # Description:  Extracts firmware with unblob to the module log directory.
-#               IMPORTANT: The results are currently not used for further analysis,
-#               it is currently only for evaluation purposes
+#               IMPORTANT: The results are currently not used for further analysis.
+#               This module is currently only for evaluation purposes.
 
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
@@ -24,6 +24,7 @@ P61_unblob_eval() {
   module_log_init "${FUNCNAME[0]}"
 
   if [[ "$UNBLOB" -eq 0 ]]; then
+    print_output "[-] Unblob module currently disabled - enable it in emba.sh setting the UNBLOB variable to 1"
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -38,6 +39,7 @@ P61_unblob_eval() {
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
+  print_output "[-] Unblob module currently enabled - disable it in emba.sh setting the UNBLOB variable to 0"
 
   print_output "[!] INFO: This is an evaluation module for the extractor ${ORANGE}unblob - https://unblob.org/$MAGENTA."
   print_output "[!] INFO: The results are currently not further used in the EMBA firmware analysis process (this will probably change in the future)."
