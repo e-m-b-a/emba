@@ -62,6 +62,7 @@ IP61_unblob() {
         elif nix profile list | grep -q unblob; then
           UNBLOB_PATH=$(nix profile list | grep unblob | awk '{print $4}' | sort -u)
           "$UNBLOB_PATH"/bin/unblob --show-external-dependencies
+          echo "$UNBLOB_PATH" > ./external/unblob_path.cfg
           echo -e "$GREEN""unblob installed successfully""$NC"
         else
           echo -e "$ORANGE""unblob installation failed - check it manually""$NC"

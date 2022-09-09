@@ -34,7 +34,7 @@ P60_firmware_bin_extractor() {
     binwalking "$FIRMWARE_PATH"
   fi
 
-  linux_basic_identification_helper
+  linux_basic_identification_helper "$FIRMWARE_PATH_CP"
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
   # Manual activation via -x switch:
@@ -56,12 +56,16 @@ P60_firmware_bin_extractor() {
   print_ln
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f | wc -l )
-  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  UNIQUE_FILES=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  DIRS_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type d | wc -l )
+  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep "ELF" | wc -l )
 
-  if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
+  if [[ "$BINS" -gt 0 || "$UNIQUE_FILES" -gt 0 ]]; then
     print_ln
-    print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all:"
+    print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
+    print_output "[*] Found $ORANGE$BINS$NC binaries."
+    print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
+    print_ln
     tree -sh "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
 
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
@@ -369,6 +373,10 @@ binwalk_deep_extract_helper() {
 }
 
 linux_basic_identification_helper() {
-  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  local FIRMWARE_PATH_CHECK="${1:-}"
+  if ! [[ -d "$FIRMWARE_PATH_CHECK" ]]; then
+    return
+  fi
+  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CHECK" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
   backup_var "LINUX_PATH_COUNTER" "$LINUX_PATH_COUNTER"
 }
