@@ -34,6 +34,8 @@ P60_firmware_bin_extractor() {
     binwalking "$FIRMWARE_PATH"
   fi
 
+  # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
+  # shellcheck disable=SC2153
   linux_basic_identification_helper "$FIRMWARE_PATH_CP"
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
@@ -58,7 +60,7 @@ P60_firmware_bin_extractor() {
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
   UNIQUE_FILES=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   DIRS_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type d | wc -l )
-  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep "ELF" | wc -l )
+  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
 
   if [[ "$BINS" -gt 0 || "$UNIQUE_FILES" -gt 0 ]]; then
     print_ln

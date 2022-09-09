@@ -56,7 +56,7 @@ P61_unblob_eval() {
   FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type f | wc -l )
   UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   DIRS_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type d | wc -l )
-  BINS_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep "ELF" | wc -l )
+  BINS_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
 
   if [[ "$BINS_UB" -gt 0 ]] || [[ "$FILES_EXT_UB" -gt 0 ]]; then
     print_bar

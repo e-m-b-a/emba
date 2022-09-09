@@ -43,6 +43,7 @@ vmdk_extractor() {
   local DEV_NAME=""
   local TMP_VMDK_MNT="$TMP_DIR/vmdk_mount_$RANDOM"
   local VMDK_DIRS=0
+  local RET=0
   VMDK_FILES=0
 
   if ! [[ -f "$VMDK_PATH_" ]]; then
@@ -53,10 +54,25 @@ vmdk_extractor() {
   sub_module_title "VMDK (Virtual Machine Disk) extractor"
 
   print_output "[*] Enumeration of devices in VMDK images $ORANGE$VMDK_PATH_$NC"
-  mapfile -t VMDK_VIRT_FS < <(virt-filesystems -a "$VMDK_PATH_")
-  for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
-    print_output "[*] Found device $ORANGE$MOUNT_DEV$NC"
-  done
+  disable_strict_mode "$STRICT_MODE" 0
+  virt-filesystems -a "$VMDK_PATH_" > "$TMP_DIR"/vmdk.log
+  RET="$?"
+
+  if [[ "$RET" -ne 0 ]]; then
+    # backup with 7z
+    7z x -o"$EXTRACTION_DIR_" "$VMDK_PATH_"
+    RET="$?"
+    if [[ "$RET" -ne 0 ]]; then
+      print_output "[-] WARNING: VMDK filesystem not enumerated"
+      return
+    fi
+  else
+    mapfile -t VMDK_VIRT_FS < "$TMP_DIR"/vmdk.log
+    for MOUNT_DEV in "${VMDK_VIRT_FS[@]}"; do
+      print_output "[*] Found device $ORANGE$MOUNT_DEV$NC"
+    done
+  fi
+  enable_strict_mode "$STRICT_MODE" 0
 
   mkdir -p "$TMP_VMDK_MNT" || true
 
