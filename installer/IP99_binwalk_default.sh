@@ -85,7 +85,8 @@ IP99_binwalk_default() {
     echo -e "$ORANGE""cramfs-tools will be downloaded.""$NC"
     print_git_info "ubi_reader" "jrspruitt/ubi_reader" "UBI Reader is a Python module and collection of scripts capable of extracting the contents of UBI and UBIFS images"
     echo -e "$ORANGE""ubi_reader will be downloaded.""$NC"
-    print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
+    # print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
+    print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "https://github.com/m-1-k-3/emba_resources/raw/main/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -152,7 +153,8 @@ IP99_binwalk_default() {
 
         if ! command -v unstuff > /dev/null ; then
           mkdir -p ./external/binwalk/unstuff
-          wget --no-check-certificate -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+          #wget --no-check-certificate -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+          wget --no-check-certificate -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz https://github.com/m-1-k-3/emba_resources/raw/main/stuffit520.611linux-i386.tar.gz
           tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
           cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
         else
