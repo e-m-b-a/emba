@@ -76,7 +76,7 @@ P61_unblob_eval() {
     print_ln
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
+  module_end_log "${FUNCNAME[0]}" "$FILES_EXT_UB"
 }
 
 unblobber() {

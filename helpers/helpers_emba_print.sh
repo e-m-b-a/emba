@@ -725,7 +725,7 @@ write_notification(){
   else
     # if we are on the host (e.g., in developer mode) we can directly handle
     # the notification
-    notify-send --icon="$EMBA_ICON" "EMBA" "$MESSAGE" -t 2
+    NOTIFICATION_ID=$(notify-send -p -r "$NOTIFICATION_ID" --icon="$EMBA_ICON" "EMBA" "$MESSAGE" -t 2)
   fi
 }
 
@@ -753,7 +753,10 @@ print_notification(){
       fi
       local PREV="$CURRENT"
       CURRENT=$(<"$NOTIFICATION_LOCATION")
-      [ "$CURRENT" == "$PREV" ] || notify-send --icon="$EMBA_ICON" "EMBA" "$CURRENT" -t 2
+      if ! [[ "$CURRENT" == "$PREV" ]]; then
+        # notification replacement see https://super-unix.com/ubuntu/ubuntu-how-to-use-notify-send-to-immediately-replace-an-existing-notification/
+        NOTIFICATION_ID=$(notify-send -p -r "$NOTIFICATION_ID" --icon="$EMBA_ICON" "EMBA" "$CURRENT" -t 2)
+      fi
     fi
   done
 }

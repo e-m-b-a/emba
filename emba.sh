@@ -357,8 +357,10 @@ main()
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
   export WSL=0    # wsl environment detected
-  export UNBLOB=1 # extracts the firmware also with unblob - https://github.com/onekey-sec/unblob
-                  # currently the extracted results are not further used. This is for evaluation purposes
+  export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
+                  # currently the extracted results are not further used. The current implementation
+                  # is for evaluation purposes
+  export NOTIFICATION_ID=0
 
   import_helper
   print_ln "no_log"
