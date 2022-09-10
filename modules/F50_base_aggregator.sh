@@ -269,22 +269,21 @@ output_config_issues() {
       write_csv_log "ssh_issues" "$S85_SSH_VUL_CNT" "NA"
       DATA=1
     fi
-    if [[ "${PW_COUNTER:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 ]]; then
-      if [[ "${PW_COUNTER:-0}" -gt 0 ]]; then
-        print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password related details.")")"
-        write_link "s107"
-        write_csv_log "password_hashes" "$PW_COUNTER" "NA"
-      fi
-      if [[ "${STACS_HASHES:-0}" -gt 0 ]]; then
-        write_csv_log "password_hashes_stacs" "$STACS_HASHES" "NA"
-        if [[ "${HASHES_CRACKED:-0}" -gt 0 ]]; then
-          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS ($ORANGE$HASHES_CRACKED$GREEN passwords cracked.)")")"
-          write_link "s109"
-          write_csv_log "password_hashes_cracked" "$HASHES_CRACKED" "NA"
-        else
-          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
-          write_link "s108"
-        fi
+    if [[ "${PW_COUNTER:-0}" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password related details.")")"
+      write_link "s107"
+      write_csv_log "password_hashes" "$PW_COUNTER" "NA"
+      DATA=1
+    fi
+    if [[ "${STACS_HASHES:-0}" -gt 0 ]]; then
+      write_csv_log "password_hashes_stacs" "$STACS_HASHES" "NA"
+      if [[ "${HASHES_CRACKED:-0}" -gt 0 ]]; then
+        print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS ($ORANGE$HASHES_CRACKED$GREEN passwords cracked.)")")"
+        write_link "s109"
+        write_csv_log "password_hashes_cracked" "$HASHES_CRACKED" "NA"
+      else
+        print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
+        write_link "s108"
       fi
       DATA=1
     fi

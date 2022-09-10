@@ -39,7 +39,7 @@ P61_unblob_eval() {
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
-  print_output "[-] Unblob module currently enabled - disable it in emba.sh setting the UNBLOB variable to 0"
+  print_output "[*] Unblob module currently enabled - disable it in emba.sh setting the UNBLOB variable to 0"
 
   print_output "[!] INFO: This is an evaluation module for the extractor ${ORANGE}unblob - https://unblob.org/$MAGENTA."
   print_output "[!] INFO: The results are currently not further used in the EMBA firmware analysis process (this will probably change in the future)."
@@ -94,11 +94,16 @@ unblobber() {
     if [[ -e $(cat "$EXT_DIR"/unblob_path.cfg)/bin/unblob ]]; then
       UNBLOB_BIN="$(cat "$EXT_DIR"/unblob_path.cfg)""/bin/unblob"
     fi
-  elif nix profile list | grep -q unblob; then
-    UNBLOB_PATH=$(nix profile list | grep unblob | awk '{print $4}' | sort -u)
-    UNBLOB_BIN="$UNBLOB_PATH"/bin/unblob
+  elif command -v nix; then
+    if nix profile list | grep -q unblob 2>/dev/null; then
+      UNBLOB_PATH=$(nix profile list | grep unblob | awk '{print $4}' | sort -u)
+      UNBLOB_BIN="$UNBLOB_PATH"/bin/unblob
+    else
+      print_output "[-] Cant find unblob installation - check your installation"
+      return
+    fi
   else
-    print_output "[-] Can\'t find unblob installation - check your installation"
+    print_output "[-] Cant find unblob installation - check your installation"
     return
   fi
 

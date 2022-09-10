@@ -24,6 +24,7 @@ print_help()
   echo -e "$CYAN""-D""$NC""         Only used via docker-compose for building EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
+  echo -e "$CYAN""-r""$NC""         Remove a default installation of EMBA"
   echo
 }
 

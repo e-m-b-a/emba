@@ -70,8 +70,8 @@ F20_vul_aggregator() {
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
     # [+] Found Version details (kernel): Linux kernel version 2.6.33.2
-    if [[ -v VERSIONS_KERNEL[@] ]]; then
-      if [[ ${#VERSIONS_KERNEL[@]} -ne 0 ]]; then
+    if [[ -v KERNEL_CVE_EXPLOITS[@] ]]; then
+      if [[ ${#KERNEL_CVE_EXPLOITS[@]} -ne 0 ]]; then
         # then we have found a kernel in our s25 kernel module
         KERNELV=1
       fi
@@ -141,8 +141,9 @@ aggregate_versions() {
 
   local VERSION=""
   export VERSIONS_AGGREGATED=()
+  VERSIONS_KERNEL=()
 
-  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#VERSIONS_KERNEL[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 ]]; then
+  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
@@ -182,17 +183,17 @@ aggregate_versions() {
       print_output "[+] Found Version details (${ORANGE}system emulator - web$GREEN): ""$ORANGE$VERSION$NC"
     done
 
-    for VERSION in "${VERSIONS_KERNEL[@]}"; do
+    for VERSION in "${KERNEL_CVE_EXPLOITS[@]}"; do
       if [ -z "$VERSION" ]; then
         continue
       fi
+      VERSION="$(echo "$VERSION" | cut -d\; -f1-2 | tr ';' ':')"
       print_output "[+] Found Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
-      if [[ "$VERSION" =~ \.0$ ]]; then
-        # shellcheck disable=SC2001
-        VERSION=$(echo "$VERSION" | sed 's/\.0$/:/')
-        VERSIONS_KERNEL+=( "$VERSION" )
-        print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
-      fi
+      # we ensure that we search for the correct kernel version by adding a : at the end of the search string
+      # shellcheck disable=SC2001
+      VERSION=$(echo "$VERSION" | sed 's/$/:/')
+      VERSIONS_KERNEL+=( "$VERSION" )
+      #print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
     done
 
     print_ln

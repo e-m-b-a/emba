@@ -75,7 +75,7 @@ log_folder()
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
             rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
-            echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
+            echo -e "\\n${GREEN}Sucessfully deleted: $ORANGE$LOG_DIR${NC}\\n"
           fi
         ;;
         n|N )

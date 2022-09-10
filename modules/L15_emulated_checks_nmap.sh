@@ -21,7 +21,7 @@ export THREAD_PRIO=0
 
 L15_emulated_checks_nmap() {
 
-  MODULE_END=0
+  local MODULE_END=0
   export NMAP_SERVICES=()
   export NMAP_PORTS_SERVICES=()
 
