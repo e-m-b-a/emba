@@ -90,7 +90,7 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-while getopts cCdDFhl OPT ; do
+while getopts cCdDFhlr OPT ; do
   case $OPT in
     d)
       export DOCKER_SETUP=1
@@ -109,10 +109,6 @@ while getopts cCdDFhl OPT ; do
       export CVE_SEARCH=1
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
-    r)
-      export REMOVE=1
-      echo -e "$GREEN""$BOLD""Remove EMBA from the system""$NC"
-      ;;
     h)
       print_help
       exit 0
@@ -122,6 +118,10 @@ while getopts cCdDFhl OPT ; do
       export CVE_SEARCH=0
       export DOCKER_SETUP=0
       echo -e "$GREEN""$BOLD""List all dependecies""$NC"
+      ;;
+    r)
+      export REMOVE=1
+      echo -e "$GREEN""$BOLD""Remove EMBA from the system""$NC"
       ;;
     *)
       echo -e "$RED""$BOLD""Invalid option""$NC"
