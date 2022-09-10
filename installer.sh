@@ -44,6 +44,7 @@ export IN_DOCKER=0
 # list dependencies
 export LIST_DEP=0
 export FULL=0
+export REMOVE=0
 # other os stuff
 export OTHER_OS=0
 export UBUNTU_OS=0
@@ -108,6 +109,10 @@ while getopts cCdDFhl OPT ; do
       export CVE_SEARCH=1
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
       ;;
+    r)
+      export REMOVE=1
+      echo -e "$GREEN""$BOLD""Remove EMBA from the system""$NC"
+      ;;
     h)
       print_help
       exit 0
@@ -169,6 +174,11 @@ fi
 # standard stuff before installation run
 
 HOME_PATH=$(pwd)
+
+if [[ "$REMOVE" -eq 1 ]]; then
+  R00_emba_remove
+  exit 0
+fi
 
 if [[ $LIST_DEP -eq 0 ]] ; then
   if ! [[ -d "external" ]] ; then

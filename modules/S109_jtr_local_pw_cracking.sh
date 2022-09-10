@@ -45,14 +45,19 @@ S109_jtr_local_pw_cracking()
   if [[ -f "$PW_FILE" ]]; then
     mapfile -t HASHES < <(cut -d\; -f2,3 "$PW_FILE" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
     for HASH in "${HASHES[@]}"; do
+      if [[ "$HASH" == *"BEGIN"*"KEY"* ]]; then
+        continue
+      fi
       HASH_SOURCE=$(basename "$(echo "$HASH" | cut -d\; -f1)")
       HASH=$(echo "$HASH" | cut -d\; -f2 | tr -d \")
-      echo "$HASH_SOURCE:$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
+      print_output "[*] Found password data $ORANGE$HASH$NC in $ORANGE$HASH_SOURCE$NC"
+      #echo "$HASH_SOURCE:$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
+      echo "$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
     done
 
     if [[ -f "$LOG_PATH_MODULE"/jtr_hashes.txt ]]; then
-      print_output "[*] Starting jtr for the following hashes (runtime: $ORANGE$JTR_TIMEOUT$NC):"
-      tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jtr_hashes.txt
+      print_output "[*] Starting jtr with a runtime of $ORANGE$JTR_TIMEOUT$NC"
+      #tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jtr_hashes.txt
       print_ln
       timeout --preserve-status --signal SIGINT "$JTR_TIMEOUT" john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt | tee -a "$LOG_FILE" || true
       print_ln

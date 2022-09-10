@@ -52,6 +52,10 @@ P60_firmware_bin_extractor() {
     fi
   fi
 
+  # we need it after deep extraction:
+  # shellcheck disable=SC2153
+  linux_basic_identification_helper "$FIRMWARE_PATH_CP"
+
   # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
   # shellcheck disable=SC2153
   detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
