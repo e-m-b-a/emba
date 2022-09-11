@@ -354,13 +354,13 @@ main()
   export DISABLE_STATUS_BAR=1
   export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
   export NOTIFICATION_PID="NA"
+  export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
   export WSL=0    # wsl environment detected
   export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
                   # currently the extracted results are not further used. The current implementation
                   # is for evaluation purposes
-  export NOTIFICATION_ID=0
 
   import_helper
   print_ln "no_log"

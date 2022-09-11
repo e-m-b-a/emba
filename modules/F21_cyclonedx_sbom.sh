@@ -26,14 +26,6 @@ F21_cyclonedx_sbom() {
   local VERSION=""
   local NEG_LOG=0
 
-  if ! [[ -f /home/linuxbrew/.linuxbrew/bin/cyclonedx ]]; then
-    print_output "[-] Cyclonedx installation missing"
-    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
-    return
-  fi
-
-  PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/
-
   if [[ -f "$F20_LOG" ]]; then
     if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
       rm "$CSV_DIR"/f21_cyclonedx_sbom.csv
@@ -51,7 +43,7 @@ F21_cyclonedx_sbom() {
       write_csv_log "" "" "" "" "" "" "$BINARY" "$VERSION" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
     done
     if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
-      # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick and dirty tranlation
+      # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick tranlation
       sed -i 's/\;/,/g' "$CSV_DIR"/f21_cyclonedx_sbom.csv
       cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
       local NEG_LOG=1

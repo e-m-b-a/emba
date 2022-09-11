@@ -446,7 +446,6 @@ dependency_check()
       check_dep_file "vmlinux.mips*" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
       check_dep_file "vmlinux.armel" "$EXT_DIR""/firmae/binaries/vmlinux.armel"
 
-      # re-enable this with the PR
       check_dep_file "fixImage.sh" "$MOD_DIR""/L10_system_emulation/fixImage.sh"
       check_dep_file "preInit.sh" "$MOD_DIR""/L10_system_emulation/preInit.sh"
       check_dep_file "inferFile.sh" "$MOD_DIR""/L10_system_emulation/inferFile.sh"

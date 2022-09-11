@@ -26,8 +26,9 @@
 log_folder()
 {
   if [[ $ONLY_DEP -eq 0 ]] && [[ -d "$LOG_DIR" ]] ; then
-    export RESTART=0
-    local NOT_FINISHED=0
+    export RESTART=0          # indicator for testing unfinished tests again
+    local NOT_FINISHED=0      # identify unfinished firmware tests
+    local POSSIBLE_RESTART=0  # used for testing the checksums of the firmware with stored checksum
 
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    There are files in the specified directory: ""$LOG_DIR""\\n    You can now delete the content here or start the tool again and specify a different directory."
@@ -49,9 +50,19 @@ log_folder()
         NOT_FINISHED=1
       fi
     fi
+
+    # we check the found sha512 hash with the firmware to test:
+    if [[ -f "$LOG_DIR"/csv_logs/p02_firmware_bin_file_check.csv ]]; then
+      STORED_SHA512=$(grep "SHA512" "$LOG_DIR"/csv_logs/p02_firmware_bin_file_check.csv | cut -d\; -f2)
+      FW_SHA512=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
+      if [[ "$STORED_SHA512" == "$FW_SHA512" ]]; then
+        # the found analysis is for the same firmware
+        POSSIBLE_RESTART=1
+      fi
+    fi
     echo -e "\\n${ORANGE}Delete content of log directory: $LOG_DIR ?${NC}\\n"
-    if [[ "$NOT_FINISHED" -eq 1 ]]; then
-      print_output "[*] If you answer with ${ORANGE}no${NC}, EMBA tries to process the unfinished test${NC}" "no_log"
+    if [[ "$NOT_FINISHED" -eq 1 ]] && [[ "$POSSIBLE_RESTART" -eq 1 ]]; then
+      print_output "[*] If you answer with ${ORANGE}n${NC}o, EMBA tries to process the unfinished test${NC}" "no_log"
     fi
 
     if [[ $OVERWRITE_LOG -eq 1 ]] ; then
@@ -79,7 +90,7 @@ log_folder()
           fi
         ;;
         n|N )
-          if [[ "$NOT_FINISHED" -eq 1 ]] && [[ -f "$LOG_DIR"/backup_vars.log ]]; then
+          if [[ "$NOT_FINISHED" -eq 1 ]] && [[ -f "$LOG_DIR"/backup_vars.log ]] && [[ "$POSSIBLE_RESTART" -eq 1 ]]; then
             print_output "[*] EMBA tries to process the unfinished test" "no_log"
             if ! [[ -d "$TMP_DIR" ]]; then
               mkdir "$TMP_DIR"
