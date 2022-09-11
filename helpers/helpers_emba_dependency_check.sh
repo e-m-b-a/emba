@@ -420,6 +420,10 @@ dependency_check()
     if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
       export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/
     fi
+    if [[ -d "/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/" ]]; then
+      # check this - currently cyclone is installed in this dir in our docker image:
+      export PATH=$PATH:/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/
+    fi
     check_dep_tool "cyclonedx"
 
     check_dep_file "vmlinux-to-elf" "$EXT_DIR""/vmlinux-to-elf/vmlinux-to-elf"
@@ -443,10 +447,10 @@ dependency_check()
       check_dep_file "vmlinux.armel" "$EXT_DIR""/firmae/binaries/vmlinux.armel"
 
       # re-enable this with the PR
-      #check_dep_file "fixImage.sh" "$MOD_DIR""/L10_system_emulation/fixImage.sh"
-      #check_dep_file "preInit.sh" "$MOD_DIR""/L10_system_emulation/preInit.sh"
-      #check_dep_file "inferFile.sh" "$MOD_DIR""/L10_system_emulation/inferFile.sh"
-      #check_dep_file "inferService.sh" "$MOD_DIR""/L10_system_emulation/inferService.sh"
+      check_dep_file "fixImage.sh" "$MOD_DIR""/L10_system_emulation/fixImage.sh"
+      check_dep_file "preInit.sh" "$MOD_DIR""/L10_system_emulation/preInit.sh"
+      check_dep_file "inferFile.sh" "$MOD_DIR""/L10_system_emulation/inferFile.sh"
+      check_dep_file "inferService.sh" "$MOD_DIR""/L10_system_emulation/inferService.sh"
 
       # routersploit for full system emulation
       check_dep_file "Routersploit installation" "$EXT_DIR""/routersploit/rsf.py"

@@ -82,6 +82,8 @@ P61_unblob_eval() {
 unblobber() {
   local FIRMWARE_PATH_="${1:-}"
   local OUTPUT_DIR_UNBLOB="${2:-}"
+  local UNBLOB_PATH=""
+  local UNBLOB_BIN=""
 
   if ! [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
     mkdir -p "$OUTPUT_DIR_UNBLOB"
