@@ -35,6 +35,8 @@ I13_objdump() {
       print_tool_info "debuginfod" 1
       if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
         print_tool_info "radare2" 1
+      else
+        echo -e "$RED""$BOLD""Not installing radare2. Your EMBA installation will be incomplete""$NC"
       fi
     fi
   

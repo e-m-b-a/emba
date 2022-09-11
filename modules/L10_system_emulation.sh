@@ -1510,7 +1510,7 @@ check_online_stat() {
     write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
     print_ln
     ping -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE" || true
-    nmap -Pn -n -A -sSV --host-timeout 30m -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG"
+    nmap -Pn -n -A -sSV --host-timeout 30m -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG" || true
 
     mapfile -t TCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t UDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)

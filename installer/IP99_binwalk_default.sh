@@ -43,6 +43,8 @@ IP99_binwalk_default() {
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
       # firmware-mod-kit is only available on Kali Linux
       print_tool_info "firmware-mod-kit" 1
+    else
+      echo -e "$RED""$BOLD""Not installing firmware-mod-kit. Your EMBA installation will be incomplete""$NC"
     fi
 
     print_tool_info "cramfsswap" 1

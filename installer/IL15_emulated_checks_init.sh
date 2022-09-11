@@ -32,6 +32,8 @@ IL15_emulated_checks_init() {
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
       print_tool_info "snmpcheck" 1
+    else
+      echo -e "$RED""$BOLD""Not installing snmpcheck. Your EMBA installation will be incomplete""$NC"
     fi
     print_tool_info "python3-pip" 1
     print_tool_info "cutycapt" 1

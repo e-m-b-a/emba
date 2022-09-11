@@ -43,6 +43,8 @@ I01_default_apps(){
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1
+    else
+      echo -e "$RED""$BOLD""Not installing metasploit-framework. Your EMBA installation will be incomplete""$NC"
     fi
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then

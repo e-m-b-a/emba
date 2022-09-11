@@ -90,7 +90,7 @@ sub_module_title()
   fi
 }
 
-print_output()
+print_output_()
 {
   local OUTPUT="${1:-}"
   local LOG_SETTING="${2:-}"
@@ -125,7 +125,7 @@ print_output()
   else
     echo -e "$OUTPUT" || true
     if [[ "$LOG_SETTING" == "main" ]] ; then
-      echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_FILE" >/dev/null
+      echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_LOG" >/dev/null
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
         echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
@@ -142,6 +142,74 @@ print_output()
   fi
   if [[ "$LOG_SETTING" != "no_log" ]] ; then
     write_grep_log "$OUTPUT"
+  fi
+}
+
+print_output()
+{
+  local OUTPUT="${1:-}"
+  local LOG_SETTING="${2:-}"
+  if [[ -n "${LOG_SETTING}" && -d "$(dirname "${LOG_SETTING}")" && "${LOG_FILE:-}" != "${LOG_FILE_MOD:-}" ]]; then
+    local LOG_FILE_MOD="${2:-}"
+  fi
+  # add a link as third argument to add a link marker for web report
+  #if [[ -n "${3+NA}" ]] ; then
+  local REF_LINK="${3:-}"
+  #fi
+  local TYPE_CHECK
+  TYPE_CHECK="$( safe_echo "$OUTPUT" | cut -c1-3 )"
+  if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
+    local COLOR_OUTPUT_STRING=""
+    COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
+    safe_echo "$COLOR_OUTPUT_STRING"
+    if [[ "$LOG_SETTING" == "main" ]] ; then
+      safe_echo "$(format_log "$COLOR_OUTPUT_STRING")" "$MAIN_LOG"
+    elif [[ "$LOG_SETTING" != "no_log" ]] ; then
+      if [[ -z "${REF_LINK:-}" ]] ; then
+        safe_echo "$(format_log "$COLOR_OUTPUT_STRING")" "$LOG_FILE"
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "$COLOR_OUTPUT_STRING")" "$LOG_FILE_MOD"
+        fi
+      else
+        safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
+        fi
+      fi
+    fi
+  else
+    safe_echo "$OUTPUT"
+    if [[ "$LOG_SETTING" == "main" ]] ; then
+      safe_echo "$(format_log "$OUTPUT")" "$MAIN_LOG"
+    elif [[ "$LOG_SETTING" != "no_log" ]] ; then
+      if [[ -z "$REF_LINK" ]] ; then
+        safe_echo "$(format_log "$OUTPUT")" "$LOG_FILE"
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "$OUTPUT")" "$LOG_FILE_MOD"
+        fi
+      else
+        safe_echo "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
+        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
+          safe_echo "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
+        fi
+      fi
+    fi
+  fi
+  if [[ "$LOG_SETTING" != "no_log" ]] ; then
+    write_grep_log "$OUTPUT"
+  fi
+}
+
+# echo untrusted data in a secure way:
+safe_echo() {
+  STRING_TO_ECHO="${1:-}"
+
+  # %b  ARGUMENT  as a string with '\' escapes interpreted, except that octal escapes are of the form \0 or
+  if [[ -v 2 ]]; then
+    local LOG_TO_FILE="${2:-}"
+    printf -- "%b" "$STRING_TO_ECHO\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
+  else
+    printf -- "%b" "$STRING_TO_ECHO\n" || true
   fi
 }
 
