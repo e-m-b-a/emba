@@ -95,6 +95,10 @@ log_folder()
             if ! [[ -d "$TMP_DIR" ]]; then
               mkdir "$TMP_DIR"
             fi
+            if [[ -d "$LOG_DIR"/html-report ]]; then
+              print_output "[*] EMBA needs to remove and re-create the current HTML report" "no_log"
+              rm -r "$LOG_DIR""/html-report" && mkdir "$LOG_DIR""/html-report"
+            fi
             touch "$TMP_DIR"/restart
           else
             echo -e "\\n${RED}Terminate EMBA${NC}\\n"

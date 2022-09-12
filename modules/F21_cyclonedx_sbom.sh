@@ -19,7 +19,7 @@ F21_cyclonedx_sbom() {
   module_log_init "${FUNCNAME[0]}"
   module_title "CycloneDX SBOM converter"
 
-  local F20_LOG="$LOG_DIR""/f20_vul_aggregator.csv"
+  local F20_LOG="$CSV_DIR""/f20_vul_aggregator.csv"
   local BIN_VER_SBOM_ARR=()
   local BIN_VER_SBOM_ENTRY=""
   local BINARY=""
@@ -46,6 +46,12 @@ F21_cyclonedx_sbom() {
       # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick tranlation
       sed -i 's/\;/,/g' "$CSV_DIR"/f21_cyclonedx_sbom.csv
       cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
+    fi
+    if [[ -f "$LOG_DIR"/f21_cyclonedx_sbom.json ]]; then
+      print_output "[+] SBOM in json format created in $ORANGE$LOG_DIR/f21_cyclonedx_sbom.json$NC:"
+      print_ln
+      tee -a "$LOG_FILE" < "$LOG_DIR"/f21_cyclonedx_sbom.json
+      print_ln
       local NEG_LOG=1
     fi
   fi

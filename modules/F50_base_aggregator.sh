@@ -54,6 +54,10 @@ F50_base_aggregator() {
   L30_LOG="l30_routersploit.txt"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
 
+  if [[ "$RESTART" -eq 1 ]] && [[ -f "$LOG_FILE" ]]; then
+    rm "$LOG_FILE"
+  fi
+
   get_data
   output_overview
   output_details
@@ -139,7 +143,7 @@ output_details() {
     write_csv_log "directories" "$DETECTED_DIR" "NA"
     DATA=1
   fi
-  ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
+  ENTROPY_PIC=$(find "$LOG_DIR" -xdev -maxdepth 1 -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is: ""$ORANGE""$ENTROPY"
     write_link "p02"
@@ -705,7 +709,7 @@ get_data() {
   export WEB_UP=0
   export ROUTERSPLOIT_VULN=0
   export CVE_COUNTER=0
-  export CVE_SEARCH=""
+  export CVE_SEARCH=1
   export FWHUNTER_CNT=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
@@ -818,7 +822,7 @@ get_data() {
     ROUTERSPLOIT_VULN=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L30_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
-    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | cut -d: -f2 || true)
+    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -u | cut -d: -f2 || true)
   fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
@@ -850,9 +854,15 @@ get_data() {
     LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "$F20_EXPLOITS_LOG" || true)"
     DOS_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(D\)" "$F20_EXPLOITS_LOG" || true)"
     GITHUB_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(G\)" "$F20_EXPLOITS_LOG" || true)"
-    EXPLOIT_HIGH_COUNT="$(cat "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp || true)"
-    EXPLOIT_MEDIUM_COUNT="$(cat "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp || true)"
-    EXPLOIT_LOW_COUNT="$(cat "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp || true)"
+    if [[ -f "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp ]]; then
+      EXPLOIT_HIGH_COUNT="$(cat "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp || true)"
+    fi
+    if [[ -f "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp ]]; then
+      EXPLOIT_MEDIUM_COUNT="$(cat "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp || true)"
+    fi
+    if [[ -f "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp ]]; then
+      EXPLOIT_LOW_COUNT="$(cat "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp || true)"
+    fi
   fi
 }
 
