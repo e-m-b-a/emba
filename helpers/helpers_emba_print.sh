@@ -53,6 +53,11 @@ module_log_init()
   LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
   LOG_FILE_NAME="$FILE_NAME"".txt"
 
+  if [[ -f "$LOG_FILE" ]]; then
+    print_output "[*] Found old module log file $ORANGE$LOG_FILE$NC... creating a backup" "no_log"
+    mv "$LOG_FILE" "$LOG_FILE".bak."$RANDOM" || true
+  fi
+
   module_start_log "${FILE_NAME^}"
 
   if [[ "$DISABLE_NOTIFICATIONS" -eq 0 ]]; then
@@ -638,7 +643,13 @@ module_start_log() {
     LOG_DIR="${LOG_DIR:: -1}"
   fi
   LOG_PATH_MODULE=$(abs_path "$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')")
-  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" || true; fi
+  if [[ -d "$LOG_PATH_MODULE" ]] ; then
+    print_output "[*] Found old module log path for $ORANGE$MODULE_MAIN_NAME$NC ... creating a backup" "no_log"
+    mv "$LOG_PATH_MODULE" "$LOG_PATH_MODULE".bak."$RANDOM" || true
+  fi
+  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then
+    mkdir "$LOG_PATH_MODULE" || true
+  fi
 }
 
 pre_module_reporter() {
@@ -684,9 +695,11 @@ module_end_log() {
   if [[ "$HTML" -eq 1 ]]; then
     run_web_reporter_mod_name "$MODULE_MAIN_NAME"
   fi
-  if [ -z "$(ls -A "$LOG_PATH_MODULE" 2>/dev/null)" ]; then
+  if [[ -v LOG_PATH_MODULE ]]; then
     if [[ -d "$LOG_PATH_MODULE" ]]; then
-      rmdir "$LOG_PATH_MODULE"
+      if [[ "$(find "$LOG_PATH_MODULE" -type f | wc -l)" -eq 0 ]]; then
+        rm -r "$LOG_PATH_MODULE"
+      fi
     fi
   fi
 

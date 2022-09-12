@@ -171,6 +171,14 @@ run_modules()
           else
             $MODULE_MAIN
           fi
+        else
+          local ENABLE=1
+          FILE_NAME=$(echo "$MODULE_MAIN" | sed -e 's/\(.*\)/\L\1/' | tr " " _ | tr '[:upper:]' '[:lower:]')
+          LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
+          if grep -i -q "$MODULE_MAIN nothing reported" "$LOG_FILE"; then
+            ENABLE=0
+          fi
+          module_end_log "$MODULE_MAIN" "$ENABLE"
         fi
         reset_module_count
       fi
@@ -207,6 +215,14 @@ run_modules()
             else
               $MODULE_MAIN
             fi
+          else
+            local ENABLE=1
+            FILE_NAME=$(echo "$MODULE_MAIN" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
+            LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
+            if grep -i -q "$MODULE_MAIN nothing reported" "$LOG_FILE"; then
+              ENABLE=0
+            fi
+            module_end_log "$MODULE_MAIN" "$ENABLE"
           fi
           reset_module_count
         fi
@@ -241,10 +257,10 @@ run_modules()
             if [[ "$RESTART" -eq 1 ]]; then
               if [[ $(grep -i -c "$MODULE_MAIN finished" "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
                 if [[ "$MODULE_MAIN" == "P99_"* ]]; then
-                  print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "no_log"
+                  print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "main"
                   MOD_FIN=0
                 else
-                  print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "no_log"
+                  print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "main"
                   MOD_FIN=1
                 fi
               fi
@@ -257,6 +273,14 @@ run_modules()
               else
                 $MODULE_MAIN
               fi
+            else
+              local ENABLE=1
+              FILE_NAME=$(echo "$MODULE_MAIN" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
+              LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
+              if grep -i -q "$MODULE_MAIN nothing reported" "$LOG_FILE"; then
+                ENABLE=0
+              fi
+              module_end_log "$MODULE_MAIN" "$ENABLE"
             fi
             reset_module_count
           fi
