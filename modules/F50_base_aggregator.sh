@@ -137,7 +137,7 @@ output_details() {
     if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
       write_link "s05"
     else
-      write_link "p20"
+      write_link "p99"
     fi
     write_csv_log "files" "$FILE_ARR_COUNT" "NA"
     write_csv_log "directories" "$DETECTED_DIR" "NA"
