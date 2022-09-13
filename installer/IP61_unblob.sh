@@ -85,6 +85,7 @@ IP61_unblob() {
 
         # install poetry
         curl -sSL https://install.python-poetry.org | python3 -
+        export PATH=$PATH:/root/.local/bin
         cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
         poetry install --only main
         cd "$HOME_PATH" || ( echo "Could not install EMBA component unblob" && exit 1 )
