@@ -62,7 +62,10 @@ P99_prepare_analyzer() {
 
   set_etc_paths
   print_ln "no_log"
-  if [[ "$RTOS" -eq 1 ]]; then
+  if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
+    print_output "[*] UEFI firmware detected"
+    # -> we run only Sxx modules with UEFI in the name
+  elif [[ "$RTOS" -eq 1 ]]; then
     print_output "[*] RTOS system detected"
   fi
 
