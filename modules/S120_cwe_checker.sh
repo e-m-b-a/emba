@@ -86,6 +86,7 @@ cwe_check() {
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
       if [[ "$BINARY" == *".ko" ]]; then
+        # do not try to analyze kernel modules:
         continue
       fi
       if [[ "$THREADED" -eq 1 ]]; then
