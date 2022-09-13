@@ -25,7 +25,8 @@ IP61_unblob() {
     print_tool_info "e2fsprogs" 1
     print_tool_info "gcc" 1
     print_tool_info "git" 1
-    print_tool_info "img2simg" 1
+    # print_tool_info "img2simg" 1
+    print_tool_info "android-sdk-libsparse-utils" 1
     print_tool_info "liblzo2-dev" 1
     print_tool_info "lz4"
     print_tool_info "lziprecover" 1
@@ -84,8 +85,10 @@ IP61_unblob() {
 
         # install poetry
         curl -sSL https://install.python-poetry.org | python3 -
-        cd unblob
+        cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
         poetry install --only main
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component unblob" && exit 1 )
+
 
         if command -v unblob > /dev/null ; then
           unblob --show-external-dependencies
