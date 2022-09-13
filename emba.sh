@@ -167,7 +167,7 @@ run_modules()
           if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
             # if UEFI firmware detected then run only Sxx modules with UEFI in the name
             if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-              print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC."
+              print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
               continue
             fi
           fi
@@ -218,7 +218,7 @@ run_modules()
             if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
               # if UEFI firmware detected then run only Sxx modules with UEFI in the name
               if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-                print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC."
+                print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
                 continue
               fi
             fi
@@ -283,7 +283,7 @@ run_modules()
               if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
                 # if UEFI firmware detected then run only Sxx modules with UEFI in the name
                 if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-                  print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC."
+                  print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
                   continue
                 fi
               fi
@@ -406,6 +406,8 @@ main()
   export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
                   # currently the extracted results are not further used. The current implementation
                   # is for evaluation purposes
+  export CVE_BLACKLIST="$CONFIG_DIR"/cve-blacklist.txt  # include the blacklisted CVE values to this file
+  export CVE_WHITELIST="$CONFIG_DIR"/cve-whitelist.txt  # include the whitelisted CVE values to this file
 
   import_helper
   print_ln "no_log"

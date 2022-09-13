@@ -45,6 +45,12 @@ F20_vul_aggregator() {
   local FOUND_CVE=0
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
+  if [[ -f "$CVE_WHITELIST" ]] && [[ $(grep -c -E "CVE-[0-9]+-[0-9]+" "$CVE_WHITELIST") -gt 0 ]]; then
+    print_output "[!] WARNING: CVE whitelisting activated"
+  fi
+  if [[ -f "$CVE_BLACKLIST" ]] && [[ $(grep -c -E "CVE-[0-9]+-[0-9]+" "$CVE_BLACKLIST") -gt 0 ]]; then
+    print_output "[!] WARNING: CVE blacklisting activated"
+  fi
 
   local S06_LOG="$CSV_DIR"/s06_distribution_identification.csv
   local S08_LOG="$CSV_DIR"/s08_package_mgmt_extractor.csv
@@ -296,6 +302,7 @@ generate_special_log() {
       fi
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
       CVE_VALUES=$(cut -d ":" -f1 "$FILE" | paste -s -d ',' || true)
+      # we need to check the whitelisted and blacklisted CVEs here:
       if [[ -n $CVE_VALUES ]]; then
         print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
         print_output "$CVE_VALUES"
@@ -520,10 +527,31 @@ cve_extractor() {
   if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       local CVEv2_TMP=0
+      CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f1)
+
+      # if we find a blacklist file we check if the current CVE value is in the blacklist
+      # if we find it this CVE is not further processed
+      if [[ -f "$CVE_BLACKLIST" ]]; then
+        if grep -q ^"$CVE_VALUE"$ "$CVE_BLACKLIST"; then
+          print_output "[*] $ORANGE$CVE_VALUE$NC for $ORANGE$BINARY$NC blacklisted and ignored." "no_log"
+          continue
+        fi
+      fi
+      # if we find a whitelist file we check if the current CVE value is in the whitelist
+      # only if we find this CVE in the whitelist it is further processed
+      if [[ -f "$CVE_WHITELIST" ]]; then
+        # do a quick check if there is some data in the whitelist config file
+        if [[ $(grep -E -c "^CVE-[0-9]+-[0-9]+$" "$CVE_WHITELIST") -gt 0 ]]; then
+          if ! grep -q ^"$CVE_VALUE"$ "$CVE_WHITELIST"; then
+            print_output "[*] $ORANGE$CVE_VALUE$NC for $ORANGE$BINARY$NC not in whiteist -> ignored." "no_log"
+            continue
+          fi
+        fi
+      fi
+
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
       KNOWN_EXPLOITED=0
-      CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f1)
       CVSSv2_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f2)
       CVSS_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f3)
 
