@@ -17,26 +17,28 @@
 R00_emba_remove() {
   echo -e "\\n""$RED""A default installation of EMBA will be removed from this system. This includes the following steps:""$NC"
   echo -e "\\n""$ORANGE""Stopping EMBA processes""$NC"
-  echo -e "\\n""$ORANGE""Stopping mongod and redis server""$NC"
-  echo -e "\\n""$ORANGE""Removing mongod (purge) and configuration""$NC"
-  echo -e "\\n""$ORANGE""Removing mongod apt configuration""$NC"
-  echo -e "\\n""$ORANGE""Removing redis-server (purge) and configuration""$NC"
-  echo -e "\\n""$ORANGE""Removing EMBA docker images""$NC"
-  echo -e "\\n""$ORANGE""Removing external directory: ./external""$NC"
+  echo -e "$ORANGE""Stopping mongod and redis server""$NC"
+  echo -e "$ORANGE""Removing mongod (purge) and configuration""$NC"
+  echo -e "$ORANGE""Removing mongod apt configuration""$NC"
+  echo -e "$ORANGE""Removing redis-server (purge) and configuration""$NC"
+  echo -e "$ORANGE""Removing EMBA docker images""$NC"
+  echo -e "$ORANGE""Removing external directory: ./external""$NC\\n"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 
   echo -e "\\n""$ORANGE""Stopping EMBA processes""$NC"
-  pkill -f "./emba.sh"
+  pkill -f "./emba.sh" || true
 
   echo -e "\\n""$ORANGE""Stopping mongod process""$NC"
   systemctl stop mongod
-  echo -e "\\n""$ORANGE""Stopping redis-server process""$NC"
-  /etc/init.d/redis-server stop
+  if [[ -f "/etc/init.d/redis-server" ]]; then
+    echo -e "\\n""$ORANGE""Stopping redis-server process""$NC"
+    /etc/init.d/redis-server stop
+  fi
 
-  echo -e "\\n""$ORANGE""Removing mongod packages""$NC"
-  apt-get purge redis-server
   echo -e "\\n""$ORANGE""Removing redis-server packages""$NC"
-  apt-get purge mongodb-org
+  apt-get purge redis-server -y || true
+  echo -e "\\n""$ORANGE""Removing mongod packages""$NC"
+  apt-get purge mongodb-org -y || true
 
   if [[ -f /etc/redis/redis.conf ]]; then
     echo -e "\\n""$ORANGE""Removing redis configuration""$NC"
@@ -53,7 +55,7 @@ R00_emba_remove() {
   apt-get update -y
   systemctl daemon-reload
   echo -e "\\n""$ORANGE""Removing EMBA docker image""$NC"
-  docker images rm embeddedanalyzer/emba
+  docker image rm embeddedanalyzer/emba -f
   if [[ -d ./external ]]; then
     echo -e "\\n""$ORANGE""Removing external directory""$NC"
     rm -r ./external
