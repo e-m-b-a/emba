@@ -64,7 +64,8 @@ I02_UEFI_fwhunt() {
         if [[ -d external/BIOSUtilities ]]; then
           rm -r external/BIOSUtilities
         fi
-        git clone --branch refactor https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
+        #git clone --branch refactor https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
+        git clone https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
 
         echo -e "$ORANGE""$BOLD""Installing FwHunt""$NC"
         if [[ -d external/fwhunt-scan ]]; then
