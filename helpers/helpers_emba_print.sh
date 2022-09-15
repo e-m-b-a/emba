@@ -95,61 +95,6 @@ sub_module_title()
   fi
 }
 
-print_output_()
-{
-  local OUTPUT="${1:-}"
-  local LOG_SETTING="${2:-}"
-  if [[ -n "${LOG_SETTING}" && -d "$(dirname "${LOG_SETTING}")" && "${LOG_FILE:-}" != "${LOG_FILE_MOD:-}" ]]; then
-    local LOG_FILE_MOD="${2:-}"
-  fi
-  # add a link as third argument to add a link marker for web report
-  #if [[ -n "${3+NA}" ]] ; then
-  local REF_LINK="${3:-}"
-  #fi
-  local TYPE_CHECK
-  TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
-  if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
-    local COLOR_OUTPUT_STRING=""
-    COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
-    echo -e "$COLOR_OUTPUT_STRING" || true
-    if [[ "$LOG_SETTING" == "main" ]] ; then
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
-    elif [[ "$LOG_SETTING" != "no_log" ]] ; then
-      if [[ -z "${REF_LINK:-}" ]] ; then
-        echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE_MOD" >/dev/null 
-        fi
-      else
-        echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
-        fi
-      fi
-    fi
-  else
-    echo -e "$OUTPUT" || true
-    if [[ "$LOG_SETTING" == "main" ]] ; then
-      echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_LOG" >/dev/null
-    elif [[ "$LOG_SETTING" != "no_log" ]] ; then
-      if [[ -z "$REF_LINK" ]] ; then
-        echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE_MOD" >/dev/null 
-        fi
-      else
-        echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
-        if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
-        fi
-      fi
-    fi
-  fi
-  if [[ "$LOG_SETTING" != "no_log" ]] ; then
-    write_grep_log "$OUTPUT"
-  fi
-}
-
 print_output()
 {
   local OUTPUT="${1:-}"
@@ -158,9 +103,7 @@ print_output()
     local LOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
-  #if [[ -n "${3+NA}" ]] ; then
   local REF_LINK="${3:-}"
-  #fi
   local TYPE_CHECK
   TYPE_CHECK="$( safe_echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then

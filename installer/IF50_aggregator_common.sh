@@ -24,6 +24,7 @@ IF50_aggregator_common() {
     INSTALL_APP_LIST=()
     print_tool_info "python3-pip" 1
     print_tool_info "net-tools" 1
+    print_tool_info "exploitdb" 1
     print_pip_info "cve-searchsploit"
     echo -e "$ORANGE""cyclonedx sbom converter will be downloaded.""$NC"
 
@@ -39,10 +40,17 @@ IF50_aggregator_common() {
         apt-get install "${INSTALL_APP_LIST[@]}" -y
         pip3 install cve_searchsploit 2>/dev/null
 
-        if [[ "$IN_DOCKER" -eq 1 ]] ; then
-          echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database on docker.""$NC"
-          cve_searchsploit -u
+        # we try to avoid downloading the exploit-database multiple times:
+        CVE_SEARCH_PATH=$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')
+        if [[ -d "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database" ]] && [[ -d "/usr/share/exploitdb" ]]; then
+          rm -r "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database"
         fi
+        if [[ -d "/usr/share/exploitdb" ]]; then
+          ln -s "/usr/share/exploitdb" "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database"
+        fi
+
+        echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database mapping.""$NC"
+        cve_searchsploit -u
 
         echo -e "[*] Installing cyclonedx-cli for converting SBOMs"
         if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
@@ -55,5 +63,7 @@ IF50_aggregator_common() {
       ;;
     esac
   fi
+  # we were running into issues that this package was removed somehow during the installation process
+  # Todo: figure out why and solve it somehow
   apt-get install p7zip-full -y
 } 
