@@ -300,27 +300,42 @@ generate_special_log() {
       if [[ "$FILE" == *"exploits-overview"* ]]; then
         continue
       fi
+      local CVE_OUTPUT=""
       NAME=$(basename "$FILE" | sed -e 's/\.txt//g' | sed -e 's/_/\ /g')
-      CVE_VALUES=$(cut -d ":" -f1 "$FILE" | paste -s -d ',' || true)
+      mapfile -t CVE_VALUES < <(cut -d ":" -f1 "$FILE") # | paste -s -d ',' || true)
       # we need to check the whitelisted and blacklisted CVEs here:
-      if [[ -n $CVE_VALUES ]]; then
+      for CVE_VALUE in "${CVE_VALUES[@]}"; do
+        if grep -q "^$CVE_VALUE$" "$CVE_BLACKLIST"; then
+          continue
+        fi
+        if [[ $(grep -E -c "^CVE-[0-9]+-[0-9]+$" "$CVE_WHITELIST") -gt 0 ]]; then
+          if ! grep -q ^"$CVE_VALUE"$ "$CVE_WHITELIST"; then
+            continue
+          fi
+        fi
+        CVE_OUTPUT="$CVE_OUTPUT"",""$CVE_VALUE"
+      done
+      if [[ "$CVE_OUTPUT" == *CVE-* ]]; then
+        CVE_OUTPUT=${CVE_OUTPUT#,}
         print_output "[*] CVE details for ${GREEN}$NAME${NC}:\\n"
-        print_output "$CVE_VALUES"
+        print_output "$CVE_OUTPUT"
         echo -e "\n[*] CVE details for ${GREEN}$NAME${NC}:" >> "$CVE_MINIMAL_LOG"
-        echo "$CVE_VALUES" >> "$CVE_MINIMAL_LOG"
+        echo "$CVE_OUTPUT" >> "$CVE_MINIMAL_LOG"
         print_ln
       fi
     done
-
-    print_ln
-    print_output "[*] Minimal exploit summary file generated."
-    write_link "$EXPLOIT_OVERVIEW_LOG"
-    print_ln
 
     echo -e "\n[*] Exploit summary:" >> "$EXPLOIT_OVERVIEW_LOG"
     grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" >> "$EXPLOIT_OVERVIEW_LOG" || true
 
     mapfile -t EXPLOITS_AVAIL < <(grep -E "Exploit\ \(" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -t : -k 4 -h -r || true)
+    if [[ "${#EXPLOITS_AVAIL[@]}" -gt 0 ]]; then
+      print_ln
+      print_output "[*] Minimal exploit summary file generated."
+      write_link "$EXPLOIT_OVERVIEW_LOG"
+      print_ln
+    fi
+
 
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
@@ -543,7 +558,7 @@ cve_extractor() {
         # do a quick check if there is some data in the whitelist config file
         if [[ $(grep -E -c "^CVE-[0-9]+-[0-9]+$" "$CVE_WHITELIST") -gt 0 ]]; then
           if ! grep -q ^"$CVE_VALUE"$ "$CVE_WHITELIST"; then
-            print_output "[*] $ORANGE$CVE_VALUE$NC for $ORANGE$BINARY$NC not in whiteist -> ignored." "no_log"
+            print_output "[*] $ORANGE$CVE_VALUE$NC for $ORANGE$BINARY$NC not in whitelist -> ignored." "no_log"
             continue
           fi
         fi
