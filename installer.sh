@@ -269,6 +269,9 @@ cd "$HOME_PATH" || exit 1
 
 # we reset the permissions of external from 777 back to 755:
 chmod 755 ./external
+if [[ "$IN_DOCKER" -eq 1 ]]; then
+  userdel linuxbrew
+fi
 
 if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"

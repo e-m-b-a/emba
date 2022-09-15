@@ -118,6 +118,7 @@ cwe_checker_threaded () {
   local CWE=""
   local CWE_DESC=""
   local CWE_CNT=0
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"*80/100 ))
 
   local NAME=""
   NAME=$(basename "$BINARY_")
@@ -125,7 +126,9 @@ cwe_checker_threaded () {
   local LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
   BINARY_=$(readlink -f "$BINARY_")
 
+  ulimit -Sv "$MEM_LIMIT"
   /root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
+  ulimit -Sv unlimited
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
 
   if [[ -f "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then

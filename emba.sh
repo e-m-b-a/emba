@@ -408,6 +408,9 @@ main()
                   # is for evaluation purposes
   export CVE_BLACKLIST="$CONFIG_DIR"/cve-blacklist.txt  # include the blacklisted CVE values to this file
   export CVE_WHITELIST="$CONFIG_DIR"/cve-whitelist.txt  # include the whitelisted CVE values to this file
+  # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
+  export TOTAL_MEMORY=0
+  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
 
   import_helper
   print_ln "no_log"

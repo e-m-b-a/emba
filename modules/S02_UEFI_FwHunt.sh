@@ -61,9 +61,12 @@ fwhunter() {
   local FWHUNTER_CHECK_FILE="${1:-}"
   local FWHUNTER_CHECK_FILE_NAME=""
   FWHUNTER_CHECK_FILE_NAME=$(basename "$FWHUNTER_CHECK_FILE")
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"*80/100 ))
 
   print_output "[*] Running FwHunt on $ORANGE$FWHUNTER_CHECK_FILE$NC" "" "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt"
+  ulimit -Sv "$MEM_LIMIT"
   python3 "$EXT_DIR"/fwhunt-scan/fwhunt_scan_analyzer.py scan-firmware "$FWHUNTER_CHECK_FILE" --rules_dir "$EXT_DIR"/fwhunt-scan/rules/ | tee -a "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" || true
+  ulimit -Sv unlimited
 }
 
 fwhunter_logging() {

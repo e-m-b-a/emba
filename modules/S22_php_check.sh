@@ -107,8 +107,6 @@ s22_vuln_check() {
     return
   fi
 
-  # usually this memory limit is not needed, but sometimes it protects our machine
-  local TOTAL_MEMORY
   local NAME
   local VULNS
 

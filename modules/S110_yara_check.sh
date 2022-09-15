@@ -29,6 +29,7 @@ S110_yara_check()
   local MATCH_FILE=""
   local MATCH_FILE_NAME=""
   local MAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"*80/100 ))
 
   if [[ $YARA -eq 1 ]] ; then
     # if multiple instances are running we can't overwrite it
@@ -37,7 +38,9 @@ S110_yara_check()
       find "$EXT_DIR""/yara" -xdev -iname '*.yar' -exec realpath {} \; | xargs printf 'include "%s"\n'| sort -n > "$DIR_COMB_YARA"
     fi
 
+    ulimit -Sv "$MEM_LIMIT"
     yara -p "$MAX_MOD_THREADS" -r -w -s -m -L -g "$DIR_COMB_YARA" "$LOG_DIR"/firmware > "$LOG_PATH_MODULE"/yara_complete_output.txt || true
+    ulimit -Sv unlimited
 
     while read -r YARA_OUT_LINE; do
       if [[ "$YARA_OUT_LINE" == *" [] [author="* ]]; then

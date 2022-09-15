@@ -96,6 +96,10 @@ check_live_nmap_basic() {
       #IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
       readarray -d ', ' -t NMAP_CPES_ARR < <(printf "%s" "$NMAP_CPES")
       for NMAP_CPE in "${NMAP_CPES_ARR[@]}"; do
+        if [[ "$NMAP_CPE" == *"windows"* ]]; then
+          # we emulate only Linux -> if windows is detected this is a FP
+          continue
+        fi
         NMAP_CPE=${NMAP_CPE/ /}
         NMAP_CPE=${NMAP_CPE//cpe:\/}
         # just to ensure there is some kind of version information in our entry
