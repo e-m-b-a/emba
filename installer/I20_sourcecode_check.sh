@@ -30,19 +30,24 @@ I20_sourcecode_check() {
     print_tool_info "shellcheck" 1
     print_tool_info "php" 1
     print_pip_info "semgrep"
+    print_git_info "semgrep-rules" "returntocorp/semgrep-rules" "Standard library for Semgrep rules"
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""Composer and iniscan (if not already on the system) will be downloaded!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""Composer, iniscan and semgrep (if not already on the system) will be downloaded!""$NC"
       ANSWER=("y")
     fi
   
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y
+
+        pip3 install semgrep
+        git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
+
         if ! [[ -d "external/iniscan" ]] ; then
           mkdir external/iniscan
         fi
