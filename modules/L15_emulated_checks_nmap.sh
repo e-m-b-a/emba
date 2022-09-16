@@ -198,7 +198,10 @@ l15_version_detector() {
 
     LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
     CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+    # VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4)"
+    VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+    VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
     VERSION_FINDER=$(echo "$SERVICE_" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null || true)
     if [[ -n $VERSION_FINDER ]]; then

@@ -108,10 +108,6 @@ import_installer() {
 check()
 {
   echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Shellcheck""$NC""\\n""$BOLD""=================================================================""$NC"
-  if ! command -v shellcheck >/dev/null 2>&1; then
-    echo -e "\\n""$ORANGE""Shellcheck not found!""$NC""\\n""$ORANGE""Install shellcheck via 'apt-get install shellcheck'!""$NC\\n"
-    exit 1
-  fi
 
   echo -e "\\n""$GREEN""Run shellcheck on this script:""$NC""\\n"
   if shellcheck ./check_project.sh || [[ $? -ne 1 && $? -ne 2 ]]; then
@@ -148,17 +144,21 @@ check()
     fi
 
     echo -e "\\n""$GREEN""Run ${ORANGE}semgrep$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE"
-    #if ; then
-    #  echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
-    #else
-    #  echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
-    #  MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
-    #fi
+    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE" | tee /tmp/emba_semgrep.log
+    if grep -q "Findings:" /tmp/emba_semgrep.log; then
+      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+      MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
+    else
+      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    fi
   done
 }
 
 summary() {
+  if [[ -f /tmp/emba_semgrep.log ]]; then
+    rm /tmp/emba_semgrep.log
+  fi
+
   if [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
     echo -e "Modules to check (shellcheck): ${#MODULES_TO_CHECK_ARR[@]}\\n"

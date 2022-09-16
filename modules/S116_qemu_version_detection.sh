@@ -66,17 +66,20 @@ S116_qemu_version_detection() {
 version_detection_thread() {
   local VERSION_LINE="${1:-}"
 
-  local BINARY
+  local BINARY=""
   BINARY="$(echo "$VERSION_LINE" | cut -d\; -f1)"
-  local STRICT
+  local STRICT=""
   STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
-  local LIC
+  local LIC=""
   LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
-  local CSV_REGEX
+  local CSV_REGEX=""
   CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
 
-  local VERSION_IDENTIFIER
-  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+  local VERSION_IDENTIFIER=""
+  # VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4)"
+  VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+  VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
   local BINARY_PATH=""
   local BINARY_PATHS=()

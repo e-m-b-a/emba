@@ -53,7 +53,10 @@ S09_firmware_base_version_check() {
     BIN_NAME="$(echo "$VERSION_LINE" | cut -d\; -f1)"
     CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
 
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+    # VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4)"
+    VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+    VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
     if [[ "$STRICT" == *"strict"* ]]; then
 
@@ -91,7 +94,10 @@ S09_firmware_base_version_check() {
       for SFILE in "${SPECIAL_FINDS[@]}"; do
         BIN_PATH=$(echo "$SFILE" | cut -d ":" -f1)
         BIN_NAME="$(basename "$(echo "$SFILE" | cut -d ":" -f1)")"
-        CSV_REGEX=$(echo "$VERSION_LINE" | cut -d\; -f5 | sed s/^\"// | sed s/\"$//)
+        # CSV_REGEX=$(echo "$VERSION_LINE" | cut -d\; -f5 | sed s/^\"// | sed s/\"$//)
+        CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
+        CSV_REGEX="${CSV_REGEX/\"}"
+        CSV_REGEX="${CSV_REGEX%\"}"
         VERSION_FINDER=$(echo "$SFILE" | cut -d ":" -f2-3 | tr -dc '[:print:]')
         get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN_PATH")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - zgrep$GREEN)."
