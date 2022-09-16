@@ -116,7 +116,7 @@ check_live_nmap_basic() {
   if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
     for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
       print_output "[*] Service detected: $ORANGE$SERVICE$NC"
-      SERVICE_NAME=$(echo "$SERVICE" | awk '{print $2}')
+      SERVICE_NAME="$(escape_echo $(echo "$SERVICE" | awk '{print $2}'))"
       if [[ "$SERVICE_NAME" == "unknown" ]] || [[ "$SERVICE_NAME" == "tcpwrapped" ]] || [[ -z "$SERVICE_NAME" ]]; then
         continue
       fi

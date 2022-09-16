@@ -161,6 +161,19 @@ safe_echo() {
   fi
 }
 
+# This should be used for using untrusted data as input for other commands:
+escape_echo() {
+  STRING_TO_ECHO="${1:-}"
+
+  # %q  ARGUMENT is printed in a format that can be reused as shell input, escaping non-printable characters with the proposed POSIX $'' syntax.
+  if [[ -v 2 ]]; then
+    local LOG_TO_FILE="${2:-}"
+    printf -- "%q" "$STRING_TO_ECHO\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
+  else
+    printf -- "%q" "$STRING_TO_ECHO\n" || true
+  fi
+}
+
 print_ln()
 {
   local LOG_SETTING="${1:-}"
