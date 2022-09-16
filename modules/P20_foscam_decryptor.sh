@@ -56,11 +56,11 @@ foscam_enc_extractor() {
   hexdump -C "$FOSCAM_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
   mapfile FOSCAM_KEYS < <(grep -v "ID" "$KEY_FILE" | cut -d\; -f2 | tr -d \')
-  for FOSCAM_KEY in "${FOSCAM_KEYS[@]}"; do
+  for _FOSCAM_KEY in "${FOSCAM_KEYS[@]}"; do
     FOSCAM_DECRYTED=0
-    print_output "[*] Testing FOSCAM decryption key $ORANGE$FOSCAM_KEY$NC."
+    print_output "[*] Testing FOSCAM decryption key $ORANGE$_FOSCAM_KEY$NC."
     # shellcheck disable=SC2086
-    openssl enc -d -aes-128-cbc -md md5 -k $FOSCAM_KEY -in "$FOSCAM_ENC_PATH_" > "$EXTRACTION_FILE_" || true
+    openssl enc -d -aes-128-cbc -md md5 -k $_FOSCAM_KEY -in "$FOSCAM_ENC_PATH_" > "$EXTRACTION_FILE_" || true
 
     if [[ -f "$EXTRACTION_FILE_" ]]; then
       FOSCAM_FILE_CHECK=$(file "$EXTRACTION_FILE_")

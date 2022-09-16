@@ -177,7 +177,7 @@ final_cwe_log() {
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
+        CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_ln

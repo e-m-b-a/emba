@@ -41,6 +41,7 @@ HELP_DIR="./helpers"
 MOD_DIR="./modules"
 MOD_DIR_LOCAL="./modules_local"
 CONF_DIR="./config"
+EXT_DIR="./external"
 REP_DIR="$CONF_DIR/report_templates"
 
 SOURCES=()
@@ -145,17 +146,47 @@ check()
       MODULES_TO_CHECK_ARR+=("$SOURCE")
     fi
   done
+
+  if command -v semgrep; then
+    if [[ -d ./external/semgrep-rules/bash ]]; then
+      echo -e "\\n""$GREEN""Run semgrep:""$NC""\\n"
+      for SOURCE in "${SOURCES[@]}"; do
+        echo -e "\\n""$GREEN""Run semgrep on $SOURCE""$NC""\\n"
+        #semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bin/bash "$SOURCE"
+        #if ; then
+        #  echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+        #else
+        #  echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+        #  MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
+        #fi
+      done
+    else
+      echo -e "\\n""$ORANGE""$BOLD""Please install semgrep-rules to directory ./external to perform all checks""$NC""\\n"
+    fi
+  else
+    echo -e "\\n""$ORANGE""$BOLD""Please install semgrep to perform all checks""$NC""\\n"
+  fi
 }
 
 summary() {
   if [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
-    echo -e "Modules to check: ${#MODULES_TO_CHECK_ARR[@]}\\n"
+    echo -e "Modules to check (shellcheck): ${#MODULES_TO_CHECK_ARR[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR[@]}"; do
       echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
     done
     echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
+
+  if [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "Modules to check (semgrep): ${#MODULES_TO_CHECK_ARR_SEMGREP[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR[@]}"; do
+      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+    done
+    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+
 }
 
 check

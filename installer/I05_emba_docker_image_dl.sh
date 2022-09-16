@@ -27,7 +27,7 @@ I05_emba_docker_image_dl() {
 
     if command -v docker > /dev/null; then
       f="$(docker manifest inspect embeddedanalyzer/emba:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-      echo "Download-Size : ""$(($(( ${f//$'\n'/+} ))/1048576))"" MB"
+      echo "Download-Size : ""$(("$(( "${f//$'\n'/+}" ))"/1048576))"" MB"
     fi
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then

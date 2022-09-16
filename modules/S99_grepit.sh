@@ -64,7 +64,7 @@ S99_grepit() {
   local GREP_ARGUMENTS="-a -n -A 1 -B 3 -rP"
   # Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)
   local COLOR_ARGUMENTS="--color=always"
-  export STANDARD_GREP_ARGUMENTS="$GREP_ARGUMENTS $COLOR_ARGUMENTS"
+  export _STANDARD_GREP_ARGUMENTS="$GREP_ARGUMENTS $COLOR_ARGUMENTS"
   export ENABLE_LEAST_LIKELY=0
 
   mapfile -t GREPIT_MODULES < <(grep -E "^grepit_module.*\(\) " "$MOD_DIR"/"${FUNCNAME[0]}".sh | sed -e 's/()\ .*//g' | sort -u)
@@ -127,7 +127,7 @@ grepit_reporter() {
 
 grepit_search() {
   local LINES_OF_OUTPUT=0
-  local GREP_COMMAND="grep"
+  local _GREP_COMMAND="grep"
   local LOG_DETAILS=1
   local COMMENT="$1"
   local EXAMPLE="$2"
@@ -135,28 +135,28 @@ grepit_search() {
   local SEARCH_REGEX="$4"
   local OUTFILE="$5"
   if [[ -v 6 ]]; then
-    local ARGS_FOR_GREP="${6}" # usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
+    local _ARGS_FOR_GREP="${6}" # usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
   else
-    local ARGS_FOR_GREP=""
+    local _ARGS_FOR_GREP=""
   fi
 
   if [[ "$ENABLE_LEAST_LIKELY" -eq 0 ]] && [[ "$OUTFILE" == 9_* ]]; then
     print_output "[-] Skipping searching for $OUTFILE with regex $SEARCH_REGEX. Set ENABLE_LEAST_LIKELY in the module options to 1 if you would like to." "no_log"
   else
-    write_log "[*] Searching (args for grep: $ORANGE$ARGS_FOR_GREP$NC) for $ORANGE$SEARCH_REGEX$NC." "$LOG_PATH_MODULE/$OUTFILE"
+    write_log "[*] Searching (args for grep: $ORANGE$_ARGS_FOR_GREP$NC) for $ORANGE$SEARCH_REGEX$NC." "$LOG_PATH_MODULE/$OUTFILE"
 
     if [[ "$LOG_DETAILS" -eq 1 ]]; then
       write_log "[*] Grepit state info - comment: $ORANGE$COMMENT$NC" "$LOG_PATH_MODULE/$OUTFILE"
       write_log "[*] Grepit state info - Filename $ORANGE$OUTFILE$NC" "$LOG_PATH_MODULE/$OUTFILE"
       write_log "[*] Grepit state info - Example: $ORANGE$EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
       write_log "[*] Grepit state info - False positive example: $ORANGE$FALSE_POSITIVES_EXAMPLE$NC" "$LOG_PATH_MODULE/$OUTFILE"
-      write_log "[*] Grepit state info - Grep args: $ORANGE$ARGS_FOR_GREP$NC" "$LOG_PATH_MODULE/$OUTFILE"
+      write_log "[*] Grepit state info - Grep args: $ORANGE$_ARGS_FOR_GREP$NC" "$LOG_PATH_MODULE/$OUTFILE"
       write_log "[*] Grepit state info - Search regex: $ORANGE$SEARCH_REGEX$NC" "$LOG_PATH_MODULE/$OUTFILE"
       write_log "" "$LOG_PATH_MODULE/$OUTFILE"
     fi
 
     # shellcheck disable=SC2086
-    $GREP_COMMAND $ARGS_FOR_GREP $STANDARD_GREP_ARGUMENTS -- "$SEARCH_REGEX" "$FIRMWARE_PATH" >> "$LOG_PATH_MODULE/$OUTFILE" 2>&1 || true
+    $_GREP_COMMAND $_ARGS_FOR_GREP $_STANDARD_GREP_ARGUMENTS -- "$SEARCH_REGEX" "$FIRMWARE_PATH" >> "$LOG_PATH_MODULE/$OUTFILE" 2>&1 || true
 
     if [[ "$LOG_DETAILS" -eq 1 ]]; then
       if [[ -f "$LOG_PATH_MODULE/$OUTFILE" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null) -gt 7 ]]; then

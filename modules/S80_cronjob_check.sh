@@ -31,7 +31,8 @@ S80_cronjob_check()
     if [[ -e "$CJ_FILE" ]] ; then
       local CRONJOBS
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-      CRONJOBS=$(ls -la "$CJ_FILE"* 2>/dev/null)
+      #CRONJOBS=$(ls -la "$CJ_FILE"* 2>/dev/null)
+      CRONJOBS=$(find "$CJ_FILE"* -xdev -type f 2>/dev/null)
       if [[ "$CRONJOBS" ]] ; then
         print_output "[+] Cronjobs:"
         print_output "$(indent "$CRONJOBS")"
@@ -72,7 +73,8 @@ S80_cronjob_check()
   for CT_VAR in "${CJ_FILE_PATH[@]}"; do
     local CRONTABVAR
     # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-    CRONTABVAR=$(ls -la "$CT_VAR" 2>/dev/null)
+    # CRONTABVAR=$(ls -la "$CT_VAR" 2>/dev/null)
+    CRONTABVAR=$(find "$CT_VAR"* -type f -ls 2>/dev/null)
     if [[ "$CRONTABVAR" ]] ; then
       print_output "[+] Anything interesting in ""$(print_path "$CT_VAR")"
       print_output "$(indent "$CRONTABVAR")"

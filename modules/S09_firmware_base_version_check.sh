@@ -55,12 +55,12 @@ S09_firmware_base_version_check() {
 
     VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
 
-    if [[ $STRICT == *"strict"* ]]; then
+    if [[ "$STRICT" == *"strict"* ]]; then
 
       # strict mode
       #   use the defined regex only on a binary called BIN_NAME (field 1)
 
-      if [[ $RTOS -eq 1 ]]; then
+      if [[ "$RTOS" -eq 1 ]]; then
         continue
       fi
 
@@ -80,7 +80,7 @@ S09_firmware_base_version_check() {
       done
       print_dot
 
-    elif [[ $STRICT == "zgrep" ]]; then
+    elif [[ "$STRICT" == "zgrep" ]]; then
 
       # zgrep mode:
       #   search for files with identifier in field 1

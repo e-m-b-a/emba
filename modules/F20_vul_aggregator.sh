@@ -426,7 +426,7 @@ cve_db_lookup() {
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "$BIN_VERSION_" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${ORANGE}$VERSION_SEARCHx${NC}" "no_log"
-    $PATH_CVE_SEARCH -p "$VERSION_SEARCHx" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
+    "$PATH_CVE_SEARCH" -p "$VERSION_SEARCHx" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r >> "$LOG_PATH_MODULE"/"$VERSION_PATH".txt
   fi
 
   if [[ "$THREADED" -eq 1 ]]; then

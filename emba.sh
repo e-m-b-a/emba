@@ -172,11 +172,11 @@ run_modules()
             fi
           fi
           if [[ $THREADING_SET -eq 1 ]]; then
-            $MODULE_MAIN &
+            "$MODULE_MAIN" &
             WAIT_PIDS+=( "$!" )
             max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
           else
-            $MODULE_MAIN
+            "$MODULE_MAIN"
           fi
         else
           local ENABLE=1
@@ -223,11 +223,11 @@ run_modules()
               fi
             fi
             if [[ $THREADING_SET -eq 1 ]]; then
-              $MODULE_MAIN &
+              "$MODULE_MAIN" &
               WAIT_PIDS+=( "$!" )
               max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
             else
-              $MODULE_MAIN
+              "$MODULE_MAIN"
             fi
           else
             local ENABLE=1
@@ -288,11 +288,11 @@ run_modules()
                 fi
               fi
               if [[ $THREADING_SET -eq 1 ]]; then
-                $MODULE_MAIN &
+                "$MODULE_MAIN" &
                 WAIT_PIDS+=( "$!" )
                 max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
               else
-                $MODULE_MAIN
+                "$MODULE_MAIN"
               fi
             else
               local ENABLE=1
@@ -723,7 +723,7 @@ main()
   if [[ $THREADED -eq 1 ]] && [[ "$MAX_MODS" -eq 0 ]]; then
     # the maximum modules in parallel
     # rule of thumb - per core half a module, minimum 2 modules
-    MAX_MODS="$(( $(grep -c ^processor /proc/cpuinfo) /2 +1))"
+    MAX_MODS="$(( "$(grep -c ^processor /proc/cpuinfo)" /2 +1))"
 
     # if we have only one core we run two modules in parallel
     if [[ "$MAX_MODS" -lt 2 ]]; then
@@ -736,7 +736,7 @@ main()
   if [[ $THREADED -eq 1 ]] && [[ "$MAX_MOD_THREADS" -eq 0 ]]; then
     # the maximum threads per modules - if this value does not match adjust it via
     # local MAX_MOD_THREADS=123 in module area
-    export MAX_MOD_THREADS="$(( 2* $(grep -c ^processor /proc/cpuinfo) ))"
+    export MAX_MOD_THREADS="$(( 2* "$(grep -c ^processor /proc/cpuinfo)" ))"
   fi
 
   # setup non threaded mode:
@@ -937,9 +937,9 @@ main()
     print_ln "no_log"
 
     if [[ -d "$LOG_DIR" ]]; then
-      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "main" 
     else
-      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     fi
     write_notification "Pre-checking phase finished"
 
@@ -975,9 +975,9 @@ main()
     print_ln "no_log"
 
     if [[ -d "$LOG_DIR" ]]; then
-      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
+      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "main"
     else
-      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     fi
     write_notification "Testing phase ended"
 
@@ -1002,9 +1002,9 @@ main()
 
     print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
-      print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main"
+      print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "main"
     else
-      print_output "[!] System emulation ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] System emulation ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     fi
     write_notification "System emulation phase ended"
   fi
@@ -1032,17 +1032,17 @@ main()
     fi
     print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "main" 
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "main" 
       write_notification "EMBA finished analysis"
       rm -r "$TMP_DIR" 2>/dev/null || true
     else
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@$SECONDS -u +%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     fi
     if [[ "$NOTIFICATION_PID" != "NA" ]]; then
       kill "$NOTIFICATION_PID" 2>/dev/null || true
     fi
     write_grep_log "$(date)" "TIMESTAMP"
-    write_grep_log "$(date -d@$SECONDS -u +%H:%M:%S)" "DURATION"
+    write_grep_log "$(date -d@"$SECONDS" -u +%H:%M:%S)" "DURATION"
   else
     print_output "[!] No extracted firmware found" "no_log"
     print_output "$(indent "Try using binwalk or something else to extract the firmware")"

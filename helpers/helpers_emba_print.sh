@@ -672,7 +672,7 @@ matrix_mode() {
   echo -e "\033[2J\033[?25l"
 
   R=$(tput lines)
-  C=$(tput cols);: $((R--))
+  C=$(tput cols);: "$((R--))"
 
   while true; do
     (
@@ -681,7 +681,7 @@ matrix_mode() {
 
     for i in $(eval echo -e "{1..$R}"); do
       # shellcheck disable=SC2006
-      c=`printf '\\\\0%o' $((RANDOM%57+33))` ### http://bruxy.regnet.cz/web/linux ###
+      c=`printf '\\\\0%o' "$((RANDOM%57+33))"` ### http://bruxy.regnet.cz/web/linux ###
       echo -e "\033[$((i-1));${j}H\033[32m$c\033[$i;${j}H\033[37m""$c"
       sleep 0.1
 

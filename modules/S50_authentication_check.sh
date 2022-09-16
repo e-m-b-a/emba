@@ -536,7 +536,7 @@ scan_pam_conf() {
       else
         print_output "[+] Found one or more configuration lines"
         local LINE
-        LINE=$(echo "$FIND" | ${SEDBINARY} 's/:space:/ /g')
+        LINE=$(echo "$FIND" | sed 's/:space:/ /g')
         print_output "$(indent "$(orange "$LINE")")"
         ((AUTH_ISSUES+=1))
       fi
