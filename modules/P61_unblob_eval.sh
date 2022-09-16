@@ -96,14 +96,6 @@ unblobber() {
     if [[ -e $(cat "$EXT_DIR"/unblob_path.cfg)/bin/unblob ]]; then
       UNBLOB_BIN="$(cat "$EXT_DIR"/unblob_path.cfg)""/bin/unblob"
     fi
-  elif command -v nix; then
-    if nix profile list | grep -q unblob 2>/dev/null; then
-      UNBLOB_PATH=$(nix profile list | grep unblob | awk '{print $4}' | sort -u)
-      UNBLOB_BIN="$UNBLOB_PATH"/bin/unblob
-    else
-      print_output "[-] Cant find unblob installation - check your installation"
-      return
-    fi
   else
     print_output "[-] Cant find unblob installation - check your installation"
     return

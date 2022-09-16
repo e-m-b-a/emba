@@ -87,23 +87,27 @@ IP61_unblob() {
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH=$PATH:/root/.local/bin
         cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
-        poetry install --only main
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component unblob" && exit 1 )
 
+        # install unblob with poetry:
+        poetry install --only main
+        UNBLOB_PATH=$(poetry env info --path)
+        if [[ -f "$UNBLOB_PATH""/bin/unblob" ]]; then
+          export PATH=$PATH:"$UNBLOB_PATH""/bin"
+        else
+          cd "$HOME_PATH" && ( echo "Could not install EMBA component unblob" && exit 1 )
+        fi
+
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component unblob" && exit 1 )
 
         if command -v unblob > /dev/null ; then
           unblob --show-external-dependencies
           echo -e "$GREEN""unblob installed successfully""$NC"
           echo
-        elif nix profile list | grep -q unblob; then
-          UNBLOB_PATH=$(nix profile list | grep unblob | awk '{print $4}' | sort -u)
-          "$UNBLOB_PATH"/bin/unblob --show-external-dependencies
-          echo "$UNBLOB_PATH" > ./external/unblob_path.cfg
-          echo -e "$GREEN""unblob installed successfully""$NC"
         else
           echo -e "$ORANGE""unblob installation failed - check it manually""$NC"
+          echo
         fi
       ;;
     esac
   fi
-} 
+}
