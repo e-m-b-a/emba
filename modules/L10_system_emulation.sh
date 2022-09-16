@@ -350,7 +350,7 @@ main_emulation() {
     # we deal with a startup script
     if file "$MNT_POINT""$INIT_FILE" | grep -q "text executable\|ASCII text"; then
       INIT_OUT="$MNT_POINT""$INIT_FILE"
-      find "$INIT_OUT" -xdev -ls
+      find "$INIT_OUT" -xdev -ls || true
       print_output "[*] Backup original init file $ORANGE$INIT_OUT$NC"
       BAK_INIT_ORIG="$INIT_OUT"
       BAK_INIT_BACKUP="$LOG_PATH_MODULE"/"$(basename "$INIT_OUT".init)"
@@ -384,13 +384,13 @@ main_emulation() {
 
     print_ln
     print_output "[*] FirmAE filesytem:"
-    find "$MNT_POINT" -xdev -ls | tee -a "$LOG_FILE"
+    find "$MNT_POINT" -xdev -ls | tee -a "$LOG_FILE" || true
 
     print_ln
     print_output "[*] FirmAE firmadyne directory:"
     # shellcheck disable=SC2012
     #ls -l "$MNT_POINT/firmadyne" | tee -a "$LOG_FILE"
-    find "$MNT_POINT"/firmadyne -xdev -ls | tee -a "$LOG_FILE"
+    find "$MNT_POINT"/firmadyne -xdev -ls | tee -a "$LOG_FILE" || true
     print_ln
 
     ### set default network values for network identification mode
@@ -712,7 +712,7 @@ handle_fs_mounts() {
       continue
     fi
 
-    find "$FS_FIND" -xdev -ls
+    find "$FS_FIND" -xdev -ls || true
 
     print_output "[*] Identify system areas in the to-mount area:"
     local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
@@ -735,7 +735,7 @@ handle_fs_mounts() {
         continue
       fi
       print_output "[*] PATH found: $N_PATH"
-      find "$N_PATH" -xdev -ls
+      find "$N_PATH" -xdev -ls || true
 
       if ! [[ -d "$MNT_POINT""$MOUNT_PT" ]]; then
         print_output "[*] Creating target directory $MNT_POINT$MOUNT_PT"
@@ -744,7 +744,7 @@ handle_fs_mounts() {
       print_output "[*] Let's copy the identified area to the root filesystem"
       cp -pr "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
       print_output "[*] Target directory: $MNT_POINT$MOUNT_PT"
-      find "$MNT_POINT""$MOUNT_PT" -xdev -ls
+      find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     done
   done
 
