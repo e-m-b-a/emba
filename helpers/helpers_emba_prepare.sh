@@ -37,13 +37,13 @@ log_folder()
       if grep -q "Test ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
         print_output "[*] A finished EMBA firmware test was found in the log directory" "no_log"
       elif grep -q "System emulation phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
-        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - system emulation phase already finished" "no_log"
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - ${ORANGE}system emulation phase${NC} already finished" "no_log"
         NOT_FINISHED=1
       elif grep -q "Testing phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
-        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - testing phase already finished" "no_log"
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - ${ORANGE}testing phase${NC} already finished" "no_log"
         NOT_FINISHED=1
       elif grep -q "Pre-checking phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
-        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - pre-checking phase already finished" "no_log"
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - ${ORANGE}pre-checking phase${NC} already finished" "no_log"
         NOT_FINISHED=1
       else
         print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory" "no_log"
