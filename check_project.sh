@@ -152,7 +152,7 @@ check()
       echo -e "\\n""$GREEN""Run semgrep:""$NC""\\n"
       for SOURCE in "${SOURCES[@]}"; do
         echo -e "\\n""$GREEN""Run semgrep on $SOURCE""$NC""\\n"
-        #semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bin/bash "$SOURCE"
+        semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bin/bash "$SOURCE"
         #if ; then
         #  echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
         #else

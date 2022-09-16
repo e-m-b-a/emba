@@ -178,7 +178,7 @@ grepit_search() {
       # parse the csv output file and sort it according the test priority - 1-9, where 1 is more interesting
       # (low false positive rate, certainty of "vulnerability") and 9 is only "you might want to have a look when you are desperately looking for vulns")
       print_output "[*] $ORANGE$LINES_OF_OUTPUT$NC results of grepit module $ORANGE$CURRENT_TEST$NC." "no_log"
-      write_csv_log "$CURRENT_TEST" "$LINES_OF_OUTPUT" "$ARGS_FOR_GREP" "$SEARCH_REGEX" "$COMMENT"
+      write_csv_log "$CURRENT_TEST" "$LINES_OF_OUTPUT" "$_ARGS_FOR_GREP" "$SEARCH_REGEX" "$COMMENT"
     fi
   fi
 }
