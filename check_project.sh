@@ -46,6 +46,7 @@ REP_DIR="$CONF_DIR/report_templates"
 
 SOURCES=()
 MODULES_TO_CHECK_ARR=()
+MODULES_TO_CHECK_ARR_SEMGREP=()
 
 import_config_scripts() {
   mapfile -t HELPERS < <(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
@@ -136,36 +137,25 @@ check()
   import_reporting_templates
   import_module
 
-  echo -e "\\n""$GREEN""Run shellcheck:""$NC""\\n"
+  echo -e "\\n""$GREEN""Run shellcheck and semgrep:""$NC""\\n"
   for SOURCE in "${SOURCES[@]}"; do
-    echo -e "\\n""$GREEN""Run shellcheck on $SOURCE""$NC""\\n"
+    echo -e "\\n""$GREEN""Run ${ORANGE}shellcheck$GREEN on $ORANGE$SOURCE""$NC""\\n"
     if shellcheck -P "$HELP_DIR":"$MOD_DIR":"$MOD_DIR_LOCAL" -a ./emba.sh "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
       echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
     else
       echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
       MODULES_TO_CHECK_ARR+=("$SOURCE")
     fi
-  done
 
-  if command -v semgrep; then
-    if [[ -d ./external/semgrep-rules/bash ]]; then
-      echo -e "\\n""$GREEN""Run semgrep:""$NC""\\n"
-      for SOURCE in "${SOURCES[@]}"; do
-        echo -e "\\n""$GREEN""Run semgrep on $SOURCE""$NC""\\n"
-        semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bin/bash "$SOURCE"
-        #if ; then
-        #  echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
-        #else
-        #  echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
-        #  MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
-        #fi
-      done
-    else
-      echo -e "\\n""$ORANGE""$BOLD""Please install semgrep-rules to directory ./external to perform all checks""$NC""\\n"
-    fi
-  else
-    echo -e "\\n""$ORANGE""$BOLD""Please install semgrep to perform all checks""$NC""\\n"
-  fi
+    echo -e "\\n""$GREEN""Run ${ORANGE}semgrep$GREEN on $ORANGE$SOURCE""$NC""\\n"
+    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE"
+    #if ; then
+    #  echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    #else
+    #  echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+    #  MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
+    #fi
+  done
 }
 
 summary() {
@@ -189,6 +179,23 @@ summary() {
 
 }
 
+# check that all tools are installed
+check_tools(){
+  TOOLS=("semgrep" "shellcheck")
+  for TOOL in "${TOOLS[@]}";do
+    if ! command -v "$TOOL" > /dev/null ; then
+      echo -e "\\n""$RED""$TOOL is not installed correctly""$NC""\\n"
+      exit 1
+    fi
+  done
+  if ! [[ -d ./external/semgrep-rules/bash ]]; then
+    echo -e "\\n""$RED""$BOLD""Please install semgrep-rules to directory ./external to perform all checks""$NC""\\n"
+    exit 1
+  fi
+}
+
+# main:
+check_tools
 check
 summary
 
