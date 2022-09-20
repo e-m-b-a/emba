@@ -140,8 +140,8 @@ run_modules()
     for MODULE_FILE in "${MODULES[@]}" ; do
       # check if "$MODULE_NAME" is in blacklist from config directory and skip it
       MODULE_NAME=$(basename -s .sh "$MODULE_FILE")
-      if [[ " ${MODULE_BLACKLIST[*]} " =~ " ${MODULE_NAME} " ]]; then
-        print_output "[*] Blacklist triggered - Module ${MODULE_NAME} not executed" "main"
+      if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
+        print_output "[*] $(date) - Blacklist triggered - Module ${MODULE_NAME} not executed" "main"
         continue
       fi
       local MOD_FIN=0
@@ -261,8 +261,8 @@ run_modules()
         for MODULE_FILE in "${MODULES[@]}" ; do
           # check if "$MODULE_NAME" is in blacklist from config directory and skip it
           MODULE_NAME=$(basename -s .sh "$MODULE_FILE")
-          if [[ " ${MODULE_BLACKLIST[*]} " =~ " ${MODULE_NAME} " ]]; then
-            print_output "[*] Blacklist triggered - Module ${MODULE_NAME} not executed" "main"
+          if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
+            print_output "[*] $(date) - Blacklist triggered - Module ${MODULE_NAME} not executed" "main"
             continue
           fi
           local MOD_FIN=0
