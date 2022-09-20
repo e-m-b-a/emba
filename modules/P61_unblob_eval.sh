@@ -89,7 +89,7 @@ unblobber() {
   fi
 
   # find unblob installation - we move this later to the dependency checker
-  if command -v unblob; then
+  if command -v unblob > /dev/null; then
     UNBLOB_BIN="unblob"
   elif [[ -f "$EXT_DIR"/unblob_path.cfg ]]; then
     if [[ -e $(cat "$EXT_DIR"/unblob_path.cfg)/bin/unblob ]]; then
