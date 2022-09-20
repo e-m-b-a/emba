@@ -24,68 +24,38 @@ IP12_avm_freetz_ng_extract() {
     cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
   
     print_file_info "execstack" "execstack for Freetz-NG" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/freetz-ng/execstack_0.0.20131005-1+b10_amd64.deb"
-    print_tool_info "python3" 1
-    print_tool_info "python-is-python3" 1
-    print_tool_info "pv" 1
-    print_tool_info "cpio" 1
-    print_tool_info "rsync" 1
-    print_tool_info "kmod" 1
-    print_tool_info "libzstd-dev" 1
-    print_tool_info "unar" 1
-    print_tool_info "inkscape" 1
-    print_tool_info "imagemagick" 1
-    print_tool_info "graphicsmagick" 1
-    print_tool_info "subversion" 1
-    print_tool_info "git" 1
-    print_tool_info "bc" 1
-    print_tool_info "unrar" 1
     print_tool_info "wget" 1
-    print_tool_info "sudo" 1
     print_tool_info "gcc" 1
-    print_tool_info "g++" 1
-    print_tool_info "binutils" 1
-    print_tool_info "autoconf" 1
-    print_tool_info "automake" 1
-    print_tool_info "autopoint" 1
-    print_tool_info "libtool-bin" 1
     print_tool_info "make" 1
-    print_tool_info "bzip2" 1
-    print_tool_info "libncurses5-dev" 1
-    print_tool_info "libreadline-dev" 1
-    print_tool_info "zlib1g-dev" 1
-    print_tool_info "flex" 1
+    print_tool_info "automake" 1
+    print_tool_info "autoconf" 1
     print_tool_info "bison" 1
-    print_tool_info "patch" 1
-    print_tool_info "texinfo" 1
-    print_tool_info "tofrodos" 1
-    print_tool_info "gettext" 1
-    print_tool_info "pkg-config" 1
-    print_tool_info "ecj" 1
-    print_tool_info "fastjar" 1
-    print_tool_info "perl" 1
-    print_tool_info "libstring-crc32-perl" 1
-    print_tool_info "ruby" 1
+    print_tool_info "bzip2" 1
+    print_tool_info "file" 1
+    print_tool_info "flex" 1
+    print_tool_info "g++" 1
     print_tool_info "gawk" 1
-    print_tool_info "python2" 1
-    print_tool_info "libusb-dev" 1
+    print_tool_info "gettext" 1
+    print_tool_info "libtool" 1
+    print_tool_info "libtool-bin" 1
+    print_tool_info "pkg-config" 1
+    print_tool_info "python3" 1
     print_tool_info "unzip" 1
-    print_tool_info "intltool" 1
+    print_tool_info "subversion" 1
+    print_tool_info "libncurses5-dev" 1
+    print_tool_info "zlib1g-dev" 1
     print_tool_info "libacl1-dev" 1
     print_tool_info "libcap-dev" 1
-    print_tool_info "libc6-dev-i386" 1
-    print_tool_info "lib32ncurses5-dev" 1
-    print_tool_info "gcc-multilib" 1
-    print_tool_info "bsdmainutils" 1
-    print_tool_info "lib32stdc++6" 1
-    print_tool_info "libglib2.0-dev" 1
-    print_tool_info "ccache" 1
-    print_tool_info "cmake" 1
-    print_tool_info "lib32z1-dev" 1
-    print_tool_info "libssl-dev" 1
+    print_tool_info "bc" 1
+    print_tool_info "rsync" 1
+    print_tool_info "kmod" 1
+    print_tool_info "libelf1" 1
     print_tool_info "uuid-dev" 1
+    print_tool_info "libssl-dev" 1
     print_tool_info "libgnutls28-dev" 1
     print_tool_info "libsqlite3-dev" 1
-    print_tool_info "sqlite3" 1
+    print_tool_info "gcc-multilib" 1
+    print_tool_info "python-is-python3" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -97,10 +67,8 @@ IP12_avm_freetz_ng_extract() {
     case ${ANSWER:0:1} in
       y|Y )
   
-        # apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-	apt-get install sudo wget gcc make automake autoconf bison bzip2 file flex g++ gawk gettext libtool libtool-bin pkg-config \
-python3 unzip subversion libncurses5-dev zlib1g-dev libacl1-dev libcap-dev bc rsync kmod libelf1 uuid-dev libssl-dev libgnutls28-dev \
-libsqlite3-dev gcc-multilib python-is-python3 -y --no-install-recommends
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+
         if ! grep -q freetzuser /etc/passwd; then
           useradd -m freetzuser
           usermod -a -G "${ORIG_GROUP}" freetzuser
