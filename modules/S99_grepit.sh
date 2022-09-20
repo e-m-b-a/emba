@@ -2997,11 +2997,11 @@ grepit_module_python() {
   "\s{1,$WILDCARD_SHORT}==\s{1,$WILDCARD_SHORT}\d\.\d{1,$WILDCARD_SHORT}" \
   "4_python_float_equality_right.txt"
 
-  grepit_search "The float type can not be reliably compared for equality. Make sure none of these comparisons uses floats, see https://access.redhat.com/blogs/766093/posts/2592591" \
-  '2.2 * 3.0 == 3.3 * 2.2' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "\s{1,$WILDCARD_SHORT}==\s{1,$WILDCARD_SHORT}" \
-  "4_python_float_equality_general.txt"
+#  grepit_search "The float type can not be reliably compared for equality. Make sure none of these comparisons uses floats, see https://access.redhat.com/blogs/766093/posts/2592591" \
+#  '2.2 * 3.0 == 3.3 * 2.2' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  "\s{1,$WILDCARD_SHORT}==\s{1,$WILDCARD_SHORT}" \
+#  "4_python_float_equality_general.txt"
 
   grepit_search "Double underscore variable visibility can be tricky, see https://access.redhat.com/blogs/766093/posts/2592591" \
   'self.__private' \
@@ -3447,13 +3447,13 @@ grepit_module_crypto_creds() {
   "4_cryptocred_ciphers_kerberos.txt" \
   "-i"
 
-  #take care with the next regex, ! has a special meaning in double quoted strings but not in single quoted
-  grepit_search "Hash" \
-  'hash_value' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'hash(?!(table|map|set|code))' \
-  "6_cryptocred_hash.txt" \
-  "-i"
+#  #take care with the next regex, ! has a special meaning in double quoted strings but not in single quoted
+#  grepit_search "Hash" \
+#  'hash_value' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  'hash(?!(table|map|set|code))' \
+#  "6_cryptocred_hash.txt" \
+#  "-i"
 
   grepit_search 'Find *nix passwd or shadow files.' \
   '_xcsbuildagent:*:239:239:Xcode Server Build Agent:/var/empty:/usr/bin/false' \
@@ -3546,12 +3546,12 @@ grepit_module_crypto_creds() {
   "2_cryptocred_default_password.txt" \
   "-i"
 
-  grepit_search "Password and variants of it" \
-  'pass-word or passwd' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'pass.?wo?r?d' \
-  "4_cryptocred_password.txt" \
-  "-i"
+#  grepit_search "Password and variants of it" \
+#  'pass-word or passwd' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  'pass.?wo?r?d' \
+#  "4_cryptocred_password.txt" \
+#  "-i"
 
   grepit_search "Password verification methods, interesting to see if timing " \
   'verifyPassword' \
@@ -4302,11 +4302,11 @@ grepit_module_general() {
   "exec\s{0,$WILDCARD_SHORT}\(" \
   "4_general_exec_narrow.txt"
 
-  grepit_search "Exec mostly means executing on OS." \
-  'runTime.exec("echo "+unsanitized_input);' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "exec" \
-  "5_general_exec_wide.txt"
+#  grepit_search "Exec mostly means executing on OS." \
+#  'runTime.exec("echo "+unsanitized_input);' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  "exec" \
+#  "5_general_exec_wide.txt"
 
   grepit_search "Eval mostly means evaluating commands." \
   'eval (' \
@@ -4334,19 +4334,19 @@ grepit_module_general() {
   "5_general_syscall_wide.txt" \
   "-i"
 
-  grepit_search "system: Command execution?" \
-  'system(' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "system\s{0,$WILDCARD_SHORT}\(" \
-  "4_general_system_narrow.txt" \
-  "-i"
+#  grepit_search "system: Command execution?" \
+#  'system(' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  "system\s{0,$WILDCARD_SHORT}\(" \
+#  "4_general_system_narrow.txt" \
+#  "-i"
 
-  grepit_search "system: Command execution?" \
-  'system' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "system" \
-  "5_general_system_wide.txt" \
-  "-i"
+#  grepit_search "system: Command execution?" \
+#  'system' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  "system" \
+#  "5_general_system_wide.txt" \
+#  "-i"
 
   grepit_search "Search for binary paths or similar: Command execution?" \
   'place = "/usr/bin/softwareupdate"' \
@@ -4472,12 +4472,12 @@ grepit_module_general() {
   "4_general_session_timeout.txt" \
   "-i"
 
-  grepit_search "Timeout. Whatever timeout this might be, that might be interesting." \
-  'timeout' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'time-?\s?out' \
-  "5_general_session_timeout.txt" \
-  "-i"
+#  grepit_search "Timeout. Whatever timeout this might be, that might be interesting." \
+#  'timeout' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  'time-?\s?out' \
+#  "5_general_session_timeout.txt" \
+#  "-i"
 
   grepit_search "General setcookie command used in HTTP, important to see HTTPonly/secure flags, path setting, etc." \
   'setcookie' \
@@ -4493,12 +4493,12 @@ grepit_module_general() {
   "4_general_serialise.txt" \
   "-i"
 
-  grepit_search "Relative paths. May allow an attacker to put something early in the search path (if parts are user supplied input) and overwrite behavior" \
-  '../../' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  '\./' \
-  "5_general_relative_paths.txt" \
-  "-i"
+#  grepit_search "Relative paths. May allow an attacker to put something early in the search path (if parts are user supplied input) and overwrite behavior" \
+#  '../../' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  '\./' \
+#  "5_general_relative_paths.txt" \
+#  "-i"
 
   grepit_search "Search for the word credit card" \
   'credit-card' \
@@ -4507,12 +4507,12 @@ grepit_module_general() {
   "4_general_creditcard.txt" \
   "-i"
 
-  grepit_search "Update code and general update strategy weaknesses" \
-  'Update' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'update' \
-  "6_general_update.txt" \
-  "-i"
+#  grepit_search "Update code and general update strategy weaknesses" \
+#  'Update' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  'update' \
+#  "6_general_update.txt" \
+#  "-i"
 
   grepit_search "Backup code and general backup strategy weaknesses" \
   'Backup' \
@@ -4528,12 +4528,12 @@ grepit_module_general() {
   "5_general_debugger.txt" \
   "-i"
 
-  grepit_search "Kernel. A reference to something low level in a Kernel?" \
-  'Kernel' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  'Kernel' \
-  "5_general_kernel.txt" \
-  "-i"
+#  grepit_search "Kernel. A reference to something low level in a Kernel?" \
+#  'Kernel' \
+#  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+#  'Kernel' \
+#  "5_general_kernel.txt" \
+#  "-i"
 
   #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "Email addresses" \
@@ -4626,13 +4626,13 @@ grepit_module_general() {
   "1_general_uris_auth_info_narrow.txt" \
   "-i"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
-  grepit_search "URIs with authentication information specified as username:password@example.org" \
-  'username:password@example.com' \
-  'android:duration="@integer/animator_heartbeat_scaling_duration" or addObject:NSLocalizedString(@' \
-  "[^ \:/]{1,$WILDCARD_SHORT}:[^ \:/]{1,$WILDCARD_SHORT}@" \
-  "2_general_uris_auth_info_wide.txt" \
-  "-i"
+#  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+#  grepit_search "URIs with authentication information specified as username:password@example.org" \
+#  'username:password@example.com' \
+#  'android:duration="@integer/animator_heartbeat_scaling_duration" or addObject:NSLocalizedString(@' \
+#  "[^ \:/]{1,$WILDCARD_SHORT}:[^ \:/]{1,$WILDCARD_SHORT}@" \
+#  "2_general_uris_auth_info_wide.txt" \
+#  "-i"
 
   grepit_search "All HTTPS URIs" \
   'https://example.com' \

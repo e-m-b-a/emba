@@ -111,6 +111,7 @@ set_p02_default_exports() {
   # Note: we do not set UEFI_DETECTED in this function. If so, we are going to reset it and we only need
   #       an indicator if this could be some UEFI firmware for further processing
   export UEFI_AMI_CAPSULE=0
+  export ZYXEL_ZIP=0
 }
 
 fw_bin_detector() {
@@ -240,6 +241,15 @@ fw_bin_detector() {
     print_output "[+] Identified Buffalo encrpyted firmware - using Buffalo extraction module"
     export BUFFALO_ENC_DETECTED=1
     write_csv_log "Buffalo encrypted" "yes" "NA"
+  fi
+  if [[ "$(basename "$CHECK_FILE")" =~ .*\.ri ]] && [[ "$FILE_BIN_OUT" == *"data"* ]]; then
+    # ri files are usually used by zyxel
+    if [[ $(find "$LOG_DIR"/firmware -name "$(basename -s .ri "$CHECK_FILE")".bin | wc -l) -gt 0 ]]; then
+      # if we find a bin file with the same name then it is a Zyxel firmware image
+      print_output "[+] Identified ZyXel encrpyted ZIP firmware - using ZyXel extraction module"
+      export ZYXEL_ZIP=1
+      write_csv_log "ZyXel encrypted ZIP" "yes" ""
+    fi
   fi
   print_ln
 }
