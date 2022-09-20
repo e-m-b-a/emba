@@ -26,7 +26,7 @@ R00_emba_remove() {
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 
   echo -e "\\n""$ORANGE""Stopping EMBA processes""$NC"
-  pkill -f "./emba.sh" || true
+  pkill -f "emba.sh" || true
 
   echo -e "\\n""$ORANGE""Stopping mongod process""$NC"
   systemctl stop mongod
