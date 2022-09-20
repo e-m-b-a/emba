@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -1699,7 +1699,7 @@ write_script_exec() {
 
   if [[ "$EXECUTE" -ne 2 ]];then
     if ! [[ -f "$SCRIPT_WRITE" ]]; then
-      echo "#!/bin/bash" > "$SCRIPT_WRITE"
+      echo "#!/bin/bash -p" > "$SCRIPT_WRITE"
     fi
 
     # for the final script we need to adjust the paths:

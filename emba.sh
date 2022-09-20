@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -p
+# see: https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/ShellScriptSecurity/ShellScriptSecurity.html#//apple_ref/doc/uid/TP40004268-CH8-SW29
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
