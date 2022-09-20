@@ -38,7 +38,7 @@ I108_stacs_password_search() {
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         if ! [[ -d external/stacs-rules ]]; then
           git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
         fi

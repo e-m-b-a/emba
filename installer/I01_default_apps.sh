@@ -39,6 +39,7 @@ I01_default_apps(){
     # linuxbrew
     print_tool_info "curl" 1
     print_tool_info "git" 1
+    print_tool_info "strace" 1
 
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then

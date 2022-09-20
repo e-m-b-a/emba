@@ -59,18 +59,24 @@ cwe_container_prepare() {
   # on every run from scratch:
   if [[ -d "$EXT_DIR"/cwe_checker/.config ]]; then
     print_output "[*] Restoring config directory in read-only container"
-    cp -pr "$EXT_DIR"/cwe_checker/.config /root/
-    cp -pr "$EXT_DIR"/cwe_checker/.local /root/
+    if ! [[ -d /root/.config/ ]]; then
+      mkdir -p /root/.config
+    fi
+    cp -pr "$EXT_DIR"/cwe_checker/.config/cwe_checker /root/.config/
+    cp -pr "$EXT_DIR"/cwe_checker/.local/share /root/.local/
   fi
   if ! [[ -d /root/.cargo ]]; then
-    mkdir -p /root/.cargo
+    mkdir -p /root/.cargo/bin
   fi
   if [[ -d "$EXT_DIR"/cwe_checker/bin ]]; then
     print_output "[*] Restoring cargo bin directory in read-only container"
-    cp -pr "$EXT_DIR"/cwe_checker/bin /root/.cargo/
+    cp -pr "$EXT_DIR"/cwe_checker/bin/* /root/.cargo/bin/
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
+    return
   fi
+  # Todo: move this to dependency check
+  export PATH=$PATH:/root/.cargo/bin/:"$EXT_DIR"/jdk/bin/
 }
 
 cwe_check() {

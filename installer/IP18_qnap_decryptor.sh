@@ -34,7 +34,7 @@ IP18_qnap_decryptor() {
 
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         download_file "PC1.c" "https://gist.githubusercontent.com/galaxy4public/0420c7c9a8e3ff860c8d5dce430b2669/raw/1f8a42c0525efb188c0165c6a4cb205e82f851e2/pc1.c" "external/pc1.c"
 
         if [[ -f "external/pc1.c" ]]; then

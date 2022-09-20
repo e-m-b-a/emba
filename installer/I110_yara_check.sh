@@ -42,7 +42,7 @@ I110_yara_check() {
           mkdir external/yara
         fi
   
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
   
         download_file "Xumeiquer/yara-forensics/compressed.yar" "https://raw.githubusercontent.com/Xumeiquer/yara-forensics/master/file/compressed.yar" "external/yara/compressed.yar"
         download_file "DiabloHorn/yara4pentesters/juicy_files.txt" "https://raw.githubusercontent.com/DiabloHorn/yara4pentesters/master/juicy_files.txt" "external/yara/juicy_files.yar"

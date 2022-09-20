@@ -290,6 +290,12 @@ dependency_check()
 
     print_ln "no_log"
     print_output "[*] External utils:" "no_log"
+
+    # we need the path for the poetry tools like unblob
+    if [[ -f "$EXT_DIR/unblob/unblob_path.cfg" ]]; then
+      UNBLOB_PATH=$(cat $EXT_DIR/unblob/unblob_path.cfg)
+      export PATH=$PATH:$UNBLOB_PATH/bin/
+    fi
   
     # bc
     check_dep_tool "bc"
@@ -318,6 +324,8 @@ dependency_check()
         export BINWALK_VER_CHECK=1
       fi
     fi
+    export MPLCONFIGDIR="$TMP_DIR"
+
 
     # jtr
     check_dep_tool "john"

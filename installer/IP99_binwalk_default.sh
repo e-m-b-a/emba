@@ -97,7 +97,7 @@ IP99_binwalk_default() {
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
         pip3 install nose 2>/dev/null
         pip3 install coverage 2>/dev/null
@@ -176,18 +176,14 @@ IP99_binwalk_default() {
           echo -e "$GREEN""cramfsck already installed""$NC"
         fi
 
-        if ! command -v ubireader_extract_files > /dev/null ; then
-          if ! [[ -d external/binwalk/ubi_reader ]]; then
-            git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
-          fi
-          cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-          #git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
-          #python2 setup.py install
-          python3 setup.py install
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-        else
-          echo -e "$GREEN""ubi_reader already installed""$NC"
+        if ! [[ -d external/binwalk/ubi_reader ]]; then
+          git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
         fi
+        cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
+        #git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
+        #python2 setup.py install
+        python3 setup.py install
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
 
         if command -v binwalk > /dev/null ; then
           echo "WARNING: Uninstalling binwalk version"

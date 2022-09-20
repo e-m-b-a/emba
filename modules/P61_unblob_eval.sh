@@ -92,8 +92,17 @@ unblobber() {
   if command -v unblob; then
     UNBLOB_BIN="unblob"
   elif [[ -f "$EXT_DIR"/unblob_path.cfg ]]; then
+    # recover unblob installation
+    if ! [[ -d /root/.cache ]]; then
+      mkdir /root/.cache
+    fi
+    cp -pr "$EXT_DIR"/unblob/root_cache/* /root/.cache/
     if [[ -e $(cat "$EXT_DIR"/unblob_path.cfg)/bin/unblob ]]; then
       UNBLOB_BIN="$(cat "$EXT_DIR"/unblob_path.cfg)""/bin/unblob"
+      export PATH=$PATH:"$UNBLOB_BIN"/bin
+    else
+      print_output "[-] Cant find unblob installation - check your installation"
+      return
     fi
   else
     print_output "[-] Cant find unblob installation - check your installation"
@@ -104,7 +113,7 @@ unblobber() {
 
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_UNBLOB$NC"
 
-  "$UNBLOB_BIN" -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
+  unblob -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
 
   print_ln
 }

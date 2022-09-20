@@ -30,7 +30,6 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "cpio" 1
     print_tool_info "rsync" 1
     print_tool_info "kmod" 1
-    # print_tool_info "execstack" 1
     print_tool_info "libzstd-dev" 1
     print_tool_info "unar" 1
     print_tool_info "inkscape" 1
@@ -98,7 +97,10 @@ IP12_avm_freetz_ng_extract() {
     case ${ANSWER:0:1} in
       y|Y )
   
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        # apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+	apt-get install sudo wget gcc make automake autoconf bison bzip2 file flex g++ gawk gettext libtool libtool-bin pkg-config \
+python3 unzip subversion libncurses5-dev zlib1g-dev libacl1-dev libcap-dev bc rsync kmod libelf1 uuid-dev libssl-dev libgnutls28-dev \
+libsqlite3-dev gcc-multilib python-is-python3 -y --no-install-recommends
         if ! grep -q freetzuser /etc/passwd; then
           useradd -m freetzuser
           usermod -a -G "${ORIG_GROUP}" freetzuser
@@ -118,27 +120,34 @@ IP12_avm_freetz_ng_extract() {
 
           sudo -u freetzuser make allnoconfig
           # we currently running into an error that does not hinder us in using Freetz-NG
-          sudo -u freetzuser make || true
+          # sudo -u freetzuser make || true
           sudo -u freetzuser make tools
           cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
           chown -R root:root external/freetz-ng
-          userdel freetzuser
-          if [[ -d external/freetz-ng/source ]]; then
-            echo "[*] Removing freetz-ng source directory"
-            rm -r external/freetz-ng/source
-          fi
-          if [[ -d external/freetz-ng/docs ]]; then
-            echo "[*] Removing freetz-ng docs directory"
-            rm -r external/freetz-ng/docs
-          fi
-          if [[ -d external/freetz-ng/toolchain ]]; then
-            echo "[*] Removing freetz-ng toolchain directory"
-            rm -r external/freetz-ng/toolchain
-          fi
-          if [[ -d external/freetz-ng/.git ]]; then
-            echo "[*] Removing freetz-ng .git directory"
-            rm -r external/freetz-ng/.git
-          fi
+	  if [[ "$IN_DOCKER" -eq 1 ]]; then
+            # do some cleanup of the docker image
+            userdel freetzuser
+            if [[ -d "external/freetz-ng/source" ]]; then
+              echo -e "$ORANGE[*] Removing freetz-ng source directory$NC"
+              rm -r "external/freetz-ng/source"
+            fi
+            if [[ -d "external/freetz-ng/docs" ]]; then
+              echo -e "$ORANGE[*] Removing freetz-ng docs directory$NC"
+              rm -r "external/freetz-ng/docs"
+            fi
+            if [[ -d "external/freetz-ng/toolchain" ]]; then
+              echo -e "$ORANGE[*] Removing freetz-ng toolchain directory$NC"
+              rm -r "external/freetz-ng/toolchain"
+            fi
+            if [[ -d "external/freetz-ng/.git" ]]; then
+              echo -e "$ORANGE[*] Removing freetz-ng .git directory$NC"
+              rm -r "external/freetz-ng/.git"
+            fi
+            if [[ -d "external/freetz-ng/make" ]]; then
+              echo -e "$ORANGE[*] Removing freetz-ng make directory$NC"
+              rm -r "external/freetz-ng/make"
+            fi
+	  fi
         else
           echo -e "${ORANGE}Found freetz directory ... Not touching it$NC"
         fi
