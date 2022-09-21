@@ -309,6 +309,9 @@ dependency_check()
     # 7zip
     check_dep_tool "7z"
 
+    # jchroot - https://github.com/vincentbernat/jchroot
+    check_dep_tool "jchroot"
+
     # mkimage (uboot)
     check_dep_tool "uboot mkimage" "mkimage"
 
