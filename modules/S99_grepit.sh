@@ -56,11 +56,13 @@ S99_grepit() {
   # Weird grep behaviour with clearing to the end of line -.-
   # This variable prevents this behaviour
   export GREP_COLORS=ne
+  # sometimes we have so many results. We need to limit it a bit
+  local LIMIT_GREP=(-m 20000)
   # Do not remove -rP if you don't know what you are doing, otherwise you probably break this script
   local GREP_ARGUMENTS=(-a -n -A 1 -B 3 -rP)
   # Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)
   local COLOR_ARGUMENTS=(--color=always)
-  export STANDARD_GREP_ARGUMENTS=("${GREP_ARGUMENTS[@]}" "${COLOR_ARGUMENTS[@]}")
+  export STANDARD_GREP_ARGUMENTS=("${GREP_ARGUMENTS[@]}" "${COLOR_ARGUMENTS[@]}" "${LIMIT_GREP[@]}")
   export ENABLE_LEAST_LIKELY=0
 
   mapfile -t GREPIT_MODULES < <(grep -E "^grepit_module.*\(\) " "$MOD_DIR"/"${FUNCNAME[0]}".sh | sed -e 's/()\ .*//g' | sort -u)
