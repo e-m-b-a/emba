@@ -270,8 +270,7 @@ create_emulation_filesystem() {
         if ! [[ -d "$LOG_PATH_MODULE"/nvram ]]; then
           mkdir "$LOG_PATH_MODULE"/nvram
         fi
-        # shellcheck disable=SC2001
-        NVRAM_FILE=$(echo "$NVRAM_FILE" | sed -e 's/^\.//')
+        NVRAM_FILE="${NVRAM_FILE/\.}"
         print_output "[*] Found possible NVRAM default file $ORANGE$NVRAM_FILE$NC -> setup /firmadyne directory"
         echo "$NVRAM_FILE" >> "$LOG_PATH_MODULE"/nvram/nvram_files
         cp ."$NVRAM_FILE" "$LOG_PATH_MODULE"/nvram/
@@ -350,7 +349,7 @@ main_emulation() {
     # we deal with a startup script
     if file "$MNT_POINT""$INIT_FILE" | grep -q "text executable\|ASCII text"; then
       INIT_OUT="$MNT_POINT""$INIT_FILE"
-      find "$INIT_OUT" -xdev -ls || true
+      find "$INIT_OUT" -xdev -maxdepth 1 -ls || true
       print_output "[*] Backup original init file $ORANGE$INIT_OUT$NC"
       BAK_INIT_ORIG="$INIT_OUT"
       BAK_INIT_BACKUP="$LOG_PATH_MODULE"/"$(basename "$INIT_OUT".init)"
@@ -384,12 +383,10 @@ main_emulation() {
 
     print_ln
     print_output "[*] FirmAE filesytem:"
-    find "$MNT_POINT" -xdev -ls | tee -a "$LOG_FILE" || true
+    find "$MNT_POINT" -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE" || true
 
     print_ln
     print_output "[*] FirmAE firmadyne directory:"
-    # shellcheck disable=SC2012
-    #ls -l "$MNT_POINT/firmadyne" | tee -a "$LOG_FILE"
     find "$MNT_POINT"/firmadyne -xdev -ls | tee -a "$LOG_FILE" || true
     print_ln
 
@@ -940,8 +937,7 @@ get_networking_details_emulation() {
     if [[ -v NVRAM_TMP[@] ]]; then
       for NVRAM_ENTRY in "${NVRAM_TMP[@]}"; do
         if [[ "$NVRAM_ENTRY" =~ [[:print:]] ]]; then
-          # shellcheck disable=SC2076
-          if [[ ! " ${NVRAMS[*]} " =~ " $NVRAM_ENTRY " ]]; then
+          if [[ ! " ${NVRAMS[*]} " =~  $NVRAM_ENTRY  ]]; then
             NVRAMS+=( "$NVRAM_ENTRY" )
           fi
         fi
@@ -1007,8 +1003,8 @@ get_networking_details_emulation() {
         fi
       done
 
-      #shellcheck disable=SC2001
-      IP_="$(echo "$IP_" | sed 's/^\.//')"
+      #IP_="$(echo "$IP_" | sed 's/^\.//')"
+      IP_="${IP_/\.}"
 
       IP_ADDRESS_=""
       if [[ "$D_END" == "eb" ]]; then
@@ -1353,8 +1349,8 @@ nvram_searcher_emulation() {
       fi
     done
     if [[ "$COUNT" -gt 0 ]]; then
-      #shellcheck disable=SC2001
-      NVRAM_FILE=$(echo "$NVRAM_FILE" | sed 's/^\.//')
+      #NVRAM_FILE=$(echo "$NVRAM_FILE" | sed 's/^\.//')
+      NVRAM_FILE="${NVRAM_FILE/\.}"
       #print_output "[*] $NVRAM_FILE $COUNT ASCII_text"
       echo "$NVRAM_FILE $COUNT ASCII_text" >> "$LOG_PATH_MODULE"/nvram/nvram_files_final
     fi
@@ -1569,10 +1565,8 @@ check_online_stat() {
 
       UDP_SERV="U:""$UDP_SERV"
       TCP_SERV="T:""$TCP_SERV"
-      # shellcheck disable=SC2001
-      TCP_SERV=$(echo "$TCP_SERV" | sed 's/,$//g')
-      # shellcheck disable=SC2001
-      UDP_SERV=$(echo "$UDP_SERV" | sed 's/,$//g')
+      TCP_SERV="${TCP_SERV%,}"
+      UDP_SERV="${UDP_SERV%,}"
       
       local PORTS_TO_SCAN=""
       if [[ "$TCP_SERV" =~ ^T:[0-9].* ]]; then
