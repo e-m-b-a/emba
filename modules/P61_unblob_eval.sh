@@ -82,24 +82,18 @@ P61_unblob_eval() {
 unblobber() {
   local FIRMWARE_PATH_="${1:-}"
   local OUTPUT_DIR_UNBLOB="${2:-}"
-  local UNBLOB_BIN=""
-
-  if ! [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
-    mkdir -p "$OUTPUT_DIR_UNBLOB"
-  fi
+  local UNBLOB_BIN="unblob"
 
   # find unblob installation - we move this later to the dependency checker
-  if command -v unblob; then
-    UNBLOB_BIN="unblob"
-  elif [[ -f "$EXT_DIR"/unblob_path.cfg ]]; then
-    # recover unblob installation
-    if ! [[ -d /root/.cache ]]; then
-      mkdir /root/.cache
+  if ! command -v unblob && [[ -f "$EXT_DIR"/unblob/unblob_path.cfg ]]; then
+    # recover unblob installation - usually we are in the docker container
+    if ! [[ -d "$HOME"/.cache ]]; then
+      mkdir "$HOME"/.cache
     fi
-    cp -pr "$EXT_DIR"/unblob/root_cache/* /root/.cache/
-    if [[ -e $(cat "$EXT_DIR"/unblob_path.cfg)/bin/unblob ]]; then
-      UNBLOB_BIN="$(cat "$EXT_DIR"/unblob_path.cfg)""/bin/unblob"
-      export PATH=$PATH:"$UNBLOB_BIN"/bin
+    cp -pr "$EXT_DIR"/unblob/root_cache/* "$HOME"/.cache/
+    if [[ -e $(cat "$EXT_DIR"/unblob/unblob_path.cfg)/bin/"$UNBLOB_BIN" ]]; then
+      UNBLOB_PATH="$(cat "$EXT_DIR"/unblob/unblob_path.cfg)""/bin/"
+      export PATH=$PATH:"$UNBLOB_PATH"
     else
       print_output "[-] Cant find unblob installation - check your installation"
       return
@@ -113,7 +107,11 @@ unblobber() {
 
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_UNBLOB$NC"
 
-  unblob -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
+  if ! [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
+    mkdir -p "$OUTPUT_DIR_UNBLOB"
+  fi
+
+  "$UNBLOB_BIN" -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
 
   print_ln
 }
