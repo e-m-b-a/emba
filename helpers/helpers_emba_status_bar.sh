@@ -30,11 +30,11 @@ draw_box() {
   BOX_TITLE=" $BOX_TITLE "
   local BOX_L="${3:0}"
   local BOX=""
-  BOX+="\e[$((LINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[0m$(repeat_char "─" $((BOX_W - ${#BOX_TITLE} - 2)))┐"
-  BOX+="\e[$((LINES - 3));${BOX_L}f│""$(repeat_char " " $((BOX_W - 2)))""│"
-  BOX+="\e[$((LINES - 2));${BOX_L}f│$(repeat_char " " $((BOX_W - 2)))│"
-  BOX+="\e[$((LINES - 1));${BOX_L}f│$(repeat_char " " $((BOX_W - 2)))│"
-  BOX+="\e[${LINES};${BOX_L}f└$(repeat_char "─" $((BOX_W - 2)))┘"
+  BOX+="\e[$((LINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[0m$(repeat_char "─" "$((BOX_W - "${#BOX_TITLE}" - 2))")┐"
+  BOX+="\e[$((LINES - 3));${BOX_L}f│""$(repeat_char " " "$((BOX_W - 2))")""│"
+  BOX+="\e[$((LINES - 2));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
+  BOX+="\e[$((LINES - 1));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
+  BOX+="\e[${LINES};${BOX_L}f└$(repeat_char "─" "$((BOX_W - 2))")┘"
   echo -e "$BOX"
 }
 
@@ -98,7 +98,7 @@ system_load_util_str() {
 update_box_system_load() {
   update_cpu() {
     local CPU_LOG_STR_
-    CPU_LOG_STR_="$(system_load_util_str "$((100-$(vmstat 1 2 | tail -1 | awk '{print $15}')))" 0 2> /dev/null || true)"
+    CPU_LOG_STR_="$(system_load_util_str "$((100-"$(vmstat 1 2 | tail -1 | awk '{print $15}')"))" 0 2> /dev/null || true)"
     if [[ -f "$STATUS_TMP_PATH" ]] ; then
       sed -i "2s/.*/$CPU_LOG_STR_/" "$STATUS_TMP_PATH" 2> /dev/null || true
     fi
@@ -140,7 +140,7 @@ status_util_str() {
   local UTIL_VALUE="${2:-}"
   local UTIL_BAR_BLANK=""
 
-  local UTIL_LEN=$((22-${#UTIL_STR}-${#UTIL_VALUE}))
+  local UTIL_LEN=$((22-"${#UTIL_STR}"-"${#UTIL_VALUE}"))
   local U=0
   for ((U=1; U<=UTIL_LEN; U++)) ; do
     UTIL_BAR_BLANK+=" "
@@ -174,7 +174,7 @@ update_box_status() {
   fi
   while [[ "$BOX_SIZE" -gt 0 ]]; do
     local RUNTIME=0
-    RUNTIME="$(date -d@$(( $(date +%s) - "$DATE_STR" )) -u +%H:%M:%S)"
+    RUNTIME="$(date -d@"$(( "$(date +%s)" - "$DATE_STR" ))" -u +%H:%M:%S)"
     LOG_DIR_SIZE="$(du -sh "$LOG_DIR" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
     RUN_EMBA_PROCESSES="$(ps -C emba.sh | wc -l || true)"
     printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( LINES - 3 ))" "$(status_util_str 0 "$RUNTIME")" "$(( LINES - 2 ))" "$(status_util_str 1 "$LOG_DIR_SIZE")" "$(( LINES - 1 ))" "$(status_util_str 2 "$RUN_EMBA_PROCESSES")" || true
@@ -195,7 +195,7 @@ module_util_str() {
   local UTIL_VALUE="${2:-}"
   local UTIL_BAR_BLANK=""
 
-  local UTIL_LEN=$((22-${#UTIL_STR}-${#UTIL_VALUE}))
+  local UTIL_LEN=$((22-"${#UTIL_STR}"-"${#UTIL_VALUE}"))
   local U=0
   for ((U=1; U<=UTIL_LEN; U++)) ; do
     UTIL_BAR_BLANK+=" "
@@ -244,7 +244,7 @@ update_box_modules() {
     STARTED_MODULE_STR="$(grep -c "starting" "$LOG_DIR/emba.log" 2> /dev/null || true )"
     FINISHED_MODULE_STR="$(grep -c "finished" "$LOG_DIR/emba.log" 2> /dev/null || true )"
     LAST_FINISHED_MODULE_STR="$(grep "finished" "$LOG_DIR/emba.log" 2> /dev/null | tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
-    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 $((STARTED_MODULE_STR - FINISHED_MODULE_STR)))" "$(( LINES - 2 ))" "$(module_util_str 1 "$LAST_FINISHED_MODULE_STR")" "$(( LINES - 1 ))" "$(module_util_str 2 "$FINISHED_MODULE_STR/$COUNT_MODULES")" || true
+    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 "$((STARTED_MODULE_STR - FINISHED_MODULE_STR))")" "$(( LINES - 2 ))" "$(module_util_str 1 "$LAST_FINISHED_MODULE_STR")" "$(( LINES - 1 ))" "$(module_util_str 2 "$FINISHED_MODULE_STR/$COUNT_MODULES")" || true
     sleep 1
     if [[ -f "$STATUS_TMP_PATH" ]] ; then
       BOX_SIZE="$(sed '1q;d' "$STATUS_TMP_PATH" 2> /dev/null || true)"
@@ -262,7 +262,7 @@ status_2_util_str() {
   local UTIL_VALUE="${2:-}"
   local UTIL_BAR_BLANK=""
 
-  local UTIL_LEN=$((22-${#UTIL_STR}-${#UTIL_VALUE}))
+  local UTIL_LEN=$((22-"${#UTIL_STR}"-"${#UTIL_VALUE}"))
   local U=0
   for ((U=1; U<=UTIL_LEN; U++)) ; do
     UTIL_BAR_BLANK+=" "
