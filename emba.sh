@@ -397,7 +397,11 @@ main()
   export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_STATUS_BAR=1
-  export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
+  # as we encounter issues with the status bar on other system we disable it for non Kali systems
+  export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
+  if [[ -f "/etc/debian_version" ]] && grep -q kali-rolling /etc/debian_version; then
+    export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
+  fi
   export NOTIFICATION_PID="NA"
   export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
   export EMBA_ICON=""
