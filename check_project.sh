@@ -33,6 +33,7 @@ fi
 
 GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
+RED='\033[0;31m'
 BOLD='\033[1m'
 NC='\033[0m' # no color
 
@@ -195,7 +196,7 @@ check_tools(){
 }
 
 # main:
-#check_tools
+check_tools
 check
 summary
 
