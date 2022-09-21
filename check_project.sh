@@ -195,7 +195,7 @@ check_tools(){
 }
 
 # main:
-check_tools
+#check_tools
 check
 summary
 
