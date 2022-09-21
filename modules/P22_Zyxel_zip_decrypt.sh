@@ -49,6 +49,8 @@ zyxel_zip_extractor() {
   local ZLD_BINS=()
   local ZLD_BIN=""
 
+  sub_module_title "Zyxel protected ZIP firmware extractor"
+
   if ! [[ -f "$RI_FILE_" ]]; then
     print_output "[-] Zyxel - No file for extraction provided"
     return
@@ -58,10 +60,21 @@ zyxel_zip_extractor() {
     return
   fi
 
-  sub_module_title "Zyxel protected ZIP firmware extractor"
-
   binwalk_deep_extract_helper 1 "$RI_FILE_" "$EXTRACTION_DIR_"
   print_ln
+
+  if command -v jchroot > /dev/null; then
+    CHROOT="jchroot"
+    # OPTS see https://github.com/vincentbernat/jchroot#security-note
+    OPTS=(-n emba -U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+    print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
+  #elif command -v chroot > /dev/null; then
+  #  CHROOT="chroot"
+  #  print_output "[*] Using ${ORANGE}chroot${NC} for building chroot environments"
+  else
+    print_output "[-] No jchroot binary found ..."
+    return
+  fi
 
   mapfile -t ZLD_BINS < <(find "$EXTRACTION_DIR_" -name "zld_fsextract")
   RI_FILE_BIN="$(basename -s .ri "$RI_FILE_")".bin
@@ -99,10 +112,10 @@ zyxel_zip_extractor() {
       cp "$RI_FILE_BIN_PATH" "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
       ZLD_BIN=$(basename "$ZLD_BIN")
 
-      cd "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
-      timeout --preserve-status --signal SIGINT 2s chroot . ./"$EMULATOR" -strace ./"$ZLD_BIN" "$RI_FILE_BIN" AABBCCDD >> "$LOG_PATH_MODULE"/zld_strace.log 2>&1 || true
-      rm "$EMULATOR" || true
-      cd "$MAIN_DIR" || ( print_output "[-] Something went wrong" && return)
+      #cd "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
+      timeout --preserve-status --signal SIGINT 2s jchroot "$ZLD_DIR" -- ./"$EMULATOR" -strace ./"$ZLD_BIN" "$RI_FILE_BIN" AABBCCDD >> "$LOG_PATH_MODULE"/zld_strace.log 2>&1 || true
+      rm "$ZLD_DIR"/"$EMULATOR" || true
+      #cd "$MAIN_DIR" || ( print_output "[-] Something went wrong" && return)
 
       if [[ -f "$LOG_PATH_MODULE"/zld_strace.log ]]; then
         ZIP_KEY=$(grep -a -E "execve.*AABBCCDD" "$LOG_PATH_MODULE"/zld_strace.log | cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')
