@@ -96,23 +96,23 @@ IP12_avm_freetz_ng_extract() {
             # do some cleanup of the docker image
             userdel freetzuser
             if [[ -d "external/freetz-ng/source" ]]; then
-              echo -e "$ORANGE[*] Removing freetz-ng source directory$NC"
+              echo -e "${ORANGE}[*] Removing freetz-ng source directory$NC"
               rm -r "external/freetz-ng/source"
             fi
             if [[ -d "external/freetz-ng/docs" ]]; then
-              echo -e "$ORANGE[*] Removing freetz-ng docs directory$NC"
+              echo -e "${ORANGE}[*] Removing freetz-ng docs directory$NC"
               rm -r "external/freetz-ng/docs"
             fi
             if [[ -d "external/freetz-ng/toolchain" ]]; then
-              echo -e "$ORANGE[*] Removing freetz-ng toolchain directory$NC"
+              echo -e "${ORANGE}[*] Removing freetz-ng toolchain directory$NC"
               rm -r "external/freetz-ng/toolchain"
             fi
             if [[ -d "external/freetz-ng/.git" ]]; then
-              echo -e "$ORANGE[*] Removing freetz-ng .git directory$NC"
+              echo -e "${ORANGE}[*] Removing freetz-ng .git directory$NC"
               rm -r "external/freetz-ng/.git"
             fi
             if [[ -d "external/freetz-ng/make" ]]; then
-              echo -e "$ORANGE[*] Removing freetz-ng make directory$NC"
+              echo -e "${ORANGE}[*] Removing freetz-ng make directory$NC"
               rm -r "external/freetz-ng/make"
             fi
 	  fi
