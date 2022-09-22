@@ -41,7 +41,6 @@ zyxel_zip_extractor() {
   local RI_FILE_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
 
-  local MAIN_DIR=""
   local RI_FILE_BIN=""
   local ZLD_DIR=""
   local RI_FILE_BIN_PATH=""
