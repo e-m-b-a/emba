@@ -42,7 +42,6 @@ zyxel_zip_extractor() {
   local EXTRACTION_DIR_="${2:-}"
 
   local MAIN_DIR=""
-  MAIN_DIR="$(pwd)"
   local RI_FILE_BIN=""
   local ZLD_DIR=""
   local RI_FILE_BIN_PATH=""
@@ -68,9 +67,6 @@ zyxel_zip_extractor() {
     # OPTS see https://github.com/vincentbernat/jchroot#security-note
     OPTS=(-n emba -U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
     print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
-  #elif command -v chroot > /dev/null; then
-  #  CHROOT="chroot"
-  #  print_output "[*] Using ${ORANGE}chroot${NC} for building chroot environments"
   else
     print_output "[-] No jchroot binary found ..."
     return
@@ -112,10 +108,8 @@ zyxel_zip_extractor() {
       cp "$RI_FILE_BIN_PATH" "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
       ZLD_BIN=$(basename "$ZLD_BIN")
 
-      #cd "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
-      timeout --preserve-status --signal SIGINT 2s jchroot "$ZLD_DIR" -- ./"$EMULATOR" -strace ./"$ZLD_BIN" "$RI_FILE_BIN" AABBCCDD >> "$LOG_PATH_MODULE"/zld_strace.log 2>&1 || true
+      timeout --preserve-status --signal SIGINT 2s "$CHROOT" "${OPTS[@]}" "$ZLD_DIR" -- ./"$EMULATOR" -strace ./"$ZLD_BIN" "$RI_FILE_BIN" AABBCCDD >> "$LOG_PATH_MODULE"/zld_strace.log 2>&1 || true
       rm "$ZLD_DIR"/"$EMULATOR" || true
-      #cd "$MAIN_DIR" || ( print_output "[-] Something went wrong" && return)
 
       if [[ -f "$LOG_PATH_MODULE"/zld_strace.log ]]; then
         ZIP_KEY=$(grep -a -E "execve.*AABBCCDD" "$LOG_PATH_MODULE"/zld_strace.log | cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')
