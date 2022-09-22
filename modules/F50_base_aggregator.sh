@@ -1007,6 +1007,8 @@ cwe_logging() {
         CWE="$(echo "$CWE_ENTRY" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_ENTRY" | cut -d\  -f2-)"
         CWE_CNT="$(grep "$CWE" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | wc -l || true)"
+        # do not change this to grep -c!
+        # shellcheck disable=SC2126
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_ln
