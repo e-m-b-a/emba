@@ -69,9 +69,9 @@ It also sketches the typical integration process of patches.
 
 - At least ["weak quoting"](https://wiki.bash-hackers.org/syntax/quoting#weak_quoting) is required - unquoted variable processing is not permitted
 
-- Code tests: Use shellcheck to test your code (./check_project.sh)
+- Code tests: Use shellcheck and semgrep to test your code with the ./check_project.sh script
 
-- Code tests: Run EMBA in STRICT mode (parameter -S) to ensure everything is correct
+- Code tests: Run EMBA in STRICT mode (parameter -S) to ensure everything is correct (new code has to be STRICT mode compatible and needs to pass shellcheck and semgrep tests).
 
 ## 3) Developer's Certificate of Origin 1.1
 

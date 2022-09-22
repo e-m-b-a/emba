@@ -34,7 +34,9 @@ P60_firmware_bin_extractor() {
     binwalking "$FIRMWARE_PATH"
   fi
 
-  linux_basic_identification_helper
+  # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
+  # shellcheck disable=SC2153
+  linux_basic_identification_helper "$FIRMWARE_PATH_CP"
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
   # Manual activation via -x switch:
@@ -50,20 +52,27 @@ P60_firmware_bin_extractor() {
     fi
   fi
 
+  # we need it after deep extraction:
+  # shellcheck disable=SC2153
+  linux_basic_identification_helper "$FIRMWARE_PATH_CP"
+
   # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
   # shellcheck disable=SC2153
   detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
   print_ln
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
-  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f | wc -l )
-  UNIQUE_BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  UNIQUE_FILES=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+  DIRS_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type d | wc -l )
+  BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
 
-  if [[ "$BINS" -gt 0 || "$UNIQUE_BINS" -gt 0 ]]; then
+  if [[ "$BINS" -gt 0 || "$UNIQUE_FILES" -gt 0 ]]; then
     print_ln
-    print_output "[*] Found $ORANGE$UNIQUE_BINS$NC unique files and $ORANGE$BINS$NC files at all:"
-    #shellcheck disable=SC2012
-    ls -l "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
+    print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
+    print_output "[*] Found $ORANGE$BINS$NC binaries."
+    print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
+    print_ln
+    tree -sh "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
 
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
     export FIRMWARE_PATH="$FIRMWARE_PATH_CP"
@@ -354,20 +363,26 @@ binwalk_deep_extract_helper() {
 
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk --run-as=root --preserve-symlinks -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      #binwalk --run-as=root --preserve-symlinks -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     else
       # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
-      binwalk --run-as=root --preserve-symlinks -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     fi
   else
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      binwalk --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     else
-      binwalk -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      binwalk --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
     fi
   fi
 }
 
 linux_basic_identification_helper() {
-  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  local FIRMWARE_PATH_CHECK="${1:-}"
+  if ! [[ -d "$FIRMWARE_PATH_CHECK" ]]; then
+    return
+  fi
+  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CHECK" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  backup_var "LINUX_PATH_COUNTER" "$LINUX_PATH_COUNTER"
 }

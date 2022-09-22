@@ -39,6 +39,7 @@ P99_prepare_analyzer() {
     export FIRMWARE=1
     export FIRMWARE_PATH
     FIRMWARE_PATH="$(abs_path "$OUTPUT_DIR")"
+    backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
   fi
 
   print_output "[*] Quick check if it is a real Linux system"
@@ -61,7 +62,10 @@ P99_prepare_analyzer() {
 
   set_etc_paths
   print_ln "no_log"
-  if [[ "$RTOS" -eq 1 ]]; then
+  if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
+    print_output "[*] UEFI firmware detected"
+    # -> we run only Sxx modules with UEFI in the name
+  elif [[ "$RTOS" -eq 1 ]]; then
     print_output "[*] RTOS system detected"
   fi
 

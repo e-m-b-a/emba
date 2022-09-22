@@ -54,6 +54,10 @@ F50_base_aggregator() {
   L30_LOG="l30_routersploit.txt"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
 
+  if [[ "$RESTART" -eq 1 ]] && [[ -f "$LOG_FILE" ]]; then
+    rm "$LOG_FILE"
+  fi
+
   get_data
   output_overview
   output_details
@@ -85,8 +89,8 @@ output_overview() {
 
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/fw_name.log ]] && [[ -f "$TMP_DIR"/emba_command.log ]]; then
     # we need to rewrite this firmware path to the original path
-    FW_PATH_ORIG="$(cat "$TMP_DIR"/fw_name.log)"
-    EMBA_COMMAND_ORIG="$(cat "$TMP_DIR"/emba_command.log)"
+    FW_PATH_ORIG="$(sort -u "$TMP_DIR"/fw_name.log)"
+    EMBA_COMMAND_ORIG="$(sort -u "$TMP_DIR"/emba_command.log)"
     print_output "[+] Tested firmware:""$ORANGE"" ""$FW_PATH_ORIG""$NC"
     write_csv_log "FW_path" "$FW_PATH_ORIG" "NA"
     print_output "[+] EMBA start command:""$ORANGE"" ""$EMBA_COMMAND_ORIG""$NC"
@@ -133,13 +137,13 @@ output_details() {
     if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
       write_link "s05"
     else
-      write_link "p20"
+      write_link "p99"
     fi
     write_csv_log "files" "$FILE_ARR_COUNT" "NA"
     write_csv_log "directories" "$DETECTED_DIR" "NA"
     DATA=1
   fi
-  ENTROPY_PIC=$(find "$LOG_DIR" -xdev -type f -iname "*_entropy.png" 2> /dev/null)
+  ENTROPY_PIC=$(find "$LOG_DIR" -xdev -maxdepth 1 -type f -iname "*_entropy.png" 2> /dev/null)
   if [[ -n "$ENTROPY" ]]; then
     print_output "[+] Entropy analysis of binary firmware is: ""$ORANGE""$ENTROPY"
     write_link "p02"
@@ -192,7 +196,7 @@ output_details() {
     DATA=1
   fi
 
-  EMUL=$(cut -d\; -f1 "$LOG_DIR"/s116_qemu_version_detection.csv 2>/dev/null | sort -u | wc -l || true)
+  EMUL=$(cut -d\; -f1 "$CSV_DIR"/s116_qemu_version_detection.csv 2>/dev/null | sort -u | wc -l || true)
   if [[ "${EMUL:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "s116"
@@ -269,22 +273,21 @@ output_config_issues() {
       write_csv_log "ssh_issues" "$S85_SSH_VUL_CNT" "NA"
       DATA=1
     fi
-    if [[ "${PW_COUNTER:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 ]]; then
-      if [[ "${PW_COUNTER:-0}" -gt 0 ]]; then
-        print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password related details.")")"
-        write_link "s107"
-        write_csv_log "password_hashes" "$PW_COUNTER" "NA"
-      fi
-      if [[ "${STACS_HASHES:-0}" -gt 0 ]]; then
-        write_csv_log "password_hashes_stacs" "$STACS_HASHES" "NA"
-        if [[ "${HASHES_CRACKED:-0}" -gt 0 ]]; then
-          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS ($ORANGE$HASHES_CRACKED$GREEN passwords cracked.)")")"
-          write_link "s109"
-          write_csv_log "password_hashes_cracked" "$HASHES_CRACKED" "NA"
-        else
-          print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
-          write_link "s108"
-        fi
+    if [[ "${PW_COUNTER:-0}" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$PW_COUNTER$GREEN password related details.")")"
+      write_link "s107"
+      write_csv_log "password_hashes" "$PW_COUNTER" "NA"
+      DATA=1
+    fi
+    if [[ "${STACS_HASHES:-0}" -gt 0 ]]; then
+      write_csv_log "password_hashes_stacs" "$STACS_HASHES" "NA"
+      if [[ "${HASHES_CRACKED:-0}" -gt 0 ]]; then
+        print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS ($ORANGE$HASHES_CRACKED$GREEN passwords cracked.)")")"
+        write_link "s109"
+        write_csv_log "password_hashes_cracked" "$HASHES_CRACKED" "NA"
+      else
+        print_output "$(indent "$(green "Found $ORANGE$STACS_HASHES$GREEN password related details via STACS.")")"
+        write_link "s108"
       fi
       DATA=1
     fi
@@ -448,6 +451,7 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
+      #printf "$GREEN_\tCOUNT : component name  : common linux file: y/n |  CWE-check    |  RELRO  |  CANARY  |     NX      |   SYMBOLS  |  NETWORKING   |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
         binary_fct_output "$DETAIL_STRCPY"
         write_csv_log "strcpy_bin" "$BINARY" "$F_COUNTER"
@@ -521,8 +525,8 @@ binary_fct_output() {
   fi
 
   # networking
-  if grep -q "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv 2>/dev/null; then
-    if grep "/${BINARY} " "$LOG_DIR"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
+  if grep -q "/${BINARY} " "$CSV_DIR"/s1[34]_*.csv 2>/dev/null; then
+    if grep "/${BINARY} " "$CSV_DIR"/s1[34]_*.csv | cut -d\; -f5 | sort -u | grep -o -q "no"; then
       NETWORKING="$GREEN_""No Networking     $NC_"
     else
       NETWORKING="$RED_""Networking        $NC_"
@@ -540,18 +544,18 @@ binary_fct_output() {
     if [[ -f "$BASE_LINUX_FILES" ]]; then
       local FCT_LINK=""
       # if we have the base linux config file we are checking it:
-      if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
+      if grep -E -q "^$BINARY$" "$BASE_LINUX_FILES" 2>/dev/null; then
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$GREEN_\t%-5.5s: %-15.15s : common linux file: yes | CWE-check: %-2.2s | %-15.15s | %-16.16s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+        printf "$GREEN_\t%-5.5s: %-15.15s : common linux file: yes | CWE-check: %-2.2s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       else
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$ORANGE_\t%-5.5s: %-15.15s : common linux file: no  | CWE-check: %-2.2s | %-15.15s | %-16.16s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+        printf "$ORANGE_\t%-5.5s: %-15.15s : common linux file: no  | CWE-check: %-2.2s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       fi
     else
       FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-      printf "$ORANGE_\t%-5.5s: %-15.15s : common linux file: NA  | CWE-check: %-2.2s | %-15.15s | %-16.16s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+      printf "$ORANGE_\t%-5.5s: %-15.15s : common linux file: NA  | CWE-check: %-2.2s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       write_link "$FCT_LINK"
     fi
   else
@@ -559,18 +563,18 @@ binary_fct_output() {
       # No CWE checker was enabled
       local FCT_LINK=""
       # if we have the base linux config file we are checking it:
-      if grep -q "^$BINARY" "$BASE_LINUX_FILES" 2>/dev/null; then
+      if grep -E -q "^$BINARY$" "$BASE_LINUX_FILES" 2>/dev/null; then
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes |  %-15.15s  |  %-16.16s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+        printf "$GREEN_\t%-5.5s : %-15.15s : common linux file: yes |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       else
         FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_*check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-        printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no  |  %-15.15s  |  %-16.16s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
+        printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: no  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING"| tee -a "$LOG_FILE"
         write_link "$FCT_LINK"
       fi
     else
       FCT_LINK=$(find "$LOG_DIR"/s1[34]_weak_func_check/ -name "vul_func_*$FCT-$BINARY*.txt" | sort -u | head -1 || true)
-      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: NA  |  %-15.15s  |  %-16.16s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
+      printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: NA  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       write_link "$FCT_LINK"
     fi
 
@@ -705,7 +709,7 @@ get_data() {
   export WEB_UP=0
   export ROUTERSPLOIT_VULN=0
   export CVE_COUNTER=0
-  export CVE_SEARCH=""
+  export CVE_SEARCH=1
   export FWHUNTER_CNT=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
@@ -818,7 +822,7 @@ get_data() {
     ROUTERSPLOIT_VULN=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L30_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
-    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | cut -d: -f2 || true)
+    CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -u | cut -d: -f2 || true)
   fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
     while read -r COUNTING; do
@@ -850,9 +854,15 @@ get_data() {
     LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "$F20_EXPLOITS_LOG" || true)"
     DOS_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(D\)" "$F20_EXPLOITS_LOG" || true)"
     GITHUB_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(G\)" "$F20_EXPLOITS_LOG" || true)"
-    EXPLOIT_HIGH_COUNT="$(cat "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp || true)"
-    EXPLOIT_MEDIUM_COUNT="$(cat "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp || true)"
-    EXPLOIT_LOW_COUNT="$(cat "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp || true)"
+    if [[ -f "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp ]]; then
+      EXPLOIT_HIGH_COUNT="$(cat "$TMP_DIR"/EXPLOIT_HIGH_COUNTER.tmp || true)"
+    fi
+    if [[ -f "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp ]]; then
+      EXPLOIT_MEDIUM_COUNT="$(cat "$TMP_DIR"/EXPLOIT_MEDIUM_COUNTER.tmp || true)"
+    fi
+    if [[ -f "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp ]]; then
+      EXPLOIT_LOW_COUNT="$(cat "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp || true)"
+    fi
   fi
 }
 
@@ -996,7 +1006,7 @@ cwe_logging() {
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_ENTRY" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_ENTRY" | cut -d\  -f2-)"
-        CWE_CNT="$(cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
+        CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_ln

@@ -200,11 +200,11 @@ create_emulation_filesystem() {
     cp "$(which busybox)" "$MNT_POINT" || true
     cp "$(which bash-static)" "$MNT_POINT" || true
 
-    if [[ -f "$LOG_DIR"/s24_kernel_bin_identifier.csv ]]; then
+    if [[ -f "$CSV_DIR"/s24_kernel_bin_identifier.csv ]]; then
       # kernelInit is getting the output of the init command line we get from s24
-      if grep -q "init=" "$LOG_DIR"/s24_kernel_bin_identifier.csv; then
+      if grep -q "init=" "$CSV_DIR"/s24_kernel_bin_identifier.csv; then
         print_output "[*] Found init entry for kernel - see $ORANGE$LOG_DIR/s24_kernel_bin_identifier.txt$NC:"
-        grep "init=/" "$LOG_DIR"/s24_kernel_bin_identifier.csv | cut -d\; -f3 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+        grep "init=/" "$CSV_DIR"/s24_kernel_bin_identifier.csv | cut -d\; -f3 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "$LOG_FILE" < "${MNT_POINT}"/kernelInit
       fi
     else
@@ -350,7 +350,7 @@ main_emulation() {
     # we deal with a startup script
     if file "$MNT_POINT""$INIT_FILE" | grep -q "text executable\|ASCII text"; then
       INIT_OUT="$MNT_POINT""$INIT_FILE"
-      ls -l "$INIT_OUT"
+      find "$INIT_OUT" -xdev -ls || true
       print_output "[*] Backup original init file $ORANGE$INIT_OUT$NC"
       BAK_INIT_ORIG="$INIT_OUT"
       BAK_INIT_BACKUP="$LOG_PATH_MODULE"/"$(basename "$INIT_OUT".init)"
@@ -384,13 +384,13 @@ main_emulation() {
 
     print_ln
     print_output "[*] FirmAE filesytem:"
-    # shellcheck disable=SC2012
-    ls -l "$MNT_POINT" | tee -a "$LOG_FILE"
+    find "$MNT_POINT" -xdev -ls | tee -a "$LOG_FILE" || true
 
     print_ln
     print_output "[*] FirmAE firmadyne directory:"
     # shellcheck disable=SC2012
-    ls -l "$MNT_POINT/firmadyne" | tee -a "$LOG_FILE"
+    #ls -l "$MNT_POINT/firmadyne" | tee -a "$LOG_FILE"
+    find "$MNT_POINT"/firmadyne -xdev -ls | tee -a "$LOG_FILE" || true
     print_ln
 
     ### set default network values for network identification mode
@@ -435,7 +435,7 @@ main_emulation() {
     # if we were running into issues with the network identification we poke with rdinit vs init:
     # lets check if we have found a startup procedure (preInit script) from FirmAE - if not we try it with the other init
     F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
-    F_STARTUP=$(( "$F_STARTUP" + $(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true) ))
+    F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
 
     if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
@@ -483,7 +483,7 @@ main_emulation() {
 
         # now we need to check if something is better now or we should switch back to the original init
         F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
-        F_STARTUP=$(( "$F_STARTUP" + $(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true) ))
+        F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
         # IPS_INT_VLAN is always at least 1 for the default configuration
         if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]]; then
           if [[ "$KINIT" == "rdinit="* ]]; then
@@ -712,7 +712,7 @@ handle_fs_mounts() {
       continue
     fi
 
-    ls -l "$FS_FIND"
+    find "$FS_FIND" -xdev -ls || true
 
     print_output "[*] Identify system areas in the to-mount area:"
     local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
@@ -735,7 +735,7 @@ handle_fs_mounts() {
         continue
       fi
       print_output "[*] PATH found: $N_PATH"
-      ls -l "$N_PATH"
+      find "$N_PATH" -xdev -ls || true
 
       if ! [[ -d "$MNT_POINT""$MOUNT_PT" ]]; then
         print_output "[*] Creating target directory $MNT_POINT$MOUNT_PT"
@@ -744,7 +744,7 @@ handle_fs_mounts() {
       print_output "[*] Let's copy the identified area to the root filesystem"
       cp -pr "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
       print_output "[*] Target directory: $MNT_POINT$MOUNT_PT"
-      ls -l "$MNT_POINT""$MOUNT_PT"
+      find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     done
   done
 
@@ -1000,10 +1000,10 @@ get_networking_details_emulation() {
       # IP_ADDRESS -> c0a80001
       # as I don't get it to change the hex ip to dec with printf, we do it the poor way:
       IP_=""
-      for IPs in "${IP_ADDRESS[@]}"; do
-        if [[ "$IPs" == "0x"* ]]; then
+      for _IPs in "${IP_ADDRESS[@]}"; do
+        if [[ "$_IPs" == "0x"* ]]; then
           #shellcheck disable=SC2004
-          IP_="$IP_.$(($IPs))"
+          IP_="$IP_.$(($_IPs))"
         fi
       done
 
@@ -1510,7 +1510,7 @@ check_online_stat() {
     write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
     print_ln
     ping -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE" || true
-    nmap -Pn -n -A -sSV --host-timeout 30m -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG"
+    nmap -Pn -n -A -sSV --host-timeout 30m -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG" || true
 
     mapfile -t TCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t UDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)

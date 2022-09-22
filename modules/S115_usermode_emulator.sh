@@ -67,6 +67,7 @@ S115_usermode_emulator() {
 
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
+      print_ln
       NEG_LOG=1
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
       # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
@@ -150,8 +151,8 @@ S115_usermode_emulator() {
               EMULATOR="qemu-mips64-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "32-bit MSB.*PowerPC" ) ; then
               EMULATOR="qemu-ppc-static"
-            elif ( file "$FULL_BIN_PATH" | grep -q "64-bit MSB.*PowerPC" ) ; then
-              EMULATOR="qemu-ppc64-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "ELF 32-bit LSB executable, Altera Nios II" ) ; then
+              EMULATOR="qemu-nios2-static"
             else
               print_output "[-] No working emulator found for $BIN_"
               EMULATOR="NA"
@@ -580,8 +581,8 @@ check_disk_space_emu() {
   mapfile -t CRITICAL_FILES < <(find "$LOG_PATH_MODULE"/ -xdev -type f -size +"$KILL_SIZE" -exec basename {} \; 2>/dev/null| cut -d\. -f1 | cut -d_ -f2 || true)
   for KILLER in "${CRITICAL_FILES[@]}"; do
     if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
-      print_output "[!] Qemu processes are wasting disk space ... we try to kill it"
-      print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}"
+      print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"
+      print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}" "no_log"
       pkill -f "$EMULATOR.*$KILLER.*" || true
       #rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
     fi
@@ -690,7 +691,7 @@ s115_cleanup() {
     print_output "[*] Cleanup empty log files.\\n"
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do
-      LINES_OF_LOG=$(grep -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -v "\[\*\] " | grep -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
+      LINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -a -v "\[\*\] " | grep -a -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
       #print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
       if ! [[ -s "$LOG_FILE_" ]] || [[ "$LINES_OF_LOG" -eq 0 ]]; then
         #print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"

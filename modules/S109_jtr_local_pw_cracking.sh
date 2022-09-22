@@ -20,7 +20,7 @@ S109_jtr_local_pw_cracking()
 {
   module_log_init "${FUNCNAME[0]}"
 
-  local PW_FILE="$LOG_DIR"/s108_stacs_password_search.csv
+  local PW_FILE="$CSV_DIR"/s108_stacs_password_search.csv
   local NEG_LOG=0
   local HASHES=()
   local HASH=""
@@ -43,15 +43,38 @@ S109_jtr_local_pw_cracking()
   pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ -f "$PW_FILE" ]]; then
-    mapfile -t HASHES < <(cut -d\; -f2,3 "$PW_FILE" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
+    mapfile -t HASHES < <(cut -d\; -f1,2,3 "$PW_FILE" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
     for HASH in "${HASHES[@]}"; do
-      HASH_SOURCE=$(basename "$(echo "$HASH" | cut -d\; -f1)")
-      HASH=$(echo "$HASH" | cut -d\; -f2 | tr -d \")
-      echo "$HASH_SOURCE:$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
+      HASH_DESCRIPTION=$(basename "$(echo "$HASH" | cut -d\; -f1)")
+      HASH_SOURCE=$(basename "$(echo "$HASH" | cut -d\; -f2)")
+      HASH=$(echo "$HASH" | cut -d\; -f3 | tr -d \")
+
+      if [[ "$HASH" == *"BEGIN"*"KEY"* ]]; then
+        continue
+      fi
+      if [[ "$HASH_DESCRIPTION" == *"private key found"* ]]; then
+        continue
+      fi
+
+      if echo "$HASH" | cut -d: -f1-3 | grep -q "::[0-9]"; then
+        # removing entries: root::0:0:99999:7:::
+        continue
+      fi
+
+      if [[ -f "$LOG_PATH_MODULE"/jtr_hashes.txt ]]; then
+        if ! grep -q "$HASH" "$LOG_PATH_MODULE"/jtr_hashes.txt; then
+          print_output "[*] Found password data $ORANGE$HASH$NC for further processing in $ORANGE$HASH_SOURCE$NC"
+          echo "$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
+        fi
+      else
+        print_output "[*] Found password data $ORANGE$HASH$NC for further processing in $ORANGE$HASH_SOURCE$NC"
+        echo "$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
+      fi
+
     done
 
     if [[ -f "$LOG_PATH_MODULE"/jtr_hashes.txt ]]; then
-      print_output "[*] Starting jtr for the following hashes (runtime: $ORANGE$JTR_TIMEOUT$NC):"
+      print_output "[*] Starting jtr with a runtime of $ORANGE$JTR_TIMEOUT$NC on the following data:"
       tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jtr_hashes.txt
       print_ln
       timeout --preserve-status --signal SIGINT "$JTR_TIMEOUT" john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt | tee -a "$LOG_FILE" || true
@@ -59,8 +82,8 @@ S109_jtr_local_pw_cracking()
       NEG_LOG=1
     fi
 
-    mapfile -t CRACKED_HASHES < <(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep -v "password hash cracked" | grep -v "^$")
-    JTR_FINAL_STAT=$(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep "password hash cracked\|No password hashes loaded" || true)
+    mapfile -t CRACKED_HASHES < <(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep -v "password hash\(es\)\? cracked" | grep -v "^$")
+    JTR_FINAL_STAT=$(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
     CRACKED=$(echo "$JTR_FINAL_STAT" | awk '{print $1}')
     if [[ -n "$JTR_FINAL_STAT" ]]; then
       print_output "[*] John the ripper final status: $ORANGE$JTR_FINAL_STAT$NC"

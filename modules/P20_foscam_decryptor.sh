@@ -56,11 +56,11 @@ foscam_enc_extractor() {
   hexdump -C "$FOSCAM_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
 
   mapfile FOSCAM_KEYS < <(grep -v "ID" "$KEY_FILE" | cut -d\; -f2 | tr -d \')
-  for FOSCAM_KEY in "${FOSCAM_KEYS[@]}"; do
+  for _FOSCAM_KEY in "${FOSCAM_KEYS[@]}"; do
     FOSCAM_DECRYTED=0
-    print_output "[*] Testing FOSCAM decryption key $ORANGE$FOSCAM_KEY$NC."
+    print_output "[*] Testing FOSCAM decryption key $ORANGE$_FOSCAM_KEY$NC."
     # shellcheck disable=SC2086
-    openssl enc -d -aes-128-cbc -md md5 -k $FOSCAM_KEY -in "$FOSCAM_ENC_PATH_" > "$EXTRACTION_FILE_" || true
+    openssl enc -d -aes-128-cbc -md md5 -k $_FOSCAM_KEY -in "$FOSCAM_ENC_PATH_" > "$EXTRACTION_FILE_" || true
 
     if [[ -f "$EXTRACTION_FILE_" ]]; then
       FOSCAM_FILE_CHECK=$(file "$EXTRACTION_FILE_")
@@ -68,6 +68,7 @@ foscam_enc_extractor() {
         print_ln
         print_output "[+] Decrypted Foscam firmware file to $ORANGE$EXTRACTION_FILE_$NC"
         export FIRMWARE_PATH="$EXTRACTION_FILE_"
+        backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
         print_ln
         print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
         write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
@@ -172,6 +173,7 @@ foscam_ubi_extractor() {
       print_output "[*] Extracted $ORANGE$FOSCAM_UBI_FILES$NC files and $ORANGE$FOSCAM_UBI_DIRS$NC directories from the firmware image."
       write_csv_log "Foscam UBI extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FOSCAM_UBI_FILES" "$FOSCAM_UBI_DIRS" "NA"
       export FIRMWARE_PATH="$LOG_DIR"/firmware
+      backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
       write_csv_log "Foscam decryptor/extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FOSCAM_UBI_FILES" "$FOSCAM_UBI_DIRS" "NA"
     fi
   fi

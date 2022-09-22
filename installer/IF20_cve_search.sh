@@ -25,7 +25,6 @@ IF20_cve_search() {
     print_git_info "cve-search" "cve-search/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
     echo -e "$ORANGE""cve-search will be downloaded.""$NC"
     echo -e "$ORANGE""trickest poc database will be downloaded.""$NC"
-    echo -e "$ORANGE""cyclonedx sbom converter will be downloaded.""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
       ANSWER=("n")
@@ -35,13 +34,6 @@ IF20_cve_search() {
     fi
 
     if [[ "$LIST_DEP" -ne 1 ]] ; then
-
-      echo -e "[*] Installing cyclonedx-cli for converting SBOMs"
-      if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
-        sudo -u linuxbrew NONINTERACTIVE=1 /home/linuxbrew/.linuxbrew/bin/brew install cyclonedx/cyclonedx/cyclonedx-cli
-      else
-        echo -e "$ORANGE""WARNING: Brew installation not found - skipping cyclonedx installation.""$NC"
-      fi
 
       # we always need the cve-search stuff:
       if ! [[ -d external/cve-search ]]; then

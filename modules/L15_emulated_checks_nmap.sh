@@ -21,7 +21,7 @@ export THREAD_PRIO=0
 
 L15_emulated_checks_nmap() {
 
-  MODULE_END=0
+  local MODULE_END=0
   export NMAP_SERVICES=()
   export NMAP_PORTS_SERVICES=()
 
@@ -96,6 +96,10 @@ check_live_nmap_basic() {
       #IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
       readarray -d ', ' -t NMAP_CPES_ARR < <(printf "%s" "$NMAP_CPES")
       for NMAP_CPE in "${NMAP_CPES_ARR[@]}"; do
+        if [[ "$NMAP_CPE" == *"windows"* ]]; then
+          # we emulate only Linux -> if windows is detected this is a FP
+          continue
+        fi
         NMAP_CPE=${NMAP_CPE/ /}
         NMAP_CPE=${NMAP_CPE//cpe:\/}
         # just to ensure there is some kind of version information in our entry
@@ -112,28 +116,30 @@ check_live_nmap_basic() {
   if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
     for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
       print_output "[*] Service detected: $ORANGE$SERVICE$NC"
-      SERVICE_NAME=$(echo "$SERVICE" | awk '{print $2}')
+      SERVICE_NAME="$(escape_echo "$(echo "$SERVICE" | awk '{print $2}')")"
       if [[ "$SERVICE_NAME" == "unknown" ]] || [[ "$SERVICE_NAME" == "tcpwrapped" ]] || [[ -z "$SERVICE_NAME" ]]; then
         continue
       fi
 
-      if [[ -f "$LOG_DIR"/s09_firmware_base_version_check.csv ]]; then
+      if [[ -f "$CSV_DIR"/s09_firmware_base_version_check.csv ]]; then
         # Let's check if we have already found details about this service in our other modules (S09, S115/S116)
-        mapfile -t S09_L15_CHECK < <(grep "$SERVICE_NAME" "$LOG_DIR"/s09_firmware_base_version_check.csv || true)
+        #mapfile -t S09_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
+        mapfile -t S09_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
         if [[ "${#S09_L15_CHECK[@]}" -gt 0 ]]; then
           for S09_L15_MATCH in "${S09_L15_CHECK[@]}"; do
             print_output "[+] Service also detected with static analysis (S09):\\n$(indent "$ORANGE$S09_L15_MATCH$NC")"
-            echo "$S09_L15_MATCH" >> "$LOG_DIR"/l15_emulated_checks_nmap.csv
+            echo "$S09_L15_MATCH" >> "$CSV_DIR"/l15_emulated_checks_nmap.csv
           done
         fi
       fi
 
-      if [[ -f "$LOG_DIR"/s116_qemu_version_detection.csv ]]; then
-        mapfile -t S116_L15_CHECK < <(grep "$SERVICE_NAME" "$LOG_DIR"/s116_qemu_version_detection.csv || true)
+      if [[ -f "$CSV_DIR"/s116_qemu_version_detection.csv ]]; then
+        #mapfile -t S116_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s116_qemu_version_detection.csv || true)
+        mapfile -t S116_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s116_qemu_version_detection.csv || true)
         if [[ "${#S116_L15_CHECK[@]}" -gt 0 ]]; then
           for S116_L15_MATCH in "${S116_L15_CHECK[@]}"; do
             print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116):\\n $(indent "$ORANGE$S116_L15_MATCH$NC")"
-            echo "$S116_L15_MATCH" >> "$LOG_DIR"/l15_emulated_checks_nmap.csv
+            echo "$S116_L15_MATCH" >> "$CSV_DIR"/l15_emulated_checks_nmap.csv
           done
         fi
       fi
@@ -192,7 +198,10 @@ l15_version_detector() {
 
     LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
     CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+    # VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4)"
+    VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+    VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
     VERSION_FINDER=$(echo "$SERVICE_" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2>/dev/null || true)
     if [[ -n $VERSION_FINDER ]]; then

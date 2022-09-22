@@ -21,7 +21,7 @@ export PRE_THREAD_ENA=1
 P03_firmware_virustotal_check() {
 
   if [[ "$IN_DOCKER" -eq 1 ]]; then
-    print_output "[-] The docker container has no access to the Internet -> no virustotal query possible!"
+    print_output "[-] The docker container has no access to the Internet -> no virustotal query possible!" "no_log"
     # module_end_log "${FUNCNAME[0]}" 0
     return
   fi

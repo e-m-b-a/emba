@@ -66,6 +66,7 @@ qnap_enc_extractor() {
     print_output "[+] Decrypted QNAP firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     MD5_DONE_DEEP+=( "$(md5sum "$QNAP_ENC_PATH_" | awk '{print $1}')" )
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
+    backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
     export QNAP=1
     print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
@@ -74,6 +75,7 @@ qnap_enc_extractor() {
     write_csv_log "QNAP decryptor" "$QNAP_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "gzip compressed data"
     if [[ -z "${FW_VENDOR:-}" ]]; then
       FW_VENDOR="QNAP"
+      backup_var "FW_VENDOR" "$FW_VENDOR"
     fi
 
   else
@@ -104,8 +106,7 @@ qnap_extractor() {
     tar xvf "$DECRYPTED_FW_" -C "$QNAP_EXTRACTION_ROOT" 2>/dev/null || true | tee -a "$LOG_FILE"
     print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$QNAP_EXTRACTION_ROOT$NC):"
-    #shellcheck disable=SC2012
-    ls -lh "$QNAP_EXTRACTION_ROOT" | tee -a "$LOG_FILE"
+    find "$QNAP_EXTRACTION_ROOT" -xdev -ls | tee -a "$LOG_FILE"
     print_files_dirs
     print_bar ""
   else
@@ -205,8 +206,7 @@ qnap_extractor() {
       cp -a "$TMP_EXT_MOUNT"/boot/* "$QNAP_EXTRACTION_ROOT_DST" || true
       print_ln
       print_output "[*] Extracted firmware structure ($ORANGE$QNAP_EXTRACTION_ROOT_DST$NC):"
-      #shellcheck disable=SC2012
-      ls -lh "$QNAP_EXTRACTION_ROOT_DST" | tee -a "$LOG_FILE"
+      find "$QNAP_EXTRACTION_ROOT_DST" -xdev -ls | tee -a "$LOG_FILE"
 
       print_output "[*] UBI cleanup"
       umount "$TMP_EXT_MOUNT"
@@ -223,12 +223,12 @@ qnap_extractor() {
   if [ -e "$INITRAMFS" ]; then
     print_ln
     print_output "[*] Extracting $ORANGE$INITRAMFS$NC."
-    # shellcheck disable=SC2002
-    cat "$INITRAMFS" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
+    #  # shellcheck disable=SC2002
+    #cat "$INITRAMFS" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
+    (cd "$SYSROOT" && (cpio -i --make-directories||true) ) < "$INITRAMFS"
     print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
-    #shellcheck disable=SC2012
-    ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    find "$SYSROOT" -xdev -ls | tee -a "$LOG_FILE"
     print_files_dirs
     print_bar ""
   fi
@@ -240,8 +240,7 @@ qnap_extractor() {
       lzma -d <"$INITRD" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
       print_ln
       print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
-      #shellcheck disable=SC2012
-      ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+      find "$SYSROOT" -xdev -ls | tee -a "$LOG_FILE"
       print_files_dirs
       print_bar ""
     fi
@@ -259,8 +258,7 @@ qnap_extractor() {
         umount "$TMP_EXT_MOUNT"
         print_ln
         print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
-        #shellcheck disable=SC2012
-        ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+        find "$SYSROOT" -xdev -ls | tee -a "$LOG_FILE"
         rm "$QNAP_EXTRACTION_ROOT_DST/initrd.$$" || true
       else
         print_output "[-] Something went wrong!"
@@ -277,8 +275,7 @@ qnap_extractor() {
     tar -xvzf "$ROOTFS2" -C "$SYSROOT"
     print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
-    #shellcheck disable=SC2012
-    ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    find "$SYSROOT" -xdev -ls | tee -a "$LOG_FILE"
     print_files_dirs
     print_bar ""
   fi
@@ -294,8 +291,7 @@ qnap_extractor() {
     fi
     print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
-    #shellcheck disable=SC2012
-    ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    find "$SYSROOT" -xdev -ls | tee -a "$LOG_FILE"
     print_files_dirs
     print_bar ""
   fi
@@ -310,8 +306,7 @@ qnap_extractor() {
       tar -xvjf "$TMP_EXT_MOUNT"/rootfs2.bz -C "$SYSROOT"
       print_ln
       print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
-      #shellcheck disable=SC2012
-      ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+      find "$SYSROOT" -xdev -ls | tee -a "$LOG_FILE"
       umount "$TMP_EXT_MOUNT"
     else
       print_output "[-] Something went wrong!"
@@ -338,8 +333,7 @@ qnap_extractor() {
     rm -r "$TMP_EXT_MOUNT" || true
     print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"
-    #shellcheck disable=SC2012
-    ls -lh "$SYSROOT" | tee -a "$LOG_FILE"
+    find "$SYSROOT" -xdev -ls | tee -a "$LOG_FILE"
     print_files_dirs
     print_bar ""
   fi

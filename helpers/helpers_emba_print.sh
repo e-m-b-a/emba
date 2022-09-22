@@ -45,12 +45,18 @@ welcome()
 
 module_log_init()
 {
-  local LOG_FILE_NAME
+  #local LOG_FILE_NAME
   LOG_FILE_NAME="${1:-}"
   local FILE_NAME
   MODULE_NUMBER="$(echo "$LOG_FILE_NAME" | cut -d "_" -f1 | cut -c2- )"
   FILE_NAME=$(echo "$LOG_FILE_NAME" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
   LOG_FILE="$LOG_DIR""/""$FILE_NAME"".txt"
+  LOG_FILE_NAME="$FILE_NAME"".txt"
+
+  if [[ -f "$LOG_FILE" ]]; then
+    print_output "[*] Found old module log file $ORANGE$LOG_FILE$NC... creating a backup" "no_log"
+    mv "$LOG_FILE" "$LOG_FILE".bak."$RANDOM" || true
+  fi
 
   module_start_log "${FILE_NAME^}"
 
@@ -97,50 +103,74 @@ print_output()
     local LOG_FILE_MOD="${2:-}"
   fi
   # add a link as third argument to add a link marker for web report
-  #if [[ -n "${3+NA}" ]] ; then
   local REF_LINK="${3:-}"
-  #fi
   local TYPE_CHECK
-  TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
+  TYPE_CHECK="$( safe_echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
     local COLOR_OUTPUT_STRING=""
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
-    echo -e "$COLOR_OUTPUT_STRING" || true
+    safe_echo "$COLOR_OUTPUT_STRING"
     if [[ "$LOG_SETTING" == "main" ]] ; then
-      echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$MAIN_LOG" >/dev/null
+      safe_echo "$(format_log "$COLOR_OUTPUT_STRING")" "$MAIN_LOG"
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "${REF_LINK:-}" ]] ; then
-        echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE" >/dev/null 
+        safe_echo "$(format_log "$COLOR_OUTPUT_STRING")" "$LOG_FILE"
         if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$COLOR_OUTPUT_STRING")" | tee -a "$LOG_FILE_MOD" >/dev/null 
+          safe_echo "$(format_log "$COLOR_OUTPUT_STRING")" "$LOG_FILE_MOD"
         fi
       else
-        echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+        safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
         if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
+          safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
         fi
       fi
     fi
   else
-    echo -e "$OUTPUT" || true
+    safe_echo "$OUTPUT"
     if [[ "$LOG_SETTING" == "main" ]] ; then
-      echo -e "$(format_log "$OUTPUT")" | tee -a "$MAIN_FILE" >/dev/null
+      safe_echo "$(format_log "$OUTPUT")" "$MAIN_LOG"
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
-        echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE" >/dev/null 
+        safe_echo "$(format_log "$OUTPUT")" "$LOG_FILE"
         if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$OUTPUT")" | tee -a "$LOG_FILE_MOD" >/dev/null 
+          safe_echo "$(format_log "$OUTPUT")" "$LOG_FILE_MOD"
         fi
       else
-        echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE" >/dev/null 
+        safe_echo "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
         if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          echo -e "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" | tee -a "$LOG_FILE_MOD" >/dev/null 
+          safe_echo "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
         fi
       fi
     fi
   fi
   if [[ "$LOG_SETTING" != "no_log" ]] ; then
     write_grep_log "$OUTPUT"
+  fi
+}
+
+# echo untrusted data in a secure way:
+safe_echo() {
+  STRING_TO_ECHO="${1:-}"
+
+  # %b  ARGUMENT  as a string with '\' escapes interpreted, except that octal escapes are of the form \0 or
+  if [[ -v 2 ]]; then
+    local LOG_TO_FILE="${2:-}"
+    printf -- "%b" "$STRING_TO_ECHO\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
+  else
+    printf -- "%b" "$STRING_TO_ECHO\n" || true
+  fi
+}
+
+# This should be used for using untrusted data as input for other commands:
+escape_echo() {
+  STRING_TO_ECHO="${1:-}"
+
+  # %q  ARGUMENT is printed in a format that can be reused as shell input, escaping non-printable characters with the proposed POSIX $'' syntax.
+  if [[ -v 2 ]]; then
+    local LOG_TO_FILE="${2:-}"
+    printf -- "%q" "$STRING_TO_ECHO\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
+  else
+    printf -- "%q" "$STRING_TO_ECHO\n" || true
   fi
 }
 
@@ -184,7 +214,12 @@ write_log()
 
 write_csv_log() {
   local CSV_ITEMS=("$@")
-  CSV_LOG="${LOG_FILE/\.txt/\.csv}"
+  if ! [[ -d "$CSV_DIR" ]]; then
+    print_output "[-] WARNING: Directory $ORANGE$CSV_DIR$NC not found"
+    return
+  fi
+  CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
+  CSV_LOG="$CSV_DIR""/""$CSV_LOG"
 
   (
   IFS=\;
@@ -564,7 +599,13 @@ module_start_log() {
     LOG_DIR="${LOG_DIR:: -1}"
   fi
   LOG_PATH_MODULE=$(abs_path "$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')")
-  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then mkdir "$LOG_PATH_MODULE" || true; fi
+  if [[ -d "$LOG_PATH_MODULE" ]] ; then
+    print_output "[*] Found old module log path for $ORANGE$MODULE_MAIN_NAME$NC ... creating a backup" "no_log"
+    mv "$LOG_PATH_MODULE" "$LOG_PATH_MODULE".bak."$RANDOM" || true
+  fi
+  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then
+    mkdir "$LOG_PATH_MODULE" || true
+  fi
 }
 
 pre_module_reporter() {
@@ -610,9 +651,11 @@ module_end_log() {
   if [[ "$HTML" -eq 1 ]]; then
     run_web_reporter_mod_name "$MODULE_MAIN_NAME"
   fi
-  if [ -z "$(ls -A "$LOG_PATH_MODULE" 2>/dev/null)" ]; then
+  if [[ -v LOG_PATH_MODULE ]]; then
     if [[ -d "$LOG_PATH_MODULE" ]]; then
-      rmdir "$LOG_PATH_MODULE"
+      if [[ "$(find "$LOG_PATH_MODULE" -type f | wc -l)" -eq 0 ]]; then
+        rm -r "$LOG_PATH_MODULE"
+      fi
     fi
   fi
 
@@ -642,7 +685,7 @@ matrix_mode() {
   echo -e "\033[2J\033[?25l"
 
   R=$(tput lines)
-  C=$(tput cols);: $((R--))
+  C=$(tput cols);: "$((R--))"
 
   while true; do
     (
@@ -651,7 +694,7 @@ matrix_mode() {
 
     for i in $(eval echo -e "{1..$R}"); do
       # shellcheck disable=SC2006
-      c=`printf '\\\\0%o' $((RANDOM%57+33))` ### http://bruxy.regnet.cz/web/linux ###
+      c=`printf '\\\\0%o' "$((RANDOM%57+33))"` ### http://bruxy.regnet.cz/web/linux ###
       echo -e "\033[$((i-1));${j}H\033[32m$c\033[$i;${j}H\033[37m""$c"
       sleep 0.1
 
@@ -719,7 +762,7 @@ write_notification(){
   else
     # if we are on the host (e.g., in developer mode) we can directly handle
     # the notification
-    notify-send --icon="$EMBA_ICON" "EMBA" "$MESSAGE" -t 2
+    NOTIFICATION_ID=$(notify-send -p -r "$NOTIFICATION_ID" --icon="$EMBA_ICON" "EMBA" "$MESSAGE" -t 2)
   fi
 }
 
@@ -747,7 +790,10 @@ print_notification(){
       fi
       local PREV="$CURRENT"
       CURRENT=$(<"$NOTIFICATION_LOCATION")
-      [ "$CURRENT" == "$PREV" ] || notify-send --icon="$EMBA_ICON" "EMBA" "$CURRENT" -t 2
+      if ! [[ "$CURRENT" == "$PREV" ]]; then
+        # notification replacement see https://super-unix.com/ubuntu/ubuntu-how-to-use-notify-send-to-immediately-replace-an-existing-notification/
+        NOTIFICATION_ID=$(notify-send -p -r "$NOTIFICATION_ID" --icon="$EMBA_ICON" "EMBA" "$CURRENT" -t 2)
+      fi
     fi
   done
 }

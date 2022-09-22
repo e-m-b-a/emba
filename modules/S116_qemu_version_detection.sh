@@ -26,7 +26,7 @@ S116_qemu_version_detection() {
     # This module waits for S115_usermode_emulator
     # check emba.log for S115_usermode_emulator
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while [[ $(grep -c S115_usermode_emulator "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
+      while [[ $(grep -c "S115_usermode_emulator finished" "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -ne 1 ]]; do
         sleep 1
       done
     fi
@@ -54,7 +54,7 @@ S116_qemu_version_detection() {
       if [[ $THREADED -eq 1 ]]; then
         wait_for_pid "${WAIT_PIDS_F05[@]}"
       fi
-      if [[ $(wc -l "$LOG_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
+      if [[ $(wc -l "$CSV_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
         NEG_LOG=1
       fi
     fi
@@ -66,17 +66,20 @@ S116_qemu_version_detection() {
 version_detection_thread() {
   local VERSION_LINE="${1:-}"
 
-  local BINARY
+  local BINARY=""
   BINARY="$(echo "$VERSION_LINE" | cut -d\; -f1)"
-  local STRICT
+  local STRICT=""
   STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
-  local LIC
+  local LIC=""
   LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
-  local CSV_REGEX
+  local CSV_REGEX=""
   CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
 
-  local VERSION_IDENTIFIER
-  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+  local VERSION_IDENTIFIER=""
+  # VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
+  VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4)"
+  VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+  VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
   local BINARY_PATH=""
   local BINARY_PATHS=()
@@ -90,23 +93,25 @@ version_detection_thread() {
       TYPE="emulation/strict"
     fi
   else
-    readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null || true)
-    # VERSIONS_DETECTED:
-    # path_to_logfile:Version Identifier
-    #└─$ grep -a -o -H -E "Version: 1.8" /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt                                                    130 ⨯
-    # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
-    # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
-    for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
-      mapfile -t LOG_PATHS < <(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u || true)")
-      for LOG_PATH_ in "${LOG_PATHS[@]}"; do
-        mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
-        for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
-          # BINARY_PATH is the final array which we are using further
-          BINARY_PATHS+=( "$BINARY_PATH_" )
+    if [[ $(find "$LOG_PATH_MODULE_S115" -name "qemu_tmp*" | wc -l) -gt 0 ]]; then
+      readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null || true)
+      # VERSIONS_DETECTED:
+      # path_to_logfile:Version Identifier
+      #└─$ grep -a -o -H -E "Version: 1.8" /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt                                                    130 ⨯
+      # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
+      # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
+      for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do
+        mapfile -t LOG_PATHS < <(strip_color_codes "$(echo "$VERSION_DETECTED" | cut -d: -f1 | sort -u || true)")
+        for LOG_PATH_ in "${LOG_PATHS[@]}"; do
+          mapfile -t BINARY_PATHS_ < <(strip_color_codes "$(grep -a "Emulating binary:" "$LOG_PATH_" 2>/dev/null | cut -d: -f2 | sed -e 's/^\ //' | sort -u 2>/dev/null || true)")
+          for BINARY_PATH_ in "${BINARY_PATHS_[@]}"; do
+            # BINARY_PATH is the final array which we are using further
+            BINARY_PATHS+=( "$BINARY_PATH_" )
+          done
         done
       done
-    done
-    TYPE="emulation"
+      TYPE="emulation"
+    fi
   fi
 
   for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do

@@ -25,7 +25,8 @@ S12_binary_protection()
   pre_module_reporter "${FUNCNAME[0]}"
   local BIN_PROT_COUNTER=0
   local CSV_LOG
-  CSV_LOG="${LOG_FILE/\.txt/\.csv}"
+  CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
+  CSV_LOG="$CSV_DIR""/""$CSV_LOG"
   local BINARY=""
 
   if [[ -f "$EXT_DIR"/checksec ]] ; then

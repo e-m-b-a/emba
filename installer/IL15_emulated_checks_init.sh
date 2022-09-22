@@ -29,7 +29,12 @@ IL15_emulated_checks_init() {
     print_tool_info "nmap" 1
     print_tool_info "snmp" 1
     print_tool_info "nikto" 1
-    print_tool_info "snmpcheck" 1
+    # tools only available on Kali Linux:
+    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+      print_tool_info "snmpcheck" 1
+    else
+      echo -e "$RED""$BOLD""Not installing snmpcheck. Your EMBA installation will be incomplete""$NC"
+    fi
     print_tool_info "python3-pip" 1
     print_tool_info "cutycapt" 1
 
@@ -88,6 +93,7 @@ IL15_emulated_checks_init() {
       fi
 
       python3 -m pip install -r requirements.txt
+      # if the default log path is set we reset it to /tmp
       if ! grep -q "/tmp/routersploit.log" rsf.py; then
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
       fi

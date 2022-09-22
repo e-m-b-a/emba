@@ -24,6 +24,7 @@ print_help()
   echo -e "$CYAN""-D""$NC""         Only used via docker-compose for building EMBA docker container"
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA"
+  echo -e "$CYAN""-r""$NC""         Remove a default installation of EMBA"
   echo
 }
 
@@ -173,7 +174,7 @@ print_file_info()
     echo -e "Description: ""${2:-}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
-  FILE_SIZE=$(($(wget "${3:-}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d' || true)))
+  FILE_SIZE=$(("$(wget "${3:-}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d' || true)"))
 
   if (( FILE_SIZE > 1048576 )) ; then
     echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"

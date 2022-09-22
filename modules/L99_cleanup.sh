@@ -19,7 +19,7 @@ export THREAD_PRIO=0
 
 L99_cleanup() {
 
-  MODULE_END=0
+  local MODULE_END=0
 
   if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"

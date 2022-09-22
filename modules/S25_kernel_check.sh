@@ -30,6 +30,10 @@ S25_kernel_check()
   FOUND=0
   KMOD_BAD=0
 
+  if ! [[ -f "$KNOWN_EXP_CSV" ]]; then
+    KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
+  fi
+
   # This module waits for S24_kernel_bin_identifier
   # check emba.log for S24_kernel_bin_identifier starting
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
@@ -45,6 +49,7 @@ S25_kernel_check()
     populate_karrays
 
     if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
+      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
       print_output "Kernel version:"
       for LINE in "${KERNEL_VERSION[@]}" ; do
         print_output "$(indent "$ORANGE$LINE$NC")"
@@ -136,11 +141,11 @@ populate_karrays() {
 
     IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     for V in "${KV_C_ARR[@]}" ; do
-      if [[ -z "${i:-}" ]]; then
+      if [[ -z "${V:-}" ]]; then
         # remove empty entries:
         continue
       fi
-      if ! [[ "$i" =~ .*[0-9]\.[0-9].* ]]; then
+      if ! [[ "$V" =~ .*[0-9]\.[0-9].* ]]; then
         continue
       fi
       KERNEL_VERSION_+=( "$V" )
@@ -148,7 +153,7 @@ populate_karrays() {
   done
 
   # if we have found a kernel version in binary kernel:
-  if [[ -f "$LOG_DIR"/s24_kernel_bin_identifier.csv ]]; then
+  if [[ -f "$CSV_DIR"/s24_kernel_bin_identifier.csv ]]; then
     while IFS=";" read -r K_VER; do
       K_VER="$(echo "$K_VER" | sed 's/Linux\ version\ //g' | tr -d "(" | tr -d ")" | tr -d "#")"
 
@@ -159,7 +164,7 @@ populate_karrays() {
       for V in "${KV_C_ARR[@]}" ; do
         KERNEL_VERSION_+=( "$V" )
       done
-    done < <(cut -d ";" -f1 "$LOG_DIR"/s24_kernel_bin_identifier.csv | tail -n +2)
+    done < <(cut -d ";" -f1 "$CSV_DIR"/s24_kernel_bin_identifier.csv | tail -n +2)
   fi
 
   # unique our results
@@ -222,7 +227,6 @@ get_kernel_vulns()
   sub_module_title "Kernel vulnerabilities"
 
   local VER=""
-  local V=""
 
   if [[ "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
     print_output "[+] Found linux kernel version/s:"
@@ -232,13 +236,29 @@ get_kernel_vulns()
     print_ln
   
     if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
-      print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh"
-      print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
       # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
       demess_kv_version "${KERNEL_VERSION[@]}"
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
-      for V in "${KV_C_ARR[@]}" ; do
-        print_output "$( "$EXT_DIR""/linux-exploit-suggester.sh" --skip-more-checks -f -d -k "$V")"
+      for VER in "${KV_C_ARR[@]}" ; do
+        print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh for kernel version $ORANGE$VER$NC"
+        print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
+        "$EXT_DIR""/linux-exploit-suggester.sh" --skip-more-checks -f -d -k "$VER" >> "$LOG_PATH_MODULE""/linux_exploit_suggester_kernel_$VER.txt"
+        tee -a "$LOG_FILE" < "$LOG_PATH_MODULE""/linux_exploit_suggester_kernel_$VER.txt"
+        if [[ -f "$LOG_PATH_MODULE""/linux_exploit_suggester_kernel_$VER.txt" ]]; then
+          mapfile -t LES_CVE_ENTRIES < <(grep "[+]" "$LOG_PATH_MODULE""/linux_exploit_suggester_kernel_$VER.txt" | grep -E "CVE-[0-9]+")
+          for LES_ENTRY in "${LES_CVE_ENTRIES[@]}"; do
+            LES_ENTRY=$(strip_color_codes "$LES_ENTRY")
+            LES_CVE=$(echo "$LES_ENTRY" | awk '{print $2}' | tr -d '[' | tr -d ']')
+            KNOWN_EXPLOITED=0
+            if [[ -f "$KNOWN_EXP_CSV" ]]; then
+              if grep -q \""${LES_CVE}"\", "$KNOWN_EXP_CSV"; then
+                print_output "[+] ${ORANGE}WARNING:$GREEN Vulnerability $ORANGE$LES_CVE$GREEN is a known exploited vulnerability."
+                KNOWN_EXPLOITED=1
+              fi
+            fi
+            write_csv_log "kernel" "$VER" "$LES_CVE" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "NA" "$KNOWN_EXPLOITED"
+          done
+        fi
       done
     else
       print_output "[-] linux-exploit-suggester.sh is not installed"

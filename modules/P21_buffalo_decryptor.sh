@@ -70,6 +70,7 @@ buffalo_enc_extractor() {
       print_output "[+] Decrypted Buffalo firmware file to $ORANGE$EXTRACTION_FILE_$NC"
       MD5_DONE_DEEP+=( "$(md5sum "$BUFFALO_ENC_PATH_" | awk '{print $1}')" )
       export FIRMWARE_PATH="$EXTRACTION_FILE_"
+      backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
       print_ln
       print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
       write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"

@@ -26,9 +26,45 @@
 log_folder()
 {
   if [[ $ONLY_DEP -eq 0 ]] && [[ -d "$LOG_DIR" ]] ; then
+    export RESTART=0          # indicator for testing unfinished tests again
+    local NOT_FINISHED=0      # identify unfinished firmware tests
+    local POSSIBLE_RESTART=0  # used for testing the checksums of the firmware with stored checksum
+
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    There are files in the specified directory: ""$LOG_DIR""\\n    You can now delete the content here or start the tool again and specify a different directory."
+
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+      if grep -q "Test ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A finished EMBA firmware test was found in the log directory" "no_log"
+      elif grep -q "System emulation phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - ${ORANGE}system emulation phase${NC} already finished" "no_log"
+        NOT_FINISHED=1
+      elif grep -q "Testing phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - ${ORANGE}testing phase${NC} already finished" "no_log"
+        NOT_FINISHED=1
+      elif grep -q "Pre-checking phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - ${ORANGE}pre-checking phase${NC} already finished" "no_log"
+        NOT_FINISHED=1
+      else
+        print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory" "no_log"
+        NOT_FINISHED=1
+      fi
+    fi
+
+    # we check the found sha512 hash with the firmware to test:
+    if [[ -f "$LOG_DIR"/csv_logs/p02_firmware_bin_file_check.csv ]]; then
+      STORED_SHA512=$(grep "SHA512" "$LOG_DIR"/csv_logs/p02_firmware_bin_file_check.csv | cut -d\; -f2)
+      FW_SHA512=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
+      if [[ "$STORED_SHA512" == "$FW_SHA512" ]]; then
+        # the found analysis is for the same firmware
+        POSSIBLE_RESTART=1
+      fi
+    fi
     echo -e "\\n${ORANGE}Delete content of log directory: $LOG_DIR ?${NC}\\n"
+    if [[ "$NOT_FINISHED" -eq 1 ]] && [[ "$POSSIBLE_RESTART" -eq 1 ]]; then
+      print_output "[*] If you answer with ${ORANGE}n${NC}o, EMBA tries to process the unfinished test${NC}" "no_log"
+    fi
+
     if [[ $OVERWRITE_LOG -eq 1 ]] ; then
       ANSWER="y"
     else
@@ -50,7 +86,23 @@ log_folder()
             print_output "$(indent "$(mount | grep "$LOG_DIR")")" "no_log"
           else
             rm -R "${LOG_DIR:?}/"* 2>/dev/null || true
-            echo -e "\\n${GREEN}Sucessfully deleted: $LOG_DIR ${NC}\\n"
+            echo -e "\\n${GREEN}Sucessfully deleted: $ORANGE$LOG_DIR${NC}\\n"
+          fi
+        ;;
+        n|N )
+          if [[ "$NOT_FINISHED" -eq 1 ]] && [[ -f "$LOG_DIR"/backup_vars.log ]] && [[ "$POSSIBLE_RESTART" -eq 1 ]]; then
+            print_output "[*] EMBA tries to process the unfinished test" "no_log"
+            if ! [[ -d "$TMP_DIR" ]]; then
+              mkdir "$TMP_DIR"
+            fi
+            if [[ -d "$LOG_DIR"/html-report ]]; then
+              print_output "[*] EMBA needs to remove and re-create the current HTML report" "no_log"
+              rm -r "$LOG_DIR""/html-report" && mkdir "$LOG_DIR""/html-report"
+            fi
+            touch "$TMP_DIR"/restart
+          else
+            echo -e "\\n${RED}Terminate EMBA${NC}\\n"
+            exit 1
           fi
         ;;
         * )
@@ -103,8 +155,9 @@ architecture_check()
 {
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n"
-    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0
+    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0
     local D_END_LE=0 D_END_BE=0
+    D_END="NA"
 
     # we use the binaries array which is already unique
     for D_ARCH in "${BINARIES[@]}" ; do
@@ -131,26 +184,32 @@ architecture_check()
       elif [[ "$D_ARCH" == *"PowerPC"* ]] ; then
         ARCH_PPC=$((ARCH_PPC+1))
         continue
+      elif [[ "$D_ARCH" == *"Altera Nios II"* ]] ; then
+        ARCH_NIOS2=$((ARCH_NIOS2+1))
+        continue
       fi
     done
 
-    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC)) -gt 0 ]] ; then
+    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC+ARCH_NIOS2)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture  Count")")"
       if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" ; fi
       if [[ $ARCH_ARM -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""$ARCH_ARM")")" ; fi
       if [[ $ARCH_X64 -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""$ARCH_X64")")" ; fi
       if [[ $ARCH_X86 -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""$ARCH_X86")")" ; fi
       if [[ $ARCH_PPC -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""$ARCH_PPC")")" ; fi
-      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] ; then
+      if [[ $ARCH_NIOS2 -gt 0 ]] ; then print_output "$(indent "$(orange "NIOS II       ""$ARCH_NIOS2")")" ; fi
+      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] && [[ $ARCH_MIPS -gt $ARCH_NIOS2 ]]; then
         D_ARCH="MIPS"
-      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] ; then
+      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] && [[ $ARCH_ARM -gt $ARCH_NIOS2 ]]; then
         D_ARCH="ARM"
-      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] ; then
+      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] && [[ $ARCH_X64 -gt $ARCH_NIOS2 ]]; then
         D_ARCH="x64"
-      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] ; then
+      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] && [[ $ARCH_X86 -gt $ARCH_NIOS2 ]]; then
         D_ARCH="x86"
-      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] ; then
+      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] && [[ $ARCH_PPC -gt $ARCH_NIOS2 ]]; then
         D_ARCH="PPC"
+      elif [[ $ARCH_NIOS2 -gt $ARCH_MIPS ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM ]] && [[ $ARCH_NIOS2 -gt $ARCH_X64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_X86 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC ]]; then
+        D_ARCH="NIOS2"
       else
         D_ARCH="unknown"
       fi
@@ -196,6 +255,8 @@ architecture_check()
         print_output "[!] Since no architecture could be detected, you should set one."
       fi
     fi
+    backup_var "ARCH" "$ARCH"
+    backup_var "D_END" "$D_END"
 
   else
     print_output "[*] Architecture auto detection disabled\\n"

@@ -82,6 +82,8 @@ P02_firmware_bin_file_check() {
     fi
 
     fw_bin_detector "$FIRMWARE_PATH"
+
+    backup_p02_vars
   fi
 
   module_end_log "${FUNCNAME[0]}" 1
@@ -240,4 +242,23 @@ fw_bin_detector() {
     write_csv_log "Buffalo encrypted" "yes" "NA"
   fi
   print_ln
+}
+
+backup_p02_vars() {
+  backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
+  backup_var "UEFI_DETECTED" "$UEFI_DETECTED"
+  backup_var "AVM_DETECTED" "$AVM_DETECTED"
+  backup_var "PATOOLS_INIT" "$PATOOLS_INIT"
+  backup_var "VMDK_DETECTED" "$VMDK_DETECTED"
+  backup_var "UBI_IMAGE" "$UBI_IMAGE"
+  backup_var "DLINK_ENC_DETECTED" "$DLINK_ENC_DETECTED"
+  backup_var "ENGENIUS_ENC_DETECTED" "$ENGENIUS_ENC_DETECTED"
+  backup_var "UBOOT_IMAGE" "$UBOOT_IMAGE"
+  backup_var "BSD_UFS" "$BSD_UFS"
+  backup_var "EXT_IMAGE" "$EXT_IMAGE"
+  backup_var "QNAP_ENC_DETECTED" "$QNAP_ENC_DETECTED"
+  backup_var "GPG_COMPRESS" "$GPG_COMPRESS"
+  backup_var "ANDROID_OTA" "$ANDROID_OTA"
+  backup_var "OPENSSL_ENC_DETECTED" "$OPENSSL_ENC_DETECTED"
+  backup_var "BUFFALO_ENC_DETECTED" "$BUFFALO_ENC_DETECTED"
 }

@@ -23,8 +23,6 @@ IP99_binwalk_default() {
     cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
     INSTALL_APP_LIST=()
 
-    # currently we use the debian package of binwalk:
-    #print_tool_info "binwalk" 1
     print_tool_info "git" 1
     print_tool_info "locales" 1
     print_tool_info "qtbase5-dev" 1
@@ -40,8 +38,15 @@ IP99_binwalk_default() {
     print_tool_info "p7zip-full" 1
     print_tool_info "cabextract" 1
     print_tool_info "util-linux" 1
-    # firmware-mod-kit is only available on Kali Linux
-    print_tool_info "firmware-mod-kit" 1
+
+    # tools only available on Kali Linux:
+    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+      # firmware-mod-kit is only available on Kali Linux
+      print_tool_info "firmware-mod-kit" 1
+    else
+      echo -e "$RED""$BOLD""Not installing firmware-mod-kit. Your EMBA installation will be incomplete""$NC"
+    fi
+
     print_tool_info "cramfsswap" 1
     print_tool_info "squashfs-tools" 1
     print_tool_info "zlib1g-dev" 1
@@ -59,8 +64,6 @@ IP99_binwalk_default() {
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
     print_tool_info "python3-lzo" 1
-    # python2 is needed for ubireader installation
-    #print_tool_info "python2" 1
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "srecord" 1
@@ -84,7 +87,7 @@ IP99_binwalk_default() {
     echo -e "$ORANGE""cramfs-tools will be downloaded.""$NC"
     print_git_info "ubi_reader" "jrspruitt/ubi_reader" "UBI Reader is a Python module and collection of scripts capable of extracting the contents of UBI and UBIFS images"
     echo -e "$ORANGE""ubi_reader will be downloaded.""$NC"
-    print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
+    print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "https://downloads.tuxfamily.org/sdtraces/BottinHTML/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -151,7 +154,7 @@ IP99_binwalk_default() {
 
         if ! command -v unstuff > /dev/null ; then
           mkdir -p ./external/binwalk/unstuff
-          wget --no-check-certificate -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz http://downloads.tuxfamily.org/sdtraces/stuffit520.611linux-i386.tar.gz
+          wget --no-check-certificate -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz https://downloads.tuxfamily.org/sdtraces/BottinHTML/stuffit520.611linux-i386.tar.gz
           tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
           cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
         else

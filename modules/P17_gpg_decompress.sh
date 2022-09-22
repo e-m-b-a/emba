@@ -53,6 +53,7 @@ gpg_decompress_extractor() {
   if [[ -f "$EXTRACTION_FILE_" ]]; then
     print_output "[+] Extracted GPG compressed firmware file to $ORANGE$EXTRACTION_FILE_$NC"
     export FIRMWARE_PATH="$EXTRACTION_FILE_"
+    backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
     print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"

@@ -45,11 +45,11 @@ S06_distribution_identification()
           PATTERN="$(echo "$CONFIG" | cut -d\; -f3)"
           SED_COMMAND="$(echo "$CONFIG" | cut -d\; -f4)"
           # shellcheck disable=SC2086
-          FILE_QUOTED=$(printf "%q" "$FILE")
+          FILE_QUOTED=$(escape_echo "$FILE")
           OUT1="$(eval "$PATTERN" "$FILE_QUOTED" || true)"
           # echo "SED command: $SED_COMMAND"
           # echo "identified: $OUT1"
-          IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//')
+          IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//' || true)
 
           if [[ $(basename "$FILE") == "image_sign" ]]; then
             # dlink image_sign file handling
@@ -143,5 +143,7 @@ get_csv_rule_distri() {
   # F5 BigIP
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/big-ip\ ltm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_local_traffic_manager:\1/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/big-ip\ asm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_application_security_manager:\1/')"
+  # Buildroot 2022.01.01
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/buildroot\ ([0-9]+(\.[0-9]+)+?)/buildroot:\1/')"
   CSV_RULE="$VERSION_IDENTIFIER"
 }

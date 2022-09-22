@@ -189,11 +189,15 @@ mod_path_array() {
 
 create_log_dir() {
   if ! [[ -d "$LOG_DIR" ]] ; then
-      mkdir "$LOG_DIR" 2> /dev/null || true
+    mkdir "$LOG_DIR" 2> /dev/null || true
   fi
   if ! [[ -d "$TMP_DIR" ]] ; then
-      mkdir "$TMP_DIR" 2> /dev/null || true
+    mkdir "$TMP_DIR" 2> /dev/null || true
   fi
+  if ! [[ -d "$CSV_DIR" ]]; then
+    mkdir "$CSV_DIR" 2> /dev/null || true
+  fi
+
   if [[ $FIRMWARE -eq 1 ]] ; then
     export HTML_PATH="$LOG_DIR""/html-report"
     if ! [[ -d "$HTML_PATH" ]] && [[ "$HTML" -eq 1 ]]; then
@@ -203,7 +207,6 @@ create_log_dir() {
     mkdir -p "$FIRMWARE_PATH_CP" 2> /dev/null || true
     export SUPPL_PATH="$LOG_DIR""/etc"
     mkdir -p "$SUPPL_PATH" 2> /dev/null || true
-    mkdir -p "$TMP_DIR" 2> /dev/null || true
   fi
 }
 

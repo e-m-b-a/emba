@@ -71,6 +71,7 @@ avm_extractor() {
 
       if [[ -z "${FW_VENDOR:-}" ]]; then
         FW_VENDOR="AVM"
+        backup_var "FW_VENDOR" "$FW_VENDOR"
       fi
       if [[ -z "${FW_VERSION:-}" && "$FRITZ_VERSION" != "NA" ]]; then
         FW_VERSION="$FRITZ_VERSION"

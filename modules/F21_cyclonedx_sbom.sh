@@ -18,14 +18,22 @@
 F21_cyclonedx_sbom() {
   module_log_init "${FUNCNAME[0]}"
   module_title "CycloneDX SBOM converter"
-  local F20_LOG="$LOG_DIR""/f20_vul_aggregator.csv"
+
+  local F20_LOG="$CSV_DIR""/f20_vul_aggregator.csv"
   local BIN_VER_SBOM_ARR=()
   local BIN_VER_SBOM_ENTRY=""
   local BINARY=""
   local VERSION=""
-
+  local NEG_LOG=0
 
   if [[ -f "$F20_LOG" ]]; then
+    if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
+      rm "$CSV_DIR"/f21_cyclonedx_sbom.csv
+    fi
+    if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.json ]]; then
+      rm "$CSV_DIR"/f21_cyclonedx_sbom.json
+    fi
+
     write_csv_log "Type" "MimeType" "Supplier" "Author" "Publisher" "Group" "Name" "Version" "Scope" "LicenseExpressions" "LicenseNames" "Copyright" "Cpe" "Purl" "Modified" "SwidTagId" "SwidName" "SwidVersion" "SwidTagVersion" "SwidPatch" "SwidTextContentType" "SwidTextEncoding" "SwidTextContent" "SwidUrl" "MD5" "SHA-1" "SHA-256" "SHA-512" "BLAKE2b-256" "BLAKE2b-384" "BLAKE2b-512" "SHA-384" "SHA3-256" "SHA3-384" "SHA3-512" "BLAKE3" "Description"
     print_output "[*] Collect SBOM details of module $(basename "$F20_LOG")."
     mapfile -t BIN_VER_SBOM_ARR < <(cut -d\; -f1,2 "$F20_LOG" | grep -v "BINARY;VERSION" | sort -u)
@@ -34,10 +42,19 @@ F21_cyclonedx_sbom() {
       VERSION=$(echo "$BIN_VER_SBOM_ENTRY" | cut -d\; -f2)
       write_csv_log "" "" "" "" "" "" "$BINARY" "$VERSION" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
     done
-    if [[ -f "$LOG_DIR"/f21_cyclonedx_sbom.csv ]]; then
-      # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick and dirty tranlation
-      sed -i 's/\;/,/g' "$LOG_DIR"/f21_cyclonedx_sbom.csv
-      cyclonedx convert --input-file "$LOG_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
+    if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
+      # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick tranlation
+      sed -i 's/\;/,/g' "$CSV_DIR"/f21_cyclonedx_sbom.csv
+      cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
+    fi
+    if [[ -f "$LOG_DIR"/f21_cyclonedx_sbom.json ]]; then
+      print_output "[+] SBOM in json format created in $ORANGE$LOG_DIR/f21_cyclonedx_sbom.json$NC:"
+      print_ln
+      tee -a "$LOG_FILE" < "$LOG_DIR"/f21_cyclonedx_sbom.json
+      print_ln
+      local NEG_LOG=1
     fi
   fi
+
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }

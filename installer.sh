@@ -19,6 +19,9 @@
 # it the installer fails you can try to change it to 0
 STRICT_MODE=1
 
+ORIG_USER="${SUDO_USER:-${USER}}"
+ORIG_GROUP=$(groups "$ORIG_USER" | cut -d: -f2 | awk '{print $1}')
+
 export DEBIAN_FRONTEND=noninteractive
 export INSTALL_APP_LIST=()
 export DOWNLOAD_FILE_LIST=()
@@ -41,6 +44,7 @@ export IN_DOCKER=0
 # list dependencies
 export LIST_DEP=0
 export FULL=0
+export REMOVE=0
 # other os stuff
 export OTHER_OS=0
 export UBUNTU_OS=0
@@ -86,7 +90,7 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-while getopts cCdDFhl OPT ; do
+while getopts cCdDFhlr OPT ; do
   case $OPT in
     d)
       export DOCKER_SETUP=1
@@ -114,6 +118,10 @@ while getopts cCdDFhl OPT ; do
       export CVE_SEARCH=0
       export DOCKER_SETUP=0
       echo -e "$GREEN""$BOLD""List all dependecies""$NC"
+      ;;
+    r)
+      export REMOVE=1
+      echo -e "$GREEN""$BOLD""Remove EMBA from the system""$NC"
       ;;
     *)
       echo -e "$RED""$BOLD""Invalid option""$NC"
@@ -167,10 +175,19 @@ fi
 
 HOME_PATH=$(pwd)
 
+if [[ "$REMOVE" -eq 1 ]]; then
+  R00_emba_remove
+  exit 0
+fi
+
 if [[ $LIST_DEP -eq 0 ]] ; then
   if ! [[ -d "external" ]] ; then
     echo -e "\\n""$ORANGE""Created external directory: ./external""$NC"
     mkdir external
+    # currently this is needed for full install on Ubuntu
+    # the freetz installation is running as freetzuser and needs write access:
+    chown "$ORIG_USER":"$ORIG_GROUP" ./external
+    chmod 777 ./external
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
@@ -217,13 +234,15 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IP18_qnap_decryptor
 
+  IP61_unblob
+
   IP99_binwalk_default
 
   I02_UEFI_fwhunt
 
   I13_objdump
 
-  I20_php_check
+  I20_sourcecode_check
 
   I24_25_kernel_tools
 
@@ -247,6 +266,12 @@ fi
 IF20_cve_search
 
 cd "$HOME_PATH" || exit 1
+
+# we reset the permissions of external from 777 back to 755:
+chmod 755 ./external
+if [[ "$IN_DOCKER" -eq 1 ]]; then
+  userdel linuxbrew
+fi
 
 if [[ "$LIST_DEP" -eq 0 ]] || [[ $IN_DOCKER -eq 0 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
   echo -e "\\n""$MAGENTA""$BOLD""Installation notes:""$NC"

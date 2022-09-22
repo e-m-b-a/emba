@@ -85,6 +85,10 @@ cwe_check() {
 
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
+      if [[ "$BINARY" == *".ko" ]]; then
+        # do not try to analyze kernel modules:
+        continue
+      fi
       if [[ "$THREADED" -eq 1 ]]; then
         local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)"))
         if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
@@ -114,22 +118,21 @@ cwe_checker_threaded () {
   local CWE=""
   local CWE_DESC=""
   local CWE_CNT=0
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"*80/100 ))
 
   local NAME=""
   NAME=$(basename "$BINARY_")
   local OLD_LOG_FILE="$LOG_FILE"
   local LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
   BINARY_=$(readlink -f "$BINARY_")
-  readarray -t TEST_OUTPUT < <(/root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true)
+
+  ulimit -Sv "$MEM_LIMIT"
+  /root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
+  ulimit -Sv unlimited
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
-  for ENTRY in "${TEST_OUTPUT[@]}" ; do
-    if [[ -n "$ENTRY" ]] ; then
-      if ! [[ "$ENTRY" == *"ERROR:"* || "$ENTRY" == *"DEBUG:"* || "$ENTRY" == *"INFO:"* ]] ; then
-        print_output "$(indent "$ENTRY")"
-      fi
-    fi
-  done
+
   if [[ -f "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
+    grep -v "ERROR:\|DEBUG:\|INFO:" "$LOG_PATH_MODULE"/cwe_"$NAME".log
     mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
@@ -174,7 +177,7 @@ final_cwe_log() {
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -c "$CWE" || true)"
+        CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_ln
