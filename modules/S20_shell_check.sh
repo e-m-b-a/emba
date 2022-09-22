@@ -28,6 +28,7 @@ S20_shell_check()
   local S20_VULN_TYPES=()
   local VTYPE=""
   local SEMGREP=1
+  local NEG_LOG=0
 
   mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
@@ -58,6 +59,9 @@ S20_shell_check()
       done < "$TMP_DIR"/S20_VULNS.tmp
       rm "$TMP_DIR"/S20_VULNS.tmp
     fi
+    if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
+      NEG_LOG=1
+    fi
 
     print_ln
     sub_module_title "Summary of shell issues (shellcheck)"
@@ -76,44 +80,29 @@ S20_shell_check()
 
   if [[ $SEMGREP -eq 1 ]] ; then
     sub_module_title "Check scripts with semgrep"
-    export S20_SCRIPTS=0
-    export S20_SHELL_VULNS=0
-    SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
+    local S20_SEMGREP_SCRIPTS=0
+    local S20_SEMGREP_VULNS=0
+    local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
 
-    for SH_SCRIPT in "${SH_SCRIPTS[@]}" ; do
-      if ( file "$SH_SCRIPT" | grep -q "shell script" ) ; then
-        ((S20_SCRIPTS+=1))
-        if [[ "$THREADED" -eq 1 ]]; then
-          s20_semgrep_script_check "$SH_SCRIPT" &
-          WAIT_PIDS_S20+=( "$!" )
-          max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S20[@]}"
-          continue
-        else
-          s20_semgrep_script_check "$SH_SCRIPT"
-        fi
-      fi
-    done
+    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$LOG_DIR"/firmware/ > "$SHELL_LOG" 2>&1
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S20[@]}"
+    if [[ -f "$SHELL_LOG" ]]; then
+      S20_SEMGREP_VULNS=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
+      S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "$SHELL_LOG" | awk '{print $5}')
+      print_ln
+      sub_module_title "Summary of shell issues (semgrep)"
+      print_output "[+] Found ""$ORANGE""$S20_SEMGREP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
     fi
-
-    if [[ -f "$TMP_DIR"/S20_VULNS.tmp ]]; then
-      while read -r VULNS; do
-        S20_SHELL_VULNS=$((S20_SHELL_VULNS+VULNS))
-      done < "$TMP_DIR"/S20_VULNS.tmp
-      rm "$TMP_DIR"/S20_VULNS.tmp
+    if [[ "$S20_SEMGREP_VULNS" -gt 0 ]]; then
+      NEG_LOG=1
     fi
-
-    print_ln
-    print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts""$NC""\\n"
     write_log ""
-    write_log "[*] Statistics:$S20_SHELL_VULNS:$S20_SCRIPTS"
+    write_log "[*] Statistics1:$S20_SEMGREP_VULNS:$S20_SEMGREP_SCRIPTS"
   else
     print_output "[-] Semgrepper is disabled ... no tests performed"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$S20_SHELL_VULNS"
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 s20_semgrep_script_check() {
@@ -128,9 +117,14 @@ s20_semgrep_script_check() {
 
   NAME=$(basename "$SH_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   SHELL_LOG="$LOG_PATH_MODULE""/semgrep_""$NAME"".txt"
+  SEM_OPTS=(--disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SH_SCRIPT_")
   #semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SH_SCRIPT_" > "$SHELL_LOG" 2>&1
+  if [[ -d "$EXT_DIR"/semgrep-rules/bash ]]; then
+    print_output "[*] Config dir ok"
+  fi
   print_output "[*] Testing $SH_SCRIPT_"
-  semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SH_SCRIPT_"
+  #semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SH_SCRIPT_"
+  semgrep "${SEM_OPTS[@]}"
   VULNS=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
 
   s20_reporter "$VULNS" "$SH_SCRIPT_" "$SHELL_LOG"
