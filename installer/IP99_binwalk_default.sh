@@ -180,8 +180,6 @@ IP99_binwalk_default() {
           git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
         fi
         cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-        #git reset --hard 0955e6b95f07d849a182125919a1f2b6790d5b51
-        #python2 setup.py install
         python3 setup.py install
         cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
 

@@ -45,7 +45,7 @@ I120_cwe_checker() {
     case ${ANSWER:0:1} in
       y|Y )
         echo
-	apt-get install "${INSTALL_APP_LIST[@]}" -y
+	apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
   
         if ! [[ -d ./external/cwe_checker ]]; then
           # cleanup first

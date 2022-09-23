@@ -47,7 +47,7 @@ IP00_extractors(){
       y|Y )
         echo
 
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         pip3 install protobuf
         pip3 install bsdiff4
 

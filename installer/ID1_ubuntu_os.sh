@@ -27,7 +27,7 @@ ID1_ubuntu_os() {
     print_tool_info "dbus-x11" 1
     print_tool_info "libnotify-cil-dev" 1
 
-    apt-get install "${INSTALL_APP_LIST[@]}" -y
+    apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
     if ! [[ -f "/usr/share/dbus-1/services/org.freedesktop.Notifications.service" ]] && [[ -f "/usr/lib/notification-daemon/notification-daemon" ]]; then
       echo "[D-BUS Service]" > /usr/share/dbus-1/services/org.freedesktop.Notifications.service

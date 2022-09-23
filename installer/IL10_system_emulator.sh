@@ -75,7 +75,7 @@ IL10_system_emulator() {
 
       mkdir -p external/firmae/binaries
 
-      apt-get install "${INSTALL_APP_LIST[@]}" -y
+      apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
       # download_file "vmlinux.mipsel.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipsel.2" "external/firmae/binaries/vmlinux.mipsel.2"
       # download_file "vmlinux.mipseb.2" "https://github.com/pr0v3rbs/FirmAE_kernel-v2.6/releases/download/v1.0/vmlinux.mipseb.2" "external/firmae/binaries/vmlinux.mipseb.2"

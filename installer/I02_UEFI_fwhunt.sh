@@ -47,7 +47,7 @@ I02_UEFI_fwhunt() {
         pip3 install uefi_firmware 2>/dev/null
 
         # rizin:
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         echo -e "$ORANGE""$BOLD""Installing rizin""$NC"
         if [[ -d external/rizin ]]; then
           rm -r external/rizin
