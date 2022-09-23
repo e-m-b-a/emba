@@ -87,17 +87,22 @@ S20_shell_check()
     semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$LOG_DIR"/firmware/ > "$SHELL_LOG" 2>&1
 
     if [[ -f "$SHELL_LOG" ]]; then
-      S20_SEMGREP_VULNS=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
+      S20_SEMGREP_ISSUES=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
+      S20_SEMGREP_VULNS=$(grep -c "semgrep-rules.bash.lang.security" "$SHELL_LOG" || true)
       S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "$SHELL_LOG" | awk '{print $5}')
       print_ln
       sub_module_title "Summary of shell issues (semgrep)"
-      print_output "[+] Found ""$ORANGE""$S20_SEMGREP_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
+      if [[ "$S20_SEMGREP_VULNS" -gt 0 ]]; then
+        print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" (""$ORANGE""$S20_SEMGREP_VULNS"" vulnerabilites${GREEN}) in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
+      else
+        print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
+      fi
     fi
-    if [[ "$S20_SEMGREP_VULNS" -gt 0 ]]; then
+    if [[ "$S20_SEMGREP_ISSUES" -gt 0 ]]; then
       NEG_LOG=1
     fi
     write_log ""
-    write_log "[*] Statistics1:$S20_SEMGREP_VULNS:$S20_SEMGREP_SCRIPTS"
+    write_log "[*] Statistics1:$S20_SEMGREP_ISSUES:$S20_SEMGREP_SCRIPTS"
   else
     print_output "[-] Semgrepper is disabled ... no tests performed"
   fi
