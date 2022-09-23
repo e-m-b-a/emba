@@ -32,7 +32,7 @@ I24_25_kernel_tools() {
   
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         if ! [[ -d external/vmlinux-to-elf ]]; then
           git clone https://github.com/marin-m/vmlinux-to-elf external/vmlinux-to-elf
         fi

@@ -56,7 +56,7 @@ IF20_cve_search() {
 
       #xargs sudo apt-get install -y < requirements.system
       while read -r TOOL_NAME; do
-        apt-get install -y "$TOOL_NAME"
+        apt-get install -y "$TOOL_NAME" --no-install-recommends
       done < requirements.system
 
       # this is a temp solution - Currently needed to fulfill broken deps:

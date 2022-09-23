@@ -290,7 +290,7 @@ dependency_check()
 
     print_ln "no_log"
     print_output "[*] External utils:" "no_log"
-  
+
     # bc
     check_dep_tool "bc"
 
@@ -302,6 +302,9 @@ dependency_check()
 
     # 7zip
     check_dep_tool "7z"
+
+    # jchroot - https://github.com/vincentbernat/jchroot
+    check_dep_tool "jchroot"
 
     # mkimage (uboot)
     check_dep_tool "uboot mkimage" "mkimage"
@@ -318,6 +321,8 @@ dependency_check()
         export BINWALK_VER_CHECK=1
       fi
     fi
+    export MPLCONFIGDIR="$TMP_DIR"
+
 
     # jtr
     check_dep_tool "john"

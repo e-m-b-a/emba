@@ -39,7 +39,7 @@ I05_emba_docker_image_dl() {
 
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
   
         if ! pgrep dockerd; then
           echo -e "\\n""$RED""$BOLD""Docker daemon not running! Please check it manually and try again""$NC"

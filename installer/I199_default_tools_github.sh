@@ -58,6 +58,16 @@ I199_default_tools_github() {
         cd "$HOME_PATH" || ( echo "Could not install EMBA component pixd" && exit 1 )
         rm -r ./external/pixd/
         # pixd installation finished
+
+	# jchroot
+        echo -e "\\n""$ORANGE""$BOLD""Download and install jchroot""$NC"
+    	git clone https://github.com/vincentbernat/jchroot.git external/jchroot
+        cd ./external/jchroot/ || ( echo "Could not install EMBA component jchroot" && exit 1 )
+	make
+	if [[ -e ./jchroot ]]; then
+          cp -r jchroot /usr/sbin/
+	fi
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component jchroot" && exit 1 )
       ;;
     esac
   fi
