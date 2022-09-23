@@ -43,7 +43,7 @@ I108_stacs_password_search() {
           git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
         fi
         cd ./external/stacs-rules || ( echo "Could not install EMBA component STACS" && exit 1 )
-        find rules -name *.yar | sed 's/rules\///' \
+        find rules -name "*.yar" | sed 's/rules\///' \
           | xargs -I{} bash -c "\
             mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
             touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
