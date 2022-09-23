@@ -1525,23 +1525,27 @@ check_online_stat() {
       # write all services into a one liner for output:
       print_ln
       if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
-        TCP_SERV=$(IFS=$' '; echo "${TCP_SERVICES_STARTUP[*]}")
+        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERVICES_STARTUP[*]}")
+        printf -v TCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
         TCP_SERV_STARTUP=${TCP_SERV//\ /,}
         print_output "[*] TCP Services detected via startup: $ORANGE$TCP_SERV_STARTUP$NC"
       fi
       if [[ -v UDP_SERVICES_STARTUP[@] ]]; then
-        UDP_SERV=$(IFS=$' '; echo "${UDP_SERVICES_STARTUP[*]}")
+        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERVICES_STARTUP[*]}")
+        printf -v UDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
         UDP_SERV_STARTUP=${UDP_SERV//\ /,}
         print_output "[*] UDP Services detected via startup: $ORANGE$UDP_SERV_STARTUP$NC"
       fi
 
       if [[ "${#TCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-        TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_NETSTAT_ARR[*]}")
+        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_NETSTAT_ARR[*]}")
+        printf -v TCP_SERV "%s " "${TCP_SERV_NETSTAT_ARR[@]}"
         TCP_SERV_NETSTAT=${TCP_SERV//\ /,}
         print_output "[*] TCP Services detected via netstat: $ORANGE$TCP_SERV_NETSTAT$NC"
       fi
       if [[ "${#UDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-        UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_NETSTAT_ARR[*]}")
+        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_NETSTAT_ARR[*]}")
+        printf -v UDP_SERV "%s " "${UDP_SERV_NETSTAT_ARR[@]}"
         UDP_SERV_NETSTAT=${UDP_SERV//\ /,}
         print_output "[*] UDP Services detected via netstat: $ORANGE$UDP_SERV_NETSTAT$NC"
       fi
@@ -1553,12 +1557,14 @@ check_online_stat() {
       eval "TCP_SERV_ARR=($(for i in "${TCP_SERV_ARR[@]}" ; do echo "\"$i\"" ; done | sort -u))"
       eval "UDP_SERV_ARR=($(for i in "${UDP_SERV_ARR[@]}" ; do echo "\"$i\"" ; done | sort -u))"
       if [[ -v TCP_SERV_ARR[@] ]]; then
-        TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_ARR[*]}")
+        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_ARR[*]}")
+        printf -v TCP_SERV "%s " "${TCP_SERV_ARR[@]}"
         TCP_SERV=${TCP_SERV//\ /,}
         # print_output "[*] TCP Services detected: $ORANGE$TCP_SERV$NC"
       fi
       if [[ -v UDP_SERV_ARR[@] ]]; then
-        UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_ARR[*]}")
+        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_ARR[*]}")
+        printf -v UDP_SERV "%s " "${UDP_SERV_ARR[@]}"
         UDP_SERV=${UDP_SERV//\ /,}
         # print_output "[*] UDP Services detected: $ORANGE$UDP_SERV$NC"
       fi
