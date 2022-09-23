@@ -110,31 +110,6 @@ S20_shell_check()
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
-s20_semgrep_script_check() {
-  local SH_SCRIPT_="${1:-}"
-  local NAME=""
-  local SHELL_LOG=""
-  local VULNS=""
-  if ! [[ -d "$EXT_DIR"/semgrep-rules/bash ]]; then
-    print_output "[*] No semgrep rules found"
-    return
-  fi
-
-  NAME=$(basename "$SH_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
-  SHELL_LOG="$LOG_PATH_MODULE""/semgrep_""$NAME"".txt"
-  SEM_OPTS=(--disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SH_SCRIPT_")
-  #semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SH_SCRIPT_" > "$SHELL_LOG" 2>&1
-  if [[ -d "$EXT_DIR"/semgrep-rules/bash ]]; then
-    print_output "[*] Config dir ok"
-  fi
-  print_output "[*] Testing $SH_SCRIPT_"
-  #semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SH_SCRIPT_"
-  semgrep "${SEM_OPTS[@]}"
-  VULNS=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
-
-  s20_reporter "$VULNS" "$SH_SCRIPT_" "$SHELL_LOG"
-}
-
 s20_script_check() {
   local SH_SCRIPT_="${1:-}"
   local CFF=""
