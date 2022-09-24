@@ -1283,7 +1283,7 @@ nvram_check() {
   print_output "[*] Mounting QEMU Image Partition 1 to $ORANGE$MNT_POINT$NC"
   mount "${DEVICE}" "$MNT_POINT" || true
 
-	if mount | grep -q "$MNT_POINT"; then
+  if mount | grep -q "$MNT_POINT"; then
     if [[ -v NVRAMS[@] ]]; then
       print_output "[*] NVRAM access detected $ORANGE${#NVRAMS[@]}$NC times. Testing NVRAM access now."
       CURRENT_DIR=$(pwd)
