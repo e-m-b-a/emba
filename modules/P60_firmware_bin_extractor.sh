@@ -377,6 +377,7 @@ binwalk_deep_extract_helper() {
 linux_basic_identification_helper() {
   local FIRMWARE_PATH_CHECK="${1:-}"
   if ! [[ -d "$FIRMWARE_PATH_CHECK" ]]; then
+    LINUX_PATH_COUNTER=0
     return
   fi
   LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CHECK" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
