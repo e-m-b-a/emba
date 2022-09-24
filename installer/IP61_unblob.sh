@@ -77,7 +77,7 @@ IP61_unblob() {
 
         if [[ -f "$UNBLOB_PATH""/bin/unblob" ]]; then
           export PATH=$PATH:"$UNBLOB_PATH""/bin"
-	  echo -e "${GREEN}Identified unblob path: $ORANGE$UNBLOB_PATH$NC"
+          echo -e "${GREEN}Identified unblob path: $ORANGE$UNBLOB_PATH$NC"
         else
           cd "$HOME_PATH" && ( echo "Could not install EMBA component unblob" && exit 1 )
         fi
@@ -93,10 +93,10 @@ IP61_unblob() {
           echo
         fi
 
-	echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
-	echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
-	cp -pr /root/.cache external/unblob/root_cache
-	rm -rf /root/.cache
+        echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
+        echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
+        cp -pr /root/.cache external/unblob/root_cache
+        rm -rf /root/.cache
       ;;
     esac
   fi
