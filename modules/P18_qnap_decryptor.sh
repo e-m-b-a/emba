@@ -223,8 +223,6 @@ qnap_extractor() {
   if [ -e "$INITRAMFS" ]; then
     print_ln
     print_output "[*] Extracting $ORANGE$INITRAMFS$NC."
-    #  # shellcheck disable=SC2002
-    #cat "$INITRAMFS" | (cd "$SYSROOT" && (cpio -i --make-directories||true) )
     (cd "$SYSROOT" && (cpio -i --make-directories||true) ) < "$INITRAMFS"
     print_ln
     print_output "[*] Extracted firmware structure ($ORANGE$SYSROOT$NC):"

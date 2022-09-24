@@ -198,7 +198,6 @@ copy_firmware() {
   # we just create a backup if the original firmware path was a root directory
   # if it was a binary file we already have extracted it and it is already messed up
   # so we can mess it up a bit more ;)
-  # shellcheck disable=SC2154
   if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
     cp -pri "$FIRMWARE_PATH" "$LOG_PATH_MODULE" 2> /dev/null
@@ -522,8 +521,7 @@ emulate_binary() {
   write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_BIN"
   write_log "[*] Using CPU config: $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
   #write_log "[*] Root path used: $ORANGE$R_PATH$NC" "$LOG_FILE_BIN"
-  #shellcheck disable=SC2001
-  write_log "[*] Emulating binary: $ORANGE$(echo "$BIN_" | sed 's/^\.//')$NC" "$LOG_FILE_BIN"
+  write_log "[*] Emulating binary: $ORANGE${BIN_/\.}$NC" "$LOG_FILE_BIN"
   write_log "" "$LOG_FILE_BIN"
 
   # lets assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
