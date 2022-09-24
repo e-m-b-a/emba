@@ -420,19 +420,22 @@ main_emulation() {
     get_networking_details_emulation "$IMAGE_NAME"
 
     print_output "[*] Firmware $ORANGE$IMAGE_NAME$NC finished for identification of the network configuration"
+
+    local F_STARTUP=0
     if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
       cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
       write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
+
+      ###############################################################################################
+      # if we were running into issues with the network identification we poke with rdinit vs init:
+      # lets check if we have found a startup procedure (preInit script) from FirmAE - if not we try it with the other init
+      F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
+      F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
     else
       print_output "[-] No Qemu log file generated ... some weird error occured"
     fi
     print_ln
 
-    ###############################################################################################
-    # if we were running into issues with the network identification we poke with rdinit vs init:
-    # lets check if we have found a startup procedure (preInit script) from FirmAE - if not we try it with the other init
-    F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
-    F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
 
     if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
