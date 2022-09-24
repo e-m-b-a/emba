@@ -36,12 +36,10 @@ P60_firmware_bin_extractor() {
 
   # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
   # shellcheck disable=SC2153
-  linux_basic_identification_helper "$FIRMWARE_PATH_CP"
+  detect_root_dir_helper "$FIRMWARE_PATH_CP"
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
-  # Manual activation via -x switch:
-  # print_output "[*] LINUX_PATH_COUNTER: $LINUX_PATH_COUNTER"
-  if [[ $LINUX_PATH_COUNTER -lt 2 || $DEEP_EXTRACTOR -eq 1 ]] ; then
+  if [[ $RTOS -eq 1 ]] ; then
     check_disk_space
     if ! [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
       deep_extractor
@@ -52,13 +50,6 @@ P60_firmware_bin_extractor() {
     fi
   fi
 
-  # we need it after deep extraction:
-  # shellcheck disable=SC2153
-  linux_basic_identification_helper "$FIRMWARE_PATH_CP"
-
-  # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
-  # shellcheck disable=SC2153
-  detect_root_dir_helper "$FIRMWARE_PATH_CP" "$LOG_FILE"
   print_ln
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
@@ -67,12 +58,13 @@ P60_firmware_bin_extractor() {
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
 
   if [[ "$BINS" -gt 0 || "$UNIQUE_FILES" -gt 0 ]]; then
+    linux_basic_identification_helper "$FIRMWARE_PATH_CP"
     print_ln
     print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
     print_output "[*] Found $ORANGE$BINS$NC binaries."
     print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
     print_ln
-    tree -sh "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
+    tree -csh "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
 
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
     export FIRMWARE_PATH="$FIRMWARE_PATH_CP"
@@ -132,39 +124,39 @@ deep_extractor() {
 
   FILES_BEFORE_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
+  # if we run into the deep extraction mode we always do at least one extraction round:
   if [[ "$DISK_SPACE_CRIT" -eq 0 ]]; then
     print_output "[*] Deep extraction - 1st round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
     deeper_extractor_helper
+    detect_root_dir_helper "$FIRMWARE_PATH_CP"
   fi
 
-  linux_basic_identification_helper
-
-  if [[ $LINUX_PATH_COUNTER -lt 5 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
+  if [[ $RTOS -eq 1 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
     print_output "[*] Deep extraction - 2nd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
     deeper_extractor_helper
+    detect_root_dir_helper "$FIRMWARE_PATH_CP"
   fi
 
-  linux_basic_identification_helper
-
-  if [[ $LINUX_PATH_COUNTER -lt 5 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
+  if [[ $RTOS -eq 1 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
     print_output "[*] Deep extraction - 3rd round"
     print_output "[*] Walking through all files and try to extract what ever possible"
 
     deeper_extractor_helper
+    detect_root_dir_helper "$FIRMWARE_PATH_CP"
   fi
 
-  linux_basic_identification_helper
-
-  if [[ $LINUX_PATH_COUNTER -lt 5 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
+  if [[ $RTOS -eq 1 && "$DISK_SPACE_CRIT" -eq 0 ]]; then
     print_output "[*] Deep extraction - 4th round"
     print_output "[*] Walking through all files and try to extract what ever possible with binwalk matryoshka mode"
-    print_output "[*] This is the last extraction round that is executed."
+    print_output "[*] WARNING: This is the last extraction round that is executed."
 
+    # if we are already that far we do a final matryoshka extraction mode
     deeper_extractor_helper "M"
+    detect_root_dir_helper "$FIRMWARE_PATH_CP"
   fi
 
   FILES_AFTER_DEEP=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
@@ -199,6 +191,7 @@ deeper_extractor_helper() {
 
       print_output "[*] Details of file: $ORANGE$FILE_TMP$NC"
       print_output "$(indent "$(file "$FILE_TMP")")"
+
       # do a quick check if EMBA should handle the file or we give it to binwalk:
       # fw_bin_detector is a function from p02
       fw_bin_detector "$FILE_TMP"
@@ -277,10 +270,10 @@ deeper_extractor_helper() {
       else
         # default case to binwalk
         if [[ "$THREADED" -eq 1 ]]; then
-          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "$FIRMWARE_PATH_CP" &
+          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "${FILE_TMP}_binwalk_extracted" &
           WAIT_PIDS_P20+=( "$!" )
         else
-          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "$FIRMWARE_PATH_CP"
+          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "${FILE_TMP}_binwalk_extracted"
         fi
       fi
 
@@ -303,6 +296,9 @@ deeper_extractor_helper() {
   fi
 }
 
+# this function is for the first round of binwalk
+# in case no other EMBA extractor did something and the
+# current firmware file is a file and not multiple files
 binwalking() {
   local FIRMWARE_PATH_="${1:-}"
   export OUTPUT_DIR_BINWALK=""

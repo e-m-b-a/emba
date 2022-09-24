@@ -331,43 +331,42 @@ set_etc_paths()
 
 check_firmware()
 {
-  # Check if firmware got normal linux directory structure and warn if not
-  # as we already have done some root directory detection we are going to use it now
-  local DIR_COUNT=0
-  local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
-  if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
-    for R_PATH in "${ROOT_PATH[@]}"; do
+  # this detection is only running if we have not found a Linux system:
+  if [[ "$RTOS" -eq 1 ]]; then
+    # Check if firmware got normal linux directory structure and warn if not
+    # as we already have done some root directory detection we are going to use it now
+    local DIR_COUNT=0
+    local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
+    if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
+      for R_PATH in "${ROOT_PATH[@]}"; do
+        for L_PATH in "${LINUX_PATHS[@]}"; do
+          if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+            ((DIR_COUNT+=1))
+          fi
+        done
+      done
+    else
+      # this is needed for directories we are testing
+      # in such a case the pre-checking modules are not executed and no RPATH is available
       for L_PATH in "${LINUX_PATHS[@]}"; do
-        if [[ -d "$R_PATH"/"$L_PATH" ]] ; then
+        if [[ -d "$FIRMWARE_PATH"/"$L_PATH" ]] ; then
           ((DIR_COUNT+=1))
         fi
       done
-    done
-  else
-    # this is needed for directories we are testing
-    # in such a case the pre-checking modules are not executed and no RPATH is available
-    for L_PATH in "${LINUX_PATHS[@]}"; do
-      if [[ -d "$FIRMWARE_PATH"/"$L_PATH" ]] ; then
-        ((DIR_COUNT+=1))
-      fi
-    done
+    fi
   fi
 
-  if [[ $DIR_COUNT -lt 5 ]] ; then
+  if [[ $DIR_COUNT -lt 5 ]] && [[ "$RTOS" -eq 1 ]]; then
     print_ln "no_log"
     print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?"
-  else
+  fi
+  if [[ "$RTOS" -eq 0 ]] || [[ $DIR_COUNT -gt 4 ]]; then
     print_output "[+] Your firmware looks like a regular Linux system."
   fi
 }
 
 detect_root_dir_helper() {
   SEARCH_PATH="${1:-}"
-  #if [[ -n "$2" ]];then
-  #  LOGGER="$2"
-  #else
-  #  LOGGER="no_log"
-  #fi
 
   print_output "[*] Root directory auto detection (could take some time)\\n"
   ROOT_PATH=()
