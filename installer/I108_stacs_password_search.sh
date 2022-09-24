@@ -38,14 +38,15 @@ I108_stacs_password_search() {
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         if ! [[ -d external/stacs-rules ]]; then
           git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
         fi
         cd ./external/stacs-rules || ( echo "Could not install EMBA component STACS" && exit 1 )
-        find rules -name "*.yar" | sed 's/rules\///' | xargs -I{} sh -c "\
-        mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
-        touch ./tests/fixtures/{}/{negative,positive}/.gitignore || true"
+        find rules -name "*.yar" | sed 's/rules\///' \
+          | xargs -I{} bash -c "\
+            mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
+            touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
         pip3 install stacs 2>/dev/null
         cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
         if command -v stacs > /dev/null ; then

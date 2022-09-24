@@ -221,10 +221,8 @@ write_csv_log() {
   CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
   CSV_LOG="$CSV_DIR""/""$CSV_LOG"
 
-  (
-  IFS=\;
-    echo -e "${CSV_ITEMS[*]}" | tee -a "$CSV_LOG" >/dev/null
-  )
+  printf '%s;' "${CSV_ITEMS[@]}" | tee -a "$CSV_LOG" >/dev/null
+  printf '\n' | tee -a "$CSV_LOG" >/dev/null
 }
 
 write_grep_log()

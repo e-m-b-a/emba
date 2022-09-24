@@ -27,6 +27,8 @@ I120_cwe_checker() {
     print_tool_info "gcc" 1
     print_tool_info "curl" 1
     print_tool_info "make" 1
+    print_tool_info "rust-all" 1
+    print_tool_info "cargo" 1
 
     print_git_info "cwe-checker" "fkie-cad/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
     echo -e "$ORANGE""cwe-checker will be downloaded.""$NC"
@@ -43,30 +45,13 @@ I120_cwe_checker() {
     case ${ANSWER:0:1} in
       y|Y )
         echo
+	apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
   
         if ! [[ -d ./external/cwe_checker ]]; then
           # cleanup first
           rm "$HOME"/.cargo -r -f
           rm "$HOME"/.config -r -f
           rm external/rustup -r -f
-
-          curl https://sh.rustup.rs -sSf | RUSTUP_HOME=external/rustup sh -s -- -y
-          # shellcheck disable=SC1090
-          # shellcheck disable=SC1091
-          source "$HOME/.cargo/env"
-          RUSTUP_HOME=external/rustup rustup default stable
-          export RUSTUP_TOOLCHAIN=stable
-
-          if external/rustup toolchain list | grep -q "no installed toolchains"; then
-            echo "[*] Warning: Rust toolchain installation failed ... trying manually"
-            external/rustup install stable
-            external/rustup default stable
-            # shellcheck disable=SC1090
-            # shellcheck disable=SC1091
-            source "$HOME/.cargo/env"
-            RUSTUP_HOME=external/rustup rustup default stable
-            export RUSTUP_TOOLCHAIN=stable
-          fi
 
           # Java SDK for ghidra
           if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
@@ -95,15 +80,19 @@ I120_cwe_checker() {
           cd "$HOME_PATH" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "$IN_DOCKER" -eq 1 ]]; then
-            mv "$HOME""/.cargo/bin" "external/cwe_checker/bin"
+            cp -pr "$HOME""/.cargo/bin" "external/cwe_checker/bin"
             echo '{"ghidra_path":"/external/ghidra/ghidra_10.1.2_PUBLIC"}' > /root/.config/cwe_checker/ghidra.json
 
             # save .config as we remount /root with tempfs -> now we can restore it in the module
-            mv /root/.config ./external/cwe_checker/
-            mv /root/.local ./external/cwe_checker/
+            cp -pr /root/.config ./external/cwe_checker/
+            cp -pr /root/.local ./external/cwe_checker/
           fi
-          #rm -r -f "$HOME""/.cargo/"
-          rm -r ./external/rustup
+
+	  if [[ "$IN_DOCKER" -eq 1 ]]; then
+            # cleanup
+            rm "$HOME"/.cargo -r -f || true
+            rm "$HOME"/.config -r -f || true
+	  fi
         else
           echo -e "\\n""$GREEN""cwe-checker already installed - no further action performed.""$NC"
         fi

@@ -138,7 +138,7 @@ add_link_tags() {
           REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
         fi
         # link modules
-        readarray -t MODUL_ARR_LINK < <( find . \( -iname "$REF_LINK""_*" ! -iname "*pre.sh" ! -iname "*post.sh" \) || true )
+        readarray -t MODUL_ARR_LINK < <( find ./modules \( -iname "$REF_LINK""_*.sh" ! -iname "*pre.sh" ! -iname "*post.sh" \) || true )
         if [[ "${#MODUL_ARR_LINK[@]}" -gt 0 ]] ; then
           MODUL_ARR_LINK_E="$(echo "${MODUL_ARR_LINK[0]}" | tr '[:upper:]' '[:lower:]' || true)"
           if [[ -n "$REF_ANCHOR" ]] ; then

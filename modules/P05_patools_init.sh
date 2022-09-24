@@ -86,8 +86,7 @@ patools_extractor() {
 
   print_ln
   print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
-  #shellcheck disable=SC2012
-  ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
+  find "$EXTRACTION_DIR_" -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
   print_ln
 
   FILES_PATOOLS=$(find "$EXTRACTION_DIR_" -type f | wc -l)
