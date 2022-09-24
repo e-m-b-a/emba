@@ -37,7 +37,7 @@ S24_kernel_bin_identifier()
   for FILE in "${FILE_ARR_TMP[@]}" ; do
     K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
     if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
-	    print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
+      print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
       print_ln
       print_output "$(indent "$(orange "$K_VER")")"
       print_ln
