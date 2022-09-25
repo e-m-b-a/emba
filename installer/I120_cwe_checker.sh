@@ -45,7 +45,7 @@ I120_cwe_checker() {
     case ${ANSWER:0:1} in
       y|Y )
         echo
-	apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
   
         if ! [[ -d ./external/cwe_checker ]]; then
           # cleanup first
@@ -88,11 +88,11 @@ I120_cwe_checker() {
             cp -pr /root/.local ./external/cwe_checker/
           fi
 
-	  if [[ "$IN_DOCKER" -eq 1 ]]; then
+          if [[ "$IN_DOCKER" -eq 1 ]]; then
             # cleanup
             rm "$HOME"/.cargo -r -f || true
             rm "$HOME"/.config -r -f || true
-	  fi
+          fi
         else
           echo -e "\\n""$GREEN""cwe-checker already installed - no further action performed.""$NC"
         fi
