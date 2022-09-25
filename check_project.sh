@@ -47,6 +47,7 @@ REP_DIR="$CONF_DIR/report_templates"
 
 SOURCES=()
 MODULES_TO_CHECK_ARR=()
+MODULES_TO_CHECK_ARR_TAB=()
 MODULES_TO_CHECK_ARR_SEMGREP=()
 
 import_config_scripts() {
@@ -134,6 +135,17 @@ check()
   import_reporting_templates
   import_module
 
+  echo -e "\\n""$GREEN""Check all source for correct tab usage:""$NC""\\n"
+  for SOURCE in "${SOURCES[@]}"; do
+    echo -e "\\n""$GREEN""Run ${ORANGE}tab check$GREEN on $ORANGE$SOURCE""$NC""\\n"
+    if [[ $(grep -cP '\t' "$SOURCE") -eq 0 ]]; then
+      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    else
+      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+      MODULES_TO_CHECK_ARR_TAB+=("$SOURCE")
+    fi
+  done
+
   echo -e "\\n""$GREEN""Run shellcheck and semgrep:""$NC""\\n"
   for SOURCE in "${SOURCES[@]}"; do
     echo -e "\\n""$GREEN""Run ${ORANGE}shellcheck$GREEN on $ORANGE$SOURCE""$NC""\\n"
@@ -160,6 +172,15 @@ summary() {
     rm /tmp/emba_semgrep.log
   fi
 
+  if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "Modules to check (tab vs spaces): ${#MODULES_TO_CHECK_ARR_TAB[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR_TAB[@]}"; do
+      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+    done
+    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+
   if [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
     echo -e "Modules to check (shellcheck): ${#MODULES_TO_CHECK_ARR[@]}\\n"
@@ -172,12 +193,11 @@ summary() {
   if [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
     echo -e "Modules to check (semgrep): ${#MODULES_TO_CHECK_ARR_SEMGREP[@]}\\n"
-    for MODULE in "${MODULES_TO_CHECK_ARR[@]}"; do
+    for MODULE in "${MODULES_TO_CHECK_ARR_SEMGREP[@]}"; do
       echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
     done
     echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
-
 }
 
 # check that all tools are installed
