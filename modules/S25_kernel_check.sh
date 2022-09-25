@@ -294,7 +294,6 @@ analyze_kernel_module()
   fi
 
   # in threading we need to go via a temp file with the need to count it now:
-  # shellcheck disable=SC2153
   if [[ -f "$TMP_DIR"/KMOD_BAD.tmp ]]; then
     while read -r COUNTING; do
       KMOD_BAD=$((KMOD_BAD+COUNTING))
@@ -341,14 +340,14 @@ check_modprobe()
 
   local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0
   local MODPROBE_D_DIRS=()
-  local MP_DIR=""
+  local MPROBE_DIR=""
 
   readarray -t MODPROBE_D_DIRS < <( find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  for MP_DIR in "${MODPROBE_D_DIRS[@]}"; do
-    if [[ -d "$MP_DIR" ]] ; then
+  for MPROBE_DIR in "${MODPROBE_D_DIRS[@]}"; do
+    if [[ -d "$MPROBE_DIR" ]] ; then
       MP_CHECK=1
-      print_output "[+] Found ""$(print_path "$MP_DIR")"
-      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "$MP_DIR" -xdev -iname '*.conf' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )"
+      print_output "[+] Found ""$(print_path "$MPROBE_DIR")"
+      readarray -t MODPROBE_D_DIR_CONTENT <<< "$( find "$MPROBE_DIR" -xdev -iname '*.conf' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )"
       for MP_CONF in "${MODPROBE_D_DIR_CONTENT[@]}"; do
         if [[ -e "$MP_CONF" ]] ; then
           MP_F_CHECK=1
