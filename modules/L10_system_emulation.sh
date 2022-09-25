@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -420,19 +420,22 @@ main_emulation() {
     get_networking_details_emulation "$IMAGE_NAME"
 
     print_output "[*] Firmware $ORANGE$IMAGE_NAME$NC finished for identification of the network configuration"
+
+    local F_STARTUP=0
     if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
       cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
       write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
+
+      ###############################################################################################
+      # if we were running into issues with the network identification we poke with rdinit vs init:
+      # lets check if we have found a startup procedure (preInit script) from FirmAE - if not we try it with the other init
+      F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
+      F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
     else
       print_output "[-] No Qemu log file generated ... some weird error occured"
     fi
     print_ln
 
-    ###############################################################################################
-    # if we were running into issues with the network identification we poke with rdinit vs init:
-    # lets check if we have found a startup procedure (preInit script) from FirmAE - if not we try it with the other init
-    F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
-    F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
 
     if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
@@ -1283,7 +1286,7 @@ nvram_check() {
   print_output "[*] Mounting QEMU Image Partition 1 to $ORANGE$MNT_POINT$NC"
   mount "${DEVICE}" "$MNT_POINT" || true
 
-	if mount | grep -q "$MNT_POINT"; then
+  if mount | grep -q "$MNT_POINT"; then
     if [[ -v NVRAMS[@] ]]; then
       print_output "[*] NVRAM access detected $ORANGE${#NVRAMS[@]}$NC times. Testing NVRAM access now."
       CURRENT_DIR=$(pwd)
@@ -1699,7 +1702,7 @@ write_script_exec() {
 
   if [[ "$EXECUTE" -ne 2 ]];then
     if ! [[ -f "$SCRIPT_WRITE" ]]; then
-      echo "#!/bin/bash" > "$SCRIPT_WRITE"
+      echo "#!/bin/bash -p" > "$SCRIPT_WRITE"
     fi
 
     # for the final script we need to adjust the paths:
