@@ -23,8 +23,17 @@ export PRE_THREAD_ENA=0
 P61_unblob_eval() {
   module_log_init "${FUNCNAME[0]}"
 
+  if [[ -f "$TMP_DIR""/unblob_disable.cfg" ]]; then
+    # if we disable unblob from a background module we need to work with a file to
+    # store the state of this variable (bash rules ;))
+    UNBLOB="$(cat "$TMP_DIR"/unblob_disable.cfg)"
+  fi
   if [[ "$UNBLOB" -eq 0 ]]; then
-    print_output "[-] Unblob module currently disabled - enable it in emba.sh setting the UNBLOB variable to 1"
+    if [[ -f "$TMP_DIR""/unblob_disable.cfg" ]]; then
+      print_output "[-] Unblob module automatically disabled from other module."
+    else
+      print_output "[-] Unblob module currently disabled - enable it in emba.sh setting the UNBLOB variable to 1"
+    fi
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -36,6 +45,7 @@ P61_unblob_eval() {
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
+
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
