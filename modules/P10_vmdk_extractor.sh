@@ -100,7 +100,7 @@ vmdk_extractor() {
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "VMDK extractor" "$VMDK_PATH_" "$EXTRACTION_DIR_" "$VMDK_FILES" "$VMDK_DIRS" "NA"
     # currently unblob has issues with VMDKs. We need to disable it for this extraction process
-    UNBLOB=0
+    export UNBLOB=0
   fi
   rm -r "$TMP_VMDK_MNT" || true
 }

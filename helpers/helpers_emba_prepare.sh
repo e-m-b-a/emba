@@ -332,10 +332,10 @@ set_etc_paths()
 check_firmware()
 {
   # this detection is only running if we have not found a Linux system:
+  local DIR_COUNT=0
   if [[ "$RTOS" -eq 1 ]]; then
     # Check if firmware got normal linux directory structure and warn if not
     # as we already have done some root directory detection we are going to use it now
-    local DIR_COUNT=0
     local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
     if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
       for R_PATH in "${ROOT_PATH[@]}"; do

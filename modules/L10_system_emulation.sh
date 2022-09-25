@@ -53,7 +53,7 @@ L10_system_emulation() {
 
       for R_PATH in "${ROOT_PATH[@]}" ; do
         print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
-        write_link "p60"
+        write_link "p59"
 
         if [[ -n "$D_END" ]]; then
           D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
