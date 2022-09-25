@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -49,7 +49,7 @@ F21_cyclonedx_sbom() {
     if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
       # our csv is with ";" as deliminiter. cyclonedx needs "," -> lets do a quick tranlation
       sed -i 's/\;/,/g' "$CSV_DIR"/f21_cyclonedx_sbom.csv
-      cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json
+      cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json || true
     fi
     if [[ -f "$LOG_DIR"/f21_cyclonedx_sbom.json ]]; then
       print_output "[+] SBOM in json format created in $ORANGE$LOG_DIR/f21_cyclonedx_sbom.json$NC:"

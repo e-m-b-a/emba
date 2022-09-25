@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -59,25 +59,31 @@ cwe_container_prepare() {
   # on every run from scratch:
   if [[ -d "$EXT_DIR"/cwe_checker/.config ]]; then
     print_output "[*] Restoring config directory in read-only container"
-    cp -pr "$EXT_DIR"/cwe_checker/.config /root/
-    cp -pr "$EXT_DIR"/cwe_checker/.local /root/
+    if ! [[ -d "$HOME"/.config/ ]]; then
+      mkdir -p "$HOME"/.config
+    fi
+    cp -pr "$EXT_DIR"/cwe_checker/.config/cwe_checker "$HOME"/.config/
+    cp -pr "$EXT_DIR"/cwe_checker/.local/share "$HOME"/.local/
   fi
-  if ! [[ -d /root/.cargo ]]; then
-    mkdir -p /root/.cargo
+  if ! [[ -d "$HOME"/.cargo ]]; then
+    mkdir -p "$HOME"/.cargo/bin
   fi
   if [[ -d "$EXT_DIR"/cwe_checker/bin ]]; then
     print_output "[*] Restoring cargo bin directory in read-only container"
-    cp -pr "$EXT_DIR"/cwe_checker/bin /root/.cargo/
+    cp -pr "$EXT_DIR"/cwe_checker/bin/* "$HOME"/.cargo/bin/
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
+    return
   fi
+  # Todo: move this to dependency check
+  export PATH=$PATH:"$HOME"/.cargo/bin/:"$EXT_DIR"/jdk/bin/
 }
 
 cwe_check() {
   local BINARY=""
 
-  if [[ -d /root/.cargo/bin ]]; then
-    export PATH=$PATH:/root/.cargo/bin
+  if [[ -d "$HOME"/.cargo/bin ]]; then
+    export PATH="$PATH":"$HOME"/.cargo/bin
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
     return
@@ -127,7 +133,7 @@ cwe_checker_threaded () {
   BINARY_=$(readlink -f "$BINARY_")
 
   ulimit -Sv "$MEM_LIMIT"
-  /root/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
+  "$HOME"/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
   ulimit -Sv unlimited
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
 
@@ -177,7 +183,9 @@ final_cwe_log() {
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null || true)"
+        # do not change this to grep -c!
+        # shellcheck disable=SC2126
+        CWE_CNT="$(grep "$CWE" "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | wc -l || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_ln

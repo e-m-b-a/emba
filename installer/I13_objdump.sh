@@ -48,7 +48,7 @@ I13_objdump() {
   
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
   
         if ! [[ -f "external/objdump" ]] ; then
           download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"

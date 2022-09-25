@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -847,8 +847,7 @@ get_data() {
   fi
   if [[ -f "$F20_EXPLOITS_LOG" ]]; then
     #EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG" || true)"
-    # shellcheck disable=SC2126
-    EXPLOIT_COUNTER="$(grep -E "Exploit\ .*" "$F20_EXPLOITS_LOG" | grep -v "Exploit summary" | wc -l || true)"
+    EXPLOIT_COUNTER="$(grep -E "Exploit\ .*" "$F20_EXPLOITS_LOG" | grep -cv "Exploit summary" || true)"
     MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*MSF" "$F20_EXPLOITS_LOG" || true)"
     REMOTE_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(R\)" "$F20_EXPLOITS_LOG" || true)"
     LOCAL_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(L\)" "$F20_EXPLOITS_LOG" || true)"
@@ -1006,7 +1005,9 @@ cwe_logging() {
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
         CWE="$(echo "$CWE_ENTRY" | cut -d\  -f1)"
         CWE_DESC="$(echo "$CWE_ENTRY" | cut -d\  -f2-)"
-        CWE_CNT="$(grep -c "$CWE" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null || true)"
+        # do not change this to grep -c!
+        # shellcheck disable=SC2126
+        CWE_CNT="$(grep "$CWE" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | wc -l || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_ln

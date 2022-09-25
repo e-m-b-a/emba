@@ -21,7 +21,13 @@ IP61_unblob() {
     cd "$HOME_PATH" || ( echo "Could not install EMBA component unblob" && exit 1 )
     INSTALL_APP_LIST=()
 
-    print_tool_info "curl" 1
+    print_tool_info "python3-pip" 1
+    print_tool_info "libpython3-dev" 1
+    print_tool_info "zlib1g" 1
+    print_tool_info "zlib1g-dev" 1
+    print_tool_info "liblzo2-2" 1
+    print_tool_info "liblzo2-dev" 1
+    print_tool_info "python3-lzo" 1
     print_tool_info "e2fsprogs" 1
     print_tool_info "gcc" 1
     print_tool_info "git" 1
@@ -53,29 +59,7 @@ IP61_unblob() {
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y
-
-        #if ! command -v nix > /dev/null ; then
-        #  echo "Installing Nix installation environment ..."
-        #  apt-get install nix-bin nix-setup-systemd -y
-        #  #wget https://nixos.org/nix/install -O ./external/unblob/install
-        #  #cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
-        #  #chmod +x install
-        #  #echo "y" | ./install --daemon
-        #else
-        #  echo -e "$GREEN""Nix installation environment already installed""$NC"
-        #fi
-
-        #if command -v nix > /dev/null ; then
-        #  if ! [[ -d ~/.config/nix/ ]]; then
-        #    mkdir -p ~/.config/nix/
-        #  fi
-        #  echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-
-        #  echo "Installing unblob ..."
-        #  nix profile install github:onekey-sec/unblob
-        #  echo
-        #fi
+        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
         download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v1.0/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
         dpkg -i external/sasquatch_1.0_amd64.deb
@@ -84,15 +68,16 @@ IP61_unblob() {
         git clone https://github.com/onekey-sec/unblob.git external/unblob
 
         # install poetry
-        curl -sSL https://install.python-poetry.org | python3 -
-        export PATH=$PATH:/root/.local/bin
+        python3 -m pip install --upgrade poetry
         cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
 
         # install unblob with poetry:
         poetry install --only main
         UNBLOB_PATH=$(poetry env info --path)
+
         if [[ -f "$UNBLOB_PATH""/bin/unblob" ]]; then
           export PATH=$PATH:"$UNBLOB_PATH""/bin"
+          echo -e "${GREEN}Identified unblob path: $ORANGE$UNBLOB_PATH$NC"
         else
           cd "$HOME_PATH" && ( echo "Could not install EMBA component unblob" && exit 1 )
         fi
@@ -107,6 +92,11 @@ IP61_unblob() {
           echo -e "$ORANGE""unblob installation failed - check it manually""$NC"
           echo
         fi
+
+        echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
+        echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
+        cp -pr /root/.cache external/unblob/root_cache
+        rm -rf /root/.cache
       ;;
     esac
   fi

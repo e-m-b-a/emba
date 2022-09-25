@@ -2,15 +2,20 @@ version: "3"
 services:
   emba:
     image: embeddedanalyzer/emba:latest
-    #hostname: emba
     read_only: true
     # all pre-checker mount modules need privileged mode
     privileged: true
-    # /root is needed for binwalk
+    # /root/.config is needed for binwalk - further recovery for other tools needed
+    # /root/.cache is needed for unblob -> further recovery of this directory needed
     # /external/arachni/... needed by arachni (full system emulator modules)
     # /external/freetz-ng/.fakeroot-cache needed by freetz-ng (AVM extractor)
+    # Todo: cleanup of tmpfs entries
     tmpfs:
       - /tmp
+      - /root/.config/
+      - /root/.local/
+      - /root/.cache/
+      - /root/.cache/pypoetry/virtualenvs:exec
       - /root
       - /root/.cargo/bin:exec
       - /run
