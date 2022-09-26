@@ -749,7 +749,7 @@ write_notification(){
   if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
     return
   fi
-  if [[ -z "$DISPLAY" ]]; then
+  if ! [[ -v DISPLAY ]]; then
     # in case DISPLAY is not set we are not able to show notifications
     return
   fi
@@ -775,7 +775,7 @@ print_notification(){
   if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
     return
   fi
-  if [[ -z "$DISPLAY" ]]; then
+  if ! [[ -v DISPLAY ]]; then
     # in case DISPLAY is not set we are not able to show notifications
     return
   fi
