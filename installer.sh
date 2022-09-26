@@ -226,11 +226,11 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I01_default_apps
 
-  I05_emba_docker_image_dl
+#  I05_emba_docker_image_dl
 
   IP00_extractors
 
-  IP12_avm_freetz_ng_extract
+#  IP12_avm_freetz_ng_extract
 
   IP18_qnap_decryptor
 
@@ -240,7 +240,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I02_UEFI_fwhunt
 
-  I13_objdump
+#  I13_objdump
 
   I20_sourcecode_check
 
@@ -248,17 +248,17 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I108_stacs_password_search
 
-  I110_yara_check
+#  I110_yara_check
 
-  I199_default_tools_github
+#  I199_default_tools_github
 
-  I120_cwe_checker
+#  I120_cwe_checker
 
-  IL10_system_emulator
+#  IL10_system_emulator
 
-  IL15_emulated_checks_init
+#  IL15_emulated_checks_init
 
-  IF50_aggregator_common
+#  IF50_aggregator_common
 
 fi
 

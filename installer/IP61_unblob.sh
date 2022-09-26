@@ -65,7 +65,9 @@ IP61_unblob() {
         dpkg -i external/sasquatch_1.0_amd64.deb
         rm -f external/sasquatch_1.0_amd64.deb
 
-        git clone https://github.com/onekey-sec/unblob.git external/unblob
+        if ! [[ -d external/unblob ]]; then
+          git clone https://github.com/onekey-sec/unblob.git external/unblob
+        fi
 
         # install poetry
         python3 -m pip install --upgrade poetry
@@ -93,10 +95,12 @@ IP61_unblob() {
           echo
         fi
 
-	echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
-	echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
-	cp -pr /root/.cache external/unblob/root_cache
-	rm -rf /root/.cache
+        echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
+        echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
+        if [[ -d "$HOME"/.cache ]]; then
+          cp -pr "$HOME"/.cache external/unblob/root_cache
+          rm -rf "$HOME"/.cache || true
+        fi
       ;;
     esac
   fi

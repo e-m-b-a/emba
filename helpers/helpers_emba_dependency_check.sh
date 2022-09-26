@@ -191,21 +191,35 @@ dependency_check()
   #######################################################################################
   print_output "[*] Elementary:" "no_log"
 
-  # currently we only need root privileges for emulation
-  # but we are running into issues if we have already run an emulation test with root privs
-  # and try to run an non emulation test afterwards on the same log directory
-  print_output "    user permission - \\c" "no_log"
-  if [[ $QEMULATION -eq 1 && $EUID -ne 0 ]] || [[ $USE_DOCKER -eq 1 && $EUID -ne 0 ]]; then
-    echo -e "$RED""not ok""$NC"
-    if [[ $QEMULATION -eq 1 ]]; then
+  # currently we need root privileges for emulation and multiple extractors
+  # As the container runs as root we should not run into issues within the container.
+  # Outside the container we can run mostly without root privs - this is currently under evaluation
+  # Some other nice features like restarting the mongod will not work without root privs.
+  print_output "    user permissions" "no_log"
+  if [[ $QEMULATION -eq 1 && $EUID -ne 0 ]] || [[ $USE_DOCKER -eq 1 && $EUID -ne 0 ]] || [[ $FULL_EMULATION -eq 1 && $EUID -ne 0 ]]; then
+    if [[ $QEMULATION -eq 1 && $USE_DOCKER -eq 0 ]] || [[ $FULL_EMULATION -eq 1 && $USE_DOCKER -eq 0 ]]; then
+      print_output "    user permission - emulation mode - \\c" "no_log"
+      echo -e "$RED""not ok""$NC"
       echo -e "$RED""    With emulation enabled this script needs root privileges""$NC"
+      DEP_EXIT=1
+    else
+      print_output "    user permission - emulation mode - \\c" "no_log"
+      echo -e "$GREEN""ok""$NC"
     fi
     if [[ $USE_DOCKER -eq 1 ]]; then
-      echo -e "$RED""    With docker enabled this script needs root privileges""$NC"
+      print_output "    user permission - docker mode - \\c" "no_log"
+      if ! groups | grep -qw docker; then
+        echo -e "$RED""not ok""$NC"
+        echo -e "$RED""   With docker enabled this script needs privileges to start the docker container""$NC"
+        echo -e "$RED""   Run EMBA with root permissions or add your user to docker group""$NC"
+        echo -e "$RED""   e.g., sudo usermod -aG docker [non-root user]""$NC"
+        DEP_EXIT=1
+      else
+        echo -e "$GREEN""ok""$NC"
+      fi
     fi
-    echo -e "$RED""    Run EMBA with sudo""$NC"
-    DEP_EXIT=1
   else
+    print_output "    user permission - \\c" "no_log"
     echo -e "$GREEN""ok""$NC"
   fi
 
