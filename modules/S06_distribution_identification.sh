@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -44,7 +44,6 @@ S06_distribution_identification()
         if [[ -f "$FILE" ]]; then
           PATTERN="$(echo "$CONFIG" | cut -d\; -f3)"
           SED_COMMAND="$(echo "$CONFIG" | cut -d\; -f4)"
-          # shellcheck disable=SC2086
           FILE_QUOTED=$(escape_echo "$FILE")
           OUT1="$(eval "$PATTERN" "$FILE_QUOTED" || true)"
           # echo "SED command: $SED_COMMAND"

@@ -79,7 +79,7 @@ IP61_unblob() {
 
         if [[ -f "$UNBLOB_PATH""/bin/unblob" ]]; then
           export PATH=$PATH:"$UNBLOB_PATH""/bin"
-	  echo -e "${GREEN}Identified unblob path: $ORANGE$UNBLOB_PATH$NC"
+          echo -e "${GREEN}Identified unblob path: $ORANGE$UNBLOB_PATH$NC"
         else
           cd "$HOME_PATH" && ( echo "Could not install EMBA component unblob" && exit 1 )
         fi

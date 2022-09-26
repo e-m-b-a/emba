@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -64,8 +64,7 @@ ufs_extractor() {
     cp -pri "$TMP_UFS_MOUNT"/* "$EXTRACTION_DIR_" 2>/dev/null || true
     print_ln
     print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
-    #shellcheck disable=SC2012
-    ls -lh "$EXTRACTION_DIR_" | tee -a "$LOG_FILE"
+    find "$EXTRACTION_DIR_" -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
     print_ln
     print_output "[*] Unmounting $ORANGE$TMP_UFS_MOUNT$NC directory"
 

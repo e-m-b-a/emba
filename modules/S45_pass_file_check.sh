@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -52,12 +52,12 @@ S45_pass_file_check()
       for LINE in "${PASSWD_STUFF[@]}" ; do
         print_output "$(indent "$(print_path "$LINE")")"
         if [[ -f "$LINE" ]] && ! [[ -x "$LINE" ]] ; then
-	        local POSSIBLE_PASSWD
+          local POSSIBLE_PASSWD
           # regex source: https://serverfault.com/questions/972572/regex-for-etc-passwd-content
           #POSSIBLE_PASSWD=$(grep -hIE '^([^:]*:){6}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
           POSSIBLE_PASSWD=$(grep -hIE '^[a-zA-Z0-9]+:.:[0-9]+:[0-9]+([^:]*:){3}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null || true)
 
-	        local POSSIBLE_SHADOWS
+          local POSSIBLE_SHADOWS
           #POSSIBLE_SHADOWS=$(grep -hIE '^([^:]*:){8}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
           POSSIBLE_SHADOWS=$(grep -hIE '^[a-zA-Z0-9]+:\$[0-9a-z]\$.*:[0-9]+:[0-9]+:[0-9]+([^:]*:){4}[^:]*' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null || true)
 
@@ -72,8 +72,8 @@ S45_pass_file_check()
             L_BREAK=1
           fi
 
-	        if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_PASSWD" | wc -w)" -gt 0 ]] ; then
-	          print_output "$(indent "$(green "Found passwords or weak configuration:")")"
+          if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] || [[ "$(echo "$POSSIBLE_PASSWD" | wc -w)" -gt 0 ]] ; then
+            print_output "$(indent "$(green "Found passwords or weak configuration:")")"
             PASS_FILES_FOUND=1
             export PASS_FILES_FOUND
             if [[ "$(echo "$POSSIBLE_SHADOWS" | wc -w)" -gt 0 ]] ; then
@@ -83,8 +83,8 @@ S45_pass_file_check()
               print_output "$(indent "$(indent "$(orange "$POSSIBLE_PASSWD")")")"
             fi
             L_BREAK=1
-	        fi
-	        if ! [[ $L_BREAK -eq 0 ]] ; then
+          fi
+          if ! [[ $L_BREAK -eq 0 ]] ; then
             print_ln
           fi
         fi

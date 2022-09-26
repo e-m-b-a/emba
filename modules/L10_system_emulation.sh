@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -270,8 +270,7 @@ create_emulation_filesystem() {
         if ! [[ -d "$LOG_PATH_MODULE"/nvram ]]; then
           mkdir "$LOG_PATH_MODULE"/nvram
         fi
-        # shellcheck disable=SC2001
-        NVRAM_FILE=$(echo "$NVRAM_FILE" | sed -e 's/^\.//')
+        NVRAM_FILE="${NVRAM_FILE/\.}"
         print_output "[*] Found possible NVRAM default file $ORANGE$NVRAM_FILE$NC -> setup /firmadyne directory"
         echo "$NVRAM_FILE" >> "$LOG_PATH_MODULE"/nvram/nvram_files
         cp ."$NVRAM_FILE" "$LOG_PATH_MODULE"/nvram/
@@ -350,7 +349,7 @@ main_emulation() {
     # we deal with a startup script
     if file "$MNT_POINT""$INIT_FILE" | grep -q "text executable\|ASCII text"; then
       INIT_OUT="$MNT_POINT""$INIT_FILE"
-      find "$INIT_OUT" -xdev -ls
+      find "$INIT_OUT" -xdev -maxdepth 1 -ls || true
       print_output "[*] Backup original init file $ORANGE$INIT_OUT$NC"
       BAK_INIT_ORIG="$INIT_OUT"
       BAK_INIT_BACKUP="$LOG_PATH_MODULE"/"$(basename "$INIT_OUT".init)"
@@ -384,13 +383,11 @@ main_emulation() {
 
     print_ln
     print_output "[*] FirmAE filesytem:"
-    find "$MNT_POINT" -xdev -ls | tee -a "$LOG_FILE"
+    find "$MNT_POINT" -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE" || true
 
     print_ln
     print_output "[*] FirmAE firmadyne directory:"
-    # shellcheck disable=SC2012
-    #ls -l "$MNT_POINT/firmadyne" | tee -a "$LOG_FILE"
-    find "$MNT_POINT"/firmadyne -xdev -ls | tee -a "$LOG_FILE"
+    find "$MNT_POINT"/firmadyne -xdev -ls | tee -a "$LOG_FILE" || true
     print_ln
 
     ### set default network values for network identification mode
@@ -423,19 +420,22 @@ main_emulation() {
     get_networking_details_emulation "$IMAGE_NAME"
 
     print_output "[*] Firmware $ORANGE$IMAGE_NAME$NC finished for identification of the network configuration"
+
+    local F_STARTUP=0
     if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
       cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
       write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
+
+      ###############################################################################################
+      # if we were running into issues with the network identification we poke with rdinit vs init:
+      # lets check if we have found a startup procedure (preInit script) from FirmAE - if not we try it with the other init
+      F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
+      F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
     else
       print_output "[-] No Qemu log file generated ... some weird error occured"
     fi
     print_ln
 
-    ###############################################################################################
-    # if we were running into issues with the network identification we poke with rdinit vs init:
-    # lets check if we have found a startup procedure (preInit script) from FirmAE - if not we try it with the other init
-    F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
-    F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
 
     if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
@@ -712,7 +712,7 @@ handle_fs_mounts() {
       continue
     fi
 
-    find "$FS_FIND" -xdev -ls
+    find "$FS_FIND" -xdev -ls || true
 
     print_output "[*] Identify system areas in the to-mount area:"
     local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
@@ -735,7 +735,7 @@ handle_fs_mounts() {
         continue
       fi
       print_output "[*] PATH found: $N_PATH"
-      find "$N_PATH" -xdev -ls
+      find "$N_PATH" -xdev -ls || true
 
       if ! [[ -d "$MNT_POINT""$MOUNT_PT" ]]; then
         print_output "[*] Creating target directory $MNT_POINT$MOUNT_PT"
@@ -744,7 +744,7 @@ handle_fs_mounts() {
       print_output "[*] Let's copy the identified area to the root filesystem"
       cp -pr "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
       print_output "[*] Target directory: $MNT_POINT$MOUNT_PT"
-      find "$MNT_POINT""$MOUNT_PT" -xdev -ls
+      find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     done
   done
 
@@ -940,8 +940,7 @@ get_networking_details_emulation() {
     if [[ -v NVRAM_TMP[@] ]]; then
       for NVRAM_ENTRY in "${NVRAM_TMP[@]}"; do
         if [[ "$NVRAM_ENTRY" =~ [[:print:]] ]]; then
-          # shellcheck disable=SC2076
-          if [[ ! " ${NVRAMS[*]} " =~ " $NVRAM_ENTRY " ]]; then
+          if [[ ! " ${NVRAMS[*]} " =~  $NVRAM_ENTRY  ]]; then
             NVRAMS+=( "$NVRAM_ENTRY" )
           fi
         fi
@@ -1007,8 +1006,8 @@ get_networking_details_emulation() {
         fi
       done
 
-      #shellcheck disable=SC2001
-      IP_="$(echo "$IP_" | sed 's/^\.//')"
+      #IP_="$(echo "$IP_" | sed 's/^\.//')"
+      IP_="${IP_/\.}"
 
       IP_ADDRESS_=""
       if [[ "$D_END" == "eb" ]]; then
@@ -1287,7 +1286,7 @@ nvram_check() {
   print_output "[*] Mounting QEMU Image Partition 1 to $ORANGE$MNT_POINT$NC"
   mount "${DEVICE}" "$MNT_POINT" || true
 
-	if mount | grep -q "$MNT_POINT"; then
+  if mount | grep -q "$MNT_POINT"; then
     if [[ -v NVRAMS[@] ]]; then
       print_output "[*] NVRAM access detected $ORANGE${#NVRAMS[@]}$NC times. Testing NVRAM access now."
       CURRENT_DIR=$(pwd)
@@ -1353,8 +1352,8 @@ nvram_searcher_emulation() {
       fi
     done
     if [[ "$COUNT" -gt 0 ]]; then
-      #shellcheck disable=SC2001
-      NVRAM_FILE=$(echo "$NVRAM_FILE" | sed 's/^\.//')
+      #NVRAM_FILE=$(echo "$NVRAM_FILE" | sed 's/^\.//')
+      NVRAM_FILE="${NVRAM_FILE/\.}"
       #print_output "[*] $NVRAM_FILE $COUNT ASCII_text"
       echo "$NVRAM_FILE $COUNT ASCII_text" >> "$LOG_PATH_MODULE"/nvram/nvram_files_final
     fi
@@ -1529,23 +1528,27 @@ check_online_stat() {
       # write all services into a one liner for output:
       print_ln
       if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
-        TCP_SERV=$(IFS=$' '; echo "${TCP_SERVICES_STARTUP[*]}")
+        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERVICES_STARTUP[*]}")
+        printf -v TCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
         TCP_SERV_STARTUP=${TCP_SERV//\ /,}
         print_output "[*] TCP Services detected via startup: $ORANGE$TCP_SERV_STARTUP$NC"
       fi
       if [[ -v UDP_SERVICES_STARTUP[@] ]]; then
-        UDP_SERV=$(IFS=$' '; echo "${UDP_SERVICES_STARTUP[*]}")
+        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERVICES_STARTUP[*]}")
+        printf -v UDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
         UDP_SERV_STARTUP=${UDP_SERV//\ /,}
         print_output "[*] UDP Services detected via startup: $ORANGE$UDP_SERV_STARTUP$NC"
       fi
 
       if [[ "${#TCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-        TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_NETSTAT_ARR[*]}")
+        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_NETSTAT_ARR[*]}")
+        printf -v TCP_SERV "%s " "${TCP_SERV_NETSTAT_ARR[@]}"
         TCP_SERV_NETSTAT=${TCP_SERV//\ /,}
         print_output "[*] TCP Services detected via netstat: $ORANGE$TCP_SERV_NETSTAT$NC"
       fi
       if [[ "${#UDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-        UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_NETSTAT_ARR[*]}")
+        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_NETSTAT_ARR[*]}")
+        printf -v UDP_SERV "%s " "${UDP_SERV_NETSTAT_ARR[@]}"
         UDP_SERV_NETSTAT=${UDP_SERV//\ /,}
         print_output "[*] UDP Services detected via netstat: $ORANGE$UDP_SERV_NETSTAT$NC"
       fi
@@ -1557,22 +1560,22 @@ check_online_stat() {
       eval "TCP_SERV_ARR=($(for i in "${TCP_SERV_ARR[@]}" ; do echo "\"$i\"" ; done | sort -u))"
       eval "UDP_SERV_ARR=($(for i in "${UDP_SERV_ARR[@]}" ; do echo "\"$i\"" ; done | sort -u))"
       if [[ -v TCP_SERV_ARR[@] ]]; then
-        TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_ARR[*]}")
+        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_ARR[*]}")
+        printf -v TCP_SERV "%s " "${TCP_SERV_ARR[@]}"
         TCP_SERV=${TCP_SERV//\ /,}
         # print_output "[*] TCP Services detected: $ORANGE$TCP_SERV$NC"
       fi
       if [[ -v UDP_SERV_ARR[@] ]]; then
-        UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_ARR[*]}")
+        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_ARR[*]}")
+        printf -v UDP_SERV "%s " "${UDP_SERV_ARR[@]}"
         UDP_SERV=${UDP_SERV//\ /,}
         # print_output "[*] UDP Services detected: $ORANGE$UDP_SERV$NC"
       fi
 
       UDP_SERV="U:""$UDP_SERV"
       TCP_SERV="T:""$TCP_SERV"
-      # shellcheck disable=SC2001
-      TCP_SERV=$(echo "$TCP_SERV" | sed 's/,$//g')
-      # shellcheck disable=SC2001
-      UDP_SERV=$(echo "$UDP_SERV" | sed 's/,$//g')
+      TCP_SERV="${TCP_SERV%,}"
+      UDP_SERV="${UDP_SERV%,}"
       
       local PORTS_TO_SCAN=""
       if [[ "$TCP_SERV" =~ ^T:[0-9].* ]]; then
@@ -1699,7 +1702,7 @@ write_script_exec() {
 
   if [[ "$EXECUTE" -ne 2 ]];then
     if ! [[ -f "$SCRIPT_WRITE" ]]; then
-      echo "#!/bin/bash" > "$SCRIPT_WRITE"
+      echo "#!/bin/bash -p" > "$SCRIPT_WRITE"
     fi
 
     # for the final script we need to adjust the paths:

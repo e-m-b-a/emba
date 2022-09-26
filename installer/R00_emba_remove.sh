@@ -26,13 +26,19 @@ R00_emba_remove() {
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 
   echo -e "\\n""$ORANGE""Stopping EMBA processes""$NC"
-  pkill -f "./emba.sh" || true
+  pkill -f "emba.sh" || true
 
   echo -e "\\n""$ORANGE""Stopping mongod process""$NC"
-  systemctl stop mongod
+  if [[ -f "/etc/init.d/mongod" ]]; then
+    /etc/init.d/mongod stop
+  else
+    systemctl stop mongod
+  fi
+  echo -e "\\n""$ORANGE""Stopping redis-server process""$NC"
   if [[ -f "/etc/init.d/redis-server" ]]; then
-    echo -e "\\n""$ORANGE""Stopping redis-server process""$NC"
     /etc/init.d/redis-server stop
+  else
+    systemctl stop redis-server
   fi
 
   echo -e "\\n""$ORANGE""Removing redis-server packages""$NC"

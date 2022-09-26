@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -25,6 +25,10 @@ F21_cyclonedx_sbom() {
   local BINARY=""
   local VERSION=""
   local NEG_LOG=0
+  if ! command -v cyclonedx; then
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+    return
+  fi
 
   if [[ -f "$F20_LOG" ]]; then
     if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 # shellcheck disable=SC2016
 
 # EMBA - EMBEDDED LINUX ANALYZER

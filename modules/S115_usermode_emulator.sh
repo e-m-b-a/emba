@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -31,6 +31,20 @@ S115_usermode_emulator() {
     if [[ $IN_DOCKER -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
+    export OPTS=()
+    if command -v jchroot > /dev/null; then
+      CHROOT="jchroot"
+      # OPTS see https://github.com/vincentbernat/jchroot#security-note
+      OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+      print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
+    elif command -v chroot > /dev/null; then
+      CHROOT="chroot"
+      print_output "[*] Using ${ORANGE}chroot${NC} for building chroot environments"
+    else
+      print_output "[-] No chroot binary found ..."
+      return
+    fi
+
     local EMULATOR="NA"
     local BIN_EMU_ARR=()
     local BIN_EMU_TMP=()
@@ -198,7 +212,6 @@ copy_firmware() {
   # we just create a backup if the original firmware path was a root directory
   # if it was a binary file we already have extracted it and it is already messed up
   # so we can mess it up a bit more ;)
-  # shellcheck disable=SC2154
   if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
     cp -pri "$FIRMWARE_PATH" "$LOG_PATH_MODULE" 2> /dev/null
@@ -268,7 +281,7 @@ prepare_emulator() {
     chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
     cp "$(which busybox)" "$R_PATH"
     chmod +x "$R_PATH"/busybox
-    chroot "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
+    "$CHROOT" "${OPTS[@]}" "$R_PATH" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
     rm "$R_PATH"/fixImage_user_mode_emulation.sh || true
     rm "$R_PATH"/busybox || true
     print_bar
@@ -304,7 +317,7 @@ run_init_test() {
 
     write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
 
-    mapfile -t CPU_CONFIGS < <(chroot "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
+    mapfile -t CPU_CONFIGS < <("$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
 
     for CPU_CONFIG_ in "${CPU_CONFIGS[@]}"; do
       if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
@@ -391,11 +404,11 @@ run_init_qemu_runner() {
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
     write_log "" "$LOG_FILE_INIT"
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
   else
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
     write_log "" "$LOG_FILE_INIT"
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
   fi
 }
 
@@ -425,10 +438,10 @@ emulate_strace_run() {
     set +e
   fi
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   else
-    timeout --preserve-status --signal SIGINT 2 chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
+    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
     PID=$!
   fi
   if [[ "$STRICT_MODE" -eq 1 ]]; then
@@ -522,8 +535,7 @@ emulate_binary() {
   write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_BIN"
   write_log "[*] Using CPU config: $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
   #write_log "[*] Root path used: $ORANGE$R_PATH$NC" "$LOG_FILE_BIN"
-  #shellcheck disable=SC2001
-  write_log "[*] Emulating binary: $ORANGE$(echo "$BIN_" | sed 's/^\.//')$NC" "$LOG_FILE_BIN"
+  write_log "[*] Emulating binary: $ORANGE${BIN_/\.}$NC" "$LOG_FILE_BIN"
   write_log "" "$LOG_FILE_BIN"
 
   # lets assume we now have only ELF files. Sometimes the permissions of firmware updates are completely weird
@@ -555,10 +567,10 @@ emulate_binary() {
     fi
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" chroot "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
     fi
     if [[ "$STRICT_MODE" -eq 1 ]]; then
       set -e
@@ -691,7 +703,7 @@ s115_cleanup() {
     print_output "[*] Cleanup empty log files.\\n"
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do
-      LINES_OF_LOG=$(grep -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -v "\[\*\] " | grep -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
+      LINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -a -v "\[\*\] " | grep -a -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
       #print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
       if ! [[ -s "$LOG_FILE_" ]] || [[ "$LINES_OF_LOG" -eq 0 ]]; then
         #print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"

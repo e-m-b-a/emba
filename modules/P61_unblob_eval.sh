@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -85,6 +85,7 @@ unblobber() {
   local UNBLOB_BIN="unblob"
 
   # find unblob installation - we move this later to the dependency checker
+
   if ! command -v unblob && [[ -f "$EXT_DIR"/unblob/unblob_path.cfg ]]; then
     # recover unblob installation - usually we are in the docker container
     if ! [[ -d "$HOME"/.cache ]]; then
