@@ -672,8 +672,8 @@ main()
     NOTIFICATION_PID="$?"
     print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
     echo "${SUDO_USER:-${USER}}" > "$LOG_DIR"/orig_user.log
-    echo "UID: $(id -u ${SUDO_USER:-${USER}})" >> "$LOG_DIR"/orig_user.log
-    echo "GID: $(id -g ${SUDO_USER:-${USER}})" >> "$LOG_DIR"/orig_user.log
+    echo "UID: $(id -u "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
+    echo "GID: $(id -g "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
   fi
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
