@@ -43,12 +43,10 @@ I108_stacs_password_search() {
           git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
         fi
         cd ./external/stacs-rules || ( echo "Could not install EMBA component STACS" && exit 1 )
-        pwd
         find rules -name "*.yar" | sed 's/rules\///' \
           | xargs -I{} bash -c "\
             mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
             touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
-        ls -alR ./*
         pip3 install stacs 2>/dev/null
         cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
         if command -v stacs > /dev/null ; then
