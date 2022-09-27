@@ -18,7 +18,7 @@
 S20_shell_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check scripts (shellchecker)"
+  module_title "Check scripts with shellcheck and semgrep"
   pre_module_reporter "${FUNCNAME[0]}"
 
   export S20_SHELL_VULNS=0
@@ -27,10 +27,14 @@ S20_shell_check()
   local SH_SCRIPT=""
   local S20_VULN_TYPES=()
   local VTYPE=""
+  local SEMGREP=1
+  local NEG_LOG=0
+
+  mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
-    write_csv_log "Script path" "Shell issues detected" "common linux file"
-    mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+    sub_module_title "Check scripts with shellcheck"
     for SH_SCRIPT in "${SH_SCRIPTS[@]}" ; do
       if ( file "$SH_SCRIPT" | grep -q "shell script" ) ; then
         ((S20_SCRIPTS+=1))
@@ -53,10 +57,14 @@ S20_shell_check()
       while read -r VULNS; do
         S20_SHELL_VULNS=$((S20_SHELL_VULNS+VULNS))
       done < "$TMP_DIR"/S20_VULNS.tmp
+      rm "$TMP_DIR"/S20_VULNS.tmp
+    fi
+    if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
+      NEG_LOG=1
     fi
 
     print_ln
-    sub_module_title "Summary of shell issues"
+    sub_module_title "Summary of shell issues (shellcheck)"
     print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts""$NC""\\n"
     write_log ""
     write_log "[*] Statistics:$S20_SHELL_VULNS:$S20_SCRIPTS"
@@ -69,7 +77,37 @@ S20_shell_check()
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}" "$S20_SHELL_VULNS"
+
+  if [[ $SEMGREP -eq 1 ]] ; then
+    sub_module_title "Check scripts with semgrep"
+    local S20_SEMGREP_SCRIPTS=0
+    local S20_SEMGREP_VULNS=0
+    local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
+
+    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$LOG_DIR"/firmware/ > "$SHELL_LOG" 2>&1
+
+    if [[ -f "$SHELL_LOG" ]]; then
+      S20_SEMGREP_ISSUES=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
+      S20_SEMGREP_VULNS=$(grep -c "semgrep-rules.bash.lang.security" "$SHELL_LOG" || true)
+      S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "$SHELL_LOG" | awk '{print $5}')
+      print_ln
+      sub_module_title "Summary of shell issues (semgrep)"
+      if [[ "$S20_SEMGREP_VULNS" -gt 0 ]]; then
+        print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" (""$ORANGE""$S20_SEMGREP_VULNS"" vulnerabilites${GREEN}) in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
+      else
+        print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
+      fi
+    fi
+    if [[ "$S20_SEMGREP_ISSUES" -gt 0 ]]; then
+      NEG_LOG=1
+    fi
+    write_log ""
+    write_log "[*] Statistics1:$S20_SEMGREP_ISSUES:$S20_SEMGREP_SCRIPTS"
+  else
+    print_output "[-] Semgrepper is disabled ... no tests performed"
+  fi
+
+  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
 s20_script_check() {
@@ -83,6 +121,14 @@ s20_script_check() {
   SHELL_LOG="$LOG_PATH_MODULE""/shellchecker_""$NAME"".txt"
   shellcheck -C "$SH_SCRIPT_" > "$SHELL_LOG" 2> /dev/null || true
   VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null || true)
+
+  s20_reporter "$VULNS" "$SH_SCRIPT_" "$SHELL_LOG"
+}
+
+s20_reporter() {
+  local VULNS="${1:0}"
+  local SH_SCRIPT_="${2:0}"
+  local SHELL_LOG="${3:0}"
 
   if [[ "$VULNS" -ne 0 ]] ; then
     #check if this is common linux file:
@@ -103,7 +149,7 @@ s20_script_check() {
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     fi
-    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF"
+    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
     
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi
