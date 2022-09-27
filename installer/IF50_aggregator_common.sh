@@ -26,7 +26,8 @@ IF50_aggregator_common() {
     print_tool_info "net-tools" 1
     print_tool_info "exploitdb" 1
     print_pip_info "cve-searchsploit"
-    echo -e "$ORANGE""cyclonedx sbom converter will be downloaded.""$NC"
+    echo -e "\\n""$ORANGE""$BOLD""cyclonedx""$NC"
+    echo -e "$ORANGE""cyclonedx sbom converter will be installed.""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")

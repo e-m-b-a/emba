@@ -8,3 +8,4 @@ tools/
 config/vt_api_key.txt
 config/emba_updater
 config/trickest_cve-db.txt
+config/module_blacklist.txt

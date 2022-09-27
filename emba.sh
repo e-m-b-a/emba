@@ -139,6 +139,12 @@ run_modules()
       sort_modules
     fi
     for MODULE_FILE in "${MODULES[@]}" ; do
+      # check if "$MODULE_NAME" is in blacklist from config directory and skip it
+      MODULE_NAME=$(basename -s .sh "$MODULE_FILE")
+      if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
+        print_output "[*] $(date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
+        continue
+      fi
       local MOD_FIN=0
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
         if [[ "${MODULE_GROUP^^}" == "P" ]]; then
@@ -254,6 +260,12 @@ run_modules()
           sort_modules
         fi
         for MODULE_FILE in "${MODULES[@]}" ; do
+          # check if "$MODULE_NAME" is in blacklist from config directory and skip it
+          MODULE_NAME=$(basename -s .sh "$MODULE_FILE")
+          if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
+            print_output "[*] $(date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
+            continue
+          fi
           local MOD_FIN=0
           if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
             if [[ "${MODULE_GROUP^^}" == "P" ]]; then
@@ -413,6 +425,10 @@ main()
                   # is for evaluation purposes
   export CVE_BLACKLIST="$CONFIG_DIR"/cve-blacklist.txt  # include the blacklisted CVE values to this file
   export CVE_WHITELIST="$CONFIG_DIR"/cve-whitelist.txt  # include the whitelisted CVE values to this file
+  export MODULE_BLACKLIST=()
+  if [[ -f "$CONFIG_DIR"/module_blacklist.txt ]]; then
+    readarray -t MODULE_BLACKLIST < "$CONFIG_DIR"/module_blacklist.txt
+  fi
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
