@@ -32,7 +32,7 @@ P18_qnap_decryptor() {
     if [[ "$QNAP" -eq 1 ]]; then
       qnap_extractor "$FIRMWARE_PATH"
     fi
-    if [[ "$QNAP" -eq 1 ]] && [[ "$FILES_QNAP" -gt 10 ]]; then
+    if [[ "$QNAP" -eq 1 ]] && [[ "$FILES_QNAP" -gt 20 ]]; then
       MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
       export FIRMWARE_PATH="$LOG_DIR"/firmware/
       backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
