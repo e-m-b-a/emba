@@ -24,13 +24,13 @@ P60_firmware_bin_extractor() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   export DISK_SPACE_CRIT=0
-  export LINUX_PATH_COUNTER=0
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
   if [[ $RTOS -eq 0 ]] ; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
+
 
   check_disk_space
   if ! [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
@@ -49,6 +49,7 @@ P60_firmware_bin_extractor() {
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
 
   if [[ "$BINS" -gt 0 || "$UNIQUE_FILES" -gt 0 ]]; then
+    export LINUX_PATH_COUNTER=0
     linux_basic_identification_helper "$FIRMWARE_PATH_CP"
     print_ln
     print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
