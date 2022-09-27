@@ -28,6 +28,12 @@ P12_avm_freetz_ng_extract() {
 
     avm_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
 
+    if [[ "$FRITZ_FILES" -gt 0 ]]; then
+      MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
+      export FIRMWARE_PATH="$LOG_DIR"/firmware/
+      backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
+    fi
+
     NEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
   fi
@@ -39,9 +45,9 @@ avm_extractor() {
   if ! [[ -f "$AVM_FW_PATH_" ]]; then
     return
   fi
-  local FRITZ_FILES=0
   local FRITZ_DIRS=0
-  local FRITZ_VERSION=""
+  export FRITZ_FILE=0
+  export FRITZ_VERSION=""
 
   sub_module_title "AVM freetz-ng firmware extractor"
 
