@@ -104,14 +104,28 @@ check_nw_interface() {
 }
 
 check_cve_search() {
+  if [[ $JUMP_OVER_CVESEARCH_CHECK -eq 1 ]] ; then
+    # no cve check -> just return
+    return
+  fi
   TOOL_NAME="cve-search"
   print_output "    ""$TOOL_NAME"" - testing" "no_log"
-  if [[ $JUMP_OVER_CVESEARCH_CHECK -eq 0 ]] ; then
-    local CVE_SEARCH_=0 # local checker variable
-    # check if the cve-search produces results:
-    if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-      # we can restart the mongod database only in dev mode and not in docker mode:
-      if [[ "$IN_DOCKER" -eq 0 ]]; then
+  local CVE_SEARCH_=0 # local checker variable
+  # check if the cve-search produces results:
+  if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+    # we can restart the mongod database only in dev mode and not in docker mode:
+    if [[ "$IN_DOCKER" -eq 0 ]]; then
+      print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
+      if [[ "$WSL" -eq 1 ]]; then
+        pkill -f mongod
+        mongod --config /etc/mongod.conf &
+      else
+        service mongod restart
+      fi
+      sleep 10
+
+      # do a second try
+      if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
         print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
         if [[ "$WSL" -eq 1 ]]; then
           pkill -f mongod
@@ -121,21 +135,7 @@ check_cve_search() {
         fi
         sleep 10
 
-        # do a second try
-        if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-          print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
-          if [[ "$WSL" -eq 1 ]]; then
-            pkill -f mongod
-            mongod --config /etc/mongod.conf &
-          else
-            service mongod restart
-          fi
-          sleep 10
-
-          if [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-            CVE_SEARCH_=1
-          fi
-        else
+        if [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_SEARCH_=1
         fi
       else
@@ -144,17 +144,16 @@ check_cve_search() {
     else
       CVE_SEARCH_=1
     fi
-
-    if [[ "$CVE_SEARCH_" -eq 0 ]]; then
-      print_output "    ""$TOOL_NAME"" - ""$RED""not ok""$NC" "no_log"
-      print_cve_search_failure
-      export CVE_SEARCH=0
-    else
-      print_output "    ""$TOOL_NAME"" - ""$GREEN""ok""$NC" "no_log"
-      export CVE_SEARCH=1
-    fi
   else
-    print_output "    ""$TOOL_NAME"" - ""$ORANGE""not checked""$NC" "no_log"
+    CVE_SEARCH_=1
+  fi
+
+  if [[ "$CVE_SEARCH_" -eq 0 ]]; then
+    print_output "    ""$TOOL_NAME"" - ""$RED""not ok""$NC" "no_log"
+    print_cve_search_failure
+    export CVE_SEARCH=0
+  else
+    print_output "    ""$TOOL_NAME"" - ""$GREEN""ok""$NC" "no_log"
     export CVE_SEARCH=1
   fi
 }

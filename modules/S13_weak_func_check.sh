@@ -109,6 +109,7 @@ S13_weak_func_check()
 
         else
           print_output "[-] Something went wrong ... no supported architecture available"
+          print_output "[-] Tested binary: $ORANGE$BINARY$NC"
           print_output "[-] Please open an issue at https://github.com/e-m-b-a/emba/issues"
         fi
       fi
@@ -517,8 +518,10 @@ output_function_details()
     LOG_FILE="$3"
     print_output "$1"
     write_link "$2"
-    cat "$LOG_FILE" >> "$OLD_LOG_FILE"
-    rm "$LOG_FILE" 2> /dev/null
+    if [[ -f "$LOG_FILE" ]]; then
+      cat "$LOG_FILE" >> "$OLD_LOG_FILE"
+      rm "$LOG_FILE" 2> /dev/null
+    fi
     LOG_FILE="$OLD_LOG_FILE"
   }
 
