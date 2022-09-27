@@ -749,6 +749,10 @@ write_notification(){
   if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
     return
   fi
+  if [[ -z "$DISPLAY" ]]; then
+    # in case DISPLAY is not set we are not able to show notifications
+    return
+  fi
 
   local MESSAGE="${1:-}"
 
@@ -769,6 +773,10 @@ write_notification(){
 # this function will handle it and generate a desktop notification
 print_notification(){
   if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
+    return
+  fi
+  if [[ -z "$DISPLAY" ]]; then
+    # in case DISPLAY is not set we are not able to show notifications
     return
   fi
   local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log
