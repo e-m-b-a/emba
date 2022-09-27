@@ -489,8 +489,8 @@ main()
       f)
         export FIRMWARE=1
         export FIRMWARE_PATH="$OPTARG"
-        export FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
-                                                    # we store the original firmware path variable
+        readonly FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
+        export FIRMWARE_PATH_BAK                      # we store the original firmware path variable and make it readonly
         ;;
       F)
         export FORCE=1
