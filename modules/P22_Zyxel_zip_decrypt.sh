@@ -147,8 +147,10 @@ zyxel_zip_extractor() {
           DIRS_ZYXEL=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted/compress_img_extracted -type d | wc -l)
           print_output "[*] Zyxel 2nd stage - Extracted $ORANGE$FILES_ZYXEL$NC files and $ORANGE$DIRS_ZYXEL$NC directories from the firmware image."
           write_csv_log "Zyxel extractor" "$RI_FILE_BIN_PATH" "$EXTRACTION_DIR_/firmware_zyxel_extracted/compress_img_extracted" "$FILES_ZYXEL" "$DIRS_ZYXEL" "NA"
-          break
+          export FIRMWARE_PATH="$LOG_DIR"/firmware/
+          backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
           print_ln
+          break
         else
           print_output "[-] No valid ${ORANGE}compress.img$NC file found"
         fi
