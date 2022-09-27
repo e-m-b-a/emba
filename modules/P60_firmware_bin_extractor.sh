@@ -235,6 +235,13 @@ deeper_extractor_helper() {
         else
           buffalo_enc_extractor "$FILE_TMP" "${FILE_TMP}_buffalo_enc_extracted"
         fi
+      elif [[ "$ZYXEL_ZIP" -ne 0 ]]; then
+        if [[ "$THREADED" -eq 1 ]]; then
+          zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted" &
+          WAIT_PIDS_P20+=( "$!" )
+        else
+          zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted"
+        fi
 
       else
         # default case to binwalk
