@@ -75,10 +75,12 @@ zyxel_zip_extractor() {
   RI_FILE_BIN="$(basename -s .ri "$RI_FILE_")".bin
 
   for ZLD_BIN in "${ZLD_BINS[@]}"; do
+    local FILES_ZYXEL=0
+    local DIRS_ZYXEL=0
     print_output "[*] Checking $ORANGE$ZLD_BIN$NC"
 
     ZLD_DIR=$(dirname "$ZLD_BIN")
-    RI_FILE_BIN_PATH=$(find "$LOG_DIR"/firmware -name "$RI_FILE_BIN")
+    RI_FILE_BIN_PATH=$(find "$LOG_DIR"/firmware -name "$RI_FILE_BIN" | head -1)
     # => this should be the protected Zip file
 
     if [[ $(file "$ZLD_BIN") == *"ELF"* ]] && [[ $(file "$RI_FILE_BIN_PATH") == *"Zip archive data"* ]]; then
@@ -110,7 +112,7 @@ zyxel_zip_extractor() {
       timeout --preserve-status --signal SIGINT 2s "$CHROOT" "${OPTS[@]}" "$ZLD_DIR" -- ./"$EMULATOR" -strace ./"$ZLD_BIN" "$RI_FILE_BIN" AABBCCDD >> "$LOG_PATH_MODULE"/zld_strace.log 2>&1 || true
       rm "$ZLD_DIR"/"$EMULATOR" || true
 
-      if [[ -f "$LOG_PATH_MODULE"/zld_strace.log ]]; then
+      if [[ -f "$LOG_PATH_MODULE"/zld_strace.log ]] && [[ -s "$LOG_PATH_MODULE"/zld_strace.log ]]; then
         ZIP_KEY=$(grep -a -E "execve.*AABBCCDD" "$LOG_PATH_MODULE"/zld_strace.log | cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')
       else
         print_output "[-] No qemu strace log generated -> no further processing possible"
@@ -145,7 +147,10 @@ zyxel_zip_extractor() {
           DIRS_ZYXEL=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted/compress_img_extracted -type d | wc -l)
           print_output "[*] Zyxel 2nd stage - Extracted $ORANGE$FILES_ZYXEL$NC files and $ORANGE$DIRS_ZYXEL$NC directories from the firmware image."
           write_csv_log "Zyxel extractor" "$RI_FILE_BIN_PATH" "$EXTRACTION_DIR_/firmware_zyxel_extracted/compress_img_extracted" "$FILES_ZYXEL" "$DIRS_ZYXEL" "NA"
+          export FIRMWARE_PATH="$LOG_DIR"/firmware/
+          backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
           print_ln
+          break
         else
           print_output "[-] No valid ${ORANGE}compress.img$NC file found"
         fi
