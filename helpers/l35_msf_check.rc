@@ -1,0 +1,178 @@
+<ruby>
+
+#
+# Print the help function
+#
+def help_me
+	help = %Q|
+	Description:
+    This Metasploit RC script is part of the firmware analyzer EMBA.
+    This script will automatically import the CSV file generated from the Nmap
+    portscanner during system mode emulation. After the import procedure it runs
+    through all Metasploit modules and triggers the check function.
+
+  Usage:
+		./msfconsole -r [rc_path] [db_user] [db_pass] [db_workspace] [Nmap CSV file]
+		./msfconsole -r ./helpers/msf-check.rc msf msf msf nmap_csv_file
+
+  This script is massively based on the following resource scripts:
+    https://github.com/rapid7/metasploit-framework/blob/master/scripts/resource/autoexploit.rc
+    https://github.com/rapid7/metasploit-framework/blob/master/scripts/resource/dev_checks.rc
+	|
+
+	help = help.gsub(/^\t/, '')
+	print_line(help)
+end
+
+@job_ids = []
+
+#
+# See if we're already connected to the database
+#
+def is_db_connected?
+	begin
+		framework.db.hosts
+		return true
+	rescue ::ActiveRecord::ConnectionNotEstablished
+		return false
+	end
+end
+
+#
+# Connect to the database
+#
+def init_db(username, password, workspace)
+	if username.empty? or password.empty?
+		raise ArgumentError, "You must have credentials to connect to the database"
+	end
+
+	print_status("Connecting to database: #{workspace}")
+	run_single("db_connect #{username}:#{password}@localhost:5432/#{workspace}")
+end
+
+def wait_until_jobs_done
+    loop do
+        @job_ids.each do |job_id|
+            current_job_ids = framework.jobs.keys.map { |e| e.to_i }
+            sleep 1 if current_job_ids.include?(job_id)
+        end
+
+        return
+    end
+end
+
+def nmap_importer(nmap_csv)
+  print_status("Cleanup current database ...")
+  run_single("hosts -d")
+  run_single("services -d")
+
+  print_status("Importing Nmap results ...")
+  run_single("db_import #{nmap_csv}")
+
+  print_status("Imported host and service details ...")
+  run_single("hosts")
+  run_single("services")
+end
+
+def exploit_checker
+  framework.db.hosts.each { |host|
+    print_status("Checking host #{host.address.to_s} ...")
+    framework.exploits.each { |name,mod|
+      mod = framework.modules.create("#{name}")
+
+      if mod.nil?
+        print_line("Unable to load #{name}")
+        next
+      end
+
+      mod.datastore['RHOSTS'] = host.address
+
+      host.services.each { |serv|
+        next if (serv.state != Msf::ServiceState::Open)
+
+        next if (mod.datastore['RPORT'] != serv.port)
+
+        # remove modules that we won't check:
+        next if (name =~ /local/ or
+                 name =~ /fileformat/)
+        # only test modules from the following categories:
+        next if not (name =~ /linux/ or
+                      name =~ /multi/ or
+                      name =~ /freebsd/ or
+                      name =~ /unix/ or
+                      name =~ /openbsd/)
+        # remove modules with known issues:
+        next if (name =~ /cve_2020_13160_anydesk/ or
+                name =~ /goahead_ldpreload/)
+    
+        print_status("Checking #{name} against host #{host.address.to_s}:#{serv.port} ...")
+        begin
+          check_code = mod.check_simple({'RunAsJob': true, 'LocalOutput': self.output})
+          if mod.job_id
+                print_status("#{name} job ID for target #{host.address} is: #{mod.job_id}")
+                @job_ids << mod.job_id
+          end
+          if (check_code =~ /Vulnerable/ or check_code =~ /Appears/)
+                print_good("Vulnerability identified with #{check_code} - module #{name} - #{host.address.to_s}:#{serv.port}")
+                framework.db.report_vuln(
+                    workspace: mod.workspace,
+                    host: mod.rhost,
+                    name: mod.name,
+                    info: "This was flagged as vulnerable by the explicit check of #{mod.fullname}.",
+                    refs: mod.references
+                )
+          end
+        rescue ::Exception => e
+            print_error(e.message)
+        end
+      }
+    }
+  }
+  wait_until_jobs_done
+end
+
+
+#
+# Initialize our arguments
+#
+def init_args
+	args = {}
+	if ARGV.join('') =~ /^help$/i
+		args[:help] = true
+		return args
+	end
+
+	datastore           = framework.datastore
+	args[:db_user]      = ARGV.shift || datastore['DB_USER'] || ''
+	args[:db_pass]      = ARGV.shift || datastore['DB_PASS'] || ''
+	args[:db_workspace] = ARGV.shift || datastore['DB_WORKSPACE'] || ''
+	args[:nmap_csv]     = ARGV.shift || ''
+
+	raise ArgumentError, "Missing a nmap csv path" if args[:nmap_csv].empty?
+
+	return args
+end
+
+begin
+	args = init_args
+	if args[:help]
+		help_me
+		return
+	else
+		if not is_db_connected?
+			init_db(args[:db_user], args[:db_pass], args[:db_workspace])
+		end
+	end
+
+  nmap_importer(args[:nmap_csv])
+  exploit_checker
+  # just to get a final overview
+  run_single("vulns")
+rescue ArgumentError => e
+	print_error("Invalid argument: #{e.message}")
+	return
+end
+
+run_single("exit")
+
+</ruby>
