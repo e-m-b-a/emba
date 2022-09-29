@@ -31,10 +31,6 @@ L35_metasploit_check() {
       print_output "[-] Metasploit resource script not available - Not performing metasploit checks"
       return
     fi
-    if [[ "$IN_DOCKER" -eq 1 ]]; then
-      print_output "[-] Metasploit module currently only in full installation mode supported - Not performing metasploit checks"
-      return
-    fi
 
     module_log_init "${FUNCNAME[0]}"
     module_title "Metasploit exploit checks of emulated device."
@@ -44,9 +40,7 @@ L35_metasploit_check() {
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
     if [[ -n "$IP_ADDRESS_" ]]; then
-
       if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-        prepare_metasploit
 
         check_live_metasploit
         MODULE_END=1
@@ -63,25 +57,24 @@ L35_metasploit_check() {
 
 check_live_metasploit() {
   sub_module_title "Metasploit tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
+  local PORTS=""
+  local PORTS_ARR=()
 
-  mapfile -t NMAP_XML_FILES < <(find "$LOG_DIR"/l10_system_emulation/ -iname "nmap_emba_*.xml")
-  for NMAP_XML in "${NMAP_XML_FILES[@]}"; do
-    timeout --preserve-status --signal SIGINT 600 msfconsole -r ./helpers/l35_msf_check.rc msf msf msf "$NMAP_XML" | tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
-  done
+  mapfile -t PORTS_ARR < <(grep -h "<state state=\"open\"" "$LOG_DIR"/l10_system_emulation/*.xml | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
+  printf -v PORTS "%s " "${PORTS_ARR[@]}"
+  PORTS=${PORTS//\ /,}
+  PORTS="${PORTS%,}"
+  print_output "[*] Testing system with IP address $ORANGE$IP_ADDRESS_$NC and ports $ORANGE$PORTS$NC."
+
+  timeout --preserve-status --signal SIGINT 1000 msfconsole -r ./helpers/l35_msf_check.rc "$IP_ADDRESS_" "$PORTS" | tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
 
   if [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]]; then
     print_ln
+    print_output "[*] Possible Metasploit results for verification." "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
+
+    grep -a -i "\[+\]\|stager" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt
+
+    print_ln
   fi
   print_output "[*] Metasploit tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
-}
-
-prepare_metasploit() {
-  print_output "[*] Stop the metasploit database"
-  msfdb stop
-  print_output "[*] Initialize the metasploit database"
-  msfdb init
-  print_output "[*] Start the metasploit database"
-  msfdb start
-  print_output "[*] Status of the metasploit database"
-  msfdb status
 }

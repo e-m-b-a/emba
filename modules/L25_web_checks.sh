@@ -64,10 +64,18 @@ main_web_check() {
 
       # handle first https and afterwards http
       if [[ "$SERVICE" == *"ssl|http"* ]] || [[ "$SERVICE" == *"ssl/http"* ]];then
-        # we make a screenshot for every web server
-        make_web_screenshot "$IP_ADDRESS_" "$PORT"
+        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          # we make a screenshot for every web server
+          make_web_screenshot "$IP_ADDRESS_" "$PORT"
+        else
+          print_output "[-] System not responding - No screenshot possible"
+        fi
 
-        testssl_check "$IP_ADDRESS_" "$PORT"
+        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          testssl_check "$IP_ADDRESS_" "$PORT"
+        else
+          print_output "[-] System not responding - No SSL test possible"
+        fi
 
         # but we only test the server with Nikto and other long running tools once
         # Note: this is not a full vulnerability scan. The checks are running only for
