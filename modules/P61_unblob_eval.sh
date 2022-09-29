@@ -122,7 +122,7 @@ unblobber() {
     mkdir -p "$OUTPUT_DIR_UNBLOB"
   fi
 
-  "$UNBLOB_BIN" -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
+  timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
 
   print_ln
 }

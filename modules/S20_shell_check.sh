@@ -84,7 +84,7 @@ S20_shell_check()
     local S20_SEMGREP_VULNS=0
     local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
 
-    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$LOG_DIR"/firmware/ > "$SHELL_LOG" 2>&1
+    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$LOG_DIR"/firmware/ > "$SHELL_LOG" 2>&1 || true
 
     if [[ -f "$SHELL_LOG" ]]; then
       S20_SEMGREP_ISSUES=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
