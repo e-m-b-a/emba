@@ -92,6 +92,7 @@ end
 #
 # main
 #
+print_status("Starting Metasploit analysis ..."
 begin
   args = init_args
   if args[:help]

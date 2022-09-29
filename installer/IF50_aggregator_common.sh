@@ -50,8 +50,8 @@ IF50_aggregator_common() {
           ln -s "/usr/share/exploitdb" "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database"
         fi
 
-        echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database mapping.""$NC"
-        cve_searchsploit -u
+        #echo -e "\\n""$MAGENTA""$BOLD""Updating cve_searchsploit database mapping.""$NC"
+        #cve_searchsploit -u
 
         echo -e "[*] Installing cyclonedx-cli for converting SBOMs"
         if [[ -d "/home/linuxbrew/.linuxbrew/bin" ]]; then
