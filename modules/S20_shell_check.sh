@@ -87,9 +87,9 @@ S20_shell_check()
     semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$LOG_DIR"/firmware/ > "$SHELL_LOG" 2>&1 || true
 
     if [[ -f "$SHELL_LOG" ]]; then
-      S20_SEMGREP_ISSUES=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}')
+      S20_SEMGREP_ISSUES=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}' || true)
       S20_SEMGREP_VULNS=$(grep -c "semgrep-rules.bash.lang.security" "$SHELL_LOG" || true)
-      S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "$SHELL_LOG" | awk '{print $5}')
+      S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "$SHELL_LOG" | awk '{print $5}' || true)
       print_ln
       sub_module_title "Summary of shell issues (semgrep)"
       if [[ "$S20_SEMGREP_VULNS" -gt 0 ]]; then
