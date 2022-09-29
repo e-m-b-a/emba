@@ -1719,7 +1719,6 @@ get_binary() {
 }
 
 add_partition_emulation() {
-  local IFS=$'\n'
   local IMAGE_PATH
   local DEV_PATH=""
   local FOUND=false
@@ -1727,7 +1726,9 @@ add_partition_emulation() {
   losetup -Pf "${1}"
   while (! "${FOUND}"); do
     sleep 1
-    for LINE in $(losetup); do
+    local LOSETUP_OUT=()
+    mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE")
+    for LINE in "${LOSETUP_OUT[@]}"; do
       IMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
       if [[ "${IMAGE_PATH}" = "${1}" ]]; then
         DEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
