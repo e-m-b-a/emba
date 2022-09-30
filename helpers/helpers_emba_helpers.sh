@@ -126,6 +126,7 @@ cleaner() {
       reset_network_emulation 2
     fi
   fi
+  restore_permissions
 
   if pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
     pkill -f "find ./external/trickest" 2>/dev/null || true
@@ -253,9 +254,11 @@ disable_strict_mode() {
 
 restore_permissions() {
   if [[ -f "$LOG_DIR"/orig_user.log ]]; then
-    ORIG_USER=$(cat "$LOG_DIR"/orig_user.log)
+    ORIG_USER=$(head -1 "$LOG_DIR"/orig_user.log)
     print_output "[*] Restoring directory permissions for user: $ORANGE$ORIG_USER$NC" "no_log"
-    chown "$ORIG_USER":"$ORIG_USER" "$LOG_DIR" -R || true
+    ORIG_UID="$(grep "UID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
+    ORIG_GID="$(grep "GID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
+    chown "$ORIG_UID":"$ORIG_GID" "$LOG_DIR" -R
     rm "$LOG_DIR"/orig_user.log || true
   fi
 }
