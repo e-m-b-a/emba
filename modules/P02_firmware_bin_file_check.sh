@@ -128,6 +128,7 @@ fw_bin_detector() {
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
+  # we are running binwalk on the file to analyze the output afterwards:
   binwalk "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
   UEFI_CHECK=$(grep -c "UEFI" "$TMP_DIR"/s02_binwalk_output.txt || true)
 

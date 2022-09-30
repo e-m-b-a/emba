@@ -46,7 +46,8 @@ S99_grepit() {
   local GREPIT_RESULTS=0
 
   local MAX_MOD_THREADS
-  MAX_MOD_THREADS=$((1*"$(grep -c ^processor /proc/cpuinfo || true )"))
+  #MAX_MOD_THREADS=$((1*"$(grep -c ^processor /proc/cpuinfo || true )"))
+  MAX_MOD_THREADS=1
 
   # grepit options:
   # Sometimes we look for composite words with wildcard, eg. root.{0,20}detection, this is the maximum
@@ -57,7 +58,8 @@ S99_grepit() {
   # This variable prevents this behaviour
   export GREP_COLORS=ne
   # sometimes we have so many results. We need to limit it a bit
-  local LIMIT_GREP=(-m 20000)
+  # -m is limit per file and in this case per grep search per file
+  local LIMIT_GREP=(-m 100)
   # Do not remove -rP if you don't know what you are doing, otherwise you probably break this script
   local GREP_ARGUMENTS=(-a -n -A 1 -B 3 -rP)
   # Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)

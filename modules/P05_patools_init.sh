@@ -77,11 +77,8 @@ patools_extractor() {
     print_ln
     print_output "[*] No valid compressed file detected - extraction process via binwalk started"
 
-    if [[ "$BINWALK_VER_CHECK" -eq 1 ]]; then
-      binwalk --run-as=root --preserve-symlinks -e -C "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
-    else
-      binwalk -e -C "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
-    fi
+    binwalk_deep_extract_helper 0 "$FIRMWARE_PATH_" "$EXTRACTION_DIR_"
+
   fi
 
   print_ln

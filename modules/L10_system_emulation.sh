@@ -53,7 +53,7 @@ L10_system_emulation() {
 
       for R_PATH in "${ROOT_PATH[@]}" ; do
         print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
-        write_link "p60"
+        write_link "p59"
 
         if [[ -n "$D_END" ]]; then
           D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
@@ -1528,26 +1528,22 @@ check_online_stat() {
       # write all services into a one liner for output:
       print_ln
       if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
-        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERVICES_STARTUP[*]}")
         printf -v TCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
         TCP_SERV_STARTUP=${TCP_SERV//\ /,}
         print_output "[*] TCP Services detected via startup: $ORANGE$TCP_SERV_STARTUP$NC"
       fi
       if [[ -v UDP_SERVICES_STARTUP[@] ]]; then
-        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERVICES_STARTUP[*]}")
         printf -v UDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
         UDP_SERV_STARTUP=${UDP_SERV//\ /,}
         print_output "[*] UDP Services detected via startup: $ORANGE$UDP_SERV_STARTUP$NC"
       fi
 
       if [[ "${#TCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_NETSTAT_ARR[*]}")
         printf -v TCP_SERV "%s " "${TCP_SERV_NETSTAT_ARR[@]}"
         TCP_SERV_NETSTAT=${TCP_SERV//\ /,}
         print_output "[*] TCP Services detected via netstat: $ORANGE$TCP_SERV_NETSTAT$NC"
       fi
       if [[ "${#UDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_NETSTAT_ARR[*]}")
         printf -v UDP_SERV "%s " "${UDP_SERV_NETSTAT_ARR[@]}"
         UDP_SERV_NETSTAT=${UDP_SERV//\ /,}
         print_output "[*] UDP Services detected via netstat: $ORANGE$UDP_SERV_NETSTAT$NC"
@@ -1560,13 +1556,11 @@ check_online_stat() {
       eval "TCP_SERV_ARR=($(for i in "${TCP_SERV_ARR[@]}" ; do echo "\"$i\"" ; done | sort -u))"
       eval "UDP_SERV_ARR=($(for i in "${UDP_SERV_ARR[@]}" ; do echo "\"$i\"" ; done | sort -u))"
       if [[ -v TCP_SERV_ARR[@] ]]; then
-        #TCP_SERV=$(IFS=$' '; echo "${TCP_SERV_ARR[*]}")
         printf -v TCP_SERV "%s " "${TCP_SERV_ARR[@]}"
         TCP_SERV=${TCP_SERV//\ /,}
         # print_output "[*] TCP Services detected: $ORANGE$TCP_SERV$NC"
       fi
       if [[ -v UDP_SERV_ARR[@] ]]; then
-        #UDP_SERV=$(IFS=$' '; echo "${UDP_SERV_ARR[*]}")
         printf -v UDP_SERV "%s " "${UDP_SERV_ARR[@]}"
         UDP_SERV=${UDP_SERV//\ /,}
         # print_output "[*] UDP Services detected: $ORANGE$UDP_SERV$NC"
@@ -1725,7 +1719,6 @@ get_binary() {
 }
 
 add_partition_emulation() {
-  local IFS=$'\n'
   local IMAGE_PATH
   local DEV_PATH=""
   local FOUND=false
@@ -1733,7 +1726,9 @@ add_partition_emulation() {
   losetup -Pf "${1}"
   while (! "${FOUND}"); do
     sleep 1
-    for LINE in $(losetup); do
+    local LOSETUP_OUT=()
+    mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE")
+    for LINE in "${LOSETUP_OUT[@]}"; do
       IMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
       if [[ "${IMAGE_PATH}" = "${1}" ]]; then
         DEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
@@ -1744,8 +1739,7 @@ add_partition_emulation() {
     done
   done
 
-  # shellcheck disable=SC2010
-  while (! ls -al "${DEV_PATH}" | grep -q "disk"); do
+  while (! find "${DEV_PATH}" -ls | grep -q "disk"); do
     sleep 1
   done
   echo "${DEV_PATH}"

@@ -92,7 +92,7 @@ IP12_avm_freetz_ng_extract() {
           sudo -u freetzuser make tools
           cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
           chown -R root:root external/freetz-ng
-	  if [[ "$IN_DOCKER" -eq 1 ]]; then
+          if [[ "$IN_DOCKER" -eq 1 ]]; then
             # do some cleanup of the docker image
             userdel freetzuser
             if [[ -d "external/freetz-ng/source" ]]; then
@@ -115,7 +115,7 @@ IP12_avm_freetz_ng_extract() {
               echo -e "${ORANGE}[*] Removing freetz-ng make directory$NC"
               rm -r "external/freetz-ng/make"
             fi
-	  fi
+          fi
         else
           echo -e "${ORANGE}Found freetz directory ... Not touching it$NC"
         fi
