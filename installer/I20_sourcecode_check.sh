@@ -46,7 +46,9 @@ I20_sourcecode_check() {
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
         pip3 install semgrep
-        git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
+        if ! [[ -d external/semgrep-rules ]]; then
+          git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
+        fi
 
         if ! [[ -d "external/iniscan" ]] ; then
           mkdir external/iniscan

