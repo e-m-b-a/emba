@@ -151,6 +151,10 @@ check()
       MODULES_TO_CHECK_ARR+=("$SOURCE")
     fi
 
+    if [[ "$SOURCE" =~ helpers_emba_load_strict_settings ]]; then
+      # this file resets the IFS which is complained by semgrep - we exclude it from semgrep checks
+      continue
+    fi
     echo -e "\\n""$GREEN""Run ${ORANGE}semgrep$GREEN on $ORANGE$SOURCE""$NC""\\n"
     semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE" | tee /tmp/emba_semgrep.log
     if grep -q "Findings:" /tmp/emba_semgrep.log; then
