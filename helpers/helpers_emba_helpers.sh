@@ -126,7 +126,9 @@ cleaner() {
       reset_network_emulation 2
     fi
   fi
-  restore_permissions
+  if [[ "$IN_DOCKER" -eq 1 ]]; then
+    restore_permissions
+  fi
 
   if pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
     pkill -f "find ./external/trickest" 2>/dev/null || true
