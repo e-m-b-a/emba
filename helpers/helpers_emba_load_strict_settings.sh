@@ -22,6 +22,7 @@ load_strict_mode_settings(){
   set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
   set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
   shopt -s extdebug # Enable extended debugging
+  # nosemgrep
   IFS=$'\n\t'     # Set the "internal field separator"
   trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
 }
