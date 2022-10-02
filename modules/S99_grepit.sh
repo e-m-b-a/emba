@@ -45,9 +45,9 @@ S99_grepit() {
   local GREPIT_MODULES=()
   local GREPIT_RESULTS=0
 
-  local MAX_MOD_THREADS
-  #MAX_MOD_THREADS=$((1*"$(grep -c ^processor /proc/cpuinfo || true )"))
-  MAX_MOD_THREADS=1
+  local MAX_MOD_THREADS=1
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
+
 
   # grepit options:
   # Sometimes we look for composite words with wildcard, eg. root.{0,20}detection, this is the maximum
@@ -151,7 +151,9 @@ grepit_search() {
       write_log "" "$LOG_PATH_MODULE/$OUTFILE"
     fi
 
+    ulimit -Sv "$MEM_LIMIT"
     "$GREP_COMMAND" "${ARGS_FOR_GREP[@]}" "${STANDARD_GREP_ARGUMENTS[@]}" -- "$SEARCH_REGEX" "$FIRMWARE_PATH" >> "$LOG_PATH_MODULE/$OUTFILE" 2>&1 || true
+    ulimit -Sv unlimited
 
     if [[ "$LOG_DETAILS" -eq 1 ]]; then
       if [[ -f "$LOG_PATH_MODULE/$OUTFILE" ]] && ! [[ $(grep -v -c -E "\ Searching\ \(" "$LOG_PATH_MODULE/$OUTFILE" 2>/dev/null) -gt 7 ]]; then
