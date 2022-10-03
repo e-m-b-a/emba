@@ -1,0 +1,74 @@
+
+EMBA version 1.1.2 - Knight Rider Edt.
+
+
+                                    ..............................................................................                                    
+                                 .'cooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooool,.                                 
+                                .:xOOkdllllllllccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccokOOkl.                                
+                              .'okOOxc.;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::,.;dOOOo'.                              
+                             .;xOOOd,'lkOkoolllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllokOkl.'oOOOx:.                             
+                            .lkOOOo',dOkd'                                                                  ,dOOd;.lkOOkl.                            
+                           'oOOOkl':xOkl.                                                                    .lkOkc.:kOkOo'                           
+                         .,dOOOk:.ckOx:                             .,,,'...                                  .:kOkl.;xOOOd;.                         
+                        .:xOOOx;'lOOx,                              .cllollllllc;'.                             ;xOOo',dOkOk:.                        
+                       .ckOkOd,'oOOd'                               .:lcccccccclloddc;.                          ,xOOd',dOkOkc.                       
+                      .:kOkOd',dOko.                                .cddxxkkOkxdlccloxxo:.                        'dOOd''dOOOkc.                      
+                     .;kOOOo',xOko.                                  ,cccccccccldkkxolloxkl,.                      'xOOd,'dOkOk:.                     
+                     .oOkOd',xOOl.                                ..;xOOOOkkkxollllldkxollxko,                      'dOOx,'oOOOd'                     
+                     ,xOOk;.dOOo.                              .,cdkkOkkOOOOkOOOOOxolcldkdclxkc.                     'dOOd''xOOx;                     
+                     ;kOOd.;kOx,                              .okOOkkOOOOOOOOOOOOOOOOkl;:dkl:oko.                     ,xOO:.lOOk:.                    
+                    .:kOOc.cOOl.                             .dOOOOOOOOOOOOOOOOOOOOkOOOxc,oOd:lkd.                    .lOOc.:OkOc.                    
+                     ;kOO:.cOO:                              cOOOOOOOOOOOOOOOOOOOOkOOOkkOl,oOo;oOl.                    cOOc.:OOkc.                    
+                     ,xOO:.lOk;                             .dOOOOOkkOOOOOOOOOOOOOOOOOOOOkc:xOl;xk,                    :kOc.:OOOc.                    
+                     ,xOO:.lOk;                             :kOOOOOOOOOkOOOOOkkOOOOOOOOOOOd:oOx;cOc                    :kOc.:OOk:.                    
+                     .dOOc.cOk;                           .;xOkOOOOOOOOkOOOOOOOOOOOOOOOOOOkclkk::Oo.                   :kOc.:OOx;                     
+                     .lOOl.:OO:                          ,okOOOOOkkOOOkxxkOOOOOOOOOOOOOOOOOl:kO::ko.                   cOO:.lOOd'                     
+                     .ckOo.;kOc                        .lkOOOOOOOkOkl;...:xOOOkOOOOOOOOOOOOl:xO::ko.                  .lOk,.oOOo.                     
+                      ;xOd''xOd.                      .oOOOOOOOOOxc'      cOOOOOkOOOOOOOOOOl:xO::ko.                  .oOx''xOk:.                     
+                      .oOO:.oOk,                      :OkOOOOkOkl.        ;xkOOOOOOOOOOOOkOl;xk;;Oo.                  ,kOl.:OOd'                      
+                      .:kOo.;kOl.                     'loolokko,         .lOOOOOOOOOOOOOOOOl;xk,;Oo.                 .lOk;.oOk:.                      
+                       'oOk;.oOx'                           ''.       .,cdOOOOkOOOOOOOOOOOOl;xx':Ol.                 ,xOo.,kOd'                       
+                       .:kOd';kOc                                 .,cokOOOOOOOOOOOOOOOOOkOO:;ko.:Oc                 .oOk;.lOk:.                       
+                        .lkOc.lOx,                              'cxOOkOOOOOOOOOOOOOOOOOOOOk;;Ol.cO:                 ckOl.;kOo.                        
+                         ,xOx,'xOo.                           'lkOOkkOOOOOOOOOOOOOOOOOOOOOk;:Ol.lOc                'xOd'.dOx,                         
+                         .:kOo':Ok:                         .cxOkkOOOOOOOOOOOOOOOOOOOOOOOOk:;ko,l0d.              .oOk;.cOkc.                         
+                          .lOOc.lOx,                       .oOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo;lkl;okd,             ckkc.;kOo.                          
+                           'dOx;'dOo.                     'dOkOOOOOOOOOOOOOOOOOOOOOOOOOOOOOkd:cxd::xkc.          ,xOo.'dOx,                           
+                           .,dOd';xOc.                   'dOkOOOOOOOOOOOOOOOOOOOOOOOOOOOkkOOOkocoko:okd,        'dOd'.oOk:.                           
+                            .;xOo.:kkc                  .dOkkOOOOOOOOOOOOOOOOOOOOOOOOOOOOkxdddxo;;oo;;lo,      .oOk;.cOkc.                            
+                             .:kOl'cOk:                .lOOkOkOOOOOOOOOOOOOOOOOOOOOOOOkkOd,.....   .   .      .lOk:.:kkl.                             
+                              .ckOc.cOk;               ;kOkOkOOOOOOOOOOOOOOOOOOOOOOOOOOOOk:                  .lOkc.;kOd'                              
+                               .ckkc.lkx;             .dOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOx;                .lkkc.;xOd'                               
+                                .ckkc.cOx;            .:cccclllllllllllllllllllllllllllc:::'               .lOkc.;xOd,                                
+                                 .:kkc.ckk:.               ,oddooooooooooooooooooodooc'                   .lOkc.:kOd,                                 
+                                  .:kkl':kkc.               ;xOOOOOOOOOOOOOOOOOOkOkd:.                   .oOk:.ckOd'                                  
+                                   .;xOl';xOo.               .looooooooooooooooool;.                    ,xOx;.lkOl.                                   
+                                    .,dOd,'oOd,            'cccllllllllllllllllllccccc:'              .:kOo''oOkc.                                    
+                                      .lkx;.ckkc.        .ckOOOOOOOOOOOOOOOOOOOOOOOOOkOkc.           .okkl';xOx;.                                     
+                                       .:kkl';dOo'      .lkOOkOOOOOOOOOOkkkkOOOOOOOOOkkOko.         ;xOx;'lkOo'.                                      
+                                        .,dOd,'lkx:.   .okxxkkxxxxxxxxxxxxxxxxxkkkxxkkxxxxo.      .lkkl';dOkc.                                        
+                                          .ckkc',dkd,   ...................................     .:xOd;'ckOd,.                                         
+                                           .;dOd;.:xko'                                        ,oOkc';dOkc.                                           
+                                             .ckkl,'lkkl.                                    'lkkl,;okOo,.                                            
+                                              .,okxc',okxc.                                .lkko,,lkkx:.                                              
+                                                .;dkx:',okkc.                            'lkko;,cxOxc.                                                
+                                                  .:xOd:',okkl'                        'lkko;,cxOkl'.                                                 
+                                                   ..:xOd:',lkkl'                   .,lkko;,cxOkl,.                                                   
+                                                     ..cxkxc',lxkl,.              .;dOkl;,cxOkl,.                                                     
+                                                       ..:dkxl,':dkdc:;,'''''',,;cxOxc,;okOxl'.                                                       
+                                                          .;okko:,;lxkkkkkkkkkkkkxo:;:dkkd:..                                                         
+                                                            .,lkOxl;,,,,'''''''''';lxOko;.                                                            
+                                                              .'cdOOxdddooooooooodkOxl'.                                                              
+                                                                ..:odxxdddddddddddl:..                                                                
+                                                                   ................                                                                   
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+                                                                                                                                                      
+
