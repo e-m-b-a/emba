@@ -68,13 +68,13 @@ check_live_metasploit() {
 
   # metasploit tries to parse env variables and our environment is wasted!
   export PORT=""
-  timeout --preserve-status --signal SIGINT 1000 msfconsole -q -n -r ./helpers/l35_msf_check.rc "$IP_ADDRESS_" "$PORTS" | tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
+  timeout --preserve-status --signal SIGINT 1000 msfconsole -q -n -r "$HELP_DIR"/l35_msf_check.rc "$IP_ADDRESS_" "$PORTS" | tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
 
   if [[ -d "$HOME"/.msf/logs ]]; then
     cp -pr "$HOME"/.msf/logs "$LOG_PATH_MODULE"
   fi
 
-  if [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]] && [[ $(grep -a -i -c "\[+\]\|stager" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt) -gt 0 ]]; then
+  if [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]] && [[ $(grep -a -i -c "\[+\]\|stager\|opened" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt) -gt 0 ]]; then
     print_ln
     print_output "[+] Possible Metasploit results for verification." "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
     grep -a -i "\[+\]\|stager" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
