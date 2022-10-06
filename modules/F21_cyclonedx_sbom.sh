@@ -25,12 +25,13 @@ F21_cyclonedx_sbom() {
   local BINARY=""
   local VERSION=""
   local NEG_LOG=0
-  if ! command -v cyclonedx; then
+
+  if ! command -v cyclonedx > /dev/null; then
     module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
     return
   fi
 
-  if [[ -f "$F20_LOG" ]]; then
+  if [[ -f "$F20_LOG" ]] && [[ "$(wc -l "$F20_LOG" | awk '{print $1}')" -gt 1 ]]; then
     if [[ -f "$CSV_DIR"/f21_cyclonedx_sbom.csv ]]; then
       rm "$CSV_DIR"/f21_cyclonedx_sbom.csv
     fi
@@ -52,7 +53,7 @@ F21_cyclonedx_sbom() {
       cyclonedx convert --input-file "$CSV_DIR"/f21_cyclonedx_sbom.csv --output-file "$LOG_DIR"/f21_cyclonedx_sbom.json || true
     fi
     if [[ -f "$LOG_DIR"/f21_cyclonedx_sbom.json ]]; then
-      print_output "[+] SBOM in json format created in $ORANGE$LOG_DIR/f21_cyclonedx_sbom.json$NC:"
+      print_output "[+] SBOM in json format created:" "" "$LOG_DIR/f21_cyclonedx_sbom.json"
       print_ln
       tee -a "$LOG_FILE" < "$LOG_DIR"/f21_cyclonedx_sbom.json
       print_ln

@@ -126,6 +126,9 @@ cleaner() {
       reset_network_emulation 2
     fi
   fi
+  if [[ "$IN_DOCKER" -eq 1 ]]; then
+    restore_permissions
+  fi
 
   if pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
     pkill -f "find ./external/trickest" 2>/dev/null || true
@@ -208,12 +211,7 @@ enable_strict_mode() {
     # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
     # shellcheck disable=SC1091
     source ./installer/wickStrictModeFail.sh
-    set -e          # Exit immediately if a command exits with a non-zero status
-    set -u          # Exit and trigger the ERR trap when accessing an unset variable
-    set -o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
-    set -E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
-    shopt -s extdebug # Enable extended debugging
-    IFS=$'\n\t'     # Set the "internal field separator"
+    load_strict_mode_settings
     trap 'wickStrictModeFail $? | tee -a "$LOG_DIR"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
 
     if [[ "$PRINTER" -eq 1 ]]; then
@@ -253,9 +251,11 @@ disable_strict_mode() {
 
 restore_permissions() {
   if [[ -f "$LOG_DIR"/orig_user.log ]]; then
-    ORIG_USER=$(cat "$LOG_DIR"/orig_user.log)
+    ORIG_USER=$(head -1 "$LOG_DIR"/orig_user.log)
     print_output "[*] Restoring directory permissions for user: $ORANGE$ORIG_USER$NC" "no_log"
-    chown "$ORIG_USER":"$ORIG_USER" "$LOG_DIR" -R || true
+    ORIG_UID="$(grep "UID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
+    ORIG_GID="$(grep "GID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
+    chown "$ORIG_UID":"$ORIG_GID" "$LOG_DIR" -R
     rm "$LOG_DIR"/orig_user.log || true
   fi
 }

@@ -97,8 +97,10 @@ IP61_unblob() {
 
         echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
         echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
-        cp -pr /root/.cache external/unblob/root_cache
-        rm -rf /root/.cache || true
+        if [[ -d "$HOME"/.cache ]]; then
+          cp -pr "$HOME"/.cache external/unblob/root_cache
+          rm -rf "$HOME"/.cache || true
+        fi
       ;;
     esac
   fi

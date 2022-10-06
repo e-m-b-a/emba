@@ -153,7 +153,7 @@ main_web_check() {
 
       mapfile -t VERSIONS < <(grep "Retrieved x-powered-by header" "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt | cut -d: -f2 | sort -u | sed 's/^\ //' | grep -e "[0-9]" || true)
       for VERSION in "${VERSIONS[@]}"; do
-        l15_version_detector "$VERSION" "Nikto web server scanning log"
+        l15_version_detector "$VERSION" "Nikto web server scanning"
       done
 
       print_ln

@@ -351,7 +351,7 @@ check_sudoers() {
         print_output "$(indent "$(orange "$(print_path "$SUDOERS_FILE")")")"
         if [[ -f "$EXT_DIR"/sudo-parser.pl ]]; then
           print_output "[*] Testing sudoers file with sudo-parse.pl:"
-          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE" -r "$R_PATH" | grep -E "^E:\ ")
+          readarray SUDOERS_ISSUES < <("$EXT_DIR"/sudo-parser.pl -f "$SUDOERS_FILE" -r "$R_PATH" | grep -E "^E:\ " || true)
           for S_ISSUE in "${SUDOERS_ISSUES[@]}"; do
             print_output "[+] $S_ISSUE"
             ((AUTH_ISSUES+=1))

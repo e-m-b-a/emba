@@ -1,0 +1,11 @@
+
+ __  __    _______  _______ _______  
+|  |/  |  |_     _||_     _|_     _| 
+|     < __ _|   |_ __|   |__ |   |__ 
+|__|\__|__|_______|__|___|__||___|__|
+                                     
+
+Michael: KITT can you analyze this firmware?
+KITT: As usual I will use EMBA to find the weak spot ...
+
+

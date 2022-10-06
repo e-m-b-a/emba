@@ -64,6 +64,7 @@ vmdk_extractor() {
     RET="$?"
     if [[ "$RET" -ne 0 ]]; then
       print_output "[-] WARNING: VMDK filesystem not enumerated"
+      enable_strict_mode "$STRICT_MODE" 0
       return
     fi
   else
@@ -99,6 +100,8 @@ vmdk_extractor() {
     print_output "[*] Extracted $ORANGE$VMDK_FILES$NC files and $ORANGE$VMDK_DIRS$NC directories from the firmware image."
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "VMDK extractor" "$VMDK_PATH_" "$EXTRACTION_DIR_" "$VMDK_FILES" "$VMDK_DIRS" "NA"
+    # currently unblob has issues with VMDKs. We need to disable it for this extraction process
+    echo 0 > "$TMP_DIR"/unblob_disable.cfg
   fi
   rm -r "$TMP_VMDK_MNT" || true
 }

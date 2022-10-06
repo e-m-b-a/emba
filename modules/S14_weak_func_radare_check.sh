@@ -407,6 +407,9 @@ radare_print_top10_statistics() {
         for BINARY in "${RESULTS[@]}" ; do
           SEARCH_TERM="$(echo "$BINARY" | awk '{print $2}')"
           F_COUNTER="$(echo "$BINARY" | awk '{print $1}')"
+          if [[ "$F_COUNTER" -eq 0 ]]; then
+            continue
+          fi
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
             if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then

@@ -337,8 +337,8 @@ main()
 
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=0
-  export EMBA_VERSION="1.1.x"
+  export RELEASE=1
+  export EMBA_VERSION="1.1.2"
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
@@ -489,8 +489,8 @@ main()
       f)
         export FIRMWARE=1
         export FIRMWARE_PATH="$OPTARG"
-        export FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
-                                                    # we store the original firmware path variable
+        readonly FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
+        export FIRMWARE_PATH_BAK                      # we store the original firmware path variable and make it readonly
         ;;
       F)
         export FORCE=1
@@ -688,6 +688,8 @@ main()
     NOTIFICATION_PID="$?"
     print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
     echo "${SUDO_USER:-${USER}}" > "$LOG_DIR"/orig_user.log
+    echo "UID: $(id -u "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
+    echo "GID: $(id -g "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
   fi
 
   # Print additional information about the firmware (-Y, -X, -Z, -N)
@@ -844,9 +846,12 @@ main()
   #######################################################################################
   if [[ $USE_DOCKER -eq 1 ]] ; then
     if ! [[ $EUID -eq 0 ]] ; then
-      print_output "[!] Using EMBA with docker-compose requires root permissions" "no_log"
-      print_output "$(indent "Run EMBA with root permissions to use docker")" "no_log"
-      exit 1
+      if ! groups | grep -qw docker; then
+        print_output "[!] Using EMBA with docker-compose requires root permissions" "no_log"
+        print_output "$(indent "Run EMBA with root permissions or add your user to docker group")" "no_log"
+        print_output "$(indent "e.g., sudo usermod -aG docker [non-root user]")" "no_log"
+        exit 1
+      fi
     fi
     if ! command -v docker-compose > /dev/null ; then
       print_output "[!] No docker-compose found" "no_log"
@@ -912,7 +917,6 @@ main()
           fi
 
           cleaner
-          restore_permissions
           exit 0
         fi
       else
@@ -1075,6 +1079,10 @@ main()
   if [[ -f "$HTML_PATH"/index.html ]] && [[ "$IN_DOCKER" -eq 0 ]]; then
     print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main"
     print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
+  fi
+  if [[ "$IN_DOCKER" -eq 1 ]]; then
+    # we need to change the permissions of the LOG_DIR to the orig. user from the host
+    restore_permissions
   fi
 }
 
