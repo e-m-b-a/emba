@@ -112,6 +112,9 @@ IF20_cve_search() {
           apt-get update -y
           print_tool_info "mongodb-org" 1
           apt-get install mongodb-org -y
+          if ! [[ -f /etc/mongod.conf ]]; then
+            echo "Could not install EMBA component mongod - missing mongod.conf file" && exit 1
+          fi
           sed -i 's/bindIp\:\ 127.0.0.1/bindIp\:\ 172.36.0.1/g' /etc/mongod.conf
 
           if [[ "$WSL" -eq 0 ]]; then

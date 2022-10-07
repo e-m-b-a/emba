@@ -100,6 +100,7 @@ os_detection_thread_per_os() {
   local OS="${1:-}"
   local DETECTED=0
   local OS_=""
+  local OS_COUNTER_VxWorks=0
 
   OS_COUNTER[$OS]=0
   OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -xdev -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null || true)"))

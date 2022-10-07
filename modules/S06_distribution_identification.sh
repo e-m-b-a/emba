@@ -46,8 +46,10 @@ S06_distribution_identification()
           SED_COMMAND="$(echo "$CONFIG" | cut -d\; -f4)"
           FILE_QUOTED=$(escape_echo "$FILE")
           OUT1="$(eval "$PATTERN" "$FILE_QUOTED" || true)"
+          # echo "PATTERN: $PATTERN"
           # echo "SED command: $SED_COMMAND"
           # echo "identified: $OUT1"
+          # echo "FILE: $FILE_QUOTED"
           IDENTIFIER=$(echo -e "$OUT1" | eval "$SED_COMMAND" | sed 's/  \+/ /g' | sed 's/ $//' || true)
 
           if [[ $(basename "$FILE") == "image_sign" ]]; then
