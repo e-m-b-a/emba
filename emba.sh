@@ -171,13 +171,6 @@ run_modules()
           fi
         fi
         if [[ "$MOD_FIN" -eq 0 ]]; then
-          if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
-            # if UEFI firmware detected then run only Sxx modules with UEFI in the name
-            if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-              print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
-              continue
-            fi
-          fi
           if [[ $THREADING_SET -eq 1 ]]; then
             "$MODULE_MAIN" &
             WAIT_PIDS+=( "$!" )
@@ -222,13 +215,6 @@ run_modules()
             fi
           fi
           if [[ "$MOD_FIN" -eq 0 ]]; then
-            if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
-              # if UEFI firmware detected then run only Sxx modules with UEFI in the name
-              if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-                print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
-                continue
-              fi
-            fi
             if [[ $THREADING_SET -eq 1 ]]; then
               "$MODULE_MAIN" &
               WAIT_PIDS+=( "$!" )
@@ -293,13 +279,6 @@ run_modules()
               fi
             fi
             if [[ "$MOD_FIN" -eq 0 ]]; then
-              if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
-                # if UEFI firmware detected then run only Sxx modules with UEFI in the name
-                if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-                  print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
-                  continue
-                fi
-              fi
               if [[ $THREADING_SET -eq 1 ]]; then
                 "$MODULE_MAIN" &
                 WAIT_PIDS+=( "$!" )

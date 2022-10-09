@@ -65,8 +65,14 @@ fwhunter() {
 
   print_output "[*] Running FwHunt on $ORANGE$FWHUNTER_CHECK_FILE$NC" "" "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt"
   ulimit -Sv "$MEM_LIMIT"
-  python3 "$EXT_DIR"/fwhunt-scan/fwhunt_scan_analyzer.py scan-firmware "$FWHUNTER_CHECK_FILE" --rules_dir "$EXT_DIR"/fwhunt-scan/rules/ | tee -a "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" || true
+  write_log "[*] Running FwHunt on $ORANGE$FWHUNTER_CHECK_FILE$NC" "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt"
+  timeout --preserve-status --signal SIGINT 600 python3 "$EXT_DIR"/fwhunt-scan/fwhunt_scan_analyzer.py scan-firmware "$FWHUNTER_CHECK_FILE" --rules_dir "$EXT_DIR"/fwhunt-scan/rules/ | tee -a "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" || true
   ulimit -Sv unlimited
+
+  # delete empty log files
+  if [[ $(wc -l "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" | awk '{print $1}') -eq 1 ]]; then
+    rm "$LOG_PATH_MODULE""/fwhunt_scan_$FWHUNTER_CHECK_FILE_NAME.txt" || true
+  fi
 }
 
 fwhunter_logging() {
@@ -85,10 +91,11 @@ fwhunter_logging() {
 
   for FWHUNTER_RESULT in "${FWHUNTER_RESULTS[@]}"; do
     FWHUNTER_RESULT_FILE=$(echo "$FWHUNTER_RESULT" | cut -d: -f1)
+    FWHUNTER_BINARY_MATCH=$(basename "$(grep "Running FwHunt on" "$FWHUNTER_RESULT_FILE" | cut -d\  -f5-)")
     FWHUNTER_RESULT=$(echo "$FWHUNTER_RESULT" | cut -d: -f2-)
     BINARLY_RULE=$(echo "$FWHUNTER_RESULT" | sed -e 's/.*\ BRLY/BRLY/' | sed -e 's/\ .variant\:\ .*//')
     if [[ "$FWHUNTER_RESULT" == *"rule has been triggered and threat detected"* ]]; then
-      print_output "[+] $FWHUNTER_RESULT_FILE $ORANGE:$GREEN $FWHUNTER_RESULT" "" "https://binarly.io/advisories/$BINARLY_RULE"
+      print_output "[+] $FWHUNTER_BINARY_MATCH $ORANGE:$GREEN $FWHUNTER_RESULT" "" "https://binarly.io/advisories/$BINARLY_RULE"
       FWHUNTER_CNT=$((FWHUNTER_CNT+1))
     fi
   done

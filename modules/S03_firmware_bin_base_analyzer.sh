@@ -39,7 +39,7 @@ S03_firmware_bin_base_analyzer() {
 
   # we only do this if we have not found a Linux filesystem
   if ! [[ -d "$FIRMWARE_PATH" ]]; then
-    if [[ $LINUX_PATH_COUNTER -eq 0 ]] ; then
+    if [[ $RTOS -eq 1 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
         binary_architecture_detection &
         WAIT_PIDS_S03+=( "$!" )
@@ -64,6 +64,7 @@ os_identification() {
   sub_module_title "OS detection"
   local OS=""
   local OS_SEARCHER=()
+  export OS_COUNTER_VxWorks=0
 
   print_output "[*] Initial OS guessing running ..." "no_log" | tr -d "\n"
   write_log "[*] Initial OS guessing:"
@@ -94,13 +95,18 @@ os_identification() {
   if [[ $THREADED -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_S03_1[@]}"
   fi
+
+  # corner case UEFI firmware would be also respected
+  # we do it here to handle it just once
+  if [[ -f "$CSV_DIR"/p02_firmware_bin_file_check.csv ]] && grep -q "UEFI firmware detected\;yes" "$CSV_DIR"/p02_firmware_bin_file_check.csv; then
+    printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "UEFI firmware" "yes" | tee -a "$LOG_FILE"
+  fi
 }
 
 os_detection_thread_per_os() {
   local OS="${1:-}"
   local DETECTED=0
   local OS_=""
-  local OS_COUNTER_VxWorks=0
 
   OS_COUNTER[$OS]=0
   OS_COUNTER[$OS]=$(("${OS_COUNTER[$OS]}"+"$(find "$OUTPUT_DIR" -xdev -type f -exec strings {} \; | grep -i -c "$OS" 2> /dev/null || true)"))
@@ -170,24 +176,36 @@ os_detection_thread_per_os() {
 
 binary_architecture_detection()
 {
-  sub_module_title "Architecture detection"
+  sub_module_title "Architecture detection for RTOS based systems"
   print_output "[*] Architecture detection running on ""$FIRMWARE_PATH"
 
   local PRE_ARCH_Y=()
   local PRE_ARCH_A=()
   local PRE_ARCH_=""
+  local PRE_ARCH_CPU_REC=""
 
   # as Thumb is usually false positive we remove it from the results
   mapfile -t PRE_ARCH_Y < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | grep -v "Thumb" | awk '{print $3}' | sort -u || true)
   mapfile -t PRE_ARCH_A < <(binwalk -A "$FIRMWARE_PATH" | grep "\ instructions," | awk '{print $3}' | uniq -c | sort -n | tail -1 | awk '{print $2}' || true)
+  if [[ -f "$HOME"/.config/binwalk/modules/cpu_rec.py ]]; then
+    PRE_ARCH_CPU_REC=$(binwalk -% "$FIRMWARE_PATH"  | grep -v "DESCRIPTION\|None\|-----------" | grep -v "entropy=0.9" | awk '{print $3}' | grep -v -e "^$" | sort | uniq -c | head -1 | awk '{print $2}' || true)
+  fi
+
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
     print_ln
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done
+
   for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
     print_ln
     print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done
+
+  if [[ -n "$PRE_ARCH_CPU_REC" ]]; then
+    print_ln
+    print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_CPU_REC$NC"
+    echo "$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03.tmp
+  fi
 }

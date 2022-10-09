@@ -105,7 +105,8 @@ check_nw_interface() {
 
 check_cve_search() {
   if [[ $JUMP_OVER_CVESEARCH_CHECK -eq 1 ]] ; then
-    # no cve check -> just return
+    # no cve check -> just return and enforce CVE_SEARCH
+    export CVE_SEARCH=1
     return
   fi
   TOOL_NAME="cve-search"
@@ -333,9 +334,21 @@ dependency_check()
       else
         export BINWALK_VER_CHECK=1
       fi
+      # this is typically needed in the read only docker container:
+      if ! [[ -d "$HOME"/.config/binwalk/modules/ ]]; then
+        mkdir -p "$HOME"/.config/binwalk/modules/
+      fi
+      print_output "    cpu_rec - \\c" "no_log"
+      if [[ -d "$EXT_DIR"/cpu_rec/ ]]; then
+        cp -pr "$EXT_DIR"/cpu_rec/cpu_rec.py "$HOME"/.config/binwalk/modules/
+        cp -pr "$EXT_DIR"/cpu_rec/cpu_rec_corpus "$HOME"/.config/binwalk/modules/
+        echo -e "$GREEN""ok""$NC"
+      else
+        echo -e "$RED""not ok""$NC"
+        # DEP_ERROR=1
+      fi
     fi
     export MPLCONFIGDIR="$TMP_DIR"
-
 
     # jtr
     check_dep_tool "john"

@@ -111,6 +111,16 @@ IP99_binwalk_default() {
           git clone https://github.com/m-1-k-3/binwalk.git external/binwalk
         fi
 
+        if ! [[ -d external/cpu_rec ]]; then
+          git clone https://github.com/airbus-seclab/cpu_rec.git external/cpu_rec
+          # this does not make sense for the read only docker container - we have to do it
+          # during EMBA startup
+          if ! [[ -d "$HOME"/.config/binwalk/modules/ ]]; then
+            mkdir -p "$HOME"/.config/binwalk/modules/
+          fi
+          cp -pr external/cpu_rec/cpu_rec.py "$HOME"/.config/binwalk/modules/
+          cp -pr external/cpu_rec/cpu_rec_corpus "$HOME"/.config/binwalk/modules/
+        fi
         if ! command -v yaffshiv > /dev/null ; then
           if ! [[ -d external/binwalk/yaffshiv ]]; then
             git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
