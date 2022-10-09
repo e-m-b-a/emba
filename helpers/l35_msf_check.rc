@@ -227,7 +227,11 @@ end
 
 # we give the exploit another 30 seconds before we exit Metasploit the hard way
 sleep 30
-run_single("sessions -v")
+print_status("The autoexploitation attempt has completed with #{framework.sessions.length} sessions")
+unless framework.sessions.empty?
+  run_single("sessions -v")
+end
+
 run_single("jobs -K")
 run_single("exit -y")
 
