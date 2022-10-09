@@ -193,19 +193,19 @@ binary_architecture_detection()
 
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
     print_ln
-    print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
+    print_output "[+] Possible architecture details found (binwalk -Y): $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done
 
   for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
     print_ln
-    print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_$NC"
+    print_output "[+] Possible architecture details found (binwalk -A): $ORANGE$PRE_ARCH_$NC"
     echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done
 
   if [[ -n "$PRE_ARCH_CPU_REC" ]]; then
     print_ln
-    print_output "[+] Possible architecture details found: $ORANGE$PRE_ARCH_CPU_REC$NC"
+    print_output "[+] Possible architecture details found (cpu_rec): $ORANGE$PRE_ARCH_CPU_REC$NC"
     echo "$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03.tmp
   fi
 }
