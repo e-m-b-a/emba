@@ -38,13 +38,16 @@ S03_firmware_bin_base_analyzer() {
   fi
 
   # we only do this if we have not found a Linux filesystem
-  if ! [[ -d "$FIRMWARE_PATH" ]]; then
+  if [[ -f "$FIRMWARE_PATH_BAK" ]]; then
+    export PRE_ARCH_Y=()
+    export PRE_ARCH_A=()
+    export PRE_ARCH_CPU_REC=""
     if [[ $RTOS -eq 1 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
-        binary_architecture_detection &
+        binary_architecture_detection "$FIRMWARE_PATH_BAK" &
         WAIT_PIDS_S03+=( "$!" )
       else
-        binary_architecture_detection
+        binary_architecture_detection "$FIRMWARE_PATH_BAK"
       fi
     fi
   fi
@@ -52,6 +55,8 @@ S03_firmware_bin_base_analyzer() {
   if [[ $THREADED -eq 1 ]]; then
     wait_for_pid "${WAIT_PIDS_S03[@]}"
   fi
+
+  binary_architecture_reporter
 
   if [[ "$(wc -l "$TMP_DIR"/s03.tmp | awk '{print $1}')" -gt 0 ]] ; then
     NEG_LOG=1
@@ -70,7 +75,7 @@ os_identification() {
   write_log "[*] Initial OS guessing:"
   write_csv_log "Guessed OS" "confidential rating" "verified" "Linux root filesystems found"
 
-  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics")
+  OS_SEARCHER=("Linux" "FreeBSD" "VxWorks\|Wind" "FreeRTOS" "ADONIS" "eCos" "uC/OS" "SIPROTEC" "QNX" "CPU\ [34][12][0-9]-[0-9]" "CP443" "Sinamics" "UEFI")
   print_dot
   declare -A OS_COUNTER=()
   local WAIT_PIDS_S03_1=()
@@ -96,11 +101,6 @@ os_identification() {
     wait_for_pid "${WAIT_PIDS_S03_1[@]}"
   fi
 
-  # corner case UEFI firmware would be also respected
-  # we do it here to handle it just once
-  if [[ -f "$CSV_DIR"/p02_firmware_bin_file_check.csv ]] && grep -q "UEFI firmware detected\;yes" "$CSV_DIR"/p02_firmware_bin_file_check.csv; then
-    printf "${ORANGE}\t%-20.20s\t:\t%-15s${NC}\n" "UEFI firmware" "yes" | tee -a "$LOG_FILE"
-  fi
 }
 
 os_detection_thread_per_os() {
@@ -174,38 +174,46 @@ os_detection_thread_per_os() {
   fi
 }
 
-binary_architecture_detection()
-{
-  sub_module_title "Architecture detection for RTOS based systems"
-  print_output "[*] Architecture detection running on ""$FIRMWARE_PATH"
+binary_architecture_detection() {
+  #sub_module_title "Architecture detection for RTOS based systems"
 
-  local PRE_ARCH_Y=()
-  local PRE_ARCH_A=()
-  local PRE_ARCH_=""
-  local PRE_ARCH_CPU_REC=""
+  local FILE_TO_CHECK="${1:-}"
+  if ! [[ -f "$FILE_TO_CHECK" ]]; then
+    return
+  fi
+
+  print_output "[*] Architecture detection running on ""$FILE_TO_CHECK"
+
 
   # as Thumb is usually false positive we remove it from the results
-  mapfile -t PRE_ARCH_Y < <(binwalk -Y "$FIRMWARE_PATH" | grep "valid\ instructions" | grep -v "Thumb" | awk '{print $3}' | sort -u || true)
-  mapfile -t PRE_ARCH_A < <(binwalk -A "$FIRMWARE_PATH" | grep "\ instructions," | awk '{print $3}' | uniq -c | sort -n | tail -1 | awk '{print $2}' || true)
+  mapfile -t PRE_ARCH_Y < <(binwalk -Y "$FILE_TO_CHECK" | grep "valid\ instructions" | grep -v "Thumb" | \
+    awk '{print $3}' | sort -u || true)
+  mapfile -t PRE_ARCH_A < <(binwalk -A "$FILE_TO_CHECK" | grep "\ instructions," | awk '{print $3}' | \
+    uniq -c | sort -n | tail -1 | awk '{print $2}' || true)
   if [[ -f "$HOME"/.config/binwalk/modules/cpu_rec.py ]]; then
-    PRE_ARCH_CPU_REC=$(binwalk -% "$FIRMWARE_PATH"  | grep -v "DESCRIPTION\|None\|-----------" | grep -v "entropy=0.9" | awk '{print $3}' | grep -v -e "^$" | sort | uniq -c | head -1 | awk '{print $2}' || true)
+    # entropy=0.9xxx is typically encrypted or compressed -> we just remove these entries:
+    PRE_ARCH_CPU_REC=$(binwalk -% "$FILE_TO_CHECK"  | grep -v "DESCRIPTION\|None\|-----------" | grep -v "entropy=0.9" \
+      | awk '{print $3}' | grep -v -e "^$" | sort | uniq -c | head -1 | awk '{print $2}' || true)
   fi
-
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
-    print_ln
-    print_output "[+] Possible architecture details found (binwalk -Y): $ORANGE$PRE_ARCH_$NC"
-    echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
+    echo "binwalk -Y;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
   done
-
   for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
-    print_ln
-    print_output "[+] Possible architecture details found (binwalk -A): $ORANGE$PRE_ARCH_$NC"
-    echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
+    echo "binwalk -A;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
   done
-
   if [[ -n "$PRE_ARCH_CPU_REC" ]]; then
-    print_ln
-    print_output "[+] Possible architecture details found (cpu_rec): $ORANGE$PRE_ARCH_CPU_REC$NC"
-    echo "$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03.tmp
+    echo "cpu_rec;$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03_arch.tmp
   fi
+}
+
+binary_architecture_reporter() {
+  sub_module_title "Architecture detection for RTOS based systems"
+  local PRE_ARCH_=""
+  while read -r PRE_ARCH_; do
+    SOURCE=$(echo "$PRE_ARCH_" | cut -d\; -f1)
+    PRE_ARCH_=$(echo "$PRE_ARCH_" | cut -d\; -f2)
+    print_ln
+    print_output "[+] Possible architecture details found ($ORANGE$SOURCE$GREEN): $ORANGE$PRE_ARCH_$NC"
+    echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
+  done < "$TMP_DIR"/s03_arch.tmp
 }

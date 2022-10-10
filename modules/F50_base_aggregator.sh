@@ -719,7 +719,8 @@ get_data() {
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | tr -d '[:space:]' || true)
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\n' '/' || true)
+    PRE_ARCH="${PRE_ARCH%\/}"
     PRE_ARCH=$(strip_color_codes "$PRE_ARCH")
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
