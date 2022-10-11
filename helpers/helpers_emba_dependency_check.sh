@@ -498,7 +498,7 @@ dependency_check()
       check_emulation_port "Running Qemu service" "2001"
     fi
 
-    if function_exists S120_cwe_checker; then
+    if [[ "$CWE_CHECKER" -eq 1 ]]; then
       print_output "    cwe-checker environment - \\c" "no_log"
       if [[ -f "$EXT_DIR""/cwe_checker/bin/cwe_checker" ]] || [[ -f "/root/.cargo/bin/cwe_checker" ]]; then
         echo -e "$GREEN""ok""$NC"
