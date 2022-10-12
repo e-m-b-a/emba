@@ -13,7 +13,7 @@
 # Author(s): Michael Messner
 # Credits:   Binarly for support
 
-# Description:  Uses fwhunt for identification of vulnerabilities in possible UEFI firmware
+# Description:  Uses FwHunt for identification of vulnerabilities in possible UEFI firmware
 #               images:
 #               fwhunt-scan https://github.com/binarly-io/fwhunt-scan
 #               fwhunt rules https://github.com/binarly-io/FwHunt
@@ -80,31 +80,54 @@ fwhunter_logging() {
   local FWHUNTER_RESULT=""
   local FWHUNTER_RESULT_FILE=""
   local FWHUNTER_CNT=0
+  local FWHUNTER_BINARLY_ID=""
+  local BINARLY_ID_FILE=""
+  local FWHUNTER_BINARLY_ID_FILES=()
+  local CVE_RESULTS_BINARLY=()
+  local FWHUNTER_CVEs=""
 
-  mapfile -t FWHUNTER_RESULTS < <(find "$LOG_PATH_MODULE" -type f -exec grep -H "Scanner result" {} \;)
+  mapfile -t FWHUNTER_RESULTS < <(find "$LOG_PATH_MODULE" -type f -exec grep -H "Scanner result.*FwHunt rule has been triggered" {} \;)
   if ! [[ "${#FWHUNTER_RESULTS[@]}" -gt 0 ]]; then
     return
   fi
 
-  print_ln
   sub_module_title "FwHunt UEFI vulnerability details"
+  write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "BINARLY ID"
 
   for FWHUNTER_RESULT in "${FWHUNTER_RESULTS[@]}"; do
+    local CVE_RESULTS_BINARLY=()
+
     FWHUNTER_RESULT_FILE=$(echo "$FWHUNTER_RESULT" | cut -d: -f1)
+    FWHUNTER_BINARLY_ID=$(echo "$FWHUNTER_RESULT" | sed 's/.*\ BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g')
+    mapfile -t FWHUNTER_BINARLY_ID_FILES < <(find "$EXT_DIR"/fwhunt-scan/rules -iname "$FWHUNTER_BINARLY_ID*")
+    for BINARLY_ID_FILE in "${FWHUNTER_BINARLY_ID_FILES[@]}"; do
+      mapfile -t CVE_RESULTS_BINARLY_ < <(grep "CVE number:" "$BINARLY_ID_FILE" | cut -d: -f2 | tr ',' '\n' | awk '{print $1}')
+      CVE_RESULTS_BINARLY+=("${CVE_RESULTS_BINARLY_[@]}")
+    done
     FWHUNTER_BINARY_MATCH=$(basename "$(grep "Running FwHunt on" "$FWHUNTER_RESULT_FILE" | cut -d\  -f5-)")
     FWHUNTER_RESULT=$(echo "$FWHUNTER_RESULT" | cut -d: -f2-)
     BINARLY_RULE=$(echo "$FWHUNTER_RESULT" | sed -e 's/.*\ BRLY/BRLY/' | sed -e 's/\ .variant\:\ .*//')
     if [[ "$FWHUNTER_RESULT" == *"rule has been triggered and threat detected"* ]]; then
-      print_output "[+] $FWHUNTER_BINARY_MATCH $ORANGE:$GREEN $FWHUNTER_RESULT" "" "https://binarly.io/advisories/$BINARLY_RULE"
-      FWHUNTER_CNT=$((FWHUNTER_CNT+1))
+      if [[ "${#CVE_RESULTS_BINARLY[@]}" -gt 0 ]]; then
+        for BINARLY_ID_CVE in "${CVE_RESULTS_BINARLY[@]}"; do
+          print_output "[+] $FWHUNTER_BINARY_MATCH $ORANGE:$GREEN $FWHUNTER_RESULT$GREEN - CVE: $ORANGE$BINARLY_ID_CVE$NC" "" "https://binarly.io/advisories/$BINARLY_RULE"
+          write_csv_log "$FWHUNTER_BINARY_MATCH" "unknown" "$BINARLY_ID_CVE" "unknown" "$BINARLY_RULE"
+        done
+      else
+        print_output "[+] $FWHUNTER_BINARY_MATCH $ORANGE:$GREEN $FWHUNTER_RESULT$NC" "" "https://binarly.io/advisories/$BINARLY_RULE"
+      fi
     fi
   done
+  mapfile -t FWHUNTER_CVEs < <(find "$LOG_PATH_MODULE" -type f -exec grep "CVE" {} \; | sed 's/.*\ -\ CVE:\ //' | sort -u)
 
   print_ln
   print_ln
-  print_output "[*] Detected $ORANGE$FWHUNTER_CNT$NC firmware issues in UEFI firmware"
+  print_output "[*] Detected $ORANGE${#FWHUNTER_CVEs[@]}$NC firmware issues in UEFI firmware:"
+  for BINARLY_CVE in "${FWHUNTER_CVEs[@]}"; do
+    print_output "$(indent "$(orange "$BINARLY_CVE")")"
+  done
   print_ln
 
   write_log ""
-  write_log "[*] Statistics:$FWHUNTER_CNT"
+  write_log "[*] Statistics:${#FWHUNTER_CVEs[@]}"
 }

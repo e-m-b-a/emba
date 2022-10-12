@@ -56,7 +56,9 @@ S03_firmware_bin_base_analyzer() {
     wait_for_pid "${WAIT_PIDS_S03[@]}"
   fi
 
-  binary_architecture_reporter
+  if [[ -f "$TMP_DIR"/s03_arch.tmp ]]; then
+    binary_architecture_reporter
+  fi
 
   if [[ "$(wc -l "$TMP_DIR"/s03.tmp | awk '{print $1}')" -gt 0 ]] ; then
     NEG_LOG=1
