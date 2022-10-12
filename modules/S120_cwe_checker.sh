@@ -133,21 +133,21 @@ cwe_checker_threaded () {
   BINARY_=$(readlink -f "$BINARY_")
 
   ulimit -Sv "$MEM_LIMIT"
-  "$HOME"/.cargo/bin/cwe_checker "$BINARY" 2>/dev/null | tee -a "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
+  "$HOME"/.cargo/bin/cwe_checker "$BINARY" --json --out "$LOG_PATH_MODULE"/cwe_"$NAME".json 2>/dev/null|| true
   ulimit -Sv unlimited
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
 
-  if [[ -f "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
-    grep -v "ERROR:\|DEBUG:\|INFO:" "$LOG_PATH_MODULE"/cwe_"$NAME".log
-    mapfile -t CWE_OUT < <( grep -v "ERROR\|DEBUG\|INFO" "$LOG_PATH_MODULE"/cwe_"$NAME".log | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
+  if [[ -f "$LOG_PATH_MODULE"/cwe_"$NAME".json ]]; then
+    jq -rc '.[].name + " - " + .[].description' "$LOG_PATH_MODULE"/cwe_"$NAME".json
+    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_PATH_MODULE"/cwe_"$NAME".json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
       print_ln
-      print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".log
+      print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".json
       for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
+        CWE="$(echo "$CWE_LINE" | awk '{print $1}')"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null || true)"
+        CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".json 2>/dev/null || true)"
         echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
@@ -155,7 +155,7 @@ cwe_checker_threaded () {
     else
       print_ln
       print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
-      rm "$LOG_PATH_MODULE"/cwe_"$NAME".log
+      rm "$LOG_PATH_MODULE"/cwe_"$NAME".json
     fi
   fi
   if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_ln ; fi
@@ -176,18 +176,20 @@ final_cwe_log() {
   local CWE_CNT=""
 
   if [[ -d "$LOG_PATH_MODULE" ]]; then
-    mapfile -t CWE_OUT < <( cat "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
+    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_PATH_MODULE"/cwe_*.json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
     print_ln
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
+      print_bar
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "$CWE_LINE" | cut -d\  -f1)"
+        CWE="$(echo "$CWE_LINE" | awk '{print $1}')"
         CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
         # do not change this to grep -c!
         # shellcheck disable=SC2126
-        CWE_CNT="$(grep "$CWE" "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | wc -l || true)"
+        CWE_CNT="$(grep "$CWE" "$LOG_PATH_MODULE"/cwe_*.json 2>/dev/null | wc -l || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
+      print_bar
       print_ln
     fi
   fi
