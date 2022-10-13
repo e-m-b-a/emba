@@ -52,7 +52,7 @@ log_folder()
     fi
 
     # we check the found sha512 hash with the firmware to test:
-    if [[ -f "$CSV_DIR"/p02_firmware_bin_file_check.csv ]] && grep -q "SHA512" "$CSV_DIR"/p02_firmware_bin_file_check.csv; then
+    if [[ -f "$CSV_DIR"/p02_firmware_bin_file_check.csv ]] && [[ -f "$FIRMWARE_PATH" ]] && grep -q "SHA512" "$CSV_DIR"/p02_firmware_bin_file_check.csv; then
       STORED_SHA512=$(grep "SHA512" "$CSV_DIR"/p02_firmware_bin_file_check.csv | cut -d\; -f2)
       FW_SHA512=$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')
       if [[ "$STORED_SHA512" == "$FW_SHA512" ]]; then

@@ -109,7 +109,7 @@ grepit_reporter() {
   local OUTFILE=""
 
   if [[ -f "$CSV_LOG" ]]; then
-    readarray -t GREPIT_RESULTS_DETAILS < <(cut -d\; -f1,2,5 "$CSV_LOG" | grep -v "Grepit test" | sort -u)
+    readarray -t GREPIT_RESULTS_DETAILS < <(cut -d\; -f1,2,5 "$CSV_LOG" | grep -v "Grepit test" | grep -v "^$" | sort -u)
     for RESULT in "${GREPIT_RESULTS_DETAILS[@]}"; do
       CURRENT_TEST=$(echo "$RESULT" | cut -d\; -f1)
       LINES_OF_OUTPUT=$(echo "$RESULT" | cut -d\; -f2)
