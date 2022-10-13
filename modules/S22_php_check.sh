@@ -152,6 +152,7 @@ s22_check_php_ini(){
   local PHP_FILE=""
   local INISCAN_RESULT=()
   local LINE=""
+  local PHP_INISCAN_PATH="$EXT_DIR""/iniscan/bin/iniscan"
   PHP_INI_FAILURE=0
   PHP_INI_LIMIT_EXCEEDED=0
   PHP_INI_WARNINGS=0
@@ -161,7 +162,7 @@ s22_check_php_ini(){
   disable_strict_mode "$STRICT_MODE"
   for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
     #print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
-    mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" 2>/dev/null || true)
+    mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" || true)
     for LINE in "${INISCAN_RESULT[@]}" ; do  
       local LIMIT_CHECK
       IFS='|' read -ra LINE_ARR <<< "$LINE"
@@ -192,9 +193,11 @@ s22_check_php_ini(){
         fi
       fi
     done
-    print_ln
-    print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES""$GREEN"" PHP configuration issues in php config file :""$ORANGE"" ""$(print_path "$PHP_FILE")"
-    print_ln
+    if [[ "$S22_PHP_INI_ISSUES" -gt 0 ]]; then
+      print_ln
+      print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES""$GREEN"" PHP configuration issues in php config file :""$ORANGE"" ""$(print_path "$PHP_FILE")"
+      print_ln
+    fi
   done
   enable_strict_mode "$STRICT_MODE"
 }
