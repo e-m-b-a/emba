@@ -372,7 +372,6 @@ main()
   export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0             # test only dependency
-  export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default EMBA scan
@@ -407,7 +406,6 @@ main()
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
-  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
@@ -448,7 +446,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:op:P:QrsStT:UxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -527,9 +525,6 @@ main()
         ;;
       N)
         export FW_NOTES="$OPTARG"
-        ;;
-      o)
-        export ONLINE_CHECKS=1
         ;;
       p)
         export PROFILE="$OPTARG"
