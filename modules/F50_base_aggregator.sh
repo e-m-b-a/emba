@@ -1000,7 +1000,7 @@ cwe_logging() {
 
   if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
     # mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
-    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.json | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
 
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
@@ -1010,7 +1010,7 @@ cwe_logging() {
         CWE_DESC="$(echo "$CWE_ENTRY" | cut -d\  -f2-)"
         # do not change this to grep -c!
         # shellcheck disable=SC2126
-        CWE_CNT="$(grep "$CWE" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.json 2>/dev/null | wc -l || true)"
+        CWE_CNT="$(grep "$CWE" "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | wc -l || true)"
         print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
       done
       print_ln

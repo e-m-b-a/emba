@@ -211,6 +211,10 @@ aggregate_versions() {
       if [ -z "$CVE_ENTRY" ]; then
         continue
       fi
+      if ! [[ "$CVE_ENTRY" == *CVE-[0-9]* ]]; then
+        print_output "[-] WARNING: Broken CVE identifier found: $ORANGE$VERSION$NC"
+        continue
+      fi
       print_output "[+] Found CVE details (${ORANGE}binarly UEFI module$GREEN): ""$ORANGE$CVE_ENTRY$NC"
     done
 
@@ -245,8 +249,6 @@ aggregate_versions() {
       fi
       echo "$VERSION" >> "$LOG_PATH_MODULE"/versions.tmp
     done
-  else
-    print_output "[-] No Version details found."
   fi
 
   if [[ -f "$LOG_PATH_MODULE"/versions.tmp ]]; then
@@ -451,19 +453,19 @@ cve_db_lookup_cve () {
 
   # CVE search:
   set +e
-  "$PATH_CVE_SEARCH" -p "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
+  "$PATH_CVE_SEARCH" -c "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
 
   # shellcheck disable=SC2181
   if [[ "$?" -ne 0 ]]; then
-    "$PATH_CVE_SEARCH" -p "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
+    "$PATH_CVE_SEARCH" -c "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
   fi
   set -e
 
   if [[ "$THREADED" -eq 1 ]]; then
-    cve_extractor_cve "$CVE_ENTRY" &
+    cve_extractor "$CVE_ENTRY" &
     WAIT_PIDS_F19_2+=( "$!" )
   else
-    cve_extractor_cve "$CVE_ENTRY"
+    cve_extractor "$CVE_ENTRY"
   fi
 
   if [[ "$THREADED" -eq 1 ]]; then
@@ -477,8 +479,6 @@ cve_db_lookup_version() {
 
   # we create something like "binary_1.2.3" for log paths
   local VERSION_PATH="${BIN_VERSION_//:/_}"
-  #local VERSION_BINARY
-  #VERSION_BINARY=$(echo "$BIN_VERSION_" | cut -d: -f1)
   print_output "[*] CVE database lookup with version information: ${ORANGE}$BIN_VERSION_${NC}" "no_log"
 
   # CVE search:
@@ -511,13 +511,9 @@ cve_db_lookup_version() {
   fi
 }
 
-cve_extractor_cve() {
-  local CVE_ENTRY="${1:-}"
-  # we need to integrate this into cve_extractor!!!
-
-}
-
 cve_extractor() {
+  # VERSION_orig is usually the BINARY_NAME:VERSION
+  # in some cases it is only the CVE-Identifier
   local VERSION_orig="${1:-}"
   local VERSION=""
   local BINARY=""
@@ -537,15 +533,20 @@ cve_extractor() {
   local CVEs_OUTPUT=()
   local CVE_OUTPUT=""
 
-  if [[ "$(echo "$VERSION_orig" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
-    BINARY="$(echo "$VERSION_orig" | cut -d ":" -f1)"
-    VERSION="$(echo "$VERSION_orig" | cut -d ":" -f2)"
+  if ! [[ "$VERSION_orig" == "CVE-"* ]]; then
+    if [[ "$(echo "$VERSION_orig" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
+      BINARY="$(echo "$VERSION_orig" | cut -d ":" -f1)"
+      VERSION="$(echo "$VERSION_orig" | cut -d ":" -f2)"
+    else
+      # DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
+      BINARY="$(echo "$VERSION_orig" | cut -d ":" -f2)"
+      VERSION="$(echo "$VERSION_orig" | cut -d ":" -f3-)"
+    fi
+    local VERSION_PATH="${VERSION_orig//:/_}"
+    AGG_LOG_FILE="$VERSION_PATH".txt
   else
-    # DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
-    BINARY="$(echo "$VERSION_orig" | cut -d ":" -f2)"
-    VERSION="$(echo "$VERSION_orig" | cut -d ":" -f3-)"
+    AGG_LOG_FILE="$VERSION_orig".txt
   fi
-  local VERSION_PATH="${VERSION_orig//:/_}"
 
   # VSOURCE is used to track the source of version details, this is relevant for the
   # final report. With this in place we know if it is from live testing via the network
@@ -576,6 +577,17 @@ cve_extractor() {
     fi
   fi
 
+  if grep -q "$VERSION_orig" "$S02_LOG" 2>/dev/null; then
+    if [[ "$VSOURCE" == "unknown" ]]; then
+      VSOURCE="FwHunt"
+    else
+      VSOURCE="$VSOURCE""/FwHunt"
+    fi
+    BINARY="UEFI firmware"
+    VERSION="unknown"
+  fi
+
+
   if grep -q "$BINARY;.*$VERSION" "$S08_LOG" 2>/dev/null; then
     if [[ "$VSOURCE" == "unknown" ]]; then
       VSOURCE="PACK"
@@ -592,7 +604,6 @@ cve_extractor() {
     fi
   fi
 
-  AGG_LOG_FILE="$VERSION_PATH".txt
 
   EXPLOIT_COUNTER_VERSION=0
   CVE_COUNTER_VERSION=0
@@ -883,7 +894,7 @@ cve_extractor() {
   fi
   
   { echo ""
-    echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$BIN_VERSION_"
+    echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_orig"
   } >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
 
   if [[ $LOW_CVE_COUNTER -gt 0 ]]; then
@@ -936,7 +947,6 @@ cve_extractor() {
     printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-5.5s:   Source: %-15.15s\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
     echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/F20_summary.csv
   fi
-
 }
 
 get_firmware_base_version_check() {
@@ -995,7 +1005,7 @@ get_uefi_details() {
   CVE_S02_DETAILS=()
   if [[ -f "$S02_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$S02_LOG")."
-    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "$S02_LOG" | grep -v "BINARLY ID" | sort -u || true)
+    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "$S02_LOG" | grep -v "CVE identifier" | sort -u || true)
   fi
 
 }

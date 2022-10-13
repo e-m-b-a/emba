@@ -79,7 +79,6 @@ fwhunter_logging() {
   export FWHUNTER_RESULTS=()
   local FWHUNTER_RESULT=""
   local FWHUNTER_RESULT_FILE=""
-  local FWHUNTER_CNT=0
   local FWHUNTER_BINARLY_ID=""
   local BINARLY_ID_FILE=""
   local FWHUNTER_BINARLY_ID_FILES=()
@@ -101,6 +100,7 @@ fwhunter_logging() {
     FWHUNTER_BINARLY_ID=$(echo "$FWHUNTER_RESULT" | sed 's/.*\ BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g')
     mapfile -t FWHUNTER_BINARLY_ID_FILES < <(find "$EXT_DIR"/fwhunt-scan/rules -iname "$FWHUNTER_BINARLY_ID*")
     for BINARLY_ID_FILE in "${FWHUNTER_BINARLY_ID_FILES[@]}"; do
+      # extract possible CVE information from the binarly scan rule:
       mapfile -t CVE_RESULTS_BINARLY_ < <(grep "CVE number:" "$BINARLY_ID_FILE" | cut -d: -f2 | tr ',' '\n' | awk '{print $1}')
       CVE_RESULTS_BINARLY+=("${CVE_RESULTS_BINARLY_[@]}")
     done
@@ -110,22 +110,36 @@ fwhunter_logging() {
     if [[ "$FWHUNTER_RESULT" == *"rule has been triggered and threat detected"* ]]; then
       if [[ "${#CVE_RESULTS_BINARLY[@]}" -gt 0 ]]; then
         for BINARLY_ID_CVE in "${CVE_RESULTS_BINARLY[@]}"; do
+          # if we have CVE details we include it into our reporting
           print_output "[+] $FWHUNTER_BINARY_MATCH $ORANGE:$GREEN $FWHUNTER_RESULT$GREEN - CVE: $ORANGE$BINARLY_ID_CVE$NC" "" "https://binarly.io/advisories/$BINARLY_RULE"
           write_csv_log "$FWHUNTER_BINARY_MATCH" "unknown" "$BINARLY_ID_CVE" "unknown" "$BINARLY_RULE"
         done
       else
+        # if we do not have CVE details we can't include it into our reporting
         print_output "[+] $FWHUNTER_BINARY_MATCH $ORANGE:$GREEN $FWHUNTER_RESULT$NC" "" "https://binarly.io/advisories/$BINARLY_RULE"
+        write_csv_log "$FWHUNTER_BINARY_MATCH" "unknown" "NA" "unknown" "$BINARLY_RULE"
       fi
     fi
   done
-  mapfile -t FWHUNTER_CVEs < <(find "$LOG_PATH_MODULE" -type f -exec grep "CVE" {} \; | sed 's/.*\ -\ CVE:\ //' | sort -u)
+
+  mapfile -t FWHUNTER_CVEs < <(grep "CVE" "$LOG_FILE" | cut -d: -f4 | sort -u)
+  mapfile -t FWHUNTER_BINARLY_IDs < <(grep "FwHunt rule has been triggered and threat detected" "$LOG_PATH_MODULE"/* | sed 's/.*BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g' | sort -u)
 
   print_ln
   print_ln
-  print_output "[*] Detected $ORANGE${#FWHUNTER_CVEs[@]}$NC firmware issues in UEFI firmware:"
-  for BINARLY_CVE in "${FWHUNTER_CVEs[@]}"; do
-    print_output "$(indent "$(orange "$BINARLY_CVE")")"
-  done
+  # default: output of CVE data
+  # backup: output of binarly IDs
+  if [[ "${#FWHUNTER_CVEs[@]}" -gt 0 ]]; then
+    print_output "[*] Detected $ORANGE${#FWHUNTER_CVEs[@]}$NC firmware issues in UEFI firmware:"
+    for BINARLY_CVE in "${FWHUNTER_CVEs[@]}"; do
+      print_output "$(indent "$(orange "$BINARLY_CVE")")"
+    done
+  elif [[ "${#FWHUNTER_BINARLY_IDs[@]}" -gt 0 ]]; then
+    print_output "[*] Detected $ORANGE${#FWHUNTER_BINARLY_IDs[@]}$NC firmware issues in UEFI firmware:"
+    for BINARLY_ID in "${FWHUNTER_BINARLY_IDs[@]}"; do
+      print_output "$(indent "$(orange "$BINARLY_ID")")"
+    done
+  fi
   print_ln
 
   write_log ""

@@ -114,7 +114,7 @@ s22_vuln_check() {
   local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
 
   NAME=$(basename "$PHP_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
-  local PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
+  local PHP_LOG="$LOG_PATH_MODULE""/php_vuln_""$NAME"".txt"
 
   ulimit -Sv "$MEM_LIMIT"
   "$EXT_DIR"/progpilot "$PHP_SCRIPT_" > "$PHP_LOG" 2>&1 || true
@@ -122,7 +122,11 @@ s22_vuln_check() {
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
 
-  if [[ "$VULNS" -ne 0 ]] ; then
+  if [[ "$VULNS" -eq 0 ]] ; then
+    rm "$PHP_LOG"
+  fi
+
+  if [[ "$VULNS" -gt 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND
     local CFF
