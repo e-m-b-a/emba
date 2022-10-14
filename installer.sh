@@ -130,6 +130,7 @@ done
 if grep -q -i wsl /proc/version; then
   echo -e "\n${ORANGE}INFO: System running in WSL environment!$NC"
   echo -e "\n${ORANGE}INFO: WSL is currently experimental!$NC"
+  echo -e "\n${ORANGE}WARNING: If you are using WSL2, disable docker integration from the docker-desktop daemon!$NC"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   WSL=1
 fi
