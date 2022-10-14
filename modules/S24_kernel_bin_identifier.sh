@@ -18,7 +18,7 @@
 S24_kernel_bin_identifier()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Kernel Binary Identifier"
+  module_title "Kernel Binary and Configuration Identifier"
   pre_module_reporter "${FUNCNAME[0]}"
 
   local NEG_LOG=0
@@ -36,6 +36,7 @@ S24_kernel_bin_identifier()
 
   for FILE in "${FILE_ARR_TMP[@]}" ; do
     K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
+
     if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
       print_output "[+] Possible Linux Kernel found: $ORANGE$FILE$NC"
       print_ln
@@ -68,8 +69,25 @@ S24_kernel_bin_identifier()
       fi
 
       write_csv_log "$K_VER" "$FILE" "$K_INIT"
-
       NEG_LOG=1
+
+    # ASCII kernel config files:
+    elif file "$FILE" | grep -q "ASCII"; then
+      K_CON_FILE=$(strings "$FILE" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)
+      if [[ "$K_CON_FILE" =~ \ Kernel\ Configuration ]]; then
+        print_output "[+] Found kernel configuration file: $ORANGE$FILE$NC"
+        if [[ -e "$EXT_DIR"/kconfig-hardened-check/bin/kconfig-hardened-check ]]; then
+          print_output "[*] Testing kernel configuration file $ORANGE$FILE$NC with kconfig-hardened-check"
+          "$EXT_DIR"/kconfig-hardened-check/bin/kconfig-hardened-check -c "$FILE" | tee -a "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log
+          if [[ -f "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log ]]; then
+            FAILED_KSETTINGS=$(grep -c "FAIL: " "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log)
+            if [[ "$FAILED_KSETTINGS" -gt 0 ]]; then
+              print_output "[+] Found $ORANGE$FAILED_KSETTINGS$GREEN security related kernel settings which should be reviewed - $ORANGE"$(print_path "$FILE")"$NC"
+            fi
+          fi
+        fi
+        NEG_LOG=1
+      fi
     fi
   done
 
