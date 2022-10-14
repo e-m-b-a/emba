@@ -24,6 +24,7 @@ P35_UEFI_extractor() {
     module_log_init "${FUNCNAME[0]}"
     module_title "UEFI extractor"
     pre_module_reporter "${FUNCNAME[0]}"
+    export FILES_UEFI=0
 
     EXTRACTION_DIR="$LOG_DIR"/firmware/uefi_extraction/
 
@@ -46,7 +47,6 @@ ami_extractor() {
 
   local FIRMWARE_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
-  FILES_UEFI=0
   local DIRS_UEFI=0
   local FIRMWARE_NAME_=""
 
