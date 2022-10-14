@@ -402,7 +402,6 @@ main()
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   export MSF_PATH="/usr/share/metasploit-framework/modules/"
-  export PHP_INISCAN_PATH="$EXT_DIR""/iniscan/bin/iniscan"
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
