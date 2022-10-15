@@ -83,7 +83,8 @@ S24_kernel_bin_identifier()
         print_output "[+] Found kernel configuration file: $ORANGE$FILE$NC"
         if [[ "$KCONF_HARD_CHECKER" != "NA" ]]; then
           print_output "[*] Testing kernel configuration file $ORANGE$FILE$NC with kconfig-hardened-check"
-          local KCONF_LOG="$LOG_PATH_MODULE/kconfig_hardening_check_$(basename "$FILE").log"
+          local KCONF_LOG=""
+          KCONF_LOG="$LOG_PATH_MODULE/kconfig_hardening_check_$(basename "$FILE").log"
           "$KCONF_HARD_CHECKER" -c "$FILE" | tee -a "$KCONF_LOG"
           if [[ -f "$KCONF_LOG" ]]; then
             FAILED_KSETTINGS=$(grep -c "FAIL: " "$KCONF_LOG")
