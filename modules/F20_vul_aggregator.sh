@@ -201,8 +201,7 @@ aggregate_versions() {
       VERSION="$(echo "$VERSION" | cut -d\; -f1-2 | tr ';' ':')"
       print_output "[+] Found Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
-      # shellcheck disable=SC2001
-      VERSION=$(echo "$VERSION" | sed 's/$/:/')
+      VERSION=${VERSION/%/:}
       VERSIONS_KERNEL+=( "$VERSION" )
       #print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
     done
