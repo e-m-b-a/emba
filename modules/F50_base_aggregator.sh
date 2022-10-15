@@ -617,7 +617,6 @@ output_cve_exploits() {
       print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries / Exploits: $ORANGE${EXPLOIT_HIGH_COUNT:0}$NC")")"
       print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries / Exploits: $ORANGE${EXPLOIT_MEDIUM_COUNT:0}$NC")")"
       print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries /Exploits: $ORANGE${EXPLOIT_LOW_COUNT:0}$NC")")"
-      # shellcheck disable=SC2129
       write_csv_log "cve_high" "$HIGH_CVE_COUNTER" "NA"
       write_csv_log "cve_medium" "$MEDIUM_CVE_COUNTER" "NA"
       write_csv_log "cve_low" "$LOW_CVE_COUNTER" "NA"

@@ -49,7 +49,8 @@ if ("${FIRMAE_BOOT}"); then
   if (( ${#arr[@]} )); then
     # convert to the unique array following the original order
     # shellcheck disable=SC2207,SC2016
-    uniq_arr=($("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' '))
+    #uniq_arr=($("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' '))
+    mapfile -t uniq_arr < <("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' ')
     for FILE in "${uniq_arr[@]}"
     do
       if [ -d "${FILE}" ]; then
