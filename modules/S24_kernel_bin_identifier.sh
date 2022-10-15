@@ -82,7 +82,8 @@ S24_kernel_bin_identifier()
           if [[ -f "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log ]]; then
             FAILED_KSETTINGS=$(grep -c "FAIL: " "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log)
             if [[ "$FAILED_KSETTINGS" -gt 0 ]]; then
-              print_output "[+] Found $ORANGE$FAILED_KSETTINGS$GREEN security related kernel settings which should be reviewed - $ORANGE"$(print_path "$FILE")"$NC"
+              print_output "[+] Found $ORANGE$FAILED_KSETTINGS$GREEN security related kernel settings which should be reviewed - $ORANGE$(print_path "$FILE")$NC"
+              write_log "[*] Statistics:$FAILED_KSETTINGS"
             fi
           fi
         fi

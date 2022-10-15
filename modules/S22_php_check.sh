@@ -156,7 +156,7 @@ s22_check_php_ini(){
   local PHP_FILE=""
   local INISCAN_RESULT=()
   local LINE=""
-  local PHP_INISCAN_PATH="$EXT_DIR""/iniscan/bin/iniscan"
+  local PHP_INISCAN_PATH="$EXT_DIR""/iniscan/vendor/bin/iniscan"
   PHP_INI_FAILURE=0
   PHP_INI_LIMIT_EXCEEDED=0
   PHP_INI_WARNINGS=0
