@@ -26,6 +26,11 @@ S24_kernel_bin_identifier()
   local FILE=""
   local K_VER=""
   local K_INIT=""
+  if [[ -e "$EXT_DIR"/kconfig-hardened-check/bin/kconfig-hardened-check ]]; then
+    KCONF_HARD_CHECKER="$EXT_DIR/kconfig-hardened-check/bin/kconfig-hardened-check"
+  else
+    KCONF_HARD_CHECKER="NA"
+  fi
 
   readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
     -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
@@ -73,14 +78,15 @@ S24_kernel_bin_identifier()
 
     # ASCII kernel config files:
     elif file "$FILE" | grep -q "ASCII"; then
-      K_CON_FILE=$(strings "$FILE" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)
-      if [[ "$K_CON_FILE" =~ \ Kernel\ Configuration ]]; then
+      K_CON_DET=$(strings "$FILE" 2>/dev/null | grep -E "^# Linux.*[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}.* Kernel Configuration" || true)
+      if [[ "$K_CON_DET" =~ \ Kernel\ Configuration ]]; then
         print_output "[+] Found kernel configuration file: $ORANGE$FILE$NC"
-        if [[ -e "$EXT_DIR"/kconfig-hardened-check/bin/kconfig-hardened-check ]]; then
+        if [[ "$KCONF_HARD_CHECKER" != "NA" ]]; then
           print_output "[*] Testing kernel configuration file $ORANGE$FILE$NC with kconfig-hardened-check"
-          "$EXT_DIR"/kconfig-hardened-check/bin/kconfig-hardened-check -c "$FILE" | tee -a "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log
-          if [[ -f "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log ]]; then
-            FAILED_KSETTINGS=$(grep -c "FAIL: " "$LOG_PATH_MODULE"/kconfig_hardening_check_"$(basename "$FILE")".log)
+          local KCONF_LOG="$LOG_PATH_MODULE/kconfig_hardening_check_$(basename "$FILE").log"
+          "$KCONF_HARD_CHECKER" -c "$FILE" | tee -a "$KCONF_LOG"
+          if [[ -f "$KCONF_LOG" ]]; then
+            FAILED_KSETTINGS=$(grep -c "FAIL: " "$KCONF_LOG")
             if [[ "$FAILED_KSETTINGS" -gt 0 ]]; then
               print_output "[+] Found $ORANGE$FAILED_KSETTINGS$GREEN security related kernel settings which should be reviewed - $ORANGE$(print_path "$FILE")$NC"
               write_log "[*] Statistics:$FAILED_KSETTINGS"
