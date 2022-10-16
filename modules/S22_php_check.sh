@@ -114,7 +114,7 @@ s22_vuln_check() {
   local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
 
   NAME=$(basename "$PHP_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
-  local PHP_LOG="$LOG_PATH_MODULE""/php_vuln""$NAME"".txt"
+  local PHP_LOG="$LOG_PATH_MODULE""/php_vuln_""$NAME"".txt"
 
   ulimit -Sv "$MEM_LIMIT"
   "$EXT_DIR"/progpilot "$PHP_SCRIPT_" > "$PHP_LOG" 2>&1 || true
@@ -122,7 +122,11 @@ s22_vuln_check() {
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
 
-  if [[ "$VULNS" -ne 0 ]] ; then
+  if [[ "$VULNS" -eq 0 ]] ; then
+    rm "$PHP_LOG"
+  fi
+
+  if [[ "$VULNS" -gt 0 ]] ; then
     #check if this is common linux file:
     local COMMON_FILES_FOUND
     local CFF
@@ -152,6 +156,7 @@ s22_check_php_ini(){
   local PHP_FILE=""
   local INISCAN_RESULT=()
   local LINE=""
+  local PHP_INISCAN_PATH="$EXT_DIR""/iniscan/bin/iniscan"
   PHP_INI_FAILURE=0
   PHP_INI_LIMIT_EXCEEDED=0
   PHP_INI_WARNINGS=0
@@ -161,7 +166,7 @@ s22_check_php_ini(){
   disable_strict_mode "$STRICT_MODE"
   for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
     #print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
-    mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" 2>/dev/null || true)
+    mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" || true)
     for LINE in "${INISCAN_RESULT[@]}" ; do  
       local LIMIT_CHECK
       IFS='|' read -ra LINE_ARR <<< "$LINE"
@@ -192,9 +197,11 @@ s22_check_php_ini(){
         fi
       fi
     done
-    print_ln
-    print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES""$GREEN"" PHP configuration issues in php config file :""$ORANGE"" ""$(print_path "$PHP_FILE")"
-    print_ln
+    if [[ "$S22_PHP_INI_ISSUES" -gt 0 ]]; then
+      print_ln
+      print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES""$GREEN"" PHP configuration issues in php config file :""$ORANGE"" ""$(print_path "$PHP_FILE")"
+      print_ln
+    fi
   done
   enable_strict_mode "$STRICT_MODE"
 }

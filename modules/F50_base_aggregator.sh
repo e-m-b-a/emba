@@ -719,7 +719,8 @@ get_data() {
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | tr -d '[:space:]' || true)
+    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\n' '/' || true)
+    PRE_ARCH="${PRE_ARCH%\/}"
     PRE_ARCH=$(strip_color_codes "$PRE_ARCH")
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
@@ -998,12 +999,14 @@ cwe_logging() {
   local CWE_CNT=""
 
   if [[ -d "$LOG_DIR"/"$LOG_DIR_MOD" ]]; then
-    mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
+    # mapfile -t CWE_OUT < <( cat "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log 2>/dev/null | grep -v "ERROR\|DEBUG\|INFO" | grep "CWE[0-9]" | sed -z 's/[0-9]\.[0-9]//g' | cut -d\( -f1,3 | cut -d\) -f1 | sort -u | tr -d '(' | tr -d "[" | tr -d "]" || true)
+    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_DIR"/"$LOG_DIR_MOD"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
       write_link "s120"
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
-        CWE="$(echo "$CWE_ENTRY" | cut -d\  -f1)"
+        CWE="$(echo "$CWE_ENTRY" | awk '{print $1}')"
         CWE_DESC="$(echo "$CWE_ENTRY" | cut -d\  -f2-)"
         # do not change this to grep -c!
         # shellcheck disable=SC2126

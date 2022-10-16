@@ -35,6 +35,9 @@ I01_default_apps_host() {
   print_tool_info "net-tools" 1
   print_tool_info "curl" 1
 
+  # python3.10-request
+  print_pip_info "requests"
+
   if [[ "$LIST_DEP" -eq 1 ]] ; then
     ANSWER=("n")
   else
@@ -45,6 +48,7 @@ I01_default_apps_host() {
     y|Y )
       echo
       apt-get install "${INSTALL_APP_LIST[@]}" -y
+      pip3 install -U requests 2>/dev/null
     ;;
   esac
 }  

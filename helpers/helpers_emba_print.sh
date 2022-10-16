@@ -510,7 +510,6 @@ print_help()
   echo -e "$CYAN""-C [container id]""$NC"" Extract and analyze a local docker container via container id"
   echo -e "$CYAN""-x""$NC""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
-  echo -e "$CYAN""-o""$NC""                Activate online checks (e.g. upload and test with VirusTotal)"
   echo -e "$CYAN""-r""$NC""                Remove temporary firmware directory after testing"
   echo -e "$CYAN""-b""$NC""                Just print a random banner and exit"
   echo -e "\\nModify output"

@@ -70,7 +70,6 @@ S109_jtr_local_pw_cracking()
         print_output "[*] Found password data $ORANGE$HASH$NC for further processing in $ORANGE$HASH_SOURCE$NC"
         echo "$HASH" >> "$LOG_PATH_MODULE"/jtr_hashes.txt
       fi
-
     done
 
     if [[ -f "$LOG_PATH_MODULE"/jtr_hashes.txt ]]; then
@@ -80,14 +79,14 @@ S109_jtr_local_pw_cracking()
       timeout --preserve-status --signal SIGINT "$JTR_TIMEOUT" john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt | tee -a "$LOG_FILE" || true
       print_ln
       NEG_LOG=1
-    fi
 
-    mapfile -t CRACKED_HASHES < <(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep -v "password hash\(es\)\? cracked" | grep -v "^$" || true)
-    JTR_FINAL_STAT=$(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
-    CRACKED=$(echo "$JTR_FINAL_STAT" | awk '{print $1}')
-    if [[ -n "$JTR_FINAL_STAT" ]]; then
-      print_output "[*] John the ripper final status: $ORANGE$JTR_FINAL_STAT$NC"
-      NEG_LOG=1
+      mapfile -t CRACKED_HASHES < <(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep -v "password hash\(es\)\? cracked" | grep -v "^$" || true)
+      JTR_FINAL_STAT=$(john --show "$LOG_PATH_MODULE"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
+      CRACKED=$(echo "$JTR_FINAL_STAT" | awk '{print $1}')
+      if [[ -n "$JTR_FINAL_STAT" ]]; then
+        print_output "[*] John the ripper final status: $ORANGE$JTR_FINAL_STAT$NC"
+        NEG_LOG=1
+      fi
     fi
 
     if [[ "$CRACKED" -gt 0 ]]; then

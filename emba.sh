@@ -171,13 +171,6 @@ run_modules()
           fi
         fi
         if [[ "$MOD_FIN" -eq 0 ]]; then
-          if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
-            # if UEFI firmware detected then run only Sxx modules with UEFI in the name
-            if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-              print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
-              continue
-            fi
-          fi
           if [[ $THREADING_SET -eq 1 ]]; then
             "$MODULE_MAIN" &
             WAIT_PIDS+=( "$!" )
@@ -222,13 +215,6 @@ run_modules()
             fi
           fi
           if [[ "$MOD_FIN" -eq 0 ]]; then
-            if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
-              # if UEFI firmware detected then run only Sxx modules with UEFI in the name
-              if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-                print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
-                continue
-              fi
-            fi
             if [[ $THREADING_SET -eq 1 ]]; then
               "$MODULE_MAIN" &
               WAIT_PIDS+=( "$!" )
@@ -293,13 +279,6 @@ run_modules()
               fi
             fi
             if [[ "$MOD_FIN" -eq 0 ]]; then
-              if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
-                # if UEFI firmware detected then run only Sxx modules with UEFI in the name
-                if [[ "$MODULE_BN" =~ ^S[0-9]+_* ]] && ! [[ "$MODULE_BN" == *UEFI* ]]; then
-                  print_output "[*] UEFI firmware detected - skipping module $ORANGE$MODULE_MAIN$NC." "no_log"
-                  continue
-                fi
-              fi
               if [[ $THREADING_SET -eq 1 ]]; then
                 "$MODULE_MAIN" &
                 WAIT_PIDS+=( "$!" )
@@ -337,8 +316,8 @@ main()
 
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
-  export EMBA_VERSION="1.1.2"
+  export RELEASE=0
+  export EMBA_VERSION="1.1.x"
   export STRICT_MODE=0
   export MATRIX_MODE=0
   export UPDATE=0
@@ -372,7 +351,6 @@ main()
   export RESTART=0              # if we find an unfinished EMBA scan we try to only process not finished modules
   export FINAL_FW_RM=0          # remove the firmware working copy after testing (do not waste too much disk space)
   export ONLY_DEP=0             # test only dependency
-  export ONLINE_CHECKS=0        # checks with internet connection needed (e.g. upload of firmware to virustotal)
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default EMBA scan
@@ -403,11 +381,9 @@ main()
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   export MSF_PATH="/usr/share/metasploit-framework/modules/"
-  export PHP_INISCAN_PATH="$EXT_DIR""/iniscan/bin/iniscan"
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
   fi
-  export VT_API_KEY_FILE="$CONFIG_DIR"/vt_api_key.txt     # virustotal API key for P03 module
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
@@ -448,7 +424,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:op:P:QrsStT:UxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -527,9 +503,6 @@ main()
         ;;
       N)
         export FW_NOTES="$OPTARG"
-        ;;
-      o)
-        export ONLINE_CHECKS=1
         ;;
       p)
         export PROFILE="$OPTARG"

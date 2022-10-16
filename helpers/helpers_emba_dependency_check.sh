@@ -105,7 +105,8 @@ check_nw_interface() {
 
 check_cve_search() {
   if [[ $JUMP_OVER_CVESEARCH_CHECK -eq 1 ]] ; then
-    # no cve check -> just return
+    # no cve check -> just return and enforce CVE_SEARCH
+    export CVE_SEARCH=1
     return
   fi
   TOOL_NAME="cve-search"
@@ -333,15 +334,30 @@ dependency_check()
       else
         export BINWALK_VER_CHECK=1
       fi
+      # this is typically needed in the read only docker container:
+      if ! [[ -d "$HOME"/.config/binwalk/modules/ ]]; then
+        mkdir -p "$HOME"/.config/binwalk/modules/
+      fi
+      print_output "    cpu_rec - \\c" "no_log"
+      if [[ -d "$EXT_DIR"/cpu_rec/ ]]; then
+        cp -pr "$EXT_DIR"/cpu_rec/cpu_rec.py "$HOME"/.config/binwalk/modules/
+        cp -pr "$EXT_DIR"/cpu_rec/cpu_rec_corpus "$HOME"/.config/binwalk/modules/
+        echo -e "$GREEN""ok""$NC"
+      else
+        echo -e "$RED""not ok""$NC"
+        # DEP_ERROR=1
+      fi
     fi
     export MPLCONFIGDIR="$TMP_DIR"
-
 
     # jtr
     check_dep_tool "john"
 
     # pixd
     check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
+
+    # php iniscan
+    check_dep_file "PHP iniscan" "$EXT_DIR""/iniscan/bin/iniscan"
 
     # pixd image
     check_dep_file "pixd image renderer" "$EXT_DIR""/pixd_png.py"
@@ -486,7 +502,7 @@ dependency_check()
       check_emulation_port "Running Qemu service" "2001"
     fi
 
-    if function_exists S120_cwe_checker; then
+    if [[ "$CWE_CHECKER" -eq 1 ]]; then
       print_output "    cwe-checker environment - \\c" "no_log"
       if [[ -f "$EXT_DIR""/cwe_checker/bin/cwe_checker" ]] || [[ -f "/root/.cargo/bin/cwe_checker" ]]; then
         echo -e "$GREEN""ok""$NC"
