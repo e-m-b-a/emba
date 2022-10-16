@@ -59,6 +59,10 @@ check_live_metasploit() {
   sub_module_title "Metasploit tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
   local PORTS=""
   local PORTS_ARR=()
+  local MSF_VULN=""
+  local MSF_VULNS_VERIFIED=()
+  local MSF_MODULE=""
+  local ARCH_END=""
 
   mapfile -t PORTS_ARR < <(grep -a -h "<state state=\"open\"" "$LOG_DIR"/l10_system_emulation/*.xml | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
   printf -v PORTS "%s " "${PORTS_ARR[@]}"
@@ -75,14 +79,23 @@ check_live_metasploit() {
 
   timeout --preserve-status --signal SIGINT 2000 msfconsole -q -n -r "$HELP_DIR"/l35_msf_check.rc "$IP_ADDRESS_" "$PORTS" "$ARCH_END"| tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
 
-  # if [[ -d "$HOME"/.msf/logs ]]; then
-  #   cp -pr "$HOME"/.msf/logs "$LOG_PATH_MODULE"
-  # fi
-
   if [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]] && [[ $(grep -a -i -c "Vulnerability identified for module" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt) -gt 0 ]]; then
+    write_csv_log "Source" "Module" "CVE" "ARCH_END" "IP_ADDRESS" "PORTS"
     print_ln
     print_output "[+] Possible Metasploit results for verification:" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
-    grep -a -i "Vulnerability identified for module" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
+    mapfile -t MSF_VULNS_VERIFIED < <(grep -a -i "Vulnerability identified for module" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true)
+    for MSF_VULN in "${MSF_VULNS_VERIFIED[@]}"; do
+      local MSF_CVE=""
+      MSF_MODULE="$(echo "$MSF_VULN" | sed 's/.*module\ //' | sed 's/\ -\ .*//')"
+      mapfile -t MSF_CVEs < <(grep "$MSF_MODULE" "$MSF_DB_PATH" | cut -d: -f2)
+      printf -v MSF_CVE "%s " "${MSF_CVEs[@]}"
+      if [[ -z "$MSF_CVE" ]]; then
+        print_output "[+] Vulnerability verified: $ORANGE$MODULE$GREEN / $ORANGE$MSF_CVE$NC."
+      else
+        print_output "[+] Vulnerability verified: $ORANGE$MODULE$NC."
+      fi
+      write_csv_log "Metasploit framework" "$MSF_MODULE" "$MSF_CVE" "$ARCH_END" "$IP_ADDRESS_" "$PORTS"
+    done
 
     print_ln
 
