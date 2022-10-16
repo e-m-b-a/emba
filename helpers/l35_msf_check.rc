@@ -58,9 +58,8 @@ def select_payload(exploit,arch)
     return generic
   else
     # WTF? This exploit supports NONE of our favorite payloads?
-    # What kinda BS is this?
+    # What kinda BS is this? We return a linux payload:
     return linux
-    #return nil
   end
 end
 
@@ -85,7 +84,7 @@ def exploit_checker(host,ports,architecture)
                  name =~ /freebsd/ or
                  name =~ /unix/ or
                  name =~ /openbsd/)
-    # remove modules with known issues - we need to check them manually:
+    # remove modules with known issues - we need to check them again and adjust the settings:
     next if (name =~ /cve_2020_13160_anydesk/ or
              name =~ /goahead_ldpreload/ or
              name =~ /phpmailer_arg_injection/ or
@@ -191,9 +190,10 @@ def init_args
 
   raise ArgumentError, "Missing a host ip address" if args[:host].empty?
   raise ArgumentError, "Missing port list" if args[:ports].empty?
-  print_line("Ports: #{args[:ports]}")
-  print_line("Host: #{args[:host]}")
-  print_line("ARCH: #{args[:architecture]}")
+
+  print_status("Ports: #{args[:ports]}")
+  print_status("Host: #{args[:host]}")
+  print_status("ARCH: #{args[:architecture]}")
 
   return args
 end
@@ -215,8 +215,8 @@ begin
   run_single("color true")
   run_single("setg ConsoleLogging true")
   run_single("setg SessionLogging true")
-  run_single("setg VERBOSE true")
   exploit_checker(args[:host],args[:ports],args[:architecture])
+  # todo:
   # auxiliary_checker(args[:host],args[:ports],args[:arch])
 rescue ArgumentError => e
   print_error("Invalid argument: #{e.message}")

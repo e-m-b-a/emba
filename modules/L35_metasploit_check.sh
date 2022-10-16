@@ -68,9 +68,10 @@ check_live_metasploit() {
 
   # metasploit tries to parse env variables and our environment is wasted!
   export PORT=""
-  if [[ "$ARCH_END" == "mipsel" ]]; then ARCH_END = "mipsle"; fi
-  if [[ "$ARCH_END" == "mipseb" ]]; then ARCH_END = "mipsbe"; fi
-  if [[ "$ARCH_END" == "armel" ]]; then ARCH_END = "armle"; fi
+  D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$D_END" == "el" ]]; then D_END="le"; fi
+  if [[ "$D_END" == "eb" ]]; then D_END="be"; fi
+  ARCH_END="$(echo "$ARCH" | tr '[:upper:]' '[:lower:]')$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
 
   timeout --preserve-status --signal SIGINT 2000 msfconsole -q -n -r "$HELP_DIR"/l35_msf_check.rc "$IP_ADDRESS_" "$PORTS" "$ARCH_END"| tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
 
