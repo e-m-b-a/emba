@@ -36,6 +36,7 @@ I01_default_apps_host() {
   print_tool_info "curl" 1
 
   # python3.10-request
+  print_tool_info "python3-pip" 1
   print_pip_info "requests"
 
   if [[ "$LIST_DEP" -eq 1 ]] ; then
