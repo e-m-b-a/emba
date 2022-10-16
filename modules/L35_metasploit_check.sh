@@ -68,24 +68,26 @@ check_live_metasploit() {
 
   # metasploit tries to parse env variables and our environment is wasted!
   export PORT=""
-  timeout --preserve-status --signal SIGINT 1000 msfconsole -q -n -r "$HELP_DIR"/l35_msf_check.rc "$IP_ADDRESS_" "$PORTS" | tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
+  if [[ "$ARCH_END" == "mipsel" ]]; then ARCH_END = "mipsle"; fi
+  if [[ "$ARCH_END" == "mipseb" ]]; then ARCH_END = "mipsbe"; fi
+  if [[ "$ARCH_END" == "armel" ]]; then ARCH_END = "armle"; fi
 
-  if [[ -d "$HOME"/.msf/logs ]]; then
-    cp -pr "$HOME"/.msf/logs "$LOG_PATH_MODULE"
-  fi
+  timeout --preserve-status --signal SIGINT 2000 msfconsole -q -n -r "$HELP_DIR"/l35_msf_check.rc "$IP_ADDRESS_" "$PORTS" "$ARCH_END"| tee -a "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
 
-  if [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]] && [[ $(grep -a -i -c "\[+\]\|stager\|opened" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt) -gt 0 ]]; then
+  # if [[ -d "$HOME"/.msf/logs ]]; then
+  #   cp -pr "$HOME"/.msf/logs "$LOG_PATH_MODULE"
+  # fi
+
+  if [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]] && [[ $(grep -a -i -c "Vulnerability identified for module" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt) -gt 0 ]]; then
     print_ln
-    print_output "[+] Possible Metasploit results for verification." "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
-    grep -a -i "\[+\]\|stager" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
+    print_output "[+] Possible Metasploit results for verification:" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
+    grep -a -i "Vulnerability identified for module" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
 
     print_ln
 
     print_output "[+] Possible Metasploit sessions for verification." "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
-    grep -E " session [0-9]+? opened" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
     print_ln
     sed -n '/Active sessions/,/Stopping all jobs/p' "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
-
     print_ln
   else
     print_output "[-] No Metasploit results detected"

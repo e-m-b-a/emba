@@ -85,9 +85,10 @@ def exploit_checker(host,ports,architecture)
                  name =~ /freebsd/ or
                  name =~ /unix/ or
                  name =~ /openbsd/)
-    # remove modules with known issues:
+    # remove modules with known issues - we need to check them manually:
     next if (name =~ /cve_2020_13160_anydesk/ or
              name =~ /goahead_ldpreload/ or
+             name =~ /phpmailer_arg_injection/ or
              name =~ /atutor_filemanager_traversal/)
 
 
@@ -98,6 +99,7 @@ def exploit_checker(host,ports,architecture)
 
       mod.datastore['VERBOSE'] = "true"
       mod.datastore['RHOSTS'] = host.to_s
+      mod.datastore['SRVHOST'] = Rex::Socket.source_address("#{host.to_s}") 
 
       if architecture == "mipsbe"
         # mipsle is mostly target 1
@@ -115,15 +117,20 @@ def exploit_checker(host,ports,architecture)
           print_status("Check #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
           @job_ids << mod.job_id
         end
-        print_status("Check code for #{name}: #{result.to_s}")
+
+        if not result.nil?
+          print_status("Check code for #{name}: #{result.to_s}")
+        end
+
         if (result =~ /Vulnerable/ or result =~ /Appears/)
-          print_good("Vulnerability identified with #{result} - module #{name} - #{host.to_s}:#{serv}")
+          print_good("Vulnerability identified for module #{name} - #{host.to_s}:#{serv}")
+          print_good("Check state #{result} for module #{name} - #{host.to_s}:#{serv}")
         end
-        print_line(Msf::Exploit::CheckCode)
-        if (result =~ /Safe/)
-          print_status("Check code is safe - skipping exploitation")
+
+        if (result.to_s =~ /safe/)
+          print_status("Check code is safe - skipping exploitation attempt")
+          next
         end
-        next if (result =~ /safe/)
       rescue ::Exception => e
         print_error(e.message)
       end
