@@ -194,7 +194,7 @@ fi
 # initial installation of the host environment:
 I01_default_apps_host
 
-DOCKER_COMP_VER=$(docker-compose -v | grep version | awk '{print $3}' | tr -d ',')
+DOCKER_COMP_VER=$(docker-compose -v | grep version | tr '-' ' ' | awk '{print $4}' | tr -d ',' | sed 's/^v//')
 if [[ $(version "$DOCKER_COMP_VER") -lt $(version "1.28.5") ]]; then
   echo -e "\n${ORANGE}WARNING: compatibility of the used docker-compose version is unknown!$NC"
   echo -e "\n${ORANGE}Please consider updating your docker-compose installation to version 1.28.5 or later.$NC"
