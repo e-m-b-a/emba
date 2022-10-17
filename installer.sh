@@ -28,7 +28,7 @@ export DOWNLOAD_FILE_LIST=()
 export INSTALLER_DIR="./installer"
 
 if [[ "$STRICT_MODE" -eq 1 ]]; then
-  # shellcheck disable=SC1091
+  # shellcheck source=/dev/null
   source ./helpers/helpers_emba_load_strict_settings.sh
   load_strict_mode_settings
   trap 'wickStrictModeFail $? | tee -a /tmp/emba_installer.log' ERR  # The ERR trap is triggered when a script catches an error

@@ -131,7 +131,6 @@ S14_weak_func_radare_check()
       done < "$TMP_DIR"/S14_STRCPY_CNT.tmp
     fi
 
-    # shellcheck disable=SC2129
     write_log ""
     write_log "[*] Statistics:$STRCPY_CNT"
     write_log ""

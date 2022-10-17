@@ -133,7 +133,6 @@ S13_weak_func_check()
       done < "$TMP_DIR"/S13_STRCPY_CNT.tmp
     fi
 
-    # shellcheck disable=SC2129
     write_log ""
     write_log "[*] Statistics:$STRCPY_CNT"
     write_log ""
