@@ -87,20 +87,28 @@ check_live_metasploit() {
     for MSF_VULN in "${MSF_VULNS_VERIFIED[@]}"; do
       local MSF_CVE=""
       MSF_MODULE="$(echo "$MSF_VULN" | sed 's/.*module\ //' | sed 's/\ -\ .*//')"
-      mapfile -t MSF_CVEs < <(grep "$MSF_MODULE" "$MSF_DB_PATH" | cut -d: -f2)
+      mapfile -t MSF_CVEs < <(grep "$MSF_MODULE" "$MSF_DB_PATH" | cut -d: -f2 || true)
       printf -v MSF_CVE "%s " "${MSF_CVEs[@]}"
-      if [[ -z "$MSF_CVE" ]]; then
-        print_output "[+] Vulnerability verified: $ORANGE$MODULE$GREEN / $ORANGE$MSF_CVE$NC."
+      MSF_CVE="${MSF_CVE%\ }"
+      if [[ -n "$MSF_CVE" ]]; then
+        print_output "[+] Vulnerability verified: $ORANGE$MSF_MODULE$GREEN / $ORANGE$MSF_CVE$NC."
       else
-        print_output "[+] Vulnerability verified: $ORANGE$MODULE$NC."
+        print_output "[+] Vulnerability verified: $ORANGE$MSF_MODULE$NC."
+        MSF_CVE="NA"
+        # if we have not CVE entry we can directly write our csv entry:
+        write_csv_log "Metasploit framework" "$MSF_MODULE" "$MSF_CVE" "$ARCH_END" "$IP_ADDRESS_" "$PORTS"
       fi
-      write_csv_log "Metasploit framework" "$MSF_MODULE" "$MSF_CVE" "$ARCH_END" "$IP_ADDRESS_" "$PORTS"
+      for MSF_CVE in "${MSF_CVEs[@]}"; do
+        # per CVE one csv entry:
+        write_csv_log "Metasploit framework" "$MSF_MODULE" "$MSF_CVE" "$ARCH_END" "$IP_ADDRESS_" "$PORTS"
+      done
     done
 
     print_ln
 
     print_output "[+] Possible Metasploit sessions for verification." "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
     print_ln
+    # Print the session output from the metasploit log:
     sed -n '/Active sessions/,/Stopping all jobs/p' "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
     print_ln
   else

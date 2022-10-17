@@ -52,6 +52,7 @@ F50_base_aggregator() {
   L20_LOG="l20_snmp_checks.txt"
   L25_LOG="l25_web_checks.txt"
   L30_LOG="l30_routersploit.txt"
+  L35_CSV_LOG="$CSV_DIR""/L35_metasploit_check.csv"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
 
   if [[ "$RESTART" -eq 1 ]] && [[ -f "$LOG_FILE" ]]; then
@@ -451,7 +452,6 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
-      #printf "$GREEN_\tCOUNT : component name  : common linux file: y/n |  CWE-check    |  RELRO  |  CANARY  |     NX      |   SYMBOLS  |  NETWORKING   |$NC\n" "$F_COUNTER" "$BINARY" "$CWE_CNT" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
         binary_fct_output "$DETAIL_STRCPY"
         write_csv_log "strcpy_bin" "$BINARY" "$F_COUNTER"
@@ -627,9 +627,9 @@ output_cve_exploits() {
       print_output "[!] WARNING: CVE-Search was not performed. The vulnerability results should be taken with caution!"
       print_ln
     fi
-    if [[ "${EXPLOIT_COUNTER:-0}" -gt 0 ]]; then
+    if [[ "${EXPLOIT_COUNTER:-0}" -gt 0 ]] || [[ "$MSF_VERIFIED" -gt 0 ]]; then
       write_csv_log "exploits" "$EXPLOIT_COUNTER" "NA"
-      if [[ $MSF_MODULE_CNT -gt 0 ]]; then
+      if [[ "$MSF_MODULE_CNT" -gt 0 ]]; then
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available ($MAGENTA$MSF_MODULE_CNT$GREEN Metasploit modules).")")"
         write_link "f20#minimalreportofexploitsandcves"
         write_csv_log "metasploit_modules" "$MSF_MODULE_CNT" "NA"
@@ -637,13 +637,18 @@ output_cve_exploits() {
         print_output "$(indent "$(green "$MAGENTA$BOLD$EXPLOIT_COUNTER$NC$GREEN possible exploits available.")")"
         write_link "f20#minimalreportofexploitsandcves"
       fi
-      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 || "$KNOWN_EXPLOITED_COUNTER" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited vulnerabilities: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$NC")")"
+      if [[ "$MSF_VERIFIED" -gt 0 ]]; then
+        print_output "$(indent "$(green "$MAGENTA$BOLD$MSF_VERIFIED$NC$GREEN exploits in system mode emulation verified.")")"
+        write_link "l35"
+      fi
+      if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 || "$KNOWN_EXPLOITED_COUNTER" -gt 0 || "$MSF_VERIFIED" -gt 0 ]]; then
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited vulnerabilities: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$GREE / Verified Exploits: $MAGENTA$BOLD$MSF_VERIFIED$NC")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT" "NA"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT" "NA"
         write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT" "NA"
         write_csv_log "github_exploits" "$GITHUB_EXPLOIT_CNT" "NA"
         write_csv_log "known_exploited" "$KNOWN_EXPLOITED_COUNTER" "NA"
+        write_csv_log "verified_exploited" "$MSF_VERIFIED" "NA"
       fi
       # we report only software components with exploits to csv:
       grep "Found version details" "$LOG_DIR/f20_vul_aggregator/F20_summary.txt" 2>/dev/null | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tr -d "\[\+\]" | grep -v "CVEs: 0" | sed -e 's/Found version details:/version_details:/' |sed -e 's/[[:blank:]]//g' | sed -e 's/:/;/g' >> "$CSV_LOG" || true
@@ -711,6 +716,7 @@ get_data() {
   export CVE_COUNTER=0
   export CVE_SEARCH=1
   export FWHUNTER_CNT=0
+  export MSF_VERIFIED=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
@@ -821,6 +827,9 @@ get_data() {
     SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L20_LOG" | cut -d: -f2 || true)
     WEB_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L25_LOG" | cut -d: -f2 || true)
     ROUTERSPLOIT_VULN=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L30_LOG" | cut -d: -f2 || true)
+  fi
+  if [[ -f "$L35_CSV_LOG" ]]; then
+    MSF_VERIFIED=$(grep -v -c "Source" "$L35_CSV_LOG" || true)
   fi
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
     CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -u | cut -d: -f2 || true)
