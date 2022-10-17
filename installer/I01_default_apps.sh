@@ -41,6 +41,10 @@ I01_default_apps(){
     print_tool_info "git" 1
     print_tool_info "strace" 1
 
+    # python3.10-request
+    print_tool_info "python3-pip" 1
+    print_pip_info "requests"
+
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1
@@ -73,6 +77,8 @@ I01_default_apps(){
         chown -R linuxbrew: /home/linuxbrew/.linuxbrew
         #sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
         sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        pip3 install -U requests 2>/dev/null
       ;;
     esac
   fi

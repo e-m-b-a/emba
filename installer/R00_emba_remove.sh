@@ -51,8 +51,8 @@ R00_emba_remove() {
     rm /etc/redis/redis.conf
   fi
   if [[ -f /etc/mongod.conf ]]; then
-    echo -e "\\n""$ORANGE""Removing mongod configuration""$NC"
-    rm /etc/mongod.conf
+    echo -e "\\n""$ORANGE""Removing EMBAs mongod configuration""$NC"
+    sed -i 's/bindIp\:\ 172.36.0.1/bindIp\:\ 127.0.0.1/g' /etc/mongod.conf    # inverse of IF20 line 118
   fi
   if [[ -f /etc/apt/sources.list.d/mongodb-org-4.4.list ]]; then
     echo -e "\\n""$ORANGE""Removing mongod sources.list configuration""$NC"

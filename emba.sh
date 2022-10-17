@@ -319,7 +319,6 @@ main()
   export RELEASE=0
   export EMBA_VERSION="1.1.x"
   export STRICT_MODE=0
-  export MATRIX_MODE=0
   export UPDATE=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
@@ -424,7 +423,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
 
-  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:MN:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:N:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
     case $OPT in
       a)
         export ARCH="$OPTARG"
@@ -500,9 +499,6 @@ main()
         ;;
       m)
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
-        ;;
-      M)
-        export MATRIX_MODE=1
         ;;
       N)
         export FW_NOTES="$OPTARG"
@@ -808,10 +804,6 @@ main()
       check_cve_search_job "$EMBA_PID" &
     fi
 
-    if [[ "$MATRIX_MODE" -eq 1 && $IN_DOCKER -eq 0 ]]; then
-      matrix_mode &
-    fi
-
     # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
     # EMBA container into log directory
     # we do this only outside of the EMBA container - otherwise we will not reach the docker environment
@@ -840,7 +832,7 @@ main()
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:dDe:Ef:Fghijk:l:m:MN:op:P:QrsStT:UX:yY:WxzZ: OPT ; do
+    while getopts a:A:BcC:dDe:Ef:Fghijk:l:m:N:op:P:QrsStT:UX:yY:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
