@@ -42,7 +42,9 @@ I01_default_apps(){
     print_tool_info "strace" 1
 
     # python3.10-request
+    print_tool_info "python3-pip" 1
     print_pip_info "requests"
+
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1
