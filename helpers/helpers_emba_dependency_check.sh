@@ -514,6 +514,7 @@ dependency_check()
     fi
   fi
   
+
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
     print_output "\\n""$ORANGE""Some dependencies are missing - please check your installation\\n" "no_log"
     print_output "$ORANGE""To install all needed dependencies, run '""$NC""sudo ./installer.sh""$ORANGE""'." "no_log"
@@ -527,13 +528,17 @@ dependency_check()
   fi
 
   # If only dependency check, then exit EMBA after it
-  if [[ $ONLY_DEP -eq 1 ]] ; then
-    exit 0
+  if [[ $ONLY_DEP -eq 1 ]]; then
+    if [[ "$IN_DOCKER" -eq 1 ]] || [[ "$USE_DOCKER" -eq 0 ]]; then
+      exit 0
+    fi
+    # no exit if USE_DOCKER -eq 1 and not in docker -> IN_DOCKER -eq 0
   fi
 }
 
 architecture_dep_check() {
   print_ln "no_log"
+  local ARCH_STR="unknown"
   if [[ "$ARCH" == "MIPS" ]] ; then
     ARCH_STR="mips"
   elif [[ "$ARCH" == "ARM" ]] ; then
@@ -549,9 +554,8 @@ architecture_dep_check() {
   else
     ARCH_STR="unknown"
   fi
-  if [[ -z "$ARCH_STR" ]] ; then
+  if [[ "$ARCH_STR" == "unknown" ]] ; then
     print_output "[-] WARNING: No valid architecture detected\\n" "no_log"
-    #exit 1
   else
     print_output "[+] ""$ARCH"" is a valid architecture\\n" "no_log"
   fi
