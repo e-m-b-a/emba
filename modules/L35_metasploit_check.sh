@@ -111,6 +111,8 @@ check_live_metasploit() {
     # Print the session output from the metasploit log:
     sed -n '/Active sessions/,/Stopping all jobs/p' "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true
     print_ln
+  elif [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]]; then
+    print_output "[-] No Metasploit results detected" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
   else
     print_output "[-] No Metasploit results detected"
   fi
