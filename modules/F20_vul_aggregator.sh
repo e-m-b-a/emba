@@ -1027,7 +1027,7 @@ get_msf_verified() {
   CVE_L35_DETAILS=()
   if [[ -f "$L35_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$L35_LOG")."
-    readarray -t CVE_L35_DETAILS < <(cut -d\; -f3 "$L35_LOG" | grep -v "Source" | grep -v "NA" | sort -u || true)
+    readarray -t CVE_L35_DETAILS < <(cut -d\; -f3 "$L35_LOG" | grep -v "^CVE$" | grep -v "NA" | sort -u || true)
   fi
 }
 

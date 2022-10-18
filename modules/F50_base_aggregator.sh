@@ -53,7 +53,7 @@ F50_base_aggregator() {
   L20_LOG="l20_snmp_checks.txt"
   L25_LOG="l25_web_checks.txt"
   L30_LOG="l30_routersploit.txt"
-  L35_CSV_LOG="$CSV_DIR""/L35_metasploit_check.csv"
+  L35_CSV_LOG="$CSV_DIR""/l35_metasploit_check.csv"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
 
   if [[ "$RESTART" -eq 1 ]] && [[ -f "$LOG_FILE" ]]; then
