@@ -61,8 +61,7 @@ debian_status_files_search() {
         for PACKAGE_VERSION in "${DEBIAN_PACKAGES[@]}" ; do
           # Package: xxd - Status: install ok installed - 2:8.2.3995-1+b3
           PACKAGE=$(echo "$PACKAGE_VERSION" | awk '{print $2}')
-          # shellcheck disable=SC2001
-          VERSION=$(echo "$PACKAGE_VERSION" | sed 's/.*Version: //g')
+          VERSION=${PACKAGE_VERSION/*Version:\ /}
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
           #if ! echo "$PACKAGE_VERSION" | grep -q "installed"; then
@@ -101,8 +100,7 @@ openwrt_control_files_search() {
         print_ln
         for PACKAGE_VERSION in "${OPENWRT_PACKAGES[@]}" ; do
           PACKAGE=$(echo "$PACKAGE_VERSION" | awk '{print $2}')
-          # shellcheck disable=SC2001
-          VERSION=$(echo "$PACKAGE_VERSION" | sed 's/.*Version: //g')
+          VERSION=${PACKAGE_VERSION/*Version:\ /}
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
           clean_package_versions "$VERSION"

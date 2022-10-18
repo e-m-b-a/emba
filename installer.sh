@@ -28,7 +28,7 @@ export DOWNLOAD_FILE_LIST=()
 export INSTALLER_DIR="./installer"
 
 if [[ "$STRICT_MODE" -eq 1 ]]; then
-  # shellcheck disable=SC1091
+  # shellcheck source=/dev/null
   source ./helpers/helpers_emba_load_strict_settings.sh
   load_strict_mode_settings
   trap 'wickStrictModeFail $? | tee -a /tmp/emba_installer.log' ERR  # The ERR trap is triggered when a script catches an error
@@ -194,7 +194,7 @@ fi
 # initial installation of the host environment:
 I01_default_apps_host
 
-DOCKER_COMP_VER=$(docker-compose -v | grep version | awk '{print $3}' | tr -d ',')
+DOCKER_COMP_VER=$(docker-compose -v | grep version | tr '-' ' ' | awk '{print $4}' | tr -d ',' | sed 's/^v//')
 if [[ $(version "$DOCKER_COMP_VER") -lt $(version "1.28.5") ]]; then
   echo -e "\n${ORANGE}WARNING: compatibility of the used docker-compose version is unknown!$NC"
   echo -e "\n${ORANGE}Please consider updating your docker-compose installation to version 1.28.5 or later.$NC"

@@ -33,6 +33,7 @@ F50_base_aggregator() {
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
   S22_LOG="s22_php_check.txt"
+  S24_LOG="s24_kernel_bin_identifier.txt"
   S25_LOG="s25_kernel_check.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
   S40_LOG="s40_weak_perm_check.txt"
@@ -248,7 +249,7 @@ output_details() {
 output_config_issues() {
   local DATA=0
 
-  if [[ "${PW_COUNTER:-0}" -gt 0 || "${S85_SSH_VUL_CNT:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 || "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 || "${MOD_DATA_COUNTER:-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 || "${S55_HISTORY_COUNTER:-0}" -gt 0 || "${S50_AUTH_ISSUES:-0}" -gt 0 || "${PASS_FILES_FOUND:-0}" -gt 0 || "${CERT_CNT:-0}" -gt 0 ]]; then
+  if [[ "${PW_COUNTER:-0}" -gt 0 || "${S85_SSH_VUL_CNT:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 || "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 || "${MOD_DATA_COUNTER:-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 || "${S55_HISTORY_COUNTER:-0}" -gt 0 || "${S50_AUTH_ISSUES:-0}" -gt 0 || "${PASS_FILES_FOUND:-0}" -gt 0 || "${CERT_CNT:-0}" -gt 0 || "${S24_FAILED_KSETTINGS:-0}" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
@@ -305,6 +306,11 @@ output_config_issues() {
       write_csv_log "kernel_modules" "$MOD_DATA_COUNTER" "NA"
       write_csv_log "kernel_modules_lic" "$KMOD_BAD" "NA"
       DATA=1
+    fi
+    if [[ "${S24_FAILED_KSETTINGS:-0}" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE${S24_FAILED_KSETTINGS}$GREEN security related kernel settings for review.")")"
+      write_link "s24"
+      write_csv_log "kernel_settings" "${S24_FAILED_KSETTINGS:-0}" "NA"
     fi
     if [[ "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE${INT_COUNT}$GREEN interesting files and $ORANGE${POST_COUNT:-0}$GREEN files that could be useful for post-exploitation.")")"
@@ -617,7 +623,6 @@ output_cve_exploits() {
       print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries / Exploits: $ORANGE${EXPLOIT_HIGH_COUNT:0}$NC")")"
       print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries / Exploits: $ORANGE${EXPLOIT_MEDIUM_COUNT:0}$NC")")"
       print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries /Exploits: $ORANGE${EXPLOIT_LOW_COUNT:0}$NC")")"
-      # shellcheck disable=SC2129
       write_csv_log "cve_high" "$HIGH_CVE_COUNTER" "NA"
       write_csv_log "cve_medium" "$MEDIUM_CVE_COUNTER" "NA"
       write_csv_log "cve_low" "$LOW_CVE_COUNTER" "NA"
@@ -690,6 +695,7 @@ get_data() {
   export S22_PHP_SCRIPTS=0
   export S22_PHP_INI_ISSUES=0
   export S22_PHP_INI_CONFIGS=0
+  export S24_FAILED_KSETTINGS=0
   export MOD_DATA_COUNTER=0
   export KMOD_BAD=0
   export S40_WEAK_PERM_COUNTER=0
@@ -766,6 +772,9 @@ get_data() {
     S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3 || true)
     S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f4 || true)
     S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f5 || true)
+  fi
+  if [[ -f "$LOG_DIR"/"$S24_LOG" ]]; then
+    S24_FAILED_KSETTINGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S24_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 || true)

@@ -131,6 +131,7 @@ fw_bin_detector() {
   # we are running binwalk on the file to analyze the output afterwards:
   binwalk "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
   UEFI_CHECK=$(grep -c "UEFI" "$TMP_DIR"/s02_binwalk_output.txt || true)
+  UEFI_CHECK=$(( "$UEFI_CHECK" + "$(grep -c "UEFI" "$CHECK_FILE" || true)" ))
 
   if [[ "$UEFI_CHECK" -gt 0 ]]; then
     print_output "[+] Identified possible UEFI firmware - using fwhunt-scan vulnerability scanning module"
