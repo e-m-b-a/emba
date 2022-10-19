@@ -4,21 +4,21 @@
 
 The EMBA project is very thankful to the individuals who contributed to the project.
 
-  Want to contribute as well? Here are some suggestions:
+Want to contribute as well? Here are some suggestions:
 
-  - Create new module for a test currently not supported by EMBA
-  - Report or fix (unexpected) errors
-  - Share missing results and findings
-  - Share firmware where EMBA is not performing as expected
-  - Improve code quality
-  - Improve performance
-  - Improve textblocks for [report templates](https://github.com/e-m-b-a/emba/tree/master/config/report_templates)
-  - Improve license and version detection [configuration](https://github.com/e-m-b-a/emba/blob/master/config/bin_version_strings.cfg)
-  - Review the [wiki](https://github.com/e-m-b-a/emba/wiki) for outdated information and open dedicated issues
-  - Check the current [issues](https://github.com/e-m-b-a/emba/issues) if some issue needs help.
-  - For interested first-time contributors we created the label [good first issue](https://github.com/e-m-b-a/emba/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+- Create new module for a test currently not supported by EMBA
+- Report or fix (unexpected) errors
+- Share missing results and findings
+- Share firmware where EMBA is not performing as expected
+- Improve code quality
+- Improve performance
+- Improve textblocks for [report templates](https://github.com/e-m-b-a/emba/tree/master/config/report_templates)
+- Improve license and version detection [configuration](https://github.com/e-m-b-a/emba/blob/master/config/bin_version_strings.cfg)
+- Review the [wiki](https://github.com/e-m-b-a/emba/wiki) for outdated information and open dedicated issues
+- Check the current [issues](https://github.com/e-m-b-a/emba/issues) if some issue needs help.
+- For interested first-time contributors we created the label [good first issue](https://github.com/e-m-b-a/emba/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
-  See [CONTRIBUTING.md](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTING.md) for more details.
+See [CONTRIBUTING.md](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTING.md) for more details.
 
 ==========================================================================================
 
