@@ -234,6 +234,10 @@ output_details() {
       STATE="$STATE""$ORANGE / ""$GREEN""Routersploit"
       EMU_STATE="$EMU_STATE"";Routersploit"
     fi
+    if [[ "$MSF_VERIFIED" -gt 0 ]]; then
+      STATE="$STATE""$ORANGE / ""$GREEN""Exploited"
+      EMU_STATE="$EMU_STATE"";Exploited"
+    fi
     STATE="$STATE$ORANGE"")$NC"
 
     print_output "[+] System emulation was successful $STATE" "" "l10"
