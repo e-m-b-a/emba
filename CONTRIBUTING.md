@@ -26,14 +26,17 @@ It also sketches the typical integration process of patches.
     - check with your employer when not working on your own!
 
 - test your code with shellcheck [**required**] 
-    -  see the included [shellchecker script](./check_project.sh)
+    - see the included [codechecker script](./check_project.sh)
+    - shellcheck should not be disabled on areas with issues -> solve these problems before the PR
 
 - test your code in strict mode (EMBA parameter -S) [**required**]
     - all code should be strict mode compatible
 
 - send reminder if nothing happens after about a week
 
-- the code needs to work on the latest Kali Linux (other distributions are welcome but currently not tested)
+- feel free to mention [EMBA team members](https://github.com/orgs/e-m-b-a/people) in the issue/PR.
+
+- the code needs to work on the latest Kali Linux and Ubuntu 22.04LTS (other distributions are welcome but currently not tested)
 
 ## 2) Code Guidelines
 

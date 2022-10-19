@@ -108,6 +108,8 @@ check_live_metasploit() {
     print_ln
 
     print_output "[+] Possible Metasploit sessions for verification:" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
+    # sometimes we need two print_ln to get one in the web report?!?
+    print_ln
     print_ln
     # Print the session output from the metasploit log:
     sed -n '/Active sessions/,/Stopping all jobs/p' "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE" || true
