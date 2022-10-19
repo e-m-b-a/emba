@@ -123,7 +123,7 @@ s22_vuln_check() {
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
 
   if [[ "$VULNS" -eq 0 ]] ; then
-    rm "$PHP_LOG"
+    rm "$PHP_LOG" 2>/dev/null || true
   fi
 
   if [[ "$VULNS" -gt 0 ]] ; then
