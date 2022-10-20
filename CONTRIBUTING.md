@@ -109,6 +109,6 @@ following:
             maintained indefinitely and may be redistributed consistent with
             this project or the open source license(s) involved.
 
-See also https://www.kernel.org/doc/Documentation/process/submitting-patches.rst
+See also [here](https://www.kernel.org/doc/Documentation/process/submitting-patches.rst)
 (Section 11, "Sign your work") for further background on this process which was
 adopted from the Linux kernel.
