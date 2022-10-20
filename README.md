@@ -72,4 +72,4 @@ We welcome [pull requests](https://github.com/e-m-b-a/emba/pulls) and [issues](h
 
 ## Team
 
-https://github.com/orgs/e-m-b-a/people
+[The EMBA Team](https://github.com/orgs/e-m-b-a/people)
