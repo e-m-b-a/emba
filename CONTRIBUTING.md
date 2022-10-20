@@ -6,31 +6,31 @@ It also sketches the typical integration process of patches.
 ## 1) Contribution Checklist
 
 
-- use git to manage your changes [*recommended*]
+- use git to manage your changes \[*recommended*]
 
 - add the required copyright header to each new file introduced, see
-  [licensing information](./LICENSE) [**required**]
+  [licensing information](./LICENSE) \[**required**]
 
-- structure patches logically, in small steps [**required**]
-    - one separable functionality/fix/refactoring = one patch
-    - do not mix those three into a single patch (e.g., first refactor, then add a new functionality that builds onto the refactoring)
-    - after each patch, *EMBA* has to work. Do not add
-      even temporary breakages inside a patch series (helps when tracking down bugs)
-    - use `git rebase -i` to restructure a patch series
+- structure patches logically, in small steps \[**required**]
+  - one separable functionality/fix/refactoring = one patch
+  - do not mix those three into a single patch (e.g., first refactor, then add a new functionality that builds onto the refactoring)
+  - after each patch, *EMBA* has to work. Do not add
+    even temporary breakages inside a patch series (helps when tracking down bugs)
+  - use `git rebase -i` to restructure a patch series
 
 - base patches on top of latest master or - if there are dependencies - on next
   (note: next is an integration branch that may change non-linearly)
 
-- add signed-off to all patches [**required**]
-    - to certify the "Developer's Certificate of Origin", see below
-    - check with your employer when not working on your own!
+- add signed-off to all patches \[**required**]
+  - to certify the "Developer's Certificate of Origin", see below
+  - check with your employer when not working on your own!
 
-- test your code with shellcheck [**required**] 
-    - see the included [codechecker script](./check_project.sh)
-    - shellcheck should not be disabled on areas with issues -> solve these problems before the PR
+- test your code with shellcheck \[**required**] 
+  - see the included [codechecker script](./check_project.sh)
+  - shellcheck should not be disabled on areas with issues -> solve these problems before the PR
 
-- test your code in strict mode (EMBA parameter -S) [**required**]
-    - all code should be strict mode compatible
+- test your code in strict mode (EMBA parameter -S) \[**required**]
+  - all code should be strict mode compatible
 
 - send reminder if nothing happens after about a week
 
@@ -51,7 +51,7 @@ It also sketches the typical integration process of patches.
 
 - Variables: Variables should be capitalized, with underscore as word separator (e.g. `PROCESS_EXISTS=1`)
 
-- If you use external code, add `# Test source: [LINK TO CODE]` above
+- If you use external code, add `# Test source: \[LINK TO CODE]` above
 
 - Scope of variables: Use local variables if possible
 
@@ -59,14 +59,14 @@ It also sketches the typical integration process of patches.
   - e.g., local VARIABLE=""
 
 - Use parameters to functions
-    - work with local variables inside the functions
-    - do not rely on globals if not needed
+  - work with local variables inside the functions
+  - do not rely on globals if not needed
 
 - Use `export` for variables which aren't only used in one file - it isn't necessary, but helps for readability
 
 - Don't use backticks anymore, use $(..) instead
 
-- Use double square [[]] brackets (conditional expressions) instead of single square [] brackets
+- Use double square \[[]] brackets (conditional expressions) instead of single square [] brackets
 
 - Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](http://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). Using bash internals is faster as it does not fork, fopen and pipes the results back.
 
