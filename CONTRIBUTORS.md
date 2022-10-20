@@ -36,4 +36,4 @@ These people have contributed to EMBA:
 * [nightlark](https://github.com/nightlark)
 
 ==========================================================================================
-  EMBA - Embedded Analyzer - [https://e-m-b-a.github.io/](https://e-m-b-a.github.io/)
+  EMBA - Embedded Analyzer - [https://e-m-b-a.github.io](https://e-m-b-a.github.io/)
