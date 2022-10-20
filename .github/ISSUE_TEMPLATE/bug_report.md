@@ -15,7 +15,7 @@ Steps to reproduce the behavior:
 1. EMBA installation (dev-mode/default mode)
 2. Use the firmware available here: <Insert URL>
 3. Start EMBA with the following parameters: sudo ./emba.sh <insert further parameters>
-4. 
+4. additional steps
 5. See error
 
 **Expected behavior**
@@ -25,7 +25,9 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: [e.g. Kali Linux 2022.01]
+- OS: e.g. Kali Linux 2022.03
+- EMBA version: v1.1.2 or current master branch
+- Installation method: default with up to date docker image
 
 **Additional context**
 Add any other context about the problem here.

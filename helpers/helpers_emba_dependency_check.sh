@@ -496,6 +496,7 @@ dependency_check()
       check_dep_tool "Nmap portscanner" "nmap"
       check_dep_tool "hping3" "hping3"
       check_dep_tool "ping" "ping"
+      check_dep_tool "Metasploit framework" "msfconsole"
       # This port is used by our Qemu installation and should not be used by another process.
       # This check is not a blocker for the test. It is checked again by the emulation module:
       check_emulation_port "Running Qemu service" "2001"

@@ -617,7 +617,7 @@ main()
           print_output "[*] Loading EMBA scan profile." "no_log"
         fi
         # all profile output and settings are done by the profile file located in ./scan-profiles/
-        # shellcheck disable=SC1090
+        # shellcheck source=/dev/null
         source "$PROFILE"
         print_output "[*] Profile $PROFILE loaded." "no_log"
         print_bar "no_log"
@@ -640,7 +640,7 @@ main()
         print_output "[!] Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
         export RESTART=1
         rm "$TMP_DIR"/restart
-        # shellcheck disable=SC1091
+        # shellcheck source=/dev/null
         source "$LOG_DIR""/backup_vars.log"
       fi
     fi

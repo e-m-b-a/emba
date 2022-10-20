@@ -60,6 +60,7 @@ F20_vul_aggregator() {
   local S116_LOG="$CSV_DIR"/s116_qemu_version_detection.csv
   local L15_LOG="$CSV_DIR"/l15_emulated_checks_nmap.csv
   local L25_LOG="$CSV_DIR"/l25_web_checks.csv
+  local L35_LOG="$CSV_DIR"/l35_metasploit_check.csv
 
   local CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   local EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
@@ -91,6 +92,7 @@ F20_vul_aggregator() {
     get_usermode_emulator "$S116_LOG"
     get_systemmode_emulator "$L15_LOG"
     get_systemmode_webchecks "$L25_LOG"
+    get_msf_verified "$L35_LOG"
 
     aggregate_versions
     
@@ -154,7 +156,7 @@ aggregate_versions() {
   export VERSIONS_AGGREGATED=()
   VERSIONS_KERNEL=()
 
-  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 ]]; then
+  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 ]]; then
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
@@ -217,12 +219,24 @@ aggregate_versions() {
       print_output "[+] Found CVE details (${ORANGE}binarly UEFI module$GREEN): ""$ORANGE$CVE_ENTRY$NC"
     done
 
+    for CVE_ENTRY in "${CVE_L35_DETAILS[@]}"; do
+      if [ -z "$CVE_ENTRY" ]; then
+        continue
+      fi
+      if ! [[ "$CVE_ENTRY" == *CVE-[0-9]* ]]; then
+        print_output "[-] WARNING: Broken CVE identifier found: $ORANGE$VERSION$NC"
+        continue
+      fi
+      print_output "[+] Found CVE details (${ORANGE}verified Metasploit exploits$GREEN): ""$ORANGE$CVE_ENTRY$NC"
+    done
+
+
 
     print_ln
     VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
 
     # if we get from a module CVE details we also need to handle them
-    CVES_AGGREGATED=("${CVE_S02_DETAILS[@]}")
+    CVES_AGGREGATED=("${CVE_S02_DETAILS[@]}" "${CVE_L35_DETAILS[@]}")
   fi
 
   # sorting and unique our versions array:
@@ -586,6 +600,15 @@ cve_extractor() {
     VERSION="unknown"
   fi
 
+  if grep -q "$VERSION_orig" "$L35_LOG" 2>/dev/null; then
+    if [[ "$VSOURCE" == "unknown" ]]; then
+      VSOURCE="MSF verified"
+    else
+      VSOURCE="$VSOURCE""/MSF verified"
+    fi
+    BINARY="unknown"
+    VERSION="unknown"
+  fi
 
   if grep -q "$BINARY;.*$VERSION" "$S08_LOG" 2>/dev/null; then
     if [[ "$VSOURCE" == "unknown" ]]; then
@@ -999,6 +1022,15 @@ get_systemmode_webchecks() {
   fi
 }
 
+get_msf_verified() {
+  local L35_LOG="${1:-}"
+  CVE_L35_DETAILS=()
+  if [[ -f "$L35_LOG" ]]; then
+    print_output "[*] Collect CVE details of module $(basename "$L35_LOG")."
+    readarray -t CVE_L35_DETAILS < <(cut -d\; -f3 "$L35_LOG" | grep -v "^CVE$" | grep -v "NA" | sort -u || true)
+  fi
+}
+
 get_uefi_details() {
   local S02_LOG="${1:-}"
   CVE_S02_DETAILS=()
@@ -1006,8 +1038,8 @@ get_uefi_details() {
     print_output "[*] Collect CVE details of module $(basename "$S02_LOG")."
     readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "$S02_LOG" | grep -v "CVE identifier" | sort -u || true)
   fi
-
 }
+
 get_firmware_details() {
   local S06_LOG="${1:-}"
   VERSIONS_S06_FW_DETAILS=()

@@ -64,8 +64,8 @@ main_web_check() {
 
       # handle first https and afterwards http
       if [[ "$SERVICE" == *"ssl|http"* ]] || [[ "$SERVICE" == *"ssl/http"* ]];then
-        # we make a screenshot for every web server
         if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          # we make a screenshot for every web server
           make_web_screenshot "$IP_ADDRESS_" "$PORT"
         else
           print_output "[-] System not responding - No screenshot possible"

@@ -44,6 +44,7 @@ SOURCES=()
 MODULES_TO_CHECK_ARR=()
 MODULES_TO_CHECK_ARR_TAB=()
 MODULES_TO_CHECK_ARR_SEMGREP=()
+MODULES_TO_CHECK_ARR_DOCKER=()
 
 import_config_scripts() {
   mapfile -t HELPERS < <(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
@@ -101,9 +102,22 @@ import_installer() {
   done
 }
 
+dockerchecker() {
+  echo -e "\\n""$ORANGE""$BOLD""EMBA docker-files check""$NC""\\n""$BOLD""=================================================================""$NC"
+  mapfile -t DOCKER_COMPS < <(find . -maxdepth 1 -iname "docker-compose*.yml")
+  for DOCKER_COMP in "${DOCKER_COMPS[@]}"; do
+    echo -e "\\n""$GREEN""Run docker check on $DOCKER_COMP:""$NC""\\n"
+    if docker-compose -f "$DOCKER_COMP" config 1>/dev/null || [[ $? -ne 1 ]]; then
+      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    else
+      echo -e "\\n""$ORANGE$BOLD==> FIX ERRORS""$NC""\\n"
+      ((MODULES_TO_CHECK=MODULES_TO_CHECK+1))
+      MODULES_TO_CHECK_ARR_DOCKER+=( "$DOCKER_COMP" )
+    fi
+  done
+}
 
-check()
-{
+check() {
   echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Shellcheck""$NC""\\n""$BOLD""=================================================================""$NC"
 
   echo -e "\\n""$GREEN""Run shellcheck on this script:""$NC""\\n"
@@ -193,10 +207,19 @@ summary() {
     done
     echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
+  if [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "Modules to check (docker-compose): ${#MODULES_TO_CHECK_ARR_DOCKER[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR_DOCKER[@]}"; do
+      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+    done
+    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+
 }
 
 # check that all tools are installed
-check_tools(){
+check_tools() {
   TOOLS=("semgrep" "shellcheck")
   for TOOL in "${TOOLS[@]}";do
     if ! command -v "$TOOL" > /dev/null ; then
@@ -213,5 +236,6 @@ check_tools(){
 # main:
 check_tools
 check
+dockerchecker
 summary
 

