@@ -70,6 +70,7 @@ fi
 
 if [ ! -s /etc/passwd ]; then
   mkdir -p "$(dirname "$(resolve_link /etc/passwd)")"
+  # nosemgrep
   echo "root::0:0:root:/root:/bin/sh" > "$(resolve_link /etc/passwd)"
 fi
 

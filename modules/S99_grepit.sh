@@ -3837,6 +3837,7 @@ grepit_module_api_keys() {
   print_output "[*] Starting Grepit API keys module" "no_log"
 
   grepit_search "Slack API keys" \
+  # nosemgrep
   'xoxp-683201246722-694612795216-829330901254-7ec6cd4f9686bc6dce91f9d81f717dbf' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   "xox[p|b|o|a]-[0-9]{12}" \

@@ -57,6 +57,7 @@ S109_jtr_local_pw_cracking()
       fi
 
       if echo "$HASH" | cut -d: -f1-3 | grep -q "::[0-9]"; then
+        # nosemgrep
         # removing entries: root::0:0:99999:7:::
         continue
       fi
