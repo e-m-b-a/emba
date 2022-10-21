@@ -78,7 +78,7 @@ I01_default_apps(){
         #sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
         sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-        pip3 install -U requests 2>/dev/null
+        pip3 install -U requests 2>/dev/null || true
       ;;
     esac
   fi
