@@ -775,7 +775,7 @@ main()
         if ! [[ -d "$LOG_DIR" ]] ; then
           mkdir "$LOG_DIR" || true
         fi
-        S25_kernel_check
+        check_kconfig
         exit 0
       fi
     fi
