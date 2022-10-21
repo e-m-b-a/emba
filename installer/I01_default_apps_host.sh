@@ -49,7 +49,7 @@ I01_default_apps_host() {
     y|Y )
       echo
       apt-get install "${INSTALL_APP_LIST[@]}" -y
-      pip3 install -U requests 2>/dev/null
+      pip3 install -U requests 2>/dev/null || true
     ;;
   esac
 }  
