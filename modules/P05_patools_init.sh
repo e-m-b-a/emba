@@ -55,9 +55,16 @@ patools_extractor() {
 
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
 
-  set +e
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    set +e
+  fi
+
   patool -v test "$FIRMWARE_PATH_" | tee -a "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log
-  set -e
+
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    set -e
+  fi
+
   cat "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
 
   if ! [[ -d "$EXTRACTION_DIR_" ]]; then
