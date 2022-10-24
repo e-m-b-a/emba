@@ -509,6 +509,8 @@ generate_report_file()
 
     sed -i -E -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_FILE" || true
     sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_FILE" || true
+    # this fixes the </pre> lines instead of <pre></pre> - something weird with \r\n
+    sed -i -E "s:\r$P_END:$P_END:" "$TMP_FILE" || true
     
     # add html tags for style
     add_color_tags "$TMP_FILE"
@@ -608,9 +610,9 @@ scan_report()
 {
   # at the end of an EMBA run, we have to disable all non-valid links to modules
   local LINK_ARR
-  readarray -t LINK_ARR < <(grep -a -R -E "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH" | cut -d"\"" -f 4 | cut -d"#" -f 1 | sort -u)
+  readarray -t LINK_ARR < <(grep -a -R -E "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH" | cut -d"\"" -f 4 | cut -d"#" -f 1 | sort -u || true)
   local LINK_FILE_ARR
-  readarray -t LINK_FILE_ARR < <(grep -a -R -E -l "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH")
+  readarray -t LINK_FILE_ARR < <(grep -a -R -E -l "class\=\"refmodul\" href=\"(.*)" "$ABS_HTML_PATH" || true)
   for LINK in "${LINK_ARR[@]}" ; do
     for FILE in "${LINK_FILE_ARR[@]}" ; do
       if ! [[ -f "$ABS_HTML_PATH""/""$LINK" ]] ; then
