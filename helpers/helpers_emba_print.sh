@@ -105,7 +105,7 @@ print_output()
   # add a link as third argument to add a link marker for web report
   local REF_LINK="${3:-}"
   local TYPE_CHECK
-  TYPE_CHECK="$( safe_echo "$OUTPUT" | cut -c1-3 )"
+  TYPE_CHECK="$( echo "$OUTPUT" | cut -c1-3 )"
   if [[ "$TYPE_CHECK" == "[-]" || "$TYPE_CHECK" == "[*]" || "$TYPE_CHECK" == "[!]" || "$TYPE_CHECK" == "[+]" ]] ; then
     local COLOR_OUTPUT_STRING=""
     COLOR_OUTPUT_STRING="$(color_output "$OUTPUT")"
@@ -119,9 +119,9 @@ print_output()
           safe_echo "$(format_log "$COLOR_OUTPUT_STRING")" "$LOG_FILE_MOD"
         fi
       else
-        safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
+        safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\r\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
         if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
+          safe_echo "$(format_log "$COLOR_OUTPUT_STRING")""\\r\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
         fi
       fi
     fi
@@ -136,9 +136,9 @@ print_output()
           safe_echo "$(format_log "$OUTPUT")" "$LOG_FILE_MOD"
         fi
       else
-        safe_echo "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
+        safe_echo "$(format_log "$OUTPUT")""\\r\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE"
         if [[ -n "${LOG_FILE_MOD:-}" ]]; then
-          safe_echo "$(format_log "$OUTPUT")""\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
+          safe_echo "$(format_log "$OUTPUT")""\\r\\n""$(format_log "[REF] ""$REF_LINK" 1)" "$LOG_FILE_MOD"
         fi
       fi
     fi
@@ -155,9 +155,9 @@ safe_echo() {
   # %b  ARGUMENT  as a string with '\' escapes interpreted, except that octal escapes are of the form \0 or
   if [[ -v 2 ]]; then
     local LOG_TO_FILE="${2:-}"
-    printf -- "%b" "$STRING_TO_ECHO\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
+    printf -- "%b" "$STRING_TO_ECHO\r\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
   else
-    printf -- "%b" "$STRING_TO_ECHO\n" || true
+    printf -- "%b" "$STRING_TO_ECHO\r\n" || true
   fi
 }
 
