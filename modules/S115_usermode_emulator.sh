@@ -462,7 +462,7 @@ emulate_strace_run() {
 
   if [[ "${#MISSING_AREAS[@]}" -gt 0 ]]; then
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
-      if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* ]]; then
+      if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* || "$MISSING_AREA" != */dev/* ]]; then
         write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
 
         FILENAME_MISSING=$(basename "$MISSING_AREA")

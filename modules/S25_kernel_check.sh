@@ -21,7 +21,7 @@
 S25_kernel_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Identify and check kernel version"
+  module_title "Identify and analyze kernel version"
   pre_module_reporter "${FUNCNAME[0]}"
 
   export KERNEL_VERSION=()
