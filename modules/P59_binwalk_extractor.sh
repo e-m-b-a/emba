@@ -45,6 +45,7 @@ P59_binwalk_extractor() {
   BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
 
   if [[ "$BINS" -gt 0 || "$UNIQUE_FILES" -gt 0 ]]; then
+    sub_module_title "Firmware extraction details"
     linux_basic_identification_helper "$FIRMWARE_PATH_CP"
     print_ln
     print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."

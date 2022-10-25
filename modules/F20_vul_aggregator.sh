@@ -465,14 +465,18 @@ cve_db_lookup_cve () {
   print_output "[*] CVE database lookup with CVE information: ${ORANGE}$CVE_ENTRY${NC}" "no_log"
 
   # CVE search:
-  set +e
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    set +e
+  fi
   "$PATH_CVE_SEARCH" -c "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
 
   # shellcheck disable=SC2181
   if [[ "$?" -ne 0 ]]; then
     "$PATH_CVE_SEARCH" -c "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
   fi
-  set -e
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    set -e
+  fi
 
   if [[ "$THREADED" -eq 1 ]]; then
     cve_extractor "$CVE_ENTRY" &

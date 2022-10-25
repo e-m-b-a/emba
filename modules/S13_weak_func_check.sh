@@ -171,7 +171,7 @@ function_check_NIOS2(){
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*$FUNC_ADDR" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*($FUNC_ADDR).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNC_ADDR).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c "call.*""$FUNC_ADDR" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "call.*$STRLEN_ADDR" "$FUNC_LOG"  2> /dev/null || true)
@@ -212,7 +212,7 @@ function_check_PPC32(){
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -256,7 +256,7 @@ function_check_MIPS32() {
         "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG" 2> /dev/null || true)
@@ -294,7 +294,7 @@ function_check_ARM64() {
       "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-      sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+      sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -332,7 +332,7 @@ function_check_ARM32() {
       "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-      sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+      sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -371,7 +371,7 @@ function_check_x86() {
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -410,7 +410,7 @@ function_check_x86_64() {
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy"  ]] ; then
           COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -469,6 +469,7 @@ print_top10_statistics() {
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
           fi
         done
+        print_ln
       fi  
     done
   else
@@ -489,7 +490,7 @@ log_bin_hardening() {
     write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
     # get binary entry
     BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
-    write_log "  $BIN_PROT" "$FUNC_LOG"
+    write_log "  $BIN_PROT$NC" "$FUNC_LOG"
     write_log "" "$FUNC_LOG"
   fi
 }
@@ -507,7 +508,7 @@ log_func_footer() {
   local NAME="${1:-}"
   local FUNCTION="${2:-}"
 
-  write_log "" "$FUNC_LOG"
+  write_log "\n$NC" "$FUNC_LOG"
   write_log "[*] Function $ORANGE$FUNCTION$NC used $ORANGE$COUNT_FUNC$NC times $ORANGE$NAME$NC" "$FUNC_LOG"
   write_log "" "$FUNC_LOG"
 }

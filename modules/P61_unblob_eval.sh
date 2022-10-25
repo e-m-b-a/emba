@@ -71,7 +71,7 @@ P61_unblob_eval() {
   BINS_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
 
   if [[ "$BINS_UB" -gt 0 ]] || [[ "$FILES_EXT_UB" -gt 0 ]]; then
-    print_bar
+    sub_module_title "Firmware extraction details"
     print_output "[*] ${ORANGE}Unblob$NC results:"
     print_output "[*] Found $ORANGE$FILES_EXT_UB$NC files ($ORANGE$UNIQUE_FILES_UB$NC unique files) and $ORANGE$DIRS_EXT_UB$NC directories at all."
     print_output "[*] Found $ORANGE$BINS_UB$NC binaries."

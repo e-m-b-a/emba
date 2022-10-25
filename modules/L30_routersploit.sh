@@ -64,11 +64,13 @@ check_live_routersploit() {
   if grep -q "Target is vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt; then
     print_output "[+] Found the following vulnerabilities:" "" "$LOG_PATH_MODULE/routersploit-$IP_ADDRESS_.txt"
     grep -B 1 "Target is vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE"
+    print_ln
   fi
   if grep -q "Target seems to be vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt; then
     print_ln
     print_output "[+] Found the following possible vulnerabilities:" "" "$LOG_PATH_MODULE/routersploit-$IP_ADDRESS_.txt"
     grep -B 1 "Target seems to be vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE"
+    print_ln
   fi
   print_output "[*] Routersploit tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
 }

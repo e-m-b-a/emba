@@ -58,7 +58,7 @@ S06_distribution_identification()
           fi
 
           # check if not zero and not only spaces
-          if [[ -n "${IDENTIFIER// }" ]]; then
+          if [[ -n "${IDENTIFIER// }" ]] && [[ "$IDENTIFIER" == *[0-9]* ]]; then
             if [[ -n "$DLINK_FW_VER" ]]; then
               print_output "[+] Version information found $ORANGE$IDENTIFIER$GREEN in file $ORANGE$(print_path "$FILE")$GREEN for D-Link device."
               get_csv_rule_distri "$IDENTIFIER"
@@ -128,7 +128,7 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ (kamikaze)\ r1[4-8][0-9][0-9][0-9].*/\1:\2:8.09/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ (backfire)\ r2[0-9][0-9][0-9][0-9].*/\1:\2:10.03/')"
   # OpenWrt 18.06.2 r7676-cddd7b4c77
-  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ ([0-9]+\.[0-9]+\.[0-9])\ (r[0-9]+\-)([a-z0-9]+).*/openwrt:\2/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/(openwrt)\ ([0-9]+\.[0-9]+\.[0-9]+)\ (r[0-9]+\-[a-z0-9]+).*/openwrt:\2:\3/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/lede\ ([0-9]+\.[0-9]+\.[0-9]+)(-)?(rc[0-9])?.*/openwrt:\1:\3/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/openwrt\ ([0-9]+\.[0-9]+)/openwrt:\1/')"
   # OpenWrt Attitude Adjustment r7549 -> 12.09
@@ -137,7 +137,7 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+[a-z][0-9]+)/dlink:\1_firmware:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/d-link\ (.*)\ v([0-9].[0-9]+)/dlink:\1_firmware:\2/')"
   # dd-wrt v24-sp2
-  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ v([0-9]+)(-sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ v([0-9]+)-?(sp[0-9])?/dd-wrt:dd-wrt:\1:\2/')"
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/dd-wrt\ \#([0-9]+)/dd-wrt:dd-wrt:\1/')"
   # iotgoat v1.0
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/iotgoat\ v([0-9]\.[0-9]+)/iotgoat:\1/')"
@@ -146,5 +146,6 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/big-ip\ asm\ ([0-9]+(\.[0-9]+)+?)/f5:big-ip_application_security_manager:\1/')"
   # Buildroot 2022.01.01
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/buildroot\ ([0-9]+(\.[0-9]+)+?)/buildroot:\1/')"
+  VERSION_IDENTIFIER="${VERSION_IDENTIFIER// /:}"
   CSV_RULE="$VERSION_IDENTIFIER"
 }

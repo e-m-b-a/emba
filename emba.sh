@@ -775,7 +775,8 @@ main()
         if ! [[ -d "$LOG_DIR" ]] ; then
           mkdir "$LOG_DIR" || true
         fi
-        S25_kernel_check
+        # check_kconfig
+        print_output "[!] Currently not supported"
         exit 0
       fi
     fi
