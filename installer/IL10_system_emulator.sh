@@ -48,9 +48,9 @@ IL10_system_emulator() {
     print_file_info "zImage.armel" "FirmAE - Linux kernel 4.1 - ARMel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/zImage.armel" "external/firmae/binaries/zImage.armel"
     print_file_info "vmlinux.armel" "FirmAE - Linux kernel 4.1 - ARMel" "https://github.com/pr0v3rbs/FirmAE_kernel-v4.1/releases/download/v1.0/vmlinux.armel" "external/firmae/binaries/vmlinux.armel"
 
-    print_file_info "busybox.armel" "FirmAE - busybox - ARMel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.armel" "external/firmae/binaries/console.armel"
-    print_file_info "busybox.mipseb" "FirmAE - busybox - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipseb" "external/firmae/binaries/console.mipseb"
-    print_file_info "busybox.mipsel" "FirmAE - busybox - MIPSel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipsel" "external/firmae/binaries/console.mipsel"
+    print_file_info "busybox.armel" "FirmAE - busybox - ARMel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.armel" "external/firmae/binaries/busybox.armel"
+    print_file_info "busybox.mipseb" "FirmAE - busybox - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipseb" "external/firmae/binaries/busybox.mipseb"
+    print_file_info "busybox.mipsel" "FirmAE - busybox - MIPSel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/busybox.mipsel" "external/firmae/binaries/busybox.mipsel"
 
     print_file_info "console.armel" "FirmAE - Console - ARMel" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.armel" "external/firmae/binaries/console.armel"
     print_file_info "console.mipseb" "FirmAE - Console - MIPSeb" "https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/console.mipseb" "external/firmae/binaries/console.mipseb"

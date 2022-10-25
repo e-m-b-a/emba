@@ -26,6 +26,7 @@ IL15_emulated_checks_init() {
     print_git_info "testssl" "drwetter/testssl.sh.git" "TestSSL.sh"
     print_file_info "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "Arachni web application scanner" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni"
 
+    print_tool_info "dnsutils" 1
     print_tool_info "nmap" 1
     print_tool_info "snmp" 1
     print_tool_info "nikto" 1
