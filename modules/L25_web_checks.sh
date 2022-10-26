@@ -185,7 +185,7 @@ testssl_check() {
       WEB_RESULTS=1
     fi
 
-    TESTSSL_VULNERABLE=$(grep -c "VULNERABLE\|NOT\ ok" "$LOG_PATH_MODULE"/testssl-"$IP_"-"$PORT".txt)
+    TESTSSL_VULNERABLE=$(grep -c "VULNERABLE\|NOT\ ok" "$LOG_PATH_MODULE"/testssl-"$IP_"-"$PORT".txt || true)
     if [[ "$TESTSSL_VULNERABLE" -gt 0 ]]; then
       print_ln
       print_output "[+] Weaknesses in the SSL service of system $ORANGE$IP_:$PORT$GREEN found."
