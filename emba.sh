@@ -889,12 +889,12 @@ main()
           if [[ -f "$HTML_PATH"/index.html ]]; then
             print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
           fi
-          cleaner
+          cleaner 0
         fi
         exit 0
       else
         print_output "[-] EMBA failed in docker mode!" "main"
-        cleaner
+        cleaner 0
         write_notification "EMBA failed analysis in default mode"
         exit 1
       fi
@@ -1057,6 +1057,8 @@ main()
     # we need to change the permissions of the LOG_DIR to the orig. user from the host
     restore_permissions
   fi
+  cleaner 0
+  exit 0
 }
 
 main "$@"
