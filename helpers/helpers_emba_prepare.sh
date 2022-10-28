@@ -157,10 +157,14 @@ architecture_check()
     print_output "[*] Architecture auto detection (could take some time)\\n"
     local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0
     local D_END_LE=0 D_END_BE=0
+    local D_FLAGS=""
+    export ARM_HF=0
+    export ARM_SF=0
     D_END="NA"
 
     # we use the binaries array which is already unique
     for D_ARCH in "${BINARIES[@]}" ; do
+      D_FLAGS=$(readelf -h "$D_ARCH" | grep "Flags:" 2>/dev/null || true)
       D_ARCH=$(file "$D_ARCH")
 
       if [[ "$D_ARCH" == *"MSB"* ]] ; then
@@ -174,6 +178,12 @@ architecture_check()
         continue
       elif [[ "$D_ARCH" == *"ARM"* ]] ; then
         ARCH_ARM=$((ARCH_ARM+1))
+        if [[ "$D_FLAGS" == *"hard-float"* ]]; then
+          ARM_HF=$((ARM_HF+1))
+        fi
+        if [[ "$D_FLAGS" == *"soft-float"* ]]; then
+          ARM_SF=$((ARM_SF+1))
+        fi
         continue
       elif [[ "$D_ARCH" == *"x86-64"* ]] ; then
         ARCH_X64=$((ARCH_X64+1))
@@ -219,6 +229,12 @@ architecture_check()
         print_output "$(indent "$(orange "Endianness  Count")")"
         if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" ; fi
         if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" ; fi
+      fi
+      if [[ $((ARM_SF+ARM_HF)) -gt 0 ]] ; then
+        print_ln
+        print_output "$(indent "$(orange "ARM Hardware/Software floating Count")")"
+        if [[ $ARM_SF -gt 0 ]] ; then print_output "$(indent "$(orange "Software floating          ""$ARM_SF")")" ; fi
+        if [[ $ARM_HF -gt 0 ]] ; then print_output "$(indent "$(orange "Hardware floating          ""$ARM_HF")")" ; fi
       fi
 
       if [[ $D_END_LE -gt $D_END_BE ]] ; then

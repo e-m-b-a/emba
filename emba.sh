@@ -395,7 +395,7 @@ main()
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
   export WSL=0    # wsl environment detected
-  export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
+  export UNBLOB=0 # additional extraction with unblob - https://github.com/onekey-sec/unblob
                   # currently the extracted results are not further used. The current implementation
                   # is for evaluation purposes
   export CVE_BLACKLIST="$CONFIG_DIR"/cve-blacklist.txt  # include the blacklisted CVE values to this file

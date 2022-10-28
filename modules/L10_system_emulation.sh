@@ -29,8 +29,6 @@ export THREAD_PRIO=0
 
 L10_system_emulation() {
   module_log_init "${FUNCNAME[0]}"
-  #run_web_reporter_mod_name "$MODULE_MAIN_NAME"
-  #exit
   module_title "System emulation of Linux based embedded devices."
 
   export SYS_ONLINE=0
@@ -42,7 +40,7 @@ L10_system_emulation() {
     export MODULE_SUB_PATH="$MOD_DIR"/"${FUNCNAME[0]}"
     S25_LOG="s25_kernel_check.txt"
 
-    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" ]]; then
+    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" ]]; then
       enable_firmae_arbitration
 
       export FIRMAE_DIR="$EXT_DIR""/firmae"
@@ -50,6 +48,7 @@ L10_system_emulation() {
       FIRMWARE_PATH_orig="$(abs_path "$FIRMWARE_PATH_BAK")"
       LOG_PATH_MODULE=$(abs_path "$LOG_PATH_MODULE")
       R_PATH_CNT=1
+      ARM_HF_L10=0
 
       for R_PATH in "${ROOT_PATH[@]}" ; do
         print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
@@ -58,6 +57,18 @@ L10_system_emulation() {
         if [[ -n "$D_END" ]]; then
           D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
           ARCH_END="$(echo "$ARCH" | tr '[:upper:]' '[:lower:]')$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
+
+          # default is ARM_SF -> we only need to check if it is HF
+          # The information is based on the results of architecture_check()
+          if [[ -n "$ARM_HF" ]] && [[ "$ARM_HF" -gt "$ARM_SF" ]]; then
+            print_output "[*] ARM hardware floating detected"
+            ARCH_END="$ARCH_END""hf"
+          fi
+
+          if [[ "$ARCH_END" == "armbe"* ]]; then
+            print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
+            return
+          fi
 
           print_output "[*] Found supported architecture $ORANGE$ARCH_END$NC"
           write_link "p99"
@@ -826,7 +837,7 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
-  elif [[ "$ARCH_END" == "armel" ]]; then
+  elif [[ "$ARCH_END" == "armel"* ]]; then
     KERNEL_="zImage"
     QEMU_BIN="qemu-system-arm"
     MACHINE="virt"
@@ -835,6 +846,13 @@ identify_networking_emulation() {
     QEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
     #QEMU_NETWORK="-device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4"
     #QEMU_PARAMS="-audiodev driver=none,id=none"
+  elif [[ "$ARCH_END" == "x86el"* ]]; then
+    KERNEL_="bzImage"
+    QEMU_BIN="qemu-system-x86_64"
+    MACHINE="pc-i440fx-3.1"
+    QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
+    QEMU_ROOTFS="/dev/sda1"
+    QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
   fi
 
   run_network_id_emulation &
@@ -929,6 +947,7 @@ get_networking_details_emulation() {
     # mapfile -t NVRAM_SET < <(grep -a "nvram_set" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2 | sed 's/^\ //g' | cut -d\  -f1 | sed 's/\"//g' | grep -v "^#" | grep -E '[[:alnum:]]{3,50}'| sort -u || true)
     # we check all available qemu logs for services that are started:
     mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.*serial*.log | sed 's/.*inet_bind\[PID:\ //' | sort -u || true)
+    mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
     NVRAM_TMP=( "${NVRAM[@]}" )
 
@@ -1006,7 +1025,6 @@ get_networking_details_emulation() {
         fi
       done
 
-      #IP_="$(echo "$IP_" | sed 's/^\.//')"
       IP_="${IP_/\.}"
 
       IP_ADDRESS_=""
@@ -1027,9 +1045,10 @@ get_networking_details_emulation() {
         # NETWORK_DEVICE -> eth0, eth1.1, br0 ...
 
         if [[ -n "$NETWORK_DEVICE" ]]; then
-          # if the network device is not a eth it is a bridge interface:
-          if ! [[ "$NETWORK_DEVICE" == *"eth"* ]]; then
-            print_output "[+] Possible br interface detected: $ORANGE$NETWORK_DEVICE$GREEN / IP: $ORANGE$IP_ADDRESS_$NC"
+          # if the network device is not a eth it is a bridge interface
+          # if we have BRIDGE_INTERFACES we also check it here (this way we can correct the br interface entry):
+          if ! [[ "$NETWORK_DEVICE" == *"eth"* ]] || [[ -v BRIDGE_INTERFACES[@] ]]; then
+            print_output "[*] Possible br interface detected: $ORANGE$NETWORK_DEVICE$GREEN / IP: $ORANGE$IP_ADDRESS_$NC"
             NETWORK_MODE="bridge"
             if [[ -v BRIDGE_INTERFACES[@] ]]; then
               for BRIDGE_INT in "${BRIDGE_INTERFACES[@]}"; do
@@ -1039,29 +1058,61 @@ get_networking_details_emulation() {
                 print_output "[*] Testing bridge interface $ORANGE$BRIDGE_INT$NC"
                 VLAN_ID="NONE"
                 if [[ "$BRIDGE_INT" == *"$NETWORK_DEVICE"* ]]; then
-                  ETH_INT="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]')"
                   # br_add_if[PID: 138 (brctl)]: br:br0 dev:eth1.1
+                  ETH_INT="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]')"
+                  # do we have vlans?
                   if [[ -v VLAN_INFOS[@] ]]; then
                     iterate_vlans "$ETH_INT" "${VLAN_INFOS[@]}"
                   elif echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
                     # we have a vlan entry:
                     VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
+                  elif [[ -v VLAN_HW_INFO_DEV[@] ]]; then
+                    # if we have found some entry "adding VLAN [0-9] to HW filter on device ethX" in our qemu logs
+                    # we check all these entries now and generate additional configurations for further evaluation
+                    for ETH_INT_ in "${VLAN_HW_INFO_DEV[@]}"; do
+                      # if we found multiple interfaces belonging to a vlan we need to store all of them:
+                      ETH_INT_=$(echo "$ETH_INT_" | tr -dc '[:print:]')
+                      VLAN_ID=$(grep -a -o -E "adding VLAN [0-9] to HW filter on device $ETH_INT_" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | sort -u)
+                      # initial entry
+                      IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT_"\;"$VLAN_ID"\;"$NETWORK_MODE" )
+                      print_output "[+] Interface details via VLAN detected (qemu logs): IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT_$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+
+                      # entry with vlan NONE
+                      IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT_"\;"NONE"\;"$NETWORK_MODE" )
+                      print_output "[+] Interface details via VLAN detected (qemu logs): IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT_$NC / vlan id: ${ORANGE}NONE$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+
+                      # entry with vlan NONE and interface br0 - just as another fallback possibility
+                      IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"br0"\;"$ETH_INT_"\;"NONE"\;"$NETWORK_MODE" )
+                      print_output "[+] Interface details via VLAN detected (qemu logs): IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: ${ORANGE}br0$NC / network device: $ORANGE$ETH_INT_$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+                    done
                   else
                     VLAN_ID="NONE"
                   fi
+                  # now we set the orig. network_device with the new details:
+                  IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT"\;"$VLAN_ID"\;"$NETWORK_MODE" )
+                  print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+
+                  if ! [[ "$NETWORK_DEVICE" =~ *br[0-9]* ]] && ! [[ "$NETWORK_DEVICE" =~ *eth[0-9]* ]]; then
+                    NETWORK_DEVICE_="br0"
+                    print_output "[*] Fallback bridge interface $ORANGE$NETWORK_DEVICE_$NC"
+                    IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE_"\;"$ETH_INT"\;"$VLAN_ID"\;"$NETWORK_MODE" )
+                    print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE_$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+                  fi
+                  # if we have found that the br entry has for eg an ethX interface, we now check for the real br interface entry -> NETWORK_DEVICE
+                  NETWORK_DEVICE="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]')"
                 fi
                 IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT"\;"$VLAN_ID"\;"$NETWORK_MODE" )
-                print_output "[*] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+                print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
               done
             else
               # set typical default values - this is just in case we have not found br_add_if entries:
               VLAN_ID="NONE"
               ETH_INT="eth0"
               IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT"\;"$VLAN_ID"\;"$NETWORK_MODE" )
-              print_output "[*] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+              print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
             fi
           elif [[ "$NETWORK_DEVICE" == *"eth"* ]]; then
-            print_output "[+] Possible eth network interface detected: $ORANGE$NETWORK_DEVICE$GREEN / IP: $ORANGE$IP_ADDRESS_$NC"
+            print_output "[*] Possible eth network interface detected: $ORANGE$NETWORK_DEVICE$GREEN / IP: $ORANGE$IP_ADDRESS_$NC"
             NETWORK_MODE="normal"
             NETWORK_DEVICE="$(echo "$NETWORK_DEVICE" | cut -d. -f1)"
             ETH_INT="$(echo "$NETWORK_DEVICE" | cut -d. -f1)"
@@ -1072,7 +1123,7 @@ get_networking_details_emulation() {
               VLAN_ID="NONE"
             fi
             IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT"\;"$VLAN_ID"\;"$NETWORK_MODE" )
-            print_output "[*] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+            print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
           else
             # could not happen - just for future extension
             print_output "[+] Possible other interface detected: $ORANGE$NETWORK_DEVICE$NC"
@@ -1081,7 +1132,7 @@ get_networking_details_emulation() {
             NETWORK_DEVICE="$(echo "$NETWORK_DEVICE" | cut -d. -f1)"
             ETH_INT="$NETWORK_DEVICE"
             IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT"\;"$VLAN_ID"\;"$NETWORK_MODE" )
-            print_output "[*] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+            print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
           fi
         fi
       fi
@@ -1196,7 +1247,8 @@ setup_network_emulation() {
   VLAN_ID=$(echo "$IPS_INT_VLAN_CFG" | cut -d\; -f4)
   NETWORK_MODE=$(echo "$IPS_INT_VLAN_CFG" | cut -d\; -f5)
 
-  if [[ "$NETWORK_DEVICE" == *"br"* ]]; then
+  # a br interface with a number ... eg br0, br1 ... but no br-lan interface
+  if [[ "$NETWORK_DEVICE" == *"br"* ]] && [[ "$NETWORK_DEVICE" =~ *[0-9]* ]]; then
     BR_NUM=$(echo "$NETWORK_DEVICE" | sed -e "s/br//" | tr -dc '[:print:]')
   else
     BR_NUM=0
@@ -1384,10 +1436,14 @@ run_emulated_system() {
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
     QEMU_BIN="qemu-system-mips"
     QEMU_MACHINE="malta"
-  elif [[ "$ARCH_END" == "armel" ]]; then
+  elif [[ "$ARCH_END" == "armel"* ]]; then
     KERNEL="$BINARY_DIR/zImage.$ARCH_END"
     QEMU_BIN="qemu-system-arm"
     QEMU_MACHINE="virt"
+  elif [[ "$ARCH_END" == "x86el"* ]]; then
+    KERNEL="$BINARY_DIR/bzImage.$ARCH_END"
+    QEMU_BIN="qemu-system-x86_64"
+    QEMU_MACHINE="pc-i440fx-3.1"
   else
     QEMU_BIN="NA"
   fi
@@ -1400,7 +1456,7 @@ run_emulated_system() {
     # newer kernels use virtio only
     QEMU_NETWORK="-device virtio-net-device,netdev=net$NET_ID -netdev tap,id=net$NET_ID,ifname=${TAPDEV_0},script=no"
 
-  elif [[ "$ARCH" == "MIPS" ]]; then
+  elif [[ "$ARCH" == "MIPS" ]] || [[ "$ARCH_END" == "x86el" ]]; then
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_PARAMS=""
     QEMU_ROOTFS="/dev/sda1"
