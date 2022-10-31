@@ -542,6 +542,8 @@ architecture_dep_check() {
   local ARCH_STR="unknown"
   if [[ "$ARCH" == "MIPS" ]] ; then
     ARCH_STR="mips"
+  elif [[ "$ARCH" == "MIPS64" ]] ; then
+    ARCH_STR="mips64"
   elif [[ "$ARCH" == "ARM" ]] ; then
     ARCH_STR="arm"
   elif [[ "$ARCH" == "x86" ]] ; then
@@ -552,6 +554,8 @@ architecture_dep_check() {
   elif [[ "$ARCH" == "PPC" ]] ; then
     #ARCH_STR="powerpc:common"
     ARCH_STR="powerpc"
+  elif [[ "$ARCH" == "NIOS2" ]] ; then
+    ARCH_STR="nios2"
   else
     ARCH_STR="unknown"
   fi

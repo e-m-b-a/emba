@@ -37,6 +37,10 @@ S24_kernel_bin_identifier()
   write_csv_log "Kernel version" "file" "identified init"
 
   for FILE in "${FILE_ARR_TMP[@]}" ; do
+    if file "$FILE" | grep -q "ASCII text"; then
+      # reduce false positive rate
+      continue
+    fi
     K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
 
     if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
