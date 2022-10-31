@@ -59,7 +59,7 @@ L10_system_emulation() {
 
           # default is ARM_SF -> we only need to check if it is HF
           # The information is based on the results of architecture_check()
-          if [[ -n "$ARM_HF" ]] && [[ "$ARM_HF" -gt "$ARM_SF" ]]; then
+          if [[ -n "$ARM_HF" ]] && [[ "$ARM_HF" -gt "${ARM_SF:-0}" ]]; then
             print_output "[*] ARM hardware floating detected"
             ARCH_END="$ARCH_END""hf"
           fi
@@ -1101,14 +1101,15 @@ get_networking_details_emulation() {
                       print_output "[+] Interface details via VLAN detected (qemu logs): IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT_$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
 
                       # entry with vlan NONE (just in case as backup)
-                      IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT_"\;"NONE"\;"$NETWORK_MODE" )
+                      VLAN_ID_="NONE"
+                      IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT_"\;"$VLAN_ID_"\;"$NETWORK_MODE" )
                       print_output "[+] Interface details via VLAN detected (qemu logs): IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT_$NC / vlan id: ${ORANGE}NONE$NC / network mode: $ORANGE$NETWORK_MODE$NC"
 
                       if ! [[ "$NETWORK_DEVICE" == *br[0-9]* ]] && ! [[ "$NETWORK_DEVICE" == *eth[0-9]* ]]; then
                         # entry with vlan NONE and interface br0 - just as another fallback solution
                         NETWORK_DEVICE_="br0"
                         print_output "[*] Fallback bridge interface - #1 $ORANGE$NETWORK_DEVICE_$NC"
-                        IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE_"\;"$ETH_INT_"\;"NONE"\;"$NETWORK_MODE" )
+                        IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE_"\;"$ETH_INT_"\;"$VLAN_ID_"\;"$NETWORK_MODE" )
                         print_output "[+] Interface details via VLAN detected (qemu logs): IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: ${ORANGE}$NETWORK_DEVICE_$NC / network device: $ORANGE$ETH_INT_$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
                       fi
                     done
