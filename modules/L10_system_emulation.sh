@@ -194,9 +194,7 @@ create_emulation_filesystem() {
     # ensure that the needed permissions for exec files are set correctly
     # This is needed at some firmwares have corrupted permissions on ELF or sh files
     print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
-    find "$MNT_POINT" -xdev -type f -name "*.sh" -exec chmod +x {} \;
-    find "$MNT_POINT" -xdev -path "*/init.d/*" -exec chmod +x {} \;
-    readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1)
+    readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep executable | cut -d: -f1)
     for BINARY_L10 in "${BINARIES_L10[@]}"; do
       if [[ -f "$BINARY_L10" ]]; then
         chmod +x "$BINARY_L10"
