@@ -299,7 +299,7 @@ module_analyzer() {
   local LINE=""
 
   if [[ "$KMODULE" == *".ko" ]]; then
-    LINE=$(modinfo "$KMODULE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/')
+    LINE=$(modinfo "$KMODULE" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' || true)
     local M_PATH
     M_PATH="$( echo "$LINE" | cut -d '|' -f 1 )"
     local LICENSE

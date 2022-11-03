@@ -107,24 +107,20 @@ s22_vuln_check() {
     return
   fi
 
-  local NAME
-  local VULNS
+  local NAME=""
+  local VULNS=0
 
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
 
   NAME=$(basename "$PHP_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
-  local PHP_LOG="$LOG_PATH_MODULE""/php_vuln_""$NAME"".txt"
+  local PHP_LOG="$LOG_PATH_MODULE""/php_vuln_""$NAME""-$RANDOM.txt"
 
   ulimit -Sv "$MEM_LIMIT"
-  "$EXT_DIR"/progpilot "$PHP_SCRIPT_" > "$PHP_LOG" 2>&1 || true
+  "$EXT_DIR"/progpilot "$PHP_SCRIPT_" >> "$PHP_LOG" 2>&1 || true
   ulimit -Sv unlimited
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
-
-  if [[ "$VULNS" -eq 0 ]] ; then
-    rm "$PHP_LOG" 2>/dev/null || true
-  fi
 
   if [[ "$VULNS" -gt 0 ]] ; then
     #check if this is common linux file:
@@ -144,6 +140,9 @@ s22_vuln_check() {
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
+  else
+    print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"
+    rm "$PHP_LOG" 2>/dev/null || true
   fi
 }
 

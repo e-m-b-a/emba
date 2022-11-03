@@ -27,7 +27,8 @@ IP61_unblob() {
     print_tool_info "zlib1g-dev" 1
     print_tool_info "liblzo2-2" 1
     print_tool_info "liblzo2-dev" 1
-    print_tool_info "python3-lzo" 1
+    # print_tool_info "python3-lzo" 1
+    print_pip_info "python-lzo"
     print_tool_info "e2fsprogs" 1
     print_tool_info "gcc" 1
     print_tool_info "git" 1
@@ -64,6 +65,7 @@ IP61_unblob() {
         download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v1.0/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
         dpkg -i external/sasquatch_1.0_amd64.deb
         rm -f external/sasquatch_1.0_amd64.deb
+        pip3 install python-lzo
 
         if ! [[ -d external/unblob ]]; then
           git clone https://github.com/onekey-sec/unblob.git external/unblob

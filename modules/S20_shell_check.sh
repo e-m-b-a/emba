@@ -82,6 +82,14 @@ S20_shell_check()
 
   if [[ $SEMGREP -eq 1 ]] ; then
     sub_module_title "Check scripts with semgrep"
+    # semgrep has issues if we are running throught a complete filesystem with /proc and other filesystems are in use
+    # This results that we need to wait for for S115_usermode_emulator and unmounted /proc filesytem
+    # check emba.log for S115_usermode_emulator
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+      while [[ $(grep -c "S115_usermode_emulator finished" "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -ne 1 ]]; do
+        sleep 1
+      done
+    fi
     local S20_SEMGREP_SCRIPTS=0
     local S20_SEMGREP_VULNS=0
     local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
@@ -99,6 +107,8 @@ S20_shell_check()
       else
         print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
       fi
+      # highlight security findings in semgrep log:
+      sed -i -r "s/.*external\.semgrep-rules\.bash\.lang\.security.*/\x1b[32m&\x1b[0m/" "$SHELL_LOG"
     fi
     if [[ "$S20_SEMGREP_ISSUES" -gt 0 ]]; then
       NEG_LOG=1

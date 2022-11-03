@@ -63,7 +63,8 @@ IP99_binwalk_default() {
     print_tool_info "python3-pyqt5.qtopengl" 1
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
-    print_tool_info "python3-lzo" 1
+    #print_tool_info "python3-lzo" 1
+    print_pip_info "python-lzo"
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "srecord" 1
@@ -105,6 +106,7 @@ IP99_binwalk_default() {
         pip3 install capstone 2>/dev/null
         pip3 install cstruct 2>/dev/null
         pip3 install matplotlib 2>/dev/null
+        pip3 install python-lzo 2>/dev/null
 
         if ! [[ -d external/binwalk ]]; then
           #git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk

@@ -425,8 +425,14 @@ detect_root_dir_helper() {
     fi
   done
 
-  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | head -1 | awk '{print $2}')
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
   for R_PATH in "${ROOTx_PATH[@]}"; do
+    CNT=$(echo "$R_PATH" | awk '{print $1}')
+    if [[ "$CNT" -lt 5 ]]; then
+      # we only use paths with more then 4 matches as possible root path
+      continue
+    fi
+    R_PATH=$(echo "$R_PATH" | awk '{print $2}')
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
       if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
@@ -475,7 +481,11 @@ detect_root_dir_helper() {
   fi
 
   for R_PATH in "${ROOT_PATH[@]}"; do
-    print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
+    if [[ "$MECHANISM" == "last resort" ]]; then
+      print_output "[*] Found no real root directory - setting it to: $ORANGE$R_PATH$NC via $ORANGE$MECHANISM$NC."
+    else
+      print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
+    fi
     write_link "s05#file_dirs"
   done
 }

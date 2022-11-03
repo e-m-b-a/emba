@@ -56,10 +56,16 @@ ubi_extractor() {
 
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_images$NC."
   print_output "[*] File details: $ORANGE$(file "$UBI_PATH_" | cut -d ':' -f2-)$NC"
-  ubireader_extract_images -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE" || true
+  ubireader_extract_images -i -v -w -o "$EXTRACTION_DIR_"/ubi_images "$UBI_PATH_" | tee -a "$LOG_FILE" || true
+  FILES_UBI_EXT=$(find "$EXTRACTION_DIR_"/ubi_images -type f | wc -l)
+  DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_"/ubi_images -type d | wc -l)
+  print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image via UBI extraction round 1."
 
   print_output "[*] Extracts UBI firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
-  ubireader_extract_files -i -v -w -o "$EXTRACTION_DIR_" "$UBI_PATH_" | tee -a "$LOG_FILE" || true
+  ubireader_extract_files -i -v -w -o "$EXTRACTION_DIR_"/ubi_files "$UBI_PATH_" | tee -a "$LOG_FILE" || true
+  FILES_UBI_EXT=$(find "$EXTRACTION_DIR_"/ubi_files -type f | wc -l)
+  DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_"/ubi_files -type d | wc -l)
+  print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image via UBI extraction round 2."
 
   if [[ -d "$EXTRACTION_DIR_" ]]; then
     mapfile -t UBI_1st_ROUND < <(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image" || true)
@@ -72,6 +78,9 @@ ubi_extractor() {
         print_output "[*] Extracts UBIfs firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."
         print_output "[*] File details: $ORANGE$(file "$UBI_FILE" | cut -d ':' -f2-)$NC"
         ubireader_extract_files -l -i -w -v -o "$EXTRACTION_DIR_"/UBIfs_extracted "$UBI_FILE" | tee -a "$LOG_FILE" || true
+        FILES_UBI_EXT=$(find "$EXTRACTION_DIR_"/UBIfs_extracted -type f | wc -l)
+        DIRS_UBI_EXT=$(find "$EXTRACTION_DIR_"/UBIfs_extracted -type d | wc -l)
+        print_output "[*] Extracted $ORANGE$FILES_UBI_EXT$NC files and $ORANGE$DIRS_UBI_EXT$NC directories from the firmware image via UBI deep extraction."
       fi
     done
 
