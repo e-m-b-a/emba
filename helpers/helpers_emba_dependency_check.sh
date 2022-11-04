@@ -383,7 +383,10 @@ dependency_check()
 
     check_dep_tool "ubireader image extractor" "ubireader_extract_images"
     check_dep_tool "ubireader file extractor" "ubireader_extract_files"
-
+    
+    # UEFI
+    check_dep_tool "UEFI image extractor" "$EXT_DIR""/UEFITool/UEFIExtract"
+    
     if function_exists F20_vul_aggregator; then
       # CVE-search
       # TODO change to portcheck and write one for external hosts
