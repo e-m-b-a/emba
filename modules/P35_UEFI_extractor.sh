@@ -92,7 +92,7 @@ uefi_extractor(){
   local DIRS_UEFI=0
   local NVARS=0
   local PE32_IMAGE=0
-  local ARCHITECTURE=""
+  local EFI_ARCH=""
 
   if ! [[ -f "$FIRMWARE_PATH_" ]]; then
     print_output "[-] No file for extraction provided"
@@ -121,9 +121,9 @@ uefi_extractor(){
   PE32_IMAGE=$(grep -c "PE32 image" "$UEFI_EXTRACT_REPORT_FILE")
   EFI_ARCH=$(find "$EXTRACTION_DIR_" -name 'info.txt' -exec grep 'Machine type:' {} \; | sed -E 's/Machine\ type\:\ //g' | uniq )
 
-  if ! [[ -z "$EFI_ARCH" ]]; then
+  if [[ -n "$EFI_ARCH" ]]; then
     print_output "[*] Found $ORANGE$PE32_IMAGE$NC PE32 images for architecture $ORANGE$EFI_ARCH$ORANGE drivers."
-    print_output "[+] Possible architecture details found ($ORANGE UEFI Extractor $NC): $ORANGE$EFI_ARCH_$NC"
+    print_output "[+] Possible architecture details found ($ORANGE UEFI Extractor $NC): $ORANGE$EFI_ARCH$NC"
     export EFI_ARCH
     backup_var "EFI_ARCH" "$EFI_ARCH"
   fi
