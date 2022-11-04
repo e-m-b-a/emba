@@ -39,7 +39,9 @@ IP35_uefi_extraction() {
       fi
       download_file "UEFIExtract_NE_A62_linux_x86_64.zip" "https://github.com/LongSoft/UEFITool/releases/download/A62/UEFIExtract_NE_A62_linux_x86_64.zip" "external/UEFITool/UEFIExtract_NE_A62_linux_x86_64.zip"
       if [[ -f "external/UEFITool/UEFIExtract_NE_A62_linux_x86_64.zip" ]]; then
+        if ! [[ -f external/UEFITool/UEFIExtract ]]; then
           unzip external/UEFITool/UEFIExtract_NE_A62_linux_x86_64.zip -d external/UEFITool
+        fi
       else
           echo -e "$ORANGE""UEFITool installation failed - check it manually""$NC"
       fi
