@@ -155,7 +155,7 @@ architecture_check()
 {
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n"
-    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0 ARCH_MIPS64=0
+    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0 ARCH_MIPS64R2=0 ARCH_MIPS64_III=0
     local D_END_LE=0 D_END_BE=0
     local D_FLAGS=""
     export ARM_HF=0
@@ -173,8 +173,11 @@ architecture_check()
         D_END_LE=$((D_END_LE+1))
       fi
 
-      if [[ "$D_ARCH" == *"MIPS64"* ]] ; then
-        ARCH_MIPS64=$((ARCH_MIPS64+1))
+      if [[ "$D_ARCH" == *"MIPS64 rel2"* ]] ; then
+        ARCH_MIPS64R2=$((ARCH_MIPS64R2+1))
+        continue
+      elif [[ "$D_ARCH" == *"64-bit"*"MIPS-III"* ]] ; then
+        ARCH_MIPS64_III=$((ARCH_MIPS64_III+1))
         continue
       elif [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
@@ -203,29 +206,32 @@ architecture_check()
       fi
     done
 
-    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC+ARCH_NIOS2+ARCH_MIPS64)) -gt 0 ]] ; then
+    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC+ARCH_NIOS2+ARCH_MIPS64R2+ARCH_MIPS64_III)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture  Count")")"
       if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" ; fi
-      if [[ $ARCH_MIPS64 -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64        ""$ARCH_MIPS64")")" ; fi
+      if [[ $ARCH_MIPS64R2 -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64r2     ""$ARCH_MIPS64R2")")" ; fi
+      if [[ $ARCH_MIPS64_III -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 III     ""$ARCH_MIPS64_III")")" ; fi
       if [[ $ARCH_ARM -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""$ARCH_ARM")")" ; fi
       if [[ $ARCH_X64 -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""$ARCH_X64")")" ; fi
       if [[ $ARCH_X86 -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""$ARCH_X86")")" ; fi
       if [[ $ARCH_PPC -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""$ARCH_PPC")")" ; fi
       if [[ $ARCH_NIOS2 -gt 0 ]] ; then print_output "$(indent "$(orange "NIOS II       ""$ARCH_NIOS2")")" ; fi
-      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] && [[ $ARCH_MIPS -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64 ]]; then
+      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] && [[ $ARCH_MIPS -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64_III ]]; then
         D_ARCH="MIPS"
-      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] && [[ $ARCH_ARM -gt $ARCH_NIOS2 ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64 ]]; then
+      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] && [[ $ARCH_ARM -gt $ARCH_NIOS2 ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64_III ]]; then
         D_ARCH="ARM"
-      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] && [[ $ARCH_X64 -gt $ARCH_NIOS2 ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64 ]]; then
+      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] && [[ $ARCH_X64 -gt $ARCH_NIOS2 ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64_III ]]; then
         D_ARCH="x64"
-      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] && [[ $ARCH_X86 -gt $ARCH_NIOS2 ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64 ]]; then
+      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] && [[ $ARCH_X86 -gt $ARCH_NIOS2 ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64_III ]]; then
         D_ARCH="x86"
-      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] && [[ $ARCH_PPC -gt $ARCH_NIOS2 ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64 ]]; then
+      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] && [[ $ARCH_PPC -gt $ARCH_NIOS2 ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64_III ]]; then
         D_ARCH="PPC"
-      elif [[ $ARCH_NIOS2 -gt $ARCH_MIPS ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM ]] && [[ $ARCH_NIOS2 -gt $ARCH_X64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_X86 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64 ]]; then
+      elif [[ $ARCH_NIOS2 -gt $ARCH_MIPS ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM ]] && [[ $ARCH_NIOS2 -gt $ARCH_X64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_X86 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64_III ]]; then
         D_ARCH="NIOS2"
-      elif [[ $ARCH_MIPS64 -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64 -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64 -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64 -gt $ARCH_PPC ]] && [[ $ARCH_MIPS64 -gt $ARCH_NIOS2 ]]; then
-        D_ARCH="MIPS64"
+      elif [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_PPC ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS64_III ]]; then
+        D_ARCH="MIPS64R2"
+      elif [[ $ARCH_MIPS64_III -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64_III -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64_III -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_PPC ]] && [[ $ARCH_MIPS64_III -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_MIPS64R2 ]]; then
+        D_ARCH="MIPS64R2"
       else
         D_ARCH="unknown"
       fi

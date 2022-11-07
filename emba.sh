@@ -857,7 +857,7 @@ main()
 
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
       print_output "[*] Available docker images:" "no_log"
-      docker images | grep -E "emba[[:space:]]*latest"
+      docker images | grep -E "emba[[:space:]]*latest" || true
       print_output "[-] EMBA docker not ready!" "no_log"
       exit 1
     else

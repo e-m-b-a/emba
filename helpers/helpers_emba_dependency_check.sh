@@ -478,7 +478,7 @@ dependency_check()
       check_dep_file "busybox.*" "$EXT_DIR""/firmae/binaries/busybox.mipsel"
       check_dep_file "libnvram.*" "$EXT_DIR""/firmae/binaries/libnvram.so.armel"
       check_dep_file "vmlinux.mips*" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
-      check_dep_file "vmlinux.armel" "$EXT_DIR""/firmae/binaries/vmlinux.armel"
+      check_dep_file "zImage.armel" "$EXT_DIR""/firmae/binaries/zImage.armel"
 
       check_dep_file "fixImage.sh" "$MOD_DIR""/L10_system_emulation/fixImage.sh"
       check_dep_file "preInit.sh" "$MOD_DIR""/L10_system_emulation/preInit.sh"
@@ -542,8 +542,10 @@ architecture_dep_check() {
   local ARCH_STR="unknown"
   if [[ "$ARCH" == "MIPS" ]] ; then
     ARCH_STR="mips"
-  elif [[ "$ARCH" == "MIPS64" ]] ; then
-    ARCH_STR="mips64"
+  elif [[ "$ARCH" == "MIPS64R2" ]] ; then
+    ARCH_STR="mips64r2"
+  elif [[ "$ARCH" == "MIPS64_III" ]] ; then
+    ARCH_STR="mips64_III"
   elif [[ "$ARCH" == "ARM" ]] ; then
     ARCH_STR="arm"
   elif [[ "$ARCH" == "x86" ]] ; then

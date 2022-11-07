@@ -40,7 +40,7 @@ L10_system_emulation() {
     export MODULE_SUB_PATH="$MOD_DIR"/"${FUNCNAME[0]}"
     S25_LOG="s25_kernel_check.txt"
 
-    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64" ]]; then
+    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* ]]; then
       enable_firmae_arbitration
 
       export FIRMAE_DIR="$EXT_DIR""/firmae"
@@ -246,9 +246,13 @@ create_emulation_filesystem() {
 
     print_output "[*] Setting up system mode emulation environment on target filesystem"
     # FirmAE binaries (we only use a subset of them):
-    BINARIES=( "busybox" "console" "libnvram.so" "libnvram_ioctl.so" )
+    BINARIES=( "busybox" "console" "libnvram.so" "libnvram_ioctl.so" "strace" "gdb" "gdbserver" )
     for BINARY_NAME in "${BINARIES[@]}"; do
       BINARY_PATH=$(get_binary "${BINARY_NAME}" "${ARCH_END}")
+      if ! [[ -f "$BINARY_PATH" ]]; then
+        print_output "[-] Missing $ORANGE$BINARY_PATH$NC - no setup possible"
+        continue
+      fi
       print_output "[*] Setting up $ORANGE$BINARY_NAME$NC - $ORANGE$ARCH_END$NC ($ORANGE$BINARY_PATH$NC)"
       cp "${BINARY_PATH}" "${MNT_POINT}/firmadyne/${BINARY_NAME}"
       chmod a+x "${MNT_POINT}/firmadyne/${BINARY_NAME}"
@@ -821,6 +825,7 @@ identify_networking_emulation() {
   print_output "[*] Running firmware $ORANGE$IMAGE_NAME$NC: Terminating after 660 secs..."
 
   QEMU_PARAMS=""
+  CPU=""
   if [[ "$ARCH_END" == "mipsel" ]]; then
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-mipsel"
@@ -828,9 +833,10 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
-  elif [[ "$ARCH_END" == "mips64el" ]]; then
+  elif [[ "$ARCH_END" == "mips64r2el" ]]; then
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-mips64el"
+    CPU="-cpu MIPS64R2-generic"
     MACHINE="malta"
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
@@ -842,14 +848,14 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
-  elif [[ "$ARCH_END" == "mips64eb" ]]; then
+  elif [[ "$ARCH_END" == "mips64r2eb" ]]; then
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-mips64"
+    CPU="-cpu MIPS64R2-generic"
     MACHINE="malta"
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
-
   elif [[ "$ARCH_END" == "armel"* ]]; then
     KERNEL_="zImage"
     QEMU_BIN="qemu-system-arm"
@@ -873,6 +879,9 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
+  else
+    print_output "[-] WARNING: No supported configuration found for $ORANGE$ARCH_END$NC."
+    return
   fi
 
   run_network_id_emulation &
@@ -938,7 +947,7 @@ run_network_id_emulation() {
   print_output "[*] Starting firmware emulation for network identification - $ORANGE$QEMU_BIN / $ARCH_END / $IMAGE_NAME$NC ... use Ctrl-a + x to exit"
   print_ln
 
-  write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait -serial telnet:localhost:4321,server,nowait" /tmp/do_not_create_run.sh 3
+  write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait" /tmp/do_not_create_run.sh 3
 }
 
 get_networking_details_emulation() {
@@ -958,7 +967,6 @@ get_networking_details_emulation() {
     local TCP_PORT=""
     local UDP_PORT=""
   
-    mapfile -t MAC_CHANGES < <(grep -a "ioctl_SIOCSIFHWADDR" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
     mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
     mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sed -e 's/.*firmadyne: //g' | cut -d: -f2- | sort -u || true)
     mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
@@ -971,7 +979,7 @@ get_networking_details_emulation() {
 
     NVRAM_TMP=( "${NVRAM[@]}" )
 
-    if [[ "${#MAC_CHANGES[@]}" -gt 0 || "${#INTERFACE_CANDIDATES[@]}" -gt 0 || "${#BRIDGE_INTERFACES[@]}" -gt 0 || "${#VLAN_INFOS[@]}" -gt 0 || "${#PORTS[@]}" -gt 0 || "${#NVRAM_TMP[@]}" -gt 0 ]]; then
+    if [[ "${#INTERFACE_CANDIDATES[@]}" -gt 0 || "${#BRIDGE_INTERFACES[@]}" -gt 0 || "${#VLAN_INFOS[@]}" -gt 0 || "${#PORTS[@]}" -gt 0 || "${#NVRAM_TMP[@]}" -gt 0 ]]; then
       print_output "[+] Booted system detected."
       BOOTED="yes"
     fi
@@ -1013,13 +1021,6 @@ get_networking_details_emulation() {
     eval "SERVICES_STARTUP=($(for i in "${SERVICES_STARTUP[@]}" ; do echo "\"$i\"" ; done | sort -u))"
     eval "UDP_SERVICES_STARTUP=($(for i in "${UDP_SERVICES_STARTUP[@]}" ; do echo "\"$i\"" ; done | sort -u))"
     eval "TCP_SERVICES_STARTUP=($(for i in "${TCP_SERVICES_STARTUP[@]}" ; do echo "\"$i\"" ; done | sort -u))"
-
-    if [[ -v MAC_CHANGES[@] ]]; then
-      for MAC_CHANGE in "${MAC_CHANGES[@]}"; do
-        print_output "[*] MAC change detected: $ORANGE$MAC_CHANGE$NC"
-      done
-      print_output "[!] Currently no further action implemented"
-    fi
 
     for VLAN_INFO in "${VLAN_INFOS[@]}"; do
       # register_vlan_dev[PID: 128 (vconfig)]: dev:eth1.1 vlan_id:1
@@ -1461,17 +1462,19 @@ run_emulated_system() {
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
     QEMU_BIN="qemu-system-$ARCH_END"
     QEMU_MACHINE="malta"
-  elif [[ "$ARCH_END" == "mips64el" ]]; then
+  elif [[ "$ARCH_END" == "mips64r2el" ]]; then
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
     QEMU_BIN="qemu-system-$ARCH_END"
+    CPU="-cpu MIPS64R2-generic"
     QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "mipseb" ]]; then
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
     QEMU_BIN="qemu-system-mips"
     QEMU_MACHINE="malta"
-  elif [[ "$ARCH_END" == "mips64eb" ]]; then
+  elif [[ "$ARCH_END" == "mips64r2eb" ]]; then
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
     QEMU_BIN="qemu-system-mips64"
+    CPU="-cpu MIPS64R2-generic"
     QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "armel"* ]]; then
     KERNEL="$BINARY_DIR/zImage.$ARCH_END"
@@ -1552,8 +1555,9 @@ run_qemu_final_emulation() {
 
   write_script_exec "echo -e \"[*] Starting firmware emulation $ORANGE$QEMU_BIN / $ARCH_END / $IMAGE_NAME / $IP_ADDRESS_$NC ... use Ctrl-a + x to exit\n\"" "$ARCHIVE_PATH"/run.sh 0
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log$NC file\n\"" "$ARCHIVE_PATH"/run.sh 0
+  write_script_exec "echo -e \"[*] For interactive connection check reaching localhost port ${ORANGE}4321$NC via telnet\n\"" "$ARCHIVE_PATH"/run.sh 0
  
-  write_script_exec "$QEMU_BIN -m 2048 -M $QEMU_MACHINE -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.final.serial.log -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait -serial telnet:localhost:4321,server,nowait" "$ARCHIVE_PATH"/run.sh 1
+  write_script_exec "$QEMU_BIN -m 2048 -M $QEMU_MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait" "$ARCHIVE_PATH"/run.sh 1
 }
 
 check_online_stat() {
@@ -1563,6 +1567,10 @@ check_online_stat() {
   local SYS_ONLINE=0
   local TCP_SERV_NETSTAT_ARR=()
   local UDP_SERV_NETSTAT_ARR=()
+
+  if [[ "$QEMU_BIN" == "NA" ]]; then
+    return
+  fi
 
   # we write the results to a tmp file. This is needed to only have the results of the current emulation round
   # for further processing available

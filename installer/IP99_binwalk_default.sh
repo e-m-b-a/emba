@@ -100,13 +100,13 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        pip3 install nose 2>/dev/null
-        pip3 install coverage 2>/dev/null
-        pip3 install pyqtgraph 2>/dev/null
-        pip3 install capstone 2>/dev/null
-        pip3 install cstruct 2>/dev/null
-        pip3 install matplotlib 2>/dev/null
-        pip3 install python-lzo 2>/dev/null
+        pip3 install nose
+        pip3 install coverage
+        pip3 install pyqtgraph
+        pip3 install capstone
+        pip3 install cstruct
+        pip3 install matplotlib
+        pip3 install "python-lzo>=1.14"
 
         if ! [[ -d external/binwalk ]]; then
           #git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
