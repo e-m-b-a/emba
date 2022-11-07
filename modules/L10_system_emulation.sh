@@ -642,7 +642,7 @@ main_emulation() {
           fi
         else
           print_output "[-] No working emulation - removing emulation archive."
-          #rm -r "$ARCHIVE_PATH" || true
+          rm -r "$ARCHIVE_PATH" || true
         fi
 
         stopping_emulation_process "$IMAGE_NAME"
