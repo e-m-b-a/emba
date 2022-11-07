@@ -40,7 +40,7 @@ services:
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
-        - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/firmae/binaries/:ro
+          # - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/firmae/binaries/:ro
     environment:
         - USER
     devices:
