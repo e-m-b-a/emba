@@ -27,9 +27,9 @@ I02_UEFI_fwhunt() {
     print_pip_info "click"
     print_tool_info "meson" 1
     print_git_info "rizin" "rizinorg/rizin" ""
-    print_git_info "fwhunt-scan" "binarly-io/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
-    print_git_info "fwhunt-rules" "binarly-io/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
-    print_git_info "BIOSUtilities" "platomav/BIOSUtilities" "Various BIOS Utilities for Modding/Research"
+    print_git_info "fwhunt-scan" "EMBA-support-repos/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
+    print_git_info "fwhunt-rules" "EMBA-support-repos/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
+    print_git_info "BIOSUtilities" "EMBA-support-repos/BIOSUtilities" "Various BIOS Utilities for Modding/Research"
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -64,16 +64,15 @@ I02_UEFI_fwhunt() {
         if [[ -d external/BIOSUtilities ]]; then
           rm -r external/BIOSUtilities
         fi
-        #git clone --branch refactor https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
-        git clone https://github.com/platomav/BIOSUtilities.git external/BIOSUtilities
+        git clone https://github.com/EMBA-support-repos/BIOSUtilities.git external/BIOSUtilities
 
         echo -e "$ORANGE""$BOLD""Installing FwHunt""$NC"
         if [[ -d external/fwhunt-scan ]]; then
           rm -r external/fwhunt-scan
         fi
-        git clone https://github.com/binarly-io/fwhunt-scan.git external/fwhunt-scan
+        git clone https://github.com/EMBA-support-repos/fwhunt-scan.git external/fwhunt-scan
         cd external/fwhunt-scan || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
-        git clone https://github.com/binarly-io/FwHunt.git rules
+        git clone https://github.com/EMBA-support-repos/FwHunt.git rules
         echo "Installed $(find rules/ -iname "BRLY-*" | wc -l) fwhunt rules"
         ldconfig
         python3 setup.py install

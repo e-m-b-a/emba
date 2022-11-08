@@ -185,7 +185,8 @@ emba_updater() {
     git pull
     cd "$BASE_PATH" || exit
   else
-    git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    #git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    git clone https://github.com/EMBA-support-repos/trickest-cve.git "$EXT_DIR"/trickest-cve
   fi
 
   print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"
