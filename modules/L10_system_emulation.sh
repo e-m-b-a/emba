@@ -44,8 +44,7 @@ L10_system_emulation() {
     if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* ]]; then
       enable_firmae_arbitration
 
-      export FIRMAE_DIR="$EXT_DIR""/firmae"
-      export BINARY_DIR="$FIRMAE_DIR/binaries"
+      export BINARY_DIR="$EXT_DIR/EMBA_Live_bins"
       FIRMWARE_PATH_orig="$(abs_path "$FIRMWARE_PATH_BAK")"
       LOG_PATH_MODULE=$(abs_path "$LOG_PATH_MODULE")
       R_PATH_CNT=1
@@ -887,6 +886,7 @@ identify_networking_emulation() {
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
   elif [[ "$ARCH_END" == "nios2" ]]; then
+    # not tested
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-nios2"
     MACHINE="10m50-ghrd"
@@ -1504,6 +1504,7 @@ run_emulated_system() {
     QEMU_BIN="qemu-system-x86_64"
     QEMU_MACHINE="pc-i440fx-3.1"
   elif [[ "$ARCH_END" == "nios2" ]]; then
+    # not tested
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END"
     QEMU_BIN="qemu-system-nios2"
     QEMU_MACHINE="10m50-ghrd"
