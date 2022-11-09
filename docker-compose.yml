@@ -40,7 +40,7 @@ services:
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
-          #- /home/m1k3/github-repos/EMBA-emulation-binaries:/external/firmae/binaries/:ro
+          #- /home/m1k3/github-repos/EMBA-emulation-binaries:/external/EMBA_Live_bins/:ro
     environment:
         - USER
     devices:
@@ -53,15 +53,6 @@ services:
       core:
         hard: 0
         soft: 0
-    # adjust the following limits to protect your host
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 12G
-    #      cpus: 7
-    #    reservations:
-    #      cpus: 2
-    #      memory: 4G
 
 networks:
   emba_runs:

@@ -16,5 +16,6 @@ RUN yes | sudo /installer.sh -D && \
 
 WORKDIR /emba
 
+# nosemgrep
 ENTRYPOINT [ "/bin/bash" ]
 
