@@ -44,10 +44,11 @@ IP61_unblob() {
     print_tool_info "libmagic1" 1
     print_tool_info "libhyperscan5" 1
     print_tool_info "zstd" 1
+    print_tool_info "python3-magic" 1
 
     print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v1.0/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 
-    print_git_info "unblob" "onekey-sec/unblob" "Unblob is a powerful firmware extractor"
+    print_git_info "unblob" "EMBA-support-repos/unblob" "Unblob is a powerful firmware extractor"
 
     echo -e "$ORANGE""Unblob will be downloaded and installed via poetry.""$NC"
 
@@ -66,7 +67,7 @@ IP61_unblob() {
         rm -f external/sasquatch_1.0_amd64.deb
 
         if ! [[ -d external/unblob ]]; then
-          git clone https://github.com/onekey-sec/unblob.git external/unblob
+          git clone https://github.com/EMBA-support-repos/unblob.git external/unblob
         fi
 
         # install poetry
@@ -76,6 +77,11 @@ IP61_unblob() {
         # install unblob with poetry:
         poetry install --only main
         UNBLOB_PATH=$(poetry env info --path)
+
+        # Temp solution to install hyperscan in a recent version which is installable on Kali:
+        sed -i 's/hyperscan\ =\ \"0.2.0\"//' pyproject.toml
+        poetry env use "$UNBLOB_PATH"
+        poetry add hyperscan
 
         if [[ -f "$UNBLOB_PATH""/bin/unblob" ]]; then
           export PATH=$PATH:"$UNBLOB_PATH""/bin"

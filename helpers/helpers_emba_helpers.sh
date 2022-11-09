@@ -156,8 +156,8 @@ cleaner() {
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
   fi
-  print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
+    print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     exit 1
   fi
 }
@@ -185,7 +185,8 @@ emba_updater() {
     git pull
     cd "$BASE_PATH" || exit
   else
-    git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    #git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    git clone https://github.com/EMBA-support-repos/trickest-cve.git "$EXT_DIR"/trickest-cve
   fi
 
   print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"

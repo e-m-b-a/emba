@@ -46,6 +46,10 @@ P61_unblob_eval() {
     return
   fi
 
+  local FILES_EXT_UB=0
+  local UNIQUE_FILES_UB=0
+  local DIRS_EXT_UB=0
+  local BINS_UB=0
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -65,10 +69,12 @@ P61_unblob_eval() {
 
   print_ln
 
-  FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type f | wc -l )
-  UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-  DIRS_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type d | wc -l )
-  BINS_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+  if [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
+    FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type f | wc -l )
+    UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+    DIRS_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type d | wc -l )
+    BINS_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+  fi
 
   if [[ "$BINS_UB" -gt 0 ]] || [[ "$FILES_EXT_UB" -gt 0 ]]; then
     sub_module_title "Firmware extraction details"
@@ -122,7 +128,7 @@ unblobber() {
     mkdir -p "$OUTPUT_DIR_UNBLOB"
   fi
 
-  timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
+  timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
 
   print_ln
 }

@@ -155,12 +155,16 @@ architecture_check()
 {
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n"
-    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0
+    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0 ARCH_MIPS64R2=0 ARCH_MIPS64_III=0 ARCH_MIPS64_N32=0
     local D_END_LE=0 D_END_BE=0
+    local D_FLAGS=""
+    export ARM_HF=0
+    export ARM_SF=0
     D_END="NA"
 
     # we use the binaries array which is already unique
     for D_ARCH in "${BINARIES[@]}" ; do
+      D_FLAGS=$(readelf -h "$D_ARCH" | grep "Flags:" 2>/dev/null || true)
       D_ARCH=$(file "$D_ARCH")
 
       if [[ "$D_ARCH" == *"MSB"* ]] ; then
@@ -169,11 +173,27 @@ architecture_check()
         D_END_LE=$((D_END_LE+1))
       fi
 
-      if [[ "$D_ARCH" == *"MIPS"* ]] ; then
+      if [[ "$D_ARCH" == *"N32 MIPS64 rel2"* ]] ; then
+        # ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1
+        ARCH_MIPS64_N32=$((ARCH_MIPS64_N32+1))
+        continue
+      elif [[ "$D_ARCH" == *"MIPS64 rel2"* ]] ; then
+        ARCH_MIPS64R2=$((ARCH_MIPS64R2+1))
+        continue
+      elif [[ "$D_ARCH" == *"64-bit"*"MIPS-III"* ]] ; then
+        ARCH_MIPS64_III=$((ARCH_MIPS64_III+1))
+        continue
+      elif [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
         continue
       elif [[ "$D_ARCH" == *"ARM"* ]] ; then
         ARCH_ARM=$((ARCH_ARM+1))
+        if [[ "$D_FLAGS" == *"hard-float"* ]]; then
+          ARM_HF=$((ARM_HF+1))
+        fi
+        if [[ "$D_FLAGS" == *"soft-float"* ]]; then
+          ARM_SF=$((ARM_SF+1))
+        fi
         continue
       elif [[ "$D_ARCH" == *"x86-64"* ]] ; then
         ARCH_X64=$((ARCH_X64+1))
@@ -190,26 +210,45 @@ architecture_check()
       fi
     done
 
-    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC+ARCH_NIOS2)) -gt 0 ]] ; then
+    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC+ARCH_NIOS2+ARCH_MIPS64R2+ARCH_MIPS64_III+ARCH_MIPS64_N32)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture  Count")")"
       if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" ; fi
+      if [[ $ARCH_MIPS64R2 -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64r2     ""$ARCH_MIPS64R2")")" ; fi
+      if [[ $ARCH_MIPS64_III -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 III     ""$ARCH_MIPS64_III")")" ; fi
+      if [[ $ARCH_MIPS64_N32 -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 N32     ""$ARCH_MIPS64_N32")")" ; fi
       if [[ $ARCH_ARM -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""$ARCH_ARM")")" ; fi
       if [[ $ARCH_X64 -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""$ARCH_X64")")" ; fi
       if [[ $ARCH_X86 -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""$ARCH_X86")")" ; fi
       if [[ $ARCH_PPC -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""$ARCH_PPC")")" ; fi
       if [[ $ARCH_NIOS2 -gt 0 ]] ; then print_output "$(indent "$(orange "NIOS II       ""$ARCH_NIOS2")")" ; fi
-      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] && [[ $ARCH_MIPS -gt $ARCH_NIOS2 ]]; then
+
+      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] && [[ $ARCH_MIPS -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_MIPS -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64_III ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64_N32 ]]; then
         D_ARCH="MIPS"
-      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] && [[ $ARCH_ARM -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] && [[ $ARCH_ARM -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_ARM -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64_III ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64_N32 ]]; then
         D_ARCH="ARM"
-      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] && [[ $ARCH_X64 -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] && [[ $ARCH_X64 -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_X64 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64_N32 ]]; then
         D_ARCH="x64"
-      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] && [[ $ARCH_X86 -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] && [[ $ARCH_X86 -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_X86 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64_N32 ]]; then
         D_ARCH="x86"
-      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] && [[ $ARCH_PPC -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] && [[ $ARCH_PPC -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_PPC -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64_III ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64_N32 ]]; then
         D_ARCH="PPC"
-      elif [[ $ARCH_NIOS2 -gt $ARCH_MIPS ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM ]] && [[ $ARCH_NIOS2 -gt $ARCH_X64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_X86 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC ]]; then
+      elif [[ $ARCH_NIOS2 -gt $ARCH_MIPS ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM ]] && [[ $ARCH_NIOS2 -gt $ARCH_X64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_X86 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC ]] \
+        && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64_N32 ]]; then
         D_ARCH="NIOS2"
+      elif [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_MIPS64R2 -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS64_N32 ]]; then
+        D_ARCH="MIPS64R2"
+      elif [[ $ARCH_MIPS64_III -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64_III -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64_III -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_PPC ]] && \
+        [[ $ARCH_MIPS64_III -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_MIPS64_N32 ]]; then
+        D_ARCH="MIPS64_3"
+      elif [[ $ARCH_MIPS64_N32 -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_MIPS64_N32 -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_ARM ]]; then
+        D_ARCH="MIPS64N32"
       else
         D_ARCH="unknown"
       fi
@@ -219,6 +258,12 @@ architecture_check()
         print_output "$(indent "$(orange "Endianness  Count")")"
         if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" ; fi
         if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" ; fi
+      fi
+      if [[ $((ARM_SF+ARM_HF)) -gt 0 ]] ; then
+        print_ln
+        print_output "$(indent "$(orange "ARM Hardware/Software floating Count")")"
+        if [[ $ARM_SF -gt 0 ]] ; then print_output "$(indent "$(orange "Software floating          ""$ARM_SF")")" ; fi
+        if [[ $ARM_HF -gt 0 ]] ; then print_output "$(indent "$(orange "Hardware floating          ""$ARM_HF")")" ; fi
       fi
 
       if [[ $D_END_LE -gt $D_END_BE ]] ; then
@@ -395,18 +440,37 @@ detect_root_dir_helper() {
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "dir names"; then
+      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
         MECHANISM="$MECHANISM / dir names"
       elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
         MECHANISM="dir names"
       fi
     fi
   done
+
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
+  for R_PATH in "${ROOTx_PATH[@]}"; do
+    CNT=$(echo "$R_PATH" | awk '{print $1}')
+    if [[ "$CNT" -lt 5 ]]; then
+      # we only use paths with more then 4 matches as possible root path
+      continue
+    fi
+    R_PATH=$(echo "$R_PATH" | awk '{print $2}')
+    if [[ -d "$R_PATH" ]]; then
+      ROOT_PATH+=( "$R_PATH" )
+      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
+        MECHANISM="$MECHANISM / dir names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="dir names"
+      fi
+    fi
+  done
+
   mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "file names"; then
+      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "file names"; then
         MECHANISM="$MECHANISM / file names"
       elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
         MECHANISM="file names"
@@ -417,7 +481,7 @@ detect_root_dir_helper() {
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "file names"; then
+      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "file names"; then
         MECHANISM="$MECHANISM / file names"
       elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
         MECHANISM="file names"
@@ -440,7 +504,11 @@ detect_root_dir_helper() {
   fi
 
   for R_PATH in "${ROOT_PATH[@]}"; do
-    print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
+    if [[ "$MECHANISM" == "last resort" ]]; then
+      print_output "[*] Found no real root directory - setting it to: $ORANGE$R_PATH$NC via $ORANGE$MECHANISM$NC."
+    else
+      print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
+    fi
     write_link "s05#file_dirs"
   done
 }

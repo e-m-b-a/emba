@@ -30,6 +30,7 @@ I199_default_tools_github() {
     print_file_info "EnGenius decryptor" "Decrypts EnGenius firmware files." "https://gist.githubusercontent.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99/raw/5600956a5bba4c674a010bf27e7eaad25a496b87/decrypt.py" "external/engenius-decrypt.py"
   
     print_pip_info "pillow"
+    print_git_info "jchroot" "EMBA-support-repos/jchroot" "jchroot - a chroot with more isolation"
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -61,7 +62,7 @@ I199_default_tools_github() {
 
         # jchroot
         echo -e "\\n""$ORANGE""$BOLD""Download and install jchroot""$NC"
-        git clone https://github.com/vincentbernat/jchroot.git external/jchroot
+        git clone https://github.com/EMBA-support-repos/jchroot.git external/jchroot
         cd ./external/jchroot/ || ( echo "Could not install EMBA component jchroot" && exit 1 )
         make
         if [[ -e ./jchroot ]]; then

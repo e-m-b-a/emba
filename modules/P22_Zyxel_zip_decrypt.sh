@@ -113,7 +113,7 @@ zyxel_zip_extractor() {
       rm "$ZLD_DIR"/"$EMULATOR" || true
 
       if [[ -f "$LOG_PATH_MODULE"/zld_strace.log ]] && [[ -s "$LOG_PATH_MODULE"/zld_strace.log ]]; then
-        ZIP_KEY=$(grep -a -E "execve.*AABBCCDD" "$LOG_PATH_MODULE"/zld_strace.log | cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')
+        ZIP_KEY=$(grep -a -E "^[0-9]+\ execve.*AABBCCDD\",\"-o" "$LOG_PATH_MODULE"/zld_strace.log| cut -d, -f6 | sort -u | sed 's/^\"//' | sed 's/\"$//')
       else
         print_output "[-] No qemu strace log generated -> no further processing possible"
       fi

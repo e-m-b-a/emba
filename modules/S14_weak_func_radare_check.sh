@@ -94,11 +94,12 @@ S14_weak_func_radare_check()
             radare_function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "MIPS" ) ; then
+          # MIPS32 and MIPS64
           if [[ "$THREADED" -eq 1 ]]; then
-            radare_function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            radare_function_check_MIPS "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
             WAIT_PIDS_S14+=( "$!" )
           else
-            radare_function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+            radare_function_check_MIPS "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "PowerPC" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
@@ -180,7 +181,7 @@ radare_function_check_PPC32(){
   echo "$STRCPY_CNT" >> "$TMP_DIR"/S14_STRCPY_CNT.tmp
 }
 
-radare_function_check_MIPS32() {
+radare_function_check_MIPS() {
   local BINARY_="${1:-}"
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
@@ -196,16 +197,16 @@ radare_function_check_MIPS32() {
     radare_log_bin_hardening "$NAME" "$FUNCTION"
     if [[ "$FUNCTION" == "mmap" ]] ; then
       # For the mmap check we need the disasm after the call
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$BINARY_" 2>/dev/null | grep -A 20 "^lw .*$FUNCTION""(gp)" >> "$FUNC_LOG" || true
+      r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$BINARY_" 2>/dev/null | grep -A 20 "^l[wd] .*$FUNCTION""(gp)" >> "$FUNC_LOG" || true
     else
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$BINARY_" 2>/dev/null | grep -A 20 -B 25 "^lw .*$FUNCTION""(gp)" >> "$FUNC_LOG" || true
+      r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "$BINARY_" 2>/dev/null | grep -A 20 -B 25 "^l[wd] .*$FUNCTION""(gp)" >> "$FUNC_LOG" || true
     fi
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
       radare_color_output "$FUNCTION"
 
-      COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
+      COUNT_FUNC="$(grep -c "l[wd].*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
-        COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG" 2> /dev/null || true)
+        COUNT_STRLEN=$(grep -c "l[wd].*strlen" "$FUNC_LOG" 2> /dev/null || true)
         STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       elif [[ "$FUNCTION" == "mmap" ]] ; then
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
@@ -432,7 +433,7 @@ radare_print_top10_statistics() {
 
 radare_color_output() {
   local FUNCTION="${1:-}"
-  sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+  sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
 }
 
 radare_log_bin_hardening() {
@@ -474,8 +475,8 @@ radare_output_function_details()
     print_output "$1"
     write_link "$2"
     if [[ -f "$LOG_FILE" ]]; then
-      cat "$LOG_FILE" >> "$OLD_LOG_FILE"
-      rm "$LOG_FILE" 2> /dev/null
+      cat "$LOG_FILE" >> "$OLD_LOG_FILE" || true
+      rm "$LOG_FILE" 2> /dev/null || true
     fi
     LOG_FILE="$OLD_LOG_FILE"
   }
@@ -513,7 +514,7 @@ radare_output_function_details()
   local LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$COUNT_FUNC"_"$FUNCTION"-"$NAME".txt
 
   if [[ -f "$LOG_FILE_LOC_OLD" ]]; then
-    mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null
+    mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null || true
   fi
   
   if [[ "$NETWORKING" -gt 1 ]]; then

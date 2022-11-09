@@ -137,8 +137,8 @@ cwe_checker_threaded () {
   ulimit -Sv unlimited
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
 
-  if [[ -f "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
-    jq -rc '.[].name + " - " + .[].description' "$LOG_PATH_MODULE"/cwe_"$NAME".log
+  if [[ -s "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
+    jq -rc '.[].name + " - " + .[].description' "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
     mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_PATH_MODULE"/cwe_"$NAME".log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then

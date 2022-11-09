@@ -198,7 +198,7 @@ output_details() {
     DATA=1
   fi
 
-  EMUL=$(cut -d\; -f1 "$CSV_DIR"/s116_qemu_version_detection.csv 2>/dev/null | sort -u | wc -l || true)
+  EMUL=$(cut -d\; -f1 "$CSV_DIR"/s116_qemu_version_detection.csv 2>/dev/null | grep -v "binary/file" | sort -u | wc -l || true)
   if [[ "${EMUL:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$EMUL""$GREEN"" successful emulated processes $ORANGE(${GREEN}user mode emulation$ORANGE)$GREEN.""$NC"
     write_link "s116"

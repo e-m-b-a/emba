@@ -28,8 +28,16 @@ export DOWNLOAD_FILE_LIST=()
 export INSTALLER_DIR="./installer"
 
 if [[ "$STRICT_MODE" -eq 1 ]]; then
-  # shellcheck source=/dev/null
-  source ./helpers/helpers_emba_load_strict_settings.sh
+  if [[ -f "./helpers/helpers_emba_load_strict_settings.sh" ]]; then
+    # shellcheck source=/dev/null
+    source ./helpers/helpers_emba_load_strict_settings.sh
+  elif [[ -f "/emba/helpers/helpers_emba_load_strict_settings.sh" ]]; then
+    # in docker this is in /emba/...
+    # shellcheck source=/dev/null
+    source /emba/helpers/helpers_emba_load_strict_settings.sh
+  else
+    echo "Warning - strict mode module not found"
+  fi
   load_strict_mode_settings
   trap 'wickStrictModeFail $? | tee -a /tmp/emba_installer.log' ERR  # The ERR trap is triggered when a script catches an error
 fi
