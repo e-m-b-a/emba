@@ -27,6 +27,7 @@ IP00_extractors(){
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     # ubireader:
     #print_tool_info "python3-lzo" 1
+    print_tool_info "liblzo2-dev" 1
     print_pip_info "python-lzo"
     # vmdk extractor:
     print_tool_info "guestfs-tools" 1

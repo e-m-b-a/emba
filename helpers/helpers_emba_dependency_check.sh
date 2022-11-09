@@ -546,6 +546,8 @@ architecture_dep_check() {
     ARCH_STR="mips64r2"
   elif [[ "$ARCH" == "MIPS64_III" ]] ; then
     ARCH_STR="mips64_III"
+  elif [[ "$ARCH" == "MIPS64N32" ]] ; then
+    ARCH_STR="mips64n32"
   elif [[ "$ARCH" == "ARM" ]] ; then
     ARCH_STR="arm"
   elif [[ "$ARCH" == "x86" ]] ; then

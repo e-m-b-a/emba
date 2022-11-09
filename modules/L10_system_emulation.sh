@@ -34,6 +34,7 @@ L10_system_emulation() {
   export SYS_ONLINE=0
   export TCP=""
   local MODULE_END=0
+  local UNSUPPORTED_ARCH=0
 
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
@@ -64,13 +65,18 @@ L10_system_emulation() {
             ARCH_END="$ARCH_END""hf"
           fi
 
-          if [[ "$ARCH_END" == "armbe"* ]]; then
+          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64_3"* ]] || [[ "$ARCH_END" == "mips64n32"* ]]; then
             print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
+            print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
+            UNSUPPORTED_ARCH=1
             return
           fi
 
-          print_output "[*] Found supported architecture $ORANGE$ARCH_END$NC"
-          write_link "p99"
+          # just in case we remove the return in the unsupported arch checker for testing:
+          if [[ "$UNSUPPORTED_ARCH" -ne 1 ]]; then
+            print_output "[*] Found supported architecture $ORANGE$ARCH_END$NC"
+            write_link "p99"
+          fi
 
           pre_cleanup_emulator
 
@@ -856,6 +862,14 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
+  elif [[ "$ARCH_END" == "mips64n32eb" ]]; then
+    KERNEL_="vmlinux"
+    QEMU_BIN="qemu-system-mips64"
+    CPU="-cpu MIPS64R2-generic"
+    MACHINE="malta"
+    QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
+    QEMU_ROOTFS="/dev/sda1"
+    QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
   elif [[ "$ARCH_END" == "armel"* ]]; then
     KERNEL_="zImage"
     QEMU_BIN="qemu-system-arm"
@@ -1472,6 +1486,11 @@ run_emulated_system() {
     QEMU_BIN="qemu-system-mips"
     QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "mips64r2eb" ]]; then
+    KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
+    QEMU_BIN="qemu-system-mips64"
+    CPU="-cpu MIPS64R2-generic"
+    QEMU_MACHINE="malta"
+  elif [[ "$ARCH_END" == "mips64n32eb" ]]; then
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
     QEMU_BIN="qemu-system-mips64"
     CPU="-cpu MIPS64R2-generic"
