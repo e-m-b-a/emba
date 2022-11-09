@@ -1,9 +1,11 @@
 version: "3"
 services:
+  # nosemgrep
   emba:
     image: embeddedanalyzer/emba:latest
     read_only: true
     # all pre-checker mount modules need privileged mode
+    # nosemgrep
     privileged: true
     # /root/.config is needed for binwalk - further recovery for other tools needed
     # /root/.cache is needed for unblob -> further recovery of this directory needed
