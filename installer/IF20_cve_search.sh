@@ -88,7 +88,7 @@ IF20_cve_search() {
         cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
         # get trickest repository
         if ! [[ -d external/trickest-cve ]]; then
-          git clone https://github.com/EMBA-support-repos/trickest-ĵcve.git external/trickest-cve
+          git clone https://github.com/EMBA-support-repos/trickest-cve.git external/trickest-cve
         else
           cd external/trickest-cve || ( echo "Could not install EMBA component Trickest" && exit 1 )
           git pull
