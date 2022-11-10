@@ -106,6 +106,7 @@ IL10_system_emulator() {
     print_file_info "vmlinux.mipseb" "vmlinux mipseb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipseb.4" "external/EMBA_Live_bins/vmlinux.mipseb.4"
     print_file_info "vmlinux.mipsel" "vmlinux mipsel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipsel.4" "external/EMBA_Live_bins/vmlinux.mipsel.4"
     print_file_info "vmlinux.x86el" "vmlinux x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.x86el" "external/EMBA_Live_bins/vmlinux.x86el"
+    print_file_info "bzImage.x86el" "bzImage x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/bzImage.x86el" "external/EMBA_Live_bins/bzImage.x86el"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -185,6 +186,7 @@ IL10_system_emulator() {
       download_file "vmlinux.mipseb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipseb.4" "external/EMBA_Live_bins/vmlinux.mipseb.4"
       download_file "vmlinux.mipsel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipsel.4" "external/EMBA_Live_bins/vmlinux.mipsel.4"
       download_file "vmlinux.x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.x86el" "external/EMBA_Live_bins/vmlinux.x86el"
+      download_file "bzImage.x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/bzImage.x86el" "external/EMBA_Live_bins/bzImage.x86el"
       ;;
     esac
   fi

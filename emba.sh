@@ -588,8 +588,6 @@ main()
     export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   fi
 
-  # Check all dependencies of EMBA
-  dependency_check
 
   if [[ "$ONLY_DEP" -eq 0 ]]; then
     if [[ "$UPDATE" -eq 1 ]]; then
@@ -626,6 +624,9 @@ main()
         exit 1
       fi
     fi
+
+    # Check all dependencies of EMBA
+    dependency_check
 
     if [[ "$ONLY_DEP" -eq 0 ]]; then
       # check provided paths for validity
@@ -893,7 +894,7 @@ main()
         fi
         exit 0
       else
-        print_output "[-] EMBA failed in docker mode!" "main"
+        print_output "[-] EMBA failed in docker mode!" "no_log"
         cleaner 0
         write_notification "EMBA failed analysis in default mode"
         exit 1
