@@ -472,13 +472,18 @@ dependency_check()
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
+      check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
+      check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
+      check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
+      check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
 
       # check only some of the needed files
-      check_dep_file "console.*" "$EXT_DIR""/firmae/binaries/console.mipsel"
-      check_dep_file "busybox.*" "$EXT_DIR""/firmae/binaries/busybox.mipsel"
-      check_dep_file "libnvram.*" "$EXT_DIR""/firmae/binaries/libnvram.so.armel"
-      check_dep_file "vmlinux.mips*" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
-      check_dep_file "zImage.armel" "$EXT_DIR""/firmae/binaries/zImage.armel"
+      check_dep_file "console.*" "$EXT_DIR""/EMBA_Live_bins/console.x86el"
+      check_dep_file "busybox.*" "$EXT_DIR""/EMBA_Live_bins/busybox.mipsel"
+      check_dep_file "libnvram.*" "$EXT_DIR""/EMBA_Live_bins/libnvram.so.armel"
+      check_dep_file "libnvram_ioctl.*" "$EXT_DIR""/EMBA_Live_bins/libnvram_ioctl.so.mipsel"
+      check_dep_file "vmlinux.mips*" "$EXT_DIR""/EMBA_Live_bins/vmlinux.mips64r2el.4"
+      check_dep_file "zImage.armel" "$EXT_DIR""/EMBA_Live_bins/zImage.armel"
 
       check_dep_file "fixImage.sh" "$MOD_DIR""/L10_system_emulation/fixImage.sh"
       check_dep_file "preInit.sh" "$MOD_DIR""/L10_system_emulation/preInit.sh"
@@ -500,6 +505,7 @@ dependency_check()
       # This port is used by our Qemu installation and should not be used by another process.
       # This check is not a blocker for the test. It is checked again by the emulation module:
       check_emulation_port "Running Qemu service" "2001"
+      check_emulation_port "Running Qemu service" "4321"
     fi
 
     if [[ "$CWE_CHECKER" -eq 1 ]]; then
@@ -518,8 +524,12 @@ dependency_check()
 
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
     print_output "\\n""$ORANGE""Some dependencies are missing - please check your installation\\n" "no_log"
-    print_output "$ORANGE""To install all needed dependencies, run '""$NC""sudo ./installer.sh""$ORANGE""'." "no_log"
-    print_output "$ORANGE""Learn more about the installation on the EMBA wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
+      print_output "$ORANGE""Looks like your docker container is outdated - please update your base image: ""$NC""sudo docker pull embeddedanalyzer/emba""$ORANGE""'." "no_log"
+    else
+      print_output "$ORANGE""To install all needed dependencies, run '""$NC""sudo ./installer.sh""$ORANGE""'." "no_log"
+      print_output "$ORANGE""Learn more about the installation on the EMBA wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
+    fi
 
     if [[ $ONLY_DEP -eq 1 ]] || [[ $FORCE -eq 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
       exit 1
