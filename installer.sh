@@ -184,6 +184,18 @@ if [[ "$REMOVE" -eq 1 ]]; then
   exit 0
 fi
 
+# quick check if we have enough disk space for the docker image
+
+FREE_SPACE=$(df --output=avail /var/lib/docker/ | awk 'NR==2')
+if [[ "$FREE_SPACE" -lt 13000000 ]]; then
+  echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 13Gig for the docker image""$NC"
+  echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
+  echo ""
+  df -h
+  echo ""
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+fi
+
 if [[ $LIST_DEP -eq 0 ]] ; then
   if ! [[ -d "external" ]] ; then
     echo -e "\\n""$ORANGE""Created external directory: ./external""$NC"
