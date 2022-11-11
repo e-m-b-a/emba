@@ -320,6 +320,7 @@ main_emulation() {
   BAK_INIT_BACKUP=""
   BAK_INIT_ORIG=""
   local INIT_OUT=""
+  export IPS_INT_VLAN=()
 
   for INIT_FILE in "${INIT_FILES[@]}"; do
     # this is the main init entry - we modify it later for special cases:
@@ -377,6 +378,9 @@ main_emulation() {
 
       # just in case we have issues with permissions
       chmod +x "$INIT_OUT"
+
+      # just in case there is an exit in the init -> comment it
+      sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "$INIT_OUT"
     fi
 
     handle_fs_mounts
@@ -973,7 +977,6 @@ get_networking_details_emulation() {
   sub_module_title "Network identification - $IMAGE_NAME"
 
   if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
-    IPS_INT_VLAN=()
     ETH_INT="NONE"
     VLAN_ID="NONE"
     NETWORK_MODE="bridge"
@@ -1261,8 +1264,7 @@ iterate_vlans() {
     else
       VLAN_ID="NONE"
     fi
-    print_output "[*] Interface details via VLAN detected: IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
-    IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT"\;"$VLAN_ID"\;"$NETWORK_MODE" )
+    store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "$ETH_INT" "$VLAN_ID" "$NETWORK_MODE"
     # if we have entries without an interface name, we need to identify an interface name:
     # register_vlan_dev[PID: 212 (vconfig)]: dev:vlan1 vlan_id:1
     # for this we try to check the qemu output for vlan entries and generate the configuration entry
@@ -1271,8 +1273,7 @@ iterate_vlans() {
       for ETH_INT_ in "${ETH_INTS[@]}"; do
         # if we found multiple interfaces belonging to a vlan we need to store all of them:
         ETH_INT_=$(echo "$ETH_INT_" | tr -dc '[:print:]')
-        IPS_INT_VLAN+=( "$IP_ADDRESS_"\;"$NETWORK_DEVICE"\;"$ETH_INT_"\;"$VLAN_ID"\;"$NETWORK_MODE" )
-        print_output "[*] Interface details via VLAN detected (qemu logs): IP address: $ORANGE$IP_ADDRESS_$NC / bridge dev: $ORANGE$NETWORK_DEVICE$NC / network device: $ORANGE$ETH_INT_$NC / vlan id: $ORANGE$VLAN_ID$NC / network mode: $ORANGE$NETWORK_MODE$NC"
+        store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "$ETH_INT_" "$VLAN_ID" "$NETWORK_MODE"
       done
     fi
   done

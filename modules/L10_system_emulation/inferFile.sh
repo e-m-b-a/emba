@@ -25,7 +25,7 @@ if ("${FIRMAE_BOOT}"); then
       arr+=(/init)
     fi
   fi
-  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local")
+  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init")
   do
     "${BUSYBOX}" echo "[*] Found boot file $FILE"
     arr+=("${FILE}")
