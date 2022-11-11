@@ -42,7 +42,7 @@ services:
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
-        - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/EMBA_Live_bins/:ro
+          # - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/EMBA_Live_bins/:ro
     environment:
         - USER
     devices:

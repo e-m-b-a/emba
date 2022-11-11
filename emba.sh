@@ -589,6 +589,9 @@ main()
   fi
 
 
+  # Check all dependencies of EMBA
+  dependency_check
+
   if [[ "$ONLY_DEP" -eq 0 ]]; then
     if [[ "$UPDATE" -eq 1 ]]; then
       write_notification "EMBA starts with update"
@@ -624,9 +627,6 @@ main()
         exit 1
       fi
     fi
-
-    # Check all dependencies of EMBA
-    dependency_check
 
     if [[ "$ONLY_DEP" -eq 0 ]]; then
       # check provided paths for validity
