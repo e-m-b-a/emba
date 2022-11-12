@@ -42,7 +42,10 @@ L10_system_emulation() {
     S25_LOG="s25_kernel_check.txt"
 
     if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* ]]; then
-      enable_firmae_arbitration
+
+      # WARNING: false was never tested ;)
+      # Could be interesting for future extensions
+      set_firmae_arbitration "true"
 
       export BINARY_DIR="$EXT_DIR/EMBA_Live_bins"
       FIRMWARE_PATH_orig="$(abs_path "$FIRMWARE_PATH_BAK")"
@@ -1238,6 +1241,7 @@ store_interface_details() {
   local ETH_INT__="${3:-eth0}"
   local VLAN_ID__="${4:-NONE}"
   local NETWORK_MODE__="${5:-bridge}"
+  NETWORK_DEVICE__="br-lan"
 
   IPS_INT_VLAN+=( "$IP_ADDRESS__"\;"$NETWORK_DEVICE__"\;"$ETH_INT__"\;"$VLAN_ID__"\;"$NETWORK_MODE__" )
   print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS__$GREEN / bridge dev: $ORANGE$NETWORK_DEVICE__$GREEN / network device: $ORANGE$ETH_INT__$GREEN / vlan id: $ORANGE$VLAN_ID__$GREEN / network mode: $ORANGE$NETWORK_MODE__$NC"
@@ -1923,13 +1927,14 @@ write_results() {
   print_bar ""
 }
 
-enable_firmae_arbitration() {
+set_firmae_arbitration() {
+  FIRMAE_STATE="${1:-true}"
   # FirmAE arbitration - enable all mechanisms
-  export FIRMAE_BOOT=true
-  export FIRMAE_NET=true
-  export FIRMAE_NVRAM=true
-  export FIRMAE_KERNEL=true
-  export FIRMAE_ETC=true
+  export FIRMAE_BOOT="$FIRMAE_STATE"
+  export FIRMAE_NET="$FIRMAE_STATE"
+  export FIRMAE_NVRAM="$FIRMAE_STATE"
+  export FIRMAE_KERNEL="$FIRMAE_STATE"
+  export FIRMAE_ETC="$FIRMAE_STATE"
 }
 
 color_qemu_log() {
