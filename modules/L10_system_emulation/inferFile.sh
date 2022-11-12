@@ -25,7 +25,7 @@ if ("${FIRMAE_BOOT}"); then
       arr+=(/init)
     fi
   fi
-  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init")
+  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc")
   do
     "${BUSYBOX}" echo "[*] Found boot file $FILE"
     arr+=("${FILE}")
@@ -35,15 +35,18 @@ if ("${FIRMAE_BOOT}"); then
   for FILE in $("${BUSYBOX}" find / -name "inittab" -type f)
   do
     "${BUSYBOX}" echo "[*] Found boot file $FILE"
-    # sysinit entry is the one to look for - we do not handle multiple entries!
+    # sysinit entry is the one to look for
     # shellcheck disable=SC2016
-    STARTUP_FILE=$("${BUSYBOX}" grep ":.*sysinit:" "$FILE" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}')
-    "${BUSYBOX}" echo "[*] Found possible startup file $STARTUP_FILE"
-    if [ -e "${STARTUP_FILE}" ]; then
+    for STARTUP_FILE in $("${BUSYBOX}" grep ":.*sysinit:" "$FILE" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u)
+    do
+      "${BUSYBOX}" echo "[*] Found possible startup file $STARTUP_FILE"
       arr+=("${STARTUP_FILE}")
-    else
-      "${BUSYBOX}" echo "[-] Something went wrong with startup file $STARTUP_FILE"
-    fi
+      #if [ -e "${STARTUP_FILE}" ]; then
+      #  arr+=("${STARTUP_FILE}")
+      #else
+      #  "${BUSYBOX}" echo "[-] Something went wrong with startup file $STARTUP_FILE"
+      #fi
+    done
   done
 
   if (( ${#arr[@]} )); then

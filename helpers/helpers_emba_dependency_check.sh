@@ -181,6 +181,31 @@ check_emulation_port() {
   fi
 }
 
+setup_unblob() {
+  TOOL_NAME="${1:-}"
+
+  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
+
+  if command -v unblob; then
+    echo -e "$GREEN""ok""$NC"
+  elif ! command -v unblob && [[ -f "$EXT_DIR"/unblob/unblob_path.cfg ]]; then
+    # recover unblob installation - usually we are in the docker container
+    if ! [[ -d "$HOME"/.cache ]]; then
+      mkdir "$HOME"/.cache
+    fi
+    cp -pr "$EXT_DIR"/unblob/root_cache/* "$HOME"/.cache/
+    if [[ -e $(cat "$EXT_DIR"/unblob/unblob_path.cfg)/bin/"$UNBLOB_BIN" ]]; then
+      UNBLOB_PATH="$(cat "$EXT_DIR"/unblob/unblob_path.cfg)""/bin/"
+      export PATH=$PATH:"$UNBLOB_PATH"
+      echo -e "$GREEN""ok""$NC"
+    else
+      echo -e "$RED""not ok""$NC"
+    fi
+  else
+    echo -e "$RED""not ok""$NC"
+  fi
+}
+
 dependency_check() 
 {
   module_title "Dependency check" "no_log"
@@ -349,6 +374,8 @@ dependency_check()
       fi
     fi
     export MPLCONFIGDIR="$TMP_DIR"
+
+    setup_unblob "unblob"
 
     # jtr
     check_dep_tool "john"

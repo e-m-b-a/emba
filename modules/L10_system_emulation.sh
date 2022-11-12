@@ -323,6 +323,7 @@ main_emulation() {
   export IPS_INT_VLAN=()
 
   for INIT_FILE in "${INIT_FILES[@]}"; do
+    INIT_FNAME=$(basename "$INIT_FILE")
     # this is the main init entry - we modify it later for special cases:
     KINIT="rdinit=/firmadyne/preInit.sh"
 
@@ -445,8 +446,8 @@ main_emulation() {
 
     local F_STARTUP=0
     if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
-      cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
-      write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME".log
+      cat "$LOG_PATH_MODULE"/qemu.initial.serial.log >> "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME".log
+      write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME".log
 
       ###############################################################################################
       # if we were running into issues with the network identification we poke with rdinit vs init:
@@ -464,7 +465,7 @@ main_emulation() {
       # if we are running into a kernel panic during the network detection we are going to check if the
       # panic is caused from an init failure. If so, we are trying the other init kernel command (init vs rdinit)
       if [[ "${PANICS[*]}" == *"Kernel panic - not syncing: Attempted to kill init!"* || "${PANICS[*]}" == *"Kernel panic - not syncing: No working init found."* ]]; then
-        mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_base_init.log
+        mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log
         if [[ "$KINIT" == "rdinit="* ]]; then
           print_output "[*] Warning: Kernel panic with failed rdinit found - testing init"
           # strip rd from rdinit
@@ -480,8 +481,8 @@ main_emulation() {
 
         print_output "[*] Firmware $ORANGE$IMAGE_NAME$NC finished for identification of the network configuration"
         if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
-          mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_new_init.log
-          write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_new_init.log
+          mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_new_init.log
+          write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_new_init.log
         else
           print_output "[-] No Qemu log file generated ... some weird error occured"
         fi
@@ -491,7 +492,7 @@ main_emulation() {
       #elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
       #  [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" && "${#IPS_INT_VLAN[@]}" -lt 2 ]]; then
       elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" ]] || [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" ]]; then
-        mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_base_init.log
+        mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log
         if [[ "$KINIT" == "rdinit="* ]]; then
           print_output "[*] Warning: Unknown EMBA startup found via rdinit - testing init"
           # strip rd from rdinit
@@ -524,8 +525,8 @@ main_emulation() {
 
         print_output "[*] Firmware $ORANGE$IMAGE_NAME$NC finished for identification of the network configuration"
         if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
-          mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_new_init.log
-          write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_new_init.log
+          mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_new_init.log
+          write_link "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_new_init.log
         else
           print_output "[-] No Qemu log file generated ... some weird error occured"
         fi
@@ -628,14 +629,14 @@ main_emulation() {
         reset_network_emulation "$EXECUTE"
               
         if [[ -f "$LOG_PATH_MODULE"/qemu.final.serial.log ]]; then
-          mv "$LOG_PATH_MODULE"/qemu.final.serial.log "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod".log
+          mv "$LOG_PATH_MODULE"/qemu.final.serial.log "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod"-"$INIT_FNAME".log
         fi
 
         if [[ "$SYS_ONLINE" -eq 1 ]]; then
           print_ln
           print_output "[+] System emulation was successful."
-          if [[ -f "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod".log ]]; then
-            print_output "[+] System should be available via IP $ORANGE$IP_ADDRESS_$GREEN." "" "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod".log
+          if [[ -f "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod"-"$INIT_FNAME".log ]]; then
+            print_output "[+] System should be available via IP $ORANGE$IP_ADDRESS_$GREEN." "" "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod"-"$INIT_FNAME".log
           else
             print_output "[+] System should be available via IP $ORANGE$IP_ADDRESS_$GREEN."
           fi
@@ -662,8 +663,8 @@ main_emulation() {
         if [[ -f "$LOG_PATH_MODULE"/nvram/nvram_files_final_ ]]; then
           mv "$LOG_PATH_MODULE"/nvram/nvram_files_final_ "$LOG_PATH_MODULE"/nvram/nvram_files_"$IMAGE_NAME".bak
         fi
-        if ! [[ -f "$LOG_PATH_MODULE/qemu.final.serial_$IMAGE_NAME-$IPS_INT_VLAN_CFG_mod.log" ]]; then
-          print_output "[!] Warning: No Qemu log file generated for $ORANGE$IMAGE_NAME-$IPS_INT_VLAN_CFG_mod$NC"
+        if ! [[ -f "$LOG_PATH_MODULE/qemu.final.serial_$IMAGE_NAME-$IPS_INT_VLAN_CFG_mod-$INIT_FNAME.log" ]]; then
+          print_output "[!] Warning: No Qemu log file generated for $ORANGE$IMAGE_NAME-$IPS_INT_VLAN_CFG_mod-$INIT_FNAME$NC"
         fi
       done
     else
@@ -1764,7 +1765,7 @@ create_emulation_archive() {
     tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz "$ARCHIVE_PATH"
     if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz ]]; then
       print_ln
-      print_output "[*] Qemu emulation archive created in log directory." "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME-$RANDOM_ID.tar.gz"
+      print_output "[*] Qemu emulation archive created in log directory: $ORANGE$ARCHIVE_PATH$NC" "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME-$RANDOM_ID.tar.gz"
       print_ln
     fi
   else
@@ -1918,7 +1919,7 @@ write_results() {
     local FIRMWARE_PATH_orig
     FIRMWARE_PATH_orig="$(cat "$TMP_DIR"/fw_name.log)"
   fi
-  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED; ICMP $ICMP; TCP-0 $TCP_0;TCP $TCP; IP address: $IP_ADDRESS_; Network mode: $NETWORK_MODE" >> "$LOG_DIR"/emulator_online_results.log
+  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED; ICMP $ICMP; TCP-0 $TCP_0;TCP $TCP; IP address: $IP_ADDRESS_; Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE)" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""
 }
 

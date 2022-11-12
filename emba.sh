@@ -588,7 +588,6 @@ main()
     export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
   fi
 
-
   # Check all dependencies of EMBA
   dependency_check
 
