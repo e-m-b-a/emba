@@ -100,29 +100,30 @@ uefi_extractor(){
   fi
 
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
-
-  # UEFIExtract uses abs_path of file to determine target-dir(auto generated)
-  $UEFI_EXTRACT_BIN "$FIRMWARE_PATH_" all &> "$LOG_PATH_MODULE"/uefi_extractor_"$FIRMWARE_NAME_".log
-  mv "$FIRMWARE_PATH_"".dump" "$EXTRACTION_DIR_"
-  mv "$FIRMWARE_PATH_"".report.txt" "$LOG_PATH_MODULE"
-  
-  UEFI_EXTRACT_REPORT_FILE="$LOG_PATH_MODULE"/"$FIRMWARE_NAME_".report.txt
+  cp "$FIRMWARE_PATH_" "$EXTRACTION_DIR_"
+  $UEFI_EXTRACT_BIN "$EXTRACTION_DIR_"/firmware all &> "$LOG_PATH_MODULE"/uefi_extractor_"$FIRMWARE_NAME_".log
+  UEFI_EXTRACT_REPORT_FILE="$EXTRACTION_DIR_"/firmware.report.txt
+  mv "$UEFI_EXTRACT_REPORT_FILE" "$LOG_PATH_MODULE"
+  UEFI_EXTRACT_REPORT_FILE="$LOG_PATH_MODULE"/firmware.report.txt
+  if [[ -f "$EXTRACTION_DIR_"/firmware ]]; then
+    rm "$EXTRACTION_DIR_"/firmware
+  fi
 
   if [[ -f "$LOG_PATH_MODULE"/uefi_extractor_"$FIRMWARE_NAME_".log ]]; then
     tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/uefi_extractor_"$FIRMWARE_NAME_".log
   fi
 
   print_ln
-  print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
-  find "$EXTRACTION_DIR_" -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
+  print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_/firmware.dump$NC) as base directory:"
+  find "$EXTRACTION_DIR_"/firmware.dump -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
   print_ln
 
   NVARS=$(grep -c "NVAR entry" "$UEFI_EXTRACT_REPORT_FILE")
   PE32_IMAGE=$(grep -c "PE32 image" "$UEFI_EXTRACT_REPORT_FILE")
-  EFI_ARCH=$(find "$EXTRACTION_DIR_" -name 'info.txt' -exec grep 'Machine type:' {} \; | sed -E 's/Machine\ type\:\ //g' | uniq )
+  EFI_ARCH=$(find "$EXTRACTION_DIR_" -name 'info.txt' -exec grep 'Machine type:' {} \; | sed -E 's/Machine\ type\:\ //g' | uniq | head -n 1)
 
   if [[ -n "$EFI_ARCH" ]]; then
-    print_output "[*] Found $ORANGE$PE32_IMAGE$NC PE32 images for architecture $ORANGE$EFI_ARCH$ORANGE drivers."
+    print_output "[*] Found $ORANGE$PE32_IMAGE$NC PE32 images for architecture $ORANGE$EFI_ARCH$NC drivers."
     print_output "[+] Possible architecture details found ($ORANGE UEFI Extractor $NC): $ORANGE$EFI_ARCH$NC"
     export EFI_ARCH
     backup_var "EFI_ARCH" "$EFI_ARCH"
@@ -131,7 +132,7 @@ uefi_extractor(){
   FILES_UEFI=$(grep -c "File" "$UEFI_EXTRACT_REPORT_FILE")
   DIRS_UEFI=$(find "$EXTRACTION_DIR_" -type d | wc -l)
   print_output "[*] Extracted $ORANGE$FILES_UEFI$NC files and $ORANGE$DIRS_UEFI$NC directories from the firmware image."
-  print_output "[*] Found $ORANGE$NVARS$NC NVARS and $ORANGE$DRIVER_COUNT$ORANGE drivers."
+  print_output "[*] Found $ORANGE$NVARS$NC NVARS and $ORANGE$DRIVER_COUNT$NC drivers."
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
   write_csv_log "UEFI extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_UEFI" "$DIRS_UEFI" "NA"
   print_ln
