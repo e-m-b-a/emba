@@ -41,7 +41,7 @@ L10_system_emulation() {
     export MODULE_SUB_PATH="$MOD_DIR"/"${FUNCNAME[0]}"
     S25_LOG="s25_kernel_check.txt"
 
-    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* ]]; then
+    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* || "$ARCH" == "NIOS2" ]]; then
 
       # WARNING: false was never tested ;)
       # Could be interesting for future extensions
@@ -57,6 +57,7 @@ L10_system_emulation() {
         write_link "p59"
 
         if [[ -n "$D_END" ]]; then
+          TAPDEV_0="tap0_0"
           D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
           ARCH_END="$(echo "$ARCH" | tr '[:upper:]' '[:lower:]')$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
 
@@ -71,7 +72,7 @@ L10_system_emulation() {
             print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
             print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
             UNSUPPORTED_ARCH=1
-            return
+            #return
           fi
 
           # just in case we remove the return in the unsupported arch checker for testing:
@@ -460,7 +461,7 @@ main_emulation() {
     else
       print_output "[-] No Qemu log file generated ... some weird error occured"
     fi
-    print_output "[*] Found $ORANGE$F_STARTUP$NC EMBA startup entries."
+    # print_output "[*] Found $ORANGE$F_STARTUP$NC EMBA startup entries."
     print_ln
 
 
@@ -896,14 +897,15 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
-  elif [[ "$ARCH_END" == "nios2" ]]; then
-    # not tested
+  elif [[ "$ARCH_END" == "nios2el" ]]; then
+    # not implemented -> Future
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-nios2"
     MACHINE="10m50-ghrd"
-    QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
+    QEMU_DISK="-drive file=$IMAGE,format=raw"
     QEMU_ROOTFS="/dev/sda1"
-    QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
+    QEMU_PARAMS="-monitor none"
+    QEMU_NETWORK=""
   else
     print_output "[-] WARNING: No supported configuration found for $ORANGE$ARCH_END$NC."
     return
@@ -1241,7 +1243,6 @@ store_interface_details() {
   local ETH_INT__="${3:-eth0}"
   local VLAN_ID__="${4:-NONE}"
   local NETWORK_MODE__="${5:-bridge}"
-  NETWORK_DEVICE__="br-lan"
 
   IPS_INT_VLAN+=( "$IP_ADDRESS__"\;"$NETWORK_DEVICE__"\;"$ETH_INT__"\;"$VLAN_ID__"\;"$NETWORK_MODE__" )
   print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS__$GREEN / bridge dev: $ORANGE$NETWORK_DEVICE__$GREEN / network device: $ORANGE$ETH_INT__$GREEN / vlan id: $ORANGE$VLAN_ID__$GREEN / network mode: $ORANGE$NETWORK_MODE__$NC"
@@ -1511,8 +1512,8 @@ run_emulated_system() {
     KERNEL="$BINARY_DIR/bzImage.$ARCH_END"
     QEMU_BIN="qemu-system-x86_64"
     QEMU_MACHINE="pc-i440fx-3.1"
-  elif [[ "$ARCH_END" == "nios2" ]]; then
-    # not tested
+  elif [[ "$ARCH_END" == "nios2el" ]]; then
+    # not implemented -> Future
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END"
     QEMU_BIN="qemu-system-nios2"
     QEMU_MACHINE="10m50-ghrd"
@@ -1528,7 +1529,11 @@ run_emulated_system() {
     # newer kernels use virtio only
     QEMU_NETWORK="-device virtio-net-device,netdev=net$NET_ID -netdev tap,id=net$NET_ID,ifname=${TAPDEV_0},script=no"
 
-  elif [[ "$ARCH" == "MIPS" ]] || [[ "$ARCH_END" == "x86el" ]] || [[ "$ARCH_END" == "nios2" ]] || [[ "$ARCH_END" == "mips64"* ]]; then
+  elif [[ "$ARCH" == "NIOS2" ]]; then
+    QEMU_PARAMS="-monitor none"
+    QEMU_NETWORK=""
+    QEMU_DISK="-drive file=$IMAGE,format=raw"
+  elif [[ "$ARCH" == "MIPS" ]] || [[ "$ARCH_END" == "x86el" ]] || [[ "$ARCH_END" == "mips64"* ]]; then
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_PARAMS=""
     QEMU_ROOTFS="/dev/sda1"
@@ -1583,7 +1588,7 @@ run_qemu_final_emulation() {
 
   write_script_exec "echo -e \"[*] Starting firmware emulation $ORANGE$QEMU_BIN / $ARCH_END / $IMAGE_NAME / $IP_ADDRESS_$NC ... use Ctrl-a + x to exit\n\"" "$ARCHIVE_PATH"/run.sh 0
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log$NC file\n\"" "$ARCHIVE_PATH"/run.sh 0
-  write_script_exec "echo -e \"[*] For interactive connection check reaching localhost port ${ORANGE}4321$NC via telnet\n\"" "$ARCHIVE_PATH"/run.sh 0
+  write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321$NC via telnet\n\"" "$ARCHIVE_PATH"/run.sh 0
  
   write_script_exec "$QEMU_BIN -m 2048 -M $QEMU_MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=ttyS0 nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait" "$ARCHIVE_PATH"/run.sh 1
 }
@@ -1779,6 +1784,10 @@ create_emulation_archive() {
 
 reset_network_emulation() {
   EXECUTE_="${1:0}"
+
+  if ! [[ -v IMAGE_NAME ]] || ! [[ -v ARCHIVE_PATH ]]; then
+    return
+  fi
 
   if [[ "$EXECUTE_" -ne 0 ]]; then
     print_output "[*] Stopping Qemu emulation ..."

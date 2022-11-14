@@ -46,7 +46,7 @@ P61_unblob_eval() {
     return
   fi
 
-  if ! command -v unblob 2>/dev/null; then
+  if ! command -v unblob >/dev/null; then
     print_output "[-] Unblob not correct installed - check your installation"
     return
   fi

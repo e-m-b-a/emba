@@ -497,6 +497,7 @@ dependency_check()
     # Full system emulation modules (L*)
     if [[ $FULL_EMULATION -eq 1 ]]; then
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
+      #check_dep_tool "Qemu system emulator ARM64" "qemu-system-aarch64"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
       check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
@@ -532,7 +533,8 @@ dependency_check()
       # This port is used by our Qemu installation and should not be used by another process.
       # This check is not a blocker for the test. It is checked again by the emulation module:
       check_emulation_port "Running Qemu network service" "2001"
-      check_emulation_port "Running Qemu network service" "4321"
+      # Port 4321 is used for Qemu telnet access and should be available
+      check_emulation_port "Running Qemu telnet service" "4321"
     fi
 
     if [[ "$CWE_CHECKER" -eq 1 ]]; then

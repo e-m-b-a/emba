@@ -63,7 +63,7 @@ if ("${FIRMAE_BOOT}"); then
           "${BUSYBOX}" rm "${FILE}"
         fi
         # find original program from binary directories
-        "${BUSYBOX}" echo "${FILE}"
+        "${BUSYBOX}" echo "[*] Analysing ${FILE}"
         FILE_NAME=$("${BUSYBOX}" basename "${FILE}")
         if ("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" grep -qr "${FILE_NAME}" {} \;); then
           TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)
