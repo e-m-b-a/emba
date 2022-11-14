@@ -123,6 +123,7 @@ uefi_extractor(){
 
   NVARS=$(grep -c "NVAR entry" "$UEFI_EXTRACT_REPORT_FILE")
   PE32_IMAGE=$(grep -c "PE32 image" "$UEFI_EXTRACT_REPORT_FILE")
+  DRIVER_COUNT=$(grep -c "DXE driver" "$UEFI_EXTRACT_REPORT_FILE")
   EFI_ARCH=$(find "$EXTRACTION_DIR_" -name 'info.txt' -exec grep 'Machine type:' {} \; | sed -E 's/Machine\ type\:\ //g' | uniq | head -n 1)
 
   if [[ -n "$EFI_ARCH" ]]; then
