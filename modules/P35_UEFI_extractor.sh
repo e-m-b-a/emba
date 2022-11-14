@@ -100,12 +100,12 @@ uefi_extractor(){
   fi
 
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
-  if [[ -d "$EXTRACTION_DIR_" ]]; then
+  if ! [[ -d "$EXTRACTION_DIR_" ]]; then
     mkdir -p "$EXTRACTION_DIR_"
   fi
   cp "$FIRMWARE_PATH_" "$EXTRACTION_DIR_"
-  $UEFI_EXTRACT_BIN "$EXTRACTION_DIR_"/firmware all &> "$LOG_PATH_MODULE"/uefi_extractor_"$FIRMWARE_NAME_".log
-  UEFI_EXTRACT_REPORT_FILE="$EXTRACTION_DIR_"/firmware.report.txt
+  $UEFI_EXTRACT_BIN "$EXTRACTION_DIR_"firmware all &> "$LOG_PATH_MODULE"/uefi_extractor_"$FIRMWARE_NAME_".log
+  UEFI_EXTRACT_REPORT_FILE="$EXTRACTION_DIR_"firmware.report.txt
   mv "$UEFI_EXTRACT_REPORT_FILE" "$LOG_PATH_MODULE"
   UEFI_EXTRACT_REPORT_FILE="$LOG_PATH_MODULE"/firmware.report.txt
   if [[ -f "$EXTRACTION_DIR_"/firmware ]]; then
