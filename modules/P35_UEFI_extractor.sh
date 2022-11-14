@@ -44,39 +44,40 @@ P35_UEFI_extractor() {
   fi
 }
 
-ami_extractor() {
-  sub_module_title "AMI capsule extractor"
-
-  local FIRMWARE_PATH_="${1:-}"
-  local EXTRACTION_DIR_="${2:-}"
-  local DIRS_UEFI=0
-  local FIRMWARE_NAME_=""
-
-  if ! [[ -f "$FIRMWARE_PATH_" ]]; then
-    print_output "[-] No file for extraction provided"
-    return
-  fi
-
-  FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
-
-  echo -ne '\n' | python3 "$EXT_DIR"/BIOSUtilities/AMI_PFAT_Extract.py -o "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" &> "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log
-
-  if [[ -f "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log ]]; then
-    tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log
-  fi
-
-  print_ln
-  print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
-  find "$EXTRACTION_DIR_" -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
-  print_ln
-
-  FILES_UEFI=$(find "$EXTRACTION_DIR_" -type f | wc -l)
-  DIRS_UEFI=$(find "$EXTRACTION_DIR_" -type d | wc -l)
-  print_output "[*] Extracted $ORANGE$FILES_UEFI$NC files and $ORANGE$DIRS_UEFI$NC directories from the firmware image."
-  write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-  write_csv_log "UEFI AMI extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_UEFI" "$DIRS_UEFI" "NA"
-  print_ln
-}
+# TODO marked for deletion
+# ami_extractor() {
+#   sub_module_title "AMI capsule extractor"
+# 
+#   local FIRMWARE_PATH_="${1:-}"
+#   local EXTRACTION_DIR_="${2:-}"
+#   local DIRS_UEFI=0
+#   local FIRMWARE_NAME_=""
+# 
+#   if ! [[ -f "$FIRMWARE_PATH_" ]]; then
+#     print_output "[-] No file for extraction provided"
+#     return
+#   fi
+# 
+#   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
+# 
+#   echo -ne '\n' | python3 "$EXT_DIR"/BIOSUtilities/AMI_PFAT_Extract.py -o "$EXTRACTION_DIR_" "$FIRMWARE_PATH_" &> "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log
+# 
+#   if [[ -f "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log ]]; then
+#     tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/uefi_ami_"$FIRMWARE_NAME_".log
+#   fi
+# 
+#   print_ln
+#   print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_$NC) as base directory:"
+#   find "$EXTRACTION_DIR_" -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
+#   print_ln
+# 
+#   FILES_UEFI=$(find "$EXTRACTION_DIR_" -type f | wc -l)
+#   DIRS_UEFI=$(find "$EXTRACTION_DIR_" -type d | wc -l)
+#   print_output "[*] Extracted $ORANGE$FILES_UEFI$NC files and $ORANGE$DIRS_UEFI$NC directories from the firmware image."
+#   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+#   write_csv_log "UEFI AMI extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_UEFI" "$DIRS_UEFI" "NA"
+#   print_ln
+# }
 
 uefi_extractor(){
   sub_module_title "UEFI Extractor"
