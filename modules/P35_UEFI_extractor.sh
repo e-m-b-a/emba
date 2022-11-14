@@ -28,11 +28,11 @@ P35_UEFI_extractor() {
 
     EXTRACTION_DIR="$LOG_DIR"/firmware/uefi_extraction/
 
-    if [[ "$UEFI_AMI_CAPSULE" -gt 0 ]]; then
-      ami_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
-    else
-      uefi_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
-    fi
+    # if [[ "$UEFI_AMI_CAPSULE" -gt 0 ]]; then
+    #   ami_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
+    # else
+    uefi_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
+    # fi
 
     if [[ "$FILES_UEFI" -gt 0 ]]; then
       MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
