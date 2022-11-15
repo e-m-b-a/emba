@@ -20,7 +20,8 @@ services:
       - /root/.cache/pypoetry/virtualenvs:exec
       - /root
       - /root/.cargo/bin:exec
-      - /run
+      - /run/lock
+      - /var
       - /var/run
       - /var/tmp
       - /external/freetz-ng/.fakeroot-cache

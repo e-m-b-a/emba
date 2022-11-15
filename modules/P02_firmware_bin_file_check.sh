@@ -112,6 +112,7 @@ set_p02_default_exports() {
   #       an indicator if this could be some UEFI firmware for further processing
   export UEFI_AMI_CAPSULE=0
   export ZYXEL_ZIP=0
+  export QCOW_DETECTED=0
 }
 
 fw_bin_detector() {
@@ -157,6 +158,11 @@ fw_bin_detector() {
       export PATOOLS_INIT=1
       write_csv_log "basic compressed (patool)" "yes" "NA"
     fi
+  fi
+  if [[ "$FILE_BIN_OUT" == *"QEMU QCOW2 Image"* ]]; then
+    print_output "[+] Identified Qemu QCOW image - using QCOW extraction module"
+    export QCOW_DETECTED=1
+    write_csv_log "Qemu QCOW firmware detected" "yes" "NA"
   fi
   if [[ "$FILE_BIN_OUT" == *"VMware4 disk image"* ]]; then
     print_output "[+] Identified VMWware VMDK archive file - using VMDK extraction module"

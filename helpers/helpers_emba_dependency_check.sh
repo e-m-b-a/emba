@@ -497,7 +497,7 @@ dependency_check()
     # Full system emulation modules (L*)
     if [[ $FULL_EMULATION -eq 1 ]]; then
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
-      #check_dep_tool "Qemu system emulator ARM64" "qemu-system-aarch64"
+      check_dep_tool "Qemu system emulator ARM64" "qemu-system-aarch64"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
       check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
@@ -589,6 +589,8 @@ architecture_dep_check() {
     ARCH_STR="mips64n32"
   elif [[ "$ARCH" == "ARM" ]] ; then
     ARCH_STR="arm"
+  elif [[ "$ARCH" == "ARM64" ]] ; then
+    ARCH_STR="aarch64"
   elif [[ "$ARCH" == "x86" ]] ; then
     ARCH_STR="i386"
   elif [[ "$ARCH" == "x64" ]] ; then

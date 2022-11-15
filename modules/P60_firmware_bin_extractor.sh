@@ -243,6 +243,13 @@ deeper_extractor_helper() {
         else
           zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted"
         fi
+      elif [[ "$QCOW_DETECTED" -ne 0 ]]; then
+        if [[ "$THREADED" -eq 1 ]]; then
+          qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted" &
+          WAIT_PIDS_P20+=( "$!" )
+        else
+          qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted"
+        fi
 
       else
         # default case to binwalk

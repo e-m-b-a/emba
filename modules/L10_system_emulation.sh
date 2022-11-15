@@ -41,7 +41,7 @@ L10_system_emulation() {
     export MODULE_SUB_PATH="$MOD_DIR"/"${FUNCNAME[0]}"
     S25_LOG="s25_kernel_check.txt"
 
-    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* || "$ARCH" == "NIOS2" ]]; then
+    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "ARM64" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* || "$ARCH" == "NIOS2" ]]; then
 
       # WARNING: false was never tested ;)
       # Could be interesting for future extensions
@@ -68,7 +68,7 @@ L10_system_emulation() {
             ARCH_END="$ARCH_END""hf"
           fi
 
-          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64_3"* ]] || [[ "$ARCH_END" == "mips64n32"* ]]; then
+          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64_3"* ]] || [[ "$ARCH_END" == "mips64n32"* ]] || [[ "$ARCH_END" == "arm64"* ]]; then
             print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
             print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
             UNSUPPORTED_ARCH=1
@@ -890,6 +890,13 @@ identify_networking_emulation() {
     QEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
     #QEMU_NETWORK="-device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4"
     #QEMU_PARAMS="-audiodev driver=none,id=none"
+  elif [[ "$ARCH_END" == "arm64el"* ]]; then
+    KERNEL_="vmlinux"
+    QEMU_BIN="qemu-system-aarch64"
+    MACHINE="virt"
+    QEMU_DISK="-drive if=none,file=$IMAGE,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
+    QEMU_ROOTFS="/dev/vda1"
+    QEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
   elif [[ "$ARCH_END" == "x86el"* ]]; then
     KERNEL_="bzImage"
     QEMU_BIN="qemu-system-x86_64"
@@ -1507,6 +1514,10 @@ run_emulated_system() {
   elif [[ "$ARCH_END" == "armel"* ]]; then
     KERNEL="$BINARY_DIR/zImage.$ARCH_END"
     QEMU_BIN="qemu-system-arm"
+    QEMU_MACHINE="virt"
+  elif [[ "$ARCH_END" == "arm64el"* ]]; then
+    KERNEL="$BINARY_DIR/vmlinux.$ARCH_END"
+    QEMU_BIN="qemu-system-aarch64"
     QEMU_MACHINE="virt"
   elif [[ "$ARCH_END" == "x86el"* ]]; then
     KERNEL="$BINARY_DIR/bzImage.$ARCH_END"

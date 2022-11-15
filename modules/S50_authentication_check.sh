@@ -574,7 +574,7 @@ search_pam_configs() {
           ((AUTH_ISSUES+=1))
           print_output "[+] ""$(print_path "$FILE")"" exist"
           local FIND2
-          FIND2=$(grep "^auth.*ldap" "$FILE")
+          FIND2=$(grep "^auth.*ldap" "$FILE" || true)
           if [[ -n "$FIND2" ]] ; then
             print_output "[+] LDAP module present"
             print_output "$(indent "$(orange "$FIND2")")"

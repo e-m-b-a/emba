@@ -125,9 +125,9 @@ grepit_search() {
   local LINES_OF_OUTPUT=0
   local GREP_COMMAND="grep"
   local LOG_DETAILS=1
-  local COMMENT="$1"
-  local EXAMPLE="$2"
-  local FALSE_POSITIVES_EXAMPLE="$3"
+  local COMMENT="${1:-NA}"
+  local EXAMPLE="${2:-NA}"
+  local FALSE_POSITIVES_EXAMPLE="${3:-NA}"
   local SEARCH_REGEX="$4"
   local OUTFILE="$5"
   if [[ -v 6 ]]; then

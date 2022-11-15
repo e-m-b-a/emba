@@ -120,6 +120,11 @@ IL10_system_emulator() {
 
       mkdir -p external/EMBA_Live_bins
 
+      # to ensure old EMBA versions do not completeley break - remove this at the beginning of 2023
+      mkdir -p external/firmae/
+      ln -s external/EMBA_Live_bins external/firmae/binaries
+      # END - remove this at the beginning of 2023
+
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
       # BusyBox - https://busybox.net/downloads/busybox-1.29.3.tar.bz2
