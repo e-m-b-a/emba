@@ -477,7 +477,20 @@ detect_root_dir_helper() {
       fi
     fi
   done
+
   mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/bash" | sed -E 's/\/.?bin\/bash//')
+  for R_PATH in "${ROOTx_PATH[@]}"; do
+    if [[ -d "$R_PATH" ]]; then
+      ROOT_PATH+=( "$R_PATH" )
+      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "file names"; then
+        MECHANISM="$MECHANISM / file names"
+      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+        MECHANISM="file names"
+      fi
+    fi
+  done
+
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/sh" | sed -E 's/\/.?bin\/sh//')
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
