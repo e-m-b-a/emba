@@ -118,8 +118,8 @@ uefi_extractor(){
   fi
 
   print_ln
-  print_output "[*] Using the following firmware directory ($ORANGE$EXTRACTION_DIR_/firmware.dump$NC) as base directory:"
-  find "$EXTRACTION_DIR_"/firmware.dump -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
+  print_output "[*] Using the following firmware directory ($ORANGE${EXTRACTION_DIR_}firmware.dump$NC) as base directory:"
+  find "$EXTRACTION_DIR_"firmware.dump -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
   print_ln
 
   NVARS=$(grep -c "NVAR entry" "$UEFI_EXTRACT_REPORT_FILE")
