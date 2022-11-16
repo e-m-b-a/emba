@@ -68,7 +68,7 @@ L10_system_emulation() {
             ARCH_END="$ARCH_END""hf"
           fi
 
-          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64_3"* ]] || [[ "$ARCH_END" == "mips64n32"* ]] || [[ "$ARCH_END" == "arm64"* ]]; then
+          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64r2"* ]] || [[ "$ARCH_END" == "mips64_3"* ]] || [[ "$ARCH_END" == "arm64"* ]]; then
             print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
             print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
             UNSUPPORTED_ARCH=1
@@ -460,6 +460,7 @@ main_emulation() {
       F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
     else
       print_output "[-] No Qemu log file generated ... some weird error occured"
+      return
     fi
     # print_output "[*] Found $ORANGE$F_STARTUP$NC EMBA startup entries."
     print_ln
@@ -873,6 +874,22 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
     QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
+  elif [[ "$ARCH_END" == "mips64v1eb" ]]; then
+    KERNEL_="vmlinux"
+    QEMU_BIN="qemu-system-mips64"
+    #CPU="-cpu MIPS64R2-generic"
+    MACHINE="malta"
+    QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
+    QEMU_ROOTFS="/dev/sda1"
+    QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
+  elif [[ "$ARCH_END" == "mips64v1el" ]]; then
+    KERNEL_="vmlinux"
+    QEMU_BIN="qemu-system-mips64el"
+    #CPU="-cpu MIPS64R2-generic"
+    MACHINE="malta"
+    QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
+    QEMU_ROOTFS="/dev/sda1"
+    QEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
   elif [[ "$ARCH_END" == "mips64n32eb" ]]; then
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-mips64"
@@ -988,6 +1005,7 @@ get_networking_details_emulation() {
   IMAGE_NAME="${1:-}"
 
   sub_module_title "Network identification - $IMAGE_NAME"
+  PANICS=()
 
   if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     ETH_INT="NONE"
@@ -1506,6 +1524,16 @@ run_emulated_system() {
     QEMU_BIN="qemu-system-mips64"
     CPU="-cpu MIPS64R2-generic"
     QEMU_MACHINE="malta"
+  elif [[ "$ARCH_END" == "mips64v1eb" ]]; then
+    KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
+    QEMU_BIN="qemu-system-mips64"
+    # CPU="-cpu MIPS64R2-generic"
+    QEMU_MACHINE="malta"
+  elif [[ "$ARCH_END" == "mips64v1el" ]]; then
+    KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
+    QEMU_BIN="qemu-system-mips64el"
+    # CPU="-cpu MIPS64R2-generic"
+    QEMU_MACHINE="malta"
   elif [[ "$ARCH_END" == "mips64n32eb" ]]; then
     KERNEL="$BINARY_DIR/vmlinux.$ARCH_END$KERNEL_V"
     QEMU_BIN="qemu-system-mips64"
@@ -1762,7 +1790,7 @@ check_online_stat() {
 stopping_emulation_process() {
   local IMAGE_NAME_="${1:-}"
   print_output "[*] Stopping emulation process"
-  pkill -9 -f "qemu-system-.*$IMAGE_NAME_.*" || true &>/dev/null
+  pkill -9 -f "qemu-system-.*$IMAGE_NAME_.*" &>/dev/null || true
   sleep 1
 }
 

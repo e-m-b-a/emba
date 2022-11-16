@@ -58,7 +58,7 @@ qcow_extractor() {
   print_output "[*] Trying to mount $ORANGE$QCOW_PATH_$NC to $ORANGE$TMP_QCOW_MOUNT$NC directory"
 
   if lsmod | grep -q nbd; then
-    rmmod nbd
+    rmmod nbd || true
   fi
   if ! [[ -d /var/lock ]]; then
     mkdir /var/lock
@@ -67,14 +67,19 @@ qcow_extractor() {
   modprobe nbd max_part=8
   print_output "[*] Qemu disconnect device ${ORANGE}/dev/nbd$NC."
   qemu-nbd --disconnect /dev/nbd0
-  sleep 5
-  ls -l /dev/nbd0*
   print_output "[*] Qemu connect device ${ORANGE}/dev/nbd$NC."
   qemu-nbd --connect=/dev/nbd0 "$QCOW_PATH_"
 
   print_output "[*] Identification of partitions on ${ORANGE}/dev/nbd$NC."
-  mapfile -t NBD_DEVS < <(fdisk /dev/nbd0 -l | grep "^/dev/" | awk '{print $1}')
+  mapfile -t NBD_DEVS < <(fdisk -l /dev/nbd0 | grep "^/dev/" | awk '{print $1}' || true)
+  if [[ "${#NBD_DEVS[@]}" -eq 0 ]]; then
+    # sometimes we are not able to find the partitions with fdisk -> fallback
+    NBD_DEVS+=( "/dev/nbd0" )
+  fi
+
+  print_ln
   fdisk /dev/nbd0 -l
+  print_ln
 
   for NBD_DEV in "${NBD_DEVS[@]}"; do
     print_output "[*] Extract data from partition $ORANGE$NBD_DEV$NC"
@@ -83,10 +88,10 @@ qcow_extractor() {
     if mount | grep -q "$NBD_DEV"; then
       EXTRACTION_DIR_FINAL="$EXTRACTION_DIR_"/"$(basename "$NBD_DEV")"
       copy_qemu_nbd "$TMP_QCOW_MOUNT" "$EXTRACTION_DIR_FINAL"
-    fi
 
-    FILES_QCOW_MOUNT=$(find "$EXTRACTION_DIR_FINAL" -type f | wc -l)
-    DIRS_QCOW_MOUNT=$(find "$EXTRACTION_DIR_FINAL" -type d | wc -l)
+      FILES_QCOW_MOUNT=$(find "$EXTRACTION_DIR_FINAL" -type f | wc -l)
+      DIRS_QCOW_MOUNT=$(find "$EXTRACTION_DIR_FINAL" -type d | wc -l)
+    fi
     print_output "[*] Extracted $ORANGE$FILES_QCOW_MOUNT$NC files and $ORANGE$DIRS_QCOW_MOUNT$NC directories from the firmware image."
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "Qemu QCOW filesystem extractor" "$QCOW_PATH_" "$EXTRACTION_DIR_FINAL" "$FILES_QCOW_MOUNT" "$DIRS_QCOW_MOUNT" "NA"

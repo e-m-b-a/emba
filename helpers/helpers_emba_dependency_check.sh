@@ -504,6 +504,8 @@ dependency_check()
       check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
       check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
       check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
+      # check_dep_tool "Qemu system emulator RISC-V" "qemu-system-riscv32"
+      # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
 
       # check only some of the needed files
       check_dep_file "console.*" "$EXT_DIR""/EMBA_Live_bins/console.x86el"
@@ -587,6 +589,8 @@ architecture_dep_check() {
     ARCH_STR="mips64_III"
   elif [[ "$ARCH" == "MIPS64N32" ]] ; then
     ARCH_STR="mips64n32"
+  elif [[ "$ARCH" == "MIPS64v1" ]] ; then
+    ARCH_STR="mips64v1"
   elif [[ "$ARCH" == "ARM" ]] ; then
     ARCH_STR="arm"
   elif [[ "$ARCH" == "ARM64" ]] ; then
@@ -599,8 +603,12 @@ architecture_dep_check() {
   elif [[ "$ARCH" == "PPC" ]] ; then
     #ARCH_STR="powerpc:common"
     ARCH_STR="powerpc"
+  elif [[ "$ARCH" == "PPC64" ]] ; then
+    ARCH_STR="powerpc64"
   elif [[ "$ARCH" == "NIOS2" ]] ; then
     ARCH_STR="nios2"
+  elif [[ "$ARCH" == "RISCV" ]] ; then
+    ARCH_STR="riscv"
   else
     ARCH_STR="unknown"
   fi

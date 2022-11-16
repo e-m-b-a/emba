@@ -151,10 +151,10 @@ fw_bin_detector() {
   # if we have a zip, tgz, tar archive we are going to use the patools extractor
   if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || \
     "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* || \
-    "$FILE_BIN_OUT" == *"7-zip archive data"* ]]; then
+    "$FILE_BIN_OUT" == *"7-zip archive data"* || "$FILE_BIN_OUT" == *"XZ compressed data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "$AVM_DETECTED" -ne 1 ]]; then
-      print_output "[+] Identified gzip/zip/tar/iso archive file - using patools extraction module"
+      print_output "[+] Identified gzip/zip/tar/iso/xz archive file - using patools extraction module"
       export PATOOLS_INIT=1
       write_csv_log "basic compressed (patool)" "yes" "NA"
     fi
