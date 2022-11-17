@@ -99,6 +99,11 @@ IL15_emulated_checks_init() {
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
       fi
 
+      # we need to safe /var/lib/nikto now
+      if [[ -d /var/lib/nikto ]]; then
+        cp -pri /var/lib/nikto external/var_lib_nikto
+      fi
+
       cd "$HOME_PATH" || ( echo "Could not install EMBA component routersploit" && exit 1 )
 
       ;;

@@ -181,6 +181,13 @@ check_emulation_port() {
   fi
 }
 
+setup_nikto() {
+  if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$EXT_DIR"/var_lib_nikto ]]; then
+    mkdir -p /var/lib/nikto
+    cp "$EXT_DIR"/var_lib_nikto/* /var/lib/nikto/
+  fi
+}
+
 setup_unblob() {
   TOOL_NAME="${1:-}"
 
@@ -376,6 +383,7 @@ dependency_check()
     export MPLCONFIGDIR="$TMP_DIR"
 
     setup_unblob "unblob"
+    setup_nikto
 
     # jtr
     check_dep_tool "john"
