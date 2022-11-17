@@ -41,7 +41,7 @@ L10_system_emulation() {
     export MODULE_SUB_PATH="$MOD_DIR"/"${FUNCNAME[0]}"
     S25_LOG="s25_kernel_check.txt"
 
-    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "ARM64" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* || "$ARCH" == "NIOS2" ]]; then
+    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM" || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* ]]; then
 
       # WARNING: false was never tested ;)
       # Could be interesting for future extensions
@@ -72,7 +72,7 @@ L10_system_emulation() {
             print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
             print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
             UNSUPPORTED_ARCH=1
-            #return
+            return
           fi
 
           # just in case we remove the return in the unsupported arch checker for testing:
