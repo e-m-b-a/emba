@@ -186,14 +186,16 @@ fi
 
 # quick check if we have enough disk space for the docker image
 
-FREE_SPACE=$(df --output=avail /var/lib/docker/ | awk 'NR==2')
-if [[ "$FREE_SPACE" -lt 13000000 ]]; then
-  echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 13Gig for the docker image""$NC"
-  echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
-  echo ""
-  df -h
-  echo ""
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+if [[ "$IN_DOCKER" -eq 0 ]]; then
+  FREE_SPACE=$(df --output=avail /var/lib/docker/ | awk 'NR==2')
+  if [[ "$FREE_SPACE" -lt 13000000 ]]; then
+    echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 13Gig for the docker image""$NC"
+    echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
+    echo ""
+    df -h
+    echo ""
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
 fi
 
 if [[ $LIST_DEP -eq 0 ]] ; then
@@ -249,6 +251,9 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
   IP12_avm_freetz_ng_extract
 
   IP18_qnap_decryptor
+
+  # temp
+  IP35_uefi_extraction
 
   IP61_unblob
 

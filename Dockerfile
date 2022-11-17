@@ -8,7 +8,7 @@ WORKDIR /
 # updates system
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get -y install wget kmod procps sudo dialog apt-utils curl git
+    apt-get -y install wget kmod procps sudo dialog apt curl git
 
 # install EMBA, disable coredumps and final cleanup
 RUN yes | sudo /installer.sh -D && \

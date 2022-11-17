@@ -47,6 +47,7 @@ IP61_unblob() {
     print_tool_info "zstd" 1
     print_tool_info "python3-magic" 1
     print_tool_info "pkg-config" 1
+    print_tool_info "pkgconf" 1
 
     print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v1.0/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 

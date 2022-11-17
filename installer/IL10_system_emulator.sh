@@ -111,8 +111,8 @@ IL10_system_emulator() {
     print_file_info "zImage.armelhf" "zImage armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/zImage.armelhf" "external/EMBA_Live_bins/zImage.armelhf"print_file_info "vmlinux.mips64n32eb" "vmlinux mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64n32eb.4" "external/EMBA_Live_bins/vmlinux.mips64n32eb.4"
     print_file_info "vmlinux.mips64r2eb" "vmlinux mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2eb.4" "external/EMBA_Live_bins/vmlinux.mips64r2eb.4"
     print_file_info "vmlinux.mips64r2el" "vmlinux mips64r2el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2el.4" "external/EMBA_Live_bins/vmlinux.mips64r2el.4"
-    print_file_info "vmlinux.mips64v1el" "vmlinux mips64v1el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1el.4" "external/EMBA_Live_bins/vmlinux.mips64v1el.4"
-    print_file_info "vmlinux.mips64v1eb" "vmlinux mips64v1eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1eb.4" "external/EMBA_Live_bins/vmlinux.mips64v1eb.4"
+    print_file_info "vmlinux.mips64v1el" "vmlinux mips64v1el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1el" "external/EMBA_Live_bins/vmlinux.mips64v1el.4"
+    print_file_info "vmlinux.mips64v1eb" "vmlinux mips64v1eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1eb" "external/EMBA_Live_bins/vmlinux.mips64v1eb.4"
     print_file_info "vmlinux.mipseb" "vmlinux mipseb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipseb.4" "external/EMBA_Live_bins/vmlinux.mipseb.4"
     print_file_info "vmlinux.mipsel" "vmlinux mipsel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipsel.4" "external/EMBA_Live_bins/vmlinux.mipsel.4"
     print_file_info "vmlinux.x86el" "vmlinux x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.x86el" "external/EMBA_Live_bins/vmlinux.x86el"
@@ -129,15 +129,6 @@ IL10_system_emulator() {
       y|Y )
 
       mkdir -p external/EMBA_Live_bins
-
-      # to ensure old EMBA versions do not completeley break - remove this at the beginning of 2023
-      mkdir -p external/firmae/
-      if [[ "$IN_DOCKER" -eq 1 ]]; then
-        ln -s /external/EMBA_Live_bins /external/firmae/binaries
-      else
-        ln -s external/EMBA_Live_bins external/firmae/binaries
-      fi
-      # END - remove this at the beginning of 2023
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
@@ -210,8 +201,8 @@ IL10_system_emulator() {
       download_file "vmlinux.mips64n32eb" "vmlinux mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64n32eb.4" "external/EMBA_Live_bins/vmlinux.mips64n32eb.4"
       download_file "vmlinux.mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2eb.4" "external/EMBA_Live_bins/vmlinux.mips64r2eb.4"
       download_file "vmlinux.mips64r2el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2el.4" "external/EMBA_Live_bins/vmlinux.mips64r2el.4"
-      download_file "vmlinux.mips64v1eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1eb.4" "external/EMBA_Live_bins/vmlinux.mips64v1eb.4"
-      download_file "vmlinux.mips64v1el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1el.4" "external/EMBA_Live_bins/vmlinux.mips64v1el.4"
+      download_file "vmlinux.mips64v1eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1eb" "external/EMBA_Live_bins/vmlinux.mips64v1eb.4"
+      download_file "vmlinux.mips64v1el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1el" "external/EMBA_Live_bins/vmlinux.mips64v1el.4"
       download_file "vmlinux.mipseb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipseb.4" "external/EMBA_Live_bins/vmlinux.mipseb.4"
       download_file "vmlinux.mipsel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mipsel.4" "external/EMBA_Live_bins/vmlinux.mipsel.4"
       download_file "vmlinux.x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.x86el" "external/EMBA_Live_bins/vmlinux.x86el"

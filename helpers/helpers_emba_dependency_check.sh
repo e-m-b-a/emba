@@ -511,7 +511,7 @@ dependency_check()
       check_dep_file "console.*" "$EXT_DIR""/EMBA_Live_bins/console.x86el"
       check_dep_file "busybox.*" "$EXT_DIR""/EMBA_Live_bins/busybox.mipsel"
       check_dep_file "libnvram.*" "$EXT_DIR""/EMBA_Live_bins/libnvram.so.armel"
-      check_dep_file "libnvram_ioctl.*" "$EXT_DIR""/EMBA_Live_bins/libnvram_ioctl.so.mipsel"
+      check_dep_file "libnvram_ioctl.*" "$EXT_DIR""/EMBA_Live_bins/libnvram_ioctl.so.mips64v1el"
       check_dep_file "vmlinux.mips*" "$EXT_DIR""/EMBA_Live_bins/vmlinux.mips64r2el.4"
       check_dep_file "zImage.armel" "$EXT_DIR""/EMBA_Live_bins/zImage.armel"
 
