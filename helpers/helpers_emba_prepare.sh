@@ -435,15 +435,16 @@ detect_root_dir_helper() {
       done
     done
   fi
+
   # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
   mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
-        MECHANISM="$MECHANISM / dir names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+       if [[ -z "$MECHANISM" ]]; then
         MECHANISM="dir names"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
+        MECHANISM="$MECHANISM / dir names"
       fi
     fi
   done
@@ -458,10 +459,10 @@ detect_root_dir_helper() {
     R_PATH=$(echo "$R_PATH" | awk '{print $2}')
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
-        MECHANISM="$MECHANISM / dir names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+       if [[ -z "$MECHANISM" ]]; then
         MECHANISM="dir names"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
+        MECHANISM="$MECHANISM / dir names"
       fi
     fi
   done
@@ -470,34 +471,35 @@ detect_root_dir_helper() {
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "file names"; then
-        MECHANISM="$MECHANISM / file names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
-        MECHANISM="file names"
+       if [[ -z "$MECHANISM" ]]; then
+        MECHANISM="busybox"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "busybox"; then
+        MECHANISM="$MECHANISM / busybox"
+      fi
       fi
     fi
   done
 
-  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/bash" | sed -E 's/\/.?bin\/bash//')
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//')
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "file names"; then
-        MECHANISM="$MECHANISM / file names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
-        MECHANISM="file names"
+      if [[ -z "$MECHANISM" ]]; then
+        MECHANISM="shell"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "shell"; then
+        MECHANISM="$MECHANISM / shell"
       fi
     fi
   done
 
-  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/sh" | sed -E 's/\/.?bin\/sh//')
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//')
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "file names"; then
-        MECHANISM="$MECHANISM / file names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
-        MECHANISM="file names"
+      if [[ -z "$MECHANISM" ]]; then
+        MECHANISM="shell"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "shell"; then
+        MECHANISM="$MECHANISM / shell"
       fi
     fi
   done
