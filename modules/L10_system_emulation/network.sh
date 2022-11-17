@@ -10,7 +10,7 @@ ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
 "${BUSYBOX}" echo "[*] Network configuration - ACTION: $ACTION" 
 
 if ("${FIRMAE_NET}"); then
-  "${BUSYBOX}" echo "[*] starting network configuration"
+  "${BUSYBOX}" echo "[*] Starting network configuration"
   "${BUSYBOX}" sleep 10
 
   if [ "${ACTION}" = "default" ]; then
@@ -36,8 +36,15 @@ if ("${FIRMAE_NET}"); then
     "${BUSYBOX}" sleep 5
 
     if [ "${ACTION}" = "normal" ]; then
+
       # shellcheck disable=SC2016
-      IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+      if ("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1); then
+        IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+        "${BUSYBOX}" echo "[*] Identified IP address: $IP"
+      else
+        IP=$("${BUSYBOX}" cat /firmadyne/ip_default)
+        "${BUSYBOX}" echo "[*] Setting default IP address: $IP"
+      fi
       # tplink TL-WA860RE_EU_UK_US__V5_171116
       "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
@@ -54,8 +61,16 @@ if ("${FIRMAE_NET}"); then
         WAN_BRIDGE=$("${BUSYBOX}" brctl show | "${BUSYBOX}" grep "eth0" | "${BUSYBOX}" awk '{print $1}')
         "${BUSYBOX}" brctl delif "${WAN_BRIDGE}" eth0
       fi
+
       # shellcheck disable=SC2016
-      IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+      if ("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1); then
+        IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
+        "${BUSYBOX}" echo "[*] Identified IP address: $IP"
+      else
+        IP=$("${BUSYBOX}" cat /firmadyne/ip_default)
+        "${BUSYBOX}" echo "[*] Setting default IP address: $IP"
+      fi
+
       "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
       "${BUSYBOX}" brctl addif "${NET_BRIDGE}" eth0
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up

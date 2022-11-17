@@ -316,8 +316,8 @@ main()
 
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
-  export EMBA_VERSION="1.1.3"
+  export RELEASE=0
+  export EMBA_VERSION="1.2.0"
   export STRICT_MODE=0
   export UPDATE=0
   export ARCH_CHECK=1
@@ -893,7 +893,7 @@ main()
         fi
         exit 0
       else
-        print_output "[-] EMBA failed in docker mode!" "main"
+        print_output "[-] EMBA failed in docker mode!" "no_log"
         cleaner 0
         write_notification "EMBA failed analysis in default mode"
         exit 1

@@ -265,7 +265,7 @@ restore_permissions() {
     print_output "[*] Restoring directory permissions for user: $ORANGE$ORIG_USER$NC" "no_log"
     ORIG_UID="$(grep "UID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
     ORIG_GID="$(grep "GID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
-    chown "$ORIG_UID":"$ORIG_GID" "$LOG_DIR" -R
+    chown "$ORIG_UID":"$ORIG_GID" "$LOG_DIR" -R || true
     rm "$LOG_DIR"/orig_user.log || true
   fi
 }

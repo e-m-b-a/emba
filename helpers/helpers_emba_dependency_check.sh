@@ -181,6 +181,31 @@ check_emulation_port() {
   fi
 }
 
+setup_unblob() {
+  TOOL_NAME="${1:-}"
+
+  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
+
+  if command -v unblob; then
+    echo -e "$GREEN""ok""$NC"
+  elif ! command -v unblob && [[ -f "$EXT_DIR"/unblob/unblob_path.cfg ]]; then
+    # recover unblob installation - usually we are in the docker container
+    if ! [[ -d "$HOME"/.cache ]]; then
+      mkdir "$HOME"/.cache
+    fi
+    cp -pr "$EXT_DIR"/unblob/root_cache/* "$HOME"/.cache/
+    if [[ -e $(cat "$EXT_DIR"/unblob/unblob_path.cfg)/bin/"$UNBLOB_BIN" ]]; then
+      UNBLOB_PATH="$(cat "$EXT_DIR"/unblob/unblob_path.cfg)""/bin/"
+      export PATH=$PATH:"$UNBLOB_PATH"
+      echo -e "$GREEN""ok""$NC"
+    else
+      echo -e "$RED""not ok""$NC"
+    fi
+  else
+    echo -e "$RED""not ok""$NC"
+  fi
+}
+
 dependency_check() 
 {
   module_title "Dependency check" "no_log"
@@ -350,6 +375,8 @@ dependency_check()
     fi
     export MPLCONFIGDIR="$TMP_DIR"
 
+    setup_unblob "unblob"
+
     # jtr
     check_dep_tool "john"
 
@@ -470,15 +497,23 @@ dependency_check()
     # Full system emulation modules (L*)
     if [[ $FULL_EMULATION -eq 1 ]]; then
       check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
+      check_dep_tool "Qemu system emulator ARM64" "qemu-system-aarch64"
       check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
       check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
+      check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
+      check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
+      check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
+      check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
+      # check_dep_tool "Qemu system emulator RISC-V" "qemu-system-riscv32"
+      # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
 
       # check only some of the needed files
-      check_dep_file "console.*" "$EXT_DIR""/firmae/binaries/console.mipsel"
-      check_dep_file "busybox.*" "$EXT_DIR""/firmae/binaries/busybox.mipsel"
-      check_dep_file "libnvram.*" "$EXT_DIR""/firmae/binaries/libnvram.so.armel"
-      check_dep_file "vmlinux.mips*" "$EXT_DIR""/firmae/binaries/vmlinux.mipseb.4"
-      check_dep_file "zImage.armel" "$EXT_DIR""/firmae/binaries/zImage.armel"
+      check_dep_file "console.*" "$EXT_DIR""/EMBA_Live_bins/console.x86el"
+      check_dep_file "busybox.*" "$EXT_DIR""/EMBA_Live_bins/busybox.mipsel"
+      check_dep_file "libnvram.*" "$EXT_DIR""/EMBA_Live_bins/libnvram.so.armel"
+      check_dep_file "libnvram_ioctl.*" "$EXT_DIR""/EMBA_Live_bins/libnvram_ioctl.so.mips64v1el"
+      check_dep_file "vmlinux.mips*" "$EXT_DIR""/EMBA_Live_bins/vmlinux.mips64r2el.4"
+      check_dep_file "zImage.armel" "$EXT_DIR""/EMBA_Live_bins/zImage.armel"
 
       check_dep_file "fixImage.sh" "$MOD_DIR""/L10_system_emulation/fixImage.sh"
       check_dep_file "preInit.sh" "$MOD_DIR""/L10_system_emulation/preInit.sh"
@@ -499,7 +534,9 @@ dependency_check()
       check_dep_tool "Metasploit framework" "msfconsole"
       # This port is used by our Qemu installation and should not be used by another process.
       # This check is not a blocker for the test. It is checked again by the emulation module:
-      check_emulation_port "Running Qemu service" "2001"
+      check_emulation_port "Running Qemu network service" "2001"
+      # Port 4321 is used for Qemu telnet access and should be available
+      check_emulation_port "Running Qemu telnet service" "4321"
     fi
 
     if [[ "$CWE_CHECKER" -eq 1 ]]; then
@@ -518,8 +555,12 @@ dependency_check()
 
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
     print_output "\\n""$ORANGE""Some dependencies are missing - please check your installation\\n" "no_log"
-    print_output "$ORANGE""To install all needed dependencies, run '""$NC""sudo ./installer.sh""$ORANGE""'." "no_log"
-    print_output "$ORANGE""Learn more about the installation on the EMBA wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
+      print_output "$ORANGE""Looks like your docker container is outdated - please update your base image: ""$NC""sudo docker pull embeddedanalyzer/emba""$ORANGE""'." "no_log"
+    else
+      print_output "$ORANGE""To install all needed dependencies, run '""$NC""sudo ./installer.sh""$ORANGE""'." "no_log"
+      print_output "$ORANGE""Learn more about the installation on the EMBA wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
+    fi
 
     if [[ $ONLY_DEP -eq 1 ]] || [[ $FORCE -eq 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
       exit 1
@@ -548,8 +589,12 @@ architecture_dep_check() {
     ARCH_STR="mips64_III"
   elif [[ "$ARCH" == "MIPS64N32" ]] ; then
     ARCH_STR="mips64n32"
+  elif [[ "$ARCH" == "MIPS64v1" ]] ; then
+    ARCH_STR="mips64v1"
   elif [[ "$ARCH" == "ARM" ]] ; then
     ARCH_STR="arm"
+  elif [[ "$ARCH" == "ARM64" ]] ; then
+    ARCH_STR="aarch64"
   elif [[ "$ARCH" == "x86" ]] ; then
     ARCH_STR="i386"
   elif [[ "$ARCH" == "x64" ]] ; then
@@ -558,8 +603,12 @@ architecture_dep_check() {
   elif [[ "$ARCH" == "PPC" ]] ; then
     #ARCH_STR="powerpc:common"
     ARCH_STR="powerpc"
+  elif [[ "$ARCH" == "PPC64" ]] ; then
+    ARCH_STR="powerpc64"
   elif [[ "$ARCH" == "NIOS2" ]] ; then
     ARCH_STR="nios2"
+  elif [[ "$ARCH" == "RISCV" ]] ; then
+    ARCH_STR="riscv"
   else
     ARCH_STR="unknown"
   fi

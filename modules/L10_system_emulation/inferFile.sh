@@ -25,7 +25,7 @@ if ("${FIRMAE_BOOT}"); then
       arr+=(/init)
     fi
   fi
-  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local")
+  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc")
   do
     "${BUSYBOX}" echo "[*] Found boot file $FILE"
     arr+=("${FILE}")
@@ -35,22 +35,24 @@ if ("${FIRMAE_BOOT}"); then
   for FILE in $("${BUSYBOX}" find / -name "inittab" -type f)
   do
     "${BUSYBOX}" echo "[*] Found boot file $FILE"
-    # sysinit entry is the one to look for - we do not handle multiple entries!
+    # sysinit entry is the one to look for
     # shellcheck disable=SC2016
-    STARTUP_FILE=$("${BUSYBOX}" grep ":.*sysinit:" "$FILE" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}')
-    "${BUSYBOX}" echo "[*] Found possible startup file $STARTUP_FILE"
-    if [ -e "${STARTUP_FILE}" ]; then
+    for STARTUP_FILE in $("${BUSYBOX}" grep ":.*sysinit:" "$FILE" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u)
+    do
+      "${BUSYBOX}" echo "[*] Found possible startup file $STARTUP_FILE"
       arr+=("${STARTUP_FILE}")
-    else
-      "${BUSYBOX}" echo "[-] Something went wrong with startup file $STARTUP_FILE"
-    fi
+      #if [ -e "${STARTUP_FILE}" ]; then
+      #  arr+=("${STARTUP_FILE}")
+      #else
+      #  "${BUSYBOX}" echo "[-] Something went wrong with startup file $STARTUP_FILE"
+      #fi
+    done
   done
 
   if (( ${#arr[@]} )); then
     # convert to the unique array following the original order
     # shellcheck disable=SC2207,SC2016
-    #uniq_arr=($("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' '))
-    mapfile -t uniq_arr < <("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' ')
+    uniq_arr=($("${BUSYBOX}" tr ' ' '\n' <<< "${arr[@]}" | "${BUSYBOX}" awk '!u[$0]++' | "${BUSYBOX}" tr '\n' ' '))
     for FILE in "${uniq_arr[@]}"
     do
       if [ -d "${FILE}" ]; then
@@ -61,7 +63,7 @@ if ("${FIRMAE_BOOT}"); then
           "${BUSYBOX}" rm "${FILE}"
         fi
         # find original program from binary directories
-        "${BUSYBOX}" echo "${FILE}"
+        "${BUSYBOX}" echo "[*] Analysing ${FILE}"
         FILE_NAME=$("${BUSYBOX}" basename "${FILE}")
         if ("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" grep -qr "${FILE_NAME}" {} \;); then
           TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)

@@ -21,11 +21,13 @@ I02_UEFI_fwhunt() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
 
+    print_tool_info "meson" 1
+    print_tool_info "python3-pip" 1
+    print_tool_info "gcc" 1
     print_pip_info "rzpipe"
     print_pip_info "uefi_firmware"
     print_pip_info "pyyaml"
     print_pip_info "click"
-    print_tool_info "meson" 1
     print_git_info "rizin" "rizinorg/rizin" ""
     print_git_info "fwhunt-scan" "EMBA-support-repos/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
     print_git_info "fwhunt-rules" "EMBA-support-repos/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
@@ -74,8 +76,10 @@ I02_UEFI_fwhunt() {
         cd external/fwhunt-scan || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
         git clone https://github.com/EMBA-support-repos/FwHunt.git rules
         echo "Installed $(find rules/ -iname "BRLY-*" | wc -l) fwhunt rules"
-        ldconfig
-        python3 setup.py install
+        #ldconfig
+        #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
+        #python3 setup.py install
+        pip3 install fwhunt-scan
         cd "$HOME_PATH" || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
       ;;
     esac

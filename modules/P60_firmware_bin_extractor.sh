@@ -243,6 +243,13 @@ deeper_extractor_helper() {
         else
           zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted"
         fi
+      elif [[ "$QCOW_DETECTED" -ne 0 ]]; then
+        if [[ "$THREADED" -eq 1 ]]; then
+          qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted" &
+          WAIT_PIDS_P20+=( "$!" )
+        else
+          qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted"
+        fi
 
       else
         # default case to binwalk
@@ -277,7 +284,7 @@ binwalk_deep_extract_helper() {
   # Matryoshka mode is first parameter: 1 - enable, 0 - disable
   local MATRYOSHKA_="${1:-0}"
   local FILE_TO_EXTRACT_="${2:-}"
-  local DEST_FILE_="${3:-$FIRMWARE_PATH_CP}"
+  local DEST_FILE_="${3:-}"
 
   if ! [[ -f "$FILE_TO_EXTRACT_" ]]; then
     print_output "[-] No file for extraction provided"
