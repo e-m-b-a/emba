@@ -609,6 +609,8 @@ architecture_dep_check() {
     ARCH_STR="nios2"
   elif [[ "$ARCH" == "RISCV" ]] ; then
     ARCH_STR="riscv"
+  elif [[ "$ARCH" == "QCOM_DSP6" ]] ; then
+    ARCH_STR="qcom_dsp6"
   else
     ARCH_STR="unknown"
   fi
