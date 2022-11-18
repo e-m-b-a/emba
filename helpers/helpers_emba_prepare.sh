@@ -441,7 +441,7 @@ detect_root_dir_helper() {
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-       if [[ -z "$MECHANISM" ]]; then
+      if [[ -z "$MECHANISM" ]]; then
         MECHANISM="dir names"
       elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
         MECHANISM="$MECHANISM / dir names"
@@ -459,7 +459,7 @@ detect_root_dir_helper() {
     R_PATH=$(echo "$R_PATH" | awk '{print $2}')
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-       if [[ -z "$MECHANISM" ]]; then
+      if [[ -z "$MECHANISM" ]]; then
         MECHANISM="dir names"
       elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
         MECHANISM="$MECHANISM / dir names"
@@ -471,11 +471,10 @@ detect_root_dir_helper() {
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-       if [[ -z "$MECHANISM" ]]; then
+      if [[ -z "$MECHANISM" ]]; then
         MECHANISM="busybox"
       elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "busybox"; then
         MECHANISM="$MECHANISM / busybox"
-      fi
       fi
     fi
   done
