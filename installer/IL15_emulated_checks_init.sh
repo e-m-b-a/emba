@@ -101,6 +101,13 @@ IL15_emulated_checks_init() {
 
       cd "$HOME_PATH" || ( echo "Could not install EMBA component routersploit" && exit 1 )
 
+      # we need to safe /var/lib/nikto now
+      if [[ -d /var/lib/nikto ]]; then
+        echo "[*] Backup nikto directory to /external"
+        mkdir external/var_lib_nikto
+        cp -pr /var/lib/nikto external/var_lib_nikto
+      fi
+
       ;;
     esac
   fi

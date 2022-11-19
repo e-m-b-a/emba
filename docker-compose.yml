@@ -24,6 +24,7 @@ services:
       - /var
       - /var/run
       - /var/tmp
+      - /var/lock
       - /external/freetz-ng/.fakeroot-cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
@@ -43,7 +44,7 @@ services:
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
-          # - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/EMBA_Live_bins/:ro
+        - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/EMBA_Live_bins/:ro
     environment:
         - USER
     devices:

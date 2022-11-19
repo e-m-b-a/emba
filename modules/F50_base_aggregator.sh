@@ -833,7 +833,7 @@ get_data() {
     TCP=$(grep -c "TCP ok;" "$SYS_EMU_RESULTS" || true)
     IP_ADDR=$(grep -E -c "IP\ address:\ [0-9]+" "$SYS_EMU_RESULTS" || true)
     # we make something like this: "bridge-default-normal"
-    MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "$SYS_EMU_RESULTS" | cut -d\; -f8 | sort -u | sed 's/Network mode: //g' | tr -d '[:blank:]' | tr '\n' '-' | sed 's/-$//g' || true)
+    MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "$SYS_EMU_RESULTS" | cut -d\; -f8 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
   if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
     #NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2 || true)

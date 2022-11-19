@@ -12,22 +12,36 @@
 #
 # Author(s): Michael Messner
 
-# Description: Mounts and extracts Qemu QCOS images
+# Description: Mounts and extracts Qemu QCOW2 images
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=0
 
 P23_qemu_qcow_mounter() {
   local NEG_LOG=0
-  if [[ "$BSD_UFS" -eq 1 ]]; then
+  if [[ "$QCOW_DETECTED" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Qemu QCOW filesystem extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
-    print_output "[*] Connect to device $ORANGE$FIRMWARE_PATH$NC"
 
     EXTRACTION_DIR="$LOG_DIR"/firmware/qemu_qcow_mount_filesystem/
+    local FIRMWARE_PATHx=""
 
-    qcow_extractor "$FIRMWARE_PATH" "$EXTRACTION_DIR"
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
+      # we need rw access to firmware -> in docker container we need to copy
+      # the firmware to TMP_DIR and use this for extraction
+      # afterwards we are going to remove this path
+      cp /firmware "$TMP_DIR"
+      FIRMWARE_PATHx="$TMP_DIR"/firmware
+    else
+      FIRMWARE_PATHx="$FIRMWARE_PATH"
+    fi
+
+    qcow_extractor "$FIRMWARE_PATHx" "$EXTRACTION_DIR"
+
+    if [[ -f "$TMP_DIR"/firmware ]]; then
+      rm "$TMP_DIR"/firmware
+    fi
 
     if [[ "$FILES_QCOW_MOUNT" -gt 0 ]]; then
       MD5_DONE_DEEP+=( "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" )
@@ -36,7 +50,6 @@ P23_qemu_qcow_mounter() {
     fi
     NEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
-    exit 1
   fi
 }
 
@@ -61,7 +74,7 @@ qcow_extractor() {
     rmmod nbd || true
   fi
   if ! [[ -d /var/lock ]]; then
-    mkdir /var/lock
+    mkdir /var/lock || true
   fi
   print_output "[*] Load kernel module ${ORANGE}nbd$NC."
   modprobe nbd max_part=8
