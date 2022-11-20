@@ -31,10 +31,10 @@ if [[ "$STRICT_MODE" -eq 1 ]]; then
   if [[ -f "./helpers/helpers_emba_load_strict_settings.sh" ]]; then
     # shellcheck source=/dev/null
     source ./helpers/helpers_emba_load_strict_settings.sh
-  elif [[ -f "/emba/helpers/helpers_emba_load_strict_settings.sh" ]]; then
+  elif [[ -f "/installer/helpers_emba_load_strict_settings.sh" ]]; then
     # in docker this is in /emba/...
     # shellcheck source=/dev/null
-    source /emba/helpers/helpers_emba_load_strict_settings.sh
+    source /installer/helpers_emba_load_strict_settings.sh
   else
     echo "Warning - strict mode module not found"
   fi
@@ -187,7 +187,15 @@ fi
 # quick check if we have enough disk space for the docker image
 
 if [[ "$IN_DOCKER" -eq 0 ]]; then
-  FREE_SPACE=$(df --output=avail /var/lib/docker/ | awk 'NR==2')
+  if [[ -d "/var/lib/docker/" ]]; then
+    # docker is already installed
+    DDISK="/var/lib/docker"
+  else
+    # default
+    DDISK="/var/lib/"
+  fi
+
+  FREE_SPACE=$(df --output=avail "$DDISK" | awk 'NR==2')
   if [[ "$FREE_SPACE" -lt 13000000 ]]; then
     echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 13Gig for the docker image""$NC"
     echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
@@ -251,6 +259,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
   IP12_avm_freetz_ng_extract
 
   IP18_qnap_decryptor
+
+  # IP35_uefi_extraction
 
   IP61_unblob
 
