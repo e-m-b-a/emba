@@ -30,7 +30,7 @@ I120_cwe_checker() {
     print_tool_info "rust-all" 1
     print_tool_info "cargo" 1
 
-    print_git_info "cwe-checker" "fkie-cad/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
+    print_git_info "cwe-checker" "EMBA-support-repos/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
     echo -e "$ORANGE""cwe-checker will be downloaded.""$NC"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
     print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.1.2_build/ghidra_10.1.2_PUBLIC_20220125.zip" "external/ghidra.zip"
@@ -75,7 +75,7 @@ I120_cwe_checker() {
 
           if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
           mkdir ./external/cwe_checker 2>/dev/null
-          git clone https://github.com/fkie-cad/cwe_checker.git external/cwe_checker
+          git clone https://github.com/EMBA-support-repos/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
           # currently we stick on PR353 - Kali does not resolve the new dependencies
           git checkout 00f223dfc19bd5b4fb093ffb61b6b88d269bc862

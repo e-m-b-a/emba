@@ -1,9 +1,11 @@
 version: "3"
 services:
+  # nosemgrep
   emba:
     image: embeddedanalyzer/emba:latest
     read_only: true
     # all pre-checker mount modules need privileged mode
+    # nosemgrep
     privileged: true
     # /root/.config is needed for binwalk - further recovery for other tools needed
     # /root/.cache is needed for unblob -> further recovery of this directory needed
@@ -18,7 +20,8 @@ services:
       - /root/.cache/pypoetry/virtualenvs:exec
       - /root
       - /root/.cargo/bin:exec
-      - /run
+      - /run/lock
+      - /var
       - /var/run
       - /var/tmp
       - /external/freetz-ng/.fakeroot-cache
@@ -40,6 +43,7 @@ services:
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
+          # - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/EMBA_Live_bins/:ro
     environment:
         - USER
     devices:
@@ -52,15 +56,6 @@ services:
       core:
         hard: 0
         soft: 0
-    # adjust the following limits to protect your host
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 12G
-    #      cpus: 7
-    #    reservations:
-    #      cpus: 2
-    #      memory: 4G
 
 networks:
   emba_runs:

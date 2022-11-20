@@ -155,12 +155,17 @@ architecture_check()
 {
   if [[ $ARCH_CHECK -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n"
-    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0
+    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_ARM64=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0 ARCH_MIPS64R2=0 ARCH_MIPS64_III=0
+    local ARCH_MIPS64v1=0 ARCH_MIPS64_N32=0 ARCH_RISCV=0 ARCH_PPC64=0 ARCH_QCOM_DSP6=0
     local D_END_LE=0 D_END_BE=0
+    local D_FLAGS=""
+    export ARM_HF=0
+    export ARM_SF=0
     D_END="NA"
 
     # we use the binaries array which is already unique
     for D_ARCH in "${BINARIES[@]}" ; do
+      D_FLAGS=$(readelf -h "$D_ARCH" | grep "Flags:" 2>/dev/null || true)
       D_ARCH=$(file "$D_ARCH")
 
       if [[ "$D_ARCH" == *"MSB"* ]] ; then
@@ -169,11 +174,34 @@ architecture_check()
         D_END_LE=$((D_END_LE+1))
       fi
 
-      if [[ "$D_ARCH" == *"MIPS"* ]] ; then
+      if [[ "$D_ARCH" == *"N32 MIPS64 rel2"* ]] ; then
+        # ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1
+        ARCH_MIPS64_N32=$((ARCH_MIPS64_N32+1))
+        continue
+      elif [[ "$D_ARCH" == *"MIPS64 rel2"* ]] ; then
+        ARCH_MIPS64R2=$((ARCH_MIPS64R2+1))
+        continue
+      elif [[ "$D_ARCH" == *"64-bit"*"MIPS-III"* ]] ; then
+        ARCH_MIPS64_III=$((ARCH_MIPS64_III+1))
+        continue
+      elif [[ "$D_ARCH" == *"64-bit"*"MIPS64 version 1"* ]] ; then
+        ARCH_MIPS64v1=$((ARCH_MIPS64v1+1))
+        continue
+      elif [[ "$D_ARCH" == *"MIPS"* ]] ; then
         ARCH_MIPS=$((ARCH_MIPS+1))
         continue
       elif [[ "$D_ARCH" == *"ARM"* ]] ; then
-        ARCH_ARM=$((ARCH_ARM+1))
+        if [[ "$D_ARCH" == *"ARM aarch64"* ]] ; then
+          ARCH_ARM64=$((ARCH_ARM64+1))
+        else
+          ARCH_ARM=$((ARCH_ARM+1))
+        fi
+        if [[ "$D_FLAGS" == *"hard-float"* ]]; then
+          ARM_HF=$((ARM_HF+1))
+        fi
+        if [[ "$D_FLAGS" == *"soft-float"* ]]; then
+          ARM_SF=$((ARM_SF+1))
+        fi
         continue
       elif [[ "$D_ARCH" == *"x86-64"* ]] ; then
         ARCH_X64=$((ARCH_X64+1))
@@ -181,35 +209,97 @@ architecture_check()
       elif [[ "$D_ARCH" == *"80386"* ]] ; then
         ARCH_X86=$((ARCH_X86+1))
         continue
+      elif [[ "$D_ARCH" == *"64-bit PowerPC"* ]] ; then
+        ARCH_PPC64=$((ARCH_PPC64+1))
+        continue
       elif [[ "$D_ARCH" == *"PowerPC"* ]] ; then
         ARCH_PPC=$((ARCH_PPC+1))
         continue
       elif [[ "$D_ARCH" == *"Altera Nios II"* ]] ; then
         ARCH_NIOS2=$((ARCH_NIOS2+1))
         continue
+      elif [[ "$D_ARCH" == *"UCB RISC-V"* ]] ; then
+        ARCH_RISCV=$((ARCH_RISCV+1))
+        continue
+      elif [[ "$D_ARCH" == *"QUALCOMM DSP6"* ]] ; then
+        ARCH_QCOM_DSP6=$((ARCH_QCOM_DSP6+1))
+        continue
       fi
     done
 
-    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC+ARCH_NIOS2)) -gt 0 ]] ; then
+    if [[ $((ARCH_MIPS+ARCH_ARM+ARCH_X64+ARCH_X86+ARCH_PPC+ARCH_NIOS2+ARCH_MIPS64R2+ARCH_MIPS64_III+ARCH_MIPS64_N32+ARCH_ARM64+ARCH_MIPS64v1+ARCH_RISCV+ARCH_PPC64+ARCH_QCOM_DSP6)) -gt 0 ]] ; then
       print_output "$(indent "$(orange "Architecture  Count")")"
       if [[ $ARCH_MIPS -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS          ""$ARCH_MIPS")")" ; fi
+      if [[ $ARCH_MIPS64R2 -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64r2     ""$ARCH_MIPS64R2")")" ; fi
+      if [[ $ARCH_MIPS64_III -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 III     ""$ARCH_MIPS64_III")")" ; fi
+      if [[ $ARCH_MIPS64_N32 -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64 N32     ""$ARCH_MIPS64_N32")")" ; fi
+      if [[ $ARCH_MIPS64v1 -gt 0 ]] ; then print_output "$(indent "$(orange "MIPS64v1      ""$ARCH_MIPS64v1")")" ; fi
       if [[ $ARCH_ARM -gt 0 ]] ; then print_output "$(indent "$(orange "ARM           ""$ARCH_ARM")")" ; fi
+      if [[ $ARCH_ARM64 -gt 0 ]] ; then print_output "$(indent "$(orange "ARM64         ""$ARCH_ARM64")")" ; fi
       if [[ $ARCH_X64 -gt 0 ]] ; then print_output "$(indent "$(orange "x64           ""$ARCH_X64")")" ; fi
       if [[ $ARCH_X86 -gt 0 ]] ; then print_output "$(indent "$(orange "x86           ""$ARCH_X86")")" ; fi
       if [[ $ARCH_PPC -gt 0 ]] ; then print_output "$(indent "$(orange "PPC           ""$ARCH_PPC")")" ; fi
+      if [[ $ARCH_PPC -gt 0 ]] ; then print_output "$(indent "$(orange "PPC64         ""$ARCH_PPC64")")" ; fi
       if [[ $ARCH_NIOS2 -gt 0 ]] ; then print_output "$(indent "$(orange "NIOS II       ""$ARCH_NIOS2")")" ; fi
-      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] && [[ $ARCH_MIPS -gt $ARCH_NIOS2 ]]; then
+      if [[ $ARCH_RISCV -gt 0 ]] ; then print_output "$(indent "$(orange "RISC-V        ""$ARCH_RISCV")")" ; fi
+      if [[ $ARCH_QCOM_DSP6 -gt 0 ]] ; then print_output "$(indent "$(orange "Qualcom DSP6  ""$ARCH_QCOM_DSP6")")" ; fi
+
+      if [[ $ARCH_MIPS -gt $ARCH_ARM ]] && [[ $ARCH_MIPS -gt $ARCH_X64 ]] && [[ $ARCH_MIPS -gt $ARCH_X86 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC ]] && [[ $ARCH_MIPS -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_MIPS -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64_III ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_MIPS -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_MIPS -gt $ARCH_RISCV ]] && [[ $ARCH_MIPS -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_MIPS -gt $ARCH_PPC64 ]] && [[ $ARCH_MIPS -gt $ARCH_QCOM_DSP6 ]]; then
         D_ARCH="MIPS"
-      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] && [[ $ARCH_ARM -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_ARM -gt $ARCH_MIPS ]] && [[ $ARCH_ARM -gt $ARCH_X64 ]] && [[ $ARCH_ARM -gt $ARCH_X86 ]] && [[ $ARCH_ARM -gt $ARCH_PPC ]] && [[ $ARCH_ARM -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_ARM -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64_III ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_ARM -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_ARM -gt $ARCH_RISCV ]] && [[ $ARCH_ARM -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_ARM -gt $ARCH_PPC64 ]] && [[ $ARCH_ARM -gt $ARCH_QCOM_DSP6 ]]; then
         D_ARCH="ARM"
-      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] && [[ $ARCH_X64 -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_ARM64 -gt $ARCH_MIPS ]] && [[ $ARCH_ARM64 -gt $ARCH_X64 ]] && [[ $ARCH_ARM64 -gt $ARCH_X86 ]] && [[ $ARCH_ARM64 -gt $ARCH_PPC ]] && [[ $ARCH_ARM64 -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_ARM64 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_ARM64 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_ARM64 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_ARM64 -gt $ARCH_ARM ]] && \
+        [[ $ARCH_ARM64 -gt $ARCH_RISCV ]] && [[ $ARCH_ARM64 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_ARM64 -gt $ARCH_PPC64 ]] && [[ $ARCH_ARM64 -gt $ARCH_QCOM_DSP6 ]]; then
+        D_ARCH="ARM64"
+      elif [[ $ARCH_X64 -gt $ARCH_MIPS ]] && [[ $ARCH_X64 -gt $ARCH_ARM ]] && [[ $ARCH_X64 -gt $ARCH_X86 ]] && [[ $ARCH_X64 -gt $ARCH_PPC ]] && [[ $ARCH_X64 -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_X64 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_X64 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_X64 -gt $ARCH_RISCV ]] && [[ $ARCH_X64 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_X64 -gt $ARCH_PPC64 ]] && [[ $ARCH_X64 -gt $ARCH_QCOM_DSP6 ]]; then
         D_ARCH="x64"
-      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] && [[ $ARCH_X86 -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_X86 -gt $ARCH_MIPS ]] && [[ $ARCH_X86 -gt $ARCH_X64 ]] && [[ $ARCH_X86 -gt $ARCH_ARM ]] && [[ $ARCH_X86 -gt $ARCH_PPC ]] && [[ $ARCH_X86 -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_X86 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_X86 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_X86 -gt $ARCH_RISCV ]] && [[ $ARCH_X86 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_X86 -gt $ARCH_PPC64 ]] && [[ $ARCH_X86 -gt $ARCH_QCOM_DSP6 ]]; then
         D_ARCH="x86"
-      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] && [[ $ARCH_PPC -gt $ARCH_NIOS2 ]]; then
+      elif [[ $ARCH_PPC -gt $ARCH_MIPS ]] && [[ $ARCH_PPC -gt $ARCH_ARM ]] && [[ $ARCH_PPC -gt $ARCH_X64 ]] && [[ $ARCH_PPC -gt $ARCH_X86 ]] && [[ $ARCH_PPC -gt $ARCH_NIOS2 ]] && \
+        [[ $ARCH_PPC -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64_III ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_PPC -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_PPC -gt $ARCH_RISCV ]] && [[ $ARCH_PPC -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_PPC -gt $ARCH_PPC64 ]] && [[ $ARCH_PPC -gt $ARCH_QCOM_DSP6 ]]; then
         D_ARCH="PPC"
-      elif [[ $ARCH_NIOS2 -gt $ARCH_MIPS ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM ]] && [[ $ARCH_NIOS2 -gt $ARCH_X64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_X86 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC ]]; then
+      elif [[ $ARCH_NIOS2 -gt $ARCH_MIPS ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM ]] && [[ $ARCH_NIOS2 -gt $ARCH_X64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_X86 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_NIOS2 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_NIOS2 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_NIOS2 -gt $ARCH_RISCV ]] && [[ $ARCH_NIOS2 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_NIOS2 -gt $ARCH_PPC64 ]] && [[ $ARCH_NIOS2 -gt $ARCH_QCOM_DSP6 ]]; then
         D_ARCH="NIOS2"
+      elif [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_MIPS64R2 -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS64_III ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_MIPS64R2 -gt $ARCH_RISCV ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_PPC64 ]] && [[ $ARCH_MIPS64R2 -gt $ARCH_QCOM_DSP6 ]]; then
+        D_ARCH="MIPS64R2"
+      elif [[ $ARCH_MIPS64_III -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64_III -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64_III -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_PPC ]] && \
+        [[ $ARCH_MIPS64_III -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_MIPS64_III -gt $ARCH_RISCV ]] && [[ $ARCH_MIPS64_III -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_PPC64 ]] && [[ $ARCH_MIPS64_III -gt $ARCH_QCOM_DSP6 ]]; then
+        D_ARCH="MIPS64_3"
+      elif [[ $ARCH_MIPS64_N32 -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_MIPS64_N32 -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_MIPS64_N32 -gt $ARCH_RISCV ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_PPC64 ]] && [[ $ARCH_MIPS64_N32 -gt $ARCH_QCOM_DSP6 ]]; then
+        D_ARCH="MIPS64N32"
+      elif [[ $ARCH_MIPS64v1 -gt $ARCH_MIPS ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_X64 ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_X86 ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_MIPS64v1 -gt $ARCH_NIOS2 ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_ARM ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_MIPS64v1 -gt $ARCH_RISCV ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_PPC64 ]] && [[ $ARCH_MIPS64v1 -gt $ARCH_QCOM_DSP6 ]]; then
+        D_ARCH="MIPS64v1"
+      elif [[ $ARCH_RISCV -gt $ARCH_MIPS ]] && [[ $ARCH_RISCV -gt $ARCH_ARM ]] && [[ $ARCH_RISCV -gt $ARCH_X64 ]] && [[ $ARCH_RISCV -gt $ARCH_X86 ]] && [[ $ARCH_RISCV -gt $ARCH_PPC ]] && \
+        [[ $ARCH_RISCV -gt $ARCH_NIOS2 ]] && [[ $ARCH_RISCV -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_RISCV -gt $ARCH_ARM ]] && [[ $ARCH_RISCV -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_RISCV -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_RISCV -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_RISCV -gt $ARCH_PPC64 ]] && [[ $ARCH_RISCV -gt $ARCH_QCOM_DSP6 ]]; then
+        D_ARCH="RISCV"
+      elif [[ $ARCH_PPC64 -gt $ARCH_MIPS ]] && [[ $ARCH_PPC64 -gt $ARCH_ARM ]] && [[ $ARCH_PPC64 -gt $ARCH_X64 ]] && [[ $ARCH_PPC64 -gt $ARCH_X86 ]] && [[ $ARCH_PPC64 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_PPC64 -gt $ARCH_NIOS2 ]] && [[ $ARCH_PPC64 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_PPC64 -gt $ARCH_ARM ]] && [[ $ARCH_PPC64 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_PPC64 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_PPC64 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_PPC64 -gt $ARCH_RISCV ]] && [[ $ARCH_PPC64 -gt $ARCH_QCOM_DSP6 ]]; then
+        D_ARCH="PPC64"
+      elif [[ $ARCH_QCOM_DSP6 -gt $ARCH_MIPS ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_ARM ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_X64 ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_X86 ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_PPC ]] && \
+        [[ $ARCH_QCOM_DSP6 -gt $ARCH_NIOS2 ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_MIPS64R2 ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_ARM ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_ARM64 ]] && \
+        [[ $ARCH_QCOM_DSP6 -gt $ARCH_MIPS64_N32 ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_MIPS64v1 ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_RISCV ]] && [[ $ARCH_QCOM_DSP6 -gt $ARCH_PPC64 ]]; then
+        D_ARCH="QCOM_DSP6"
       else
         D_ARCH="unknown"
       fi
@@ -219,6 +309,12 @@ architecture_check()
         print_output "$(indent "$(orange "Endianness  Count")")"
         if [[ $D_END_BE -gt 0 ]] ; then print_output "$(indent "$(orange "Big endian          ""$D_END_BE")")" ; fi
         if [[ $D_END_LE -gt 0 ]] ; then print_output "$(indent "$(orange "Little endian          ""$D_END_LE")")" ; fi
+      fi
+      if [[ $((ARM_SF+ARM_HF)) -gt 0 ]] ; then
+        print_ln
+        print_output "$(indent "$(orange "ARM Hardware/Software floating Count")")"
+        if [[ $ARM_SF -gt 0 ]] ; then print_output "$(indent "$(orange "Software floating          ""$ARM_SF")")" ; fi
+        if [[ $ARM_HF -gt 0 ]] ; then print_output "$(indent "$(orange "Hardware floating          ""$ARM_HF")")" ; fi
       fi
 
       if [[ $D_END_LE -gt $D_END_BE ]] ; then
@@ -368,7 +464,7 @@ check_firmware()
 detect_root_dir_helper() {
   SEARCH_PATH="${1:-}"
 
-  print_output "[*] Root directory auto detection (could take some time)\\n"
+  print_output "[*] Root directory auto detection for $ORANGE$SEARCH_PATH$NC (could take some time)\\n"
   ROOT_PATH=()
   export ROOT_PATH
   local R_PATH
@@ -385,42 +481,77 @@ detect_root_dir_helper() {
       for R_PATH in "${INTERPRETER_FULL_RPATH[@]}"; do
         # remove the interpreter path from the full path:
         R_PATH="${R_PATH//$INTERPRETER_ESCAPED/}"
-        ROOT_PATH+=( "$R_PATH" )
-        MECHANISM="binary interpreter"
+        if [[ -v R_PATH ]] && [[ -d "$R_PATH" ]]; then
+          ROOT_PATH+=( "$R_PATH" )
+          MECHANISM="binary interpreter"
+        fi
       done
     done
   fi
+
   # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
   mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "dir names"; then
-        MECHANISM="$MECHANISM / dir names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
+      if [[ -z "$MECHANISM" ]]; then
         MECHANISM="dir names"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
+        MECHANISM="$MECHANISM / dir names"
       fi
     fi
   done
+
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
+  for R_PATH in "${ROOTx_PATH[@]}"; do
+    CNT=$(echo "$R_PATH" | awk '{print $1}')
+    if [[ "$CNT" -lt 5 ]]; then
+      # we only use paths with more then 4 matches as possible root path
+      continue
+    fi
+    R_PATH=$(echo "$R_PATH" | awk '{print $2}')
+    if [[ -d "$R_PATH" ]]; then
+      ROOT_PATH+=( "$R_PATH" )
+      if [[ -z "$MECHANISM" ]]; then
+        MECHANISM="dir names"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "dir names"; then
+        MECHANISM="$MECHANISM / dir names"
+      fi
+    fi
+  done
+
   mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "file names"; then
-        MECHANISM="$MECHANISM / file names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
-        MECHANISM="file names"
+      if [[ -z "$MECHANISM" ]]; then
+        MECHANISM="busybox"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "busybox"; then
+        MECHANISM="$MECHANISM / busybox"
       fi
     fi
   done
-  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/bash" | sed -E 's/\/.?bin\/bash//')
+
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//')
   for R_PATH in "${ROOTx_PATH[@]}"; do
     if [[ -d "$R_PATH" ]]; then
       ROOT_PATH+=( "$R_PATH" )
-      if ! echo "$MECHANISM" | grep -q "file names"; then
-        MECHANISM="$MECHANISM / file names"
-      elif ! echo "$MECHANISM" | grep -q "binary interpreter"; then
-        MECHANISM="file names"
+      if [[ -z "$MECHANISM" ]]; then
+        MECHANISM="shell"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "shell"; then
+        MECHANISM="$MECHANISM / shell"
+      fi
+    fi
+  done
+
+  mapfile -t ROOTx_PATH < <(find "$SEARCH_PATH" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//')
+  for R_PATH in "${ROOTx_PATH[@]}"; do
+    if [[ -d "$R_PATH" ]]; then
+      ROOT_PATH+=( "$R_PATH" )
+      if [[ -z "$MECHANISM" ]]; then
+        MECHANISM="shell"
+      elif [[ -n "$MECHANISM" ]] && ! echo "$MECHANISM" | grep -q "shell"; then
+        MECHANISM="$MECHANISM / shell"
       fi
     fi
   done
@@ -440,7 +571,11 @@ detect_root_dir_helper() {
   fi
 
   for R_PATH in "${ROOT_PATH[@]}"; do
-    print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
+    if [[ "$MECHANISM" == "last resort" ]]; then
+      print_output "[*] Found no real root directory - setting it to: $ORANGE$R_PATH$NC via $ORANGE$MECHANISM$NC."
+    else
+      print_output "[+] Found the following root directory: $ORANGE$R_PATH$GREEN via $ORANGE$MECHANISM$GREEN."
+    fi
     write_link "s05#file_dirs"
   done
 }

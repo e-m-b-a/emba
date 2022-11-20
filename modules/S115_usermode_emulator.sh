@@ -31,8 +31,10 @@ S115_usermode_emulator() {
     if [[ $IN_DOCKER -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode as it could harm your host environment."
     fi
+
     export OPTS=()
-    if command -v jchroot > /dev/null; then
+    # we have seen issues on MIPS64 -> lets fall back to chroot
+    if [[ "$ARCH" != "MIPS64" ]] && command -v jchroot > /dev/null; then
       CHROOT="jchroot"
       # OPTS see https://github.com/vincentbernat/jchroot#security-note
       OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
@@ -281,7 +283,11 @@ prepare_emulator() {
     chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
     cp "$(which busybox)" "$R_PATH"
     chmod +x "$R_PATH"/busybox
-    "$CHROOT" "${OPTS[@]}" "$R_PATH" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt
+    if [[ "$CHROOT" == "jchroot" ]]; then
+      "$CHROOT" "${OPTS[@]}" "$R_PATH" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt || print_output "[-] Something weird going wrong in chroot filesystem fixing"
+    else
+      "$CHROOT" "${OPTS[@]}" "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt || print_output "[-] Something weird going wrong in chroot filesystem fixing"
+    fi
     rm "$R_PATH"/fixImage_user_mode_emulation.sh || true
     rm "$R_PATH"/busybox || true
     print_bar
@@ -317,7 +323,11 @@ run_init_test() {
 
     write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
 
-    mapfile -t CPU_CONFIGS < <("$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
+    if [[ "$CHROOT" == "jchroot" ]]; then
+      mapfile -t CPU_CONFIGS < <("$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
+    else
+      mapfile -t CPU_CONFIGS < <("$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
+    fi
 
     for CPU_CONFIG_ in "${CPU_CONFIGS[@]}"; do
       if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
@@ -404,11 +414,19 @@ run_init_qemu_runner() {
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
     write_log "" "$LOG_FILE_INIT"
-    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    if [[ "$CHROOT" == "jchroot" ]]; then
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    else
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    fi
   else
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
     write_log "" "$LOG_FILE_INIT"
-    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    if [[ "$CHROOT" == "jchroot" ]]; then
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    else
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    fi
   fi
 }
 
@@ -438,11 +456,21 @@ emulate_strace_run() {
     set +e
   fi
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
-    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
-    PID=$!
+    if [[ "$CHROOT" == "jchroot" ]]; then
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
+      PID=$!
+    else
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
+      PID=$!
+    fi
   else
-    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
-    PID=$!
+    if [[ "$CHROOT" == "jchroot" ]]; then
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
+      PID=$!
+    else
+      timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
+      PID=$!
+    fi
   fi
   if [[ "$STRICT_MODE" -eq 1 ]]; then
     set -e
@@ -567,10 +595,18 @@ emulate_binary() {
     fi
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      if [[ "$CHROOT" == "jchroot" ]]; then
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      else
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      fi
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-      timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      if [[ "$CHROOT" == "jchroot" ]]; then
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      else
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+      fi
     fi
     if [[ "$STRICT_MODE" -eq 1 ]]; then
       set -e

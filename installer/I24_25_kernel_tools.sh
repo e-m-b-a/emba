@@ -19,10 +19,9 @@ I24_25_kernel_tools() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
 
-    print_pip_info "lz4"
-    print_pip_info "zstandard"
     print_tool_info "python3-pip" 1
-    print_git_info "kconfig-hardened-check" "a13xp0p0v/kconfig-hardened-check" "There are plenty of security hardening options for the Linux kernel. This tool checks them."
+    print_pip_info "python-lzo"
+    print_git_info "kconfig-hardened-check" "EMBA-support-repos/kconfig-hardened-check" "There are plenty of security hardening options for the Linux kernel. This tool checks them."
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -35,16 +34,16 @@ I24_25_kernel_tools() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
         if ! [[ -d external/vmlinux-to-elf ]]; then
-          git clone https://github.com/marin-m/vmlinux-to-elf external/vmlinux-to-elf
+          git clone https://github.com/EMBA-support-repos/vmlinux-to-elf external/vmlinux-to-elf
         fi
 
         cd external/vmlinux-to-elf || ( echo "Could not install EMBA component vmlinux-to-elf" && exit 1 )
-        pip3 install --upgrade lz4 zstandard git+https://github.com/clubby789/python-lzo@b4e39df
-        pip3 install --upgrade git+https://github.com/marin-m/vmlinux-to-elf
+        pip3 install --upgrade git+https://github.com/EMBA-support-repos/vmlinux-to-elf
+        pip3 install "python-lzo>=1.14"
         cd "$HOME_PATH" || ( echo "Could not install EMBA component vmlinux-to-elf" && exit 1 )
 
         if ! [[ -d external/kconfig-hardened-check ]]; then
-          git clone https://github.com/a13xp0p0v/kconfig-hardened-check.git external/kconfig-hardened-check
+          git clone https://github.com/EMBA-support-repos/kconfig-hardened-check.git external/kconfig-hardened-check
         fi
       ;;
     esac

@@ -39,6 +39,7 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "libtool" 1
     print_tool_info "libtool-bin" 1
     print_tool_info "pkg-config" 1
+    print_tool_info "pkgconf" 1
     print_tool_info "python3" 1
     print_tool_info "unzip" 1
     print_tool_info "subversion" 1

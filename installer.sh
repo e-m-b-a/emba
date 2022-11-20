@@ -28,8 +28,16 @@ export DOWNLOAD_FILE_LIST=()
 export INSTALLER_DIR="./installer"
 
 if [[ "$STRICT_MODE" -eq 1 ]]; then
-  # shellcheck source=/dev/null
-  source ./helpers/helpers_emba_load_strict_settings.sh
+  if [[ -f "./helpers/helpers_emba_load_strict_settings.sh" ]]; then
+    # shellcheck source=/dev/null
+    source ./helpers/helpers_emba_load_strict_settings.sh
+  elif [[ -f "/installer/helpers_emba_load_strict_settings.sh" ]]; then
+    # in docker this is in /emba/...
+    # shellcheck source=/dev/null
+    source /installer/helpers_emba_load_strict_settings.sh
+  else
+    echo "Warning - strict mode module not found"
+  fi
   load_strict_mode_settings
   trap 'wickStrictModeFail $? | tee -a /tmp/emba_installer.log' ERR  # The ERR trap is triggered when a script catches an error
 fi
@@ -174,6 +182,28 @@ HOME_PATH=$(pwd)
 if [[ "$REMOVE" -eq 1 ]]; then
   R00_emba_remove
   exit 0
+fi
+
+# quick check if we have enough disk space for the docker image
+
+if [[ "$IN_DOCKER" -eq 0 ]]; then
+  if [[ -d "/var/lib/docker/" ]]; then
+    # docker is already installed
+    DDISK="/var/lib/docker"
+  else
+    # default
+    DDISK="/var/lib/"
+  fi
+
+  FREE_SPACE=$(df --output=avail "$DDISK" | awk 'NR==2')
+  if [[ "$FREE_SPACE" -lt 13000000 ]]; then
+    echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 13Gig for the docker image""$NC"
+    echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
+    echo ""
+    df -h
+    echo ""
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
 fi
 
 if [[ $LIST_DEP -eq 0 ]] ; then

@@ -86,11 +86,12 @@ S13_weak_func_check()
             function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "MIPS" ) ; then
+          # MIPS32 and MIPS64
           if [[ "$THREADED" -eq 1 ]]; then
-            function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            function_check_MIPS "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
             WAIT_PIDS_S13+=( "$!" )
           else
-            function_check_MIPS32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+            function_check_MIPS "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "PowerPC" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
@@ -171,7 +172,7 @@ function_check_NIOS2(){
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*$FUNC_ADDR" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*:.*($FUNC_ADDR).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNC_ADDR).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" || true
         COUNT_FUNC="$(grep -c "call.*""$FUNC_ADDR" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "call.*$STRLEN_ADDR" "$FUNC_LOG"  2> /dev/null || true)
@@ -212,7 +213,7 @@ function_check_PPC32(){
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "bl.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" || true
         COUNT_FUNC="$(grep -c "bl.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "bl.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -229,7 +230,7 @@ function_check_PPC32(){
   echo "$STRCPY_CNT" >> "$TMP_DIR"/S13_STRCPY_CNT.tmp
 }
 
-function_check_MIPS32() {
+function_check_MIPS() {
   local BINARY_="${1:-}"
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
@@ -256,10 +257,10 @@ function_check_MIPS32() {
         "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 25 "$FUNC_ADDR""(gp)" | sed s/-"$FUNC_ADDR"\(gp\)/"$FUNCTION"/ | sed s/-"$STRLEN_ADDR"\(gp\)/strlen/ >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
-        COUNT_FUNC="$(grep -c "lw.*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" || true
+        COUNT_FUNC="$(grep -c "l[wd].*""$FUNCTION" "$FUNC_LOG" 2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
-          COUNT_STRLEN=$(grep -c "lw.*strlen" "$FUNC_LOG" 2> /dev/null || true)
+          COUNT_STRLEN=$(grep -c "l[wd].*strlen" "$FUNC_LOG" 2> /dev/null || true)
           STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
         elif [[ "$FUNCTION" == "mmap" ]] ; then
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
@@ -294,7 +295,7 @@ function_check_ARM64() {
       "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-      sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+      sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" || true
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -332,7 +333,7 @@ function_check_ARM32() {
       "$OBJDUMP" -d "$BINARY_" | grep -A 2 -B 20 "[[:blank:]]bl[[:blank:]].*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
     fi
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-      sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+      sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" || true
       COUNT_FUNC="$(grep -c "[[:blank:]]bl[[:blank:]].*<$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "[[:blank:]]bl[[:blank:]].*<strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -371,7 +372,7 @@ function_check_x86() {
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" || true
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy" ]] ; then
           COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -410,7 +411,7 @@ function_check_x86_64() {
         "$OBJDUMP" -d "$BINARY_" | grep -E -A 2 -B 20 "call.*<$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
       fi
       if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG"
+        sed -i -r "s/^.*:.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" || true
         COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
         if [[ "$FUNCTION" == "strcpy"  ]] ; then
           COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
@@ -523,7 +524,7 @@ output_function_details()
     write_link "$2"
     if [[ -f "$LOG_FILE" ]]; then
       cat "$LOG_FILE" >> "$OLD_LOG_FILE"
-      rm "$LOG_FILE" 2> /dev/null
+      rm "$LOG_FILE" 2> /dev/null || true
     fi
     LOG_FILE="$OLD_LOG_FILE"
   }

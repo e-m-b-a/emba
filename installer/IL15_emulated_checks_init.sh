@@ -23,7 +23,7 @@ IL15_emulated_checks_init() {
     cd "$HOME_PATH" || ( echo "Could not install EMBA component system emulator" && exit 1 )
     print_git_info "routersploit" "m-1-k-3/routersploit" "The RouterSploit Framework is an open-source exploitation framework dedicated to embedded devices. (EMBA fork)"
     print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
-    print_git_info "testssl" "drwetter/testssl.sh.git" "TestSSL.sh"
+    print_git_info "testssl" "EMBA-support-repos/testssl.sh.git" "TestSSL.sh"
     print_file_info "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "Arachni web application scanner" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni"
 
     print_tool_info "dnsutils" 1
@@ -75,7 +75,7 @@ IL15_emulated_checks_init() {
       chown arachni external/arachni -R
 
       if ! [[ -d external/testssl.sh ]]; then
-        git clone --depth 1 https://github.com/drwetter/testssl.sh.git external/testssl.sh
+        git clone --depth 1 https://github.com/EMBA-support-repos/testssl.sh.git external/testssl.sh
       fi
 
       if ! [[ -d external/routersploit ]]; then
@@ -97,6 +97,11 @@ IL15_emulated_checks_init() {
       # if the default log path is set we reset it to /tmp
       if ! grep -q "/tmp/routersploit.log" rsf.py; then
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
+      fi
+
+      # we need to safe /var/lib/nikto now
+      if [[ -d /var/lib/nikto ]]; then
+        cp -pri /var/lib/nikto external/var_lib_nikto
       fi
 
       cd "$HOME_PATH" || ( echo "Could not install EMBA component routersploit" && exit 1 )

@@ -37,6 +37,10 @@ S24_kernel_bin_identifier()
   write_csv_log "Kernel version" "file" "identified init"
 
   for FILE in "${FILE_ARR_TMP[@]}" ; do
+    if file "$FILE" | grep -q "ASCII text"; then
+      # reduce false positive rate
+      continue
+    fi
     K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
 
     if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
@@ -247,9 +251,9 @@ check_kconfig() {
   print_output "[*] Testing kernel configuration file $ORANGE$KCONFIG_FILE$NC with kconfig-hardened-check"
   local KCONF_LOG=""
   KCONF_LOG="$LOG_PATH_MODULE/kconfig_hardening_check_$(basename "$KCONFIG_FILE").log"
-  "$KCONF_HARD_CHECKER" -c "$KCONFIG_FILE" | tee -a "$KCONF_LOG"
+  "$KCONF_HARD_CHECKER" -c "$KCONFIG_FILE" | tee -a "$KCONF_LOG" || true
   if [[ -f "$KCONF_LOG" ]]; then
-    FAILED_KSETTINGS=$(grep -c "FAIL: " "$KCONF_LOG")
+    FAILED_KSETTINGS=$(grep -c "FAIL: " "$KCONF_LOG" || true)
     if [[ "$FAILED_KSETTINGS" -gt 0 ]]; then
       print_output "[+] Found $ORANGE$FAILED_KSETTINGS$GREEN security related kernel settings which should be reviewed - $ORANGE$(print_path "$KCONFIG_FILE")$NC" "" "$KCONF_LOG"
       print_ln

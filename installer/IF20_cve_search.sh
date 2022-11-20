@@ -21,8 +21,8 @@ IF20_cve_search() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $CVE_SEARCH -eq 1 ]] || [[ $FULL -eq 1 ]]; then
 
-    print_git_info "trickest cve database" "trickest/cve" "Trickest CVE to github exploit database"
-    print_git_info "cve-search" "cve-search/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
+    print_git_info "trickest cve database" "EMBA-support-repos/trickest-cve" "Trickest CVE to github exploit database"
+    print_git_info "cve-search" "EMBA-support-repos/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
     echo -e "$ORANGE""cve-search will be downloaded.""$NC"
     echo -e "$ORANGE""trickest poc database will be downloaded.""$NC"
 
@@ -37,7 +37,7 @@ IF20_cve_search() {
 
       # we always need the cve-search stuff:
       if ! [[ -d external/cve-search ]]; then
-        git clone https://github.com/cve-search/cve-search.git external/cve-search
+        git clone https://github.com/EMBA-support-repos/cve-search.git external/cve-search
         cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
       else
         cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
@@ -88,7 +88,7 @@ IF20_cve_search() {
         cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
         # get trickest repository
         if ! [[ -d external/trickest-cve ]]; then
-          git clone https://github.com/trickest/cve.git external/trickest-cve
+          git clone https://github.com/EMBA-support-repos/trickest-cve.git external/trickest-cve
         else
           cd external/trickest-cve || ( echo "Could not install EMBA component Trickest" && exit 1 )
           git pull

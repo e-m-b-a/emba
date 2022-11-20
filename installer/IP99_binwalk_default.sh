@@ -63,7 +63,8 @@ IP99_binwalk_default() {
     print_tool_info "python3-pyqt5.qtopengl" 1
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
-    print_tool_info "python3-lzo" 1
+    #print_tool_info "python3-lzo" 1
+    print_pip_info "python-lzo"
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "srecord" 1
@@ -75,7 +76,7 @@ IP99_binwalk_default() {
     print_pip_info "cstruct"
     print_pip_info "matplotlib"
 
-    print_git_info "binwalk" "m-1-k-3/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
+    print_git_info "binwalk" "EMBA-support-repos/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
     echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
     print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
     echo -e "$ORANGE""yaffshiv will be downloaded.""$NC"
@@ -99,20 +100,21 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        pip3 install nose 2>/dev/null
-        pip3 install coverage 2>/dev/null
-        pip3 install pyqtgraph 2>/dev/null
-        pip3 install capstone 2>/dev/null
-        pip3 install cstruct 2>/dev/null
-        pip3 install matplotlib 2>/dev/null
+        pip3 install nose
+        pip3 install coverage
+        pip3 install pyqtgraph
+        pip3 install capstone
+        pip3 install cstruct
+        pip3 install matplotlib
+        pip3 install "python-lzo>=1.14"
 
         if ! [[ -d external/binwalk ]]; then
           #git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
-          git clone https://github.com/m-1-k-3/binwalk.git external/binwalk
+          git clone https://github.com/EMBA-support-repos/binwalk.git external/binwalk
         fi
 
         if ! [[ -d external/cpu_rec ]]; then
-          git clone https://github.com/airbus-seclab/cpu_rec.git external/cpu_rec
+          git clone https://github.com/EMBA-support-repos/cpu_rec.git external/cpu_rec
           # this does not make sense for the read only docker container - we have to do it
           # during EMBA startup
           if ! [[ -d "$HOME"/.config/binwalk/modules/ ]]; then
@@ -123,7 +125,7 @@ IP99_binwalk_default() {
         fi
         if ! command -v yaffshiv > /dev/null ; then
           if ! [[ -d external/binwalk/yaffshiv ]]; then
-            git clone https://github.com/devttys0/yaffshiv external/binwalk/yaffshiv
+            git clone https://github.com/EMBA-support-repos/yaffshiv external/binwalk/yaffshiv
           fi
           cd ./external/binwalk/yaffshiv/ || ( echo "Could not install EMBA component yaffshiv" && exit 1 )
           python3 setup.py install
@@ -134,7 +136,7 @@ IP99_binwalk_default() {
 
         if ! command -v sasquatch > /dev/null ; then
           if ! [[ -d external/binwalk/sasquatch ]]; then
-            git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+            git clone https://github.com/EMBA-support-repos/sasquatch external/binwalk/sasquatch
           fi
           cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
           wget https://github.com/devttys0/sasquatch/pull/47.patch
@@ -147,7 +149,7 @@ IP99_binwalk_default() {
 
         if ! command -v jefferson > /dev/null ; then
           if ! [[ -d external/binwalk/jefferson ]]; then
-            git clone https://github.com/sviehb/jefferson external/binwalk/jefferson
+            git clone https://github.com/EMBA-support-repos/jefferson external/binwalk/jefferson
           fi
 
           while read -r TOOL_NAME; do
@@ -177,7 +179,7 @@ IP99_binwalk_default() {
           fi
 
           if ! [[ -d external/binwalk/cramfs-tools ]]; then
-            git clone https://github.com/npitre/cramfs-tools external/binwalk/cramfs-tools
+            git clone https://github.com/EMBA-support-repos/cramfs-tools external/binwalk/cramfs-tools
           fi
           make -C ./external/binwalk/cramfs-tools/
           install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
@@ -187,7 +189,7 @@ IP99_binwalk_default() {
         fi
 
         if ! [[ -d external/binwalk/ubi_reader ]]; then
-          git clone https://github.com/jrspruitt/ubi_reader external/binwalk/ubi_reader
+          git clone https://github.com/EMBA-support-repos/ubi_reader external/binwalk/ubi_reader
         fi
         cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
         python3 setup.py install

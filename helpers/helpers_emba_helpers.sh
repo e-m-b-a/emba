@@ -80,12 +80,18 @@ max_pids_protection() {
   done
 }
 
+# $1 - 1 some interrupt detected
+# $1 - 0 default exit 0
 cleaner() {
-  print_output "[*] User interrupt detected!" "no_log"
+  INTERRUPT_CLEAN="${1:-1}"
+  if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
+    print_output "[*] User interrupt detected!" "no_log"
+  fi
   print_output "[*] Final cleanup started." "no_log"
 
   # stop inotifywait on host
-  if pgrep -f "inotifywait.*$LOG_DIR.*" &> /dev/null 2>&1; then
+  if [[ "$IN_DOCKER" -eq 0 ]] && pgrep -f "inotifywait.*$LOG_DIR.*" &> /dev/null 2>&1; then
+    print_output "[*] Stopping inotify ..."
     pkill -f "inotifywait.*$LOG_DIR.*" || true
   fi
 
@@ -130,13 +136,14 @@ cleaner() {
     restore_permissions
   fi
 
-  if pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
+  if [[ "$IN_DOCKER" -eq 0 ]] && pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
     pkill -f "find ./external/trickest" 2>/dev/null || true
   fi
 
-  if [[ "$NOTIFICATION_PID" != "NA" ]]; then
-    kill "$NOTIFICATION_PID" 2>/dev/null || true
-  fi
+  # what a quick fix - need to come back to this!
+  #if [[ "$NOTIFICATION_PID" != "NA" ]]; then
+  #  kill "$NOTIFICATION_PID" 2>/dev/null || true
+  #fi
   if [[ -f "$TMP_DIR"/orig_logdir ]]; then
     LOG_DIR_HOST=$(cat "$TMP_DIR"/orig_logdir)
     pkill -f "inotifywait.*$LOG_DIR_HOST" 2>/dev/null || true
@@ -149,8 +156,10 @@ cleaner() {
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
   fi
-  print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
-  exit 1
+  if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
+    print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
+    exit 1
+  fi
 }
 
 emba_updater() {
@@ -176,7 +185,8 @@ emba_updater() {
     git pull
     cd "$BASE_PATH" || exit
   else
-    git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    #git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    git clone https://github.com/EMBA-support-repos/trickest-cve.git "$EXT_DIR"/trickest-cve
   fi
 
   print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"
@@ -255,7 +265,7 @@ restore_permissions() {
     print_output "[*] Restoring directory permissions for user: $ORANGE$ORIG_USER$NC" "no_log"
     ORIG_UID="$(grep "UID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
     ORIG_GID="$(grep "GID" "$LOG_DIR"/orig_user.log | awk '{print $2}')"
-    chown "$ORIG_UID":"$ORIG_GID" "$LOG_DIR" -R
+    chown "$ORIG_UID":"$ORIG_GID" "$LOG_DIR" -R || true
     rm "$LOG_DIR"/orig_user.log || true
   fi
 }
