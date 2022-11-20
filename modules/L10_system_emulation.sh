@@ -41,7 +41,7 @@ L10_system_emulation() {
     export MODULE_SUB_PATH="$MOD_DIR"/"${FUNCNAME[0]}"
     S25_LOG="s25_kernel_check.txt"
 
-    if [[ "$ARCH" == "MIPS" || "$ARCH" == "ARM"* || "$ARCH" == "x86" || "$ARCH" == "MIPS64"* ]]; then
+    if [[ "$ARCH" == "MIPS"* || "$ARCH" == "ARM"* || "$ARCH" == "x86" ]]; then
 
       # WARNING: false was never tested ;)
       # Could be interesting for future extensions
@@ -68,11 +68,12 @@ L10_system_emulation() {
             ARCH_END="$ARCH_END""hf"
           fi
 
-          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64r2"* ]] || [[ "$ARCH_END" == "mips64_3"* ]] || [[ "$ARCH_END" == "arm64"* ]]; then
+          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64r2"* ]] || [[ "$ARCH_END" == "mips64_3"* ]]; then
             print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
+            write_link "p99"
             print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
             UNSUPPORTED_ARCH=1
-            # return
+            return
           fi
 
           # just in case we remove the return in the unsupported arch checker for testing:
@@ -105,7 +106,7 @@ L10_system_emulation() {
       MODULE_END=1
     else
       print_output "[!] No supported architecture found.\\n"
-      print_output "[!] Curently supported: ${ORANGE}ARM$NC, ${ORANGE}MIPS$NC.\\n"
+      print_output "[!] Curently supported: ${ORANGE}ARM$NC, ${ORANGE}MIPS$NC and ${ORANGE}x86$NC.\\n"
       MODULE_END=0
     fi
   fi
@@ -1570,7 +1571,7 @@ run_emulated_system() {
     QEMU_BIN="NA"
   fi
 
-  if [[ "$ARCH" == "ARM" ]]; then
+  if [[ "$ARCH" == "ARM"* ]]; then
     QEMU_DISK="-drive if=none,file=$IMAGE,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     QEMU_PARAMS="-audiodev driver=none,id=none"
     QEMU_ROOTFS="/dev/vda1"
