@@ -1289,7 +1289,7 @@ iterate_vlans() {
   local VLAN_INFO
 
   for VLAN_INFO in "${VLAN_INFOS[@]}"; do
-    if ! [[ "$VLAN_INFO" == "register_vlan_dev" ]]; then
+    if ! [[ "$VLAN_INFO" == *"register_vlan_dev"* ]]; then
       continue
     fi
     # VLAN_INFO -> register_vlan_dev[PID: 848 (vconfig)]: dev:eth2.1 vlan_id:1
