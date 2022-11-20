@@ -181,6 +181,13 @@ check_emulation_port() {
   fi
 }
 
+setup_nikto() {
+  if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$EXT_DIR"/var_lib_nikto ]]; then
+    mkdir -p /var/lib/nikto
+    cp "$EXT_DIR"/var_lib_nikto/* /var/lib/nikto/
+  fi
+}
+
 setup_unblob() {
   TOOL_NAME="${1:-}"
 
@@ -376,6 +383,7 @@ dependency_check()
     export MPLCONFIGDIR="$TMP_DIR"
 
     setup_unblob "unblob"
+    setup_nikto
 
     # jtr
     check_dep_tool "john"
@@ -410,7 +418,10 @@ dependency_check()
 
     check_dep_tool "ubireader image extractor" "ubireader_extract_images"
     check_dep_tool "ubireader file extractor" "ubireader_extract_files"
-
+    
+    # UEFI
+    check_dep_tool "UEFI image extractor" "$EXT_DIR""/UEFITool/UEFIExtract"
+    
     if function_exists F20_vul_aggregator; then
       # CVE-search
       # TODO change to portcheck and write one for external hosts
@@ -609,6 +620,8 @@ architecture_dep_check() {
     ARCH_STR="nios2"
   elif [[ "$ARCH" == "RISCV" ]] ; then
     ARCH_STR="riscv"
+  elif [[ "$ARCH" == "QCOM_DSP6" ]] ; then
+    ARCH_STR="qcom_dsp6"
   else
     ARCH_STR="unknown"
   fi
