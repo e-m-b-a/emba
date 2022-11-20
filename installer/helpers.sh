@@ -169,12 +169,20 @@ print_pip_info() {
 
 print_file_info()
 {
+  local CONTENT_LENGTH=""
+  local FILE_SIZE=0
   echo -e "\\n""$ORANGE""$BOLD""${1:-}""$NC"
   if [[ -n "${2:-}" ]] ; then
     echo -e "Description: ""${2:-}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
-  FILE_SIZE=$(("$(wget "${3:-}" --no-check-certificate --spider --server-response 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d' || true)"))
+  CONTENT_LENGTH=$(wget "${3:-}" --no-check-certificate --spider --server-response --output-file=./.wget.log 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d')
+  if [[ -n "$CONTENT_LENGTH" ]]; then
+    FILE_SIZE=$(("$CONTENT_LENGTH"))
+  else
+    # try grep from .wget.log
+    FILE_SIZE=$(("$(sed -ne '/.ontent-.ength/{s/.*: //;p}' ./.wget.log | sed '$!d')"))
+  fi
 
   if (( FILE_SIZE > 1048576 )) ; then
     echo -e "Download-Size: ""$(( FILE_SIZE / 1048576 ))"" MB"
@@ -213,7 +221,7 @@ download_file()
     if [[ "$D_FILE" == "${1:-}" ]] ; then
       echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1:-}""$NC"
       if ! [[ -f "${3:-}" ]] ; then
-        wget --no-check-certificate "${2:-}" -O "${3:-}"
+        wget --no-check-certificate --output-file=./.wget.log "${2:-}" -O "${3:-}"
       else
         echo -e "$GREEN""${1}"" is already downloaded - no further action performed.""$NC"
       fi

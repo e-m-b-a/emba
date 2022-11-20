@@ -260,7 +260,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IP18_qnap_decryptor
 
-  # IP35_uefi_extraction
+  IP35_uefi_extraction
 
   IP61_unblob
 
