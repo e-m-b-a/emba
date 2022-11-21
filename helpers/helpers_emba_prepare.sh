@@ -413,6 +413,24 @@ prepare_binary_arr()
   #rm_proc_binary "${BINARIES[@]}"
 }
 
+prepare_file_arr_limited() {
+  local FIRMWARE_PATH="${1:-}"
+  export FILE_ARR_LIMITED=()
+
+  if ! [[ -d "$FIRMWARE_PATH" ]]; then
+    return
+  fi
+
+  echo ""
+  print_output "[*] Unique and limited file array generation for $ORANGE$FIRMWARE_PATH$NC (could take some time)\\n"
+
+  readarray -t FILE_ARR_LIMITED < <(find "$FIRMWARE_PATH" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
+    -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
+    -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" -o -iname "*.png" -o -iname "*.svg" \
+    -o -iname "*.js" -o -iname "*.info"\) \
+    -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
+}
+
 set_etc_paths()
 {
   # For the case if ./etc isn't in root of provided firmware or is renamed like e.g. ./etc-ro:

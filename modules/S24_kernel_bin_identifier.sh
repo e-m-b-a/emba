@@ -22,21 +22,19 @@ S24_kernel_bin_identifier()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local NEG_LOG=0
-  local FILE_ARR_TMP=()
   local FILE=""
   local K_VER=""
   local K_INIT=""
   local CFG_MD5=""
   export KCFG_MD5=()
 
-  readarray -t FILE_ARR_TMP < <(find "$FIRMWARE_PATH_CP" -xdev "${EXCL_FIND[@]}" -type f ! \( -iname "*.udeb" -o -iname "*.deb" \
-    -o -iname "*.ipk" -o -iname "*.pdf" -o -iname "*.php" -o -iname "*.txt" -o -iname "*.doc" -o -iname "*.rtf" -o -iname "*.docx" \
-    -o -iname "*.htm" -o -iname "*.html" -o -iname "*.md5" -o -iname "*.sha1" -o -iname "*.torrent" \) \
-    -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  if ! [[ -v FILE_ARR_LIMITED ]] || [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
+    prepare_file_arr_limited "$FIRMWARE_PATH_CP"
+  fi
 
   write_csv_log "Kernel version" "file" "identified init"
 
-  for FILE in "${FILE_ARR_TMP[@]}" ; do
+  for FILE in "${FILE_ARR_LIMITED[@]}" ; do
     if file "$FILE" | grep -q "ASCII text"; then
       # reduce false positive rate
       continue
