@@ -164,7 +164,7 @@ check() {
     fi
 
     echo -e "\\n""$GREEN""Run ${ORANGE}semgrep$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE" | tee /tmp/emba_semgrep.log
+    semgrep --disable-version-check --metrics=off --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE" | tee /tmp/emba_semgrep.log
     if grep -q "Findings:" /tmp/emba_semgrep.log; then
       echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
       MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
