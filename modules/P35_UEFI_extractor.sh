@@ -129,7 +129,7 @@ uefi_extractor(){
 
   if [[ -n "$EFI_ARCH" ]]; then
     print_output "[*] Found $ORANGE$PE32_IMAGE$NC PE32 images for architecture $ORANGE$EFI_ARCH$NC drivers."
-    print_output "[+] Possible architecture details found ($ORANGE UEFI Extractor $NC): $ORANGE$EFI_ARCH$NC"
+    print_output "[+] Possible architecture details found ($ORANGE UEFI Extractor $GREEN): $ORANGE$EFI_ARCH$NC"
     export EFI_ARCH
     backup_var "EFI_ARCH" "$EFI_ARCH"
   fi

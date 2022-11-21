@@ -46,6 +46,7 @@ IL10_system_emulator() {
     # BusyBox - https://busybox.net/downloads/busybox-1.29.3.tar.bz2
     print_file_info "busybox.armel" "busybox ARMel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.armel" "external/EMBA_Live_bins/busybox.armel"
     print_file_info "busybox.armelhf" "busybox ARMel hard float" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.armelhf" "external/EMBA_Live_bins/busybox.armelhf"
+    print_file_info "busybox.arm64el" "busybox ARM64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.arm64el" "external/EMBA_Live_bins/busybox.arm64el"
     print_file_info "busybox.mips64n32eb" "busybox mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.mips64n32eb" "external/EMBA_Live_bins/busybox.mips64n32eb"
     print_file_info "busybox.mips64n32el" "busybox mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.mips64n32el" "external/EMBA_Live_bins/busybox.mips64n32el"
     print_file_info "busybox.mips64r2eb" "busybox mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.mips64r2eb" "external/EMBA_Live_bins/busybox.mips64r2eb"
@@ -59,6 +60,7 @@ IL10_system_emulator() {
     # Console - https://github.com/EMBA-support-repos/firmadyne-console
     print_file_info "console.armel" "console ARMel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.armel" "external/EMBA_Live_bins/console.armel"
     print_file_info "console.armelhf" "console ARMel hard float" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.armelhf" "external/EMBA_Live_bins/console.armelhf"
+    print_file_info "console.arm64el" "console ARM64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.arm64el" "external/EMBA_Live_bins/console.arm64el"
     print_file_info "console.mips64n32eb" "console mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.mips64n32eb" "external/EMBA_Live_bins/console.mips64n32eb"
     print_file_info "console.mips64n32el" "console mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.mips64n32el" "external/EMBA_Live_bins/console.mips64n32el"
     print_file_info "console.mips64r2eb" "console mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.mips64r2eb" "external/EMBA_Live_bins/console.mips64r2eb"
@@ -72,6 +74,7 @@ IL10_system_emulator() {
     # libnvram - https://github.com/EMBA-support-repos/FirmAE-libnvram
     print_file_info "libnvram.so.armel" "libnvram.so ARMel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.armel" "external/EMBA_Live_bins/libnvram.so.armel"
     print_file_info "libnvram.so.armelhf" "libnvram.so ARMel hard float" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.armelhf" "external/EMBA_Live_bins/libnvram.so.armelhf"
+    print_file_info "libnvram.so.arm64el" "libnvram.so ARM64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.arm64el" "external/EMBA_Live_bins/libnvram.so.arm64el"
     print_file_info "libnvram.so.mips64n32eb" "libnvram.so mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.mips64n32eb" "external/EMBA_Live_bins/libnvram.so.mips64n32eb"
     print_file_info "libnvram.so.mips64n32el" "libnvram.so mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.mips64n32el" "external/EMBA_Live_bins/libnvram.so.mips64n32el"
     print_file_info "libnvram.so.mips64r2eb" "libnvram.so mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.mips64r2eb" "external/EMBA_Live_bins/libnvram.so.mips64r2eb"
@@ -85,6 +88,7 @@ IL10_system_emulator() {
     # libnvram_ioctl - https://github.com/EMBA-support-repos/FirmAE-libnvram
     print_file_info "libnvram_ioctl.so.armel" "libnvram_ioctl.so ARMel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.armel" "external/EMBA_Live_bins/libnvram_ioctl.so.armel"
     print_file_info "libnvram_ioctl.so.armelhf" "libnvram_ioctl.so ARMel hard float" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.armelhf" "external/EMBA_Live_bins/libnvram_ioctl.so.armelhf"
+    print_file_info "libnvram_ioctl.so.arm64el" "libnvram_ioctl.so ARM64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.arm64el" "external/EMBA_Live_bins/libnvram_ioctl.so.arm64el"
     print_file_info "libnvram_ioctl.so.mips64n32eb" "libnvram_ioctl.so mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.mips64n32eb" "external/EMBA_Live_bins/libnvram_ioctl.so.mips64n32eb"
     print_file_info "libnvram_ioctl.so.mips64n32el" "libnvram_ioctl.so mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.mips64n32el" "external/EMBA_Live_bins/libnvram_ioctl.so.mips64n32el"
     print_file_info "libnvram_ioctl.so.mips64r2eb" "libnvram_ioctl.so mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.mips64r2eb" "external/EMBA_Live_bins/libnvram_ioctl.so.mips64r2eb"
@@ -108,7 +112,9 @@ IL10_system_emulator() {
 
     # Linux Kernel 4.1.17 - https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1
     print_file_info "zImage.armel" "zImage armel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/zImage.armel" "external/EMBA_Live_bins/zImage.armel"
-    print_file_info "zImage.armelhf" "zImage armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/zImage.armelhf" "external/EMBA_Live_bins/zImage.armelhf"print_file_info "vmlinux.mips64n32eb" "vmlinux mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64n32eb.4" "external/EMBA_Live_bins/vmlinux.mips64n32eb.4"
+    print_file_info "zImage.armelhf" "zImage armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/zImage.armelhf" "external/EMBA_Live_bins/zImage.armelhf"
+    print_file_info "Image.arm64el" "Image arm64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/Image.arm64el" "external/EMBA_Live_bins/Image.arm64el"
+    print_file_info "vmlinux.mips64n32eb" "vmlinux mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64n32eb.4" "external/EMBA_Live_bins/vmlinux.mips64n32eb.4"
     print_file_info "vmlinux.mips64r2eb" "vmlinux mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2eb.4" "external/EMBA_Live_bins/vmlinux.mips64r2eb.4"
     print_file_info "vmlinux.mips64r2el" "vmlinux mips64r2el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2el.4" "external/EMBA_Live_bins/vmlinux.mips64r2el.4"
     print_file_info "vmlinux.mips64v1el" "vmlinux mips64v1el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64v1el" "external/EMBA_Live_bins/vmlinux.mips64v1el.4"
@@ -135,6 +141,7 @@ IL10_system_emulator() {
       # BusyBox - https://busybox.net/downloads/busybox-1.29.3.tar.bz2
       download_file "busybox.armel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.armel" "external/EMBA_Live_bins/busybox.armel"
       download_file "busybox.armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.armelhf" "external/EMBA_Live_bins/busybox.armelhf"
+      download_file "busybox.arm64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.arm64el" "external/EMBA_Live_bins/busybox.arm64el"
       download_file "busybox.mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.mips64n32eb" "external/EMBA_Live_bins/busybox.mips64n32eb"
       download_file "busybox.mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.mips64n32el" "external/EMBA_Live_bins/busybox.mips64n32el"
       download_file "busybox.mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.mips64r2eb" "external/EMBA_Live_bins/busybox.mips64r2eb"
@@ -148,6 +155,7 @@ IL10_system_emulator() {
       # Console - https://github.com/EMBA-support-repos/firmadyne-console
       download_file "console.armel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.armel" "external/EMBA_Live_bins/console.armel"
       download_file "console.armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.armelhf" "external/EMBA_Live_bins/console.armelhf"
+      download_file "console.arm64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.arm64el" "external/EMBA_Live_bins/console.arm64el"
       download_file "console.mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.mips64n32eb" "external/EMBA_Live_bins/console.mips64n32eb"
       download_file "console.mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.mips64n32el" "external/EMBA_Live_bins/console.mips64n32el"
       download_file "console.mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/console.mips64r2eb" "external/EMBA_Live_bins/console.mips64r2eb"
@@ -161,6 +169,7 @@ IL10_system_emulator() {
       # libnvram - https://github.com/EMBA-support-repos/FirmAE-libnvram
       download_file "libnvram.so.armel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.armel" "external/EMBA_Live_bins/libnvram.so.armel"
       download_file "libnvram.so.armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.armelhf" "external/EMBA_Live_bins/libnvram.so.armelhf"
+      download_file "libnvram.so.arm64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.arm64el" "external/EMBA_Live_bins/libnvram.so.arm64el"
       download_file "libnvram.so.mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.mips64n32eb" "external/EMBA_Live_bins/libnvram.so.mips64n32eb"
       download_file "libnvram.so.mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.mips64n32el" "external/EMBA_Live_bins/libnvram.so.mips64n32el"
       download_file "libnvram.so.mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram.so.mips64r2eb" "external/EMBA_Live_bins/libnvram.so.mips64r2eb"
@@ -174,6 +183,7 @@ IL10_system_emulator() {
       # libnvram_ioctl - https://github.com/EMBA-support-repos/FirmAE-libnvram
       download_file "libnvram_ioctl.so.armel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.armel" "external/EMBA_Live_bins/libnvram_ioctl.so.armel"
       download_file "libnvram_ioctl.so.armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.armelhf" "external/EMBA_Live_bins/libnvram_ioctl.so.armelhf"
+      download_file "libnvram_ioctl.so.arm64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.arm64el" "external/EMBA_Live_bins/libnvram_ioctl.so.arm64el"
       download_file "libnvram_ioctl.so.mips64n32eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.mips64n32eb" "external/EMBA_Live_bins/libnvram_ioctl.so.mips64n32eb"
       download_file "libnvram_ioctl.so.mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.mips64n32el" "external/EMBA_Live_bins/libnvram_ioctl.so.mips64n32el"
       download_file "libnvram_ioctl.so.mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/libnvram_ioctl.so.mips64r2eb" "external/EMBA_Live_bins/libnvram_ioctl.so.mips64r2eb"
@@ -198,6 +208,7 @@ IL10_system_emulator() {
       # Linux Kernel 4.1.17 - https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1
       download_file "zImage.armel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/zImage.armel" "external/EMBA_Live_bins/zImage.armel"
       download_file "zImage.armelhf" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/zImage.armelhf" "external/EMBA_Live_bins/zImage.armelhf"
+      download_file "Image.arm64el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/Image.arm64el" "external/EMBA_Live_bins/Image.arm64el"
       download_file "vmlinux.mips64n32eb" "vmlinux mips64n32el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64n32eb.4" "external/EMBA_Live_bins/vmlinux.mips64n32eb.4"
       download_file "vmlinux.mips64r2eb" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2eb.4" "external/EMBA_Live_bins/vmlinux.mips64r2eb.4"
       download_file "vmlinux.mips64r2el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.mips64r2el.4" "external/EMBA_Live_bins/vmlinux.mips64r2el.4"

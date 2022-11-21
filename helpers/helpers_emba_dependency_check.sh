@@ -184,7 +184,7 @@ check_emulation_port() {
 setup_nikto() {
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$EXT_DIR"/var_lib_nikto ]]; then
     mkdir -p /var/lib/nikto
-    cp "$EXT_DIR"/var_lib_nikto/* /var/lib/nikto/
+    cp -r "$EXT_DIR"/var_lib_nikto/* /var/lib/nikto/
   fi
 }
 
