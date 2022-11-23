@@ -31,9 +31,9 @@ S02_UEFI_FwHunt() {
   local MAX_MOD_THREADS=$((MAX_MOD_THREADS/2))
   local EXTRACTED_FILE=""
 
-  if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]]; then
+  if [[ "$RTOS" -eq 1 ]] && [[ "$UEFI_DETECTED" -eq 1 ]] && [[ -v FILE_ARR_LIMITED ]]; then
     print_output "[*] Starting FwHunter UEFI firmware vulnerability detection"
-    for EXTRACTED_FILE in "${FILE_ARR[@]}"; do
+    for EXTRACTED_FILE in "${FILE_ARR_LIMITED[@]}"; do
       if [[ $THREADED -eq 1 ]]; then
         fwhunter "$EXTRACTED_FILE" &
         WAIT_PIDS_S02+=( "$!" )

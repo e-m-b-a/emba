@@ -216,8 +216,8 @@ create_emulation_filesystem() {
     mkdir -p "$MNT_POINT/firmadyne/libnvram.override/" || true
 
     print_output "[*] Patching filesystem (chroot)"
-    cp "$(which busybox)" "$MNT_POINT" || true
-    cp "$(which bash-static)" "$MNT_POINT" || true
+    cp "$(command -v busybox)" "$MNT_POINT" || true
+    cp "$(command -v bash-static)" "$MNT_POINT" || true
 
     if [[ -f "$CSV_DIR"/s24_kernel_bin_identifier.csv ]]; then
       # kernelInit is getting the output of the init command line we get from s24
@@ -781,8 +781,8 @@ handle_fs_mounts() {
   done
 
   # now we need to startup the inferFile/inferService script again
-  cp "$(which bash-static)" "$MNT_POINT" || true
-  cp "$(which busybox)" "$MNT_POINT" || true
+  cp "$(command -v bash-static)" "$MNT_POINT" || true
+  cp "$(command -v busybox)" "$MNT_POINT" || true
   cp "$MODULE_SUB_PATH/inferService.sh" "${MNT_POINT}" || true
   print_output "[*] inferService.sh (chroot)"
   FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "$LOG_FILE"

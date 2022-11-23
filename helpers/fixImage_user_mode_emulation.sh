@@ -89,7 +89,7 @@ if ("$BUSYBOX" grep -sq "/dev/gpio/in" /bin/gpio) ||
   ("$BUSYBOX" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
   echo "[*] Creating /dev/gpio/in (required for some linksys devices)"
   "$BUSYBOX" mkdir -p /dev/gpio
-  # shellcheck disable=SC3037
+  # shellcheck disable=SC3037,2039
   echo -ne "\xff\xff\xff\xff" > /dev/gpio/in
 fi
 

@@ -63,7 +63,7 @@ S99_grepit() {
   # Do not remove -rP if you don't know what you are doing, otherwise you probably break this script
   local GREP_ARGUMENTS=(-a -n -A 1 -B 3 -rP)
   # Open the colored outputs with "less -R" or cat, otherwise remove --color=always (not recommended, colors help to find the matches in huge text files)
-  local COLOR_ARGUMENTS=(--color=always)
+  local COLOR_ARGUMENTS=("--color=always")
   export STANDARD_GREP_ARGUMENTS=("${GREP_ARGUMENTS[@]}" "${COLOR_ARGUMENTS[@]}" "${LIMIT_GREP[@]}")
   export ENABLE_LEAST_LIKELY=0
 

@@ -100,12 +100,12 @@ zyxel_zip_extractor() {
 
       print_output "[*] Running Zyxel emulation for key extraction ..."
 
-      if ! [[ -e "$(which "$EMULATOR")" ]]; then
+      if ! [[ -e "$(command -v "$EMULATOR")" ]]; then
         print_output "[-] No valid emulator ($ORANGE$EMULATOR$NC) found in your environment"
         return
       fi
 
-      cp "$(which "$EMULATOR")" "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
+      cp "$(command -v "$EMULATOR")" "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
       cp "$RI_FILE_BIN_PATH" "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
       ZLD_BIN=$(basename "$ZLD_BIN")
 

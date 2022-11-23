@@ -45,6 +45,7 @@ MODULES_TO_CHECK_ARR=()
 MODULES_TO_CHECK_ARR_TAB=()
 MODULES_TO_CHECK_ARR_SEMGREP=()
 MODULES_TO_CHECK_ARR_DOCKER=()
+MODULES_TO_CHECK_ARR_PERM=()
 
 import_config_scripts() {
   mapfile -t HELPERS < <(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
@@ -102,6 +103,18 @@ import_installer() {
   done
 }
 
+import_emba_main() {
+  MODULES=()
+  mapfile -t MODULES < <(find ./ -iname "emba.sh" -o -iname "installer.sh" -o -iname "check_project.sh" 2>/dev/null)
+  for LINE in "${MODULES[@]}"; do
+    if (file "$LINE" | grep -q "shell script"); then
+      echo "$LINE"
+      SOURCES+=("$LINE")
+    fi
+  done
+}
+
+
 dockerchecker() {
   echo -e "\\n""$ORANGE""$BOLD""EMBA docker-files check""$NC""\\n""$BOLD""=================================================================""$NC"
   mapfile -t DOCKER_COMPS < <(find . -maxdepth 1 -iname "docker-compose*.yml")
@@ -120,24 +133,9 @@ dockerchecker() {
 check() {
   echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Shellcheck""$NC""\\n""$BOLD""=================================================================""$NC"
 
-  echo -e "\\n""$GREEN""Run shellcheck on this script:""$NC""\\n"
-  if shellcheck ./check_project.sh || [[ $? -ne 1 && $? -ne 2 ]]; then
-    echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
-  else
-    echo -e "\\n""$ORANGE$BOLD==> FIX ERRORS""$NC""\\n"
-    MODULES_TO_CHECK_ARR+=("check_project.sh")
-  fi
-
-  echo -e "\\n""$GREEN""Run shellcheck on installer:""$NC""\\n"
-  if shellcheck ./installer.sh || [[ $? -ne 1 && $? -ne 2 ]]; then
-    echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
-  else
-    echo -e "\\n""$ORANGE$BOLD==> FIX ERRORS""$NC""\\n"
-    MODULES_TO_CHECK_ARR+=("installer.sh")
-  fi
-
   echo -e "\\n""$GREEN""Load all files for check:""$NC""\\n"
-  echo "./emba.sh"
+
+  import_emba_main
   import_installer
   import_helper
   import_config_scripts
@@ -166,12 +164,23 @@ check() {
     fi
 
     echo -e "\\n""$GREEN""Run ${ORANGE}semgrep$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE" | tee /tmp/emba_semgrep.log
+    semgrep --disable-version-check --metrics=off --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE" | tee /tmp/emba_semgrep.log
     if grep -q "Findings:" /tmp/emba_semgrep.log; then
       echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
       MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
     else
       echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    fi
+  done
+
+  echo -e "\\n""$GREEN""Check all scripts for correct permissions:""$NC""\\n"
+  for SOURCE in "${SOURCES[@]}"; do
+    echo -e "\\n""$GREEN""Check ${ORANGE}permission$GREEN on $ORANGE$SOURCE""$NC""\\n"
+    if stat -L -c "%a" "$SOURCE" | grep -q "755"; then
+      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    else
+      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+      MODULES_TO_CHECK_ARR_PERM+=("$SOURCE")
     fi
   done
 }
@@ -215,6 +224,15 @@ summary() {
     done
     echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
+  if [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "Modules to check (permissions): ${#MODULES_TO_CHECK_ARR_PERM[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR_PERM[@]}"; do
+      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+    done
+    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+
 
 }
 
@@ -239,3 +257,7 @@ check
 dockerchecker
 summary
 
+if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
+  [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]]; then
+  exit 1
+fi

@@ -243,7 +243,7 @@ prepare_emulator() {
       print_output "$(indent "$(red "Terminating EMBA now.\\n")")"
       exit 1
     else
-      cp "$(which "$EMULATOR")" "$R_PATH"
+      cp "$(command -v "$EMULATOR")" "$R_PATH"
     fi
 
     if ! [[ -d "$R_PATH""/proc" ]] ; then
@@ -281,7 +281,7 @@ prepare_emulator() {
     print_output "[*] Final fixes of the root filesytem in a chroot environment"
     cp "$HELP_DIR"/fixImage_user_mode_emulation.sh "$R_PATH"
     chmod +x "$R_PATH"/fixImage_user_mode_emulation.sh
-    cp "$(which busybox)" "$R_PATH"
+    cp "$(command -v busybox)" "$R_PATH"
     chmod +x "$R_PATH"/busybox
     if [[ "$CHROOT" == "jchroot" ]]; then
       "$CHROOT" "${OPTS[@]}" "$R_PATH" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt || print_output "[-] Something weird going wrong in chroot filesystem fixing"

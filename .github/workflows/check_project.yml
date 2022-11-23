@@ -1,0 +1,31 @@
+# This workflow tests the project for proper linting
+
+name: Check the project with check_project.sh
+
+on:
+  push:
+    branches:    
+      - '**'        # matches every branch
+  pull_request:
+    branches:
+      - '**'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v2
+    - name: Install dependencies for check script
+      run: |
+        sudo apt-get install -y shellcheck python3-pip
+        pip3 install -U requests
+        pip3 install semgrep
+        mkdir ./external
+        git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
+    - name: Run check_project.sh
+      run: |
+        ./check_project.sh
