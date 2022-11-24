@@ -32,13 +32,15 @@ S24_kernel_bin_identifier()
     prepare_file_arr_limited "$FIRMWARE_PATH_CP"
   fi
 
-  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted"
+  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols"
 
   for FILE in "${FILE_ARR_LIMITED[@]}" ; do
     local K_ELF="NA"
-    local K_CONFIG_EXTRACTED="NA"
+    local KCONFIG_EXTRACTED="NA"
     local K_VER_CLEAN="NA"
+    local K_INIT="NA"
     local CFG_CNT=0
+    local K_SYMBOLS=0
 
     if file "$FILE" | grep -q "ASCII text"; then
       # reduce false positive rate
@@ -59,6 +61,8 @@ S24_kernel_bin_identifier()
         print_ln
         print_output "$(indent "$(orange "$K_INIT")")"
         print_ln
+      else
+        K_INIT="NA"
       fi
 
       if [[ -e "$EXT_DIR"/vmlinux-to-elf/vmlinux-to-elf ]]; then
@@ -89,17 +93,20 @@ S24_kernel_bin_identifier()
         check_kconfig "$KCONFIG_EXTRACTED"
       fi
 
-      K_VER_TMP="$(echo "$K_VER" | sed 's/Linux version //')"
+      K_VER_TMP="${K_VER/Linux version /}"
       demess_kv_version "$K_VER_TMP"
+
+      if [[ "$K_ELF" == *"ELF "* ]]; then
+        K_ELF="$(echo "$K_ELF" | cut -d: -f1)"
+        K_SYMBOLS="$(readelf -s "$K_ELF" | grep -c "FUNC\|OBJECT" || true)"
+      fi
+
       for K_VER_CLEAN in "${KV_ARR[@]}"; do
         # we should only get one element back, but as array
-        if [[ "$K_ELF" == *"ELF "* ]]; then
-          K_ELF="$(echo "$K_ELF" | cut -d: -f1)"
-        fi
         if [[ "$CFG_CNT" -gt 50 ]]; then
-          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "$KCONFIG_EXTRACTED"
+          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "$KCONFIG_EXTRACTED" "$K_SYMBOLS"
         else
-          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "NA"
+          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "NA" "$K_SYMBOLS"
         fi
       done
       NEG_LOG=1
