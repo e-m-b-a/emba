@@ -32,14 +32,19 @@ S24_kernel_bin_identifier()
     prepare_file_arr_limited "$FIRMWARE_PATH_CP"
   fi
 
-  write_csv_log "Kernel version" "file" "identified init"
+  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted"
 
   for FILE in "${FILE_ARR_LIMITED[@]}" ; do
+    local K_ELF="NA"
+    local K_CONFIG_EXTRACTED="NA"
+    local K_VER_CLEAN="NA"
+    local CFG_CNT=0
+
     if file "$FILE" | grep -q "ASCII text"; then
       # reduce false positive rate
       continue
     fi
-    K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" || true)
+    K_VER=$(strings "$FILE" 2>/dev/null | grep -E "^Linux version [0-9]+\.[0-9]+" | sort -u || true)
 
     if [[ "$K_VER" =~ Linux\ version\ .* ]]; then
       print_ln
@@ -48,7 +53,7 @@ S24_kernel_bin_identifier()
       print_output "$(indent "$(orange "$K_VER")")"
       print_ln
 
-      K_INIT=$(strings "$FILE" 2>/dev/null | grep -E "init=\/" || true)
+      K_INIT=$(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sort -u || true)
       if [[ "$K_INIT" =~ init=\/.* ]]; then
         print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
         print_ln
@@ -84,7 +89,19 @@ S24_kernel_bin_identifier()
         check_kconfig "$KCONFIG_EXTRACTED"
       fi
 
-      write_csv_log "$K_VER" "$FILE" "$K_INIT"
+      K_VER_TMP="$(echo "$K_VER" | sed 's/Linux version //')"
+      demess_kv_version "$K_VER_TMP"
+      for K_VER_CLEAN in "${KV_ARR[@]}"; do
+        # we should only get one element back, but as array
+        if [[ "$K_ELF" == *"ELF "* ]]; then
+          K_ELF="$(echo "$K_ELF" | cut -d: -f1)"
+        fi
+        if [[ "$CFG_CNT" -gt 50 ]]; then
+          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "$KCONFIG_EXTRACTED"
+        else
+          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "NA"
+        fi
+      done
       NEG_LOG=1
 
     # ASCII kernel config files:
