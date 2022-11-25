@@ -67,5 +67,4 @@ IF50_aggregator_common() {
   # we were running into issues that this package was removed somehow during the installation process
   # Todo: figure out why and solve it somehow
   apt-get install p7zip-full -y
-  pip3 install --force-reinstall --no-deps --ignore-installed requests==2.28.1
 } 
