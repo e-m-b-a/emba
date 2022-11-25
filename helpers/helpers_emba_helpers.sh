@@ -140,6 +140,11 @@ cleaner() {
     pkill -f "find ./external/trickest" 2>/dev/null || true
   fi
 
+  # just in case we have the temp trickest db left
+  if [[ -f "$EXT_DIR"/trickest_db-cleaned.txt ]]; then
+    rm "$EXT_DIR"/trickest_db-cleaned.txt || true
+  fi
+
   # what a quick fix - need to come back to this!
   #if [[ "$NOTIFICATION_PID" != "NA" ]]; then
   #  kill "$NOTIFICATION_PID" 2>/dev/null || true
