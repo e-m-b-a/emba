@@ -103,11 +103,6 @@ IL15_emulated_checks_init() {
 
       # we need to safe /var/lib/nikto now
       if [[ -d /var/lib/nikto ]]; then
-        cp -pri /var/lib/nikto external/var_lib_nikto
-      fi
-
-      # we need to safe /var/lib/nikto now
-      if [[ -d /var/lib/nikto ]]; then
         echo "[*] Backup nikto directory to /external"
         mkdir external/var_lib_nikto
         cp -pr /var/lib/nikto external/var_lib_nikto
