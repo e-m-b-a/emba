@@ -22,13 +22,13 @@ IP00_extractors(){
 
     print_tool_info "python3-pip" 1
     print_tool_info "patool" 1
-    print_pip_info "protobuf"
-    print_pip_info "bsdiff4"
+    pipenv install --deploy "protobuf"
+    pipenv install --deploy "bsdiff4"
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     # ubireader:
     #print_tool_info "python3-lzo" 1
     print_tool_info "liblzo2-dev" 1
-    print_pip_info "python-lzo"
+    # pipenv install --deploy "python-lzo"
     # vmdk extractor:
     print_tool_info "guestfs-tools" 1
     # Buffalo decryptor
@@ -50,9 +50,9 @@ IP00_extractors(){
         echo
 
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-        pip3 install protobuf
-        pip3 install bsdiff4
-        pip3 install "python-lzo>=1.14"
+        pipenv install --deploy protobuf
+        pipenv install --deploy bsdiff4
+        # pipenv install --deploy "python-lzo>=1.14"
 
         if ! [[ -d external/payload_dumper ]]; then
           git clone https://github.com/EMBA-support-repos/payload_dumper.git external/payload_dumper

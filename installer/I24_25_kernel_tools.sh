@@ -20,7 +20,7 @@ I24_25_kernel_tools() {
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
 
     print_tool_info "python3-pip" 1
-    print_pip_info "python-lzo"
+    # pipenv install --deploy "python-lzo"
     print_git_info "kconfig-hardened-check" "EMBA-support-repos/kconfig-hardened-check" "There are plenty of security hardening options for the Linux kernel. This tool checks them."
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
@@ -38,8 +38,8 @@ I24_25_kernel_tools() {
         fi
 
         cd external/vmlinux-to-elf || ( echo "Could not install EMBA component vmlinux-to-elf" && exit 1 )
-        pip3 install --upgrade git+https://github.com/EMBA-support-repos/vmlinux-to-elf
-        pip3 install "python-lzo>=1.14"
+        pipenv install --deploy -e git+https://github.com/EMBA-support-repos/vmlinux-to-elf#egg=vmlinux-to-elf
+        # pipenv install --deploy "python-lzo>=1.14" TODO this needed?
         cd "$HOME_PATH" || ( echo "Could not install EMBA component vmlinux-to-elf" && exit 1 )
 
         if ! [[ -d external/kconfig-hardened-check ]]; then
@@ -48,4 +48,4 @@ I24_25_kernel_tools() {
       ;;
     esac
   fi
-} 
+}

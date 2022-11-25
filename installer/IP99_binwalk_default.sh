@@ -64,17 +64,17 @@ IP99_binwalk_default() {
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
     #print_tool_info "python3-lzo" 1
-    print_pip_info "python-lzo"
+    # pipenv install --deploy "python-lzo"
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "srecord" 1
 
-    print_pip_info "nose"
-    print_pip_info "coverage"
-    print_pip_info "pyqtgraph"
-    print_pip_info "capstone"
-    print_pip_info "cstruct"
-    print_pip_info "matplotlib"
+    pipenv install --deploy "nose"
+    pipenv install --deploy "coverage"
+    pipenv install --deploy "pyqtgraph"
+    pipenv install --deploy "capstone"
+    pipenv install --deploy "cstruct"
+    pipenv install --deploy "matplotlib"
 
     print_git_info "binwalk" "EMBA-support-repos/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
     echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
@@ -100,13 +100,13 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        pip3 install nose
-        pip3 install coverage
-        pip3 install pyqtgraph
-        pip3 install capstone
-        pip3 install cstruct
-        pip3 install matplotlib
-        pip3 install "python-lzo>=1.14"
+        pipenv install --deploy nose
+        pipenv install --deploy coverage
+        pipenv install --deploy pyqtgraph
+        pipenv install --deploy capstone
+        pipenv install --deploy cstruct
+        pipenv install --deploy matplotlib
+        # pipenv install --deploy "python-lzo>=1.14"
 
         if ! [[ -d external/binwalk ]]; then
           #git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
@@ -152,11 +152,11 @@ IP99_binwalk_default() {
             git clone https://github.com/EMBA-support-repos/jefferson external/binwalk/jefferson
           fi
 
-          while read -r TOOL_NAME; do
-            print_pip_info "$TOOL_NAME"
-          done < ./external/binwalk/jefferson/requirements.txt
+          # while read -r TOOL_NAME; do
+          #   pipenv install --deploy "$TOOL_NAME"
+          # done < ./external/binwalk/jefferson/requirements.txt
 
-          pip3 install -r ./external/binwalk/jefferson/requirements.txt
+          pipenv install --deploy -r ./external/binwalk/jefferson/requirements.txt
           cd ./external/binwalk/jefferson/ || ( echo "Could not install EMBA component jefferson" && exit 1 )
           python3 ./setup.py install
           cd "$HOME_PATH" || ( echo "Could not install EMBA component jefferson" && exit 1 )

@@ -48,21 +48,18 @@ IF20_cve_search() {
         print_tool_info "$TOOL_NAME" 1
       done < requirements.system
 
-      while read -r TOOL_NAME; do
-        PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
-        TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
-        print_pip_info "$PIP_NAME" "$TOOL_VERSION"
-      done < requirements.txt
+      #while read -r TOOL_NAME; do
+      #  PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
+      #  TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
+      #  print_pip_info "$PIP_NAME" "$TOOL_VERSION"
+      #done < requirements.txt
 
       #xargs sudo apt-get install -y < requirements.system
       while read -r TOOL_NAME; do
         apt-get install -y "$TOOL_NAME" --no-install-recommends
       done < requirements.system
 
-      # this is a temp solution - Currently needed to fulfill broken deps:
-      python3 -m pip install -Iv crackmapexec==5.1.7.dev0
-
-      python3 -m pip install -r requirements.txt
+      pipenv install -r requirements.txt
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 
       echo -e "[*] Setting up CVE-search environment - ./external/cve-search/etc/configuration.ini"

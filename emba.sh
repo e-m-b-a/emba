@@ -607,6 +607,9 @@ main()
 
     enable_strict_mode "$STRICT_MODE"
 
+    # source pipenv
+    source ./.venv/bin/activate
+
     # profile handling
     if [[ -n "${PROFILE:-}" ]]; then
       if [[ -f "$PROFILE" ]]; then

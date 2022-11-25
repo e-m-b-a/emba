@@ -42,9 +42,8 @@ I01_default_apps(){
     print_tool_info "git" 1
     print_tool_info "strace" 1
 
-    # python3.10-request
-    print_tool_info "python3-pip" 1
-    print_pip_info "requests"
+    # python
+    print_tool_info "python3-pipenv" 1
 
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
@@ -79,7 +78,7 @@ I01_default_apps(){
         #sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
         sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-        pip3 install -U requests 2>/dev/null || true
+        # create_pipenv 1
       ;;
     esac
   fi

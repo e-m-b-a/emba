@@ -27,7 +27,7 @@ I108_stacs_password_search() {
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
   
     print_tool_info "libarchive-dev" 1
-    print_pip_info "stacs"
+    pipenv install --deploy "stacs"
     print_git_info "stacs-rules" "stacscan/stacs-rules" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
@@ -47,7 +47,7 @@ I108_stacs_password_search() {
           | xargs -I{} bash -c "\
             mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
             touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
-        pip3 install stacs 2>/dev/null
+        pipenv install --deploy stacs 2>/dev/null
         cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
         if command -v stacs > /dev/null ; then
           echo -e "$GREEN""STACS installed successfully""$NC"

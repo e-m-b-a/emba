@@ -29,7 +29,7 @@ I199_default_tools_github() {
     print_file_info "progpilot" "progpilot is a tool for static security tests on php files." "https://github.com/designsecurity/progpilot/releases/download/v0.8.0/progpilot_v0.8.0.phar" "external/progpilot"
     print_file_info "EnGenius decryptor" "Decrypts EnGenius firmware files." "https://gist.githubusercontent.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99/raw/5600956a5bba4c674a010bf27e7eaad25a496b87/decrypt.py" "external/engenius-decrypt.py"
   
-    print_pip_info "pillow"
+    pipenv install --deploy "pillow"
     print_git_info "jchroot" "EMBA-support-repos/jchroot" "jchroot - a chroot with more isolation"
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
@@ -49,7 +49,7 @@ I199_default_tools_github() {
         download_file "EnGenius decryptor" "https://gist.githubusercontent.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99/raw/5600956a5bba4c674a010bf27e7eaad25a496b87/decrypt.py" "external/engenius-decrypt.py"
   
         # pixd installation
-        pip3 install pillow 2>/dev/null
+        pipenv install --deploy pillow 2>/dev/null
         echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"
         git clone https://github.com/p4cx/pixd_image external/pixd
         cd ./external/pixd/ || ( echo "Could not install EMBA component pixd" && exit 1 )

@@ -24,10 +24,10 @@ I02_UEFI_fwhunt() {
     print_tool_info "meson" 1
     print_tool_info "python3-pip" 1
     print_tool_info "gcc" 1
-    print_pip_info "rzpipe"
-    print_pip_info "uefi_firmware"
-    print_pip_info "pyyaml"
-    print_pip_info "click"
+    pipenv install --deploy "rzpipe"
+    pipenv install --deploy "uefi_firmware"
+    pipenv install --deploy "pyyaml"
+    pipenv install --deploy "click"
     print_git_info "rizin" "rizinorg/rizin" ""
     print_git_info "fwhunt-scan" "EMBA-support-repos/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
     print_git_info "fwhunt-rules" "EMBA-support-repos/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
@@ -43,10 +43,10 @@ I02_UEFI_fwhunt() {
     case ${ANSWER:0:1} in
       y|Y )
   
-        pip3 install rzpipe 2>/dev/null
-        pip3 install click 2>/dev/null
-        pip3 install pyyaml 2>/dev/null
-        pip3 install uefi_firmware 2>/dev/null
+        pipenv install --deploy rzpipe 2>/dev/null
+        pipenv install --deploy click 2>/dev/null
+        pipenv install --deploy pyyaml 2>/dev/null
+        pipenv install --deploy uefi_firmware 2>/dev/null
 
         # rizin:
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
@@ -79,7 +79,7 @@ I02_UEFI_fwhunt() {
         #ldconfig
         #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
         #python3 setup.py install
-        pip3 install fwhunt-scan
+        pipenv install --deploy fwhunt-scan
         cd "$HOME_PATH" || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
       ;;
     esac

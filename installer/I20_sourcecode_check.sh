@@ -29,7 +29,7 @@ I20_sourcecode_check() {
   
     print_tool_info "shellcheck" 1
     print_tool_info "php" 1
-    print_pip_info "semgrep"
+    pipenv install --deploy "semgrep"
     print_git_info "semgrep-rules" "returntocorp/semgrep-rules" "Standard library for Semgrep rules"
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
@@ -45,7 +45,7 @@ I20_sourcecode_check() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        pip3 install semgrep
+        pipenv install --deploy semgrep
         if ! [[ -d external/semgrep-rules ]]; then
           git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
         fi

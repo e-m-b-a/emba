@@ -25,24 +25,24 @@ IF50_aggregator_common() {
     print_tool_info "python3-pip" 1
     print_tool_info "net-tools" 1
     print_tool_info "exploitdb" 1
-    print_pip_info "cve-searchsploit"
+    pipenv install --deploy "cve-searchsploit"
     echo -e "\\n""$ORANGE""$BOLD""cyclonedx""$NC"
     echo -e "$ORANGE""cyclonedx sbom converter will be installed.""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""cyclonedx, net-tools, pip3, cve-search, trickest and cve_searchsploit (if not already on the system) will be downloaded and installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""cyclonedx, net-tools, pipenv, cve-search, trickest and cve_searchsploit (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
 
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-        pip3 install cve_searchsploit 2>/dev/null
+        pipenv install --deploy cve_searchsploit 2>/dev/null
 
         # we try to avoid downloading the exploit-database multiple times:
-        CVE_SEARCH_PATH=$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')
+        CVE_SEARCH_PATH=$(pipenv show cve-searchsploit | grep "Location" | awk '{print $2}')
         if [[ -d "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database" ]] && [[ -d "/usr/share/exploitdb" ]]; then
           rm -r "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database"
         fi

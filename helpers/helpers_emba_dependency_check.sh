@@ -213,6 +213,12 @@ setup_unblob() {
   fi
 }
 
+check_pipenv()
+{
+  PIPENV_VENV_IN_PROJECT=1 pipenv check
+  PIPENV_VENV_IN_PROJECT=1 pipenv verify
+}
+
 dependency_check() 
 {
   module_title "Dependency check" "no_log"
@@ -291,7 +297,9 @@ dependency_check()
       echo -e "$GREEN""ok""$NC"
     fi
   fi
-
+  
+  # check python-environment
+  check_pipenv
 
   print_ln "no_log"
   print_output "[*] Necessary utils on system:" "no_log"
