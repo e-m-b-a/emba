@@ -41,7 +41,7 @@ wait_for_pid() {
       #print_output "[*] wait pid protection - running pid: $PID"
       print_dot
       # if S115 is running we have to kill old qemu processes
-      if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
+      if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
         killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
       fi
     done
