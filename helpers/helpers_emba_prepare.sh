@@ -628,6 +628,13 @@ generate_trickest_db() {
     cd ../.. || true
 
     find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH" || true
+
+    # if we have a blacklist file we are going to apply it to the generated trickest database
+    if [[ -f "$CONFIG_DIR"/trickest_blacklist.txt ]] && [[ -f "$TRICKEST_DB_PATH" ]]; then
+      grep -Fvf "$CONFIG_DIR"/trickest_blacklist.txt "$TRICKEST_DB_PATH" > "$EXT_DIR"/trickest_db-cleaned.txt || true
+      mv "$EXT_DIR"/trickest_db-cleaned.txt "$TRICKEST_DB_PATH" || true
+    fi
+
     if [[ -f "$TRICKEST_DB_PATH" ]]; then
       print_output "[*] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$NC exploit entries." "no_log"
     fi

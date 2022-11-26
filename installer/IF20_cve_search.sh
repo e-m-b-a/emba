@@ -176,4 +176,6 @@ IF20_cve_search() {
       ;;
     esac
   fi
+
+  pip3 install --force-reinstall --no-deps --ignore-installed requests==2.28.1
 } 
