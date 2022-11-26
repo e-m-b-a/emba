@@ -5,6 +5,7 @@
 # shellcheck disable=SC2148
 BUSYBOX="/busybox"
 
+"${BUSYBOX}" touch /firmadyne/init_tmp
 "${BUSYBOX}" touch /firmadyne/init
 "${BUSYBOX}" echo "[*] EMBA inferFile script starting ..."
 
@@ -58,6 +59,10 @@ if ("${FIRMAE_BOOT}"); then
       if [ -d "${FILE}" ]; then
         continue
       fi
+      if [ "$FILE" = "/firmadyne/init" ]; then
+        # skip our own init
+        continue
+      fi
       if [ ! -e "${FILE}" ]; then # could not find original file (symbolic link or just file)
         if [ -h "${FILE}" ]; then # remove old symbolic link
           "${BUSYBOX}" rm "${FILE}"
@@ -75,14 +80,16 @@ if ("${FIRMAE_BOOT}"); then
       fi
       if [ -e "${FILE}" ]; then
         "${BUSYBOX}" echo "[*] Writing firmadyne init $FILE"
-        "${BUSYBOX}" echo "${FILE}" >> /firmadyne/init
+        "${BUSYBOX}" echo "${FILE}" >> /firmadyne/init_tmp
       fi
     done
   fi
 fi
 
 "${BUSYBOX}" echo "[*] Re-creating firmadyne/init:"
+"${BUSYBOX}" sort /firmadyne/init_tmp > /firmadyne/init
 "${BUSYBOX}" echo '/firmadyne/preInit.sh' >> /firmadyne/init
 "${BUSYBOX}" cat /firmadyne/init
+"${BUSYBOX}" rm /firmadyne/init_tmp
 
 "${BUSYBOX}" echo "[*] EMBA inferFile script finished ..."
