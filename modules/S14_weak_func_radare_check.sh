@@ -424,6 +424,7 @@ radare_print_top10_statistics() {
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
           fi
         done
+        print_ln
       fi  
     done
   else
