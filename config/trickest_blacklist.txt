@@ -1,1 +1,5 @@
-REMOVE THIS LINE and ADD YOUR BLACKLISTED URLS
+thdusdl1219/CVE-Study
+facebookincubator/nvdtools
+akiraabe/myapp-container-jaxrs
+rostskadat/ziniollc-devops-test-62f1178138d1
+turbot/steampipe-plugin-trivy
