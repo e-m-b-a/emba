@@ -89,6 +89,9 @@ P61_unblob_eval() {
     print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER_UNBLOB$NC."
     print_ln
     print_output "[*] ${ORANGE}EMBA/binwalk$NC results:$NC"
+    if [[ -f "$LOG_DIR/p59_binwalk_extractor.txt" ]]; then
+      write_link "p59"
+    fi
     print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
     print_output "[*] Found $ORANGE$BINS$NC binaries."
     print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
