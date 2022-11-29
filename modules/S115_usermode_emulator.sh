@@ -596,16 +596,16 @@ emulate_binary() {
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]]; then
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" &> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       else
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" &> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       fi
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]]; then
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       else
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       fi
     fi
     if [[ "$STRICT_MODE" -eq 1 ]]; then
