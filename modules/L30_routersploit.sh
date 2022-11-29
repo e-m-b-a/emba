@@ -72,6 +72,18 @@ check_live_routersploit() {
     grep -B 1 "Target seems to be vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE"
     print_ln
   fi
+
+  color_routersploit_log "$LOG_PATH_MODULE/routersploit-$IP_ADDRESS_.txt"
+
   print_output "[*] Routersploit tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
 }
 
+color_routersploit_log() {
+  local RSPLOIT_LOG_FILE_="${1:-}"
+  if ! [[ -f "${RSPLOIT_LOG_FILE_:-}" ]]; then
+    return
+  fi
+
+  sed -i -r "s/Target is vulnerable/\x1b[32m&\x1b[0m/" "$RSPLOIT_LOG_FILE_"
+  sed -i -r "s/Target seems to be vulnerable/\x1b[32m&\x1b[0m/" "$RSPLOIT_LOG_FILE_"
+}

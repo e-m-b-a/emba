@@ -424,6 +424,7 @@ radare_print_top10_statistics() {
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
           fi
         done
+        print_ln
       fi  
     done
   else
@@ -433,7 +434,7 @@ radare_print_top10_statistics() {
 
 radare_color_output() {
   local FUNCTION="${1:-}"
-  sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
+  sed -i -r "s/^[[:alnum:]].*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
 }
 
 radare_log_bin_hardening() {
