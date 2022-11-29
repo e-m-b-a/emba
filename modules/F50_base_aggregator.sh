@@ -657,7 +657,7 @@ output_cve_exploits() {
         write_link "l35"
       fi
       if [[ "$REMOTE_EXPLOIT_CNT" -gt 0 || "$LOCAL_EXPLOIT_CNT" -gt 0 || "$DOS_EXPLOIT_CNT" -gt 0 || "$GITHUB_EXPLOIT_CNT" -gt 0 || "$KNOWN_EXPLOITED_COUNTER" -gt 0 || "$MSF_VERIFIED" -gt 0 ]]; then
-        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited vulnerabilities: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$GREE / Verified Exploits: $MAGENTA$BOLD$MSF_VERIFIED$NC")")"
+        print_output "$(indent "$(green "Remote exploits: $MAGENTA$BOLD$REMOTE_EXPLOIT_CNT$NC$GREEN / Local exploits: $MAGENTA$BOLD$LOCAL_EXPLOIT_CNT$NC$GREEN / DoS exploits: $MAGENTA$BOLD$DOS_EXPLOIT_CNT$NC$GREEN / Github PoCs: $MAGENTA$BOLD$GITHUB_EXPLOIT_CNT$NC$GREEN / Known exploited vulnerabilities: $MAGENTA$BOLD$KNOWN_EXPLOITED_COUNTER$GREEN / Verified Exploits: $MAGENTA$BOLD$MSF_VERIFIED$NC")")"
         write_csv_log "remote_exploits" "$REMOTE_EXPLOIT_CNT" "NA"
         write_csv_log "local_exploits" "$LOCAL_EXPLOIT_CNT" "NA"
         write_csv_log "dos_exploits" "$DOS_EXPLOIT_CNT" "NA"

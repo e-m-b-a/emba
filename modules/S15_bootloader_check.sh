@@ -66,7 +66,7 @@ check_bootloader()
   # Syslinux
   local SYSLINUX_PATHS=()
   local SYSLINUX_FILE=""
-  mapfile -t SYSLINUX_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/syslinux/syslinux.cfg")
+  mapfile -t SYSLINUX_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/syslinux/syslinux.cfg" || true)
   for SYSLINUX_FILE in "${SYSLINUX_PATHS[@]}" ; do
     if [[ -f "$SYSLINUX_FILE" ]] ; then
       CHECK=1
@@ -83,7 +83,7 @@ check_bootloader()
   CHECK=0
   local GRUB_PATHS=()
   local GRUB_FILE=""
-  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf" || true)
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -93,7 +93,7 @@ check_bootloader()
       ((STARTUP_FINDS+=1))
     fi
   done
-  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/menu.lst")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/menu.lst" || true)
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -109,7 +109,7 @@ check_bootloader()
 
   # Grub2
   CHECK=0
-  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.cfg")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.cfg" || true)
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -119,7 +119,7 @@ check_bootloader()
       ((STARTUP_FINDS+=1))
     fi
   done
-  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf")
+  mapfile -t GRUB_PATHS < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/grub/grub.conf" || true)
   for GRUB_FILE in "${GRUB_PATHS[@]}" ; do
     if [[ -f "$GRUB_FILE" ]] ; then
       CHECK=1
@@ -170,11 +170,11 @@ check_bootloader()
   CHECK=0
   local BOOT1 BOOT2 BOOTL
   #mapfile -t BOOT1 < <(mod_path "/boot/boot1")
-  mapfile -t BOOT1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot1")
+  mapfile -t BOOT1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot1" || true)
   #mapfile -t BOOT2 < <(mod_path "/boot/boot2")
-  mapfile -t BOOT2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot2")
+  mapfile -t BOOT2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot2" || true)
   #mapfile -t BOOTL < <(mod_path "/boot/loader")
-  mapfile -t BOOTL < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/loader")
+  mapfile -t BOOTL < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/loader" || true)
 
   for B1 in "${BOOT1[@]}" ; do
     for B2 in "${BOOT2[@]}" ; do
