@@ -38,7 +38,7 @@ if ("${FIRMAE_BOOT}"); then
     "${BUSYBOX}" echo "[*] Found boot file $FILE"
     # sysinit entry is the one to look for
     # shellcheck disable=SC2016
-    for STARTUP_FILE in $("${BUSYBOX}" grep ":.*sysinit:" "$FILE" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u)
+    for STARTUP_FILE in $("${BUSYBOX}" grep "^:.*sysinit:" "$FILE" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u)
     do
       "${BUSYBOX}" echo "[*] Found possible startup file $STARTUP_FILE"
       arr+=("${STARTUP_FILE}")
