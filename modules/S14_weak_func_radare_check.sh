@@ -108,6 +108,10 @@ S14_weak_func_radare_check()
           else
             radare_function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
+        elif ( file "$BINARY" | grep -q "QUALCOMM DSP6" ) ; then
+          print_output "[-] Qualcom DSP6 is currently not supported for further analysis"
+          print_output "[-] Tested binary: $ORANGE$BINARY$NC"
+          print_output "[-] Please check for updates: https://github.com/e-m-b-a/emba/issues/395"
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: $ORANGE$BINARY$NC"
