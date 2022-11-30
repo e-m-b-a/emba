@@ -233,6 +233,9 @@ download_file()
   if [[ -f "${3:-}" ]] && ! [[ -x "${3:-}" ]] ; then
     chmod +x "${3:-}"
   fi
+  if [[ -f "./.wget.log" ]]; then
+    rm "./.wget.log" || true
+  fi
 }
 
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
