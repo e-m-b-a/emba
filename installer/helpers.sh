@@ -207,6 +207,9 @@ print_file_info()
   else
     echo -e "$ORANGE""${1:-}"" has already been downloaded.""$NC"
   fi
+  if [[ -f "./.wget.log" ]]; then
+    rm "./.wget.log" || true
+  fi
 }
 
 # download_file a b c
