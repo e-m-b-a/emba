@@ -108,6 +108,10 @@ S14_weak_func_radare_check()
           else
             radare_function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
+        elif ( file "$BINARY" | grep -q "QUALCOMM DSP6" ) ; then
+          print_output "[-] Qualcom DSP6 is currently not supported for further analysis"
+          print_output "[-] Tested binary: $ORANGE$BINARY$NC"
+          print_output "[-] Please check for updates: https://github.com/e-m-b-a/emba/issues/395"
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: $ORANGE$BINARY$NC"
@@ -424,6 +428,7 @@ radare_print_top10_statistics() {
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
           fi
         done
+        print_ln
       fi  
     done
   else
@@ -433,7 +438,7 @@ radare_print_top10_statistics() {
 
 radare_color_output() {
   local FUNCTION="${1:-}"
-  sed -i -r "s/^.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
+  sed -i -r "s/^[[:alnum:]].*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
 }
 
 radare_log_bin_hardening() {

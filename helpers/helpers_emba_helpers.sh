@@ -41,7 +41,7 @@ wait_for_pid() {
       #print_output "[*] wait pid protection - running pid: $PID"
       print_dot
       # if S115 is running we have to kill old qemu processes
-      if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
+      if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
         killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
       fi
     done
@@ -67,7 +67,7 @@ max_pids_protection() {
       fi
     done
     # if S115 is running we have to kill old qemu processes
-    if [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
       killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
     fi
 
@@ -138,6 +138,11 @@ cleaner() {
 
   if [[ "$IN_DOCKER" -eq 0 ]] && pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
     pkill -f "find ./external/trickest" 2>/dev/null || true
+  fi
+
+  # just in case we have the temp trickest db left
+  if [[ -f "$EXT_DIR"/trickest_db-cleaned.txt ]]; then
+    rm "$EXT_DIR"/trickest_db-cleaned.txt || true
   fi
 
   # what a quick fix - need to come back to this!

@@ -100,14 +100,17 @@ S13_weak_func_check()
           else
             function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
-       elif ( file "$BINARY" | grep -q "Altera Nios II" ) ; then
+        elif ( file "$BINARY" | grep -q "Altera Nios II" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             function_check_NIOS2 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
             WAIT_PIDS_S13+=( "$!" )
           else
             function_check_NIOS2 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
-
+        elif ( file "$BINARY" | grep -q "QUALCOMM DSP6" ) ; then
+          print_output "[-] Qualcom DSP6 is currently not supported for further analysis"
+          print_output "[-] Tested binary: $ORANGE$BINARY$NC"
+          print_output "[-] Please check for updates: https://github.com/e-m-b-a/emba/issues/395"
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: $ORANGE$BINARY$NC"

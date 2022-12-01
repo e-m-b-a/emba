@@ -1237,7 +1237,14 @@ get_networking_details_emulation() {
       done
     fi
 
-    eval "IPS_INT_VLAN=($(for i in "${IPS_INT_VLAN[@]}" ; do echo "\"$i\"" ; done | sort -u))"
+    eval "IPS_INT_VLAN=(
+    $(for i in "${IPS_INT_VLAN[@]}" ; do
+      if [[ "$i" == *"default"* ]]; then
+        # Quick fix - we remove the default entry now and add it later on to the last position
+        continue
+      fi
+      echo "\"$i\"" ;
+    done | sort -u))"
 
     # fallback - default network configuration:
     # we always add this as the last resort - with this at least ICMP should be possible in most cases

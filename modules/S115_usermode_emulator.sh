@@ -182,7 +182,7 @@ S115_usermode_emulator() {
                 WAIT_PIDS_S115+=( "$!" )
                 max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115[@]}"
               else
-                emulate_binary "$EMULATOR" "$R_PATH" "$BIN_" &
+                emulate_binary "$EMULATOR" "$R_PATH" "$BIN_"
               fi
             fi
           fi
@@ -555,7 +555,7 @@ emulate_binary() {
   # now we should have CPU_CONFIG in log file from Binary
 
   local CPU_CONFIG_=""
-  CPU_CONFIG_="$(grep "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2 | sort -u | head -1 || true)"
+  CPU_CONFIG_="$(grep -a "CPU_CONFIG_det" "$LOG_PATH_MODULE""/qemu_init_""$BIN_EMU_NAME"".txt" | cut -d\; -f2 | sort -u | head -1 || true)"
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
   write_log "[*] Emulating binary name: $ORANGE$BIN_EMU_NAME$NC" "$LOG_FILE_BIN"
@@ -596,16 +596,16 @@ emulate_binary() {
     if [[ -z "$CPU_CONFIG_" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]]; then
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       else
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       fi
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]]; then
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       else
-        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" >> "$LOG_FILE_BIN" || true &
+        timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       fi
     fi
     if [[ "$STRICT_MODE" -eq 1 ]]; then
