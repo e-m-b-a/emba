@@ -25,24 +25,24 @@ IF50_aggregator_common() {
     print_tool_info "python3-pip" 1
     print_tool_info "net-tools" 1
     print_tool_info "exploitdb" 1
-    pipenv install --deploy "cve-searchsploit"
+    print_pip_info "cve-searchsploit"
     echo -e "\\n""$ORANGE""$BOLD""cyclonedx""$NC"
     echo -e "$ORANGE""cyclonedx sbom converter will be installed.""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""cyclonedx, net-tools, pipenv, cve-search, trickest and cve_searchsploit (if not already on the system) will be downloaded and installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""cyclonedx, net-tools, pip3, cve-search, trickest and cve_searchsploit (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
 
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-        pipenv install --deploy cve_searchsploit 2>/dev/null
+        pip3 install cve_searchsploit 2>/dev/null
 
         # we try to avoid downloading the exploit-database multiple times:
-        CVE_SEARCH_PATH=$(pipenv show cve-searchsploit | grep "Location" | awk '{print $2}')
+        CVE_SEARCH_PATH=$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')
         if [[ -d "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database" ]] && [[ -d "/usr/share/exploitdb" ]]; then
           rm -r "$CVE_SEARCH_PATH""/cve_searchsploit/exploit-database"
         fi
@@ -67,5 +67,4 @@ IF50_aggregator_common() {
   # we were running into issues that this package was removed somehow during the installation process
   # Todo: figure out why and solve it somehow
   apt-get install p7zip-full -y
-  pip3 install --force-reinstall --no-deps --ignore-installed requests==2.28.1
 } 

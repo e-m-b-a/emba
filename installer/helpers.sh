@@ -117,12 +117,12 @@ print_pip_info() {
     local PACKAGE_VERSION="${2:-}"
   fi
   echo -e "\\n""$ORANGE""$BOLD""$PIP_NAME""$NC"
-  mapfile -t PIP_INFOS < <(pipenv show "$PIP_NAME" 2>/dev/null || true)
+  mapfile -t PIP_INFOS < <(pip3 show "$PIP_NAME" 2>/dev/null || true)
   # in the error message of pip install we can find all available versions
   if [[ -n "${PACKAGE_VERSION+x}" ]] ; then
-    PVERSION=$(pipenv install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION" || true)
+    PVERSION=$(pip3 install "$PIP_NAME==" 2>&1 | grep -o "$PACKAGE_VERSION" || true)
   else
-  #  PVERSION=$(pipenv install "$PIP_NAME" 2>&1 | grep -v "Requirement already satisfied")
+  #  PVERSION=$(pip3 install "$PIP_NAME" 2>&1 | grep -v "Requirement already satisfied")
     PVERSION="NA"
   fi
   for INFO in "${PIP_INFOS[@]}"; do
@@ -146,12 +146,12 @@ print_pip_info() {
 
   # we need grep -c -> with -q we got errors
   if [[ -n "${PACKAGE_VERSION+x}" ]]; then
-    INSTALLED=$(pipenv list 2>/dev/null | grep -E -c "^${PIP_NAME}[[:space:]]+$PACKAGE_VERSION" || true)
+    INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^${PIP_NAME}[[:space:]]+$PACKAGE_VERSION" || true)
   fi
   if [[ "$INSTALLED" -gt 0 ]]; then
     echo -e "$GREEN""$PIP_NAME"" is already installed - no further action performed.""$NC"
   else
-    INSTALLED=$(pipenv list 2>/dev/null | grep -E -c "^$PIP_NAME" || true)
+    INSTALLED=$(pip3 list 2>/dev/null | grep -E -c "^$PIP_NAME" || true)
     if [[ "$INSTALLED" -gt 0 ]]; then
       echo -e "$ORANGE""$PIP_NAME"" is already installed and will be updated (if a newer version is available).""$NC"
     else
@@ -241,15 +241,10 @@ version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; 
 
 create_pipenv()
 {
-  local PIPENV_DEPLOY_FLAG="${1:-}"
-  local PIPENV_DEV_FLAG="${2:-}"
+  local PIPENV_DEV_FLAG="${1:-}"
   local PIPENV_FLAGS=()
 
   echo -e "\\n""$ORANGE""$BOLD""Creating Python Environment""$NC"
-  if [[ PIPENV_DEPLOY_FLAG -eq 1 ]]; then
-    PIPENV_FLAGS+=(--deploy)
-    echo -e "\\n""$ORANGE""$BOLD""Installing --deploy packages""$NC"
-  fi
   if [[ PIPENV_DEV_FLAG -eq 1 ]]; then
     PIPENV_FLAGS+=(--dev)
     echo -e "\\n""$ORANGE""$BOLD""Installing --dev packages""$NC"

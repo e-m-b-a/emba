@@ -4,12 +4,74 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-requests = "*"
-lz4 = "*"
-zstandard = "*"
-vmlinux-to-elf = {editable = true, git = "https://github.com/EMBA-support-repos/vmlinux-to-elf"}
+# universal
+requests = "==2.27.1"
+# cve-search
+cve-searchsploit = "*"
+flask = "==2.1.1"
+flask-login = "==0.6.0"
+flask-restx = "==0.5.1"
+flask-breadcrumbs = "==0.5.1"
+flask-bootstrap4 = "==4.0.2"
+flask-jwt-extended = "==4.3.1"
+flask-socketio = "==5.1.1"
+flask-wtf = "==1.0.1"
+flask-plugins = "==1.6.1"
+gevent = "==21.12.0"
+gevent-websocket = "==0.10.1"
+wtforms = "==3.0.1"
+jinja2 = "==3.0.3"
+python-dateutil = "==2.8.2"
+pytest = "==7.1.1"
+pytest-cov = "==3.0.0"
+beautifulsoup4 = "==4.11.0"
+whoosh = "==2.7.4"
+werkzeug = "==2.1.1"
+tqdm = "==4.64.0"
+pymongo = "==3.12.1"
+dicttoxml = "==1.7.4"
+redis = "==4.2.2"
+ijson = "==3.1.4"
+jsonpickle = "==2.1.0"
+requirements-parser = "==0.5.0"
+ansicolors = "==1.1.8"
+nltk = "==3.7"
+nested-lookup = "==0.2.23"
+oauthlib = "==3.2.0"
+dnspython = "==2.2.1"
+feedformatter = {file = "https://github.com/marianoguerra/feedformatter/archive/master.zip"}
 
 [dev-packages]
+# container/full installation
+lz4 = "*"
+zstandard = "*"
+protobuf = "*"
+bsdiff4 = "*"
+poetry = "*"
+nose = "*"
+coverage = "*"
+pyqtgraph = "*"
+capstone = "*"
+cstruct = "*"
+matplotlib = "*"
+
+# I02
+rzpipe = "*"
+uefi-firmware = "*"
+pyyaml = "*"
+click = "*"
+fwhunt-scan = "*"
+
+
+semgrep = "*"
+stacs = "*"
+pillow = "*"
+future = "*"
+paramiko = "*"
+pysnmp = "*"
+pycryptodome = "*"
+vmlinux-to-elf = {editable = true, git = "https://github.com/EMBA-support-repos/vmlinux-to-elf"}
+
 
 [requires]
 python_version = "3.10"

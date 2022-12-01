@@ -43,7 +43,8 @@ I01_default_apps(){
     print_tool_info "strace" 1
 
     # python
-    print_tool_info "python3-pipenv" 1
+    print_tool_info "python3-pip" 1
+    print_pip_info "pipenv"
 
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
@@ -78,7 +79,8 @@ I01_default_apps(){
         #sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
         sudo -u linuxbrew CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-        # create_pipenv 1
+        create_pipenv 1
+        source ./.venv/bin/activate
       ;;
     esac
   fi

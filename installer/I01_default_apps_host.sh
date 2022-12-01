@@ -36,7 +36,8 @@ I01_default_apps_host() {
   print_tool_info "curl" 1
 
   # python
-  print_tool_info "python3-pipenv" 1
+  print_tool_info "python3-pip" 1
+  print_pip_info "pipenv"
 
   if [[ "$LIST_DEP" -eq 1 ]] ; then
     ANSWER=("n")
@@ -48,7 +49,7 @@ I01_default_apps_host() {
     y|Y )
       echo
       apt-get install "${INSTALL_APP_LIST[@]}" -y
-      # create_pipenv 0
+      create_pipenv 0
     ;;
   esac
 }  
