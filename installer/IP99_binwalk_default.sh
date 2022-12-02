@@ -134,17 +134,20 @@ IP99_binwalk_default() {
           echo -e "$GREEN""yaffshiv already installed""$NC"
         fi
 
-        if ! command -v sasquatch > /dev/null ; then
-          if ! [[ -d external/binwalk/sasquatch ]]; then
-            git clone https://github.com/EMBA-support-repos/sasquatch external/binwalk/sasquatch
-          fi
-          cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
-          wget https://github.com/devttys0/sasquatch/pull/47.patch
-          patch -p1 < 47.patch
-          CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
-        else
-          echo -e "$GREEN""sasquatch already installed""$NC"
+        if ! [[ -d external/binwalk/sasquatch ]]; then
+          git clone https://github.com/EMBA-support-repos/sasquatch external/binwalk/sasquatch
+        fi
+        cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+        wget https://github.com/devttys0/sasquatch/pull/47.patch
+        patch -p1 < 47.patch
+        CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+
+        # we have seen issues with the unblob sasquash version - lets move the binwalk version to another name and link to it
+        # during the testing phase. With this we are able to install both versions in ||
+        if [[ -e /usr/local/bin/sasquatch ]]; then
+          echo -e "${GREEN}Backup binwalk sasquatch version to $ORANGE/usr/local/bin/sasquatch_binwalk$NC"
+          mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
         fi
 
         if ! command -v jefferson > /dev/null ; then

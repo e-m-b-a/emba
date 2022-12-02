@@ -596,10 +596,6 @@ emulate_binary() {
     EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
   fi
   
-  if [[ "$CPU_CONFIG_" == "NONE" ]]; then
-    CPU_CONFIG_=""
-  fi
-
   for PARAM in "${EMULATION_PARAMS[@]}"; do
     if [[ -z "$PARAM" ]]; then
       PARAM="NONE"
@@ -608,7 +604,7 @@ emulate_binary() {
     if [[ "$STRICT_MODE" -eq 1 ]]; then
       set +e
     fi
-    if [[ -z "$CPU_CONFIG_" ]]; then
+    if [[ -z "$CPU_CONFIG_" ]] || [[ "$CPU_CONFIG_" == "NONE" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]]; then
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
