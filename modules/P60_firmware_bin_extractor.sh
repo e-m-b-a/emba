@@ -31,6 +31,13 @@ P60_firmware_bin_extractor() {
     return
   fi
 
+  # we need to check if sasquatch is the correct one for binwalk:
+  if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_binwalk" ]]; then
+    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
+      rm "$UNBLOB_PATH"/sasquatch
+    fi
+    ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch || true
+  fi
 
   check_disk_space
   if ! [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then

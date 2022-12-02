@@ -129,7 +129,7 @@ grepit_search() {
   local EXAMPLE="${2:-NA}"
   local FALSE_POSITIVES_EXAMPLE="${3:-NA}"
   local SEARCH_REGEX="$4"
-  local OUTFILE="$5"
+  local OUTFILE="${5:-MISSING_LOG_DIR.txt}"
   if [[ -v 6 ]]; then
     local ARGS_FOR_GREP=("${6}") # usually just -i for case insensitive or empty, very rare we use -o for match-only part with no context info
   else
@@ -3835,13 +3835,6 @@ grepit_module_crypto_creds() {
 
 grepit_module_api_keys() {
   print_output "[*] Starting Grepit API keys module" "no_log"
-
-  grepit_search "Slack API keys" \
-  # nosemgrep
-  'xoxp-683201246722-694612795216-829330901254-7ec6cd4f9686bc6dce91f9d81f717dbf' \
-  'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  "xox[p|b|o|a]-[0-9]{12}" \
-  "3_apikeys_slack.txt"
 
   grepit_search "Generic access token search" \
   '?access_token=' \
