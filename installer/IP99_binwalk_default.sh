@@ -143,8 +143,8 @@ IP99_binwalk_default() {
         CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
         cd "$HOME_PATH" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
 
-        # we have seen issues with the unblob sasquash version - lets move the binwalk version to another name and link to it
-        # during the testing phase. With this we are able to install both versions in ||
+        # we have seen issues with the unblob sasquatch version - lets move the binwalk version to another name and link to it
+        # during the testing phase. With this in place we are able to install both versions in ||
         if [[ -e /usr/local/bin/sasquatch ]]; then
           echo -e "${GREEN}Backup binwalk sasquatch version to $ORANGE/usr/local/bin/sasquatch_binwalk$NC"
           mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk

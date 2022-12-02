@@ -110,7 +110,7 @@ IP61_unblob() {
           cp -pr "$HOME"/.cache external/unblob/root_cache
           rm -rf "$HOME"/.cache || true
         fi
-        # we have seen issues with the installed sasquash version - lets move it to another name and link to it
+        # we have seen issues with the installed sasquatch version - lets move it to another name and link to it
         # during the testing phase. With this we are also able to install the binwalk sasquatch version in ||
         if [[ -e /usr/bin/sasquatch ]]; then
           echo -e "${GREEN}Backup unblob sasquatch version to $ORANGE/usr/local/bin/sasquatch_unblob$NC"
