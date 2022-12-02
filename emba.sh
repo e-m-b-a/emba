@@ -654,6 +654,12 @@ main()
     create_log_dir
 
     if [[ $IN_DOCKER -eq 0 ]]; then
+      kernel_downloader &
+      K_DOWN_PID="$!"
+      print_output "[*] Started kernel downloader thread with PID $K_DOWN_PID" "no_log"
+    fi
+
+    if [[ $IN_DOCKER -eq 0 ]]; then
       echo "$LOG_DIR" > "$TMP_DIR"/orig_logdir
     fi
 
