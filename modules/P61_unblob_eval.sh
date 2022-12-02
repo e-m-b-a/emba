@@ -51,6 +51,14 @@ P61_unblob_eval() {
     return
   fi
 
+  # we need to check if sasquatch is the correct one for unblob:
+  if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_unblob" ]]; then
+    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
+      rm "$UNBLOB_PATH"/sasquatch
+    fi
+    ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch || true
+  fi
+
   local FILES_EXT_UB=0
   local UNIQUE_FILES_UB=0
   local DIRS_EXT_UB=0

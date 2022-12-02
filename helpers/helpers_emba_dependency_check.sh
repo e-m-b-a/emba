@@ -211,6 +211,17 @@ setup_unblob() {
   else
     echo -e "$RED""not ok""$NC"
   fi
+  print_output "    ""sasquatch"" - \\c" "no_log"
+  if [[ -f /usr/local/bin/sasquatch_binwalk ]]; then
+    ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch
+    echo -e "$GREEN""ok""$NC"
+  elif [[ -f /usr/local/bin/sasquatch_unblob ]]; then
+    ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch
+    echo -e "$ORANGE""warning""$NC"
+  else
+    echo -e "$RED""not ok""$NC"
+  fi
+
 }
 
 dependency_check() 

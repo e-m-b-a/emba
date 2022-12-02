@@ -25,6 +25,14 @@ P59_binwalk_extractor() {
 
   export LINUX_PATH_COUNTER=0
 
+  # we need to check if sasquatch is the correct one for binwalk:
+  if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_binwalk" ]]; then
+    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
+      rm "$UNBLOB_PATH"/sasquatch
+    fi
+    ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch || true
+  fi
+
   # typically FIRMWARE_PATH is only a file if none of the EMBA extractors were able to extract something
   # This means we are using binwalk in Matryoshka mode here
   # if we have a directory with multiple files in it we automatically pass here and run into the deep extractor

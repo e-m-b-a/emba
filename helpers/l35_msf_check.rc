@@ -87,6 +87,7 @@ def exploit_checker(host,ports,architecture)
     next if (name =~ /cve_2020_13160_anydesk/ or
              name =~ /goahead_ldpreload/ or
              name =~ /phpmailer_arg_injection/ or
+             name =~ /trans2open/ or
              name =~ /atutor_filemanager_traversal/)
 
     ports.split(",").each { |serv|
