@@ -33,15 +33,11 @@ S115_usermode_emulator() {
     fi
 
     export OPTS=()
-    # we have seen issues on MIPS64 -> lets fall back to chroot
     if [[ "$ARCH" != "MIPS64" ]] && command -v jchroot > /dev/null; then
-      CHROOT="jchroot"
-      # OPTS see https://github.com/vincentbernat/jchroot#security-note
-      OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
-      print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
+      # we have seen issues on MIPS64 -> lets fall back to chroot
+      setup_jchroot
     elif command -v chroot > /dev/null; then
-      CHROOT="chroot"
-      print_output "[*] Using ${ORANGE}chroot${NC} for building chroot environments"
+      setup_chroot
     else
       print_output "[-] No chroot binary found ..."
       return
@@ -227,6 +223,19 @@ copy_firmware() {
   fi
 }
 
+setup_jchroot() {
+  export CHROOT="jchroot"
+  # OPTS see https://github.com/vincentbernat/jchroot#security-note
+  OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+  print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
+}
+
+setup_chroot() {
+  export OPTS=()
+  export CHROOT="chroot"
+  print_output "[*] Using ${ORANGE}chroot${NC} for building chroot environments"
+}
+
 prepare_emulator() {
   local R_PATH="${1:-}"
   local EMULATOR="${2:-}"
@@ -317,6 +326,12 @@ run_init_test() {
   write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_INIT"
   write_log "" "$LOG_FILE_INIT"
 
+  if [[ "$CHROOT" == "jchroot" ]]; then
+    if timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" 2>&1 | grep -q "unable to create temporary directory for pivot root: Permission denied"; then
+      print_output "[*] jchroot issues identified - ${ORANGE}switching to chroot$NC" "no_log"
+      setup_chroot
+    fi
+  fi
   run_init_qemu "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT"
 
   if [[ ! -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" || $(grep -a -c "Illegal instruction\|cpu_init.*failed" "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2> /dev/null) -gt 0 || $(wc -l "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" | awk '{print $1}') -lt 6 ]]; then
