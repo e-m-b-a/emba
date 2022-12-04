@@ -483,7 +483,7 @@ get_csv_data_s24() {
   print_output "[+] Identified kernel version: $ORANGE$K_VERSION$NC"
 
   mapfile -t KERNEL_ELF_EMBA < <(grep "$K_VERSION" "$S24_CSV_LOG" | cut -d\; -f4-7 | \
-    grep -v "^NA" | grep -v "config extracted" | sort -u | sort -r -n -t\; -k4)
+    grep -v "^NA" | grep -v "config extracted" | sort -u | sort -r -n -t\; -k4 || true)
   
   for KERNEL_DATA in "${KERNEL_ELF_EMBA[@]}"; do
     if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f3)" == "NA" ]]; then
