@@ -109,8 +109,8 @@ P61_unblob_eval() {
       mv "$OUTPUT_DIR_UNBLOB" "$LOG_DIR"/firmware/ || true
       detect_root_dir_helper "$LOG_DIR/firmware"
       print_ln
-      tree -sh "$LOG_DIR/firmware/unblob_extracted" | tee -a "$LOG_FILE"
     fi
+    tree -sh "$LOG_DIR/firmware/unblob_extracted" | tee -a "$LOG_FILE"
     print_ln
   fi
 
