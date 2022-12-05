@@ -394,6 +394,7 @@ dependency_check()
     export MPLCONFIGDIR="$TMP_DIR"
 
     setup_unblob "unblob"
+    check_dep_tool "unrar" "unrar"
     setup_nikto
 
     # jtr
