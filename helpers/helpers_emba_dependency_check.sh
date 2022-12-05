@@ -207,9 +207,11 @@ setup_unblob() {
       echo -e "$GREEN""ok""$NC"
     else
       echo -e "$RED""not ok""$NC"
+      DEP_EXIT=1
     fi
   else
     echo -e "$RED""not ok""$NC"
+    DEP_EXIT=1
   fi
   print_output "    ""sasquatch"" - \\c" "no_log"
   if [[ -f /usr/local/bin/sasquatch_binwalk ]]; then
@@ -218,8 +220,10 @@ setup_unblob() {
   elif [[ -f /usr/local/bin/sasquatch_unblob ]]; then
     ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch
     echo -e "$ORANGE""warning""$NC"
+    DEP_EXIT=1
   else
     echo -e "$RED""not ok""$NC"
+    DEP_EXIT=1
   fi
 
 }
