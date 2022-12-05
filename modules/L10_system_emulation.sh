@@ -1024,7 +1024,8 @@ get_networking_details_emulation() {
     local UDP_PORT=""
   
     mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
-    mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sed -e 's/.*firmadyne: //g' | cut -d: -f2- | sort -u || true)
+    mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f4- | sort -u || true)
+                #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
     mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
     mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u || true)
     mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | grep -E '[[:alnum:]]{3,50}' | sort -u || true)
@@ -1138,13 +1139,16 @@ get_networking_details_emulation() {
                 if [[ "$BRIDGE_INT" == *"$NETWORK_DEVICE"* ]]; then
                   # br_add_if[PID: 138 (brctl)]: br:br0 dev:eth1.1
                   # extract the eth1 from dev:eth1
-                  ETH_INT="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]')"
+                  # ETH_INT="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]')"
+                  ETH_INT="$(echo "$BRIDGE_INT" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]')"
                   # do we have vlans?
                   if [[ -v VLAN_INFOS[@] ]]; then
                     iterate_vlans "$ETH_INT" "${VLAN_INFOS[@]}"
-                  elif echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+                  #elif echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+                  elif echo "$BRIDGE_INT" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
                     # we have a vlan entry in our BRIDGE_INT entry br:br0 dev:eth1.1:
-                    VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
+                    # VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
+                    VLAN_ID="$(echo "$BRIDGE_INT" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
                   elif [[ -v VLAN_HW_INFO_DEV[@] ]]; then
                     # if we have found some entry "adding VLAN [0-9] to HW filter on device ethX" in our qemu logs
                     # we check all these entries now and generate additional configurations for further evaluation
@@ -1178,7 +1182,8 @@ get_networking_details_emulation() {
                     store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE_" "$ETH_INT" "$VLAN_ID" "$NETWORK_MODE"
                   fi
                   # if we have found that the br entry has for eg an ethX interface, we now check for the real br interface entry -> NETWORK_DEVICE
-                  NETWORK_DEVICE="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]')"
+                  # NETWORK_DEVICE="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]')"
+                  NETWORK_DEVICE="$(echo "$BRIDGE_INT" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]')"
                 fi
                 store_interface_details "$IP_ADDRESS_" "${NETWORK_DEVICE:-br0}" "${ETH_INT:-eth0}" "${VLAN_ID:-0}" "${NETWORK_MODE:-bridge}"
               done
@@ -1220,13 +1225,16 @@ get_networking_details_emulation() {
         # BRIDGE_INT -> br_add_if[PID: 494 (brctl)]: br:br0 dev:eth0.1
         # NETWORK_DEVICE -> br0
         print_output "[*] Possible bridge interface candidate detected: $ORANGE$BRIDGE_INT$NC"
-        ETH_INT="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
+        # ETH_INT="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
+        ETH_INT="$(echo "$BRIDGE_INT" | grep -o "dev:.*" | cut -d. -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
         NETWORK_DEVICE="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
         IP_ADDRESS_="192.168.0.1"
         NETWORK_MODE="bridge"
-        if echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+        #if echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+        if echo "$BRIDGE_INT" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
           # we have a vlan entry:
-          VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
+          #VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
+          VLAN_ID="$(echo "$BRIDGE_INT" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
         else
           VLAN_ID="NONE"
           if [[ -v VLAN_INFOS[@] ]]; then
