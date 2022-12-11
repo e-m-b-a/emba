@@ -1419,7 +1419,7 @@ write_network_config_to_filesystem() {
   fi
   if [[ "$DEVICE" == "NA" ]]; then
     print_output "[-] No Qemu Image device identified"
-    break
+    return
   fi
   sleep 1
   print_output "[*] Device mapper created at $ORANGE${DEVICE}$NC"
