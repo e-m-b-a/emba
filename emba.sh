@@ -650,8 +650,11 @@ main()
       log_folder
     fi
 
-    # create log directory, if not exists and needed subdirectories
-    create_log_dir
+    # do not create a log dir for dep check
+    if [[ "$ONLY_DEP" -eq 0 ]]; then
+      # create log directory, if not exists and needed subdirectories
+      create_log_dir
+    fi
 
     if [[ $IN_DOCKER -eq 0 ]]; then
       echo "$LOG_DIR" > "$TMP_DIR"/orig_logdir
@@ -890,6 +893,11 @@ main()
             print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
           fi
           cleaner 0
+        else
+          # we do not need the log dir from dependency checker
+          if [[ -d "$LOG_DIR" ]]; then
+            rm -r "$LOG_DIR"
+          fi
         fi
         exit 0
       else
