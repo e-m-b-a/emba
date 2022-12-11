@@ -185,6 +185,13 @@ create_emulation_filesystem() {
 
   print_output "[*] Identify Qemu Image device for $ORANGE$LOG_PATH_MODULE/$IMAGE_NAME$NC"
   DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+  if [[ "$DEVICE" == "NA" ]]; then
+    DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+  fi
+  if [[ "$DEVICE" == "NA" ]]; then
+    print_output "[-] No Qemu Image device identified"
+    return
+  fi
   print_output "[*] Qemu Image device: $ORANGE$DEVICE$NC"
   sleep 1
   print_output "[*] Device mapper created at $ORANGE${DEVICE}$NC"
@@ -336,6 +343,13 @@ main_emulation() {
     print_output "[*] Processing init file $ORANGE$INIT_FILE$NC ($INDEX/${#INIT_FILES[@]})"
     if ! mount | grep -q "$MNT_POINT"; then
       DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+      if [[ "$DEVICE" == "NA" ]]; then
+        DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+      fi
+      if [[ "$DEVICE" == "NA" ]]; then
+        print_output "[-] No Qemu Image device identified"
+        break
+      fi
       sleep 1
       print_output "[*] Device mapper created at $ORANGE${DEVICE}$NC"
       print_output "[*] Mounting QEMU Image Partition 1 to $ORANGE$MNT_POINT$NC"
@@ -1400,6 +1414,13 @@ write_network_config_to_filesystem() {
   #mount filesystem again for network config:
   print_output "[*] Identify Qemu Image device for $ORANGE$LOG_PATH_MODULE/$IMAGE_NAME$NC"
   DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+  if [[ "$DEVICE" == "NA" ]]; then
+    DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+  fi
+  if [[ "$DEVICE" == "NA" ]]; then
+    print_output "[-] No Qemu Image device identified"
+    break
+  fi
   sleep 1
   print_output "[*] Device mapper created at $ORANGE${DEVICE}$NC"
   print_output "[*] Mounting QEMU Image Partition 1 to $ORANGE$MNT_POINT$NC"
@@ -1425,6 +1446,13 @@ nvram_check() {
   #mount filesystem again for network config:
   print_output "[*] Identify Qemu Image device for $ORANGE$LOG_PATH_MODULE/$IMAGE_NAME$NC"
   DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+  if [[ "$DEVICE" == "NA" ]]; then
+    DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
+  fi
+  if [[ "$DEVICE" == "NA" ]]; then
+    print_output "[-] No Qemu Image device identified"
+    return
+  fi
   sleep 1
 
   print_output "[*] Device mapper created at $ORANGE${DEVICE}$NC"
@@ -1920,27 +1948,39 @@ get_binary() {
 
 add_partition_emulation() {
   local IMAGE_PATH
-  local DEV_PATH=""
+  local DEV_PATH="NA"
   local FOUND=false
+  local CNT=0
 
   losetup -Pf "${1}"
   while (! "${FOUND}"); do
     sleep 1
+    ((CNT+=1))
     local LOSETUP_OUT=()
     mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE")
     for LINE in "${LOSETUP_OUT[@]}"; do
       IMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
-      if [[ "${IMAGE_PATH}" = "${1}" ]]; then
+      if [[ "${IMAGE_PATH}" == "${1}" ]]; then
         DEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
         if [[ -b "${DEV_PATH}" ]]; then
           FOUND=true
         fi
       fi
     done
+    if [[ "$CNT" -gt 600 ]]; then
+      # get an exit if nothing happens
+      break
+    fi
   done
 
+  local CNT=0
   while (! find "${DEV_PATH}" -ls | grep -q "disk"); do
     sleep 1
+    ((CNT+=1))
+    if [[ "$CNT" -gt 600 ]]; then
+      # get an exit if nothing happens
+      break
+    fi
   done
   echo "${DEV_PATH}"
 }
