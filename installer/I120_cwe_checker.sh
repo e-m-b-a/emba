@@ -77,8 +77,6 @@ I120_cwe_checker() {
           mkdir ./external/cwe_checker 2>/dev/null
           git clone https://github.com/EMBA-support-repos/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
-          # currently we stick on PR353 - Kali does not resolve the new dependencies
-          git checkout 00f223dfc19bd5b4fb093ffb61b6b88d269bc862
           make all GHIDRA_PATH="$HOME_PATH""/external/ghidra/ghidra_10.1.2_PUBLIC"
           cd "$HOME_PATH" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
