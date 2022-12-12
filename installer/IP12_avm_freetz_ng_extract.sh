@@ -23,7 +23,7 @@ IP12_avm_freetz_ng_extract() {
     INSTALL_APP_LIST=()
     cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
   
-    print_file_info "execstack" "execstack for Freetz-NG" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/freetz-ng/execstack_0.0.20131005-1+b10_amd64.deb"
+    print_file_info "execstack" "execstack for Freetz-NG" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/execstack_0.0.20131005-1+b10_amd64.deb"
     print_tool_info "wget" 1
     print_tool_info "gcc" 1
     print_tool_info "make" 1
