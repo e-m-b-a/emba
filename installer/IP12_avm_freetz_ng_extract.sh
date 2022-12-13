@@ -73,6 +73,7 @@ IP12_avm_freetz_ng_extract() {
         if ! grep -q freetzuser /etc/passwd; then
           useradd -m freetzuser
           usermod -a -G "${ORIG_GROUP}" freetzuser
+          passwd -d freetzuser
         fi
         download_file "execstack" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/execstack_0.0.20131005-1+b10_amd64.deb"
         dpkg -i external/execstack_0.0.20131005-1+b10_amd64.deb
@@ -83,7 +84,7 @@ IP12_avm_freetz_ng_extract() {
 
           chown -R freetzuser:freetzuser external/freetz-ng
           chmod 777 -R external/freetz-ng
-          su freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
+          su - freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
 
           cd external/freetz-ng || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
 
