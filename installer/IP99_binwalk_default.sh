@@ -68,6 +68,8 @@ IP99_binwalk_default() {
     # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "srecord" 1
+    print_tool_info "unrar-free" 1
+    print_tool_info "unrar" 1
 
     print_pip_info "nose"
     print_pip_info "coverage"

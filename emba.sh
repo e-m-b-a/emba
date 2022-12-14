@@ -317,7 +317,7 @@ main()
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=0
-  export EMBA_VERSION="1.2.0"
+  export EMBA_VERSION="1.2.x"
   export STRICT_MODE=0
   export UPDATE=0
   export ARCH_CHECK=1
@@ -650,8 +650,11 @@ main()
       log_folder
     fi
 
-    # create log directory, if not exists and needed subdirectories
-    create_log_dir
+    # do not create a log dir for dep check
+    if [[ "$ONLY_DEP" -eq 0 ]]; then
+      # create log directory, if not exists and needed subdirectories
+      create_log_dir
+    fi
 
     if [[ $IN_DOCKER -eq 0 ]]; then
       kernel_downloader &
@@ -896,6 +899,11 @@ main()
             print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
           fi
           cleaner 0
+        else
+          # we do not need the log dir from dependency checker
+          if [[ -d "$LOG_DIR" ]]; then
+            rm -r "$LOG_DIR"
+          fi
         fi
         exit 0
       else

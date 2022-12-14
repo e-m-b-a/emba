@@ -627,7 +627,7 @@ generate_trickest_db() {
     git pull || true
     cd ../.. || true
 
-    find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "\-\ https://github.com/.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH" || true
+    find "$EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "^\-\ https://github.com.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH" || true
 
     # if we have a blacklist file we are going to apply it to the generated trickest database
     if [[ -f "$CONFIG_DIR"/trickest_blacklist.txt ]] && [[ -f "$TRICKEST_DB_PATH" ]]; then

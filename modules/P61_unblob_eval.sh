@@ -69,7 +69,7 @@ P61_unblob_eval() {
   print_output "[*] Unblob module currently enabled - disable it in emba.sh setting the UNBLOB variable to 0"
 
   print_output "[!] INFO: This is an evaluation module for the extractor ${ORANGE}unblob - https://unblob.org/$MAGENTA."
-  print_output "[!] INFO: The results are currently not further used in the EMBA firmware analysis process (this will probably change in the future)."
+  print_output "[!] INFO: The results are currently only further used if the binwalk extraction process failes (this will probably change in the future)."
 
   export LINUX_PATH_COUNTER_UNBLOB=0
   local OUTPUT_DIR_UNBLOB="$LOG_PATH_MODULE"/unblob_extracted
@@ -104,7 +104,15 @@ P61_unblob_eval() {
     print_output "[*] Found $ORANGE$BINS$NC binaries."
     print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
     print_bar
-    tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
+    if [[ "$LINUX_PATH_COUNTER" -eq 0 ]] && [[ "$LINUX_PATH_COUNTER_UNBLOB" -gt 0 ]]; then
+      print_output "[+] Binwalk extraction failed - using Unblob results as additional source for further analysis"
+      mv "$OUTPUT_DIR_UNBLOB" "$LOG_DIR"/firmware/ || true
+      detect_root_dir_helper "$LOG_DIR/firmware"
+      print_ln
+      tree -sh "$LOG_DIR/firmware/unblob_extracted" | tee -a "$LOG_FILE"
+    else
+      tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
+    fi
     print_ln
   fi
 
