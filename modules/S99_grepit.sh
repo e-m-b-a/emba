@@ -1615,7 +1615,7 @@ grepit_module_html() {
   "-i"
 }
 
-grepit_module_html() {
+grepit_module_js() {
   print_output "[*] Starting Grepit JavaScript module" "no_log"
 
   grepit_search "Location hash: DOM-based XSS source/sink." \
