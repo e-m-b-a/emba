@@ -47,6 +47,8 @@ EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\
 CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"_blank\" >"
 CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"_blank\" >"
 GITHUB_LINK="<a href=\"https://github.com/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
+SNYK_LINK="<a href=\"https://security.snyk.io/vuln/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
+PSS_LINK="<a href=\"https://packetstormsecurity.com/files/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
 LICENSE_LINK="<a href=\"LINK\" title=\"LINK\" target=\"_blank\" >"
 MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
 MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
@@ -261,6 +263,36 @@ add_link_tags() {
         done
       done
     fi 
+
+    if ( grep -a -q -E 'Exploit.*Snyk' "$LINK_FILE" ) ; then
+      readarray -t SNYK_KEY_F < <( grep -a -n -o -E "Snyk: .*" "$LINK_FILE" | sed 's/Snyk: //' | uniq || true)
+      for SNYK_KEY in "${SNYK_KEY_F[@]}" ; do
+        SNYK_ID_LINE="$(echo "$SNYK_KEY" | cut -d ":" -f 1)"
+        SNYK_ID_STRING="$(echo "$SNYK_KEY" | cut -d ":" -f 2-)"
+        readarray -t SNYK_KEY_STRING_ARR < <(echo "$SNYK_ID_STRING" | tr " " "\n" | grep "SNYK-" | uniq)
+        for SNYK_KEY_ELEM in "${SNYK_KEY_STRING_ARR[@]}" ; do
+          # we rename / to _ for the display name of the link -> in the cli report it is possible to just copy and paste the URL to github,
+          # in the web reporter you can click it
+          SNYK_KEY_NAME="$(echo "$SNYK_KEY_ELEM" | tr "/" "_")"
+          HTML_LINK="$(echo "$SNYK_LINK" | sed -e "s@LINKNAME@$SNYK_KEY_NAME@g" | sed -e "s@LINK@$SNYK_KEY_ELEM@g")""$SNYK_KEY_NAME""$LINK_END"
+          LINK_COMMAND_ARR+=( "$SNYK_ID_LINE"'s@'"$SNYK_KEY_ELEM"'@'"$HTML_LINK"'@' )
+        done
+      done
+    fi
+
+    if ( grep -a -q -E 'Exploit.*PSS' "$LINK_FILE" ) ; then
+      readarray -t PSS_KEY_F < <( grep -a -n -o -E "PSS: .*" "$LINK_FILE" | sed 's/PSS: //' | uniq || true)
+      for PSS_KEY in "${PSS_KEY_F[@]}" ; do
+        PSS_ID_LINE="$(echo "$PSS_KEY" | cut -d ":" -f 1)"
+        PSS_ID_STRING="$(echo "$PSS_KEY" | cut -d ":" -f 2-)"
+        readarray -t PSS_KEY_STRING_ARR < <(echo "$PSS_ID_STRING" | tr " " "\n" | grep -E "[0-9]+/.*\.html" | uniq)
+        for PSS_KEY_NAME in "${PSS_KEY_STRING_ARR[@]}" ; do
+          # PSS_KEY_NAME="$(echo "$PSS_KEY_ELEM" | tr "/" "_")"
+          HTML_LINK="$(echo "$PSS_LINK" | sed -e "s@LINKNAME@$PSS_KEY_NAME@g" | sed -e "s@LINK@$PSS_KEY_NAME@g")""$PSS_KEY_NAME""$LINK_END"
+          LINK_COMMAND_ARR+=( "$PSS_ID_LINE"'s@'"$PSS_KEY_NAME"'@'"$HTML_LINK"'@' )
+        done
+      done
+    fi
 
     # CVE links
     if ( grep -a -q -E '(CVE)' "$LINK_FILE" ) ; then
