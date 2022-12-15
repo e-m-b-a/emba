@@ -271,10 +271,7 @@ add_link_tags() {
         SNYK_ID_STRING="$(echo "$SNYK_KEY" | cut -d ":" -f 2-)"
         readarray -t SNYK_KEY_STRING_ARR < <(echo "$SNYK_ID_STRING" | tr " " "\n" | grep "SNYK-" | uniq)
         for SNYK_KEY_ELEM in "${SNYK_KEY_STRING_ARR[@]}" ; do
-          # we rename / to _ for the display name of the link -> in the cli report it is possible to just copy and paste the URL to github,
-          # in the web reporter you can click it
-          SNYK_KEY_NAME="$(echo "$SNYK_KEY_ELEM" | tr "/" "_")"
-          HTML_LINK="$(echo "$SNYK_LINK" | sed -e "s@LINKNAME@$SNYK_KEY_NAME@g" | sed -e "s@LINK@$SNYK_KEY_ELEM@g")""$SNYK_KEY_NAME""$LINK_END"
+          HTML_LINK="$(echo "$SNYK_LINK" | sed -e "s@LINKNAME@$SNYK_KEY_ELEM@g" | sed -e "s@LINK@$SNYK_KEY_ELEM@g")""$SNYK_KEY_ELEM""$LINK_END"
           LINK_COMMAND_ARR+=( "$SNYK_ID_LINE"'s@'"$SNYK_KEY_ELEM"'@'"$HTML_LINK"'@' )
         done
       done

@@ -855,8 +855,7 @@ cve_extractor() {
           fi
 
           for EXPLOIT_PS in "${EXPLOIT_AVAIL_PACKETSTORM[@]}" ; do
-            # we use the html file as EXPLOIT_NAME. For later identification of the web url
-            # we can use the CVE and the EXPLOIT_NAME
+            # we use the html file as EXPLOIT_NAME.
             EXPLOIT_NAME=$(echo "$EXPLOIT_PS" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
             EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
             TYPE=$(grep "^$CVE_VALUE;" "$CONFIG_DIR"/PS_PoC_results.csv | grep "$EXPLOIT_NAME" | cut -d\; -f4 || true)
