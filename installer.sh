@@ -200,7 +200,7 @@ if [[ "$IN_DOCKER" -eq 0 ]]; then
     echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 13Gig for the docker image""$NC"
     echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
     echo ""
-    df -h
+    df -h || true
     echo ""
     read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   fi
