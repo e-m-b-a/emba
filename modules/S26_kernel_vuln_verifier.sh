@@ -48,6 +48,7 @@ S26_kernel_vuln_verifier()
     return
   fi
 
+  # extract kernel version
   get_csv_data_s24 "$S24_CSV_LOG"
 
   if ! [[ -f "$KERNEL_ELF_PATH" ]]; then
@@ -97,6 +98,11 @@ S26_kernel_vuln_verifier()
   while ! [[ -f "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" ]]; do
     print_output "[*] Waiting for kernel sources ..." "no_log"
     ((WAIT_CNT+=1))
+    if [[ "$WAIT_CNT" -gt 60 ]]; then
+      print_output "[-] No kernel source file available ... exit module now"
+      module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+      return
+    fi
     sleep 5
   done
 
@@ -128,14 +134,14 @@ S26_kernel_vuln_verifier()
   fi
 
   print_ln
-  print_output "[*] Create kernel symbols ..."
+  print_output "[*] Identify kernel symbols ..."
   readelf -s "$KERNEL_ELF_PATH" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' | \
     sed 's/\[\.\.\.\]//' > "$LOG_PATH_MODULE"/symbols.txt
   SYMBOLS_CNT=$(wc -l "$LOG_PATH_MODULE"/symbols.txt | awk '{print $1}')
   print_output "[*] Extracted $SYMBOLS_CNT symbols from kernel"
 
   if [[ -d "$LOG_DIR""/firmware" ]]; then
-    print_output "[*] Create kernel modules symbols array ..."
+    print_output "[*] Identify kernel modules symbols ..."
     find "$LOG_DIR/firmware" -name "*.ko" -exec readelf -a {} \; | grep FUNC | sed 's/.*FUNC//' | \
       awk '{print $4}' | sed 's/\[\.\.\.\]//' >> "$LOG_PATH_MODULE"/symbols.txt
   fi
@@ -167,7 +173,7 @@ S26_kernel_vuln_verifier()
   local NEG_LOG=1
 
   print_ln
-  print_output "[*] Checking vulnerabilities"
+  print_output "[*] Checking vulnerabilities for kernel version $ORANGE$K_VERSION$NC"
   print_ln
 
   for VULN in "${ALL_KVULNS[@]}"; do
@@ -181,10 +187,14 @@ S26_kernel_vuln_verifier()
     CVSS2="$(echo "$VULN" | cut -d: -f2)"
     CVSS3="$(echo "$VULN" | cut -d: -f3)"
     SUMMARY="$(echo "$VULN" | cut -d: -f4-)"
+
+    # extract kernel source paths from summary -> we use these paths to check if they are used by our
+    # symbols or during kernel compilation
     mapfile -t K_PATHS < <(echo "$SUMMARY" | tr ' ' '\n' | grep ".*\.[chS]$" | sed -r 's/CVE-[0-9]+-[0-9]+:[0-9].*://' \
       | sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 || true)
 
     for K_PATH in "${K_PATHS[@]}"; do
+      # we have only a filename without path -> we search for possible candidate files in the kernel sources
       if ! [[ "$K_PATH" == *"/"* ]]; then
         print_output "[*] Found file name $ORANGE$K_PATH$NC for $ORANGE$CVE$NC without path details ... looking for candidates now"
         mapfile -t K_PATHS_FILES_TMP < <(find "$KERNEL_DIR" -name "$K_PATH" | sed "s&$KERNEL_DIR\/&&")
@@ -205,6 +215,7 @@ S26_kernel_vuln_verifier()
               compile_verifier "$CVE" "$K_VERSION" "$K_PATH" "$CVSS2/$CVSS3" &
               WAIT_PIDS_S26+=( "$!" )
             else
+              # this vulnerability is for a different architecture -> we can skip it for our kernel
               print_output "[-] Vulnerable path for different architecture found for $ORANGE$K_PATH$NC - not further processing $ORANGE$CVE$NC"
               ((CNT_PATHS_FOUND_WRONG_ARCH+=1))
             fi
@@ -216,6 +227,7 @@ S26_kernel_vuln_verifier()
             WAIT_PIDS_S26+=( "$!" )
           fi
         else
+          # no source file in our kernel sources -> no vulns
           print_output "[-] $ORANGE$CVE$NC - $ORANGE$K_PATH$NC - source file not found"
           ((CNT_PATHS_NOT_FOUND+=1))
         fi
@@ -273,6 +285,7 @@ symbol_verifier() {
 
   if [[ "$VULN_FOUND" -eq 1 ]]; then
     # if we have already a match for this path we can skip the 2nd check
+    # this is only for speed up the process a bit
     return
   fi
 
@@ -305,6 +318,7 @@ compile_verifier() {
 } 
 
 compile_kernel() {
+  # this is based on the great work shown here https://arxiv.org/pdf/2209.05217.pdf
   local KERNEL_CONFIG_FILE="${1:-}"
   local KERNEL_DIR="${2:-}"
   local KARCH="${3:-}"
@@ -320,11 +334,11 @@ compile_kernel() {
 
   print_bar
   cd "$KERNEL_DIR" || exit
-  print_output "[*] Create default kernel config"
+  print_output "[*] Create default kernel config for $ORANGE$K_ARCH$NC architecture"
   LANG=en make ARCH="$KARCH" defconfig
   cp "$KERNEL_CONFIG_FILE" .config
   print_ln
-  print_output "[*] Update kernel config with the configuration of the firmware"
+  print_output "[*] Update kernel config with the identified configuration of the firmware"
   # https://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-in-the-linux-kernel-makefile
   LANG=en make ARCH="$KARCH" olddefconfig
   print_ln
