@@ -18,3 +18,17 @@ RedHatOfficial/rhsecapi
 RedHatProductSecurity/cve-pylib
 oracle-japan/ochacafe-s5-3
 mergebase/usn2json
+ARPSyndicate/cvemon
+hrbrmstr/internetdb
+jumanjihouse/oval
+jumanjihouse/wormhole
+kn0630/vulssimulator_ds
+RedHatSatellite/satellite-host-cve
+defgsus/good-github
+alsmadi/Parse_CVE_Details
+TinyNiko/android_bulletin_notes
+Milkad0/DC-4_VulnHub
+sriramkandukuri/cve-fix-reporter
+bollwarm/SecToolSet
+doshyt/cve-monitor
+fir3storm/Vision2

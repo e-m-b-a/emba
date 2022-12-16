@@ -73,6 +73,7 @@ IP12_avm_freetz_ng_extract() {
         if ! grep -q freetzuser /etc/passwd; then
           useradd -m freetzuser
           usermod -a -G "${ORIG_GROUP}" freetzuser
+          passwd -d freetzuser
         fi
         download_file "execstack" "http://ftp.br.debian.org/debian/pool/main/p/prelink/execstack_0.0.20131005-1+b10_amd64.deb" "external/execstack_0.0.20131005-1+b10_amd64.deb"
         dpkg -i external/execstack_0.0.20131005-1+b10_amd64.deb
@@ -81,17 +82,13 @@ IP12_avm_freetz_ng_extract() {
         if ! [[ -d external/freetz-ng ]]; then
           mkdir external/freetz-ng
 
-          chown -R freetzuser:freetzuser external/freetz-ng
-          chmod 777 -R external/freetz-ng
-          su freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git external/freetz-ng"
-
-          cd external/freetz-ng || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
-
-          sudo -u freetzuser make allnoconfig
+          su - freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git /tmp/freetz-ng"
+          su - freetzuser -c "cd /tmp/freetz-ng/ && make allnoconfig"
           # we currently running into an error that does not hinder us in using Freetz-NG
           # sudo -u freetzuser make || true
-          sudo -u freetzuser make tools
+          su - freetzuser -c "cd /tmp/freetz-ng/ && make tools"
           cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
+          mv /tmp/freetz-ng/* external/freetz-ng/
           chown -R root:root external/freetz-ng
           if [[ "$IN_DOCKER" -eq 1 ]]; then
             # do some cleanup of the docker image
