@@ -128,6 +128,7 @@ S26_kernel_vuln_verifier()
   print_output "[*] Create CVE vulnerabilities array for kernel version $ORANGE$K_VERSION$NC ..."
   mapfile -t ALL_KVULNS < <(jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "$CVE_DETAILS_PATH")
   print_output "[+] Extracted $ORANGE${#ALL_KVULNS[@]}$GREEN vulnerabilities based on kernel version only"
+  print_output "[*] Starting in depth testing of these vulnerabilities ..."
 
   if [[ -f "$KERNEL_CONFIG" ]] && [[ -d "$KERNEL_DIR" ]]; then
     compile_kernel "$KERNEL_CONFIG" "$KERNEL_DIR" "$ORIG_K_ARCH"
@@ -165,11 +166,11 @@ S26_kernel_vuln_verifier()
   sed -i 's/^/EXPORT_SYMBOL_GPL\(/' "$LOG_PATH_MODULE"/symbols_uniq.split_gpl.*
   sed -i 's/$/\)/' "$LOG_PATH_MODULE"/symbols_uniq.split_gpl.*
 
-  CNT_PATHS_UNK=0
-  CNT_PATHS_FOUND=0
-  CNT_PATHS_NOT_FOUND=0
-  VULN_CNT=1
-  CNT_PATHS_FOUND_WRONG_ARCH=0
+  export CNT_PATHS_UNK=0
+  export CNT_PATHS_FOUND=0
+  export CNT_PATHS_NOT_FOUND=0
+  export VULN_CNT=1
+  export CNT_PATHS_FOUND_WRONG_ARCH=0
   local NEG_LOG=1
 
   print_ln
@@ -177,13 +178,13 @@ S26_kernel_vuln_verifier()
   print_ln
 
   for VULN in "${ALL_KVULNS[@]}"; do
-    print_output "[*] Testing vulnerability $ORANGE$VULN_CNT$NC / $ORANGE${#ALL_KVULNS[@]}$NC"
-
     K_PATHS=()
     K_PATHS_FILES_TMP=()
     K_PATH="undocumented source path"
 
     CVE=$(echo "$VULN" | cut -d: -f1)
+    print_output "[*] Testing vulnerability $ORANGE$VULN_CNT$NC / $ORANGE${#ALL_KVULNS[@]}$NC / $ORANGE$CVE$NC"
+
     CVSS2="$(echo "$VULN" | cut -d: -f2)"
     CVSS3="$(echo "$VULN" | cut -d: -f3)"
     SUMMARY="$(echo "$VULN" | cut -d: -f4-)"
@@ -322,6 +323,8 @@ compile_kernel() {
   local KERNEL_CONFIG_FILE="${1:-}"
   local KERNEL_DIR="${2:-}"
   local KARCH="${3:-}"
+  export COMPILE_SOURCE_FILES=0
+
   if ! [[ -f "$KERNEL_CONFIG_FILE" ]]; then
     return
   fi
@@ -334,7 +337,7 @@ compile_kernel() {
 
   print_bar
   cd "$KERNEL_DIR" || exit
-  print_output "[*] Create default kernel config for $ORANGE$K_ARCH$NC architecture"
+  print_output "[*] Create default kernel config for $ORANGE$KARCH$NC architecture"
   LANG=en make ARCH="$KARCH" defconfig
   cp "$KERNEL_CONFIG_FILE" .config
   print_ln
@@ -363,16 +366,30 @@ final_log_kernel_vulns() {
   rm -r "$LOG_PATH_MODULE"/symbols_uniq.split.*
   rm -r "$LOG_PATH_MODULE"/symbols_uniq.split_gpl.*
 
-  local CVE=""
   local VULN=""
+  local SYM_USAGE_VERIFIED=0
+  local VULN_PATHS_VERIFIED_SYMBOLS=0
+  local VULN_PATHS_VERIFIED_COMPILED=0
+  local CVE_VERIFIED_SYMBOLS=0
+  local CVE_VERIFIED_COMPILED=0
+  local CVE_VERIFIED_ONE=0
+  local CVE_VERIFIED_OVERLAP=0
+  local CVE_VERIFIED_OVERLAP_CRITICAL=()
+  local CVE_VERIFIED_ONE_CRITICAL=()
 
   print_ln
   print_output "[*] Generating final kernel report ..."
   echo "Kernel version;Architecture;CVE;CVSSv2;CVSSv3;Verified with symbols;Verified with compile files" >> "$LOG_PATH_MODULE"/cve_results_kernel_"$K_VERSION".csv
 
   for VULN in "${ALL_KVULNS[@]}"; do
+    local CVE=""
+    local CVSS2=""
+    local CVSS3=""
     local CVE_SYMBOL_FOUND=0
     local CVE_COMPILE_FOUND=0
+    local CVE_SYMBOL_FOUND=0
+    local CVE_COMPILE_FOUND=0
+
     CVE=$(echo "$VULN" | cut -d: -f1)
     CVSS2="$(echo "$VULN" | cut -d: -f2)"
     CVSS3="$(echo "$VULN" | cut -d: -f3)"
@@ -470,6 +487,16 @@ identify_exploits() {
   fi
   if [[ -f "$TRICKEST_DB_PATH" ]]; then
     if grep -q -E "$CVE_VALUE\.md" "$TRICKEST_DB_PATH"; then
+      POC_DETECTED="yes"
+    fi
+  fi
+  if [[ -f "$CONF_DIR/Snyk_PoC_results.csv" ]]; then
+    if grep -q -E "^$CVE_VALUE;" "$CONF_DIR/Snyk_PoC_results.csv"; then
+      POC_DETECTED="yes"
+    fi
+  fi
+  if [[ -f "$CONF_DIR/PS_PoC_results.csv" ]]; then
+    if grep -q -E "^$CVE_VALUE;" "$CONF_DIR/PS_PoC_results.csv"; then
       POC_DETECTED="yes"
     fi
   fi
