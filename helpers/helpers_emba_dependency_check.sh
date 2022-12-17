@@ -222,9 +222,15 @@ setup_unblob() {
   fi
   print_output "    ""sasquatch"" - \\c" "no_log"
   if [[ -f /usr/local/bin/sasquatch_binwalk ]]; then
+    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
+      rm  "$UNBLOB_PATH"/sasquatch
+    fi
     ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch
     echo -e "$GREEN""ok""$NC"
   elif [[ -f /usr/local/bin/sasquatch_unblob ]]; then
+    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
+      rm  "$UNBLOB_PATH"/sasquatch
+    fi
     ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch
     echo -e "$ORANGE""warning""$NC"
     DEP_EXIT=1
