@@ -40,6 +40,7 @@ S115_usermode_emulator() {
       setup_chroot
     else
       print_output "[-] No chroot binary found ..."
+      module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
       return
     fi
 
