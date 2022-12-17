@@ -123,8 +123,14 @@ F20_vul_aggregator() {
       if [[ -f "$CONFIG_DIR"/routersploit_cve-db.txt || -f "$CONFIG_DIR"/routersploit_exploit-db.txt ]]; then
         RS_SEARCH=1
       fi
+      if [[ -f "$CONFIG_DIR"/PS_PoC_results.csv ]]; then
+        PS_SEARCH=1
+      fi
+      if [[ -f "$CONFIG_DIR"/Snyk_PoC_results.csv ]]; then
+        SNYK_SEARCH=1
+      fi
 
-      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
+      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "Snyk PoC" "Packetstormsecurity PoC" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
 
       generate_cve_details_versions "${VERSIONS_AGGREGATED[@]}"
       generate_cve_details_cves "${CVES_AGGREGATED[@]}"
@@ -707,7 +713,7 @@ cve_extractor() {
         done
       fi
 
-      if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 || "$TRICKEST_SEARCH" -eq 1 ]] ; then
+      if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 || "$TRICKEST_SEARCH" -eq 1 || "$SNYK_SEARCH" -eq 1 || "$PS_SEARCH" -eq 1 ]] ; then
         if [[ $CVE_SEARCHSPLOIT -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "$CVE_VALUE" 2>/dev/null || true)
         fi
@@ -717,9 +723,16 @@ cve_extractor() {
         fi
 
         if [[ $TRICKEST_SEARCH -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL_TRICKEST < <(grep -E "$CVE_VALUE\.md" "$TRICKEST_DB_PATH" 2>/dev/null || true)
+          mapfile -t EXPLOIT_AVAIL_TRICKEST < <(grep -E "$CVE_VALUE\.md" "$TRICKEST_DB_PATH" 2>/dev/null | sort -u || true)
         fi
 
+        if [[ $PS_SEARCH -eq 1 ]]; then
+          mapfile -t EXPLOIT_AVAIL_PACKETSTORM < <(grep -E "^$CVE_VALUE\;" "$CONFIG_DIR"/PS_PoC_results.csv 2>/dev/null || true)
+        fi
+
+        if [[ $SNYK_SEARCH -eq 1 ]]; then
+          mapfile -t EXPLOIT_AVAIL_SNYK < <(grep -E "^$CVE_VALUE\;" "$CONFIG_DIR"/Snyk_PoC_results.csv 2>/dev/null || true)
+        fi
         # routersploit db search
         if [[ $RS_SEARCH -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT < <(grep -E "$CVE_VALUE"$ "$CONFIG_DIR/routersploit_cve-db.txt" 2>/dev/null || true)
@@ -807,8 +820,61 @@ cve_extractor() {
           done
 
           if [[ $EDB -eq 0 ]]; then
-            # only count the msf exploit if we have not already count an EDB exploit
-            # otherwise we count an exploit for one CVE twice
+            # only count the msf exploit if we have not already count an other exploit
+            # otherwise we count an exploit for one CVE multiple times
+            ((EXPLOIT_COUNTER_VERSION+=1))
+            EDB=1
+          fi
+        fi
+
+        if [[ ${#EXPLOIT_AVAIL_SNYK[@]} -gt 0 ]]; then
+          if [[ "$EXPLOIT" == "No exploit available" ]]; then
+            EXPLOIT="Exploit (Snyk:"
+          else
+            EXPLOIT="$EXPLOIT"" ""/ Snyk:"
+          fi
+
+          for EXPLOIT_SNYK in "${EXPLOIT_AVAIL_SNYK[@]}" ; do
+            EXPLOIT_NAME=$(echo "$EXPLOIT_SNYK" | cut -d\; -f2)
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"" (S)"
+          done
+
+          if [[ $EDB -eq 0 ]]; then
+            # only count the snyk exploit if we have not already count an other exploit
+            # otherwise we count an exploit for one CVE multiple times
+            ((EXPLOIT_COUNTER_VERSION+=1))
+            EDB=1
+          fi
+        fi
+
+        if [[ ${#EXPLOIT_AVAIL_PACKETSTORM[@]} -gt 0 ]]; then
+          if [[ "$EXPLOIT" == "No exploit available" ]]; then
+            EXPLOIT="Exploit (PSS:"
+          else
+            EXPLOIT="$EXPLOIT"" ""/ PSS:"
+          fi
+
+          for EXPLOIT_PS in "${EXPLOIT_AVAIL_PACKETSTORM[@]}" ; do
+            # we use the html file as EXPLOIT_NAME.
+            EXPLOIT_NAME=$(echo "$EXPLOIT_PS" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
+            EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
+            TYPE=$(grep "^$CVE_VALUE;" "$CONFIG_DIR"/PS_PoC_results.csv | grep "$EXPLOIT_NAME" | cut -d\; -f4 || true)
+            if [[ "$TYPE" == "remote" ]]; then
+              TYPE="R"
+            elif [[ "$TYPE" == "local" ]]; then
+              TYPE="L"
+            elif [[ "$TYPE" == "DoS" ]]; then
+              TYPE="D"
+            else
+              # fallback to P for packetstorm exploit with unknownt type
+              TYPE="P"
+            fi
+            EXPLOIT="$EXPLOIT"" ($TYPE)"
+          done
+
+          if [[ $EDB -eq 0 ]]; then
+            # only count the packetstorm exploit if we have not already count an other exploit
+            # otherwise we count an exploit for one CVE multiple times
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
           fi
@@ -837,8 +903,8 @@ cve_extractor() {
           done
 
           if [[ $EDB -eq 0 ]]; then
-            # only count the msf exploit if we have not already count an EDB exploit
-            # otherwise we count an exploit for one CVE twice
+            # only count the github exploit if we have not already count an other exploit
+            # otherwise we count an exploit for one CVE multiple times
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
           fi
@@ -865,8 +931,8 @@ cve_extractor() {
           done
 
           if [[ $EDB -eq 0 ]]; then
-            # only count the msf exploit if we have not already count an EDB exploit
-            # otherwise we count an exploit for one CVE twice
+            # only count the routersploit exploit if we have not already count an other exploit
+            # otherwise we count an exploit for one CVE multiple times
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
           fi
@@ -892,7 +958,8 @@ cve_extractor() {
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
         # put a note in the output if we have switched to CVSSv2
         if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || \
+          "$EXPLOIT" == *Github* || "$EXPLOIT" == *PSS* || "$EXPLOIT" == *Snyk* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${RED}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -900,7 +967,8 @@ cve_extractor() {
         ((HIGH_CVE_COUNTER+=1))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
         if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || \
+          "$EXPLOIT" == *Github* || "$EXPLOIT" == *PSS* || "$EXPLOIT" == *Snyk* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -908,14 +976,15 @@ cve_extractor() {
         ((MEDIUM_CVE_COUNTER+=1))
       else
         if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
-        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || "$EXPLOIT" == *Github* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
+        if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || \
+          "$EXPLOIT" == *Github* || "$EXPLOIT" == *PSS* || "$EXPLOIT" == *Snyk* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
           printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
           printf "${GREEN}\t%-20.20s:   %-12.12s:   %-17.17s:   %-9.9s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((LOW_CVE_COUNTER+=1))
       fi
-      write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "$LOCAL" "$REMOTE" "$DOS" "${#KNOWN_EXPLOITED_VULNS[@]}"
+      write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "$LOCAL" "$REMOTE" "$DOS" "${#KNOWN_EXPLOITED_VULNS[@]}"
     done
   fi
   

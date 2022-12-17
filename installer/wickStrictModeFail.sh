@@ -37,6 +37,7 @@ wickStrictModeFail() (
     if [[ ${#BASH_ARGC[@]} -gt $i ]] && [[ ${#BASH_ARGV[@]} -ge $(( nextArg + BASH_ARGC[i] )) ]]; then
       for (( argsLeft = BASH_ARGC[i]; argsLeft; --argsLeft )); do
         # Note: this reverses the order on purpose
+        # shellcheck disable=SC2004
         argsList[$argsLeft]=${BASH_ARGV[nextArg]}
         (( nextArg ++ ))
       done
