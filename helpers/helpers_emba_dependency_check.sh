@@ -200,7 +200,14 @@ setup_unblob() {
     if ! [[ -d "$HOME"/.cache ]]; then
       mkdir "$HOME"/.cache
     fi
-    cp -pr "$EXT_DIR"/unblob/root_cache/* "$HOME"/.cache/
+    if [[ "$IN_DOCKER" -eq 1 ]]; then
+      if [[ -d "$EXT_DIR"/unblob/root_cache ]]; then
+        cp -pr "$EXT_DIR"/unblob/root_cache/* "$HOME"/.cache/
+      else
+        echo -e "$RED""not ok""$NC"
+        DEP_EXIT=1
+      fi
+    fi
     if [[ -e $(cat "$EXT_DIR"/unblob/unblob_path.cfg)/bin/"$UNBLOB_BIN" ]]; then
       UNBLOB_PATH="$(cat "$EXT_DIR"/unblob/unblob_path.cfg)""/bin/"
       export PATH=$PATH:"$UNBLOB_PATH"
@@ -225,7 +232,6 @@ setup_unblob() {
     echo -e "$RED""not ok""$NC"
     DEP_EXIT=1
   fi
-
 }
 
 dependency_check() 
