@@ -68,6 +68,9 @@ I199_default_tools_github() {
         git clone https://github.com/EMBA-support-repos/jchroot.git external/jchroot
         cd ./external/jchroot/ || ( echo "Could not install EMBA component jchroot" && exit 1 )
         make
+        if [[ -e ./jchroot ]] && [[ -e "/usr/sbin/jchroot" ]]; then
+          rm /usr/sbin/jchroot
+        fi
         if [[ -e ./jchroot ]]; then
           cp -r jchroot /usr/sbin/
         fi
