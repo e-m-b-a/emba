@@ -226,8 +226,11 @@ copy_firmware() {
 
 setup_jchroot() {
   export CHROOT="jchroot"
-  # OPTS see https://github.com/vincentbernat/jchroot#security-note
-  OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+  export OPTS=()
+  if [[ "$IN_DOCKER" -eq 1 ]]; then
+    # OPTS see https://github.com/vincentbernat/jchroot#security-note
+    OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+  fi
   print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
 }
 
