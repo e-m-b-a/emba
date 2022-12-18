@@ -214,6 +214,10 @@ if [[ $LIST_DEP -eq 0 ]] ; then
     # the freetz installation is running as freetzuser and needs write access:
     chown "$ORIG_USER":"$ORIG_GROUP" ./external
     chmod 777 ./external
+  else
+    echo -e "\\n""$ORANGE""WARNING: external directory available: ./external""$NC"
+    echo -e "$ORANGE""Please remove it before proceeding ... exit now""$NC"
+    exit 1
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
