@@ -33,7 +33,6 @@ I120_cwe_checker() {
     print_git_info "cwe-checker" "EMBA-support-repos/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
     echo -e "$ORANGE""cwe-checker will be downloaded.""$NC"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
-    print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.1.2_build/ghidra_10.1.2_PUBLIC_20220125.zip" "external/ghidra.zip"
     print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.1.5_build/ghidra_10.1.5_PUBLIC_20220726.zip" "external/ghidra.zip"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
@@ -77,7 +76,7 @@ I120_cwe_checker() {
           mkdir ./external/cwe_checker 2>/dev/null
           git clone https://github.com/EMBA-support-repos/cwe_checker.git external/cwe_checker
           cd external/cwe_checker || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
-          make all GHIDRA_PATH="$HOME_PATH""/external/ghidra/ghidra_10.1.2_PUBLIC"
+          make all GHIDRA_PATH="$HOME_PATH""/external/ghidra/ghidra_10.1.5_PUBLIC"
           cd "$HOME_PATH" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "$IN_DOCKER" -eq 1 ]]; then
@@ -87,9 +86,7 @@ I120_cwe_checker() {
             # save .config as we remount /root with tempfs -> now we can restore it in the module
             cp -pr /root/.config ./external/cwe_checker/
             cp -pr /root/.local ./external/cwe_checker/
-          fi
 
-          if [[ "$IN_DOCKER" -eq 1 ]]; then
             # cleanup
             rm "$HOME"/.cargo -r -f || true
             rm "$HOME"/.config -r -f || true

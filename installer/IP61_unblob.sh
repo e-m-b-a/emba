@@ -104,9 +104,9 @@ IP61_unblob() {
           echo
         fi
 
-        echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
         echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
-        if [[ -d "$HOME"/.cache ]]; then
+        if [[ -d "$HOME"/.cache ]] && [[ "$IN_DOCKER" -eq 1 ]]; then
+          echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
           cp -pr "$HOME"/.cache external/unblob/root_cache
           rm -rf "$HOME"/.cache || true
         fi
