@@ -34,11 +34,8 @@ S13_weak_func_check()
   if [[ -n "$ARCH" ]] ; then
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
-    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while [[ $(grep -c S12_binary "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
-        sleep 1
-      done
-    fi
+    module_wait "S12_binary_protection"
+
     if ! [[ -d "$TMP_DIR" ]]; then
       mkdir "$TMP_DIR"
     fi
