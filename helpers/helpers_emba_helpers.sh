@@ -282,3 +282,15 @@ backup_var() {
 
   echo "export ${VAR_NAME}=\"${VAR_VALUE}\"" >> "$BACKUP_FILE"
 }
+
+module_wait() {
+  local MODULE_TO_WAIT="${1:-}"
+
+  while ! [[ -f "$MAIN_LOG" ]]; do
+    sleep 1
+  done
+
+  while [[ $(grep -c "$MODULE_TO_WAIT finished" "$MAIN_LOG" || true) -ne 1 ]]; do
+    sleep 1
+  done
+}

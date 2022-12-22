@@ -32,19 +32,10 @@ S14_weak_func_radare_check()
 
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
-    if [[ -f "$MAIN_LOG" ]]; then
-      while [[ $(grep -c S13_weak "$MAIN_LOG" || true) -eq 1 ]]; do
-        sleep 1
-      done
-    fi
-
-    # This module waits for S12 - binary protections
+    # This module waits for S12 - binary protections and s13
     # check emba.log for S12_binary_protection starting
-    if [[ -f "$MAIN_LOG" ]]; then
-      while [[ $(grep -c S12_binary "$MAIN_LOG" || true) -eq 1 ]]; do
-        sleep 1
-      done
-    fi
+    module_wait "S12_binary_protection"
+    module_wait "S13_weak_func_check"
 
     local BINARY=""
     local VULNERABLE_FUNCTIONS=()
