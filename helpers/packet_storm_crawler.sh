@@ -115,6 +115,12 @@ done
 
 sed -i '/\;\;\;/d' "$SAVE_PATH"/PS_PoC_results.csv
 
+## apply blacklist
+if [[ -f "$EMBA_CONFIG_PATH"/pss_blacklist.txt ]]; then
+  grep -Fvf "$EMBA_CONFIG_PATH"/pss_blacklist.txt "$SAVE_PATH"/PS_PoC_results.csv >  "$SAVE_PATH"/PS_PoC_results1.csv
+  mv "$SAVE_PATH"/PS_PoC_results1.csv "$SAVE_PATH"/PS_PoC_results.csv
+fi
+
 if [[ -f "$SAVE_PATH"/PS_PoC_results.csv ]] && [[ -d "$EMBA_CONFIG_PATH" ]]; then
   mv "$SAVE_PATH"/PS_PoC_results.csv "$EMBA_CONFIG_PATH"
   rm -r "$SAVE_PATH"

@@ -32,3 +32,10 @@ sriramkandukuri/cve-fix-reporter
 bollwarm/SecToolSet
 doshyt/cve-monitor
 fir3storm/Vision2
+joneswu456/rt-n56u
+Ananya-0306/vuln-finder
+cve-search/git-vuln-finder
+andir/nixos-issue-db-example
+andrewwebber/kate
+jenkinsci-cert/nvd-cwe
+xaviermerino/ECE1552
