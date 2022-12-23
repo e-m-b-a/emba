@@ -80,7 +80,9 @@ IP12_avm_freetz_ng_extract() {
         rm external/execstack_0.0.20131005-1+b10_amd64.deb
 
         if ! [[ -d external/freetz-ng ]]; then
-          mkdir external/freetz-ng
+          if [[ -d /tmp/freetz-ng ]]; then
+            rm -r /tmp/freetz-ng
+          fi
 
           su - freetzuser -c "git clone https://github.com/Freetz-NG/freetz-ng.git /tmp/freetz-ng"
           su - freetzuser -c "cd /tmp/freetz-ng/ && make allnoconfig"
@@ -88,7 +90,7 @@ IP12_avm_freetz_ng_extract() {
           # sudo -u freetzuser make || true
           su - freetzuser -c "cd /tmp/freetz-ng/ && make tools"
           cd "$HOME_PATH" || ( echo "Could not install EMBA component Freetz-NG" && exit 1 )
-          mv /tmp/freetz-ng/* external/freetz-ng/
+          mv /tmp/freetz-ng external/
           chown -R root:root external/freetz-ng
           if [[ "$IN_DOCKER" -eq 1 ]]; then
             # do some cleanup of the docker image

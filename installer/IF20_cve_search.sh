@@ -48,11 +48,12 @@ IF20_cve_search() {
         print_tool_info "$TOOL_NAME" 1
       done < requirements.system
 
-      while read -r TOOL_NAME; do
-        PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
-        TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
-        print_pip_info "$PIP_NAME" "$TOOL_VERSION"
-      done < requirements.txt
+      # we do not need to install the Flask web environment - we do it manually
+      #while read -r TOOL_NAME; do
+      #  PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
+      #  TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
+      #  print_pip_info "$PIP_NAME" "$TOOL_VERSION"
+      #done < requirements.txt
 
       #xargs sudo apt-get install -y < requirements.system
       while read -r TOOL_NAME; do
@@ -60,9 +61,24 @@ IF20_cve_search() {
       done < requirements.system
 
       # this is a temp solution - Currently needed to fulfill broken deps:
-      python3 -m pip install -Iv crackmapexec==5.1.7.dev0
+      #python3 -m pip install -Iv crackmapexec==5.1.7.dev0
+      
+      # we do not need to install the Flask web environment - we do it manually
+      #python3 -m pip install -r requirements.txt
+      pip3 install requests==2.28.1
+      pip3 install Whoosh==2.7.4
+      pip3 install tqdm==4.64.0
+      pip3 install pymongo==3.12.1
+      pip3 install dicttoxml==1.7.4
+      pip3 install redis==4.2.2
+      pip3 install ijson==3.1.4
+      pip3 install jsonpickle==2.1.0
+      pip3 install requirements-parser==0.5.0
+      pip3 install ansicolors==1.1.8
+      pip3 install nltk==3.7
+      pip3 install nested-lookup==0.2.23
+      pip3 install dnspython==2.2.1
 
-      python3 -m pip install -r requirements.txt
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 
       echo -e "[*] Setting up CVE-search environment - ./external/cve-search/etc/configuration.ini"
@@ -177,5 +193,5 @@ IF20_cve_search() {
     esac
   fi
 
-  pip3 install --force-reinstall --no-deps --ignore-installed requests==2.28.1
+  # pip3 install --force-reinstall --no-deps --ignore-installed requests==2.28.1
 } 

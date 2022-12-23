@@ -40,6 +40,7 @@ S115_usermode_emulator() {
       setup_chroot
     else
       print_output "[-] No chroot binary found ..."
+      module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
       return
     fi
 
@@ -225,8 +226,11 @@ copy_firmware() {
 
 setup_jchroot() {
   export CHROOT="jchroot"
-  # OPTS see https://github.com/vincentbernat/jchroot#security-note
-  OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+  export OPTS=()
+  if [[ "$IN_DOCKER" -eq 1 ]]; then
+    # OPTS see https://github.com/vincentbernat/jchroot#security-note
+    OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+  fi
   print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
 }
 
@@ -746,11 +750,14 @@ s115_cleanup() {
   fi
 
   mapfile -t LOG_FILES < <(find "$LOG_PATH_MODULE""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
+  ILLEGAL_INSTRUCTIONS=$(grep -l "Illegal instruction" "$LOG_PATH_MODULE""/"qemu_tmp* | wc -l)
+  print_output "[*] Found $ORANGE$ILLEGAL_INSTRUCTIONS$NC binaries not emulated - Illegal instructions"
   if [[ "${#LOG_FILES[@]}" -gt 0 ]] ; then
-    print_output "[*] Cleanup empty log files.\\n"
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do
-      LINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | grep -a -v "\[\*\] " | grep -a -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
+      LINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | \
+        grep -a -v "\[\*\] " | grep -a -v "Illegal instruction\|core dumped\|Invalid ELF image for this architecture" | \
+        grep -a -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
       #print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
       if ! [[ -s "$LOG_FILE_" ]] || [[ "$LINES_OF_LOG" -eq 0 ]]; then
         #print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"
