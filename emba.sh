@@ -656,6 +656,8 @@ main()
       create_log_dir
     fi
 
+    # kernel downloader runs on the host and waits for an identified kernel version. Afterwards
+    # it tries to download the kernel sources for further analysis
     if [[ $IN_DOCKER -eq 0 ]]; then
       kernel_downloader &
       K_DOWN_PID="$!"

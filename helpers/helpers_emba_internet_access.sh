@@ -14,6 +14,10 @@
 
 # Description: Multiple useful helpers used to access online resources
 
+
+# kernel downloader waits for s24 results. If we were able to identify a kernel version,
+# a kernel config or at least kernel symbols we can use these information to verify the
+# vulnerabilities
 kernel_downloader() {
   LOG_FILE_KERNEL="$CSV_DIR"/s24_kernel_bin_identifier.csv
   KERNEL_ARCH_PATH="$EXT_DIR"/linux_kernel_sources/
@@ -23,14 +27,8 @@ kernel_downloader() {
   fi
 
   # we wait until the s24 module is finished and hopefully shows us a kernel version
-  while ! [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; do
-    sleep 1
-  done
-  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S24_kernel_bin_identifier "$LOG_DIR"/"$MAIN_LOG_FILE") -lt 2 ]]; do
-      sleep 1
-    done
-  fi
+  module_wait "S24_kernel_bin_identifier"
+
   # now we should have a csv log with a kernel version:
   if ! [[ -f "$LOG_FILE_KERNEL" ]]; then
     print_output "[-] No Kernel version identified ..." "no_log"
@@ -66,6 +64,8 @@ kernel_downloader() {
     if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]]; then
       print_output "[*] Kernel download for version $ORANGE$K_VERSION$NC" "no_log"
       wget https://mirrors.edge.kernel.org/pub/linux/kernel/v"$K_VER_DOWNLOAD"/linux-"$K_VERSION".tar.gz -O "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz || true
+    else
+      print_output "[*] Kernel sources of version $ORANGE$K_VERSION$NC already available" "no_log"
     fi
   
     if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]]; then
