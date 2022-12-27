@@ -57,10 +57,14 @@ F20_vul_aggregator() {
   local S08_LOG="$CSV_DIR"/s08_package_mgmt_extractor.csv
   local S09_LOG="$CSV_DIR"/s09_firmware_base_version_check.csv
   local S25_LOG="$CSV_DIR"/s25_kernel_check.csv
+  local S26_LOG="$LOG_DIR""/s26_kernel_vuln_verifier/"
   local S116_LOG="$CSV_DIR"/s116_qemu_version_detection.csv
   local L15_LOG="$CSV_DIR"/l15_emulated_checks_nmap.csv
   local L25_LOG="$CSV_DIR"/l25_web_checks.csv
   local L35_LOG="$CSV_DIR"/l35_metasploit_check.csv
+  if [[ -d "$S26_LOG" ]]; then
+    mapfile -t S26_LOGS_ARR < <(find "$S26_LOG" -name "cve_results_kernel_*.csv")
+  fi
 
   local CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   local EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
@@ -83,6 +87,10 @@ F20_vul_aggregator() {
         # then we have found a kernel in our s25 kernel module
         KERNELV=1
       fi
+    fi
+
+    if [[ -v S26_LOGS_ARR ]]; then
+      get_kernel_verified "${S26_LOGS_ARR[@]}"
     fi
 
     get_uefi_details "$S02_LOG"
@@ -162,7 +170,10 @@ aggregate_versions() {
   export VERSIONS_AGGREGATED=()
   VERSIONS_KERNEL=()
 
-  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 ]]; then
+  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
+    ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
+    ${#KERNEL_CVE_VERIFIED[@]} -gt 0 ]]; then
+
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
@@ -213,6 +224,19 @@ aggregate_versions() {
       VERSIONS_KERNEL+=( "$VERSION" )
       #print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
     done
+
+    for VERSION in "${KERNEL_CVE_VERIFIED_VERSION[@]}"; do
+      if [ -z "$VERSION" ]; then
+        continue
+      fi
+      VERSION="$(echo "$VERSION" | cut -d\; -f1) | sed 's/^/kernel:/')"
+      print_output "[+] Found Version details with verified vulnerability details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
+      # we ensure that we search for the correct kernel version by adding a : at the end of the search string
+      VERSION=${VERSION/%/:}
+      VERSIONS_KERNEL+=( "$VERSION" )
+      #print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
+    done
+
 
     for CVE_ENTRY in "${CVE_S02_DETAILS[@]}"; do
       if [ -z "$CVE_ENTRY" ]; then
@@ -1066,6 +1090,21 @@ get_kernel_check() {
     readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "$S25_LOG" | grep -v "CVE identifier" | sort -u || true)
     # we get something like this: "kernel;5.10.59;CVE-2021-3490"
   fi
+}
+
+get_kernel_verified() {
+  local S26_LOGS_ARR=("$@")
+  local KERNEL_CVE_VERIFIEDX=()
+  KERNEL_CVE_VERIFIED=()
+  KERNEL_CVE_VERIFIED_VERSION=()
+  for S26_LOG in "${S26_LOGS_ARR[@]}"; do
+    if [[ -f "$S26_LOG" ]]; then
+      print_output "[*] Collect verified kernel details of module $(basename "$S26_LOG")."
+      readarray -t KERNEL_CVE_VERIFIEDX < <(tail -n +2 "$S26_LOG" | sort -u || true)
+    fi
+    KERNEL_CVE_VERIFIED+=("$KERNEL_CVE_VERIFIEDX")
+  done
+  mapfile -t KERNEL_CVE_VERIFIED_VERSION < <(find "$S26_LOG" -name "cve_results_kernel_*.csv" -exec cut -d\; -f1 {} \; | grep -v "Kernel version" | sort -u)
 }
 
 get_usermode_emulator() {

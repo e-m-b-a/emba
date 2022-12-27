@@ -24,13 +24,18 @@ S26_kernel_vuln_verifier()
   module_title "Kernel vulnerability identification and verification"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  KERNEL_CONFIG="NA"
   HOME_DIR="$(pwd)"
   # KERNEL_ARCH_PATH is the directory where we store all the kernels
   KERNEL_ARCH_PATH="$EXT_DIR""/linux_kernel_sources"
   S24_CSV_LOG="$CSV_DIR""/s24_kernel_bin_identifier.csv"
   WAIT_PIDS_S26=()
   NEG_LOG=0
+
+  if ! [[ -d "$KERNEL_ARCH_PATH" ]]; then
+    print_output "[-] Missing directory for kernel sources ... exit module now"
+    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+    return
+  fi
 
   # we wait until the s24 module is finished and hopefully shows us a kernel version
   module_wait "S24_kernel_bin_identifier"
@@ -47,7 +52,7 @@ S26_kernel_vuln_verifier()
 
   local KERNEL_DATA=""
   local KERNEL_ELF_EMBA=()
-  export KERNEL_CONFIG_PATH=""
+  export KERNEL_CONFIG_PATH="NA"
   export KERNEL_ELF_PATH=""
 
   for K_VERSION in "${K_VERSIONS[@]}"; do
@@ -55,22 +60,27 @@ S26_kernel_vuln_verifier()
     print_output "[+] Identified kernel version: $ORANGE$K_VERSION$NC"
 
     mapfile -t KERNEL_ELF_EMBA < <(grep "$K_VERSION" "$S24_CSV_LOG" | cut -d\; -f4-7 | \
-      grep -v "^NA" | grep -v "config extracted" | sort -u | sort -r -n -t\; -k4 || true)
+      grep -v "config extracted" | sort -u | sort -r -n -t\; -k4 || true)
 
     # we check for a kernel configuration
     for KERNEL_DATA in "${KERNEL_ELF_EMBA[@]}"; do
-      if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f3)" == "NA" ]]; then
+      if [[ "$(echo "$KERNEL_DATA" | cut -d\; -f3)" == "/"* ]]; then
+        # field 3 is the kernel config file
         KERNEL_CONFIG_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f3)
-        print_output "[+] Found kernel configuration file: $ORANGE$KERNEL_CONFIG$NC"
+        print_output "[+] Found kernel configuration file: $ORANGE$KERNEL_CONFIG_PATH$NC"
         # we use the first entry with a kernel config detected
-        KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
-        K_FOUND=1
-        break
+        if [[ "$(echo "$KERNEL_DATA" | cut -d\; -f1)" == "/"* ]]; then
+          # field 1 is the matching kernel elf file - sometimes we have a config but no elf file
+          KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
+          print_output "[+] Found kernel elf file: $ORANGE$KERNEL_ELF_PATH$NC"
+          K_FOUND=1
+          break
+        fi
       fi
     done
 
     if [[ "$K_FOUND" -ne 1 ]]; then
-      print_output "[-] No kernel configuration file found for kernel $ORANGE$K_VERSION$NC."
+      print_output "[-] No kernel configuration file with matching elf file found for kernel $ORANGE$K_VERSION$NC."
     fi
 
     if [[ "$K_FOUND" -ne 1 ]]; then
@@ -79,6 +89,7 @@ S26_kernel_vuln_verifier()
         if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f2)" == "NA" ]]; then
           KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
           # we use the first entry with a kernel init detected
+          print_output "[+] Found kernel elf file with init entry: $ORANGE$KERNEL_ELF_PATH$NC"
           K_FOUND=1
           break
         fi
@@ -91,6 +102,7 @@ S26_kernel_vuln_verifier()
         # and no init entry -> we just use the first valid elf file
         if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f1)" == "NA" ]]; then
           KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
+          print_output "[+] Found kernel elf file: $ORANGE$KERNEL_ELF_PATH$NC"
           # we use the first entry as final resort
           K_FOUND=1
           break
@@ -165,7 +177,7 @@ S26_kernel_vuln_verifier()
       rm -rf "$KERNEL_DIR"
     fi
     if ! [[ -d "$KERNEL_DIR" ]] && [[ "$(file "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz")" == *"gzip compressed data"* ]]; then
-      print_output "[*] Kernel extract for version $ORANGE$K_VERSION$NC"
+      print_output "[*] Kernel version $ORANGE$K_VERSION$NC extraction ... "
       tar -xzf "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" -C "$LOG_PATH_MODULE"
     fi
 
@@ -180,19 +192,20 @@ S26_kernel_vuln_verifier()
 
     print_output "[*] Create CVE vulnerabilities array for kernel version $ORANGE$K_VERSION$NC ..."
     mapfile -t ALL_KVULNS < <(jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "$CVE_DETAILS_PATH")
-    print_output "[+] Extracted $ORANGE${#ALL_KVULNS[@]}$GREEN vulnerabilities based on kernel version only"
-    print_output "[*] Starting in depth testing of these vulnerabilities ..."
+    print_ln
+    print_output "[+] Extracted $ORANGE${#ALL_KVULNS[@]}$GREEN vulnerabilities based on kernel version only" "" "$CVE_DETAILS_PATH"
 
-    if [[ -f "$KERNEL_CONFIG" ]] && [[ -d "$KERNEL_DIR" ]]; then
-      compile_kernel "$KERNEL_CONFIG" "$KERNEL_DIR" "$ORIG_K_ARCH"
+    if [[ -f "$KERNEL_CONFIG_PATH" ]] && [[ -d "$KERNEL_DIR" ]]; then
+      compile_kernel "$KERNEL_CONFIG_PATH" "$KERNEL_DIR" "$ORIG_K_ARCH"
     fi
 
     print_ln
-    print_output "[*] Identify kernel symbols ..."
+    sub_module_title "Identify kernel symbols ..."
     readelf -s "$KERNEL_ELF_PATH" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' | \
       sed 's/\[\.\.\.\]//' > "$LOG_PATH_MODULE"/symbols.txt
     SYMBOLS_CNT=$(wc -l "$LOG_PATH_MODULE"/symbols.txt | awk '{print $1}')
     print_output "[*] Extracted $SYMBOLS_CNT symbols from kernel"
+
 
     if [[ -d "$LOG_DIR""/firmware" ]]; then
       print_output "[*] Identify kernel modules symbols ..."
@@ -212,21 +225,23 @@ S26_kernel_vuln_verifier()
 
     split_symbols_file
 
+    sub_module_title "Linux kernel vulnerability verification"
+
     export CNT_PATHS_UNK=0
     export CNT_PATHS_FOUND=0
     export CNT_PATHS_NOT_FOUND=0
     export VULN_CNT=1
     export CNT_PATHS_FOUND_WRONG_ARCH=0
-    local NEG_LOG=1
 
     print_ln
     print_output "[*] Checking vulnerabilities for kernel version $ORANGE$K_VERSION$NC"
     print_ln
 
     for VULN in "${ALL_KVULNS[@]}"; do
+      NEG_LOG=1
       K_PATHS=()
       K_PATHS_FILES_TMP=()
-      K_PATH="undocumented source path"
+      K_PATH="missing vulnerability path from advisory"
 
       CVE=$(echo "$VULN" | cut -d: -f1)
       print_output "[*] Testing vulnerability $ORANGE$VULN_CNT$NC / $ORANGE${#ALL_KVULNS[@]}$NC / $ORANGE$CVE$NC"
@@ -275,7 +290,7 @@ S26_kernel_vuln_verifier()
             fi
           else
             # no source file in our kernel sources -> no vulns
-            print_output "[-] $ORANGE$CVE$NC - $ORANGE$K_PATH$NC - source file not found"
+            print_output "[-] $ORANGE$CVE$NC - $ORANGE$K_PATH$NC - vulnerable source file not found in kernel sources"
             ((CNT_PATHS_NOT_FOUND+=1))
           fi
           max_pids_protection 20 "${WAIT_PIDS_S26[@]}"
@@ -307,6 +322,7 @@ split_symbols_file() {
 }
 
 get_cve_kernel_data() {
+  sub_module_title "Version based vulnerability detection"
   local K_VERSION_="${1:-}"
   print_output "[*] Extract CVE data for kernel version $ORANGE$K_VERSION_$NC"
   "$PATH_CVE_SEARCH" -p "linux_kernel:""$K_VERSION_"":" -o json > "$CVE_DETAILS_PATH"
@@ -322,7 +338,7 @@ extract_kernel_arch() {
   ORIG_K_ARCH=${ORIG_K_ARCH/MIPS64/MIPS}
 
   ORIG_K_ARCH=$(echo "$ORIG_K_ARCH" | tr -d ' ' | tr "[:upper:]" "[:lower:]")
-  print_output "[+] Found kernel architecture $ORANGE$ORIG_K_ARCH$NC"
+  print_output "[+] Identified kernel architecture $ORANGE$ORIG_K_ARCH$NC"
 }
 
 symbol_verifier() {
@@ -367,11 +383,11 @@ compile_verifier() {
   local K_PATH="${3:-}"
   local CVSS="${4:-}"
   local VULN_FOUND=0
-  if ! [[ -f "$LOG_PATH_MODULE"/kernel-compile.files ]]; then
+  if ! [[ -f "$LOG_PATH_MODULE"/kernel-compile-files.log ]]; then
     return
   fi
 
-  if grep -q "$K_PATH" "$LOG_PATH_MODULE"/kernel-compile.files ; then
+  if grep -q "$K_PATH" "$LOG_PATH_MODULE"/kernel-compile-files.log ; then
     print_output "[+] $CVE_ ($CVSS) - $K_PATH verified - compiled path"
     echo "$CVE_ ($CVSS) - $K_VERSION - compiled path verified - $K_PATH" >> "$LOG_PATH_MODULE""/${CVE_}_compiled_verified.txt"
   fi
@@ -390,40 +406,51 @@ compile_kernel() {
   if ! [[ -d "$KERNEL_DIR" ]]; then
     return
   fi
+  sub_module_title "Compile Linux kernel - dry run mode"
 
   KARCH=$(echo "$KARCH" | tr '[:upper:]' '[:lower:]')
-  # todo handle further architecture values
+  # todo check and adjust further architecture details
 
-  print_bar
   cd "$KERNEL_DIR" || exit
   print_output "[*] Create default kernel config for $ORANGE$KARCH$NC architecture"
-  LANG=en make ARCH="$KARCH" defconfig
+  LANG=en make ARCH="$KARCH" defconfig | tee -a "$LOG_PATH_MODULE"/kernel-compile-defconfig.log
   cp "$KERNEL_CONFIG_FILE" .config
+  print_output "[*] Finished creating default kernel config for $ORANGE$KARCH$NC architecture" "" "$LOG_PATH_MODULE/kernel-compile-defconfig.log"
   print_ln
   print_output "[*] Update kernel config with the identified configuration of the firmware"
   # https://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-in-the-linux-kernel-makefile
-  LANG=en make ARCH="$KARCH" olddefconfig
+  LANG=en make ARCH="$KARCH" olddefconfig | tee -a "$LOG_PATH_MODULE"/kernel-compile-olddefconfig.log
+  print_output "[*] Finished updating kernel config with the identified configuration of the firmware" "" "$LOG_PATH_MODULE/kernel-compile-olddefconfig.log"
   print_ln
-  print_output "[*] Starting dry run ..."
-  LANG=en make ARCH="$KARCH" target=all -Bndi | tee -a "$LOG_PATH_MODULE"/kernel-compile.output
+  print_output "[*] Starting kernel compile dry run ..."
+  LANG=en make ARCH="$KARCH" target=all -Bndi | tee -a "$LOG_PATH_MODULE"/kernel-compile.log
   print_ln
-  print_output "[*] Finished dry run ..."
+  print_output "[*] Finished kernel compile dry run ... generated used source files" "" "$LOG_PATH_MODULE/kernel-compile.log"
   cd "$HOME_DIR" || exit
-  if [[ -f "$LOG_PATH_MODULE"/kernel-compile.output ]]; then
-    tr ' ' '\n' < "$LOG_PATH_MODULE"/kernel-compile.output | grep ".*\.[chS]" | tr -d '"' | tr -d ')' \
+  if [[ -f "$LOG_PATH_MODULE"/kernel-compile.log ]]; then
+    tr ' ' '\n' < "$LOG_PATH_MODULE"/kernel-compile.log | grep ".*\.[chS]" | tr -d '"' | tr -d ')' \
       | tr -d '(' | sed 's/^\.\///' | sed '/^\/.*/d' | tr -d ';' | sed 's/^>//' | sed 's/^-o//' | tr -d \' \
-      | sed 's/--defines=//' | sed 's/\.$//' | sort -u > "$LOG_PATH_MODULE"/kernel-compile.files
-    COMPILE_SOURCE_FILES=$(wc -l "$LOG_PATH_MODULE"/kernel-compile.files | awk '{print $1}')
-    print_output "[+] Found $ORANGE$COMPILE_SOURCE_FILES$GREEN used source files during compilation"
+      | sed 's/--defines=//' | sed 's/\.$//' | sort -u > "$LOG_PATH_MODULE"/kernel-compile-files.log
+    COMPILE_SOURCE_FILES=$(wc -l "$LOG_PATH_MODULE"/kernel-compile-files.log | awk '{print $1}')
+    print_ln
+    print_output "[+] Found $ORANGE$COMPILE_SOURCE_FILES$GREEN used source files during compilation" "" "$LOG_PATH_MODULE/kernel-compile-files.log"
   else
     print_output "[-] Found ${RED}NO$NC used source files during compilation"
   fi
-  print_bar
 }
 
 final_log_kernel_vulns() {
-  rm -r "$LOG_PATH_MODULE"/symbols_uniq.split.*
-  rm -r "$LOG_PATH_MODULE"/symbols_uniq.split_gpl.*
+  sub_module_title "Linux kernel verification results"
+
+  if ! [[ -v ALL_KVULNS ]]; then
+    print_output "[-] No module results"
+    return
+  fi
+
+  find "$LOG_PATH_MODULE" -name "symbols_uniq.split.*" -delete || true
+  find "$LOG_PATH_MODULE" -name "symbols_uniq.split_gpl.*" -delete || true
+
+  NEG_LOG=1
 
   local VULN=""
   local SYM_USAGE_VERIFIED=0
@@ -437,7 +464,7 @@ final_log_kernel_vulns() {
   local CVE_VERIFIED_ONE_CRITICAL=()
 
   print_ln
-  print_output "[*] Generating final kernel report ..."
+  print_output "[*] Generating final kernel report ..." "no_log"
   echo "Kernel version;Architecture;CVE;CVSSv2;CVSSv3;Verified with symbols;Verified with compile files" >> "$LOG_PATH_MODULE"/cve_results_kernel_"$K_VERSION".csv
 
   # we walk through the original version based kernel vulnerabilities and report the results
@@ -459,7 +486,7 @@ final_log_kernel_vulns() {
     echo "$K_VERSION;$ORIG_K_ARCH;$CVE;$CVSS2;$CVSS3;$CVE_SYMBOL_FOUND;$CVE_COMPILE_FOUND" >> "$LOG_PATH_MODULE"/cve_results_kernel_"$K_VERSION".csv
   done
 
-  SYM_USAGE_VERIFIED=$(wc -l "$LOG_PATH_MODULE"/CVE-*symbol_* | tail -1 | awk '{print $1}' 2>/dev/null)
+  SYM_USAGE_VERIFIED=$(wc -l "$LOG_PATH_MODULE"/CVE-*symbol_* | tail -1 | awk '{print $1}' 2>/dev/null || true)
   VULN_PATHS_VERIFIED_SYMBOLS=$(cat "$LOG_PATH_MODULE"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | sed 's/.*verified - //' | sed 's/.*verified (GPL) - //' | sort -u | wc -l || true)
   VULN_PATHS_VERIFIED_COMPILED=$(cat "$LOG_PATH_MODULE"/CVE-*compiled_verified.txt 2>/dev/null | grep "compiled path verified" | sed 's/.*verified - //' | sort -u | wc -l || true)
   CVE_VERIFIED_SYMBOLS=$(cat "$LOG_PATH_MODULE"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | cut -d\  -f1 | sort -u | wc -l || true)
@@ -469,12 +496,10 @@ final_log_kernel_vulns() {
   mapfile -t CVE_VERIFIED_OVERLAP_CRITICAL < <(grep ";1;1$" "$LOG_PATH_MODULE"/cve_results_kernel_"$K_VERSION".csv | grep ";9.[0-9];\|;10;" || true)
   mapfile -t CVE_VERIFIED_ONE_CRITICAL < <(grep ";1;\|;1$" "$LOG_PATH_MODULE"/cve_results_kernel_"$K_VERSION".csv | grep ";9.[0-9];\|;10;" || true)
 
-  print_ln
-  print_bar
   print_output "[+] Identified $ORANGE${#ALL_KVULNS[@]}$GREEN unverified CVE vulnerabilities for kernel version $ORANGE$K_VERSION$NC"
   print_output "[*] Detected architecture $ORANGE$ORIG_K_ARCH$NC"
   print_output "[*] Extracted $ORANGE$SYMBOLS_CNT$NC unique symbols from kernel and modules"
-  if [[ "$COMPILE_SOURCE_FILES" -gt 0 ]]; then
+  if [[ -v COMPILE_SOURCE_FILES ]]; then
     print_output "[*] Extracted $ORANGE$COMPILE_SOURCE_FILES$NC used source files during compilation"
   fi
   print_output "[*] Found $ORANGE$CNT_PATHS_UNK$NC advisories with missing vulnerable path details"
@@ -489,7 +514,7 @@ final_log_kernel_vulns() {
   if [[ "$CVE_VERIFIED_SYMBOLS" -gt 0 ]]; then
     print_output "[+] Verified CVEs: $ORANGE$CVE_VERIFIED_SYMBOLS$GREEN (exported symbols)"
   fi
-  if [[ "$CVE_VERIFIED_SYMBOLS" -gt 0 ]]; then
+  if [[ "$CVE_VERIFIED_COMPILED" -gt 0 ]]; then
     print_output "[+] Verified CVEs: $ORANGE$CVE_VERIFIED_COMPILED$GREEN (compiled paths)"
   fi
   if [[ "$CVE_VERIFIED_ONE" -gt 0 ]]; then
@@ -507,7 +532,7 @@ final_log_kernel_vulns() {
       CVSS2_CRITICAL=$(echo "$CVE_VERIFIED_ONE_CRITICAL_" | cut -d\; -f4)
       CVSS3_CRITICAL=$(echo "$CVE_VERIFIED_ONE_CRITICAL_" | cut -d\; -f5)
       identify_exploits "$CVE_CRITICAL"
-      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN - $ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN - Exploit/PoC: $ORANGE$EXPLOIT_DETECTED / $POC_DETECTED$NC")")"
+      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN\t-\t$ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN\t-\tExploit/PoC: $ORANGE$EXPLOIT_DETECTED / $POC_DETECTED$NC")")"
     done
   fi
 
@@ -519,7 +544,7 @@ final_log_kernel_vulns() {
       CVSS2_CRITICAL=$(echo "$CVE_VERIFIED_OVERLAP_CRITICAL_" | cut -d\; -f4)
       CVSS3_CRITICAL=$(echo "$CVE_VERIFIED_OVERLAP_CRITICAL_" | cut -d\; -f5)
       identify_exploits "$CVE_CRITICAL"
-      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN - $ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN - Exploit/PoC: $ORANGE$EXPLOIT_DETECTED / $POC_DETECTED$NC")")"
+      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN\t-\t$ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN\t-\tExploit/PoC: $ORANGE$EXPLOIT_DETECTED / $POC_DETECTED$NC")")"
     done
   fi
   print_bar
@@ -553,13 +578,13 @@ identify_exploits() {
       POC_DETECTED="yes"
     fi
   fi
-  if [[ -f "$CONF_DIR/Snyk_PoC_results.csv" ]]; then
-    if grep -q -E "^$CVE_VALUE;" "$CONF_DIR/Snyk_PoC_results.csv"; then
+  if [[ -f "$CONFIG_DIR/Snyk_PoC_results.csv" ]]; then
+    if grep -q -E "^$CVE_VALUE;" "$CONFIG_DIR/Snyk_PoC_results.csv"; then
       POC_DETECTED="yes"
     fi
   fi
-  if [[ -f "$CONF_DIR/PS_PoC_results.csv" ]]; then
-    if grep -q -E "^$CVE_VALUE;" "$CONF_DIR/PS_PoC_results.csv"; then
+  if [[ -f "$CONFIG_DIR/PS_PoC_results.csv" ]]; then
+    if grep -q -E "^$CVE_VALUE;" "$CONFIG_DIR/PS_PoC_results.csv"; then
       POC_DETECTED="yes"
     fi
   fi
@@ -578,7 +603,4 @@ get_csv_data_s24() {
   # currently we only support one kernel version
   # if we detect multiple kernel versions we only process the first one after sorting
   mapfile -t K_VERSIONS < <(cut -d\; -f2 "$S24_CSV_LOG" | tail -n +2 | grep -v "NA" | sort -u)
-
 }
-
-
