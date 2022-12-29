@@ -52,6 +52,7 @@ S26_kernel_vuln_verifier()
 
   local KERNEL_DATA=""
   local KERNEL_ELF_EMBA=()
+  local ALL_KVULNS=()
   export KERNEL_CONFIG_PATH="NA"
   export KERNEL_ELF_PATH=""
 
@@ -98,7 +99,7 @@ S26_kernel_vuln_verifier()
 
     if [[ "$K_FOUND" -ne 1 ]]; then
       for KERNEL_DATA in "${KERNEL_ELF_EMBA[@]}"; do
-        # this means we have not kernel configuration found
+        # this means we have no kernel configuration found
         # and no init entry -> we just use the first valid elf file
         if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f1)" == "NA" ]]; then
           KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
@@ -158,12 +159,27 @@ S26_kernel_vuln_verifier()
       extract_kernel_arch "$KERNEL_ELF_PATH"
     fi
 
+    # we need to wait for the downloaded linux kernel sources from the host
     WAIT_CNT=0
     while ! [[ -f "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" ]]; do
       print_output "[*] Waiting for kernel sources ..." "no_log"
       ((WAIT_CNT+=1))
       if [[ "$WAIT_CNT" -gt 60 ]]; then
         print_output "[-] No kernel source file available ... exit module now"
+        module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+        return
+      fi
+      sleep 5
+    done
+
+    # now we have a file with the kernel sources ... we do not know if this file is complete.
+    # Probably it is just downloaded partly and we need to wait a bit longer
+    WAIT_CNT=0
+    print_output "[*] Testing kernel sources ..." "no_log"
+    while ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" > /dev/null; do
+      print_output "[*] Testing kernel sources ..." "no_log"
+      if [[ "$WAIT_CNT" -gt 60 ]]; then
+        print_output "[-] No valid kernel source file available ... exit module now"
         module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
         return
       fi
@@ -181,7 +197,7 @@ S26_kernel_vuln_verifier()
       tar -xzf "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" -C "$LOG_PATH_MODULE"
     fi
 
-    # we get a file with the results in $CVE_DETAILS_PATH
+    # we get a json result file with the results in $CVE_DETAILS_PATH
     get_cve_kernel_data "$K_VERSION"
 
     if ! [[ -f "$CVE_DETAILS_PATH" ]]; then
@@ -301,11 +317,11 @@ S26_kernel_vuln_verifier()
       fi
       ((VULN_CNT+=1))
     done
+
+    wait_for_pid "${WAIT_PIDS_S26[@]}"
+
+    final_log_kernel_vulns "$K_VERSION" "${ALL_KVULNS[@]}"
   done
-
-  wait_for_pid "${WAIT_PIDS_S26[@]}"
-
-  final_log_kernel_vulns
 
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
@@ -441,6 +457,9 @@ compile_kernel() {
 
 final_log_kernel_vulns() {
   sub_module_title "Linux kernel verification results"
+  local K_VERSION="${1:-}"
+  shift
+  local ALL_KVULNS=("$@")
 
   if ! [[ -v ALL_KVULNS ]]; then
     print_output "[-] No module results"
