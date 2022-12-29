@@ -506,9 +506,13 @@ final_log_kernel_vulns() {
   done
 
   SYM_USAGE_VERIFIED=$(wc -l "$LOG_PATH_MODULE"/CVE-*symbol_* | tail -1 | awk '{print $1}' 2>/dev/null || true)
+  # nosemgrep
   VULN_PATHS_VERIFIED_SYMBOLS=$(cat "$LOG_PATH_MODULE"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | sed 's/.*verified - //' | sed 's/.*verified (GPL) - //' | sort -u | wc -l || true)
+  # nosemgrep
   VULN_PATHS_VERIFIED_COMPILED=$(cat "$LOG_PATH_MODULE"/CVE-*compiled_verified.txt 2>/dev/null | grep "compiled path verified" | sed 's/.*verified - //' | sort -u | wc -l || true)
+  # nosemgrep
   CVE_VERIFIED_SYMBOLS=$(cat "$LOG_PATH_MODULE"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | cut -d\  -f1 | sort -u | wc -l || true)
+  # nosemgrep
   CVE_VERIFIED_COMPILED=$(cat "$LOG_PATH_MODULE"/CVE-*compiled_verified.txt 2>/dev/null| grep "compiled path verified" | cut -d\  -f1 | sort -u | wc -l || true)
   CVE_VERIFIED_ONE=$(cut -d\; -f6-7 "$LOG_PATH_MODULE"/cve_results_kernel_"$K_VERSION".csv | grep -c "1" || true)
   CVE_VERIFIED_OVERLAP=$(grep -c ";1;1" "$LOG_PATH_MODULE"/cve_results_kernel_"$K_VERSION".csv || true)
@@ -537,7 +541,7 @@ final_log_kernel_vulns() {
     print_output "[+] Verified CVEs: $ORANGE$CVE_VERIFIED_COMPILED$GREEN (compiled paths)"
   fi
   if [[ "$CVE_VERIFIED_ONE" -gt 0 ]]; then
-    print_output "[+] Verified CVEs: $ORANGE$CVE_VERIFIED_ONE$GREEN (one mechanism success)"
+    print_output "[+] Verified CVEs: $ORANGE$CVE_VERIFIED_ONE$GREEN (one mechanism succeeded)"
   fi
   if [[ "$CVE_VERIFIED_OVERLAP" -gt 0 ]]; then
     print_output "[+] Verified CVEs: $ORANGE$CVE_VERIFIED_OVERLAP$GREEN (both mechanisms overlap)"
@@ -545,7 +549,7 @@ final_log_kernel_vulns() {
 
   if [[ "${#CVE_VERIFIED_ONE_CRITICAL[@]}" -gt 0 ]]; then
     print_ln
-    print_output "[+] Verified CRITICAL CVEs: $ORANGE${#CVE_VERIFIED_ONE_CRITICAL[@]}$GREEN (one mechanisms success)"
+    print_output "[+] Verified CRITICAL CVEs: $ORANGE${#CVE_VERIFIED_ONE_CRITICAL[@]}$GREEN (one mechanism succeeded)"
     for CVE_VERIFIED_ONE_CRITICAL_ in "${CVE_VERIFIED_ONE_CRITICAL[@]}"; do
       CVE_CRITICAL=$(echo "$CVE_VERIFIED_ONE_CRITICAL_" | cut -d\; -f3)
       CVSS2_CRITICAL=$(echo "$CVE_VERIFIED_ONE_CRITICAL_" | cut -d\; -f4)

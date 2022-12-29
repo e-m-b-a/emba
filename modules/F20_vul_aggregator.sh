@@ -613,7 +613,6 @@ cve_extractor() {
       elif ! [[ "$VSOURCE" =~ .*STAT.* ]]; then
         VSOURCE="$VSOURCE""/STAT"
       fi
-    # Todo: elif s26 check
     fi
   fi
 
@@ -1096,7 +1095,8 @@ cve_extractor() {
 
 get_firmware_base_version_check() {
   local S09_LOG="${1:-}"
-  VERSIONS_STAT_CHECK=()
+  export VERSIONS_STAT_CHECK=()
+
   if [[ -f "$S09_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S09_LOG")."
     # if we have already kernel information:
@@ -1110,7 +1110,8 @@ get_firmware_base_version_check() {
 
 get_kernel_check() {
   local S25_LOG="${1:-}"
-  KERNEL_CVE_EXPLOITS=()
+  export KERNEL_CVE_EXPLOITS=()
+
   if [[ -f "$S25_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S25_LOG")."
     readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "$S25_LOG" | grep -v "CVE identifier" | sort -u || true)
@@ -1122,22 +1123,23 @@ get_kernel_verified() {
   local S26_LOGS_ARR=("$@")
   local KERNEL_CVE_VERIFIEDX=()
   local S26_LOG_DIR="$LOG_DIR""/s26_kernel_vuln_verifier/"
+  export KERNEL_CVE_VERIFIED=()
+  export KERNEL_CVE_VERIFIED_VERSION=()
 
-  KERNEL_CVE_VERIFIED=()
-  KERNEL_CVE_VERIFIED_VERSION=()
   for S26_LOG in "${S26_LOGS_ARR[@]}"; do
     if [[ -f "$S26_LOG" ]]; then
       print_output "[*] Collect verified kernel details of module $(basename "$S26_LOG")."
       readarray -t KERNEL_CVE_VERIFIEDX < <(tail -n +2 "$S26_LOG" | sort -u || true)
     fi
-    KERNEL_CVE_VERIFIED+=("$KERNEL_CVE_VERIFIEDX")
+    KERNEL_CVE_VERIFIED+=("${KERNEL_CVE_VERIFIEDX[@]}")
   done
   mapfile -t KERNEL_CVE_VERIFIED_VERSION < <(find "$S26_LOG_DIR" -name "cve_results_kernel_*.csv" -exec cut -d\; -f1 {} \; | grep -v "Kernel version" | sort -u)
 }
 
 get_usermode_emulator() {
   local S116_LOG="${1:-}"
-  VERSIONS_EMULATOR=()
+  export VERSIONS_EMULATOR=()
+
   if [[ -f "$S116_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S116_LOG")."
     readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1146,7 +1148,8 @@ get_usermode_emulator() {
 
 get_systemmode_emulator() {
   local L15_LOG="${1:-}"
-  VERSIONS_SYS_EMULATOR=()
+  export VERSIONS_SYS_EMULATOR=()
+
   if [[ -f "$L15_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$L15_LOG")."
     readarray -t VERSIONS_SYS_EMULATOR < <(cut -d\; -f4 "$L15_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1155,7 +1158,8 @@ get_systemmode_emulator() {
 
 get_systemmode_webchecks() {
   local L25_LOG="${1:-}"
-  VERSIONS_SYS_EMULATOR_WEB=()
+  export VERSIONS_SYS_EMULATOR_WEB=()
+
   if [[ -f "$L25_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$L25_LOG")."
     readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1164,7 +1168,8 @@ get_systemmode_webchecks() {
 
 get_msf_verified() {
   local L35_LOG="${1:-}"
-  CVE_L35_DETAILS=()
+  export CVE_L35_DETAILS=()
+
   if [[ -f "$L35_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$L35_LOG")."
     readarray -t CVE_L35_DETAILS < <(cut -d\; -f3 "$L35_LOG" | grep -v "^CVE$" | grep -v "NA" | sort -u || true)
@@ -1173,7 +1178,8 @@ get_msf_verified() {
 
 get_uefi_details() {
   local S02_LOG="${1:-}"
-  CVE_S02_DETAILS=()
+  export CVE_S02_DETAILS=()
+
   if [[ -f "$S02_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$S02_LOG")."
     readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "$S02_LOG" | grep -v "CVE identifier" | sort -u || true)
@@ -1182,7 +1188,8 @@ get_uefi_details() {
 
 get_firmware_details() {
   local S06_LOG="${1:-}"
-  VERSIONS_S06_FW_DETAILS=()
+  export VERSIONS_S06_FW_DETAILS=()
+
   if [[ -f "$S06_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S06_LOG")."
     readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1191,7 +1198,8 @@ get_firmware_details() {
 
 get_package_details() {
   local S08_LOG="${1:-}"
-  VERSIONS_S08_PACKAGE_DETAILS=()
+  export VERSIONS_S08_PACKAGE_DETAILS=()
+
   if [[ -f "$S08_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S08_LOG")."
     readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "$S08_LOG" | grep -v "package\;stripped version" | sort -u | tr ';' ':'|| true)
