@@ -51,7 +51,7 @@ kernel_downloader() {
     local K_VER_DOWNLOAD=""
     local K_VER_1st=""
     local K_VER_2nd=""
-    local K_VER_3rd=""
+    # local K_VER_3rd=""
   
     K_VER_1st=$(echo "$K_VERSION" | cut -d. -f1)
     K_VER_2nd=$(echo "$K_VERSION" | cut -d. -f2)
