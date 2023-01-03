@@ -86,27 +86,33 @@ S26_kernel_vuln_verifier()
 
     if [[ "$K_FOUND" -ne 1 ]]; then
       for KERNEL_DATA in "${KERNEL_ELF_EMBA[@]}"; do
-        # now we check for init entries
-        if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f2)" == "NA" ]]; then
-          KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
-          # we use the first entry with a kernel init detected
-          print_output "[+] Found kernel elf file with init entry: $ORANGE$KERNEL_ELF_PATH$NC"
-          K_FOUND=1
-          break
+        # check for some path indicator for the elf file
+        if [[ "$(echo "$KERNEL_DATA" | cut -d\; -f1)" == "/"* ]]; then
+          # now we check for init entries
+          if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f2)" == "NA" ]]; then
+            KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
+            # we use the first entry with a kernel init detected
+            print_output "[+] Found kernel elf file with init entry: $ORANGE$KERNEL_ELF_PATH$NC"
+            K_FOUND=1
+            break
+          fi
         fi
       done
     fi
 
     if [[ "$K_FOUND" -ne 1 ]]; then
       for KERNEL_DATA in "${KERNEL_ELF_EMBA[@]}"; do
-        # this means we have no kernel configuration found
-        # and no init entry -> we just use the first valid elf file
-        if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f1)" == "NA" ]]; then
-          KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
-          print_output "[+] Found kernel elf file: $ORANGE$KERNEL_ELF_PATH$NC"
-          # we use the first entry as final resort
-          K_FOUND=1
-          break
+        # check for some path indicator for the elf file
+        if [[ "$(echo "$KERNEL_DATA" | cut -d\; -f1)" == "/"* ]]; then
+          # this means we have no kernel configuration found
+          # and no init entry -> we just use the first valid elf file
+          if ! [[ "$(echo "$KERNEL_DATA" | cut -d\; -f1)" == "NA" ]]; then
+            KERNEL_ELF_PATH=$(echo "$KERNEL_DATA" | cut -d\; -f1)
+            print_output "[+] Found kernel elf file: $ORANGE$KERNEL_ELF_PATH$NC"
+            # we use the first entry as final resort
+            K_FOUND=1
+            break
+          fi
         fi
       done
     fi
@@ -159,15 +165,19 @@ S26_kernel_vuln_verifier()
       extract_kernel_arch "$KERNEL_ELF_PATH"
     fi
 
+    if [[ "$K_VERSION" == *".0" ]]; then
+      K_VERSION_KORG=${K_VERSION%.0}
+    else
+      K_VERSION_KORG="$K_VERSION"
+    fi
     # we need to wait for the downloaded linux kernel sources from the host
     WAIT_CNT=0
-    while ! [[ -f "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" ]]; do
+    while ! [[ -f "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz" ]]; do
       print_output "[*] Waiting for kernel sources ..." "no_log"
       ((WAIT_CNT+=1))
-      if [[ "$WAIT_CNT" -gt 60 ]]; then
-        print_output "[-] No kernel source file available ... exit module now"
-        module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
-        return
+      if [[ "$WAIT_CNT" -gt 60 ]] || [[ -f "$TMP_DIR"/linux_download_failed ]]; then
+        print_output "[-] No valid kernel source file available ... check for further kernel versions"
+        continue 2
       fi
       sleep 5
     done
@@ -176,34 +186,33 @@ S26_kernel_vuln_verifier()
     # Probably it is just downloaded partly and we need to wait a bit longer
     WAIT_CNT=0
     print_output "[*] Testing kernel sources ..." "no_log"
-    while ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" > /dev/null; do
+    while ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz" > /dev/null; do
       print_output "[*] Testing kernel sources ..." "no_log"
-      if [[ "$WAIT_CNT" -gt 60 ]]; then
-        print_output "[-] No valid kernel source file available ... exit module now"
-        module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
-        return
+      ((WAIT_CNT+=1))
+      if [[ "$WAIT_CNT" -gt 60 ]] || [[ -f "$TMP_DIR"/linux_download_failed ]]; then
+        print_output "[-] No valid kernel source file available ... check for further kernel versions"
+        continue 2
       fi
       sleep 5
     done
 
     print_output "[*] Kernel sources for version $ORANGE$K_VERSION$NC available"
 
-    KERNEL_DIR="$LOG_PATH_MODULE/linux-$K_VERSION"
+    KERNEL_DIR="$LOG_PATH_MODULE/linux-$K_VERSION_KORG"
     if [[ -d "$KERNEL_DIR" ]]; then
       rm -rf "$KERNEL_DIR"
     fi
-    if ! [[ -d "$KERNEL_DIR" ]] && [[ "$(file "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz")" == *"gzip compressed data"* ]]; then
+    if ! [[ -d "$KERNEL_DIR" ]] && [[ "$(file "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz")" == *"gzip compressed data"* ]]; then
       print_output "[*] Kernel version $ORANGE$K_VERSION$NC extraction ... "
-      tar -xzf "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" -C "$LOG_PATH_MODULE"
+      tar -xzf "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz" -C "$LOG_PATH_MODULE"
     fi
 
     # we get a json result file with the results in $CVE_DETAILS_PATH
     get_cve_kernel_data "$K_VERSION"
 
     if ! [[ -f "$CVE_DETAILS_PATH" ]]; then
-      print_output "[-] No CVE details generated ... return"
-      module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
-      return
+      print_output "[-] No CVE details generated ... check for further kernel version"
+      continue
     fi
 
     print_output "[*] Create CVE vulnerabilities array for kernel version $ORANGE$K_VERSION$NC ..."
@@ -220,8 +229,7 @@ S26_kernel_vuln_verifier()
     readelf -s "$KERNEL_ELF_PATH" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' | \
       sed 's/\[\.\.\.\]//' > "$LOG_PATH_MODULE"/symbols.txt
     SYMBOLS_CNT=$(wc -l "$LOG_PATH_MODULE"/symbols.txt | awk '{print $1}')
-    print_output "[*] Extracted $SYMBOLS_CNT symbols from kernel"
-
+    print_output "[*] Extracted $ORANGE$SYMBOLS_CNT$NC symbols from kernel"
 
     if [[ -d "$LOG_DIR""/firmware" ]]; then
       print_output "[*] Identify kernel modules symbols ..."
@@ -231,13 +239,15 @@ S26_kernel_vuln_verifier()
 
     uniq "$LOG_PATH_MODULE"/symbols.txt > "$LOG_PATH_MODULE"/symbols_uniq.txt
     SYMBOLS_CNT=$(wc -l "$LOG_PATH_MODULE"/symbols_uniq.txt | awk '{print $1}')
-    print_output "[*] Extracted $ORANGE$SYMBOLS_CNT$NC unique symbols"
 
     if [[ "$SYMBOLS_CNT" -eq 0 ]]; then
-      print_output "[-] No symbols found ... exit"
-      module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
-      return
+      print_output "[-] No symbols found ... check for further kernel version"
+      continue
     fi
+
+    print_ln
+    print_output "[+] Extracted $ORANGE$SYMBOLS_CNT$GREEN unique symbols"
+    print_ln
 
     split_symbols_file
 
@@ -352,6 +362,7 @@ extract_kernel_arch() {
   ORIG_K_ARCH=${ORIG_K_ARCH/ARM\ aarch64/arm64}
   # for MIPS64 -> MIPS64 to MIPS
   ORIG_K_ARCH=${ORIG_K_ARCH/MIPS64/MIPS}
+  ORIG_K_ARCH=${ORIG_K_ARCH/*PowerPC*/powerpc}
 
   ORIG_K_ARCH=$(echo "$ORIG_K_ARCH" | tr -d ' ' | tr "[:upper:]" "[:lower:]")
   print_output "[+] Identified kernel architecture $ORANGE$ORIG_K_ARCH$NC"
@@ -417,26 +428,31 @@ compile_kernel() {
   export COMPILE_SOURCE_FILES=0
 
   if ! [[ -f "$KERNEL_CONFIG_FILE" ]]; then
+    print_output "[-] No supported kernel config found - $ORANGE$KERNEL_CONFIG_FILE$NC"
     return
   fi
   if ! [[ -d "$KERNEL_DIR" ]]; then
+    print_output "[-] No supported kernel source directory found - $ORANGE$KERNEL_DIR$NC"
     return
   fi
   sub_module_title "Compile Linux kernel - dry run mode"
 
   KARCH=$(echo "$KARCH" | tr '[:upper:]' '[:lower:]')
-  # todo check and adjust further architecture details
+  if ! [[ -d "$KERNEL_DIR"/arch/"$KARCH" ]]; then
+    print_output "[!] No supported architecture found - $ORANGE$KARCH$NC"
+    return
+  fi
 
   cd "$KERNEL_DIR" || exit
-  print_output "[*] Create default kernel config for $ORANGE$KARCH$NC architecture"
-  LANG=en make ARCH="$KARCH" defconfig | tee -a "$LOG_PATH_MODULE"/kernel-compile-defconfig.log
-  cp "$KERNEL_CONFIG_FILE" .config
-  print_output "[*] Finished creating default kernel config for $ORANGE$KARCH$NC architecture" "" "$LOG_PATH_MODULE/kernel-compile-defconfig.log"
+  # print_output "[*] Create default kernel config for $ORANGE$KARCH$NC architecture"
+  # LANG=en make ARCH="$KARCH" defconfig | tee -a "$LOG_PATH_MODULE"/kernel-compile-defconfig.log || true
+  # print_output "[*] Finished creating default kernel config for $ORANGE$KARCH$NC architecture" "" "$LOG_PATH_MODULE/kernel-compile-defconfig.log"
   print_ln
-  print_output "[*] Update kernel config with the identified configuration of the firmware"
+  print_output "[*] Install kernel config of the identified configuration of the firmware"
+  cp "$KERNEL_CONFIG_FILE" .config
   # https://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-in-the-linux-kernel-makefile
   LANG=en make ARCH="$KARCH" olddefconfig | tee -a "$LOG_PATH_MODULE"/kernel-compile-olddefconfig.log
-  print_output "[*] Finished updating kernel config with the identified configuration of the firmware" "" "$LOG_PATH_MODULE/kernel-compile-olddefconfig.log"
+  print_output "[*] Finished updating kernel config with the identified firmware configuration" "" "$LOG_PATH_MODULE/kernel-compile-olddefconfig.log"
   print_ln
   print_output "[*] Starting kernel compile dry run ..."
   LANG=en make ARCH="$KARCH" target=all -Bndi | tee -a "$LOG_PATH_MODULE"/kernel-compile.log

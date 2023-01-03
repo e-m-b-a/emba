@@ -24,6 +24,7 @@ S24_kernel_bin_identifier()
   local NEG_LOG=0
   local FILE=""
   local K_VER=""
+  local K_INITS=()
   local K_INIT=""
   local CFG_MD5=""
   export KCFG_MD5=()
@@ -55,15 +56,18 @@ S24_kernel_bin_identifier()
       print_output "$(indent "$(orange "$K_VER")")"
       print_ln
 
-      K_INIT=$(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sort -u || true)
-      if [[ "$K_INIT" =~ init=\/.* ]]; then
-        print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
-        print_ln
-        print_output "$(indent "$(orange "$K_INIT")")"
-        print_ln
-      else
-        K_INIT="NA"
-      fi
+      # not perfect, but not too bad for now:
+      mapfile -t K_INITS < <(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sed 's/.*rdinit/rdinit/' | sed 's/.*\ init/init/' | awk '{print $1}' | sort -u || true)
+      for K_INIT in "${K_INITS[@]}"; do
+        if [[ "$K_INIT" =~ init=\/.* ]]; then
+          print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"
+          print_ln
+          print_output "$(indent "$(orange "$K_INIT")")"
+          print_ln
+        else
+          K_INIT="NA"
+        fi
+      done
 
       if [[ -e "$EXT_DIR"/vmlinux-to-elf/vmlinux-to-elf ]]; then
         print_output "[*] Testing possible Linux kernel file $ORANGE$FILE$NC with ${ORANGE}vmlinux-to-elf:$NC"
@@ -95,18 +99,24 @@ S24_kernel_bin_identifier()
 
       K_VER_TMP="${K_VER/Linux version /}"
       demess_kv_version "$K_VER_TMP"
+      # -> KV_ARR
 
       if [[ "$K_ELF" == *"ELF "* ]]; then
         K_ELF="$(echo "$K_ELF" | cut -d: -f1)"
         K_SYMBOLS="$(readelf -s "$K_ELF" | grep -c "FUNC\|OBJECT" || true)"
       fi
 
+      # we should only get one element back, but as array
       for K_VER_CLEAN in "${KV_ARR[@]}"; do
-        # we should only get one element back, but as array
-        if [[ "$CFG_CNT" -gt 50 ]]; then
-          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "$KCONFIG_EXTRACTED" "$K_SYMBOLS"
+        if [[ "${#K_INITS[@]}" -gt 0 ]]; then
+          for K_INIT in "${K_INITS[@]}"; do
+            if [[ "$CFG_CNT" -lt 50 ]]; then
+              KCONFIG_EXTRACTED="NA"
+            fi
+            write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "$KCONFIG_EXTRACTED" "$K_SYMBOLS"
+          done
         else
-          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "NA" "$K_SYMBOLS"
+          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "NA" "$KCONFIG_EXTRACTED" "$K_SYMBOLS"
         fi
       done
       NEG_LOG=1

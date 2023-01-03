@@ -56,6 +56,8 @@ kernel_downloader() {
     K_VER_1st=$(echo "$K_VERSION" | cut -d. -f1)
     K_VER_2nd=$(echo "$K_VERSION" | cut -d. -f2)
     K_VER_3rd=$(echo "$K_VERSION" | cut -d. -f3)
+
+    # prepare the path in the URL:
     if [[ "$K_VER_1st" -lt 3 ]]; then
       K_VER_DOWNLOAD="$K_VER_1st"".""$K_VER_2nd"
     elif [[ "$K_VER_1st" -eq 3 && "$K_VER_2nd" -eq 0 ]]; then
@@ -63,14 +65,28 @@ kernel_downloader() {
     else
       K_VER_DOWNLOAD="$K_VER_1st"".x"
     fi
-    if [[ "$K_VER_3rd" -eq 0 ]]; then
+
+    # prepare the download filename:
+    if [[ "$K_VERSION" == *".0" ]]; then
       # for download we need to modify versions like 3.1.0 to 3.1
-      K_VERSION="$K_VER_1st"".""$K_VER_2nd"
+      K_VERSION=${K_VERSION%.0}
     fi
   
-    if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]]; then
+    # we check if the sources archive is already available and is a valid tgz file:
+    if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]] || ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" > /dev/null; then
       print_output "[*] Kernel download for version $ORANGE$K_VERSION$NC" "no_log"
-      wget https://mirrors.edge.kernel.org/pub/linux/kernel/v"$K_VER_DOWNLOAD"/linux-"$K_VERSION".tar.gz -O "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz || true
+      disable_strict_mode "$STRICT_MODE" 0
+      wget https://mirrors.edge.kernel.org/pub/linux/kernel/v"$K_VER_DOWNLOAD"/linux-"$K_VERSION".tar.gz -O "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz
+      D_RETURN="$?"
+      enable_strict_mode "$STRICT_MODE" 0
+      # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which checks for
+      # the file "$TMP_DIR"/linux_download_failed and exits if this file is available
+      if [[ $D_RETURN -ne 0 ]] ; then
+        echo "failed" > "$TMP_DIR"/linux_download_failed
+        if [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]]; then
+          rm "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz
+        fi
+      fi
     else
       print_output "[*] Kernel sources of version $ORANGE$K_VERSION$NC already available" "no_log"
     fi
