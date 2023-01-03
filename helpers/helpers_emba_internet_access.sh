@@ -55,7 +55,7 @@ kernel_downloader() {
   
     K_VER_1st=$(echo "$K_VERSION" | cut -d. -f1)
     K_VER_2nd=$(echo "$K_VERSION" | cut -d. -f2)
-    K_VER_3rd=$(echo "$K_VERSION" | cut -d. -f3)
+    # K_VER_3rd=$(echo "$K_VERSION" | cut -d. -f3)
 
     # prepare the path in the URL:
     if [[ "$K_VER_1st" -lt 3 ]]; then
