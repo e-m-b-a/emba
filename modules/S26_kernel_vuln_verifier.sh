@@ -217,8 +217,11 @@ S26_kernel_vuln_verifier()
 
     print_output "[*] Create CVE vulnerabilities array for kernel version $ORANGE$K_VERSION$NC ..."
     mapfile -t ALL_KVULNS < <(jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "$CVE_DETAILS_PATH")
+    # readable log file for the web report:
+    jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "$CVE_DETAILS_PATH" > "$LOG_PATH_MODULE""/kernel-$K_VERSION-vulns.log"
+
     print_ln
-    print_output "[+] Extracted $ORANGE${#ALL_KVULNS[@]}$GREEN vulnerabilities based on kernel version only" "" "$CVE_DETAILS_PATH"
+    print_output "[+] Extracted $ORANGE${#ALL_KVULNS[@]}$GREEN vulnerabilities based on kernel version only" "" "$LOG_PATH_MODULE""/kernel-$K_VERSION-vulns.log"
 
     if [[ -f "$KERNEL_CONFIG_PATH" ]] && [[ -d "$KERNEL_DIR" ]]; then
       compile_kernel "$KERNEL_CONFIG_PATH" "$KERNEL_DIR" "$ORIG_K_ARCH"
