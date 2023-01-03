@@ -632,21 +632,21 @@ grepit_module_java() {
   "javax.validation" \
   "5_java_javax-validation.txt"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search 'Setting values in Java objects from HTTP/JSON requests directly can be very dangerous. This is usually a fasterxml.jackson binding. These properties might be secret inputs the server accepts, but are unlinked in the client side JavaScript code. For example imagine such an annotation on the username attribute of a User Java class. This would allow to fake the username by sending a username attribute in the JSON payload.' \
   '@JsonProperty("version")' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '@JsonProperty\(' \
   "4_java_jsonproperty_annotation.txt"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search 'Validation in Java can be done via certain @constraint' \
   '@constraint' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '@constraint' \
   "5_java_constraint_annotation.txt"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search 'Lint will sometimes complain about security related stuff, this annotation deactivates the warning' \
   '@SuppressLint' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -954,7 +954,7 @@ grepit_module_java_spring() {
   "\.getHeader\(" \
   "5_java_spring_http_getHeader.txt"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "Check for Spring View Manipulation https://github.com/veracode-research/spring-view-manipulation/" \
   '@GetMapping("/safe/redirect")' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
