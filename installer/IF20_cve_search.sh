@@ -78,6 +78,8 @@ IF20_cve_search() {
       pip3 install nltk==3.7
       pip3 install nested-lookup==0.2.23
       pip3 install dnspython==2.2.1
+      pip3 install Werkzeug
+      pip3 install python-dateutil
 
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 
