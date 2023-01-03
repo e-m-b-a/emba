@@ -207,7 +207,7 @@ radare_function_check_MIPS() {
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
         # Check this. This test is very rough:
         # TODO: check this in radare2
-        #COUNT_MMAP_OK=$(grep -c ",-1$" "$FUNC_LOG"  2> /dev/null)
+        # COUNT_MMAP_OK=$(grep -c ",-1$" "$FUNC_LOG"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
       radare_log_func_footer "$NAME" "$FUNCTION"
@@ -247,7 +247,7 @@ radare_function_check_ARM64() {
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
         # Test not implemented on ARM64
         # TODO: check this in radare2
-        #COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
+        # COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
       radare_log_func_footer "$NAME" "$FUNCTION"
@@ -488,7 +488,7 @@ radare_output_function_details()
   local LOG_FILE_LOC
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$FUNCTION"-"$NAME".txt
 
-  #check if this is common linux file:
+  # check if this is common linux file:
   local COMMON_FILES_FOUND
   local SEARCH_TERM
   if [[ -f "$BASE_LINUX_FILES" ]]; then

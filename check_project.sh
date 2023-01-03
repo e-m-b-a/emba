@@ -46,6 +46,7 @@ MODULES_TO_CHECK_ARR_TAB=()
 MODULES_TO_CHECK_ARR_SEMGREP=()
 MODULES_TO_CHECK_ARR_DOCKER=()
 MODULES_TO_CHECK_ARR_PERM=()
+MODULES_TO_CHECK_ARR_COMMENT=()
 
 import_config_scripts() {
   mapfile -t HELPERS < <(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
@@ -153,6 +154,19 @@ check() {
     fi
   done
 
+  echo -e "\\n""$GREEN""Check all source for correct comment usage:""$NC""\\n"
+  for SOURCE in "${SOURCES[@]}"; do
+    echo -e "\\n""$GREEN""Run ${ORANGE}comment check$GREEN on $ORANGE$SOURCE""$NC""\\n"
+    if [[ $(grep -E -R "^( )+?#" "$SOURCE" | grep -v "#\ \|bash\|/bin/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
+      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    else
+      grep -E -R -n "^( )+?#" "$SOURCE" | grep -v "#\ \|bash\|shellcheck" | grep -v -E "#$"
+      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
+      MODULES_TO_CHECK_ARR_COMMENT+=("$SOURCE")
+    fi
+  done
+
+
   echo -e "\\n""$GREEN""Run shellcheck and semgrep:""$NC""\\n"
   for SOURCE in "${SOURCES[@]}"; do
     echo -e "\\n""$GREEN""Run ${ORANGE}shellcheck$GREEN on $ORANGE$SOURCE""$NC""\\n"
@@ -194,6 +208,15 @@ summary() {
     echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
     echo -e "Modules to check (tab vs spaces): ${#MODULES_TO_CHECK_ARR_TAB[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_TAB[@]}"; do
+      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+    done
+    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+
+  if [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "Modules to check (space after # sign): ${#MODULES_TO_CHECK_ARR_COMMENT[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR_COMMENT[@]}"; do
       echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
     done
     echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
@@ -258,6 +281,7 @@ dockerchecker
 summary
 
 if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]]; then
+  [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
+  [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]]; then
   exit 1
 fi

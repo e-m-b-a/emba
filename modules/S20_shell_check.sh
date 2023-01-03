@@ -143,7 +143,7 @@ s20_reporter() {
   local SHELL_LOG="${3:0}"
 
   if [[ "$VULNS" -ne 0 ]] ; then
-    #check if this is common linux file:
+    # check if this is common linux file:
     local COMMON_FILES_FOUND
     if [[ -f "$BASE_LINUX_FILES" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"

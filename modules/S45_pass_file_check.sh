@@ -54,11 +54,11 @@ S45_pass_file_check()
         if [[ -f "$LINE" ]] && ! [[ -x "$LINE" ]] ; then
           local POSSIBLE_PASSWD
           # regex source: https://serverfault.com/questions/972572/regex-for-etc-passwd-content
-          #POSSIBLE_PASSWD=$(grep -hIE '^([^:]*:){6}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
+          # POSSIBLE_PASSWD=$(grep -hIE '^([^:]*:){6}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
           POSSIBLE_PASSWD=$(grep -hIE '^[a-zA-Z0-9]+:.:[0-9]+:[0-9]+([^:]*:){3}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null || true)
 
           local POSSIBLE_SHADOWS
-          #POSSIBLE_SHADOWS=$(grep -hIE '^([^:]*:){8}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
+          # POSSIBLE_SHADOWS=$(grep -hIE '^([^:]*:){8}[^:]*$' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null)
           POSSIBLE_SHADOWS=$(grep -hIE '^[a-zA-Z0-9]+:\$[0-9a-z]\$.*:[0-9]+:[0-9]+:[0-9]+([^:]*:){4}[^:]*' "$LINE" | grep -v ":x:" | grep -v ":\*:" | grep -v ":!:" 2> /dev/null || true)
 
           local ROOT_ACCOUNTS

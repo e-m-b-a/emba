@@ -13,10 +13,12 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  A rough guess of the used operating system. Currently, it tries to identify VxWorks, eCos, Adonis, Siprotec, uC/OS and Linux.
-#               If no Linux operating system is found, then it also tries to identify the target architecture (currently with binwalk only).
+# Description:  A rough guess of the used operating system. Currently, it tries to
+#               identify VxWorks, eCos, Adonis, Siprotec, uC/OS and Linux.
+#               If no Linux operating system is found, then it also tries to identify
+#               the target architecture (currently with binwalk only).
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
-#export PRE_THREAD_ENA=1
+# export PRE_THREAD_ENA=1
 
 S03_firmware_bin_base_analyzer() {
 
@@ -177,7 +179,7 @@ os_detection_thread_per_os() {
 }
 
 binary_architecture_detection() {
-  #sub_module_title "Architecture detection for RTOS based systems"
+  # sub_module_title "Architecture detection for RTOS based systems"
 
   local FILE_TO_CHECK="${1:-}"
   if ! [[ -f "$FILE_TO_CHECK" ]]; then

@@ -123,7 +123,7 @@ s22_vuln_check() {
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
 
   if [[ "$VULNS" -gt 0 ]] ; then
-    #check if this is common linux file:
+    # check if this is common linux file:
     local COMMON_FILES_FOUND
     local CFF
     if [[ -f "$BASE_LINUX_FILES" ]]; then
@@ -164,7 +164,7 @@ s22_check_php_ini(){
 
   disable_strict_mode "$STRICT_MODE"
   for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
-    #print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
+    # print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
     mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" || true)
     for LINE in "${INISCAN_RESULT[@]}" ; do  
       local LIMIT_CHECK

@@ -446,7 +446,7 @@ grepit_module_java() {
   'setMaxInactiveInterval\(' \
   "4_java_servlet_setMaxInactiveInterval.txt"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "Find out which Java Beans get persisted with javax.persistence" \
   '@Entity' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -454,14 +454,14 @@ grepit_module_java() {
   "7_java_persistent_beans.txt" \
   "-l" #Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "The source code shows the database table/column names... e.g. if you find a sql injection later on, this will help for the exploitation" \
   '@Column(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   '@Column\(' \
   "6_java_persistent_columns_in_database.txt"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "The source code shows the database table/column names... e.g. if you find a sql injection later on, this will help for the exploitation" \
   '@Table(' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -473,28 +473,28 @@ grepit_module_java() {
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'java\.net\.' \
   "8_java_io_java_net.txt" \
-  "-l" #Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
+  "-l" # Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
 
   grepit_search "Find out which Java classes do any kind of io" \
   'java.io.' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'java\.io\.' \
   "8_java_io_java_io.txt" \
-  "-l" #Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
+  "-l" # Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
 
   grepit_search "Find out which Java classes do any kind of io" \
   'javax.servlet' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'javax\.servlet' \
   "8_java_io_javax_servlet.txt" \
-  "-l" #Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
+  "-l" # Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
 
   grepit_search "Find out which Java classes do any kind of io" \
   'org.apache.http' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'org\.apache\.http' \
   "8_java_io_apache_http.txt" \
-  "-l" #Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
+  "-l" # Special case, we only want to know matching files to know which beans get persisted, therefore -l to output matching files
 
   grepit_search "Especially for high security applications. From http://docs.oracle.com/javase/1.5.0/docs/guide/security/jce/JCERefGuide.html#PBEEx : \"It would seem logical to collect and store the password in an object of type java.lang.String. However, here's the caveat: Objects of type String are immutable, i.e., there are no methods defined that allow you to change (overwrite) or zero out the contents of a String after usage. This feature makes String objects unsuitable for storing security sensitive information such as user passwords. You should always collect and store security sensitive information in a char array instead.\" " \
   'String password' \
@@ -1542,7 +1542,7 @@ grepit_module_php() {
   "-i"
 }
 
-#The HTML/JavaScript specific stuff
+# The HTML/JavaScript specific stuff
 grepit_module_html() {
   print_output "[*] Starting Grepit HTML module" "no_log"
 
@@ -1829,12 +1829,12 @@ grepit_module_js() {
 grepit_module_modsecurity() {
   print_output "[*] Starting Grepit Modsecurity module" "no_log"
 
-  #grepit_search "Block is not recommended to use because it is depending on default action, use deny (or allow)" \
-  #'block' \
-  #'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  #'block' \
-  #"6_modsecurity_block.txt" \
-  #"-i"
+  # grepit_search "Block is not recommended to use because it is depending on default action, use deny (or allow)" \
+  # 'block' \
+  # 'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  # 'block' \
+  # "6_modsecurity_block.txt" \
+  # "-i"
 
   grepit_search "Rather complex modsecurity constructs that are worth having a look." \
   'ctl:auditEngine' \
@@ -1878,7 +1878,7 @@ grepit_module_modsecurity() {
   "5_modsecurity_SecContentInjection.txt" \
   "-i"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "Modsecurity inspecting uploaded files." \
   '@inspectFile' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -1949,7 +1949,7 @@ grepit_module_mobile_device() {
 
 grepit_module_android() {
   print_output "[*] Starting Grepit Android module" "no_log"
-  #For interesting inputs see:
+  # For interesting inputs see:
   # http://developer.android.com/training/articles/security-tips.html
   # http://source.android.com/devices/tech/security/
 
@@ -2297,14 +2297,14 @@ grepit_module_android() {
 grepit_module_ios() {
   print_output "[*] Starting Grepit Apple iOS module" "no_log"
 
-  #Rule triggers for Objective-C and SWIFT
+  # Rule triggers for Objective-C and SWIFT
   grepit_search "iOS fileURLWithPath opens a file, eg. for writing. Make sure attributes such as NSURLIsExcludedFromBackupKey described on https://developer.apple.com/library/content/qa/qa1719/_index.html are correctly set." \
   'fileURLWithPath' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
   'fileURLWithPath' \
   "5_ios_file_access_fileURLWithPath.txt"
 
-  #Rule triggers for Objective-C and SWIFT
+  # Rule triggers for Objective-C and SWIFT
   grepit_search "iOS NSURL opens a URL for example a local file, eg. for writing. Make sure attributes such as NSURLIsExcludedFromBackupKey described on https://developer.apple.com/library/content/qa/qa1719/_index.html are correctly set." \
   'NSURL' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -2768,7 +2768,7 @@ grepit_module_ios() {
   'sourceApplication:' \
   "4_ios_sourceApplication.txt"
 
-  #Below here Info.plist stuff
+  # Below here Info.plist stuff
   grepit_search "NSAllowsArbitraryLoads set to 1 allows iOS applications to load resources over insecure non-TLS protocols and is specified in the Info.plist file. It doesn't mean the application is really doing it, however, it is recommended to disable non-TLS connections." \
   'NSAllowsArbitraryLoads' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -2947,10 +2947,10 @@ grepit_module_ios() {
 grepit_module_python() {
   print_output "[*] Starting Grepit Python module" "no_log"
 
-  #Python language specific stuff
-  #- whitespaces are allowed between function names and brackets: abs (-1.3)
-  #- Function names are case sensitive
-  #- Due to the many flexible way of calling a function, the regexes will only catch "the most natural" case
+  # Python language specific stuff
+  # - whitespaces are allowed between function names and brackets: abs (-1.3)
+  # - Function names are case sensitive
+  # - Due to the many flexible way of calling a function, the regexes will only catch "the most natural" case
 
   grepit_search "Input function in Python 2.X is dangerous (but not in python 3.X), as it read from stdin and then evals the input, see https://access.redhat.com/blogs/766093/posts/2592591" \
   'input()' \
@@ -2976,11 +2976,11 @@ grepit_module_python() {
   "\s{1,$WILDCARD_SHORT}is\s{1,$WILDCARD_SHORT}\d" \
   "5_python_is_object_identity_operator_right.txt"
 
-  #grepit_search "The 'is' object identity operator should not be used for numbers, see https://access.redhat.com/blogs/766093/posts/2592591" \
-  #'object.an_integer is other_object.other_integer' \
-  #'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  #"\sis\s" \
-  #"5_python_is_object_identity_operator_general.txt"
+  # grepit_search "The 'is' object identity operator should not be used for numbers, see https://access.redhat.com/blogs/766093/posts/2592591" \
+  # 'object.an_integer is other_object.other_integer' \
+  # 'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  # "\sis\s" \
+  # "5_python_is_object_identity_operator_general.txt"
 
   grepit_search "The float type can not be reliably compared for equality, see https://access.redhat.com/blogs/766093/posts/2592591" \
   '2.2 * 3.0 == 3.3 * 2.2' \
@@ -3094,8 +3094,8 @@ grepit_module_python() {
 grepit_module_ruby() {
   print_output "[*] Starting Grepit Ruby module" "no_log"
 
-  #ruby is case sensitive in general
-  #If you have a ruby application, the static analyzer https://github.com/presidentbeef/brakeman seems pretty promising
+  # ruby is case sensitive in general
+  # If you have a ruby application, the static analyzer https://github.com/presidentbeef/brakeman seems pretty promising
 
   grepit_search "Basic authentication in ruby with http_basic_authenticate_with" \
   'http_basic_authenticate_with' \
@@ -3444,7 +3444,7 @@ grepit_module_crypto_creds() {
   "4_cryptocred_ciphers_kerberos.txt" \
   "-i"
 
-  #take care with the next regex, ! has a special meaning in double quoted strings but not in single quoted
+  # take care with the next regex, ! has a special meaning in double quoted strings but not in single quoted
   grepit_search "Hash" \
   'hash_value' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4217,8 +4217,8 @@ grepit_module_api_keys() {
 
 grepit_module_asm_native() {
   print_output "[*] Starting Grepit Assembly native module" "no_log"
-  #Whatever you can usually find in a disassembly
-  #This is a very experimental section...
+  # Whatever you can usually find in a disassembly
+  # This is a very experimental section...
 
   grepit_search "Checking if sleep is hooked via Windows API by checking CPU clock delta to detect sandboxes (sandboxes such as Windows Defender hook sleep calls) via GetTickCount" \
   'call cs:GetTickCount' \
@@ -4526,7 +4526,7 @@ grepit_module_general() {
   "5_general_kernel.txt" \
   "-i"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "Email addresses" \
   'example-email_address-@example-domain.com' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4609,7 +4609,7 @@ grepit_module_general() {
   "5_general_fake.txt" \
   "-i"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "URIs with authentication information specified as ://username:password@example.org" \
   'http://username:password@example.com' \
   'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
@@ -4617,7 +4617,7 @@ grepit_module_general() {
   "1_general_uris_auth_info_narrow.txt" \
   "-i"
 
-  #Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
+  # Take care with the following regex, @ has a special meaning in double quoted strings, but not in single quoted strings
   grepit_search "URIs with authentication information specified as username:password@example.org" \
   'username:password@example.com' \
   'android:duration="@integer/animator_heartbeat_scaling_duration" or addObject:NSLocalizedString(@' \
@@ -4828,13 +4828,13 @@ grepit_module_general() {
   "2_general_obfuscation.txt" \
   "-i"
 
-  #take care with the following regex, backticks have to be escaped
-  #grepit_search "Everything between backticks, because in Perl and Shell scirpting (eg. cgi-scripts) these are system execs." \
-  #'`basename file-var`' \
-  #'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
-  #"\`.{2,$WILDCARD_LONG}\`" \
-  #"5_general_backticks.txt"\
-  #"-i"
+  # take care with the following regex, backticks have to be escaped
+  # grepit_search "Everything between backticks, because in Perl and Shell scirpting (eg. cgi-scripts) these are system execs." \
+  # '`basename file-var`' \
+  # 'FALSE_POSITIVES_EXAMPLE_PLACEHOLDER' \
+  # "\`.{2,$WILDCARD_LONG}\`" \
+  # "5_general_backticks.txt"\
+  # "-i"
 
   grepit_search "Piping into the mail command is very dangerous, as it interpretes ~! as a command that should be executed, see https://research.securitum.com/fail2ban-remote-code-execution/" \
   'echo "test $userinput" | mail -s "subject" user@example.org' \
@@ -4927,26 +4927,26 @@ grepit_module_general() {
   "4_general_sql_sqlcipher.txt" \
   "-i"
 
-  #TODO: These regexes can take waaaay too long sometimes, improve performance
-  #As the following regex had way too many false positives (thousands of english words match), we require the base64 to include
-  #at least one equal sign at the end. The old regex was:
-  #'(?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=)'
+  # TODO: These regexes can take waaaay too long sometimes, improve performance
+  # As the following regex had way too many false positives (thousands of english words match), we require the base64 to include
+  # at least one equal sign at the end. The old regex was:
+  # '(?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=)'
   grepit_search "Base64 encoded data (that is more than 6 bytes long). This regex won't detect a base64 encoded value over several lines and won't detect one that does not end with an equal sign..." \
   'YWJj YScqKyo6LV/Dpw==' \
   '/target/ //JQLite - the following ones shouldnt be an issue anymore as we require more than 6 bytes: done echo else gen/ ////' \
   '(?:[A-Za-z0-9+/]{4}){2,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)' \
   "5_general_base64_content.txt"
-  #case sensitive, the regex is insensitive anyway
+  # case sensitive, the regex is insensitive anyway
 
-  #As the following regex had way too many false positives (thousands of english words match), we require the base64 to include
-  #at least one equal sign at the end. The old regex was:
-  #'(?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})'
+  # As the following regex had way too many false positives (thousands of english words match), we require the base64 to include
+  # at least one equal sign at the end. The old regex was:
+  # '(?:[A-Za-z0-9_-]{4})+(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=|[A-Za-z0-9_-]{4})'
   grepit_search "Base64 URL-safe encoded data (that is more than 6 bytes long). To get from URL-safe base64 to regular base64 you need .replace('-','+').replace('_','/'). This regex won't detect a base64 encoded value over several lines and won't detect one that does not end with an equal sign..." \
   'YScqKyo6LV_Dpw==' \
   '/target/ //JQLite - the following ones shouldnt be an issue anymore as we require more than 6 bytes: done echo else gen/ ////' \
   '(?:[A-Za-z0-9_-]{4}){2,}(?:[A-Za-z0-9_-]{2}==|[A-Za-z0-9_-]{3}=)' \
   "5_general_base64_urlsafe.txt"
-  #case sensitive, the regex is insensitive anyway
+  # case sensitive, the regex is insensitive anyway
 
   grepit_search "Base64 as a word used" \
   'Base64' \
@@ -5018,8 +5018,8 @@ grepit_module_general() {
   "4_general_swear_crap.txt" \
   "-i"
 
-  #IP-Adresses
-  #\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.
+  # IP-Adresses
+  # \b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.
   #  (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.
   #  (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.
   #  (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b

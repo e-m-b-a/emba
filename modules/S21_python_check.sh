@@ -86,7 +86,7 @@ s21_script_bandit() {
 
   VULNS=$(grep -c ">> Issue: " "$PY_LOG" 2> /dev/null || true)
   if [[ "$VULNS" -ne 0 ]] ; then
-    #check if this is common linux file:
+    # check if this is common linux file:
     local COMMON_FILES_FOUND
     local CFF
     if [[ -f "$BASE_LINUX_FILES" ]]; then

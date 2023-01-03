@@ -401,10 +401,10 @@ run_init_qemu() {
   local LOG_FILE_INIT="${3:-}"
 
   # Enable the following echo output for debugging
-  #echo "BIN: $BIN_" | tee -a "$LOG_FILE_INIT"
-  #echo "EMULATOR: $EMULATOR" | tee -a "$LOG_FILE_INIT"
-  #echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
-  #echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
+  # echo "BIN: $BIN_" | tee -a "$LOG_FILE_INIT"
+  # echo "EMULATOR: $EMULATOR" | tee -a "$LOG_FILE_INIT"
+  # echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
+  # echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
 
   if [[ "$STRICT_MODE" -eq 1 ]]; then
     set +e
@@ -524,7 +524,7 @@ emulate_strace_run() {
         if [[ ! -d "$R_PATH""$PATH_MISSING" ]]; then
           write_log "[*] Creating directory $ORANGE$R_PATH$PATH_MISSING$NC" "$LOG_FILE_STRACER"
           mkdir -p "$R_PATH""$PATH_MISSING" 2> /dev/null || true
-          #continue
+          # continue
         fi
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
@@ -581,7 +581,7 @@ emulate_binary() {
   write_log "[*] Emulator used: $ORANGE$EMULATOR$NC" "$LOG_FILE_BIN"
   write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_BIN"
   write_log "[*] Using CPU config: $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-  #write_log "[*] Root path used: $ORANGE$R_PATH$NC" "$LOG_FILE_BIN"
+  # write_log "[*] Root path used: $ORANGE$R_PATH$NC" "$LOG_FILE_BIN"
   write_log "[*] Emulating binary: $ORANGE${BIN_/\.}$NC" "$LOG_FILE_BIN"
   write_log "" "$LOG_FILE_BIN"
 
@@ -647,7 +647,7 @@ check_disk_space_emu() {
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"
       print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}" "no_log"
       pkill -f "$EMULATOR.*$KILLER.*" || true
-      #rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
+      # rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
     fi
   done
 }
@@ -719,7 +719,7 @@ s115_cleanup() {
   local LOG_FILES=()
   local BIN=""
 
-  #rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
+  # rm "$LOG_PATH_MODULE""/stracer_*.txt" 2>/dev/null || true
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
@@ -758,9 +758,9 @@ s115_cleanup() {
       LINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "$LOG_FILE_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | \
         grep -a -v "\[\*\] " | grep -a -v "Illegal instruction\|core dumped\|Invalid ELF image for this architecture" | \
         grep -a -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)
-      #print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
+      # print_output "[*] LOG_FILE: $LOG_FILE_ - Lines: $LINES_OF_LOG" "no_log"
       if ! [[ -s "$LOG_FILE_" ]] || [[ "$LINES_OF_LOG" -eq 0 ]]; then
-        #print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"
+        # print_output "[*] Removing empty log file: $LOG_FILE_" "no_log"
         rm "$LOG_FILE_" 2> /dev/null || true
         continue
       fi
