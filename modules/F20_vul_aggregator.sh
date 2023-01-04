@@ -234,7 +234,7 @@ aggregate_versions() {
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
       VERSION=${VERSION/%/:}
       VERSIONS_KERNEL+=( "$VERSION" )
-      #print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
+      # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
     done
 
     # details from module s26
@@ -684,13 +684,13 @@ cve_extractor() {
   # On the other hand, do not forget that we are also using the s25 results if we can find the
   # same CVE here via version detection.
 
-  #if [[ "$BINARY" == *kernel* ]]; then
+  # if [[ "$BINARY" == *kernel* ]]; then
   #  if [[ -f "$S25_LOG" ]]; then
   #    for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
   #      KCVE_VALUE=$(echo "$KERNEL_CVE_EXPLOIT" | cut -d\; -f3)
   #    done
   #  fi
-  #fi
+  # fi
 
   if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do

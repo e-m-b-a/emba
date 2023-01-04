@@ -76,9 +76,9 @@ I02_UEFI_fwhunt() {
         cd external/fwhunt-scan || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
         git clone https://github.com/EMBA-support-repos/FwHunt.git rules
         echo "Installed $(find rules/ -iname "BRLY-*" | wc -l) fwhunt rules"
-        #ldconfig
-        #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
-        #python3 setup.py install
+        # ldconfig
+        # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
+        # python3 setup.py install
         pip3 install fwhunt-scan
         cd "$HOME_PATH" || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
       ;;

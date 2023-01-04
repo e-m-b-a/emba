@@ -30,7 +30,7 @@ S05_firmware_details()
     # Linux:
     DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
   else
-    #RTOS:
+    # RTOS:
     DETECTED_DIR=$(find "$OUTPUT_DIR" -xdev -type d 2>/dev/null | wc -l)
   fi
   

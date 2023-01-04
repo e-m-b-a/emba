@@ -637,10 +637,10 @@ architecture_dep_check() {
   elif [[ "$ARCH" == "x86" ]] ; then
     ARCH_STR="i386"
   elif [[ "$ARCH" == "x64" ]] ; then
-    #ARCH_STR="i386:x86-64"
+    # ARCH_STR="i386:x86-64"
     ARCH_STR="x86-64"
   elif [[ "$ARCH" == "PPC" ]] ; then
-    #ARCH_STR="powerpc:common"
+    # ARCH_STR="powerpc:common"
     ARCH_STR="powerpc"
   elif [[ "$ARCH" == "PPC64" ]] ; then
     ARCH_STR="powerpc64"

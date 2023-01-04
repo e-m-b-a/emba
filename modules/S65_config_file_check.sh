@@ -60,7 +60,7 @@ check_fstab()
   sub_module_title "Scan fstab"
   local LINE=""
 
-  #IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
+  # IFS=" " read -r -a FSTAB_ARR < <(printf '%s' "$(mod_path "/ETC_PATHS/fstab")")
   mapfile -t FSTAB_ARR < <(mod_path "/ETC_PATHS/fstab")
 
   if [[ ${#FSTAB_ARR[@]} -gt 0 ]] ; then

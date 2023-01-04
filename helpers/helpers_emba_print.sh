@@ -45,7 +45,7 @@ welcome()
 
 module_log_init()
 {
-  #local LOG_FILE_NAME
+  # local LOG_FILE_NAME
   LOG_FILE_NAME="${1:-}"
   local FILE_NAME
   MODULE_NUMBER="$(echo "$LOG_FILE_NAME" | cut -d "_" -f1 | cut -c2- )"
@@ -591,7 +591,7 @@ module_start_log() {
   print_output "[*] $(date) - $MODULE_MAIN_NAME starting" "main"
   export LOG_PATH_MODULE
   if [[ "${LOG_DIR: -1}" == "/" ]]; then
-    #strip final slash from log dir
+    # strip final slash from log dir
     LOG_DIR="${LOG_DIR:: -1}"
   fi
   LOG_PATH_MODULE=$(abs_path "$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')")

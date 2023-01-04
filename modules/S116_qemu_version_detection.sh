@@ -93,7 +93,7 @@ version_detection_thread() {
       readarray -t VERSIONS_DETECTED < <(grep -a -o -H -E "$VERSION_IDENTIFIER" "$LOG_PATH_MODULE_S115"/qemu_tmp*.txt | sort -u 2>/dev/null || true)
       # VERSIONS_DETECTED:
       # path_to_logfile:Version Identifier
-      #└─$ grep -a -o -H -E "Version: 1.8" /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt                                                    130 ⨯
+      # └─$ grep -a -o -H -E "Version: 1.8" /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt                                                    130 ⨯
       # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
       # /home/m1k3/firmware/emba_logs_manual/test_dir300/s115_usermode_emulator/qemu_tmp_radvd.txt:Version: 1.8
       for VERSION_DETECTED in "${VERSIONS_DETECTED[@]}"; do

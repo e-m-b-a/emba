@@ -49,7 +49,7 @@ F50_base_aggregator() {
   S109_LOG="s109_jtr_local_pw_cracking.txt"
   S110_LOG="s110_yara_check.txt"
   S120_LOG="s120_cwe_checker.txt"
-  #L10_LOG="l10_system_emulator.txt"
+  # L10_LOG="l10_system_emulator.txt"
   L15_LOG="l15_emulated_checks_init.txt"
   L20_LOG="l20_snmp_checks.txt"
   L25_LOG="l25_web_checks.txt"
@@ -458,7 +458,7 @@ output_binaries() {
     readarray -t RESULTS_STRCPY < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_strcpy-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_strcpy-/ strcpy /" | sed "s/\.txt//" 2> /dev/null || true)
     readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2> /dev/null || true)
 
-    #strcpy:
+    # strcpy:
     if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
       print_ln
       print_output "[+] STRCPY - top 10 results:"
@@ -475,7 +475,7 @@ output_binaries() {
       print_output "$NC"
     fi
 
-    #system:
+    # system:
     if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
       print_ln
       print_output "[+] SYSTEM - top 10 results:"
@@ -848,7 +848,7 @@ get_data() {
     MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "$SYS_EMU_RESULTS" | cut -d\; -f8 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
   if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
-    #NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2 || true)
+    # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2 || true)
     SNMP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L20_LOG" | cut -d: -f2 || true)
     WEB_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L25_LOG" | cut -d: -f2 || true)
     ROUTERSPLOIT_VULN=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L30_LOG" | cut -d: -f2 || true)
@@ -881,7 +881,7 @@ get_data() {
     KNOWN_EXPLOITED_COUNTER=$(cat "$TMP_DIR"/KNOWN_EXPLOITED_COUNTER.tmp)
   fi
   if [[ -f "$F20_EXPLOITS_LOG" ]]; then
-    #EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG" || true)"
+    # EXPLOIT_COUNTER="$(grep -c -E "Exploit\ .*" "$F20_EXPLOITS_LOG" || true)"
     EXPLOIT_COUNTER="$(grep -E "Exploit\ .*" "$F20_EXPLOITS_LOG" | grep -cv "Exploit summary" || true)"
     MSF_MODULE_CNT="$(grep -c -E "Exploit\ .*MSF" "$F20_EXPLOITS_LOG" || true)"
     REMOTE_EXPLOIT_CNT="$(grep -c -E "Exploit\ .*\ \(R\)" "$F20_EXPLOITS_LOG" || true)"

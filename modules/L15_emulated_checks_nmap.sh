@@ -93,7 +93,7 @@ check_live_nmap_basic() {
       NMAP_CPES=$(echo "$NMAP_CPES" | grep -o "cpe:.*" || true)
       # rewrite the string into an array:
       # NMAP_CPES_ARR=( $(echo "$NMAP_CPES" | tr "," "\n") )
-      #IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
+      # IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
       readarray -d ', ' -t NMAP_CPES_ARR < <(printf "%s" "$NMAP_CPES")
       for NMAP_CPE in "${NMAP_CPES_ARR[@]}"; do
         if [[ "$NMAP_CPE" == *"windows"* ]]; then
@@ -123,7 +123,7 @@ check_live_nmap_basic() {
 
       if [[ -f "$CSV_DIR"/s09_firmware_base_version_check.csv ]]; then
         # Let's check if we have already found details about this service in our other modules (S09, S115/S116)
-        #mapfile -t S09_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
+        # mapfile -t S09_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
         mapfile -t S09_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
         if [[ "${#S09_L15_CHECK[@]}" -gt 0 ]]; then
           for S09_L15_MATCH in "${S09_L15_CHECK[@]}"; do
@@ -134,7 +134,7 @@ check_live_nmap_basic() {
       fi
 
       if [[ -f "$CSV_DIR"/s116_qemu_version_detection.csv ]]; then
-        #mapfile -t S116_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s116_qemu_version_detection.csv || true)
+        # mapfile -t S116_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s116_qemu_version_detection.csv || true)
         mapfile -t S116_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s116_qemu_version_detection.csv || true)
         if [[ "${#S116_L15_CHECK[@]}" -gt 0 ]]; then
           for S116_L15_MATCH in "${S116_L15_CHECK[@]}"; do

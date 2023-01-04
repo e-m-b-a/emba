@@ -198,7 +198,7 @@ qnap_extractor() {
     # attach ubi
     modprobe ubi
     ubiattach /dev/ubi_ctrl -m0 -O2048
-    #ubinfo -a
+    # ubinfo -a
 
     print_output "[*] Mounting ubifs file system"
     # mount the ubifs to host
@@ -342,7 +342,7 @@ qnap_extractor() {
   fi
 
   USR_LOCAL=$(find "$SYSROOT/opt/source" -name "*.tgz" 2>/dev/null)
-  #if [[ "${#USR_LOCAL[@]}" -gt 0 ]]; then
+  # if [[ "${#USR_LOCAL[@]}" -gt 0 ]]; then
   if [[ -v USR_LOCAL[@] ]]; then
     print_ln
     for f in "${USR_LOCAL[@]}"; do

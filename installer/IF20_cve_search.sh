@@ -49,22 +49,22 @@ IF20_cve_search() {
       done < requirements.system
 
       # we do not need to install the Flask web environment - we do it manually
-      #while read -r TOOL_NAME; do
+      # while read -r TOOL_NAME; do
       #  PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
       #  TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
       #  print_pip_info "$PIP_NAME" "$TOOL_VERSION"
-      #done < requirements.txt
+      # done < requirements.txt
 
-      #xargs sudo apt-get install -y < requirements.system
+      # xargs sudo apt-get install -y < requirements.system
       while read -r TOOL_NAME; do
         apt-get install -y "$TOOL_NAME" --no-install-recommends
       done < requirements.system
 
       # this is a temp solution - Currently needed to fulfill broken deps:
-      #python3 -m pip install -Iv crackmapexec==5.1.7.dev0
+      # python3 -m pip install -Iv crackmapexec==5.1.7.dev0
       
       # we do not need to install the Flask web environment - we do it manually
-      #python3 -m pip install -r requirements.txt
+      # python3 -m pip install -r requirements.txt
       pip3 install requests==2.28.1
       pip3 install Whoosh==2.7.4
       pip3 install tqdm==4.64.0
@@ -78,6 +78,8 @@ IF20_cve_search() {
       pip3 install nltk==3.7
       pip3 install nested-lookup==0.2.23
       pip3 install dnspython==2.2.1
+      pip3 install Werkzeug
+      pip3 install python-dateutil
 
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 

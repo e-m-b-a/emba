@@ -31,7 +31,7 @@ S80_cronjob_check()
     if [[ -e "$CJ_FILE" ]] ; then
       local CRONJOBS
       # This check is based on source code from LinEnum: https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh
-      #CRONJOBS=$(ls -la "$CJ_FILE"* 2>/dev/null)
+      # CRONJOBS=$(ls -la "$CJ_FILE"* 2>/dev/null)
       CRONJOBS=$(find "$CJ_FILE"* -xdev -type f 2>/dev/null)
       if [[ "$CRONJOBS" ]] ; then
         print_output "[+] Cronjobs:"
@@ -68,7 +68,7 @@ S80_cronjob_check()
     fi
   done
 
-  #mapfile -t CJ_FILE_PATH < <(mod_path "/var/spool/cron/crontabs")
+  # mapfile -t CJ_FILE_PATH < <(mod_path "/var/spool/cron/crontabs")
   mapfile -t CJ_FILE_PATH < <(find "$FIRMWARE_PATH" -xdev -type d -iwholename "/var/spool/cron/crontabs")
   for CT_VAR in "${CJ_FILE_PATH[@]}"; do
     local CRONTABVAR
@@ -96,7 +96,7 @@ S80_cronjob_check()
     fi
   done
 
-  #mapfile -t CJ_FILE_PATH < <(mod_path "/var/spool/anacron")
+  # mapfile -t CJ_FILE_PATH < <(mod_path "/var/spool/anacron")
   mapfile -t CJ_FILE_PATH < <(find "$FIRMWARE_PATH" -xdev -type d -iwholename "/var/spool/anacron")
   for CT_VAR in "${CJ_FILE_PATH[@]}"; do
     local ANACRONTAB

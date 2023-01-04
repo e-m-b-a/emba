@@ -30,15 +30,15 @@ run_web_reporter_mod_name() {
 wait_for_pid() {
   local WAIT_PIDS=("$@")
   local PID
-  #print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
+  # print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
   for PID in "${WAIT_PIDS[@]}"; do
-    #print_output "[*] wait pid protection: $PID"
+    # print_output "[*] wait pid protection: $PID"
     print_dot
     if ! [[ -e /proc/"$PID" ]]; then
       continue
     fi
     while [[ -e /proc/"$PID" ]]; do
-      #print_output "[*] wait pid protection - running pid: $PID"
+      # print_output "[*] wait pid protection - running pid: $PID"
       print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
@@ -153,9 +153,9 @@ cleaner() {
   fi
 
   # what a quick fix - need to come back to this!
-  #if [[ "$NOTIFICATION_PID" != "NA" ]]; then
+  # if [[ "$NOTIFICATION_PID" != "NA" ]]; then
   #  kill "$NOTIFICATION_PID" 2>/dev/null || true
-  #fi
+  # fi
   if [[ -f "$TMP_DIR"/orig_logdir ]]; then
     LOG_DIR_HOST=$(cat "$TMP_DIR"/orig_logdir)
     pkill -f "inotifywait.*$LOG_DIR_HOST" 2>/dev/null || true
@@ -197,7 +197,7 @@ emba_updater() {
     git pull
     cd "$BASE_PATH" || exit
   else
-    #git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
+    # git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
     git clone https://github.com/EMBA-support-repos/trickest-cve.git "$EXT_DIR"/trickest-cve
   fi
 

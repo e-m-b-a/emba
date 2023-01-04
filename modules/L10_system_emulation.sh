@@ -371,7 +371,7 @@ main_emulation() {
     # we deal with something which is not a script:
     if file "$MNT_POINT""$INIT_FILE" | grep -q "symbolic link\|ELF"; then
       # e.g. netgear R6200
-      #KINIT="init=/firmadyne/preInit.sh"
+      # KINIT="init=/firmadyne/preInit.sh"
       KINIT="${KINIT:2}"
       # write the init ELF file or sym link to the firmadyne preInit script:
       INIT_OUT="$MNT_POINT""/firmadyne/preInit.sh"
@@ -509,7 +509,7 @@ main_emulation() {
         print_ln
 
       # #IPS_INT_VLAN is always at least 1 for the default configuration
-      #elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
+      # elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
       #  [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" && "${#IPS_INT_VLAN[@]}" -lt 2 ]]; then
       elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" ]] || [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" ]]; then
         mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log
@@ -696,7 +696,6 @@ main_emulation() {
     print_output "[*] Processing init file $ORANGE$INIT_FILE$NC ($INDEX/${#INIT_FILES[@]}) finished"
     print_bar ""
     sleep 1
-    #reset
     ((INDEX+=1))
   done
 
@@ -822,7 +821,7 @@ cleanup_emulator(){
   rm /tmp/qemu."$IMAGE_NAME".S1 || true
   rm /tmp/do_not_create_run.sh || true
 
-  #losetup
+  # losetup
   losetup -D
 }
 
@@ -893,7 +892,7 @@ identify_networking_emulation() {
   elif [[ "$ARCH_END" == "mips64v1eb" ]]; then
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-mips64"
-    #CPU="-cpu MIPS64R2-generic"
+    # CPU="-cpu MIPS64R2-generic"
     MACHINE="malta"
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
@@ -901,7 +900,7 @@ identify_networking_emulation() {
   elif [[ "$ARCH_END" == "mips64v1el" ]]; then
     KERNEL_="vmlinux"
     QEMU_BIN="qemu-system-mips64el"
-    #CPU="-cpu MIPS64R2-generic"
+    # CPU="-cpu MIPS64R2-generic"
     MACHINE="malta"
     QEMU_DISK="-drive if=ide,format=raw,file=$IMAGE"
     QEMU_ROOTFS="/dev/sda1"
@@ -921,8 +920,8 @@ identify_networking_emulation() {
     QEMU_DISK="-drive if=none,file=$IMAGE,format=raw,id=rootfs -device virtio-blk-device,drive=rootfs"
     QEMU_ROOTFS="/dev/vda1"
     QEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
-    #QEMU_NETWORK="-device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4"
-    #QEMU_PARAMS="-audiodev driver=none,id=none"
+    # QEMU_NETWORK="-device virtio-net-device,netdev=net1 -netdev socket,listen=:2000,id=net1 -device virtio-net-device,netdev=net2 -netdev socket,listen=:2001,id=net2 -device virtio-net-device,netdev=net3 -netdev socket,listen=:2002,id=net3 -device virtio-net-device,netdev=net4 -netdev socket,listen=:2003,id=net4"
+    # QEMU_PARAMS="-audiodev driver=none,id=none"
   elif [[ "$ARCH_END" == "arm64el"* ]]; then
     KERNEL_="Image"
     QEMU_BIN="qemu-system-aarch64"
@@ -1158,7 +1157,7 @@ get_networking_details_emulation() {
                   # do we have vlans?
                   if [[ -v VLAN_INFOS[@] ]]; then
                     iterate_vlans "$ETH_INT" "${VLAN_INFOS[@]}"
-                  #elif echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+                  # elif echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
                   elif echo "$BRIDGE_INT" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
                     # we have a vlan entry in our BRIDGE_INT entry br:br0 dev:eth1.1:
                     # VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]')"
@@ -1244,10 +1243,10 @@ get_networking_details_emulation() {
         NETWORK_DEVICE="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
         IP_ADDRESS_="192.168.0.1"
         NETWORK_MODE="bridge"
-        #if echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
+        # if echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
         if echo "$BRIDGE_INT" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
           # we have a vlan entry:
-          #VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
+          # VLAN_ID="$(echo "$BRIDGE_INT" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
           VLAN_ID="$(echo "$BRIDGE_INT" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
         else
           VLAN_ID="NONE"
@@ -1271,9 +1270,9 @@ get_networking_details_emulation() {
     # fallback - default network configuration:
     # we always add this as the last resort - with this at least ICMP should be possible in most cases
     if [[ ! " ${IPS_INT_VLAN[*]} " =~ "default" ]]; then
-      #print_output "[*] No IP address - use default address: ${ORANGE}192.168.0.1${NC}."
-      #print_output "[*] No VLAN."
-      #print_output "[*] No Network interface - use ${ORANGE}eth0${NC} network."
+      # print_output "[*] No IP address - use default address: ${ORANGE}192.168.0.1${NC}."
+      # print_output "[*] No VLAN."
+      # print_output "[*] No Network interface - use ${ORANGE}eth0${NC} network."
       IP_ADDRESS_="192.168.0.1"
       NETWORK_MODE="default"
       if [[ "${FW_VENDOR:-}" == "AVM" ]]; then
@@ -1419,7 +1418,7 @@ setup_network_emulation() {
 }
 
 write_network_config_to_filesystem() {
-  #mount filesystem again for network config:
+  # mount filesystem again for network config:
   print_output "[*] Identify Qemu Image device for $ORANGE$LOG_PATH_MODULE/$IMAGE_NAME$NC"
   DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
   if [[ "$DEVICE" == "NA" ]]; then
@@ -1442,7 +1441,7 @@ write_network_config_to_filesystem() {
 
     set_network_config "$IP_ADDRESS_" "$NETWORK_MODE" "$NETWORK_DEVICE" "$ETH_INT"
 
-    #umount filesystem:
+    # umount filesystem:
     umount_qemu_image "$DEVICE"
   fi
 }
@@ -1451,7 +1450,7 @@ nvram_check() {
   local IMAGE_NAME="${1:-}"
   local MAX_THREADS_NVRAM=$((4*"$(grep -c ^processor /proc/cpuinfo || true)"))
 
-  #mount filesystem again for network config:
+  # mount filesystem again for network config:
   print_output "[*] Identify Qemu Image device for $ORANGE$LOG_PATH_MODULE/$IMAGE_NAME$NC"
   DEVICE="$(add_partition_emulation "$LOG_PATH_MODULE/$IMAGE_NAME")"
   if [[ "$DEVICE" == "NA" ]]; then
@@ -1491,8 +1490,8 @@ nvram_check() {
  
     if [[ -f "$LOG_PATH_MODULE"/nvram/nvram_files_final ]]; then
       if [[ "$(wc -l "$LOG_PATH_MODULE"/nvram/nvram_files_final | awk '{print $1}')" -gt 0 ]]; then
-        #print_output "[*] Identified the following NVRAM files:"
-        #tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/nvram/nvram_files_final
+        # print_output "[*] Identified the following NVRAM files:"
+        # tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/nvram/nvram_files_final
 
         sort -u -r -h -k2 "$LOG_PATH_MODULE"/nvram/nvram_files_final | sort -u -k1,1 | sort -r -h -k2 | head -10 > "$MNT_POINT"/firmadyne/nvram_files
         # store a copy in the log dir
@@ -1505,7 +1504,7 @@ nvram_check() {
     fi
   fi
 
-  #umount filesystem:
+  # umount filesystem:
   umount_qemu_image "$DEVICE"
 
 }
@@ -1524,18 +1523,18 @@ nvram_searcher_emulation() {
       echo "$NVRAM_ENTRY" >> "$LOG_PATH_MODULE"/nvram/nvram_keys.tmp
       NVRAM_KEY=$(echo "$NVRAM_ENTRY" | tr -dc '[:print:]' | tr -s '[:blank:]')
       if [[ "$NVRAM_KEY" =~ [a-zA-Z0-9_] && "${#NVRAM_KEY}" -gt 3 ]]; then
-        #print_output "[*] NVRAM access detected: $ORANGE$NVRAM_KEY$NC"
+        # print_output "[*] NVRAM access detected: $ORANGE$NVRAM_KEY$NC"
         if grep -q "$NVRAM_KEY" "$NVRAM_FILE" 2>/dev/null; then
-          #print_output "[*] Possible NVRAM access via key $ORANGE$NVRAM_KEY$NC found in NVRAM file $ORANGE$NVRAM_FILE$NC."
+          # print_output "[*] Possible NVRAM access via key $ORANGE$NVRAM_KEY$NC found in NVRAM file $ORANGE$NVRAM_FILE$NC."
           COUNT=$((COUNT + 1))
         fi
         echo "$NVRAM_KEY" >> "$LOG_PATH_MODULE"/nvram/nvram_keys.log
       fi
     done
     if [[ "$COUNT" -gt 0 ]]; then
-      #NVRAM_FILE=$(echo "$NVRAM_FILE" | sed 's/^\.//')
+      # NVRAM_FILE=$(echo "$NVRAM_FILE" | sed 's/^\.//')
       NVRAM_FILE="${NVRAM_FILE/\.}"
-      #print_output "[*] $NVRAM_FILE $COUNT ASCII_text"
+      # print_output "[*] $NVRAM_FILE $COUNT ASCII_text"
       echo "$NVRAM_FILE $COUNT ASCII_text" >> "$LOG_PATH_MODULE"/nvram/nvram_files_final
     fi
   fi
@@ -1553,7 +1552,7 @@ run_emulated_system() {
   get_kernel_version
   if [[ -n "${KERNEL_V:-}" ]]; then
     print_output "[*] Kernel $KERNEL_V.x detected -> Using Kernel v4.x"
-    #KERNEL_V=".$KERNEL_V"
+    # KERNEL_V=".$KERNEL_V"
     KERNEL_V=".4"
   fi
 
@@ -1647,7 +1646,7 @@ run_emulated_system() {
     for NET_ID in {0..3}; do
       QEMU_NETWORK="$QEMU_NETWORK -device e1000,netdev=net$NET_ID"
       if [[ "$NET_ID" == "$NET_NUM" ]];then
-        #if MATCH in IPS_INT -> connect this interface to host
+        # if MATCH in IPS_INT -> connect this interface to host
         print_output "[*] Connect interface: $ORANGE$NET_ID$NC to host"
         QEMU_NETWORK="$QEMU_NETWORK -netdev tap,id=net$NET_ID,ifname=${TAPDEV_0},script=no"
       else
