@@ -381,7 +381,7 @@ prepare_file_arr()
 
   # xdev will do the trick for us:
   # remove ./proc/* executables (for live testing)
-  #rm_proc_binary "${FILE_ARR[@]}"
+  # rm_proc_binary "${FILE_ARR[@]}"
 }
 
 prepare_binary_arr()
@@ -392,7 +392,7 @@ prepare_binary_arr()
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES=()
-  #readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  # readarray -t BINARIES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
   readarray -t BINARIES_TMP < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1 || true)
@@ -410,7 +410,7 @@ prepare_binary_arr()
   fi
 
   # remove ./proc/* executables (for live testing)
-  #rm_proc_binary "${BINARIES[@]}"
+  # rm_proc_binary "${BINARIES[@]}"
 }
 
 prepare_file_arr_limited() {

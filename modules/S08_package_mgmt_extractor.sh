@@ -27,7 +27,7 @@ S08_package_mgmt_extractor()
   debian_status_files_search
   openwrt_control_files_search
   # Future work: rpm, ...
-  #rpm_package_files_search
+  # rpm_package_files_search
 
   if [[ "${#DEBIAN_MGMT_STATUS[@]}" -gt 0 || "${#OPENWRT_MGMT_CONTROL[@]}" -gt 0 ]]; then
     NEG_LOG=1
@@ -64,10 +64,10 @@ debian_status_files_search() {
           VERSION=${PACKAGE_VERSION/*Version:\ /}
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
-          #if ! echo "$PACKAGE_VERSION" | grep -q "installed"; then
+          # if ! echo "$PACKAGE_VERSION" | grep -q "installed"; then
           #  # a not installed package - skip it
           #  continue
-          #fi
+          # fi
           clean_package_versions "$VERSION"
           print_output "[*] Debian package details: $ORANGE$PACKAGE_FILE$NC - $ORANGE$PACKAGE$NC - $ORANGE$VERSION$NC"
           write_csv_log "$PACKAGING_SYSTEM" "$PACKAGE_FILE" "$PACKAGE" "$VERSION" "$STRIPPED_VERSION"

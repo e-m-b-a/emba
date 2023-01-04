@@ -169,11 +169,11 @@ check_bootloader()
   # FreeBSD or DragonFly
   CHECK=0
   local BOOT1 BOOT2 BOOTL
-  #mapfile -t BOOT1 < <(mod_path "/boot/boot1")
+  # mapfile -t BOOT1 < <(mod_path "/boot/boot1")
   mapfile -t BOOT1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot1" || true)
-  #mapfile -t BOOT2 < <(mod_path "/boot/boot2")
+  # mapfile -t BOOT2 < <(mod_path "/boot/boot2")
   mapfile -t BOOT2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/boot2" || true)
-  #mapfile -t BOOTL < <(mod_path "/boot/loader")
+  # mapfile -t BOOTL < <(mod_path "/boot/loader")
   mapfile -t BOOTL < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot/loader" || true)
 
   for B1 in "${BOOT1[@]}" ; do
@@ -252,9 +252,9 @@ check_bootloader()
   local OBSD_PATH1 OBSD_PATH2
   local OBSD_FILE1=""
   local OBSD_FILE2=""
-  #mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")
+  # mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")
   mapfile -t OBSD_PATH1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/usr/mdec/biosboot")
-  #mapfile -t OBSD_PATH2 < <(mod_path "/boot")
+  # mapfile -t OBSD_PATH2 < <(mod_path "/boot")
   mapfile -t OBSD_PATH2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot")
   for OBSD_FILE1 in "${OBSD_PATH1[@]}" ; do
     for OBSD_FILE2 in "${OBSD_PATH2[@]}" ; do

@@ -303,7 +303,7 @@ function_check_ARM64() {
       elif [[ "$FUNCTION" == "mmap" ]] ; then
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
         # Test not implemented on ARM64
-        #COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
+        # COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
       log_func_footer "$NAME" "$FUNCTION"
@@ -540,7 +540,7 @@ output_function_details()
   local LOG_FILE_LOC
   LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$FUNCTION"-"$NAME".txt
 
-  #check if this is common linux file:
+  # check if this is common linux file:
   local COMMON_FILES_FOUND
   local SEARCH_TERM
   if [[ -f "$BASE_LINUX_FILES" ]]; then

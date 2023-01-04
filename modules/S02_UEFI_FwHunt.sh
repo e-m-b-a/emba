@@ -17,8 +17,6 @@
 #               images:
 #               fwhunt-scan https://github.com/binarly-io/fwhunt-scan
 #               fwhunt rules https://github.com/binarly-io/FwHunt
-# Pre-checker threading mode - if set to 1, these modules will run in threaded mode
-#export PRE_THREAD_ENA=1
 
 S02_UEFI_FwHunt() {
 
