@@ -574,7 +574,7 @@ final_log_kernel_vulns() {
       CVSS2_CRITICAL=$(echo "$CVE_VERIFIED_ONE_CRITICAL_" | cut -d\; -f4)
       CVSS3_CRITICAL=$(echo "$CVE_VERIFIED_ONE_CRITICAL_" | cut -d\; -f5)
       identify_exploits "$CVE_CRITICAL"
-      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN\t-\t$ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN\t-\tExploit/PoC: $ORANGE$EXPLOIT_DETECTED / $POC_DETECTED$NC")")"
+      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN\t-\t$ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN\t-\tExploit/PoC: $ORANGE$EXPLOIT_DETECTED $EXP / $POC_DETECTED $POC$NC")")"
     done
   fi
 
@@ -586,7 +586,7 @@ final_log_kernel_vulns() {
       CVSS2_CRITICAL=$(echo "$CVE_VERIFIED_OVERLAP_CRITICAL_" | cut -d\; -f4)
       CVSS3_CRITICAL=$(echo "$CVE_VERIFIED_OVERLAP_CRITICAL_" | cut -d\; -f5)
       identify_exploits "$CVE_CRITICAL"
-      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN\t-\t$ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN\t-\tExploit/PoC: $ORANGE$EXPLOIT_DETECTED / $POC_DETECTED$NC")")"
+      print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN\t-\t$ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN\t-\tExploit/PoC: $ORANGE$EXPLOIT_DETECTED $EXP / $POC_DETECTED $POC$NC")")"
     done
   fi
   print_bar
@@ -594,8 +594,10 @@ final_log_kernel_vulns() {
 
 identify_exploits() {
   local CVE_VALUE="${1:-}"
-  EXPLOIT_DETECTED="no"
-  POC_DETECTED="no"
+  export EXPLOIT_DETECTED="no"
+  export POC_DETECTED="no"
+  export POC=""
+  export EXP=""
 
   local MSF_DB_PATH="$CONFIG_DIR/msf_cve-db.txt"
   local KNOWN_EXP_CSV="$EXT_DIR/known_exploited_vulnerabilities.csv"
@@ -603,31 +605,37 @@ identify_exploits() {
   if command -v cve_searchsploit >/dev/null; then
     if cve_searchsploit "$CVE_VALUE" 2>/dev/null | grep -q "Exploit DB Id:"; then
       EXPLOIT_DETECTED="yes"
+      EXP="(EDB)"
     fi
   fi
   if [[ -f "$MSF_DB_PATH" ]]; then
     if grep -q -E "$CVE_VALUE"$ "$MSF_DB_PATH"; then
       EXPLOIT_DETECTED="yes"
+      EXP="$EXP(MSF)"
     fi
   fi
   if [[ -f "$KNOWN_EXP_CSV" ]]; then
     if grep -q \""${CVE_VALUE}"\", "$KNOWN_EXP_CSV"; then
       EXPLOIT_DETECTED="yes"
+      EXP="$EXP(KNOWN)"
     fi
   fi
   if [[ -f "$TRICKEST_DB_PATH" ]]; then
     if grep -q -E "$CVE_VALUE\.md" "$TRICKEST_DB_PATH"; then
       POC_DETECTED="yes"
+      POC="$POC(GH)"
     fi
   fi
   if [[ -f "$CONFIG_DIR/Snyk_PoC_results.csv" ]]; then
     if grep -q -E "^$CVE_VALUE;" "$CONFIG_DIR/Snyk_PoC_results.csv"; then
       POC_DETECTED="yes"
+      POC="$POC(SNYK)"
     fi
   fi
   if [[ -f "$CONFIG_DIR/PS_PoC_results.csv" ]]; then
     if grep -q -E "^$CVE_VALUE;" "$CONFIG_DIR/PS_PoC_results.csv"; then
       POC_DETECTED="yes"
+      POC="$POC(PS)"
     fi
   fi
 }

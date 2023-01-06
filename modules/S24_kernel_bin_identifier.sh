@@ -29,9 +29,7 @@ S24_kernel_bin_identifier()
   local CFG_MD5=""
   export KCFG_MD5=()
 
-  if ! [[ -v FILE_ARR_LIMITED ]] || [[ "${#FILE_ARR_LIMITED[@]}" -eq 0 ]]; then
-    prepare_file_arr_limited "$FIRMWARE_PATH_CP"
-  fi
+  prepare_file_arr_limited "$FIRMWARE_PATH_CP"
 
   write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols"
 
