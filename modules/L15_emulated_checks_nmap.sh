@@ -117,13 +117,14 @@ check_live_nmap_basic() {
     for SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
       print_output "[*] Service detected: $ORANGE$SERVICE$NC"
       SERVICE_NAME="$(escape_echo "$(echo "$SERVICE" | awk '{print $2}')")"
+      # just in case we have a / in our SERVICE_NAME
+      SERVICE_NAME="${SERVICE_NAME/\//\\\/}"
       if [[ "$SERVICE_NAME" == "unknown" ]] || [[ "$SERVICE_NAME" == "tcpwrapped" ]] || [[ -z "$SERVICE_NAME" ]]; then
         continue
       fi
 
       if [[ -f "$CSV_DIR"/s09_firmware_base_version_check.csv ]]; then
         # Let's check if we have already found details about this service in our other modules (S09, S115/S116)
-        # mapfile -t S09_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
         mapfile -t S09_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
         if [[ "${#S09_L15_CHECK[@]}" -gt 0 ]]; then
           for S09_L15_MATCH in "${S09_L15_CHECK[@]}"; do
@@ -134,7 +135,6 @@ check_live_nmap_basic() {
       fi
 
       if [[ -f "$CSV_DIR"/s116_qemu_version_detection.csv ]]; then
-        # mapfile -t S116_L15_CHECK < <(grep "$SERVICE_NAME" "$CSV_DIR"/s116_qemu_version_detection.csv || true)
         mapfile -t S116_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s116_qemu_version_detection.csv || true)
         if [[ "${#S116_L15_CHECK[@]}" -gt 0 ]]; then
           for S116_L15_MATCH in "${S116_L15_CHECK[@]}"; do

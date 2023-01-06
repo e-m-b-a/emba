@@ -82,7 +82,7 @@ check_live_metasploit() {
   if [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]] && [[ $(grep -a -i -c "Vulnerability identified for module" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt) -gt 0 ]]; then
     write_csv_log "Source" "Module" "CVE" "ARCH_END" "IP_ADDRESS" "PORTS"
     print_ln
-    print_output "[+] Possible Metasploit results for verification:" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
+    print_output "[+] Metasploit results for verification" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
     mapfile -t MSF_VULNS_VERIFIED < <(grep -a -i "Vulnerability identified for module" "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt || true)
     for MSF_VULN in "${MSF_VULNS_VERIFIED[@]}"; do
       local MSF_CVE=""
@@ -92,9 +92,11 @@ check_live_metasploit() {
       MSF_CVE="${MSF_CVE%\ }"
       if [[ -n "$MSF_CVE" ]]; then
         print_output "[+] Vulnerability verified: $ORANGE$MSF_MODULE$GREEN / $ORANGE$MSF_CVE$GREEN."
+        write_link "https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits/${MSF_MODULE}.rb"
         # we write our csv entry later for every CVE entry
       else
         print_output "[+] Vulnerability verified: $ORANGE$MSF_MODULE$GREEN."
+        write_link "https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits/${MSF_MODULE}.rb"
         MSF_CVE="NA"
         # if we have no CVE entry we can directly write our csv entry:
         write_csv_log "Metasploit framework" "$MSF_MODULE" "$MSF_CVE" "$ARCH_END" "$IP_ADDRESS_" "$PORTS"
@@ -107,14 +109,20 @@ check_live_metasploit() {
 
     print_ln
 
-    print_output "[+] Possible Metasploit sessions for verification:" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
-    # sometimes we need two print_ln to get one in the web report?!?
-    print_ln
-    print_ln
-    # Print the session output from the metasploit log:
-    sed -n '/Active sessions/,/Stopping all jobs/p' "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE" || true
-    print_ln
+    if grep -q "Active sessions" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"; then
+      print_ln
+      print_output "[+] Possible Metasploit sessions for verification:" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
+      # sometimes we need two print_ln to get one in the web report?!?
+      print_ln
+      print_ln
+      # Print the session output from the metasploit log:
+      sed -n '/Active sessions/,/Stopping all jobs/p' "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE" || true
+      print_ln
+    else
+      print_output "[-] No Metasploit session detected"
+    fi
   elif [[ -f "$LOG_PATH_MODULE"/metasploit-check-"$IP_ADDRESS_".txt ]]; then
+    # just for link the log file in the web reporter
     print_output "[-] No Metasploit results detected" "" "$LOG_PATH_MODULE/metasploit-check-$IP_ADDRESS_.txt"
   else
     print_output "[-] No Metasploit results detected"

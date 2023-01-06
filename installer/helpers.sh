@@ -225,6 +225,9 @@ download_file()
       echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1:-}""$NC"
       if ! [[ -f "${3:-}" ]] ; then
         wget --no-check-certificate --output-file=./.wget.log "${2:-}" -O "${3:-}"
+        if [[ -f "./.wget.log" ]]; then
+          cat ./.wget.log
+        fi
       else
         echo -e "$GREEN""${1}"" is already downloaded - no further action performed.""$NC"
       fi

@@ -230,7 +230,7 @@ create_emulation_filesystem() {
       # kernelInit is getting the output of the init command line we get from s24
       if grep -q "init=" "$CSV_DIR"/s24_kernel_bin_identifier.csv; then
         print_output "[*] Found init entry for kernel - see $ORANGE$LOG_DIR/s24_kernel_bin_identifier.txt$NC:"
-        grep "init=/" "$CSV_DIR"/s24_kernel_bin_identifier.csv | cut -d\; -f3 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+        grep "init=/" "$CSV_DIR"/s24_kernel_bin_identifier.csv | cut -d\; -f5 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "$LOG_FILE" < "${MNT_POINT}"/kernelInit
       fi
     else
@@ -1287,6 +1287,7 @@ get_networking_details_emulation() {
 
     for PANIC in "${PANICS[@]}"; do
       print_output "[!] WARNING: Kernel Panic detected: $ORANGE$PANIC$NC"
+      print_output "$NC"
     done
     color_qemu_log "$LOG_PATH_MODULE/qemu.initial.serial.log"
   else

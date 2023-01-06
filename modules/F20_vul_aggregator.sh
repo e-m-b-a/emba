@@ -247,7 +247,7 @@ aggregate_versions() {
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
       VERSION=${VERSION/%/:}
       VERSIONS_KERNEL+=( "$VERSION" )
-      #print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
+      # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
     done
 
     for CVE_ENTRY in "${CVE_S02_DETAILS[@]}"; do

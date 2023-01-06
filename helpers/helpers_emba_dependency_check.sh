@@ -434,6 +434,9 @@ dependency_check()
     # Freetz-NG
     check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
 
+    # AVM fitimg extraction script
+    check_dep_file "fitimg script" "$EXT_DIR""/fitimg-0.8/fitimg"
+
     # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
     check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"
 

@@ -72,11 +72,11 @@ IF20_cve_search() {
       pip3 install dicttoxml==1.7.4
       pip3 install redis==4.2.2
       pip3 install ijson==3.1.4
-      pip3 install jsonpickle==2.1.0
+      pip3 install jsonpickle==3.0.1
       pip3 install requirements-parser==0.5.0
       pip3 install ansicolors==1.1.8
       pip3 install nltk==3.7
-      pip3 install nested-lookup==0.2.23
+      pip3 install nested-lookup==0.2.25
       pip3 install dnspython==2.2.1
       pip3 install Werkzeug
       pip3 install python-dateutil
