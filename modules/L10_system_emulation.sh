@@ -250,7 +250,7 @@ create_emulation_filesystem() {
     cp "$MODULE_SUB_PATH/inferService.sh" "${MNT_POINT}" || true
     FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "$LOG_FILE"
 
-    if [ -e "${MNT_POINT}/kernelInit" ]; then
+    if [[ -e "${MNT_POINT}/kernelInit" ]]; then
       print_output "[*] Backup ${MNT_POINT}/kernelInit:"
       tee -a "$LOG_FILE" < "${MNT_POINT}/kernelInit"
       rm "${MNT_POINT}/kernelInit"
@@ -470,7 +470,7 @@ main_emulation() {
 
       ###############################################################################################
       # if we were running into issues with the network identification we poke with rdinit vs init:
-      # lets check if we have found a startup procedure (preInit script) from FirmAE/EMBA - if not we try it with the other init
+      # lets check if we have found a startup procedure (preInit script) from EMBA - if not we try it with the other init
       F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
       F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
     else
@@ -480,8 +480,7 @@ main_emulation() {
     # print_output "[*] Found $ORANGE$F_STARTUP$NC EMBA startup entries."
     print_ln
 
-
-    if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 ]]; then
+    if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 ]] || [[ "$DETECTED_IP" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
       # panic is caused from an init failure. If so, we are trying the other init kernel command (init vs rdinit)
       if [[ "${PANICS[*]}" == *"Kernel panic - not syncing: Attempted to kill init!"* || "${PANICS[*]}" == *"Kernel panic - not syncing: No working init found."* ]]; then
@@ -508,10 +507,8 @@ main_emulation() {
         fi
         print_ln
 
-      # #IPS_INT_VLAN is always at least 1 for the default configuration
-      # elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
-      #  [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" && "${#IPS_INT_VLAN[@]}" -lt 2 ]]; then
-      elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" ]] || [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" ]]; then
+      elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" ]] || \
+        [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" ]] || [[ "$DETECTED_IP" -eq 0 ]]; then
         mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log
         if [[ "$KINIT" == "rdinit="* ]]; then
           print_output "[*] Warning: Unknown EMBA startup found via rdinit - testing init"
@@ -531,7 +528,8 @@ main_emulation() {
         F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
         F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
         # IPS_INT_VLAN is always at least 1 for the default configuration
-        if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]]; then
+        if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
+          [[ "$DETECTED_IP" -eq 0 ]]; then
           if [[ "$KINIT" == "rdinit="* ]]; then
             print_output "[*] Warning: switching back to init"
             # strip rd from rdinit
@@ -671,7 +669,11 @@ main_emulation() {
 
           # if we have a working emulation we stop here
           if [[ "$TCP" == "ok" ]]; then
-            break 2
+            if [[ $(grep -c "tcp.*open" "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null) -gt 1 ]]; then
+              # we only exit if we have more than 1 open port detected.
+              # Otherwise we try to find a better solution
+              break 2
+            fi
           fi
         else
           print_output "[-] No working emulation - removing emulation archive."
@@ -1024,6 +1026,7 @@ get_networking_details_emulation() {
 
   sub_module_title "Network identification - $IMAGE_NAME"
   PANICS=()
+  export DETECTED_IP=0
 
   if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     ETH_INT="NONE"
@@ -1129,6 +1132,7 @@ get_networking_details_emulation() {
       if [[ "$IP_ADDRESS_" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && ! [[ "$IP_ADDRESS_" == "127."* ]] && ! [[ "$IP_ADDRESS_" == "0.0.0.0" ]]; then
         print_ln
         print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC"
+        DETECTED_IP=1
         # get the network device
         NETWORK_DEVICE="$(echo "$INTERFACE_CAND" | grep device | cut -d: -f2- | sed "s/^.*\]:\ //" | awk '{print $1}' | cut -d: -f2 | tr -dc '[:print:]' || true)"
         # INTERFACE_CAND -> __inet_insert_ifa[PID: 139 (ifconfig)]: device:br0 ifa:0xc0a80001

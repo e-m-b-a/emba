@@ -339,7 +339,10 @@ dependency_check()
   # Check system tools
   #######################################################################################
   if [[ $USE_DOCKER -eq 0 ]] ; then
-    SYSTEM_TOOLS=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" "dpkg-deb" "echo" "eval" "find" "grep" "head" "kill" "ln" "ls" "md5sum" "mkdir" "mknod" "modinfo" "mv" "netstat" "openssl" "printf" "pwd" "readelf" "realpath" "rm" "rmdir" "sed" "seq" "sleep" "sort" "strings" "tee" "touch" "tr" "uniq" "unzip" "wc")
+    SYSTEM_TOOLS=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" \
+      "dpkg-deb" "echo" "eval" "find" "grep" "head" "kill" "ln" "ls" "md5sum" "mkdir" "mknod" \
+      "modinfo" "mv" "netstat" "openssl" "printf" "pwd" "readelf" "realpath" "rm" "rmdir" "sed" \
+      "seq" "sleep" "sort" "strings" "tee" "touch" "tr" "uniq" "unzip" "wc")
 
     for TOOL in "${SYSTEM_TOOLS[@]}" ; do
       check_dep_tool "$TOOL"

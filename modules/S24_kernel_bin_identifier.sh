@@ -55,7 +55,7 @@ S24_kernel_bin_identifier()
       print_ln
 
       # not perfect, but not too bad for now:
-      mapfile -t K_INITS < <(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sed 's/.*rdinit/rdinit/' | sed 's/.*\ init/init/' | awk '{print $1}' | sort -u || true)
+      mapfile -t K_INITS < <(strings "$FILE" 2>/dev/null | grep -E "init=\/" | sed 's/.*rdinit/rdinit/' | sed 's/.*\ init/init/' | awk '{print $1}' | tr -d '"' | sort -u || true)
       for K_INIT in "${K_INITS[@]}"; do
         if [[ "$K_INIT" =~ init=\/.* ]]; then
           print_output "[+] Init found in Linux kernel file $ORANGE$FILE$NC"

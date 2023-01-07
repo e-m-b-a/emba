@@ -415,7 +415,8 @@ main()
   welcome  # Print EMBA welcome message
 
   if [[ $# -eq 0 ]]; then
-    print_output "\\n""$ORANGE""In order to be able to use EMBA, you have to specify at least a firmware (-f).\\nIf you don't set a log directory (-l), then ./logs will be used.""$NC" "no_log"
+    print_output "\\n""$ORANGE""In order to be able to use EMBA, you have to specify at least a firmware (-f)." "no_log"
+    print_output "If you don't set a log directory (-l), then ./logs will be used.""$NC" "no_log"
     print_help
     exit 1
   fi
