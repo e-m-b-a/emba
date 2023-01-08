@@ -294,7 +294,6 @@ add_link_tags() {
     # CVE links
     if ( grep -a -q -E '(CVE)' "$LINK_FILE" ) ; then
       # in l35 html report we do not link CVE - we have Metasploit links in there
-      echo "LINK_FILE $LINK_FILE"
       if ! [[ "$LINK_FILE" == *"l35_"* ]]; then
         readarray -t CVE_IDS < <( grep -a -n -E -o 'CVE-[0-9]{4}-[0-9]{4,7}' "$LINK_FILE" | uniq || true)
         for CVE_ID in "${CVE_IDS[@]}" ; do

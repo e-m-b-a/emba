@@ -186,7 +186,7 @@ S26_kernel_vuln_verifier()
     # Probably it is just downloaded partly and we need to wait a bit longer
     WAIT_CNT=0
     print_output "[*] Testing kernel sources ..." "no_log"
-    while ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz" > /dev/null; do
+    while ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz" 2> /dev/null; do
       print_output "[*] Testing kernel sources ..." "no_log"
       ((WAIT_CNT+=1))
       if [[ "$WAIT_CNT" -gt 60 ]] || [[ -f "$TMP_DIR"/linux_download_failed ]]; then
@@ -197,6 +197,7 @@ S26_kernel_vuln_verifier()
     done
 
     print_output "[*] Kernel sources for version $ORANGE$K_VERSION$NC available"
+    write_link "$LOG_DIR/kernel_downloader.log"
 
     KERNEL_DIR="$LOG_PATH_MODULE/linux-$K_VERSION_KORG"
     if [[ -d "$KERNEL_DIR" ]]; then
@@ -589,6 +590,7 @@ final_log_kernel_vulns() {
       print_output "$(indent "$(orange "$ORANGE$CVE_CRITICAL$GREEN\t-\t$ORANGE$CVSS2_CRITICAL$GREEN / $ORANGE$CVSS3_CRITICAL$GREEN\t-\tExploit/PoC: $ORANGE$EXPLOIT_DETECTED $EXP / $POC_DETECTED $POC$NC")")"
     done
   fi
+  write_log "[*] Statistics:$K_VERSION:${#ALL_KVULNS[@]}:$CVE_VERIFIED_SYMBOLS:$CVE_VERIFIED_COMPILED"
   print_bar
 }
 

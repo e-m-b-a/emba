@@ -36,6 +36,7 @@ F50_base_aggregator() {
   S22_LOG="s22_php_check.txt"
   S24_LOG="s24_kernel_bin_identifier.txt"
   S25_LOG="s25_kernel_check.txt"
+  S26_LOG="s26_kernel_vuln_verifier.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
   S40_LOG="s40_weak_perm_check.txt"
   S45_LOG="s45_pass_file_check.txt"
@@ -249,6 +250,19 @@ output_details() {
     print_output "[+] System emulation was successful $STATE" "" "l10"
     write_csv_log "system_emulation_state" "$EMU_STATE" "NA"
     DATA=1
+  fi
+
+  if [[ "${K_CVE_VERIFIED_SYMBOLS:-0}" -gt 0 ]] || [[ "${K_CVE_VERIFIED_COMPILED:-0}" -gt 0 ]]; then
+    if [[ "${K_CVE_VERIFIED_SYMBOLS:-0}" -gt 0 ]]; then
+      print_output "$(indent "$(green "Verified $ORANGE${K_CVE_VERIFIED_SYMBOLS:-0}$GREEN kernel vulnerabilities (kernel symbols).")")"
+      write_link "s26"
+    fi
+    if [[ "${K_CVE_VERIFIED_COMPILED:-0}" -gt 0 ]]; then
+      print_output "$(indent "$(green "Verified $ORANGE${K_CVE_VERIFIED_COMPILED:-0}$GREEN kernel vulnerabilities (${ORANGE}kernel compilation$GREEN).")")"
+      write_link "s26"
+    fi
+    DATA=1
+    write_csv_log "kernel_verified" "${K_CVE_VERIFIED_SYMBOLS:-0}" "${K_CVE_VERIFIED_COMPILED:-0}"
   fi
 
   if [[ $DATA -eq 1 ]]; then
@@ -734,6 +748,8 @@ get_data() {
   export CVE_SEARCH=1
   export FWHUNTER_CNT=0
   export MSF_VERIFIED=0
+  export K_CVE_VERIFIED_SYMBOLS=0
+  export K_CVE_VERIFIED_COMPILED=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
@@ -795,6 +811,10 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 || true)
     KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3 || true)
+  fi
+  if [[ -f "$LOG_DIR"/"$S26_LOG" ]]; then
+    K_CVE_VERIFIED_SYMBOLS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S26_LOG" | cut -d: -f4 || true)
+    K_CVE_VERIFIED_COMPILED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S26_LOG" | cut -d: -f5 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
     S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2 || true)

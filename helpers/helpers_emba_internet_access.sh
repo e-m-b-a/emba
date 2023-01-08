@@ -16,8 +16,8 @@
 
 
 # kernel downloader waits for s24 results. If we were able to identify a kernel version,
-# a kernel config or at least kernel symbols we can use these information to verify the
-# vulnerabilities
+# a kernel config or at least kernel symbols we can use these details to verify the
+# vulnerabilities which we identified based on the kernel version
 kernel_downloader() {
   LOG_FILE_KERNEL="$CSV_DIR"/s24_kernel_bin_identifier.csv
   KERNEL_ARCH_PATH="$EXT_DIR"/linux_kernel_sources/
@@ -38,7 +38,9 @@ kernel_downloader() {
 
   # now we should have a csv log with a kernel version:
   if ! [[ -f "$LOG_FILE_KERNEL" ]]; then
-    print_output "[-] No Kernel version identified ..." "no_log"
+    local OUTPUTTER="[-] No Kernel version identified ..."
+    print_output "$OUTPUTTER" "no_log"
+    write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
     return
   fi
   local K_VERSIONS=()
@@ -47,7 +49,9 @@ kernel_downloader() {
   mapfile -t K_VERSIONS < <(cut -d\; -f2 "$LOG_FILE_KERNEL" | tail -n +2 | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
 
   for K_VERSION in "${K_VERSIONS[@]}"; do
-    print_output "[*] Checking download of kernel version $ORANGE$K_VERSION$NC" "no_log"
+    local OUTPUTTER="[*] Checking download of kernel version $ORANGE$K_VERSION$NC"
+    print_output "$OUTPUTTER" "no_log"
+    write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
     local K_VER_DOWNLOAD=""
     local K_VER_1st=""
     local K_VER_2nd=""
@@ -74,32 +78,58 @@ kernel_downloader() {
   
     # we check if the sources archive is already available and is a valid tgz file:
     if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]] || ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" > /dev/null; then
-      print_output "[*] Kernel download for version $ORANGE$K_VERSION$NC" "no_log"
+      local OUTPUTTER="[*] Kernel download for version $ORANGE$K_VERSION$NC"
+      print_output "$OUTPUTTER" "no_log"
+      write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
+
+      if ! [[ -d "$TMP_DIR" ]]; then
+        mkdir "$TMP_DIR"
+      fi
+
       disable_strict_mode "$STRICT_MODE" 0
-      wget https://mirrors.edge.kernel.org/pub/linux/kernel/v"$K_VER_DOWNLOAD"/linux-"$K_VERSION".tar.gz -O "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz
+      wget --output-file="$TMP_DIR"/wget.log https://mirrors.edge.kernel.org/pub/linux/kernel/v"$K_VER_DOWNLOAD"/linux-"$K_VERSION".tar.gz -O "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz 2>&1
       D_RETURN="$?"
       enable_strict_mode "$STRICT_MODE" 0
-      # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which checks for
-      # the file "$TMP_DIR"/linux_download_failed and exits if this file is available
+
+      if [[ -f "$TMP_DIR"/wget.log ]]; then
+        print_ln
+        tee -a "$LOG_DIR/kernel_downloader.log" < "$TMP_DIR"/wget.log
+        rm "$TMP_DIR"/wget.log
+      fi
+      # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which
+      # checks for the file "$TMP_DIR"/linux_download_failed. If this file is available it stops waiting for the kernel
+      # sources
       if [[ $D_RETURN -ne 0 ]] ; then
+        local OUTPUTTER="[-] Kernel download for version $ORANGE$K_VERSION$NC failed"
+        print_output "$OUTPUTTER" "no_log"
+        write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
+
         echo "failed" > "$TMP_DIR"/linux_download_failed
         if [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]]; then
           rm "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz
         fi
       fi
     else
-      print_output "[*] Kernel sources of version $ORANGE$K_VERSION$NC already available" "no_log"
+      local OUTPUTTER="[*] Kernel sources of version $ORANGE$K_VERSION$NC already available"
+      print_output "$OUTPUTTER" "no_log"
+      write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
     fi
   
     if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]]; then
-      print_output "[-] Kernel sources not available ..." "no_log"
+      local OUTPUTTER="[-] Kernel sources not available ..."
+      print_output "$OUTPUTTER" "no_log"
+      write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
       continue
     fi
     if ! file "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz | grep -q "gzip compressed data"; then
-      print_output "[-] Kernel sources not available ..." "no_log"
+      local OUTPUTTER="[-] Kernel sources not available ..."
+      print_output "$OUTPUTTER" "no_log"
+      write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
       continue
     fi
-    print_output "[*] Kernel source for version $ORANGE$K_VERSION$NC stored in $ORANGE$KERNEL_ARCH_PATH$NC" "no_log"
+    local OUTPUTTER="[*] Kernel source for version $ORANGE$K_VERSION$NC stored in $ORANGE$KERNEL_ARCH_PATH$NC"
+    print_output "$OUTPUTTER" "no_log"
+    write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
   done
 }
 
