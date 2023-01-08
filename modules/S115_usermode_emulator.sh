@@ -750,7 +750,7 @@ s115_cleanup() {
   fi
 
   mapfile -t LOG_FILES < <(find "$LOG_PATH_MODULE""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
-  ILLEGAL_INSTRUCTIONS=$(grep -l "Illegal instruction" "$LOG_PATH_MODULE""/"qemu_tmp* | wc -l)
+  ILLEGAL_INSTRUCTIONS=$(grep -l "Illegal instruction" "$LOG_PATH_MODULE""/"qemu_tmp* | wc -l || true)
   print_output "[*] Found $ORANGE$ILLEGAL_INSTRUCTIONS$NC binaries not emulated - Illegal instructions"
   if [[ "${#LOG_FILES[@]}" -gt 0 ]] ; then
     sub_module_title "Reporting phase"
