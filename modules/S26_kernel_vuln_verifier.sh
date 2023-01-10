@@ -591,7 +591,6 @@ final_log_kernel_vulns() {
     done
   fi
   write_log "[*] Statistics:$K_VERSION:${#ALL_KVULNS[@]}:$CVE_VERIFIED_SYMBOLS:$CVE_VERIFIED_COMPILED"
-  print_bar
 }
 
 identify_exploits() {

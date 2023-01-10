@@ -254,11 +254,11 @@ output_details() {
 
   if [[ "${K_CVE_VERIFIED_SYMBOLS:-0}" -gt 0 ]] || [[ "${K_CVE_VERIFIED_COMPILED:-0}" -gt 0 ]]; then
     if [[ "${K_CVE_VERIFIED_SYMBOLS:-0}" -gt 0 ]]; then
-      print_output "$(indent "$(green "Verified $ORANGE${K_CVE_VERIFIED_SYMBOLS:-0}$GREEN kernel vulnerabilities (kernel symbols).")")"
+      print_output "[+] Verified $ORANGE${K_CVE_VERIFIED_SYMBOLS:-0}$GREEN kernel vulnerabilities (${ORANGE}kernel symbols$GREEN)."
       write_link "s26"
     fi
     if [[ "${K_CVE_VERIFIED_COMPILED:-0}" -gt 0 ]]; then
-      print_output "$(indent "$(green "Verified $ORANGE${K_CVE_VERIFIED_COMPILED:-0}$GREEN kernel vulnerabilities (${ORANGE}kernel compilation$GREEN).")")"
+      print_output "[+] Verified $ORANGE${K_CVE_VERIFIED_COMPILED:-0}$GREEN kernel vulnerabilities (${ORANGE}kernel compilation$GREEN)."
       write_link "s26"
     fi
     DATA=1
