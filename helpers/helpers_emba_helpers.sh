@@ -136,6 +136,13 @@ cleaner() {
     restore_permissions
   fi
 
+  if [[ "$IN_DOCKER" -eq 0 ]] && [[ -v K_DOWN_PID ]]; then
+    if ps -p "$K_DOWN_PID" > /dev/null; then
+      # kernel downloader is running in a thread on the host and needs to be stopped now
+      print_output "[*] Stopping kernel downloader thread with PID $K_DOWN_PID" "no_log"
+      kill "$K_DOWN_PID" || true
+    fi
+  fi
   if [[ "$IN_DOCKER" -eq 0 ]] && pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
     pkill -f "find ./external/trickest" 2>/dev/null || true
   fi

@@ -233,7 +233,8 @@ get_kernel_vulns()
       demess_kv_version "${KERNEL_VERSION[@]}"
       IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
       for VER in "${KV_C_ARR[@]}" ; do
-        print_output "[*] Searching for possible exploits via linux-exploit-suggester.sh for kernel version $ORANGE$VER$NC"
+        sub_module_title "Possible exploits via linux-exploit-suggester.sh for kernel version $ORANGE$VER$NC"
+        print_output "[*] Search possible exploits via linux-exploit-suggester.sh for kernel version $ORANGE$VER$NC"
         print_output "$(indent "https://github.com/mzet-/linux-exploit-suggester")"
         "$EXT_DIR""/linux-exploit-suggester.sh" --skip-more-checks -f -d -k "$VER" >> "$LOG_PATH_MODULE""/linux_exploit_suggester_kernel_$VER.txt"
         tee -a "$LOG_FILE" < "$LOG_PATH_MODULE""/linux_exploit_suggester_kernel_$VER.txt"

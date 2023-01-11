@@ -339,7 +339,10 @@ dependency_check()
   # Check system tools
   #######################################################################################
   if [[ $USE_DOCKER -eq 0 ]] ; then
-    SYSTEM_TOOLS=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" "dpkg-deb" "echo" "eval" "find" "grep" "head" "kill" "ln" "ls" "md5sum" "mkdir" "mknod" "modinfo" "mv" "netstat" "openssl" "printf" "pwd" "readelf" "realpath" "rm" "rmdir" "sed" "seq" "sleep" "sort" "strings" "tee" "touch" "tr" "uniq" "unzip" "wc")
+    SYSTEM_TOOLS=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" \
+      "dpkg-deb" "echo" "eval" "find" "grep" "head" "kill" "ln" "ls" "md5sum" "mkdir" "mknod" \
+      "modinfo" "mv" "netstat" "openssl" "printf" "pwd" "readelf" "realpath" "rm" "rmdir" "sed" \
+      "seq" "sleep" "sort" "strings" "tee" "touch" "tr" "uniq" "unzip" "wc")
 
     for TOOL in "${SYSTEM_TOOLS[@]}" ; do
       check_dep_tool "$TOOL"
@@ -433,6 +436,9 @@ dependency_check()
 
     # Freetz-NG
     check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
+
+    # AVM fitimg extraction script
+    check_dep_file "fitimg script" "$EXT_DIR""/fitimg-0.8/fitimg"
 
     # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
     check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"

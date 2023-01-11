@@ -176,7 +176,7 @@ print_file_info()
     echo -e "Description: ""${2:-}"
   fi
   # echo "$(wget "${3}" --spider --server-response -O -)"
-  CONTENT_LENGTH=$(wget "${3:-}" --no-check-certificate --spider --server-response --output-file=./.wget.log 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d')
+  CONTENT_LENGTH=$(wget "${3:-}" --no-check-certificate --spider --server-response --output-file=./.wget.log 2>&1 | sed -ne '/.ontent-.ength/{s/.*: //;p}' | sed '$!d' || true)
   if [[ -n "$CONTENT_LENGTH" ]]; then
     FILE_SIZE=$(("$CONTENT_LENGTH"))
   else
@@ -225,6 +225,9 @@ download_file()
       echo -e "\\n""$ORANGE""$BOLD""Downloading ""${1:-}""$NC"
       if ! [[ -f "${3:-}" ]] ; then
         wget --no-check-certificate --output-file=./.wget.log "${2:-}" -O "${3:-}"
+        if [[ -f "./.wget.log" ]]; then
+          cat ./.wget.log
+        fi
       else
         echo -e "$GREEN""${1}"" is already downloaded - no further action performed.""$NC"
       fi

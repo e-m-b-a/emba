@@ -57,6 +57,9 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "libsqlite3-dev" 1
     print_tool_info "gcc-multilib" 1
     print_tool_info "python-is-python3" 1
+    print_file_info "fitimg" "fit image extractor" "https://boxmatrix.info/hosted/hippie2000/fitimg-0.8.tar.gz" "external/fitimg-0.8.tar.gz"
+    print_tool_info "libstring-crc32-perl" 1
+    print_tool_info "liblzma-dev" 1
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -118,6 +121,18 @@ IP12_avm_freetz_ng_extract() {
           fi
         else
           echo -e "${ORANGE}Found freetz directory ... Not touching it$NC"
+        fi
+
+        # fitimg installation
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component fitimg" && exit 1 )
+        download_file "fitimg" "https://boxmatrix.info/hosted/hippie2000/fitimg-0.8.tar.gz" "external/fitimg-0.8.tar.gz"
+        if [[ -f "external/fitimg-0.8.tar.gz" ]]; then
+          echo -e "${ORANGE}[*] Installing fitimg$NC"
+          tar -zxv -f "external/fitimg-0.8.tar.gz" -C external
+          rm "external/fitimg-0.8.tar.gz"
+        else
+          echo "Warning: fitimg download failed"
+          exit 1
         fi
       ;;
     esac

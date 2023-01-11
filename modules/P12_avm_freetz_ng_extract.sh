@@ -46,6 +46,11 @@ avm_extractor() {
     return
   fi
   local FRITZ_DIRS=0
+  local FIT_IMAGES=()
+  local FIT_IMAGE=""
+  local RAM_DISKS=()
+  local RAM_DISK=""
+  local RAM_DISK_NAME=""
   export FRITZ_FILE=0
   export FRITZ_VERSION=""
 
@@ -67,11 +72,38 @@ avm_extractor() {
       print_output "[+] Detected Fritz version: $ORANGE$FRITZ_VERSION$NC"
     fi
 
+    # fitimages are handled here with fitimg - binwalk and unblob are also able to handle these images
+    # but it is currently more beautiful doing the AVM extraction in one place here
+    mapfile -t FIT_IMAGES < <(find "$EXTRACTION_DIR_" -type f -name "fit-image")
+
+    if [[ "${#FIT_IMAGES[@]}" -gt 0 ]]; then
+      if [[ -f "$EXT_DIR"/fitimg-0.8/fitimg ]]; then
+        for FIT_IMAGE in "${FIT_IMAGES[@]}"; do
+          print_output "[*] Detected fit-image: $ORANGE$FIT_IMAGE$NC"
+          print_output "[*] Extracting fit-image with fitimg to $ORANGE$EXTRACTION_DIR/fit-image-extraction$NC"
+          mkdir -p "$EXTRACTION_DIR/fit-image-extraction"
+          "$EXT_DIR"/fitimg-0.8/fitimg -x "$FIT_IMAGE" -d "$EXTRACTION_DIR"/fit-image-extraction || true
+          mapfile -t RAM_DISKS < <(find "$EXTRACTION_DIR_"/fit-image-extraction -type f -name "*ramdisk")
+          print_ln
+        done
+      else
+        print_output "[-] Fitimg installation not available - check your installation"
+      fi
+    fi
+    if [[ "${#RAM_DISKS[@]}" -gt 0 ]]; then
+      for RAM_DISK in "${RAM_DISKS[@]}"; do
+        print_output "[*] Detected AVM ramdisk: $ORANGE$RAM_DISK$NC"
+        RAM_DISK_NAME="$(basename "$RAM_DISK")"
+        binwalk_deep_extract_helper 1 "$RAM_DISK" "$EXTRACTION_DIR_"/fit-image-extraction/"$RAM_DISK_NAME"_binwalk
+        print_ln
+      done
+    fi
+
     if [[ "$FRITZ_FILES" -gt 0 ]]; then
       print_ln
       print_output "[*] Extracted $ORANGE$FRITZ_FILES$NC files and $ORANGE$FRITZ_DIRS$NC directories from the firmware image."
       write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-      write_csv_log "Freetz-NG" "$AVM_FW_PATH_" "$EXTRACTION_DIR_" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
+      write_csv_log "AVM extractor" "$AVM_FW_PATH_" "$EXTRACTION_DIR_" "$FRITZ_FILES" "$FRITZ_DIRS" "$FRITZ_VERSION"
       export DEEP_EXTRACTOR=1
       MD5_DONE_DEEP+=( "$(md5sum "$AVM_FW_PATH_" | awk '{print $1}')" )
 

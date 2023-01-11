@@ -12,6 +12,10 @@ print_output "$(indent "${ORANGE}S$NC - PoC code found on Snyk vulnerability dat
 write_link "https://security.snyk.io/vuln"
 print_output "$(indent "${ORANGE}X$NC - Vulnerability is known as exploited")"
 write_link "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+if [[ -f "$LOG_DIR"/s26_kernel_vuln_verifier.txt ]]; then
+  print_output "$(indent "${ORANGE}V$NC - Kernel vulnerability was verified from module s26")"
+  write_link "s26"
+fi
 print_ln
 print_ln
 print_output "[*] Source notes:"

@@ -36,6 +36,7 @@ F50_base_aggregator() {
   S22_LOG="s22_php_check.txt"
   S24_LOG="s24_kernel_bin_identifier.txt"
   S25_LOG="s25_kernel_check.txt"
+  S26_LOG="s26_kernel_vuln_verifier.txt"
   S30_LOG="s30_version_vulnerability_check.txt"
   S40_LOG="s40_weak_perm_check.txt"
   S45_LOG="s45_pass_file_check.txt"
@@ -249,6 +250,19 @@ output_details() {
     print_output "[+] System emulation was successful $STATE" "" "l10"
     write_csv_log "system_emulation_state" "$EMU_STATE" "NA"
     DATA=1
+  fi
+
+  if [[ "${K_CVE_VERIFIED_SYMBOLS:-0}" -gt 0 ]] || [[ "${K_CVE_VERIFIED_COMPILED:-0}" -gt 0 ]]; then
+    if [[ "${K_CVE_VERIFIED_SYMBOLS:-0}" -gt 0 ]]; then
+      print_output "[+] Verified $ORANGE${K_CVE_VERIFIED_SYMBOLS:-0}$GREEN kernel vulnerabilities (${ORANGE}kernel symbols$GREEN)."
+      write_link "s26"
+    fi
+    if [[ "${K_CVE_VERIFIED_COMPILED:-0}" -gt 0 ]]; then
+      print_output "[+] Verified $ORANGE${K_CVE_VERIFIED_COMPILED:-0}$GREEN kernel vulnerabilities (${ORANGE}kernel compilation$GREEN)."
+      write_link "s26"
+    fi
+    DATA=1
+    write_csv_log "kernel_verified" "${K_CVE_VERIFIED_SYMBOLS:-0}" "${K_CVE_VERIFIED_COMPILED:-0}"
   fi
 
   if [[ $DATA -eq 1 ]]; then
@@ -602,7 +616,7 @@ output_cve_exploits() {
   local BINARY_=""
 
   if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
-    if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
+    if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]] && [[ -f "$LOG_DIR/f20_vul_aggregator/F20_summary.txt" ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
       write_link "f20#collectcveandexploitdetails"
 
@@ -630,9 +644,9 @@ output_cve_exploits() {
       echo -e "\n" >> "$LOG_FILE"
       print_output "[+] Identified ""$ORANGE""$CVE_COUNTER""$GREEN"" CVE entries."
       write_link "f20#collectcveandexploitdetails"
-      print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries / Exploits: $ORANGE${EXPLOIT_HIGH_COUNT:0}$NC")")"
-      print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries / Exploits: $ORANGE${EXPLOIT_MEDIUM_COUNT:0}$NC")")"
-      print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries /Exploits: $ORANGE${EXPLOIT_LOW_COUNT:0}$NC")")"
+      print_output "$(indent "$(green "Identified $RED$BOLD$HIGH_CVE_COUNTER$NC$GREEN High rated CVE entries / Exploits: $ORANGE${EXPLOIT_HIGH_COUNT:-0}$NC")")"
+      print_output "$(indent "$(green "Identified $ORANGE$BOLD$MEDIUM_CVE_COUNTER$NC$GREEN Medium rated CVE entries / Exploits: $ORANGE${EXPLOIT_MEDIUM_COUNT:-0}$NC")")"
+      print_output "$(indent "$(green "Identified $GREEN$BOLD$LOW_CVE_COUNTER$NC$GREEN Low rated CVE entries /Exploits: $ORANGE${EXPLOIT_LOW_COUNT:-0}$NC")")"
       write_csv_log "cve_high" "$HIGH_CVE_COUNTER" "NA"
       write_csv_log "cve_medium" "$MEDIUM_CVE_COUNTER" "NA"
       write_csv_log "cve_low" "$LOW_CVE_COUNTER" "NA"
@@ -734,6 +748,8 @@ get_data() {
   export CVE_SEARCH=1
   export FWHUNTER_CNT=0
   export MSF_VERIFIED=0
+  export K_CVE_VERIFIED_SYMBOLS=0
+  export K_CVE_VERIFIED_COMPILED=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
@@ -795,6 +811,10 @@ get_data() {
   if [[ -f "$LOG_DIR"/"$S25_LOG" ]]; then
     MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f2 || true)
     KMOD_BAD=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S25_LOG" | cut -d: -f3 || true)
+  fi
+  if [[ -f "$LOG_DIR"/"$S26_LOG" ]]; then
+    K_CVE_VERIFIED_SYMBOLS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S26_LOG" | cut -d: -f4 || true)
+    K_CVE_VERIFIED_COMPILED=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S26_LOG" | cut -d: -f5 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S30_LOG" ]]; then
     S30_VUL_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S30_LOG" | cut -d: -f2 || true)

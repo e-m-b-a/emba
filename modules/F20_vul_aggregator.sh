@@ -12,7 +12,8 @@
 #
 # Author(s): Michael Messner
 
-# Description:  Aggregates all found version numbers together from S06, S08, S09, S25, S115/S116 and L15.
+# Description:  Aggregates all found version numbers together from S06, S08, S09, S25, S26,
+#               S115/S116 and L15.
 #               The versions are used for identification of known vulnerabilities cve-search,
 #               finally it creates a list of exploits that are matching for the CVEs.
 
@@ -42,31 +43,42 @@ F20_vul_aggregator() {
   MSF_SEARCH=0
   TRICKEST_SEARCH=0
   CVE_SEARCHSPLOIT=0
+
   local FOUND_CVE=0
+  local S26_LOGS_ARR=()
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
-  if [[ -f "$CVE_WHITELIST" ]] && [[ $(grep -c -E "CVE-[0-9]+-[0-9]+" "$CVE_WHITELIST") -gt 0 ]]; then
-    print_output "[!] WARNING: CVE whitelisting activated"
-  fi
-  if [[ -f "$CVE_BLACKLIST" ]] && [[ $(grep -c -E "CVE-[0-9]+-[0-9]+" "$CVE_BLACKLIST") -gt 0 ]]; then
-    print_output "[!] WARNING: CVE blacklisting activated"
-  fi
 
   local S02_LOG="$CSV_DIR"/s02_uefi_fwhunt.csv
   local S06_LOG="$CSV_DIR"/s06_distribution_identification.csv
   local S08_LOG="$CSV_DIR"/s08_package_mgmt_extractor.csv
   local S09_LOG="$CSV_DIR"/s09_firmware_base_version_check.csv
   local S25_LOG="$CSV_DIR"/s25_kernel_check.csv
+  local S26_LOG_DIR="$LOG_DIR""/s26_kernel_vuln_verifier/"
   local S116_LOG="$CSV_DIR"/s116_qemu_version_detection.csv
   local L15_LOG="$CSV_DIR"/l15_emulated_checks_nmap.csv
   local L25_LOG="$CSV_DIR"/l25_web_checks.csv
   local L35_LOG="$CSV_DIR"/l35_metasploit_check.csv
 
+  if [[ -d "$S26_LOG_DIR" ]]; then
+    mapfile -t S26_LOGS_ARR < <(find "$S26_LOG_DIR" -name "cve_results_kernel_*.csv")
+  fi
+
   local CVE_MINIMAL_LOG="$LOG_PATH_MODULE"/CVE_minimal.txt
   local EXPLOIT_OVERVIEW_LOG="$LOG_PATH_MODULE"/exploits-overview.txt
 
+  export KERNEL_CVE_VERIFIED=()
+  export KERNEL_CVE_VERIFIED_VERSION=()
+
   if ! [[ -f "$KNOWN_EXP_CSV" ]]; then
     KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
+  fi
+
+  if [[ -f "$CVE_WHITELIST" ]] && [[ $(grep -c -E "CVE-[0-9]+-[0-9]+" "$CVE_WHITELIST") -gt 0 ]]; then
+    print_output "[!] WARNING: CVE whitelisting activated"
+  fi
+  if [[ -f "$CVE_BLACKLIST" ]] && [[ $(grep -c -E "CVE-[0-9]+-[0-9]+" "$CVE_BLACKLIST") -gt 0 ]]; then
+    print_output "[!] WARNING: CVE blacklisting activated"
   fi
 
   if [[ -f $PATH_CVE_SEARCH ]]; then
@@ -83,6 +95,10 @@ F20_vul_aggregator() {
         # then we have found a kernel in our s25 kernel module
         KERNELV=1
       fi
+    fi
+
+    if [[ -v S26_LOGS_ARR ]]; then
+      get_kernel_verified "${S26_LOGS_ARR[@]}"
     fi
 
     get_uefi_details "$S02_LOG"
@@ -130,10 +146,14 @@ F20_vul_aggregator() {
         SNYK_SEARCH=1
       fi
 
-      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "Snyk PoC" "Packetstormsecurity PoC" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
+      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "Snyk PoC" "Packetstormsecurity PoC" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln" "kernel vulnerability verified"
 
-      generate_cve_details_versions "${VERSIONS_AGGREGATED[@]}"
-      generate_cve_details_cves "${CVES_AGGREGATED[@]}"
+      if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+        generate_cve_details_versions "${VERSIONS_AGGREGATED[@]}"
+      fi
+      if [[ "${#CVES_AGGREGATED[@]}" -gt 0 ]]; then
+        generate_cve_details_cves "${CVES_AGGREGATED[@]}"
+      fi
 
       generate_special_log "$CVE_MINIMAL_LOG" "$EXPLOIT_OVERVIEW_LOG"
     else
@@ -162,7 +182,10 @@ aggregate_versions() {
   export VERSIONS_AGGREGATED=()
   VERSIONS_KERNEL=()
 
-  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} || ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 ]]; then
+  if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
+    ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
+    ${#KERNEL_CVE_VERIFIED[@]} -gt 0 ]]; then
+
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
     for VERSION in "${VERSIONS_S06_FW_DETAILS[@]}"; do
@@ -214,6 +237,19 @@ aggregate_versions() {
       # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
     done
 
+    # details from module s26
+    for VERSION in "${KERNEL_CVE_VERIFIED_VERSION[@]}"; do
+      if [ -z "$VERSION" ]; then
+        continue
+      fi
+      VERSION="$(echo "$VERSION" | cut -d\; -f1 | sed 's/^/kernel:/')"
+      print_output "[+] Found Version details (${ORANGE}kernel - with verified vulnerability details$GREEN): ""$ORANGE$VERSION$NC"
+      # we ensure that we search for the correct kernel version by adding a : at the end of the search string
+      VERSION=${VERSION/%/:}
+      VERSIONS_KERNEL+=( "$VERSION" )
+      # print_output "[+] Added modfied Kernel Version details (${ORANGE}kernel$GREEN): ""$ORANGE$VERSION$NC"
+    done
+
     for CVE_ENTRY in "${CVE_S02_DETAILS[@]}"; do
       if [ -z "$CVE_ENTRY" ]; then
         continue
@@ -235,8 +271,6 @@ aggregate_versions() {
       fi
       print_output "[+] Found CVE details (${ORANGE}verified Metasploit exploits$GREEN): ""$ORANGE$CVE_ENTRY$NC"
     done
-
-
 
     print_ln
     VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
@@ -313,7 +347,7 @@ generate_special_log() {
   local CVE_MINIMAL_LOG="${1:-}"
   local EXPLOIT_OVERVIEW_LOG="${2:-}"
 
-  if [[ $(grep -c "Found.*CVEs\ and" "$LOG_FILE" || true) -gt 0 ]]; then
+  if [[ $(grep -c "Found.*CVEs\ .*and" "$LOG_FILE" || true) -gt 0 ]]; then
     sub_module_title "Minimal report of exploits and CVE's."
     write_anchor "minimalreportofexploitsandcves"
 
@@ -378,7 +412,6 @@ generate_special_log() {
       print_ln
     fi
 
-
     for EXPLOIT_ in "${EXPLOITS_AVAIL[@]}"; do
       # remove color codes:
       EXPLOIT_=$(echo "$EXPLOIT_" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
@@ -418,7 +451,7 @@ generate_special_log() {
 }
 
 generate_cve_details_cves() {
-  sub_module_title "Collect CVE and exploit details."
+  sub_module_title "Collect CVE and exploit details from CVEs."
   write_anchor "collectcveandexploitdetails_cves"
 
   local CVES_AGGREGATED=("$@")
@@ -431,7 +464,7 @@ generate_cve_details_cves() {
       WAIT_PIDS_F19+=( "$!" )
       max_pids_protection "$MAX_MODS" "${WAIT_PIDS_F19[@]}"
     else
-      cve_db_lookup_version "$CVE_ENTRY"
+      cve_db_lookup_cve "$CVE_ENTRY"
     fi
   done
 
@@ -441,7 +474,7 @@ generate_cve_details_cves() {
 }
 
 generate_cve_details_versions() {
-  sub_module_title "Collect CVE and exploit details."
+  sub_module_title "Collect CVE and exploit details from versions."
   write_anchor "collectcveandexploitdetails"
 
   CVE_COUNTER=0
@@ -555,6 +588,8 @@ cve_extractor() {
   local DOS=0
   local CVEs_OUTPUT=()
   local CVE_OUTPUT=""
+  local S26_LOG_DIR="$LOG_DIR""/s26_kernel_vuln_verifier"
+  local KERNEL_VERIFIED_VULN=0
 
   if ! [[ "$VERSION_orig" == "CVE-"* ]]; then
     if [[ "$(echo "$VERSION_orig" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
@@ -660,6 +695,7 @@ cve_extractor() {
   if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       local CVEv2_TMP=0
+      local KERNEL_VERIFIED="no"
       CVE_VALUE=$(echo "$CVE_OUTPUT" | cut -d: -f1)
 
       # if we find a blacklist file we check if the current CVE value is in the blacklist
@@ -711,6 +747,25 @@ cve_extractor() {
             EDB=1
           fi
         done
+
+        if [[ -f "$S26_LOG_DIR"/cve_results_kernel_"$VERSION".csv ]]; then
+          # check if the current CVE is a verified kernel CVE from s26 module
+          if grep -q ";$CVE_VALUE;.*;.*;1;1" "$S26_LOG_DIR"/cve_results_kernel_"$VERSION".csv; then
+            print_output "[+] ${ORANGE}INFO:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!"
+            ((KERNEL_VERIFIED_VULN+=1))
+            KERNEL_VERIFIED="yes"
+          fi
+          if grep -q ";$CVE_VALUE;.*;.*;1;0" "$S26_LOG_DIR"/cve_results_kernel_"$VERSION".csv; then
+            print_output "[+] ${ORANGE}INFO:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!"
+            ((KERNEL_VERIFIED_VULN+=1))
+            KERNEL_VERIFIED="yes"
+          fi
+          if grep -q ";$CVE_VALUE;.*;.*;0;1" "$S26_LOG_DIR"/cve_results_kernel_"$VERSION".csv; then
+            print_output "[+] ${ORANGE}INFO:$GREEN Vulnerability $ORANGE$CVE_VALUE$GREEN is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!"
+            ((KERNEL_VERIFIED_VULN+=1))
+            KERNEL_VERIFIED="yes"
+          fi
+        fi
       fi
 
       if [[ "$CVE_SEARCHSPLOIT" -eq 1 || "$MSF_SEARCH" -eq 1 || "$TRICKEST_SEARCH" -eq 1 || "$SNYK_SEARCH" -eq 1 || "$PS_SEARCH" -eq 1 ]] ; then
@@ -954,37 +1009,40 @@ cve_extractor() {
         CVEv2_TMP=1
       fi
 
+      # if this CVE is a kernel verified CVE we add a V to the CVE
+      if [[ "$KERNEL_VERIFIED" == "yes" ]]; then CVE_VALUE="$CVE_VALUE"" (V)"; fi
+
       # we do not deal with output formatting the usual way -> we use printf
       if (( $(echo "$CVSS_VALUE > 6.9" | bc -l) )); then
         # put a note in the output if we have switched to CVSSv2
         if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
         if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || \
           "$EXPLOIT" == *Github* || "$EXPLOIT" == *PSS* || "$EXPLOIT" == *Snyk* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          printf "${RED}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((HIGH_CVE_COUNTER+=1))
       elif (( $(echo "$CVSS_VALUE > 3.9" | bc -l) )); then
         if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
         if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || \
           "$EXPLOIT" == *Github* || "$EXPLOIT" == *PSS* || "$EXPLOIT" == *Snyk* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((MEDIUM_CVE_COUNTER+=1))
       else
         if [[ "$CVEv2_TMP" -eq 1 ]]; then CVSS_VALUE="$CVSS_VALUE"" (v2)"; fi
         if [[ "$EXPLOIT" == *MSF* || "$EXPLOIT" == *EDB\ ID* || "$EXPLOIT" == *linux-exploit-suggester* || "$EXPLOIT" == *Routersploit* || \
           "$EXPLOIT" == *Github* || "$EXPLOIT" == *PSS* || "$EXPLOIT" == *Snyk* || "$KNOWN_EXPLOITED" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-17.17s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         else
-          printf "${GREEN}\t%-20.20s:   %-12.12s:   %-17.17s:   %-9.9s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
+          printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "$VSOURCE" "$EXPLOIT" >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
         fi
         ((LOW_CVE_COUNTER+=1))
       fi
-      write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "$LOCAL" "$REMOTE" "$DOS" "${#KNOWN_EXPLOITED_VULNS[@]}"
+      write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "$LOCAL" "$REMOTE" "$DOS" "${#KNOWN_EXPLOITED_VULNS[@]}" "$KERNEL_VERIFIED"
     done
   fi
   
@@ -1007,12 +1065,20 @@ cve_extractor() {
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_ln
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE" || true
-    print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
+    if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then 
+      print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$GREEN CVEs ($RED$KERNEL_VERIFIED_VULN verified$GREEN) and $RED$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
+    else
+      print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
+    fi
     print_ln
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
     print_ln
     grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
-    print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$NC$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$NC$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
+    if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then 
+      print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$GREEN CVEs ($ORANGE$KERNEL_VERIFIED_VULN verified$GREEN) and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
+    else
+      print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
+    fi
     print_ln
   else
     print_ln
@@ -1020,7 +1086,11 @@ cve_extractor() {
     print_ln
   fi
 
+  # normally we only print the number of CVEs. If we have verified CVEs in the Linux Kernel we also add this detail
   CVEs="$CVE_COUNTER_VERSION"
+  if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]] && [[ "$BINARY" == *"kernel"* ]]; then
+    CVEs="$CVEs"" ($KERNEL_VERIFIED_VULN)"
+  fi
   EXPLOITS="$EXPLOIT_COUNTER_VERSION"
 
   if [[ "$CVE_COUNTER_VERSION" -gt 0 || "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
@@ -1028,25 +1098,26 @@ cve_extractor() {
       echo "BINARY;VERSION;Number of CVEs;Number of EXPLOITS" >> "$LOG_PATH_MODULE"/F20_summary.csv
     fi
     if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 || "$KNOWN_EXPLOITED" -eq 1 ]]; then
-      printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
+      printf "[${MAGENTA}+${NC}]${MAGENTA} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
       echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/F20_summary.csv
     else
-      printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
+      printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
       echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/F20_summary.csv
     fi
   elif [[ "$CVEs" -eq 0 && "$EXPLOITS" -eq 0 ]]; then
-      printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
+      printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
     echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/F20_summary.csv
   else
     # this should never happen ...
-    printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-5.5s:   Source: %-15.15s\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
+    printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-10.10s:   Source: %-15.15s\n" "$BINARY" "$VERSION" "$CVEs" "$EXPLOITS" "$VSOURCE" >> "$LOG_PATH_MODULE"/F20_summary.txt
     echo "$BINARY;$VERSION;$CVEs;$EXPLOITS" >> "$LOG_PATH_MODULE"/F20_summary.csv
   fi
 }
 
 get_firmware_base_version_check() {
   local S09_LOG="${1:-}"
-  VERSIONS_STAT_CHECK=()
+  export VERSIONS_STAT_CHECK=()
+
   if [[ -f "$S09_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S09_LOG")."
     # if we have already kernel information:
@@ -1060,7 +1131,8 @@ get_firmware_base_version_check() {
 
 get_kernel_check() {
   local S25_LOG="${1:-}"
-  KERNEL_CVE_EXPLOITS=()
+  export KERNEL_CVE_EXPLOITS=()
+
   if [[ -f "$S25_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S25_LOG")."
     readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "$S25_LOG" | grep -v "CVE identifier" | sort -u || true)
@@ -1068,9 +1140,25 @@ get_kernel_check() {
   fi
 }
 
+get_kernel_verified() {
+  local S26_LOGS_ARR=("$@")
+  local KERNEL_CVE_VERIFIEDX=()
+  local S26_LOG_DIR="$LOG_DIR""/s26_kernel_vuln_verifier/"
+
+  for S26_LOG in "${S26_LOGS_ARR[@]}"; do
+    if [[ -f "$S26_LOG" ]]; then
+      print_output "[*] Collect verified kernel details of module $(basename "$S26_LOG")."
+      readarray -t KERNEL_CVE_VERIFIEDX < <(tail -n +2 "$S26_LOG" | sort -u || true)
+    fi
+    KERNEL_CVE_VERIFIED+=("${KERNEL_CVE_VERIFIEDX[@]}")
+  done
+  mapfile -t KERNEL_CVE_VERIFIED_VERSION < <(find "$S26_LOG_DIR" -name "cve_results_kernel_*.csv" -exec cut -d\; -f1 {} \; | grep -v "Kernel version" | sort -u)
+}
+
 get_usermode_emulator() {
   local S116_LOG="${1:-}"
-  VERSIONS_EMULATOR=()
+  export VERSIONS_EMULATOR=()
+
   if [[ -f "$S116_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S116_LOG")."
     readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1079,7 +1167,8 @@ get_usermode_emulator() {
 
 get_systemmode_emulator() {
   local L15_LOG="${1:-}"
-  VERSIONS_SYS_EMULATOR=()
+  export VERSIONS_SYS_EMULATOR=()
+
   if [[ -f "$L15_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$L15_LOG")."
     readarray -t VERSIONS_SYS_EMULATOR < <(cut -d\; -f4 "$L15_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1088,7 +1177,8 @@ get_systemmode_emulator() {
 
 get_systemmode_webchecks() {
   local L25_LOG="${1:-}"
-  VERSIONS_SYS_EMULATOR_WEB=()
+  export VERSIONS_SYS_EMULATOR_WEB=()
+
   if [[ -f "$L25_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$L25_LOG")."
     readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1097,7 +1187,8 @@ get_systemmode_webchecks() {
 
 get_msf_verified() {
   local L35_LOG="${1:-}"
-  CVE_L35_DETAILS=()
+  export CVE_L35_DETAILS=()
+
   if [[ -f "$L35_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$L35_LOG")."
     readarray -t CVE_L35_DETAILS < <(cut -d\; -f3 "$L35_LOG" | grep -v "^CVE$" | grep -v "NA" | sort -u || true)
@@ -1106,7 +1197,8 @@ get_msf_verified() {
 
 get_uefi_details() {
   local S02_LOG="${1:-}"
-  CVE_S02_DETAILS=()
+  export CVE_S02_DETAILS=()
+
   if [[ -f "$S02_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$S02_LOG")."
     readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "$S02_LOG" | grep -v "CVE identifier" | sort -u || true)
@@ -1115,7 +1207,8 @@ get_uefi_details() {
 
 get_firmware_details() {
   local S06_LOG="${1:-}"
-  VERSIONS_S06_FW_DETAILS=()
+  export VERSIONS_S06_FW_DETAILS=()
+
   if [[ -f "$S06_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S06_LOG")."
     readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u || true)
@@ -1124,7 +1217,8 @@ get_firmware_details() {
 
 get_package_details() {
   local S08_LOG="${1:-}"
-  VERSIONS_S08_PACKAGE_DETAILS=()
+  export VERSIONS_S08_PACKAGE_DETAILS=()
+
   if [[ -f "$S08_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S08_LOG")."
     readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "$S08_LOG" | grep -v "package\;stripped version" | sort -u | tr ';' ':'|| true)

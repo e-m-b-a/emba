@@ -415,7 +415,8 @@ main()
   welcome  # Print EMBA welcome message
 
   if [[ $# -eq 0 ]]; then
-    print_output "\\n""$ORANGE""In order to be able to use EMBA, you have to specify at least a firmware (-f).\\nIf you don't set a log directory (-l), then ./logs will be used.""$NC" "no_log"
+    print_output "\\n""$ORANGE""In order to be able to use EMBA, you have to specify at least a firmware (-f)." "no_log"
+    print_output "If you don't set a log directory (-l), then ./logs will be used.""$NC" "no_log"
     print_help
     exit 1
   fi
@@ -656,6 +657,14 @@ main()
       create_log_dir
     fi
 
+    # kernel downloader runs on the host and waits for an identified kernel version. Afterwards
+    # it tries to download the kernel sources for further analysis
+    if [[ $IN_DOCKER -eq 0 ]]; then
+      kernel_downloader &
+      K_DOWN_PID="$!"
+      print_output "[*] Started kernel downloader thread with PID $K_DOWN_PID" "no_log"
+    fi
+
     if [[ $IN_DOCKER -eq 0 ]]; then
       echo "$LOG_DIR" > "$TMP_DIR"/orig_logdir
     fi
@@ -854,58 +863,56 @@ main()
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
-    if [[ "$UPDATE" -eq 1 ]]; then
-      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
-    fi
-
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
-      print_output "[*] Available docker images:" "no_log"
-      docker images | grep -E "emba[[:space:]]*latest" || true
-      print_output "[-] EMBA docker not ready!" "no_log"
-      exit 1
-    else
-      print_output "[*] EMBA initializes docker container.\\n" "no_log"
-
-      if [[ "$ONLY_DEP" -eq 0 ]]; then
-        # store some details that we do not have in the docker container:
-        echo "$FIRMWARE_PATH" >> "$TMP_DIR"/fw_name.log
-        echo "$LOG_DIR" >> "$TMP_DIR"/emba_log_dir.log
-        echo "$EMBA_COMMAND" >> "$TMP_DIR"/emba_command.log
-      fi
-
-      write_notification "EMBA starting docker container"
-
-      if [[ "$STRICT_MODE" -eq 1 ]]; then
-        set +e
-      fi
-      disable_strict_mode "$STRICT_MODE" 0
-      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-      D_RETURN=$?
-      enable_strict_mode "$STRICT_MODE" 0
-
-      if [[ $D_RETURN -eq 0 ]] ; then
-        if [[ $ONLY_DEP -eq 0 ]] ; then
-          print_output "[*] EMBA finished analysis in docker container.\\n" "no_log"
-          write_notification "EMBA finished analysis in default mode"
-          print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
-          print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
-          if [[ -f "$HTML_PATH"/index.html ]]; then
-            print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
-          fi
-          cleaner 0
-        else
-          # we do not need the log dir from dependency checker
-          if [[ -d "$LOG_DIR" ]]; then
-            rm -r "$LOG_DIR"
-          fi
-        fi
-        exit 0
-      else
-        print_output "[-] EMBA failed in docker mode!" "no_log"
-        cleaner 0
-        write_notification "EMBA failed analysis in default mode"
+      if ! docker images | grep -qE "emba[[:space:]]*latest"; then
+        print_output "[*] Available docker images:" "no_log"
+        docker images | grep -E "emba[[:space:]]*latest" || true
+        print_output "[-] EMBA docker not ready!" "no_log"
         exit 1
       fi
+    fi
+
+    print_output "[*] EMBA initializes docker container.\\n" "no_log"
+
+    if [[ "$ONLY_DEP" -eq 0 ]]; then
+      # store some details that we do not have in the docker container:
+      echo "$FIRMWARE_PATH" >> "$TMP_DIR"/fw_name.log
+      echo "$LOG_DIR" >> "$TMP_DIR"/emba_log_dir.log
+      echo "$EMBA_COMMAND" >> "$TMP_DIR"/emba_command.log
+    fi
+
+    write_notification "EMBA starting docker container"
+
+    if [[ "$STRICT_MODE" -eq 1 ]]; then
+      set +e
+    fi
+    disable_strict_mode "$STRICT_MODE" 0
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+    D_RETURN=$?
+    enable_strict_mode "$STRICT_MODE" 0
+
+    if [[ $D_RETURN -eq 0 ]] ; then
+      if [[ $ONLY_DEP -eq 0 ]] ; then
+        print_output "[*] EMBA finished analysis in docker container.\\n" "no_log"
+        write_notification "EMBA finished analysis in default mode"
+        print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
+        print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
+        if [[ -f "$HTML_PATH"/index.html ]]; then
+          print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
+        fi
+        cleaner 0
+      else
+        # we do not need the log dir from dependency checker
+        if [[ -d "$LOG_DIR" ]]; then
+          rm -r "$LOG_DIR"
+        fi
+      fi
+      exit 0
+    else
+      print_output "[-] EMBA failed in docker mode!" "no_log"
+      cleaner 0
+      write_notification "EMBA failed analysis in default mode"
+      exit 1
     fi
   fi
 

@@ -40,12 +40,12 @@ services:
         - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/logs
         - ${EMBA}/:/emba:ro
+        - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - /etc/timezone:/etc/timezone:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
-          # - /home/m1k3/github-repos/EMBA-emulation-binaries:/external/EMBA_Live_bins/:ro
     environment:
         - USER
     devices:

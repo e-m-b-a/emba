@@ -65,7 +65,8 @@ export NC="\033[0m"  # no color
 ## Attribute definition
 export BOLD="\033[1m"
 
-echo -e "\\n""$ORANGE""$BOLD""EMBA - Embedded Linux Analyzer Installer""$NC""\\n""$BOLD""=================================================================""$NC"
+echo -e "\\n""$ORANGE""$BOLD""EMBA - Embedded Linux Analyzer Installer""$NC"
+echo -e "$BOLD""=================================================================""$NC"
 
 # import all the installation modules
 mapfile -t INSTALLERS < <(find "$INSTALLER_DIR" -iname "*.sh" 2> /dev/null)

@@ -104,7 +104,7 @@ S20_shell_check()
       sub_module_title "Summary of shell issues (semgrep)"
       if [[ "$S20_SEMGREP_VULNS" -gt 0 ]]; then
         print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" (""$ORANGE""$S20_SEMGREP_VULNS"" vulnerabilites${GREEN}) in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
-      else
+      elif [[ "$S20_SEMGREP_ISSUES" -gt 0 ]]; then
         print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
       fi
       # highlight security findings in semgrep log:

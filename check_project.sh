@@ -117,7 +117,8 @@ import_emba_main() {
 
 
 dockerchecker() {
-  echo -e "\\n""$ORANGE""$BOLD""EMBA docker-files check""$NC""\\n""$BOLD""=================================================================""$NC"
+  echo -e "\\n""$ORANGE""$BOLD""EMBA docker-files check""$NC"
+  echo -e "$BOLD""=================================================================""$NC"
   mapfile -t DOCKER_COMPS < <(find . -maxdepth 1 -iname "docker-compose*.yml")
   for DOCKER_COMP in "${DOCKER_COMPS[@]}"; do
     echo -e "\\n""$GREEN""Run docker check on $DOCKER_COMP:""$NC""\\n"
@@ -132,7 +133,8 @@ dockerchecker() {
 }
 
 check() {
-  echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Shellcheck""$NC""\\n""$BOLD""=================================================================""$NC"
+  echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Shellcheck""$NC"
+  echo -e "$BOLD""=================================================================""$NC"
 
   echo -e "\\n""$GREEN""Load all files for check:""$NC""\\n"
 
@@ -280,8 +282,9 @@ check
 dockerchecker
 summary
 
-if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
+if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
+  [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || \
+  [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]]; then
   exit 1
 fi

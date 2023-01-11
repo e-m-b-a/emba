@@ -31,7 +31,8 @@ log_folder()
     local POSSIBLE_RESTART=0  # used for testing the checksums of the firmware with stored checksum
 
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
-    echo -e "    There are files in the specified directory: ""$LOG_DIR""\\n    You can now delete the content here or start the tool again and specify a different directory."
+    echo -e "    There are files in the specified directory: ""$LOG_DIR"
+    echo -e "    You can now delete the content here or start the tool again and specify a different directory."
 
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
       if grep -q "Test ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; then
