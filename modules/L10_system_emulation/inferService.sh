@@ -67,7 +67,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
       # check if this service is already in the service file:
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
         # check if we have a configuration available and iterate
-        for LIGHT_CONFIG in $("${BUSYBOX}" find / -name "lighttpd.conf" -type f); do
+        for LIGHT_CONFIG in $("${BUSYBOX}" find / -name "lighttpd*.conf" -type f); do
           # write the service starter with config file
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} - ${LIGHT_CONFIG}$NC"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}\n" >> /firmadyne/service
@@ -75,7 +75,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "miniupnpd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
-        for MINIUPNPD_CONFIG in $("${BUSYBOX}" find / -name "miniupnpd.conf" -type f); do
+        for MINIUPNPD_CONFIG in $("${BUSYBOX}" find / -name "miniupnpd*.conf" -type f); do
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} - ${MINIUPNPD_CONFIG}$NC"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
         done
