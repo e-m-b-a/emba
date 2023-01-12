@@ -57,9 +57,11 @@ fi
 # twonkystarter: F9K1119_WW_1.00.01.bin
 
 for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -type f -o -name "upnpd" -type f \
-  -o -name "telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "twonkystarter" -type f \
-  -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f -o -name "uhttpd" -type f -o -name "miniigd" -type f \
-  -o -name "ISS.exe" -type f -o -name "ubusd" -type f); do
+  -o -name "telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "mini_upnpd" -type f \
+  -o -name "twonkystarter" -type f -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f \
+  -o -name "uhttpd" -type f -o -name "miniigd" -type f -o -name "ISS.exe" -type f -o -name "ubusd" -type f \
+  -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f); do
+
   if [ -x "${BINARY}" ]; then
     SERVICE_NAME=$("${BUSYBOX}" basename "${BINARY}")
     # entry for lighttpd:
@@ -79,6 +81,27 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
           "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} - ${MINIUPNPD_CONFIG}$NC"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
         done
+      fi
+    elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "wscd" ]; then
+      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+        for WSCD_CONFIG in $("${BUSYBOX}" find / -name "wscd*.conf" -type f); do
+          "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} - ${WSCD_CONFIG}$NC"
+          "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG}\n" >> /firmadyne/service
+        done
+      fi
+    elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnpd" ]; then
+      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+        "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY}$NC"
+        "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
+
+        # let's try upnpd with a basic configuration:
+        "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} ppp0 eth0$NC"
+        "${BUSYBOX}" echo -e -n "${BINARY} ppp0 eth0\n" >> /firmadyne/service
+      fi
+    elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "ftpd" ]; then
+      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+        "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY}$NC"
+        "${BUSYBOX}" echo -e -n "${BINARY} -D\n" >> /firmadyne/service
       fi
     fi
     # this is the default case - without config but only if the service is not already in the service file
