@@ -788,7 +788,7 @@ main()
           mkdir "$LOG_DIR" || true
         fi
         # check_kconfig
-        print_output "[!] Currently not supported"
+        print_output "[!] Currently not supported" "no_log"
         exit 0
       fi
     fi
