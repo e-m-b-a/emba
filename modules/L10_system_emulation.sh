@@ -1047,7 +1047,7 @@ get_networking_details_emulation() {
     mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | grep -E '[[:alnum:]]{3,50}' | sort -u || true)
     # mapfile -t NVRAM_SET < <(grep -a "nvram_set" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2 | sed 's/^\ //g' | cut -d\  -f1 | sed 's/\"//g' | grep -v "^#" | grep -E '[[:alnum:]]{3,50}'| sort -u || true)
     # we check all available qemu logs for services that are started:
-    mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.*serial*.log | sed 's/.*inet_bind\[PID:\ //' | sort -u || true)
+    mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.*serial*.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
     NVRAM_TMP=( "${NVRAM[@]}" )
@@ -1337,6 +1337,13 @@ iterate_vlans() {
       VLAN_ID="NONE"
     fi
     store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "$ETH_INT" "$VLAN_ID" "$NETWORK_MODE"
+
+    # check this later
+    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth0" "$VLAN_ID" "$NETWORK_MODE"
+    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth0" "NONE" "$NETWORK_MODE"
+    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth1" "$VLAN_ID" "$NETWORK_MODE"
+    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth1" "NONE" "$NETWORK_MODE"
+
     # if we have entries without an interface name, we need to identify an interface name:
     # register_vlan_dev[PID: 212 (vconfig)]: dev:vlan1 vlan_id:1
     # for this we try to check the qemu output for vlan entries and generate the configuration entry
