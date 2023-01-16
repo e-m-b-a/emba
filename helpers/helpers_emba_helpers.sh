@@ -152,10 +152,6 @@ cleaner() {
     rm "$EXT_DIR"/trickest_db-cleaned.txt || true
   fi
 
-  # what a quick fix - need to come back to this!
-  # if [[ "$NOTIFICATION_PID" != "NA" ]]; then
-  #  kill "$NOTIFICATION_PID" 2>/dev/null || true
-  # fi
   if [[ -f "$TMP_DIR"/orig_logdir ]]; then
     LOG_DIR_HOST=$(cat "$TMP_DIR"/orig_logdir)
     pkill -f "inotifywait.*$LOG_DIR_HOST" 2>/dev/null || true
@@ -172,9 +168,10 @@ cleaner() {
     print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     exit 1
   fi
-  if [[ "$IN_DOCKER" -eq 0 ]]; then
-    pkill -f "emba.sh -f $FIRMWARE_PATH -l $LOG_DIR" || true
-  fi
+  # if [[ "$IN_DOCKER" -eq 0 ]]; then
+  #  # this does not work as we get an not-zero return value of EMBA
+  #  pkill -f "emba.sh -f $FIRMWARE_PATH -l $LOG_DIR" || true
+  # fi
 }
 
 emba_updater() {
@@ -200,8 +197,7 @@ emba_updater() {
     git pull
     cd "$BASE_PATH" || exit
   else
-    # git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
-    git clone https://github.com/EMBA-support-repos/trickest-cve.git "$EXT_DIR"/trickest-cve
+    git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
   fi
 
   print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"
