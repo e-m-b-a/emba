@@ -36,70 +36,49 @@ S25_kernel_check()
 
   # This module waits for S24_kernel_bin_identifier
   # check emba.log for S24_kernel_bin_identifier starting
-  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S24_kernel_bin_identifier "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
-      sleep 1
-    done
-  fi
+  module_wait "S24_kernel_bin_identifier"
+  # if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+  #  while [[ $(grep -i -c S24_kernel_bin_identifier "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; do
+  #    sleep 1
+  #  done
+  # fi
 
   # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_kernel
 
-  if [[ "$KERNEL" -eq 0 ]] && [[ "$FIRMWARE" -eq 1 ]] ; then
+  populate_karrays
 
-    populate_karrays
-
-    if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
-      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
-      print_output "Kernel version:"
-      for LINE in "${KERNEL_VERSION[@]}" ; do
-        print_output "$(indent "$ORANGE$LINE$NC")"
+  if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
+    write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln"
+    print_output "Kernel version:"
+    for LINE in "${KERNEL_VERSION[@]}" ; do
+      print_output "$(indent "$ORANGE$LINE$NC")"
+      FOUND=1
+    done
+    if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
+      print_ln
+      print_output "Kernel details:"
+      for LINE in "${KERNEL_DESC[@]}" ; do
+        print_output "$(indent "$LINE")"
         FOUND=1
       done
-      if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
-        print_ln
-        print_output "Kernel details:"
-        for LINE in "${KERNEL_DESC[@]}" ; do
-          print_output "$(indent "$LINE")"
-          FOUND=1
-        done
-      fi
-      print_output "[-] No check for kernel configuration"
-
-      get_kernel_vulns
-      check_modprobe
-    else
-      print_output "[-] No kernel version identified"
     fi
-    if [[ ${#KERNEL_MODULES[@]} -ne 0 ]] ; then
-      analyze_kernel_module
-      FOUND=1
-    fi
+    get_kernel_vulns
+    check_modprobe
+  else
+    print_output "[-] No kernel version identified"
+  fi
 
-  elif [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 1 ]] ; then
+  if [[ "$KERNEL" -eq 1 ]] && [[ -f "$KERNEL_CONFIG" ]]; then
+    # we use check_kconfig from s24 module
+    check_kconfig "$KERNEL_CONFIG"
+    FOUND=1
+  else
+    print_output "[-] No check for kernel configuration"
+  fi
 
-    populate_karrays
-
-    if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then
-      print_output "Kernel version:"
-      for LINE in "${KERNEL_VERSION[@]}" ; do
-        print_output "$(indent "$LINE")"
-      done
-      if [[ ${#KERNEL_DESC[@]} -ne 0 ]] ; then
-        print_output "Kernel details:"
-        for LINE in "${KERNEL_DESC[@]}" ; do
-          print_output "$(indent "$LINE")"
-        done
-      fi
-      print_output "[*] Check kernel configuration ""$(print_path "$KERNEL_CONFIG" )"" via checksec.sh"
-      print_output "$("$EXT_DIR""/checksec" --kernel="$KERNEL_CONFIG")"
-      FOUND=1
-
-      get_kernel_vulns
-      check_modprobe
-
-    else
-      print_output "[-] No kernel found"
-    fi
+  if [[ ${#KERNEL_MODULES[@]} -ne 0 ]] ; then
+    analyze_kernel_module
+    FOUND=1
   fi
 
   if [[ ${#KERNEL_VERSION[@]} -ne 0 ]] ; then

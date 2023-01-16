@@ -145,6 +145,10 @@ run_modules()
         print_output "[*] $(date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
         continue
       fi
+      if [[ "$SKIP_PRE_CHECKERS" == 1 ]] && [[ "$MODULE_GROUP" == "P" ]]; then
+        print_output "[*] $(date) - ${MODULE_NAME} not executed - skip pre-checkers is set " "main"
+        continue
+      fi
       local MOD_FIN=0
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
         if [[ "${MODULE_GROUP^^}" == "P" ]]; then
@@ -353,6 +357,7 @@ main()
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default EMBA scan
+  export SKIP_PRE_CHECKERS=0    # we can set this to 1 to skip all further pre-checkers (WARNING: use this with caution!!!)
   export PYTHON_CHECK=1
   export QEMULATION=0
   export FULL_EMULATION=0
@@ -492,6 +497,10 @@ main()
       k)
         export KERNEL=1
         export KERNEL_CONFIG="$OPTARG"
+        if [[ "$FIRMWARE" -ne 1 ]]; then
+          # this is little hack to enable kernel config only checks
+          export FIRMWARE_PATH="$KERNEL_CONFIG"
+        fi
         ;;
       l)
         export LOG_DIR="$OPTARG"
@@ -688,10 +697,6 @@ main()
     FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
     export MAIN_LOG="$LOG_DIR""/""$MAIN_LOG_FILE"
 
-    if [[ $KERNEL -eq 1 ]] ; then
-      LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
-    fi
-
     # Check firmware type (file/directory)
     # copy the firmware outside of the docker and not a second time within the docker
     if [[ -d "$FIRMWARE_PATH" ]] ; then
@@ -771,7 +776,7 @@ main()
       write_grep_log "sudo ""$EMBA_COMMAND" "COMMAND"
     fi
 
-    if [[ "$KERNEL" -ne 1 ]]; then
+    if [[ "$KERNEL" -ne 1 ]] && [[ $FIRMWARE -eq 1 ]]; then
       # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
       set_exclude
     fi
@@ -779,17 +784,25 @@ main()
     #######################################################################################
     # Kernel configuration check
     #######################################################################################
-    if [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]] ; then
+    if [[ $KERNEL -eq 1 ]]; then
+      if [[ $IN_DOCKER -eq 1 ]] && [[ -f "$LOG_DIR"/kernel_config ]]; then
+        export KERNEL_CONFIG="$LOG_DIR"/kernel_config
+      fi
+
       if ! [[ -f "$KERNEL_CONFIG" ]] ; then
-        print_output "[-] Invalid kernel configuration file: $ORANGE$KERNEL_CONFIG" "no_log"
+        print_output "[-] Invalid kernel configuration file: $ORANGE$KERNEL_CONFIG$NC" "no_log"
         exit 1
       else
-        if ! [[ -d "$LOG_DIR" ]] ; then
-          mkdir "$LOG_DIR" || true
+        if [[ $IN_DOCKER -eq 0 ]] ; then
+          # we copy the kernel config file from outside the container into our log directory
+          # further modules are using LOG_DIR/kernel_config for accessing the kernel config
+          if [[ -d "$LOG_DIR" ]] ; then
+            cp "$KERNEL_CONFIG" "$LOG_DIR"/kernel_config
+          else
+            print_output "[!] Missing log directory" "no_log"
+            exit 1
+          fi
         fi
-        # check_kconfig
-        print_output "[!] Currently not supported" "no_log"
-        exit 0
       fi
     fi
 
@@ -864,6 +877,7 @@ main()
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
+      sleep 1
       if ! docker images | grep -qE "emba[[:space:]]*latest"; then
         print_output "[*] Available docker images:" "no_log"
         docker images | grep -E "emba[[:space:]]*latest" || true
@@ -897,7 +911,7 @@ main()
         write_notification "EMBA finished analysis in default mode"
         print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
         print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
-        if [[ -f "$HTML_PATH"/index.html ]]; then
+        if [[ -v HTML_PATH ]] && [[ -f "$HTML_PATH"/index.html ]]; then
           print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
         fi
         cleaner 0

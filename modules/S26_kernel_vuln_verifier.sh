@@ -117,6 +117,15 @@ S26_kernel_vuln_verifier()
       done
     fi
 
+    if [[ -f "$KERNEL_CONFIG" ]]; then
+      # check if the provided configuration is for the kernel version under test
+      if grep -q "$K_VERSION" "$KERNEL_CONFIG"; then
+        KERNEL_CONFIG_PATH="$KERNEL_CONFIG"
+        print_output "[+] Using provided kernel configuration file: $ORANGE$KERNEL_CONFIG_PATH$NC"
+        K_FOUND=1
+      fi
+    fi
+
     if [[ "$K_FOUND" -ne 1 ]]; then
       print_output "[-] No valid kernel information found for kernel $ORANGE$K_VERSION$NC."
       continue
@@ -445,6 +454,8 @@ compile_kernel() {
   if ! [[ -d "$KERNEL_DIR"/arch/"$KARCH" ]]; then
     print_output "[!] No supported architecture found - $ORANGE$KARCH$NC"
     return
+  else
+    print_output "[*] Supported architecture found - $ORANGE$KARCH$NC"
   fi
 
   cd "$KERNEL_DIR" || exit

@@ -41,7 +41,7 @@ wait_for_pid() {
       # print_output "[*] wait pid protection - running pid: $PID"
       print_dot
       # if S115 is running we have to kill old qemu processes
-      if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
+      if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -i -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
         killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
       fi
     done
@@ -67,7 +67,7 @@ max_pids_protection() {
       fi
     done
     # if S115 is running we have to kill old qemu processes
-    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -i -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
       killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
     fi
 
@@ -104,7 +104,7 @@ cleaner() {
   # additionally we need to check some variable from a running EMBA instance
   # otherwise the unmounter runs crazy in some corner cases
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" && "${#FILE_ARR[@]}" -gt 0 ]]; then
-    if [[ $(grep -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+    if [[ $(grep -i -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu.*sta.* || true
       print_output "[*] Cleaning the emulation environment\\n" "no_log"
@@ -119,14 +119,14 @@ cleaner() {
       done
     fi
 
-    if [[ $(grep -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+    if [[ $(grep -i -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
       killall -9 --quiet -r .*cwe_checker.* || true
     fi
 
     # IF SYS_ONLINE is 1, the live system tester (system mode emulator) was able to setup the box
     # we need to do a cleanup
-    if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+    if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -i -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
       print_output "[*] Resetting system emulation environment" "no_log"
       stopping_emulation_process
       reset_network_emulation 2
@@ -171,6 +171,9 @@ cleaner() {
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
     print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     exit 1
+  fi
+  if [[ "$IN_DOCKER" -eq 0 ]]; then
+    pkill -f "emba.sh -f $FIRMWARE_PATH -l $LOG_DIR" || true
   fi
 }
 
@@ -297,7 +300,7 @@ module_wait() {
     sleep 1
   done
 
-  while [[ $(grep -c "$MODULE_TO_WAIT finished" "$MAIN_LOG" || true) -ne 1 ]]; do
+  while [[ $(grep -i -c "$MODULE_TO_WAIT finished" "$MAIN_LOG" || true) -ne 1 ]]; do
     sleep 1
   done
 }
