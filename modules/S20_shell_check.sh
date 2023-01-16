@@ -88,11 +88,6 @@ S20_shell_check()
     if [[ "$THREADED" -eq 1 ]]; then
       module_wait "S115_usermode_emulator"
     fi
-    # if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    #  while [[ $(grep -i -c "S115_usermode_emulator finished" "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -ne 1 ]]; do
-    #    sleep 1
-    #  done
-    # fi
     local S20_SEMGREP_SCRIPTS=0
     local S20_SEMGREP_VULNS=0
     local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
