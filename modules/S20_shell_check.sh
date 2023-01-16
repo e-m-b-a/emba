@@ -85,7 +85,9 @@ S20_shell_check()
     # semgrep has issues if we are running throught a complete filesystem with /proc and other filesystems are in use
     # This results that we need to wait for for S115_usermode_emulator and unmounted /proc filesytem
     # check emba.log for S115_usermode_emulator
-    module_wait "S115_usermode_emulator"
+    if [[ "$THREADED" -eq 1 ]]; then
+      module_wait "S115_usermode_emulator"
+    fi
     # if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
     #  while [[ $(grep -i -c "S115_usermode_emulator finished" "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -ne 1 ]]; do
     #    sleep 1

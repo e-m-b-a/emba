@@ -228,10 +228,10 @@ setup_jchroot() {
   export CHROOT="jchroot"
   export OPTS=()
   echo "$CHROOT" > "$TMP_DIR"/chroot_mode.tmp
-  #if [[ "$IN_DOCKER" -eq 1 ]]; then
+  # if [[ "$IN_DOCKER" -eq 1 ]]; then
   #  # OPTS see https://github.com/vincentbernat/jchroot#security-note
   #  OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
-  #fi
+  # fi
   print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
 }
 
