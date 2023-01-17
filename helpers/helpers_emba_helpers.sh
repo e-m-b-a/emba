@@ -168,10 +168,12 @@ cleaner() {
     print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     exit 1
   fi
-  # if [[ "$IN_DOCKER" -eq 0 ]]; then
-  #  # this does not work as we get an not-zero return value of EMBA
-  #  pkill -f "emba.sh -f $FIRMWARE_PATH -l $LOG_DIR" || true
-  # fi
+  if [[ "$IN_DOCKER" -eq 0 ]]; then
+    for KILL_PID in "${NOTIFICATION_PID[@]}"; do
+      print_output "[*] Stopping EMBA PID $KILL_PID" "no_log"
+      kill "$KILL_PID" || true
+    done
+  fi
 }
 
 emba_updater() {

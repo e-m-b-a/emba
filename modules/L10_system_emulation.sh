@@ -963,7 +963,6 @@ identify_networking_emulation() {
   if ! [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
   fi
-
 }
 
 run_kpanic_identification() {

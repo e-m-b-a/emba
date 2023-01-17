@@ -412,6 +412,7 @@ main()
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
+  export EXIT_KILL_PIDS=()
 
   import_helper
   print_ln "no_log"
@@ -671,7 +672,8 @@ main()
     if [[ $IN_DOCKER -eq 0 ]]; then
       kernel_downloader &
       K_DOWN_PID="$!"
-      print_output "[*] Started kernel downloader thread with PID $K_DOWN_PID" "no_log"
+      EXIT_KILL_PIDS+=("$K_DOWN_PID")
+      print_output "[*] Started kernel downloader thread with PID $ORANGE$K_DOWN_PID$NC" "no_log"
     fi
 
     if [[ $IN_DOCKER -eq 0 ]]; then
@@ -680,8 +682,10 @@ main()
 
     if [[ "$IN_DOCKER" -eq 0 ]]; then
       print_notification &
-      NOTIFICATION_PID="$?"
+      NOTIFICATION_PID="$!"
+      EXIT_KILL_PIDS+=("$NOTIFICATION_PID")
       print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
+      print_output "[*] Notification process started with PID $ORANGE${NOTIFICATION_PID}$NC" "no_log"
       echo "${SUDO_USER:-${USER}}" > "$LOG_DIR"/orig_user.log
       echo "UID: $(id -u "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
       echo "GID: $(id -g "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
@@ -809,6 +813,7 @@ main()
     # we use the metasploit path for exploit information from the metasploit framework
     if [[ -d "$MSF_PATH" && "$IN_DOCKER" -eq 0 ]]; then
       generate_msf_db &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     # we create the trickest cve database on the host - if the trickest-cve repo is here
@@ -817,6 +822,7 @@ main()
     if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
       # we update the trickest database on every scan and store the database in the tmp directory
       generate_trickest_db &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     # we update the known_exploited_vulnerabilities.csv file on the host - if the file is here
@@ -824,10 +830,12 @@ main()
     if [[ -f "$EXT_DIR/known_exploited_vulnerabilities.csv" && "$IN_DOCKER" -eq 0 ]]; then
       # we update the known_exploited_vulnerabilities.csv file on every scan and store the database in the tmp directory
       update_known_exploitable &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
       check_cve_search_job "$EMBA_PID" &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
