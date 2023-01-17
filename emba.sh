@@ -321,7 +321,7 @@ main()
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=0
-  export EMBA_VERSION="1.2.x"
+  export EMBA_VERSION="1.2.1"
   export STRICT_MODE=0
   export UPDATE=0
   export ARCH_CHECK=1
