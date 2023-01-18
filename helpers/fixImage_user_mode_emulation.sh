@@ -53,6 +53,7 @@ if [ ! -s /etc/hosts ]; then
   "$BUSYBOX" mkdir -p "$(dirname "$(resolve_link /etc/hosts)")"
   echo "127.0.0.1 localhost" > "$(resolve_link /etc/hosts)"
 fi
+"$BUSYBOX" mkdir -p /var/run
 
 PASSWD=$(resolve_link /etc/passwd)
 SHADOW=$(resolve_link /etc/shadow)

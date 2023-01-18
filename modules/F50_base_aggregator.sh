@@ -939,7 +939,7 @@ os_detector() {
   #### The following check is based on the results of the aggregator:
   if [[ -f "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" ]]; then
     for OS_TO_CHECK in "${OSES[@]}"; do
-      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep aggregated | grep "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g' || true)
+      mapfile -t SYSTEM_VERSION < <(grep -i "Found Version details" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | grep aggregated | grep "$OS_TO_CHECK" | cut -d: -f3 | sed -e 's/[[:blank:]]//g' | sort -u || true)
       if [[ "${#SYSTEM_VERSION[@]}" -gt 0 ]]; then
         if [[ "$OS_TO_CHECK" == "kernel" ]]; then
           SYSTEM="Linux"

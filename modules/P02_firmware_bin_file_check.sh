@@ -134,6 +134,16 @@ fw_bin_detector() {
   UEFI_CHECK=$(grep -c "UEFI" "$TMP_DIR"/s02_binwalk_output.txt || true)
   UEFI_CHECK=$(( "$UEFI_CHECK" + "$(grep -c "UEFI" "$CHECK_FILE" || true)" ))
 
+  if [[ -f "$KERNEL_CONFIG" ]] && [[ "$KERNEL" -eq 1 ]]; then
+    # we set the FIRMWARE_PATH to the kernel config path if we have only -k parameter
+    if [[ "$(md5sum "$KERNEL_CONFIG" | awk '{print $1}')" == "$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')" ]]; then
+      print_output "[+] Identified Linux kernel configuration file"
+      write_csv_log "kernel config" "yes" "NA"
+      export SKIP_PRE_CHECKERS=1
+      return
+    fi
+  fi
+
   if [[ "$UEFI_CHECK" -gt 0 ]]; then
     print_output "[+] Identified possible UEFI firmware - using fwhunt-scan vulnerability scanning module"
     export UEFI_DETECTED=1

@@ -963,7 +963,6 @@ identify_networking_emulation() {
   if ! [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
   fi
-
 }
 
 run_kpanic_identification() {
@@ -1039,7 +1038,7 @@ get_networking_details_emulation() {
     local TCP_PORT=""
     local UDP_PORT=""
   
-    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //'| sort -u || true)
     mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f4- | sort -u || true)
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
     mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)

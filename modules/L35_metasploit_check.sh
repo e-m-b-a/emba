@@ -24,11 +24,11 @@ L35_metasploit_check() {
   local MODULE_END=0
   if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
     if ! command -v msfconsole > /dev/null; then
-      print_output "[-] Metasploit not available - Not performing metasploit checks"
+      print_output "[-] Metasploit not available - Not performing Metasploit checks"
       return
     fi
     if ! [[ -f "$HELP_DIR""/l35_msf_check.rc" ]]; then
-      print_output "[-] Metasploit resource script not available - Not performing metasploit checks"
+      print_output "[-] Metasploit resource script not available - Not performing Metasploit checks"
       return
     fi
 
@@ -45,7 +45,7 @@ L35_metasploit_check() {
         check_live_metasploit
         MODULE_END=1
       else
-        print_output "[-] System not responding - Not performing routersploit checks"
+        print_output "[-] System not responding - Not performing Metasploit checks"
       fi
     else
       print_output "[!] No IP address found"
