@@ -145,6 +145,10 @@ run_modules()
         print_output "[*] $(date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
         continue
       fi
+      if [[ "$SKIP_PRE_CHECKERS" == 1 ]] && [[ "$MODULE_GROUP" == "P" ]]; then
+        print_output "[*] $(date) - ${MODULE_NAME} not executed - skip pre-checkers is set " "main"
+        continue
+      fi
       local MOD_FIN=0
       if ( file "$MODULE_FILE" | grep -q "shell script" ) && ! [[ "$MODULE_FILE" =~ \ |\' ]] ; then
         if [[ "${MODULE_GROUP^^}" == "P" ]]; then
@@ -317,7 +321,7 @@ main()
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=0
-  export EMBA_VERSION="1.2.x"
+  export EMBA_VERSION="1.2.1"
   export STRICT_MODE=0
   export UPDATE=0
   export ARCH_CHECK=1
@@ -353,6 +357,7 @@ main()
   export PHP_CHECK=1
   export PRE_CHECK=0            # test and extract binary files with binwalk
                                 # afterwards do a default EMBA scan
+  export SKIP_PRE_CHECKERS=0    # we can set this to 1 to skip all further pre-checkers (WARNING: use this with caution!!!)
   export PYTHON_CHECK=1
   export QEMULATION=0
   export FULL_EMULATION=0
@@ -407,6 +412,7 @@ main()
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
+  export EXIT_KILL_PIDS=()
 
   import_helper
   print_ln "no_log"
@@ -492,6 +498,10 @@ main()
       k)
         export KERNEL=1
         export KERNEL_CONFIG="$OPTARG"
+        if [[ "$FIRMWARE" -ne 1 ]]; then
+          # this is little hack to enable kernel config only checks
+          export FIRMWARE_PATH="$KERNEL_CONFIG"
+        fi
         ;;
       l)
         export LOG_DIR="$OPTARG"
@@ -662,7 +672,8 @@ main()
     if [[ $IN_DOCKER -eq 0 ]]; then
       kernel_downloader &
       K_DOWN_PID="$!"
-      print_output "[*] Started kernel downloader thread with PID $K_DOWN_PID" "no_log"
+      EXIT_KILL_PIDS+=("$K_DOWN_PID")
+      print_output "[*] Started kernel downloader thread with PID $ORANGE$K_DOWN_PID$NC" "no_log"
     fi
 
     if [[ $IN_DOCKER -eq 0 ]]; then
@@ -671,8 +682,10 @@ main()
 
     if [[ "$IN_DOCKER" -eq 0 ]]; then
       print_notification &
-      NOTIFICATION_PID="$?"
+      NOTIFICATION_PID="$!"
+      EXIT_KILL_PIDS+=("$NOTIFICATION_PID")
       print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
+      print_output "[*] Notification process started with PID $ORANGE${NOTIFICATION_PID}$NC" "no_log"
       echo "${SUDO_USER:-${USER}}" > "$LOG_DIR"/orig_user.log
       echo "UID: $(id -u "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
       echo "GID: $(id -g "${SUDO_USER:-${USER}}")" >> "$LOG_DIR"/orig_user.log
@@ -687,10 +700,6 @@ main()
     # Now we have the firmware and log path, lets set some additional paths
     FIRMWARE_PATH="$(abs_path "$FIRMWARE_PATH")"
     export MAIN_LOG="$LOG_DIR""/""$MAIN_LOG_FILE"
-
-    if [[ $KERNEL -eq 1 ]] ; then
-      LOG_DIR="$LOG_DIR""/""$(basename "$KERNEL_CONFIG")"
-    fi
 
     # Check firmware type (file/directory)
     # copy the firmware outside of the docker and not a second time within the docker
@@ -771,7 +780,7 @@ main()
       write_grep_log "sudo ""$EMBA_COMMAND" "COMMAND"
     fi
 
-    if [[ "$KERNEL" -ne 1 ]]; then
+    if [[ "$KERNEL" -ne 1 ]] && [[ $FIRMWARE -eq 1 ]]; then
       # Exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
       set_exclude
     fi
@@ -779,23 +788,32 @@ main()
     #######################################################################################
     # Kernel configuration check
     #######################################################################################
-    if [[ $KERNEL -eq 1 ]] && [[ $FIRMWARE -eq 0 ]] ; then
+    if [[ $KERNEL -eq 1 ]]; then
+      if [[ $IN_DOCKER -eq 1 ]] && [[ -f "$LOG_DIR"/kernel_config ]]; then
+        export KERNEL_CONFIG="$LOG_DIR"/kernel_config
+      fi
+
       if ! [[ -f "$KERNEL_CONFIG" ]] ; then
-        print_output "[-] Invalid kernel configuration file: $ORANGE$KERNEL_CONFIG" "no_log"
+        print_output "[-] Invalid kernel configuration file: $ORANGE$KERNEL_CONFIG$NC" "no_log"
         exit 1
       else
-        if ! [[ -d "$LOG_DIR" ]] ; then
-          mkdir "$LOG_DIR" || true
+        if [[ $IN_DOCKER -eq 0 ]] ; then
+          # we copy the kernel config file from outside the container into our log directory
+          # further modules are using LOG_DIR/kernel_config for accessing the kernel config
+          if [[ -d "$LOG_DIR" ]] ; then
+            cp "$KERNEL_CONFIG" "$LOG_DIR"/kernel_config
+          else
+            print_output "[!] Missing log directory" "no_log"
+            exit 1
+          fi
         fi
-        # check_kconfig
-        print_output "[!] Currently not supported" "no_log"
-        exit 0
       fi
     fi
 
     # we use the metasploit path for exploit information from the metasploit framework
     if [[ -d "$MSF_PATH" && "$IN_DOCKER" -eq 0 ]]; then
       generate_msf_db &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     # we create the trickest cve database on the host - if the trickest-cve repo is here
@@ -804,6 +822,7 @@ main()
     if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
       # we update the trickest database on every scan and store the database in the tmp directory
       generate_trickest_db &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     # we update the known_exploited_vulnerabilities.csv file on the host - if the file is here
@@ -811,10 +830,12 @@ main()
     if [[ -f "$EXT_DIR/known_exploited_vulnerabilities.csv" && "$IN_DOCKER" -eq 0 ]]; then
       # we update the known_exploited_vulnerabilities.csv file on every scan and store the database in the tmp directory
       update_known_exploitable &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
       check_cve_search_job "$EMBA_PID" &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
@@ -864,6 +885,7 @@ main()
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
     if ! docker images | grep -qE "emba[[:space:]]*latest"; then
+      sleep 1
       if ! docker images | grep -qE "emba[[:space:]]*latest"; then
         print_output "[*] Available docker images:" "no_log"
         docker images | grep -E "emba[[:space:]]*latest" || true
@@ -897,7 +919,7 @@ main()
         write_notification "EMBA finished analysis in default mode"
         print_output "[*] Firmware tested: $ORANGE$FIRMWARE_PATH$NC" "no_log"
         print_output "[*] Log directory: $ORANGE$LOG_DIR$NC" "no_log"
-        if [[ -f "$HTML_PATH"/index.html ]]; then
+        if [[ -v HTML_PATH ]] && [[ -f "$HTML_PATH"/index.html ]]; then
           print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
         fi
         cleaner 0

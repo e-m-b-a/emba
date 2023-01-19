@@ -129,7 +129,7 @@ S115_usermode_emulator() {
           if [[ "$THREADED" -eq 1 ]]; then
             # we adjust the max threads regularly. S115 respects the consumption of S09 and adjusts the threads
             MAX_THREADS_S115=$((5*"$(grep -c ^processor /proc/cpuinfo || true)"))
-            if [[ $(grep -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
+            if [[ $(grep -i -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
               # if only one result for S09_ is found in emba.log means the S09 module is started and currently running
               MAX_THREADS_S115=$((3*"$(grep -c ^processor /proc/cpuinfo || true)"))
             fi
@@ -227,16 +227,18 @@ copy_firmware() {
 setup_jchroot() {
   export CHROOT="jchroot"
   export OPTS=()
-  if [[ "$IN_DOCKER" -eq 1 ]]; then
-    # OPTS see https://github.com/vincentbernat/jchroot#security-note
-    OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
-  fi
+  echo "$CHROOT" > "$TMP_DIR"/chroot_mode.tmp
+  # if [[ "$IN_DOCKER" -eq 1 ]]; then
+  #  # OPTS see https://github.com/vincentbernat/jchroot#security-note
+  #  OPTS=(-U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+  # fi
   print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
 }
 
 setup_chroot() {
   export OPTS=()
   export CHROOT="chroot"
+  echo "$CHROOT" > "$TMP_DIR"/chroot_mode.tmp
   print_output "[*] Using ${ORANGE}chroot${NC} for building chroot environments"
 }
 
@@ -297,7 +299,7 @@ prepare_emulator() {
     cp "$(command -v busybox)" "$R_PATH"
     chmod +x "$R_PATH"/busybox
     if [[ "$CHROOT" == "jchroot" ]]; then
-      "$CHROOT" "${OPTS[@]}" "$R_PATH" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt || print_output "[-] Something weird going wrong in chroot filesystem fixing"
+      "$CHROOT" "${OPTS[@]}" "$R_PATH" -- /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt || print_output "[-] Something weird going wrong in jchroot filesystem fixing"
     else
       "$CHROOT" "${OPTS[@]}" "$R_PATH" /busybox ash /fixImage_user_mode_emulation.sh | tee -a "$LOG_PATH_MODULE"/chroot_fixes.txt || print_output "[-] Something weird going wrong in chroot filesystem fixing"
     fi
@@ -331,9 +333,13 @@ run_init_test() {
   write_log "" "$LOG_FILE_INIT"
 
   if [[ "$CHROOT" == "jchroot" ]]; then
-    if timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" 2>&1 | grep -q "unable to create temporary directory for pivot root: Permission denied"; then
+    timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    if [[ -f "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt" ]] && grep -q "unable to create temporary directory for pivot root: Permission denied" "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt"; then
       print_output "[*] jchroot issues identified - ${ORANGE}switching to chroot$NC" "no_log"
       setup_chroot
+    fi
+    if [[ -f "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt" ]]; then
+      rm "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt" || true
     fi
   fi
   run_init_qemu "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT"
@@ -342,7 +348,7 @@ run_init_test() {
 
     write_log "[-] Emulation process of binary $ORANGE$BIN_EMU_NAME_$NC with CPU configuration $ORANGE$CPU_CONFIG_$NC failed" "$LOG_FILE_INIT"
 
-    if [[ "$CHROOT" == "jchroot" ]]; then
+    if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       mapfile -t CPU_CONFIGS < <("$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
     else
       mapfile -t CPU_CONFIGS < <("$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu help | grep -v alias | awk '{print $2}' | tr -d "'" || true)
@@ -433,7 +439,7 @@ run_init_qemu_runner() {
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == "NONE" ]]; then
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config ${ORANGE}NONE$NC" "$LOG_FILE_INIT"
     write_log "" "$LOG_FILE_INIT"
-    if [[ "$CHROOT" == "jchroot" ]]; then
+    if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
     else
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
@@ -441,7 +447,7 @@ run_init_qemu_runner() {
   else
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
     write_log "" "$LOG_FILE_INIT"
-    if [[ "$CHROOT" == "jchroot" ]]; then
+    if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
     else
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
@@ -463,9 +469,10 @@ emulate_strace_run() {
 
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_STRACER"
 
-  print_output "[*] Initial strace run on the command ${ORANGE}$BIN_${NC} to identify missing areas" "$LOG_FILE_STRACER" "$LOG_FILE_STRACER"
-  write_log "[*] Emulating binary name: $ORANGE$BIN_EMU_NAME$NC in ${ORANGE}strace$NC mode to identify missing areas" "$LOG_FILE_STRACER"
+  print_output "[*] Initial strace run with ${ORANGE}$CHROOT$NC on the command ${ORANGE}$BIN_${NC} to identify missing areas" "$LOG_FILE_STRACER" "$LOG_FILE_STRACER"
+  write_log "[*] Emulating binary name: $ORANGE$BIN_EMU_NAME$NC in ${ORANGE}strace$NC mode to identify missing areas (with ${ORANGE}$CHROOT$NC)" "$LOG_FILE_STRACER"
   write_log "[*] Emulator used: $ORANGE$EMULATOR$NC" "$LOG_FILE_STRACER"
+  write_log "[*] Chroot environment used: $ORANGE$CHROOT$NC" "$LOG_FILE_STRACER"
   write_log "[*] Using root directory: $ORANGE$R_PATH$NC ($ORANGE$ROOT_CNT/${#ROOT_PATH[@]}$NC)" "$LOG_FILE_STRACER"
   write_log "[*] Using CPU config: $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_STRACER"
   write_log "" "$LOG_FILE_STRACER"
@@ -475,7 +482,7 @@ emulate_strace_run() {
     set +e
   fi
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
-    if [[ "$CHROOT" == "jchroot" ]]; then
+    if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
       PID=$!
     else
@@ -483,7 +490,7 @@ emulate_strace_run() {
       PID=$!
     fi
   else
-    if [[ "$CHROOT" == "jchroot" ]]; then
+    if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
       PID=$!
     else
@@ -610,14 +617,14 @@ emulate_binary() {
     fi
     if [[ -z "$CPU_CONFIG_" ]] || [[ "$CPU_CONFIG_" == "NONE" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
-      if [[ "$CHROOT" == "jchroot" ]]; then
+      if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       else
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       fi
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
-      if [[ "$CHROOT" == "jchroot" ]]; then
+      if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       else
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
@@ -657,7 +664,7 @@ running_jobs() {
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
-    CJOBS=$(pgrep -a "$EMULATOR" || true)
+    CJOBS=$(pgrep -f -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
       print_ln "no_log"
       print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)" "no_log"
@@ -727,7 +734,7 @@ s115_cleanup() {
     killall -9 --quiet -r .*qemu.*sta.* || true
   fi
 
-  CJOBS_=$(pgrep qemu- || true)
+  CJOBS_=$(pgrep -f qemu- || true)
   if [[ -n "$CJOBS_" ]] ; then
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
     killall -9 "$EMULATOR" 2> /dev/null || true
@@ -751,7 +758,9 @@ s115_cleanup() {
 
   mapfile -t LOG_FILES < <(find "$LOG_PATH_MODULE""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
   ILLEGAL_INSTRUCTIONS=$(grep -l "Illegal instruction" "$LOG_PATH_MODULE""/"qemu_tmp* | wc -l || true)
-  print_output "[*] Found $ORANGE$ILLEGAL_INSTRUCTIONS$NC binaries not emulated - Illegal instructions"
+  if [[ "$ILLEGAL_INSTRUCTIONS" -gt 0 ]]; then
+    print_output "[*] Found $ORANGE$ILLEGAL_INSTRUCTIONS$NC binaries not emulated - Illegal instructions"
+  fi
   if [[ "${#LOG_FILES[@]}" -gt 0 ]] ; then
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do

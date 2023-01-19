@@ -41,7 +41,7 @@ wait_for_pid() {
       # print_output "[*] wait pid protection - running pid: $PID"
       print_dot
       # if S115 is running we have to kill old qemu processes
-      if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
+      if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -i -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
         killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
       fi
     done
@@ -67,7 +67,7 @@ max_pids_protection() {
       fi
     done
     # if S115 is running we have to kill old qemu processes
-    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -i -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
       killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
     fi
 
@@ -104,7 +104,7 @@ cleaner() {
   # additionally we need to check some variable from a running EMBA instance
   # otherwise the unmounter runs crazy in some corner cases
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" && "${#FILE_ARR[@]}" -gt 0 ]]; then
-    if [[ $(grep -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+    if [[ $(grep -i -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu.*sta.* || true
       print_output "[*] Cleaning the emulation environment\\n" "no_log"
@@ -119,14 +119,14 @@ cleaner() {
       done
     fi
 
-    if [[ $(grep -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+    if [[ $(grep -i -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
       killall -9 --quiet -r .*cwe_checker.* || true
     fi
 
     # IF SYS_ONLINE is 1, the live system tester (system mode emulator) was able to setup the box
     # we need to do a cleanup
-    if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+    if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -i -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
       print_output "[*] Resetting system emulation environment" "no_log"
       stopping_emulation_process
       reset_network_emulation 2
@@ -152,10 +152,6 @@ cleaner() {
     rm "$EXT_DIR"/trickest_db-cleaned.txt || true
   fi
 
-  # what a quick fix - need to come back to this!
-  # if [[ "$NOTIFICATION_PID" != "NA" ]]; then
-  #  kill "$NOTIFICATION_PID" 2>/dev/null || true
-  # fi
   if [[ -f "$TMP_DIR"/orig_logdir ]]; then
     LOG_DIR_HOST=$(cat "$TMP_DIR"/orig_logdir)
     pkill -f "inotifywait.*$LOG_DIR_HOST" 2>/dev/null || true
@@ -171,6 +167,12 @@ cleaner() {
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
     print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     exit 1
+  fi
+  if [[ "$IN_DOCKER" -eq 0 ]]; then
+    for KILL_PID in "${NOTIFICATION_PID[@]}"; do
+      print_output "[*] Stopping EMBA PID $KILL_PID" "no_log"
+      kill "$KILL_PID" || true
+    done
   fi
 }
 
@@ -197,8 +199,7 @@ emba_updater() {
     git pull
     cd "$BASE_PATH" || exit
   else
-    # git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
-    git clone https://github.com/EMBA-support-repos/trickest-cve.git "$EXT_DIR"/trickest-cve
+    git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
   fi
 
   print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"
@@ -297,7 +298,7 @@ module_wait() {
     sleep 1
   done
 
-  while [[ $(grep -c "$MODULE_TO_WAIT finished" "$MAIN_LOG" || true) -ne 1 ]]; do
+  while [[ $(grep -i -c "$MODULE_TO_WAIT finished" "$MAIN_LOG" || true) -ne 1 ]]; do
     sleep 1
   done
 }

@@ -82,14 +82,23 @@ check_docker_env() {
   TOOL_NAME="Docker Interface"
   print_output "    ""$TOOL_NAME"" -""$RED"" \\c" "no_log"
   if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
-    # echo -e "$RED""not ok""$NC"
     echo -e "$RED""    Missing ""Docker-Interface"" - check your installation""$NC"
     if [[ "$WSL" -eq 1 ]]; then
       echo -e "$RED""    Is dockerd running (e.g., sudo dockerd --iptables=false &)""$NC"
+      DEP_ERROR=1
     else
-      echo -e "$RED""    Use  \$systemctl restart NetworkManager docker or reset the docker interface manually (\$ docker network rm emba_runs)""$NC"
+      if [[ $EUID -eq 0 ]]; then
+        echo -e "$ORANGE""    Trying to auto-maintain the docker interface ...""$NC"
+        systemctl restart NetworkManager docker
+      fi
+      if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+        echo -e "$RED""    Use  \$systemctl restart NetworkManager docker or reset the docker interface manually (\$ docker network rm emba_runs)""$NC"
+        DEP_ERROR=1
+      else
+        print_output "    ""$TOOL_NAME"" -""$RED"" \\c" "no_log"
+        echo -e "$GREEN""ok""$NC"
+      fi
     fi
-    DEP_ERROR=1
   else
     echo -e "$GREEN""ok""$NC"
   fi

@@ -33,11 +33,7 @@ S109_jtr_local_pw_cracking()
 
   # This module waits for S108_stacs_password_search
   # check emba.log for S108_stacs_password_search starting
-  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S108_stacs_password_search "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; do
-      sleep 1
-    done
-  fi
+  module_wait "S108_stacs_password_search"
 
   module_title "Cracking identified password hashes"
   pre_module_reporter "${FUNCNAME[0]}"
