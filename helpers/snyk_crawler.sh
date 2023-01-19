@@ -16,7 +16,7 @@ ORANGE="\033[0;33m"
 NC="\033[0m"  # no color
 
 if [[ -d "$SAVE_PATH" ]]; then
-  rm "$SAVE_PATH"
+  rm -r "$SAVE_PATH"
 fi
 if ! [[ -d "$SAVE_PATH/vuln" ]]; then
   mkdir -p "$SAVE_PATH/vuln"
@@ -138,7 +138,7 @@ done < <(find "$SAVE_PATH"/vuln/ -type f -print0)
 
 if [[ -f "$SAVE_PATH"/Snyk_PoC_results.csv ]] && [[ -d "$EMBA_CONFIG_PATH" ]]; then
   mv "$SAVE_PATH"/Snyk_PoC_results.csv "$EMBA_CONFIG_PATH"
-  rm -r "$SAVE_PATH"
+  # rm -r "$SAVE_PATH"
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."
 else
   echo "[-] Not able to copy generated PoC file to configuration directory $EMBA_CONFIG_PATH"
