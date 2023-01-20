@@ -15,6 +15,11 @@ GREEN="\033[0;32m"
 ORANGE="\033[0;33m"
 NC="\033[0m"  # no color
 
+if [[ -f "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv ]]; then
+  PoC_CNT_BEFORE="$(wc -l "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv | awk '{print $1}')"
+  echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT_BEFORE$GREEN advisories with PoC code (before udpate)"
+fi
+
 if [[ -d "$SAVE_PATH" ]]; then
   rm -r "$SAVE_PATH"
 fi
@@ -42,6 +47,15 @@ for APPLICATION in "${APPLICATIONS[@]}"; do
     ((ID+=1))
   done
 done
+
+# as we do not reach all the advisories via this search mechanism we also load the current state
+# and use the URLs from it for further crawling:
+if [[ -f "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv ]]; then
+  echo -e "[*] Adding already knwon URLs from current configuration file"
+  cut -d\; -f3 "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv >> "$SAVE_PATH"/"$LINKS"
+else
+  echo -e "${RED}[-] WARNING: No Snyk configuration file found"
+fi
 
 # remove the numbering at the beginning of every entry:
 sed 's/.*http/http/' "$SAVE_PATH"/"$LINKS" | sort -u > "$SAVE_PATH"/"$LINKS"_sorted
@@ -138,11 +152,12 @@ done < <(find "$SAVE_PATH"/vuln/ -type f -print0)
 
 if [[ -f "$SAVE_PATH"/Snyk_PoC_results.csv ]] && [[ -d "$EMBA_CONFIG_PATH" ]]; then
   mv "$SAVE_PATH"/Snyk_PoC_results.csv "$EMBA_CONFIG_PATH"
-  # rm -r "$SAVE_PATH"
+  rm -r "$SAVE_PATH"
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."
 else
   echo "[-] Not able to copy generated PoC file to configuration directory $EMBA_CONFIG_PATH"
 fi
 
+echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT_BEFORE$GREEN advisories with PoC code (before udpate)."
 echo ""
-echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT$GREEN advisories with PoC code"
+echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT$GREEN advisories with PoC code (after update)."

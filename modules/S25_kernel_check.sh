@@ -30,10 +30,6 @@ S25_kernel_check()
   FOUND=0
   KMOD_BAD=0
 
-  if ! [[ -f "$KNOWN_EXP_CSV" ]]; then
-    KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
-  fi
-
   # This module waits for S24_kernel_bin_identifier
   # check emba.log for S24_kernel_bin_identifier starting
   module_wait "S24_kernel_bin_identifier"
