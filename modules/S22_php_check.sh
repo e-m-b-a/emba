@@ -141,7 +141,7 @@ s22_vuln_check() {
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   else
-    print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"
+    # print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"
     rm "$PHP_LOG" 2>/dev/null || true
   fi
 }

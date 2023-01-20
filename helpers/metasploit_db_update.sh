@@ -1,4 +1,19 @@
-#!/bin/bash
+#!/bin/bash -p
+# see: https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/ShellScriptSecurity/ShellScriptSecurity.html#//apple_ref/doc/uid/TP40004268-CH8-SW29
+
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2023 Siemens Energy AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+#
+# Author(s): Michael Messner
+
+# Description:  Update script for Metasploit Exploit collection
 
 EMBA_CONFIG_PATH="./config"
 MSF_DB_PATH="$EMBA_CONFIG_PATH"/msf_cve-db.txt
