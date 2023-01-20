@@ -45,12 +45,13 @@ else
 fi
 
 if [[ -d "$EMBA_EXT_DIR"/trickest-cve ]]; then
+  echo "[*] Generate the EMBA database"
   find "$EMBA_EXT_DIR"/trickest-cve -type f -iname "*.md" -exec grep -o -H "^\-\ https://github.com.*" {} \; | sed 's/:-\ /:/g' | sort > "$TRICKEST_DB_PATH" || (echo "[-] Something was going wrong during trickest update" && exit 1)
 
   # if we have a blacklist file we are going to apply it to the generated trickest database
-  if [[ -f "$EMBA_CONFIG_DIR"/trickest_blacklist.txt ]] && [[ -f "$TRICKEST_DB_PATH" ]]; then
-    grep -Fvf "$EMBA_CONFIG_DIR"/trickest_blacklist.txt "$TRICKEST_DB_PATH" > /tmp/trickest_db-cleaned.txt || (echo "[-] Something was going wrong during trickest update" && exit 1)
-    mv "$EXT_DIR"/trickest_db-cleaned.txt "$TRICKEST_DB_PATH" || (echo "[-] Something was going wrong during trickest update" && exit 1)
+  if [[ -f "$EMBA_CONFIG_PATH"/trickest_blacklist.txt ]]; then
+    grep -Fvf "$EMBA_CONFIG_PATH"/trickest_blacklist.txt "$TRICKEST_DB_PATH" > /tmp/trickest_db-cleaned.txt || (echo "[-] Something was going wrong during trickest update" && exit 1)
+    mv /tmp/trickest_db-cleaned.txt "$TRICKEST_DB_PATH" || (echo "[-] Something was going wrong during trickest update" && exit 1)
   fi
 
   if [[ -f "$TRICKEST_DB_PATH" ]]; then
