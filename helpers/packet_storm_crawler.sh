@@ -45,7 +45,6 @@ fi
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 CUR_SLEEP_TIME=1
-echo "CVE;advisory name;advisory URL;exploit type (local/remote)" > "$SAVE_PATH"/PS_PoC_results_tmp.csv
 
 while ( true ); do
   FAIL_CNT=0
@@ -139,7 +138,7 @@ mv "$SAVE_PATH"/PS_PoC_results_tmp1.csv "$SAVE_PATH"/PS_PoC_results_tmp.csv
 
 ## apply blacklist
 if [[ -f "$EMBA_CONFIG_PATH"/pss_blacklist.txt ]]; then
-  grep -Fvf "$EMBA_CONFIG_PATH"/pss_blacklist.txt "$SAVE_PATH"/PS_PoC_results_tmp.csv >  "$SAVE_PATH"/PS_PoC_results.csv
+  grep -Fvf "$EMBA_CONFIG_PATH"/pss_blacklist.txt "$SAVE_PATH"/PS_PoC_results_tmp.csv > "$SAVE_PATH"/PS_PoC_results.csv
 fi
 
 
@@ -148,6 +147,7 @@ if [[ -f "$SAVE_PATH"/PS_PoC_results.csv ]]; then
   rm -r "$SAVE_PATH"
   echo -e "${GREEN}[*] Initial Packetstorm PoC file had $ORANGE$ENTRIES_BEFORE$GREEN exploit entries."
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory with $ORANGE$(wc -l $EMBA_CONFIG_PATH/PS_PoC_results.csv | awk '{print $1}')$GREEN exploit entries."
+  sed -i '1i CVE;advisory name;advisory URL;exploit type (local/remote)' "$EMBA_CONFIG_PATH"/PS_PoC_results.csv
 else
   echo "[-] Not able to copy generated PoC file to configuration directory $EMBA_CONFIG_PATH"
 fi

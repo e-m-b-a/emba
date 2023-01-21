@@ -1,3 +1,4 @@
+CVE;advisory name;advisory URL;exploit type (local/remote)
 CVE-1999-0101;rs_aix_host.sh;https://packetstormsecurity.com/files/50586/rs_aix_host.sh.html;unknown
 CVE-1999-0209;Solaris ypupdated Command Execution;https://packetstormsecurity.com/files/82327/Solaris-ypupdated-Command-Execution.html;unknown
 CVE-1999-1441;Linux Kernel 2.0 / 2.1 Send SIGIO;https://packetstormsecurity.com/files/154456/Linux-Kernel-2.0-2.1-Send-SIGIO-Signal.html;unknown
