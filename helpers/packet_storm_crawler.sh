@@ -38,7 +38,7 @@ if ! [[ -d "$SAVE_PATH/advisory" ]]; then
 fi
 
 if [[ -f "$EMBA_CONFIG_PATH"/PS_PoC_results.csv ]]; then
-  ENTRIES_BEFORE=$(wc -l $EMBA_CONFIG_PATH/PS_PoC_results.csv | awk '{print $1}')
+  ENTRIES_BEFORE="$(wc -l "$EMBA_CONFIG_PATH"/PS_PoC_results.csv | awk '{print $1}')"
   echo -e "${GREEN}[+] Current Packetstorm PoC file has $ORANGE$ENTRIES_BEFORE$GREEN exploit entries."
 fi
  
