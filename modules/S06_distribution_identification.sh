@@ -148,6 +148,8 @@ get_csv_rule_distri() {
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/.*\(yocto:project:reference:distro\):([0-9]+(\.[0-9]+)+?):\(.*\)$/yoctoproject:yocto:\1/')"
   # Buildroot 2022.01.01
   VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/buildroot\ ([0-9]+(\.[0-9]+)+?)/buildroot:\1/')"
+  #   MikroTik routerOS V2.4 (c) 1999-2001       http://mikrotik.com/
+  VERSION_IDENTIFIER="$(echo "$VERSION_IDENTIFIER" | sed -r 's/.*mikrotik\ routeros\ v([0-9]\.[0-9]+).*/mikrotik:routeros:\1/')"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER// /:}"
   CSV_RULE="$VERSION_IDENTIFIER"
 }
