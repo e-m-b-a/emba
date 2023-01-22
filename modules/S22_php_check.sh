@@ -192,6 +192,7 @@ s22_check_php_ini(){
           S22_PHP_INI_CONFIGS=$(( S22_PHP_INI_CONFIGS+1 ))
         elif ( echo "$LINE" | grep -q "passing" ) ; then
           IFS=' ' read -ra LINE_ARR <<< "$LINE"
+          # semgrep does not like the following line of code:
           LINE_ARR[0]=$(( LINE_ARR[0]-PHP_INI_LIMIT_EXCEEDED ))
         fi
       fi
