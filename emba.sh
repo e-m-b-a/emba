@@ -384,9 +384,14 @@ main()
   export MOD_DIR_LOCAL="$INVOCATION_PATH""/modules_local"
   export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
   export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
-  export MSF_PATH="/usr/share/metasploit-framework/modules/"
+  if [[ -f "$CONFIG_DIR"/known_exploited_vulnerabilities.csv ]]; then
+    export KNOWN_EXP_CSV="$CONFIG_DIR"/known_exploited_vulnerabilities.csv
+  fi
   if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
     export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
+  fi
+  if [[ -f "$CONFIG_DIR"/trickest_cve-db.txt ]]; then
+    export TRICKEST_DB_PATH="$CONFIG_DIR"/trickest_cve-db.txt
   fi
   export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_STATUS_BAR=1
@@ -808,29 +813,6 @@ main()
           fi
         fi
       fi
-    fi
-
-    # we use the metasploit path for exploit information from the metasploit framework
-    if [[ -d "$MSF_PATH" && "$IN_DOCKER" -eq 0 ]]; then
-      generate_msf_db &
-      EXIT_KILL_PIDS+=("$!")
-    fi
-
-    # we create the trickest cve database on the host - if the trickest-cve repo is here
-    # typically this is on installations in full mode
-    export TRICKEST_DB_PATH="$TMP_DIR"/trickest_cve-db.txt
-    if [[ -d "$EXT_DIR/trickest-cve" && "$IN_DOCKER" -eq 0 ]]; then
-      # we update the trickest database on every scan and store the database in the tmp directory
-      generate_trickest_db &
-      EXIT_KILL_PIDS+=("$!")
-    fi
-
-    # we update the known_exploited_vulnerabilities.csv file on the host - if the file is here
-    export KNOWN_EXP_CSV="$TMP_DIR"/known_exploited_vulnerabilities.csv
-    if [[ -f "$EXT_DIR/known_exploited_vulnerabilities.csv" && "$IN_DOCKER" -eq 0 ]]; then
-      # we update the known_exploited_vulnerabilities.csv file on every scan and store the database in the tmp directory
-      update_known_exploitable &
-      EXIT_KILL_PIDS+=("$!")
     fi
 
     if [[ $IN_DOCKER -eq 0 ]] ; then

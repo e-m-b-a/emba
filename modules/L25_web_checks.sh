@@ -129,7 +129,7 @@ main_web_check() {
           if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
             web_access_crawler "$IP_ADDRESS_" "$PORT" "$SSL"
           else
-            print_output "[-] System not responding - Not performing Nikto checks"
+            print_output "[-] System not responding - Not performing crawler checks"
           fi
 
           if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then

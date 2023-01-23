@@ -141,7 +141,7 @@ s22_vuln_check() {
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   else
-    print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"
+    # print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"
     rm "$PHP_LOG" 2>/dev/null || true
   fi
 }
@@ -192,6 +192,7 @@ s22_check_php_ini(){
           S22_PHP_INI_CONFIGS=$(( S22_PHP_INI_CONFIGS+1 ))
         elif ( echo "$LINE" | grep -q "passing" ) ; then
           IFS=' ' read -ra LINE_ARR <<< "$LINE"
+          # semgrep does not like the following line of code:
           LINE_ARR[0]=$(( LINE_ARR[0]-PHP_INI_LIMIT_EXCEEDED ))
         fi
       fi

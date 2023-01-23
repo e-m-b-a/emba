@@ -1,4 +1,20 @@
-#!/bin/bash
+#!/bin/bash -p
+# see: https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/ShellScriptSecurity/ShellScriptSecurity.html#//apple_ref/doc/uid/TP40004268-CH8-SW29
+
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2023 Siemens Energy AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+#
+# Author(s): Michael Messner
+
+# Description:  Update script for Snyk Exploit/PoC collection
+
 
 URL="https://security.snyk.io/vuln"
 LINKS="snyk_adv_links.txt"
@@ -15,8 +31,13 @@ GREEN="\033[0;32m"
 ORANGE="\033[0;33m"
 NC="\033[0m"  # no color
 
+if [[ -f "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv ]]; then
+  PoC_CNT_BEFORE="$(wc -l "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv | awk '{print $1}')"
+  echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT_BEFORE$GREEN advisories with PoC code (before udpate)"
+fi
+
 if [[ -d "$SAVE_PATH" ]]; then
-  rm "$SAVE_PATH"
+  rm -r "$SAVE_PATH"
 fi
 if ! [[ -d "$SAVE_PATH/vuln" ]]; then
   mkdir -p "$SAVE_PATH/vuln"
@@ -42,6 +63,15 @@ for APPLICATION in "${APPLICATIONS[@]}"; do
     ((ID+=1))
   done
 done
+
+# as we do not reach all the advisories via this search mechanism we also load the current state
+# and use the URLs from it for further crawling:
+if [[ -f "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv ]]; then
+  echo -e "[*] Adding already knwon URLs from current configuration file"
+  cut -d\; -f3 "$EMBA_CONFIG_PATH"/Snyk_PoC_results.csv >> "$SAVE_PATH"/"$LINKS"
+else
+  echo -e "${RED}[-] WARNING: No Snyk configuration file found"
+fi
 
 # remove the numbering at the beginning of every entry:
 sed 's/.*http/http/' "$SAVE_PATH"/"$LINKS" | sort -u > "$SAVE_PATH"/"$LINKS"_sorted
@@ -144,5 +174,6 @@ else
   echo "[-] Not able to copy generated PoC file to configuration directory $EMBA_CONFIG_PATH"
 fi
 
+echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT_BEFORE$GREEN advisories with PoC code (before udpate)."
 echo ""
-echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT$GREEN advisories with PoC code"
+echo -e "${GREEN}[+] Found $ORANGE$PoC_CNT$GREEN advisories with PoC code (after update)."

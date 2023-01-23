@@ -611,9 +611,6 @@ identify_exploits() {
   export POC=""
   export EXP=""
 
-  local MSF_DB_PATH="$CONFIG_DIR/msf_cve-db.txt"
-  local KNOWN_EXP_CSV="$EXT_DIR/known_exploited_vulnerabilities.csv"
-
   if command -v cve_searchsploit >/dev/null; then
     if cve_searchsploit "$CVE_VALUE" 2>/dev/null | grep -q "Exploit DB Id:"; then
       EXPLOIT_DETECTED="yes"

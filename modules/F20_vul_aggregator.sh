@@ -70,10 +70,6 @@ F20_vul_aggregator() {
   export KERNEL_CVE_VERIFIED=()
   export KERNEL_CVE_VERIFIED_VERSION=()
 
-  if ! [[ -f "$KNOWN_EXP_CSV" ]]; then
-    KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
-  fi
-
   if [[ -f "$CVE_WHITELIST" ]] && [[ $(grep -c -E "CVE-[0-9]+-[0-9]+" "$CVE_WHITELIST") -gt 0 ]]; then
     print_output "[!] WARNING: CVE whitelisting activated"
   fi

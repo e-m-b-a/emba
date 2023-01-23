@@ -30,10 +30,6 @@ S25_kernel_check()
   FOUND=0
   KMOD_BAD=0
 
-  if ! [[ -f "$KNOWN_EXP_CSV" ]]; then
-    KNOWN_EXP_CSV="$EXT_DIR"/known_exploited_vulnerabilities.csv
-  fi
-
   # This module waits for S24_kernel_bin_identifier
   # check emba.log for S24_kernel_bin_identifier starting
   module_wait "S24_kernel_bin_identifier"
@@ -87,12 +83,13 @@ S25_kernel_check()
 }
 
 populate_karrays() {
-  mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   local KERNEL_VERSION_=()
   local K_MODULE=""
   local VER=""
   local K_VER=""
   local V=""
+
+  mapfile -t KERNEL_MODULES < <( find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev \( -iname "*.ko" -o -iname "*.o" \) -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   for K_MODULE in "${KERNEL_MODULES[@]}"; do
     if [[ "$K_MODULE" =~ .*\.o ]]; then
@@ -100,7 +97,7 @@ populate_karrays() {
       continue
     fi
     KERNEL_VERSION+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "vermagic" | cut -d: -f2 | sed 's/^ *//g' || true)" )
-    KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' || true)" )
+    KERNEL_DESC+=( "$(modinfo "$K_MODULE" 2>/dev/null | grep -E "description" | cut -d: -f2 | sed 's/^ *//g' | tr -c '[:alnum:]\n\r' '_' | sort -u || true)" )
   done
 
   for VER in "${KERNEL_VERSION[@]}" ; do
@@ -141,7 +138,7 @@ populate_karrays() {
       continue;
     fi
     if ! [[ "$i" =~ .*[0-9]\.[0-9].* ]]; then
-      # remove lines without someting like *1.2*
+      # remove lines without a possible version identifier like *1.2*
       continue;
     fi
     echo "\"$i\"" ;
@@ -149,7 +146,7 @@ populate_karrays() {
 
   eval "KERNEL_DESC=($(for i in "${KERNEL_DESC[@]}" ; do echo "\"$i\"" ; done | sort -u))"
 
-  # if we have no kernel version identified -> we try to identify something via the path:
+  # if we have no kernel version identified -> we try to identify a possible identifier in the path:
   if [[ "${#KERNEL_VERSION_[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
     # remove the first part of the path:
     KERNEL_VERSION1=$(echo "${KERNEL_MODULES[0]}" | sed 's/.*\/lib\/modules\///')
@@ -189,8 +186,7 @@ demess_kv_version() {
   done
 }
 
-get_kernel_vulns()
-{
+get_kernel_vulns() {
   sub_module_title "Kernel vulnerabilities"
 
   local VER=""
@@ -237,8 +233,7 @@ get_kernel_vulns()
   fi
 }
 
-analyze_kernel_module()
-{
+analyze_kernel_module() {
   sub_module_title "Analyze kernel modules"
   write_anchor "kernel_modules"
 
@@ -302,8 +297,7 @@ module_analyzer() {
 
 # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_usb
 
-check_modprobe()
-{
+check_modprobe() {
   sub_module_title "Check modprobe.d directory and content"
 
   local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0

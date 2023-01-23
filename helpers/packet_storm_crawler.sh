@@ -1,4 +1,19 @@
-#!/bin/bash
+#!/bin/bash -p
+# see: https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/ShellScriptSecurity/ShellScriptSecurity.html#//apple_ref/doc/uid/TP40004268-CH8-SW29
+
+# EMBA - EMBEDDED LINUX ANALYZER
+#
+# Copyright 2020-2023 Siemens Energy AG
+#
+# EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+# welcome to redistribute it under the terms of the GNU General Public License.
+# See LICENSE file for usage of this software.
+#
+# EMBA is licensed under GPLv3
+#
+# Author(s): Michael Messner
+
+# Description:  Update script for packetstorm PoC/Exploit collection
 
 URL="https://packetstormsecurity.com/files/tags/exploit/page"
 LINKS="packet_storm_links.txt"
@@ -22,10 +37,14 @@ if ! [[ -d "$SAVE_PATH/advisory" ]]; then
   mkdir -p "$SAVE_PATH/advisory"
 fi
 
+if [[ -f "$EMBA_CONFIG_PATH"/PS_PoC_results.csv ]]; then
+  ENTRIES_BEFORE="$(wc -l "$EMBA_CONFIG_PATH"/PS_PoC_results.csv | awk '{print $1}')"
+  echo -e "${GREEN}[+] Current Packetstorm PoC file has $ORANGE$ENTRIES_BEFORE$GREEN exploit entries."
+fi
+ 
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 CUR_SLEEP_TIME=1
-echo "CVE;advisory name;advisory URL;exploit type (local/remote)" > "$SAVE_PATH"/PS_PoC_results.csv
 
 while ( true ); do
   FAIL_CNT=0
@@ -42,7 +61,7 @@ while ( true ); do
   CUR_SLEEP_TIME=1
 
   if grep -q "No Results Found" "$SAVE_PATH"/"$LINKS"; then
-    echo "[-] Finished downloading exploits from packetstormsecurity.com with page$ID ... exit now"
+    echo -e "[*] Finished downloading exploits from packetstormsecurity.com with page $ORANGE$ID$NC ... exit now"
     break
   fi
 
@@ -62,8 +81,8 @@ while ( true ); do
     # init marker with name:
     # e.g.: [22]Spitfire CMS 1.0.475 PHP Object Injection
     CURRENT_MARKER=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f1)
-    # the name is after the first marker
-    ADV_NAME=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f2)
+    # the name is after the first marker and we use only 7 fields
+    ADV_NAME=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f2 | cut -d\  -f1-7)
 
     # with the following search we are going to find the URL of the marker
     ADV_URL=$(grep " $CURRENT_MARKER\.\ " "$SAVE_PATH"/"$LINKS" | awk '{print $2}' | sort -u)
@@ -97,13 +116,13 @@ while ( true ); do
       fi
     fi
     
-    mapfile -t CVEs < <(sed '/\['"$CURRENT_MARKER"'\]/,/\['"$NEXT_MARKER"'\]/!d' "$SAVE_PATH"/"$LINKS" | grep -o -E "\[[0-9]+\]CVE-[0-9]+-[0-9]+" \
-      | sed 's/\[[0-9]*\]//' | sort -u)
+    mapfile -t CVEs < <(sed '/\['"$CURRENT_MARKER"'\]/,/\['"$NEXT_MARKER"'\]/!d' "$SAVE_PATH"/"$LINKS" \
+      | grep -o -E "\[[0-9]+\]CVE-[0-9]+-[0-9]+" | sed 's/\[[0-9]*\]//' | sort -u)
     if [[ -v CVEs ]]; then
       for CVE in "${CVEs[@]}";do
         echo -e "[+] Found PoC for $ORANGE$CVE$NC in advisory $ORANGE$ADV_NAME$NC / $ORANGE$ADV_URL$NC"
         if [[ "$MSF" -eq 0 ]]; then
-          echo "$CVE;$ADV_NAME;$ADV_URL;$TYPE" >> "$SAVE_PATH"/PS_PoC_results.csv
+          echo "$CVE;$ADV_NAME;$ADV_URL;$TYPE" >> "$SAVE_PATH"/PS_PoC_results_tmp.csv
         fi
       done
     fi
@@ -113,18 +132,23 @@ while ( true ); do
   sleep "$CUR_SLEEP_TIME"
 done
 
-sed -i '/\;\;\;/d' "$SAVE_PATH"/PS_PoC_results.csv
+sed -i '/\;\;\;/d' "$SAVE_PATH"/PS_PoC_results_tmp.csv
+sort -u "$SAVE_PATH"/PS_PoC_results_tmp.csv -o "$SAVE_PATH"/PS_PoC_results_tmp1.csv
+mv "$SAVE_PATH"/PS_PoC_results_tmp1.csv "$SAVE_PATH"/PS_PoC_results_tmp.csv
 
 ## apply blacklist
 if [[ -f "$EMBA_CONFIG_PATH"/pss_blacklist.txt ]]; then
-  grep -Fvf "$EMBA_CONFIG_PATH"/pss_blacklist.txt "$SAVE_PATH"/PS_PoC_results.csv >  "$SAVE_PATH"/PS_PoC_results1.csv
-  mv "$SAVE_PATH"/PS_PoC_results1.csv "$SAVE_PATH"/PS_PoC_results.csv
+  grep -Fvf "$EMBA_CONFIG_PATH"/pss_blacklist.txt "$SAVE_PATH"/PS_PoC_results_tmp.csv > "$SAVE_PATH"/PS_PoC_results.csv
 fi
 
-if [[ -f "$SAVE_PATH"/PS_PoC_results.csv ]] && [[ -d "$EMBA_CONFIG_PATH" ]]; then
+
+if [[ -f "$SAVE_PATH"/PS_PoC_results.csv ]]; then
   mv "$SAVE_PATH"/PS_PoC_results.csv "$EMBA_CONFIG_PATH"
   rm -r "$SAVE_PATH"
-  echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."
+  echo -e "${GREEN}[*] Initial Packetstorm PoC file had $ORANGE$ENTRIES_BEFORE$GREEN exploit entries."
+  PoC_ENTRIES="$(wc -l "$EMBA_CONFIG_PATH"/PS_PoC_results.csv | awk '{print $1}')"
+  echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory with $ORANGE$PoC_ENTRIES$GREEN exploit entries."
+  sed -i '1i CVE;advisory name;advisory URL;exploit type (local/remote)' "$EMBA_CONFIG_PATH"/PS_PoC_results.csv
 else
   echo "[-] Not able to copy generated PoC file to configuration directory $EMBA_CONFIG_PATH"
 fi
