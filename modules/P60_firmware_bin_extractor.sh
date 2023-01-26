@@ -276,9 +276,7 @@ deeper_extractor_helper() {
     fi
   done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_P20[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
 }
 
 binwalk_deep_extract_helper() {

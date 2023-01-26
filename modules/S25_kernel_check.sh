@@ -169,7 +169,7 @@ demess_kv_version() {
   # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
   for VER in "${K_VERSION[@]}" ; do
     if ! [[ "$VER" == *[0-9]* ]]; then
-      continue;
+      continue
     fi
 
     KV=$(echo "$VER" | tr "-" " ")
@@ -252,15 +252,11 @@ analyze_kernel_module() {
     fi
   done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S25[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S25[@]}"
 
   # in threading we need to go via a temp file with the need to count it now:
   if [[ -f "$TMP_DIR"/KMOD_BAD.tmp ]]; then
-    while read -r COUNTING; do
-      KMOD_BAD=$((KMOD_BAD+COUNTING))
-    done < "$TMP_DIR"/KMOD_BAD.tmp
+    KMOD_BAD=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/KMOD_BAD.tmp)
   fi
 }
 

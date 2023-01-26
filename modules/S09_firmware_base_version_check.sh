@@ -36,25 +36,25 @@ S09_firmware_base_version_check() {
   TYPE="static"
 
   while read -r VERSION_LINE; do
-    if echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
+    if safe_echo "$VERSION_LINE" | grep -v -q "^[^#*/;]"; then
       continue
     fi
-    if echo "$VERSION_LINE" | grep -q ";no_static;"; then
+    if safe_echo "$VERSION_LINE" | grep -q ";no_static;"; then
       continue
     fi
-    if echo "$VERSION_LINE" | grep -q ";live;"; then
+    if safe_echo "$VERSION_LINE" | grep -q ";live;"; then
       continue
     fi
 
     print_dot
 
-    STRICT="$(echo "$VERSION_LINE" | cut -d\; -f2)"
-    LIC="$(echo "$VERSION_LINE" | cut -d\; -f3)"
-    BIN_NAME="$(echo "$VERSION_LINE" | cut -d\; -f1)"
+    STRICT="$(safe_echo "$VERSION_LINE" | cut -d\; -f2)"
+    LIC="$(safe_echo "$VERSION_LINE" | cut -d\; -f3)"
+    BIN_NAME="$(safe_echo "$VERSION_LINE" | cut -d\; -f1)"
     CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
 
     # VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
-    VERSION_IDENTIFIER="$(echo "$VERSION_LINE" | cut -d\; -f4)"
+    VERSION_IDENTIFIER="$(safe_echo "$VERSION_LINE" | cut -d\; -f4)"
     VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
     VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
 
@@ -63,9 +63,7 @@ S09_firmware_base_version_check() {
       # strict mode
       #   use the defined regex only on a binary called BIN_NAME (field 1)
 
-      if [[ "$RTOS" -eq 1 ]]; then
-        continue
-      fi
+      [[ "$RTOS" -eq 1 ]] && continue
 
       mapfile -t STRICT_BINS < <(find "$OUTPUT_DIR" -xdev -executable -type f -name "$BIN_NAME" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
       for BIN in "${STRICT_BINS[@]}"; do
@@ -92,13 +90,13 @@ S09_firmware_base_version_check() {
 
       mapfile -t SPECIAL_FINDS < <(find "$FIRMWARE_PATH" -xdev -type f -name "$BIN_NAME" -exec zgrep -H "$VERSION_IDENTIFIER" {} \; || true)
       for SFILE in "${SPECIAL_FINDS[@]}"; do
-        BIN_PATH=$(echo "$SFILE" | cut -d ":" -f1)
-        BIN_NAME="$(basename "$(echo "$SFILE" | cut -d ":" -f1)")"
+        BIN_PATH=$(safe_echo "$SFILE" | cut -d ":" -f1)
+        BIN_NAME="$(basename "$(safe_echo "$SFILE" | cut -d ":" -f1)")"
         # CSV_REGEX=$(echo "$VERSION_LINE" | cut -d\; -f5 | sed s/^\"// | sed s/\"$//)
         CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
         CSV_REGEX="${CSV_REGEX/\"}"
         CSV_REGEX="${CSV_REGEX%\"}"
-        VERSION_FINDER=$(echo "$SFILE" | cut -d ":" -f2-3 | tr -dc '[:print:]')
+        VERSION_FINDER=$(safe_echo "$SFILE" | cut -d ":" -f2-3 | tr -dc '[:print:]')
         get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
         print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in binary $ORANGE$(print_path "$BIN_PATH")$GREEN (license: $ORANGE$LIC$GREEN) (${ORANGE}static - zgrep$GREEN)."
         write_csv_log "$BIN_PATH" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
@@ -158,9 +156,7 @@ S09_firmware_base_version_check() {
 
   print_dot
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S09[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09[@]}"
 
   VERSIONS_DETECTED=$(grep -c "Version information found" "$LOG_FILE" || true)
 

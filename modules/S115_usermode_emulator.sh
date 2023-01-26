@@ -72,9 +72,7 @@ S115_usermode_emulator() {
     copy_firmware
 
     # we only need to detect the root directory again if we have copied it before
-    if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
-      detect_root_dir_helper "$EMULATION_PATH_BASE"
-    fi
+    [[ -d "$FIRMWARE_PATH_BAK" ]] && detect_root_dir_helper "$EMULATION_PATH_BASE"
     kill_qemu_threader &
     PID_killer+="$!"
 
@@ -188,9 +186,7 @@ S115_usermode_emulator() {
       done
     done
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S115[@]}"
-    fi
+    [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S115[@]}"
 
     s115_cleanup "$EMULATOR"
     running_jobs
@@ -378,9 +374,7 @@ run_init_test() {
 
     done
   else
-    if [[ -z "$CPU_CONFIG_" ]]; then
-      CPU_CONFIG_="NONE"
-    fi
+    [[ -z "$CPU_CONFIG_" ]] && CPU_CONFIG_="NONE"
 
     write_log "[+] CPU configuration used for $ORANGE$BIN_EMU_NAME_$GREEN: $ORANGE$CPU_CONFIG_$GREEN" "$LOG_FILE_INIT"
     write_log "CPU_CONFIG_det\;$CPU_CONFIG_" "$LOG_PATH_MODULE""/qemu_init_cpu.txt"
@@ -412,14 +406,10 @@ run_init_qemu() {
   # echo "R_PATH: $R_PATH" | tee -a "$LOG_FILE_INIT"
   # echo "CPU_CONFIG: $CPU_CONFIG_" | tee -a "$LOG_FILE_INIT"
 
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    set +e
-  fi
+  [[ "$STRICT_MODE" -eq 1 ]] && set +e
   run_init_qemu_runner "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT" &
   PID=$!
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    set -e
-  fi
+  [[ "$STRICT_MODE" -eq 1 ]] && set -e
 
   # wait a bit and then kill it
   sleep 1
@@ -478,9 +468,7 @@ emulate_strace_run() {
   write_log "" "$LOG_FILE_STRACER"
 
   # currently we only look for file errors (errno=2) and try to fix this
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    set +e
-  fi
+  [[ "$STRICT_MODE" -eq 1 ]] && set +e
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
     if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
@@ -498,9 +486,7 @@ emulate_strace_run() {
       PID=$!
     fi
   fi
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    set -e
-  fi
+  [[ "$STRICT_MODE" -eq 1 ]] && set -e
 
   # wait a second and then kill it
   sleep 1
@@ -608,13 +594,9 @@ emulate_binary() {
   fi
   
   for PARAM in "${EMULATION_PARAMS[@]}"; do
-    if [[ -z "$PARAM" ]]; then
-      PARAM="NONE"
-    fi
+    [[ -z "$PARAM" ]] && PARAM="NONE"
 
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set +e
-    fi
+    [[ "$STRICT_MODE" -eq 1 ]] && set +e
     if [[ -z "$CPU_CONFIG_" ]] || [[ "$CPU_CONFIG_" == "NONE" ]]; then
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
@@ -630,9 +612,7 @@ emulate_binary() {
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
       fi
     fi
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set -e
-    fi
+    [[ "$STRICT_MODE" -eq 1 ]] && set -e
     check_disk_space_emu
   done
 

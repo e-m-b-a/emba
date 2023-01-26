@@ -28,7 +28,7 @@ S14_weak_func_radare_check()
   module_title "Check binaries for weak functions (radare mode)"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  STRCPY_CNT=0
+  local STRCPY_CNT=0
 
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
@@ -115,16 +115,12 @@ S14_weak_func_radare_check()
       fi
     done
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S14[@]}"
-    fi
+    [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S14[@]}"
 
     radare_print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
     if [[ -f "$TMP_DIR"/S14_STRCPY_CNT.tmp ]]; then
-      while read -r STRCPY; do
-        STRCPY_CNT=$((STRCPY_CNT+STRCPY))
-      done < "$TMP_DIR"/S14_STRCPY_CNT.tmp
+      STRCPY_CNT=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S14_STRCPY_CNT.tmp)
     fi
 
     write_log ""
@@ -142,6 +138,7 @@ radare_function_check_PPC32(){
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -182,6 +179,7 @@ radare_function_check_MIPS() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -223,6 +221,7 @@ radare_function_check_ARM64() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -263,6 +262,7 @@ radare_function_check_ARM32() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -303,6 +303,7 @@ radare_function_check_x86() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -344,6 +345,7 @@ radare_function_check_x86_64() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -386,7 +388,6 @@ radare_print_top10_statistics() {
 
   sub_module_title "Top 10 legacy C functions"
 
-
   if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
       local SEARCH_TERM=""
@@ -402,9 +403,8 @@ radare_print_top10_statistics() {
         for BINARY in "${RESULTS[@]}" ; do
           SEARCH_TERM="$(echo "$BINARY" | awk '{print $2}')"
           F_COUNTER="$(echo "$BINARY" | awk '{print $1}')"
-          if [[ "$F_COUNTER" -eq 0 ]]; then
-            continue
-          fi
+          [[ "$F_COUNTER" -eq 0 ]] && continue
+
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
             if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then
@@ -533,4 +533,3 @@ radare_output_function_details()
     write_csv_log "$(print_path "$BINARY_")" "$FUNCTION" "$COUNT_FUNC" "$CFF_CSV" "$NW_CSV"
   fi
 }
-

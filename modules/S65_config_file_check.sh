@@ -87,5 +87,4 @@ check_fstab()
   else
     print_output "[-] No fstab files with passwords found"
   fi
-
 }

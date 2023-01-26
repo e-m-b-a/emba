@@ -45,12 +45,8 @@ S109_jtr_local_pw_cracking()
       HASH_SOURCE=$(basename "$(echo "$HASH" | cut -d\; -f2)")
       HASH=$(echo "$HASH" | cut -d\; -f3 | tr -d \")
 
-      if [[ "$HASH" == *"BEGIN"*"KEY"* ]]; then
-        continue
-      fi
-      if [[ "$HASH_DESCRIPTION" == *"private key found"* ]]; then
-        continue
-      fi
+      [[ "$HASH" == *"BEGIN"*"KEY"* ]] && continue
+      [[ "$HASH_DESCRIPTION" == *"private key found"* ]] && continue
 
       if echo "$HASH" | cut -d: -f1-3 | grep -q "::[0-9]"; then
         # nosemgrep

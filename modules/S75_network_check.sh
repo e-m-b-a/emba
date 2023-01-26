@@ -49,14 +49,12 @@ check_resolv()
 
       DNS_INFO=$(grep "nameserver" "$RES_INFO_P" 2>/dev/null || true)
       if [[ "$DNS_INFO" ]] ; then
-          print_output "$(indent "$DNS_INFO")"
-          ((NET_CFG_FOUND+=1))
+        print_output "$(indent "$DNS_INFO")"
+        ((NET_CFG_FOUND+=1))
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] No or empty network configuration found"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] No or empty network configuration found"
 }
 
 check_iptables()
@@ -75,9 +73,7 @@ check_iptables()
       ((NET_CFG_FOUND+=1))
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] No iptables configuration found"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] No iptables configuration found"
 }
 
 # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_snmp
@@ -106,9 +102,7 @@ check_snmp()
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] No SNMP configuration found"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] No SNMP configuration found"
 }
 
 check_network_configs()

@@ -67,12 +67,10 @@ filesystem_tree() {
       ls -laR --color=never "$LPATH" >> "$LOG_FILE"
     fi
   fi
-
 }
 
 # Test source: http://linuxmafia.com/faq/Admin/release-files.html
-release_info()
-{
+release_info() {
   sub_module_title "Release/Version information"
   local R_INFO=""
   local RELEASE=""

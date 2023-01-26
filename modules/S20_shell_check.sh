@@ -49,19 +49,13 @@ S20_shell_check()
       fi
     done
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S20[@]}"
-    fi
+    [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S20[@]}"
 
     if [[ -f "$TMP_DIR"/S20_VULNS.tmp ]]; then
-      while read -r VULNS; do
-        S20_SHELL_VULNS=$((S20_SHELL_VULNS+VULNS))
-      done < "$TMP_DIR"/S20_VULNS.tmp
+      S20_SHELL_VULNS=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S20_VULNS.tmp)
       rm "$TMP_DIR"/S20_VULNS.tmp
     fi
-    if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
-      NEG_LOG=1
-    fi
+    [[ "$S20_SHELL_VULNS" -gt 0 ]] && NEG_LOG=1
 
     print_ln
     if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
@@ -85,9 +79,7 @@ S20_shell_check()
     # semgrep has issues if we are running throught a complete filesystem with /proc and other filesystems are in use
     # This results that we need to wait for for S115_usermode_emulator and unmounted /proc filesytem
     # check emba.log for S115_usermode_emulator
-    if [[ "$THREADED" -eq 1 ]]; then
-      module_wait "S115_usermode_emulator"
-    fi
+    [[ "$THREADED" -eq 1 ]] && module_wait "S115_usermode_emulator"
     local S20_SEMGREP_SCRIPTS=0
     local S20_SEMGREP_VULNS=0
     local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
@@ -108,9 +100,9 @@ S20_shell_check()
       # highlight security findings in semgrep log:
       sed -i -r "s/.*external\.semgrep-rules\.bash\.lang\.security.*/\x1b[32m&\x1b[0m/" "$SHELL_LOG"
     fi
-    if [[ "$S20_SEMGREP_ISSUES" -gt 0 ]]; then
-      NEG_LOG=1
-    fi
+
+    [[ "$S20_SEMGREP_ISSUES" -gt 0 ]] && NEG_LOG=1
+
     write_log ""
     write_log "[*] Statistics1:$S20_SEMGREP_ISSUES:$S20_SEMGREP_SCRIPTS"
   else

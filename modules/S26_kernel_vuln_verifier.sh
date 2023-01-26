@@ -209,9 +209,7 @@ S26_kernel_vuln_verifier()
     write_link "$LOG_DIR/kernel_downloader.log"
 
     KERNEL_DIR="$LOG_PATH_MODULE/linux-$K_VERSION_KORG"
-    if [[ -d "$KERNEL_DIR" ]]; then
-      rm -rf "$KERNEL_DIR"
-    fi
+    [[ -d "$KERNEL_DIR" ]] && rm -rf "$KERNEL_DIR"
     if ! [[ -d "$KERNEL_DIR" ]] && [[ "$(file "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz")" == *"gzip compressed data"* ]]; then
       print_output "[*] Kernel version $ORANGE$K_VERSION$NC extraction ... "
       tar -xzf "$KERNEL_ARCH_PATH/linux-$K_VERSION_KORG.tar.gz" -C "$LOG_PATH_MODULE"
@@ -399,11 +397,9 @@ symbol_verifier() {
     fi
   done
 
-  if [[ "$VULN_FOUND" -eq 1 ]]; then
-    # if we have already a match for this path we can skip the 2nd check
-    # this is only for speed up the process a bit
-    return
-  fi
+  # if we have already a match for this path we can skip the 2nd check
+  # this is only for speed up the process a bit
+  [[ "$VULN_FOUND" -eq 1 ]] && return
 
   for CHUNK_FILE in "$LOG_PATH_MODULE"/symbols_uniq.split_gpl.* ; do
     # echo "testing chunk file $CHUNK_FILE"

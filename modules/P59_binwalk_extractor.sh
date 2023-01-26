@@ -76,7 +76,7 @@ wait_for_extractor() {
 
   # this is not solid and we probably have to adjust it in the future
   # but for now it works
-  SEARCHER="$(echo "$SEARCHER" | tr "(" "." | tr ")" ".")"
+  SEARCHER="$(safe_echo "$SEARCHER" | tr "(" "." | tr ")" ".")"
 
   for PID in "${WAIT_PIDS[@]}"; do
     local running=1

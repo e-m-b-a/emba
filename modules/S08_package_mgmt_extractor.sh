@@ -29,9 +29,7 @@ S08_package_mgmt_extractor()
   # Future work: rpm, ...
   # rpm_package_files_search
 
-  if [[ "${#DEBIAN_MGMT_STATUS[@]}" -gt 0 || "${#OPENWRT_MGMT_CONTROL[@]}" -gt 0 ]]; then
-    NEG_LOG=1
-  fi
+  [[ "${#DEBIAN_MGMT_STATUS[@]}" -gt 0 || "${#OPENWRT_MGMT_CONTROL[@]}" -gt 0 ]] && NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
@@ -60,7 +58,7 @@ debian_status_files_search() {
         print_output "[*] Found debian package details:"
         for PACKAGE_VERSION in "${DEBIAN_PACKAGES[@]}" ; do
           # Package: xxd - Status: install ok installed - 2:8.2.3995-1+b3
-          PACKAGE=$(echo "$PACKAGE_VERSION" | awk '{print $2}')
+          PACKAGE=$(safe_echo "$PACKAGE_VERSION" | awk '{print $2}')
           VERSION=${PACKAGE_VERSION/*Version:\ /}
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
@@ -99,7 +97,7 @@ openwrt_control_files_search() {
         mapfile -t OPENWRT_PACKAGES < <(grep "^Package: \|^Version: " "$PACKAGE_FILE" | sed -z 's/\nVersion: / - Version: /g')
         print_ln
         for PACKAGE_VERSION in "${OPENWRT_PACKAGES[@]}" ; do
-          PACKAGE=$(echo "$PACKAGE_VERSION" | awk '{print $2}')
+          PACKAGE=$(safe_echo "$PACKAGE_VERSION" | awk '{print $2}')
           VERSION=${PACKAGE_VERSION/*Version:\ /}
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
@@ -121,13 +119,13 @@ clean_package_versions() {
   # usually we get a version like 1.2.3-4 or 1.2.3-0kali1bla or 1.2.3-unknown
   # this is a quick approach to clean this version identifier
   # there is a lot of room for future improvement
-  STRIPPED_VERSION=$(echo "$VERSION_" | sed -r 's/-[0-9]+$//g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/-unknown$//g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+kali[0-9]+.*$//g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+ubuntu[0-9]+.*$//g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+build[0-9]+$//g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+\.[0-9]+$//g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+\.[a-d][0-9]+$//g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/:[0-9]:/:/g')
-  STRIPPED_VERSION=$(echo "$STRIPPED_VERSION" | sed -r 's/^[0-9]://g')
+  STRIPPED_VERSION=$(safe_echo "$VERSION_" | sed -r 's/-[0-9]+$//g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/-unknown$//g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+kali[0-9]+.*$//g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+ubuntu[0-9]+.*$//g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+build[0-9]+$//g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+\.[0-9]+$//g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+\.[a-d][0-9]+$//g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/:[0-9]:/:/g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/^[0-9]://g')
 }

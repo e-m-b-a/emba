@@ -13,7 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Examine all files for cronjob configuration, e.g. cron or crontab and lists their jobs and other possible intriguing details.
+# Description:  Examine all files for cronjob configuration, e.g. cron or crontab
+#               and lists their jobs and other possible intriguing details.
 
 S80_cronjob_check()
 {

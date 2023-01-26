@@ -143,12 +143,12 @@ print_output()
       fi
     fi
   fi
-  if [[ "$LOG_SETTING" != "no_log" ]] ; then
+  if [[ "$LOG_SETTING" != "no_log" ]]; then
     write_grep_log "$OUTPUT"
   fi
 }
 
-# echo untrusted data in a secure way:
+# echo unknown data in a consistent way:
 safe_echo() {
   STRING_TO_ECHO="${1:-}"
 
@@ -169,8 +169,10 @@ escape_echo() {
   if [[ -v 2 ]]; then
     local LOG_TO_FILE="${2:-}"
     printf -- "%q" "$STRING_TO_ECHO" | tee -a "$LOG_TO_FILE" >/dev/null || true
+    # printf -- "%b" "\r\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
   else
     printf -- "%q" "$STRING_TO_ECHO" || true
+    # printf -- "%b" "\r\n" || true
   fi
 }
 
@@ -182,7 +184,7 @@ print_ln()
 
 print_dot()
 {
-  echo "." | tr -d "\n" 2>/dev/null ||true
+  echo -n "." 2>/dev/null ||true
 }
 
 write_log()
@@ -564,8 +566,7 @@ print_etc()
   fi
 }
 
-print_excluded()
-{
+print_excluded() {
   readarray -t EXCLUDE_PATHS_ARR < <(printf '%s' "$EXCLUDE_PATHS")
   if [[ ${#EXCLUDE_PATHS_ARR[@]} -gt 0 ]] ; then
     print_ln "no_log"
@@ -599,7 +600,7 @@ module_start_log() {
     print_output "[*] Found old module log path for $ORANGE$MODULE_MAIN_NAME$NC ... creating a backup" "no_log"
     mv "$LOG_PATH_MODULE" "$LOG_PATH_MODULE".bak."$RANDOM" || true
   fi
-  if ! [[ -d "$LOG_PATH_MODULE" ]] ; then
+  if ! [[ -d "$LOG_PATH_MODULE" ]]; then
     mkdir "$LOG_PATH_MODULE" || true
   fi
 }
@@ -644,9 +645,7 @@ module_end_log() {
       print_bar ""
     fi
   fi
-  if [[ "$HTML" -eq 1 ]]; then
-    run_web_reporter_mod_name "$MODULE_MAIN_NAME"
-  fi
+  [[ "$HTML" -eq 1 ]] && run_web_reporter_mod_name "$MODULE_MAIN_NAME"
   if [[ -v LOG_PATH_MODULE ]]; then
     if [[ -d "$LOG_PATH_MODULE" ]]; then
       if [[ "$(find "$LOG_PATH_MODULE" -type f | wc -l)" -eq 0 ]]; then
@@ -690,12 +689,10 @@ banner_printer() {
 # write notfication is the central notification area
 # if you want to print a notification via the notification system
 # call this function with the message as parameter
-write_notification(){
-  if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
-    return
-  fi
+write_notification() {
+  [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]] && return
+  # in case DISPLAY is not set we are not able to show notifications
   if ! [[ -v DISPLAY ]]; then
-    # in case DISPLAY is not set we are not able to show notifications
     return
   fi
 
@@ -716,12 +713,10 @@ write_notification(){
 # print_notification handles the monitoring of the notification tmp file
 # from the docker container. If someone prints something into this file
 # this function will handle it and generate a desktop notification
-print_notification(){
-  if [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]]; then
-    return
-  fi
+print_notification() {
+  [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]] && return
+  # in case DISPLAY is not set we are not able to show notifications
   if ! [[ -v DISPLAY ]]; then
-    # in case DISPLAY is not set we are not able to show notifications
     return
   fi
   local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log

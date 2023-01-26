@@ -62,9 +62,7 @@ max_pids_protection() {
     # check for really running PIDs and re-create the array
     for PID in "${WAIT_PIDS[@]}"; do
       # print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
-      if [[ -e /proc/"$PID" ]]; then
-        TEMP_PIDS+=( "$PID" )
-      fi
+      [[ -e /proc/"$PID" ]] && TEMP_PIDS+=( "$PID" )
     done
     # if S115 is running we have to kill old qemu processes
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -i -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
@@ -96,9 +94,7 @@ cleaner() {
   fi
 
   # Remove status bar and reset screen
-  if [[ "$DISABLE_STATUS_BAR" -eq 0 ]]; then
-    remove_status_bar
-  fi
+  [[ "$DISABLE_STATUS_BAR" -eq 0 ]] && remove_status_bar
 
   # if S115 is found only once in main.log the module was started and we have to clean it up
   # additionally we need to check some variable from a running EMBA instance
@@ -132,9 +128,7 @@ cleaner() {
       reset_network_emulation 2
     fi
   fi
-  if [[ "$IN_DOCKER" -eq 1 ]]; then
-    restore_permissions
-  fi
+  [[ "$IN_DOCKER" -eq 1 ]] && restore_permissions
 
   if [[ "$IN_DOCKER" -eq 0 ]] && [[ -v K_DOWN_PID ]]; then
     if ps -p "$K_DOWN_PID" > /dev/null; then
@@ -293,6 +287,11 @@ backup_var() {
 
 module_wait() {
   local MODULE_TO_WAIT="${1:-}"
+  # if the module we should wait is not in our module array we return without waiting
+  if ! [[ " ${MODULES_EXPORTED[*]} " == *"${MODULE_TO_WAIT}"* ]]; then
+    print_output "[-] Module $ORANGE$MODULE_TO_WAIT$NC not in module array - this will result in unexpected behavior" "main"
+    return
+  fi
 
   while ! [[ -f "$MAIN_LOG" ]]; do
     sleep 1

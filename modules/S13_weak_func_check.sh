@@ -27,7 +27,7 @@ S13_weak_func_check()
   module_title "Check binaries for weak functions (intense)"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  STRCPY_CNT=0
+  local STRCPY_CNT=0
   local BINARY=""
   local VULNERABLE_FUNCTIONS=()
   local VULNERABLE_FUNCTIONS_VAR=""
@@ -119,9 +119,7 @@ S13_weak_func_check()
       fi
     done
 
-    if [[ "$THREADED" -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS_S13[@]}"
-    fi
+    [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S13[@]}"
 
     # ensure that we do not have result files without real results:
     find "$LOG_DIR"/s13_weak_func_check/vul_func_0*.txt -exec rm {} \; 2>/dev/null || true
@@ -129,9 +127,7 @@ S13_weak_func_check()
     print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
     if [[ -f "$TMP_DIR"/S13_STRCPY_CNT.tmp ]]; then
-      while read -r STRCPY; do
-        STRCPY_CNT=$((STRCPY_CNT+STRCPY))
-      done < "$TMP_DIR"/S13_STRCPY_CNT.tmp
+      STRCPY_CNT=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S13_STRCPY_CNT.tmp)
     fi
 
     write_log ""
@@ -148,6 +144,7 @@ function_check_NIOS2(){
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
+  local STRCPY_CNT=0
   NAME=$(basename "$BINARY_" 2> /dev/null)
   if ! [[ -f "$BINARY_" ]]; then
     return
@@ -196,6 +193,7 @@ function_check_PPC32(){
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
@@ -236,9 +234,11 @@ function_check_MIPS() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
+
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     FUNC_ADDR=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E \ "$FUNCTION" | grep gp | grep -m1 UND | cut -d\  -f4 | sed s/\(gp\)// | sed s/-// 2> /dev/null || true)
     if [[ -z "$FUNC_ADDR" ]] || [[ "$FUNC_ADDR" == "00000000" ]]; then
@@ -281,9 +281,11 @@ function_check_ARM64() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
+
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
@@ -319,9 +321,11 @@ function_check_ARM32() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
+
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
@@ -356,9 +360,11 @@ function_check_x86() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
+
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r --use-dynamic "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
@@ -395,9 +401,11 @@ function_check_x86_64() {
   local VULNERABLE_FUNCTIONS=("$@")
   local NAME=""
   NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
   if ! [[ -f "$BINARY_" ]]; then
     return
   fi
+
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r --use-dynamic "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" 2> /dev/null ) ; then
       NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
@@ -453,9 +461,7 @@ print_top10_statistics() {
         for BINARY in "${RESULTS[@]}" ; do
           SEARCH_TERM="$(echo "$BINARY" | awk '{print $2}')"
           F_COUNTER="$(echo "$BINARY" | awk '{print $1}')"
-          if [[ "$F_COUNTER" -eq 0 ]]; then
-            continue
-          fi
+          [[ "$F_COUNTER" -eq 0 ]] && continue
           if [[ -f "$BASE_LINUX_FILES" ]]; then
             # if we have the base linux config file we are checking it:
             if grep -E -q "^$SEARCH_TERM$" "$BASE_LINUX_FILES" 2>/dev/null; then

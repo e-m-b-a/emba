@@ -257,8 +257,6 @@ summary() {
     done
     echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
-
-
 }
 
 # check that all tools are installed

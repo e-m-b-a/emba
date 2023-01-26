@@ -164,9 +164,7 @@ deb_extractor() {
         done < "$TMP_DIR"/deb_db.txt
       done
 
-      if [[ "$THREADED" -eq 1 ]]; then
-        wait_for_pid "${WAIT_PIDS_P20[@]}"
-      fi
+      [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
 
       FILES_AFTER_DEB=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
       print_ln "no_log"

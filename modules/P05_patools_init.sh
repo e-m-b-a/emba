@@ -55,15 +55,11 @@ patools_extractor() {
 
   FIRMWARE_NAME_="$(basename "$FIRMWARE_PATH_")"
 
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    set +e
-  fi
+  [[ "$STRICT_MODE" -eq 1 ]] && set +e
 
   patool -v test "$FIRMWARE_PATH_" | tee -a "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log
 
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    set -e
-  fi
+  [[ "$STRICT_MODE" -eq 1 ]] && set -e
 
   cat "$LOG_PATH_MODULE"/paextract_test_"$FIRMWARE_NAME_".log >> "$LOG_FILE"
 
@@ -85,7 +81,6 @@ patools_extractor() {
     print_output "[*] No valid compressed file detected - extraction process via binwalk started"
 
     binwalk_deep_extract_helper 0 "$FIRMWARE_PATH_" "$EXTRACTION_DIR_"
-
   fi
 
   print_ln
@@ -99,5 +94,4 @@ patools_extractor() {
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
   write_csv_log "Patool extractor" "$FIRMWARE_PATH_" "$EXTRACTION_DIR_" "$FILES_PATOOLS" "$DIRS_PATOOLS" "NA"
   print_ln
-
 }
