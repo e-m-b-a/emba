@@ -134,7 +134,7 @@ print_examples() {
 
   # If you only want to print stuff into an own log file
   print_log "log text" "[path to log file]" "g"
-  # "g" is optional for printing line into grep-able log file (emba.sh -g)
+  # "g" is optional for printing line into grep-able log file (emba -g)
 }
 
 path_handling() {

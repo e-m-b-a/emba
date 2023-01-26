@@ -32,7 +32,7 @@ P61_unblob_eval() {
     if [[ -f "$TMP_DIR""/unblob_disable.cfg" ]]; then
       print_output "[-] Unblob module automatically disabled from other module."
     else
-      print_output "[-] Unblob module currently disabled - enable it in emba.sh setting the UNBLOB variable to 1"
+      print_output "[-] Unblob module currently disabled - enable it in emba setting the UNBLOB variable to 1"
     fi
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -66,7 +66,7 @@ P61_unblob_eval() {
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
-  print_output "[*] Unblob module currently enabled - disable it in emba.sh setting the UNBLOB variable to 0"
+  print_output "[*] Unblob module currently enabled - disable it in emba setting the UNBLOB variable to 0"
 
   print_output "[!] INFO: This is an evaluation module for the extractor ${ORANGE}unblob - https://unblob.org/$MAGENTA."
   print_output "[!] INFO: The results are currently only further used if the binwalk extraction process failes (this will probably change in the future)."

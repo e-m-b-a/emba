@@ -437,7 +437,7 @@ main()
   fi
 
   export EMBA_COMMAND
-  EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
+  EMBA_COMMAND="$(dirname "$0")""/emba ""$*"
 
   while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:N:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
     case $OPT in
@@ -888,7 +888,7 @@ main()
     [[ "$STRICT_MODE" -eq 1 ]] && set +e
 
     disable_strict_mode "$STRICT_MODE" 0
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
     D_RETURN=$?
     enable_strict_mode "$STRICT_MODE" 0
 
