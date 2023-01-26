@@ -82,7 +82,7 @@ kernel_downloader() {
       print_output "$OUTPUTTER" "no_log"
       write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
 
-      if [[ -d "$TMP_DIR" ]]; then
+      if ! [[ -d "$TMP_DIR" ]]; then
         mkdir "$TMP_DIR"
       fi
 

@@ -169,10 +169,8 @@ escape_echo() {
   if [[ -v 2 ]]; then
     local LOG_TO_FILE="${2:-}"
     printf -- "%q" "$STRING_TO_ECHO" | tee -a "$LOG_TO_FILE" >/dev/null || true
-    # printf -- "%b" "\r\n" | tee -a "$LOG_TO_FILE" >/dev/null || true
   else
     printf -- "%q" "$STRING_TO_ECHO" || true
-    # printf -- "%b" "\r\n" || true
   fi
 }
 
@@ -715,8 +713,8 @@ write_notification() {
 # this function will handle it and generate a desktop notification
 print_notification() {
   [[ "$DISABLE_NOTIFICATIONS" -eq 1 ]] && return
-  # in case DISPLAY is not set we are not able to show notifications
   if ! [[ -v DISPLAY ]]; then
+    # in case DISPLAY is not set we are not able to show notifications
     return
   fi
   local NOTIFICATION_LOCATION="$TMP_DIR"/notifications.log

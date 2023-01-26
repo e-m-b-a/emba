@@ -885,9 +885,7 @@ main()
 
     write_notification "EMBA starting docker container"
 
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set +e
-    fi
+    [[ "$STRICT_MODE" -eq 1 ]] && set +e
 
     disable_strict_mode "$STRICT_MODE" 0
     EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"

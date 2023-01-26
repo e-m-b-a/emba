@@ -116,7 +116,7 @@ cwe_checker_threaded () {
   local CWE=""
   local CWE_DESC=""
   local CWE_CNT=0
-  local MEM_LIMIT=$(( "$TOTAL_MEMORY" ))
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
 
   local NAME=""
   NAME=$(basename "$BINARY_")

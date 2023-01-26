@@ -79,8 +79,8 @@ os_identification() {
   local WAIT_PIDS_S03_1=()
 
   if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
-    escape_echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/s03.tmp
-    escape_echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/s03.tmp
+    safe_echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/s03.tmp
+    safe_echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/s03.tmp
   fi
 
   print_ln
@@ -166,7 +166,7 @@ os_detection_thread_per_os() {
     fi
   fi
 
-  [[ "${OS_COUNTER[$OS]}" -gt 0 ]] && escape_echo "${OS_COUNTER[$OS]}" >> "$TMP_DIR"/s03.tmp
+  [[ "${OS_COUNTER[$OS]}" -gt 0 ]] && safe_echo "${OS_COUNTER[$OS]}" >> "$TMP_DIR"/s03.tmp
 }
 
 binary_architecture_detection() {
@@ -211,6 +211,6 @@ binary_architecture_reporter() {
     PRE_ARCH_=$(safe_echo "$PRE_ARCH_" | cut -d\; -f2)
     print_ln
     print_output "[+] Possible architecture details found ($ORANGE$SOURCE$GREEN): $ORANGE$PRE_ARCH_$NC"
-    escape_echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
+    safe_echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done < "$TMP_DIR"/s03_arch.tmp
 }
