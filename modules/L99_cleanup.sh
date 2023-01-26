@@ -14,9 +14,6 @@
 
 # Description:  Stop and cleanup emulation environment
 
-# Threading priority - if set to 1, these modules will be executed first
-export THREAD_PRIO=0
-
 L99_cleanup() {
 
   local MODULE_END=0

@@ -16,9 +16,6 @@
 #               Currently this is an experimental module and needs to be activated separately via the -Q switch. 
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
-# Threading priority - if set to 1, these modules will be executed first
-export THREAD_PRIO=0
-
 L35_metasploit_check() {
 
   local MODULE_END=0
