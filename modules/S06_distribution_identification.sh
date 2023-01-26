@@ -113,7 +113,7 @@ dlink_image_sign() {
 get_csv_rule_distri() {
   # this is a temp solution. If this list grows we are going to solve it via a configuration file
   local VERSION_IDENTIFIER="${1:-}"
-  VERSION_IDENTIFIER="$(safe_echo "$VERSION_IDENTIFIER" | tr '[:upper:]' '[:lower:]' | tr -dc '[[:print:]]')"
+  VERSION_IDENTIFIER="$(safe_echo "$VERSION_IDENTIFIER" | tr '[:upper:]' '[:lower:]' | tr -dc '[:print:]')"
 
   ### handle versions of linux distributions:
   # debian 9 (stretch) - installer build 20170615+deb9u5
@@ -152,5 +152,5 @@ get_csv_rule_distri() {
   #   MikroTik routerOS V2.4 (c) 1999-2001       http://mikrotik.com/
   VERSION_IDENTIFIER="$(safe_echo "$VERSION_IDENTIFIER" | sed -r 's/.*mikrotik\ routeros\ v([0-9]\.[0-9]+).*/mikrotik:routeros:\1/')"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER// /:}"
-  CSV_RULE="$(safe_echo "$VERSION_IDENTIFIER" | tr -dc '[[:print:]]')"
+  CSV_RULE="$(safe_echo "$VERSION_IDENTIFIER" | tr -dc '[:print:]')"
 }
