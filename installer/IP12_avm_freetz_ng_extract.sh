@@ -51,6 +51,7 @@ IP12_avm_freetz_ng_extract() {
     print_tool_info "rsync" 1
     print_tool_info "kmod" 1
     print_tool_info "libelf1" 1
+    print_tool_info "libelf-dev" 1
     print_tool_info "uuid-dev" 1
     print_tool_info "libssl-dev" 1
     print_tool_info "libgnutls28-dev" 1

@@ -172,45 +172,29 @@ extract_kconfig() {
 
   # Initial attempt for uncompressed images or objects:
   dump_config "$IMG"
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 
   # That didn't work, so retry after decompression.
   try_decompress '\037\213\010' xy    gunzip
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 
   try_decompress '\3757zXZ\000' abcde unxz
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 
   try_decompress 'BZh'          xy    bunzip2
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 
   try_decompress '\135\0\0\0'   xxx   unlzma
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 
   try_decompress '\211\114\132' xy    'lzop -d'
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 
   try_decompress '\002\041\114\030' xyy 'lz4 -d -l'
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 
   try_decompress '\050\265\057\375' xxx unzstd
-  if [[ $? -eq 4 ]]; then
-    return
-  fi
+  [[ $? -eq 4 ]] && return
 }
 
 dump_config() {
@@ -229,9 +213,7 @@ dump_config() {
     tail -c+"$((POS + 8))" "$IMG_" | zcat > "$TMP1" 2> /dev/null
 
     if [[ $? != 1 ]]; then  # exit status must be 0 or 2 (trailing garbage warning)
-      if [[ "$STRICT_MODE" -eq 1 ]]; then
-        set +e
-      fi
+      [[ "$STRICT_MODE" -eq 1 ]] && set +e
 
       if ! [[ -f "$TMP1" ]]; then
         return
@@ -258,9 +240,7 @@ try_decompress() {
     POS=${POS%%:*}
     tail -c+"$POS" "$IMG" | "$3" > "$TMP2" 2> /dev/null
     dump_config "$TMP2"
-    if [[ $? -eq 4 ]]; then
-      return 4
-    fi
+    [[ $? -eq 4 ]] && return 4
   done
 }
 

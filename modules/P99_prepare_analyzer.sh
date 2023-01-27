@@ -25,10 +25,8 @@ export PRE_THREAD_ENA=0
 
 P99_prepare_analyzer() {
 
-  if [[ $THREADED -eq 1 ]]; then
-    # this module is the latest in the preparation phase. So, wait for all the others
-    wait_for_pid "${WAIT_PIDS[@]}"
-  fi
+  # this module is the latest in the preparation phase. So, wait for all the others
+  [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
 
   module_log_init "${FUNCNAME[0]}"
   module_title "Analysis preparation"

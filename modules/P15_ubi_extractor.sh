@@ -71,8 +71,8 @@ ubi_extractor() {
     mapfile -t UBI_1st_ROUND < <(find "$EXTRACTION_DIR_" -type f -exec file {} \; | grep "UBI image" || true)
 
     for UBI_DATA in "${UBI_1st_ROUND[@]}"; do
-      UBI_FILE=$(echo "$UBI_DATA" | cut -d: -f1)
-      UBI_INFO=$(echo "$UBI_DATA" | cut -d: -f2)
+      UBI_FILE=$(safe_echo "$UBI_DATA" | cut -d: -f1)
+      UBI_INFO=$(safe_echo "$UBI_DATA" | cut -d: -f2)
       if [[ "$UBI_INFO" == *"UBIfs image"* ]]; then
         sub_module_title "UBIfs deep extraction"
         print_output "[*] Extracts UBIfs firmware image $ORANGE$UBI_PATH_$NC with ${ORANGE}ubireader_extract_files$NC."

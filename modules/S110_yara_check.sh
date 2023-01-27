@@ -47,10 +47,8 @@ S110_yara_check()
         YRULE=$(echo "$YARA_OUT_LINE" | awk '{print $1}')
         MATCH_FILE=$(echo "$YARA_OUT_LINE" | grep "\ \[\]\ \[author=\"" | rev | awk '{print $1}' | rev)
         MATCH_FILE_NAME=$(basename "$MATCH_FILE")
-        if [[ "$YRULE" =~ .*IsSuspicious.* ]]; then
-          # this rule does not help us a lot ... remove it from results
-          continue
-        fi
+        # this rule does not help us a lot ... remove it from results
+        [[ "$YRULE" =~ .*IsSuspicious.* ]] && continue
         if ! [[ -f "$LOG_PATH_MODULE"/"$MATCH_FILE_NAME" ]]; then
           print_output "[+] Yara rule $ORANGE$YRULE$GREEN matched in $ORANGE$MATCH_FILE$NC" "" "$LOG_PATH_MODULE/$MATCH_FILE_NAME".txt
           write_log "" "$LOG_PATH_MODULE/$MATCH_FILE_NAME".txt
@@ -59,9 +57,7 @@ S110_yara_check()
           COUNTING=$((COUNTING+1))
         fi
       fi
-      if [[ -v MATCH_FILE_NAME ]]; then
-        echo "$YARA_OUT_LINE" >> "$LOG_PATH_MODULE"/"$MATCH_FILE_NAME".txt
-      fi
+      [[ -v MATCH_FILE_NAME ]] && echo "$YARA_OUT_LINE" >> "$LOG_PATH_MODULE"/"$MATCH_FILE_NAME".txt
     done < "$LOG_PATH_MODULE"/yara_complete_output.txt
 
     print_ln
@@ -70,8 +66,8 @@ S110_yara_check()
     write_log ""
     write_log "[*] Statistics:$COUNTING"
 
-    if [[ "$COUNTING" -eq 0 ]] ; then print_output "[-] No code patterns found with yara." ; fi
-    if [[ -f "$DIR_COMB_YARA" ]] ; then rm "$DIR_COMB_YARA" ; fi
+    [[ "$COUNTING" -eq 0 ]] && print_output "[-] No code patterns found with yara."
+    [[ -f "$DIR_COMB_YARA" ]] && rm "$DIR_COMB_YARA"
   else
     print_output "[!] Check with yara not possible, because it isn't installed!"
   fi

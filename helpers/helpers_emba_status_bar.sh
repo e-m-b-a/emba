@@ -176,7 +176,7 @@ update_box_status() {
     local RUNTIME=0
     RUNTIME="$(date -d@"$(( "$(date +%s)" - "$DATE_STR" ))" -u +%H:%M:%S)"
     LOG_DIR_SIZE="$(du -sh "$LOG_DIR" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
-    RUN_EMBA_PROCESSES="$(ps -C emba.sh | wc -l || true)"
+    RUN_EMBA_PROCESSES="$(ps -C emba | wc -l || true)"
     printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( LINES - 3 ))" "$(status_util_str 0 "$RUNTIME")" "$(( LINES - 2 ))" "$(status_util_str 1 "$LOG_DIR_SIZE")" "$(( LINES - 1 ))" "$(status_util_str 2 "$RUN_EMBA_PROCESSES")" || true
     sleep .5
     if [[ -f "$STATUS_TMP_PATH" ]] ; then

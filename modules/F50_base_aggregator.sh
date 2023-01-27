@@ -73,7 +73,6 @@ F50_base_aggregator() {
 }
 
 output_overview() {
-
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR""$NC"
     write_csv_log "Firmware_vendor" "$FW_VENDOR" "NA"
@@ -473,7 +472,7 @@ output_binaries() {
     readarray -t RESULTS_SYSTEM < <( find "$LOG_DIR"/s1[34]*/ -xdev -iname "vul_func_*_system-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_system-/ system /" | sed "s/\.txt//" 2> /dev/null || true)
 
     # strcpy:
-    if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]]; then
+    if [[ "${#RESULTS_STRCPY[@]}" -gt 0 ]] && [[ $(echo "${RESULTS_STRCPY[0]}" | awk '{print $1}') -gt 0 ]]; then
       print_ln
       print_output "[+] STRCPY - top 10 results:"
       if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
@@ -490,7 +489,7 @@ output_binaries() {
     fi
 
     # system:
-    if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]]; then
+    if [[ "${#RESULTS_SYSTEM[@]}" -gt 0 ]] && [[ $(echo "${RESULTS_SYSTEM[0]}" | awk '{print $1}') -gt 0 ]]; then
       print_ln
       print_output "[+] SYSTEM - top 10 results:"
       if [[ -d "$LOG_DIR""/s13_weak_func_check/" ]]; then
@@ -880,21 +879,15 @@ get_data() {
     CVE_SEARCH=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$CVE_AGGREGATOR_LOG" | sort -u | cut -d: -f2 || true)
   fi
   if [[ -f "$TMP_DIR"/HIGH_CVE_COUNTER.tmp ]]; then
-    while read -r COUNTING; do
-      (( HIGH_CVE_COUNTER="$HIGH_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/HIGH_CVE_COUNTER.tmp
+    HIGH_CVE_COUNTER=$(awk '{ sum += $1 } END { print sum }' "$TMP_DIR"/HIGH_CVE_COUNTER.tmp)
     (( CVE_COUNTER="$CVE_COUNTER"+"$HIGH_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp ]]; then
-    while read -r COUNTING; do
-      (( MEDIUM_CVE_COUNTER="$MEDIUM_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp
+    MEDIUM_CVE_COUNTER=$(awk '{ sum += $1 } END { print sum }' "$TMP_DIR"/MEDIUM_CVE_COUNTER.tmp)
     (( CVE_COUNTER="$CVE_COUNTER"+"$MEDIUM_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/LOW_CVE_COUNTER.tmp ]]; then
-    while read -r COUNTING; do
-      (( LOW_CVE_COUNTER="$LOW_CVE_COUNTER"+"$COUNTING" ))
-    done < "$TMP_DIR"/LOW_CVE_COUNTER.tmp
+    LOW_CVE_COUNTER=$(awk '{ sum += $1 } END { print sum }' "$TMP_DIR"/LOW_CVE_COUNTER.tmp)
     (( CVE_COUNTER="$CVE_COUNTER"+"$LOW_CVE_COUNTER" ))
   fi
   if [[ -f "$TMP_DIR"/KNOWN_EXPLOITED_COUNTER.tmp ]]; then

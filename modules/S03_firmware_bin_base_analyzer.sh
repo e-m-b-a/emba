@@ -54,17 +54,11 @@ S03_firmware_bin_base_analyzer() {
     fi
   fi
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S03[@]}"
-  fi
+  [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S03[@]}"
 
-  if [[ -f "$TMP_DIR"/s03_arch.tmp ]]; then
-    binary_architecture_reporter
-  fi
+  [[ -f "$TMP_DIR"/s03_arch.tmp ]] && binary_architecture_reporter
 
-  if [[ "$(wc -l "$TMP_DIR"/s03.tmp | awk '{print $1}')" -gt 0 ]] ; then
-    NEG_LOG=1
-  fi
+  [[ "$(wc -l "$TMP_DIR"/s03.tmp | awk '{print $1}')" -gt 0 ]] && NEG_LOG=1
 
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
@@ -85,8 +79,8 @@ os_identification() {
   local WAIT_PIDS_S03_1=()
 
   if [[ ${#ROOT_PATH[@]} -gt 1 || $LINUX_PATH_COUNTER -gt 2 ]] ; then
-    echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/s03.tmp
-    echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/s03.tmp
+    safe_echo "${#ROOT_PATH[@]}" >> "$TMP_DIR"/s03.tmp
+    safe_echo "$LINUX_PATH_COUNTER" >> "$TMP_DIR"/s03.tmp
   fi
 
   print_ln
@@ -101,10 +95,7 @@ os_identification() {
     fi
   done
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S03_1[@]}"
-  fi
-
+  [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S03_1[@]}"
 }
 
 os_detection_thread_per_os() {
@@ -175,9 +166,7 @@ os_detection_thread_per_os() {
     fi
   fi
 
-  if [[ "${OS_COUNTER[$OS]}" -gt 0 ]]; then
-    echo "${OS_COUNTER[$OS]}" >> "$TMP_DIR"/s03.tmp
-  fi
+  [[ "${OS_COUNTER[$OS]}" -gt 0 ]] && safe_echo "${OS_COUNTER[$OS]}" >> "$TMP_DIR"/s03.tmp
 }
 
 binary_architecture_detection() {
@@ -196,19 +185,21 @@ binary_architecture_detection() {
     awk '{print $3}' | sort -u || true)
   mapfile -t PRE_ARCH_A < <(binwalk -A "$FILE_TO_CHECK" | grep "\ instructions," | awk '{print $3}' | \
     uniq -c | sort -n | tail -1 | awk '{print $2}' || true)
+
   if [[ -f "$HOME"/.config/binwalk/modules/cpu_rec.py ]]; then
     # entropy=0.9xxx is typically encrypted or compressed -> we just remove these entries:
     PRE_ARCH_CPU_REC=$(binwalk -% "$FILE_TO_CHECK"  | grep -v "DESCRIPTION\|None\|-----------" | grep -v "entropy=0.9" \
       | awk '{print $3}' | grep -v -e "^$" | sort | uniq -c | head -1 | awk '{print $2}' || true)
   fi
+
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
-    echo "binwalk -Y;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
+    safe_echo "binwalk -Y;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
   done
   for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
-    echo "binwalk -A;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
+    safe_echo "binwalk -A;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
   done
   if [[ -n "$PRE_ARCH_CPU_REC" ]]; then
-    echo "cpu_rec;$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03_arch.tmp
+    safe_echo "cpu_rec;$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03_arch.tmp
   fi
 }
 
@@ -216,10 +207,10 @@ binary_architecture_reporter() {
   sub_module_title "Architecture detection for RTOS based systems"
   local PRE_ARCH_=""
   while read -r PRE_ARCH_; do
-    SOURCE=$(echo "$PRE_ARCH_" | cut -d\; -f1)
-    PRE_ARCH_=$(echo "$PRE_ARCH_" | cut -d\; -f2)
+    SOURCE=$(safe_echo "$PRE_ARCH_" | cut -d\; -f1)
+    PRE_ARCH_=$(safe_echo "$PRE_ARCH_" | cut -d\; -f2)
     print_ln
     print_output "[+] Possible architecture details found ($ORANGE$SOURCE$GREEN): $ORANGE$PRE_ARCH_$NC"
-    echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
+    safe_echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done < "$TMP_DIR"/s03_arch.tmp
 }

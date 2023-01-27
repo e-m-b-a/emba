@@ -35,9 +35,8 @@ S95_interesting_binaries_check()
     post_exploitation
   fi
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S95[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S95[@]}"
+
   if [[ -f "$LOG_PATH_MODULE"/interesting_binaries.txt ]]; then
     sub_module_title "Interesting binaries"
     tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/interesting_binaries.txt

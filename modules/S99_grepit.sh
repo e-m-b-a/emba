@@ -84,9 +84,7 @@ S99_grepit() {
     done
   fi
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S99[@]}"
-  fi
+  [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S99[@]}"
 
   grepit_reporter
 

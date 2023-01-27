@@ -30,16 +30,12 @@ S120_cwe_checker()
     pre_module_reporter "${FUNCNAME[0]}"
     local CWE_CNT_=0
 
-    if [[ "$IN_DOCKER" -eq 1 ]]; then
-      cwe_container_prepare
-    fi
+    [[ "$IN_DOCKER" -eq 1 ]] && cwe_container_prepare
 
     cwe_check
 
     if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
-      while read -r COUNTING; do
-        (( CWE_CNT_="$CWE_CNT_"+"$COUNTING" ))
-      done < "$TMP_DIR"/CWE_CNT.tmp
+      CWE_CNT_=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/CWE_CNT_.tmp)
     fi
 
     final_cwe_log "$CWE_CNT_"
@@ -91,12 +87,10 @@ cwe_check() {
 
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "$BINARY" | grep -q ELF ) ; then
-      if [[ "$BINARY" == *".ko" ]]; then
-        # do not try to analyze kernel modules:
-        continue
-      fi
+      # do not try to analyze kernel modules:
+      [[ "$BINARY" == *".ko" ]] && continue
       if [[ "$THREADED" -eq 1 ]]; then
-        local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)"))
+        local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 2))
         if [[ $(grep -i -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
           local MAX_MOD_THREADS=1
         fi
@@ -111,9 +105,7 @@ cwe_check() {
     fi
   done
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S120[@]}"
-  fi
+  [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S120[@]}"
 }
 
 cwe_checker_threaded () {
@@ -124,7 +116,7 @@ cwe_checker_threaded () {
   local CWE=""
   local CWE_DESC=""
   local CWE_CNT=0
-  local MEM_LIMIT=$(( "$TOTAL_MEMORY"*80/100 ))
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
 
   local NAME=""
   NAME=$(basename "$BINARY_")
@@ -138,7 +130,7 @@ cwe_checker_threaded () {
   print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
 
   if [[ -s "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
-    jq -rc '.[].name + " - " + .[].description' "$LOG_PATH_MODULE"/cwe_"$NAME".log || true
+    jq -r '.[] | "\(.name) - \(.description)"' "$LOG_PATH_MODULE"/cwe_"$NAME".log | sort -u || true
     mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_PATH_MODULE"/cwe_"$NAME".log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
@@ -158,7 +150,7 @@ cwe_checker_threaded () {
       rm "$LOG_PATH_MODULE"/cwe_"$NAME".log
     fi
   fi
-  if [[ ${#TEST_OUTPUT[@]} -ne 0 ]] ; then print_ln ; fi
+  [[ ${#TEST_OUTPUT[@]} -ne 0 ]] && print_ln
 
   if [[ -f "$LOG_FILE" ]]; then
     cat "$LOG_FILE" >> "$OLD_LOG_FILE"

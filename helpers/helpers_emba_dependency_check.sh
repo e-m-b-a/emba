@@ -231,15 +231,11 @@ setup_unblob() {
   fi
   print_output "    ""sasquatch"" - \\c" "no_log"
   if [[ -f /usr/local/bin/sasquatch_binwalk ]]; then
-    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
-      rm  "$UNBLOB_PATH"/sasquatch
-    fi
+    [[ -L "$UNBLOB_PATH"/sasquatch ]] && rm  "$UNBLOB_PATH"/sasquatch
     ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch
     echo -e "$GREEN""ok""$NC"
   elif [[ -f /usr/local/bin/sasquatch_unblob ]]; then
-    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
-      rm  "$UNBLOB_PATH"/sasquatch
-    fi
+    [[ -L "$UNBLOB_PATH"/sasquatch ]] && rm  "$UNBLOB_PATH"/sasquatch
     ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch
     echo -e "$ORANGE""warning""$NC"
     DEP_EXIT=1
@@ -327,7 +323,6 @@ dependency_check()
       echo -e "$GREEN""ok""$NC"
     fi
   fi
-
 
   print_ln "no_log"
   print_output "[*] Necessary utils on system:" "no_log"
@@ -470,9 +465,7 @@ dependency_check()
       # TODO change to portcheck and write one for external hosts
       check_dep_file "cve-search script" "$EXT_DIR""/cve-search/bin/search.py"
       # we have already checked it outside the docker - do not need it again
-      if [[ "$IN_DOCKER" -eq 0 ]]; then
-        check_cve_search
-      fi
+      [[ "$IN_DOCKER" -eq 0 ]] && check_cve_search
       if [[ "$IN_DOCKER" -eq 0 ]]; then
         # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
         check_dep_tool "mongo database" "mongod"

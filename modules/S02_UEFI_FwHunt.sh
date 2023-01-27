@@ -42,15 +42,11 @@ S02_UEFI_FwHunt() {
     done
   fi
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S02[@]}"
-  fi
+  [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S02[@]}"
 
   fwhunter_logging
 
-  if [[ "${#FWHUNTER_RESULTS[@]}" -gt 0 ]]; then
-    NEG_LOG=1
-  fi
+  [[ "${#FWHUNTER_RESULTS[@]}" -gt 0 ]] && NEG_LOG=1
 
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
@@ -120,8 +116,8 @@ fwhunter_logging() {
     fi
   done
 
-  mapfile -t FWHUNTER_CVEs < <(grep "CVE" "$LOG_FILE" | cut -d: -f4 | sort -u)
-  mapfile -t FWHUNTER_BINARLY_IDs < <(grep "FwHunt rule has been triggered and threat detected" "$LOG_PATH_MODULE"/* | sed 's/.*BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g' | sort -u)
+  mapfile -t FWHUNTER_CVEs < <(grep "CVE" "$LOG_FILE" | cut -d: -f4 | sort -u || true)
+  mapfile -t FWHUNTER_BINARLY_IDs < <(grep "FwHunt rule has been triggered and threat detected" "$LOG_PATH_MODULE"/* | sed 's/.*BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g' | sort -u || true)
 
   print_ln
   print_ln

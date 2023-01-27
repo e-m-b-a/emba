@@ -102,9 +102,7 @@ check_squid()
       ((SQUID_VUL_CNT+=1))
     fi
   done
-  if [[ $SQUID_VUL_CNT -eq 0 ]] ; then
-    print_output "[-] No possible squid executable found"
-  fi
+  [[ $SQUID_VUL_CNT -eq 0 ]] && print_output "[-] No possible squid executable found"
 
   local SQUID_DAEMON_CONFIG_LOCS=("/ETC_PATHS" "/ETC_PATHS/squid" "/ETC_PATHS/squid3" "/usr/local/etc/squid" "/usr/local/squid/etc")
   mapfile -t SQUID_PATHS_ARR < <(mod_path_array "${SQUID_DAEMON_CONFIG_LOCS[@]}")
@@ -129,7 +127,5 @@ check_squid()
       fi
     done
   fi
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] No squid configuration found"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] No squid configuration found"
 }

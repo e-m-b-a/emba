@@ -464,9 +464,7 @@ generate_cve_details_cves() {
     fi
   done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19[@]}"
 }
 
 generate_cve_details_versions() {
@@ -490,9 +488,7 @@ generate_cve_details_versions() {
     fi
   done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19[@]}"
 }
 
 cve_db_lookup_cve () {
@@ -520,9 +516,7 @@ cve_db_lookup_cve () {
     cve_extractor "$CVE_ENTRY"
   fi
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19_2[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
 }
 
 cve_db_lookup_version() {
@@ -558,9 +552,7 @@ cve_db_lookup_version() {
     cve_extractor "$BIN_VERSION_"
   fi
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_F19_2[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
 }
 
 cve_extractor() {

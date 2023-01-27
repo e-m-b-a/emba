@@ -69,14 +69,10 @@ S50_authentication_check() {
     search_pam_files
   fi
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S50[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S50[@]}"
 
   if [[ -f "$TMP_DIR"/S50_AUTH_ISSUES.tmp ]]; then
-    while read -r ISSUES; do
-      AUTH_ISSUES=$((AUTH_ISSUES+ISSUES))
-    done < "$TMP_DIR"/S50_AUTH_ISSUES.tmp
+    AUTH_ISSUES=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S50_AUTH_ISSUES.tmp)
   fi
   write_log ""
   write_log "[*] Statistics:$AUTH_ISSUES"
@@ -151,9 +147,7 @@ user_zero() {
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/passwd not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/passwd not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -182,9 +176,7 @@ non_unique_acc() {
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/passwd not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/passwd not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -213,9 +205,7 @@ non_unique_group_id() {
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/group not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/group not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -243,9 +233,7 @@ non_unique_group_name() {
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/group not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/group not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -271,9 +259,7 @@ query_user_acc() {
           print_output "[*] Found minimal user id specified: ""$UID_MIN"
         fi
       done
-      if [[ "$UID_MIN" = "" ]] ; then
-        UID_MIN="1000"
-      fi
+      [[ "$UID_MIN" = "" ]] && UID_MIN="1000"
       print_output "[*] Linux real users output (ID = 0, or ""$UID_MIN""+, but not 65534):"
       FIND=$(awk -v UID_MIN="$UID_MIN" -F: '($3 >= UID_MIN && $3 != 65534) || ($3 == 0) { print $1","$3 }' "$PASSWD_FILE")
 
@@ -285,9 +271,7 @@ query_user_acc() {
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/passwd not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/passwd not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -328,9 +312,7 @@ query_nis_plus_auth_supp() {
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/nsswitch.conf not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/nsswitch.conf not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -542,9 +524,7 @@ scan_pam_conf() {
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/pam.conf not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/pam.conf not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -587,9 +567,7 @@ search_pam_configs() {
       done
     fi
   done
-  if [[ $CHECK -eq 0 ]] ; then
-    print_output "[-] /etc/pam.d not available"
-  fi
+  [[ $CHECK -eq 0 ]] && print_output "[-] /etc/pam.d not available"
   echo "$AUTH_ISSUES" >> "$TMP_DIR"/S50_AUTH_ISSUES.tmp
 }
 
@@ -622,9 +600,7 @@ search_pam_files() {
         ((AUTH_ISSUES+=1))
       fi
     done
-    if [[ $CHECK -eq 0 ]] ; then
-      print_output "[-] Nothing interesting found"
-    fi
+    [[ $CHECK -eq 0 ]] && print_output "[-] Nothing interesting found"
   else
     print_output "[-] Nothing found"
   fi

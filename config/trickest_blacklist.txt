@@ -39,3 +39,4 @@ andir/nixos-issue-db-example
 andrewwebber/kate
 jenkinsci-cert/nvd-cwe
 xaviermerino/ECE1552
+evdenis/cvehound

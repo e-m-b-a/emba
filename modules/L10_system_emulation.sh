@@ -24,9 +24,6 @@
 # Warning:      This module changes your network configuration and it could happen that your system looses
 #               network connectivity.
 
-# Threading priority - if set to 1, these modules will be executed first
-export THREAD_PRIO=0
-
 L10_system_emulation() {
   module_log_init "${FUNCNAME[0]}"
   module_title "System emulation of Linux based embedded devices."

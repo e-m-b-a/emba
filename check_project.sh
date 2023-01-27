@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Check all shell scripts inside ./helpers, ./modules, emba.sh and itself with shellchecker
+# Description:  Check all shell scripts inside ./helpers, ./modules, emba and itself with shellchecker
 
 STRICT_MODE=1
 
@@ -106,7 +106,7 @@ import_installer() {
 
 import_emba_main() {
   MODULES=()
-  mapfile -t MODULES < <(find ./ -iname "emba.sh" -o -iname "installer.sh" -o -iname "check_project.sh" 2>/dev/null)
+  mapfile -t MODULES < <(find ./ -iname "emba" -o -iname "installer.sh" -o -iname "check_project.sh" 2>/dev/null)
   for LINE in "${MODULES[@]}"; do
     if (file "$LINE" | grep -q "shell script"); then
       echo "$LINE"
@@ -172,7 +172,7 @@ check() {
   echo -e "\\n""$GREEN""Run shellcheck and semgrep:""$NC""\\n"
   for SOURCE in "${SOURCES[@]}"; do
     echo -e "\\n""$GREEN""Run ${ORANGE}shellcheck$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    if shellcheck -P "$HELP_DIR":"$MOD_DIR":"$MOD_DIR_LOCAL" -a ./emba.sh "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
+    if shellcheck -P "$HELP_DIR":"$MOD_DIR":"$MOD_DIR_LOCAL" -a ./emba "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
       echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
     else
       echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
@@ -257,8 +257,6 @@ summary() {
     done
     echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
-
-
 }
 
 # check that all tools are installed

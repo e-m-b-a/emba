@@ -135,6 +135,7 @@ run_modules()
       mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
     fi
     MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
+    MODULES_EXPORTED+=("${MODULES[@]}")
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
@@ -203,6 +204,8 @@ run_modules()
       if [[ "$SELECT_NUM" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
         local MODULE=""
         MODULE=$(find "$MOD_DIR" -name "${MODULE_GROUP^^}""${SELECT_NUM:1}""_*.sh" | sort -V 2> /dev/null)
+        # we need the whole module name including path in our array for later checks on it
+        export MODULES_EXPORTED+=("${MODULE}")
         if ( file "$MODULE" | grep -q "shell script" ) && ! [[ "$MODULE" =~ \ |\' ]] ; then
           MODULE_BN=$(basename "$MODULE")
           MODULE_MAIN=${MODULE_BN%.*}
@@ -246,9 +249,9 @@ run_modules()
           mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
         fi
         MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
-        if [[ $THREADING_SET -eq 1 ]] ; then
-          sort_modules
-        fi
+
+        [[ $THREADING_SET -eq 1 ]] && sort_modules
+
         for MODULE_FILE in "${MODULES[@]}" ; do
           # check if "$MODULE_NAME" is in blacklist from config directory and skip it
           MODULE_NAME=$(basename -s .sh "$MODULE_FILE")
@@ -346,6 +349,7 @@ main()
   export ARCH=""
   export EXLUDE=()
   export SELECT_MODULES=()
+  export MODULES_EXPORTED=()
   export ROOT_PATH=()
   export FILE_ARR=()
   export LOG_GREP=0
@@ -433,7 +437,7 @@ main()
   fi
 
   export EMBA_COMMAND
-  EMBA_COMMAND="$(dirname "$0")""/emba.sh ""$*"
+  EMBA_COMMAND="$(dirname "$0")""/emba ""$*"
 
   while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:N:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
     case $OPT in
@@ -594,9 +598,7 @@ main()
   fi
 
   # print it only once per EMBA run - not again from started container
-  if [[ $IN_DOCKER -eq 0 ]]; then
-    banner_printer
-  fi
+  [[ $IN_DOCKER -eq 0 ]] && banner_printer
 
   if [[ $IN_DOCKER -eq 1 ]] ; then
     # set external path new for docker
@@ -621,7 +623,7 @@ main()
       print_bar "no_log"
     fi
 
-    enable_strict_mode "$STRICT_MODE"
+    enable_strict_mode "$STRICT_MODE" 1
 
     # profile handling
     if [[ -n "${PROFILE:-}" ]]; then
@@ -661,16 +663,12 @@ main()
       fi
     fi
 
-    if [[ $IN_DOCKER -eq 0 ]]; then
-      # check if LOG_DIR exists and prompt to terminal to delete its content (Y/n)
-      log_folder
-    fi
+    # check if LOG_DIR exists and prompt to terminal to delete its content (Y/n)
+    [[ $IN_DOCKER -eq 0 ]] && log_folder
 
+    # create log directory, if not exists and needed subdirectories
     # do not create a log dir for dep check
-    if [[ "$ONLY_DEP" -eq 0 ]]; then
-      # create log directory, if not exists and needed subdirectories
-      create_log_dir
-    fi
+    [[ "$ONLY_DEP" -eq 0 ]] && create_log_dir
 
     # kernel downloader runs on the host and waits for an identified kernel version. Afterwards
     # it tries to download the kernel sources for further analysis
@@ -887,11 +885,10 @@ main()
 
     write_notification "EMBA starting docker container"
 
-    if [[ "$STRICT_MODE" -eq 1 ]]; then
-      set +e
-    fi
+    [[ "$STRICT_MODE" -eq 1 ]] && set +e
+
     disable_strict_mode "$STRICT_MODE" 0
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba.sh -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
     D_RETURN=$?
     enable_strict_mode "$STRICT_MODE" 0
 
@@ -907,9 +904,7 @@ main()
         cleaner 0
       else
         # we do not need the log dir from dependency checker
-        if [[ -d "$LOG_DIR" ]]; then
-          rm -r "$LOG_DIR"
-        fi
+        [[ -d "$LOG_DIR" ]] && rm -r "$LOG_DIR"
       fi
       exit 0
     else
@@ -947,9 +942,7 @@ main()
     run_modules "P" "$THREADED" "0"
 
     # if we running threaded we ware going to wait for the slow guys here
-    if [[ $THREADED -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS[@]}"
-    fi
+    [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
 
     print_ln "no_log"
 
@@ -985,9 +978,7 @@ main()
 
     run_modules "S" "$THREADED" "$HTML"
 
-    if [[ $THREADED -eq 1 ]]; then
-      wait_for_pid "${WAIT_PIDS[@]}"
-    fi
+    [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
 
     print_ln "no_log"
 
@@ -1065,17 +1056,16 @@ main()
     print_output "$(indent "Try using binwalk or something else to extract the firmware")"
     exit 1
   fi
-  if [[ "$HTML" -eq 1 ]]; then
-    update_index
-  fi
+
+  [[ "$HTML" -eq 1 ]] && update_index
+
   if [[ -f "$HTML_PATH"/index.html ]] && [[ "$IN_DOCKER" -eq 0 ]]; then
     print_output "[*] Web report created HTML report in $ORANGE$LOG_DIR/html-report$NC\\n" "main"
     print_output "[*] Open the web-report with$ORANGE firefox $(abs_path "$HTML_PATH/index.html")$NC\\n" "main"
   fi
-  if [[ "$IN_DOCKER" -eq 1 ]]; then
-    # we need to change the permissions of the LOG_DIR to the orig. user from the host
-    restore_permissions
-  fi
+
+  # we need to change the permissions of the LOG_DIR to the orig. user from the host
+  [[ "$IN_DOCKER" -eq 1 ]] && restore_permissions
   cleaner 0
   exit 0
 }

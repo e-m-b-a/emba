@@ -83,14 +83,10 @@ s22_vuln_check_caller() {
     fi
   done
 
-  if [[ "$THREADED" -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_S22[@]}"
-  fi
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S22[@]}"
 
   if [[ -f "$TMP_DIR"/S22_VULNS.tmp ]]; then
-    while read -r VULNS; do
-      (( S22_PHP_VULNS="$S22_PHP_VULNS"+"$VULNS" ))
-    done < "$TMP_DIR"/S22_VULNS.tmp
+    S22_PHP_VULNS=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S22_VULNS.tmp)
   fi
  
   print_ln
