@@ -16,25 +16,25 @@
 # Description:  All functions for colorizing terminal output and handling logging
 
 ## Color definition
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-ORANGE="\033[0;33m"
-BLUE="\033[0;34m"
-MAGENTA="\033[0;35m"
-CYAN="\033[0;36m"
-NC="\033[0m"  # no color
+export RED="\033[0;31m"
+export GREEN="\033[0;32m"
+export ORANGE="\033[0;33m"
+export BLUE="\033[0;34m"
+export MAGENTA="\033[0;35m"
+export CYAN="\033[0;36m"
+export NC="\033[0m"  # no color
 
-RED_="\x1b[31m"
-GREEN_="\x1b[32m"
-ORANGE_="\x1b[33m"
-BLUE_="\x1b[34m"
-MAGENTA_="\x1b[35m"
-CYAN_="\x1b[36m"
-NC_="\x1b[0m"
+export RED_="\x1b[31m"
+export GREEN_="\x1b[32m"
+export ORANGE_="\x1b[33m"
+export BLUE_="\x1b[34m"
+export MAGENTA_="\x1b[35m"
+export CYAN_="\x1b[36m"
+export NC_="\x1b[0m"
 
 ## Attribute definition
-BOLD="\033[1m"
-ITALIC="\033[3m"
+export BOLD="\033[1m"
+export ITALIC="\033[3m"
 
 MODULE_NUMBER="--"
 SUB_MODULE_COUNT=0
