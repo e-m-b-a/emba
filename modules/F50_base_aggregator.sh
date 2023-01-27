@@ -374,8 +374,10 @@ output_binaries() {
       PIE=$(grep -c "No PIE" "$LOG_DIR"/"$S12_LOG" || true)
       STRIPPED=$(grep -c "No Symbols" "$LOG_DIR"/"$S12_LOG" || true)
       BINS_CHECKED=$(grep -c "RELRO.*NX.*RPATH" "$LOG_DIR"/"$S12_LOG" || true)
-      # we have to remove the first line of the original output:
-      (( BINS_CHECKED-- ))
+      if [[ "$BINS_CHECKED" -gt 0 ]]; then
+        # we have to remove the first line of the original output:
+        (( BINS_CHECKED-- ))
+      fi
     fi
   
     if [[ "${CANARY:-0}" -gt 0 ]]; then

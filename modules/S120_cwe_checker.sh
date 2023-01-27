@@ -90,7 +90,7 @@ cwe_check() {
       # do not try to analyze kernel modules:
       [[ "$BINARY" == *".ko" ]] && continue
       if [[ "$THREADED" -eq 1 ]]; then
-        local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 2))
+        local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
         if [[ $(grep -i -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
           local MAX_MOD_THREADS=1
         fi

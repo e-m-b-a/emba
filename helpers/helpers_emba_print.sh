@@ -24,6 +24,14 @@ MAGENTA="\033[0;35m"
 CYAN="\033[0;36m"
 NC="\033[0m"  # no color
 
+RED_="\x1b[31m"
+GREEN_="\x1b[32m"
+ORANGE_="\x1b[33m"
+BLUE_="\x1b[34m"
+MAGENTA_="\x1b[35m"
+CYAN_="\x1b[36m"
+NC_="\x1b[0m"
+
 ## Attribute definition
 BOLD="\033[1m"
 ITALIC="\033[3m"
