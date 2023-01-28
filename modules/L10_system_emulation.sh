@@ -1014,7 +1014,7 @@ run_network_id_emulation() {
   print_output "[*] Starting firmware emulation for network identification - $ORANGE$QEMU_BIN / $ARCH_END / $IMAGE_NAME$NC ... use Ctrl-a + x to exit"
   print_ln
 
-  write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait" /tmp/do_not_create_run.sh 3
+  write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait ; pkill -9 -f tail.*-F.*\"$LOG_PATH_MODULE\"" /tmp/do_not_create_run.sh 3
 }
 
 get_networking_details_emulation() {
@@ -1691,7 +1691,7 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log$NC file\n\"" "$ARCHIVE_PATH"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321$NC via telnet\n\"" "$ARCHIVE_PATH"/run.sh 0
  
-  write_script_exec "$QEMU_BIN -m 2048 -M $QEMU_MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait" "$ARCHIVE_PATH"/run.sh 1
+  write_script_exec "$QEMU_BIN -m 2048 -M $QEMU_MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait ; pkill -9 -f tail.*-F.*\"$LOG_PATH_MODULE\"" "$ARCHIVE_PATH"/run.sh 1
 }
 
 check_online_stat() {
