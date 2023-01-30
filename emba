@@ -1038,6 +1038,10 @@ main()
       print_output "[*] Removing temp firmware directory\\n" "no_log" 
       rm -r "$LOG_DIR"/firmware 2>/dev/null
     fi
+    if [[ "$FINAL_FW_RM" -eq 1 && -d "$LOG_DIR"/p61_unblob_eval/unblob_extracted ]]; then
+      print_output "[*] Removing unblob firmware directory\\n" "no_log"
+      rm -r "$LOG_DIR"/p61_unblob_eval/unblob_extracted 2>/dev/null
+    fi
     print_ln "no_log"
     if [[ -d "$LOG_DIR" ]]; then
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "main" 
