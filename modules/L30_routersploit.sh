@@ -30,7 +30,6 @@ L30_routersploit() {
     fi
     if [[ -n "$IP_ADDRESS_" ]]; then
       if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-        restart_emulation "$IP_ADDRESS_"
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
         if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
           print_output "[-] System not responding - Not performing routersploit checks"
