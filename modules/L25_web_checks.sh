@@ -27,14 +27,19 @@ L25_web_checks() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ -n "$IP_ADDRESS_" ]]; then
-      if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-        main_web_check "$IP_ADDRESS_"
-      else
+      if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
         print_output "[-] System not responding - Not performing web checks"
+        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
+        if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+          module_end_log "${FUNCNAME[0]}" "$WEB_RESULTS"
+          return
+        fi
       fi
+      main_web_check "$IP_ADDRESS_"
     else
       print_output "[-] No IP address found ... skipping live system tests"
     fi
+
     write_log ""
     write_log "[*] Statistics:$WEB_RESULTS"
     module_end_log "${FUNCNAME[0]}" "$WEB_RESULTS"
