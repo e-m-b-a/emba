@@ -164,6 +164,8 @@ S115_usermode_emulator() {
               EMULATOR="qemu-ppc-static"
             elif ( file "$FULL_BIN_PATH" | grep -q "ELF 32-bit LSB executable, Altera Nios II" ) ; then
               EMULATOR="qemu-nios2-static"
+            elif ( file "$FULL_BIN_PATH" | grep -q "ELF 32-bit LSB shared object, QUALCOMM DSP6" ) ; then
+              EMULATOR="qemu-hexagon-static"
             else
               print_output "[-] No working emulator found for $BIN_"
               EMULATOR="NA"

@@ -100,9 +100,13 @@ S14_weak_func_radare_check()
             radare_function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "QUALCOMM DSP6" ) ; then
-          print_output "[-] Qualcom DSP6 is currently not supported for further analysis"
-          print_output "[-] Tested binary: $ORANGE$BINARY$NC"
-          print_output "[-] Please check for updates: https://github.com/e-m-b-a/emba/issues/395"
+          if [[ "$THREADED" -eq 1 ]]; then
+            radare_function_check_hexagon "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
+            WAIT_PIDS_S14+=( "$!" )
+          else
+            radare_function_check_hexagon "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+          fi
+
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: $ORANGE$BINARY$NC"
@@ -292,6 +296,48 @@ radare_function_check_ARM32() {
       fi
       radare_log_func_footer "$NAME" "$FUNCTION"
       radare_output_function_details "$BINARY_" "$FUNCTION"
+    fi
+  done
+  echo "$STRCPY_CNT" >> "$TMP_DIR"/S14_STRCPY_CNT.tmp
+}
+
+radare_function_check_hexagon() {
+  local BINARY_="${1:-}"
+  shift 1
+  local VULNERABLE_FUNCTIONS=("$@")
+  local NAME=""
+  NAME=$(basename "$BINARY_" 2> /dev/null)
+  local STRCPY_CNT=0
+  if ! [[ -f "$BINARY_" ]]; then
+    return
+  fi
+
+  NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
+  for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
+    if ( readelf -s --use-dynamic "$BINARY_" | grep -q "$FUNCTION" 2> /dev/null ) ; then
+      FUNC_LOG="$LOG_PATH_MODULE""/vul_func_""$FUNCTION""-""$NAME"".txt"
+      radare_log_bin_hardening "$NAME" "$FUNCTION"
+      if [[ "$FUNCTION" == "mmap" ]] ; then
+        # For the mmap check we need the disasm after the call
+        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$BINARY_" | grep -E -A 20 "call.*$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
+      else
+        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "$BINARY_" | grep -E -A 2 -B 20 "call.*$FUNCTION" 2> /dev/null >> "$FUNC_LOG" || true
+      fi
+      if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+        radare_color_output "$FUNCTION"
+
+        COUNT_FUNC="$(grep -c -e "call.*$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
+        if [[ "$FUNCTION" == "strcpy" ]] ; then
+          COUNT_STRLEN=$(grep -c "call.*strlen" "$FUNC_LOG"  2> /dev/null || true)
+          STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
+        elif [[ "$FUNCTION" == "mmap" ]] ; then
+          # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
+          # TODO: check this in radare2
+          COUNT_MMAP_OK="NA"
+        fi
+        radare_log_func_footer "$NAME" "$FUNCTION"
+        radare_output_function_details "$BINARY_" "$FUNCTION"
+      fi
     fi
   done
   echo "$STRCPY_CNT" >> "$TMP_DIR"/S14_STRCPY_CNT.tmp
