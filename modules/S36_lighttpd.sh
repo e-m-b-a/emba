@@ -53,7 +53,7 @@ S36_lighttpd() {
 
 lighttpd_binary_analysis() {
   sub_module_title "Lighttpd binary analysis"
-  local LIGHTTP_BIN_ARR="${@}"
+  local LIGHTTP_BIN_ARR=("${@}")
   export LIGHT_VERSIONS=()
 
   if [[ -f "$CSV_DIR/s09_firmware_base_version_check.csv" ]] && grep -q "lighttpd" "$CSV_DIR"/s09_firmware_base_version_check.csv; then
@@ -74,7 +74,6 @@ lighttpd_binary_analysis() {
 
       CSV_REGEX="$(echo "$VERSION_LINE" | cut -d\; -f5)"
       LIC="$(safe_echo "$VERSION_LINE" | cut -d\; -f3)"
-      BIN_NAME="$(safe_echo "$VERSION_LINE" | cut -d\; -f1)"
       VERSION_IDENTIFIER="$(safe_echo "$VERSION_LINE" | cut -d\; -f4)"
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
@@ -137,7 +136,7 @@ lighttpd_binary_analysis() {
 lighttpd_config_analysis() {
   local LIGHTTPD_CONFIG="${1:-}"
   shift
-  local LIGHT_VERSIONS="${@}"
+  local LIGHT_VERSIONS=("${@}")
   local SSL_ENABLED=0
 
   if ! [[ -f "$LIGHTTPD_CONFIG" ]]; then
