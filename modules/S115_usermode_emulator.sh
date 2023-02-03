@@ -209,7 +209,8 @@ copy_firmware() {
     EMULATION_PATH_BASE="$LOG_DIR"/firmware
   fi
   # we just create a backup if the original firmware path was a root directory
-  # or we are using full system mode emulation
+  # or we are using full system mode emulation (for system emulation we need to
+  # keep the emulation filesystem clean)
   # if it was a binary file we already have extracted it and it is already messed up
   # so we can mess it up a bit more ;)
   if [[ -d "$FIRMWARE_PATH_BAK" ]] || [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
