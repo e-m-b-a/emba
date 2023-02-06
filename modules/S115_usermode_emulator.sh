@@ -208,18 +208,20 @@ copy_firmware() {
   else
     EMULATION_PATH_BASE="$LOG_DIR"/firmware
   fi
-  # we just create a backup if the original firmware path was a root directory
-  # or we are using full system mode emulation (for system emulation we need to
-  # keep the emulation filesystem clean)
-  # if it was a binary file we already have extracted it and it is already messed up
-  # so we can mess it up a bit more ;)
-  if [[ -d "$FIRMWARE_PATH_BAK" ]] || [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
+
+  # we create a backup copy for user mode emulation only if we have enough disk space.
+  # If there is not enough disk space we use the original firmware directory
+  FREE_SPACE="$(df --output=avail "$DDISK" | awk 'NR==2')"
+  NEEDED_SPACE="$(( "$(du --max-depth=0 "$EMULATION_PATH_BASE" | awk '{print $1}')" + 10000 ))"
+
+  if [[ "$FREE_SPACE" -lt "$NEEDED_SPACE" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
     mkdir -p "$LOG_PATH_MODULE"/firmware
     cp -pri "$EMULATION_PATH_BASE" "$LOG_PATH_MODULE"/firmware 2> /dev/null
     EMULATION_PATH_BASE="$LOG_PATH_MODULE"/firmware
     print_output "[*] Firmware backup for emulation created in $ORANGE$EMULATION_PATH_BASE$NC"
   else
+    print_output "[!] WARNING: Not enough disk space available - we do not create a firmware backup for emulation ..."
     EMULATION_PATH_BASE="$LOG_DIR"/firmware
     print_output "[*] Firmware used for emulation in $ORANGE$EMULATION_PATH_BASE$NC"
   fi
@@ -514,7 +516,7 @@ emulate_strace_run() {
         write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
         PATH_MISSING=$(dirname "$MISSING_AREA")
 
-        #FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
+        # FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
         FILENAME_FOUND=$(find "$EMULATION_PATH_BASE" -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
