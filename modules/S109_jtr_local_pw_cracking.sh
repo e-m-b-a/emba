@@ -29,7 +29,7 @@ S109_jtr_local_pw_cracking()
   local JTR_FINAL_STAT=""
   local CRACKED_HASH=""
   local CRACKED=0
-  local JTR_TIMEOUT="60m"
+  local JTR_TIMEOUT="3600"
 
   # This module waits for S108_stacs_password_search
   # check emba.log for S108_stacs_password_search starting
@@ -69,7 +69,58 @@ S109_jtr_local_pw_cracking()
       print_output "[*] Starting jtr with a runtime of $ORANGE$JTR_TIMEOUT$NC on the following data:"
       tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jtr_hashes.txt
       print_ln
-      timeout --preserve-status --signal SIGINT "$JTR_TIMEOUT" john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt | tee -a "$LOG_FILE" || true
+      john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
+      PID="$!"
+      COUNT=0
+      while [[ "$COUNT" -le "$JTR_TIMEOUT" ]];do
+        ((COUNT+=1))
+        if ! pgrep john > /dev/null; then
+          # if no john process is running it means we are finished with cracking passwords
+          # and we can exit the while loop for waiting
+          break
+        fi
+        sleep 1
+      done
+      if [[ "$COUNT" -ge "$JTR_TIMEOUT" ]]; then
+        # we are running out of time and kill john
+        kill "$PID" || true
+      fi
+
+      # lets check our log if we can find further hashes
+      mapfile -t JTR_FORMATS < <(grep "option to force loading hashes of that type instead" "$LOG_FILE" || true)
+
+      # if we have further hashes we are processing these now
+      if [[ "${#JTR_FORMATS[@]}" -gt 0 ]] && [[ "$COUNT" -lt "$JTR_TIMEOUT" ]] ; then
+        print_ln
+        print_output "[*] Further password hashes detected:"
+        for JTR_FORMAT in "${JTR_FORMATS[@]}"; do
+          JTR_FORMAT="$(echo "$JTR_FORMAT" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
+          print_output "$(indent "$(orange "Detected hash type: $JTR_FORMAT")")"
+        done
+
+        for JTR_FORMAT in "${JTR_FORMATS[@]}"; do
+          print_ln
+          echo "[*] COUNT: $COUNT"
+          JTR_FORMAT="$(echo "$JTR_FORMAT" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
+          print_output "[*] Testing password hash types $ORANGE$JTR_FORMAT$NC"
+          john --format="$JTR_FORMAT" --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
+          PID="$!"
+
+          while [[ "$COUNT" -le "$JTR_TIMEOUT" ]];do
+            ((COUNT+=1))
+            if ! pgrep john > /dev/null; then
+              # if no john process is running it means we are finished with cracking passwords
+              # and we can exit the while loop for waiting
+              break
+            fi
+            sleep 1
+          done
+          if [[ "$COUNT" -ge "$JTR_TIMEOUT" ]]; then
+            # we are running out of time and kill john
+            kill "$PID" || true
+          fi
+        done
+      fi
       print_ln
       NEG_LOG=1
 
