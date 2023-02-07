@@ -211,10 +211,10 @@ copy_firmware() {
 
   # we create a backup copy for user mode emulation only if we have enough disk space.
   # If there is not enough disk space we use the original firmware directory
-  FREE_SPACE="$(df --output=avail "$DDISK" | awk 'NR==2')"
+  FREE_SPACE="$(df --output=avail "$LOG_DIR" | awk 'NR==2')"
   NEEDED_SPACE="$(( "$(du --max-depth=0 "$EMULATION_PATH_BASE" | awk '{print $1}')" + 10000 ))"
 
-  if [[ "$FREE_SPACE" -lt "$NEEDED_SPACE" ]]; then
+  if [[ "$FREE_SPACE" -gt "$NEEDED_SPACE" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
     mkdir -p "$LOG_PATH_MODULE"/firmware
     cp -pri "$EMULATION_PATH_BASE" "$LOG_PATH_MODULE"/firmware 2> /dev/null
