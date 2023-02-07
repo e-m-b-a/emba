@@ -85,8 +85,6 @@ echo ""
 if [ "$#" -ne 1 ]; then
   echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
   echo -e "\n\n------------------------------------------------------------------"
-  echo -e "Probably you would check all packets we are going to install with:"
-  echo -e "$CYAN""     sudo ./installer.sh -l""$NC"
   echo -e "If you are going to install EMBA in default mode you can use:"
   echo -e "$CYAN""     sudo ./installer.sh -d""$NC"
   echo -e "------------------------------------------------------------------\n\n"
@@ -121,7 +119,7 @@ while getopts cCdDFhlr OPT ; do
       export LIST_DEP=1
       export CVE_SEARCH=0
       export DOCKER_SETUP=0
-      echo -e "$GREEN""$BOLD""List all dependecies""$NC"
+      echo -e "$GREEN""$BOLD""List all dependecies (Warning: deprected feature)""$NC"
       ;;
     r)
       export REMOVE=1
@@ -134,6 +132,11 @@ while getopts cCdDFhlr OPT ; do
       ;;
   esac
 done
+
+if [[ "$LIST_DEP" -eq 1 ]]; then
+  echo -e "\n${ORANGE}WARNING: This feature is deprecated and not maintained anymore.$NC"
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+fi
 
 # WSL support - currently experimental!
 if grep -q -i wsl /proc/version; then
