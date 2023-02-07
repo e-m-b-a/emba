@@ -119,7 +119,7 @@ while getopts cCdDFhlr OPT ; do
       export LIST_DEP=1
       export CVE_SEARCH=0
       export DOCKER_SETUP=0
-      echo -e "$GREEN""$BOLD""List all dependecies (Warning: deprected feature)""$NC"
+      echo -e "$GREEN""$BOLD""List all dependecies (Warning: deprecated feature)""$NC"
       ;;
     r)
       export REMOVE=1
