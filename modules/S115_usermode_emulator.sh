@@ -218,7 +218,6 @@ copy_firmware() {
 
   if [[ "$FREE_SPACE" -gt "$NEEDED_SPACE" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
-    mkdir -p "$LOG_PATH_MODULE"/firmware
     cp -pri "$EMULATION_PATH_BASE" "$LOG_PATH_MODULE"/firmware 2> /dev/null
     EMULATION_PATH_BASE="$LOG_PATH_MODULE"/firmware
     print_output "[*] Firmware backup for emulation created in $ORANGE$EMULATION_PATH_BASE$NC"
