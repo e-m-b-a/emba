@@ -122,9 +122,9 @@ uefi_extractor(){
   find "$EXTRACTION_DIR_"firmware.dump -xdev -maxdepth 1 -ls | tee -a "$LOG_FILE"
   print_ln
 
-  NVARS=$(grep -c "NVAR entry" "$UEFI_EXTRACT_REPORT_FILE")
-  PE32_IMAGE=$(grep -c "PE32 image" "$UEFI_EXTRACT_REPORT_FILE")
-  DRIVER_COUNT=$(grep -c "DXE driver" "$UEFI_EXTRACT_REPORT_FILE")
+  NVARS=$(grep -c "NVAR entry" "$UEFI_EXTRACT_REPORT_FILE" || true)
+  PE32_IMAGE=$(grep -c "PE32 image" "$UEFI_EXTRACT_REPORT_FILE" || true)
+  DRIVER_COUNT=$(grep -c "DXE driver" "$UEFI_EXTRACT_REPORT_FILE" || true)
   EFI_ARCH=$(find "$EXTRACTION_DIR_" -name 'info.txt' -exec grep 'Machine type:' {} \; | sed -E 's/Machine\ type\:\ //g' | uniq | head -n 1)
 
   if [[ -n "$EFI_ARCH" ]]; then
@@ -134,7 +134,7 @@ uefi_extractor(){
     backup_var "EFI_ARCH" "$EFI_ARCH"
   fi
 
-  FILES_UEFI=$(grep -c "File" "$UEFI_EXTRACT_REPORT_FILE")
+  FILES_UEFI=$(grep -c "File" "$UEFI_EXTRACT_REPORT_FILE" || true)
   DIRS_UEFI=$(find "$EXTRACTION_DIR_" -type d | wc -l)
   print_output "[*] Extracted $ORANGE$FILES_UEFI$NC files and $ORANGE$DIRS_UEFI$NC directories from the firmware image."
   print_output "[*] Found $ORANGE$NVARS$NC NVARS and $ORANGE$DRIVER_COUNT$NC drivers."
