@@ -253,9 +253,9 @@ check_bootloader()
   local OBSD_FILE1=""
   local OBSD_FILE2=""
   # mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")
-  mapfile -t OBSD_PATH1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/usr/mdec/biosboot")
+  mapfile -t OBSD_PATH1 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/usr/mdec/biosboot" || true)
   # mapfile -t OBSD_PATH2 < <(mod_path "/boot")
-  mapfile -t OBSD_PATH2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot")
+  mapfile -t OBSD_PATH2 < <(find "$FIRMWARE_PATH" -xdev -type f -iwholename "/boot" || true)
   for OBSD_FILE1 in "${OBSD_PATH1[@]}" ; do
     for OBSD_FILE2 in "${OBSD_PATH2[@]}" ; do
       if [[ -f "$OBSD_FILE2" ]] && [[ -f "OBSD_FILE2" ]] ; then

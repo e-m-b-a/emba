@@ -58,7 +58,7 @@ debian_status_files_search() {
         print_output "[*] Found debian package details:"
         for PACKAGE_VERSION in "${DEBIAN_PACKAGES[@]}" ; do
           # Package: xxd - Status: install ok installed - 2:8.2.3995-1+b3
-          PACKAGE=$(safe_echo "$PACKAGE_VERSION" | awk '{print $2}')
+          PACKAGE=$(safe_echo "$PACKAGE_VERSION" | awk '{print $2}' | tr -dc '[:print:]')
           VERSION=${PACKAGE_VERSION/*Version:\ /}
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
@@ -97,7 +97,7 @@ openwrt_control_files_search() {
         mapfile -t OPENWRT_PACKAGES < <(grep "^Package: \|^Version: " "$PACKAGE_FILE" | sed -z 's/\nVersion: / - Version: /g')
         print_ln
         for PACKAGE_VERSION in "${OPENWRT_PACKAGES[@]}" ; do
-          PACKAGE=$(safe_echo "$PACKAGE_VERSION" | awk '{print $2}')
+          PACKAGE=$(safe_echo "$PACKAGE_VERSION" | awk '{print $2}' | tr -dc '[:print:]')
           VERSION=${PACKAGE_VERSION/*Version:\ /}
           # What is the state in an offline firmware image? Is it installed or not?
           # Futher investigation needed!
@@ -128,4 +128,5 @@ clean_package_versions() {
   STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/-[0-9]+\.[a-d][0-9]+$//g')
   STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/:[0-9]:/:/g')
   STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | sed -r 's/^[0-9]://g')
+  STRIPPED_VERSION=$(safe_echo "$STRIPPED_VERSION" | tr -dc '[:print:]')
 }

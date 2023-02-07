@@ -32,9 +32,16 @@ S108_stacs_password_search()
   local MESSAGE=""
 
   if command -v stacs > /dev/null ; then
-    stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" > "$STACS_LOG_FILE" || true
+    stacs --skip-unprocessable --rule-pack "$STACS_RULES_DIR"/credential.json "$FIRMWARE_PATH" 2> "$TMP_DIR"/stacs.err 1> "$STACS_LOG_FILE" || true
+
+    if [[ -f "$TMP_DIR"/stacs.err ]]; then
+      print_ln
+      print_output "[*] STACS log:"
+      tee -a "$LOG_FILE" < "$TMP_DIR"/stacs.err
+    fi
 
     if [[ -f "$STACS_LOG_FILE" && $(jq ".runs[0] .results[] | .message[]" "$STACS_LOG_FILE" | wc -l) -gt 0 ]]; then
+      print_ln
       ELEMENTS_="$(jq ".runs[0] .results[] .message.text" "$STACS_LOG_FILE" | wc -l)"
       print_output "[+] Found $ORANGE$ELEMENTS_$GREEN credential areas:"
       write_csv_log "Message" "PW_PATH" "PW_HASH" "PW_HASH_real"

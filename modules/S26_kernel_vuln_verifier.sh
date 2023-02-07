@@ -245,7 +245,7 @@ S26_kernel_vuln_verifier()
     if [[ -d "$LOG_DIR""/firmware" ]]; then
       print_output "[*] Identify kernel modules symbols ..."
       find "$LOG_DIR/firmware" -name "*.ko" -exec readelf -a {} \; | grep FUNC | sed 's/.*FUNC//' | \
-        awk '{print $4}' | sed 's/\[\.\.\.\]//' >> "$LOG_PATH_MODULE"/symbols.txt
+        awk '{print $4}' | sed 's/\[\.\.\.\]//' >> "$LOG_PATH_MODULE"/symbols.txt || true
     fi
 
     uniq "$LOG_PATH_MODULE"/symbols.txt > "$LOG_PATH_MODULE"/symbols_uniq.txt
@@ -419,11 +419,11 @@ compile_verifier() {
   local K_PATH="${3:-}"
   local CVSS="${4:-}"
   local VULN_FOUND=0
-  if ! [[ -f "$LOG_PATH_MODULE"/kernel-compile-files.log ]]; then
+  if ! [[ -f "$LOG_PATH_MODULE"/kernel-compile-files_verified.log ]]; then
     return
   fi
 
-  if grep -q "$K_PATH" "$LOG_PATH_MODULE"/kernel-compile-files.log ; then
+  if grep -q "$K_PATH" "$LOG_PATH_MODULE"/kernel-compile-files_verified.log ; then
     print_output "[+] $CVE_ ($CVSS) - $K_PATH verified - compiled path"
     echo "$CVE_ ($CVSS) - $K_VERSION - compiled path verified - $K_PATH" >> "$LOG_PATH_MODULE""/${CVE_}_compiled_verified.txt"
   fi
@@ -444,6 +444,7 @@ compile_kernel() {
     print_output "[-] No supported kernel source directory found - $ORANGE$KERNEL_DIR$NC"
     return
   fi
+  print_ln
   sub_module_title "Compile Linux kernel - dry run mode"
 
   KARCH=$(echo "$KARCH" | tr '[:upper:]' '[:lower:]')
@@ -459,24 +460,40 @@ compile_kernel() {
   # LANG=en make ARCH="$KARCH" defconfig | tee -a "$LOG_PATH_MODULE"/kernel-compile-defconfig.log || true
   # print_output "[*] Finished creating default kernel config for $ORANGE$KARCH$NC architecture" "" "$LOG_PATH_MODULE/kernel-compile-defconfig.log"
   print_ln
+
   print_output "[*] Install kernel config of the identified configuration of the firmware"
   cp "$KERNEL_CONFIG_FILE" .config
   # https://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-in-the-linux-kernel-makefile
   LANG=en make ARCH="$KARCH" olddefconfig | tee -a "$LOG_PATH_MODULE"/kernel-compile-olddefconfig.log
   print_output "[*] Finished updating kernel config with the identified firmware configuration" "" "$LOG_PATH_MODULE/kernel-compile-olddefconfig.log"
   print_ln
+
   print_output "[*] Starting kernel compile dry run ..."
   LANG=en make ARCH="$KARCH" target=all -Bndi | tee -a "$LOG_PATH_MODULE"/kernel-compile.log
   print_ln
   print_output "[*] Finished kernel compile dry run ... generated used source files" "" "$LOG_PATH_MODULE/kernel-compile.log"
+
   cd "$HOME_DIR" || exit
+
   if [[ -f "$LOG_PATH_MODULE"/kernel-compile.log ]]; then
-    tr ' ' '\n' < "$LOG_PATH_MODULE"/kernel-compile.log | grep ".*\.[chS]" | tr -d '"' | tr -d ')' \
+    tr ' ' '\n' < "$LOG_PATH_MODULE"/kernel-compile.log | grep ".*\.[chS]" | tr -d '"' | tr -d ')' | tr -d '<' | tr -d '>' \
       | tr -d '(' | sed 's/^\.\///' | sed '/^\/.*/d' | tr -d ';' | sed 's/^>//' | sed 's/^-o//' | tr -d \' \
       | sed 's/--defines=//' | sed 's/\.$//' | sort -u > "$LOG_PATH_MODULE"/kernel-compile-files.log
     COMPILE_SOURCE_FILES=$(wc -l "$LOG_PATH_MODULE"/kernel-compile-files.log | awk '{print $1}')
-    print_ln
     print_output "[+] Found $ORANGE$COMPILE_SOURCE_FILES$GREEN used source files during compilation" "" "$LOG_PATH_MODULE/kernel-compile-files.log"
+
+    # lets check the entries and verify them in our kernel sources
+    # entries without a real file are not further processed
+    # with this mechanism we can eliminate garbage
+    while read -r COMPILE_SOURCE_FILE; do
+      if [[ -f "$KERNEL_DIR""/""$COMPILE_SOURCE_FILE" ]]; then
+        # print_output "[*] Verified Source file $ORANGE$KERNEL_DIR/$COMPILE_SOURCE_FILE$NC is available"
+        echo "$COMPILE_SOURCE_FILE" >> "$LOG_PATH_MODULE"/kernel-compile-files_verified.log
+      fi
+    done < "$LOG_PATH_MODULE"/kernel-compile-files.log
+    COMPILE_SOURCE_FILES_VERIFIED=$(wc -l "$LOG_PATH_MODULE"/kernel-compile-files_verified.log | awk '{print $1}')
+    print_ln
+    print_output "[+] Found $ORANGE$COMPILE_SOURCE_FILES_VERIFIED$GREEN used and available source files during compilation" "" "$LOG_PATH_MODULE/kernel-compile-files_verified.log"
   else
     print_output "[-] Found ${RED}NO$NC used source files during compilation"
   fi

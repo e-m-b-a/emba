@@ -31,6 +31,8 @@ S13_weak_func_check()
   local BINARY=""
   local VULNERABLE_FUNCTIONS=()
   local VULNERABLE_FUNCTIONS_VAR=""
+  local ERR_PRINTED=0
+
   if [[ -n "$ARCH" ]] ; then
     # This module waits for S12 - binary protections
     # check emba.log for S12_binary_protection starting
@@ -105,9 +107,11 @@ S13_weak_func_check()
             function_check_NIOS2 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "QUALCOMM DSP6" ) ; then
-          print_output "[-] Qualcom DSP6 is currently not supported for further analysis"
-          print_output "[-] Tested binary: $ORANGE$BINARY$NC"
-          print_output "[-] Please check for updates: https://github.com/e-m-b-a/emba/issues/395"
+          if [[ "$ERR_PRINTED" -eq 0 ]]; then
+            print_output "[-] Qualcom DSP6 is currently not supported from objdump"
+            print_output "[-] The binaries will be analysed from radare2 module s14"
+            ERR_PRINTED=1
+          fi
         else
           print_output "[-] Something went wrong ... no supported architecture available"
           print_output "[-] Tested binary: $ORANGE$BINARY$NC"
