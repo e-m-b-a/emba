@@ -96,7 +96,7 @@ S12_binary_protection()
         FILE=$(print_path "$FILE")
 
         printf "\t%-22.22s  %-25.25s  %-20.20s  %-20.20s  %-20.20s  %-20.20s  %-20.20s  %-5.5s  %s\n" \
-          "$RELRO" "$CANARY" "$NX" "$PIE" "$RPATH" "$RUNPATH" "$SYMBOLS" "$FORTIFY" "$FILE" | tee -a "$TMP_DIR"/s12.tmp
+          "$RELRO" "$CANARY" "$NX" "$PIE" "$RPATH" "$RUNPATH" "$SYMBOLS" "$FORTIFY" "$FILE" | tee -a "$TMP_DIR"/s12.tmp || true
         BIN_PROT_COUNTER=$((BIN_PROT_COUNTER+1))
       fi
     done

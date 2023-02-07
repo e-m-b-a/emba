@@ -76,12 +76,12 @@ module_log_init()
 module_title()
 {
   local MODULE_TITLE
-  MODULE_TITLE="$1"
+  MODULE_TITLE="${1:-}"
   local MODULE_TITLE_FORMAT
   MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""$MODULE_TITLE""${NC}""\\n""${BOLD}""=================================================================""${NC}"
-  echo -e "\\n\\n""$MODULE_TITLE_FORMAT"
+  echo -e "\\n\\n""$MODULE_TITLE_FORMAT" || true
   if [[ "${2:-}" != "no_log" ]] ; then
-    echo -e "$(format_log "$MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
+    echo -e "$(format_log "$MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null || true
     if [[ $LOG_GREP -eq 1 ]] ; then
       write_grep_log "$MODULE_TITLE" "MODULE_TITLE"
     fi
@@ -95,8 +95,8 @@ sub_module_title()
   SUB_MODULE_TITLE="${1:-}"
   local SUB_MODULE_TITLE_FORMAT
   SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""$SUB_MODULE_TITLE""${NC}""\\n-----------------------------------------------------------------"
-  echo -e "$SUB_MODULE_TITLE_FORMAT"
-  echo -e "$(format_log "$SUB_MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null
+  echo -e "$SUB_MODULE_TITLE_FORMAT" || true
+  echo -e "$(format_log "$SUB_MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null || true
   if [[ $LOG_GREP -eq 1 ]] ; then
     SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
     write_grep_log "$SUB_MODULE_TITLE" "SUB_MODULE_TITLE"

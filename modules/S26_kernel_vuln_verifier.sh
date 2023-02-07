@@ -245,7 +245,7 @@ S26_kernel_vuln_verifier()
     if [[ -d "$LOG_DIR""/firmware" ]]; then
       print_output "[*] Identify kernel modules symbols ..."
       find "$LOG_DIR/firmware" -name "*.ko" -exec readelf -a {} \; | grep FUNC | sed 's/.*FUNC//' | \
-        awk '{print $4}' | sed 's/\[\.\.\.\]//' >> "$LOG_PATH_MODULE"/symbols.txt
+        awk '{print $4}' | sed 's/\[\.\.\.\]//' >> "$LOG_PATH_MODULE"/symbols.txt || true
     fi
 
     uniq "$LOG_PATH_MODULE"/symbols.txt > "$LOG_PATH_MODULE"/symbols_uniq.txt
