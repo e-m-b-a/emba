@@ -28,16 +28,21 @@ L20_snmp_checks() {
     if [[ $IN_DOCKER -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
-    if [[ -n "$IP_ADDRESS_" ]]; then
 
-      if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-        check_live_snmp "$IP_ADDRESS_"
-      else
-        print_output "[-] System not responding - Not performing SNMP checks"
+    if [[ -n "$IP_ADDRESS_" ]]; then
+      if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
+        if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+          print_output "[-] System not responding - Not performing SNMP checks"
+          module_end_log "${FUNCNAME[0]}" "$SNMP_UP"
+          return
+        fi
       fi
+      check_live_snmp "$IP_ADDRESS_"
     else
       print_output "[!] No IP address found"
     fi
+
     write_log ""
     write_log "Statistics:$SNMP_UP"
     module_end_log "${FUNCNAME[0]}" "$SNMP_UP"

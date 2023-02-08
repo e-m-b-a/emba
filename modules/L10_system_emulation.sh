@@ -1381,7 +1381,7 @@ setup_network_emulation() {
   fi
 
   # used for generating startup scripts for offline analysis
-  ARCHIVE_PATH="$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM"
+  export ARCHIVE_PATH="$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM"
 
   if ! [[ -d "$ARCHIVE_PATH" ]]; then
     mkdir "$ARCHIVE_PATH"

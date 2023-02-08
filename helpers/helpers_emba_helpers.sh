@@ -113,6 +113,11 @@ cleaner() {
         MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
         umount -l "$MOUNT" || true
       done
+
+      if [[ -d "$LOG_DIR/s115_usermode_emulator/firmware" ]]; then
+        print_output "[*] Removing emulation directory $ORANGE$LOG_DIR/s115_usermode_emulator/firmware$NC" "no_log"
+        rm -r "$LOG_DIR/s115_usermode_emulator/firmware" || true
+      fi
     fi
 
     if [[ $(grep -i -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
