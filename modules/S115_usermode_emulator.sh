@@ -517,7 +517,6 @@ emulate_strace_run() {
         write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
         PATH_MISSING=$(dirname "$MISSING_AREA")
 
-        # FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
         FILENAME_FOUND=$(find "$EMULATION_PATH_BASE" -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"

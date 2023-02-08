@@ -34,15 +34,17 @@ restart_emulation() {
   stopping_emulation_process "$IMAGE_NAME_"
   reset_network_emulation 2
 
-  # what an ugly hack
+  # what an ugly hack - probably we are going to improve this later on
   cd "$ARCHIVE_PATH" && ./run.sh &
   cd "$INVOCATION_PATH"
 
   COUNTER=0
   while ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; do
     print_output "[*] Waiting for restarted system ..."
-    ((COUNTER+=0))
+    ((COUNTER+=1))
     [[ "$COUNTER" -gt 50 ]] && (print_output "[-] System not recovered" && return)
     sleep 6
   done
+  print_output "[*] System automatically maintained and should be available again in a few moments ..."
+  sleep 60
 }
