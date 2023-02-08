@@ -35,7 +35,8 @@ restart_emulation() {
   reset_network_emulation 2
 
   # what an ugly hack
-  "$ARCHIVE_PATH"/run.sh &
+  cd "$ARCHIVE_PATH" && ./run.sh &
+  cd "$INVOCATION_PATH"
 
   COUNTER=0
   while ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; do
