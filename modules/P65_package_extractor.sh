@@ -55,9 +55,24 @@ P65_package_extractor() {
     FILES_POST_PACKAGE=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
 
     if [[ "$FILES_POST_PACKAGE" -gt "$FILES_PRE_PACKAGE" ]]; then
-      print_ln
-      print_output "[*] Before package extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after package extraction we have now $ORANGE$FILES_POST_PACKAGE$NC files extracted."
-      NEG_LOG=1
+      # we need to update these numbers:
+      FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
+      UNIQUE_FILES=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+      DIRS_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type d | wc -l )
+      BINS=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+
+      if [[ "$BINS" -gt 0 || "$UNIQUE_FILES" -gt 0 ]]; then
+        sub_module_title "Firmware package extraction details"
+        linux_basic_identification_helper "$FIRMWARE_PATH_CP"
+        print_ln
+        print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
+        print_output "[*] Found $ORANGE$BINS$NC binaries."
+        print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
+        print_ln
+        tree -csh "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
+        print_output "[*] Before package extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after package extraction we have now $ORANGE$FILES_POST_PACKAGE$NC files extracted."
+        NEG_LOG=1
+      fi
     fi
   else
     print_output "[*] As there is no root directory detected it is not possible to process package archives"
