@@ -597,65 +597,79 @@ cve_extractor() {
   # VSOURCE is used to track the source of version details, this is relevant for the
   # final report. With this in place we know if it is from live testing via the network
   # or if it is found via static analysis or via user-mode emulation
-  if grep -q "$VERSION_orig" "$S06_LOG" 2>/dev/null || grep -q "$VERSION_orig" "$S09_LOG" 2>/dev/null; then
-    if [[ "$VSOURCE" == "unknown" ]]; then
-      VSOURCE="STAT"
-    else
-      VSOURCE="$VSOURCE""/STAT"
-    fi
-  fi
-
-  if [[ "$BINARY" == *"kernel"* ]]; then
-    if grep -q "kernel;$VERSION;" "$S25_LOG" 2>/dev/null; then
+  if [[ -v S06_LOG && -v S09_LOG ]]; then
+    if grep -q "$VERSION_orig" "$S06_LOG" 2>/dev/null || grep -q "$VERSION_orig" "$S09_LOG" 2>/dev/null; then
       if [[ "$VSOURCE" == "unknown" ]]; then
         VSOURCE="STAT"
-      elif ! [[ "$VSOURCE" =~ .*STAT.* ]]; then
+      else
         VSOURCE="$VSOURCE""/STAT"
       fi
     fi
   fi
 
-  if grep -q "$VERSION_orig" "$S116_LOG" 2>/dev/null; then
-    if [[ "$VSOURCE" == "unknown" ]]; then
-      VSOURCE="UEMU"
-    else
-      VSOURCE="$VSOURCE""/UEMU"
+  if [[ -v S25_LOG ]]; then
+    if [[ "$BINARY" == *"kernel"* ]]; then
+      if grep -q "kernel;$VERSION;" "$S25_LOG" 2>/dev/null; then
+        if [[ "$VSOURCE" == "unknown" ]]; then
+          VSOURCE="STAT"
+        elif ! [[ "$VSOURCE" =~ .*STAT.* ]]; then
+          VSOURCE="$VSOURCE""/STAT"
+        fi
+      fi
     fi
   fi
 
-  if grep -q "$VERSION_orig" "$S02_LOG" 2>/dev/null; then
-    if [[ "$VSOURCE" == "unknown" ]]; then
-      VSOURCE="FwHunt"
-    else
-      VSOURCE="$VSOURCE""/FwHunt"
-    fi
-    BINARY="UEFI firmware"
-    VERSION="unknown"
-  fi
-
-  if grep -q "$VERSION_orig" "$L35_LOG" 2>/dev/null; then
-    if [[ "$VSOURCE" == "unknown" ]]; then
-      VSOURCE="MSF verified"
-    else
-      VSOURCE="$VSOURCE""/MSF verified"
-    fi
-    BINARY="unknown"
-    VERSION="unknown"
-  fi
-
-  if grep -q "$BINARY;.*$VERSION" "$S08_LOG" 2>/dev/null; then
-    if [[ "$VSOURCE" == "unknown" ]]; then
-      VSOURCE="PACK"
-    else
-      VSOURCE="$VSOURCE""/PACK"
+  if [[ -v S116_LOG ]]; then
+    if grep -q "$VERSION_orig" "$S116_LOG" 2>/dev/null; then
+      if [[ "$VSOURCE" == "unknown" ]]; then
+        VSOURCE="UEMU"
+      else
+        VSOURCE="$VSOURCE""/UEMU"
+      fi
     fi
   fi
 
-  if grep -q "$VERSION_orig" "$L15_LOG" 2>/dev/null || grep -q "$VERSION_orig" "$L25_LOG" 2>/dev/null; then
-    if [[ "$VSOURCE" == "unknown" ]]; then
-      VSOURCE="SEMU"
-    else
-      VSOURCE="$VSOURCE""/SEMU"
+  if [[ -v S02_LOG ]]; then
+    if grep -q "$VERSION_orig" "$S02_LOG" 2>/dev/null; then
+      if [[ "$VSOURCE" == "unknown" ]]; then
+        VSOURCE="FwHunt"
+      else
+        VSOURCE="$VSOURCE""/FwHunt"
+      fi
+      BINARY="UEFI firmware"
+      VERSION="unknown"
+    fi
+  fi
+
+  if [[ -v L35_LOG ]]; then
+    if grep -q "$VERSION_orig" "$L35_LOG" 2>/dev/null; then
+      if [[ "$VSOURCE" == "unknown" ]]; then
+        VSOURCE="MSF verified"
+      else
+        VSOURCE="$VSOURCE""/MSF verified"
+      fi
+      BINARY="unknown"
+      VERSION="unknown"
+    fi
+  fi
+
+  if [[ -v S08_LOG ]]; then
+    if grep -q "$BINARY;.*$VERSION" "$S08_LOG" 2>/dev/null; then
+      if [[ "$VSOURCE" == "unknown" ]]; then
+        VSOURCE="PACK"
+      else
+        VSOURCE="$VSOURCE""/PACK"
+      fi
+    fi
+  fi
+
+  if [[ -v L15_LOG && -v L25_LOG ]]; then
+    if grep -q "$VERSION_orig" "$L15_LOG" 2>/dev/null || grep -q "$VERSION_orig" "$L25_LOG" 2>/dev/null; then
+      if [[ "$VSOURCE" == "unknown" ]]; then
+        VSOURCE="SEMU"
+      else
+        VSOURCE="$VSOURCE""/SEMU"
+      fi
     fi
   fi
 
