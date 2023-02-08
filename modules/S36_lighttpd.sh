@@ -93,6 +93,7 @@ lighttpd_binary_analysis() {
   eval "LIGHT_VERSIONS=($(for i in "${LIGHT_VERSIONS[@]}" ; do echo "\"$i\"" ; done | sort -u))"
 
   if [[ ${#LIGHT_VERSIONS[@]} -gt 0 ]] ; then
+    prepare_cve_search_module
     print_ln
     # lets do a quick vulnerability check on our lighttpd version
     if ! [[ -d "$LOG_PATH_MODULE"/cve_sum ]]; then
@@ -101,35 +102,63 @@ lighttpd_binary_analysis() {
     for LIGHT_VER in "${LIGHT_VERSIONS[@]}"; do
       cve_db_lookup_version "$LIGHT_VER"
     done
+  fi
   
-    # check for binary protections on lighttpd binaries
-    print_ln
-    print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"
-    for BIN in "${LIGHTTP_BIN_ARR[@]}" ; do
-      print_output "$("$EXT_DIR"/checksec --file="$BIN")"
-    done
+  # check for binary protections on lighttpd binaries
+  print_ln
+  print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"
+  for BIN in "${LIGHTTP_BIN_ARR[@]}" ; do
+    print_output "$("$EXT_DIR"/checksec --file="$BIN")"
+  done
 
-    print_ln
-    print_output "[*] Testing lighttpd binaries for deprecated function calls:\\n"
-    VULNERABLE_FUNCTIONS_VAR="$(config_list "$CONFIG_DIR""/functions.cfg")"
-    IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS_VAR" | sed ':a;N;$!ba;s/\n/ /g' )"
+  print_ln
+  print_output "[*] Testing lighttpd binaries for deprecated function calls:\\n"
+  VULNERABLE_FUNCTIONS_VAR="$(config_list "$CONFIG_DIR""/functions.cfg")"
+  IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "$VULNERABLE_FUNCTIONS_VAR" | sed ':a;N;$!ba;s/\n/ /g' )"
+  for BIN in "${LIGHTTP_BIN_ARR[@]}" ; do
     if ( file "$BIN" | grep -q "x86-64" ) ; then
       function_check_x86_64 "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
     elif ( file "$BIN" | grep -q "Intel 80386" ) ; then
-      function_check_x86 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+      function_check_x86 "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
     elif ( file "$BIN" | grep -q "32-bit.*ARM" ) ; then
-      function_check_ARM32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+      function_check_ARM32 "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
     elif ( file "$BIN" | grep -q "64-bit.*ARM" ) ; then
-      function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+      function_check_ARM64 "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
     elif ( file "$BIN" | grep -q "MIPS" ) ; then
       function_check_MIPS "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
     elif ( file "$BIN" | grep -q "PowerPC" ) ; then
-      function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
+      function_check_PPC32 "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
     elif ( file "$BIN" | grep -q "Altera Nios II" ) ; then
-      function_check_NIOS2 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
-    elif ( file "$BINARY" | grep -q "QUALCOMM DSP6" ) ; then
+      function_check_NIOS2 "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
+    elif ( file "$BIN" | grep -q "QUALCOMM DSP6" ) ; then
       radare_function_check_hexagon "$BIN" "${VULNERABLE_FUNCTIONS[@]}"
     fi
+  done
+}
+
+prepare_cve_search_module() {
+  # we need to setup different exports for F20
+  export CVE_COUNTER=0
+  export HIGH_CVE_COUNTER=0
+  export MEDIUM_CVE_COUNTER=0
+  export LOW_CVE_COUNTER=0
+  if command -v cve_searchsploit > /dev/null ; then
+    export CVE_SEARCHSPLOIT=1
+  fi
+  if [[ -f "$MSF_DB_PATH" ]]; then
+    export MSF_SEARCH=1
+  fi
+  if [[ -f "$TRICKEST_DB_PATH" ]]; then
+    export TRICKEST_SEARCH=1
+  fi
+  if [[ -f "$CONFIG_DIR"/routersploit_cve-db.txt || -f "$CONFIG_DIR"/routersploit_exploit-db.txt ]]; then
+    export RS_SEARCH=1
+  fi
+  if [[ -f "$CONFIG_DIR"/PS_PoC_results.csv ]]; then
+    export PS_SEARCH=1
+  fi
+  if [[ -f "$CONFIG_DIR"/Snyk_PoC_results.csv ]]; then
+    export SNYK_SEARCH=1
   fi
 }
 
@@ -189,11 +218,11 @@ lighttpd_config_analysis() {
     print_output "[*] Testing web server pemfile location"
     if grep -E "ssl.pemfile" "$LIGHTTPD_CONFIG" | grep -q -E -v "^([[:space:]])?#"; then
       print_output "[*] ${ORANGE}Configuration note:$NC Web server using the following pem file"
-      print_output "$(indent "$(orange "$(grep -E "ssl.pemfile" "$LIGHTTPD_CONFIG" | sort -u | grep -E -v "^([[:space:]])?#")")")"
-      mapfile -t PEM_FILES < <(grep -E "ssl.pemfile" "$LIGHTTPD_CONFIG" | sort -u | grep -E -v "^([[:space:]])?#" | cut -d= -f2 | tr -d '"')
+      print_output "$(indent "$(orange "$(grep -E "ssl.pemfile" "$LIGHTTPD_CONFIG" | sort -u | grep -E -v "^([[:space:]])?#" || true)")")"
+      mapfile -t PEM_FILES < <(grep -E "ssl.pemfile" "$LIGHTTPD_CONFIG" | sort -u | grep -E -v "^([[:space:]])?#" | cut -d= -f2 | tr -d '"' || true)
       for PEM_FILE in "${PEM_FILES[@]}"; do
         PEM_FILE=$(echo "$PEM_FILE" | tr -d "[:space:]")
-        mapfile -t REAL_PEMS < <(find "$FIRMWARE_PATH" -wholename "*$PEM_FILE")
+        mapfile -t REAL_PEMS < <(find "$FIRMWARE_PATH" -wholename "*$PEM_FILE" || true)
         for REAL_PEM in "${REAL_PEMS[@]}"; do
           print_output "[*] ${ORANGE}Configuration note:${NC} Web server pem file found: $ORANGE$REAL_PEM$NC"
           print_output "[*] $(find "$REAL_PEM" -ls)"
