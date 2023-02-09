@@ -303,6 +303,11 @@ module_wait() {
   done
 
   while [[ $(grep -i -c "$MODULE_TO_WAIT finished" "$MAIN_LOG" || true) -ne 1 ]]; do
+    if grep -q "$MODULE_TO_WAIT not executed - blacklist triggered" "$MAIN_LOG"; then
+      print_output "[-] Module $ORANGE$MODULE_TO_WAIT$NC blacklisted - not waiting" "main"
+      # if our module which we are waiting is on the blacklist we can just return
+      return
+    fi
     sleep 1
   done
 }

@@ -46,7 +46,7 @@ S99_grepit() {
   local GREPIT_RESULTS=0
 
   local MAX_MOD_THREADS=1
-  local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
+  local MEM_LIMIT=$(( "$TOTAL_MEMORY"/3 ))
 
 
   # grepit options:
