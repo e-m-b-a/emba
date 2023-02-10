@@ -2046,7 +2046,7 @@ write_results() {
     FIRMWARE_PATH_orig="$(cat "$TMP_DIR"/fw_name.log)"
   fi
   local ARCHIVE_PATH_="${1:-}"
-  ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d\/ -f1 | rev)"
+  ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"
   echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED; ICMP $ICMP; TCP-0 $TCP_0;TCP $TCP; IP address: $IP_ADDRESS_; Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""
 }
