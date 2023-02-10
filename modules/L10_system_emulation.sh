@@ -631,7 +631,7 @@ main_emulation() {
         fi
 
         RESULT_SOURCE="EMBA"
-        write_results
+        write_results "$ARCHIVE_PATH"
 
         # if we are going to execute L15 then we do not reset the network environment now
         # we just write the commands to run.sh
@@ -2045,7 +2045,9 @@ write_results() {
     local FIRMWARE_PATH_orig
     FIRMWARE_PATH_orig="$(cat "$TMP_DIR"/fw_name.log)"
   fi
-  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED; ICMP $ICMP; TCP-0 $TCP_0;TCP $TCP; IP address: $IP_ADDRESS_; Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE)" >> "$LOG_DIR"/emulator_online_results.log
+  local ARCHIVE_PATH_="${1:-}"
+  ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d\/ -f1 | rev)"
+  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED; ICMP $ICMP; TCP-0 $TCP_0;TCP $TCP; IP address: $IP_ADDRESS_; Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""
 }
 
