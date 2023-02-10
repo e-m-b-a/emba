@@ -68,11 +68,9 @@ S115_usermode_emulator() {
     readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
 
     # as we modify the firmware area, we copy it to the log directory and do the modifications in this area
-    # Note: only for firmware directories - if we have already extracted the firmware we do not copy it again
     copy_firmware
 
-    # we only need to detect the root directory again if we have copied it before
-    [[ -d "$FIRMWARE_PATH_BAK" ]] && detect_root_dir_helper "$EMULATION_PATH_BASE"
+    detect_root_dir_helper "$EMULATION_PATH_BASE"
     kill_qemu_threader &
     PID_killer+="$!"
 
