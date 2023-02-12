@@ -20,6 +20,7 @@ STRICT_MODE=1
 if [[ "$STRICT_MODE" -eq 1 ]]; then
   # shellcheck disable=SC1091
   source ./installer/wickStrictModeFail.sh
+  DEBUG_SCRIPT=0
   # shellcheck disable=SC1091
   source ./helpers/helpers_emba_load_strict_settings.sh
   load_strict_mode_settings
