@@ -645,9 +645,7 @@ emulate_binary() {
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
   # This is very ugly and should only be used in docker environment!
-  # killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
   pkill -9 -O "$QRUNTIME" -f .*qemu-.*-sta.* || true
-  # killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.* || true
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
 }
 
@@ -739,14 +737,12 @@ s115_cleanup() {
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
     print_output "[*] Terminating qemu processes - check it with ps"
-    # killall -9 --quiet -r .*qemu.*sta.* || true
     pkill -9 -f .*qemu-.*-sta.* || true
   fi
 
   CJOBS_=$(pgrep -f qemu- || true)
   if [[ -n "$CJOBS_" ]] ; then
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
-    # killall -9 "$EMULATOR" 2> /dev/null || true
     pkill -9 -f .*"$EMULATOR".* || true
   fi
   kill -9 "$PID_killer" || true
