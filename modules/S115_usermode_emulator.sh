@@ -201,7 +201,6 @@ S115_usermode_emulator() {
     print_output "[!] Automated emulation is disabled."
     print_output "[!] Enable it with the $ORANGE-E$MAGENTA switch.$NC"
   fi
-  wait
 
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
