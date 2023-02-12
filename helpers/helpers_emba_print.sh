@@ -255,14 +255,14 @@ write_log()
 write_csv_log() {
   local CSV_ITEMS=("$@")
   if ! [[ -d "$CSV_DIR" ]]; then
-    print_output "[-] WARNING: Directory $ORANGE$CSV_DIR$NC not found"
+    print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
     return
   fi
   CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
   CSV_LOG="$CSV_DIR""/""$CSV_LOG"
 
-  printf '%s;\n' "${CSV_ITEMS[@]}" | tee -a "$CSV_LOG" >/dev/null
-  #printf '\n' | tee -a "$CSV_LOG" >/dev/null
+  printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_LOG" || true
+  printf '\n' >> "$CSV_LOG" || true
 }
 
 write_grep_log()

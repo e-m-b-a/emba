@@ -673,11 +673,10 @@ running_jobs() {
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
-    CJOBS=$(pgrep -f -a "$EMULATOR" || true)
+    CJOBS=$(pgrep -f -c -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
       print_ln "no_log"
-      print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)" "no_log"
-      print_output "$(indent "$CJOBS")""\\n" "no_log"
+      print_output "[*] Currently running emulation jobs: $ORANGE$CJOBS$NC" "no_log"
     else
       CJOBS="NA"
     fi
@@ -688,7 +687,7 @@ kill_qemu_threader() {
   # WARNING: This is so *** ugly! FIX IT!
   # Currently this should only used in docker environment!
   while true; do
-    print_output "[!] KILLING qemu processes" "no_log"
+    print_output "[*] KILLING qemu processes" "no_log"
     pkill -9 -O 240 -f .*qemu-.*-sta.* || true
     sleep 20
   done
