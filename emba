@@ -326,7 +326,7 @@ main()
   export RELEASE=0
   export EMBA_VERSION="1.2.x"
   export STRICT_MODE=0
-  export DEBUG=0
+  export DEBUG_SCRIPT=0
   export UPDATE=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
