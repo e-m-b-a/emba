@@ -101,18 +101,26 @@ cleaner() {
   # otherwise the unmounter runs crazy in some corner cases
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" && "${#FILE_ARR[@]}" -gt 0 ]]; then
     if [[ $(grep -i -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
+
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu-.*-sta.* || true
       print_output "[*] Cleaning the emulation environment\\n" "no_log"
-      find "$FIRMWARE_PATH_CP" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
+      find "$FIRMWARE_PATH_CP" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
+      find "$LOG_DIR/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
+
       print_output "[*] Umounting proc, sys and run" "no_log"
-      mapfile -t CHECK_MOUNTS < <(mount | grep "$FIRMWARE_PATH_CP" 2>/dev/null || true)
+      mapfile -t CHECK_MOUNTS < <(mount | grep "s115_usermode_emulator" 2>/dev/null || true)
       # now we can unmount the stuff from emulator and delete temporary stuff
       for MOUNT in "${CHECK_MOUNTS[@]}"; do
         print_output "[*] Unmounting $MOUNT" "no_log"
         MOUNT=$(echo "$MOUNT" | cut -d\  -f3)
         umount -l "$MOUNT" || true
       done
+
+      if [[ -d "$LOG_DIR/s115_usermode_emulator/firmware" ]]; then
+        print_output "[*] Removing emulation directory $ORANGE$LOG_DIR/s115_usermode_emulator/firmware$NC" "no_log"
+        rm -r "$LOG_DIR/s115_usermode_emulator/firmware" || true
+      fi
     fi
 
     if [[ $(grep -i -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
@@ -289,7 +297,7 @@ module_wait() {
   local MODULE_TO_WAIT="${1:-}"
   # if the module we should wait is not in our module array we return without waiting
   if ! [[ " ${MODULES_EXPORTED[*]} " == *"${MODULE_TO_WAIT}"* ]]; then
-    print_output "[-] Module $ORANGE$MODULE_TO_WAIT$NC not in module array - this will result in unexpected behavior" "main"
+    print_output "[-] $(date) - $MODULE_TO_WAIT not in module array - this will result in unexpected behavior" "main"
     return
   fi
 
@@ -298,6 +306,11 @@ module_wait() {
   done
 
   while [[ $(grep -i -c "$MODULE_TO_WAIT finished" "$MAIN_LOG" || true) -ne 1 ]]; do
+    if grep -q "$MODULE_TO_WAIT not executed - blacklist triggered" "$MAIN_LOG"; then
+      print_output "[-] $(date) - $MODULE_TO_WAIT blacklisted - not waiting" "main"
+      # if our module which we are waiting is on the blacklist we can just return
+      return
+    fi
     sleep 1
   done
 }

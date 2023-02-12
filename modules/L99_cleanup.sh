@@ -26,7 +26,7 @@ L99_cleanup() {
     if [[ -n "$IP_ADDRESS_" ]]; then
       if [[ -n "$IMAGE_NAME" ]]; then
         # stop function from L10
-        stopping_emulation_process
+        stopping_emulation_process "$IMAGE_NAME"
       fi
 
       # now we only execute the network reset

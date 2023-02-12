@@ -29,9 +29,7 @@ L15_emulated_checks_nmap() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ -n "$IP_ADDRESS_" ]]; then
-
       check_live_nmap_basic "$IP_ADDRESS_"
-
       MODULE_END=1
     else
       print_output "[!] No IP address found"
@@ -40,7 +38,6 @@ L15_emulated_checks_nmap() {
     write_log "[*] Statistics:${#NMAP_SERVICES[@]}"
     module_end_log "${FUNCNAME[0]}" "$MODULE_END"
   fi
-
 }
 
 check_live_nmap_basic() {
@@ -72,6 +69,13 @@ check_live_nmap_basic() {
     done
   else
     # if no Nmap results are found we initiate a scan
+    if ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+      restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
+      if ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+        print_output "[-] System not responding - Not performing Nmap checks"
+        return
+      fi
+    fi
     nmap -Pn -n -sSV -A --host-timeout 30m "$IP_ADDRESS_" -oA "$LOG_PATH_MODULE"/nmap-basic-"$IP_ADDRESS_" | tee -a "$LOG_FILE"
   fi
   print_ln

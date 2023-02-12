@@ -68,11 +68,9 @@ S115_usermode_emulator() {
     readarray -t BIN_BLACKLIST < "$CONFIG_DIR"/emulation_blacklist.cfg
 
     # as we modify the firmware area, we copy it to the log directory and do the modifications in this area
-    # Note: only for firmware directories - if we have already extracted the firmware we do not copy it again
     copy_firmware
 
-    # we only need to detect the root directory again if we have copied it before
-    [[ -d "$FIRMWARE_PATH_BAK" ]] && detect_root_dir_helper "$EMULATION_PATH_BASE"
+    detect_root_dir_helper "$EMULATION_PATH_BASE"
     kill_qemu_threader &
     export PID_killer="$!"
     disown "$PID_killer" 2> /dev/null || true
@@ -206,19 +204,25 @@ S115_usermode_emulator() {
 }
 
 copy_firmware() {
-  EMULATION_PATH_BASE="$LOG_DIR"/firmware
-  # we just create a backup if the original firmware path was a root directory
-  # if it was a binary file we already have extracted it and it is already messed up
-  # so we can mess it up a bit more ;)
   if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
+    EMULATION_PATH_BASE="$FIRMWARE_PATH"
+  else
+    EMULATION_PATH_BASE="$LOG_DIR"/firmware
+  fi
+
+  # we create a backup copy for user mode emulation only if we have enough disk space.
+  # If there is not enough disk space we use the original firmware directory
+  FREE_SPACE="$(df --output=avail "$LOG_DIR" | awk 'NR==2')"
+  NEEDED_SPACE="$(( "$(du --max-depth=0 "$EMULATION_PATH_BASE" | awk '{print $1}')" + 10000 ))"
+
+  if [[ "$FREE_SPACE" -gt "$NEEDED_SPACE" ]]; then
     print_output "[*] Create a firmware backup for emulation ..."
-    cp -pri "$FIRMWARE_PATH" "$LOG_PATH_MODULE" 2> /dev/null
-    EMULATION_DIR=$(basename "$FIRMWARE_PATH")
-    EMULATION_PATH_BASE="$LOG_PATH_MODULE"/"$EMULATION_DIR"
+    cp -pri "$EMULATION_PATH_BASE" "$LOG_PATH_MODULE"/firmware 2> /dev/null
+    EMULATION_PATH_BASE="$LOG_PATH_MODULE"/firmware
     print_output "[*] Firmware backup for emulation created in $ORANGE$EMULATION_PATH_BASE$NC"
   else
-    EMULATION_DIR=$(basename "$FIRMWARE_PATH")
-    EMULATION_PATH_BASE="$LOG_DIR"/"$EMULATION_DIR"
+    print_output "[!] WARNING: Not enough disk space available - we do not create a firmware backup for emulation ..."
+    EMULATION_PATH_BASE="$LOG_DIR"/firmware
     print_output "[*] Firmware used for emulation in $ORANGE$EMULATION_PATH_BASE$NC"
   fi
 }
@@ -527,7 +531,7 @@ emulate_strace_run() {
         write_log "[*] Trying to identify this missing file: $ORANGE$FILENAME_MISSING$NC" "$LOG_FILE_STRACER"
         PATH_MISSING=$(dirname "$MISSING_AREA")
 
-        FILENAME_FOUND=$(find "$LOG_DIR"/firmware -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
+        FILENAME_FOUND=$(find "$EMULATION_PATH_BASE" -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
         fi
@@ -784,11 +788,10 @@ s115_cleanup() {
       print_output "[+]""${NC}"" Emulated binary ""${GREEN}""$BIN""${NC}"" generated output in ""${GREEN}""$LOG_FILE_""${NC}""." "" "$LOG_FILE_"
     done
   fi
-  # if we got a firmware directory then we have created a backup for emulation
-  # lets delete it now
-  if [[ -d "$FIRMWARE_PATH_BAK" ]]; then
+  # if we created a backup for emulation - lets delete it now
+  if [[ -d "$LOG_PATH_MODULE/firmware" ]]; then
     print_output "[*] Remove firmware copy from emulation directory.\\n\\n"
-    rm -r "$EMULATION_PATH_BASE" || true
+    rm -r "$LOG_PATH_MODULE"/firmware || true
   fi
 }
 

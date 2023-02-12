@@ -39,12 +39,12 @@ ID1_ubuntu_os() {
         # libssl1.1 missing
         echo -e "\\n""$BOLD""Installing libssl1.1 for mongodb!""$NC"
         # echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
-        wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04.20_amd64.deb -O external/libssl-dev_1.1.1-1ubuntu2.1~18.04.20_amd64.deb
-        wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.20_amd64.deb -O external/libssl1.1_1.1.1-1ubuntu2.1~18.04.20_amd64.deb
-        dpkg -i external/libssl1.1_1.1.1-1ubuntu2.1~18.04.20_amd64.deb
-        dpkg -i external/libssl-dev_1.1.1-1ubuntu2.1~18.04.20_amd64.deb
-        rm external/libssl1.1_1.1.1-1ubuntu2.1~18.04.20_amd64.deb
-        rm external/libssl-dev_1.1.1-1ubuntu2.1~18.04.20_amd64.deb
+        wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04.21_amd64.deb -O external/libssl-dev_1.1.1-1ubuntu2.1~18.04.21_amd64.deb
+        wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.21_amd64.deb -O external/libssl1.1_1.1.1-1ubuntu2.1~18.04.21_amd64.deb
+        dpkg -i external/libssl1.1_1.1.1-1ubuntu2.1~18.04.21_amd64.deb
+        dpkg -i external/libssl-dev_1.1.1-1ubuntu2.1~18.04.21_amd64.deb
+        rm external/libssl1.1_1.1.1-1ubuntu2.1~18.04.21_amd64.deb
+        rm external/libssl-dev_1.1.1-1ubuntu2.1~18.04.21_amd64.deb
     fi
 
     if [[ "$WSL" -eq 1 ]]; then
