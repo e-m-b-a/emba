@@ -324,8 +324,9 @@ main()
   export EMBA_PID="$$"
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
   export RELEASE=0
-  export EMBA_VERSION="1.2.1"
+  export EMBA_VERSION="1.2.x"
   export STRICT_MODE=0
+  export DEBUG=0
   export UPDATE=0
   export ARCH_CHECK=1
   export RTOS=0                 # Testing RTOS based OS
@@ -440,12 +441,14 @@ main()
   EMBA_COMMAND="$(dirname "$0")""/emba ""$*"
 
   while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:N:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
-    case $OPT in
+    case "$OPT" in
       a)
-        export ARCH="$OPTARG"
+        check_alnum "$OPTARG"
+        export ARCH="$(escape_echo "$OPTARG")"
         ;;
       A)
-        export ARCH="$OPTARG"
+        check_alnum "$OPTARG"
+        export ARCH="$(escape_echo "$OPTARG")"
         export ARCH_CHECK=0
         ;;
       b)
@@ -458,7 +461,8 @@ main()
       C)
         # container extract only works outside the docker container
         # lets extract it outside and afterwards start the EMBA docker
-        export CONTAINER_ID="$OPTARG"
+        check_alnum "$OPTARG"
+        export CONTAINER_ID="$(escape_echo "$OPTARG")"
         export CONTAINER_EXTRACT=1
         ;;
       c)
@@ -472,17 +476,20 @@ main()
         ;;
       D)
         # new debugging mode
+        # EMBA runs without docker in full install mode
         export USE_DOCKER=0
         ;;
       e)
-        export EXCLUDE=("${EXCLUDE[@]}" "$OPTARG")
+        check_path_input "$OPTARG"
+        export EXCLUDE=("${EXCLUDE[@]}" "$(escape_echo "$OPTARG")")
         ;;
       E)
         export QEMULATION=1
         ;;
       f)
+        check_path_input "$OPTARG"
         export FIRMWARE=1
-        export FIRMWARE_PATH="$OPTARG"
+        export FIRMWARE_PATH="$(escape_echo "$OPTARG")"
         readonly FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
         export FIRMWARE_PATH_BAK                      # we store the original firmware path variable and make it readonly
         ;;
@@ -505,29 +512,35 @@ main()
         export JUMP_OVER_CVESEARCH_CHECK=1
         ;;
       k)
+        check_path_input "$OPTARG"
         export KERNEL=1
-        export KERNEL_CONFIG="$OPTARG"
+        export KERNEL_CONFIG="$(escape_echo "$OPTARG")"
         if [[ "$FIRMWARE" -ne 1 ]]; then
           # this is little hack to enable kernel config only checks
           export FIRMWARE_PATH="$KERNEL_CONFIG"
         fi
         ;;
       l)
-        export LOG_DIR="$OPTARG"
+        check_path_input "$OPTARG"
+        export LOG_DIR="$(escape_echo "$OPTARG")"
         export TMP_DIR="$LOG_DIR""/tmp"
         export CSV_DIR="$LOG_DIR""/csv_logs"
         ;;
       m)
-        SELECT_MODULES=("${SELECT_MODULES[@]}" "$OPTARG")
+        check_alnum "$OPTARG"
+        SELECT_MODULES=("${SELECT_MODULES[@]}" "$(escape_echo "$OPTARG")")
         ;;
       N)
-        export FW_NOTES="$OPTARG"
+        check_alnum "$OPTARG"
+        export FW_NOTES="$(escape_echo "$OPTARG")"
         ;;
       p)
-        export PROFILE="$OPTARG"
+        check_path_input "$OPTARG"
+        export PROFILE="$(escape_echo "$OPTARG")"
        ;;
       P)
-        export MAX_MODS="$OPTARG"
+        check_int "$OPTARG"
+        export MAX_MODS="$(escape_echo "$OPTARG")"
         ;;
       Q)
         export FULL_EMULATION=1
@@ -545,7 +558,8 @@ main()
         export THREADED=1
         ;;
       T)
-        export MAX_MOD_THREADS="$OPTARG"
+        check_int "$OPTARG"
+        export MAX_MOD_THREADS="$(escape_echo "$OPTARG")"
         ;;
       U)
         export UPDATE=1
@@ -557,19 +571,22 @@ main()
         export HTML=1
         ;;
       X)
-        export FW_VERSION="$OPTARG"
+        check_version "$OPTARG"
+        export FW_VERSION="$(escape_echo "$OPTARG")"
         ;;
       y)
         export OVERWRITE_LOG=1
         ;;
       Y)
-        export FW_VENDOR="$OPTARG"
+        check_alnum "$OPTARG"
+        export FW_VENDOR="$(escape_echo "$OPTARG")"
         ;;
       z)
         export FORMAT_LOG=1
         ;;
       Z)
-        export FW_DEVICE="$OPTARG"
+        check_alnum "$OPTARG"
+        export FW_DEVICE="$(escape_echo "$OPTARG")"
         ;;
       *)
         print_output "[-] Invalid option" "no_log"

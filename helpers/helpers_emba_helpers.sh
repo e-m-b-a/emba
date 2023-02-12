@@ -42,7 +42,7 @@ wait_for_pid() {
       print_dot
       # if S115 is running we have to kill old qemu processes
       if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -i -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 && -n "$QRUNTIME" ]]; then
-        killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
+        killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.*-sta.* || true
       fi
     done
   done
@@ -102,7 +102,12 @@ cleaner() {
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" && "${#FILE_ARR[@]}" -gt 0 ]]; then
     if [[ $(grep -i -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
+<<<<<<< Updated upstream
       killall -9 --quiet -r .*qemu.*sta.* || true
+=======
+      killall -9 --quiet -r .*qemu-.*-sta.* || true
+
+>>>>>>> Stashed changes
       print_output "[*] Cleaning the emulation environment\\n" "no_log"
       find "$FIRMWARE_PATH_CP" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null
       print_output "[*] Umounting proc, sys and run" "no_log"

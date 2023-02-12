@@ -182,6 +182,38 @@ escape_echo() {
   fi
 }
 
+check_int() {
+  local INT_TO_CHECK="${1:-}"
+  if [[ -n "${INT_TO_CHECK//[0-9]/}" ]]; then
+    print_output "[-] Invalid input detected - integers only" "no_log"
+    exit 1
+  fi
+}
+
+check_alnum() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9]+$ ]]; then
+    print_output "[-] Invalid input detected - alphanumerical only" "no_log"
+    exit 1
+  fi
+}
+
+check_path_input() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
+    print_output "[-] Invalid input detected - paths aka ~/abc/def123/ASDF only" "no_log"
+    exit 1
+  fi
+}
+
+check_version() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~:'-']+$ ]]; then
+    print_output "[-] Invalid input detected - versions aka 1.2.3-a:b only" "no_log"
+    exit 1
+  fi
+}
+
 print_ln()
 {
   local LOG_SETTING="${1:-}"

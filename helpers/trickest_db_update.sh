@@ -31,7 +31,8 @@ fi
 
 echo -e "[*] Update the trickest database\n"
 if [[ -f "$TRICKEST_DB_PATH" ]]; then
-  echo -e "${GREEN}[*] Trickest CVE database has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$GREEN exploit entries (before update).$NC"
+  TRICKEST_DB_ENTRIES_INIT="$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')"
+  echo -e "${GREEN}[*] Trickest CVE database has $ORANGE$TRICKEST_DB_ENTRIES_INIT$GREEN exploit entries (before update).$NC"
 fi
 
 if [[ -d "$EMBA_EXT_DIR"/trickest-cve ]]; then
@@ -56,6 +57,7 @@ if [[ -d "$EMBA_EXT_DIR"/trickest-cve ]]; then
 
   if [[ -f "$TRICKEST_DB_PATH" ]]; then
     echo -e "${GREEN}[+] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$GREEN exploit entries (after update)."
+    echo -e "${GREEN}[+] Before update: $ORANGE$TRICKEST_DB_ENTRIES_INIT$NC."
   fi
 else
   echo "[-] No update of the Trickest exploit database performed."

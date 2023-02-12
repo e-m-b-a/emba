@@ -601,9 +601,11 @@ main_emulation() {
         NMAP_LOG="nmap_emba_$IPS_INT_VLAN_CFG_mod.txt"
 
         check_online_stat "$IP_ADDRESS_" "$NMAP_LOG" &
+        CHECK_ONLINE_STAT_PID="$!"
 
         # we kill this process from "check_online_stat:"
         tail -F "$LOG_PATH_MODULE/qemu.final.serial.log" 2>/dev/null || true
+        kill -9 "$CHECK_ONLINE_STAT_PID" || true
 
         # set default state
         ICMP="not ok"
@@ -952,14 +954,26 @@ identify_networking_emulation() {
   fi
 
   run_network_id_emulation &
+  PID="$!"
+  disown "$PID" 2> /dev/null || true
   run_kpanic_identification &
+  KPANIC_PID="$!"
+  disown "$KPANIC_PID" 2> /dev/null || true
 
-  timeout 660 tail -F "$LOG_PATH_MODULE/qemu.initial.serial.log" 2>/dev/null || true
+  print_output "[!] Say asdf $(date)"
+  # timeout 660 tail -F "$LOG_PATH_MODULE/qemu.initial.serial.log" 2>/dev/null || true
+  timeout --preserve-status --signal SIGINT 660 tail -F "$LOG_PATH_MODULE/qemu.initial.serial.log" 2>/dev/null || true
+  PID="$!"
+  disown "$PID" 2> /dev/null || true
+
+  print_output "[!] Say HI $(date)"
   stopping_emulation_process "$IMAGE_NAME"
+  print_output "[!] Say BYE $(date)"
 
   if ! [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
   fi
+  kill -9 "$KPANIC_PID" >/dev/null || true
 }
 
 run_kpanic_identification() {
@@ -1014,7 +1028,7 @@ run_network_id_emulation() {
   print_output "[*] Starting firmware emulation for network identification - $ORANGE$QEMU_BIN / $ARCH_END / $IMAGE_NAME$NC ... use Ctrl-a + x to exit"
   print_ln
 
-  write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait ; pkill -9 -f tail.*-F.*\"$LOG_PATH_MODULE\"" /tmp/do_not_create_run.sh 3
+  write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait ; echo "KILLING" ; pkill -9 -f tail.*-F.*\"$LOG_PATH_MODULE\"" /tmp/do_not_create_run.sh 3
 }
 
 get_networking_details_emulation() {
@@ -1853,6 +1867,11 @@ stopping_emulation_process() {
   local IMAGE_NAME_="${1:-}"
   print_output "[*] Stopping emulation process"
   pkill -9 -f "qemu-system-.*$IMAGE_NAME_.*" &>/dev/null || true
+  local frame=0
+  while caller $frame; do
+    ((++frame));
+  done
+  echo "$*"
   sleep 1
 }
 
@@ -1933,6 +1952,8 @@ write_script_exec() {
 
   if [[ "$EXECUTE" -ne 0 ]];then
     eval "$COMMAND" || true &
+    PID="$!"
+    disown "$PID" 2> /dev/null || true
   fi
 
   if [[ "$EXECUTE" -ne 2 ]];then
