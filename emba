@@ -440,7 +440,7 @@ main()
   export EMBA_COMMAND
   EMBA_COMMAND="$(dirname "$0")""/emba ""$*"
 
-  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:N:p:P:QrsStT:UxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:N:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
     case "$OPT" in
       a)
         check_alnum "$OPTARG"
@@ -577,6 +577,10 @@ main()
         ;;
       U)
         export UPDATE=1
+        ;;
+      V)
+        print_output "[+] EMBA version: $ORANGE$EMBA_VERSION$NC" "no_log"
+        exit 0
         ;;
       x)
         export DEEP_EXTRACTOR=1

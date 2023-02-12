@@ -545,6 +545,7 @@ print_help()
   echo -e "$CYAN""-d""$NC""                Only checks dependencies"
   echo -e "$CYAN""-F""$NC""                Checks dependencies but ignore errors"
   echo -e "$CYAN""-U""$NC""                Check and apply available updates and exit"
+  echo -e "$CYAN""-V""$NC""                Show EMBA version"
   echo -e "\\nSpecial tests"
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
   echo -e "$CYAN""-C [container id]""$NC"" Extract and analyze a local docker container via container id"
