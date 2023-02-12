@@ -545,6 +545,10 @@ main()
         check_path_input "$OPTARG"
         export PROFILE=""
         PROFILE="$(escape_echo "$OPTARG")"
+        if ! [[ -f "$PROFILE" ]]; then
+          print_output "[-] No profile found!" "no_log"
+          exit 1
+        fi
        ;;
       P)
         check_int "$OPTARG"
