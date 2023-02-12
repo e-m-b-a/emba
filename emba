@@ -444,11 +444,13 @@ main()
     case "$OPT" in
       a)
         check_alnum "$OPTARG"
-        export ARCH="$(escape_echo "$OPTARG")"
+        export ARCH=""
+        ARCH="$(escape_echo "$OPTARG")"
         ;;
       A)
         check_alnum "$OPTARG"
-        export ARCH="$(escape_echo "$OPTARG")"
+        export ARCH=""
+        ARCH="$(escape_echo "$OPTARG")"
         export ARCH_CHECK=0
         ;;
       b)
@@ -462,7 +464,8 @@ main()
         # container extract only works outside the docker container
         # lets extract it outside and afterwards start the EMBA docker
         check_alnum "$OPTARG"
-        export CONTAINER_ID="$(escape_echo "$OPTARG")"
+        export CONTAINER_ID=""
+        CONTAINER_ID="$(escape_echo "$OPTARG")"
         export CONTAINER_EXTRACT=1
         ;;
       c)
@@ -489,7 +492,8 @@ main()
       f)
         check_path_input "$OPTARG"
         export FIRMWARE=1
-        export FIRMWARE_PATH="$(escape_echo "$OPTARG")"
+        export FIRMWARE_PATH=""
+        FIRMWARE_PATH="$(escape_echo "$OPTARG")"
         readonly FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
         export FIRMWARE_PATH_BAK                      # we store the original firmware path variable and make it readonly
         ;;
@@ -514,7 +518,8 @@ main()
       k)
         check_path_input "$OPTARG"
         export KERNEL=1
-        export KERNEL_CONFIG="$(escape_echo "$OPTARG")"
+        export KERNEL_CONFIG=""
+        KERNEL_CONFIG="$(escape_echo "$OPTARG")"
         if [[ "$FIRMWARE" -ne 1 ]]; then
           # this is little hack to enable kernel config only checks
           export FIRMWARE_PATH="$KERNEL_CONFIG"
@@ -522,7 +527,8 @@ main()
         ;;
       l)
         check_path_input "$OPTARG"
-        export LOG_DIR="$(escape_echo "$OPTARG")"
+        export LOG_DIR=""
+        LOG_DIR="$(escape_echo "$OPTARG")"
         export TMP_DIR="$LOG_DIR""/tmp"
         export CSV_DIR="$LOG_DIR""/csv_logs"
         ;;
@@ -532,15 +538,18 @@ main()
         ;;
       N)
         check_alnum "$OPTARG"
-        export FW_NOTES="$(escape_echo "$OPTARG")"
+        export FW_NOTES=""
+        FW_NOTES="$(escape_echo "$OPTARG")"
         ;;
       p)
         check_path_input "$OPTARG"
-        export PROFILE="$(escape_echo "$OPTARG")"
+        export PROFILE=""
+        PROFILE="$(escape_echo "$OPTARG")"
        ;;
       P)
         check_int "$OPTARG"
-        export MAX_MODS="$(escape_echo "$OPTARG")"
+        export MAX_MODS=""
+        MAX_MODS="$(escape_echo "$OPTARG")"
         ;;
       Q)
         export FULL_EMULATION=1
@@ -559,7 +568,8 @@ main()
         ;;
       T)
         check_int "$OPTARG"
-        export MAX_MOD_THREADS="$(escape_echo "$OPTARG")"
+        export MAX_MOD_THREADS=""
+        MAX_MOD_THREADS="$(escape_echo "$OPTARG")"
         ;;
       U)
         export UPDATE=1
@@ -572,21 +582,24 @@ main()
         ;;
       X)
         check_version "$OPTARG"
-        export FW_VERSION="$(escape_echo "$OPTARG")"
+        export FW_VERSION=""
+        FW_VERSION="$(escape_echo "$OPTARG")"
         ;;
       y)
         export OVERWRITE_LOG=1
         ;;
       Y)
         check_alnum "$OPTARG"
-        export FW_VENDOR="$(escape_echo "$OPTARG")"
+        export FW_VENDOR=""
+        FW_VENDOR="$(escape_echo "$OPTARG")"
         ;;
       z)
         export FORMAT_LOG=1
         ;;
       Z)
         check_alnum "$OPTARG"
-        export FW_DEVICE="$(escape_echo "$OPTARG")"
+        export FW_DEVICE=""
+        FW_DEVICE="$(escape_echo "$OPTARG")"
         ;;
       *)
         print_output "[-] Invalid option" "no_log"
