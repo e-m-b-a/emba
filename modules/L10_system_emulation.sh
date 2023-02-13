@@ -91,6 +91,15 @@ L10_system_emulation() {
             # do not test other root paths if we are already online (some ports are available)
             break
           fi
+          # if [[ -f "$LOG_DIR"/emulator_online_results.log ]]; then
+          #  if [[ $(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true) -gt 1 ]]; then
+          #    print_output "[+] Identified the following system emulation results:"
+          #    print_output "$(indent "$(orange "$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)")")"
+          #    print_ln
+          #    print_output "[*] Restarting emulation for further analysis ..."
+          #    break
+          #  fi
+          # fi
 
         else
           print_output "[!] No supported architecture detected"
@@ -668,7 +677,7 @@ main_emulation() {
 
           # if we have a working emulation we stop here
           if [[ "$TCP" == "ok" ]]; then
-            if [[ $(grep -c "tcp.*open" "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null) -gt 1 ]]; then
+            if [[ $(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -gt 1 ]]; then
               # we only exit if we have more than 1 open port detected.
               # Otherwise we try to find a better solution
               break 2
