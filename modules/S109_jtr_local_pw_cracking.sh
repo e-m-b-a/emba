@@ -30,6 +30,8 @@ S109_jtr_local_pw_cracking()
   local CRACKED_HASH=""
   local CRACKED=0
   local JTR_TIMEOUT="3600"
+  # optional wordlist for JTR - if no wordlist is there JTR runs in default mode
+  local JTR_WORDLIST="$CONFIG_DIR/jtr_wordlist.txt"
 
   # This module waits for S108_stacs_password_search
   # check emba.log for S108_stacs_password_search starting
@@ -69,8 +71,14 @@ S109_jtr_local_pw_cracking()
       print_output "[*] Starting jtr with a runtime of $ORANGE$JTR_TIMEOUT$NC on the following data:"
       tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jtr_hashes.txt
       print_ln
-      john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
-      PID="$!"
+      if [[ -f "$JTR_WORDLIST" ]]; then
+        print_output "[*] Starting jtr with the following wordlist: $ORANGE$JTR_WORDLIST$NC with $ORANGE$(wc -l "$JTR_WORDLIST" | awk '{print $1}')$NC entries."
+        john --progress-every=120 --wordlist="$JTR_WORDLIST" "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
+        PID="$!"
+      else
+        john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
+        PID="$!"
+      fi
       COUNT=0
       while [[ "$COUNT" -le "$JTR_TIMEOUT" ]];do
         ((COUNT+=1))
@@ -100,11 +108,17 @@ S109_jtr_local_pw_cracking()
 
         for JTR_FORMAT in "${JTR_FORMATS[@]}"; do
           print_ln
-          echo "[*] COUNT: $COUNT"
           JTR_FORMAT="$(echo "$JTR_FORMAT" | cut -d '=' -f2 | awk '{print $1}' | tr -d '"' )"
           print_output "[*] Testing password hash types $ORANGE$JTR_FORMAT$NC"
-          john --format="$JTR_FORMAT" --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
-          PID="$!"
+          if [[ -f "$JTR_WORDLIST" ]]; then
+            print_output "[*] Starting jtr with the following wordlist: $ORANGE$JTR_WORDLIST$NC with $ORANGE$(wc -l "$JTR_WORDLIST" | awk '{print $1}')$NC entries."
+            find "$JTR_WORDLIST" | tee -a "$LOG_FILE"
+            john --format="$JTR_FORMAT" --progress-every=120 --wordlist="$JTR_WORDLIST" "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
+            PID="$!"
+          else
+            john --format="$JTR_FORMAT" --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
+            PID="$!"
+          fi
 
           while [[ "$COUNT" -le "$JTR_TIMEOUT" ]];do
             ((COUNT+=1))
