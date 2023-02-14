@@ -116,7 +116,7 @@ P70_unblob() {
     print_ln
 
     write_csv_log "FILES Unblob" "UNIQUE FILES Unblob" "directories Unblob" "Binaries Unblob" "LINUX_PATH_COUNTER Unblob"
-    write_csv_log "$FILES_EXT_UB" "$UNIQUE_FILES_UB" "$DIRS_EXT_UB" "$BINS_UB" "$LINUX_PATH_COUNTER"
+    write_csv_log "$FILES_EXT_UB" "$UNIQUE_FILES_UB" "$DIRS_EXT_UB" "$BINS_UB" "$LINUX_PATH_COUNTER_UNBLOB"
   fi
 
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT_UB"
