@@ -83,6 +83,10 @@ P70_unblob() {
   print_ln
 
   if [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
+    # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
+    # shellcheck disable=SC2153
+    detect_root_dir_helper "$OUTPUT_DIR_UNBLOB"
+
     FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type f | wc -l )
     UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
     DIRS_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type d | wc -l )
@@ -114,6 +118,11 @@ P70_unblob() {
       tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
     fi
     print_ln
+
+    write_csv_log "FILES Unblob" "UNIQUE FILES Unblob" "directories Unblob" "Binaries Unblob" "LINUX_PATH_COUNTER Unblob" "Root PATH detected Unblob"
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      write_csv_log "$FILES_EXT_UB" "$UNIQUE_FILES_UB" "$DIRS_EXT_UB" "$BINS_UB" "$LINUX_PATH_COUNTER" "$R_PATH"
+    done
   fi
 
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT_UB"

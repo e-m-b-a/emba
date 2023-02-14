@@ -50,6 +50,10 @@ P60_firmware_bin_extractor() {
 
   print_ln
 
+  # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
+  # shellcheck disable=SC2153
+  detect_root_dir_helper "$FIRMWARE_PATH_CP"
+
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
   UNIQUE_FILES=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   DIRS_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type d | wc -l )
@@ -67,6 +71,11 @@ P60_firmware_bin_extractor() {
 
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP
     export FIRMWARE_PATH="$FIRMWARE_PATH_CP"
+
+    write_csv_log "FILES" "UNIQUE_FILES" "DIRS" "Binaries" "LINUX_PATH_COUNTER" "Root PATH detected"
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      write_csv_log "$FILES_EXT" "$UNIQUE_FILES" "$DIRS_EXT" "$BINS" "$LINUX_PATH_COUNTER" "$R_PATH"
+    done
   fi
 
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
