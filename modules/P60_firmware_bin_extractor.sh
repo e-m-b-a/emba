@@ -50,10 +50,6 @@ P60_firmware_bin_extractor() {
 
   print_ln
 
-  # FIRMWARE_PATH_CP is typically /log/firmware - shellcheck is probably confused here
-  # shellcheck disable=SC2153
-  detect_root_dir_helper "$FIRMWARE_PATH_CP"
-
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
   UNIQUE_FILES=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
   DIRS_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type d | wc -l )
