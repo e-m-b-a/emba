@@ -66,6 +66,13 @@ P99_prepare_analyzer() {
     print_output "[*] RTOS system detected"
   fi
 
+  if [[ "${#ROOT_PATH[@]}" -gt 0 ]] ; then
+    write_csv_log "FILES" "UNIQUE_FILES" "DIRS" "Binaries" "LINUX_PATH_COUNTER" "Root PATH detected" "architecture" "endianess"
+    for R_PATH in "${ROOT_PATH[@]}"; do
+      write_csv_log "$FILES_EXT" "$UNIQUE_FILES" "$DIRS_EXT" "$BINS" "$LINUX_PATH_COUNTER" "$R_PATH" "$ARCH" "$D_END"
+    done
+  fi
+
   local NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
