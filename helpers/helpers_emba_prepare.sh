@@ -483,8 +483,7 @@ detect_root_dir_helper() {
   SEARCH_PATH="${1:-}"
 
   print_output "[*] Root directory auto detection for $ORANGE$SEARCH_PATH$NC (could take some time)\\n"
-  ROOT_PATH=()
-  export ROOT_PATH
+  export ROOT_PATH=()
   local R_PATH
   local MECHANISM=""
 
