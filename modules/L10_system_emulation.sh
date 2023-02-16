@@ -91,6 +91,15 @@ L10_system_emulation() {
             # do not test other root paths if we are already online (some ports are available)
             break
           fi
+          # if [[ -f "$LOG_DIR"/emulator_online_results.log ]]; then
+          #  if [[ $(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true) -gt 1 ]]; then
+          #    print_output "[+] Identified the following system emulation results:"
+          #    print_output "$(indent "$(orange "$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)")")"
+          #    print_ln
+          #    print_output "[*] Restarting emulation for further analysis ..."
+          #    break
+          #  fi
+          # fi
 
         else
           print_output "[!] No supported architecture detected"
@@ -601,9 +610,11 @@ main_emulation() {
         NMAP_LOG="nmap_emba_$IPS_INT_VLAN_CFG_mod.txt"
 
         check_online_stat "$IP_ADDRESS_" "$NMAP_LOG" &
+        CHECK_ONLINE_STAT_PID="$!"
 
         # we kill this process from "check_online_stat:"
         tail -F "$LOG_PATH_MODULE/qemu.final.serial.log" 2>/dev/null || true
+        kill -9 "$CHECK_ONLINE_STAT_PID" || true
 
         # set default state
         ICMP="not ok"
@@ -666,7 +677,7 @@ main_emulation() {
 
           # if we have a working emulation we stop here
           if [[ "$TCP" == "ok" ]]; then
-            if [[ $(grep -c "tcp.*open" "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null) -gt 1 ]]; then
+            if [[ $(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -gt 1 ]]; then
               # we only exit if we have more than 1 open port detected.
               # Otherwise we try to find a better solution
               break 2
@@ -952,14 +963,22 @@ identify_networking_emulation() {
   fi
 
   run_network_id_emulation &
+  PID="$!"
+  disown "$PID" 2> /dev/null || true
   run_kpanic_identification &
+  KPANIC_PID="$!"
+  disown "$KPANIC_PID" 2> /dev/null || true
 
-  timeout 660 tail -F "$LOG_PATH_MODULE/qemu.initial.serial.log" 2>/dev/null || true
+  timeout --preserve-status --signal SIGINT 660 tail -F "$LOG_PATH_MODULE/qemu.initial.serial.log" 2>/dev/null || true
+  PID="$!"
+  disown "$PID" 2> /dev/null || true
+
   stopping_emulation_process "$IMAGE_NAME"
 
   if ! [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
   fi
+  kill -9 "$KPANIC_PID" >/dev/null || true
 }
 
 run_kpanic_identification() {
@@ -1933,6 +1952,8 @@ write_script_exec() {
 
   if [[ "$EXECUTE" -ne 0 ]];then
     eval "$COMMAND" || true &
+    PID="$!"
+    disown "$PID" 2> /dev/null || true
   fi
 
   if [[ "$EXECUTE" -ne 2 ]];then
@@ -2046,8 +2067,12 @@ write_results() {
     FIRMWARE_PATH_orig="$(cat "$TMP_DIR"/fw_name.log)"
   fi
   local ARCHIVE_PATH_="${1:-}"
+  local TCP_SERV_CNT=0
+  if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
+    TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l)"
+  fi
   ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"
-  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED; ICMP $ICMP; TCP-0 $TCP_0;TCP $TCP; IP address: $IP_ADDRESS_; Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_" >> "$LOG_DIR"/emulator_online_results.log
+  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED;ICMP $ICMP;TCP-0 $TCP_0;TCP $TCP;$TCP_SERV_CNT;IP address: $IP_ADDRESS_;Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""
 }
 

@@ -72,7 +72,8 @@ S115_usermode_emulator() {
 
     detect_root_dir_helper "$EMULATION_PATH_BASE"
     kill_qemu_threader &
-    PID_killer+="$!"
+    export PID_killer="$!"
+    disown "$PID_killer" 2> /dev/null || true
 
     print_output "[*] Detected $ORANGE${#ROOT_PATH[@]}$NC root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
@@ -336,6 +337,8 @@ run_init_test() {
 
   if [[ "$CHROOT" == "jchroot" ]]; then
     timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+    PID="$!"
+    disown "$PID" 2> /dev/null || true
     if [[ -f "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt" ]] && grep -q "unable to create temporary directory for pivot root: Permission denied" "$LOG_PATH_MODULE""/qemu_chroot_check_""$BIN_EMU_NAME_"".txt"; then
       print_output "[*] jchroot issues identified - ${ORANGE}switching to chroot$NC" "no_log"
       setup_chroot
@@ -416,10 +419,11 @@ run_init_qemu() {
   run_init_qemu_runner "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT" &
   PID=$!
   [[ "$STRICT_MODE" -eq 1 ]] && set -e
+  disown "$PID" 2> /dev/null || true
 
   # wait a bit and then kill it
   sleep 1
-  kill -0 -9 "$PID" 2> /dev/null || true
+  kill -9 "$PID" 2> /dev/null || true
   if [[ -f "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" ]]; then
     cat "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" >> "$LOG_FILE_INIT" || true
   fi
@@ -437,16 +441,24 @@ run_init_qemu_runner() {
     write_log "" "$LOG_FILE_INIT"
     if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     else
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     fi
   else
     write_log "[*] Trying to emulate binary $ORANGE$BIN_$NC with cpu config $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_INIT"
     write_log "" "$LOG_FILE_INIT"
     if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     else
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace -cpu "$CPU_CONFIG_" "$BIN_" >> "$LOG_PATH_MODULE""/qemu_initx_""$BIN_EMU_NAME_"".txt" 2>&1 || true
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     fi
   fi
 }
@@ -478,25 +490,29 @@ emulate_strace_run() {
   if [[ -z "$CPU_CONFIG_" || "$CPU_CONFIG_" == *"NONE"* ]]; then
     if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
-      PID=$!
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     else
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
-      PID=$!
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     fi
   else
     if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
-      PID=$!
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     else
       timeout --preserve-status --signal SIGINT 2 "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" --strace "$BIN_" >> "$LOG_FILE_STRACER" 2>&1 &
-      PID=$!
+      PID="$!"
+      disown "$PID" 2> /dev/null || true
     fi
   fi
   [[ "$STRICT_MODE" -eq 1 ]] && set -e
 
   # wait a second and then kill it
   sleep 1
-  kill -0 -9 "$PID" 2> /dev/null || true
+  kill -9 "$PID" 2> /dev/null || true
 
   # extract missing files, exclude *.so files:
   write_log "" "$LOG_FILE_STRACER"
@@ -607,15 +623,23 @@ emulate_binary() {
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
+        PID="$!"
+        disown "$PID" 2> /dev/null || true
       else
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
+        PID="$!"
+        disown "$PID" 2> /dev/null || true
       fi
     else
       write_log "[*] Emulating binary $ORANGE$BIN_$NC with parameter $ORANGE$PARAM$NC and cpu configuration $ORANGE$CPU_CONFIG_$NC" "$LOG_FILE_BIN"
       if [[ "$CHROOT" == "jchroot" ]] || grep -q "jchroot" "$TMP_DIR"/chroot_mode.tmp; then
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" -- ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
+        PID="$!"
+        disown "$PID" 2> /dev/null || true
       else
         timeout --preserve-status --signal SIGINT "$QRUNTIME" "$CHROOT" "${OPTS[@]}" "$R_PATH" ./"$EMULATOR" -cpu "$CPU_CONFIG_" "$BIN_" "$PARAM" &>> "$LOG_FILE_BIN" || true &
+        PID="$!"
+        disown "$PID" 2> /dev/null || true
       fi
     fi
     [[ "$STRICT_MODE" -eq 1 ]] && set -e
@@ -625,8 +649,7 @@ emulate_binary() {
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
   # This is very ugly and should only be used in docker environment!
-  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu.*sta.* || true
-  killall -9 --quiet --older-than "$QRUNTIME" -r .*qemu-.* || true
+  pkill -9 -O "$QRUNTIME" -f .*qemu-.*-sta.* || true
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
 }
 
@@ -650,11 +673,10 @@ running_jobs() {
 
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
-    CJOBS=$(pgrep -f -a "$EMULATOR" || true)
+    CJOBS=$(pgrep -f -c -a "$EMULATOR" || true)
     if [[ -n "$CJOBS" ]] ; then
       print_ln "no_log"
-      print_output "[*] Currently running emulation jobs: $(echo "$CJOBS" | wc -l)" "no_log"
-      print_output "$(indent "$CJOBS")""\\n" "no_log"
+      print_output "[*] Currently running emulation jobs: $ORANGE$CJOBS$NC" "no_log"
     else
       CJOBS="NA"
     fi
@@ -665,7 +687,8 @@ kill_qemu_threader() {
   # WARNING: This is so *** ugly! FIX IT!
   # Currently this should only used in docker environment!
   while true; do
-    pkill -9 -O 240 -f .*qemu.* || true
+    print_output "[*] KILLING qemu processes" "no_log"
+    pkill -9 -O 240 -f .*qemu-.*-sta.* || true
     sleep 20
   done
 }
@@ -717,15 +740,15 @@ s115_cleanup() {
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
     print_output "[*] Terminating qemu processes - check it with ps"
-    killall -9 --quiet -r .*qemu.*sta.* || true
+    pkill -9 -f .*qemu-.*-sta.* || true
   fi
 
   CJOBS_=$(pgrep -f qemu- || true)
   if [[ -n "$CJOBS_" ]] ; then
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
-    killall -9 "$EMULATOR" 2> /dev/null || true
+    pkill -9 -f .*"$EMULATOR".* || true
   fi
-  kill "$PID_killer" || true
+  kill -9 "$PID_killer" || true
 
   print_output "[*] Cleaning the emulation environment\\n"
   find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true

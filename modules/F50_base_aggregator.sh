@@ -212,7 +212,7 @@ output_details() {
     DATA=1
   fi
 
-  if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR:-0}" -gt 0 ]] || [[ "${ICMP:-0}" -gt 0 ]] || [[ "${TCP_0:-0}" -gt 0 ]] || [[ "${TCP:-0}" -gt 0 ]]; then
+  if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR:-0}" -gt 0 ]]; then
 
     STATE="$ORANGE(""$GREEN""booted"
     EMU_STATE="booted"
@@ -864,9 +864,9 @@ get_data() {
     ICMP=$(grep -c "ICMP ok;" "$SYS_EMU_RESULTS" || true)
     TCP_0=$(grep -c "TCP-0 ok;" "$SYS_EMU_RESULTS" || true)
     TCP=$(grep -c "TCP ok;" "$SYS_EMU_RESULTS" || true)
-    IP_ADDR=$(grep -E -c "IP\ address:\ [0-9]+" "$SYS_EMU_RESULTS" || true)
+    IP_ADDR=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "$SYS_EMU_RESULTS" | grep -E -c "IP\ address:\ [0-9]+" || true)
     # we make something like this: "bridge-default-normal"
-    MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "$SYS_EMU_RESULTS" | cut -d\; -f8 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
+    MODE=$(grep -e "Booted yes;\|ICMP ok;\|TCP-0 ok;\|TCP ok" "$SYS_EMU_RESULTS" | cut -d\; -f9 | sed 's/Network mode: //g'| tr -d '[:blank:]' | cut -d\( -f1 | sort -u | tr '\n' '-' | sed 's/-$//g' || true)
   fi
   if [[ -f "$LOG_DIR"/"$L15_LOG" ]]; then
     # NMAP_UP=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$L15_LOG" | cut -d: -f2 || true)

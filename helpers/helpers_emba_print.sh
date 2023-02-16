@@ -182,6 +182,38 @@ escape_echo() {
   fi
 }
 
+check_int() {
+  local INT_TO_CHECK="${1:-}"
+  if [[ -n "${INT_TO_CHECK//[0-9]/}" ]]; then
+    print_output "[-] Invalid input detected - integers only" "no_log"
+    exit 1
+  fi
+}
+
+check_alnum() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9]+$ ]]; then
+    print_output "[-] Invalid input detected - alphanumerical only" "no_log"
+    exit 1
+  fi
+}
+
+check_path_input() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
+    print_output "[-] Invalid input detected - paths aka ~/abc/def123/ASDF only" "no_log"
+    exit 1
+  fi
+}
+
+check_version() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~:'-']+$ ]]; then
+    print_output "[-] Invalid input detected - versions aka 1.2.3-a:b only" "no_log"
+    exit 1
+  fi
+}
+
 print_ln()
 {
   local LOG_SETTING="${1:-}"
@@ -223,14 +255,14 @@ write_log()
 write_csv_log() {
   local CSV_ITEMS=("$@")
   if ! [[ -d "$CSV_DIR" ]]; then
-    print_output "[-] WARNING: Directory $ORANGE$CSV_DIR$NC not found"
+    print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
     return
   fi
   CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
   CSV_LOG="$CSV_DIR""/""$CSV_LOG"
 
-  printf '%s;' "${CSV_ITEMS[@]}" | tee -a "$CSV_LOG" >/dev/null
-  printf '\n' | tee -a "$CSV_LOG" >/dev/null
+  printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_LOG" || true
+  printf '\n' >> "$CSV_LOG" || true
 }
 
 write_grep_log()
@@ -513,6 +545,7 @@ print_help()
   echo -e "$CYAN""-d""$NC""                Only checks dependencies"
   echo -e "$CYAN""-F""$NC""                Checks dependencies but ignore errors"
   echo -e "$CYAN""-U""$NC""                Check and apply available updates and exit"
+  echo -e "$CYAN""-V""$NC""                Show EMBA version"
   echo -e "\\nSpecial tests"
   echo -e "$CYAN""-k [./config]""$NC""     Kernel config path"
   echo -e "$CYAN""-C [container id]""$NC"" Extract and analyze a local docker container via container id"
