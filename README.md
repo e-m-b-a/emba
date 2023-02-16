@@ -60,7 +60,7 @@ sudo ./installer.sh -d
 
 ## Quick start with default scan profile:
 ```console
-sudo ./emba.sh -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
+sudo ./emba -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
 
 ```
 ---

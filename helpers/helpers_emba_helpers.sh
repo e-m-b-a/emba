@@ -324,8 +324,12 @@ disk_space_monitor() {
     return
   fi
 
+  while ! [[ -f "$MAIN_LOG" ]]; do
+    sleep 1
+  done
+
   while true; do
-    print_output "[*] Disk space monitoring active" "no_log"
+    print_output "[!] Disk space monitoring active" "no_log"
     FREE_SPACE=$(df --output=avail "$DDISK" | awk 'NR==2')
     if [[ "$FREE_SPACE" -lt 100000 ]]; then
       print_ln "no_log"
@@ -337,14 +341,20 @@ disk_space_monitor() {
       exit 1
     fi
 
-    if [[ -f "$LOG_DIR"/emba.log ]]; then
-      if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
+    if [[ -f "$MAIN_LOG" ]]; then
+      if grep -q "Test ended\|EMBA failed" "$MAIN_LOG" 2>/dev/null; then
+        print_output "[!] Disk space monitoring stopping - EMBA failed" "no_log"
         break
       fi
     fi
     # shellcheck disable=SC2009
     if ! ps aux | grep -v grep | grep -q "$EMBA_PID"; then
-      break
+      print_output "[!] Disk space monitoring stopping - EMBA PID missed #1" "no_log"
+      sleep 5
+      if ! ps aux | grep -v grep | grep -q "$EMBA_PID"; then
+        print_output "[!] Disk space monitoring stopping - EMBA PID missed #2" "no_log"
+        break
+      fi
     fi
 
     sleep 10
