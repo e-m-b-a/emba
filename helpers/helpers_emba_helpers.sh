@@ -314,3 +314,39 @@ module_wait() {
     sleep 1
   done
 }
+
+disk_space_monitor() {
+  local EMBA_PID="${1:-}"
+  local DDISK="$LOG_DIR"
+
+  if ! [[ "$EMBA_PID" =~ [0-9]+ ]]; then
+    print_output "[-] WARNING: No EMBA PID detected ... are we really running?!?" "no_log"
+    return
+  fi
+
+  while true; do
+    print_output "[*] Disk space monitoring active" "no_log"
+    FREE_SPACE=$(df --output=avail "$DDISK" | awk 'NR==2')
+    if [[ "$FREE_SPACE" -lt 100000 ]]; then
+      print_ln "no_log"
+      print_output "[!] WARNING: EMBA is running out of disk space!" "no_log"
+      print_output "[!] WARNING: EMBA is stopping now" "no_log"
+      df -h || true
+      print_ln "no_log"
+      cleaner 0
+      exit 1
+    fi
+
+    if [[ -f "$LOG_DIR"/emba.log ]]; then
+      if grep -q "Test ended\|EMBA failed" "$LOG_DIR"/emba.log 2>/dev/null; then
+        break
+      fi
+    fi
+    # shellcheck disable=SC2009
+    if ! ps aux | grep -v grep | grep -q "$EMBA_PID"; then
+      break
+    fi
+
+    sleep 10
+  done
+}

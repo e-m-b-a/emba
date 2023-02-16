@@ -854,6 +854,9 @@ main()
     if [[ $IN_DOCKER -eq 0 ]] ; then
       check_cve_search_job "$EMBA_PID" &
       EXIT_KILL_PIDS+=("$!")
+
+      disk_space_monitor "$EMBA_PID" &
+      EXIT_KILL_PIDS+=("$!")
     fi
 
     # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
