@@ -120,17 +120,19 @@ rpm_package_files_search() {
   fi
 
   local PACKAGING_SYSTEM="RPM"
+  local RPM_PACKAGE_DBS=()
   local PACKAGE_FILE=""
   local RPM_PACKAGES=()
+  local RPM_DIR=""
   local PACKAGE_VERSION=""
   local PACKAGE_NAME=""
 
-  mapfile -t RPM_STARTER < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
+  mapfile -t RPM_PACKAGE_DBS < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
 
-  if [[ -v RPM_STARTER[@] ]] ; then
+  if [[ -v RPM_PACKAGE_DBS[@] ]] ; then
     write_csv_log "Packaging system" "package dir" "package" "version"
-    print_output "[*] Found $ORANGE${#RPM_STARTER[@]}$NC RPM package management directories."
-    for PACKAGE_FILE in "${RPM_STARTER[@]}" ; do
+    print_output "[*] Found $ORANGE${#RPM_PACKAGE_DBS[@]}$NC RPM package management directories."
+    for PACKAGE_FILE in "${RPM_PACKAGE_DBS[@]}" ; do
       RPM_DIR="$(dirname "$PACKAGE_FILE")"
       mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "$RPM_DIR" || true)
       print_ln
@@ -142,7 +144,7 @@ rpm_package_files_search() {
       done
     done
   else
-    print_output "[-] No RPM package management found!"
+    print_output "[-] No RPM package management database found!"
   fi
 }
 
