@@ -855,7 +855,7 @@ main()
       check_cve_search_job "$EMBA_PID" &
       EXIT_KILL_PIDS+=("$!")
 
-      disk_space_monitor "$EMBA_PID" &
+      disk_space_monitor &
       EXIT_KILL_PIDS+=("$!")
     fi
 
@@ -949,7 +949,7 @@ main()
       fi
       exit 0
     else
-      print_output "[-] EMBA failed in docker mode!" "no_log"
+      print_output "[-] EMBA failed in docker mode!" "main"
       cleaner 0
       write_notification "EMBA failed analysis in default mode"
       exit 1

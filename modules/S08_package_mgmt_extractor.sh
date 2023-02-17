@@ -26,10 +26,9 @@ S08_package_mgmt_extractor()
 
   debian_status_files_search
   openwrt_control_files_search
-  # Future work: rpm, ...
-  # rpm_package_files_search
+  rpm_package_files_search
 
-  [[ "${#DEBIAN_MGMT_STATUS[@]}" -gt 0 || "${#OPENWRT_MGMT_CONTROL[@]}" -gt 0 ]] && NEG_LOG=1
+  [[ "${#DEBIAN_MGMT_STATUS[@]}" -gt 0 || "${#OPENWRT_MGMT_CONTROL[@]}" -gt 0 || "${#RPM_PACKAGES[@]}" -gt 0 ]] && NEG_LOG=1
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
 }
 
@@ -109,6 +108,41 @@ openwrt_control_files_search() {
     done
   else
     print_output "[-] No OpenWRT package files found!"
+  fi
+}
+
+rpm_package_files_search() {
+  sub_module_title "RPM package management identification"
+
+  if ! command -v rpm > /dev/null; then
+    print_output "[-] RPM command not found ... not executing RPM test module"
+    return
+  fi
+
+  local PACKAGING_SYSTEM="RPM"
+  local PACKAGE_FILE=""
+  local RPM_PACKAGES=()
+  local PACKAGE_VERSION=""
+  local PACKAGE_NAME=""
+
+  mapfile -t RPM_STARTER < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
+
+  if [[ -v RPM_STARTER[@] ]] ; then
+    write_csv_log "Packaging system" "package dir" "package" "version"
+    print_output "[*] Found $ORANGE${#RPM_STARTER[@]}$NC RPM package management directories."
+    for PACKAGE_FILE in "${RPM_STARTER[@]}" ; do
+      RPM_DIR="$(dirname "$PACKAGE_FILE")"
+      mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "$RPM_DIR" || true)
+      print_ln
+      for PACKAGE_AND_VERSION in "${RPM_PACKAGES[@]}" ; do
+        PACKAGE_VERSION=$(rpm -qi --dbpath "$RPM_DIR" "$PACKAGE_AND_VERSION" | grep Version | awk '{print $3}' || true)
+        PACKAGE_NAME=$(rpm -qi --dbpath "$RPM_DIR" "$PACKAGE_AND_VERSION" | grep Version | awk '{print $1}' || true)
+        print_output "[*] RPM package details: $ORANGE$PACKAGE_NAME$NC - $ORANGE$PACKAGE_VERSION$NC"
+        write_csv_log "$PACKAGING_SYSTEM" "$RPM_DIR" "$PACKAGE_NAME" "$PACKAGE_VERSION"
+      done
+    done
+  else
+    print_output "[-] No RPM package management found!"
   fi
 }
 
