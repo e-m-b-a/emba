@@ -28,6 +28,7 @@ export DOWNLOAD_FILE_LIST=()
 export INSTALLER_DIR="./installer"
 
 if [[ "$STRICT_MODE" -eq 1 ]]; then
+  export DEBUG_SCRIPT=0
   if [[ -f "./helpers/helpers_emba_load_strict_settings.sh" ]]; then
     # shellcheck source=/dev/null
     source ./helpers/helpers_emba_load_strict_settings.sh
@@ -205,6 +206,13 @@ if [[ "$IN_DOCKER" -eq 0 ]]; then
     echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
     echo ""
     df -h || true
+    echo ""
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+  fi
+
+  TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
+  if [[ "$TOTAL_MEMORY" -lt 4000000 ]]; then
+    echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 4Gig of RAM""$NC"
     echo ""
     read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   fi
