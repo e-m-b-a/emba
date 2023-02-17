@@ -83,7 +83,7 @@ max_pids_protection() {
 cleaner() {
   INTERRUPT_CLEAN="${1:-1}"
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
-    print_output "[*] User interrupt detected!" "no_log"
+    print_output "[*] Interrupt detected!" "no_log"
   fi
   print_output "[*] Final cleanup started." "no_log"
 
@@ -166,15 +166,15 @@ cleaner() {
   if [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
   fi
-  if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
-    print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
-    exit 1
-  fi
   if [[ "$IN_DOCKER" -eq 0 ]]; then
     for KILL_PID in "${NOTIFICATION_PID[@]}"; do
       print_output "[*] Stopping EMBA PID $KILL_PID" "no_log"
-      kill "$KILL_PID" || true
+      kill "$KILL_PID" > /dev/null || true
     done
+  fi
+  if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
+    print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
+    exit 1
   fi
 }
 
@@ -210,7 +210,6 @@ emba_updater() {
 
 # this checks if a function is available
 function_exists() {
-
   FCT_TO_CHECK="${1:-}"
   declare -f -F "$FCT_TO_CHECK" > /dev/null
   return $?
@@ -323,7 +322,7 @@ disk_space_monitor() {
   done
 
   while true; do
-    print_output "[!] Disk space monitoring active" "no_log"
+    # print_output "[*] Disk space monitoring active" "no_log"
     FREE_SPACE=$(df --output=avail "$DDISK" | awk 'NR==2')
     if [[ "$FREE_SPACE" -lt 100000 ]]; then
       print_ln "no_log"
@@ -331,13 +330,12 @@ disk_space_monitor() {
       print_output "[!] WARNING: EMBA is stopping now" "main"
       df -h || true
       print_ln "no_log"
-      cleaner 0
-      exit 1
+      cleaner 1
+      pkill -f emba.*"$LOG_DIR"
     fi
 
     if [[ -f "$MAIN_LOG" ]]; then
       if grep -q "Test ended\|EMBA failed" "$MAIN_LOG" 2>/dev/null; then
-        print_output "[!] Disk space monitoring stopping - EMBA failed" "main"
         break
       fi
     fi

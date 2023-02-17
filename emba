@@ -855,7 +855,7 @@ main()
       check_cve_search_job "$EMBA_PID" &
       EXIT_KILL_PIDS+=("$!")
 
-      disk_space_monitor &
+      disk_space_monitor "$EMBA_PID" &
       EXIT_KILL_PIDS+=("$!")
     fi
 
