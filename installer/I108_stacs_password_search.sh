@@ -59,7 +59,7 @@ I108_stacs_password_search() {
           | xargs -I{} bash -c "\
             mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
             touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
-        #pip3 install stacs
+        # pip3 install stacs
         cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
         if command -v stacs > /dev/null ; then
           echo -e "$GREEN""STACS installed successfully""$NC"

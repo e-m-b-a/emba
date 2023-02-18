@@ -143,6 +143,7 @@ fi
 if grep -q -i wsl /proc/version; then
   echo -e "\n${ORANGE}INFO: System running in WSL environment!$NC"
   echo -e "\n${ORANGE}INFO: WSL is currently experimental!$NC"
+  echo -e "\n${ORANGE}Please check the documentation https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites$NC"
   echo -e "\n${ORANGE}WARNING: If you are using WSL2, disable docker integration from the docker-desktop daemon!$NC"
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   WSL=1
@@ -161,6 +162,7 @@ elif ! grep -q "kali" /etc/debian_version 2>/dev/null ; then
   elif grep -q "PRETTY_NAME=\"Ubuntu 20.04 LTS\"" /etc/os-release 2>/dev/null ; then
     echo -e "\\n""$RED""EMBA is not fully supported on Ubuntu 20.04 LTS.""$NC"
     echo -e "$RED""For EMBA installation you need to update docker-compose manually. See also https://github.com/e-m-b-a/emba/issues/247""$NC"
+    echo -e "\\n""$ORANGE""Please check the documentation https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites""$NC"
     read -p "If you have updated docker-compose you can press any key to continue ..." -n1 -s -r
     OTHER_OS=0  # installation procedure identical to kali install
     UBUNTU_OS=0 # installation procedure identical to kali install
@@ -204,6 +206,7 @@ if [[ "$IN_DOCKER" -eq 0 ]]; then
   if [[ "$FREE_SPACE" -lt 13000000 ]]; then
     echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 13Gig for the docker image""$NC"
     echo -e "\\n""$ORANGE""Please free enough space on /var/lib/docker""$NC"
+    echo -e "\\n""$ORANGE""Please check the documentation https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites""$NC"
     echo ""
     df -h || true
     echo ""
@@ -213,6 +216,7 @@ if [[ "$IN_DOCKER" -eq 0 ]]; then
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   if [[ "$TOTAL_MEMORY" -lt 4000000 ]]; then
     echo -e "\\n""$ORANGE""EMBA installation in default mode needs a minimum of 4Gig of RAM""$NC"
+    echo -e "\\n""$ORANGE""Please check the documentation https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites""$NC"
     echo ""
     read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   fi

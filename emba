@@ -861,7 +861,7 @@ main()
 
     # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
     # EMBA container into log directory
-    # we do this only outside of the EMBA container - otherwise we will not reach the docker environment
+    # we do this outside of the EMBA container - otherwise we will not reach the docker environment
     if [[ "$CONTAINER_EXTRACT" -eq 1 && "$IN_DOCKER" -eq 0 ]] ; then
       docker_container_extractor "$CONTAINER_ID"
     fi

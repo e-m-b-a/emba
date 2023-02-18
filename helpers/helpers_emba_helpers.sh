@@ -181,7 +181,11 @@ cleaner() {
 emba_updater() {
   print_output "[*] EMBA update starting ..." "no_log"
 
-  git pull
+  if [[ -d ./.git ]]; then
+    git pull origin master
+  else
+    print_output "[-] Can't update EMBA without a git version"
+  fi
 
   EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
 
