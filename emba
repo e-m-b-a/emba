@@ -717,7 +717,7 @@ main()
     if [[ $IN_DOCKER -eq 0 ]]; then
       kernel_downloader &
       K_DOWN_PID="$!"
-      # store_kill_pids "$K_DOWN_PID"
+      store_kill_pids "$K_DOWN_PID"
       print_output "[*] Started kernel downloader thread with PID $ORANGE$K_DOWN_PID$NC" "no_log"
     fi
 
@@ -728,7 +728,7 @@ main()
     if [[ "$IN_DOCKER" -eq 0 ]]; then
       print_notification &
       NOTIFICATION_PID="$!"
-      # store_kill_pids "$NOTIFICATION_PID"
+      store_kill_pids "$NOTIFICATION_PID"
       disown "$NOTIFICATION_PID" 2> /dev/null || true
       print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
       print_output "[*] Notification process started with PID $ORANGE${NOTIFICATION_PID}$NC" "no_log"

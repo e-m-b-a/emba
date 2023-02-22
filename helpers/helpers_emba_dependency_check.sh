@@ -424,7 +424,8 @@ dependency_check()
     check_dep_tool "john"
 
     # rpm for checking package management system
-    check_dep_tool "rpm"
+    # module not fully tested - needs some further work
+    # check_dep_tool "rpm"
 
     # pixd
     check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
