@@ -35,7 +35,8 @@ restart_emulation() {
   reset_network_emulation 2
 
   # what an ugly hack - probably we are going to improve this later on
-  local HOME_PATH="$(pwd)"
+  local HOME_PATH=""
+  HOME_PATH="$(pwd)"
   cd "$ARCHIVE_PATH" || (print_output "[-] Emulation archive path not found")
   ./run.sh &
   cd "$HOME_PATH" || (print_output "[-] EMBA path not available?")
