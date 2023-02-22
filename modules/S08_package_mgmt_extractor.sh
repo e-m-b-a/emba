@@ -113,6 +113,7 @@ openwrt_control_files_search() {
 
 rpm_package_files_search() {
   sub_module_title "RPM package management identification"
+  export RPM_PACKAGES=()
 
   if ! command -v rpm > /dev/null; then
     print_output "[-] RPM command not found ... not executing RPM test module"
@@ -122,7 +123,6 @@ rpm_package_files_search() {
   local PACKAGING_SYSTEM="RPM"
   local RPM_PACKAGE_DBS=()
   local PACKAGE_FILE=""
-  local RPM_PACKAGES=()
   local RPM_DIR=""
   local PACKAGE_VERSION=""
   local PACKAGE_NAME=""

@@ -156,14 +156,14 @@ cleaner() {
     fuser -k "$FIRMWARE_PATH" || true
   fi
 
-  #if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log ]]; then
-    #while read -r KILL_PID; do
+  # if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log ]]; then
+    # while read -r KILL_PID; do
     #  if [[ -e /proc/"$KILL_PID" ]]; then
     #    print_output "[*] Stopping EMBA process with PID $KILL_PID" "no_log"
     #    kill -9 "$KILL_PID" > /dev/null || true
     #  fi
-    #done < "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log
-  #fi
+    # done < "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log
+  # fi
 
   if [[ "$IN_DOCKER" -eq 0 ]] && [[ -f "$TMP_DIR"/EXIT_KILL_PIDS.log ]]; then
     while read -r KILL_PID; do

@@ -35,9 +35,10 @@ restart_emulation() {
   reset_network_emulation 2
 
   # what an ugly hack - probably we are going to improve this later on
+  local HOME_PATH="$(pwd)"
   cd "$ARCHIVE_PATH" || (print_output "[-] Emulation archive path not found")
   ./run.sh &
-  cd "$INVOCATION_PATH" || (print_output "[-] EMBA path not available?")
+  cd "$HOME_PATH" || (print_output "[-] EMBA path not available?")
 
   COUNTER=0
   while ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; do
