@@ -246,7 +246,9 @@ analyze_kernel_module() {
     # modinfos can run in parallel:
     if [[ "$THREADED" -eq 1 ]]; then
       module_analyzer "$KMODULE" &
-      WAIT_PIDS_S25+=( "$!" )
+      local TMP_PID="$!"
+      store_kill_pids "$TMP_PID"
+      WAIT_PIDS_S25+=( "$TMP_PID" )
     else
       module_analyzer "$KMODULE"
     fi

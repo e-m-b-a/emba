@@ -134,6 +134,7 @@ rpm_package_files_search() {
     print_output "[*] Found $ORANGE${#RPM_PACKAGE_DBS[@]}$NC RPM package management directories."
     for PACKAGE_FILE in "${RPM_PACKAGE_DBS[@]}" ; do
       RPM_DIR="$(dirname "$PACKAGE_FILE")"
+      # not sure this works on an offline system - we need further tests on this:
       mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "$RPM_DIR" || true)
       print_ln
       for PACKAGE_AND_VERSION in "${RPM_PACKAGES[@]}" ; do

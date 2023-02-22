@@ -40,7 +40,9 @@ S20_shell_check()
         ((S20_SCRIPTS+=1))
         if [[ "$THREADED" -eq 1 ]]; then
           s20_script_check "$SH_SCRIPT" &
-          WAIT_PIDS_S20+=( "$!" )
+          local TMP_PID="$!"
+          store_kill_pids "$TMP_PID"
+          WAIT_PIDS_S20+=( "$TMP_PID" )
           max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S20[@]}"
           continue
         else

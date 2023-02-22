@@ -178,7 +178,9 @@ run_modules()
         if [[ "$MOD_FIN" -eq 0 ]]; then
           if [[ $THREADING_SET -eq 1 ]]; then
             "$MODULE_MAIN" &
-            WAIT_PIDS+=( "$!" )
+            MOD_PID="$!"
+            store_kill_pids "$MOD_PID"
+            WAIT_PIDS+=( "$MOD_PID" )
             max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
           else
             "$MODULE_MAIN"
@@ -224,7 +226,9 @@ run_modules()
           if [[ "$MOD_FIN" -eq 0 ]]; then
             if [[ $THREADING_SET -eq 1 ]]; then
               "$MODULE_MAIN" &
-              WAIT_PIDS+=( "$!" )
+              MOD_PID="$!"
+              store_kill_pids "$MOD_PID"
+              WAIT_PIDS+=( "$MOD_PID" )
               max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
             else
               "$MODULE_MAIN"
@@ -288,7 +292,9 @@ run_modules()
             if [[ "$MOD_FIN" -eq 0 ]]; then
               if [[ $THREADING_SET -eq 1 ]]; then
                 "$MODULE_MAIN" &
-                WAIT_PIDS+=( "$!" )
+                MOD_PID="$!"
+                store_kill_pids "$MOD_PID"
+                WAIT_PIDS+=( "$MOD_PID" )
                 max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
               else
                 "$MODULE_MAIN"
@@ -405,7 +411,6 @@ main()
   if [[ -f "/etc/debian_version" ]] && grep -q kali-rolling /etc/debian_version; then
     export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
   fi
-  export NOTIFICATION_PID="NA"
   export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
   export EMBA_ICON=""
   EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
@@ -422,7 +427,6 @@ main()
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
-  export EXIT_KILL_PIDS=()
 
   import_helper
   print_ln "no_log"
@@ -713,7 +717,7 @@ main()
     if [[ $IN_DOCKER -eq 0 ]]; then
       kernel_downloader &
       K_DOWN_PID="$!"
-      EXIT_KILL_PIDS+=("$K_DOWN_PID")
+      # store_kill_pids "$K_DOWN_PID"
       print_output "[*] Started kernel downloader thread with PID $ORANGE$K_DOWN_PID$NC" "no_log"
     fi
 
@@ -724,7 +728,8 @@ main()
     if [[ "$IN_DOCKER" -eq 0 ]]; then
       print_notification &
       NOTIFICATION_PID="$!"
-      EXIT_KILL_PIDS+=("$NOTIFICATION_PID")
+      # store_kill_pids "$NOTIFICATION_PID"
+      disown "$NOTIFICATION_PID" 2> /dev/null || true
       print_output "[*] Original user: $ORANGE${SUDO_USER:-${USER}}$NC" "no_log"
       print_output "[*] Notification process started with PID $ORANGE${NOTIFICATION_PID}$NC" "no_log"
       echo "${SUDO_USER:-${USER}}" > "$LOG_DIR"/orig_user.log
@@ -853,11 +858,15 @@ main()
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
       check_cve_search_job "$EMBA_PID" &
-      EXIT_KILL_PIDS+=("$!")
-
-      disk_space_monitor "$EMBA_PID" &
-      EXIT_KILL_PIDS+=("$!")
+      local TMP_PID="$!"
+      store_kill_pids "$TMP_PID"
+      disown "$TMP_PID" 2> /dev/null || true
     fi
+
+    disk_space_monitor "$EMBA_PID" &
+    local TMP_PID="$!"
+    store_kill_pids "$TMP_PID"
+    disown "$TMP_PID" 2> /dev/null || true
 
     # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
     # EMBA container into log directory
@@ -1090,9 +1099,6 @@ main()
       rm -r "$TMP_DIR" 2>/dev/null || true
     else
       print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
-    fi
-    if [[ "$NOTIFICATION_PID" != "NA" ]]; then
-      kill "$NOTIFICATION_PID" 2>/dev/null || true
     fi
     write_grep_log "$(date)" "TIMESTAMP"
     write_grep_log "$(date -d@"$SECONDS" -u +%H:%M:%S)" "DURATION"

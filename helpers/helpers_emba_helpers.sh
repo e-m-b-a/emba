@@ -103,7 +103,7 @@ cleaner() {
     if [[ $(grep -i -c S115 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
 
       print_output "[*] Terminating qemu processes - check it with ps" "no_log"
-      killall -9 --quiet -r .*qemu-.*-sta.* || true
+      killall -9 --quiet -r .*qemu-.*-sta.* > /dev/null || true
       print_output "[*] Cleaning the emulation environment\\n" "no_log"
       find "$FIRMWARE_PATH_CP" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
       find "$LOG_DIR/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
@@ -125,7 +125,7 @@ cleaner() {
 
     if [[ $(grep -i -c S120 "$LOG_DIR"/"$MAIN_LOG_FILE") -eq 1 ]]; then
       print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
-      killall -9 --quiet -r .*cwe_checker.* || true
+      killall -9 --quiet -r .*cwe_checker.* > /dev/null || true
     fi
 
     # IF SYS_ONLINE is 1, the live system tester (system mode emulator) was able to setup the box
@@ -142,16 +142,8 @@ cleaner() {
     if ps -p "$K_DOWN_PID" > /dev/null; then
       # kernel downloader is running in a thread on the host and needs to be stopped now
       print_output "[*] Stopping kernel downloader thread with PID $K_DOWN_PID" "no_log"
-      kill "$K_DOWN_PID" || true
+      kill "$K_DOWN_PID" > /dev/null || true
     fi
-  fi
-  if [[ "$IN_DOCKER" -eq 0 ]] && pgrep -f "find ./external/trickest" &> /dev/null 2>&1; then
-    pkill -f "find ./external/trickest" 2>/dev/null || true
-  fi
-
-  # just in case we have the temp trickest db left
-  if [[ -f "$EXT_DIR"/trickest_db-cleaned.txt ]]; then
-    rm "$EXT_DIR"/trickest_db-cleaned.txt || true
   fi
 
   if [[ -f "$TMP_DIR"/orig_logdir ]]; then
@@ -159,18 +151,31 @@ cleaner() {
     pkill -f "inotifywait.*$LOG_DIR_HOST" 2>/dev/null || true
   fi
 
-  if [[ -n "${CHECK_CVE_JOB_PID:-}" && "${CHECK_CVE_JOB_PID:-}" -ne 0 ]]; then
-    kill -9 "$CHECK_CVE_JOB_PID" || true
+  if [[ "$IN_DOCKER" -eq 1 ]]; then
+    fuser -k "$LOG_DIR" || true
+    fuser -k "$FIRMWARE_PATH" || true
   fi
 
-  if [[ -d "$TMP_DIR" ]]; then
-    rm -r "$TMP_DIR" 2>/dev/null || true
+  #if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log ]]; then
+    #while read -r KILL_PID; do
+    #  if [[ -e /proc/"$KILL_PID" ]]; then
+    #    print_output "[*] Stopping EMBA process with PID $KILL_PID" "no_log"
+    #    kill -9 "$KILL_PID" > /dev/null || true
+    #  fi
+    #done < "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log
+  #fi
+
+  if [[ "$IN_DOCKER" -eq 0 ]] && [[ -f "$TMP_DIR"/EXIT_KILL_PIDS.log ]]; then
+    while read -r KILL_PID; do
+      if [[ -e /proc/"$KILL_PID" ]]; then
+        print_output "[*] Stopping EMBA process with PID $KILL_PID" "no_log"
+        kill -9 "$KILL_PID" > /dev/null || true
+      fi
+    done < "$TMP_DIR"/EXIT_KILL_PIDS.log
   fi
-  if [[ "$IN_DOCKER" -eq 0 ]]; then
-    for KILL_PID in "${NOTIFICATION_PID[@]}"; do
-      print_output "[*] Stopping EMBA PID $KILL_PID" "no_log"
-      kill "$KILL_PID" > /dev/null || true
-    done
+
+  if [[ "$IN_DOCKER" -eq 0 ]] && [[ -d "$TMP_DIR" ]]; then
+    rm -r "$TMP_DIR" 2>/dev/null || true
   fi
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
     print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
@@ -184,7 +189,7 @@ emba_updater() {
   if [[ -d ./.git ]]; then
     git pull origin master
   else
-    print_output "[-] Can't update EMBA without a git version"
+    print_output "[-] INFO: Can't update non git version of EMBA"
   fi
 
   EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker pull embeddedanalyzer/emba
@@ -198,21 +203,12 @@ emba_updater() {
   /etc/init.d/redis-server start
   "$EXT_DIR"/cve-search/sbin/db_updater.py -v
 
-  print_output "[*] EMBA update - trickest PoC update" "no_log"
-  if [[ -d "$EXT_DIR"/trickest-cve ]]; then
-    BASE_PATH=$(pwd)
-    cd "$EXT_DIR"/trickest-cve || exit
-    git pull
-    cd "$BASE_PATH" || exit
-  else
-    git clone https://github.com/trickest/cve.git "$EXT_DIR"/trickest-cve
-  fi
-
   print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"
   print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
 }
 
 # this checks if a function is available
+# this means the EMBA module was loaded
 function_exists() {
   FCT_TO_CHECK="${1:-}"
   declare -f -F "$FCT_TO_CHECK" > /dev/null
@@ -318,6 +314,14 @@ module_wait() {
   done
 }
 
+store_kill_pids() {
+  local PID="${1:-}"
+  ! [[ -d "$TMP_DIR" ]] && mkdir -p "$TMP_DIR"
+  [[ "$IN_DOCKER" -eq 0 ]] && echo "$PID" >> "$TMP_DIR"/EXIT_KILL_PIDS.log
+  [[ "$IN_DOCKER" -eq 1 ]] && echo "$PID" >> "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log
+  return 0
+}
+
 disk_space_monitor() {
   local DDISK="$LOG_DIR"
 
@@ -328,14 +332,15 @@ disk_space_monitor() {
   while true; do
     # print_output "[*] Disk space monitoring active" "no_log"
     FREE_SPACE=$(df --output=avail "$DDISK" | awk 'NR==2')
-    if [[ "$FREE_SPACE" -lt 100000 ]]; then
+    if [[ "$FREE_SPACE" -lt 10000000 ]]; then
       print_ln "no_log"
       print_output "[!] WARNING: EMBA is running out of disk space!" "main"
       print_output "[!] WARNING: EMBA is stopping now" "main"
       df -h || true
       print_ln "no_log"
+      # give the container some more seconds for the cleanup process
+      [[ "$IN_DOCKER" -eq 0 ]] && sleep 5
       cleaner 1
-      pkill -f emba.*"$LOG_DIR"
     fi
 
     if [[ -f "$MAIN_LOG" ]]; then
@@ -344,6 +349,6 @@ disk_space_monitor() {
       fi
     fi
 
-    sleep 10
+    sleep 5
   done
 }

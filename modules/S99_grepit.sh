@@ -75,7 +75,9 @@ S99_grepit() {
   if [[ $THREADED -eq 1 ]]; then
     for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do 
       "$GREPIT_MODULE" &
-      WAIT_PIDS_S99+=( "$!" )
+      local TMP_PID="$!"
+      WAIT_PIDS_S99+=( "$TMP_PID" )
+      store_kill_pids "$TMP_PID"
       max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S99[@]}"
     done
   else

@@ -36,7 +36,9 @@ S21_python_check()
         ((S21_PY_SCRIPTS+=1))
         if [[ "$THREADED" -eq 1 ]]; then
           s21_script_bandit "$PY_SCRIPT" &
-          WAIT_PIDS_S21+=( "$!" )
+          local TMP_PID="$!"
+          store_kill_pids "$TMP_PID"
+          WAIT_PIDS_S21+=( "$TMP_PID" )
           max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S21[@]}"
           continue
         else

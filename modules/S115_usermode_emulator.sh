@@ -175,7 +175,9 @@ S115_usermode_emulator() {
               prepare_emulator "$R_PATH" "$EMULATOR"
               if [[ "$THREADED" -eq 1 ]]; then
                 emulate_binary "$EMULATOR" "$R_PATH" "$BIN_" &
-                WAIT_PIDS_S115+=( "$!" )
+                local TMP_PID="$!"
+                store_kill_pids "$TMP_PID"
+                WAIT_PIDS_S115+=( "$TMP_PID" )
                 max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115[@]}"
               else
                 emulate_binary "$EMULATOR" "$R_PATH" "$BIN_"
