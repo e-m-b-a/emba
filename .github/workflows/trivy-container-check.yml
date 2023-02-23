@@ -40,6 +40,15 @@ jobs:
           #      - name: Build an image from Dockerfile
           #run: |
           #docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
       - name: Generate tarball from image
         run: |
           docker pull embeddedanalyzer/emba
