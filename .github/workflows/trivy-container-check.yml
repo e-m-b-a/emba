@@ -58,7 +58,7 @@ jobs:
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
           input: /github/workspace/vuln-image.tar
-          timeout: 60
+          timeout: "60m"
           skip-dirs: "/external/semgrep-rules,/external/routersploit,/external/arachni,/etc/ssl/private/"
           format: 'template'
           template: '@/contrib/sarif.tpl'
