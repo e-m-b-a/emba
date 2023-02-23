@@ -102,13 +102,13 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        pip3 install nose
-        pip3 install coverage
-        pip3 install pyqtgraph
-        pip3 install capstone
-        pip3 install cstruct
-        pip3 install matplotlib
-        pip3 install "python-lzo>=1.14"
+        pip3 install nose --break-system-packages
+        pip3 install coverage --break-system-packages
+        pip3 install pyqtgraph --break-system-packages
+        pip3 install capstone --break-system-packages
+        pip3 install cstruct --break-system-packages
+        pip3 install matplotlib --break-system-packages
+        pip3 install "python-lzo>=1.14" --break-system-packages
 
         if ! [[ -d external/binwalk ]]; then
           # git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
@@ -161,7 +161,7 @@ IP99_binwalk_default() {
             print_pip_info "$TOOL_NAME"
           done < ./external/binwalk/jefferson/requirements.txt
 
-          pip3 install -r ./external/binwalk/jefferson/requirements.txt
+          pip3 install -r ./external/binwalk/jefferson/requirements.txt --break-system-packages
           cd ./external/binwalk/jefferson/ || ( echo "Could not install EMBA component jefferson" && exit 1 )
           python3 ./setup.py install
           cd "$HOME_PATH" || ( echo "Could not install EMBA component jefferson" && exit 1 )
