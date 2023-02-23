@@ -33,7 +33,7 @@ jobs:
         signoff: false
         branch: packetstorm_update
         delete-branch: true
-        title: 'Packetstorm database udpate'
+        title: 'Packetstorm database update'
         body: |
           Update report
           - Updated latest packetstorm exploits

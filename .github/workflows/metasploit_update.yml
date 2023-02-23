@@ -33,7 +33,7 @@ jobs:
         signoff: false
         branch: metasploit_update
         delete-branch: true
-        title: 'Metasploit database udpate'
+        title: 'Metasploit database update'
         body: |
           Update report
           - Updated latest metasploit exploits
