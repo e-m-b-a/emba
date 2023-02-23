@@ -1,13 +1,19 @@
 name: Docker Image build
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
+  push:
+    branches:    
+      - '**'        # matches every branch
+  pull_request:
+    branches:
+      - '**'
+
+#on:
+#schedule:
+#- cron: '0 0 * * *'
   
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
