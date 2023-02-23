@@ -12,9 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-   steps:
-    - uses: actions/checkout@v3
-    - name: Free Disk Space (Ubuntu)
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
           tool-cache: true
@@ -23,5 +24,5 @@ jobs:
           haskell: true
           large-packages: true
           swap-storage: true
-    - name: Build EMBA Docker image
-      run: docker-compose build --no-cache --pull
+      - name: Build EMBA Docker image
+        run: docker-compose build --no-cache --pull
