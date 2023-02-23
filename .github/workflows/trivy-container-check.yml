@@ -5,14 +5,22 @@
 
 name: trivy-image-check
 
+  #on:
+  #push:
+  #  branches: [ "master" ]
+  #pull_request:
+  #  # The branches below must be a subset of the branches above
+  #  branches: [ "master" ]
+  #schedule:
+  #  - cron: '21 21 * * 2'
+
 on:
   push:
-    branches: [ "master" ]
+    branches:    
+      - '**'        # matches every branch
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "master" ]
-  schedule:
-    - cron: '21 21 * * 2'
+    branches:
+      - '**'
 
 permissions:
   contents: read
