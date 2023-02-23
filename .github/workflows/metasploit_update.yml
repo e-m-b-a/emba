@@ -1,0 +1,44 @@
+name: Update Metasploit database
+
+on:
+  push:
+    branches:    
+      - '**'        # matches every branch
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  update_packetstorm_db:
+    runs-on: kalilinux/kali-rolling
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v3
+    - name: Install requirements
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install metasploit-framework -y --no-install-recommends
+    - name: update metasploit db
+      run: |
+        ./helpers/metasploit_db_update.sh
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.PAT }}
+        commit-message: Update Metasploit database
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        signoff: false
+        branch: metasploit_update
+        delete-branch: true
+        title: 'Metasploit database udpate'
+        body: |
+          Update report
+          - Updated latest metasploit exploits
+        labels: |
+          db_update
+          automated pr
+        milestone: 0
+        draft: false
