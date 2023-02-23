@@ -37,20 +37,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build an image from Dockerfile
+          #      - name: Build an image from Dockerfile
+          #run: |
+          #docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
+      - name: Generate tarball from image
         run: |
-          docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
+          docker pull embeddedanalyzer/emba
+          docker save -o vuln-image.tar embeddedanalyzer/emba
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
+          input: /github/workspace/vuln-image.tar
           timeout: 60
           skip-dirs: "/external/semgrep-rules,/external/routersploit,/external/arachni,/etc/ssl/private/"
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
+          #image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
