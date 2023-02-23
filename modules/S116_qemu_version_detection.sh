@@ -41,14 +41,16 @@ S116_qemu_version_detection() {
 
         if [[ $THREADED -eq 1 ]]; then
           version_detection_thread "$VERSION_LINE" &
-          WAIT_PIDS_F05+=( "$!" )
+          local TMP_PID="$!"
+          store_kill_pids "$TMP_PID"
+          WAIT_PIDS_S116+=( "$TMP_PID" )
         else
           version_detection_thread "$VERSION_LINE"
         fi
       done < "$CONFIG_DIR"/bin_version_strings.cfg
       print_ln "no_log"
 
-      [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F05[@]}"
+      [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S116[@]}"
       if [[ $(wc -l "$CSV_DIR"/s116_qemu_version_detection.csv | awk '{print $1}' ) -gt 1 ]]; then
         NEG_LOG=1
       fi

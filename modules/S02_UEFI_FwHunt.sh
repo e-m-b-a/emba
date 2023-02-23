@@ -34,7 +34,9 @@ S02_UEFI_FwHunt() {
     for EXTRACTED_FILE in "${FILE_ARR_LIMITED[@]}"; do
       if [[ $THREADED -eq 1 ]]; then
         fwhunter "$EXTRACTED_FILE" &
-        WAIT_PIDS_S02+=( "$!" )
+        local TMP_PID="$!"
+        store_kill_pids "$TMP_PID"
+        WAIT_PIDS_S02+=( "$TMP_PID" )
         max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S02[@]}"
       else
         fwhunter "$EXTRACTED_FILE"

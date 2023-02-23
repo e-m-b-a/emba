@@ -175,7 +175,9 @@ S115_usermode_emulator() {
               prepare_emulator "$R_PATH" "$EMULATOR"
               if [[ "$THREADED" -eq 1 ]]; then
                 emulate_binary "$EMULATOR" "$R_PATH" "$BIN_" &
-                WAIT_PIDS_S115+=( "$!" )
+                local TMP_PID="$!"
+                store_kill_pids "$TMP_PID"
+                WAIT_PIDS_S115+=( "$TMP_PID" )
                 max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115[@]}"
               else
                 emulate_binary "$EMULATOR" "$R_PATH" "$BIN_"
@@ -649,7 +651,7 @@ emulate_binary() {
   # now we kill all older qemu-processes:
   # if we use the correct identifier $EMULATOR it will not work ...
   # This is very ugly and should only be used in docker environment!
-  pkill -9 -O "$QRUNTIME" -f .*qemu-.*-sta.* || true
+  pkill -9 -O "$QRUNTIME" -f .*qemu-.*-sta.* >/dev/null || true
   write_log "\\n-----------------------------------------------------------------\\n" "$LOG_FILE_BIN"
 }
 
@@ -662,7 +664,7 @@ check_disk_space_emu() {
     if pgrep -f "$EMULATOR.*$KILLER" > /dev/null; then
       print_output "[!] Qemu processes are wasting disk space ... we try to kill it" "no_log"
       print_output "[*] Killing process ${ORANGE}$EMULATOR.*$KILLER.*${NC}" "no_log"
-      pkill -f "$EMULATOR.*$KILLER.*" || true
+      pkill -f "$EMULATOR.*$KILLER.*" >/dev/null|| true
       # rm "$LOG_DIR"/qemu_emulator/*"$KILLER"*
     fi
   done
@@ -688,7 +690,7 @@ kill_qemu_threader() {
   # Currently this should only used in docker environment!
   while true; do
     print_output "[*] KILLING qemu processes" "no_log"
-    pkill -9 -O 240 -f .*qemu-.*-sta.* || true
+    pkill -9 -O 240 -f .*qemu-.*-sta.* >/dev/null || true
     sleep 20
   done
 }
@@ -740,15 +742,15 @@ s115_cleanup() {
   # if no emulation at all was possible the $EMULATOR variable is not defined
   if [[ -n "$EMULATOR" ]]; then
     print_output "[*] Terminating qemu processes - check it with ps"
-    pkill -9 -f .*qemu-.*-sta.* || true
+    pkill -9 -f .*qemu-.*-sta.* >/dev/null || true
   fi
 
   CJOBS_=$(pgrep -f qemu- || true)
   if [[ -n "$CJOBS_" ]] ; then
     print_output "[*] More emulation jobs are running ... we kill it with fire\\n"
-    pkill -9 -f .*"$EMULATOR".* || true
+    pkill -9 -f .*"$EMULATOR".* >/dev/null || true
   fi
-  kill -9 "$PID_killer" || true
+  kill -9 "$PID_killer" >/dev/null || true
 
   print_output "[*] Cleaning the emulation environment\\n"
   find "$EMULATION_PATH_BASE" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true

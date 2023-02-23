@@ -58,21 +58,27 @@ S14_weak_func_radare_check()
         if ( file "$BINARY" | grep -q "x86-64" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             radare_function_check_x86_64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S14+=( "$!" )
+            local TMP_PID="$!"
+            store_kill_pids "$TMP_PID"
+            WAIT_PIDS_S14+=( "$TMP_PID" )
           else
             radare_function_check_x86_64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "Intel 80386" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             radare_function_check_x86 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S14+=( "$!" )
+            local TMP_PID="$!"
+            store_kill_pids "$TMP_PID"
+            WAIT_PIDS_S14+=( "$TMP_PID" )
           else
             radare_function_check_x86
           fi
         elif ( file "$BINARY" | grep -q "32-bit.*ARM" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             radare_function_check_ARM32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S14+=( "$!" )
+            local TMP_PID="$!"
+            store_kill_pids "$TMP_PID"
+            WAIT_PIDS_S14+=( "$TMP_PID" )
           else
             radare_function_check_ARM32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
@@ -80,7 +86,9 @@ S14_weak_func_radare_check()
           # ARM 64 code is in alpha state and nearly not tested!
           if [[ "$THREADED" -eq 1 ]]; then
             radare_function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S14+=( "$!" )
+            local TMP_PID="$!"
+            store_kill_pids "$TMP_PID"
+            WAIT_PIDS_S14+=( "$TMP_PID" )
           else
             radare_function_check_ARM64 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
@@ -88,21 +96,27 @@ S14_weak_func_radare_check()
           # MIPS32 and MIPS64
           if [[ "$THREADED" -eq 1 ]]; then
             radare_function_check_MIPS "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S14+=( "$!" )
+            local TMP_PID="$!"
+            store_kill_pids "$TMP_PID"
+            WAIT_PIDS_S14+=( "$TMP_PID" )
           else
             radare_function_check_MIPS "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "PowerPC" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             radare_function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S14+=( "$!" )
+            local TMP_PID="$!"
+            store_kill_pids "$TMP_PID"
+            WAIT_PIDS_S14+=( "$TMP_PID" )
           else
             radare_function_check_PPC32 "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi
         elif ( file "$BINARY" | grep -q "QUALCOMM DSP6" ) ; then
           if [[ "$THREADED" -eq 1 ]]; then
             radare_function_check_hexagon "$BINARY" "${VULNERABLE_FUNCTIONS[@]}" &
-            WAIT_PIDS_S14+=( "$!" )
+            local TMP_PID="$!"
+            store_kill_pids "$TMP_PID"
+            WAIT_PIDS_S14+=( "$TMP_PID" )
           else
             radare_function_check_hexagon "$BINARY" "${VULNERABLE_FUNCTIONS[@]}"
           fi

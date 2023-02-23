@@ -33,7 +33,9 @@ S03_firmware_bin_base_analyzer() {
     export OUTPUT_DIR="$FIRMWARE_PATH_CP"
     if [[ $THREADED -eq 1 ]]; then
       os_identification &
-      WAIT_PIDS_S03+=( "$!" )
+      local TMP_PID="$!"
+      store_kill_pids "$TMP_PID"
+      WAIT_PIDS_S03+=( "$TMP_PID" )
     else
       os_identification
     fi
@@ -47,7 +49,9 @@ S03_firmware_bin_base_analyzer() {
     if [[ $RTOS -eq 1 ]] ; then
       if [[ $THREADED -eq 1 ]]; then
         binary_architecture_detection "$FIRMWARE_PATH_BAK" &
-        WAIT_PIDS_S03+=( "$!" )
+        local TMP_PID="$!"
+        store_kill_pids "$TMP_PID"
+        WAIT_PIDS_S03+=( "$TMP_PID" )
       else
         binary_architecture_detection "$FIRMWARE_PATH_BAK"
       fi
@@ -89,7 +93,9 @@ os_identification() {
   for OS in "${OS_SEARCHER[@]}"; do
     if [[ $THREADED -eq 1 ]]; then
       os_detection_thread_per_os "$OS" &
-      WAIT_PIDS_S03_1+=( "$!" )
+      local TMP_PID="$!"
+      store_kill_pids "$TMP_PID"
+      WAIT_PIDS_S03_1+=( "$TMP_PID" )
     else
       os_detection_thread_per_os "$OS"
     fi

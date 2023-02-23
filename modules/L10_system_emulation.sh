@@ -516,6 +516,7 @@ main_emulation() {
       elif [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "None" ]] || \
         [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" ]] || [[ "$DETECTED_IP" -eq 0 ]]; then
         mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log
+        COUNTING_1st=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log | awk '{print $1}')
         if [[ "$KINIT" == "rdinit="* ]]; then
           print_output "[*] Warning: Unknown EMBA startup found via rdinit - testing init"
           # strip rd from rdinit
@@ -533,17 +534,21 @@ main_emulation() {
         # now we need to check if something is better now or we should switch back to the original init
         F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
         F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
+        COUNTING_2nd=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $1}')
         # IPS_INT_VLAN is always at least 1 for the default configuration
         if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
           [[ "$DETECTED_IP" -eq 0 ]]; then
-          if [[ "$KINIT" == "rdinit="* ]]; then
-            print_output "[*] Warning: switching back to init"
-            # strip rd from rdinit
-            KINIT="${KINIT:2}"
-          else
-            print_output "[*] Warning: switching back to rdinit"
-            # make rdinit from init
-            KINIT="rd""$KINIT"
+          # we only switch back if the first check has more output generated
+          if [[ "$COUNTING_1st" -gt "$COUNTING_2nd" ]]; then
+            if [[ "$KINIT" == "rdinit="* ]]; then
+              print_output "[*] Warning: switching back to init"
+              # strip rd from rdinit
+              KINIT="${KINIT:2}"
+            else
+              print_output "[*] Warning: switching back to rdinit"
+              # make rdinit from init
+              KINIT="rd""$KINIT"
+            fi
           fi
         fi
 
@@ -2069,7 +2074,7 @@ write_results() {
   local ARCHIVE_PATH_="${1:-}"
   local TCP_SERV_CNT=0
   if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
-    TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l)"
+    TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
   fi
   ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"
   echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED;ICMP $ICMP;TCP-0 $TCP_0;TCP $TCP;$TCP_SERV_CNT;IP address: $IP_ADDRESS_;Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_" >> "$LOG_DIR"/emulator_online_results.log

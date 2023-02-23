@@ -86,15 +86,19 @@ check_disk_space() {
 
 disk_space_protection() {
   local SEARCHER="${1:-}"
+  local DDISK="$LOG_DIR"
+  local FREE_SPACE=""
 
   check_disk_space
-  if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+  FREE_SPACE=$(df --output=avail "$DDISK" | awk 'NR==2')
+  if [[ "$FREE_SPACE" -lt 100000 ]] || [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
     print_ln "no_log"
     print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
     print_output "[!] $(date) - Ending extraction processes" "main"
     pgrep -a -f "binwalk.*$SEARCHER.*" || true
     pkill -f ".*binwalk.*$SEARCHER.*" || true
     pkill -f ".*extract\.py.*$SEARCHER.*" || true
+    # PID is from wait_for_extractor
     kill -9 "$PID" 2>/dev/null || true
     DISK_SPACE_CRIT=1
   fi
@@ -177,84 +181,120 @@ deeper_extractor_helper() {
       if [[ "$VMDK_DETECTED" -eq 1 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted"
         fi
       elif [[ "$UBI_IMAGE" -eq 1 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted"
         fi
       elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted"
         fi
       elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted"
         fi
       elif [[ "$EXT_IMAGE" -eq 1 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted"
         fi
       elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted"
         fi
       elif [[ "$BSD_UFS" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted"
         fi
       elif [[ "$ANDROID_OTA" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           android_ota_extractor "$FILE_TMP" "${FILE_TMP}_android_ota_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           android_ota_extractor "$FILE_TMP" "${FILE_TMP}_android_ota_extracted"
         fi
       elif [[ "$OPENSSL_ENC_DETECTED" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted"
         fi
       elif [[ "$BUFFALO_ENC_DETECTED" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           buffalo_enc_extractor "$FILE_TMP" "${FILE_TMP}_buffalo_enc_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           buffalo_enc_extractor "$FILE_TMP" "${FILE_TMP}_buffalo_enc_extracted"
         fi
       elif [[ "$ZYXEL_ZIP" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted"
         fi
       elif [[ "$QCOW_DETECTED" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted"
         fi
@@ -263,7 +303,10 @@ deeper_extractor_helper() {
         # default case to binwalk
         if [[ "$THREADED" -eq 1 ]]; then
           binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "${FILE_TMP}_binwalk_extracted" &
-          WAIT_PIDS_P20+=( "$!" )
+          BIN_PID="$!"
+          store_kill_pids "$BIN_PID"
+          disown "$BIN_PID" 2> /dev/null || true
+          WAIT_PIDS_P20+=( "$BIN_PID" )
         else
           binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "${FILE_TMP}_binwalk_extracted"
         fi
@@ -275,7 +318,15 @@ deeper_extractor_helper() {
 
     check_disk_space
 
-    if [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+    FREE_SPACE=$(df --output=avail "$LOG_DIR" | awk 'NR==2')
+    if [[ "$FREE_SPACE" -lt 100000 ]]; then
+      # this stops the complete EMBA test
+      print_output "[!] $(date) - The system is running out of disk space $ORANGE$FREE_SPACE$NC" "main"
+      print_output "[!] $(date) - Ending EMBA firmware analysis processes" "main"
+      cleaner 1
+      exit
+    elif [[ "$DISK_SPACE" -gt "$MAX_EXT_SPACE" ]]; then
+      # this stops the deep extractor but not EMBA
       print_output "[!] $(date) - Extractor needs too much disk space $DISK_SPACE" "main"
       print_output "[!] $(date) - Ending extraction processes" "main"
       DISK_SPACE_CRIT=1
