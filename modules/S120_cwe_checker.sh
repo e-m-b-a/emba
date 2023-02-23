@@ -96,7 +96,9 @@ cwe_check() {
         fi
 
         cwe_checker_threaded "$BINARY" &
-        WAIT_PIDS_S120+=( "$!" )
+        local TMP_PID="$!"
+        store_kill_pids "$TMP_PID"
+        WAIT_PIDS_S120+=( "$TMP_PID" )
         max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S120[@]}"
         continue
       else

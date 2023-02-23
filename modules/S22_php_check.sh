@@ -74,7 +74,9 @@ s22_vuln_check_caller() {
       ((S22_PHP_SCRIPTS+=1))
       if [[ "$THREADED" -eq 1 ]]; then
         s22_vuln_check "$PHP_SCRIPT" &
-        WAIT_PIDS_S22+=( "$!" )
+        local TMP_PID="$!"
+        store_kill_pids "$TMP_PID"
+        WAIT_PIDS_S22+=( "$TMP_PID" )
         max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S22[@]}"
         continue
       else

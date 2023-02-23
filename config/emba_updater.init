@@ -17,7 +17,7 @@ fi
 
 echo "[*] EMBA update - main repository" | tee -a "$LOG_DIR"/emba_update.log
 cd EMBA_INSTALL_PATH || exit
-git pull | tee -a "$LOG_DIR"/emba_update.log
+git pull origin master | tee -a "$LOG_DIR"/emba_update.log
 cd "$BASE_PATH" || exit
 
 echo "[*] EMBA update - cve-search update" | tee -a "$LOG_DIR"/emba_update.log
