@@ -2,7 +2,7 @@ name: Update packetstorm database
 
 on:
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 * * 0' # do it every week
 
 jobs:
   update_packetstorm_db:

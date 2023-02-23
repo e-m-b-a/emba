@@ -1,15 +1,11 @@
 name: Docker Image build
 
 on:
-  push:
-    branches:    
-      - '**'        # matches every branch
-  pull_request:
-    branches:
-      - '**'
+  schedule:
+    - cron: '0 0 * * *' # do it every day
 
 jobs:
-  build:
+  docker-build:
     runs-on: ubuntu-latest
 
     steps:
