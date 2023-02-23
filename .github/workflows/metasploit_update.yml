@@ -9,7 +9,7 @@ on:
       - '**'
 
 jobs:
-  update_packetstorm_db:
+  update_msf_db:
     runs-on: kalilinux/kali-rolling
 
     steps:
