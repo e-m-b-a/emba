@@ -50,6 +50,8 @@ IP00_extractors(){
         echo
 
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        pip3 install -U setuptools
+        pip3 install -U wheel
         pip3 install protobuf
         pip3 install bsdiff4
         pip3 install "python-lzo>=1.14"
