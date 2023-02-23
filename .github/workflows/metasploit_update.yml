@@ -1,12 +1,8 @@
 name: Update Metasploit database
 
 on:
-  push:
-    branches:    
-      - '**'        # matches every branch
-  pull_request:
-    branches:
-      - '**'
+  schedule:
+    - cron: '0 0 * * 0'
 
 jobs:
   update_msf_db:
