@@ -10,7 +10,7 @@ on:
 
 jobs:
   update_msf_db:
-    runs-on: kalilinux/kali-rolling
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Branch
@@ -18,10 +18,14 @@ jobs:
     - name: Install requirements
       run: |
         sudo apt-get update -y
-        sudo apt-get install metasploit-framework -y --no-install-recommends
+        sudo apt-get install git
+        pwd
+        ls
+        git clone https://github.com/rapid7/metasploit-framework.git external/metasploit-framework
+        ls external/metasploit-framework
     - name: update metasploit db
       run: |
-        ./helpers/metasploit_db_update.sh
+        ./helpers/metasploit_db_update.sh /github/workspace/external/metasploit-framework/modules
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v4

@@ -17,7 +17,7 @@
 
 EMBA_CONFIG_PATH="./config"
 MSF_DB_PATH="$EMBA_CONFIG_PATH"/msf_cve-db.txt
-MSF_MOD_PATH="/usr/share/metasploit-framework/modules/"
+MSF_MOD_PATH="${1:-}"
 
 ## Color definition
 GREEN="\033[0;32m"
