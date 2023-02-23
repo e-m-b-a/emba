@@ -1,0 +1,16 @@
+name: Docker Image build
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+  
+jobs:
+
+  build:
+
+    runs-on: kalilinux/kali-rolling
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker-compose build --no-cache --pull
