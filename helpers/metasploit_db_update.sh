@@ -38,9 +38,9 @@ if [[ -f "$MSF_DB_PATH" ]]; then
   echo -e "${GREEN}[*] Metasploit exploit database has $ORANGE$(wc -l "$MSF_DB_PATH" | awk '{print $1}')$GREEN exploit entries (before update).$NC"
 fi
 
-echo "[*] Updating the Metasploit framework package"
-sudo apt-get update -y
-sudo apt-get --only-upgrade install metasploit-framework -y
+# echo "[*] Updating the Metasploit framework package"
+# sudo apt-get update -y
+# sudo apt-get --only-upgrade install metasploit-framework -y
 
 echo "[*] Building the Metasploit exploit database"
 # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
