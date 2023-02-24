@@ -166,7 +166,7 @@ run_modules()
         # module_start_log "$MODULE_MAIN"
         if [[ "$RESTART" -eq 1 ]]; then
           if [[ $(grep -i -c "$MODULE_MAIN finished" "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
-            if [[ "$MODULE_MAIN" == "P99_"* ]]; then
+            if [[ "$MODULE_MAIN" == "P99_"* ]] || [[ "$MODULE_MAIN" == "L10_"* ]]; then
               print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "no_log"
               MOD_FIN=0
             else
@@ -180,6 +180,7 @@ run_modules()
             "$MODULE_MAIN" &
             MOD_PID="$!"
             store_kill_pids "$MOD_PID"
+            echo "main module - $MODULE_MAIN - $MOD_PID" >> "$LOG_DIR"/pid_notes.log
             WAIT_PIDS+=( "$MOD_PID" )
             max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
           else
@@ -214,7 +215,7 @@ run_modules()
           # module_start_log "$MODULE_MAIN"
           if [[ "$RESTART" -eq 1 ]]; then
             if [[ $(grep -i -c "$MODULE_MAIN finished" "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
-              if [[ "$MODULE_MAIN" == "P99_"* ]]; then
+              if [[ "$MODULE_MAIN" == "P99_"* ]] || [[ "$MODULE_MAIN" == "L10_"* ]]; then
                 print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "no_log"
                 MOD_FIN=0
               else
@@ -228,6 +229,7 @@ run_modules()
               "$MODULE_MAIN" &
               MOD_PID="$!"
               store_kill_pids "$MOD_PID"
+              echo "main module - $MODULE_MAIN - $MOD_PID" >> "$LOG_DIR"/pid_notes.log
               WAIT_PIDS+=( "$MOD_PID" )
               max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
             else
@@ -280,7 +282,7 @@ run_modules()
             # module_start_log "$MODULE_MAIN"
             if [[ "$RESTART" -eq 1 ]]; then
               if [[ $(grep -i -c "$MODULE_MAIN finished" "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
-                if [[ "$MODULE_MAIN" == "P99_"* ]]; then
+                if [[ "$MODULE_MAIN" == "P99_"* ]] || [[ "$MODULE_MAIN" == "L10_"* ]]; then
                   print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished but essential - rerun it" "main"
                   MOD_FIN=0
                 else
@@ -294,6 +296,7 @@ run_modules()
                 "$MODULE_MAIN" &
                 MOD_PID="$!"
                 store_kill_pids "$MOD_PID"
+                echo "main module - $MODULE_MAIN - $MOD_PID" >> "$LOG_DIR"/pid_notes.log
                 WAIT_PIDS+=( "$MOD_PID" )
                 max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
               else

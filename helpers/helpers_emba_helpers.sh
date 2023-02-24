@@ -21,7 +21,9 @@ run_web_reporter_mod_name() {
     # usually we should only find one file:
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
     for LOG_FILE in "${LOG_FILES[@]}"; do
+      echo "reached web reporter - $MOD_NAME" >> "$LOG_DIR"/pid_notes.log
       generate_report_file "$LOG_FILE"
+      echo "finished web reporter - $MOD_NAME" >> "$LOG_DIR"/pid_notes.log
       sed -i -E '/^\[REF\]|\[ANC\].*/d' "$LOG_FILE"
     done
   fi
