@@ -63,10 +63,18 @@ apk_checker() {
 }
 
 apk_checker_helper() {
-  print_ln
+  local APK="${1:-}"
+  ! [[ -f "$APK" ]] && return
+
   print_output "[*] Testing Android apk - $(print_path "$APK")"
-  go run "$EXT_DIR"/APKHunt/apkhunt.go -p "$APK" -l | tee -a "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
-  print_output "[*] APKHunt Android apk analysis results - $(print_path "$APK")" "" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
+  go run "$EXT_DIR"/APKHunt/apkhunt.go -p "$APK" -l 2>&1 | tee -a "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
+
+  if [[ -f "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt" ]]; then
+    print_output "[*] APKHunt Android apk analysis results - $(print_path "$APK")" "" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
+  else
+    print_output "[-] No APKHunt Android apk analysis results available - $(print_path "$APK")"
+  fi
+
   APK_DIR_NAME=$(dirname "$APK")
   APK_STACS_DIR=$(grep "APK Static Analysis Path" "$APK_DIR_NAME"/APKHunt_"$(basename -s .apk "$APK")"*.txt)
   APK_JAR="$APK_DIR_NAME"/"$(basename -s .apk "$APK")".jar
