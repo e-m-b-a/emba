@@ -11,6 +11,9 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner
+#
+# Description:  This module identifies Android apk packages and performs a static
+#               vulnerability test with APKHunt: https://github.com/Cyber-Buddy/APKHunt
 
 
 S17_apk_check() {
@@ -20,7 +23,7 @@ S17_apk_check() {
   apk_identifier
   apk_checker
 
-  module_end_log "${FUNCNAME[0]}" "${#COUNT_FINDINGS[@]}"
+  module_end_log "${FUNCNAME[0]}" "${#APK_ARR[@]}"
 }
 
 apk_identifier() {
@@ -30,7 +33,7 @@ apk_identifier() {
 
   mapfile -t APK_ARR < <(find "$FIRMWARE_PATH" -type f -name "*.apk")
   for APK in "${APK_ARR[@]}"; do
-    print_output "[+] Found Android apk - $(print_path "$APK")"
+    print_output "[+] Found Android apk - $ORANGE$(print_path "$APK")$NC"
   done
 }
 
@@ -44,6 +47,8 @@ apk_checker() {
 
   export GOTMPDIR="$TMP_DIR"/apkhunt
   mkdir "$GOTMPDIR"
+
+  write_csv_log "APK" "Identified issues" "log path"
 
   for APK in "${APK_ARR[@]}"; do
     if [[ "$THREADED" -eq 1 ]]; then
@@ -65,8 +70,9 @@ apk_checker() {
 apk_checker_helper() {
   local APK="${1:-}"
   ! [[ -f "$APK" ]] && return
+  local APK_ISSUES=0
 
-  print_output "[*] Testing Android apk - $(print_path "$APK")"
+  print_output "[*] Testing Android apk with APKHunt - $ORANGE$(print_path "$APK")$NC"
   go run "$EXT_DIR"/APKHunt/apkhunt.go -p "$APK" -l 2>&1 | tee -a "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
 
   if [[ -f "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt" ]]; then
@@ -76,8 +82,11 @@ apk_checker_helper() {
     else
       print_output "[*] APKHunt results for $ORANGE$(print_path "$APK")$NC" "" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
     fi
+
+    write_csv_log "$APK" "$APK_ISSUES" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
   else
     print_output "[-] No APKHunt Android apk analysis results available - $(print_path "$APK")"
+    write_csv_log "$APK" "$APK_ISSUES" "NA"
   fi
 
   APK_DIR_NAME=$(dirname "$APK")

@@ -30,6 +30,7 @@ F50_base_aggregator() {
   S12_LOG="s12_binary_protection.txt"
   S13_LOG="s13_weak_func_check.txt"
   S14_LOG="s14_weak_func_radare_check.txt"
+  S17_CSV_LOG="$CSV_DIR""/s17_apk_check.csv"
   S02_LOG="s02_uefi_fwhunt.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
@@ -342,6 +343,12 @@ output_config_issues() {
       write_csv_log "post_files" "${POST_COUNT:-0}" "NA"
       DATA=1
     fi
+    if [[ "${APK_ISSUES:-0}" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE${APK_ISSUES}$GREEN issues in Android APK packages.")")"
+      write_link "s17"
+      write_csv_log "apk_issues" "${APK_ISSUES}" "NA"
+    fi
+
   fi
   if [[ $DATA -eq 1 ]]; then
     print_bar
@@ -751,6 +758,7 @@ get_data() {
   export MSF_VERIFIED=0
   export K_CVE_VERIFIED_SYMBOLS=0
   export K_CVE_VERIFIED_COMPILED=0
+  export APK_ISSUES=0
 
   if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
@@ -913,6 +921,10 @@ get_data() {
       EXPLOIT_LOW_COUNT="$(cat "$TMP_DIR"/EXPLOIT_LOW_COUNTER.tmp || true)"
     fi
   fi
+  if [[ -f "$S17_CSV_LOG" ]]; then
+    APK_ISSUES="$(cut -d\; -f 2 "$S17_CSV_LOG" | awk '{ sum += $1 } END { print sum }' || true)"
+  fi
+
 }
 
 distribution_detector() {

@@ -140,6 +140,7 @@ IP99_binwalk_default() {
           git clone https://github.com/EMBA-support-repos/sasquatch external/binwalk/sasquatch
         fi
         cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+        # https://github.com/ReFirmLabs/binwalk/issues/618#issuecomment-1432373715
         wget https://github.com/devttys0/sasquatch/pull/47.patch
         patch -p1 < 47.patch
         CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
