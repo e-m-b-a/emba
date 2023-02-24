@@ -180,7 +180,7 @@ run_modules()
             "$MODULE_MAIN" &
             MOD_PID="$!"
             store_kill_pids "$MOD_PID"
-            echo "main module - $MODULE_MAIN - $MOD_PID" >> "$LOG_DIR"/pid_notes.log
+            echo "main module - $MODULE_MAIN - $MOD_PID" >> "$TMP_DIR"/pid_notes.log
             WAIT_PIDS+=( "$MOD_PID" )
             max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
           else
@@ -229,7 +229,7 @@ run_modules()
               "$MODULE_MAIN" &
               MOD_PID="$!"
               store_kill_pids "$MOD_PID"
-              echo "main module - $MODULE_MAIN - $MOD_PID" >> "$LOG_DIR"/pid_notes.log
+              echo "main module - $MODULE_MAIN - $MOD_PID" >> "$TMP_DIR"/pid_notes.log
               WAIT_PIDS+=( "$MOD_PID" )
               max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
             else
@@ -296,7 +296,7 @@ run_modules()
                 "$MODULE_MAIN" &
                 MOD_PID="$!"
                 store_kill_pids "$MOD_PID"
-                echo "main module - $MODULE_MAIN - $MOD_PID" >> "$LOG_DIR"/pid_notes.log
+                echo "main module - $MODULE_MAIN - $MOD_PID" >> "$TMP_DIR"/pid_notes.log
                 WAIT_PIDS+=( "$MOD_PID" )
                 max_pids_protection "$MAX_MODS" "${WAIT_PIDS[@]}"
               else

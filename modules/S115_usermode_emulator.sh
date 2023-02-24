@@ -177,7 +177,7 @@ S115_usermode_emulator() {
                 emulate_binary "$EMULATOR" "$R_PATH" "$BIN_" &
                 local TMP_PID="$!"
                 store_kill_pids "$TMP_PID"
-                echo "main-emulate_binary - $BIN_ - $TMP_PID" >> "$LOG_DIR"/pid_notes.log
+                echo "main-emulate_binary - $BIN_ - $TMP_PID" >> "$TMP_DIR"/pid_notes.log
                 WAIT_PIDS_S115+=( "$TMP_PID" )
                 max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115[@]}"
               else
@@ -421,7 +421,7 @@ run_init_qemu() {
   [[ "$STRICT_MODE" -eq 1 ]] && set +e
   run_init_qemu_runner "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT" &
   PID=$!
-  echo "run_init_qemu_runner - $BIN_EMU_NAME_ - $PID" >> "$LOG_DIR"/pid_notes.log
+  echo "run_init_qemu_runner - $BIN_EMU_NAME_ - $PID" >> "$TMP_DIR"/pid_notes.log
   [[ "$STRICT_MODE" -eq 1 ]] && set -e
   disown "$PID" 2> /dev/null || true
 
@@ -512,7 +512,7 @@ emulate_strace_run() {
       disown "$PID" 2> /dev/null || true
     fi
   fi
-  echo "emulate_strace_run $CHROOT strace qemu - $BIN_ - $PID" >> "$LOG_DIR"/pid_notes.log
+  echo "emulate_strace_run $CHROOT strace qemu - $BIN_ - $PID" >> "$TMP_DIR"/pid_notes.log
   [[ "$STRICT_MODE" -eq 1 ]] && set -e
 
   # wait a second and then kill it
@@ -647,7 +647,7 @@ emulate_binary() {
         disown "$PID" 2> /dev/null || true
       fi
     fi
-    echo "emulate_binary $CHROOT qemu - $BIN_ - $PID" >> "$LOG_DIR"/pid_notes.log
+    echo "emulate_binary $CHROOT qemu - $BIN_ - $PID" >> "$TMP_DIR"/pid_notes.log
     [[ "$STRICT_MODE" -eq 1 ]] && set -e
     check_disk_space_emu
   done
