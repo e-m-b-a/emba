@@ -41,11 +41,11 @@ services:
         - ${LOG}/:/logs
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
-        - /etc/timezone:/etc/timezone:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
+          # - /etc/timezone:/etc/timezone:ro
     environment:
         - USER
     devices:
