@@ -93,7 +93,7 @@ IL15_emulated_checks_init() {
         echo -e "$GREEN""routersploit_patch already downloaded""$NC"
       fi
 
-      python3 -m pip install -r requirements.txt
+      python3 -m pip install -r requirements.txt --break-system-packages
       # if the default log path is set we reset it to /tmp
       if ! grep -q "/tmp/routersploit.log" rsf.py; then
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py

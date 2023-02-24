@@ -6,6 +6,7 @@ on:
 
 jobs:
   docker-build:
+    if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-latest
 
     steps:
