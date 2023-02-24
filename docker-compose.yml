@@ -45,7 +45,6 @@ services:
         - /dev:/dev
         - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
-          # - /etc/timezone:/etc/timezone:ro
     environment:
         - USER
     devices:
