@@ -290,6 +290,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I13_objdump
 
+  I17_apk_check
+
   I20_sourcecode_check
 
   I24_25_kernel_tools

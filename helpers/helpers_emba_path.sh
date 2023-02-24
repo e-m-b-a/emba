@@ -188,6 +188,8 @@ mod_path_array() {
 }
 
 create_log_dir() {
+  [[ "$CHECK_DEP" -eq 1 ]] && return
+
   if ! [[ -d "$LOG_DIR" ]] ; then
     mkdir "$LOG_DIR" || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
   fi

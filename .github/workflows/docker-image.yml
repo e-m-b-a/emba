@@ -22,4 +22,4 @@ jobs:
           large-packages: true
           swap-storage: true
       - name: Build EMBA Docker image
-        run: docker-compose build --no-cache --pull
+        run: docker-compose build --no-cache --pull && ./emba -d -y -j

@@ -938,8 +938,13 @@ main()
     [[ "$STRICT_MODE" -eq 1 ]] && set +e
 
     disable_strict_mode "$STRICT_MODE" 0
-    EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-    D_RETURN=$?
+    if [[ "$ONLY_DEP" -eq 1 ]]; then
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      D_RETURN=$?
+    else
+      EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" LOG="$LOG_DIR" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      D_RETURN=$?
+    fi
     enable_strict_mode "$STRICT_MODE" 0
 
     if [[ $D_RETURN -eq 0 ]] ; then
@@ -954,7 +959,7 @@ main()
         cleaner 0
       else
         # we do not need the log dir from dependency checker
-        [[ -d "$LOG_DIR" ]] && rm -r "$LOG_DIR"
+        [[ -d "$LOG_DIR" ]] && rm -rf "$LOG_DIR"
       fi
       exit 0
     else
