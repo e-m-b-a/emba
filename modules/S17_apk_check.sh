@@ -70,7 +70,12 @@ apk_checker_helper() {
   go run "$EXT_DIR"/APKHunt/apkhunt.go -p "$APK" -l 2>&1 | tee -a "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
 
   if [[ -f "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt" ]]; then
-    print_output "[*] APKHunt Android apk analysis results - $(print_path "$APK")" "" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
+    APK_ISSUES=$(grep -c -E "^[0-9]+:" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt")
+    if [[ "$APK_ISSUES" -gt 0 ]]; then
+      print_output "[+] APKHunt found $ORANGE$APK_ISSUES$GREEN areas of interest in $ORANGE$(print_path "$APK")$NC" "" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
+    else
+      print_output "[*] APKHunt results for $ORANGE$(print_path "$APK")$NC" "" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
+    fi
   else
     print_output "[-] No APKHunt Android apk analysis results available - $(print_path "$APK")"
   fi
