@@ -49,7 +49,7 @@ I199_default_tools_github() {
         download_file "EnGenius decryptor" "https://raw.githubusercontent.com/EMBA-support-repos/enfringement/main/decrypt.py" "external/engenius-decrypt.py"
   
         # pixd installation
-        pip3 install pillow 2>/dev/null
+        pip3 install pillow --break-system-packages
         echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"
         git clone https://github.com/p4cx/pixd_image external/pixd
         cd ./external/pixd/ || ( echo "Could not install EMBA component pixd" && exit 1 )

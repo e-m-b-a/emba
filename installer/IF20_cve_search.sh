@@ -65,21 +65,21 @@ IF20_cve_search() {
       
       # we do not need to install the Flask web environment - we do it manually
       # python3 -m pip install -r requirements.txt
-      pip3 install requests==2.28.1
-      pip3 install Whoosh==2.7.4
-      pip3 install tqdm==4.64.0
-      pip3 install pymongo==3.12.1
-      pip3 install dicttoxml==1.7.4
-      pip3 install redis==4.2.2
-      pip3 install ijson==3.1.4
-      pip3 install jsonpickle==3.0.1
-      pip3 install requirements-parser==0.5.0
-      pip3 install ansicolors==1.1.8
-      pip3 install nltk==3.7
-      pip3 install nested-lookup==0.2.25
-      pip3 install dnspython==2.2.1
-      pip3 install Werkzeug
-      pip3 install python-dateutil
+      pip3 install requests==2.28.1 --break-system-packages
+      pip3 install Whoosh==2.7.4 --break-system-packages
+      pip3 install tqdm==4.64.0 --break-system-packages
+      pip3 install pymongo==3.12.1 --break-system-packages
+      pip3 install dicttoxml==1.7.4 --break-system-packages
+      pip3 install redis==4.2.2 --break-system-packages
+      pip3 install ijson==3.1.4 --break-system-packages
+      pip3 install jsonpickle==3.0.1 --break-system-packages
+      pip3 install requirements-parser==0.5.0 --break-system-packages
+      pip3 install ansicolors==1.1.8 --break-system-packages
+      pip3 install nltk==3.7 --break-system-packages
+      pip3 install nested-lookup==0.2.25 --break-system-packages
+      pip3 install dnspython==2.2.1 --break-system-packages
+      pip3 install Werkzeug --break-system-packages
+      pip3 install python-dateutil --break-system-packages
 
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 

@@ -1,0 +1,43 @@
+name: Update Metasploit database
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # do it every week
+
+jobs:
+  update_msf_db:
+    if: github.repository_owner == 'e-m-b-a'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v3
+    - name: Install requirements
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install git
+        mkdir external
+        git clone https://github.com/rapid7/metasploit-framework.git external/metasploit-framework
+    - name: update metasploit db
+      run: |
+        ./helpers/metasploit_db_update.sh /home/runner/work/emba/emba/external/metasploit-framework/modules
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Update Metasploit database
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        signoff: false
+        branch: metasploit_update
+        delete-branch: true
+        title: 'Metasploit database update'
+        body: |
+          Update report
+          - Updated latest metasploit exploits
+        labels: |
+          db_update
+          automated pr
+        milestone: 0
+        draft: false

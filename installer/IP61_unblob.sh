@@ -74,7 +74,7 @@ IP61_unblob() {
         fi
 
         # install poetry
-        python3 -m pip install --upgrade poetry
+        python3 -m pip install --upgrade poetry --break-system-packages
         cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
 
         # install unblob with poetry:

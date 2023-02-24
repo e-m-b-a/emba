@@ -1,18 +1,25 @@
 name: Docker Image build
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-  
+  schedule:
+    - cron: '0 0 * * *' # do it every day
+
 jobs:
-
-  build:
-
-    runs-on: kalilinux/kali-rolling
+  docker-build:
+    if: github.repository_owner == 'e-m-b-a'
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker-compose build --no-cache --pull
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+      - name: Build EMBA Docker image
+        run: docker-compose build --no-cache --pull

@@ -50,9 +50,11 @@ IP00_extractors(){
         echo
 
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-        pip3 install protobuf
-        pip3 install bsdiff4
-        pip3 install "python-lzo>=1.14"
+        pip3 install -U setuptools --break-system-packages
+        pip3 install -U wheel --break-system-packages
+        pip3 install protobuf --break-system-packages
+        pip3 install bsdiff4 --break-system-packages
+        pip3 install "python-lzo>=1.14" --break-system-packages
 
         if ! [[ -d external/payload_dumper ]]; then
           git clone https://github.com/EMBA-support-repos/payload_dumper.git external/payload_dumper

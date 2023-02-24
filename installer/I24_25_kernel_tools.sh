@@ -38,8 +38,8 @@ I24_25_kernel_tools() {
         fi
 
         cd external/vmlinux-to-elf || ( echo "Could not install EMBA component vmlinux-to-elf" && exit 1 )
-        pip3 install --upgrade git+https://github.com/EMBA-support-repos/vmlinux-to-elf
-        pip3 install "python-lzo>=1.14"
+        pip3 install --upgrade git+https://github.com/EMBA-support-repos/vmlinux-to-elf --break-system-packages
+        pip3 install "python-lzo>=1.14" --break-system-packages
         cd "$HOME_PATH" || ( echo "Could not install EMBA component vmlinux-to-elf" && exit 1 )
 
         if ! [[ -d external/kconfig-hardened-check ]]; then

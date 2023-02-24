@@ -17,7 +17,7 @@
 
 EMBA_CONFIG_PATH="./config"
 MSF_DB_PATH="$EMBA_CONFIG_PATH"/msf_cve-db.txt
-MSF_MOD_PATH="/usr/share/metasploit-framework/modules/"
+MSF_MOD_PATH="${1:-}"
 
 ## Color definition
 GREEN="\033[0;32m"
@@ -38,13 +38,14 @@ if [[ -f "$MSF_DB_PATH" ]]; then
   echo -e "${GREEN}[*] Metasploit exploit database has $ORANGE$(wc -l "$MSF_DB_PATH" | awk '{print $1}')$GREEN exploit entries (before update).$NC"
 fi
 
-echo "[*] Updating the Metasploit framework package"
-sudo apt-get update -y
-sudo apt-get --only-upgrade install  metasploit-framework -y
+# echo "[*] Updating the Metasploit framework package"
+# sudo apt-get update -y
+# sudo apt-get --only-upgrade install metasploit-framework -y
 
 echo "[*] Building the Metasploit exploit database"
 # search all ruby files in the metasploit directory and create a temporary file with the module path and CVE:
-find "$MSF_MOD_PATH" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" | sort > "$MSF_DB_PATH"
+find "$MSF_MOD_PATH" -type f -iname "*.rb" -exec grep -H -E -o "CVE', '[0-9]{4}-[0-9]+" {} \; | sed "s/', '/-/g" \
+  | sed 's/.*\/metasploit-framework//'| sort > "$MSF_DB_PATH"
 
 if [[ -f "$MSF_DB_PATH" ]]; then
   echo -e "${GREEN}[*] Metasploit exploit database now has $ORANGE$(wc -l "$MSF_DB_PATH" | awk '{print $1}')$GREEN exploit entries (after update).$NC"

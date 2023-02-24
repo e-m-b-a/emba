@@ -47,7 +47,7 @@ I108_stacs_password_search() {
           git clone https://github.com/stacscan/stacs.git external/stacs
         fi
         cd ./external/stacs || ( echo "Could not install EMBA component STACS" && exit 1 )
-        pip3 install -U setuptools
+        pip3 install -U setuptools --break-system-packages
         python3 setup.py install
         cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
 
