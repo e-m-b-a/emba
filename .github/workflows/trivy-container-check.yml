@@ -3,12 +3,11 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: trivy-image-check
+name: Trivy docker image security check
 
 on:
   schedule:
     - cron: '0 0 * * *' # do it every day
-
 
 permissions:
   contents: read
