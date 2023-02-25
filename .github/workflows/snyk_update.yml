@@ -1,0 +1,41 @@
+name: Update Snyk database
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # do it every week
+
+jobs:
+  update_snyk_db:
+    if: github.repository_owner == 'e-m-b-a'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v3
+    - name: Install requirements
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install lynx wget -y
+    - name: update Snyk db
+      run: |
+        ./helpers/snyk_crawler.sh
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Update Snyk database
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        signoff: false
+        branch: snyk_update
+        delete-branch: true
+        title: 'Snyk database update'
+        body: |
+          Update report
+          - Updated latest Snyk exploits
+        labels: |
+          db_update
+          automated pr
+        milestone: 0
+        draft: false

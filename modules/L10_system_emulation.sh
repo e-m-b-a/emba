@@ -49,6 +49,32 @@ L10_system_emulation() {
       LOG_PATH_MODULE=$(abs_path "$LOG_PATH_MODULE")
       R_PATH_CNT=1
 
+      # handling old emulation processes:
+      if [[ -f "$LOG_DIR"/emulator_online_results.log ]] && grep -q "L10_system_emulation finished" "$LOG_DIR"/emba.log; then
+        print_output "[*] Found finished emulation process - trying to recover old emulation process"
+
+        local IP_ADDRESS_=""
+        local IMAGE_NAME_=""
+        export ARCHIVE_PATH=""
+
+        IP_ADDRESS=$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
+        IMAGE_NAME="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
+        ARCHIVE_PATH="$LOG_PATH_MODULE""/""$IMAGE_NAME"
+        print_output "[*] Recovered IP address: $ORANGE$IP_ADDRESS$NC"
+        print_output "[*] Recovered IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
+        print_output "[*] Recovered ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
+
+        if [[ -f "$ARCHIVE_PATH" ]]; then
+          print_output "[+] Archive path found in old logs ... restarting emulation process"
+
+          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
+          module_end_log "${FUNCNAME[0]}" 1
+          return
+        else
+          print_output "[-] No archive path found in old logs ... restarting emulation process not possible"
+        fi
+      fi
+
       for R_PATH in "${ROOT_PATH[@]}" ; do
         print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
         write_link "p59"

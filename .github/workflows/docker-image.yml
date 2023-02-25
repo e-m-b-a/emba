@@ -21,5 +21,8 @@ jobs:
           haskell: true
           large-packages: true
           swap-storage: true
-      - name: Build EMBA Docker image
-        run: docker-compose build --no-cache --pull
+      - name: EMBA container build
+        uses: Wandalen/wretry.action@master
+        with:
+          command: docker-compose build --no-cache --pull && ./emba -d -y -j
+          attempt_limit: 3

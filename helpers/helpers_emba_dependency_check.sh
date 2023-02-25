@@ -423,10 +423,6 @@ dependency_check()
     # jtr
     check_dep_tool "john"
 
-    # rpm for checking package management system
-    # module not fully tested - needs some further work
-    # check_dep_tool "rpm"
-
     # pixd
     check_dep_file "pixd visualizer" "$EXT_DIR""/pixde"
 
@@ -438,6 +434,15 @@ dependency_check()
 
     # progpilot for php code checks
     check_dep_file "progpilot php ini checker" "$EXT_DIR""/progpilot"
+
+    # APKHunt for android apk analysis
+    # hard requirement for v1.2.2
+    # check_dep_file "APKHunt apk scanner" "$EXT_DIR""/APKHunt/apkhunt.go"
+
+    # rpm for checking package management system
+    # hard requirement for v1.2.2
+    # check_dep_tool "rpm"
+
 
     # patool extractor - https://wummel.github.io/patool/
     check_dep_tool "patool"
@@ -602,7 +607,6 @@ dependency_check()
       fi
     fi
   fi
-  
 
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
     print_output "\\n""$ORANGE""Some dependencies are missing - please check your installation\\n" "no_log"

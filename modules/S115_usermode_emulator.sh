@@ -177,6 +177,7 @@ S115_usermode_emulator() {
                 emulate_binary "$EMULATOR" "$R_PATH" "$BIN_" &
                 local TMP_PID="$!"
                 store_kill_pids "$TMP_PID"
+                write_pid_log "${FUNCNAME[0]} - emulate_binary - $BIN_ - $TMP_PID"
                 WAIT_PIDS_S115+=( "$TMP_PID" )
                 max_pids_protection "$MAX_THREADS_S115" "${WAIT_PIDS_S115[@]}"
               else
@@ -420,6 +421,7 @@ run_init_qemu() {
   [[ "$STRICT_MODE" -eq 1 ]] && set +e
   run_init_qemu_runner "$CPU_CONFIG_" "$BIN_EMU_NAME_" "$LOG_FILE_INIT" &
   PID=$!
+  write_pid_log "${FUNCNAME[0]} - runner - $BIN_ - $PID"
   [[ "$STRICT_MODE" -eq 1 ]] && set -e
   disown "$PID" 2> /dev/null || true
 
@@ -510,6 +512,7 @@ emulate_strace_run() {
       disown "$PID" 2> /dev/null || true
     fi
   fi
+  write_pid_log "${FUNCNAME[0]} - $CHROOT - $BIN_ - $PID"
   [[ "$STRICT_MODE" -eq 1 ]] && set -e
 
   # wait a second and then kill it
@@ -644,6 +647,7 @@ emulate_binary() {
         disown "$PID" 2> /dev/null || true
       fi
     fi
+    write_pid_log "${FUNCNAME[0]} - $CHROOT qemu final run - $BIN_ - $PID"
     [[ "$STRICT_MODE" -eq 1 ]] && set -e
     check_disk_space_emu
   done

@@ -198,6 +198,14 @@ check_alnum() {
   fi
 }
 
+check_vendor() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    print_output "[-] Invalid input detected - alphanumerical only" "no_log"
+    exit 1
+  fi
+}
+
 check_path_input() {
   local INPUT_TO_CHECK="${1:-}"
   if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
@@ -263,6 +271,26 @@ write_csv_log() {
 
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_LOG" || true
   printf '\n' >> "$CSV_LOG" || true
+}
+
+# write_pid_log is a functions used for debugging
+# enable it with setting PID_LOGGING to 1 in the main emba script
+# additionally you need to add a function call like the following to
+# every threaded call you need the PID
+# write_pid_log "${FUNCNAME[0]} - emulate_binary - $BIN_ - $TMP_PID"
+# with this you can trace the PIDs. Additionally it is sometimes
+# useful to enable PID output in wait_for_pid from helpers_emba_helpers.sh
+write_pid_log() {
+  local LOG_MESSAGE="${1:-}"
+  if [[ "$PID_LOGGING" -eq 0 ]]; then
+    return
+  fi
+  if ! [[ -d "$TMP_DIR" ]]; then
+    print_output "[-] WARNING: TMP directory $ORANGE$TMP_DIR$NC not found"
+    return
+  fi
+
+  echo "$LOG_MESSAGE" >> "$TMP_DIR"/"$PID_LOG_FILE" || true
 }
 
 write_grep_log()
