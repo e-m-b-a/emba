@@ -175,7 +175,7 @@ emba_parameter_parsing() {
         export OVERWRITE_LOG=1
         ;;
       Y)
-        check_alnum "$OPTARG"
+        check_vendor "$OPTARG"
         export FW_VENDOR=""
         FW_VENDOR="$(escape_echo "$OPTARG")"
         ;;

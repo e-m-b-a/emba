@@ -198,6 +198,14 @@ check_alnum() {
   fi
 }
 
+check_vendor() {
+  local INPUT_TO_CHECK="${1:-}"
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9_]+$ ]]; then
+    print_output "[-] Invalid input detected - alphanumerical only" "no_log"
+    exit 1
+  fi
+}
+
 check_path_input() {
   local INPUT_TO_CHECK="${1:-}"
   if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
