@@ -27,11 +27,12 @@ if [[ "$STRICT_MODE" -eq 1 ]]; then
   trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
 fi
 
-GREEN='\033[0;32m'
-ORANGE='\033[0;33m'
-RED='\033[0;31m'
-BOLD='\033[1m'
-NC='\033[0m' # no color
+export GREEN='\033[0;32m'
+export ORANGE='\033[0;33m'
+export RED='\033[0;31m'
+export BLUE='\033[0;34m'
+export BOLD='\033[1m'
+export NC='\033[0m' # no color
 
 INSTALLER_DIR="./installer"
 HELP_DIR="./helpers"
