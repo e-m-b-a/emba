@@ -290,7 +290,7 @@ write_pid_log() {
     return
   fi
 
-  echo "$1" >> "$TMP_DIR"/"$PID_LOG_FILE" || true
+  echo "$LOG_MESSAGE" >> "$TMP_DIR"/"$PID_LOG_FILE" || true
 }
 
 write_grep_log()
