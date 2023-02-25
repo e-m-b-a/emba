@@ -363,7 +363,7 @@ main() {
       print_output "[*] INFO: Please report issues to https://github.com/e-m-b-a/emba/issues." "no_log"
       print_ln "no_log"
       print_bar "no_log"
-      export WSL=1
+      WSL=1
     fi
   fi
 
