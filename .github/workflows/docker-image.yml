@@ -25,6 +25,6 @@ jobs:
           swap-storage: true
       - name: Build EMBA Docker image
         uses: Wandalen/wretry.action@master
-          with:
-            run: docker-compose build --no-cache --pull && ./emba -d -y -j
-            attempt_limit: 3
+        with:
+          run: docker-compose build --no-cache --pull && ./emba -d -y -j
+          attempt_limit: 3
