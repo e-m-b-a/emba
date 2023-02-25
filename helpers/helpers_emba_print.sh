@@ -265,6 +265,26 @@ write_csv_log() {
   printf '\n' >> "$CSV_LOG" || true
 }
 
+# write_pid_log is a functions used for debugging
+# enable it with setting PID_LOGGING to 1 in the main emba script
+# additionally you need to add a function call like the following to
+# every threaded call you need the PID
+# write_pid_log "${FUNCNAME[0]} - emulate_binary - $BIN_ - $TMP_PID"
+# with this you can trace the PIDs. Additionally it is sometimes
+# useful to enable PID output in wait_for_pid from helpers_emba_helpers.sh
+write_pid_log() {
+  local LOG_MESSAGE="${1:-}"
+  if [[ "$PID_LOGGING" -eq 0 ]]; then
+    return
+  fi
+  if ! [[ -d "$TMP_DIR" ]]; then
+    print_output "[-] WARNING: TMP directory $ORANGE$TMP_DIR$NC not found"
+    return
+  fi
+
+  echo "$1" >> "$TMP_DIR"/"$PID_LOG_FILE" || true
+}
+
 write_grep_log()
 {
   OLD_MESSAGE_TYPE=""
