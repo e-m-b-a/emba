@@ -701,7 +701,10 @@ module_end_log() {
 
   if [[ "$MODULE_REPORT_STATE" -eq 0 ]]; then
     print_output "[-] $(date) - $MODULE_MAIN_NAME nothing reported"
-  else
+  fi
+
+  # we do not report the templates on restarted tests
+  if [[ "$MODULE_REPORT_STATE" -ne 0 ]]; then
     REPORT_TEMPLATE="$(basename -s ".sh" "$MODULE_MAIN_NAME")-post"
     # We handle .txt and .sh files in report_template folder.
     # .txt are just echoed on cli and report

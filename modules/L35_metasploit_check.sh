@@ -66,7 +66,7 @@ check_live_metasploit() {
   local MSF_MODULE=""
   local ARCH_END=""
 
-  mapfile -t PORTS_ARR < <(grep -a -h "<state state=\"open\"" "$LOG_DIR"/l10_system_emulation/*.xml | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
+  mapfile -t PORTS_ARR < <(find "$LOG_DIR"/l10_system_emulation* -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
   printf -v PORTS "%s " "${PORTS_ARR[@]}"
   PORTS=${PORTS//\ /,}
   PORTS="${PORTS%,}"

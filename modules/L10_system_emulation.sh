@@ -1940,6 +1940,11 @@ reset_network_emulation() {
     return
   fi
 
+  # Todo: handle network shutdown also on restarted tests
+  if [[ "$RESTART" -ne 0 ]]; then
+    return
+  fi
+
   if [[ "$EXECUTE_" -ne 0 ]]; then
     print_output "[*] Stopping Qemu emulation ..."
     pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true &>/dev/null
