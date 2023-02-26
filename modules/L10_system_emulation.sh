@@ -69,71 +69,71 @@ L10_system_emulation() {
           print_output "[+] Startup script (run.sh) found in old logs ... restarting emulation process now"
 
           restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
+          # we should get TCP="ok" and SYS_ONLINE=1 back
         else
           print_output "[-] No archive path found in old logs ... restarting emulation process not possible"
         fi
-      else
+      fi
 
-      for R_PATH in "${ROOT_PATH[@]}" ; do
-        print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
-        write_link "p59"
+      if [[ "$SYS_ONLINE" -ne 1 ]] && [[ "$TCP" != "ok" ]]; then
+        for R_PATH in "${ROOT_PATH[@]}" ; do
+          print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
+          write_link "p59"
 
-        if [[ -n "$D_END" ]]; then
-          TAPDEV_0="tap0_0"
-          D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
-          ARCH_END="$(echo "$ARCH" | tr '[:upper:]' '[:lower:]')$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
+          if [[ -n "$D_END" ]]; then
+            TAPDEV_0="tap0_0"
+            D_END="$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
+            ARCH_END="$(echo "$ARCH" | tr '[:upper:]' '[:lower:]')$(echo "$D_END" | tr '[:upper:]' '[:lower:]')"
 
-          # default is ARM_SF -> we only need to check if it is HF
-          # The information is based on the results of architecture_check()
-          if [[ -n "$ARM_HF" ]] && [[ "$ARM_HF" -gt "${ARM_SF:-0}" ]]; then
-            print_output "[*] ARM hardware floating detected"
-            ARCH_END="$ARCH_END""hf"
+            # default is ARM_SF -> we only need to check if it is HF
+            # The information is based on the results of architecture_check()
+            if [[ -n "$ARM_HF" ]] && [[ "$ARM_HF" -gt "${ARM_SF:-0}" ]]; then
+              print_output "[*] ARM hardware floating detected"
+              ARCH_END="$ARCH_END""hf"
+            fi
+
+            if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64r2"* ]] || [[ "$ARCH_END" == "mips64_3"* ]]; then
+              print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
+              write_link "p99"
+              print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
+              UNSUPPORTED_ARCH=1
+              return
+            fi
+
+            # just in case we remove the return in the unsupported arch checker for testing:
+            if [[ "$UNSUPPORTED_ARCH" -ne 1 ]]; then
+              print_output "[*] Found supported architecture $ORANGE$ARCH_END$NC"
+              write_link "p99"
+            fi
+
+            pre_cleanup_emulator
+
+            main_emulation "$R_PATH" "$ARCH_END"
+
+            if [[ -d "$MNT_POINT" ]]; then
+              rm -r "$MNT_POINT"
+            fi
+
+            if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
+              # do not test other root paths if we are already online (some ports are available)
+              break
+            fi
+            # if [[ -f "$LOG_DIR"/emulator_online_results.log ]]; then
+            #  if [[ $(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true) -gt 1 ]]; then
+            #    print_output "[+] Identified the following system emulation results:"
+            #    print_output "$(indent "$(orange "$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)")")"
+            #    print_ln
+            #    print_output "[*] Restarting emulation for further analysis ..."
+            #    break
+            #  fi
+            # fi
+
+          else
+            print_output "[!] No supported architecture detected"
           fi
-
-          if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64r2"* ]] || [[ "$ARCH_END" == "mips64_3"* ]]; then
-            print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
-            write_link "p99"
-            print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
-            UNSUPPORTED_ARCH=1
-            return
-          fi
-
-          # just in case we remove the return in the unsupported arch checker for testing:
-          if [[ "$UNSUPPORTED_ARCH" -ne 1 ]]; then
-            print_output "[*] Found supported architecture $ORANGE$ARCH_END$NC"
-            write_link "p99"
-          fi
-
-          pre_cleanup_emulator
-
-          main_emulation "$R_PATH" "$ARCH_END"
-
-          if [[ -d "$MNT_POINT" ]]; then
-            rm -r "$MNT_POINT"
-          fi
-
-          if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
-            # do not test other root paths if we are already online (some ports are available)
-            break
-          fi
-          # if [[ -f "$LOG_DIR"/emulator_online_results.log ]]; then
-          #  if [[ $(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true) -gt 1 ]]; then
-          #    print_output "[+] Identified the following system emulation results:"
-          #    print_output "$(indent "$(orange "$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)")")"
-          #    print_ln
-          #    print_output "[*] Restarting emulation for further analysis ..."
-          #    break
-          #  fi
-          # fi
-
-        else
-          print_output "[!] No supported architecture detected"
-        fi
-        ((R_PATH_CNT+=1))
-      done
-
-      print_system_emulation_results
-
+          ((R_PATH_CNT+=1))
+        done
+        print_system_emulation_results
       fi
       MODULE_END=1
     else

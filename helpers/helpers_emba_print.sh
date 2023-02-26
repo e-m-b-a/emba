@@ -292,6 +292,7 @@ write_pid_log() {
     return
   fi
 
+  # shellcheck disable=SC2153
   echo "$LOG_MESSAGE" >> "$TMP_DIR"/"$PID_LOG_FILE" || true
 }
 
