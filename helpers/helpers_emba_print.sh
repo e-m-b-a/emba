@@ -63,7 +63,9 @@ module_log_init()
 
   if [[ -f "$LOG_FILE" ]]; then
     print_output "[*] Found old module log file $ORANGE$LOG_FILE$NC... creating a backup" "no_log"
-    mv "$LOG_FILE" "$LOG_FILE".bak."$RANDOM" || true
+    export OLD_LOG_FILE=""
+    OLD_LOG_FILE="$LOG_FILE".bak."$RANDOM"
+    mv "$LOG_FILE" "$OLD_LOG_FILE" || true
   fi
 
   module_start_log "${FILE_NAME^}"
@@ -665,7 +667,9 @@ module_start_log() {
   LOG_PATH_MODULE=$(abs_path "$LOG_DIR""/""$(echo "$MODULE_MAIN_NAME" | tr '[:upper:]' '[:lower:]')")
   if [[ -d "$LOG_PATH_MODULE" ]] ; then
     print_output "[*] Found old module log path for $ORANGE$MODULE_MAIN_NAME$NC ... creating a backup" "no_log"
-    mv "$LOG_PATH_MODULE" "$LOG_PATH_MODULE".bak."$RANDOM" || true
+    export OLD_LOG_DIR=""
+    OLD_LOG_DIR="$LOG_PATH_MODULE".bak."$RANDOM" || true
+    mv "$LOG_PATH_MODULE" "$OLD_LOG_DIR" || true
   fi
   if ! [[ -d "$LOG_PATH_MODULE" ]]; then
     mkdir "$LOG_PATH_MODULE" || true

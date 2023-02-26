@@ -28,7 +28,7 @@ L15_emulated_checks_nmap() {
 
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ -n "$IP_ADDRESS_" ]]; then
+    if [[ -v IP_ADDRESS_ ]]; then
       check_live_nmap_basic "$IP_ADDRESS_"
       MODULE_END=1
     else

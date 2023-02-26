@@ -17,6 +17,8 @@
 restart_emulation() {
   local IP_ADDRESS_="${1:-}"
   local IMAGE_NAME_="${2:-}"
+  # restart_scan is used to indicate a restarted scan. There we do not need to restart the network
+  local RESTART_SCAN="${3:-0}"
 
   if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
     print_output "[+] System with $ORANGE$IP_ADDRESS_$NC responding again - probably it recovered automatically."
@@ -32,7 +34,7 @@ restart_emulation() {
   print_output "[*] Trying to auto-maintain emulated system now ..."
 
   stopping_emulation_process "$IMAGE_NAME_"
-  reset_network_emulation 2
+  [[ "$RESTART_SCAN" -eq 0 ]] && reset_network_emulation 2
 
   # what an ugly hack - probably we are going to improve this later on
   local HOME_PATH=""
@@ -48,6 +50,8 @@ restart_emulation() {
     [[ "$COUNTER" -gt 50 ]] && (print_output "[-] System not recovered" && return)
     sleep 6
   done
-  print_output "[*] System automatically maintained and should be available again in a few moments ..."
+  print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address $ORANGE$IP_ADDRESS_$NC"
   sleep 60
+  export SYS_ONLINE=1
+  export TCP="ok"
 }

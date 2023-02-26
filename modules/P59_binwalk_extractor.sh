@@ -71,6 +71,7 @@ P59_binwalk_extractor() {
         write_csv_log "$FILES_EXT" "$UNIQUE_FILES" "$DIRS_EXT" "$BINS" "$LINUX_PATH_COUNTER" "$R_PATH"
       done
     fi
+    backup_var "FILES_EXT" "$FILES_EXT"
   fi
 
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
