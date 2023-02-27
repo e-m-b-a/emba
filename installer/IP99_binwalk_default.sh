@@ -102,13 +102,13 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        pip3 install nose --break-system-packages
-        pip3 install coverage --break-system-packages
-        pip3 install pyqtgraph --break-system-packages
-        pip3 install capstone --break-system-packages
-        pip3 install cstruct --break-system-packages
-        pip3 install matplotlib --break-system-packages
-        pip3 install "python-lzo>=1.14" --break-system-packages
+        pip_install "nose"
+        pip_install "coverage"
+        pip_install "pyqtgraph"
+        pip_install "capstone"
+        pip_install "cstruct"
+        pip_install "matplotlib"
+        pip_install "python-lzo>=1.14"
 
         if ! [[ -d external/binwalk ]]; then
           # git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk

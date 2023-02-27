@@ -43,10 +43,10 @@ I02_UEFI_fwhunt() {
     case ${ANSWER:0:1} in
       y|Y )
   
-        pip3 install rzpipe --break-system-packages 2>/dev/null
-        pip3 install click --break-system-packages 2>/dev/null
-        pip3 install pyyaml --break-system-packages 2>/dev/null
-        pip3 install uefi_firmware --break-system-packages 2>/dev/null
+        pip_install "rzpipe"
+        pip_install "click"
+        pip_install "pyyaml"
+        pip_install "uefi_firmware"
 
         # rizin:
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
@@ -79,7 +79,7 @@ I02_UEFI_fwhunt() {
         # ldconfig
         # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
         # python3 setup.py install
-        pip3 install fwhunt-scan --break-system-packages
+        pip_install "fwhunt-scan"
         cd "$HOME_PATH" || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
       ;;
     esac

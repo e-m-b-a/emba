@@ -39,7 +39,7 @@ IF50_aggregator_common() {
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-        pip3 install cve_searchsploit --break-system-packages
+        pip_install "cve_searchsploit"
 
         # we try to avoid downloading the exploit-database multiple times:
         CVE_SEARCH_PATH=$(pip3 show cve-searchsploit | grep "Location" | awk '{print $2}')

@@ -160,6 +160,16 @@ print_pip_info() {
   fi
 }
 
+pip_install() {
+  local PIP_NAME="${1:-}"
+  local PIP_OPTS="${2:-}"
+  if [[ "$UBUNTU_OS" -eq 1 ]] || [[ "$OTHER_OS" -eq 1 ]]; then
+    pip3 install "$PIP_NAME" "$2"
+  else
+    pip3 install "$PIP_NAME" --break-system-packages "$2"
+  fi
+}
+
 # print_file_info a b c d e
 # a = file name
 # b = description of file
