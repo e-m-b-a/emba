@@ -24,5 +24,6 @@ jobs:
       - name: EMBA container build
         uses: Wandalen/wretry.action@master
         with:
-          command: docker-compose build --no-cache --pull && ./emba -d -y -j
+          # command: docker-compose build --no-cache --pull && ./emba -d -y -j
+          command: docker-compose build --no-cache --pull
           attempt_limit: 3
