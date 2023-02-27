@@ -172,6 +172,19 @@ run_modules()
             else
               print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "main"
               MOD_FIN=1
+              if [[ $HTML -eq 1 ]] ; then
+                # we need to build the web reporter links for skipping modules
+                mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MODULE_MAIN*.txt" | sort)
+                for LOG_FILE_ in "${LOG_FILES[@]}"; do
+                  if grep -q "nothing reported" "$LOG_FILE_"; then
+                    continue
+                  fi
+                  MODULE_NAME_=$(basename -s .txt "$LOG_FILE_")
+                  MODUL_NAME="$( strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "$LOG_FILE_" | head -n 1 )" | cut -d" " -f2- )"
+                  HTML_FILE="$MODULE_NAME_.html"
+                  add_link_to_index "$HTML_FILE" "$MODUL_NAME"
+                done
+              fi
             fi
           fi
         fi
@@ -212,6 +225,19 @@ run_modules()
               else
                 print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "main"
                 MOD_FIN=1
+                if [[ $HTML -eq 1 ]] ; then
+                  # we need to build the web reporter links for skipping modules
+                  mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MODULE_MAIN*.txt" | sort)
+                  for LOG_FILE_ in "${LOG_FILES[@]}"; do
+                    if grep -q "nothing reported" "$LOG_FILE_"; then
+                      continue
+                    fi
+                    MODULE_NAME_=$(basename -s .txt "$LOG_FILE_")
+                    MODUL_NAME="$( strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "$LOG_FILE_" | head -n 1 )" | cut -d" " -f2- )"
+                    HTML_FILE="$MODULE_NAME_.html"
+                    add_link_to_index "$HTML_FILE" "$MODUL_NAME"
+                  done
+                fi
               fi
             fi
           fi
@@ -270,6 +296,19 @@ run_modules()
                 else
                   print_output "[*] Module $ORANGE$MODULE_MAIN$NC already finished ... skipping" "main"
                   MOD_FIN=1
+                  if [[ $HTML -eq 1 ]] ; then
+                    # we need to build the web reporter links for skipping modules
+                    mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MODULE_MAIN*.txt" | sort)
+                    for LOG_FILE_ in "${LOG_FILES[@]}"; do
+                      if grep -q "nothing reported" "$LOG_FILE_"; then
+                        continue
+                      fi
+                      MODULE_NAME_=$(basename -s .txt "$LOG_FILE_")
+                      MODUL_NAME="$( strip_color_tags "$(grep -a -E -B 1 '[=]{65}' "$LOG_FILE_" | head -n 1 )" | cut -d" " -f2- )"
+                      HTML_FILE="$MODULE_NAME_.html"
+                      add_link_to_index "$HTML_FILE" "$MODUL_NAME"
+                    done
+                  fi
                 fi
               fi
             fi

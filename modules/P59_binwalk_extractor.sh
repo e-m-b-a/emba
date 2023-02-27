@@ -72,6 +72,8 @@ P59_binwalk_extractor() {
       done
     fi
     backup_var "FILES_EXT" "$FILES_EXT"
+    backup_var "FILES_EXT" "$UNIQUE_FILES"
+    backup_var "FILES_EXT" "$DIRS_EXT"
   fi
 
   module_end_log "${FUNCNAME[0]}" "$FILES_EXT"
