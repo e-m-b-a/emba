@@ -163,10 +163,12 @@ print_pip_info() {
 pip_install() {
   local PIP_NAME="${1:-}"
   local PIP_OPTS="${2:-}"
-  if [[ "$UBUNTU_OS" -eq 1 ]] || [[ "$OTHER_OS" -eq 1 ]]; then
-    pip3 install "$PIP_NAME" "$2"
+  local PIP_VERS=""
+  PIP_VERS=$(pip3 -V | awk '{print $2}')
+  if [[ "$(version "$PIP_VERS")" -lt "$(version "23")" ]]; then
+    pip3 install "$PIP_NAME" "$PIP_OPTS"
   else
-    pip3 install "$PIP_NAME" --break-system-packages "$2"
+    pip3 install "$PIP_NAME" --break-system-packages "$PIP_OPTS"
   fi
 }
 
