@@ -29,7 +29,7 @@ L20_snmp_checks() {
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
-    if [[ -n "$IP_ADDRESS_" ]]; then
+    if [[ -v IP_ADDRESS_ ]]; then
       if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
         if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then

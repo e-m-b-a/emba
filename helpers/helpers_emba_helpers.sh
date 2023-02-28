@@ -21,6 +21,7 @@ run_web_reporter_mod_name() {
     # usually we should only find one file:
     mapfile -t LOG_FILES < <(find "$LOG_DIR" -maxdepth 1 -type f -iname "$MOD_NAME*.txt" | sort)
     for LOG_FILE in "${LOG_FILES[@]}"; do
+      MOD_NAME=$(basename -s .txt "$LOG_FILE")
       generate_report_file "$LOG_FILE"
       sed -i -E '/^\[REF\]|\[ANC\].*/d' "$LOG_FILE"
     done

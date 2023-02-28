@@ -28,7 +28,7 @@ L15_emulated_checks_nmap() {
 
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ -n "$IP_ADDRESS_" ]]; then
+    if [[ -v IP_ADDRESS_ ]]; then
       check_live_nmap_basic "$IP_ADDRESS_"
       MODULE_END=1
     else
@@ -54,8 +54,8 @@ check_live_nmap_basic() {
 
   sub_module_title "Nmap portscans for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
 
-  cp "$LOG_DIR"/l10_system_emulation/nmap_emba_"$IP_ADDRESS_"*.gnmap "$LOG_PATH_MODULE" || true
-  cp "$LOG_DIR"/l10_system_emulation/nmap_emba_"$IP_ADDRESS_"*.nmap "$LOG_PATH_MODULE" || true
+  cp "$LOG_DIR"/l10_system_emulation/nmap_emba_"$IP_ADDRESS_"*.gnmap "$LOG_PATH_MODULE" 2>/dev/null || true
+  cp "$LOG_DIR"/l10_system_emulation/nmap_emba_"$IP_ADDRESS_"*.nmap "$LOG_PATH_MODULE" 2>/dev/null || true
 
   # find all Nmap results
   mapfile -t NMAP_RESULT_FILES < <(find "$LOG_PATH_MODULE" -name "*.nmap")
