@@ -53,7 +53,6 @@ emba_parameter_parsing() {
         # on dependency check we need to check all deps -> activate all modules:
         export CWE_CHECKER=1
         export FULL_EMULATION=1
-        echo "reached"
         ;;
       D)
         # new debugging mode
