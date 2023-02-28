@@ -160,6 +160,18 @@ print_pip_info() {
   fi
 }
 
+pip_install() {
+  local PIP_NAME="${1:-}"
+  local PIP_OPTS="${2:-}"
+  local PIP_VERS=""
+  PIP_VERS=$(pip3 -V | awk '{print $2}')
+  if [[ "$(version "$PIP_VERS")" -lt "$(version "23")" ]]; then
+    pip3 install "$PIP_NAME" "$PIP_OPTS"
+  else
+    pip3 install "$PIP_NAME" --break-system-packages "$PIP_OPTS"
+  fi
+}
+
 # print_file_info a b c d e
 # a = file name
 # b = description of file
