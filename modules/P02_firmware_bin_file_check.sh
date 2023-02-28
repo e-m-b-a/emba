@@ -289,4 +289,6 @@ backup_p02_vars() {
   backup_var "ANDROID_OTA" "$ANDROID_OTA"
   backup_var "OPENSSL_ENC_DETECTED" "$OPENSSL_ENC_DETECTED"
   backup_var "BUFFALO_ENC_DETECTED" "$BUFFALO_ENC_DETECTED"
+  backup_var "ZYXEL_ZIP" "$ZYXEL_ZIP"
+  backup_var "QCOW_DETECTED" "$QCOW_DETECTED"
 }

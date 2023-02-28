@@ -73,6 +73,7 @@ P65_package_extractor() {
         print_output "[*] Before package extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after package extraction we have now $ORANGE$FILES_POST_PACKAGE$NC files extracted."
         NEG_LOG=1
       fi
+      backup_var "FILES_EXT" "$FILES_EXT"
     fi
   else
     print_output "[*] As there is no root directory detected it is not possible to process package archives"

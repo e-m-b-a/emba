@@ -26,7 +26,7 @@ L25_web_checks() {
     module_title "Web tests of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ -n "$IP_ADDRESS_" ]]; then
+    if [[ -v IP_ADDRESS_ ]]; then
       if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
         print_output "[-] System not responding - Not performing web checks"
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
