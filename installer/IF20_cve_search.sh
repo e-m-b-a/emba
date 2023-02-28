@@ -65,8 +65,8 @@ IF20_cve_search() {
       
       # we do not need to install the Flask web environment - we do it manually
       # python3 -m pip install -r requirements.txt
-      pip_install "requests==2.28.1"
       pip_install "Whoosh==2.7.4"
+      pip_install "requests==2.28.1"
       pip_install "tqdm==4.64.0"
       pip_install "pymongo==3.12.1"
       pip_install "dicttoxml==1.7.4"

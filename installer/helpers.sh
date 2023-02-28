@@ -162,14 +162,18 @@ print_pip_info() {
 
 pip_install() {
   local PIP_NAME="${1:-}"
+  local PIP_PARAMS=("$PIP_NAME")
   local PIP_OPTS="${2:-}"
+  if [[ -n "$PIP_OPTS" ]]; then
+    local PIP_PARAMS+=("$PIP_OPTS")
+  fi
+
   local PIP_VERS=""
   PIP_VERS=$(pip3 -V | awk '{print $2}')
-  if [[ "$(version "$PIP_VERS")" -lt "$(version "23")" ]]; then
-    pip3 install "$PIP_NAME" "$PIP_OPTS"
-  else
-    pip3 install "$PIP_NAME" --break-system-packages "$PIP_OPTS"
+  if [[ "$(version "$PIP_VERS")" -ge "$(version "23")" ]]; then
+    PIP_PARAMS+=(--break-system-packages)
   fi
+  pip3 install "${PIP_PARAMS[@]}"
 }
 
 # print_file_info a b c d e
