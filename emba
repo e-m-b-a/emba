@@ -639,7 +639,7 @@ main() {
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:dDe:Ef:Fghijk:l:m:N:op:P:QrsStT:UX:yY:WxzZ: OPT ; do
+    while getopts a:A:BcC:d:De:Ef:Fghijk:l:m:N:op:P:QrsStT:UX:yY:WxzZ: OPT ; do
       case $OPT in
         D|f|i|l)
           ;;
@@ -681,7 +681,7 @@ main() {
     [[ "$STRICT_MODE" -eq 1 ]] && set +e
 
     disable_strict_mode "$STRICT_MODE" 0
-    if [[ "$ONLY_DEP" -eq 1 ]]; then
+    if [[ "$ONLY_DEP" -gt 0 ]]; then
       EMBA="$INVOCATION_PATH" FIRMWARE="$FIRMWARE_PATH" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
     else

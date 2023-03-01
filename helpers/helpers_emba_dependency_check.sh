@@ -330,7 +330,7 @@ dependency_check()
   #######################################################################################
   # Docker for EMBA with docker
   #######################################################################################
-  if [[ $USE_DOCKER -eq 1 ]] ; then
+  if [[ $USE_DOCKER -eq 1 ]] && [[ "$ONLY_DEP" -ne 2 ]]; then
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
     check_docker_env
@@ -617,7 +617,7 @@ dependency_check()
       print_output "$ORANGE""Learn more about the installation on the EMBA wiki: ""$NC""https://github.com/e-m-b-a/emba/wiki/installation\\n" "no_log"
     fi
 
-    if [[ $ONLY_DEP -eq 1 ]] || [[ $FORCE -eq 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
+    if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
       exit 1
     fi
   else
@@ -625,7 +625,7 @@ dependency_check()
   fi
 
   # If only dependency check, then exit EMBA after it
-  if [[ $ONLY_DEP -eq 1 ]]; then
+  if [[ $ONLY_DEP -gt 0 ]]; then
     if [[ "$IN_DOCKER" -eq 1 ]] || [[ "$USE_DOCKER" -eq 0 ]]; then
       exit 0
     fi
