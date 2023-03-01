@@ -194,6 +194,7 @@ check_int() {
 
 check_alnum() {
   local INPUT_TO_CHECK="${1:-}"
+  [[ -z "$INPUT_TO_CHECK" ]] && return
   if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9]+$ ]]; then
     print_output "[-] Invalid input detected - alphanumerical only" "no_log"
     exit 1
@@ -202,6 +203,7 @@ check_alnum() {
 
 check_vendor() {
   local INPUT_TO_CHECK="${1:-}"
+  [[ -z "$INPUT_TO_CHECK" ]] && return
   if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     print_output "[-] Invalid input detected - alphanumerical only" "no_log"
     exit 1
@@ -210,6 +212,7 @@ check_vendor() {
 
 check_path_input() {
   local INPUT_TO_CHECK="${1:-}"
+  [[ -z "$INPUT_TO_CHECK" ]] && return
   if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
     print_output "[-] Invalid input detected - paths aka ~/abc/def123/ASDF only" "no_log"
     exit 1
@@ -218,6 +221,7 @@ check_path_input() {
 
 check_version() {
   local INPUT_TO_CHECK="${1:-}"
+  [[ -z "$INPUT_TO_CHECK" ]] && return
   if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~:'-']+$ ]]; then
     print_output "[-] Invalid input detected - versions aka 1.2.3-a:b only" "no_log"
     exit 1
