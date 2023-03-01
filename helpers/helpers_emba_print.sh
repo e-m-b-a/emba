@@ -195,7 +195,7 @@ check_int() {
 check_alnum() {
   local INPUT_TO_CHECK="${1:-}"
   [[ -z "$INPUT_TO_CHECK" ]] && return
-  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9]+$ ]]; then
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[[:alnum:]]+$ ]]; then
     print_output "[-] Invalid input detected - alphanumerical only" "no_log"
     exit 1
   fi
@@ -206,6 +206,15 @@ check_vendor() {
   [[ -z "$INPUT_TO_CHECK" ]] && return
   if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     print_output "[-] Invalid input detected - alphanumerical only" "no_log"
+    exit 1
+  fi
+}
+
+check_notes() {
+  local INPUT_TO_CHECK="${1:-}"
+  [[ -z "$INPUT_TO_CHECK" ]] && return
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[[:alnum:][:blank:][:punct:]]+$ ]]; then
+    print_output "[-] Invalid input detected - alphanumerical only allowed in notes" "no_log"
     exit 1
   fi
 }
