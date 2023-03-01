@@ -174,28 +174,4 @@ IF20_cve_search() {
       ;;
     esac
   fi
-
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $FULL -eq 1 ]]; then
-    cd "$HOME_PATH" || ( echo "Could not install EMBA component CISA.gov database" && exit 1 )
-
-    # see https://www.cisa.gov/known-exploited-vulnerabilities-catalog
-    print_file_info "known_exploited_vulnerabilities.csv" "CISA.gov list of known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
-
-    if [[ "$LIST_DEP" -eq 1 ]] ; then
-      ANSWER=("n")
-    else
-      echo -e "\\n""$MAGENTA""$BOLD""These rules (if not already on the system) will be downloaded!""$NC"
-      ANSWER=("y")
-    fi
-
-    case ${ANSWER:0:1} in
-      y|Y )
-
-        download_file "known_exploited_vulnerabilities.csv" "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv" "external/known_exploited_vulnerabilities.csv"
-
-      ;;
-    esac
-  fi
-
-  # pip3 install --force-reinstall --no-deps --ignore-installed requests==2.28.1
 } 
