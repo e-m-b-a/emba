@@ -186,6 +186,7 @@ escape_echo() {
 
 check_int() {
   local INT_TO_CHECK="${1:-}"
+  [[ -z "$INPUT_TO_CHECK" ]] && return
   if [[ -n "${INT_TO_CHECK//[0-9]/}" ]]; then
     print_output "[-] Invalid input detected - integers only" "no_log"
     exit 1
@@ -586,7 +587,7 @@ print_help()
   echo -e "\\nWeb reporter"
   echo -e "$CYAN""-W""$NC""                Activates web report creation in log path (overwrites -z)"
   echo -e "\\nSystem check"
-  echo -e "$CYAN""-d""$NC""                Only checks dependencies"
+  echo -e "$CYAN""-d [0/1]""$NC""          Only checks dependencies (1 - on host and in container, 2 - only container)"
   echo -e "$CYAN""-F""$NC""                Checks dependencies but ignore errors"
   echo -e "$CYAN""-U""$NC""                Check and apply available updates and exit"
   echo -e "$CYAN""-V""$NC""                Show EMBA version"

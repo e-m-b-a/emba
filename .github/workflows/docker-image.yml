@@ -1,4 +1,4 @@
-name: Docker Image build
+name: EMBA Docker Image build
 
 on:
   schedule:
@@ -24,6 +24,5 @@ jobs:
       - name: EMBA container build
         uses: Wandalen/wretry.action@master
         with:
-          # command: docker-compose build --no-cache --pull && ./emba -d -y -j
-          command: docker-compose build --no-cache --pull
+          command: docker-compose build --no-cache --pull && ./emba -d 2 -y -j
           attempt_limit: 3

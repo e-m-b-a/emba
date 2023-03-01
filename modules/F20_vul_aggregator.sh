@@ -43,6 +43,7 @@ F20_vul_aggregator() {
   MSF_SEARCH=0
   TRICKEST_SEARCH=0
   CVE_SEARCHSPLOIT=0
+  MSF_INSTALL_PATH="/usr/share/metasploit-framework"
 
   local FOUND_CVE=0
   local S26_LOGS_ARR=()
@@ -858,7 +859,11 @@ cve_extractor() {
           fi
 
           for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
-            EXPLOIT_PATH=$(echo "$EXPLOIT_MSF" | cut -d: -f1)
+            if ! [[ -d "$MSF_INSTALL_PATH" ]]; then
+              EXPLOIT_PATH=$(echo "$EXPLOIT_MSF" | cut -d: -f1)
+            else
+              EXPLOIT_PATH="$MSF_INSTALL_PATH"$(echo "$EXPLOIT_MSF" | cut -d: -f1)
+            fi
             EXPLOIT_NAME=$(basename -s .rb "$EXPLOIT_PATH")
             EXPLOIT="$EXPLOIT"" ""$EXPLOIT_NAME"
             if [[ -f "$EXPLOIT_PATH" ]] ; then

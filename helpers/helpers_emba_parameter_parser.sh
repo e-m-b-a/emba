@@ -17,7 +17,7 @@
 
 
 emba_parameter_parsing() {
-  while getopts a:bBA:cC:dDe:Ef:Fghijk:l:m:N:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:d:De:Ef:Fghijk:l:m:N:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
     case "$OPT" in
       a)
         check_alnum "$OPTARG"
@@ -49,7 +49,11 @@ emba_parameter_parsing() {
         export CWE_CHECKER=1
         ;;
       d)
-        export ONLY_DEP=1
+        check_int "$OPTARG"
+        export ONLY_DEP="$OPTARG"
+        # a value of 1 means dep check on host and in container
+        # a value of 2 means dep check only in container
+        ! [[ "$ONLY_DEP" =~ [12] ]] && exit 1
         # on dependency check we need to check all deps -> activate all modules:
         export CWE_CHECKER=1
         export FULL_EMULATION=1
