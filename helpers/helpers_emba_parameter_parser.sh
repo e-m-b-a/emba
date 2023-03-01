@@ -114,7 +114,7 @@ emba_parameter_parsing() {
         SELECT_MODULES=("${SELECT_MODULES[@]}" "$(escape_echo "$OPTARG")")
         ;;
       N)
-        check_alnum "$OPTARG"
+        check_notes "$OPTARG"
         export FW_NOTES=""
         FW_NOTES="$(escape_echo "$OPTARG")"
         ;;

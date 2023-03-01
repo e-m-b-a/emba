@@ -27,6 +27,13 @@ ID1_ubuntu_os() {
     print_tool_info "dbus-x11" 1
     print_tool_info "libnotify-cil-dev" 1
 
+    if [[ -f /etc/apt/apt.conf.d/20auto-upgrades ]]; then
+      echo "[*] Testing for unattended update settings"
+      if awk '{print $2}' /etc/apt/apt.conf.d/20auto-upgrades | grep -q "1"; then
+        echo -e "\\n""$MAGENTA""$BOLD""Automatic updates are enabled - this could result in unexpected behavior during installation!""$NC"
+      fi
+    fi
+
     apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
     if ! [[ -f "/usr/share/dbus-1/services/org.freedesktop.Notifications.service" ]] && [[ -f "/usr/lib/notification-daemon/notification-daemon" ]]; then
