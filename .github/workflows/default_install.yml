@@ -1,0 +1,36 @@
+name: EMBA default installation on Ubuntu
+
+on:
+  #  schedule:
+  #  - cron: '0 0 * * *' # do it every day
+  push:
+    branches:
+      - '**'        # matches every branch
+  pull_request:
+    branches:
+      - '**'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  default-install:
+    #if: github.repository_owner == 'e-m-b-a'
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+      - name: EMBA default install
+        uses: Wandalen/wretry.action@master
+        with:
+          command: ./installer.sh -d && ./emba -d 1
+          attempt_limit: 3
