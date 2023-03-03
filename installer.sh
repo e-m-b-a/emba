@@ -117,7 +117,8 @@ while getopts cCdDFghlr OPT ; do
       export DOCKER_SETUP=1
       export GH_ACTION=1
       export CVE_SEARCH=0
-      echo -e "$GREEN""$BOLD""Install all dependecies for EMBA in default/docker mode""$NC"
+      echo -e "$GREEN""$BOLD""Install all dependecies for EMBA test via Github actions""$NC"
+      echo -e "$GREEN""$BOLD""This mode is a default installation without populating the CVE-search database""$NC"
       ;;
     h)
       print_help
