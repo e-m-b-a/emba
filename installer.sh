@@ -319,10 +319,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
 fi
 
-if [[ "$GH_ACTION" -eq 0 ]]; then
-  # cve-search is always installed on the host:
-  IF20_cve_search
-fi
+# cve-search is always installed on the host:
+IF20_cve_search
 
 cd "$HOME_PATH" || exit 1
 
