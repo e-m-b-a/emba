@@ -32,5 +32,5 @@ jobs:
       - name: EMBA default install
         uses: Wandalen/wretry.action@master
         with:
-          command: sudo ./installer.sh -d && sudo ./emba -d 1
+          command: sudo ./installer.sh -d && sudo ./emba -d 1 -y -j
           attempt_limit: 3
