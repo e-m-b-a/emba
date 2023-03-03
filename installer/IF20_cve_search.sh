@@ -22,9 +22,9 @@ IF20_cve_search() {
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $CVE_SEARCH -eq 1 ]] || [[ $FULL -eq 1 ]]; then
 
     print_git_info "trickest cve database" "EMBA-support-repos/trickest-cve" "Trickest CVE to github exploit database"
+    echo -e "$ORANGE""trickest poc database will be downloaded.""$NC"
     print_git_info "cve-search" "EMBA-support-repos/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
     echo -e "$ORANGE""cve-search will be downloaded.""$NC"
-    echo -e "$ORANGE""trickest poc database will be downloaded.""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
       ANSWER=("n")
@@ -103,15 +103,7 @@ IF20_cve_search() {
     case ${ANSWER:0:1} in
       y|Y )
 
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
-        # get trickest repository
-        if ! [[ -d external/trickest-cve ]]; then
-          git clone https://github.com/EMBA-support-repos/trickest-cve.git external/trickest-cve
-        else
-          cd external/trickest-cve || ( echo "Could not install EMBA component Trickest" && exit 1 )
-          git pull
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
-        fi
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
 
         CVE_INST=1
         echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
@@ -171,6 +163,15 @@ IF20_cve_search() {
           echo -e "$MAGENTA""$BOLD""For automatic updates it should be checked and copied to /etc/cron.daily/""$NC"
         fi
         cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+
+        # get trickest repository
+        if ! [[ -d external/trickest-cve ]]; then
+          git clone https://github.com/EMBA-support-repos/trickest-cve.git external/trickest-cve
+        else
+          cd external/trickest-cve || ( echo "Could not install EMBA component Trickest" && exit 1 )
+          git pull
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
+        fi
       ;;
     esac
   fi

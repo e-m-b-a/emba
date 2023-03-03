@@ -53,6 +53,7 @@ export REMOVE=0
 export OTHER_OS=0
 export UBUNTU_OS=0
 export WSL=0
+export GH_ACTION=0
 
 ## Color definition
 export RED="\033[0;31m"
@@ -93,7 +94,7 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-while getopts cCdDFhlr OPT ; do
+while getopts cCdDFghlr OPT ; do
   case $OPT in
     d)
       export DOCKER_SETUP=1
@@ -111,6 +112,12 @@ while getopts cCdDFhlr OPT ; do
       export DOCKER_SETUP=0
       export CVE_SEARCH=1
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
+      ;;
+    g)
+      export DOCKER_SETUP=1
+      export GH_ACTION=1
+      export CVE_SEARCH=0
+      echo -e "$GREEN""$BOLD""Install all dependecies for EMBA in default/docker mode""$NC"
       ;;
     h)
       print_help
@@ -312,8 +319,10 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
 fi
 
-# cve-search is always installed on the host:
-IF20_cve_search
+if [[ "$GH_ACTION" -eq 0 ]]; then
+  # cve-search is always installed on the host:
+  IF20_cve_search
+fi
 
 cd "$HOME_PATH" || exit 1
 
