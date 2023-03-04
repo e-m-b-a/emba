@@ -1913,6 +1913,7 @@ create_emulation_archive() {
 
   cp "$KERNEL" "$ARCHIVE_PATH" || true
   cp "$IMAGE" "$ARCHIVE_PATH" || true
+  cp "$LOG_PATH_MODULE"/"$NMAP_LOG" "$ARCHIVE_PATH" || true
   echo "$IPS_INT_VLAN_CFG_mod" >> "$ARCHIVE_PATH"/emulation_config.txt || true
   cat "$LOG_DIR"/emulator_online_results.log >> "$ARCHIVE_PATH"/emulation_config.txt || true
 
