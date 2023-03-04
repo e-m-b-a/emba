@@ -827,7 +827,9 @@ main() {
  
   run_modules "F" "0" "$HTML"
 
-  remove_status_bar
+  if [[ $DISABLE_STATUS_BAR -eq 0 ]] ; then
+    remove_status_bar
+  fi
 
   write_notification "Reporting phase ended"
 
