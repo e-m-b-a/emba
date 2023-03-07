@@ -118,16 +118,6 @@ L10_system_emulation() {
               # do not test other root paths if we are already online (some ports are available)
               break
             fi
-            # if [[ -f "$LOG_DIR"/emulator_online_results.log ]]; then
-            #  if [[ $(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true) -gt 1 ]]; then
-            #    print_output "[+] Identified the following system emulation results:"
-            #    print_output "$(indent "$(orange "$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)")")"
-            #    print_ln
-            #    print_output "[*] Restarting emulation for further analysis ..."
-            #    break
-            #  fi
-            # fi
-
           else
             print_output "[!] No supported architecture detected"
           fi
@@ -142,6 +132,34 @@ L10_system_emulation() {
       MODULE_END=0
     fi
   fi
+
+  if [[ -f "$LOG_DIR"/emulator_online_results.log ]]; then
+    if [[ $(grep -c "TCP ok" "$LOG_DIR"/emulator_online_results.log || true) -gt 0 ]]; then
+      print_ln
+      print_output "[+] Identified the following system emulation results (with running network services):"
+      local SYS_EMUL_POS_ENTRY=""
+      SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)"
+      print_output "$(indent "$(orange "$SYS_EMUL_POS_ENTRY")")"
+
+      IP_ADDRESS_=$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
+      IMAGE_NAME="$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
+      ARCHIVE_PATH="$LOG_PATH_MODULE""/""$IMAGE_NAME"
+      print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC"
+      print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
+      print_output "[*] Identified ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
+
+      if [[ -f "$ARCHIVE_PATH""/run.sh" ]]; then
+        print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis"
+        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
+        # we should get TCP="ok" and SYS_ONLINE=1 back
+        if [[ "$SYS_ONLINE" -ne 1 ]]; then
+          print_output "[-] System recovery went wrong. No further analysis possible"
+        fi
+      else
+        print_output "[-] ${ORANGE}WARNING:$NC No archive path found in logs ... restarting emulation process for further analysis not possible"
+      fi
+    fi
+   fi
 
   module_end_log "${FUNCNAME[0]}" "$MODULE_END"
 }
@@ -708,9 +726,12 @@ main_emulation() {
 
           # if we have a working emulation we stop here
           if [[ "$TCP" == "ok" ]]; then
-            if [[ $(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -gt 1 ]]; then
+            if [[ $(grep "udp.*open\ \|tcp.*open\ " "$ARCHIVE_PATH"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -gt 1 ]]; then
               # we only exit if we have more than 1 open port detected.
               # Otherwise we try to find a better solution
+              # We stop the emulation now and restart it later on
+              stopping_emulation_process "$IMAGE_NAME"
+              reset_network_emulation 1
               break 2
             fi
           fi
@@ -720,6 +741,7 @@ main_emulation() {
         fi
 
         stopping_emulation_process "$IMAGE_NAME"
+        reset_network_emulation 1
 
         if [[ -f "$LOG_PATH_MODULE"/nvram/nvram_files_final_ ]]; then
           mv "$LOG_PATH_MODULE"/nvram/nvram_files_final_ "$LOG_PATH_MODULE"/nvram/nvram_files_"$IMAGE_NAME".bak
@@ -857,6 +879,8 @@ handle_fs_mounts() {
 
 cleanup_emulator(){
   local IMAGE_NAME="${1:-}"
+  reset_network_emulation 1
+
   # ugly cleanup:
   rm /tmp/qemu."$IMAGE_NAME" || true
   rm /tmp/qemu."$IMAGE_NAME".S1 || true
@@ -1005,6 +1029,7 @@ identify_networking_emulation() {
   disown "$PID" 2> /dev/null || true
 
   stopping_emulation_process "$IMAGE_NAME"
+  reset_network_emulation 1
 
   if ! [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
@@ -1466,6 +1491,8 @@ setup_network_emulation() {
 
     write_script_exec "ip link set ${HOSTNETDEV_0} up" "$ARCHIVE_PATH"/run.sh 1
     write_script_exec "ip addr add $HOSTIP/24 dev ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh 1
+    write_script_exec "ifconfig -a" "$ARCHIVE_PATH"/run.sh 1
+    write_script_exec "route -n" "$ARCHIVE_PATH"/run.sh 1
   fi
 
   print_ln
@@ -1883,9 +1910,8 @@ check_online_stat() {
     fi
   fi
 
-  if ! function_exists L15_emulated_checks_nmap; then
-    stopping_emulation_process "$IMAGE_NAME"
-  fi
+  stopping_emulation_process "$IMAGE_NAME"
+  reset_network_emulation 1
 
   color_qemu_log "$LOG_PATH_MODULE/qemu.final.serial.log"
 
@@ -1913,7 +1939,10 @@ create_emulation_archive() {
 
   cp "$KERNEL" "$ARCHIVE_PATH" || true
   cp "$IMAGE" "$ARCHIVE_PATH" || true
-  cp "$LOG_PATH_MODULE"/"$NMAP_LOG" "$ARCHIVE_PATH" || true
+  if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
+    mv "$LOG_PATH_MODULE"/"$NMAP_LOG" "$ARCHIVE_PATH" || true
+    mv "$LOG_PATH_MODULE"/nmap_emba_"$IPS_INT_VLAN_CFG_mod"* "$ARCHIVE_PATH" || true
+  fi
   echo "$IPS_INT_VLAN_CFG_mod" >> "$ARCHIVE_PATH"/emulation_config.txt || true
   cat "$LOG_DIR"/emulator_online_results.log >> "$ARCHIVE_PATH"/emulation_config.txt || true
 
@@ -1934,6 +1963,9 @@ create_emulation_archive() {
   fi
 }
 
+# EXECUTE: 0 -> just write script
+# EXECUTE: 1 -> execute and write script
+# EXECUTE: 2 -> just execute
 reset_network_emulation() {
   EXECUTE_="${1:0}"
 

@@ -66,7 +66,17 @@ check_live_metasploit() {
   local MSF_MODULE=""
   local ARCH_END=""
 
-  mapfile -t PORTS_ARR < <(find "$LOG_DIR"/l10_system_emulation* -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
+  if [[ -v ARCHIVE_PATH ]]; then
+    mapfile -t PORTS_ARR < <(find "$ARCHIVE_PATH" -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
+  else
+    print_output "[-] Warning: No ARCHIVE_PATH found"
+    mapfile -t PORTS_ARR < <(find "$LOG_DIR"/l10_system_emulation/ -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)
+  fi
+  if [[ "${#PORTS_ARR[@]}" -eq 0 ]]; then
+    print_output "[-] No open ports identified ..."
+    return
+  fi
+
   printf -v PORTS "%s " "${PORTS_ARR[@]}"
   PORTS=${PORTS//\ /,}
   PORTS="${PORTS%,}"

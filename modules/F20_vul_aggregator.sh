@@ -500,10 +500,8 @@ cve_db_lookup_cve () {
   if [[ "$STRICT_MODE" -eq 1 ]]; then
     set +e
   fi
-  "$PATH_CVE_SEARCH" -c "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
 
-  # shellcheck disable=SC2181
-  if [[ "$?" -ne 0 ]]; then
+  if ! "$PATH_CVE_SEARCH" -c "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt; then
     "$PATH_CVE_SEARCH" -c "$CVE_ENTRY" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$CVE_ENTRY".txt || true
   fi
   if [[ "$STRICT_MODE" -eq 1 ]]; then
@@ -528,15 +526,9 @@ cve_db_lookup_version() {
   local VERSION_PATH="${BIN_VERSION_//:/_}"
   print_output "[*] CVE database lookup with version information: ${ORANGE}$BIN_VERSION_${NC}" "no_log"
 
-  # CVE search:
-  set +e
-  "$PATH_CVE_SEARCH" -p "$BIN_VERSION_" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
-
-  # shellcheck disable=SC2181
-  if [[ "$?" -ne 0 ]]; then
+  if ! "$PATH_CVE_SEARCH" -p "$BIN_VERSION_" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt; then
     "$PATH_CVE_SEARCH" -p "$BIN_VERSION_" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "$LOG_PATH_MODULE"/"$VERSION_PATH".txt || true
   fi
-  set -e
 
   if [[ "$BIN_VERSION_" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
