@@ -587,7 +587,7 @@ print_help()
   echo -e "\\nWeb reporter"
   echo -e "$CYAN""-W""$NC""                Activates web report creation in log path (overwrites -z)"
   echo -e "\\nSystem check"
-  echo -e "$CYAN""-d [0/1]""$NC""          Only checks dependencies (1 - on host and in container, 2 - only container)"
+  echo -e "$CYAN""-d [1/2]""$NC""          Only checks dependencies (1 - on host and in container, 2 - only container)"
   echo -e "$CYAN""-F""$NC""                Checks dependencies but ignore errors"
   echo -e "$CYAN""-U""$NC""                Check and apply available updates and exit"
   echo -e "$CYAN""-V""$NC""                Show EMBA version"
