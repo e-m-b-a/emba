@@ -731,7 +731,12 @@ main_emulation() {
               # Otherwise we try to find a better solution
               # We stop the emulation now and restart it later on
               stopping_emulation_process "$IMAGE_NAME"
-              reset_network_emulation 1
+              if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+                reset_network_emulation 1
+              else
+                print_output "[-] No startup script ${ORANGE}$ARCHIVE_PATH/run.sh${NC} found - this should not be possible!"
+                reset_network_emulation 2
+              fi
               break 2
             fi
           fi
@@ -741,7 +746,11 @@ main_emulation() {
         fi
 
         stopping_emulation_process "$IMAGE_NAME"
-        reset_network_emulation 1
+        if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+          reset_network_emulation 1
+        else
+          reset_network_emulation 2
+        fi
 
         if [[ -f "$LOG_PATH_MODULE"/nvram/nvram_files_final_ ]]; then
           mv "$LOG_PATH_MODULE"/nvram/nvram_files_final_ "$LOG_PATH_MODULE"/nvram/nvram_files_"$IMAGE_NAME".bak
@@ -879,7 +888,11 @@ handle_fs_mounts() {
 
 cleanup_emulator(){
   local IMAGE_NAME="${1:-}"
-  reset_network_emulation 1
+  if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+    reset_network_emulation 1
+  else
+    reset_network_emulation 2
+  fi
 
   # ugly cleanup:
   rm /tmp/qemu."$IMAGE_NAME" || true
@@ -1029,7 +1042,11 @@ identify_networking_emulation() {
   disown "$PID" 2> /dev/null || true
 
   stopping_emulation_process "$IMAGE_NAME"
-  reset_network_emulation 1
+  if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+    reset_network_emulation 1
+  else
+    reset_network_emulation 2
+  fi
 
   if ! [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
@@ -1911,7 +1928,11 @@ check_online_stat() {
   fi
 
   stopping_emulation_process "$IMAGE_NAME"
-  reset_network_emulation 1
+  if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+    reset_network_emulation 1
+  else
+    reset_network_emulation 2
+  fi
 
   color_qemu_log "$LOG_PATH_MODULE/qemu.final.serial.log"
 
