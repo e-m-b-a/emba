@@ -65,7 +65,7 @@ L10_system_emulation() {
         print_output "[*] Recovered IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
         print_output "[*] Recovered ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
 
-        if [[ -f "$ARCHIVE_PATH""/run.sh" ]]; then
+        if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
           print_output "[+] Startup script (run.sh) found in old logs ... restarting emulation process now"
 
           restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
@@ -148,7 +148,7 @@ L10_system_emulation() {
       print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
       print_output "[*] Identified ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
 
-      if [[ -f "$ARCHIVE_PATH""/run.sh" ]]; then
+      if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis"
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
         # we should get TCP="ok" and SYS_ONLINE=1 back
@@ -731,7 +731,7 @@ main_emulation() {
               # Otherwise we try to find a better solution
               # We stop the emulation now and restart it later on
               stopping_emulation_process "$IMAGE_NAME"
-              if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+              if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
                 reset_network_emulation 1
               else
                 print_output "[-] No startup script ${ORANGE}$ARCHIVE_PATH/run.sh${NC} found - this should not be possible!"
@@ -746,7 +746,7 @@ main_emulation() {
         fi
 
         stopping_emulation_process "$IMAGE_NAME"
-        if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+        if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
           reset_network_emulation 1
         else
           reset_network_emulation 2
@@ -888,7 +888,7 @@ handle_fs_mounts() {
 
 cleanup_emulator(){
   local IMAGE_NAME="${1:-}"
-  if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+  if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
     reset_network_emulation 1
   else
     reset_network_emulation 2
@@ -1042,7 +1042,7 @@ identify_networking_emulation() {
   disown "$PID" 2> /dev/null || true
 
   stopping_emulation_process "$IMAGE_NAME"
-  if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+  if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
     reset_network_emulation 1
   else
     reset_network_emulation 2
@@ -1928,7 +1928,7 @@ check_online_stat() {
   fi
 
   stopping_emulation_process "$IMAGE_NAME"
-  if [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+  if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
     reset_network_emulation 1
   else
     reset_network_emulation 2
@@ -1967,7 +1967,7 @@ create_emulation_archive() {
   echo "$IPS_INT_VLAN_CFG_mod" >> "$ARCHIVE_PATH"/emulation_config.txt || true
   cat "$LOG_DIR"/emulator_online_results.log >> "$ARCHIVE_PATH"/emulation_config.txt || true
 
-  if [[ -f "$ARCHIVE_PATH"/run.sh ]];then
+  if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
     chmod +x "$ARCHIVE_PATH"/run.sh
     sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "$ARCHIVE_PATH"/run.sh
 
