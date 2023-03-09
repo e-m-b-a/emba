@@ -66,10 +66,7 @@ P70_unblob() {
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
-  print_output "[*] Unblob module currently enabled - disable it in emba setting the UNBLOB variable to 0"
-
-  print_output "[!] INFO: This is an additional extraction module for the extractor ${ORANGE}unblob - https://unblob.org/$MAGENTA."
-  print_output "[!] INFO: The results are currently only further used if the binwalk extraction process failes (this will probably change in the future)."
+  print_output "[*] INFO: The results are only further used if the EMBA/binwalk extraction process was failing."
 
   export LINUX_PATH_COUNTER_UNBLOB=0
   local OUTPUT_DIR_UNBLOB="$LOG_PATH_MODULE"/unblob_extracted
