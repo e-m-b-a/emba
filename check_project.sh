@@ -27,7 +27,7 @@ REP_DIR="$CONF_DIR/report_templates"
 
 if [[ "$STRICT_MODE" -eq 1 ]]; then
   # shellcheck source=./installer/wickStrictModeFail.sh
-  source "$INSTALLER"/wickStrictModeFail.sh
+  source "$INSTALLER_DIR"/wickStrictModeFail.sh
   export DEBUG_SCRIPT=0
   # shellcheck source=./helpers/helpers_emba_load_strict_settings.sh
   source "$HELP_DIR"/helpers_emba_load_strict_settings.sh

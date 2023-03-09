@@ -107,7 +107,7 @@ P70_unblob() {
       print_ln
       tree -sh "$LOG_DIR/firmware/unblob_extracted" | tee -a "$LOG_FILE"
     else
-      print_output "[*] INFO: The Unblob results are not further used as the EMBA/binwalk extraction process was fine."
+      print_output "[*] INFO: The Unblob results are not further used as the EMBA/binwalk extraction process looks good."
       tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
     fi
     print_ln

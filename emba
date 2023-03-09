@@ -336,7 +336,6 @@ run_modules()
 
 main() {
   set -a 
-  # trap ctrl_c INT
   trap cleaner INT
 
   INVOCATION_PATH="$(dirname "$0")"

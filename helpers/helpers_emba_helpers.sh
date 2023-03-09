@@ -79,11 +79,6 @@ max_pids_protection() {
   done
 }
 
-ctrl_c() {
-  echo "CTRL +C detected ... exit EMBA"
-  cleaner 1
-}
-
 # $1 - 1 some interrupt detected
 # $1 - 0 default exit 0
 cleaner() {
