@@ -66,10 +66,7 @@ P70_unblob() {
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
-  print_output "[*] Unblob module currently enabled - disable it in emba setting the UNBLOB variable to 0"
-
-  print_output "[!] INFO: This is an additional extraction module for the extractor ${ORANGE}unblob - https://unblob.org/$MAGENTA."
-  print_output "[!] INFO: The results are currently only further used if the binwalk extraction process failes (this will probably change in the future)."
+  print_output "[*] INFO: The results are only further used if the EMBA/binwalk extraction process was failing."
 
   export LINUX_PATH_COUNTER_UNBLOB=0
   local OUTPUT_DIR_UNBLOB="$LOG_PATH_MODULE"/unblob_extracted
@@ -104,8 +101,8 @@ P70_unblob() {
     print_output "[*] Found $ORANGE$BINS$NC binaries."
     print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
     print_bar
-    if [[ "$LINUX_PATH_COUNTER" -eq 0 ]] && [[ "$LINUX_PATH_COUNTER_UNBLOB" -gt 0 ]]; then
-      print_output "[+] Binwalk extraction failed - using Unblob results as additional source for further analysis"
+    if [[ "$LINUX_PATH_COUNTER" -lt "$LINUX_PATH_COUNTER_UNBLOB" ]]; then
+      print_output "[+] Unblob extraction is better than binwalk - using Unblob results as additional source for further analysis"
       mv "$OUTPUT_DIR_UNBLOB" "$LOG_DIR"/firmware/ || true
       detect_root_dir_helper "$LOG_DIR/firmware"
       print_ln

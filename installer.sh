@@ -53,6 +53,7 @@ export REMOVE=0
 export OTHER_OS=0
 export UBUNTU_OS=0
 export WSL=0
+export GH_ACTION=0
 
 ## Color definition
 export RED="\033[0;31m"
@@ -93,7 +94,7 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-while getopts cCdDFhlr OPT ; do
+while getopts cCdDFghlr OPT ; do
   case $OPT in
     d)
       export DOCKER_SETUP=1
@@ -111,6 +112,13 @@ while getopts cCdDFhlr OPT ; do
       export DOCKER_SETUP=0
       export CVE_SEARCH=1
       echo -e "$GREEN""$BOLD""Install all dependecies for developer mode""$NC"
+      ;;
+    g)
+      export DOCKER_SETUP=1
+      export GH_ACTION=1
+      export CVE_SEARCH=0
+      echo -e "$GREEN""$BOLD""Install all dependecies for EMBA test via Github actions""$NC"
+      echo -e "$GREEN""$BOLD""This mode is a default installation without populating the CVE-search database""$NC"
       ;;
     h)
       print_help

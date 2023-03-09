@@ -135,7 +135,7 @@ run_modules()
       mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -name "${MODULE_GROUP^^}""*.sh" 2>/dev/null | sort -V 2> /dev/null)
     fi
     MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
-    MODULES_EXPORTED+=("${MODULES[@]}")
+    export MODULES_EXPORTED+=("${MODULES[@]}")
     if [[ $THREADING_SET -eq 1 && "${MODULE_GROUP^^}" != "P" ]] ; then
       sort_modules
     fi
@@ -827,7 +827,7 @@ main() {
  
   run_modules "F" "0" "$HTML"
 
-  remove_status_bar
+  [[ $DISABLE_STATUS_BAR -eq 0 ]] && remove_status_bar
 
   write_notification "Reporting phase ended"
 

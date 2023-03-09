@@ -17,7 +17,7 @@
 restart_emulation() {
   local IP_ADDRESS_="${1:-}"
   local IMAGE_NAME_="${2:-}"
-  # restart_scan is used to indicate a restarted scan. There we do not need to restart the network
+  # restart_scan is used to indicate a restarted scan. For this we do not need to restart the network
   local RESTART_SCAN="${3:-0}"
 
   if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
@@ -47,11 +47,20 @@ restart_emulation() {
   while ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; do
     print_output "[*] Waiting for restarted system ..."
     ((COUNTER+=1))
-    [[ "$COUNTER" -gt 50 ]] && (print_output "[-] System not recovered" && return)
+    if [[ "$COUNTER" -gt 50 ]]; then
+      print_output "[-] System not recovered"
+      break
+    fi
     sleep 6
   done
-  print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address $ORANGE$IP_ADDRESS_$NC"
-  sleep 60
-  export SYS_ONLINE=1
-  export TCP="ok"
+
+  if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+    print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address $ORANGE$IP_ADDRESS_$NC"
+    sleep 60
+    export SYS_ONLINE=1
+    export TCP="ok"
+  else
+    export SYS_ONLINE=0
+    export TCP="not ok"
+  fi
 }

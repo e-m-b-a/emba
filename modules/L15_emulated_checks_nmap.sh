@@ -54,8 +54,8 @@ check_live_nmap_basic() {
 
   sub_module_title "Nmap portscans for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
 
-  cp "$LOG_DIR"/l10_system_emulation/nmap_emba_"$IP_ADDRESS_"*.gnmap "$LOG_PATH_MODULE" 2>/dev/null || true
-  cp "$LOG_DIR"/l10_system_emulation/nmap_emba_"$IP_ADDRESS_"*.nmap "$LOG_PATH_MODULE" 2>/dev/null || true
+  cp "$ARCHIVE_PATH"/nmap_emba_"$IP_ADDRESS_"*.gnmap "$LOG_PATH_MODULE" 2>/dev/null || true
+  cp "$ARCHIVE_PATH"/nmap_emba_"$IP_ADDRESS_"*.nmap "$LOG_PATH_MODULE" 2>/dev/null || true
 
   # find all Nmap results
   mapfile -t NMAP_RESULT_FILES < <(find "$LOG_PATH_MODULE" -name "*.nmap")
@@ -93,8 +93,6 @@ check_live_nmap_basic() {
     for NMAP_CPES in "${NMAP_CPE_DETECTION[@]}"; do
       NMAP_CPES=$(echo "$NMAP_CPES" | grep -o "cpe:.*" || true)
       # rewrite the string into an array:
-      # NMAP_CPES_ARR=( $(echo "$NMAP_CPES" | tr "," "\n") )
-      # IFS=', ' read -r -a NMAP_CPES_ARR <<< "$NMAP_CPES"
       readarray -d ', ' -t NMAP_CPES_ARR < <(printf "%s" "$NMAP_CPES")
       for NMAP_CPE in "${NMAP_CPES_ARR[@]}"; do
         if [[ "$NMAP_CPE" == *"windows"* ]]; then

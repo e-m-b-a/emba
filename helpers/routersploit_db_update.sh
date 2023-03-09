@@ -44,7 +44,7 @@ fi
 
 echo "[*] Building the Routersploit exploit database"
 # search all ruby files in the routersploit directory and create a temporary file with the module path and CVE:
-find "$ROUTERSPLOIT_MOD_PATH" -type f -iname "*.py" -exec grep -i -o -H -E "CVE-[0-9]{4}-[0-9]+" {} \; | sed 's/.*external\/routersploit//' | sort -u > "$ROUTERSPLOIT_CVE_PATH"
+find "$ROUTERSPLOIT_MOD_PATH" -type f -iname "*.py" -exec grep -i -o -H -E "CVE-[0-9]{4}-[0-9]+" {} \; | sed 's/.*external\/routersploit//' | sed 's/cve-/CVE-/' | sort -u > "$ROUTERSPLOIT_CVE_PATH"
 find "$ROUTERSPLOIT_MOD_PATH" -type f -iname "*.py" -exec grep -i -o -H -E "exploit-db.com/exploits/[0-9]+" {} \; | sed 's/exploit-db\.com\/exploits\///' | sed 's/.*external\/routersploit//' | sort -u > "$ROUTERSPLOIT_EDB_PATH"
 
 if [[ -f "$ROUTERSPLOIT_CVE_PATH" ]]; then

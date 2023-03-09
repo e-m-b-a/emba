@@ -18,10 +18,10 @@
 STRICT_MODE=1
 
 if [[ "$STRICT_MODE" -eq 1 ]]; then
-  # shellcheck disable=SC1091
+  # shellcheck source=./installer/wickStrictModeFail.sh
   source ./installer/wickStrictModeFail.sh
   export DEBUG_SCRIPT=0
-  # shellcheck disable=SC1091
+  # shellcheck source=./helpers/helpers_emba_load_strict_settings.sh
   source ./helpers/helpers_emba_load_strict_settings.sh
   load_strict_mode_settings
   trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
@@ -174,7 +174,7 @@ check() {
   echo -e "\\n""$GREEN""Run shellcheck and semgrep:""$NC""\\n"
   for SOURCE in "${SOURCES[@]}"; do
     echo -e "\\n""$GREEN""Run ${ORANGE}shellcheck$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    if shellcheck -P "$HELP_DIR":"$MOD_DIR":"$MOD_DIR_LOCAL" "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
+    if shellcheck -x -P "./installer":"$HELP_DIR":"$MOD_DIR":"$MOD_DIR_LOCAL" "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
       echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
     else
       echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
@@ -272,6 +272,7 @@ check_tools() {
   done
   if ! [[ -d ./external/semgrep-rules/bash ]]; then
     echo -e "\\n""$RED""$BOLD""Please install semgrep-rules to directory ./external to perform all checks""$NC""\\n"
+    echo -e "${ORANGE}git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rule${NC}"
     exit 1
   fi
 }
