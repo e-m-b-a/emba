@@ -141,7 +141,7 @@ print_output()
       safe_echo "$(format_log "$OUTPUT")" "$MAIN_LOG"
     elif [[ "$LOG_SETTING" != "no_log" ]] ; then
       if [[ -z "$REF_LINK" ]] ; then
-        safe_echo "$(format_log "$OUTPUT")" "$LOG_FILE"
+        safe_echo "$(format_log "$OUTPUT")" "${LOG_FILE:-}"
         if [[ -n "${LOG_FILE_MOD:-}" ]]; then
           safe_echo "$(format_log "$OUTPUT")" "$LOG_FILE_MOD"
         fi
