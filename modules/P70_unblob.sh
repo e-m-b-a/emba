@@ -66,7 +66,6 @@ P70_unblob() {
 
   module_title "Unblob binary firmware extractor"
   pre_module_reporter "${FUNCNAME[0]}"
-  print_output "[*] INFO: The results are only further used if the EMBA/binwalk extraction process was failing."
 
   export LINUX_PATH_COUNTER_UNBLOB=0
   local OUTPUT_DIR_UNBLOB="$LOG_PATH_MODULE"/unblob_extracted
@@ -108,6 +107,7 @@ P70_unblob() {
       print_ln
       tree -sh "$LOG_DIR/firmware/unblob_extracted" | tee -a "$LOG_FILE"
     else
+      print_output "[*] INFO: The Unblob results are not further used as the EMBA/binwalk extraction process was fine."
       tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
     fi
     print_ln

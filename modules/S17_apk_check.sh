@@ -76,7 +76,7 @@ apk_checker_helper() {
   go run "$EXT_DIR"/APKHunt/apkhunt.go -p "$APK" -l 2>&1 | tee -a "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
 
   if [[ -f "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt" ]]; then
-    APK_ISSUES=$(grep -c -E "^[0-9]+:" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt")
+    APK_ISSUES=$(grep -c -E "^[0-9]+:" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt" || true)
     if [[ "$APK_ISSUES" -gt 0 ]]; then
       print_output "[+] APKHunt found $ORANGE$APK_ISSUES$GREEN areas of interest in $ORANGE$(print_path "$APK")$NC" "" "$LOG_PATH_MODULE/APKHunt-$(basename -s .apk "$APK").txt"
     else
