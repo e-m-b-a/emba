@@ -21,6 +21,7 @@ set_defaults() {
   export RELEASE=0
   export EMBA_VERSION="1.2.x"
 
+  export CLEANED=0              # used for the final cleaner function for not running it multiple times
   export STRICT_MODE=0
   export DEBUG_SCRIPT=0
   export UPDATE=0

@@ -113,13 +113,19 @@ check_nw_interface() {
 }
 
 check_cve_search() {
+  # CVE_STATUS_PRINT is used to disable the printing of the regular status check
+  # this was confusing for EMBA users
+  CVE_STATUS_PRINT="${1:-0}"
+
   if [[ $JUMP_OVER_CVESEARCH_CHECK -eq 1 ]] ; then
     # no cve check -> just return and enforce CVE_SEARCH
     export CVE_SEARCH=1
     return
   fi
   TOOL_NAME="cve-search"
-  print_output "    ""$TOOL_NAME"" - testing" "no_log"
+  if [[ "$CVE_STATUS_PRINT" -eq 1 ]]; then
+    print_output "    ""$TOOL_NAME"" - testing" "no_log"
+  fi
   local CVE_SEARCH_=0 # local checker variable
   # check if the cve-search produces results:
   if ! [[ $("$PATH_CVE_SEARCH" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
@@ -163,7 +169,9 @@ check_cve_search() {
     print_cve_search_failure
     export CVE_SEARCH=0
   else
-    print_output "    ""$TOOL_NAME"" - ""$GREEN""ok""$NC" "no_log"
+    if [[ "$CVE_STATUS_PRINT" -eq 1 ]]; then
+      print_output "    ""$TOOL_NAME"" - ""$GREEN""ok""$NC" "no_log"
+    fi
     export CVE_SEARCH=1
   fi
 }
@@ -334,7 +342,7 @@ dependency_check()
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
     check_docker_env
-    check_cve_search
+    check_cve_search 1
     check_dep_tool "inotifywait"
     check_dep_tool "notify-send"
   fi
@@ -474,7 +482,7 @@ dependency_check()
       # TODO change to portcheck and write one for external hosts
       check_dep_file "cve-search script" "$EXT_DIR""/cve-search/bin/search.py"
       # we have already checked it outside the docker - do not need it again
-      [[ "$IN_DOCKER" -eq 0 ]] && check_cve_search
+      [[ "$IN_DOCKER" -eq 0 ]] && check_cve_search 1
       if [[ "$IN_DOCKER" -eq 0 ]]; then
         # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
         check_dep_tool "mongo database" "mongod"

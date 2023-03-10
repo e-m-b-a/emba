@@ -83,6 +83,7 @@ max_pids_protection() {
 # $1 - 0 default exit 0
 cleaner() {
   INTERRUPT_CLEAN="${1:-1}"
+  [[ "$CLEANED" -eq 1 ]] && return
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
     print_output "[*] Interrupt detected!" "no_log"
   fi
@@ -157,15 +158,6 @@ cleaner() {
     fuser -k "$FIRMWARE_PATH" || true
   fi
 
-  # if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log ]]; then
-    # while read -r KILL_PID; do
-    #  if [[ -e /proc/"$KILL_PID" ]]; then
-    #    print_output "[*] Stopping EMBA process with PID $KILL_PID" "no_log"
-    #    kill -9 "$KILL_PID" > /dev/null || true
-    #  fi
-    # done < "$TMP_DIR"/EXIT_KILL_PIDS_DOCKER.log
-  # fi
-
   if [[ "$IN_DOCKER" -eq 0 ]] && [[ -f "$TMP_DIR"/EXIT_KILL_PIDS.log ]]; then
     while read -r KILL_PID; do
       if [[ -e /proc/"$KILL_PID" ]]; then
@@ -178,6 +170,7 @@ cleaner() {
   if [[ "$IN_DOCKER" -eq 0 ]] && [[ -d "$TMP_DIR" ]]; then
     rm -r "$TMP_DIR" 2>/dev/null || true
   fi
+  export CLEANED=1
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
     print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
     exit 1
