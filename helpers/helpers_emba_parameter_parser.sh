@@ -186,7 +186,7 @@ emba_parameter_parsing() {
         export FORMAT_LOG=1
         ;;
       Z)
-        check_alnum "$OPTARG"
+        check_vendor "$OPTARG"
         export FW_DEVICE=""
         FW_DEVICE="$(escape_echo "$OPTARG")"
         ;;
