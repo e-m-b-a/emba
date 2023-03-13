@@ -232,7 +232,7 @@ check_path_input() {
 check_version() {
   local INPUT_TO_CHECK="${1:-}"
   [[ -z "$INPUT_TO_CHECK" ]] && return
-  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_~:'-']+$ ]]; then
+  if ! [[ "$INPUT_TO_CHECK" =~ ^[a-zA-Z0-9./_:'-''+']+$ ]]; then
     print_output "[-] Invalid input detected - versions aka 1.2.3-a:b only" "no_log"
     exit 1
   fi
