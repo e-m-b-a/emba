@@ -23,14 +23,14 @@ MOD_DIR="./modules"
 MOD_DIR_LOCAL="./modules_local"
 CONF_DIR="./config"
 EXT_DIR="./external"
-REP_DIR="$CONF_DIR/report_templates"
+REP_DIR="${CONF_DIR}/report_templates"
 
-if [[ "$STRICT_MODE" -eq 1 ]]; then
+if [[ "${STRICT_MODE}" -eq 1 ]]; then
   # shellcheck source=./installer/wickStrictModeFail.sh
-  source "$INSTALLER_DIR"/wickStrictModeFail.sh
+  source "${INSTALLER_DIR}"/wickStrictModeFail.sh
   export DEBUG_SCRIPT=0
   # shellcheck source=./helpers/helpers_emba_load_strict_settings.sh
-  source "$HELP_DIR"/helpers_emba_load_strict_settings.sh
+  source "${HELP_DIR}"/helpers_emba_load_strict_settings.sh
   load_strict_mode_settings
   trap 'wickStrictModeFail $?' ERR  # The ERR trap is triggered when a script catches an error
 fi
@@ -51,57 +51,57 @@ MODULES_TO_CHECK_ARR_PERM=()
 MODULES_TO_CHECK_ARR_COMMENT=()
 
 import_config_scripts() {
-  mapfile -t HELPERS < <(find "$CONF_DIR" -iname "*.sh" 2>/dev/null)
+  mapfile -t HELPERS < <(find "${CONF_DIR}" -iname "*.sh" 2>/dev/null)
   for LINE in "${HELPERS[@]}"; do
-    if (file "$LINE" | grep -q "shell script"); then
-      echo "$LINE"
-      SOURCES+=("$LINE")
+    if (file "${LINE}" | grep -q "shell script"); then
+      echo "${LINE}"
+      SOURCES+=("${LINE}")
     fi
   done
 }
 
 import_helper() {
-  mapfile -t HELPERS < <(find "$HELP_DIR" -iname "*.sh" 2>/dev/null)
+  mapfile -t HELPERS < <(find "${HELP_DIR}" -iname "*.sh" 2>/dev/null)
   for LINE in "${HELPERS[@]}"; do
-    if (file "$LINE" | grep -q "shell script"); then
-      echo "$LINE"
-      SOURCES+=("$LINE")
+    if (file "${LINE}" | grep -q "shell script"); then
+      echo "${LINE}"
+      SOURCES+=("${LINE}")
     fi
   done
 }
 
 import_reporting_templates() {
-  mapfile -t REP_TEMP < <(find "$REP_DIR" -iname "*.sh" 2>/dev/null)
+  mapfile -t REP_TEMP < <(find "${REP_DIR}" -iname "*.sh" 2>/dev/null)
   for LINE in "${REP_TEMP[@]}"; do
-    if (file "$LINE" | grep -q "shell script"); then
-      echo "$LINE"
-      SOURCES+=("$LINE")
+    if (file "${LINE}" | grep -q "shell script"); then
+      echo "${LINE}"
+      SOURCES+=("${LINE}")
     fi
   done
 }
 
 import_module() {
   MODULES=()
-  mapfile -t MODULES < <(find "$MOD_DIR" -iname "*.sh" 2>/dev/null)
-  if [[ -d "$MOD_DIR_LOCAL" ]]; then
-    mapfile -t MODULES_LOCAL < <(find "$MOD_DIR_LOCAL" -iname "*.sh" 2>/dev/null)
+  mapfile -t MODULES < <(find "${MOD_DIR}" -iname "*.sh" 2>/dev/null)
+  if [[ -d "${MOD_DIR_LOCAL}" ]]; then
+    mapfile -t MODULES_LOCAL < <(find "${MOD_DIR_LOCAL}" -iname "*.sh" 2>/dev/null)
     MODULES=( "${MODULES_[@]}" "${MODULES_LOCAL[@]}")
   fi
   for LINE in "${MODULES[@]}"; do
-    if (file "$LINE" | grep -q "shell script"); then
-      echo "$LINE"
-      SOURCES+=("$LINE")
+    if (file "${LINE}" | grep -q "shell script"); then
+      echo "${LINE}"
+      SOURCES+=("${LINE}")
     fi
   done
 }
 
 import_installer() {
   MODULES=()
-  mapfile -t MODULES < <(find "$INSTALLER_DIR" -iname "*.sh" 2>/dev/null)
+  mapfile -t MODULES < <(find "${INSTALLER_DIR}" -iname "*.sh" 2>/dev/null)
   for LINE in "${MODULES[@]}"; do
-    if (file "$LINE" | grep -q "shell script"); then
-      echo "$LINE"
-      SOURCES+=("$LINE")
+    if (file "${LINE}" | grep -q "shell script"); then
+      echo "${LINE}"
+      SOURCES+=("${LINE}")
     fi
   done
 }
@@ -110,35 +110,35 @@ import_emba_main() {
   MODULES=()
   mapfile -t MODULES < <(find ./ -iname "emba" -o -iname "installer.sh" -o -iname "check_project.sh" 2>/dev/null)
   for LINE in "${MODULES[@]}"; do
-    if (file "$LINE" | grep -q "shell script"); then
-      echo "$LINE"
-      SOURCES+=("$LINE")
+    if (file "${LINE}" | grep -q "shell script"); then
+      echo "${LINE}"
+      SOURCES+=("${LINE}")
     fi
   done
 }
 
 
 dockerchecker() {
-  echo -e "\\n""$ORANGE""$BOLD""EMBA docker-files check""$NC"
-  echo -e "$BOLD""=================================================================""$NC"
+  echo -e "\\n""${ORANGE}""${BOLD}""EMBA docker-files check""${NC}"
+  echo -e "${BOLD}""=================================================================""${NC}"
   mapfile -t DOCKER_COMPS < <(find . -maxdepth 1 -iname "docker-compose*.yml")
   for DOCKER_COMP in "${DOCKER_COMPS[@]}"; do
-    echo -e "\\n""$GREEN""Run docker check on $DOCKER_COMP:""$NC""\\n"
-    if docker-compose -f "$DOCKER_COMP" config 1>/dev/null || [[ $? -ne 1 ]]; then
-      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    echo -e "\\n""${GREEN}""Run docker check on ${DOCKER_COMP}:""${NC}""\\n"
+    if docker-compose -f "${DOCKER_COMP}" config 1>/dev/null || [[ $? -ne 1 ]]; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
-      echo -e "\\n""$ORANGE$BOLD==> FIX ERRORS""$NC""\\n"
+      echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
       ((MODULES_TO_CHECK=MODULES_TO_CHECK+1))
-      MODULES_TO_CHECK_ARR_DOCKER+=( "$DOCKER_COMP" )
+      MODULES_TO_CHECK_ARR_DOCKER+=( "${DOCKER_COMP}" )
     fi
   done
 }
 
 check() {
-  echo -e "\\n""$ORANGE""$BOLD""Embedded Linux Analyzer Shellcheck""$NC"
-  echo -e "$BOLD""=================================================================""$NC"
+  echo -e "\\n""${ORANGE}""${BOLD}""Embedded Linux Analyzer Shellcheck""${NC}"
+  echo -e "${BOLD}""=================================================================""${NC}"
 
-  echo -e "\\n""$GREEN""Load all files for check:""$NC""\\n"
+  echo -e "\\n""${GREEN}""Load all files for check:""${NC}""\\n"
 
   import_emba_main
   import_installer
@@ -147,58 +147,58 @@ check() {
   import_reporting_templates
   import_module
 
-  echo -e "\\n""$GREEN""Check all source for correct tab usage:""$NC""\\n"
+  echo -e "\\n""${GREEN}""Check all source for correct tab usage:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
-    echo -e "\\n""$GREEN""Run ${ORANGE}tab check$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    if [[ $(grep -cP '\t' "$SOURCE") -eq 0 ]]; then
-      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    echo -e "\\n""${GREEN}""Run ${ORANGE}tab check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    if [[ $(grep -cP '\t' "${SOURCE}") -eq 0 ]]; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
-      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
-      MODULES_TO_CHECK_ARR_TAB+=("$SOURCE")
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR_TAB+=("${SOURCE}")
     fi
   done
 
-  echo -e "\\n""$GREEN""Check all source for correct comment usage:""$NC""\\n"
+  echo -e "\\n""${GREEN}""Check all source for correct comment usage:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
-    echo -e "\\n""$GREEN""Run ${ORANGE}comment check$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    if [[ $(grep -E -R "^( )+?#" "$SOURCE" | grep -v "#\ \|bash\|/bin/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
-      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    echo -e "\\n""${GREEN}""Run ${ORANGE}comment check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    if [[ $(grep -E -R "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|/bin/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
-      grep -E -R -n "^( )+?#" "$SOURCE" | grep -v "#\ \|bash\|shellcheck" | grep -v -E "#$"
-      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
-      MODULES_TO_CHECK_ARR_COMMENT+=("$SOURCE")
+      grep -E -R -n "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|shellcheck" | grep -v -E "#$"
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR_COMMENT+=("${SOURCE}")
     fi
   done
 
 
-  echo -e "\\n""$GREEN""Run shellcheck and semgrep:""$NC""\\n"
+  echo -e "\\n""${GREEN}""Run shellcheck and semgrep:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
-    echo -e "\\n""$GREEN""Run ${ORANGE}shellcheck$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    if shellcheck -x -P "$INSTALLER_DIR":"$HELP_DIR":"$MOD_DIR":"$MOD_DIR_LOCAL" "$SOURCE" || [[ $? -ne 1 && $? -ne 2 ]]; then
-      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    echo -e "\\n""${GREEN}""Run ${ORANGE}shellcheck${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    if shellcheck -x -P "${INSTALLER_DIR}":"${HELP_DIR}":"${MOD_DIR}":"${MOD_DIR_LOCAL}" "${SOURCE}" || [[ $? -ne 1 && $? -ne 2 ]]; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
-      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
-      MODULES_TO_CHECK_ARR+=("$SOURCE")
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR+=("${SOURCE}")
     fi
 
-    echo -e "\\n""$GREEN""Run ${ORANGE}semgrep$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    semgrep --disable-version-check --metrics=off --config "$EXT_DIR"/semgrep-rules/bash "$SOURCE" | tee /tmp/emba_semgrep.log
+    echo -e "\\n""${GREEN}""Run ${ORANGE}semgrep${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    semgrep --disable-version-check --metrics=off --config "${EXT_DIR}"/semgrep-rules/bash "${SOURCE}" | tee /tmp/emba_semgrep.log
     if grep -q "Findings:" /tmp/emba_semgrep.log; then
-      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
-      MODULES_TO_CHECK_ARR_SEMGREP+=("$SOURCE")
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR_SEMGREP+=("${SOURCE}")
     else
-      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     fi
   done
 
-  echo -e "\\n""$GREEN""Check all scripts for correct permissions:""$NC""\\n"
+  echo -e "\\n""${GREEN}""Check all scripts for correct permissions:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
-    echo -e "\\n""$GREEN""Check ${ORANGE}permission$GREEN on $ORANGE$SOURCE""$NC""\\n"
-    if stat -L -c "%a" "$SOURCE" | grep -q "755"; then
-      echo -e "$GREEN""$BOLD""==> SUCCESS""$NC""\\n"
+    echo -e "\\n""${GREEN}""Check ${ORANGE}permission${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    if stat -L -c "%a" "${SOURCE}" | grep -q "755"; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
-      echo -e "\\n""$ORANGE""$BOLD""==> FIX ERRORS""$NC""\\n"
-      MODULES_TO_CHECK_ARR_PERM+=("$SOURCE")
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR_PERM+=("${SOURCE}")
     fi
   done
 }
@@ -209,55 +209,55 @@ summary() {
   fi
 
   if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]]; then
-    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
     echo -e "Modules to check (tab vs spaces): ${#MODULES_TO_CHECK_ARR_TAB[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_TAB[@]}"; do
-      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done
-    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
 
   if [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]]; then
-    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
     echo -e "Modules to check (space after # sign): ${#MODULES_TO_CHECK_ARR_COMMENT[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_COMMENT[@]}"; do
-      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done
-    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
 
   if [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]]; then
-    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
     echo -e "Modules to check (shellcheck): ${#MODULES_TO_CHECK_ARR[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR[@]}"; do
-      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done
-    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
 
   if [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]]; then
-    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
     echo -e "Modules to check (semgrep): ${#MODULES_TO_CHECK_ARR_SEMGREP[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_SEMGREP[@]}"; do
-      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done
-    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
   if [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]]; then
-    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
     echo -e "Modules to check (docker-compose): ${#MODULES_TO_CHECK_ARR_DOCKER[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_DOCKER[@]}"; do
-      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done
-    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
   if [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]]; then
-    echo -e "\\n\\n""$GREEN$BOLD""SUMMARY:$NC\\n"
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
     echo -e "Modules to check (permissions): ${#MODULES_TO_CHECK_ARR_PERM[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_PERM[@]}"; do
-      echo -e "$ORANGE$BOLD==> FIX MODULE: ""$MODULE""$NC"
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done
-    echo -e "$ORANGE""WARNING: Fix the errors before pushing to the EMBA repository!"
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
 }
 
@@ -265,13 +265,13 @@ summary() {
 check_tools() {
   TOOLS=("semgrep" "shellcheck")
   for TOOL in "${TOOLS[@]}";do
-    if ! command -v "$TOOL" > /dev/null ; then
-      echo -e "\\n""$RED""$TOOL is not installed correctly""$NC""\\n"
+    if ! command -v "${TOOL}" > /dev/null ; then
+      echo -e "\\n""${RED}""${TOOL} is not installed correctly""${NC}""\\n"
       exit 1
     fi
   done
   if ! [[ -d ./external/semgrep-rules/bash ]]; then
-    echo -e "\\n""$RED""$BOLD""Please install semgrep-rules to directory ./external to perform all checks""$NC""\\n"
+    echo -e "\\n""${RED}""${BOLD}""Please install semgrep-rules to directory ./external to perform all checks""${NC}""\\n"
     echo -e "${ORANGE}git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rule${NC}"
     exit 1
   fi
