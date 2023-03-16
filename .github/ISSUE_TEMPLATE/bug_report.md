@@ -26,8 +26,11 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
 - OS: e.g. Kali Linux 2022.03
-- EMBA version: v1.1.2 or current master branch
+- EMBA version: v1.2.2 or current master branch
 - Installation method: default with up to date docker image
+
+**Priority issue**
+- Are you a [Sponsor](https://github.com/sponsors/e-m-b-a)? [Y/N]
 
 **Additional context**
 Add any other context about the problem here.
