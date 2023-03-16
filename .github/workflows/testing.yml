@@ -1,5 +1,6 @@
 name: EMBA default installation on Ubuntu
 
+on: push
 jobs:
   default-install:
     if: github.repository_owner != 'e-m-b-a'
