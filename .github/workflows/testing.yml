@@ -1,0 +1,42 @@
+name: EMBA default installation on Ubuntu
+
+jobs:
+  default-install:
+    if: github.repository_owner != 'e-m-b-a'
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+      - name: EMBA default install
+        uses: Wandalen/wretry.action@master
+        with:
+          command: sudo ./installer.sh -g && sudo ./emba -d 1 -y -j
+          attempt_limit: 3
+      - name: EMBA firmware download
+        run: |
+            sudo apt-get update
+            sudo apt-get install wget
+            wget https://ftp.dlink.de/dir/dir-300/archive/driver_software/DIR-300_fw_revb_214b01_ALL_de_20130206.zip
+      - name: EMBA default analysis
+        run: |
+            sudo ./emba -f ./DIR-300_fw_revb_214b01_ALL_de_20130206.zip -l ./logs_emba -S -p ./scan-profiles/default-scan-emulation.emba -y -j
+      - name: Check result file exist
+        id: check_files
+        uses: andstor/file-existence-action@v2
+        with:
+          files: "./logs_emba/emba.log, ./logs_emba/csv_logs/f50_base_aggregator.csv, ./logs_emba/html_report/index.html"
+
+      - name: File exists
+        if: steps.check_files.outputs.files_exists == 'true'
+        # Only runs if all of the files exist
+        run: echo All files exist!
