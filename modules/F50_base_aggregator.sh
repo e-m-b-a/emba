@@ -23,6 +23,7 @@ F50_base_aggregator() {
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
   P02_LOG="p02_firmware_bin_file_check.csv"
+  P99_CSV_LOG="$CSV_DIR""p99_prepare_analyzer.csv"
   P35_LOG="p35_uefi_extractor.txt"
   S03_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
@@ -117,15 +118,25 @@ output_overview() {
   elif [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH""$NC"
-      write_link "p99"
+      write_link "s03"
       write_csv_log "architecture_verified" "unknown" "NA"
       write_csv_log "architecture_unverified" "$PRE_ARCH" "NA"
     fi
     if [[ -n "$EFI_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$EFI_ARCH""$NC"
-      write_link "p99"
+      write_link "p35"
       write_csv_log "architecture_verified" "$EFI_ARCH" "NA"
     fi
+  elif [[ -f "$LOG_DIR"/"$P99_CSV_LOG" ]]; then
+    if [[ -n "$P99_ARCH" ]]; then
+      if [[ -n "$D_END" ]]; then
+        print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH"" / ""$P99_END""$NC"
+      else
+        print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH""$NC"
+      fi
+      write_link "p99"
+      write_csv_log "architecture_verified" "$P99_ARCH" "NA"
+      fi
   else
     write_csv_log "architecture_verified" "unknown" "NA"
   fi
@@ -764,17 +775,20 @@ get_data() {
     ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
   fi
   if [[ -f "$LOG_DIR"/"$P35_LOG" ]]; then
-    EFI_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P35_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\n' '/' || true)
+    EFI_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P35_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' '/' || true)
     EFI_ARCH="${EFI_ARCH%\/}"
     EFI_ARCH=$(strip_color_codes "$EFI_ARCH")
+  fi
+  if [[ -f "$LOG_DIR"/"$P99_CSV_LOG" ]]; then
+    P99_ARCH="$(tail -n +2 "$LOG_DIR"/"$P99_CSV_LOG" | cut -d\; -f 7)"
+    P99_ARCH_END="$(tail -n +2 "$LOG_DIR"/"$P99_CSV_LOG" | cut -d\; -f 8)"
   fi
   if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
-    PRE_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\n' '/' || true)
+    PRE_ARCH=$(strip_color_codes $(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' ' ' | sed 's/\ /\ \//' || true))
     PRE_ARCH="${PRE_ARCH%\/}"
-    PRE_ARCH=$(strip_color_codes "$PRE_ARCH")
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
     FILE_ARR_COUNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S05_LOG" | cut -d: -f2 || true)
