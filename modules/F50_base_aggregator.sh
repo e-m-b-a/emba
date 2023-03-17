@@ -781,13 +781,13 @@ get_data() {
   fi
   if [[ -f "$LOG_DIR"/"$P99_CSV_LOG" ]]; then
     P99_ARCH="$(tail -n +2 "$LOG_DIR"/"$P99_CSV_LOG" | cut -d\; -f 7)"
-    P99_ARCH_END="$(tail -n +2 "$LOG_DIR"/"$P99_CSV_LOG" | cut -d\; -f 8)"
+    # P99_ARCH_END="$(tail -n +2 "$LOG_DIR"/"$P99_CSV_LOG" | cut -d\; -f 8)"
   fi
   if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
-    PRE_ARCH=$(strip_color_codes $(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' ' ' | sed 's/\ /\ \//' || true))
+    PRE_ARCH="$(strip_color_codes "$(grep -a "Possible architecture details found" "$LOG_DIR"/"$S03_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' ' ' | sed 's/\ /\ \//' || true)")"
     PRE_ARCH="${PRE_ARCH%\/}"
   fi
   if [[ -f "$LOG_DIR"/"$S05_LOG" ]]; then
