@@ -42,7 +42,10 @@ IL10_system_emulator() {
     print_tool_info "qemu-system-misc" 1
     print_tool_info "hping3" 1
     print_tool_info "traceroute" 1
+
+    # future extension
     print_tool_info "xxd" 1
+    print_tool_info "netcat-openbsd" 1
 
     # BusyBox - https://busybox.net/downloads/busybox-1.29.3.tar.bz2
     print_file_info "busybox.armel" "busybox ARMel" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/busybox.armel" "external/EMBA_Live_bins/busybox.armel"
