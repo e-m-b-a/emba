@@ -49,7 +49,7 @@ print_tool_info(){
   TOOL_INFO="$(apt show "${1:-}" 2> /dev/null)"
   if echo "$TOOL_INFO" | grep -q "Description:" 2>/dev/null ; then
     echo -e "$(echo "$TOOL_INFO" | grep "Description:")"
-    SIZE=$(apt show "${1:-}" 2>/dev/null | grep Download-Size | cut -d: -f2)
+    SIZE=$(apt show "${1:-}" 2>/dev/null | grep Download-Size | cut -d: -f2 || true)
     if [[ -n "$SIZE" ]]; then
       echo -e "Download-Size:$SIZE"
     fi

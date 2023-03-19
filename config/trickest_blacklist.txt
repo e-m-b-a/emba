@@ -40,3 +40,9 @@ andrewwebber/kate
 jenkinsci-cert/nvd-cwe
 xaviermerino/ECE1552
 evdenis/cvehound
+mchmarny/vulctl
+taechae/s3caa
+zzzWTF/db-13-01
+Live-Hack-CVE/CVE-2008-0455
+Live-Hack-CVE/CVE-2008-0333
+strobes-test/st-cve-search
