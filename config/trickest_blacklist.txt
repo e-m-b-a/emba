@@ -46,3 +46,13 @@ zzzWTF/db-13-01
 Live-Hack-CVE/CVE-2008-0455
 Live-Hack-CVE/CVE-2008-0333
 strobes-test/st-cve-search
+stanmay77/security
+loveov/stegosploit-python
+memmedrehimzade/CVEcheck
+Mithlonde/Mithlonde
+DingyShark/BurpSuiteCertifiedPractitioner
+summitto/tlslite-ng
+capstone-cy-team-1/vuln-web-app
+OWASP/www-project-ide-vulscanner
+VenusPR/PHP
+RxXwx3x/Redteam
