@@ -258,6 +258,11 @@ create_emulation_filesystem() {
     print_output "[*] Copy extracted root filesystem to new QEMU image"
     cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || true
 
+    if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]]; then
+      print_output "[*] Starting link fixing helper ..."
+      "$HELP_DIR"/fix_bins_lnk_emulation.sh "$MNT_POINT"
+    fi
+
     # ensure that the needed permissions for exec files are set correctly
     # This is needed at some firmwares have corrupted permissions on ELF or sh files
     print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
