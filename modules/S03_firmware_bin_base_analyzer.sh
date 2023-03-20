@@ -199,13 +199,13 @@ binary_architecture_detection() {
   fi
 
   for PRE_ARCH_ in "${PRE_ARCH_Y[@]}"; do
-    safe_echo "binwalk -Y;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
+    echo "binwalk -Y;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
   done
   for PRE_ARCH_ in "${PRE_ARCH_A[@]}"; do
-    safe_echo "binwalk -A;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
+    echo "binwalk -A;$PRE_ARCH_" >> "$TMP_DIR"/s03_arch.tmp
   done
   if [[ -n "$PRE_ARCH_CPU_REC" ]]; then
-    safe_echo "cpu_rec;$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03_arch.tmp
+    echo "cpu_rec;$PRE_ARCH_CPU_REC" >> "$TMP_DIR"/s03_arch.tmp
   fi
 }
 
@@ -213,10 +213,10 @@ binary_architecture_reporter() {
   sub_module_title "Architecture detection for RTOS based systems"
   local PRE_ARCH_=""
   while read -r PRE_ARCH_; do
-    SOURCE=$(safe_echo "$PRE_ARCH_" | cut -d\; -f1)
-    PRE_ARCH_=$(safe_echo "$PRE_ARCH_" | cut -d\; -f2)
+    SOURCE=$(echo "$PRE_ARCH_" | cut -d\; -f1)
+    PRE_ARCH_=$(echo "$PRE_ARCH_" | cut -d\; -f2)
     print_ln
     print_output "[+] Possible architecture details found ($ORANGE$SOURCE$GREEN): $ORANGE$PRE_ARCH_$NC"
-    safe_echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
+    echo "$PRE_ARCH_" >> "$TMP_DIR"/s03.tmp
   done < "$TMP_DIR"/s03_arch.tmp
 }

@@ -28,9 +28,9 @@ L25_web_checks() {
 
     if [[ -v IP_ADDRESS_ ]]; then
       if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-        print_output "[-] System not responding - Not performing web checks"
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
         if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+          print_output "[-] System not responding - Not performing web checks"
           module_end_log "${FUNCNAME[0]}" "$WEB_RESULTS"
           return
         fi
@@ -66,6 +66,7 @@ main_web_check() {
 
       # handle first https and afterwards http
       if [[ "$SERVICE" == *"ssl|http"* ]] || [[ "$SERVICE" == *"ssl/http"* ]];then
+        SSL=1
         if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
           # we make a screenshot for every web server
           make_web_screenshot "$IP_ADDRESS_" "$PORT"
@@ -79,12 +80,16 @@ main_web_check() {
           print_output "[-] System not responding - No SSL test possible"
         fi
 
+        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          web_access_crawler "$IP_ADDRESS_" "$PORT" "$SSL"
+        else
+          print_output "[-] System not responding - Not performing crawler checks"
+        fi
+
         # but we only test the server with Nikto and other long running tools once
         # Note: this is not a full vulnerability scan. The checks are running only for
         # a limited time! At the end the tester needs to perform further investigation!
         if [[ "$WEB_DONE" -eq 0 ]]; then
-          SSL=1
-
           if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
             sub_module_title "Nikto web server analysis for $ORANGE$IP_ADDRESS_:$PORT$NC"
             timeout --preserve-status --signal SIGINT 600 nikto -timeout 3 -nointeractive -maxtime 8m -ssl -port "$PORT" -host "$IP_ADDRESS_" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt || true
@@ -98,12 +103,6 @@ main_web_check() {
           fi
 
           if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-            web_access_crawler "$IP_ADDRESS_" "$PORT" "$SSL"
-          else
-            print_output "[-] System not responding - Not performing crawler checks"
-          fi
-
-          if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
             arachni_scan "$IP_ADDRESS_" "$PORT" "$SSL"
             WEB_DONE=1
           else
@@ -111,10 +110,21 @@ main_web_check() {
           fi
         fi
       elif [[ "$SERVICE" == *"http"* ]];then
-        make_web_screenshot "$IP_ADDRESS_" "$PORT"
+        SSL=0
+        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          # we make a screenshot for every web server
+          make_web_screenshot "$IP_ADDRESS_" "$PORT"
+        else
+          print_output "[-] System not responding - No screenshot possible"
+        fi
+
+        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          web_access_crawler "$IP_ADDRESS_" "$PORT" "$SSL"
+        else
+          print_output "[-] System not responding - Not performing crawler checks"
+        fi
 
         if [[ "$WEB_DONE" -eq 0 ]]; then
-          SSL=0
 
           if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
             sub_module_title "Nikto web server analysis for $ORANGE$IP_ADDRESS_:$PORT$NC"
@@ -126,12 +136,6 @@ main_web_check() {
             print_bar ""
           else
             print_output "[-] System not responding - Not performing Nikto checks"
-          fi
-
-          if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-            web_access_crawler "$IP_ADDRESS_" "$PORT" "$SSL"
-          else
-            print_output "[-] System not responding - Not performing crawler checks"
           fi
 
           if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
@@ -207,6 +211,9 @@ web_access_crawler() {
   local SSL_="$3"
   local PROTO=""
   local WEB_FILE=""
+  local WEB_DIR_L1=""
+  local WEB_DIR_L2=""
+  local WEB_DIR_L3=""
 
   if [[ "$SSL_" -eq 1 ]]; then
     PROTO="https"
@@ -217,7 +224,10 @@ web_access_crawler() {
   sub_module_title "Starting web server crawling for $ORANGE$IP_:$PORT$NC"
   print_ln
 
-  for WEB_PATH in "${FILE_ARR[@]}"; do
+  # we need files and links (for cgi files)
+  mapfile -t FILE_ARR_EXT < <(find "$FIRMWARE_PATH" -type f -o -type l || true)
+
+  for WEB_PATH in "${FILE_ARR_EXT[@]}"; do
     if ! ping -c 1 "$IP_" &> /dev/null; then
       print_output "[-] System not responding - Stopping crawling"
       break
@@ -226,6 +236,21 @@ web_access_crawler() {
     WEB_FILE="$(basename "$WEB_PATH")"
     echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/$WEB_FILE$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
     timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+    WEB_DIR_L1="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1 | rev)"
+    if [[ -n "${WEB_DIR_L1}" ]]; then
+      echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L1}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+      timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+    fi
+    WEB_DIR_L2="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-2 | rev)"
+    if [[ -n "${WEB_DIR_L2}" ]]; then
+      echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L2}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+      timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+    fi
+    WEB_DIR_L3="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-3 | rev)"
+    if [[ -n "${WEB_DIR_L3}" ]]; then
+      echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L3}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+      timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+    fi
   done
 
   if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" ]]; then

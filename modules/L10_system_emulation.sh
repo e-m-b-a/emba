@@ -300,6 +300,22 @@ create_emulation_filesystem() {
     cp "$MODULE_SUB_PATH/inferService.sh" "${MNT_POINT}" || true
     FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "$LOG_FILE"
 
+    if [[ -f "$MODULE_SUB_PATH/injection_check.sh" ]]; then
+      # injection checker - future extension
+      cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/bin/a || true
+      cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/sbin/a || true
+      chmod a+x "${MNT_POINT}/bin/a" || true
+      chmod a+x "${MNT_POINT}/sbin/a" || true
+      INJECTION_MARKER="$RANDOM"
+      sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/bin/a || true
+      sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/sbin/a || true
+      print_output "[*] Generated injection scripts with marker ${ORANGE}${INJECTION_MARKER}${NC}."
+      cat "${MNT_POINT}"/bin/a
+      # setup a marker for traversal tests
+      echo "EMBA_${INJECTION_MARKER}_EMBA" > "${MNT_POINT}"/dir_trav_check
+      echo "$INJECTION_MARKER" > "$LOG_PATH_MODULE"/injection_marker.log
+    fi
+
     if [[ -e "${MNT_POINT}/kernelInit" ]]; then
       print_output "[*] Backup ${MNT_POINT}/kernelInit:"
       tee -a "$LOG_FILE" < "${MNT_POINT}/kernelInit"

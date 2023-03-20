@@ -130,12 +130,14 @@ cleaner() {
       killall -9 --quiet -r .*cwe_checker.* > /dev/null || true
     fi
 
-    # IF SYS_ONLINE is 1, the live system tester (system mode emulator) was able to setup the box
-    # we need to do a cleanup
-    if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -i -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
-      print_output "[*] Resetting system emulation environment" "no_log"
-      stopping_emulation_process
-      reset_network_emulation 2
+    # If SYS_ONLINE is 1 and some qemu system process is running, the live system tester (system mode emulator)
+    # was able to setup the box we need to do a cleanup
+    if pgrep -f "qemu-system-.*$LOG_DIR"; then
+      if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -i -c L10 "$LOG_DIR"/"$MAIN_LOG_FILE") -gt 0 ]]; then
+        print_output "[*] Resetting system emulation environment" "no_log"
+        stopping_emulation_process
+        reset_network_emulation 2
+      fi
     fi
   fi
   [[ "$IN_DOCKER" -eq 1 ]] && restore_permissions

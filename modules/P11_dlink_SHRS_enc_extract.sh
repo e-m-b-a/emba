@@ -21,7 +21,7 @@ export PRE_THREAD_ENA=0
 P11_dlink_SHRS_enc_extract() {
   local NEG_LOG=0
 
-  if [[ "$DLINK_ENC_DETECTED" -ne 0 ]]; then
+  if [[ "$DLINK_ENC_DETECTED" -ne 0 ]] && [[ "$MODULE_DISABLED" -ne 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "DLink encrypted firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -43,6 +43,13 @@ dlink_SHRS_enc_extractor() {
   local EXTRACTION_FILE_="${2:-}"
   if ! [[ -f "$DLINK_ENC_PATH_" ]]; then
     print_output "[-] No file for decryption provided"
+    return
+  fi
+
+  local MODULE_DISABLED=1
+
+  if [[ "$MODULE_DISABLED" -eq 1 ]]; then
+    print_output "[*] Module ${FUNCNAME[0]} is deprecated and will be removed in the future"
     return
   fi
 
@@ -84,6 +91,13 @@ dlink_enc_img_extractor(){
   local IMAGE_SIZE=0
   local OFFSET=0
   local ITERATION=0
+
+  local MODULE_DISABLED=1
+
+  if [[ "$MODULE_DISABLED" -eq 1 ]]; then
+    print_output "[*] Module ${FUNCNAME[0]} is deprecated and will be removed in the future"
+    return
+  fi
 
   sub_module_title "DLink encrpted_image extractor"
 
