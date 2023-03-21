@@ -24,13 +24,9 @@ L99_cleanup() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ -n "$IP_ADDRESS_" ]]; then
-      if [[ -n "$IMAGE_NAME" ]]; then
-        # stop function from L10
-        stopping_emulation_process "$IMAGE_NAME"
-      fi
-
-      # now we only execute the network reset
-      reset_network_emulation 2
+      # as we are running from the run.sh startup script the network is also reconfigured
+      print_output "[*] Stopping Qemu emulation ..."
+      pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true &>/dev/null
     fi
     module_end_log "${FUNCNAME[0]}" "$MODULE_END"
   fi
