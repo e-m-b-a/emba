@@ -22,7 +22,7 @@ F50_base_aggregator() {
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
-  P02_LOG="p02_firmware_bin_file_check.csv"
+  P02_CSV_LOG="$CSV_DIR""p02_firmware_bin_file_check.csv"
   P35_LOG="p35_uefi_extractor.txt"
   S03_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
@@ -760,8 +760,8 @@ get_data() {
   export K_CVE_VERIFIED_COMPILED=0
   export APK_ISSUES=0
 
-  if [[ -f "$LOG_DIR"/"$P02_LOG" ]]; then
-    ENTROPY=$(grep -a "Entropy" "$LOG_DIR"/"$P02_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
+  if [[ -f "$P02_CSV_LOG" ]]; then
+    ENTROPY=$(grep -a "Entropy" "$P02_CSV_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
   fi
   if [[ -f "$LOG_DIR"/"$P35_LOG" ]]; then
     EFI_ARCH=$(grep -a "Possible architecture details found" "$LOG_DIR"/"$P35_LOG" | cut -d: -f2 | sed 's/\ //g' | tr '\n' '/' || true)
