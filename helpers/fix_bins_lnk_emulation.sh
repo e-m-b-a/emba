@@ -26,11 +26,12 @@ fi
 cp "$(command -v busybox)" "$ROOT_DIR"
 chmod +x "$ROOT_DIR"/busybox
 
-echo "[*] Identifying possible ELF files"
-mapfile -t POSSIBLE_ELFS < <(find "$ROOT_DIR" -type f -exec file {} \; | grep ELF | cut -d: -f1)
+echo "[*] Identifying possible executable files"
+mapfile -t POSSIBLE_ELFS < <(find "$ROOT_DIR" -type f -exec file {} \; | grep "ELF\|executable" | cut -d: -f1)
 
 for POSSIBLE_ELF in "${POSSIBLE_ELFS[@]}"; do
-  echo "[*] Processing ELF $(basename "$POSSIBLE_ELF") - chmod privileges"
+  [[ -x "${POSSIBLE_ELF}" ]] && continue
+  echo "[*] Processing executable $(basename "$POSSIBLE_ELF") - chmod privileges"
   chmod +x "$POSSIBLE_ELF"
 done
 
@@ -42,28 +43,59 @@ else
 fi
 
 echo ""
-echo "[*] Identifying possible symlinks"
-mapfile -t POSSIBLE_DEAD_SYMLNKS < <(find "." -type f -exec file {} \; | grep data | cut -d: -f1)
+echo "[*] Identifying possible dead symlinks"
+mapfile -t POSSIBLE_DEAD_SYMLNKS < <(find "." -type f) # -exec file {} \; | grep "data\|ASCII\ text" | cut -d: -f1)
 
 for POSSIBLE_DEAD_SYMLNK in "${POSSIBLE_DEAD_SYMLNKS[@]}"; do
-  if [[ "$(strings "$POSSIBLE_DEAD_SYMLNK" | wc -l)" -eq 0 ]] || [[ "$(strings "$POSSIBLE_DEAD_SYMLNK" | wc -l)" -gt 1 ]]; then
+  DIR_ORIG_FILE=""
+  if [[ "$(strings "$POSSIBLE_DEAD_SYMLNK" | wc -l)" -gt 1 ]]; then
+    continue
+  fi
+  if [[ "$(wc -c "$POSSIBLE_DEAD_SYMLNK" | awk '{print $1}')" -gt 200 ]]; then
+    continue
+  fi
+  if ! [[ "$(strings "$POSSIBLE_DEAD_SYMLNK")" =~ ^[a-zA-Z0-9./_~'-']+$ ]]; then
     continue
   fi
 
+  DIR_ORIG_FILE=$(dirname "$POSSIBLE_DEAD_SYMLNK")
+  [[ -z "$DIR_ORIG_FILE" ]] && continue
+  if ! [[ -d "${DIR_ORIG_FILE}" ]] && ! [[ -L "${DIR_ORIG_FILE}" ]]; then
+    echo "[*] Directory to unknown detected: $POSSIBLE_DEAD_SYMLNK -> ${DIR_ORIG_FILE}"
+  fi
+
   TMP_LNK_ORIG=$(strings "$POSSIBLE_DEAD_SYMLNK")
-  TMP_LNK=${TMP_LNK_ORIG/\.\.\//}
+  [[ -z "$TMP_LNK_ORIG" ]] && TMP_LNK_ORIG=$(cat "$POSSIBLE_DEAD_SYMLNK")
+  [[ -z "$TMP_LNK_ORIG" ]] && continue
+
+  if [[  ${TMP_LNK_ORIG:0:1} == "/" ]]; then
+    # if we have an absolute path we can just use it
+    LNK_TARGET=".""${TMP_LNK_ORIG}"
+    # sometimes the directory of the final dest does not exist - lets check and create it
+    DIR_LNK_TARGET=$(dirname "$LNK_TARGET")
+    if ! [[ -d "${DIR_LNK_TARGET}" ]]; then
+      echo "[*] Creating ${DIR_LNK_TARGET}"
+      chroot . "${BUSYBOX}" mkdir -p "${DIR_LNK_TARGET}"
+    fi
+  else
+    LNK_TARGET="$DIR_ORIG_FILE"/"${TMP_LNK_ORIG}"
+  fi
+
+  if ! [[ -f "${LNK_TARGET}" ]] && ! [[ -d "${LNK_TARGET}" ]] && ! [[ -L "${LNK_TARGET}" ]]; then
+    echo "[*] Unknown or non existent target detected: ${POSSIBLE_DEAD_SYMLNK} -> ${LNK_TARGET}"
+    LNK_TARGET_NAME="$(basename "${LNK_TARGET}")"
+    mapfile -t POSSIBLE_MATCHES < <(find "." -name "$LNK_TARGET_NAME" -exec file {} \; | grep ELF | cut -d: -f1)
+    for MATCH in "${POSSIBLE_MATCHES[@]}"; do
+      echo "[*] Found possible matching file $MATCH"
+    done
+  fi
+
+  LNK_TARGET=${LNK_TARGET/\./}
   POSSIBLE_SYMLNK_NAME=${POSSIBLE_DEAD_SYMLNK/\./}
 
-  mapfile -t POSSIBLE_MATCHES < <(find "." -wholename "*$TMP_LNK")
-  for MATCH in "${POSSIBLE_MATCHES[@]}"; do
-    if [[ "$MATCH" == "./busybox" ]]; then
-      continue
-    fi
-    MATCH=${MATCH/\./}
-    echo -e "[*] Symlink file $POSSIBLE_SYMLNK_NAME - $MATCH"
-    chroot . "$BUSYBOX" rm "$POSSIBLE_DEAD_SYMLNK"
-    chroot . "$BUSYBOX" ln -s "$MATCH" "$POSSIBLE_SYMLNK_NAME"
-  done
+  echo -e "[*] Symlink file $POSSIBLE_SYMLNK_NAME - ${LNK_TARGET}"
+  chroot . "$BUSYBOX" rm "$POSSIBLE_DEAD_SYMLNK"
+  chroot . "$BUSYBOX" ln -s "${LNK_TARGET}" "$POSSIBLE_SYMLNK_NAME"
 done
 
 cd "$HOME_DIR" || exit 1

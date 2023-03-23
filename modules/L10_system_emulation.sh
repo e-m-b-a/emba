@@ -582,6 +582,7 @@ main_emulation() {
         [[ "$F_STARTUP" -eq 0 && "$NETWORK_MODE" == "default" ]] || [[ "$DETECTED_IP" -eq 0 ]]; then
         mv "$LOG_PATH_MODULE"/qemu.initial.serial.log "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log
         COUNTING_1st=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log | awk '{print $1}')
+        PORTS_1st=$(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial_"$IMAGE_NAME"_"$INIT_FNAME"_base_init.log | sort -u | wc -l | awk '{print $1}' || true)
         if [[ "$KINIT" == "rdinit="* ]]; then
           print_output "[*] Warning: Unknown EMBA startup found via rdinit - testing init"
           # strip rd from rdinit
@@ -600,17 +601,28 @@ main_emulation() {
         F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
         F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
         COUNTING_2nd=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $1}')
+        PORTS_2nd=$(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
         # IPS_INT_VLAN is always at least 1 for the default configuration
         if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
           [[ "$DETECTED_IP" -eq 0 ]]; then
-          # we only switch back if the first check has more output generated
-          if [[ "$COUNTING_1st" -gt "$COUNTING_2nd" ]]; then
+          if [[ "$PORTS_1st" -gt "$PORTS_2nd" ]]; then
             if [[ "$KINIT" == "rdinit="* ]]; then
-              print_output "[*] Warning: switching back to init"
+              print_output "[*] Warning: switching back to init (identified services - $PORTS_1st / $PORTS_2nd)"
               # strip rd from rdinit
               KINIT="${KINIT:2}"
             else
-              print_output "[*] Warning: switching back to rdinit"
+              print_output "[*] Warning: switching back to rdinit (identified services - $PORTS_1st / $PORTS_2nd)"
+              # make rdinit from init
+              KINIT="rd""$KINIT"
+            fi
+          # we only switch back if the first check has more output generated
+          elif [[ "$COUNTING_1st" -gt "$COUNTING_2nd" ]] && [[ "$PORTS_1st" -ge "$PORTS_2nd" ]]; then
+            if [[ "$KINIT" == "rdinit="* ]]; then
+              print_output "[*] Warning: switching back to init (generated log output)"
+              # strip rd from rdinit
+              KINIT="${KINIT:2}"
+            else
+              print_output "[*] Warning: switching back to rdinit (generated log output)"
               # make rdinit from init
               KINIT="rd""$KINIT"
             fi
@@ -1156,7 +1168,7 @@ get_networking_details_emulation() {
     mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | grep -E '[[:alnum:]]{3,50}' | sort -u || true)
     # mapfile -t NVRAM_SET < <(grep -a "nvram_set" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2 | sed 's/^\ //g' | cut -d\  -f1 | sed 's/\"//g' | grep -v "^#" | grep -E '[[:alnum:]]{3,50}'| sort -u || true)
     # we check all available qemu logs for services that are started:
-    mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.*serial*.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
+    mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
     NVRAM_TMP=( "${NVRAM[@]}" )
