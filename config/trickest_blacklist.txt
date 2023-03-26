@@ -56,3 +56,6 @@ capstone-cy-team-1/vuln-web-app
 OWASP/www-project-ide-vulscanner
 VenusPR/PHP
 RxXwx3x/Redteam
+CVEDB/PoC-List
+vmmaltsev/13.1
+Zhivarev/13-01-hw

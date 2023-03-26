@@ -27,9 +27,15 @@ if ("${FIRMAE_NET}"); then
     NET_INTERFACE=$("${BUSYBOX}" cat /firmadyne/net_interface)
 
     # netgear WNR2000 bridge command
+    CNT=0
     while (true); do
+      CNT=$((CNT+1))
+      echo "[*] Waiting CNT: $CNT / 40"
       "${BUSYBOX}" sleep 5
       if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_BRIDGE}"); then
+        break
+      fi
+      if [ "${CNT}" -gt 40 ]; then
         break
       fi
     done

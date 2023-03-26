@@ -111,7 +111,7 @@ L10_system_emulation() {
             main_emulation "$R_PATH" "$ARCH_END"
 
             if [[ -d "$MNT_POINT" ]]; then
-              rm -r "$MNT_POINT"
+              rm -r "$MNT_POINT" || true
             fi
 
             if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
@@ -261,17 +261,17 @@ create_emulation_filesystem() {
     if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]]; then
       print_output "[*] Starting link fixing helper ..."
       "$HELP_DIR"/fix_bins_lnk_emulation.sh "$MNT_POINT"
+    else
+      # ensure that the needed permissions for exec files are set correctly
+      # This is needed at some firmwares have corrupted permissions on ELF or sh files
+      print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
+      readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep executable | cut -d: -f1)
+      for BINARY_L10 in "${BINARIES_L10[@]}"; do
+        if [[ -f "$BINARY_L10" ]]; then
+          chmod +x "$BINARY_L10"
+        fi
+      done
     fi
-
-    # ensure that the needed permissions for exec files are set correctly
-    # This is needed at some firmwares have corrupted permissions on ELF or sh files
-    print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
-    readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep executable | cut -d: -f1)
-    for BINARY_L10 in "${BINARIES_L10[@]}"; do
-      if [[ -f "$BINARY_L10" ]]; then
-        chmod +x "$BINARY_L10"
-      fi
-    done
 
     print_output "[*] Creating FIRMADYNE directories within the firmware environment"
     mkdir -p "$MNT_POINT/firmadyne/libnvram/" || true
@@ -724,7 +724,7 @@ main_emulation() {
         fi
 
         RESULT_SOURCE="EMBA"
-        write_results "$ARCHIVE_PATH"
+        write_results "$ARCHIVE_PATH" "$R_PATH"
 
         # if we are going to execute L15 then we do not reset the network environment now
         # we just write the commands to run.sh
@@ -759,7 +759,7 @@ main_emulation() {
 
           # if we have a working emulation we stop here
           if [[ "$TCP" == "ok" ]]; then
-            if [[ $(grep "udp.*open\ \|tcp.*open\ " "$ARCHIVE_PATH"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -gt 1 ]]; then
+            if [[ $(grep "udp.*open\ \|tcp.*open\ " "$ARCHIVE_PATH"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -gt 2 ]]; then
               # we only exit if we have more than 1 open port detected.
               # Otherwise we try to find a better solution
               # We stop the emulation now and restart it later on
@@ -775,6 +775,8 @@ main_emulation() {
           fi
         else
           print_output "[-] No working emulation - removing emulation archive."
+          # print_output "[-] Emulation archive: $ARCHIVE_PATH."
+          # create_emulation_archive "$ARCHIVE_PATH"
           rm -r "$ARCHIVE_PATH" || true
         fi
 
@@ -1353,6 +1355,8 @@ get_networking_details_emulation() {
             store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "$ETH_INT" "$VLAN_ID" "$NETWORK_MODE"
           fi
         fi
+        # this is a default (fallback) entry with the correct ip address:
+        store_interface_details "$IP_ADDRESS_" "br0" "eth0" "NONE" "default"
       fi
     done
 
@@ -1382,15 +1386,6 @@ get_networking_details_emulation() {
         store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "$ETH_INT" "$VLAN_ID" "$NETWORK_MODE"
       done
     fi
-
-    eval "IPS_INT_VLAN=(
-    $(for i in "${IPS_INT_VLAN[@]}" ; do
-      if [[ "$i" == *"default"* ]]; then
-        # Quick fix - we remove the default entry now and add it later on to the last position
-        continue
-      fi
-      echo "\"$i\"" ;
-    done | sort -u))"
 
     # fallback - default network configuration:
     # we always add this as the last resort - with this at least ICMP should be possible in most cases
@@ -1427,6 +1422,10 @@ store_interface_details() {
   local ETH_INT__="${3:-eth0}"
   local VLAN_ID__="${4:-NONE}"
   local NETWORK_MODE__="${5:-bridge}"
+
+  if [[ "${IPS_INT_VLAN[*]}" == *"$IP_ADDRESS__;$NETWORK_DEVICE__;$ETH_INT__;$VLAN_ID__;$NETWORK_MODE__"* ]]; then
+    return
+  fi
 
   IPS_INT_VLAN+=( "$IP_ADDRESS__"\;"$NETWORK_DEVICE__"\;"$ETH_INT__"\;"$VLAN_ID__"\;"$NETWORK_MODE__" )
   print_output "[+] Interface details detected: IP address: $ORANGE$IP_ADDRESS__$GREEN / bridge dev: $ORANGE$NETWORK_DEVICE__$GREEN / network device: $ORANGE$ETH_INT__$GREEN / vlan id: $ORANGE$VLAN_ID__$GREEN / network mode: $ORANGE$NETWORK_MODE__$NC"
@@ -1954,7 +1953,7 @@ check_online_stat() {
 
       if [[ "$TCP_SERV" =~ ^T:[0-9].* ]] || [[ "$UDP_SERV" =~ ^U:[0-9].* ]]; then
         print_output "[*] Starting Nmap portscan for detected services ($ORANGE$PORTS_TO_SCAN$NC) started during system init on $ORANGE$IP_ADDRESS_$NC"
-        write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
+        write_link "$ARCHIVE_PATH"/"$NMAP_LOG"
         nmap -Pn -n -sSUV --host-timeout 30m -p "$PORTS_TO_SCAN" -oA "$LOG_PATH_MODULE"/nmap_emba_"$IPS_INT_VLAN_CFG_mod"_dedicated "$IP_ADDRESS_" | tee -a "$LOG_PATH_MODULE"/"$NMAP_LOG" || true
       fi
     fi
@@ -1974,14 +1973,14 @@ check_online_stat() {
   if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]] && [[ "$SYS_ONLINE" -eq 1 ]]; then
     print_ln
     print_output "[*] Nmap scanning results for $ORANGE$IP_ADDRESS_$NC: "
-    write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
+    write_link "$ARCHIVE_PATH"/"$NMAP_LOG"
     tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/"$NMAP_LOG"
   fi
 }
 
 stopping_emulation_process() {
   local IMAGE_NAME_="${1:-}"
-  print_output "[*] Stopping emulation process"
+  print_output "[*] Stopping emulation process" "no_log"
   pkill -9 -f "qemu-system-.*$IMAGE_NAME_.*" &>/dev/null || true
   sleep 1
 }
@@ -2033,12 +2032,12 @@ reset_network_emulation() {
   fi
 
   if [[ "$EXECUTE_" -ne 0 ]]; then
-    print_output "[*] Stopping Qemu emulation ..."
+    print_output "[*] Stopping Qemu emulation ..." "no_log"
     pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true &>/dev/null
   fi
 
   if [[ "$EXECUTE_" -eq 1 ]]; then
-    print_output "[*] Deleting route..."
+    print_output "[*] Deleting route..." "no_log"
     write_script_exec "echo -e \"Deleting route ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
   if [[ -v HOSTNETDEV_0 ]]; then
@@ -2046,19 +2045,19 @@ reset_network_emulation() {
   fi
 
   if [[ "$EXECUTE_" -eq 1 ]]; then
-    print_output "[*] Bringing down TAP device..."
+    print_output "[*] Bringing down TAP device..." "no_log"
     write_script_exec "echo -e \"Bringing down TAP device ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
   write_script_exec "ip link set $TAPDEV_0 down" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
   if [[ "$EXECUTE_" -eq 1 ]]; then
-    print_output "Removing VLAN..."
+    print_output "Removing VLAN..." "no_log"
     write_script_exec "echo -e \"Removing VLAN ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
   write_script_exec "ip link delete ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
   if [[ "$EXECUTE_" -eq 1 ]]; then
-    print_output "Deleting TAP device ${TAPDEV_0}..."
+    print_output "Deleting TAP device ${TAPDEV_0}..." "no_log"
     write_script_exec "echo -e \"Deleting TAP device ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
   write_script_exec "tunctl -d ${TAPDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
@@ -2189,13 +2188,16 @@ write_results() {
     local FIRMWARE_PATH_orig
     FIRMWARE_PATH_orig="$(cat "$TMP_DIR"/fw_name.log)"
   fi
+
   local ARCHIVE_PATH_="${1:-}"
+  local R_PATH_="${2:-}"
+  local R_PATH_mod="$(echo "$R_PATH_" | sed "s#$LOG_DIR##g")"
   local TCP_SERV_CNT=0
   if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
     TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
   fi
   ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"
-  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED;ICMP $ICMP;TCP-0 $TCP_0;TCP $TCP;$TCP_SERV_CNT;IP address: $IP_ADDRESS_;Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_" >> "$LOG_DIR"/emulator_online_results.log
+  echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED;ICMP $ICMP;TCP-0 $TCP_0;TCP $TCP;$TCP_SERV_CNT;IP address: $IP_ADDRESS_;Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_;$R_PATH_mod" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""
 }
 
