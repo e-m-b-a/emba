@@ -2191,7 +2191,9 @@ write_results() {
 
   local ARCHIVE_PATH_="${1:-}"
   local R_PATH_="${2:-}"
-  local R_PATH_mod="$(echo "$R_PATH_" | sed "s#$LOG_DIR##g")"
+  local R_PATH_mod=""
+  # R_PATH_mod="$(echo "$R_PATH_" | sed "s#$LOG_DIR##g")"
+  R_PATH_mod="${R_PATH_/$LOG_DIR/}"
   local TCP_SERV_CNT=0
   if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
     TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
