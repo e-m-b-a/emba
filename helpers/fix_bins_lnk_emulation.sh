@@ -82,6 +82,9 @@ for POSSIBLE_DEAD_SYMLNK in "${POSSIBLE_DEAD_SYMLNKS[@]}"; do
   fi
 
   if ! [[ -f "${LNK_TARGET}" ]] && ! [[ -d "${LNK_TARGET}" ]] && ! [[ -L "${LNK_TARGET}" ]]; then
+    # if we have not target we need some indicator that this is a real link target
+    # we check for a / in the dead symlink.
+    ! [[ "${TMP_LNK_ORIG}" == *"/"* ]] && continue
     echo "[*] Unknown or non existent target detected: ${POSSIBLE_DEAD_SYMLNK} -> ${LNK_TARGET}"
     LNK_TARGET_NAME="$(basename "${LNK_TARGET}")"
     mapfile -t POSSIBLE_MATCHES < <(find "." -name "$LNK_TARGET_NAME" -exec file {} \; | grep ELF | cut -d: -f1)
