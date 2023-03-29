@@ -25,12 +25,15 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
-- OS: e.g. Kali Linux 2022.03
+- OS: e.g. Kali Linux 2023.01
 - EMBA version: v1.2.2 or current master branch
 - Installation method: default with up to date docker image
 
 **Priority issue**
-- Are you a [Sponsor](https://github.com/sponsors/e-m-b-a)? [Y/N]
+Are you already a [Sponsor]? - [Y/N]
+
 
 **Additional context**
 Add any other context about the problem here.
+
+[Sponsor]: https://github.com/sponsors/e-m-b-a
