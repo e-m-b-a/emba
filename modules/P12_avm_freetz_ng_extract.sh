@@ -54,6 +54,13 @@ avm_extractor() {
   export FRITZ_FILE=0
   export FRITZ_VERSION=""
 
+  local MODULE_DISABLED=1
+
+  if [[ "$MODULE_DISABLED" -eq 1 ]]; then
+    print_output "[*] Module ${FUNCNAME[0]} is deprecated and will be removed in the future"
+    return
+  fi
+
   sub_module_title "AVM freetz-ng firmware extractor"
 
   # read only filesystem bypass:
