@@ -22,8 +22,8 @@ F50_base_aggregator() {
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="$LOG_DIR"/f20_vul_aggregator/exploits-overview.txt
-  P02_CSV_LOG="$CSV_DIR""p02_firmware_bin_file_check.csv"
-  P99_CSV_LOG="$CSV_DIR""p99_prepare_analyzer.csv"
+  P02_CSV_LOG="$CSV_DIR""/p02_firmware_bin_file_check.csv"
+  P99_CSV_LOG="$CSV_DIR""/p99_prepare_analyzer.csv"
   P35_LOG="p35_uefi_extractor.txt"
   S03_LOG="s03_firmware_bin_base_analyzer.txt"
   S05_LOG="s05_firmware_details.txt"
