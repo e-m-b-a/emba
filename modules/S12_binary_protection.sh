@@ -30,7 +30,7 @@ S12_binary_protection()
   local BINARY=""
 
   if [[ -f "$EXT_DIR"/checksec ]] ; then
-    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;FILE" >> "$CSV_LOG"
+    echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;Fortified;Fortifiable;FILE" >> "$CSV_LOG"
     printf "\t%-13.13s  %-16.16s  %-11.11s  %-8.8s  %-11.11s  %-11.11s  %-11.11s  %-5.5s  %s\n" \
       "RELRO" "CANARY" "NX" "PIE" "RPATH" "RUNPATH" "SYMBOLS" "FORTIFY" "FILE" | tee -a "$TMP_DIR"/s12.tmp
 
