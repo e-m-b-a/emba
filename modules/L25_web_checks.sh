@@ -216,7 +216,7 @@ web_access_crawler() {
   local WEB_DIR_L3=""
 
   if [[ "$SSL_" -eq 1 ]]; then
-    PROTO="https"
+    PROTO="-k https"
   else
     PROTO="http"
   fi
@@ -235,26 +235,26 @@ web_access_crawler() {
     print_dot
     WEB_FILE="$(basename "$WEB_PATH")"
     echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/$WEB_FILE$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-    timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+    timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     WEB_DIR_L1="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1 | rev)"
     if [[ -n "${WEB_DIR_L1}" ]]; then
       echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L1}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-      timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+      timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     fi
     WEB_DIR_L2="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-2 | rev)"
     if [[ -n "${WEB_DIR_L2}" ]]; then
       echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L2}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-      timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+      timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     fi
     WEB_DIR_L3="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-3 | rev)"
     if [[ -n "${WEB_DIR_L3}" ]]; then
       echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L3}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-      timeout --preserve-status --signal SIGINT 2 curl -I "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+      timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     fi
   done
 
   if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" ]]; then
-    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -B1 "200 OK" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" || true
+    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "200 OK" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" || true
     CRAWL_RESP_200=$(wc -l "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" | awk '{print $1}')
 
     # Colorizing the log file:

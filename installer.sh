@@ -284,7 +284,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IP00_extractors
 
-  IP12_avm_freetz_ng_extract
+  # IP12_avm_freetz_ng_extract
 
   IP18_qnap_decryptor
 
