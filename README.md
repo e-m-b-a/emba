@@ -1,8 +1,8 @@
 <!-- 
 EMBA - EMBEDDED LINUX ANALYZER
 
-Copyright 2020-2022 Siemens AG
-Copyright 2020-2022 Siemens Energy AG
+Copyright 2020-2023 Siemens AG
+Copyright 2020-2023 Siemens Energy AG
 
 EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 welcome to redistribute it under the terms of the GNU General Public License.
@@ -60,7 +60,13 @@ sudo ./installer.sh -d
 
 ## Quick start with default scan profile:
 ```console
-sudo ./emba -l ./log -f /firmware -p ./scan-profiles/default-scan.emba
+sudo ./emba -l ~/log -f ~firmware -p ./scan-profiles/default-scan.emba
+
+```
+## Quick start with system-emulation scan profile:
+For further details on EMBA's system-emulation engine check the [wiki](https://github.com/e-m-b-a/emba/wiki/System-emulation).
+```console
+sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan-emulation.emba
 
 ```
 ---

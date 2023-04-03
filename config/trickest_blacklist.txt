@@ -59,3 +59,8 @@ RxXwx3x/Redteam
 CVEDB/PoC-List
 vmmaltsev/13.1
 Zhivarev/13-01-hw
+7hang/cyber-security-interview
+Eduardmihai1997/VulnerabilityManagement
+PotterXma/linux-deployment-standard
+paramint/AD-Attack-Defense
+BSG9432/Districts-2023

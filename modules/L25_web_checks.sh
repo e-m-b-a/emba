@@ -214,9 +214,11 @@ web_access_crawler() {
   local WEB_DIR_L1=""
   local WEB_DIR_L2=""
   local WEB_DIR_L3=""
+  local CURL_OPTS=( -sS -D )
 
   if [[ "$SSL_" -eq 1 ]]; then
-    PROTO="-k https"
+    PROTO="https"
+    CURL_OPTS+=( -k )
   else
     PROTO="http"
   fi
@@ -235,21 +237,21 @@ web_access_crawler() {
     print_dot
     WEB_FILE="$(basename "$WEB_PATH")"
     echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/$WEB_FILE$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-    timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+    timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     WEB_DIR_L1="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1 | rev)"
     if [[ -n "${WEB_DIR_L1}" ]]; then
       echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L1}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-      timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+      timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     fi
     WEB_DIR_L2="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-2 | rev)"
     if [[ -n "${WEB_DIR_L2}" ]]; then
       echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L2}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-      timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+      timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     fi
     WEB_DIR_L3="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-3 | rev)"
     if [[ -n "${WEB_DIR_L3}" ]]; then
       echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L3}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-      timeout --preserve-status --signal SIGINT 2 curl -sS -D - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+      timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
     fi
   done
 
