@@ -115,7 +115,7 @@ check_snmp_vulns() {
     snmpwalk -v 2c -c public "${IP_ADDRESS_}" "${OID}" >> "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt || true
     snmpwalk -v 1 -c public "${IP_ADDRESS_}" "${OID}" >> "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt || true
     # remove "No Such Object" entries from the counting results:
-    if [[ $(grep -v "No Such Object" "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt | wc -l) -gt 0 ]]; then
+    if [[ $(grep -v -c "No Such Object" "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt) -gt 0 ]]; then
       print_ln
       print_output "[+] Possible credential disclosure detected (${ORANGE}CVE-2016-1557 / CVE-2016-1559${GREEN}):${NC}"
       tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt
