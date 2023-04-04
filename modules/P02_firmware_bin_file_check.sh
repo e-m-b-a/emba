@@ -38,7 +38,7 @@ P02_firmware_bin_file_check() {
     write_csv_log "MD5" "${MD5_CHECKSUM:-}" "NA"
 
      # entropy checking on binary file
-    ENTROPY="$(ent "$FIRMWARE_PATH" | grep Entropy)"
+    ENTROPY="$(ent "$FIRMWARE_PATH" | grep Entropy | sed -e 's/^Entropy\ \=\ //')"
     write_csv_log "Entropy" "${ENTROPY:-}" "NA"
 
     print_output "[*] Entropy testing with binwalk ... "
