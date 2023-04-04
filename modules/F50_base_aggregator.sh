@@ -127,10 +127,10 @@ output_overview() {
       write_link "p35"
       write_csv_log "architecture_verified" "$EFI_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     fi
-  elif [[ -f "$LOG_DIR"/"$P99_CSV_LOG" ]]; then
+  elif [[ -f "$P99_CSV_LOG" ]]; then
     if [[ -n "$P99_ARCH" ]]; then
       if [[ -n "$D_END" ]]; then
-        print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH"" / ""$P99_END""$NC"
+        print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH"" / ""$P99_ARCH_END""$NC"
       else
         print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH""$NC"
       fi
@@ -779,9 +779,9 @@ get_data() {
     EFI_ARCH="${EFI_ARCH%\/}"
     EFI_ARCH=$(strip_color_codes "$EFI_ARCH")
   fi
-  if [[ -f "$LOG_DIR"/"$P99_CSV_LOG" ]]; then
-    P99_ARCH="$(tail -n +2 "$LOG_DIR"/"$P99_CSV_LOG" | cut -d\; -f 7)"
-    # P99_ARCH_END="$(tail -n +2 "$LOG_DIR"/"$P99_CSV_LOG" | cut -d\; -f 8)"
+  if [[ -f "$P99_CSV_LOG" ]]; then
+    P99_ARCH="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 7)"
+    P99_ARCH_END="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 8)"
   fi
   if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
