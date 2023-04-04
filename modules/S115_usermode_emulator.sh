@@ -533,7 +533,7 @@ emulate_strace_run() {
 
   if [[ "${#MISSING_AREAS[@]}" -gt 0 ]]; then
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
-      if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* || "$MISSING_AREA" != */dev/* ]]; then
+      if [[ "$MISSING_AREA" != *"/proc/"* && "$MISSING_AREA" != *"/sys/"* && "$MISSING_AREA" != *"/dev/"* ]]; then
         write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
 
         FILENAME_MISSING=$(basename "$MISSING_AREA")
@@ -541,6 +541,9 @@ emulate_strace_run() {
         PATH_MISSING=$(dirname "$MISSING_AREA")
 
         FILENAME_FOUND=$(find "$EMULATION_PATH_BASE" -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
+        if [[ "$FILENAME_FOUND" == *"/proc/"* || "$FILENAME_FOUND" == *"/sys/"* || "$FILENAME_FOUND" == *"/dev/"* ]]; then
+          continue
+        fi
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
         fi
