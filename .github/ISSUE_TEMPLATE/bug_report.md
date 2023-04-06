@@ -30,7 +30,7 @@ If applicable, add screenshots to help explain your problem.
 - Installation method: default with up to date docker image
 
 **Priority issue**
-Are you already a [Sponsor]? - [Y/N]
+Are you already a \[Sponsor]? - [Y/N]
 
 
 **Additional context**
