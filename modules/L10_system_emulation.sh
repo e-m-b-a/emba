@@ -597,12 +597,18 @@ main_emulation() {
         identify_networking_emulation "$IMAGE_NAME" "$ARCH_END"
         get_networking_details_emulation "$IMAGE_NAME"
 
-        # now we need to check if something is better now or we should switch back to the original init
-        F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
-        F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
-        COUNTING_2nd=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $1}')
-        PORTS_2nd=$(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
-        # IPS_INT_VLAN is always at least 1 for the default configuration
+        if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
+          # now we need to check if something is better now or we should switch back to the original init
+          F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
+          F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
+          COUNTING_2nd=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $1}')
+          PORTS_2nd=$(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
+          # IPS_INT_VLAN is always at least 1 for the default configuration
+        else
+          F_STARTUP=0
+          COUNTING_2nd=0
+          PORTS_2nd=0
+        fi
         if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
           [[ "$DETECTED_IP" -eq 0 ]]; then
           if [[ "$PORTS_1st" -gt "$PORTS_2nd" ]]; then
