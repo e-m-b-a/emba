@@ -29,11 +29,11 @@ fi
 
 EMBA_LOG_DIR="${1:-}"
 EMBA_LOG_FILE="${EMBA_LOG_DIR}""/emba.log"
+
 if ! [[ -f "${EMBA_LOG_FILE}" ]]; then
   echo -e "\\n""${ORANGE}""No valid EMBA firmware log directory found.${NC}"
   exit 1
 fi
-
 
 mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${EMBA_LOG_FILE}" | awk '{print $9}'|| true)
 
