@@ -23,7 +23,7 @@ export ORANGE="\033[0;33m"
 export NC="\033[0m"  # no color
 
 if [[ $# -eq 0 ]]; then
-  echo -e "\\n""${ORANGE}""In order to be able to use EMBAbite, you have to specify at least an EMBA firmware log directory${NC}"
+  echo -e "\\n""${ORANGE}""In order to be able to use this script, you have to specify an EMBA firmware log directory${NC}"
   exit 1
 fi
 
