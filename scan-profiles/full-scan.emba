@@ -1,7 +1,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2022 Siemens Energy AG
-# Copyright 2020-2022 Siemens AG
+# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2023 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -21,6 +21,7 @@ export HTML=1
 export CWE_CHECKER=1
 export QEMULATION=1
 export FULL_EMULATION=1
+
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
