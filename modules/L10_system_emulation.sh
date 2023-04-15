@@ -258,15 +258,16 @@ create_emulation_filesystem() {
     print_output "[*] Copy extracted root filesystem to new QEMU image"
     cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || true
 
-    if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]]; then
-      print_output "[*] Starting link fixing helper ..."
+    if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]] && [[ $(find "$MNT_POINT" -type l | wc -l) -lt 10 ]]; then
+      print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
       "$HELP_DIR"/fix_bins_lnk_emulation.sh "$MNT_POINT"
     else
       # ensure that the needed permissions for exec files are set correctly
       # This is needed at some firmwares have corrupted permissions on ELF or sh files
       print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
-      readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep executable | cut -d: -f1)
+      readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
       for BINARY_L10 in "${BINARIES_L10[@]}"; do
+        [[ -x "${BINARY_L10}" ]] && continue
         if [[ -f "$BINARY_L10" ]]; then
           chmod +x "$BINARY_L10"
         fi

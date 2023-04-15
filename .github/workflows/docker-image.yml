@@ -19,7 +19,7 @@ jobs:
           android: true
           dotnet: true
           haskell: true
-          large-packages: true
+          large-packages: false
           swap-storage: true
       - name: EMBA container build
         uses: Wandalen/wretry.action@master
