@@ -115,7 +115,7 @@ IF20_cve_search() {
             echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
         fi
         if [[ "$CVE_INST" -eq 1 ]]; then
-          wget --no-check-certificate -qO https://www.mongodb.org/static/pgp/server-4.4.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/mongodb.gpg > /dev/null
+          wget --no-check-certificate -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/mongodb.gpg > /dev/null
           echo "deb [ signed-by=/etc/apt/trusted.gpg.d/mongodb.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
           apt-get update -y
           print_tool_info "mongodb-org" 1
