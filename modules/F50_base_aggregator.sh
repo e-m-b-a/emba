@@ -780,8 +780,8 @@ get_data() {
     EFI_ARCH=$(strip_color_codes "$EFI_ARCH")
   fi
   if [[ -f "$P99_CSV_LOG" ]]; then
-    P99_ARCH="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 7)"
-    P99_ARCH_END="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 8)"
+    P99_ARCH="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 7 | sort -u | head -1)"
+    P99_ARCH_END="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 8 | sort -u | head -1)"
   fi
   if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
