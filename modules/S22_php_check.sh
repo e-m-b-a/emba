@@ -34,6 +34,8 @@ S22_php_check()
     mapfile -t PHP_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     s22_vuln_check_caller "${PHP_SCRIPTS[@]}"
 
+    s22_vuln_check_semgrep "${PHP_SCRIPTS[@]}"
+
     s22_check_php_ini
 
     s22_phpinfo_check "${PHP_SCRIPTS[@]}"
@@ -60,6 +62,33 @@ s22_phpinfo_check() {
     fi
   done
   print_ln
+}
+
+s22_vuln_check_semgrep() {
+  sub_module_title "PHP script vulnerabilities - semgrep"
+  local PHP_SEMGREP_LOG="$LOG_PATH_MODULE"/semgrep_php_results.log
+  local S22_SEMGREP_VULNS=0
+
+  semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/php "$LOG_DIR"/firmware/ > "$PHP_SEMGREP_LOG" 2>&1 || true
+
+  if [[ -f "$PHP_SEMGREP_LOG" ]]; then
+    S22_SEMGREP_ISSUES=$(grep "\ findings\." "$PHP_SEMGREP_LOG" | cut -d: -f2 | awk '{print $1}' || true)
+    S22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "$PHP_SEMGREP_LOG" || true)
+    S22_SEMGREP_SCRIPTS=$(grep "\ findings\." "$PHP_SEMGREP_LOG" | awk '{print $5}' || true)
+    print_ln
+
+    sub_module_title "Summary of php issues (semgrep)"
+    if [[ "$S22_SEMGREP_VULNS" -gt 0 ]]; then
+      print_output "[+] Found ""$ORANGE""$S22_SEMGREP_ISSUES"" issues""$GREEN"" (""$ORANGE""$S22_SEMGREP_VULNS"" vulnerabilites${GREEN}) in ""$ORANGE""$S22_SEMGREP_SCRIPTS""$GREEN"" php files""$NC" "" "$PHP_SEMGREP_LOG"
+    elif [[ "$S22_SEMGREP_ISSUES" -gt 0 ]]; then
+      print_output "[+] Found ""$ORANGE""$S22_SEMGREP_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S22_SEMGREP_SCRIPTS""$GREEN"" php files""$NC" "" "$PHP_SEMGREP_LOG"
+    fi
+    # highlight security findings in semgrep log:
+    sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "$PHP_SEMGREP_LOG"
+  fi
+
+  write_log ""
+  write_log "[*] Statistics1:$S22_SEMGREP_ISSUES:$S22_SEMGREP_SCRIPTS"
 }
 
 s22_vuln_check_caller() {
