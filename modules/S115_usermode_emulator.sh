@@ -80,8 +80,8 @@ S115_usermode_emulator() {
       print_ln
       NEG_LOG=1
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
-      if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]]; then
-        print_output "[*] Starting link fixing helper ..."
+      if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]] && [[ $(find "$R_PATH" -type l | wc -l) -lt 10 ]]; then
+        print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
         "$HELP_DIR"/fix_bins_lnk_emulation.sh "$R_PATH"
       fi
       # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
