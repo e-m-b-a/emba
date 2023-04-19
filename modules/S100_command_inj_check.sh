@@ -39,7 +39,7 @@ S100_command_inj_check()
 
         for FILE_S in "${FILE_ARRX[@]}" ; do
           if file "$FILE_S" | grep -q -E "script.*executable" ; then
-            print_output "$( indent "$(orange "$(print_path "$FILE_S")"" -> Executable")")"
+            print_output "$( indent "$(orange "$(print_path "$FILE_S")"" -> Executable script")")"
 
             local QUERY_L
             mapfile -t QUERY_L < <(config_list "$CONFIG_DIR""/check_command_injections.cfg" "")
