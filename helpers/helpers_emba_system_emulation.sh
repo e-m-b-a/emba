@@ -21,7 +21,7 @@ restart_emulation() {
   local RESTART_SCAN="${3:-0}"
 
   if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-    print_output "[+] System with $ORANGE$IP_ADDRESS_$NC responding again - probably it recovered automatically."
+    print_output "[+] System with $ORANGE$IP_ADDRESS_$GREEN responding again - probably it recovered automatically.$NC"
     return
   fi
 
