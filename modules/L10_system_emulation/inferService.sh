@@ -30,6 +30,14 @@ if [ -e /etc/init.d/lighttpd ]; then
   fi
 fi
 
+if [ -e /etc/init.d/ftpd ]; then
+  if ! "${BUSYBOX}" grep -q ftpd /firmadyne/service 2>/dev/null; then
+    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}ftpd service${NC}"
+    "${BUSYBOX}" echo -e -n "/etc/init.d/ftpd start\n" >> /firmadyne/service
+  fi
+fi
+
+
 # tplink_latest/Archer_C59_US__V2_161206.zip?
 if [ -e /etc/init.d/uhttpd ]; then
   if ! "${BUSYBOX}" grep -q uhttpd /firmadyne/service 2>/dev/null; then

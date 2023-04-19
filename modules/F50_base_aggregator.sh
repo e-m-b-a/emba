@@ -191,11 +191,18 @@ output_details() {
     DATA=1
   fi
   if [[ "${S22_PHP_VULNS:-0}" -gt 0 ]]; then
-    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" via progpilot in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
     write_link "s22"
     write_csv_log "php_scripts" "$S22_PHP_SCRIPTS" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-    write_csv_log "php_vulns" "$S22_PHP_VULNS" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    write_csv_log "php_vulns_progpilot" "$S22_PHP_VULNS" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
+  if [[ "${S22_PHP_VULNS_SEMGREP:-0}" -gt 0 ]]; then
+    print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS_SEMGREP"" vulnerabilities""$GREEN"" via semgrep in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC"
+    write_link "s22"
+    write_csv_log "php_scripts" "$S22_PHP_SCRIPTS" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    write_csv_log "php_vulns_semgrep" "$S22_PHP_VULNS_SEMGREP" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+  fi
+
   if [[ "${S22_PHP_INI_ISSUES:-0}" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_INI_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S22_PHP_INI_CONFIGS""$GREEN"" php configuration file.""$NC"
     write_link "s22"
@@ -736,6 +743,7 @@ get_data() {
   export S21_PY_VULNS=0
   export S21_PY_SCRIPTS=0
   export S22_PHP_VULNS=0
+  export S22_PHP_VULNS_SEMGREP=0
   export S22_PHP_SCRIPTS=0
   export S22_PHP_INI_ISSUES=0
   export S22_PHP_INI_CONFIGS=0
@@ -780,8 +788,8 @@ get_data() {
     EFI_ARCH=$(strip_color_codes "$EFI_ARCH")
   fi
   if [[ -f "$P99_CSV_LOG" ]]; then
-    P99_ARCH="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 7)"
-    P99_ARCH_END="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 8)"
+    P99_ARCH="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 7 | sort -u | head -1)"
+    P99_ARCH_END="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 8 | sort -u | head -1)"
   fi
   if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
@@ -827,6 +835,7 @@ get_data() {
     S22_PHP_SCRIPTS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f3 || true)
     S22_PHP_INI_ISSUES=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f4 || true)
     S22_PHP_INI_CONFIGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f5 || true)
+    S22_PHP_VULNS_SEMGREP=$(grep -a "\[\*\]\ Statistics1:" "$LOG_DIR"/"$S22_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S24_LOG" ]]; then
     S24_FAILED_KSETTINGS=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S24_LOG" | cut -d: -f2 || true)
