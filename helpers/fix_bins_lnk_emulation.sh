@@ -44,9 +44,12 @@ fi
 
 echo ""
 echo "[*] Identifying possible dead symlinks"
-mapfile -t POSSIBLE_DEAD_SYMLNKS < <(find "." -type f) # -exec file {} \; | grep "data\|ASCII\ text" | cut -d: -f1)
+mapfile -t POSSIBLE_DEAD_SYMLNKS < <(find "." -xdev -type f) # -exec file {} \; | grep "data\|ASCII\ text" | cut -d: -f1)
 
 for POSSIBLE_DEAD_SYMLNK in "${POSSIBLE_DEAD_SYMLNKS[@]}"; do
+  if [[ "$POSSIBLE_DEAD_SYMLNK" == *"/proc/"* ]]; then
+    continue
+  fi
   DIR_ORIG_FILE=""
   if [[ "$(strings "$POSSIBLE_DEAD_SYMLNK" | wc -l)" -gt 1 ]]; then
     continue
