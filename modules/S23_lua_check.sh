@@ -46,11 +46,12 @@ S23_lua_check()
   [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S23[@]}"
 
   # simple lua checks to identify files which should be analysed in more detail
+  print_ln
   s23_luaseccheck
 
   if [[ "$S23_LUA_VULNS" -gt 0 ]]; then
     print_ln
-    print_output "[+] Found ""$ORANGE""$S23_LUA_VULNS"" issues""$GREEN"" in ""$ORANGE""${#LUA_CGI_FILES[@]}""$GREEN"" lua files""$NC""\\n"
+    print_output "[+] Found ""$ORANGE""$S23_LUA_VULNS"" security issues""$GREEN"" in ""$ORANGE""${#LUA_CGI_FILES[@]}""$GREEN"" lua files""$NC""\\n"
   fi
 
   write_log ""
