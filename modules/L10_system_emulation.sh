@@ -1593,9 +1593,9 @@ write_network_config_to_filesystem() {
         [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/sys/"* ]] && continue
 
-        FILENAME_MISSING=$(basename ${FILE_PATH_MISSING})
+        FILENAME_MISSING=$(basename "${FILE_PATH_MISSING}")
         print_output "[*] Found missing area ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
-        DIR_NAME_MISSING=$(dirname ${FILE_PATH_MISSING})
+        DIR_NAME_MISSING=$(dirname "${FILE_PATH_MISSING}")
         if ! [[ -d "${MNT_POINT}""${DIR_NAME_MISSING}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}${DIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
           mkdir -p "${MNT_POINT}""${DIR_NAME_MISSING}"
