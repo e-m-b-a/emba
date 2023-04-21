@@ -24,38 +24,37 @@ S23_lua_check()
   local LUA_SCRIPT=""
   local S23_LUA_SCRIPTS=()
 
-  if [[ ${LUA_CHECK:-0} -eq 1 ]] ; then
-    write_csv_log "Script path" "LUA issues detected" "LUA vulnarabilities detected" "common linux file"
-    mapfile -t S23_LUA_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.lua" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-    for LUA_SCRIPT in "${S23_LUA_SCRIPTS[@]}" ; do
-      if [[ "$THREADED" -eq 1 ]]; then
-        # linting check:
-        s23_luacheck "$LUA_SCRIPT" &
-        local TMP_PID="$!"
-        store_kill_pids "$TMP_PID"
-        WAIT_PIDS_S23+=( "$TMP_PID" )
-        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S23[@]}"
-        continue
-      else
-        s23_luacheck "$LUA_SCRIPT"
-      fi
-    done
+  write_csv_log "Script path" "LUA issues detected" "LUA vulnarabilities detected" "common linux file"
+  mapfile -t S23_LUA_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.lua" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
-    [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S23[@]}"
+  sub_module_title "LUA linter checks module"
 
-    # simple lua checks to identify files which should be analysed in more detail
-    s23_luaseccheck
-
-    if [[ "$S23_LUA_VULNS" -gt 0 ]]; then
-      print_ln
-      print_output "[+] Found ""$ORANGE""$S23_LUA_VULNS"" issues""$GREEN"" in ""$ORANGE""${#LUA_CGI_FILES[@]}""$GREEN"" lua files""$NC""\\n"
+  for LUA_SCRIPT in "${S23_LUA_SCRIPTS[@]}" ; do
+    if [[ "$THREADED" -eq 1 ]]; then
+      # linting check:
+      s23_luacheck "$LUA_SCRIPT" &
+      local TMP_PID="$!"
+      store_kill_pids "$TMP_PID"
+      WAIT_PIDS_S23+=( "$TMP_PID" )
+      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S23[@]}"
+      continue
+    else
+      s23_luacheck "$LUA_SCRIPT"
     fi
+  done
 
-    write_log ""
-    write_log "[*] Statistics:$S23_LUA_VULNS:${#LUA_CGI_FILES[@]}"
-  else
-    print_output "[-] LUA check is disabled ... no tests performed"
+  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S23[@]}"
+
+  # simple lua checks to identify files which should be analysed in more detail
+  s23_luaseccheck
+
+  if [[ "$S23_LUA_VULNS" -gt 0 ]]; then
+    print_ln
+    print_output "[+] Found ""$ORANGE""$S23_LUA_VULNS"" issues""$GREEN"" in ""$ORANGE""${#LUA_CGI_FILES[@]}""$GREEN"" lua files""$NC""\\n"
   fi
+
+  write_log ""
+  write_log "[*] Statistics:$S23_LUA_VULNS:${#LUA_CGI_FILES[@]}"
   module_end_log "${FUNCNAME[0]}" "$S23_LUA_VULNS"
 }
 
@@ -63,6 +62,8 @@ S23_lua_check()
 s23_luaseccheck() {
   local NAME=""
   local LUA_LOG=""
+
+  sub_module_title "LUA Security checks module"
 
   mapfile -t LUA_CGI_FILES < <(find "${FIRMWARE_PATH}" -type f -exec grep -H cgilua\. {} \; 2>/dev/null | cut -d ':' -f1 | sort -u)
 
@@ -114,7 +115,7 @@ s23_luacheck() {
   LUA_LOG="$LOG_PATH_MODULE""/luacheck_""$NAME"".txt"
   luacheck "$LUA_SCRIPT_" > "$LUA_LOG" 2> /dev/null || true
 
-  ISSUES=$(grep Total "$LUA_LOG" | awk '{print $2}' 2> /dev/null || true)
+  ISSUES=$(strip_color_codes "$(grep Total "$LUA_LOG" | awk '{print $2}' 2> /dev/null || true)")
   if [[ "$ISSUES" -gt 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
