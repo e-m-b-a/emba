@@ -777,7 +777,7 @@ main_emulation() {
                 print_output "[-] No startup script ${ORANGE}$ARCHIVE_PATH/run.sh${NC} found - this should not be possible!"
                 reset_network_emulation 2
               fi
-              # break 2
+              break 2
             fi
           fi
         else
