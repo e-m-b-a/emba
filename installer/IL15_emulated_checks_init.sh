@@ -37,6 +37,8 @@ IL15_emulated_checks_init() {
       echo -e "$RED""$BOLD""Not installing snmpcheck. Your EMBA installation will be incomplete""$NC"
     fi
     print_tool_info "python3-pip" 1
+    # mini UPnP client
+    print_tool_info "miniupnpc" 1
     print_tool_info "cutycapt" 1
 
     # needed for cutycapt

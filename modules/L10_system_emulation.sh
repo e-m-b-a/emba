@@ -777,7 +777,7 @@ main_emulation() {
                 print_output "[-] No startup script ${ORANGE}$ARCHIVE_PATH/run.sh${NC} found - this should not be possible!"
                 reset_network_emulation 2
               fi
-              break 2
+              # break 2
             fi
           fi
         else
@@ -1180,6 +1180,10 @@ get_networking_details_emulation() {
     mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
+    # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
+    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "$LOG_PATH_MODULE"/qemu.initial.serial.log | tr ' ' '\n' | grep "/" | grep -v proc | tr -d ':' | sort -u || true)
+    MISSING_FILES+=( "${MISSING_FILES_TMP[@]}" )
+
     NVRAM_TMP=( "${NVRAM[@]}" )
 
     if [[ "${#INTERFACE_CANDIDATES[@]}" -gt 0 || "${#BRIDGE_INTERFACES[@]}" -gt 0 || "${#VLAN_INFOS[@]}" -gt 0 || "${#PORTS[@]}" -gt 0 || "${#NVRAM_TMP[@]}" -gt 0 ]]; then
@@ -1581,6 +1585,28 @@ write_network_config_to_filesystem() {
     print_output "$(indent "IP address: $ORANGE$IP_ADDRESS_$NC")"
 
     set_network_config "$IP_ADDRESS_" "$NETWORK_MODE" "$NETWORK_DEVICE" "$ETH_INT"
+
+    # if there were missing files found -> we try to fix this now
+    if [[ -v MISSING_FILES[@] ]]; then
+      for FILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
+        print_output "[!] MISSING_FILE: ${FILE_PATH_MISSING}"
+        [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
+        [[ "${FILE_PATH_MISSING}" == *"/sys/"* ]] && continue
+
+        FILENAME_MISSING=$(basename ${FILE_PATH_MISSING})
+        print_output "[*] Found missing area ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
+        DIR_NAME_MISSING=$(dirname ${FILE_PATH_MISSING})
+        if ! [[ -d "${MNT_POINT}""${DIR_NAME_MISSING}" ]]; then
+          print_output "[*] Create missing directory ${ORANGE}${DIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
+          mkdir -p "${MNT_POINT}""${DIR_NAME_MISSING}"
+        fi
+        FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1)
+        if [[ -f ${FOUND_MISSING} ]]; then
+          print_output "[*] Recover missing file ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
+          cp "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/
+        fi
+      done
+    fi
 
     # umount filesystem:
     umount_qemu_image "$DEVICE"

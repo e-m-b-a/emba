@@ -30,6 +30,14 @@ if [ -e /etc/init.d/lighttpd ]; then
   fi
 fi
 
+if [ -e /etc/init.d/lighttpd.sh ]; then
+  if ! "${BUSYBOX}" grep -q "/etc/init.d/lighttpd.sh" /firmadyne/service 2>/dev/null; then
+    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}lighttpd service${NC}"
+    "${BUSYBOX}" echo -e -n "/etc/init.d/lighttpd.sh start\n" >> /firmadyne/service
+  fi
+fi
+
+
 if [ -e /etc/init.d/ftpd ]; then
   if ! "${BUSYBOX}" grep -q ftpd /firmadyne/service 2>/dev/null; then
     "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}ftpd service${NC}"
