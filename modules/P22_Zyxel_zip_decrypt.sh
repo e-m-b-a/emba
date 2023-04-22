@@ -58,7 +58,8 @@ zyxel_zip_extractor() {
     return
   fi
 
-  binwalk_deep_extract_helper 1 "$RI_FILE_" "$EXTRACTION_DIR_"
+  # binwalk_deep_extract_helper 1 "$RI_FILE_" "$EXTRACTION_DIR_"
+  unblobber "$RI_FILE_" "$EXTRACTION_DIR_"
   print_ln
 
   if command -v jchroot > /dev/null; then
@@ -142,7 +143,8 @@ zyxel_zip_extractor() {
         COMPRESS_IMG=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted -type f -name compress.img | sort -u)
         if [[ $(file "$COMPRESS_IMG") == *"Squashfs"* ]]; then
           print_output "[+] Found valid ${ORANGE}compress.img$GREEN and extract it now"
-          binwalk_deep_extract_helper 1 "$COMPRESS_IMG" "$EXTRACTION_DIR_/firmware_zyxel_extracted/compress_img_extracted"
+          # binwalk_deep_extract_helper 1 "$COMPRESS_IMG" "$EXTRACTION_DIR_/firmware_zyxel_extracted/compress_img_extracted"
+          unblobber "$COMPRESS_IMG" "$EXTRACTION_DIR_/firmware_zyxel_extracted/compress_img_extracted"
           FILES_ZYXEL=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted/compress_img_extracted -type f | wc -l)
           DIRS_ZYXEL=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted/compress_img_extracted -type d | wc -l)
           print_output "[*] Zyxel 2nd stage - Extracted $ORANGE$FILES_ZYXEL$NC files and $ORANGE$DIRS_ZYXEL$NC directories from the firmware image."

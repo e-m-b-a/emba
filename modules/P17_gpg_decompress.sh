@@ -56,6 +56,7 @@ gpg_decompress_extractor() {
     backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
     print_ln
     print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
+    unblobber "$EXTRACTION_FILE_" "$LOG_DIR"/firmware/firmware_gpg_extracted
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "GPG decompression" "$GPG_FILE_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
   else

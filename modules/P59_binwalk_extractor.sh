@@ -25,6 +25,16 @@ P59_binwalk_extractor() {
 
   export LINUX_PATH_COUNTER=0
 
+  if [[ -d "${FIRMWARE_PATH}" ]] && [[ "$RTOS" -eq 1 ]]; then
+    detect_root_dir_helper "$FIRMWARE_PATH"
+  fi
+
+  # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
+  if [[ $RTOS -eq 0 ]] ; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   # we need to check if sasquatch is the correct one for binwalk:
   if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_binwalk" ]]; then
     if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
@@ -37,7 +47,6 @@ P59_binwalk_extractor() {
   # This means we are using binwalk in Matryoshka mode here
   # if we have a directory with multiple files in it we automatically pass here and run into the deep extractor
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    # we love binwalk ... this is our first chance for extracting everything
     binwalking "$FIRMWARE_PATH"
   fi
 
@@ -119,21 +128,6 @@ binwalking() {
   binwalk "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
 
   print_ln "no_log"
-  # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
-  if [[ -f $FIRMWARE_PATH_BAK ]] && ! [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
-    print_output "[*] Entropy testing with binwalk ... "
-    # we have to change the working directory for binwalk, because everything except the log directory is read-only in
-    # Docker container and binwalk fails to save the entropy picture there
-    if [[ $IN_DOCKER -eq 1 ]] ; then
-      cd "$LOG_DIR" || return
-      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH_".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
-      cd /emba || return
-    else
-      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BAK")"
-      mv "$(basename "$FIRMWARE_PATH_".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
-    fi
-  fi
 
   OUTPUT_DIR_BINWALK=$(basename "$FIRMWARE_PATH_")
   OUTPUT_DIR_BINWALK="$FIRMWARE_PATH_CP""/""$OUTPUT_DIR_BINWALK"_binwalk_emba
@@ -159,4 +153,39 @@ linux_basic_identification_helper() {
   fi
   LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CHECK" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
   backup_var "LINUX_PATH_COUNTER" "$LINUX_PATH_COUNTER"
+}
+
+binwalk_deep_extract_helper() {
+  # Matryoshka mode is first parameter: 1 - enable, 0 - disable
+  local MATRYOSHKA_="${1:-0}"
+  local FILE_TO_EXTRACT_="${2:-}"
+  local DEST_FILE_="${3:-}"
+
+  if ! [[ -f "$FILE_TO_EXTRACT_" ]]; then
+    print_output "[-] No file for extraction provided"
+    return
+  fi
+
+  # we need to check if sasquatch is the correct one for binwalk:
+  if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_binwalk" ]]; then
+    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
+      rm "$UNBLOB_PATH"/sasquatch
+    fi
+    ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch || true
+  fi
+
+  if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
+    if [[ "$MATRYOSHKA_" -eq 1 ]]; then
+      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+    else
+      # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
+      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+    fi
+  else
+    if [[ "$MATRYOSHKA_" -eq 1 ]]; then
+      binwalk --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+    else
+      binwalk --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+    fi
+  fi
 }

@@ -80,7 +80,8 @@ patools_extractor() {
     print_ln
     print_output "[*] No valid compressed file detected - extraction process via binwalk started"
 
-    binwalk_deep_extract_helper 0 "$FIRMWARE_PATH_" "$EXTRACTION_DIR_"
+    # binwalk_deep_extract_helper 0 "$FIRMWARE_PATH_" "$EXTRACTION_DIR_"
+    unblobber "$FIRMWARE_PATH_" "$EXTRACTION_DIR_"
   fi
 
   print_ln
