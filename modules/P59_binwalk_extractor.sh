@@ -29,8 +29,14 @@ P59_binwalk_extractor() {
     detect_root_dir_helper "$FIRMWARE_PATH"
   fi
 
-  # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
+  # we already found a linux root directory
   if [[ $RTOS -eq 0 ]] ; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
+  if [[ -d "$FIRMWARE_PATH" ]]; then
+    print_output "[-] Binwalk module only deals with firmware files - directories are handled via deep extractor"
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi

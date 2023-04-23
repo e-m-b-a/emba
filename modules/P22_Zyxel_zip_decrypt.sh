@@ -110,6 +110,7 @@ zyxel_zip_extractor() {
       cp "$RI_FILE_BIN_PATH" "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
       ZLD_BIN=$(basename "$ZLD_BIN")
 
+      chmod +x "$ZLD_DIR"/"$ZLD_BIN"
       timeout --preserve-status --signal SIGINT 2s "$CHROOT" "${OPTS[@]}" "$ZLD_DIR" -- ./"$EMULATOR" -strace ./"$ZLD_BIN" "$RI_FILE_BIN" AABBCCDD >> "$LOG_PATH_MODULE"/zld_strace.log 2>&1 || true
       rm "$ZLD_DIR"/"$EMULATOR" || true
 

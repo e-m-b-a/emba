@@ -47,7 +47,6 @@ P99_prepare_analyzer() {
   check_firmware
   print_ln
 
-  print_output "[!] FIRMWARE PATH: $FIRMWARE_PATH"
   prepare_file_arr "$FIRMWARE_PATH"
   print_ln
   prepare_binary_arr "$FIRMWARE_PATH"
