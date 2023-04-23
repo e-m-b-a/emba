@@ -135,7 +135,7 @@ deep_extractor() {
     print_output "[*] WARNING: This is the last extraction round that is executed."
 
     # if we are already that far we do a final matryoshka extraction mode
-    deeper_extractor_helper "M"
+    deeper_extractor_helper
     detect_root_dir_helper "$FIRMWARE_PATH_CP"
   fi
 
@@ -145,12 +145,6 @@ deep_extractor() {
 }
 
 deeper_extractor_helper() {
-
-  if [[ -v 1 ]] && [[ "$1" == "M" ]]; then
-    local MATRYOSHKA=1
-  else
-    local MATRYOSHKA=0
-  fi
   local FILE_TMP=""
   local FILE_MD5=""
 
@@ -299,7 +293,6 @@ deeper_extractor_helper() {
       else
         # default case to Unblob
         if [[ "$THREADED" -eq 1 ]]; then
-          # binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "${FILE_TMP}_binwalk_extracted" &
           unblobber "$FILE_TMP" "${FILE_TMP}_unblob_extracted" &
           BIN_PID="$!"
           store_kill_pids "$BIN_PID"
