@@ -9168,6 +9168,7 @@ CVE-2022-30519;Reprise Software RLM 14.2BL4 Cross Site Scripting;https://packets
 CVE-2022-30525;Zyxel Remote Command Execution;https://packetstormsecurity.com/files/167176/Zyxel-Remote-Command-Execution.html;remote
 CVE-2022-30525;Zyxel USG FLEX 5.21 Command Injection;https://packetstormsecurity.com/files/167372/Zyxel-USG-FLEX-5.21-Command-Injection.html;unknown
 CVE-2022-30594;Linux PT_SUSPEND_SECCOMP Permission Bypass / Ptracer Death;https://packetstormsecurity.com/files/170362/Linux-PT_SUSPEND_SECCOMP-Permission-Bypass-Ptracer-Death-Race.html;unknown
+CVE-2022-30759;Nokia OneNDS 20.9 Insecure Permissions / Privilege;https://packetstormsecurity.com/files/171971/Nokia-OneNDS-20.9-Insecure-Permissions-Privilege-Escalation.html;unknown
 CVE-2022-30981;Gentics CMS 5.36.29 Cross Site Scripting /;https://packetstormsecurity.com/files/167537/Gentics-CMS-5.36.29-Cross-Site-Scripting-Deserialization.html;unknown
 CVE-2022-30982;Gentics CMS 5.36.29 Cross Site Scripting /;https://packetstormsecurity.com/files/167537/Gentics-CMS-5.36.29-Cross-Site-Scripting-Deserialization.html;unknown
 CVE-2022-31056;GLPI 10.0.2 SQL Injection / Remote Code;https://packetstormsecurity.com/files/171656/GLPI-10.0.2-SQL-Injection-Remote-Code-Execution.html;remote
@@ -9185,6 +9186,7 @@ CVE-2022-31210;Infiray IRAY-A8Z3 1.0.957 Code Execution / Overflow;https://packe
 CVE-2022-31211;Infiray IRAY-A8Z3 1.0.957 Code Execution / Overflow;https://packetstormsecurity.com/files/167466/Infiray-IRAY-A8Z3-1.0.957-Code-Execution-Overflow-Hardcoded-Credentials.html;remote
 CVE-2022-31212;dbus-broker-29 Memory Corruption;https://packetstormsecurity.com/files/167410/dbus-broker-29-Memory-Corruption.html;unknown
 CVE-2022-31213;dbus-broker-29 Memory Corruption;https://packetstormsecurity.com/files/167410/dbus-broker-29-Memory-Corruption.html;unknown
+CVE-2022-31244;Nokia OneNDS 17 Insecure Permissions / Privilege;https://packetstormsecurity.com/files/171970/Nokia-OneNDS-17-Insecure-Permissions-Privilege-Escalation.html;unknown
 CVE-2022-31269;Nortek Linear eMerge E3-Series Credential Disclosure;https://packetstormsecurity.com/files/167990/Nortek-Linear-eMerge-E3-Series-Credential-Disclosure.html;unknown
 CVE-2022-31325;ChurchCRM 4.4.5 SQL Injection;https://packetstormsecurity.com/files/167483/ChurchCRM-4.4.5-SQL-Injection.html;remote
 CVE-2022-3141;WordPress Translatepress Multilingual SQL Injection;https://packetstormsecurity.com/files/171479/WordPress-Translatepress-Multilingual-SQL-Injection.html;remote
@@ -9391,6 +9393,7 @@ CVE-2022-4708;WordPress Royal Elementor 1.3.59 XSS / CSRF;https://packetstormsec
 CVE-2022-4709;WordPress Royal Elementor 1.3.59 XSS / CSRF;https://packetstormsecurity.com/files/170459/WordPress-Royal-Elementor-1.3.59-XSS-CSRF-Insufficient-Access-Controls.html;unknown
 CVE-2022-4710;WordPress Royal Elementor 1.3.59 XSS / CSRF;https://packetstormsecurity.com/files/170459/WordPress-Royal-Elementor-1.3.59-XSS-CSRF-Insufficient-Access-Controls.html;unknown
 CVE-2022-4711;WordPress Royal Elementor 1.3.59 XSS / CSRF;https://packetstormsecurity.com/files/170459/WordPress-Royal-Elementor-1.3.59-XSS-CSRF-Insufficient-Access-Controls.html;unknown
+CVE-2022-4744;CentOS Stream 9 Missing Kernel Security Fix;https://packetstormsecurity.com/files/171912/CentOS-Stream-9-Missing-Kernel-Security-Fix.html;local
 CVE-2022-47529;RSA NetWitness Endpoint EDR Agent 12.x Incorrect;https://packetstormsecurity.com/files/171476/RSA-NetWitness-Endpoint-EDR-Agent-12.x-Incorrect-Access-Control-Code-Execution.html;local
 CVE-2022-47632;Razer Synapse 3.7.0731.072516 Local Privilege Escalation;https://packetstormsecurity.com/files/170772/Razer-Synapse-3.7.0731.072516-Local-Privilege-Escalation.html;local
 CVE-2022-47870;SQL Monitor 12.1.31.893 Cross Site Scripting;https://packetstormsecurity.com/files/171647/SQL-Monitor-12.1.31.893-Cross-Site-Scripting.html;unknown
@@ -9399,6 +9402,7 @@ CVE-2022-48177;X2CRM 6.6 / 6.9 Cross Site Scripting;https://packetstormsecurity.
 CVE-2022-48178;X2CRM 6.6 / 6.9 Cross Site Scripting;https://packetstormsecurity.com/files/171792/X2CRM-6.6-6.9-Cross-Site-Scripting.html;unknown
 CVE-2022-48194;TP-Link TL-WR902AC Remote Code Execution;https://packetstormsecurity.com/files/171623/TP-Link-TL-WR902AC-Remote-Code-Execution.html;remote
 CVE-2022-48197;Yahoo User Interface TreeView 2.8.2 Cross Site;https://packetstormsecurity.com/files/171633/Yahoo-User-Interface-TreeView-2.8.2-Cross-Site-Scripting.html;unknown
+CVE-2022-4944;KODExplorer 4.49 Cross Site Request Forgery /;https://packetstormsecurity.com/files/171968/KODExplorer-4.49-Cross-Site-Request-Forgery-Shell-Upload.html;remote
 CVE-2023-0084;WordPress Metform Elementor Contact Form Builder 3.1.2;https://packetstormsecurity.com/files/171636/WordPress-Metform-Elementor-Contact-Form-Builder-3.1.2-Cross-Site-Scripting.html;unknown
 CVE-2023-0214;Secure Web Gateway 10.2.11 Cross Site Scripting;https://packetstormsecurity.com/files/170756/Secure-Web-Gateway-10.2.11-Cross-Site-Scripting.html;unknown
 CVE-2023-0291;WordPress Quiz And Survey Master 8.0.8 Media;https://packetstormsecurity.com/files/171010/WordPress-Quiz-And-Survey-Master-8.0.8-Media-Deletion.html;unknown
@@ -9428,6 +9432,12 @@ CVE-2023-0982;Yoga Class Registration System 1.0 SQL Injection;https://packetsto
 CVE-2023-1080;WordPress Watu Quiz 3.3.9 / GN Publisher;https://packetstormsecurity.com/files/171424/WordPress-Watu-Quiz-3.3.9-GN-Publisher-1.5.5-Japanized-For-WooComerce-2.5.4-XSS.html;unknown
 CVE-2023-1219;Chrome base::debug::ActivityUserData::ActivityUserData Heap Buffer;https://packetstormsecurity.com/files/171795/Chrome-base-debug-ActivityUserData-ActivityUserData-Heap-Buffer-Overflow.html;unknown
 CVE-2023-1220;Chrome base::SampleVectorBase::MoveSingleSampleToCounts Heap Buffer;https://packetstormsecurity.com/files/171796/Chrome-base-SampleVectorBase-MoveSingleSampleToCounts-Heap-Buffer-Overflow.html;unknown
+CVE-2023-1249;CentOS Stream 9 Missing Kernel Security Fix;https://packetstormsecurity.com/files/171912/CentOS-Stream-9-Missing-Kernel-Security-Fix.html;local
+CVE-2023-1403;WordPress Weaver Xtreme 5.0.7 / Weaver Show;https://packetstormsecurity.com/files/171915/WordPress-Weaver-Xtreme-5.0.7-Weaver-Show-Posts-1.6-Cross-Site-Scripting.html;unknown
+CVE-2023-1404;WordPress Weaver Xtreme 5.0.7 / Weaver Show;https://packetstormsecurity.com/files/171915/WordPress-Weaver-Xtreme-5.0.7-Weaver-Show-Posts-1.6-Cross-Site-Scripting.html;unknown
+CVE-2023-1532;Chrome media::mojom::VideoFrame Missing Validation;https://packetstormsecurity.com/files/171959/Chrome-media-mojom-VideoFrame-Missing-Validation.html;unknown
+CVE-2023-1534;Chrome GL_ShaderBinary Untrusted Process Exposure;https://packetstormsecurity.com/files/171961/Chrome-GL_ShaderBinary-Untrusted-Process-Exposure.html;unknown
+CVE-2023-1534;Chrome SpvGetMappedSamplerName Out-Of-Bounds String Copy;https://packetstormsecurity.com/files/171965/Chrome-SpvGetMappedSamplerName-Out-Of-Bounds-String-Copy.html;unknown
 CVE-2023-1826;Online Computer And Laptop Store 1.0 Shell;https://packetstormsecurity.com/files/171790/Online-Computer-And-Laptop-Store-1.0-Shell-Upload.html;remote
 CVE-2023-1874;WordPress WP Data Access 5.3.7 Privilege Escalation;https://packetstormsecurity.com/files/171825/WordPress-WP-Data-Access-5.3.7-Privilege-Escalation.html;unknown
 CVE-2023-1912;WordPress WP Data Access 5.3.7 Privilege Escalation;https://packetstormsecurity.com/files/171825/WordPress-WP-Data-Access-5.3.7-Privilege-Escalation.html;unknown
@@ -9445,6 +9455,7 @@ CVE-2023-21774;Windows Kernel Key Replication Issues;https://packetstormsecurity
 CVE-2023-21776;Windows Kernsl SID Table Poisoning;https://packetstormsecurity.com/files/170947/Windows-Kernsl-SID-Table-Poisoning.html;unknown
 CVE-2023-22232;Adobe Connect 11.4.5 / 12.1.5 Local File;https://packetstormsecurity.com/files/171390/Adobe-Connect-11.4.5-12.1.5-Local-File-Disclosure.html;unknown
 CVE-2023-22580;Tiki Wiki CMS Groupware 24.0 grid.php PHP;https://packetstormsecurity.com/files/170434/Tiki-Wiki-CMS-Groupware-24.0-grid.php-PHP-Object-Injection.html;unknown
+CVE-2023-22620;SecurePoint UTM 12.x Session ID Leak;https://packetstormsecurity.com/files/171924/SecurePoint-UTM-12.x-Session-ID-Leak.html;unknown
 CVE-2023-22629;Titan FTP Path Traversal;https://packetstormsecurity.com/files/171737/Titan-FTP-Path-Traversal.html;unknown
 CVE-2023-22809;sudo 1.9.12p1 Privilege Escalation;https://packetstormsecurity.com/files/171644/sudo-1.9.12p1-Privilege-Escalation.html;local
 CVE-2023-22851;Tiki Wiki CMS Groupware 24.1 tikiimporter_blog_wordpress.php PHP;https://packetstormsecurity.com/files/170435/Tiki-Wiki-CMS-Groupware-24.1-tikiimporter_blog_wordpress.php-PHP-Object-Injection.html;unknown
@@ -9452,6 +9463,7 @@ CVE-2023-22852;Tiki Wiki CMS Groupware 25.0 Cross Site;https://packetstormsecuri
 CVE-2023-22853;Tiki Wiki CMS Groupware 24.0 structlib.php Code;https://packetstormsecurity.com/files/170433/Tiki-Wiki-CMS-Groupware-24.0-structlib.php-Code-Execution.html;unknown
 CVE-2023-22855;Kardex Mlog MCC 5.7.12 Remote Code Execution;https://packetstormsecurity.com/files/171689/Kardex-Mlog-MCC-5.7.12-Remote-Code-Execution.html;remote
 CVE-2023-22855;Kardex Mlog MCC 5.7.12+0-a203c2a213-master File Inclusion /;https://packetstormsecurity.com/files/171046/Kardex-Mlog-MCC-5.7.12-0-a203c2a213-master-File-Inclusion-Remote-Code-Execution.html;remote
+CVE-2023-22897;SecurePoint UTM 12.x Memory Leak;https://packetstormsecurity.com/files/171928/SecurePoint-UTM-12.x-Memory-Leak.html;unknown
 CVE-2023-23161;Art Gallery Management System Project 1.0 Cross;https://packetstormsecurity.com/files/171642/Art-Gallery-Management-System-Project-1.0-Cross-Site-Scripting.html;unknown
 CVE-2023-23162;Art Gallery Management System Project 1.0 SQL;https://packetstormsecurity.com/files/171643/Art-Gallery-Management-System-Project-1.0-SQL-Injection.html;remote
 CVE-2023-23163;Art Gallery Management System Project 1.0 SQL;https://packetstormsecurity.com/files/171643/Art-Gallery-Management-System-Project-1.0-SQL-Injection.html;remote
@@ -9493,10 +9505,13 @@ CVE-2023-26918;File Replication Pro 7.5.0 Insecure Permissions /;https://packets
 CVE-2023-27010;Wondershare Dr Fone 12.9.6 Weak Permissions /;https://packetstormsecurity.com/files/171301/Wondershare-Dr-Fone-12.9.6-Weak-Permissions-Privilege-Escalation.html;unknown
 CVE-2023-27100;pfsenseCE 2.6.0 Protection Bypass;https://packetstormsecurity.com/files/171791/pfsenseCE-2.6.0-Protection-Bypass.html;unknown
 CVE-2023-27167;Suprema BioStar 2 2.8.16 SQL Injection;https://packetstormsecurity.com/files/171523/Suprema-BioStar-2-2.8.16-SQL-Injection.html;remote
+CVE-2023-27179;GDidees CMS 3.9.1 Local File Disclosure /;https://packetstormsecurity.com/files/171894/GDidees-CMS-3.9.1-Local-File-Disclosure-Directory-Traversal.html;unknown
 CVE-2023-27290;IBM Instana 243-0 Missing Authentication;https://packetstormsecurity.com/files/171770/IBM-Instana-243-0-Missing-Authentication.html;unknown
 CVE-2023-27571;Arris DG3450 AR01.02.056.18_041520_711.NCS.10 XSS / Missing;https://packetstormsecurity.com/files/171283/Arris-DG3450-AR01.02.056.18_041520_711.NCS.10-XSS-Missing-Authentication.html;unknown
 CVE-2023-27572;Arris DG3450 AR01.02.056.18_041520_711.NCS.10 XSS / Missing;https://packetstormsecurity.com/files/171283/Arris-DG3450-AR01.02.056.18_041520_711.NCS.10-XSS-Missing-Authentication.html;unknown
 CVE-2023-27890;MyBB Export User 2.0 Cross Site Scripting;https://packetstormsecurity.com/files/171421/MyBB-Export-User-2.0-Cross-Site-Scripting.html;unknown
 CVE-2023-28311;Microsoft Word Remote Code Execution;https://packetstormsecurity.com/files/171882/Microsoft-Word-Remote-Code-Execution.html;remote
 CVE-2023-28343;Altenergy Power Control Software C1.2.5 Command Injection;https://packetstormsecurity.com/files/171775/Altenergy-Power-Control-Software-C1.2.5-Command-Injection.html;unknown
+CVE-2023-29848;Bang Resto 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/171899/Bang-Resto-1.0-Cross-Site-Scripting.html;unknown
+CVE-2023-29849;Bang Resto 1.0 SQL Injection;https://packetstormsecurity.com/files/171900/Bang-Resto-1.0-SQL-Injection.html;unknown
 https://packetstormsecurity.com/files/139874/Chrome-Blink-SpeechRecognitionController-Use-After-Free.html;unknown
