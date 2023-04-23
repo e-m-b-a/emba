@@ -23,6 +23,7 @@ export PRE_THREAD_ENA=0
 P55_unblob_extractor() {
   module_log_init "${FUNCNAME[0]}"
 
+  # shellcheck disable=SC2153
   if [[ -d "${FIRMWARE_PATH}" ]] && [[ "$RTOS" -eq 1 ]]; then
     detect_root_dir_helper "$FIRMWARE_PATH"
   fi
