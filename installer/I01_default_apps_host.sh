@@ -48,8 +48,12 @@ I01_default_apps_host() {
   case ${ANSWER:0:1} in
     y|Y )
       echo
+      apt remove crackmapexec -y
       apt-get install "${INSTALL_APP_LIST[@]}" -y
+      python3 -m pip install pipx
+      pipx ensurepath
+      pipx install crackmapexec --force
       pip_install "requests" "-U"
     ;;
   esac
-}  
+}
