@@ -67,7 +67,7 @@ check_basic_upnp() {
     fi
     print_ln
 
-    UPNP_UP=$(grep -c "desc\|IGD" "$LOG_PATH_MODULE"/upnp-discovery-check.txt)
+    UPNP_UP=$(grep -c "desc\|IGD" "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true)
   fi
 
   if [[ "$UPNP_UP" -gt 0 ]]; then
