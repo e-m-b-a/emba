@@ -60,7 +60,7 @@ check_basic_upnp() {
 
   if command -v upnpc > /dev/null; then
     print_output "[*] UPnP scan with upnpc"
-    upnpc -m "$INTERFACE" -P >> "$LOG_PATH_MODULE"/upnp-discovery-check.txt
+    upnpc -m "$INTERFACE" -P >> "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true
     if [[ -f "$LOG_PATH_MODULE"/upnp-discovery-check.txt ]]; then
       print_ln
       tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/upnp-discovery-check.txt
