@@ -48,8 +48,12 @@ I01_default_apps_host() {
   case ${ANSWER:0:1} in
     y|Y )
       echo
-      apt remove crackmapexec -y
+      if dpkg --list | grep "crackmapexec" | grep -q $'\n';
+      then
+        apt remove crackmapexec -y
+      fi
       apt-get install "${INSTALL_APP_LIST[@]}" -y
+      apt-get install python3-venv -y
       python3 -m pip install pipx
       pipx ensurepath
       pipx install crackmapexec --force
