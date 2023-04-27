@@ -18,7 +18,7 @@
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
 export PRE_THREAD_ENA=0
 
-P60_firmware_bin_extractor() {
+P60_deep_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware deep extractor"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -29,14 +29,6 @@ P60_firmware_bin_extractor() {
   if [[ $RTOS -eq 0 ]] ; then
     module_end_log "${FUNCNAME[0]}" 0
     return
-  fi
-
-  # we need to check if sasquatch is the correct one for binwalk:
-  if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_binwalk" ]]; then
-    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
-      rm "$UNBLOB_PATH"/sasquatch
-    fi
-    ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch || true
   fi
 
   check_disk_space
@@ -143,7 +135,7 @@ deep_extractor() {
     print_output "[*] WARNING: This is the last extraction round that is executed."
 
     # if we are already that far we do a final matryoshka extraction mode
-    deeper_extractor_helper "M"
+    deeper_extractor_helper
     detect_root_dir_helper "$FIRMWARE_PATH_CP"
   fi
 
@@ -153,12 +145,6 @@ deep_extractor() {
 }
 
 deeper_extractor_helper() {
-
-  if [[ -v 1 ]] && [[ "$1" == "M" ]]; then
-    local MATRYOSHKA=1
-  else
-    local MATRYOSHKA=0
-  fi
   local FILE_TMP=""
   local FILE_MD5=""
 
@@ -168,18 +154,19 @@ deeper_extractor_helper() {
 
     FILE_MD5="$(md5sum "$FILE_TMP" | awk '{print $1}')"
     # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
-    # already extracted stuff is now ignored
+    # already extracted stuff is ignored
 
-    if [[ ! " ${MD5_DONE_DEEP[*]} " =~ ${FILE_MD5} ]]; then
+    [[ "${MD5_DONE_DEEP[*]}" == *"${FILE_MD5}"* ]] && continue
 
-      print_output "[*] Details of file: $ORANGE$FILE_TMP$NC"
-      print_output "$(indent "$(file "$FILE_TMP")")"
+    print_output "[*] Details of file: $ORANGE$FILE_TMP$NC"
+    print_output "$(indent "$(orange "$(file "$FILE_TMP")")")"
+    print_output "$(indent "$(orange "$(md5sum "$FILE_TMP")")")"
 
-      # do a quick check if EMBA should handle the file or we give it to binwalk:
-      # fw_bin_detector is a function from p02
-      fw_bin_detector "$FILE_TMP"
+    # do a quick check if EMBA should handle the file or we give it to unblob:
+    # fw_bin_detector is a function from p02
+    fw_bin_detector "$FILE_TMP"
 
-      if [[ "$VMDK_DETECTED" -eq 1 ]]; then
+    if [[ "$VMDK_DETECTED" -eq 1 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
           BIN_PID="$!"
@@ -199,26 +186,28 @@ deeper_extractor_helper() {
         else
           ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted"
         fi
-      elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted"
-        fi
-      elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted"
-        fi
+      # now handled via unblob
+      # elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
+      #  if [[ "$THREADED" -eq 1 ]]; then
+      #    dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
+      #    BIN_PID="$!"
+      #    store_kill_pids "$BIN_PID"
+      #    disown "$BIN_PID" 2> /dev/null || true
+      #    WAIT_PIDS_P20+=( "$BIN_PID" )
+      #  else
+      #    dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted"
+      #  fi
+      # now handled via unblob
+      # elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
+      #  if [[ "$THREADED" -eq 1 ]]; then
+      #    dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted" &
+      #    BIN_PID="$!"
+      #    store_kill_pids "$BIN_PID"
+      #    disown "$BIN_PID" 2> /dev/null || true
+      #    WAIT_PIDS_P20+=( "$BIN_PID" )
+      #  else
+      #    dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted"
+      #  fi
       elif [[ "$EXT_IMAGE" -eq 1 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
@@ -229,16 +218,17 @@ deeper_extractor_helper() {
         else
           ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted"
         fi
-      elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted"
-        fi
+      # now handled via unblob
+      # elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
+      #  if [[ "$THREADED" -eq 1 ]]; then
+      #    engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
+      #    BIN_PID="$!"
+      #    store_kill_pids "$BIN_PID"
+      #    disown "$BIN_PID" 2> /dev/null || true
+      #    WAIT_PIDS_P20+=( "$BIN_PID" )
+      #  else
+      #    engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted"
+      #  fi
       elif [[ "$BSD_UFS" -ne 0 ]]; then
         if [[ "$THREADED" -eq 1 ]]; then
           ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted" &
@@ -301,27 +291,26 @@ deeper_extractor_helper() {
         fi
 
       else
-        # default case to binwalk
+        # default case to Unblob
         if [[ "$THREADED" -eq 1 ]]; then
-          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "${FILE_TMP}_binwalk_extracted" &
+          unblobber "$FILE_TMP" "${FILE_TMP}_unblob_extracted" &
           BIN_PID="$!"
           store_kill_pids "$BIN_PID"
           disown "$BIN_PID" 2> /dev/null || true
           WAIT_PIDS_P20+=( "$BIN_PID" )
         else
-          binwalk_deep_extract_helper "$MATRYOSHKA" "$FILE_TMP" "${FILE_TMP}_binwalk_extracted"
+          unblobber "$FILE_TMP" "${FILE_TMP}_unblob_extracted"
         fi
-      fi
-
-      MD5_DONE_DEEP+=( "$FILE_MD5" )
-      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_P20[@]}"
     fi
+
+    MD5_DONE_DEEP+=( "$FILE_MD5" )
+    max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_P20[@]}"
 
     check_disk_space
 
     FREE_SPACE=$(df --output=avail "$LOG_DIR" | awk 'NR==2')
     if [[ "$FREE_SPACE" -lt 100000 ]]; then
-      # this stops the complete EMBA test
+      # this should stop the complete EMBA test in the future - currenlty it is work in progress
       print_output "[!] $(date) - The system is running out of disk space $ORANGE$FREE_SPACE$NC" "main"
       print_output "[!] $(date) - Ending EMBA firmware analysis processes" "main"
       cleaner 1
@@ -338,29 +327,4 @@ deeper_extractor_helper() {
   [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
 }
 
-binwalk_deep_extract_helper() {
-  # Matryoshka mode is first parameter: 1 - enable, 0 - disable
-  local MATRYOSHKA_="${1:-0}"
-  local FILE_TO_EXTRACT_="${2:-}"
-  local DEST_FILE_="${3:-}"
 
-  if ! [[ -f "$FILE_TO_EXTRACT_" ]]; then
-    print_output "[-] No file for extraction provided"
-    return
-  fi
-
-  if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
-    if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
-    else
-      # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
-      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
-    fi
-  else
-    if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
-    else
-      binwalk --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
-    fi
-  fi
-}

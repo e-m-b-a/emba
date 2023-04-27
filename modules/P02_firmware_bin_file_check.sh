@@ -81,6 +81,8 @@ P02_firmware_bin_file_check() {
       write_link "$LOG_DIR"/pixd.png
     fi
 
+    generate_entropy_graph "$FIRMWARE_PATH"
+
     fw_bin_detector "$FIRMWARE_PATH"
 
     backup_p02_vars
@@ -113,6 +115,25 @@ set_p02_default_exports() {
   export UEFI_AMI_CAPSULE=0
   export ZYXEL_ZIP=0
   export QCOW_DETECTED=0
+}
+
+generate_entropy_graph() {
+  local FIRMWARE_PATH_BIN="${1:-}"
+  # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
+  if [[ -f $FIRMWARE_PATH_BIN ]] && ! [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
+    print_output "[*] Entropy testing with binwalk ... "
+    # we have to change the working directory for binwalk, because everything except the log directory is read-only in
+    # Docker container and binwalk fails to save the entropy picture there
+    if [[ $IN_DOCKER -eq 1 ]] ; then
+      cd "$LOG_DIR" || return
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BIN")"
+      mv "$(basename "$FIRMWARE_PATH_BIN".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+      cd /emba || return
+    else
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BIN")"
+      mv "$(basename "$FIRMWARE_PATH_BIN".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+    fi
+  fi
 }
 
 fw_bin_detector() {
@@ -170,7 +191,7 @@ fw_bin_detector() {
       write_csv_log "basic compressed (patool)" "yes" "NA"
     fi
   fi
-  if [[ "$FILE_BIN_OUT" == *"QEMU QCOW2 Image"* ]]; then
+  if [[ "$FILE_BIN_OUT" == *"QEMU QCOW2 Image"* ]] || [[ "$FILE_BIN_OUT" == *"QEMU QCOW Image"* ]]; then
     print_output "[+] Identified Qemu QCOW image - using QCOW extraction module"
     export QCOW_DETECTED=1
     write_csv_log "Qemu QCOW firmware detected" "yes" "NA"
@@ -206,7 +227,7 @@ fw_bin_detector() {
     write_csv_log "D-Link encrpted_img encrypted" "yes" "NA"
   fi
   if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
-    print_output "[+] Identified u-boot firmware - using u-boot module"
+    print_output "[+] Identified u-boot firmware image"
     export UBOOT_IMAGE=1
     write_csv_log "Uboot image" "yes" "NA"
   fi
@@ -256,7 +277,7 @@ fw_bin_detector() {
     write_csv_log "OpenSSL encrypted" "yes" "NA"
   fi
   # This check is currently only tested on one firmware - further tests needed:
-  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\ b9\ 01\  ]]; then
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\  ]]; then
     print_output "[+] Identified Buffalo encrpyted firmware - using Buffalo extraction module"
     export BUFFALO_ENC_DETECTED=1
     write_csv_log "Buffalo encrypted" "yes" "NA"

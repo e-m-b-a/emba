@@ -54,12 +54,28 @@ buffalo_enc_extractor() {
   BUFFALO_ENC_PATH_STRIPPED="$LOG_DIR/firmware/$(basename "$BUFFALO_ENC_PATH_").stripped"
 
   print_output "[*] Removing initial 208 bytes from header to prepare firmware for decryption"
-  dd bs=208 skip=1 if="$BUFFALO_ENC_PATH_" of="$BUFFALO_ENC_PATH_STRIPPED"
-  hexdump -C "$BUFFALO_ENC_PATH_STRIPPED" | head | tee -a "$LOG_FILE" || true
-  print_ln
+  # on other tests we had 208 -> check again with firmware that failed here:
+  dd bs=208 skip=1 if="$BUFFALO_ENC_PATH_" of="$BUFFALO_ENC_PATH_STRIPPED""_208" || true
 
-  print_output "[*] Decrypting firmware ..."
-  "$EXT_DIR"/buffalo-enc.elf -d -i "$BUFFALO_ENC_PATH_STRIPPED" -o "$EXTRACTION_FILE_"
+  if [[ -f "$BUFFALO_ENC_PATH_STRIPPED""_208" ]]; then
+    hexdump -C "$BUFFALO_ENC_PATH_STRIPPED""_208" | head | tee -a "$LOG_FILE" || true
+    print_ln
+  fi
+
+  print_output "[*] Removing initial 228 bytes from header to prepare firmware for decryption"
+  dd bs=228 skip=1 if="$BUFFALO_ENC_PATH_" of="$BUFFALO_ENC_PATH_STRIPPED""_228" || true
+
+  if [[ -f "$BUFFALO_ENC_PATH_STRIPPED""_228" ]]; then
+    hexdump -C "$BUFFALO_ENC_PATH_STRIPPED""_228" | head | tee -a "$LOG_FILE" || true
+    print_ln
+  fi
+
+  print_output "[*] Decrypting firmware ... offset 208"
+  "$EXT_DIR"/buffalo-enc.elf -d -i "$BUFFALO_ENC_PATH_STRIPPED""_208" -o "$EXTRACTION_FILE_" || true
+  if ! [[ -f "$EXTRACTION_FILE_" ]]; then
+    print_output "[*] Decrypting firmware ... offset 228"
+    "$EXT_DIR"/buffalo-enc.elf -d -i "$BUFFALO_ENC_PATH_STRIPPED""_228" -o "$EXTRACTION_FILE_" || true
+  fi
   hexdump -C "$EXTRACTION_FILE_" | head | tee -a "$LOG_FILE" || true
   print_ln
 

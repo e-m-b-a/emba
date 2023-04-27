@@ -443,6 +443,9 @@ dependency_check()
     # progpilot for php code checks
     check_dep_file "progpilot php ini checker" "$EXT_DIR""/progpilot"
 
+    # luacheck - lua linter
+    check_dep_tool "luacheck"
+
     # APKHunt for android apk analysis
     # hard requirement for v1.2.2
     # check_dep_file "APKHunt apk scanner" "$EXT_DIR""/APKHunt/apkhunt.go"

@@ -381,8 +381,11 @@ prepare_file_arr()
   # rm_proc_binary "${FILE_ARR[@]}"
 }
 
-prepare_binary_arr()
-{
+prepare_binary_arr() {
+  local FIRMWARE_PATH="${1:-}"
+  if ! [[ -d "${FIRMWARE_PATH}" ]]; then
+    return
+  fi
   echo ""
   print_output "[*] Unique binary auto detection for $ORANGE$FIRMWARE_PATH$NC (could take some time)\\n"
 

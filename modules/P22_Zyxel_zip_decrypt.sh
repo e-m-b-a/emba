@@ -58,7 +58,7 @@ zyxel_zip_extractor() {
     return
   fi
 
-  binwalk_deep_extract_helper 1 "$RI_FILE_" "$EXTRACTION_DIR_"
+  unblobber "$RI_FILE_" "$EXTRACTION_DIR_"
   print_ln
 
   if command -v jchroot > /dev/null; then
@@ -109,6 +109,7 @@ zyxel_zip_extractor() {
       cp "$RI_FILE_BIN_PATH" "$ZLD_DIR" || ( print_output "[-] Something went wrong" && return)
       ZLD_BIN=$(basename "$ZLD_BIN")
 
+      chmod +x "$ZLD_DIR"/"$ZLD_BIN"
       timeout --preserve-status --signal SIGINT 2s "$CHROOT" "${OPTS[@]}" "$ZLD_DIR" -- ./"$EMULATOR" -strace ./"$ZLD_BIN" "$RI_FILE_BIN" AABBCCDD >> "$LOG_PATH_MODULE"/zld_strace.log 2>&1 || true
       rm "$ZLD_DIR"/"$EMULATOR" || true
 
@@ -142,7 +143,7 @@ zyxel_zip_extractor() {
         COMPRESS_IMG=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted -type f -name compress.img | sort -u)
         if [[ $(file "$COMPRESS_IMG") == *"Squashfs"* ]]; then
           print_output "[+] Found valid ${ORANGE}compress.img$GREEN and extract it now"
-          binwalk_deep_extract_helper 1 "$COMPRESS_IMG" "$EXTRACTION_DIR_/firmware_zyxel_extracted/compress_img_extracted"
+          unblobber "$COMPRESS_IMG" "$EXTRACTION_DIR_/firmware_zyxel_extracted/compress_img_extracted"
           FILES_ZYXEL=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted/compress_img_extracted -type f | wc -l)
           DIRS_ZYXEL=$(find "$EXTRACTION_DIR_"/firmware_zyxel_extracted/compress_img_extracted -type d | wc -l)
           print_output "[*] Zyxel 2nd stage - Extracted $ORANGE$FILES_ZYXEL$NC files and $ORANGE$DIRS_ZYXEL$NC directories from the firmware image."

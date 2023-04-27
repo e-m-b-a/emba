@@ -64,10 +64,10 @@ check_basic_upnp() {
     if [[ -f "$LOG_PATH_MODULE"/upnp-discovery-check.txt ]]; then
       print_ln
       tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/upnp-discovery-check.txt
-    fi
-    print_ln
+      print_ln
 
-    UPNP_UP=$(grep -c "desc\|IGD" "$LOG_PATH_MODULE"/upnp-discovery-check.txt)
+      UPNP_UP=$(grep -c "desc\|IGD" "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true)
+    fi
   fi
 
   if [[ "$UPNP_UP" -gt 0 ]]; then

@@ -26,7 +26,7 @@ set_defaults() {
   export DEBUG_SCRIPT=0
   export UPDATE=0
   export ARCH_CHECK=1
-  export RTOS=0                 # Testing RTOS based OS
+  export RTOS=1                 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
   export CWE_CHECKER=0
   export CONTAINER_EXTRACT=0
   export DEEP_EXTRACTOR=0

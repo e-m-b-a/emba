@@ -20,14 +20,26 @@
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
 export PRE_THREAD_ENA=0
 
-P70_unblob() {
+P55_unblob_extractor() {
   module_log_init "${FUNCNAME[0]}"
+
+  # shellcheck disable=SC2153
+  if [[ -d "${FIRMWARE_PATH}" ]] && [[ "$RTOS" -eq 1 ]]; then
+    detect_root_dir_helper "$FIRMWARE_PATH"
+  fi
+
+  # If we have not found a linux filesystem we try to do an unblob extraction round
+  if [[ $RTOS -eq 0 ]] ; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
 
   if [[ -f "$TMP_DIR""/unblob_disable.cfg" ]]; then
     # if we disable unblob from a background module we need to work with a file to
     # store the state of this variable (bash rules ;))
     UNBLOB="$(cat "$TMP_DIR"/unblob_disable.cfg)"
   fi
+
   if [[ "$UNBLOB" -eq 0 ]]; then
     if [[ -f "$TMP_DIR""/unblob_disable.cfg" ]]; then
       print_output "[-] Unblob module automatically disabled from other module."
@@ -38,10 +50,10 @@ P70_unblob() {
     return
   fi
 
-  local FW_PATH_UNBLOB="$FIRMWARE_PATH_BAK"
+  local FW_PATH_UNBLOB="$FIRMWARE_PATH"
 
-  if ! [[ -f "$FW_PATH_UNBLOB" ]]; then
-    print_output "[-] Unblob module currently only deals with firmware files - not with directories"
+  if [[ -d "$FW_PATH_UNBLOB" ]]; then
+    print_output "[-] Unblob module only deals with firmware files - directories are handled via deep extractor"
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -49,14 +61,6 @@ P70_unblob() {
   if ! command -v unblob >/dev/null; then
     print_output "[-] Unblob not correct installed - check your installation"
     return
-  fi
-
-  # we need to check if sasquatch is the correct one for unblob:
-  if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_unblob" ]]; then
-    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
-      rm "$UNBLOB_PATH"/sasquatch
-    fi
-    ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch || true
   fi
 
   local FILES_EXT_UB=0
@@ -68,7 +72,7 @@ P70_unblob() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   export LINUX_PATH_COUNTER_UNBLOB=0
-  local OUTPUT_DIR_UNBLOB="$LOG_PATH_MODULE"/unblob_extracted
+  export OUTPUT_DIR_UNBLOB="$LOG_DIR"/firmware/unblob_extracted
 
   if [[ -f "$FW_PATH_UNBLOB" ]]; then
     unblobber "$FW_PATH_UNBLOB" "$OUTPUT_DIR_UNBLOB"
@@ -92,25 +96,10 @@ P70_unblob() {
     print_output "[*] Found $ORANGE$BINS_UB$NC binaries."
     print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER_UNBLOB$NC."
     print_ln
-    print_output "[*] ${ORANGE}EMBA/binwalk$NC results:$NC"
-    if [[ -f "$LOG_DIR/p59_binwalk_extractor.txt" ]]; then
-      write_link "p59"
-    fi
-    print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
-    print_output "[*] Found $ORANGE$BINS$NC binaries."
-    print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
-    print_bar
-    if [[ "$LINUX_PATH_COUNTER" -lt "$LINUX_PATH_COUNTER_UNBLOB" ]]; then
-      print_output "[+] Unblob extraction is better than binwalk - using Unblob results as additional source for further analysis"
-      mv "$OUTPUT_DIR_UNBLOB" "$LOG_DIR"/firmware/ || true
-      detect_root_dir_helper "$LOG_DIR/firmware"
-      print_ln
-      tree -sh "$LOG_DIR/firmware/unblob_extracted" | tee -a "$LOG_FILE"
-    else
-      print_output "[*] INFO: The Unblob results are not further used as the EMBA/binwalk extraction process looks good."
-      tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
-    fi
+    tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
     print_ln
+
+    detect_root_dir_helper "$OUTPUT_DIR_UNBLOB"
 
     write_csv_log "FILES Unblob" "UNIQUE FILES Unblob" "directories Unblob" "Binaries Unblob" "LINUX_PATH_COUNTER Unblob"
     write_csv_log "$FILES_EXT_UB" "$UNIQUE_FILES_UB" "$DIRS_EXT_UB" "$BINS_UB" "$LINUX_PATH_COUNTER_UNBLOB"
@@ -129,6 +118,14 @@ unblobber() {
   sub_module_title "Analyze binary firmware blob with unblob"
 
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_UNBLOB$NC"
+
+  # we need to check if sasquatch is the correct one for unblob:
+  if ! [[ "$(readlink -q -f "$UNBLOB_PATH"/sasquatch)" == "/usr/local/bin/sasquatch_unblob" ]]; then
+    if [[ -L "$UNBLOB_PATH"/sasquatch ]]; then
+      rm "$UNBLOB_PATH"/sasquatch
+    fi
+    ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch || true
+  fi
 
   if ! [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
     mkdir -p "$OUTPUT_DIR_UNBLOB"

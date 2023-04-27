@@ -144,12 +144,14 @@ L10_system_emulation() {
       IP_ADDRESS_=$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
       IMAGE_NAME="$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
       ARCHIVE_PATH="$LOG_PATH_MODULE""/""$IMAGE_NAME"
+      print_ln
       print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC"
       print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
       print_output "[*] Identified ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
 
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis"
+        print_ln
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
         # we should get TCP="ok" and SYS_ONLINE=1 back
         if [[ "$SYS_ONLINE" -ne 1 ]]; then
@@ -2231,6 +2233,7 @@ write_results() {
   if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
     TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
   fi
+  [[ "${TCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"
   echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED;ICMP $ICMP;TCP-0 $TCP_0;TCP $TCP;$TCP_SERV_CNT;IP address: $IP_ADDRESS_;Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_;$R_PATH_mod" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""
