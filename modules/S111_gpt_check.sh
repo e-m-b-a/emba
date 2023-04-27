@@ -18,7 +18,7 @@ export THREAD_PRIO=0
 S111_gpt_check()
 {
   export CHATGPT_DIR_="./s111_chatgpt_check"
-  export "$(grep -v '^#' $CONFIG_DIR_/gpt_config.env | xargs)" # readin of all vars in that env file
+  export "$(grep -v '^#' $CONFIG_DIR_/gpt_config.env | xargs || true )" # readin of all vars in that env file
   module_log_init "${FUNCNAME[0]}"
   module_title "Ask Chatgpt"
   print_output "Running chatgpt check module for identification of vulnerabilities within the firmwares script files ..." "no_log"
@@ -32,7 +32,13 @@ S111_gpt_check()
 
   pre_module_reporter "${FUNCNAME[0]}"
   export CHATGPT_RESULT_CNT=0
-  ask_chatgpt ./test-scripts  #TODO set this correctly, maybe from grepit?
+  if [ -z "$OPENAI_API_KEY" ]; then
+    print_output "[!] There is no API key in the config file"
+    print_output "[!] Can't ask ChatGPT with this setup"
+  else
+    ask_chatgpt ./test-scripts  #TODO set this correctly, maybe from grepit?
+  fi
+  
 
   module_end_log "${FUNCNAME[0]}" "$CHATGPT_RESULT_CNT"
   unset OPENAI_API_KEY
