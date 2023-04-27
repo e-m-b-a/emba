@@ -14,43 +14,63 @@
 
 # Description:  Checks files with CHATGPT 
 export THREAD_PRIO=0
-export OPENAI_API_KEY="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"  # TODO get from config and make global readin?
 
 S111_gpt_check()
 {
-  # TODO
+  export CHATGPT_DIR_="./s111_chatgpt_check"
+  export "$(grep -v '^#' $CONFIG_DIR_/gpt_config.env | xargs)" # readin of all vars in that env file
+  module_log_init "${FUNCNAME[0]}"
+  module_title "Ask Chatgpt"
+  print_output "Running chatgpt check module for identification of vulnerabilities within the firmwares script files ..." "no_log"
+
+  if ! [ -d "$CHATGPT_DIR_" ]; then
+    mkdir "$CHATGPT_DIR_"
+    cp "$CONFIG_DIR_"/gpt_template.json "$CHATGPT_DIR_"
+    touch "$CHATGPT_DIR_"/gpt_results.csv
+    touch "$CHATGPT_DIR_"/chat.json
+  fi
+
+  pre_module_reporter "${FUNCNAME[0]}"
+  export CHATGPT_RESULT_CNT=0
+  ask_chatgpt ./test-scripts  #TODO set this correctly, maybe from grepit?
+
+  module_end_log "${FUNCNAME[0]}" "$CHATGPT_RESULT_CNT"
+  unset OPENAI_API_KEY
 }
 
 
 ask_chatgpt(){
   local TEST_DIR_="${1:-}"
-  local CHATGPT_DIR="./s111_chatgpt_checks"
-  local INPUT_FILES=()
-  local GPT_QUESTION="Please identify all vulnerabilities in this code: "
-  local CHATGPT_CODE=""
-  local GPT_RESPONSE=""
+  local INPUT_FILES_=()
+  local GPT_QUESTION_="Please identify all vulnerabilities in this code: "
+  local CHATGPT_CODE_=""
+  local GPT_RESPONSE_=""
+
+  local HTTP_CODE_=200
 
   sub_module_title "ask_chatgpt"
 
   print_output "[*] checking scripts in $TEST_DIR_"
-  if ! [ -d "$CHATGPT_DIR" ]; then
-    mkdir "$CHATGPT_DIR"
-    cp "$CONFIG_DIR"/gpt_template.json "$CHATGPT_DIR"
-    touch "$CHATGPT_DIR"/gpt_results.csv
-    touch "$CHATGPT_DIR"/chat.json
-  fi
 
-  mapfile -t INPUT_FILES < <(find "${TEST_DIR}" -name "*.js" -or -name "*.lua" -type f 2>/dev/null)  # TODO what file types?
+  mapfile -t INPUT_FILES_ < <(find "${TEST_DIR_}" -name "*.js" -or -name "*.lua" -type f 2>/dev/null)  # TODO what file types?
 
-  for FILE in "${INPUT_FILES[@]}" ; do
-    head -n -2 $CHATGPT_DIR/gpt_template.json > $CHATGPT_DIR/chat.json
-    CHATGPT_CODE=$(sed 's/"/\\\"/g' "$FILE" | tr -d '[:space:]')
-    printf '"%s %s"\n}]}' "$GPT_QUESTION" "$CHATGPT_CODE" >> $CHATGPT_DIR/chat.json
-    curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+  for FILE in "${INPUT_FILES_[@]}" ; do
+    head -n -2 $CHATGPT_DIR_/gpt_template.json > $CHATGPT_DIR_/chat.json
+    CHATGPT_CODE_=$(sed 's/"/\\\"/g' "$FILE" | tr -d '[:space:]')
+    printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> $CHATGPT_DIR_/chat.json
+    HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
       -H "Authorization: Bearer $OPENAI_API_KEY" \
-      -d @$CHATGPT_DIR/chat.json | tee "$CHATGPT_DIR"/response.json
+      -d @$CHATGPT_DIR_/chat.json -o "$CHATGPT_DIR_"/response.json --write-out "%{http_code}")
+    if [[ "$HTTP_CODE_" -ne 200 ]] ; then
+      print_output "[!] Something went wrong with the requests"
+      print_output "ERROR response:$(cat "$CHATGPT_DIR_"/response.json)"
+      CHATGPT_RESULT_CNT=0
+      break
+    fi
 
-    GPT_RESPONSE=$(jq '.choices[] | .message.content' "$CHATGPT_DIR"/response.json)
-    printf '%s:%s;' "$FILE" "$GPT_RESPONSE" >> "$CHATGPT_DIR"/gpt_results.csv
+    GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$CHATGPT_DIR_"/response.json)
+    printf '%s:%s;' "$FILE" "$GPT_RESPONSE_" >> "$CHATGPT_DIR_"/gpt_results.csv
+    print_log "Q:$GPT_QUESTION_ ($FILE) CHATGPT:$GPT_RESPONSE_" "s111_chatgpt_check.log" "g"
+    ((CHATGPT_RESULT_CNT++))
   done
 }
