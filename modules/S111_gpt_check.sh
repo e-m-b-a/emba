@@ -18,7 +18,7 @@ export THREAD_PRIO=0
 S111_gpt_check()
 {
   export CHATGPT_DIR_="$TMP_DIR"
-  export "$(grep -v '^#' $CONFIG_DIR_/gpt_config.env | xargs || true )" # readin of all vars in that env file
+  export "$(grep -v '^#' $CONFIG_DIR/gpt_config.env | xargs || true )" # readin of all vars in that env file
   module_log_init "${FUNCNAME[0]}"
   module_title "Ask Chatgpt"
   print_output "Running chatgpt check module for identification of vulnerabilities within the firmwares script files ..." "no_log"
@@ -54,7 +54,7 @@ ask_chatgpt(){
   mapfile -t INPUT_FILES_ < <(find "${TEST_DIR_}" -name "*.js" -or -name "*.lua" -type f 2>/dev/null)  # TODO what file types?
 
   for FILE in "${INPUT_FILES_[@]}" ; do
-    head -n -2 "$CONFIG_DIR_"/gpt_template.json > $CHATGPT_DIR_/chat.json
+    head -n -2 "$CONFIG_DIR"/gpt_template.json > $CHATGPT_DIR_/chat.json
     CHATGPT_CODE_=$(sed 's/"/\\\"/g' "$FILE" | tr -d '[:space:]')
     printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> $CHATGPT_DIR_/chat.json
     HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
