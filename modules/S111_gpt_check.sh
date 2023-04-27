@@ -62,7 +62,9 @@ ask_chatgpt(){
       -d @"$CHATGPT_DIR_/chat.json" -o "$CHATGPT_DIR_/response.json" --write-out "%{http_code}")
     if [[ "$HTTP_CODE_" -ne 200 ]] ; then
       print_output "[!] Something went wrong with the requests"
-      print_output "ERROR response:$(cat "$CHATGPT_DIR_"/response.json)"
+      if [ -f "$CHATGPT_DIR_/response.json" ]; then
+        print_output "ERROR response:$(cat "$CHATGPT_DIR_/response.json")"
+      fi
       CHATGPT_RESULT_CNT=0
       break
     fi
