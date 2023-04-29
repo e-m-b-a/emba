@@ -29,6 +29,11 @@ P02_firmware_bin_file_check() {
 
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"
+
+  if [[ -d "$FIRMWARE_PATH" ]]; then
+    export FIRMWARE_PATH="$LOG_DIR"/firmware/
+  fi
+
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM="$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')"
     write_csv_log "SHA512" "${SHA512_CHECKSUM:-}" "NA"
