@@ -280,13 +280,13 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I01_default_apps
 
+  I13_disasm
+
   I05_emba_docker_image_dl
 
   IP00_extractors
 
-  # IP12_avm_freetz_ng_extract
-
-  IP18_qnap_decryptor
+  #IP18_qnap_decryptor
 
   IP35_uefi_extraction
 
@@ -296,7 +296,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I02_UEFI_fwhunt
 
-  I13_objdump
 
   I17_apk_check
 

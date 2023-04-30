@@ -27,6 +27,7 @@ I108_stacs_password_search() {
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
   
     print_tool_info "python3-pip" 1
+    print_tool_info "libarchive13" 1
     print_tool_info "libarchive-dev" 1
     print_tool_info "pybind11-dev" 1
     print_tool_info "libssl-dev" 1
@@ -44,13 +45,15 @@ I108_stacs_password_search() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        if ! [[ -d external/stacs ]]; then
-          git clone https://github.com/stacscan/stacs.git external/stacs
-        fi
-        cd ./external/stacs || ( echo "Could not install EMBA component STACS" && exit 1 )
+        # if ! [[ -d external/stacs ]]; then
+        #   git clone https://github.com/stacscan/stacs.git external/stacs
+        # fi
+
+        # cd ./external/stacs || ( echo "Could not install EMBA component STACS" && exit 1 )
         pip_install "setuptools" "-U"
-        python3 setup.py install
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
+        pip_install "stacs"
+        # python3 setup.py install
+        # cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
 
         if ! [[ -d external/stacs-rules ]]; then
           git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
@@ -60,8 +63,8 @@ I108_stacs_password_search() {
           | xargs -I{} bash -c "\
             mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
             touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
-        # pip3 install stacs
         cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
+
         if command -v stacs > /dev/null ; then
           echo -e "$GREEN""STACS installed successfully""$NC"
         else
