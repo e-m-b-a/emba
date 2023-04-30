@@ -555,7 +555,10 @@ emulate_strace_run() {
         fi
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
-          cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING" 2> /dev/null || true
+          OUTPUT=$(file "$FILENAME_FOUND" | cut -d ':' -f2)
+          if [[ "$OUTPUT" != *"(named pipe)" ]];then
+            cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING" 2> /dev/null || true
+          fi
           continue
         else
         #  # disabled this for now - have to rethink this feature
