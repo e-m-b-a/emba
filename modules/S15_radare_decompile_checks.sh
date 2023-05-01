@@ -35,7 +35,7 @@ S15_radare_decompile_checks()
     # check emba.log for S12_binary_protection starting
     module_wait "S12_binary_protection"
     module_wait "S13_weak_func_check"
-    module_wait "S14_weak_func_check"
+    module_wait "S14_weak_func_radare_check"
 
     local BINARY=""
     local VULNERABLE_FUNCTIONS=()
@@ -68,7 +68,7 @@ S15_radare_decompile_checks()
 
     [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S14[@]}"
 
-    # radare_decompile_print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
+    radare_decomp_print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
     if [[ -f "$TMP_DIR"/S15_STRCPY_CNT.tmp ]]; then
       STRCPY_CNT=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S15_STRCPY_CNT.tmp)
@@ -97,10 +97,8 @@ radare_decompilation(){
 
   NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
-    # print_output "[*] Decompiling $BINARY_ - function: ${FUNCTION} - networking ${NETWORKING}"
-    readelf -r "$BINARY_" | awk '{print $5}' | grep -E -q "^$FUNCTION" || true
     FUNC_LOG="$LOG_PATH_MODULE""/decompilation_vul_func_""$FUNCTION""-""$NAME"".txt"
-    radare_log_bin_hardening "$NAME" "$FUNCTION"
+    radare_decomp_log_bin_hardening "$NAME" "$FUNCTION"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
     r2 -e io.cache=true -e scr.color=false -q -A -c \
@@ -108,27 +106,58 @@ radare_decompilation(){
       2> /dev/null >> "$FUNC_LOG" || true
 
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
-      radare_color_output "$FUNCTION"
+      radare_decomp_color_output "$FUNCTION"
 
+      # Todo: check this with other architectures
       COUNT_FUNC="$(grep -c "sym.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "sym.*strlen" "$FUNC_LOG"  2> /dev/null || true)
         STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       fi
       radare_log_func_footer "$NAME" "$FUNCTION"
-      radare_output_function_details "$BINARY_" "$FUNCTION"
+      radare_decomp_output_function_details "$BINARY_" "$FUNCTION"
     fi
   done
   echo "$STRCPY_CNT" >> "$TMP_DIR"/S15_STRCPY_CNT.tmp
 }
 
-radare_print_top10_statistics() {
+radare_decomp_log_bin_hardening() {
+  local NAME="${1:-}"
+  local FUNCTION="${2:-}"
+
+  if [[ -f "$LOG_DIR"/s12_binary_protection.txt ]]; then
+    write_log "[*] Binary protection state of $ORANGE$NAME$NC" "$FUNC_LOG"
+    write_link "s12"
+    write_log "" "$FUNC_LOG"
+    # get headline:
+    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u || true)
+    write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
+    # get binary entry
+    BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
+    write_log "  $BIN_PROT" "$FUNC_LOG"
+    write_log "$NC" "$FUNC_LOG"
+  fi
+
+  write_log "$NC" "$FUNC_LOG"
+  if [[ -d "$LOG_DIR"/s14_weak_func_radare_check/ ]] && [[ "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
+    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC / Switch to Radare2 disasm$NC" "$FUNC_LOG"
+    write_link "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt")" "$FUNC_LOG"
+  elif [[ -d "$LOG_DIR"/s13_weak_func_check/ ]] && [[ "$(find "$LOG_DIR"/s13_weak_func_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
+    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC / Switch to Objdump disasm$NC" "$FUNC_LOG"
+    write_link "$(find "$LOG_DIR"/s13_weak_func_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt")" "$FUNC_LOG"
+  else
+    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
+  fi
+  write_log "" "$FUNC_LOG"
+}
+
+radare_decomp_print_top10_statistics() {
   local VULNERABLE_FUNCTIONS=("$@")
   local FUNCTION=""
   local RESULTS=()
   local BINARY=""
 
-  sub_module_title "Top 10 legacy C functions"
+  sub_module_title "Top 10 legacy C functions - Radare2 decompilation mode"
 
   if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
@@ -165,48 +194,17 @@ radare_print_top10_statistics() {
       fi  
     done
   else
-    print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
+    print_output "$(indent "$(orange "No weak binary functions found - check it manually")")"
   fi
 } 
 
-radare_color_output() {
+radare_decomp_color_output() {
   local FUNCTION="${1:-}"
-  sed -i -r "s/^[[:alnum:]].*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
+  sed -i -r "s/.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
 }
 
-radare_log_bin_hardening() {
-  local NAME="${1:-}"
-  local FUNCTION="${2:-}"
-
-  if [[ -f "$LOG_DIR"/s12_binary_protection.txt ]]; then
-    write_log "[*] Binary protection state of $ORANGE$NAME$NC" "$FUNC_LOG"
-    write_log "" "$FUNC_LOG"
-    # get headline:
-    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u || true)
-    write_log "  $HEAD_BIN_PROT" "$FUNC_LOG"
-    # get binary entry
-    BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
-    write_log "  $BIN_PROT" "$FUNC_LOG"
-    write_log "" "$FUNC_LOG"
-  fi
-
-  write_log "$NC" "$FUNC_LOG"
-  write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
-  write_log "" "$FUNC_LOG"
-}
-
-radare_log_func_footer() {
-  local NAME="${1:-}"
-  local FUNCTION="${2:-}"
-
-  write_log "" "$FUNC_LOG"
-  write_log "[*] Function $ORANGE$FUNCTION$NC used $ORANGE$COUNT_FUNC$NC times $ORANGE$NAME$NC" "$FUNC_LOG"
-  write_log "" "$FUNC_LOG"
-}
-
-radare_output_function_details()
-{
-  write_s14_log()
+radare_decomp_output_function_details() {
+  write_s15_log()
   {
     OLD_LOG_FILE="$LOG_FILE"
     LOG_FILE="$3"
@@ -228,7 +226,7 @@ radare_output_function_details()
   NAME=$(basename "$BINARY_")
 
   local LOG_FILE_LOC
-  LOG_FILE_LOC="$LOG_PATH_MODULE"/vul_func_"$FUNCTION"-"$NAME".txt
+  LOG_FILE_LOC="$LOG_PATH_MODULE"/decompilation_vul_func_"$FUNCTION"-"$NAME".txt
 
   # check if this is common linux file:
   local COMMON_FILES_FOUND
@@ -256,22 +254,23 @@ radare_output_function_details()
   fi
   
   if [[ "$NETWORKING" -gt 1 ]]; then
-    NETWORKING_="${ORANGE}networking: yes${NC}"
-    NW_CSV="yes"
+    local NW_CSV="yes"
+    local NETWORKING_="${ORANGE}networking: ${NW_CSV}${NC}"
   else
-    NETWORKING_="${GREEN}networking: no${NC}"
-    NW_CSV="no"
+    local NW_CSV="no"
+    local NETWORKING_="${GREEN}networking: ${NW_CSV}${NC}"
   fi
 
   if [[ $COUNT_FUNC -ne 0 ]] ; then
     if [[ "$FUNCTION" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "$BINARY_")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""strlen: ""$COUNT_STRLEN"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     elif [[ "$FUNCTION" == "mmap" ]] ; then
+      local COUNT_MMAP_OK="NA"
       OUTPUT="[+] ""$(print_path "$BINARY_")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""$COUNT_MMAP_OK"" ""${NC}""\\n"
     else
       OUTPUT="[+] ""$(print_path "$BINARY_")""$COMMON_FILES_FOUND""${NC}"" Vulnerable function: ""${CYAN}""$FUNCTION"" ""${NC}""/ ""${RED}""Function count: ""$COUNT_FUNC"" ""${NC}""/ ""$NETWORKING_""${NC}""\\n"
     fi
-    write_s14_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/vul_func_tmp_""$FUNCTION"-"$NAME"".txt"
+    write_s15_log "$OUTPUT" "$LOG_FILE_LOC" "$LOG_PATH_MODULE""/decompilation_vul_func_""$FUNCTION"-"$NAME"".txt"
     write_csv_log "$(print_path "$BINARY_")" "$FUNCTION" "$COUNT_FUNC" "$CFF_CSV" "$NW_CSV"
   fi
 }

@@ -280,13 +280,12 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I01_default_apps
 
-  I13_disasm
-
   I05_emba_docker_image_dl
 
   IP00_extractors
 
-  #IP18_qnap_decryptor
+  # deprecated - remove for next release
+  IP18_qnap_decryptor
 
   IP35_uefi_extraction
 
@@ -296,14 +295,13 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I02_UEFI_fwhunt
 
+  I13_disasm
 
   I17_apk_check
 
   I20_sourcecode_check
 
   I24_25_kernel_tools
-
-  I108_stacs_password_search
 
   I110_yara_check
 
@@ -317,6 +315,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IF50_aggregator_common
 
+  I108_stacs_password_search
 fi
 
 # cve-search is always installed on the host:

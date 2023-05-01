@@ -446,7 +446,7 @@ radare_print_top10_statistics() {
   local RESULTS=()
   local BINARY=""
 
-  sub_module_title "Top 10 legacy C functions"
+  sub_module_title "Top 10 legacy C functions - Radare2 disasm mode"
 
   if [[ "$(find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_*-*.txt" | wc -l)" -gt 0 ]]; then
     for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
