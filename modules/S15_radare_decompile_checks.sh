@@ -1,5 +1,4 @@
 #!/bin/bash -p
-# shellcheck disable=SC2016
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
@@ -15,7 +14,7 @@
 
 # Description:  This module identifies binaries that are using weak functions and creates a ranking of areas to look first.
 #               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg). 
-#               As the module runs quite long with high CPU load it only gets executed when the objdump module fails.
+#               The analysis is done via the r2dec plugin from radara2 (see https://github.com/wargio/r2dec-js)
 
 # Threading priority - if set to 1, these modules will be executed first
 # do not prio s13 and s14 as the dependency check during runtime will fail!
@@ -102,7 +101,7 @@ radare_decompilation(){
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
     r2 -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | sort -u > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_usage"'; pdd @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}"'_usage`' "$BINARY" \
+      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | sort -u > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}"'_usage`' "$BINARY" \
       2> /dev/null >> "$FUNC_LOG" || true
 
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
@@ -127,7 +126,7 @@ radare_decomp_log_bin_hardening() {
 
   if [[ -f "$LOG_DIR"/s12_binary_protection.txt ]]; then
     write_log "[*] Binary protection state of $ORANGE$NAME$NC" "$FUNC_LOG"
-    write_link "s12"
+    # write_link "$LOG_DIR/s12_binary_protection.txt" "$FUNC_LOG"
     write_log "" "$FUNC_LOG"
     # get headline:
     HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "$LOG_DIR"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u || true)
@@ -135,19 +134,19 @@ radare_decomp_log_bin_hardening() {
     # get binary entry
     BIN_PROT=$(grep '/'"$NAME"' ' "$LOG_DIR"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
     write_log "  $BIN_PROT" "$FUNC_LOG"
-    write_log "$NC" "$FUNC_LOG"
+    write_log "" "$FUNC_LOG"
   fi
 
   write_log "$NC" "$FUNC_LOG"
-  if [[ -d "$LOG_DIR"/s14_weak_func_radare_check/ ]] && [[ "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
-    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC / Switch to Radare2 disasm$NC" "$FUNC_LOG"
-    write_link "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt")" "$FUNC_LOG"
-  elif [[ -d "$LOG_DIR"/s13_weak_func_check/ ]] && [[ "$(find "$LOG_DIR"/s13_weak_func_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
-    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC / Switch to Objdump disasm$NC" "$FUNC_LOG"
-    write_link "$(find "$LOG_DIR"/s13_weak_func_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt")" "$FUNC_LOG"
-  else
-    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
-  fi
+#  if [[ -d "$LOG_DIR"/s14_weak_func_radare_check/ ]] && [[ "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
+#    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC / Switch to Radare2 disasm$NC" "$FUNC_LOG"
+#    write_link "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt")" "$FUNC_LOG"
+#  elif [[ -d "$LOG_DIR"/s13_weak_func_check/ ]] && [[ "$(find "$LOG_DIR"/s13_weak_func_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
+#    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC / Switch to Objdump disasm$NC" "$FUNC_LOG"
+#    write_link "$(find "$LOG_DIR"/s13_weak_func_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt")" "$FUNC_LOG"
+#  else
+  write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC" "$FUNC_LOG"
+#  fi
   write_log "" "$FUNC_LOG"
 }
 
