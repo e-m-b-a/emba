@@ -64,7 +64,7 @@ s22_phpinfo_check() {
 
 s22_vuln_check_caller() {
   sub_module_title "PHP script vulnerabilities"
-  write_csv_log "Script path" "PHP issues detected" "common linux file"
+  write_csv_log "Script path" "PHP issues detected" "common linux file" "ChatGPT-priority" "ChatGPT-Question"
   local PHP_SCRIPTS=("$@")
   local VULNS=0
   local PHP_SCRIPT=""
@@ -136,7 +136,7 @@ s22_vuln_check() {
       CFF="NA"
     fi
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
-    write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF"
+    write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "GPT-Prio-1" "Please identify all vulnerabilities in this php code:" "NA"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   else
     # print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"

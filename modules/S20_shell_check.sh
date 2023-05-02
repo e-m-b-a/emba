@@ -31,7 +31,7 @@ S20_shell_check()
   local NEG_LOG=0
 
   mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 || true )
-  write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
+  write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep" "ChatGPT-priority" "ChatGPT-Question"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
     sub_module_title "Check scripts with shellcheck"
@@ -133,6 +133,7 @@ s20_reporter() {
   local VULNS="${1:0}"
   local SH_SCRIPT_="${2:0}"
   local SHELL_LOG="${3:0}"
+  local GPT_PRIO=2
 
   if [[ "$VULNS" -ne 0 ]] ; then
     # check if this is common linux file:
@@ -150,10 +151,11 @@ s20_reporter() {
 
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
+      GPT_PRIO=1
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     fi
-    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
+    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this shell script:" "NA"
     
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi

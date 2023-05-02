@@ -29,7 +29,7 @@ S21_python_check()
   local VTYPE=""
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
-    write_csv_log "Script path" "Python issues detected" "common linux file"
+    write_csv_log "Script path" "Python issues detected" "common linux file" "ChatGPT-priority" "ChatGPT-Question"
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for PY_SCRIPT in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$PY_SCRIPT" | grep -q "Python script.*executable" ) ; then
@@ -103,7 +103,7 @@ s21_script_bandit() {
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" "" "$PY_LOG"
     fi
-    write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF"
+    write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "GPT-Prio-2" "Please identify all vulnerabilities in this python code:" "NA"
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi
 }
