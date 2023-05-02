@@ -26,7 +26,7 @@ I199_default_tools_github() {
     print_file_info "sshdcc" "Check SSHd configuration files" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
     print_file_info "sudo-parser.pl" "Parses and tests sudoers configuration files" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
     print_file_info "pixd" "pixd is a tool for visualizing binary data using a colour palette." "https://raw.githubusercontent.com/p4cx/pixd_image/master/pixd.c" "external/pixd"
-    print_file_info "progpilot" "progpilot is a tool for static security tests on php files." "https://github.com/designsecurity/progpilot/releases/download/v0.8.0/progpilot_v0.8.0.phar" "external/progpilot"
+    print_file_info "progpilot" "progpilot is a tool for static security tests on php files." "https://github.com/designsecurity/progpilot/releases/download/v1.0.2/progpilot_v1.0.2.phar" "external/progpilot"
     print_file_info "EnGenius decryptor" "Decrypts EnGenius firmware files." "https://raw.githubusercontent.com/EMBA-support-repos/enfringement/main/decrypt.py" "external/engenius-decrypt.py"
   
     print_pip_info "pillow"
@@ -45,7 +45,7 @@ I199_default_tools_github() {
         download_file "checksec" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
         download_file "sshdcc" "https://raw.githubusercontent.com/sektioneins/sshdcc/master/sshdcc" "external/sshdcc"
         download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
-        download_file "progpilot" "https://github.com/designsecurity/progpilot/releases/download/v0.8.0/progpilot_v0.8.0.phar" "external/progpilot"
+        download_file "progpilot" "https://github.com/designsecurity/progpilot/releases/download/v1.0.2/progpilot_v1.0.2.phar" "external/progpilot"
         download_file "EnGenius decryptor" "https://raw.githubusercontent.com/EMBA-support-repos/enfringement/main/decrypt.py" "external/engenius-decrypt.py"
   
         # pixd installation

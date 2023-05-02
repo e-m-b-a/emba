@@ -66,7 +66,7 @@ sudo ./emba -l ~/log -f ~firmware -p ./scan-profiles/default-scan.emba
 ## Quick start with system-emulation scan profile:
 For further details on EMBA's system-emulation engine check the [wiki](https://github.com/e-m-b-a/emba/wiki/System-emulation).
 ```console
-sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan-emulation.emba
+sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan-emulation.emba -m s24
 
 ```
 ---

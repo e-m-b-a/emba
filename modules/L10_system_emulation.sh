@@ -144,12 +144,14 @@ L10_system_emulation() {
       IP_ADDRESS_=$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
       IMAGE_NAME="$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
       ARCHIVE_PATH="$LOG_PATH_MODULE""/""$IMAGE_NAME"
+      print_ln
       print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC"
       print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
       print_output "[*] Identified ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
 
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis"
+        print_ln
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
         # we should get TCP="ok" and SYS_ONLINE=1 back
         if [[ "$SYS_ONLINE" -ne 1 ]]; then
@@ -258,15 +260,16 @@ create_emulation_filesystem() {
     print_output "[*] Copy extracted root filesystem to new QEMU image"
     cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || true
 
-    if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]]; then
-      print_output "[*] Starting link fixing helper ..."
+    if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]] && [[ $(find "$MNT_POINT" -type l | wc -l) -lt 10 ]]; then
+      print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
       "$HELP_DIR"/fix_bins_lnk_emulation.sh "$MNT_POINT"
     else
       # ensure that the needed permissions for exec files are set correctly
       # This is needed at some firmwares have corrupted permissions on ELF or sh files
       print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
-      readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep executable | cut -d: -f1)
+      readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
       for BINARY_L10 in "${BINARIES_L10[@]}"; do
+        [[ -x "${BINARY_L10}" ]] && continue
         if [[ -f "$BINARY_L10" ]]; then
           chmod +x "$BINARY_L10"
         fi
@@ -597,12 +600,18 @@ main_emulation() {
         identify_networking_emulation "$IMAGE_NAME" "$ARCH_END"
         get_networking_details_emulation "$IMAGE_NAME"
 
-        # now we need to check if something is better now or we should switch back to the original init
-        F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
-        F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
-        COUNTING_2nd=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $1}')
-        PORTS_2nd=$(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
-        # IPS_INT_VLAN is always at least 1 for the default configuration
+        if [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
+          # now we need to check if something is better now or we should switch back to the original init
+          F_STARTUP=$(grep -a -c "EMBA preInit script starting" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)
+          F_STARTUP=$(( "$F_STARTUP" + "$(grep -a -c "Network configuration - ACTION" "$LOG_PATH_MODULE"/qemu.initial.serial.log || true)" ))
+          COUNTING_2nd=$(wc -l "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $1}')
+          PORTS_2nd=$(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u | wc -l | awk '{print $1}' || true)
+          # IPS_INT_VLAN is always at least 1 for the default configuration
+        else
+          F_STARTUP=0
+          COUNTING_2nd=0
+          PORTS_2nd=0
+        fi
         if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "$F_STARTUP" -eq 0 && "${#IPS_INT_VLAN[@]}" -lt 2 ]] || \
           [[ "$DETECTED_IP" -eq 0 ]]; then
           if [[ "$PORTS_1st" -gt "$PORTS_2nd" ]]; then
@@ -1173,6 +1182,10 @@ get_networking_details_emulation() {
     mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
+    # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
+    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "$LOG_PATH_MODULE"/qemu.initial.serial.log | tr ' ' '\n' | grep "/" | grep -v proc | tr -d ':' | sort -u || true)
+    MISSING_FILES+=( "${MISSING_FILES_TMP[@]}" )
+
     NVRAM_TMP=( "${NVRAM[@]}" )
 
     if [[ "${#INTERFACE_CANDIDATES[@]}" -gt 0 || "${#BRIDGE_INTERFACES[@]}" -gt 0 || "${#VLAN_INFOS[@]}" -gt 0 || "${#PORTS[@]}" -gt 0 || "${#NVRAM_TMP[@]}" -gt 0 ]]; then
@@ -1574,6 +1587,28 @@ write_network_config_to_filesystem() {
     print_output "$(indent "IP address: $ORANGE$IP_ADDRESS_$NC")"
 
     set_network_config "$IP_ADDRESS_" "$NETWORK_MODE" "$NETWORK_DEVICE" "$ETH_INT"
+
+    # if there were missing files found -> we try to fix this now
+    if [[ -v MISSING_FILES[@] ]]; then
+      for FILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
+        print_output "[!] MISSING_FILE: ${FILE_PATH_MISSING}"
+        [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
+        [[ "${FILE_PATH_MISSING}" == *"/sys/"* ]] && continue
+
+        FILENAME_MISSING=$(basename "${FILE_PATH_MISSING}")
+        print_output "[*] Found missing area ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
+        DIR_NAME_MISSING=$(dirname "${FILE_PATH_MISSING}")
+        if ! [[ -d "${MNT_POINT}""${DIR_NAME_MISSING}" ]]; then
+          print_output "[*] Create missing directory ${ORANGE}${DIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
+          mkdir -p "${MNT_POINT}""${DIR_NAME_MISSING}"
+        fi
+        FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1)
+        if [[ -f ${FOUND_MISSING} ]]; then
+          print_output "[*] Recover missing file ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
+          cp "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/
+        fi
+      done
+    fi
 
     # umount filesystem:
     umount_qemu_image "$DEVICE"
@@ -2198,6 +2233,7 @@ write_results() {
   if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
     TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
   fi
+  [[ "${TCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"
   echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED;ICMP $ICMP;TCP-0 $TCP_0;TCP $TCP;$TCP_SERV_CNT;IP address: $IP_ADDRESS_;Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_;$R_PATH_mod" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""

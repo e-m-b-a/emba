@@ -29,6 +29,11 @@ P02_firmware_bin_file_check() {
 
   write_csv_log "Entity" "data" "Notes"
   write_csv_log "Firmware path" "$FIRMWARE_PATH" "NA"
+
+  if [[ -d "$FIRMWARE_PATH" ]]; then
+    export FIRMWARE_PATH="$LOG_DIR"/firmware/
+  fi
+
   if [[ -f "$FIRMWARE_PATH" ]]; then
     SHA512_CHECKSUM="$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')"
     write_csv_log "SHA512" "${SHA512_CHECKSUM:-}" "NA"
@@ -81,6 +86,8 @@ P02_firmware_bin_file_check() {
       write_link "$LOG_DIR"/pixd.png
     fi
 
+    generate_entropy_graph "$FIRMWARE_PATH"
+
     fw_bin_detector "$FIRMWARE_PATH"
 
     backup_p02_vars
@@ -113,6 +120,25 @@ set_p02_default_exports() {
   export UEFI_AMI_CAPSULE=0
   export ZYXEL_ZIP=0
   export QCOW_DETECTED=0
+}
+
+generate_entropy_graph() {
+  local FIRMWARE_PATH_BIN="${1:-}"
+  # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
+  if [[ -f $FIRMWARE_PATH_BIN ]] && ! [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
+    print_output "[*] Entropy testing with binwalk ... "
+    # we have to change the working directory for binwalk, because everything except the log directory is read-only in
+    # Docker container and binwalk fails to save the entropy picture there
+    if [[ $IN_DOCKER -eq 1 ]] ; then
+      cd "$LOG_DIR" || return
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BIN")"
+      mv "$(basename "$FIRMWARE_PATH_BIN".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+      cd /emba || return
+    else
+      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BIN")"
+      mv "$(basename "$FIRMWARE_PATH_BIN".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
+    fi
+  fi
 }
 
 fw_bin_detector() {
@@ -161,15 +187,16 @@ fw_bin_detector() {
   # if we have a zip, tgz, tar archive we are going to use the patools extractor
   if [[ "$FILE_BIN_OUT" == *"gzip compressed data"* || "$FILE_BIN_OUT" == *"Zip archive data"* || \
     "$FILE_BIN_OUT" == *"POSIX tar archive"* || "$FILE_BIN_OUT" == *"ISO 9660 CD-ROM filesystem data"* || \
-    "$FILE_BIN_OUT" == *"7-zip archive data"* || "$FILE_BIN_OUT" == *"XZ compressed data"* ]]; then
+    "$FILE_BIN_OUT" == *"7-zip archive data"* || "$FILE_BIN_OUT" == *"XZ compressed data"* || \
+    "$FILE_BIN_OUT" == *"bzip2 compressed data"* ]]; then
     # as the AVM images are also zip files we need to bypass it here:
     if [[ "$AVM_DETECTED" -ne 1 ]]; then
-      print_output "[+] Identified gzip/zip/tar/iso/xz archive file - using patools extraction module"
+      print_output "[+] Identified gzip/zip/tar/iso/xz/bzip2 archive file - using patools extraction module"
       export PATOOLS_INIT=1
       write_csv_log "basic compressed (patool)" "yes" "NA"
     fi
   fi
-  if [[ "$FILE_BIN_OUT" == *"QEMU QCOW2 Image"* ]]; then
+  if [[ "$FILE_BIN_OUT" == *"QEMU QCOW2 Image"* ]] || [[ "$FILE_BIN_OUT" == *"QEMU QCOW Image"* ]]; then
     print_output "[+] Identified Qemu QCOW image - using QCOW extraction module"
     export QCOW_DETECTED=1
     write_csv_log "Qemu QCOW firmware detected" "yes" "NA"
@@ -205,7 +232,7 @@ fw_bin_detector() {
     write_csv_log "D-Link encrpted_img encrypted" "yes" "NA"
   fi
   if [[ "$FILE_BIN_OUT" == *"u-boot legacy uImage"* ]]; then
-    print_output "[+] Identified u-boot firmware - using u-boot module"
+    print_output "[+] Identified u-boot firmware image"
     export UBOOT_IMAGE=1
     write_csv_log "Uboot image" "yes" "NA"
   fi
@@ -255,7 +282,7 @@ fw_bin_detector() {
     write_csv_log "OpenSSL encrypted" "yes" "NA"
   fi
   # This check is currently only tested on one firmware - further tests needed:
-  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\ b9\ 01\  ]]; then
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 62\ 67\ 6e\ 00\ 00\ 00\ 00\ 00\ \ 00\ 00\ 00\  ]]; then
     print_output "[+] Identified Buffalo encrpyted firmware - using Buffalo extraction module"
     export BUFFALO_ENC_DETECTED=1
     write_csv_log "Buffalo encrypted" "yes" "NA"

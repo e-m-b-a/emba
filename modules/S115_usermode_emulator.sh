@@ -80,8 +80,8 @@ S115_usermode_emulator() {
       print_ln
       NEG_LOG=1
       print_output "[*] Detected root path: $ORANGE$R_PATH$NC"
-      if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]]; then
-        print_output "[*] Starting link fixing helper ..."
+      if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]] && [[ $(find "$R_PATH" -type l | wc -l) -lt 10 ]]; then
+        print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
         "$HELP_DIR"/fix_bins_lnk_emulation.sh "$R_PATH"
       fi
       # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
@@ -533,7 +533,7 @@ emulate_strace_run() {
 
   if [[ "${#MISSING_AREAS[@]}" -gt 0 ]]; then
     for MISSING_AREA in "${MISSING_AREAS[@]}"; do
-      if [[ "$MISSING_AREA" != */proc/* || "$MISSING_AREA" != */sys/* || "$MISSING_AREA" != */dev/* ]]; then
+      if [[ "$MISSING_AREA" != *"/proc/"* && "$MISSING_AREA" != *"/sys/"* && "$MISSING_AREA" != *"/dev/"* ]]; then
         write_log "[*] Found missing area: $ORANGE$MISSING_AREA$NC" "$LOG_FILE_STRACER"
 
         FILENAME_MISSING=$(basename "$MISSING_AREA")
@@ -541,6 +541,9 @@ emulate_strace_run() {
         PATH_MISSING=$(dirname "$MISSING_AREA")
 
         FILENAME_FOUND=$(find "$EMULATION_PATH_BASE" -xdev -ignore_readdir_race -name "$FILENAME_MISSING" 2>/dev/null | sort -u | head -1 || true)
+        if [[ "$FILENAME_FOUND" == *"/proc/"* || "$FILENAME_FOUND" == *"/sys/"* || "$FILENAME_FOUND" == *"/dev/"* ]]; then
+          continue
+        fi
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Possible matching file found: $ORANGE$FILENAME_FOUND$NC" "$LOG_FILE_STRACER"
         fi
@@ -552,7 +555,10 @@ emulate_strace_run() {
         fi
         if [[ -n "$FILENAME_FOUND" ]]; then
           write_log "[*] Copy file $ORANGE$FILENAME_FOUND$NC to $ORANGE$R_PATH$PATH_MISSING/$NC" "$LOG_FILE_STRACER"
-          cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING" 2> /dev/null || true
+          OUTPUT=$(file "$FILENAME_FOUND" | cut -d ':' -f2)
+          if [[ "$OUTPUT" != *"(named pipe)" ]];then
+            cp -L "$FILENAME_FOUND" "$R_PATH""$PATH_MISSING" 2> /dev/null || true
+          fi
           continue
         else
         #  # disabled this for now - have to rethink this feature

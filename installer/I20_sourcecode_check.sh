@@ -29,6 +29,7 @@ I20_sourcecode_check() {
   
     print_tool_info "shellcheck" 1
     print_tool_info "php" 1
+    print_tool_info "luarocks" 1
     print_pip_info "semgrep"
     print_git_info "semgrep-rules" "returntocorp/semgrep-rules" "Standard library for Semgrep rules"
 
@@ -37,13 +38,15 @@ I20_sourcecode_check() {
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""Composer, iniscan and semgrep (if not already on the system) will be downloaded!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""Composer, iniscan, luacheck  and semgrep (if not already on the system) will be downloaded!""$NC"
       ANSWER=("y")
     fi
   
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+
+        luarocks install luacheck
 
         pip_install "semgrep"
         if ! [[ -d external/semgrep-rules ]]; then

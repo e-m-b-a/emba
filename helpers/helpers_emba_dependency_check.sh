@@ -443,6 +443,9 @@ dependency_check()
     # progpilot for php code checks
     check_dep_file "progpilot php ini checker" "$EXT_DIR""/progpilot"
 
+    # luacheck - lua linter
+    check_dep_tool "luacheck"
+
     # APKHunt for android apk analysis
     # hard requirement for v1.2.2
     # check_dep_file "APKHunt apk scanner" "$EXT_DIR""/APKHunt/apkhunt.go"
@@ -455,11 +458,11 @@ dependency_check()
     # patool extractor - https://wummel.github.io/patool/
     check_dep_tool "patool"
 
-    # Freetz-NG
-    check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
+    # Freetz-NG - replaced by unblob
+    # check_dep_file "Freetz-NG fwmod" "$EXT_DIR""/freetz-ng/fwmod"
 
-    # AVM fitimg extraction script
-    check_dep_file "fitimg script" "$EXT_DIR""/fitimg-0.8/fitimg"
+    # AVM fitimg extraction script - replaced by unblob
+    # check_dep_file "fitimg script" "$EXT_DIR""/fitimg-0.8/fitimg"
 
     # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
     check_dep_file "EnGenius decryptor" "$EXT_DIR""/engenius-decrypt.py"

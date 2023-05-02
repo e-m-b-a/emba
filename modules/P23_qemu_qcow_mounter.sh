@@ -104,13 +104,13 @@ qcow_extractor() {
 
       FILES_QCOW_MOUNT=$(find "$EXTRACTION_DIR_FINAL" -type f | wc -l)
       DIRS_QCOW_MOUNT=$(find "$EXTRACTION_DIR_FINAL" -type d | wc -l)
-    fi
-    print_output "[*] Extracted $ORANGE$FILES_QCOW_MOUNT$NC files and $ORANGE$DIRS_QCOW_MOUNT$NC directories from the firmware image."
-    write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-    write_csv_log "Qemu QCOW filesystem extractor" "$QCOW_PATH_" "$EXTRACTION_DIR_FINAL" "$FILES_QCOW_MOUNT" "$DIRS_QCOW_MOUNT" "NA"
+      print_output "[*] Extracted $ORANGE$FILES_QCOW_MOUNT$NC files and $ORANGE$DIRS_QCOW_MOUNT$NC directories from the firmware image."
+      write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
+      write_csv_log "Qemu QCOW filesystem extractor" "$QCOW_PATH_" "$EXTRACTION_DIR_FINAL" "$FILES_QCOW_MOUNT" "$DIRS_QCOW_MOUNT" "NA"
 
-    print_output "[*] Unmounting $ORANGE$TMP_QCOW_MOUNT$NC directory"
-    umount "$TMP_QCOW_MOUNT"
+      print_output "[*] Unmounting $ORANGE$TMP_QCOW_MOUNT$NC directory"
+      umount "$TMP_QCOW_MOUNT"
+    fi
   done
   qemu-nbd --disconnect /dev/nbd0
   rm -r "$TMP_QCOW_MOUNT"

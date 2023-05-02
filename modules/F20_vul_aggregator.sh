@@ -688,6 +688,9 @@ cve_extractor() {
   # fi
 
   if [[ -f "$LOG_PATH_MODULE"/"$AGG_LOG_FILE" ]]; then
+    if [[ "${#CVEs_OUTPUT[@]}" == 0 ]]; then
+      write_csv_log "$BINARY" "$VERSION" "${CVE_VALUE:-NA}" "${CVSS_VALUE:-NA}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL:-NA}" "${REMOTE:-NA}" "${DOS:-NA}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED:-NA}"
+    fi
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
       local CVEv2_TMP=0
       local KERNEL_VERIFIED="no"

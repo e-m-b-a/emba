@@ -29,6 +29,7 @@ I108_stacs_password_search() {
     print_tool_info "python3-pip" 1
     print_tool_info "libarchive-dev" 1
     print_tool_info "pybind11-dev" 1
+    print_tool_info "libssl-dev" 1
     # print_pip_info "stacs"
     print_git_info "stacs" "stacscan/stacs" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
     print_git_info "stacs-rules" "stacscan/stacs-rules" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."

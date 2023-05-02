@@ -102,7 +102,8 @@ apk_extractor() {
         while read -r APK; do
           APK_NAME=$(basename "$APK")
           print_output "[*] Extracting $ORANGE$APK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar xpf "$APK" --directory "$R_PATH" || true
+          # tar xpf "$APK" --directory "$R_PATH" || true
+          unzip -o -d "$R_PATH" "$APK" || true
         done < "$TMP_DIR"/apk_db.txt
       done
 
