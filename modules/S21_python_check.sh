@@ -77,6 +77,7 @@ s21_script_bandit() {
   local NAME=""
   local PY_LOG=""
   local VULNS=""
+  local GPT_PRIO=3
 
   NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit_""$NAME"".txt"
@@ -100,10 +101,12 @@ s21_script_bandit() {
     fi
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" ""  "$PY_LOG"
+      GPT_PRIO=2 
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" "" "$PY_LOG"
     fi
-    write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "GPT-Prio-2" "Please identify all vulnerabilities in this python code:" "NA"
+    write_csv_gpt "$SH_SCRIPT" "$GPT_PRIO" "Please identify all vulnerabilities in this python code:" ""
+    write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi
 }

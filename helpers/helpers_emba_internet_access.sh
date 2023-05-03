@@ -142,65 +142,67 @@ ask_chatgpt(){
   if [ -z "$OPENAI_API_KEY" ]; then
     print_output "[!] There is no API key in the config file"
     print_output "[!] Can't ask ChatGPT with this setup"
+    CHATGPT_RESULT_CNT=-1
   else
-    ask_chatgpt ./test-scripts  #TODO set this correctly, maybe from grepit?
-    # TODO replace with simple wait?
+    # test connection
+    if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -d @"$CONFIG_DIR/gpt_template.json" ; then
+      print_output "[!] ChatGPT error while testing the API-Key"
+      CHATGPT_RESULT_CNT=-1
+    fi
   fi
-
-  # default vars
-  local GPT_QUESTION_="Please identify all vulnerabilities in this code: "
-  local CHATGPT_CODE_=""
-  local GPT_RESPONSE_=""
-  local HTTP_CODE_=200
 
   # we wait until the s20 module is finished and hopefully has some code for us
   while ! [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; do
     sleep 10
   done
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while [[ $(grep -c S20_shell_check "$LOG_DIR"/"$MAIN_LOG_FILE") -lt 2 ]] && [[ $(grep -c S21_python_check "$LOG_DIR"/"$MAIN_LOG_FILE") -lt 2 ]] \
-    && [[ $(grep -c S22_php_check "$LOG_DIR"/"$MAIN_LOG_FILE") -lt 2 ]] && [[ $(grep -c S24 "$LOG_DIR"/"$MAIN_LOG_FILE") -lt 2 ]] ; do
+    while ! [[ -f  "$CSV_DIR/gpt-checks.csv"  ]] ; do
       sleep 1
     done
   fi
 
-  print_output "[*] checking scripts with ChatGPT"
-
-  local SCRIPT_FILE_TMP_=""
   local MINIMUM_GPT_PRIO=2
-  local GPT_PRIO_=0
+  print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower"
 
-  while IFS=";" read -r COL1_ _COL2_ _COL3_ COL4_ COL5_ _COL6_ ; do
-    GPT_QUESTION_="$COL5_"
-    GPT_PRIO_="${COL4_//GPT-Prio-/}"
-    SCRIPT_FILE_TMP_="$( echo "$COL1_" |  cut -d" " -f1 )"
-    if [[ $GPT_PRIO_ -ge $MINIMUM_GPT_PRIO ]]; then
-      # find realpath
-      local TMP_PATH_=""
-      TMP_PATH_=$(find "$FIRMWARE_PATH" -wholename "$SCRIPT_FILE_TMP_")
-      if [ -f "$TMP_PATH_" ]; then
-        print_output "Asking ChatGPT about $(print_path "$TMP_PATH_")"
-        head -n -2 "$CONFIG_DIR/gpt_template.json" > "$TMP_DIR/chat.json"
-        CHATGPT_CODE_=$(sed 's/"/\\\"/g' "$TMP_PATH_" | tr -d '[:space:]')
-        printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> "$TMP_DIR/chat.json"
-        HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
-          -H "Authorization: Bearer $OPENAI_API_KEY" \
-          -d @"$TMP_DIR/chat.json" -o "$TMP_DIR/response.json" --write-out "%{http_code}")
-        if [[ "$HTTP_CODE_" -ne 200 ]] ; then
-          print_output "[!] Something went wrong with the ChatGPT requests"
-          if [ -f "$TMP_DIR/response.json" ]; then
-            print_output "ERROR response:$(cat "$TMP_DIR/response.json")"
+  while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
+    # ~read_csv_gpt()
+    local GPT_PRIO_=3
+    # default vars
+    local GPT_QUESTION_="Please identify all vulnerabilities in this code: "
+    local CHATGPT_CODE_=""
+    local GPT_RESPONSE_=""
+    local HTTP_CODE_=200
+    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ ; do
+
+      SCRIPT_PATH_TMP_="${COL1_}"
+      GPT_PRIO_="${COL2_//GPT-Prio-/}"
+      GPT_QUESTION_="${COL3_}"
+      GPT_ANSWER_="${COL4_}"
+      
+      if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -lt $MINIMUM_GPT_PRIO ]]; then
+        if [ -f "$SCRIPT_PATH_TMP_" ]; then
+          print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")"
+          head -n -2 "$CONFIG_DIR/gpt_template.json" > "$TMP_DIR/chat.json"
+          CHATGPT_CODE_=$(sed 's/"/\\\"/g' "$SCRIPT_PATH_TMP_" | tr -d '[:space:]')
+          printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> "$TMP_DIR/chat.json"
+          HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -d @"$TMP_DIR/chat.json" -o "$TMP_DIR/response.json" --write-out "%{http_code}")
+          if [[ "$HTTP_CODE_" -ne 200 ]] ; then
+            print_output "[!] Something went wrong with the ChatGPT requests"
+            if [ -f "$TMP_DIR/response.json" ]; then
+              print_output "ERROR response:$(cat "$TMP_DIR/response.json")"
+            fi
           fi
+          GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
+          write_csv_gpt "$(print_path "${SCRIPT_PATH_TMP_}")" "$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_"
+          print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
+          ((CHATGPT_RESULT_CNT++))
         fi
-        GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
-        printf '%s:%s;' "$FILE" "$GPT_RESPONSE_" >> "$CSV_DIR"/s111_gpt_check.csv
-        print_output "Q:$GPT_QUESTION_ ($FILE) CHATGPT:$GPT_RESPONSE_"
-        ((CHATGPT_RESULT_CNT++))
       fi
-    fi
-  done < <(grep "^/.*;GPT-Prio-.*;.*;NA;" "$CSV_DIR"/s2*.csv)  # get all paths from files from s20-s23
-  
-  
-  # mapfile -t -O SCRIPT_FILE_TMP_ < <(grep "^/.*;GPT-Prio-$MINIMUM_GPT_PRIO;.*;NA;" "$CSV_DIR"/s20_shell_check.csv |  cut -d" " -f1 )
+    done < <( grep ".*;GPT-Prio-.*;" "$CSV_DIR/gpt-checks.csv")
+  done
   unset OPENAI_API_KEY
 }

@@ -832,3 +832,18 @@ print_notification() {
     fi
   done
 }
+
+# writes inputs into csv for chatgpt
+write_csv_gpt(){
+  local PATH_=${1:}
+  local PRIO_=${2:}
+  local QUESTION_=${3:}
+  local ANSWER_=${4:}
+
+  if ! [[ -d "$CSV_DIR" ]]; then
+    print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
+    return
+  fi
+  printf '%s;GPT-Prio-%s;%s;%s;' "${PATH_}" "${PRIO_}" "${QUESTION_}" "${ANSWER_}" >> "$CSV_DIR/gpt-checks.csv" || true
+  printf '\n' >> "$CSV_DIR/gpt-checks.csv" || true
+}

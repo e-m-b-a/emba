@@ -93,7 +93,7 @@ s22_vuln_check_semgrep() {
 
 s22_vuln_check_caller() {
   sub_module_title "PHP script vulnerabilities"
-  write_csv_log "Script path" "PHP issues detected" "common linux file" "ChatGPT-priority" "ChatGPT-Question"
+  write_csv_log "Script path" "PHP issues detected" "common linux file"
   local PHP_SCRIPTS=("$@")
   local VULNS=0
   local PHP_SCRIPT=""
@@ -148,7 +148,7 @@ s22_vuln_check() {
   ulimit -Sv unlimited
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
-
+  local GPT_PRIO=3
   if [[ "$VULNS" -gt 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -159,13 +159,15 @@ s22_vuln_check() {
       if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
         COMMON_FILES_FOUND=" (""${CYAN}""common linux file: yes""${GREEN}"")"
         CFF="yes"
+        GPT_PRIO=1
       fi
     else
       COMMON_FILES_FOUND=""
       CFF="NA"
     fi
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
-    write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "GPT-Prio-1" "Please identify all vulnerabilities in this php code:" "NA"
+    write_csv_gpt "$PHP_SCRIPT_" "$GPT_PRIO" "Please identify all vulnerabilities in this php code:" ""
+    write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "NA"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   else
     # print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"
