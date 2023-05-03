@@ -16,7 +16,7 @@
 
 # Description:  Installs binutils and other tools like radare2 for s12-14 
 
-I13_objdump() {
+I13_disasm() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
@@ -28,16 +28,21 @@ I13_objdump() {
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
       print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
       print_tool_info "texinfo" 1
+      print_tool_info "git" 1
       print_tool_info "gcc" 1
+      print_tool_info "make" 1
       print_tool_info "build-essential" 1
       print_tool_info "gawk" 1
       print_tool_info "bison" 1
       print_tool_info "debuginfod" 1
-      if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
-        print_tool_info "radare2" 1
-      else
-        echo -e "$RED""$BOLD""Not installing radare2. Your EMBA installation will be incomplete""$NC"
-      fi
+      print_tool_info "python3" 1
+      print_tool_info "python-is-python3" 1
+      print_tool_info "libzip-dev" 1
+      # if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+      #  print_tool_info "radare2" 1
+      # else
+      #  echo -e "$RED""$BOLD""Not installing radare2. Your EMBA installation will be incomplete""$NC"
+      # fi
     fi
   
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
@@ -48,7 +53,8 @@ I13_objdump() {
   
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        # apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        apt-get install "${INSTALL_APP_LIST[@]}" -y
   
         if ! [[ -f "external/objdump" ]] ; then
           download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
@@ -73,6 +79,19 @@ I13_objdump() {
         else
           echo -e "$GREEN""objdump already installed - no further action performed.""$NC"
         fi
+
+        # radare2
+        echo -e "$ORANGE""$BOLD""Install radare2""$NC"
+        apt-get install radare2 libradare2-dev libradare2-common libradare2-5.0.0 -y
+
+        echo -e "$ORANGE""$BOLD""Install radare2 package r2dec""$NC"
+        r2pm init
+        r2pm update
+        # r2pm install r2dec
+        r2pm -cgi r2dec
+        echo -e "$ORANGE""$BOLD""Installed r2 plugins:""$NC"
+        r2pm -l
+        # cp -pri /root/.local/share/radare2 external/radare_local_bak
       ;;
     esac
   fi

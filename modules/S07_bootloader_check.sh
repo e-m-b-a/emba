@@ -16,7 +16,7 @@
 # Description:  Scans for device tree blobs, bootloader and startup files and checks for the default runlevel.
 
 # This module is based on source code from lynis: https://raw.githubusercontent.com/CISOfy/lynis/master/include/tests_boot_services
-S15_bootloader_check()
+S07_bootloader_check()
 {
   module_log_init "${FUNCNAME[0]}"
   module_title "Check bootloader and system startup"
