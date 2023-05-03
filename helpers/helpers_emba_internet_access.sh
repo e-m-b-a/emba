@@ -142,6 +142,7 @@ ask_chatgpt(){
   if [ -z "$OPENAI_API_KEY" ]; then
     print_output "[!] There is no API key in the config file"
     print_output "[!] Can't ask ChatGPT with this setup"
+    printf '%s' "There is no API key in the config file, aborting" >> "$LOG_DIR"/chatgpt.log # TODO remove
     CHATGPT_RESULT_CNT=-1
   else
     # test connection
@@ -149,6 +150,7 @@ ask_chatgpt(){
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$CONFIG_DIR/gpt_template.json" ; then
       print_output "[!] ChatGPT error while testing the API-Key"
+      printf '%s' "requests aren't working, aborting" >> "$LOG_DIR"/chatgpt.log # TODO remove
       CHATGPT_RESULT_CNT=-1
     fi
   fi
@@ -159,10 +161,11 @@ ask_chatgpt(){
   done
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
     while ! [[ -f  "$CSV_DIR/gpt-checks.csv"  ]] ; do
+      printf '%s' "waiting for the csv" >> "$LOG_DIR"/chatgpt.log # TODO remove
       sleep 1
     done
   fi
-
+  printf '%s' "starting the read-loop (CHATGPT_RESULT_CNT=$CHATGPT_RESULT_CNT)" >> "$LOG_DIR"/chatgpt.log # TODO remove
   local MINIMUM_GPT_PRIO=2
   print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower"
 
@@ -205,4 +208,5 @@ ask_chatgpt(){
     done < <( grep ".*;GPT-Prio-.*;" "$CSV_DIR/gpt-checks.csv")
   done
   unset OPENAI_API_KEY
+  printf '%s' "done" >> "$LOG_DIR"/chatgpt.log # TODO remove
 }
