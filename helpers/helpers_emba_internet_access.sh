@@ -146,6 +146,8 @@ ask_chatgpt(){
     CHATGPT_RESULT_CNT=-1
   else
     # test connection
+    print_output "[*] Testing API-Key"
+    printf '%s' "Testing API key : $OPENAI_API_KEY " >> "$LOG_DIR"/chatgpt.log # TODO remove
     if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$CONFIG_DIR/gpt_template.json" ; then
@@ -153,6 +155,7 @@ ask_chatgpt(){
       printf '%s' "requests aren't working, aborting" >> "$LOG_DIR"/chatgpt.log # TODO remove
       CHATGPT_RESULT_CNT=-1
     fi
+    print_output "[*] ChatGPT test successful"
   fi
 
   # we wait until the s20 module is finished and hopefully has some code for us
