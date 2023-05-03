@@ -170,9 +170,9 @@ ask_chatgpt(){
   local MINIMUM_GPT_PRIO=2
   local GPT_PRIO_=0
 
-  while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ ; do
+  while IFS=";" read -r COL1_ _COL2_ _COL3_ COL4_ COL5_ _COL6_ ; do
     GPT_QUESTION_="$COL5_"
-    GPT_PRIO_="$(echo "$COL4_" | sed 's/GPT-Prio-//g' )"
+    GPT_PRIO_="${COL4_//GPT-Prio-/}"
     SCRIPT_FILE_TMP_="$( echo "$COL1_" |  cut -d" " -f1 )"
     if [[ $GPT_PRIO_ -ge $MINIMUM_GPT_PRIO ]]; then
       # find realpath

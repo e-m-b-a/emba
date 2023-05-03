@@ -108,29 +108,6 @@ check_cve_search_job() {
   done
 }
 
-# runs ChatGPT checks on the host
-check_gpt_job() {
-  local EMBA_PID="${1:-}"
-  if ! [[ "${EMBA_PID}" =~ [0-9]+ ]]; then
-    print_output "[-] WARNING: No EMBA PID detected ... are we really running?!?"
-    return
-  fi
-
-  while true; do
-    if [[ -f "${LOG_DIR}"/emba.log ]]; then
-      if grep -q "Test ended\|EMBA failed" "${LOG_DIR}"/emba.log 2>/dev/null; then
-        break
-      fi
-    fi
-    # shellcheck disable=SC2009
-    if ! ps aux | grep -v grep | grep -q "${EMBA_PID}"; then
-      break
-    fi
-    #TODO move gpt check here
-    sleep 90
-  done
-}
-
 # $1: module group letter [P, S, L, F]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
