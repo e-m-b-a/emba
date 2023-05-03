@@ -844,6 +844,9 @@ write_csv_gpt(){
     print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
     return
   fi
-  printf '%s;GPT-Prio-%s;%s;%s;' "${PATH_}" "${PRIO_}" "${QUESTION_}" "${ANSWER_}" >> "$CSV_DIR/gpt-checks.csv" || true
+  if ! [[ -f "$CSV_DIR/gpt-checks.csv" ]]; then
+    touch "$CSV_DIR/gpt-checks.csv"
+  fi
+  printf '%s;GPT-Prio-%s;%s;%s;' "$PATH_" "$PRIO_" "$QUESTION_" "$ANSWER_" >> "$CSV_DIR/gpt-checks.csv" || true
   printf '\n' >> "$CSV_DIR/gpt-checks.csv" || true
 }

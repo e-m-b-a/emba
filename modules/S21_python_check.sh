@@ -29,7 +29,7 @@ S21_python_check()
   local VTYPE=""
 
   if [[ $PYTHON_CHECK -eq 1 ]] ; then
-    write_csv_log "Script path" "Python issues detected" "common linux file" "ChatGPT-priority" "ChatGPT-Question"
+    write_csv_log "Script path" "Python issues detected" "common linux file"
     mapfile -t PYTHON_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for PY_SCRIPT in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "$PY_SCRIPT" | grep -q "Python script.*executable" ) ; then
