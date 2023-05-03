@@ -835,10 +835,10 @@ print_notification() {
 
 # writes inputs into csv for chatgpt
 write_csv_gpt(){
-  local PATH_=${1:}
-  local PRIO_=${2:}
-  local QUESTION_=${3:}
-  local ANSWER_=${4:}
+  local PATH_="${1:}"
+  local PRIO_="${2:}"
+  local QUESTION_="${3:}"
+  local ANSWER_="${4:}"
 
   if ! [[ -d "$CSV_DIR" ]]; then
     print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
