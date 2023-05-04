@@ -165,13 +165,13 @@ ask_chatgpt(){
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
     while ! [[ -f  "$CSV_DIR/gpt-checks.csv"  ]] ; do
       printf '%s' "waiting for the csv" >> "$LOG_DIR"/chatgpt.log # TODO remove
-      sleep 1
+      sleep 3
     done
   fi
   printf '%s' "starting the read-loop (CHATGPT_RESULT_CNT=$CHATGPT_RESULT_CNT)" >> "$LOG_DIR"/chatgpt.log # TODO remove
   local MINIMUM_GPT_PRIO=2
   print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower"
-
+  CHATGPT_RESULT_CNT=0 # TODO remove
   while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
     # ~read_csv_gpt()
     local GPT_PRIO_=3
@@ -187,7 +187,7 @@ ask_chatgpt(){
       GPT_QUESTION_="${COL3_}"
       GPT_ANSWER_="${COL4_}"
       
-      if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -lt $MINIMUM_GPT_PRIO ]]; then
+      if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -le $MINIMUM_GPT_PRIO ]]; then
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
           print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")"
           head -n -2 "$CONFIG_DIR/gpt_template.json" > "$TMP_DIR/chat.json"
@@ -203,6 +203,7 @@ ask_chatgpt(){
             fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
+          # TODO remove old line
           write_csv_gpt "$(print_path "${SCRIPT_PATH_TMP_}")" "$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_"
           print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
           ((CHATGPT_RESULT_CNT++))
