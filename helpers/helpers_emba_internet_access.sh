@@ -137,7 +137,7 @@ kernel_downloader() {
 # (could be moved to embark)
 ask_chatgpt(){
   export "$(grep -v '^#' "$CONFIG_DIR/gpt_config.env" | xargs || true )" # readin of all vars in that env file
-  export CHATGPT_RESULT_CNT=0
+  export CHATGPT_RESULT_CNT=1
 
   if [ -z "$OPENAI_API_KEY" ]; then
     print_output "[!] There is no API key in the config file"
