@@ -168,7 +168,7 @@ ask_chatgpt(){
       sleep 3
     done
   fi
-  printf '%s' "starting the read-loop (CHATGPT_RESULT_CNT=$CHATGPT_RESULT_CNT)" >> "$LOG_DIR"/chatgpt.log # TODO remove
+  printf '%s \n' "starting the read-loop (CHATGPT_RESULT_CNT=$CHATGPT_RESULT_CNT)" >> "$LOG_DIR"/chatgpt.log # TODO remove
   local MINIMUM_GPT_PRIO=2
   print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower"
   while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
@@ -181,7 +181,7 @@ ask_chatgpt(){
     local GPT_TOKENS_=0
     local HTTP_CODE_=200
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
-      SCRIPT_PATH_TMP_="${COL1_}"
+      SCRIPT_PATH_TMP_="$(cut -d' ' -f1 "${COL1_}")"
       GPT_PRIO_="${COL2_//GPT-Prio-/}"
       GPT_QUESTION_="${COL3_}"
       GPT_ANSWER_="${COL4_}"
@@ -189,6 +189,7 @@ ask_chatgpt(){
       GPT_TOKENS_="${COL6_//cost\=/}"
       
       SCRIPT_PATH_TMP_="$(find "$FIRMWARE_PATH" -wholename "$SCRIPT_PATH_TMP_")"
+      printf '%s \n' "trying to check $SCRIPT_PATH_TMP_ with Question $GPT_QUESTION_ " >> "$LOG_DIR"/chatgpt.log # TODO remove
       if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -le $MINIMUM_GPT_PRIO ]]; then
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
           print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")"
