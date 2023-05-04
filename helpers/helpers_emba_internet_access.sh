@@ -179,13 +179,15 @@ ask_chatgpt(){
     local GPT_QUESTION_="Please identify all vulnerabilities in this code: "
     local CHATGPT_CODE_=""
     local GPT_RESPONSE_=""
+    local GPT_TOKENS_=0
     local HTTP_CODE_=200
-    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ ; do
-
+    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
       SCRIPT_PATH_TMP_="${COL1_}"
       GPT_PRIO_="${COL2_//GPT-Prio-/}"
       GPT_QUESTION_="${COL3_}"
       GPT_ANSWER_="${COL4_}"
+      GPT_RESPONSE_="${COL5_}"
+      GPT_TOKENS_="${COL6_//cost\=/}"
       
       if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -le $MINIMUM_GPT_PRIO ]]; then
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
@@ -203,13 +205,17 @@ ask_chatgpt(){
             fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
-          # TODO remove old line
-          write_csv_gpt "$(print_path "${SCRIPT_PATH_TMP_}")" "$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_"
+          GPT_TOKENS_=$(jq '.usage.total_tokens' "$TMP_DIR"/response.json)
+          # remove old line
+          sed -i "/.*$SCRIPT_PATH_TMP_.*//g" "$CSV_DIR/gpt-checks.csv"
+          # write new
+          write_csv_gpt "$(print_path "${SCRIPT_PATH_TMP_}")" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
+          
           print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
           ((CHATGPT_RESULT_CNT++))
         fi
       fi
-    done < <( grep ".*;GPT-Prio-.*;" "$CSV_DIR/gpt-checks.csv")
+    done < <( grep -v "cost=" "$CSV_DIR/gpt-checks.csv")
   done
   unset OPENAI_API_KEY
   printf '%s' "done" >> "$LOG_DIR"/chatgpt.log # TODO remove
