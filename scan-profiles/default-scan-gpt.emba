@@ -13,6 +13,8 @@
 #
 # Description: Profile for ChatGPT
 
+export STRICT_MODE=1
+
 export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1

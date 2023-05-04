@@ -60,6 +60,7 @@ F20_vul_aggregator() {
   local L15_LOG="$CSV_DIR"/l15_emulated_checks_nmap.csv
   local L25_LOG="$CSV_DIR"/l25_web_checks.csv
   local L35_LOG="$CSV_DIR"/l35_metasploit_check.csv
+  # TODO add gpt_csv 
 
   if [[ -d "$S26_LOG_DIR" ]]; then
     mapfile -t S26_LOGS_ARR < <(find "$S26_LOG_DIR" -name "cve_results_kernel_*.csv")
