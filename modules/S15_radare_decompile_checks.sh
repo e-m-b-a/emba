@@ -199,7 +199,7 @@ radare_decomp_print_top10_statistics() {
 
 radare_decomp_color_output() {
   local FUNCTION="${1:-}"
-  sed -i -r "s/.*($FUNCTION).*/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
+  sed -i -r "s/.* \| .*($FUNCTION).*$/\x1b[31m&\x1b[0m/" "$FUNC_LOG" 2>/dev/null || true
 }
 
 radare_decomp_output_function_details() {
