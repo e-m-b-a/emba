@@ -171,7 +171,6 @@ ask_chatgpt(){
   printf '%s' "starting the read-loop (CHATGPT_RESULT_CNT=$CHATGPT_RESULT_CNT)" >> "$LOG_DIR"/chatgpt.log # TODO remove
   local MINIMUM_GPT_PRIO=2
   print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower"
-  CHATGPT_RESULT_CNT=0 # TODO remove
   while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
     # ~read_csv_gpt()
     local GPT_PRIO_=3
@@ -210,7 +209,7 @@ ask_chatgpt(){
           sed -i "/.*$SCRIPT_PATH_TMP_.*//g" "$CSV_DIR/gpt-checks.csv"
           # write new
           write_csv_gpt "$(print_path "${SCRIPT_PATH_TMP_}")" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
-          
+
           print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
           ((CHATGPT_RESULT_CNT++))
         fi
