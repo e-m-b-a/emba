@@ -836,7 +836,6 @@ print_notification() {
 # writes inputs into csv for chatgpt
 write_csv_gpt(){
   local CSV_ITEMS=("$@")
-
   # local PATH_="${1:}"
   # local PRIO_="${2:}"
   # local QUESTION_="${3:}"
@@ -850,6 +849,6 @@ write_csv_gpt(){
     touch "$CSV_DIR/gpt-checks.csv"
   fi
   # printf '%s;GPT-Prio-%s;%s;%s;' "$PATH_" "$PRIO_" "$QUESTION_" "$ANSWER_" >> "$CSV_DIR/gpt-checks.csv" || true
-  printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_LOG" || true
+  printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/gpt-checks.csv" || true
   printf '\n' >> "$CSV_DIR/gpt-checks.csv" || true
 }
