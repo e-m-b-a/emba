@@ -188,6 +188,7 @@ ask_chatgpt(){
       GPT_RESPONSE_="${COL5_}"
       GPT_TOKENS_="${COL6_//cost\=/}"
       
+      SCRIPT_PATH_TMP_="$(find "$FIRMWARE_PATH" -wholename "$SCRIPT_PATH_TMP_")"
       if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -le $MINIMUM_GPT_PRIO ]]; then
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
           print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")"

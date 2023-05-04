@@ -166,7 +166,7 @@ s22_vuln_check() {
       CFF="NA"
     fi
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
-    write_csv_gpt "$PHP_SCRIPT_" "$GPT_PRIO" "Please identify all vulnerabilities in this php code:" ""
+    write_csv_gpt "$(print_path "$PHP_SCRIPT_")" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this php code:" "" "" ""
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "NA"
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   else
