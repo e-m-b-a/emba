@@ -140,22 +140,22 @@ ask_chatgpt(){
   export CHATGPT_RESULT_CNT=1
 
   if [ -z "$OPENAI_API_KEY" ]; then
-    print_output "[!] There is no API key in the config file"
-    print_output "[!] Can't ask ChatGPT with this setup"
+    print_output "[!] There is no API key in the config file" "no_log"
+    print_output "[!] Can't ask ChatGPT with this setup" "no_log"
     printf '%s' "There is no API key in the config file, aborting" >> "$LOG_DIR"/chatgpt.log # TODO remove
     CHATGPT_RESULT_CNT=-1
   else
     # test connection
-    print_output "[*] Testing API-Key"
+    print_output "[*] Testing API-Key" "no_log"
     printf '%s \n' "Testing API key : $OPENAI_API_KEY " >> "$LOG_DIR"/chatgpt.log # TODO remove
     if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$CONFIG_DIR/gpt_template.json" &>"$LOG_DIR/chatgpt.log" ; then
-      print_output "[!] ChatGPT error while testing the API-Key"
+      print_output "[!] ChatGPT error while testing the API-Key" "no_log"
       printf '%s' "requests aren't working, aborting" >> "$LOG_DIR"/chatgpt.log # TODO remove
       CHATGPT_RESULT_CNT=-1
     fi
-    print_output "[*] ChatGPT test successful"
+    print_output "[*] ChatGPT test successful" "no_log"
   fi
 
   # we wait until the s20 module is finished and hopefully has some code for us
@@ -170,7 +170,7 @@ ask_chatgpt(){
   fi
   printf '%s \n' "starting the read-loop (CHATGPT_RESULT_CNT=$CHATGPT_RESULT_CNT)" >> "$LOG_DIR"/chatgpt.log # TODO remove
   local MINIMUM_GPT_PRIO=2
-  print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower"
+  print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower" "no_log"
   while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
     # ~read_csv_gpt()
     local GPT_PRIO_=3
@@ -181,7 +181,7 @@ ask_chatgpt(){
     local GPT_TOKENS_=0
     local HTTP_CODE_=200
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
-      SCRIPT_PATH_TMP_="$(cut -d' ' -f1 "${COL1_}")"
+      SCRIPT_PATH_TMP_="$(echo "${COL1_}" | cut -d' ' -f1 )"
       GPT_PRIO_="${COL2_//GPT-Prio-/}"
       GPT_QUESTION_="${COL3_}"
       GPT_ANSWER_="${COL4_}"
@@ -192,7 +192,7 @@ ask_chatgpt(){
       printf '%s \n' "trying to check $SCRIPT_PATH_TMP_ with Question $GPT_QUESTION_ " >> "$LOG_DIR"/chatgpt.log # TODO remove
       if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -le $MINIMUM_GPT_PRIO ]]; then
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
-          print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")"
+          print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")" "no_log"
           head -n -2 "$CONFIG_DIR/gpt_template.json" > "$TMP_DIR/chat.json"
           CHATGPT_CODE_=$(sed 's/"/\\\"/g' "$SCRIPT_PATH_TMP_" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> "$TMP_DIR/chat.json"
@@ -200,9 +200,9 @@ ask_chatgpt(){
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$TMP_DIR/chat.json" -o "$TMP_DIR/response.json" --write-out "%{http_code}")
           if [[ "$HTTP_CODE_" -ne 200 ]] ; then
-            print_output "[!] Something went wrong with the ChatGPT requests"
+            print_output "[!] Something went wrong with the ChatGPT requests" "no_log"
             if [ -f "$TMP_DIR/response.json" ]; then
-              print_output "ERROR response:$(cat "$TMP_DIR/response.json")"
+              print_output "ERROR response:$(cat "$TMP_DIR/response.json")" "no_log"
             fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
@@ -212,7 +212,7 @@ ask_chatgpt(){
           # write new
           write_csv_gpt "$(print_path "${SCRIPT_PATH_TMP_}")" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
 
-          print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
+          print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}" "no_log"
           ((CHATGPT_RESULT_CNT++))
         fi
       fi
