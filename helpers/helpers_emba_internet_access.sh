@@ -187,6 +187,7 @@ ask_chatgpt(){
       GPT_ANSWER_="${COL4_}"
       GPT_RESPONSE_="${COL5_}"
       GPT_TOKENS_="${COL6_//cost\=/}"
+      GPT_FILE_="$(basename "$SCRIPT_PATH_TMP_")"
       
       printf '%s \n' "trying to check inside $LOG_DIR/firmware" >> "$LOG_DIR"/chatgpt.log # TODO remove
       SCRIPT_PATH_TMP_="$(find "$LOG_DIR/firmware" -wholename "*$SCRIPT_PATH_TMP_")"
@@ -211,9 +212,9 @@ ask_chatgpt(){
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
           GPT_TOKENS_=$(jq '.usage.total_tokens' "$TMP_DIR"/response.json)
           # remove old line
-          sed -i "/.*$SCRIPT_PATH_TMP_.*//g" "$CSV_DIR/gpt-checks.csv"
+          sed -i "/.*$GPT_FILE_.*/d" "$CSV_DIR/gpt-checks.csv"   #TODO
           # write new
-          write_csv_gpt "$(print_path "${SCRIPT_PATH_TMP_}")" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
+          write_csv_gpt "${GPT_FILE_}" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
 
           print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}" "no_log"
           ((CHATGPT_RESULT_CNT++))
