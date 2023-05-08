@@ -188,7 +188,7 @@ ask_chatgpt(){
       GPT_RESPONSE_="${COL5_}"
       GPT_TOKENS_="${COL6_//cost\=/}"
       
-      SCRIPT_PATH_TMP_="$(find "$FIRMWARE_PATH" -wholename "$SCRIPT_PATH_TMP_")"
+      SCRIPT_PATH_TMP_="$(find "$FIRMWARE_PATH" -wholename "*$SCRIPT_PATH_TMP_")"
       printf '%s \n' "trying to check $SCRIPT_PATH_TMP_ with Question $GPT_QUESTION_ " >> "$LOG_DIR"/chatgpt.log # TODO remove
       if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -le $MINIMUM_GPT_PRIO ]]; then
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
