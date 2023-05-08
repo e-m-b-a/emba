@@ -59,6 +59,7 @@ F50_base_aggregator() {
   L30_LOG="l30_routersploit.txt"
   L35_CSV_LOG="$CSV_DIR""/l35_metasploit_check.csv"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
+  CHATGPT_CSV_LOG="$CSV_DIR/gpt-checks.csv"
 
   if [[ "$RESTART" -eq 1 ]] && [[ -f "$LOG_FILE" ]]; then
     rm "$LOG_FILE"
@@ -68,6 +69,7 @@ F50_base_aggregator() {
   output_overview
   output_details
   output_config_issues
+  output_chatgpt
   output_binaries
   output_cve_exploits
 
@@ -1103,3 +1105,16 @@ cwe_logging() {
   fi
 }
 
+output_chatgpt(){
+  # grep -q "L10_system_emulation finished" "$LOG_DIR"/emba.log
+  # TODO parse s20-s23 logs by '[ASK_GPT]' and link them via anchor (second column)
+  # append answer to logs and html-report
+
+# TODO crawl s20-s23 logs by '[ASK_GPT]' and link them via anchor (second column)
+# find . -type f -maxdepth 2 -name 's2[0-3]_*' -exec sed -i "s/[ASK_GPT] $GPT_ANCHOR_/$GPT_RESPONSE_/g" {} \; #TODO
+
+# TODO remove all lines inside the logs that aren't anchored with something that has a answer (column 5)
+
+  echo ''
+  # TODO remove all lines inside the logs that aren't anchored with something that has a answer (column 5)
+}

@@ -836,10 +836,6 @@ print_notification() {
 # writes inputs into csv for chatgpt
 write_csv_gpt(){
   local CSV_ITEMS=("$@")
-  # local PATH_="${1:}"
-  # local PRIO_="${2:}"
-  # local QUESTION_="${3:}"
-  # local ANSWER_="${4:}"
 
   if ! [[ -d "$CSV_DIR" ]]; then
     print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
@@ -851,4 +847,21 @@ write_csv_gpt(){
   # printf '%s;GPT-Prio-%s;%s;%s;' "$PATH_" "$PRIO_" "$QUESTION_" "$ANSWER_" >> "$CSV_DIR/gpt-checks.csv" || true
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/gpt-checks.csv" || true
   printf '\n' >> "$CSV_DIR/gpt-checks.csv" || true
+}
+
+write_anchor_gpt()
+{
+  if [[ $HTML -eq 1 ]] ; then
+    local LINK
+    LINK="${1:-}"
+    LINK="$(format_log "[ASK_GPT] ""$LINK" 1)"
+    local LOG_FILE_ALT="${2:-}"
+    if [[ "$LOG_FILE_ALT" != "no_log" ]] && [[ "$LOG_FILE_ALT" != "main" ]] ; then
+      if [[ -f "$LOG_FILE_ALT" ]] ; then
+        echo -e "$LINK" | tee -a "$LOG_FILE_ALT" >/dev/null
+      else
+        echo -e "$LINK" | tee -a "$LOG_FILE" >/dev/null
+      fi
+    fi
+  fi
 }

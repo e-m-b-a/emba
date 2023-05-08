@@ -163,8 +163,8 @@ ask_chatgpt(){
     sleep 10
   done
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while ! [[ -f  "$CSV_DIR/gpt-checks.csv"  ]] ; do
-      sleep 3
+    while ! [[ -f  "$CSV_DIR/gpt-checks.csv" ]]; do
+        sleep 3
     done
   fi
   local MINIMUM_GPT_PRIO=2
@@ -178,13 +178,14 @@ ask_chatgpt(){
     local GPT_RESPONSE_=""
     local GPT_TOKENS_=0
     local HTTP_CODE_=200
-    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
+    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
       SCRIPT_PATH_TMP_="${COL1_}"
-      GPT_PRIO_="${COL2_//GPT-Prio-/}"
-      GPT_QUESTION_="${COL3_}"
-      GPT_ANSWER_="${COL4_}"
-      GPT_RESPONSE_="${COL5_}"
-      GPT_TOKENS_="${COL6_//cost\=/}"
+      GPT_ANCHOR_="${COL2_}"
+      GPT_PRIO_="${COL3_//GPT-Prio-/}"
+      GPT_QUESTION_="${COL4_}"
+      GPT_ANSWER_="${COL5_}"
+      GPT_RESPONSE_="${COL6_}"
+      GPT_TOKENS_="${COL7_//cost\=/}"
       GPT_FILE_="$(basename "$SCRIPT_PATH_TMP_")"
       
       printf '%s \n' "trying to check inside $LOG_DIR/firmware" >> "$LOG_DIR"/chatgpt.log # TODO remove
@@ -212,7 +213,7 @@ ask_chatgpt(){
           GPT_TOKENS_=$(jq '.usage.total_tokens' "$TMP_DIR"/response.json)
           if [[ $GPT_TOKENS_ -ne 0 ]]; then
             # remove old line
-            sed -i "/.*$GPT_FILE_.*/d" "$CSV_DIR/gpt-checks.csv"
+            sed -i "/.*$GPT_ANCHOR_.*/d" "$CSV_DIR/gpt-checks.csv"
             # write new
             write_csv_gpt "${GPT_FILE_}" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
             print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}" "no_log"
@@ -226,5 +227,4 @@ ask_chatgpt(){
     done < <( grep -v "cost=" "$CSV_DIR/gpt-checks.csv")
   done
   unset OPENAI_API_KEY
-  printf '%s' "done" >> "$LOG_DIR"/chatgpt.log # TODO remove
 }
