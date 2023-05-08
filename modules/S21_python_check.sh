@@ -105,7 +105,7 @@ s21_script_bandit() {
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" "" "$PY_LOG"
     fi
-    write_csv_gpt "$(print_path "$PY_SCRIPT_")" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this python code:" "" "" ""
+    write_csv_gpt "$(cut_path "$PY_SCRIPT_")" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this python code:" "" "" ""
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi

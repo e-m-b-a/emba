@@ -107,7 +107,7 @@ s23_luaseccheck() {
     fi
 
     if [[ "${ISSUES_FILE}" -gt 0 ]]; then
-      write_csv_gpt "$(print_path "$QUERY_FILE")" "GPT-Prio-2" "Please identify all vulnerabilities in this lua code:" "" "" ""
+      write_csv_gpt "$(cut_path "$QUERY_FILE")" "GPT-Prio-2" "Please identify all vulnerabilities in this lua code:" "" "" ""
       write_csv_log "$(print_path "$QUERY_FILE")" "0" "$ISSUES_FILE" "NA"
       
     fi

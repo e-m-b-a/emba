@@ -181,7 +181,7 @@ ask_chatgpt(){
     local GPT_TOKENS_=0
     local HTTP_CODE_=200
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
-      SCRIPT_PATH_TMP_="$(echo "${COL1_}" | cut -d' ' -f1 )"
+      SCRIPT_PATH_TMP_="${COL1_}"
       GPT_PRIO_="${COL2_//GPT-Prio-/}"
       GPT_QUESTION_="${COL3_}"
       GPT_ANSWER_="${COL4_}"
