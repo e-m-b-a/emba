@@ -67,7 +67,7 @@ set_defaults() {
   export QRUNTIME="20s"
 
   export SHELLCHECK=1
-  export GPT_OPTION=0
+  export GPT_OPTION=0           # 0 -> off 1-> unpayed plan 2 -> no rate-limit 
   export SHORT_PATH=0           # short paths in cli output
   export THREADED=0             # 0 -> single thread
                                 # 1 -> multi threaded

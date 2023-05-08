@@ -142,17 +142,17 @@ ask_chatgpt(){
   if [ -z "$OPENAI_API_KEY" ]; then
     print_output "[!] There is no API key in the config file" "no_log"
     print_output "[!] Can't ask ChatGPT with this setup" "no_log"
-    printf '%s' "There is no API key in the config file, aborting" >> "$LOG_DIR"/chatgpt.log # TODO remove
+    printf '%s' "There is no API key in the config file, aborting" >> "$LOG_DIR"/chatgpt.log
     CHATGPT_RESULT_CNT=-1
   else
     # test connection
     print_output "[*] Testing API-Key" "no_log"
-    printf '%s \n' "Testing API key : $OPENAI_API_KEY " >> "$LOG_DIR"/chatgpt.log # TODO remove
+    printf '%s \n' "Testing API key : $OPENAI_API_KEY " >> "$LOG_DIR"/chatgpt.log
     if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$CONFIG_DIR/gpt_template.json" &>"$LOG_DIR/chatgpt.log" ; then
       print_output "[!] ChatGPT error while testing the API-Key" "no_log"
-      printf '%s' "requests aren't working, aborting" >> "$LOG_DIR"/chatgpt.log # TODO remove
+      printf '%s' "requests aren't working, aborting" >> "$LOG_DIR"/chatgpt.log
       CHATGPT_RESULT_CNT=-1
     fi
     print_output "[*] ChatGPT test successful" "no_log"
@@ -164,11 +164,9 @@ ask_chatgpt(){
   done
   if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
     while ! [[ -f  "$CSV_DIR/gpt-checks.csv"  ]] ; do
-      printf '%s' "waiting for the csv" >> "$LOG_DIR"/chatgpt.log # TODO remove
       sleep 3
     done
   fi
-  printf '%s \n' "starting the read-loop (CHATGPT_RESULT_CNT=$CHATGPT_RESULT_CNT)" >> "$LOG_DIR"/chatgpt.log # TODO remove
   local MINIMUM_GPT_PRIO=2
   print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower" "no_log"
   while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
@@ -210,15 +208,20 @@ ask_chatgpt(){
             fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
+          GPT_RESPONSE_="${GPT_RESPONSE_//$'\n'/}" #remove newlines from response
           GPT_TOKENS_=$(jq '.usage.total_tokens' "$TMP_DIR"/response.json)
-          # remove old line
-          sed -i "/.*$GPT_FILE_.*/d" "$CSV_DIR/gpt-checks.csv"   #TODO
-          # write new
-          write_csv_gpt "${GPT_FILE_}" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
-
-          print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}" "no_log"
-          ((CHATGPT_RESULT_CNT++))
+          if [[ $GPT_TOKENS_ -ne 0 ]]; then
+            # remove old line
+            sed -i "/.*$GPT_FILE_.*/d" "$CSV_DIR/gpt-checks.csv"
+            # write new
+            write_csv_gpt "${GPT_FILE_}" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_"
+            print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}" "no_log"
+            ((CHATGPT_RESULT_CNT++))
+          fi
         fi
+      fi
+      if [[ $GPT_OPTION -ne 2 ]]; then
+        sleep 20s
       fi
     done < <( grep -v "cost=" "$CSV_DIR/gpt-checks.csv")
   done

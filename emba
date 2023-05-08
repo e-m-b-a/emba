@@ -465,7 +465,7 @@ main() {
     fi
 
     # chatgpt is used to identify vulnerabilities inside code snippeds
-    if [[ ${IN_DOCKER} -eq 0 ]] && [[ ${GPT_OPTION} -eq 1 ]]; then
+    if [[ ${IN_DOCKER} -eq 0 ]] && [[ ${GPT_OPTION} -gt 0 ]]; then
       ask_chatgpt &
       ASK_GPT_PID="$!"
       store_kill_pids "${ASK_GPT_PID}"
