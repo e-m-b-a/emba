@@ -16,13 +16,14 @@
 #               Currently this is an experimental module and needs to be activated separately via the -Q switch. 
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
-L22_upnp_checks() {
+L22_upnp_hnap_checks() {
 
   export UPNP_UP=0
+  export HNAP_UP=0
 
   if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
-    module_title "Live UPnP tests of emulated device."
+    module_title "Live UPnP/HNAP tests of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ $IN_DOCKER -eq 0 ]] ; then
@@ -33,13 +34,14 @@ L22_upnp_checks() {
       if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
         restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
         if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-          print_output "[-] System not responding - Not performing UPnP checks"
+          print_output "[-] System not responding - Not performing UPnP/HNAP checks"
           module_end_log "${FUNCNAME[0]}" "$UPNP_UP"
           return
         fi
       fi
       if [[ -v HOSTNETDEV_0 ]]; then
         check_basic_upnp "$HOSTNETDEV_0"
+        check_basic_hnap
       else
         print_output "[!] No network interface found"
       fi
@@ -48,7 +50,7 @@ L22_upnp_checks() {
     fi
 
     write_log ""
-    write_log "Statistics:$UPNP_UP"
+    write_log "Statistics:$UPNP_UP:$HNAP_UP"
     module_end_log "${FUNCNAME[0]}" "$UPNP_UP"
   fi
 }
@@ -72,9 +74,69 @@ check_basic_upnp() {
 
   if [[ "$UPNP_UP" -gt 0 ]]; then
     UPNP_UP=1
+    print_output "[+] UPnP service successfully identified"
   fi
 
   print_ln
   print_output "[*] UPnP basic enumeration finished"
+}
+
+check_basic_hnap() {
+  local PORT=""
+  local SERVICE=""
+  local SSL=0
+
+  sub_module_title "HNAP enumeration for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
+
+  if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
+    for PORT_SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
+      [[ "$HNAP_UP" -eq 1 ]] && break
+
+      PORT=$(echo "$PORT_SERVICE" | cut -d/ -f1 | tr -d "[:blank:]")
+      SERVICE=$(echo "$PORT_SERVICE" | awk '{print $2}' | tr -d "[:blank:]")
+      if [[ "$SERVICE" == "unknown" ]] || [[ "$SERVICE" == "tcpwrapped" ]]; then
+        continue
+      fi
+
+      if [[ "$SERVICE" == *"ssl|http"* ]] || [[ "$SERVICE" == *"ssl/http"* ]];then
+        SSL=1
+      elif [[ "$SERVICE" == *"http"* ]];then
+        SSL=0
+      else
+        # no http service - check the next one
+        continue
+      fi
+
+      print_output "[*] Analyzing service $ORANGE$SERVICE - $PORT - $IP_ADDRESS_$NC" "no_log"
+
+      if ! command -v curl > /dev/null; then
+        print_output "[-] WARNING: No curl command available - your installation seems to be weird"
+        return
+      fi
+
+      if [[ "$SSL" -eq 0 ]]; then
+        curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+      else
+        curl -v -L --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+      fi
+
+      if [[ -f "$LOG_PATH_MODULE"/hnap-discovery-check.txt ]]; then
+        print_ln
+        tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/hnap-discovery-check.txt
+        print_ln
+
+        HNAP_UP=$(grep -c "HNAP1" "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true)
+      fi
+
+      if [[ "$HNAP_UP" -gt 0 ]]; then
+        HNAP_UP=1
+        print_output "[+] HNAP service successfully identified"
+      fi
+
+    done
+  fi
+
+  print_ln
+  print_output "[*] HNAP basic enumeration finished"
 }
 
