@@ -93,15 +93,16 @@ radare_decompilation(){
     return
   fi
 
-
   NETWORKING=$(readelf -a "$BINARY_" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     FUNC_LOG="$LOG_PATH_MODULE""/decompilation_vul_func_""$FUNCTION""-""$NAME"".txt"
     radare_decomp_log_bin_hardening "$NAME" "$FUNCTION"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
+    # We analyse only 1000 functions per binary
     timeout --preserve-status --signal SIGINT 600 r2 -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | sort -u > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}"'_usage`' "$BINARY" \
+      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 1000 > \
+      '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}"'_usage`' "$BINARY" \
       2> /dev/null >> "$FUNC_LOG" || true
 
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
