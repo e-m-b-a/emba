@@ -59,7 +59,7 @@ search_ssh_files()
           local PRINTER=0
           if [[ "$(basename "$LINE")" == "sshd_config"  ]]; then
             print_output "[*] Testing sshd configuration file with sshdcc"
-            readarray SSHD_ISSUES < <("$EXT_DIR"/sshdcc -ns -nc -f "$LINE")
+            readarray SSHD_ISSUES < <("$EXT_DIR"/sshdcc -ns -nc -f "$LINE" || true)
             for S_ISSUE in "${SSHD_ISSUES[@]}"; do
               if [[ "$S_ISSUE" == *RESULTS* || "$PRINTER" -eq 1 ]]; then
                 # print finding title as EMBA finding:

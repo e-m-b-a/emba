@@ -100,7 +100,7 @@ radare_decompilation(){
     radare_decomp_log_bin_hardening "$NAME" "$FUNCTION"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
-    r2 -e io.cache=true -e scr.color=false -q -A -c \
+    timeout --preserve-status --signal SIGINT 600 r2 -e io.cache=true -e scr.color=false -q -A -c \
       'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | sort -u > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}"'_usage`' "$BINARY" \
       2> /dev/null >> "$FUNC_LOG" || true
 
