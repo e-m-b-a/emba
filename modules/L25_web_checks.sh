@@ -227,7 +227,8 @@ web_access_crawler() {
   sub_module_title "Starting web server crawling for $ORANGE$IP_:$PORT$NC"
   print_ln
 
-  local HOME_=$(pwd)
+  local HOME_=""
+  HOME_=$(pwd)
   for R_PATH in "${ROOT_PATH[@]}" ; do
     # we need files and links (for cgi files)
     cd "${R_PATH}" || exit 1
@@ -246,25 +247,25 @@ web_access_crawler() {
         CRAWLED_ARR+=( "${WEB_FILE}" )
       fi
       WEB_DIR_L1="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1 | rev)"
+      WEB_DIR_L1="${WEB_DIR_L1#\.}"
+      WEB_DIR_L1="${WEB_DIR_L1#\/}"
       if [[ -n "${WEB_DIR_L1}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_DIR_L1}/${WEB_FILE} "* ]]; then
-        WEB_DIR_L1="${WEB_DIR_L1#\.}"
-        WEB_DIR_L1="${WEB_DIR_L1#\/}"
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L1}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
         timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
         CRAWLED_ARR+=( "${WEB_DIR_L1}/${WEB_FILE}" )
       fi
       WEB_DIR_L2="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-2 | rev)"
+      WEB_DIR_L2="${WEB_DIR_L2#\.}"
+      WEB_DIR_L2="${WEB_DIR_L2#\/}"
       if [[ -n "${WEB_DIR_L2}" ]] && [[ "${WEB_DIR_L2}" != "${WEB_DIR_L1}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_DIR_L2}/${WEB_FILE} "* ]]; then
-        WEB_DIR_L2="${WEB_DIR_L2#\.}"
-        WEB_DIR_L2="${WEB_DIR_L2#\/}"
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L2}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
         timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
         CRAWLED_ARR+=( "${WEB_DIR_L2}/${WEB_FILE}" )
       fi
       WEB_DIR_L3="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-3 | rev)"
+      WEB_DIR_L3="${WEB_DIR_L3#\.}"
+      WEB_DIR_L3="${WEB_DIR_L3#\/}"
       if [[ -n "${WEB_DIR_L3}" ]] && [[ "${WEB_DIR_L3}" != "${WEB_DIR_L2}" ]] && [[ "${WEB_DIR_L3}" != "${WEB_DIR_L1}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_DIR_L3}/${WEB_FILE} "* ]]; then
-        WEB_DIR_L3="${WEB_DIR_L3#\.}"
-        WEB_DIR_L3="${WEB_DIR_L3#\/}"
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L3}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
         timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
         CRAWLED_ARR+=( "${WEB_DIR_L3}/${WEB_FILE}" )
