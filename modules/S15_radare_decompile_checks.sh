@@ -100,22 +100,22 @@ radare_decompilation(){
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
     # We analyse only 1000 functions per binary
-    timeout --preserve-status --signal SIGINT 600 r2 -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 1000 > \
-      '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}"'_usage`' "$BINARY" \
-      2> /dev/null >> "$FUNC_LOG" || true
+    r2 -e io.cache=true -e scr.color=false -q -A -c \
+      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 100 > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}"'_usage`' "$BINARY" 2> /dev/null >> "$FUNC_LOG" || true
 
-    if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 0 ]] ; then
+    if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 3 ]] ; then
       radare_decomp_color_output "$FUNCTION"
 
       # Todo: check this with other architectures
-      COUNT_FUNC="$(grep -c "sym.*""$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
+      COUNT_FUNC="$(grep -c "$FUNCTION" "$FUNC_LOG"  2> /dev/null || true)"
       if [[ "$FUNCTION" == "strcpy" ]] ; then
-        COUNT_STRLEN=$(grep -c "sym.*strlen" "$FUNC_LOG"  2> /dev/null || true)
+        COUNT_STRLEN=$(grep -c "strlen" "$FUNC_LOG"  2> /dev/null || true)
         STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       fi
       radare_log_func_footer "$NAME" "$FUNCTION"
       radare_decomp_output_function_details "$BINARY_" "$FUNCTION"
+    else
+      rm "$FUNC_LOG" || true
     fi
   done
   echo "$STRCPY_CNT" >> "$TMP_DIR"/S15_STRCPY_CNT.tmp
@@ -139,6 +139,7 @@ radare_decomp_log_bin_hardening() {
   fi
 
   write_log "$NC" "$FUNC_LOG"
+# not working - check this:
 #  if [[ -d "$LOG_DIR"/s14_weak_func_radare_check/ ]] && [[ "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt" | wc -l | awk '{print $1}')" -gt 0 ]]; then
 #    write_log "[*] Function $ORANGE$FUNCTION$NC tear down of $ORANGE$NAME$NC / Switch to Radare2 disasm$NC" "$FUNC_LOG"
 #    write_link "$(find "$LOG_DIR"/s14_weak_func_radare_check/ -name "vul_func_*""$FUNCTION""-""$NAME"".txt")" "$FUNC_LOG"
