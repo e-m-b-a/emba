@@ -59,7 +59,7 @@ F50_base_aggregator() {
   L30_LOG="l30_routersploit.txt"
   L35_CSV_LOG="$CSV_DIR""/l35_metasploit_check.csv"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
-  CHATGPT_CSV_LOG="$CSV_DIR/gpt-checks.csv"
+  # CHATGPT_CSV_LOG="$CSV_DIR/gpt-checks.csv"
 
   if [[ "$RESTART" -eq 1 ]] && [[ -f "$LOG_FILE" ]]; then
     rm "$LOG_FILE"
@@ -1106,15 +1106,32 @@ cwe_logging() {
 }
 
 output_chatgpt(){
+  # make sure all S modules are done
   # grep -q "L10_system_emulation finished" "$LOG_DIR"/emba.log
   # TODO parse s20-s23 logs by '[ASK_GPT]' and link them via anchor (second column)
   # append answer to logs and html-report
+  # default vars
+  local GPT_QUESTION_="Please identify all vulnerabilities in this code: "
+  local GPT_RESPONSE_=""
+  local _GPT_PRIO_=3
+  local GPT_TOKENS_=0
+  local _GPT_FILE_=""
+  while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
+    _GPT_FILE_="${COL1_}"
+    GPT_ANCHOR_="${COL2_}"
+    _GPT_PRIO_="${COL3_//GPT-Prio-/}"
+    GPT_QUESTION_="${COL4_}"
+    GPT_RESPONSE_="${COL5_}"
+    GPT_TOKENS_="${COL6_//cost\=/}"
 
-# TODO crawl s20-s23 logs by '[ASK_GPT]' and link them via anchor (second column)
-# find . -type f -maxdepth 2 -name 's2[0-3]_*' -exec sed -i "s/[ASK_GPT] $GPT_ANCHOR_/$GPT_RESPONSE_/g" {} \; #TODO
+    if [[ -n $GPT_RESPONSE_ ]] && [[ $GPT_TOKENS_ -ne 0 ]]; then
+      GPT_RESPONSE_="Q:${GPT_QUESTION_} A:${GPT_RESPONSE_}"
+      find "$LOG_DIR" -type f -maxdepth 2 -name 's2[0-3]_*' -exec sed -i "s/[ASK_GPT] $GPT_ANCHOR_/$GPT_RESPONSE_/g" {} \; #TODO test, find all files
+    else
+      find "$LOG_DIR" -type f -maxdepth 2 -name 's2[0-3]_*' -exec sed -i "s/[ASK_GPT] $GPT_ANCHOR_//g" {} \; #TODO test, find all files
+    fi
+  done < "$CSV_DIR/gpt-checks.csv"
 
-# TODO remove all lines inside the logs that aren't anchored with something that has a answer (column 5)
-
-  echo ''
   # TODO remove all lines inside the logs that aren't anchored with something that has a answer (column 5)
+  find "$LOG_DIR" -type f -maxdepth 2 -name 's2[0-3]_*' -exec sed -i "/[ASK_GPT]/d" {} \; #TODO test, find all files where this would occure
 }

@@ -166,8 +166,13 @@ s22_vuln_check() {
       CFF="NA"
     fi
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
-    write_csv_gpt "$(cut_path "$PHP_SCRIPT_")" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this php code:" "" "" ""
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "NA"
+    if [[ $GPT_OPTION -gt 0 ]]; then
+      GPT_ANCHOR="$(openssl rand -hex 8)"
+      write_csv_gpt "$(cut_path "$PHP_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this php code:" "" "" ""
+      # add ChatGPT link
+      write_anchor_gpt "$GPT_ANCHOR"
+    fi
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   else
     # print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"

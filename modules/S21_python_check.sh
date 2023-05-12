@@ -78,6 +78,7 @@ s21_script_bandit() {
   local PY_LOG=""
   local VULNS=""
   local GPT_PRIO=3
+  local GPT_ANCHOR=""
 
   NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit_""$NAME"".txt"
@@ -105,8 +106,14 @@ s21_script_bandit() {
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" "" "$PY_LOG"
     fi
-    write_csv_gpt "$(cut_path "$PY_SCRIPT_")" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this python code:" "" "" ""
+    
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
+    if [[ $GPT_OPTION -gt 0 ]]; then
+      GPT_ANCHOR="$(openssl rand -hex 8)"
+      write_csv_gpt "$(cut_path "$PY_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this python code:" "" "" ""
+      # add ChatGPT link
+      write_anchor_gpt "$GPT_ANCHOR"
+    fi
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi
 }

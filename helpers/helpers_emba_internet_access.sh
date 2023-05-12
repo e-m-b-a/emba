@@ -178,14 +178,13 @@ ask_chatgpt(){
     local GPT_RESPONSE_=""
     local GPT_TOKENS_=0
     local HTTP_CODE_=200
-    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
+    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
       SCRIPT_PATH_TMP_="${COL1_}"
       GPT_ANCHOR_="${COL2_}"
       GPT_PRIO_="${COL3_//GPT-Prio-/}"
       GPT_QUESTION_="${COL4_}"
-      GPT_ANSWER_="${COL5_}"
-      GPT_RESPONSE_="${COL6_}"
-      GPT_TOKENS_="${COL7_//cost\=/}"
+      GPT_RESPONSE_="${COL5_}"
+      GPT_TOKENS_="${COL6_//cost\=/}"
       GPT_FILE_="$(basename "$SCRIPT_PATH_TMP_")"
       
       printf '%s \n' "trying to check inside $LOG_DIR/firmware" >> "$LOG_DIR"/chatgpt.log # TODO remove

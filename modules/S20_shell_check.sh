@@ -155,14 +155,13 @@ s20_reporter() {
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     fi
+    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
     if [[ $GPT_OPTION -gt 0 ]]; then
       GPT_ANCHOR="$(openssl rand -hex 8)"
       write_csv_gpt "$(cut_path "$SH_SCRIPT")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this shell script:" "" "" ""
       # add ChatGPT link
       write_anchor_gpt "$GPT_ANCHOR"
     fi
-    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
-    
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi
 }
