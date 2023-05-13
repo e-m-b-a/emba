@@ -297,7 +297,6 @@ create_emulation_filesystem() {
 
     print_output "[*] fixImage.sh (chroot)"
     cp "$MODULE_SUB_PATH/fixImage.sh" "$MNT_POINT" || true
-    echo "[*] Current dir: $(pwd)"
     FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /busybox ash /fixImage.sh | tee -a "$LOG_FILE"
 
     print_output "[*] inferFile.sh (chroot)"
