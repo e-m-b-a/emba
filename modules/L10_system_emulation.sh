@@ -297,6 +297,7 @@ create_emulation_filesystem() {
 
     print_output "[*] fixImage.sh (chroot)"
     cp "$MODULE_SUB_PATH/fixImage.sh" "$MNT_POINT" || true
+    echo "[*] Current dir: $(pwd)"
     FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /busybox ash /fixImage.sh | tee -a "$LOG_FILE"
 
     print_output "[*] inferFile.sh (chroot)"
@@ -310,15 +311,22 @@ create_emulation_filesystem() {
 
     if [[ -f "$MODULE_SUB_PATH/injection_check.sh" ]]; then
       # injection checker - future extension
-      cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/bin/a || true
-      cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/sbin/a || true
-      chmod a+x "${MNT_POINT}/bin/a" || true
-      chmod a+x "${MNT_POINT}/sbin/a" || true
       INJECTION_MARKER="$RANDOM"
-      sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/bin/a || true
-      sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/sbin/a || true
-      print_output "[*] Generated injection scripts with marker ${ORANGE}${INJECTION_MARKER}${NC}."
-      cat "${MNT_POINT}"/bin/a
+      if [[ -d "${MNT_POINT}"/bin ]]; then
+        cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/bin/a || true
+        chmod a+x "${MNT_POINT}/bin/a" || true
+        sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/bin/a || true
+      fi
+      if [[ -d "${MNT_POINT}"/sbin ]]; then
+        cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/sbin/a || true
+        chmod a+x "${MNT_POINT}/sbin/a" || true
+        sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/sbin/a || true
+      fi
+      if [[ -f "${MNT_POINT}/sbin/a" ]] || [[ -f "${MNT_POINT}/bin/a" ]]; then
+        print_output "[*] Generated injection scripts with marker ${ORANGE}${INJECTION_MARKER}${NC}."
+        cat "${MNT_POINT}"/bin/a
+      fi
+
       # setup a marker for traversal tests
       echo "EMBA_${INJECTION_MARKER}_EMBA" > "${MNT_POINT}"/dir_trav_check
       echo "$INJECTION_MARKER" > "$LOG_PATH_MODULE"/injection_marker.log
@@ -1535,7 +1543,7 @@ setup_network_emulation() {
   HOSTNETDEV_0="$TAPDEV_0"
   print_output "[*] Creating TAP device $ORANGE$TAPDEV_0$NC..."
   write_script_exec "echo -e \"Creating TAP device $TAPDEV_0\n\"" "$ARCHIVE_PATH"/run.sh 0
-  write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation\" && exit 1)" "$ARCHIVE_PATH"/run.sh 0
+  write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation - install uml-utilities package\" && exit 1)" "$ARCHIVE_PATH"/run.sh 0
   write_script_exec "tunctl -t $TAPDEV_0" "$ARCHIVE_PATH"/run.sh 1
 
   if [[ "$VLAN_ID" != "NONE" ]]; then
@@ -1594,19 +1602,21 @@ write_network_config_to_filesystem() {
         [[ "${FILE_PATH_MISSING}" == *"firmadyne"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/sys/"* ]] && continue
+        [[ "${FILE_PATH_MISSING}" == *"/dev/"* ]] && continue
         print_output "[!] MISSING_FILE: ${FILE_PATH_MISSING}"
 
         FILENAME_MISSING=$(basename "${FILE_PATH_MISSING}")
+        [[ "${FILENAME_MISSING}" == '*' ]] && continue
         print_output "[*] Found missing area ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
         DIR_NAME_MISSING=$(dirname "${FILE_PATH_MISSING}")
         if ! [[ -d "${MNT_POINT}""${DIR_NAME_MISSING}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}${DIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
           mkdir -p "${MNT_POINT}""${DIR_NAME_MISSING}"
         fi
-        FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1)
-        if [[ -f ${FOUND_MISSING} ]]; then
+        FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1 || true)
+        if [[ -f ${FOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""${DIR_NAME_MISSING}"/"${FOUND_MISSING}" ]]; then
           print_output "[*] Recover missing file ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
-          cp "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/
+          cp "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/ || true
         fi
       done
     fi
