@@ -19,6 +19,9 @@ jobs:
     - name: update trickest poc database
       run: |
         ./helpers/trickest_db_update.sh
+    - name: new PoCs from this update
+      run: |
+        git diff origin/master... | grep "^+" | cut -d: -f2- | sort
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v4

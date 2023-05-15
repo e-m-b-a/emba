@@ -55,10 +55,28 @@ if [[ -d "$EMBA_EXT_DIR"/trickest-cve ]]; then
     mv /tmp/trickest_db-cleaned.txt "$TRICKEST_DB_PATH" || (echo "[-] Something was going wrong during trickest update" && exit 1)
   fi
 
+  # remove non existent sites - should we really crawl all urls?:
+  if [[ -f /tmp/trickest_db-cleaned-DISABLED.txt ]]; then
+    rm "$TRICKEST_DB_PATH" || true
+    while read -r TRICKEST_ENTRY; do
+      TRICKEST_FS="$(echo "$TRICKEST_ENTRY" | cut -d: -f1)"
+      TRICKEST_URL="$(echo "$TRICKEST_ENTRY" | cut -d: -f2-)"
+      echo "[*] Testing $TRICKEST_URL for reachability"
+      RETURN_CODE=$(curl -I -s -o /dev/null -w "%{http_code}" "$TRICKEST_URL" | head -1 || true)
+      if [[ "$RETURN_CODE" -ne 404 ]]; then
+        echo "[+] Valid URL $TRICKEST_URL found"
+        echo "$TRICKEST_FS:$TRICKEST_URL" >> "$TRICKEST_DB_PATH"
+      fi
+    done < /tmp/trickest_db-cleaned.txt
+  else
+    exit 1
+  fi
+
   if [[ -f "$TRICKEST_DB_PATH" ]]; then
     echo -e "${GREEN}[+] Trickest CVE database now has $ORANGE$(wc -l "$TRICKEST_DB_PATH" | awk '{print $1}')$GREEN exploit entries (after update)."
     echo -e "${GREEN}[+] Before update: $ORANGE$TRICKEST_DB_ENTRIES_INIT$NC."
   fi
 else
   echo "[-] No update of the Trickest exploit database performed."
+  exit 1
 fi

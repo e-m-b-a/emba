@@ -1591,9 +1591,10 @@ write_network_config_to_filesystem() {
     # if there were missing files found -> we try to fix this now
     if [[ -v MISSING_FILES[@] ]]; then
       for FILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
-        print_output "[!] MISSING_FILE: ${FILE_PATH_MISSING}"
+        [[ "${FILE_PATH_MISSING}" == *"firmadyne"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/sys/"* ]] && continue
+        print_output "[!] MISSING_FILE: ${FILE_PATH_MISSING}"
 
         FILENAME_MISSING=$(basename "${FILE_PATH_MISSING}")
         print_output "[*] Found missing area ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"

@@ -665,15 +665,19 @@ main() {
 
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
-    if ! docker images | grep -qE "emba[[:space:]]*latest"; then
-      sleep 1
+    # try it 10 times before exit
+    local CNT_DOCK=0
+    for CNT_DOCK in {1..10}; do
       if ! docker images | grep -qE "emba[[:space:]]*latest"; then
-        print_output "[*] Available docker images:" "no_log"
-        docker images | grep -E "emba[[:space:]]*latest" || true
-        print_output "[-] EMBA docker not ready!" "no_log"
+        sleep 1
+      else
+        break
+      fi
+      if [[ "$CNT_DOCK" -ge 10 ]]; then
+        print_output "[-] EMBA docker environment not ready!" "no_log"
         exit 1
       fi
-    fi
+    done
 
     print_output "[*] EMBA initializes docker container.\\n" "no_log"
 

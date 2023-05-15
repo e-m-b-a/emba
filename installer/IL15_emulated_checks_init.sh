@@ -51,6 +51,9 @@ IL15_emulated_checks_init() {
     # print_tool_info "dbus-x11" 1
     # print_tool_info "g++" 1
     # needed for cutycapt
+    #
+    # future extension
+    print_pip_info "upnpclient"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -109,6 +112,9 @@ IL15_emulated_checks_init() {
         mkdir external/var_lib_nikto
         cp -pr /var/lib/nikto external/var_lib_nikto
       fi
+
+      # future extension
+      pip_install "upnpclient"
 
       ;;
     esac
