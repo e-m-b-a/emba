@@ -196,7 +196,7 @@ ask_chatgpt(){
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
           print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")" "no_log"
           head -n -2 "$CONFIG_DIR/gpt_template.json" > "$TMP_DIR/chat.json"
-          CHATGPT_CODE_=$(sed 's/"/\\\"/g;s/\\\\\"/\\\"/g' "$SCRIPT_PATH_TMP_" | tr -d '[:space:]')
+          CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "$SCRIPT_PATH_TMP_" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> "$TMP_DIR/chat.json"
           HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
