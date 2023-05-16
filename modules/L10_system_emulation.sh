@@ -225,7 +225,7 @@ create_emulation_filesystem() {
 
   print_output "[*] Create Qemu filesystem for emulation - $ROOT_PATH.\\n"
   IMAGE_SIZE="$(du -b --max-depth=0 "$ROOT_PATH" | awk '{print $1}')"
-  IMAGE_SIZE=$((IMAGE_SIZE + 200 * 1024 * 1024))
+  IMAGE_SIZE=$((IMAGE_SIZE + 400 * 1024 * 1024))
 
   print_output "[*] Size of filesystem for emulation - $ORANGE$IMAGE_SIZE$NC.\\n"
   print_output "[*] Name of filesystem for emulation - $ORANGE$IMAGE_NAME$NC.\\n"
@@ -258,7 +258,7 @@ create_emulation_filesystem() {
   if mount | grep -q "$MNT_POINT"; then
 
     print_output "[*] Copy extracted root filesystem to new QEMU image"
-    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || true
+    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || (print_output "[-] Warning: Root filesystem not copied!" && return)
 
     if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]] && [[ $(find "$MNT_POINT" -type l | wc -l) -lt 10 ]]; then
       print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
