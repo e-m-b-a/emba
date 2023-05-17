@@ -139,7 +139,7 @@ S14_weak_func_radare_check()
 
     if [[ -f "$TMP_DIR"/S14_STRCPY_CNT.tmp ]]; then
       STRCPY_CNT=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S14_STRCPY_CNT.tmp)
-      FCT_CTN="${STRCPY_CNT}"
+      FCT_CNT="${STRCPY_CNT}"
     elif [[ -f "$TMP_DIR"/S14_FCT_CNT.tmp ]]; then
       # FCT_CNT respects also other functions
       FCT_CNT=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S14_FCT_CNT.tmp)

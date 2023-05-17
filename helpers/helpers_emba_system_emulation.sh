@@ -49,7 +49,7 @@ restart_emulation() {
   elif [[ "$STATE_CHECK" == "HPING" ]]; then
     hping_check "${IP_ADDRESS}"
   elif [[ "$STATE_CHECK" == "TCP" ]]; then
-    local PORT=80
+    # local PORT=80
     print_output "[-] Check currently not implemented!"
     # tcp_check "${IP_ADDRESS}" "${PORT}"
   fi
