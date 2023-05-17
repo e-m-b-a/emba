@@ -489,7 +489,7 @@ main_emulation() {
       sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "$INIT_OUT"
     fi
 
-    handle_fs_mounts
+    handle_fs_mounts "${FS_MOUNTS[@]}"
 
     print_output "[*] Add network.sh entry to $ORANGE$INIT_OUT$NC"
 
@@ -853,6 +853,7 @@ handle_fs_mounts() {
   # Next we are trying to find them in the extracted data. If we identify something
   # with jffs2 in the name we copy it to the original root filesystem
   # This is very dirty but if it works ... it works ;)
+  local FS_MOUNTS=("$@")
 
   for FS_MOUNT in "${FS_MOUNTS[@]}"; do
     local MOUNT_PT=""
@@ -866,7 +867,7 @@ handle_fs_mounts() {
     MOUNT_PT=$(echo "$FS_MOUNT" | awk '{print $NF}')
     MOUNT_FS=$(echo "$FS_MOUNT" | grep " \-t " | sed 's/.*-t //g' | awk '{print $1}')
     # we test for paths including the MOUNT_FS part like "jffs2" in the path
-    FS_FIND=$(find "$LOG_DIR"/firmware -path "*/$MOUNT_FS*" | head -1 || true)
+    FS_FIND=$(find "$LOG_DIR"/firmware -path "*/*$MOUNT_FS*_extract" | head -1 || true)
 
     print_output "[*] Identified mount point: $ORANGE$MOUNT_PT$NC"
     print_output "[*] Identified mounted fs: $ORANGE$MOUNT_FS$NC"
