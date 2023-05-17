@@ -838,10 +838,10 @@ print_running_modules() {
   while true; do
     local STARTED_EMBA_PROCESSES=()
     local EMBA_STARTED_PROC=""
-    mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${{MAIN_LOG_FILE}" | awk '{print $9}'|| true)
+    mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${MAIN_LOG_FILE}" | awk '{print $9}'|| true)
 
     for EMBA_STARTED_PROC in "${STARTED_EMBA_PROCESSES[@]}"; do
-      if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${{MAIN_LOG_FILE}"; then
+      if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${MAIN_LOG_FILE}"; then
         print_output "[*] EMBA module ${GREEN}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
       fi
     done
