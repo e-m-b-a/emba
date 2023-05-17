@@ -116,7 +116,6 @@ IF20_cve_search() {
         fi
 
         cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
-
         if [[ "$CVE_INST" -eq 1 ]]; then
           if ! dpkg -s libssl1.1 &>/dev/null; then
             # libssl1.1 missing
@@ -164,6 +163,7 @@ IF20_cve_search() {
             mongod --config /etc/mongod.conf &
           fi
 
+          cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
           echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
           CVE_INST=1
           echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
