@@ -915,11 +915,20 @@ handle_fs_mounts() {
         print_output "[*] Creating target directory $MNT_POINT$MOUNT_PT"
         mkdir -p "$MNT_POINT""$MOUNT_PT"
       fi
-      print_output "[*] Let's copy the identified area to the root filesystem"
+      print_output "[*] Let's copy the identified area to the root filesystem - $ORANGE$N_PATH$NC to $ORANGE$MNT_POINT$MOUNT_PT$NC"
       cp -pr "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
-      print_output "[*] Target directory: $MNT_POINT$MOUNT_PT"
       find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     done
+  done
+
+  # Todo: move this to somewhere, where we only need to do this once
+  print_output "[*] Fix script and ELF permissions - again"
+  readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
+  for BINARY_L10 in "${BINARIES_L10[@]}"; do
+    [[ -x "${BINARY_L10}" ]] && continue
+    if [[ -f "$BINARY_L10" ]]; then
+      chmod +x "$BINARY_L10"
+    fi
   done
 
   # now we need to startup the inferFile/inferService script again

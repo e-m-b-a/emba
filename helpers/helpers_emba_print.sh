@@ -834,17 +834,21 @@ print_notification() {
 }
 
 print_running_modules() {
-  sleep 1h
+  sleep 1m
   while true; do
     local STARTED_EMBA_PROCESSES=()
     local EMBA_STARTED_PROC=""
-    mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${MAIN_LOG_FILE}" | awk '{print $9}'|| true)
+    mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${LOG_DIR}""/""${MAIN_LOG_FILE}" | awk '{print $9}'|| true)
 
     for EMBA_STARTED_PROC in "${STARTED_EMBA_PROCESSES[@]}"; do
-      if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${MAIN_LOG_FILE}"; then
-        print_output "[*] EMBA module ${GREEN}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
+      if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+        print_output "[*] EMBA module ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
       fi
     done
-    sleep 1h
+    sleep 1m
   done
+}
+
+show_runtime() {
+  date -ud "@$SECONDS" +"$(( $SECONDS/3600/24 )) days and %H:%M:%S"
 }

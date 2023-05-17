@@ -756,9 +756,9 @@ main() {
     print_ln "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "main"
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Pre-checking phase finished"
 
@@ -792,9 +792,9 @@ main() {
     print_ln "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "main"
+      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Testing phase ended"
 
@@ -819,9 +819,9 @@ main() {
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "main"
+      print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] System emulation ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] System emulation ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "System emulation phase ended"
   fi
@@ -853,11 +853,11 @@ main() {
     fi
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "main"
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
       write_notification "EMBA finished analysis"
       rm -r "${TMP_DIR}" 2>/dev/null || true
     else
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)"" \\n" "no_log"
+      print_output "[!] Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_grep_log "$(date)" "TIMESTAMP"
     write_grep_log "$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)" "DURATION"
