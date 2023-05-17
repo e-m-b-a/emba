@@ -850,5 +850,5 @@ print_running_modules() {
 }
 
 show_runtime() {
-  date -ud "@$SECONDS" +"$(( $SECONDS/3600/24 )) days and %H:%M:%S"
+  date -ud "@$SECONDS" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"
 }
