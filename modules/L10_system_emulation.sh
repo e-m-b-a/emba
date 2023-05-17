@@ -138,7 +138,7 @@ L10_system_emulation() {
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
       local SYS_EMUL_POS_ENTRY=""
-      SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)"
+      SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "$SYS_EMUL_POS_ENTRY")")"
 
       IP_ADDRESS_=$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
@@ -152,7 +152,12 @@ L10_system_emulation() {
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis"
         print_ln
-        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
+        if grep -q "ICMP not ok" "$LOG_DIR"/emulator_online_results.log; then
+          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "HPING"
+        else
+          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "PING"
+        fi
+
         # we should get TCP="ok" and SYS_ONLINE=1 back
         if [[ "$SYS_ONLINE" -ne 1 ]]; then
           print_output "[-] System recovery went wrong. No further analysis possible"
