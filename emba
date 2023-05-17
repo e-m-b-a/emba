@@ -480,6 +480,13 @@ main() {
       echo "GID: $(id -g "${SUDO_USER:-${USER}}")" >> "${LOG_DIR}"/orig_user.log
     fi
 
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
+      print_running_modules &
+      RUN_MOD_PID="$!"
+      store_kill_pids "${RUN_MOD_PID}"
+      disown "${RUN_MOD_PID}" 2> /dev/null || true
+    fi
+
     # Print additional information about the firmware (-Y, -X, -Z, -N)
     print_firmware_info "${FW_VENDOR}" "${FW_VERSION}" "${FW_DEVICE}" "${FW_NOTES}"
     if [[ "${KERNEL}" -ne 1 ]] && [[ "${CONTAINER_EXTRACT}" -ne 1 ]] && [[ "${ONLY_DEP}" -eq 0 ]]; then
