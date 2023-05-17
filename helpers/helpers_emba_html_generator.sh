@@ -92,6 +92,7 @@ add_link_tags() {
     readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "$LINK_FILE" | cut -d':' -f1 )
     for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
       REF_LINK="$(sed "$REF_LINK_NUMBER""q;d" "$LINK_FILE" | cut -c12- | cut -d'<' -f1 || true)"
+      URL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "$REF_LINK" | cut -d"#" -f1)" ]] ; then
         if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
           REF_ANCHOR=""
@@ -150,7 +151,6 @@ add_link_tags() {
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
         fi
-      URL_REGEX='(www.|https?|ftp|file):\/\/'
       elif [[ "$REF_LINK" =~ $URL_REGEX ]] ; then
         LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
         while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
