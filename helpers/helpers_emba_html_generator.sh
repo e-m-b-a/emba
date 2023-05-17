@@ -269,7 +269,7 @@ add_link_tags() {
       for SNYK_KEY in "${SNYK_KEY_F[@]}" ; do
         SNYK_ID_LINE="$(echo "$SNYK_KEY" | cut -d ":" -f 1)"
         SNYK_ID_STRING="$(echo "$SNYK_KEY" | cut -d ":" -f 2-)"
-        readarray -t SNYK_KEY_STRING_ARR < <(echo "$SNYK_ID_STRING" | tr " " "\n" | grep "SNYK-" | uniq)
+        readarray -t SNYK_KEY_STRING_ARR < <(echo "$SNYK_ID_STRING" | tr " " "\n" | grep "SNYK-" | uniq || true)
         for SNYK_KEY_ELEM in "${SNYK_KEY_STRING_ARR[@]}" ; do
           HTML_LINK="$(echo "$SNYK_LINK" | sed -e "s@LINKNAME@$SNYK_KEY_ELEM@g" | sed -e "s@LINK@$SNYK_KEY_ELEM@g")""$SNYK_KEY_ELEM""$LINK_END"
           LINK_COMMAND_ARR+=( "$SNYK_ID_LINE"'s@'"$SNYK_KEY_ELEM"'@'"$HTML_LINK"'@' )
@@ -282,7 +282,7 @@ add_link_tags() {
       for PSS_KEY in "${PSS_KEY_F[@]}" ; do
         PSS_ID_LINE="$(echo "$PSS_KEY" | cut -d ":" -f 1)"
         PSS_ID_STRING="$(echo "$PSS_KEY" | cut -d ":" -f 2-)"
-        readarray -t PSS_KEY_STRING_ARR < <(echo "$PSS_ID_STRING" | tr " " "\n" | grep -E "[0-9]+/.*\.html" | uniq)
+        readarray -t PSS_KEY_STRING_ARR < <(echo "$PSS_ID_STRING" | tr " " "\n" | grep -E "[0-9]+/.*\.html" | uniq || true)
         for PSS_KEY_NAME in "${PSS_KEY_STRING_ARR[@]}" ; do
           # PSS_KEY_NAME="$(echo "$PSS_KEY_ELEM" | tr "/" "_")"
           HTML_LINK="$(echo "$PSS_LINK" | sed -e "s@LINKNAME@$PSS_KEY_NAME@g" | sed -e "s@LINK@$PSS_KEY_NAME@g")""$PSS_KEY_NAME""$LINK_END"

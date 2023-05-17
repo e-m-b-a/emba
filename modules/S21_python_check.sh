@@ -50,7 +50,7 @@ S21_python_check()
     [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S21[@]}"
 
     if [[ -f "$TMP_DIR"/S21_VULNS.tmp ]]; then
-      S21_PY_VULNS=$(awk '{sum += $1 } END { print sum }'"$TMP_DIR"/S21_VULNS.tmp)
+      S21_PY_VULNS=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S21_VULNS.tmp)
     fi
 
     if [[ "$S21_PY_VULNS" -gt 0 ]]; then
