@@ -834,7 +834,7 @@ print_notification() {
 }
 
 print_running_modules() {
-  sleep 1m
+  sleep 1h
   while true; do
     local STARTED_EMBA_PROCESSES=()
     local EMBA_STARTED_PROC=""
@@ -845,7 +845,7 @@ print_running_modules() {
         print_output "[*] EMBA module ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
       fi
     done
-    sleep 1m
+    sleep 1h
   done
 }
 
