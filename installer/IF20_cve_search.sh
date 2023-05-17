@@ -114,8 +114,10 @@ IF20_cve_search() {
         else
             echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
         fi
-        if [[ "$CVE_INST" -eq 1 ]]; then
 
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+
+        if [[ "$CVE_INST" -eq 1 ]]; then
           if ! dpkg -s libssl1.1 &>/dev/null; then
             # libssl1.1 missing
             echo -e "\\n""$BOLD""Installing libssl1.1 for mongodb!""$NC"
@@ -128,12 +130,18 @@ IF20_cve_search() {
                 # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
               if [[ "$(file external/libssl.deb)" == *"Debian binary package (format 2.0), with control.tar.xz, data compression xz"* ]]; then
                 break
+              else
+                [[ -f external/libssl.deb ]] && rm external/libssl.deb
+                [[ -f external/libssl-dev.deb ]] && rm external/libssl-dev.deb
               fi
             done
+
+            ! [[ -f external/libssl.deb ]] && ( "Could not install libssl" && exit 1)
+            ! [[ -f external/libssl-dev.deb ]] && ( "Could not install libssl-dev" && exit 1)
             dpkg -i external/libssl.deb
             dpkg -i external/libssl-dev.deb
-            rm external/libssl.deb
-            rm external/libssl-dev.deb
+            [[ -f external/libssl.deb ]] && rm external/libssl.deb
+            [[ -f external/libssl-dev.deb ]] && rm external/libssl-dev.deb
           fi
 
           wget --no-check-certificate -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/mongodb.gpg > /dev/null
