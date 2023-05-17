@@ -45,18 +45,18 @@ restart_emulation() {
   cd "$HOME_PATH" || (print_output "[-] EMBA path not available?")
 
   if [[ "$STATE_CHECK" == "PING" ]]; then
-    ping_check "${IP_ADDRESS}"
+    ping_check "${IP_ADDRESS_}"
   elif [[ "$STATE_CHECK" == "HPING" ]]; then
-    hping_check "${IP_ADDRESS}"
+    hping_check "${IP_ADDRESS_}"
   elif [[ "$STATE_CHECK" == "TCP" ]]; then
     # local PORT=80
     print_output "[-] Check currently not implemented!"
-    # tcp_check "${IP_ADDRESS}" "${PORT}"
+    # tcp_check "${IP_ADDRESS_}" "${PORT}"
   fi
 }
 
 ping_check() {
-  local IP_ADDRESS="${1:-}"
+  local IP_ADDRESS_="${1:-}"
   local COUNTER=0
 
   while ! [[ "$(hping3 -n -c 1 "$IP_ADDRESS_" 2> /dev/null | grep -c "^len=")" -gt 0 ]]; do
@@ -81,7 +81,7 @@ ping_check() {
 }
 
 hping_check() {
-  local IP_ADDRESS="${1:-}"
+  local IP_ADDRESS_="${1:-}"
   local COUNTER=0
 
   while ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; do
