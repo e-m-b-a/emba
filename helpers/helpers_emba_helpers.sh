@@ -174,7 +174,7 @@ cleaner() {
   fi
   export CLEANED=1
   if [[ "$INTERRUPT_CLEAN" -eq 1 ]]; then
-    print_output "[!] Test ended on ""$(date)"" and took about ""$(date -d@"$SECONDS" -u +%H:%M:%S)"" \\n" "no_log"
+    print_output "[!] Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     exit 1
   fi
 }

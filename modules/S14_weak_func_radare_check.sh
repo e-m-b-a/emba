@@ -29,6 +29,7 @@ S14_weak_func_radare_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local STRCPY_CNT=0
+  local FCT_CNT=0
 
   if [[ -n "$ARCH" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
@@ -139,15 +140,20 @@ S14_weak_func_radare_check()
 
     if [[ -f "$TMP_DIR"/S14_STRCPY_CNT.tmp ]]; then
       STRCPY_CNT=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S14_STRCPY_CNT.tmp)
+      FCT_CNT="${STRCPY_CNT}"
+    fi
+    if [[ "$FCT_CNT" -eq 0 ]] && [[ -f "$TMP_DIR"/S14_FCT_CNT.tmp ]]; then
+      # FCT_CNT respects also other functions
+      FCT_CNT=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S14_FCT_CNT.tmp)
     fi
 
     write_log ""
-    write_log "[*] Statistics:$STRCPY_CNT"
+    write_log "[*] Statistics:${STRCPY_CNT}"
     write_log ""
     write_log "[*] Statistics1:$ARCH"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$STRCPY_CNT"
+  module_end_log "${FUNCNAME[0]}" "$FCT_CNT"
 }
 
 radare_function_check_PPC32(){
@@ -480,6 +486,7 @@ radare_print_top10_statistics() {
           fi
         done
         print_ln
+        echo "${#RESULTS[@]}" >> "$TMP_DIR"/S14_FCT_CNT.tmp
       fi  
     done
   else

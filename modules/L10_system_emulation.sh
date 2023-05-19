@@ -138,7 +138,7 @@ L10_system_emulation() {
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
       local SYS_EMUL_POS_ENTRY=""
-      SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k6 -n -r | head -1 || true)"
+      SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "$SYS_EMUL_POS_ENTRY")")"
 
       IP_ADDRESS_=$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
@@ -152,7 +152,12 @@ L10_system_emulation() {
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis"
         print_ln
-        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
+        if grep -q "ICMP not ok" "$LOG_DIR"/emulator_online_results.log; then
+          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "HPING"
+        else
+          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "PING"
+        fi
+
         # we should get TCP="ok" and SYS_ONLINE=1 back
         if [[ "$SYS_ONLINE" -ne 1 ]]; then
           print_output "[-] System recovery went wrong. No further analysis possible"
@@ -225,7 +230,7 @@ create_emulation_filesystem() {
 
   print_output "[*] Create Qemu filesystem for emulation - $ROOT_PATH.\\n"
   IMAGE_SIZE="$(du -b --max-depth=0 "$ROOT_PATH" | awk '{print $1}')"
-  IMAGE_SIZE=$((IMAGE_SIZE + 200 * 1024 * 1024))
+  IMAGE_SIZE=$((IMAGE_SIZE + 400 * 1024 * 1024))
 
   print_output "[*] Size of filesystem for emulation - $ORANGE$IMAGE_SIZE$NC.\\n"
   print_output "[*] Name of filesystem for emulation - $ORANGE$IMAGE_NAME$NC.\\n"
@@ -258,7 +263,7 @@ create_emulation_filesystem() {
   if mount | grep -q "$MNT_POINT"; then
 
     print_output "[*] Copy extracted root filesystem to new QEMU image"
-    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || true
+    cp -prf "$ROOT_PATH"/* "$MNT_POINT"/ || (print_output "[-] Warning: Root filesystem not copied!" && return)
 
     if [[ -f "$HELP_DIR"/fix_bins_lnk_emulation.sh ]] && [[ $(find "$MNT_POINT" -type l | wc -l) -lt 10 ]]; then
       print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
@@ -310,15 +315,22 @@ create_emulation_filesystem() {
 
     if [[ -f "$MODULE_SUB_PATH/injection_check.sh" ]]; then
       # injection checker - future extension
-      cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/bin/a || true
-      cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/sbin/a || true
-      chmod a+x "${MNT_POINT}/bin/a" || true
-      chmod a+x "${MNT_POINT}/sbin/a" || true
       INJECTION_MARKER="$RANDOM"
-      sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/bin/a || true
-      sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/sbin/a || true
-      print_output "[*] Generated injection scripts with marker ${ORANGE}${INJECTION_MARKER}${NC}."
-      cat "${MNT_POINT}"/bin/a
+      if [[ -d "${MNT_POINT}"/bin ]]; then
+        cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/bin/a || true
+        chmod a+x "${MNT_POINT}/bin/a" || true
+        sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/bin/a || true
+      fi
+      if [[ -d "${MNT_POINT}"/sbin ]]; then
+        cp "$MODULE_SUB_PATH/injection_check.sh" "${MNT_POINT}"/sbin/a || true
+        chmod a+x "${MNT_POINT}/sbin/a" || true
+        sed -i 's/asdfqwertz/'"d34d_${INJECTION_MARKER}"'/' "${MNT_POINT}"/sbin/a || true
+      fi
+      if [[ -f "${MNT_POINT}/sbin/a" ]] || [[ -f "${MNT_POINT}/bin/a" ]]; then
+        print_output "[*] Generated injection scripts with marker ${ORANGE}${INJECTION_MARKER}${NC}."
+        cat "${MNT_POINT}"/bin/a
+      fi
+
       # setup a marker for traversal tests
       echo "EMBA_${INJECTION_MARKER}_EMBA" > "${MNT_POINT}"/dir_trav_check
       echo "$INJECTION_MARKER" > "$LOG_PATH_MODULE"/injection_marker.log
@@ -477,7 +489,7 @@ main_emulation() {
       sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "$INIT_OUT"
     fi
 
-    handle_fs_mounts
+    handle_fs_mounts "${FS_MOUNTS[@]}"
 
     print_output "[*] Add network.sh entry to $ORANGE$INIT_OUT$NC"
 
@@ -841,6 +853,7 @@ handle_fs_mounts() {
   # Next we are trying to find them in the extracted data. If we identify something
   # with jffs2 in the name we copy it to the original root filesystem
   # This is very dirty but if it works ... it works ;)
+  local FS_MOUNTS=("$@")
 
   for FS_MOUNT in "${FS_MOUNTS[@]}"; do
     local MOUNT_PT=""
@@ -854,7 +867,7 @@ handle_fs_mounts() {
     MOUNT_PT=$(echo "$FS_MOUNT" | awk '{print $NF}')
     MOUNT_FS=$(echo "$FS_MOUNT" | grep " \-t " | sed 's/.*-t //g' | awk '{print $1}')
     # we test for paths including the MOUNT_FS part like "jffs2" in the path
-    FS_FIND=$(find "$LOG_DIR"/firmware -path "*/$MOUNT_FS*" | head -1 || true)
+    FS_FIND=$(find "$LOG_DIR"/firmware -path "*/*$MOUNT_FS*_extract" | head -1 || true)
 
     print_output "[*] Identified mount point: $ORANGE$MOUNT_PT$NC"
     print_output "[*] Identified mounted fs: $ORANGE$MOUNT_FS$NC"
@@ -902,11 +915,20 @@ handle_fs_mounts() {
         print_output "[*] Creating target directory $MNT_POINT$MOUNT_PT"
         mkdir -p "$MNT_POINT""$MOUNT_PT"
       fi
-      print_output "[*] Let's copy the identified area to the root filesystem"
+      print_output "[*] Let's copy the identified area to the root filesystem - $ORANGE$N_PATH$NC to $ORANGE$MNT_POINT$MOUNT_PT$NC"
       cp -pr "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
-      print_output "[*] Target directory: $MNT_POINT$MOUNT_PT"
       find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     done
+  done
+
+  # Todo: move this to somewhere, where we only need to do this once
+  print_output "[*] Fix script and ELF permissions - again"
+  readarray -t BINARIES_L10 < <( find "$MNT_POINT" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
+  for BINARY_L10 in "${BINARIES_L10[@]}"; do
+    [[ -x "${BINARY_L10}" ]] && continue
+    if [[ -f "$BINARY_L10" ]]; then
+      chmod +x "$BINARY_L10"
+    fi
   done
 
   # now we need to startup the inferFile/inferService script again
@@ -1535,7 +1557,7 @@ setup_network_emulation() {
   HOSTNETDEV_0="$TAPDEV_0"
   print_output "[*] Creating TAP device $ORANGE$TAPDEV_0$NC..."
   write_script_exec "echo -e \"Creating TAP device $TAPDEV_0\n\"" "$ARCHIVE_PATH"/run.sh 0
-  write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation\" && exit 1)" "$ARCHIVE_PATH"/run.sh 0
+  write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation - install uml-utilities package\" && exit 1)" "$ARCHIVE_PATH"/run.sh 0
   write_script_exec "tunctl -t $TAPDEV_0" "$ARCHIVE_PATH"/run.sh 1
 
   if [[ "$VLAN_ID" != "NONE" ]]; then
@@ -1594,19 +1616,21 @@ write_network_config_to_filesystem() {
         [[ "${FILE_PATH_MISSING}" == *"firmadyne"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/sys/"* ]] && continue
+        [[ "${FILE_PATH_MISSING}" == *"/dev/"* ]] && continue
         print_output "[!] MISSING_FILE: ${FILE_PATH_MISSING}"
 
         FILENAME_MISSING=$(basename "${FILE_PATH_MISSING}")
+        [[ "${FILENAME_MISSING}" == '*' ]] && continue
         print_output "[*] Found missing area ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
         DIR_NAME_MISSING=$(dirname "${FILE_PATH_MISSING}")
         if ! [[ -d "${MNT_POINT}""${DIR_NAME_MISSING}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}${DIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
           mkdir -p "${MNT_POINT}""${DIR_NAME_MISSING}"
         fi
-        FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1)
-        if [[ -f ${FOUND_MISSING} ]]; then
+        FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1 || true)
+        if [[ -f ${FOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""${DIR_NAME_MISSING}"/"${FOUND_MISSING}" ]]; then
           print_output "[*] Recover missing file ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
-          cp "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/
+          cp "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/ || true
         fi
       done
     fi
@@ -2236,6 +2260,9 @@ write_results() {
   fi
   [[ "${TCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"
+  if ! [[ -f "$LOG_DIR"/emulator_online_results.log ]]; then
+    echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE/ETH_INT/INIT_FILE);ARCHIVE_PATH_;R_PATH" > "$LOG_DIR"/emulator_online_results.log
+  fi
   echo "$FIRMWARE_PATH_orig;$RESULT_SOURCE;Booted $BOOTED;ICMP $ICMP;TCP-0 $TCP_0;TCP $TCP;$TCP_SERV_CNT;IP address: $IP_ADDRESS_;Network mode: $NETWORK_MODE ($NETWORK_DEVICE/$ETH_INT/$INIT_FILE);$ARCHIVE_PATH_;$R_PATH_mod" >> "$LOG_DIR"/emulator_online_results.log
   print_bar ""
 }

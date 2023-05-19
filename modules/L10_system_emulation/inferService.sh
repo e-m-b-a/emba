@@ -16,6 +16,17 @@ NC="\033[0m"
 
 "${BUSYBOX}" echo "[*] Service detection running ..."
 
+# The manual starter can be used to write startup scripts manually and help
+# EMBA getting into the right direction
+# This script must be placed directly into the filesystem as /etc/manual.starter
+if [ -e /etc/manual.starter ]; then
+  if ! "${BUSYBOX}" grep -q "/etc/manual.starter" /firmadyne/service 2>/dev/null; then
+    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}manual starter service${NC}"
+    "${BUSYBOX}" echo -e -n "/etc/manual.starter\n" >> /firmadyne/service
+  fi
+fi
+
+
 if [ -e /etc/init.d/miniupnpd ]; then
   if ! "${BUSYBOX}" grep -q "/etc/init.d/miniupnpd" /firmadyne/service 2>/dev/null; then
     "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}miniupnpd service${NC}"
