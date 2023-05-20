@@ -31,9 +31,8 @@ L22_upnp_hnap_checks() {
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
-      if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
-        if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+      if ! system_online_check "${IP_ADDRESS_}"; then
+        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing UPnP/HNAP checks"
           module_end_log "${FUNCNAME[0]}" "$UPNP_UP"
           return
@@ -61,7 +60,8 @@ check_basic_upnp() {
   sub_module_title "UPnP enumeration for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
 
   if command -v upnpc > /dev/null; then
-    print_output "[*] UPnP scan with upnpc"
+    print_output "[*] UPnP scan with upnpc on interface $ORANGE$INTERFACE$NC"
+    ifconfig | tee -a "$LOG_FILE"
     upnpc -m "$INTERFACE" -P >> "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true
     if [[ -f "$LOG_PATH_MODULE"/upnp-discovery-check.txt ]]; then
       print_ln
@@ -124,7 +124,8 @@ check_basic_hnap() {
 
       if [[ -f "$LOG_PATH_MODULE"/hnap-discovery-check.txt ]]; then
         print_ln
-        tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/hnap-discovery-check.txt
+        # tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/hnap-discovery-check.txt
+        sed 's/></>\n</g' "$LOG_PATH_MODULE"/hnap-discovery-check.txt | tee -a "$LOG_FILE"
         print_ln
 
         HNAP_UP=$(grep -c "HNAP1" "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true)

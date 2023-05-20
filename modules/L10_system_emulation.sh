@@ -32,6 +32,7 @@ L10_system_emulation() {
   export TCP=""
   local MODULE_END=0
   local UNSUPPORTED_ARCH=0
+  export STATE_CHECK_MECHANISM="PING"
 
   if [[ "$FULL_EMULATION" -eq 1 && "$RTOS" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
@@ -57,10 +58,13 @@ L10_system_emulation() {
         export IP_ADDRESS_=""
         export IMAGE_NAME=""
         export ARCHIVE_PATH=""
+        local EMULATION_ENTRY=""
 
+        EMULATION_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1)"
         IP_ADDRESS_=$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
         IMAGE_NAME="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
         ARCHIVE_PATH="$OLD_LOG_DIR""/""$IMAGE_NAME"
+
         print_output "[*] Recovered IP address: $ORANGE$IP_ADDRESS_$NC"
         print_output "[*] Recovered IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
         print_output "[*] Recovered ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
@@ -68,8 +72,14 @@ L10_system_emulation() {
         if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
           print_output "[+] Startup script (run.sh) found in old logs ... restarting emulation process now"
 
-          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1
+          if [[ "${EMULATION_ENTRY}" == *"ICMP not ok"* ]]; then
+            print_output "[*] Testing system recovery with hping instead of ping" "no_log"
+            STATE_CHECK_MECHANISM="HPING"
+          fi
           # we should get TCP="ok" and SYS_ONLINE=1 back
+          if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
+            print_output "[-] System recovery went wrong. No further analysis possible" "no_log"
+          fi
         else
           print_output "[-] No archive path found in old logs ... restarting emulation process not possible"
         fi
@@ -78,7 +88,7 @@ L10_system_emulation() {
       if [[ "$SYS_ONLINE" -ne 1 ]] && [[ "$TCP" != "ok" ]]; then
         for R_PATH in "${ROOT_PATH[@]}" ; do
           print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
-          write_link "p59"
+          [[ -f "$LOG_DIR"/p55_unblob_extractor.txt ]] && write_link "p55"
 
           if [[ -n "$D_END" ]]; then
             TAPDEV_0="tap0_0"
@@ -94,7 +104,7 @@ L10_system_emulation() {
 
             if [[ "$ARCH_END" == "armbe"* ]] || [[ "$ARCH_END" == "mips64r2"* ]] || [[ "$ARCH_END" == "mips64_3"* ]]; then
               print_output "[-] Found NOT supported architecture $ORANGE$ARCH_END$NC"
-              write_link "p99"
+              [[ -f "$LOG_DIR"/p99_prepare_analyzer.txt ]] && write_link "p99"
               print_output "[-] Please open a new issue here: https://github.com/e-m-b-a/emba/issues"
               UNSUPPORTED_ARCH=1
               return
@@ -145,25 +155,23 @@ L10_system_emulation() {
       IMAGE_NAME="$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
       ARCHIVE_PATH="$LOG_PATH_MODULE""/""$IMAGE_NAME"
       print_ln
-      print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC"
-      print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
-      print_output "[*] Identified ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
+      print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC" "no_log"
+      print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC" "no_log"
+      print_output "[*] Identified ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC" "no_log"
 
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
-        print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis"
+        print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis" "no_log"
         print_ln
-        if grep -q "ICMP not ok" "$LOG_DIR"/emulator_online_results.log; then
-          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "HPING"
-        else
-          restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "PING"
+        if [[ "${SYS_EMUL_POS_ENTRY}" == *"ICMP not ok"* ]]; then
+          print_output "[*] Testing system recovery with hping instead of ping" "no_log"
+          STATE_CHECK_MECHANISM="HPING"
         fi
-
         # we should get TCP="ok" and SYS_ONLINE=1 back
-        if [[ "$SYS_ONLINE" -ne 1 ]]; then
-          print_output "[-] System recovery went wrong. No further analysis possible"
+        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
+          print_output "[-] System recovery went wrong. No further analysis possible" "no_log"
         fi
       else
-        print_output "[-] ${ORANGE}WARNING:$NC No archive path found in logs ... restarting emulation process for further analysis not possible"
+        print_output "[-] ${ORANGE}WARNING:$NC No archive path found in logs ... restarting emulation process for further analysis not possible" "no_log"
       fi
     fi
    fi
@@ -1617,7 +1625,7 @@ write_network_config_to_filesystem() {
         [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/sys/"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/dev/"* ]] && continue
-        print_output "[!] MISSING_FILE: ${FILE_PATH_MISSING}"
+        [[ "${FILE_PATH_MISSING}" == *"reboot"* ]] && continue
 
         FILENAME_MISSING=$(basename "${FILE_PATH_MISSING}")
         [[ "${FILENAME_MISSING}" == '*' ]] && continue

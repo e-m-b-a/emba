@@ -30,16 +30,19 @@ L20_snmp_checks() {
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
-      if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
-        if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+      if ! system_online_check "${IP_ADDRESS_}" ; then
+        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing SNMP checks"
           module_end_log "${FUNCNAME[0]}" "$SNMP_UP"
           return
         fi
       fi
-      check_basic_snmp "$IP_ADDRESS_"
-      check_snmp_vulns "$IP_ADDRESS_"
+      if [[ "${NMAP_PORTS_SERVICES[*]}" == *"snmp"* ]]; then
+        check_basic_snmp "$IP_ADDRESS_"
+        check_snmp_vulns "$IP_ADDRESS_"
+      else
+        print_output "[*] No SNMP services detected"
+      fi
     else
       print_output "[!] No IP address found"
     fi

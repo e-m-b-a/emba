@@ -38,9 +38,8 @@ L35_metasploit_check() {
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
-      if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
-        if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+      if ! system_online_check "${IP_ADDRESS_}"; then
+        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing Metasploit checks"
           module_end_log "${FUNCNAME[0]}" "$MODULE_END"
           return
