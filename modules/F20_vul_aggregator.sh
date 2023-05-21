@@ -1180,13 +1180,12 @@ get_systemmode_emulator() {
 get_systemmode_webchecks() {
   local L25_LOG="${1:-}"
   export VERSIONS_SYS_EMULATOR_WEB=()
-  # disabled for now
-  return
 
-  if [[ -f "$L25_LOG" ]]; then
-    print_output "[*] Collect version details of module $(basename "$L25_LOG")."
-    readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | grep -v "csv_rule" | sort -u || true)
-  fi
+  # disabled for now
+  # if [[ -f "$L25_LOG" ]]; then
+  #  print_output "[*] Collect version details of module $(basename "$L25_LOG")."
+  #  readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | grep -v "csv_rule" | sort -u || true)
+  # fi
 }
 
 get_msf_verified() {
