@@ -58,6 +58,7 @@ L10_system_emulation() {
         export IP_ADDRESS_=""
         export IMAGE_NAME=""
         export ARCHIVE_PATH=""
+        export HOSTNETDEV_0=""
         local EMULATION_ENTRY=""
 
         EMULATION_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1)"
@@ -71,6 +72,7 @@ L10_system_emulation() {
 
         if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
           print_output "[+] Startup script (run.sh) found in old logs ... restarting emulation process now"
+          HOSTNETDEV_0=$(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
 
           if [[ "${EMULATION_ENTRY}" == *"ICMP not ok"* ]]; then
             print_output "[*] Testing system recovery with hping instead of ping" "no_log"
@@ -147,6 +149,7 @@ L10_system_emulation() {
     if [[ $(grep -c "TCP ok" "$LOG_DIR"/emulator_online_results.log || true) -gt 0 ]]; then
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
+      export HOSTNETDEV_0=""
       local SYS_EMUL_POS_ENTRY=""
       SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "$SYS_EMUL_POS_ENTRY")")"
@@ -162,6 +165,7 @@ L10_system_emulation() {
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis" "no_log"
         print_ln
+        HOSTNETDEV_0=$(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
         if [[ "${SYS_EMUL_POS_ENTRY}" == *"ICMP not ok"* ]]; then
           print_output "[*] Testing system recovery with hping instead of ping" "no_log"
           STATE_CHECK_MECHANISM="HPING"
