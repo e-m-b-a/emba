@@ -79,6 +79,7 @@ S109_jtr_local_pw_cracking()
         john --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
         PID="$!"
       fi
+      sleep 5
 
       COUNT=0
       while [[ "$COUNT" -le "$JTR_TIMEOUT" ]];do
@@ -117,6 +118,7 @@ S109_jtr_local_pw_cracking()
             john --format="$JTR_FORMAT" --progress-every=120 "$LOG_PATH_MODULE"/jtr_hashes.txt 2>&1 | tee -a "$LOG_FILE" || true &
             PID="$!"
           fi
+          sleep 5
 
           while [[ "$COUNT" -le "$JTR_TIMEOUT" ]];do
             ((COUNT+=1))
