@@ -69,9 +69,8 @@ check_live_nmap_basic() {
     done
   else
     # if no Nmap results are found we initiate a scan
-    if ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-      restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
-      if ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+    if ! system_online_check "${IP_ADDRESS_}" ; then
+      if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
         print_output "[-] System not responding - Not performing Nmap checks"
         return
       fi

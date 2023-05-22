@@ -66,15 +66,15 @@ s22_phpinfo_check() {
 
 s22_vuln_check_semgrep() {
   sub_module_title "PHP script vulnerabilities - semgrep"
-  local PHP_SEMGREP_LOG="$LOG_PATH_MODULE"/semgrep_php_results.log
+  local PHP_SEMGREP_LOG="$LOG_PATH_MODULE"/semgrep_php_results_xml.log
   local S22_SEMGREP_VULNS=0
 
-  semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/php "$LOG_DIR"/firmware/ > "$PHP_SEMGREP_LOG" 2>&1 || true
+  semgrep --disable-version-check --junit-xml --config "$EXT_DIR"/semgrep-rules/php "$LOG_DIR"/firmware/ > "$PHP_SEMGREP_LOG" 2>&1 || true
 
   if [[ -f "$PHP_SEMGREP_LOG" ]]; then
-    S22_SEMGREP_ISSUES=$(grep "\ findings\." "$PHP_SEMGREP_LOG" | cut -d: -f2 | awk '{print $1}' || true)
+    S22_SEMGREP_ISSUES=$(grep -c "testcase name" "$PHP_SEMGREP_LOG" || true)
     S22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "$PHP_SEMGREP_LOG" || true)
-    S22_SEMGREP_SCRIPTS=$(grep "\ findings\." "$PHP_SEMGREP_LOG" | awk '{print $5}' || true)
+    S22_SEMGREP_SCRIPTS=$(grep "Scanning\ .* rules\." "$PHP_SEMGREP_LOG" | awk '{print $2}' || true)
     print_ln
 
     sub_module_title "Summary of php issues (semgrep)"

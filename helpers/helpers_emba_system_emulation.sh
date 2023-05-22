@@ -19,7 +19,7 @@ restart_emulation() {
   local IMAGE_NAME_="${2:-}"
   # restart_scan is used to indicate a restarted scan. For this we do not need to restart the network
   local RESTART_SCAN="${3:-0}"
-  local STATE_CHECK="${4:-"PING"}"
+  local STATE_CHECK_MECHANISM="${4:-"PING"}"
 
   if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
     print_output "[+] System with $ORANGE$IP_ADDRESS_$GREEN responding again - probably it recovered automatically.$NC"
@@ -44,63 +44,97 @@ restart_emulation() {
   ./run.sh &
   cd "$HOME_PATH" || (print_output "[-] EMBA path not available?")
 
-  if [[ "$STATE_CHECK" == "PING" ]]; then
-    ping_check "${IP_ADDRESS_}"
-  elif [[ "$STATE_CHECK" == "HPING" ]]; then
-    hping_check "${IP_ADDRESS_}"
-  elif [[ "$STATE_CHECK" == "TCP" ]]; then
+  if [[ "$STATE_CHECK_MECHANISM" == "PING" ]]; then
+    ping_check "${IP_ADDRESS_}" 1
+    return "$?"
+  elif [[ "$STATE_CHECK_MECHANISM" == "HPING" ]]; then
+    hping_check "${IP_ADDRESS_}" 1
+    return "$?"
+  elif [[ "$STATE_CHECK_MECHANISM" == "TCP" ]]; then
     # local PORT=80
-    print_output "[-] Check currently not implemented!"
+    print_output "[-] Check currently not implemented!" "no_log"
     # tcp_check "${IP_ADDRESS_}" "${PORT}"
+  fi
+  return 0
+}
+
+system_online_check() {
+  local IP_ADDRESS_="${1:-}"
+
+  if [[ "$STATE_CHECK_MECHANISM" == "PING" ]]; then
+    ping_check "${IP_ADDRESS_}" 0
+    return "$?"
+  elif [[ "$STATE_CHECK_MECHANISM" == "HPING" ]]; then
+    hping_check "${IP_ADDRESS_}" 0
+    return "$?"
+  elif [[ "$STATE_CHECK_MECHANISM" == "TCP" ]]; then
+    # local PORT=80
+    print_output "[-] Check currently not implemented ... we do a hping check" "no_log"
+    # tcp_check "${IP_ADDRESS_}" "${PORT}"
+    hping_check "${IP_ADDRESS_}" 0
+    return "$?"
   fi
 }
 
-ping_check() {
+hping_check() {
   local IP_ADDRESS_="${1:-}"
+  # print details or do it silent
+  local PRINT_OUTPUT="${2:-1}"
   local COUNTER=0
+  # RESTARTER is used to indicate a non reachable system for another wait period after the system is recovered
+  local RESTARTER=0
 
   while ! [[ "$(hping3 -n -c 1 "$IP_ADDRESS_" 2> /dev/null | grep -c "^len=")" -gt 0 ]]; do
-    print_output "[*] Waiting for restarted system ..."
+    RESTARTER=1
+    [[ "${PRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ... hping mode" "no_log"
     ((COUNTER+=1))
     if [[ "$COUNTER" -gt 50 ]]; then
-      print_output "[-] System not recovered"
+      [[ "${PRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"
       break
     fi
     sleep 6
   done
 
   if [[ "$(hping3 -n -c 1 "$IP_ADDRESS_" 2>/dev/null | grep -c "^len=")" -gt 0 ]]; then
-    print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address $ORANGE$IP_ADDRESS_$NC"
-    sleep 60
+    [[ "${PRINT_OUTPUT}" -eq 1 || "${RESTARTER}" -eq 1 ]] && print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address $ORANGE$IP_ADDRESS_$NC" "no_log"
+    [[ "$RESTARTER" -eq 1 ]] && sleep 60
     export SYS_ONLINE=1
     export TCP="ok"
+    return 0
   else
     export SYS_ONLINE=0
     export TCP="not ok"
+    return 1
   fi
 }
 
-hping_check() {
+ping_check() {
   local IP_ADDRESS_="${1:-}"
+  # print details or do it silent
+  local PRINT_OUTPUT="${2:-1}"
   local COUNTER=0
+  local RESTARTER=0
 
   while ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; do
-    print_output "[*] Waiting for restarted system ..."
+    RESTARTER=1
+    [[ "${PRINT_OUTPUT}" -eq 1 ]] && print_output "[*] Waiting for restarted system ..." "no_log"
     ((COUNTER+=1))
     if [[ "$COUNTER" -gt 50 ]]; then
-      print_output "[-] System not recovered"
+      [[ "${PRINT_OUTPUT}" -eq 1 ]] && print_output "[-] System not recovered" "no_log"
       break
     fi
     sleep 6
   done
 
   if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-    print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address $ORANGE$IP_ADDRESS_$NC"
-    sleep 60
+    [[ "${PRINT_OUTPUT}" -eq 1 || "${RESTARTER}" -eq 1 ]] && print_output "[*] System automatically maintained and should be available again in a few moments ... check ip address $ORANGE$IP_ADDRESS_$NC" "no_log"
+    [[ "$RESTARTER" -eq 1 ]] && sleep 60
     export SYS_ONLINE=1
     export TCP="ok"
+    return 0
   else
     export SYS_ONLINE=0
     export TCP="not ok"
+    return 1
   fi
 }
