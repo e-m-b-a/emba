@@ -3248,6 +3248,7 @@ CVE-2015-5617;Enorth Webpublisher CMS SQL Injection;https://packetstormsecurity.
 CVE-2015-5677;FreeBSD bsnmpd Information Disclosure;https://packetstormsecurity.com/files/135296/FreeBSD-bsnmpd-Information-Disclosure.html;unknown
 CVE-2015-5696;Dell Netvault Backup 10.0.1.24 Denial Of Service;https://packetstormsecurity.com/files/132928/Dell-Netvault-Backup-10.0.1.24-Denial-Of-Service.html;remote/DoS
 CVE-2015-5698;Siemens SIMATIC S7-1200 CPU Cross Site Request;https://packetstormsecurity.com/files/147789/Siemens-SIMATIC-S7-1200-CPU-Cross-Site-Request-Forgery.html;unknown
+CVE-2015-5698;Siemens SIMATIC S7-1200 Cross Site Request Forgery;https://packetstormsecurity.com/files/172315/Siemens-SIMATIC-S7-1200-Cross-Site-Request-Forgery.html;unknown
 CVE-2015-5699;Cumulus Linux 2.5.3 Privilege Escalation;https://packetstormsecurity.com/files/133244/Cumulus-Linux-2.5.3-Privilege-Escalation.html;local
 CVE-2015-5718;Websense Triton Content Manager 8.0.0 Build 1165;https://packetstormsecurity.com/files/132968/Websense-Triton-Content-Manager-8.0.0-Build-1165-Buffer-Overflow.html;unknown
 CVE-2015-5736;Fortinet FortiClient 5.2.3 Local Privilege Escalation;https://packetstormsecurity.com/files/148811/Fortinet-FortiClient-5.2.3-Local-Privilege-Escalation.html;local
@@ -9058,6 +9059,7 @@ CVE-2022-25765;pdfkit 0.8.7.2 Command Injection;https://packetstormsecurity.com/
 CVE-2022-25810;Transposh WordPress Translation 1.0.8.1 Improper Authorization;https://packetstormsecurity.com/files/167882/Transposh-WordPress-Translation-1.0.8.1-Improper-Authorization.html;unknown
 CVE-2022-25811;Transposh WordPress Translation 1.0.8.1 SQL Injection;https://packetstormsecurity.com/files/167885/Transposh-WordPress-Translation-1.0.8.1-SQL-Injection.html;unknown
 CVE-2022-25812;Transposh WordPress Translation 1.0.8.1 Remote Code Execution;https://packetstormsecurity.com/files/167887/Transposh-WordPress-Translation-1.0.8.1-Remote-Code-Execution.html;unknown
+CVE-2022-2591;FLEX Denial Of Service;https://packetstormsecurity.com/files/172323/FLEX-Denial-Of-Service.html;DoS
 CVE-2022-26088;BMC Remedy ITSM-Suite 9.1.10 / 20.02 HTML;https://packetstormsecurity.com/files/169863/BMC-Remedy-ITSM-Suite-9.1.10-20.02-HTML-Injection.html;unknown
 CVE-2022-26101;SAP Fiori Launchpad Cross Site Scripting;https://packetstormsecurity.com/files/167561/SAP-Fiori-Launchpad-Cross-Site-Scripting.html;unknown
 CVE-2022-26134;Confluence OGNL Injection Proof Of Concept;https://packetstormsecurity.com/files/167432/Confluence-OGNL-Injection-Proof-Of-Concept.html;remote
@@ -9503,8 +9505,10 @@ CVE-2023-24788;NotrinosERP 0.7 SQL Injection;https://packetstormsecurity.com/fil
 CVE-2023-25309;Rollout::UI 0.5 Cross Site Scripting;https://packetstormsecurity.com/files/172185/Rollout-UI-0.5-Cross-Site-Scripting.html;unknown
 CVE-2023-25355;CoreDial sipXcom sipXopenfire 21.04 Remote Command Execution;https://packetstormsecurity.com/files/171281/CoreDial-sipXcom-sipXopenfire-21.04-Remote-Command-Execution-Weak-Permissions.html;unknown
 CVE-2023-25356;CoreDial sipXcom sipXopenfire 21.04 Remote Command Execution;https://packetstormsecurity.com/files/171281/CoreDial-sipXcom-sipXopenfire-21.04-Remote-Command-Execution-Weak-Permissions.html;unknown
+CVE-2023-25394;VideoStream Local Privilege Escalation;https://packetstormsecurity.com/files/172395/VideoStream-Local-Privilege-Escalation.html;local
 CVE-2023-25428;Soft-o Free Password Manager 1.1.20 DLL Hijacking;https://packetstormsecurity.com/files/172259/Soft-o-Free-Password-Manager-1.1.20-DLL-Hijacking.html;unknown
 CVE-2023-25438;MilleGPG5 5.9.2 Local Privilege Escalation;https://packetstormsecurity.com/files/172052/MilleGPG5-5.9.2-Local-Privilege-Escalation.html;local
+CVE-2023-25440;CiviCRM 5.59.alpha1 Cross Site Scripting;https://packetstormsecurity.com/files/172470/CiviCRM-5.59.alpha1-Cross-Site-Scripting.html;unknown
 CVE-2023-2573;Advantech EKI-15XX Series Command Injection / Buffer;https://packetstormsecurity.com/files/172307/Advantech-EKI-15XX-Series-Command-Injection-Buffer-Overflow.html;unknown
 CVE-2023-2574;Advantech EKI-15XX Series Command Injection / Buffer;https://packetstormsecurity.com/files/172307/Advantech-EKI-15XX-Series-Command-Injection-Buffer-Overflow.html;unknown
 CVE-2023-2575;Advantech EKI-15XX Series Command Injection / Buffer;https://packetstormsecurity.com/files/172307/Advantech-EKI-15XX-Series-Command-Injection-Buffer-Overflow.html;unknown
@@ -9523,6 +9527,7 @@ CVE-2023-26774;Sales Tracker Management System 1.0 Insecure Direct;https://packe
 CVE-2023-26775;Monitorr 1.7.6 Shell Upload;https://packetstormsecurity.com/files/170974/Monitorr-1.7.6-Shell-Upload.html;remote
 CVE-2023-26776;Monitorr 1.7.6 Cross Site Scripting;https://packetstormsecurity.com/files/171705/Monitorr-1.7.6-Cross-Site-Scripting.html;unknown
 CVE-2023-26777;Uptime Kuma 1.19.6 Cross Site Scripting;https://packetstormsecurity.com/files/171699/Uptime-Kuma-1.19.6-Cross-Site-Scripting.html;unknown
+CVE-2023-26818;Telegram On macOS TCC Bypass;https://packetstormsecurity.com/files/172396/Telegram-On-macOS-TCC-Bypass.html;local
 CVE-2023-26876;Piwigo 13.5.0 SQL Injection;https://packetstormsecurity.com/files/172059/Piwigo-13.5.0-SQL-Injection.html;remote
 CVE-2023-26918;File Replication Pro 7.5.0 Insecure Permissions /;https://packetstormsecurity.com/files/171879/File-Replication-Pro-7.5.0-Insecure-Permissions-Privilege-Escalation.html;local
 CVE-2023-27010;Wondershare Dr Fone 12.9.6 Weak Permissions /;https://packetstormsecurity.com/files/171301/Wondershare-Dr-Fone-12.9.6-Weak-Permissions-Privilege-Escalation.html;unknown
@@ -9532,17 +9537,21 @@ CVE-2023-27179;GDidees CMS 3.9.1 Local File Disclosure /;https://packetstormsecu
 CVE-2023-27290;IBM Instana 243-0 Missing Authentication;https://packetstormsecurity.com/files/171770/IBM-Instana-243-0-Missing-Authentication.html;unknown
 CVE-2023-27350;PaperCut MF/NG Authentication Bypass / Remote Code;https://packetstormsecurity.com/files/171982/PaperCut-MF-NG-Authentication-Bypass-Remote-Code-Execution.html;unknown
 CVE-2023-27350;PaperCut NG/MG 22.0.4 Authentication Bypass;https://packetstormsecurity.com/files/172022/PaperCut-NG-MG-22.0.4-Authentication-Bypass.html;unknown
+CVE-2023-2745;WordPress Core 6.2 XSS / CSRF /;https://packetstormsecurity.com/files/172426/WordPress-Core-6.2-XSS-CSRF-Directory-Traversal.html;unknown
 CVE-2023-27568;Spryker Commerce OS 1.0 SQL Injection;https://packetstormsecurity.com/files/172257/Spryker-Commerce-OS-1.0-SQL-Injection.html;unknown
 CVE-2023-27571;Arris DG3450 AR01.02.056.18_041520_711.NCS.10 XSS / Missing;https://packetstormsecurity.com/files/171283/Arris-DG3450-AR01.02.056.18_041520_711.NCS.10-XSS-Missing-Authentication.html;unknown
 CVE-2023-27572;Arris DG3450 AR01.02.056.18_041520_711.NCS.10 XSS / Missing;https://packetstormsecurity.com/files/171283/Arris-DG3450-AR01.02.056.18_041520_711.NCS.10-XSS-Missing-Authentication.html;unknown
 CVE-2023-27823;Optoma 1080PSTX Firmware C02 Authentication Bypass;https://packetstormsecurity.com/files/172276/Optoma-1080PSTX-Firmware-C02-Authentication-Bypass.html;unknown
 CVE-2023-27890;MyBB Export User 2.0 Cross Site Scripting;https://packetstormsecurity.com/files/171421/MyBB-Export-User-2.0-Cross-Site-Scripting.html;unknown
+CVE-2023-28153;Kiddoware Kids Place Parental Control Android App;https://packetstormsecurity.com/files/172397/Kiddoware-Kids-Place-Parental-Control-Android-App-3.8.49-XSS-CSRF-File-Upload.html;unknown
 CVE-2023-28248;Windows Kernel CmpCleanupLightWeightPrepare Use-After-Free;https://packetstormsecurity.com/files/172283/Windows-Kernel-CmpCleanupLightWeightPrepare-Use-After-Free.html;unknown
 CVE-2023-28271;Windows Kernel Uninitialized Memory / Pointer Disclosure;https://packetstormsecurity.com/files/172298/Windows-Kernel-Uninitialized-Memory-Pointer-Disclosure.html;unknown
 CVE-2023-28293;Windows Kernel CmpDoReDoCreateKey / CmpDoReOpenTransKey;https://packetstormsecurity.com/files/172300/Windows-Kernel-CmpDoReDoCreateKey-CmpDoReOpenTransKey-Out-Of-Bounds-Read.html;unknown
 CVE-2023-28311;Microsoft Word Remote Code Execution;https://packetstormsecurity.com/files/171882/Microsoft-Word-Remote-Code-Execution.html;remote
 CVE-2023-28343;Altenergy Power Control Software C1.2.5 Command Injection;https://packetstormsecurity.com/files/171775/Altenergy-Power-Control-Software-C1.2.5-Command-Injection.html;unknown
 CVE-2023-28613;Shannon Baseband Integer Overflow;https://packetstormsecurity.com/files/172177/Shannon-Baseband-Integer-Overflow.html;unknown
+CVE-2023-29078;Kiddoware Kids Place Parental Control Android App;https://packetstormsecurity.com/files/172397/Kiddoware-Kids-Place-Parental-Control-Android-App-3.8.49-XSS-CSRF-File-Upload.html;unknown
+CVE-2023-29079;Kiddoware Kids Place Parental Control Android App;https://packetstormsecurity.com/files/172397/Kiddoware-Kids-Place-Parental-Control-Android-App-3.8.49-XSS-CSRF-File-Upload.html;unknown
 CVE-2023-29085;Shannon Baseband SIP Status Line Stack Buffer;https://packetstormsecurity.com/files/172288/Shannon-Baseband-SIP-Status-Line-Stack-Buffer-Overflow.html;unknown
 CVE-2023-29086;Shannon Baseband SIP Min-SE Header Stack Buffer;https://packetstormsecurity.com/files/172293/Shannon-Baseband-SIP-Min-SE-Header-Stack-Buffer-Overflow.html;unknown
 CVE-2023-29087;Shannon Baseband SIP Retry-After Header Heap Buffer;https://packetstormsecurity.com/files/172295/Shannon-Baseband-SIP-Retry-After-Header-Heap-Buffer-Overflow.html;unknown
@@ -9561,3 +9570,6 @@ CVE-2023-30330;SoftExpert Suite 2.1.3 Local File Inclusion;https://packetstormse
 CVE-2023-30350;FS-S3900-24T4S Privilege Escalation;https://packetstormsecurity.com/files/172124/FS-S3900-24T4S-Privilege-Escalation.html;unknown
 CVE-2023-30454;ebankIT 6 Cross Site Scripting;https://packetstormsecurity.com/files/172063/ebankIT-6-Cross-Site-Scripting.html;unknown
 CVE-2023-30455;ebankIT 6 Denial Of Service;https://packetstormsecurity.com/files/172064/ebankIT-6-Denial-Of-Service.html;DoS
+CVE-2023-31698;Bludit CMS 3.14.1 Cross Site Scripting;https://packetstormsecurity.com/files/172462/Bludit-CMS-3.14.1-Cross-Site-Scripting.html;unknown
+CVE-2023-31747;Filmora 12 Build 1.0.0.7 Unquoted Service Path;https://packetstormsecurity.com/files/172464/Filmora-12-Build-1.0.0.7-Unquoted-Service-Path.html;unknown
+CVE-2023-31748;MobileTrans 4.0.11 Weak Service Permissions;https://packetstormsecurity.com/files/172466/MobileTrans-4.0.11-Weak-Service-Permissions.html;unknown
