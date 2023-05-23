@@ -1116,17 +1116,33 @@ output_chatgpt(){
   local _GPT_PRIO_=3
   local GPT_TOKENS_=0
   local _GPT_FILE_=""
+
+  local GPT_LOG_FILES_=()
+  local GPT_REPORT_DIR_=""
+  GPT_REPORT_DIR_="$LOG_DIR""/html-report/gpt"
   while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_; do
     _GPT_FILE_="${COL1_}"
     GPT_ANCHOR_="${COL2_}"
     _GPT_PRIO_="${COL3_//GPT-Prio-/}"
     GPT_QUESTION_="${COL4_}"
-    GPT_RESPONSE_="${COL5_}"
+    GPT_RESPONSE_="${COL5_//\n/$'\n'}"
     GPT_TOKENS_="${COL6_//cost\=/}"
 
     if [[ -n $GPT_RESPONSE_ ]] && [[ $GPT_TOKENS_ -ne 0 ]]; then
-      GPT_RESPONSE_="Q:${GPT_QUESTION_} A:${GPT_RESPONSE_}"
-      find "$LOG_DIR" -type f -maxdepth 2 -name 's2[0-3]_*' -exec sed -i "s/[ASK_GPT] $GPT_ANCHOR_/$GPT_RESPONSE_/g" {} \; #TODO test, find all files
+      # 1 make files out of Responses
+      printf 'File:%s\nAnchor:%s\nPrio:%s\n\nQuestion:%s\n--------------------------\n%s' "$_GPT_FILE_" "$GPT_ANCHOR_" "$_GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" > "$GPT_REPORT_DIR_""/""$GPT_ANCHOR_"".txt"
+      # 2 replace logs with answer
+      readarray -t GPT_LOG_FILES_ < <(find "$LOG_DIR" -type f -maxdepth 2 -name 's2[0-3]_*.log') #TODO egrep to find by anchor as content
+      for LOG_FILE_ in "${GPT_LOG_FILES_[@]}"; do
+        sed -i "s/[ASK_GPT] $GPT_ANCHOR_/Q:$GPT_QUESTION_\\nA:$GPT_RESPONSE_\\n/g"
+      done
+      # 3 replace in html files
+      readarray -t GPT_LOG_FILES_ < <(find "$LOG_DIR" -type f -maxdepth 2 -name 's2[0-3]_*.html') #TODO egrep to find by anchor as content
+      for LOG_FILE_ in "${GPT_LOG_FILES_[@]}"; do
+        # TODO add link to file ?? turn ANCHOR into [REF] ??
+        # write_link "PATH_TO_TXT/LOG_FILE"
+        sed -i "s/[ASK_GPT] $GPT_ANCHOR_/$GPT_RESPONSE_\\n #html-link# $GPT_REPORT_DIR_\/$GPT_ANCHOR_.txt\\n/g" "$LOG_FILE_"
+      done
     else
       find "$LOG_DIR" -type f -maxdepth 2 -name 's2[0-3]_*' -exec sed -i "s/[ASK_GPT] $GPT_ANCHOR_//g" {} \; #TODO test, find all files
     fi

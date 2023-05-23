@@ -112,6 +112,7 @@ radare_decompilation(){
         COUNT_STRLEN=$(grep -c "strlen" "$FUNC_LOG"  2> /dev/null || true)
         STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       fi
+
       radare_log_func_footer "$NAME" "$FUNCTION"
       radare_decomp_output_function_details "$BINARY_" "$FUNCTION"
     else
@@ -157,6 +158,8 @@ radare_decomp_print_top10_statistics() {
   local FUNCTION=""
   local RESULTS=()
   local BINARY=""
+  local GPT_ANCHOR=""
+  local GPT_PRIO=0
 
   sub_module_title "Top 10 legacy C functions - Radare2 decompilation mode"
 
@@ -189,6 +192,12 @@ radare_decomp_print_top10_statistics() {
           fi
           if [[ -f "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt" ]]; then
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
+            if [[ $GPT_OPTION -gt 0 ]]; then
+              GPT_PRIO=2
+              GPT_ANCHOR="$(openssl rand -hex 8)"
+              write_csv_gpt "$(cut_path "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "" "" ""
+              write_anchor_gpt "$GPT_ANCHOR"
+            fi
           fi
         done
         print_ln
