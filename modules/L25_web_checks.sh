@@ -111,7 +111,6 @@ main_web_check() {
       elif [[ "$SERVICE" == *"http"* ]];then
         SSL=0
         if system_online_check "${IP_ADDRESS_}" ; then
-          # we make a screenshot for every web server
           check_for_basic_auth_init "$IP_ADDRESS_" "$PORT"
         else
           print_output "[-] System not responding - No basic auth check possible"
@@ -345,7 +344,7 @@ web_access_crawler() {
           if ! [[ -f "$CSV_DIR"/l25_web_checks.csv ]]; then
             write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
           fi
-          print_output "[+] Found possible vulnerability ${ORANGE}${VULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${WEB_NAME}${NC}." "$LOG_DIR"/s22_php_check/semgrep_php_results_xml.log
+          print_output "[+] Found possible vulnerability ${ORANGE}${VULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${WEB_NAME}${NC}." "" "$LOG_DIR"/s22_php_check/semgrep_php_results_xml.log
           write_csv_log "$WEB_NAME" "semgrep" "php" "$VULN_NAME" "$VULN_FILE"
         done
       done  < "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log"

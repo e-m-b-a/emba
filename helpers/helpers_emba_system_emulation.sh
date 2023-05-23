@@ -22,17 +22,17 @@ restart_emulation() {
   local STATE_CHECK_MECHANISM="${4:-"PING"}"
 
   if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-    print_output "[+] System with $ORANGE$IP_ADDRESS_$GREEN responding again - probably it recovered automatically.$NC"
+    print_output "[+] System with $ORANGE$IP_ADDRESS_$GREEN responding again - probably it recovered automatically.$NC" "no_log"
     return
   fi
 
   if ! [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
-    print_output "[-] Warning: Auto-maintaining not possible - emulation archive not available"
+    print_output "[!] Warning: Auto-maintaining not possible - emulation archive not available"
     return
   fi
 
-  print_output "[!] Warning: System with $ORANGE$IP_ADDRESS_$MAGENTA not responding."
-  print_output "[*] Trying to auto-maintain emulated system now ..."
+  print_output "[!] Warning: System with $ORANGE$IP_ADDRESS_$MAGENTA not responding." "no_log"
+  print_output "[*] Trying to auto-maintain emulated system now ..." "no_log"
 
   stopping_emulation_process "$IMAGE_NAME_"
   [[ "$RESTART_SCAN" -eq 0 ]] && reset_network_emulation 2
