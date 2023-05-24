@@ -140,6 +140,7 @@ output_overview() {
       fi
       write_link "p99"
     fi
+  # architecture detection from vmlinux-to-elf:
   elif [[ -f "$S24_CSV_LOG" ]]; then
     if [[ -n "$K_ARCH" ]]; then
       if [[ -n "$K_ARCH_END" ]]; then
