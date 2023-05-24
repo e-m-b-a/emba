@@ -32,6 +32,7 @@ F50_base_aggregator() {
   S13_LOG="s13_weak_func_check.txt"
   S14_LOG="s14_weak_func_radare_check.txt"
   S17_CSV_LOG="$CSV_DIR""/s17_apk_check.csv"
+  S24_CSV_LOG="$CSV_DIR""/s24_kernel_bin_identifier.csv"
   S02_LOG="s02_uefi_fwhunt.txt"
   S20_LOG="s20_shell_check.txt"
   S21_LOG="s21_python_check.txt"
@@ -109,12 +110,13 @@ output_overview() {
 
   if [[ -n "$ARCH" ]]; then
     if [[ -n "$D_END" ]]; then
+      write_csv_log "architecture_verified" "$ARCH" "$D_END" "NA" "NA" "NA" "NA" "NA" "NA"
       print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH"" / ""$D_END""$NC"
     else
+      write_csv_log "architecture_verified" "$ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH""$NC"
     fi
     write_link "p99"
-    write_csv_log "architecture_verified" "$ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   elif [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH""$NC"
@@ -130,13 +132,25 @@ output_overview() {
   elif [[ -f "$P99_CSV_LOG" ]]; then
     if [[ -n "$P99_ARCH" ]]; then
       if [[ -n "$D_END" ]]; then
+        write_csv_log "architecture_verified" "$P99_ARCH" "$P99_ARCH_END" "NA" "NA" "NA" "NA" "NA" "NA"
         print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH"" / ""$P99_ARCH_END""$NC"
       else
+        write_csv_log "architecture_verified" "$P99_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
         print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH""$NC"
       fi
       write_link "p99"
-      write_csv_log "architecture_verified" "$P99_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    fi
+  elif [[ -f "$S24_CSV_LOG" ]]; then
+    if [[ -n "$K_ARCH" ]]; then
+      if [[ -n "$K_ARCH_END" ]]; then
+        write_csv_log "architecture_verified" "$K_ARCH" "$K_ARCH_END" "NA" "NA" "NA" "NA" "NA" "NA"
+        print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$K_ARCH"" / ""$K_ARCH_END""$NC"
+      else
+        write_csv_log "architecture_verified" "$K_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+        print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$K_ARCH""$NC"
       fi
+      write_link "s24"
+    fi
   else
     write_csv_log "architecture_verified" "unknown" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
@@ -736,6 +750,7 @@ get_data() {
   export LINUX_DISTRIS=()
   export STRCPY_CNT_13=0
   export ARCH=""
+  export K_ARCH=""
   export STRCPY_CNT_14=0
   export STRCPY_CNT=0
   export S20_SHELL_VULNS=0
@@ -791,6 +806,11 @@ get_data() {
     P99_ARCH="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 7 | sort -u | head -1)"
     P99_ARCH_END="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 8 | sort -u | head -1)"
   fi
+  if [[ -f "$P24_CSV_LOG" ]]; then
+    K_ARCH="$(tail -n +2 "$P24_CSV_LOG" | cut -d\; -f 8 | sort -u | head -1)"
+    K_ARCH_END="$(tail -n +2 "$P24_CSV_LOG" | cut -d\; -f 9 | sort -u | head -1)"
+  fi
+
   if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
     FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S02_LOG" | cut -d: -f2 || true)
   fi
