@@ -2080,10 +2080,10 @@ create_emulation_archive() {
 
     # create archive
     RANDOM_ID="$RANDOM"
-    tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz "$ARCHIVE_PATH"
-    if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz ]]; then
+    tar -czvf "$LOG_PATH_MODULE"/"$(basename "$ARCHIVE_PATH")".tar.gz "$ARCHIVE_PATH"
+    if [[ -f "$LOG_PATH_MODULE"/"$(basename "$ARCHIVE_PATH")".tar.gz ]]; then
       print_ln
-      print_output "[*] Qemu emulation archive created in log directory: $ORANGE$ARCHIVE_PATH$NC" "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME-$RANDOM_ID.tar.gz"
+      print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}$(basename $ARCHIVE_PATH).tar.gz${NC}" "" "$LOG_PATH_MODULE/$(basename $ARCHIVE_PATH).tar.gz"
       print_ln
     fi
   else

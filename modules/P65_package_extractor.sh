@@ -141,7 +141,7 @@ ipk_extractor() {
             print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
             tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp || true
           else
-            print_output "[-] Is ${ORANGE}${IPK_NAME}${NC} really an ipk (tgz) archive?"
+            print_output "[-] Is ${ORANGE}${IPK_NAME}${NC} a valid ipk (tgz) archive?"
           fi
           if [[ -f "$LOG_DIR"/ipk_tmp/data.tar.gz ]]; then
             tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH" || true
