@@ -2079,7 +2079,6 @@ create_emulation_archive() {
     sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "$ARCHIVE_PATH"/run.sh
 
     # create archive
-    RANDOM_ID="$RANDOM"
     tar -czvf "$LOG_PATH_MODULE"/"$(basename "$ARCHIVE_PATH")".tar.gz "$ARCHIVE_PATH"
     if [[ -f "$LOG_PATH_MODULE"/"$(basename "$ARCHIVE_PATH")".tar.gz ]]; then
       print_ln
