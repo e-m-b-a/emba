@@ -31,7 +31,7 @@ S24_kernel_bin_identifier()
 
   prepare_file_arr_limited "$FIRMWARE_PATH_CP"
 
-  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture"
+  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
 
   for FILE in "${FILE_ARR_LIMITED[@]}" ; do
     local K_ELF="NA"
