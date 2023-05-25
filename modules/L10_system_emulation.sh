@@ -1216,14 +1216,14 @@ get_networking_details_emulation() {
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
     mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
     mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u || true)
-    mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | grep -E '[[:alnum:]]{3,50}' | sort -u || true)
+    mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | grep -a -E '[[:alnum:]]{3,50}' | sort -u || true)
     # mapfile -t NVRAM_SET < <(grep -a "nvram_set" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2 | sed 's/^\ //g' | cut -d\  -f1 | sed 's/\"//g' | grep -v "^#" | grep -E '[[:alnum:]]{3,50}'| sort -u || true)
     # we check all available qemu logs for services that are started:
     mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
     # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
-    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "$LOG_PATH_MODULE"/qemu.initial.serial.log | tr ' ' '\n' | grep "/" | grep -v proc | tr -d ':' | sort -u || true)
+    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "$LOG_PATH_MODULE"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | sort -u || true)
     MISSING_FILES+=( "${MISSING_FILES_TMP[@]}" )
 
     NVRAM_TMP=( "${NVRAM[@]}" )
