@@ -2079,10 +2079,11 @@ create_emulation_archive() {
     sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "$ARCHIVE_PATH"/run.sh
 
     # create archive
-    tar -czvf "$LOG_PATH_MODULE"/"$(basename "$ARCHIVE_PATH")".tar.gz "$ARCHIVE_PATH"
-    if [[ -f "$LOG_PATH_MODULE"/"$(basename "$ARCHIVE_PATH")".tar.gz ]]; then
+    ARCH_NAME="$(basename "$ARCHIVE_PATH")".tar.gz
+    tar -czvf "$LOG_PATH_MODULE"/"$ARCH_NAME" "$ARCHIVE_PATH"
+    if [[ -f "$LOG_PATH_MODULE"/"$ARCH_NAME" ]]; then
       print_ln
-      print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}$(basename $ARCHIVE_PATH).tar.gz${NC}" "" "$LOG_PATH_MODULE/$(basename $ARCHIVE_PATH).tar.gz"
+      print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}${ARCH_NAME}${NC}" "" "$LOG_PATH_MODULE/${ARCH_NAME}"
       print_ln
     fi
   else
