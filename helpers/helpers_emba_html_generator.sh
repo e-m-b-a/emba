@@ -123,8 +123,8 @@ add_link_tags() {
           if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""Download Qemu emulation archive.""$LINK_END"
-          echo "REF_LINK: $REF_LINK"
-          echo "HTML_LINK: $HTML_LINK"
+          # echo "REF_LINK: $REF_LINK"
+          # echo "HTML_LINK: $HTML_LINK"
           sed -i "s@Qemu emulation archive created in log directory.*$(basename "$REF_LINK").*@$HTML_LINK$P_END@" "$LINK_FILE"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
