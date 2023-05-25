@@ -117,6 +117,25 @@ output_overview() {
       print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$ARCH""$NC"
     fi
     write_link "p99"
+  elif [[ -f "$P99_CSV_LOG" ]] && [[ -n "$P99_ARCH" ]]; then
+    if [[ -n "$D_END" ]]; then
+      write_csv_log "architecture_verified" "$P99_ARCH" "$P99_ARCH_END" "NA" "NA" "NA" "NA" "NA" "NA"
+      print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH"" / ""$P99_ARCH_END""$NC"
+    else
+      write_csv_log "architecture_verified" "$P99_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH""$NC"
+    fi
+    write_link "p99"
+  # architecture detection from vmlinux-to-elf:
+  elif [[ -f "$S24_CSV_LOG" ]] && [[ -n "$K_ARCH" ]]; then
+    if [[ -n "$K_ARCH_END" ]]; then
+      write_csv_log "architecture_verified" "$K_ARCH" "$K_ARCH_END" "NA" "NA" "NA" "NA" "NA" "NA"
+      print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$K_ARCH"" / ""$K_ARCH_END""$NC"
+    else
+      write_csv_log "architecture_verified" "$K_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$K_ARCH""$NC"
+    fi
+    write_link "s24"
   elif [[ -f "$LOG_DIR"/"$S03_LOG" ]]; then
     if [[ -n "$PRE_ARCH" ]]; then
       print_output "[+] Detected architecture:""$ORANGE"" ""$PRE_ARCH""$NC"
@@ -128,29 +147,6 @@ output_overview() {
       print_output "[+] Detected architecture:""$ORANGE"" ""$EFI_ARCH""$NC"
       write_link "p35"
       write_csv_log "architecture_verified" "$EFI_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-    fi
-  elif [[ -f "$P99_CSV_LOG" ]]; then
-    if [[ -n "$P99_ARCH" ]]; then
-      if [[ -n "$D_END" ]]; then
-        write_csv_log "architecture_verified" "$P99_ARCH" "$P99_ARCH_END" "NA" "NA" "NA" "NA" "NA" "NA"
-        print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH"" / ""$P99_ARCH_END""$NC"
-      else
-        write_csv_log "architecture_verified" "$P99_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-        print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$P99_ARCH""$NC"
-      fi
-      write_link "p99"
-    fi
-  # architecture detection from vmlinux-to-elf:
-  elif [[ -f "$S24_CSV_LOG" ]]; then
-    if [[ -n "$K_ARCH" ]]; then
-      if [[ -n "$K_ARCH_END" ]]; then
-        write_csv_log "architecture_verified" "$K_ARCH" "$K_ARCH_END" "NA" "NA" "NA" "NA" "NA" "NA"
-        print_output "[+] Detected architecture and endianness (""$ORANGE""verified$GREEN):""$ORANGE"" ""$K_ARCH"" / ""$K_ARCH_END""$NC"
-      else
-        write_csv_log "architecture_verified" "$K_ARCH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-        print_output "[+] Detected architecture (""$ORANGE""verified$GREEN):""$ORANGE"" ""$K_ARCH""$NC"
-      fi
-      write_link "s24"
     fi
   else
     write_csv_log "architecture_verified" "unknown" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -807,9 +803,9 @@ get_data() {
     P99_ARCH="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 7 | sort -u | head -1)"
     P99_ARCH_END="$(tail -n +2 "$P99_CSV_LOG" | cut -d\; -f 8 | sort -u | head -1)"
   fi
-  if [[ -f "$P24_CSV_LOG" ]]; then
-    K_ARCH="$(tail -n +2 "$P24_CSV_LOG" | cut -d\; -f 8 | sort -u | head -1)"
-    K_ARCH_END="$(tail -n +2 "$P24_CSV_LOG" | cut -d\; -f 9 | sort -u | head -1)"
+  if [[ -f "$S24_CSV_LOG" ]]; then
+    K_ARCH="$(tail -n +2 "$S24_CSV_LOG" | cut -d\; -f 8 | sort -u | head -1)"
+    K_ARCH_END="$(tail -n +2 "$S24_CSV_LOG" | cut -d\; -f 9 | sort -u | head -1)"
   fi
 
   if [[ -f "$LOG_DIR"/"$S02_LOG" ]]; then
