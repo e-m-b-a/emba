@@ -31,7 +31,7 @@ S24_kernel_bin_identifier()
 
   prepare_file_arr_limited "$FIRMWARE_PATH_CP"
 
-  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols"
+  write_csv_log "Kernel version orig" "Kernel version stripped" "file" "generated elf" "identified init" "config extracted" "kernel symbols" "architecture" "endianness"
 
   for FILE in "${FILE_ARR_LIMITED[@]}" ; do
     local K_ELF="NA"
@@ -40,6 +40,8 @@ S24_kernel_bin_identifier()
     local K_INIT="NA"
     local CFG_CNT=0
     local K_SYMBOLS=0
+    local K_ARCH="NA"
+    local K_ARCH_END="NA"
 
     if file "$FILE" | grep -q "ASCII text"; then
       # reduce false positive rate
@@ -102,6 +104,23 @@ S24_kernel_bin_identifier()
       if [[ "$K_ELF" == *"ELF "* ]]; then
         K_ELF="$(echo "$K_ELF" | cut -d: -f1)"
         K_SYMBOLS="$(readelf -s "$K_ELF" | grep -c "FUNC\|OBJECT" || true)"
+        K_FILE="$(file "$K_ELF" | cut -d: -f2-)"
+
+        [[ "$K_FILE" == *"LSB"* ]] && K_ARCH_END="EL"
+        [[ "$K_FILE" == *"MSB"* ]] && K_ARCH_END="EB"
+
+        [[ "$K_FILE" == *"MIPS"* ]] && K_ARCH="MIPS"
+        [[ "$K_FILE" == *"ARM"* ]] && K_ARCH="ARM"
+        [[ "$K_FILE" == *"80386"* ]] && K_ARCH="x86"
+        [[ "$K_FILE" == *"x86-64"* ]] && K_ARCH="x64"
+        [[ "$K_FILE" == *"PowerPC"* ]] && K_ARCH="PPC"
+        [[ "$K_FILE" == *"UCB RISC-V"* ]] && K_ARCH="RISCV"
+        [[ "$K_FILE" == *"QUALCOMM DSP6"* ]] && K_ARCH="QCOM_DSP6"
+      else
+        # fallback
+        K_ARCH=$(grep "Guessed architecture" "$LOG_FILE" | cut -d: -f2 | awk '{print $1}' || true)
+        [[ "${K_ARCH: -2}" == "le" ]] && K_ARCH_END="EL"
+        [[ "${K_ARCH: -2}" == "be" ]] && K_ARCH_END="EB"
       fi
 
       # we should only get one element back, but as array
@@ -111,10 +130,10 @@ S24_kernel_bin_identifier()
             if [[ "$CFG_CNT" -lt 50 ]]; then
               KCONFIG_EXTRACTED="NA"
             fi
-            write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "$KCONFIG_EXTRACTED" "$K_SYMBOLS"
+            write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "$K_INIT" "$KCONFIG_EXTRACTED" "$K_SYMBOLS" "$K_ARCH" "$K_ARCH_END"
           done
         else
-          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "NA" "$KCONFIG_EXTRACTED" "$K_SYMBOLS"
+          write_csv_log "$K_VER" "$K_VER_CLEAN" "$FILE" "$K_ELF" "NA" "$KCONFIG_EXTRACTED" "$K_SYMBOLS" "$K_ARCH" "$K_ARCH_END"
         fi
       done
       NEG_LOG=1

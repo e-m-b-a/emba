@@ -137,17 +137,27 @@ ipk_extractor() {
       for R_PATH in "${ROOT_PATH[@]}"; do
         while read -r IPK; do
           IPK_NAME=$(basename "$IPK")
-          print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
-          tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp || true
-          tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH" || true
-          rm -r "$LOG_DIR"/ipk_tmp/* || true
+          if [[ $(file "${IPK}") == *"gzip"* ]]; then
+            print_output "[*] Extracting $ORANGE$IPK_NAME$NC package to the root directory $ORANGE$R_PATH$NC."
+            tar zxpf "$IPK" --directory "$LOG_DIR"/ipk_tmp || true
+          else
+            print_output "[-] Is ${ORANGE}${IPK_NAME}${NC} a valid ipk (tgz) archive?"
+          fi
+          if [[ -f "$LOG_DIR"/ipk_tmp/data.tar.gz ]]; then
+            tar xzf "$LOG_DIR"/ipk_tmp/data.tar.gz --directory "$R_PATH" || true
+          fi
+          if [[ -d "$LOG_DIR"/ipk_tmp/ ]]; then
+            rm -r "$LOG_DIR"/ipk_tmp/* 2>/dev/null || true
+          fi
         done < "$TMP_DIR"/ipk_db.txt
       done
 
       FILES_AFTER_IPK=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
       print_ln "no_log"
       print_output "[*] Before ipk extraction we had $ORANGE$FILES_PRE_PACKAGE$NC files, after deep extraction we have $ORANGE$FILES_AFTER_IPK$NC files extracted."
-      rm -r "$LOG_DIR"/ipk_tmp
+      if [[ -d "$LOG_DIR"/ipk_tmp/ ]]; then
+        rm -r "$LOG_DIR"/ipk_tmp/* 2>/dev/null || true
+      fi
     fi
     check_disk_space
   else

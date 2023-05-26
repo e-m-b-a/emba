@@ -58,7 +58,7 @@ L10_system_emulation() {
         export IP_ADDRESS_=""
         export IMAGE_NAME=""
         export ARCHIVE_PATH=""
-        export HOSTNETDEV_0=""
+        export HOSTNETDEV_ARR=()
         local EMULATION_ENTRY=""
 
         EMULATION_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1)"
@@ -72,7 +72,7 @@ L10_system_emulation() {
 
         if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
           print_output "[+] Startup script (run.sh) found in old logs ... restarting emulation process now"
-          HOSTNETDEV_0=$(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
+          mapfile -t HOSTNETDEV_ARR < <(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
 
           if [[ "${EMULATION_ENTRY}" == *"ICMP not ok"* ]]; then
             print_output "[*] Testing system recovery with hping instead of ping" "no_log"
@@ -149,7 +149,7 @@ L10_system_emulation() {
     if [[ $(grep -c "TCP ok" "$LOG_DIR"/emulator_online_results.log || true) -gt 0 ]]; then
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
-      export HOSTNETDEV_0=""
+      export HOSTNETDEV_ARR=()
       local SYS_EMUL_POS_ENTRY=""
       SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "$SYS_EMUL_POS_ENTRY")")"
@@ -165,7 +165,7 @@ L10_system_emulation() {
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis" "no_log"
         print_ln
-        HOSTNETDEV_0=$(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
+        mapfile -t HOSTNETDEV_ARR < <(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
         if [[ "${SYS_EMUL_POS_ENTRY}" == *"ICMP not ok"* ]]; then
           print_output "[*] Testing system recovery with hping instead of ping" "no_log"
           STATE_CHECK_MECHANISM="HPING"
@@ -540,21 +540,7 @@ main_emulation() {
     print_output "[*] Unmounting QEMU Image"
     umount_qemu_image "$DEVICE"
 
-    DEP_ERROR=0
-    # using the dependency checker helper module:
-    check_emulation_port "Running Qemu service" "2001"
-    if [[ "$DEP_ERROR" -eq 1 ]]; then
-      while true; do
-        DEP_ERROR=0
-        check_emulation_port "Running Qemu service" "2001"
-        if [[ "$DEP_ERROR" -ne 1 ]]; then
-          break
-        fi
-        print_output "[-] Is there some Qemu instance already running?"
-        print_output "[-] Check TCP ports 2000 - 2003!"
-        sleep 10
-      done
-    fi
+    check_qemu_instance_l10
 
     identify_networking_emulation "$IMAGE_NAME" "$ARCH_END"
     get_networking_details_emulation "$IMAGE_NAME"
@@ -746,7 +732,7 @@ main_emulation() {
             SYS_ONLINE=1
             BOOTED="yes"
           fi
-          if grep -q "tcp.*open" "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null; then
+          if grep -q "tcp.*open" "$ARCHIVE_PATH"/"$NMAP_LOG" 2>/dev/null; then
             TCP="ok"
             SYS_ONLINE=1
             BOOTED="yes"
@@ -784,7 +770,7 @@ main_emulation() {
           print_ln
 
           if [[ "$TCP" == "ok" ]]; then
-            print_output "[+] Network services are available." "" "$LOG_PATH_MODULE/$NMAP_LOG"
+            print_output "[+] Network services are available." "" "$ARCHIVE_PATH/$NMAP_LOG"
             print_ln
           fi
 
@@ -928,7 +914,7 @@ handle_fs_mounts() {
         mkdir -p "$MNT_POINT""$MOUNT_PT"
       fi
       print_output "[*] Let's copy the identified area to the root filesystem - $ORANGE$N_PATH$NC to $ORANGE$MNT_POINT$MOUNT_PT$NC"
-      cp -pr "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
+      cp -prn "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
       find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     done
   done
@@ -1170,6 +1156,8 @@ run_network_id_emulation() {
     KERNEL="$BINARY_DIR/$KERNEL_.$ARCH_END"
   fi
 
+  check_qemu_instance_l10
+
   print_output "[*] Qemu parameters used in network detection mode:"
   print_output "$(indent "MACHINE: $ORANGE$MACHINE$NC")"
   print_output "$(indent "KERNEL: $ORANGE$KERNEL$NC")"
@@ -1185,6 +1173,24 @@ run_network_id_emulation() {
   print_ln
 
   write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait ; pkill -9 -f tail.*-F.*\"$LOG_PATH_MODULE\"" /tmp/do_not_create_run.sh 3
+}
+
+check_qemu_instance_l10() {
+  DEP_ERROR=0
+  # using the dependency checker helper module:
+  check_emulation_port "Running Qemu service" "2001"
+  if [[ "$DEP_ERROR" -eq 1 ]]; then
+    while true; do
+      DEP_ERROR=0
+      check_emulation_port "Running Qemu service" "2001"
+      if [[ "$DEP_ERROR" -ne 1 ]]; then
+        break
+      fi
+      print_output "[-] Is there some Qemu instance already running?"
+      print_output "[-] Check TCP ports 2000 - 2003!"
+      sleep 10
+    done
+  fi
 }
 
 get_networking_details_emulation() {
@@ -1210,14 +1216,14 @@ get_networking_details_emulation() {
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
     mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
     mapfile -t PANICS < <(grep -a "Kernel panic - " "$LOG_PATH_MODULE"/qemu.initial.serial.log | sort -u || true)
-    mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | grep -E '[[:alnum:]]{3,50}' | sort -u || true)
+    mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk '{print $3}' | grep -a -E '[[:alnum:]]{3,50}' | sort -u || true)
     # mapfile -t NVRAM_SET < <(grep -a "nvram_set" "$LOG_PATH_MODULE"/qemu.initial.serial.log | cut -d: -f2 | sed 's/^\ //g' | cut -d\  -f1 | sed 's/\"//g' | grep -v "^#" | grep -E '[[:alnum:]]{3,50}'| sort -u || true)
     # we check all available qemu logs for services that are started:
     mapfile -t PORTS < <(grep -a "inet_bind" "$LOG_PATH_MODULE"/qemu.initial.serial.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "$LOG_PATH_MODULE"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
     # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
-    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "$LOG_PATH_MODULE"/qemu.initial.serial.log | tr ' ' '\n' | grep "/" | grep -v proc | tr -d ':' | sort -u || true)
+    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "$LOG_PATH_MODULE"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | sort -u || true)
     MISSING_FILES+=( "${MISSING_FILES_TMP[@]}" )
 
     NVRAM_TMP=( "${NVRAM[@]}" )
@@ -1642,7 +1648,7 @@ write_network_config_to_filesystem() {
         FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1 || true)
         if [[ -f ${FOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""${DIR_NAME_MISSING}"/"${FOUND_MISSING}" ]]; then
           print_output "[*] Recover missing file ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
-          cp "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/ || true
+          cp -n "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/ || true
         fi
       done
     fi
@@ -1871,6 +1877,7 @@ run_emulated_system() {
 }
 
 run_qemu_final_emulation() {
+  check_qemu_instance_l10
   print_output "[*] Qemu parameters used in run mode:"
   print_output "$(indent "MACHINE: $ORANGE$QEMU_MACHINE$NC")"
   print_output "$(indent "KERNEL: $ORANGE$KERNEL$NC")"
@@ -1941,13 +1948,14 @@ check_online_stat() {
   done
 
   if [[ "$SYS_ONLINE" -eq 1 ]]; then
-    print_output "[*] Give the system another 130 seconds to ensure the boot process is finished.\n"
+    print_output "[*] Give the system another 130 seconds to ensure the boot process is finished.\n" "no_log"
     sleep 130
-    print_output "[*] Starting Nmap portscan for $ORANGE$IP_ADDRESS_$NC"
-    write_link "$LOG_PATH_MODULE"/"$NMAP_LOG"
+    print_output "[*] Nmap portscan for $ORANGE$IP_ADDRESS_$NC"
+    write_link "$ARCHIVE_PATH"/"$NMAP_LOG"
     print_ln
     ping -c 1 "$IP_ADDRESS_" | tee -a "$LOG_FILE" || true
-    nmap -Pn -n -A -sSV --host-timeout 30m -oA "$LOG_PATH_MODULE"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" > "$LOG_PATH_MODULE"/"$NMAP_LOG" || true
+    print_ln
+    nmap -Pn -n -A -sSV --host-timeout 30m -oA "$ARCHIVE_PATH"/"$(basename "$NMAP_LOG")" "$IP_ADDRESS_" | tee -a "$ARCHIVE_PATH"/"$NMAP_LOG" "$LOG_FILE" || true
 
     mapfile -t TCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t UDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "$LOG_PATH_MODULE"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
@@ -2011,11 +2019,11 @@ check_online_stat() {
       
       local PORTS_TO_SCAN=""
       if [[ "$TCP_SERV" =~ ^T:[0-9].* ]]; then
-        print_output "[*] TCP services $ORANGE$TCP_SERV$NC"
+        print_output "[*] Detected TCP services $ORANGE$TCP_SERV$NC"
         PORTS_TO_SCAN="$TCP_SERV"
       fi
       if [[ "$UDP_SERV" =~ ^U:[0-9].* ]]; then
-        print_output "[*] UDP services $ORANGE$UDP_SERV$NC"
+        print_output "[*] Detected UDP services $ORANGE$UDP_SERV$NC"
         if [[ "$PORTS_TO_SCAN" =~ ^T:[0-9].* ]]; then
           PORTS_TO_SCAN="$PORTS_TO_SCAN,$UDP_SERV"
         else
@@ -2024,9 +2032,11 @@ check_online_stat() {
       fi
 
       if [[ "$TCP_SERV" =~ ^T:[0-9].* ]] || [[ "$UDP_SERV" =~ ^U:[0-9].* ]]; then
-        print_output "[*] Starting Nmap portscan for detected services ($ORANGE$PORTS_TO_SCAN$NC) started during system init on $ORANGE$IP_ADDRESS_$NC"
+        print_ln
+        print_output "[*] Nmap portscan for detected services ($ORANGE$PORTS_TO_SCAN$NC) started during system init on $ORANGE$IP_ADDRESS_$NC"
         write_link "$ARCHIVE_PATH"/"$NMAP_LOG"
-        nmap -Pn -n -sSUV --host-timeout 30m -p "$PORTS_TO_SCAN" -oA "$LOG_PATH_MODULE"/nmap_emba_"$IPS_INT_VLAN_CFG_mod"_dedicated "$IP_ADDRESS_" | tee -a "$LOG_PATH_MODULE"/"$NMAP_LOG" || true
+        print_ln
+        nmap -Pn -n -sSUV --host-timeout 30m -p "$PORTS_TO_SCAN" -oA "$ARCHIVE_PATH"/nmap_emba_"$IPS_INT_VLAN_CFG_mod"_dedicated "$IP_ADDRESS_" | tee -a "$ARCHIVE_PATH"/"$NMAP_LOG" "$LOG_FILE" || true
       fi
     fi
   fi
@@ -2041,13 +2051,6 @@ check_online_stat() {
   color_qemu_log "$LOG_PATH_MODULE/qemu.final.serial.log"
 
   pkill -9 -f "tail -F $LOG_PATH_MODULE/qemu.final.serial.log" || true &>/dev/null
-
-  if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]] && [[ "$SYS_ONLINE" -eq 1 ]]; then
-    print_ln
-    print_output "[*] Nmap scanning results for $ORANGE$IP_ADDRESS_$NC: "
-    write_link "$ARCHIVE_PATH"/"$NMAP_LOG"
-    tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/"$NMAP_LOG"
-  fi
 }
 
 stopping_emulation_process() {
@@ -2076,11 +2079,11 @@ create_emulation_archive() {
     sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "$ARCHIVE_PATH"/run.sh
 
     # create archive
-    RANDOM_ID="$RANDOM"
-    tar -czvf "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz "$ARCHIVE_PATH"
-    if [[ -f "$LOG_PATH_MODULE"/archive-"$IMAGE_NAME"-"$RANDOM_ID".tar.gz ]]; then
+    ARCH_NAME="$(basename "$ARCHIVE_PATH")".tar.gz
+    tar -czvf "$LOG_PATH_MODULE"/"$ARCH_NAME" "$ARCHIVE_PATH"
+    if [[ -f "$LOG_PATH_MODULE"/"$ARCH_NAME" ]]; then
       print_ln
-      print_output "[*] Qemu emulation archive created in log directory: $ORANGE$ARCHIVE_PATH$NC" "" "$LOG_PATH_MODULE/archive-$IMAGE_NAME-$RANDOM_ID.tar.gz"
+      print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}${ARCH_NAME}${NC}" "" "$LOG_PATH_MODULE/${ARCH_NAME}"
       print_ln
     fi
   else
@@ -2108,31 +2111,48 @@ reset_network_emulation() {
     pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true &>/dev/null
   fi
 
-  if [[ "$EXECUTE_" -eq 1 ]]; then
-    print_output "[*] Deleting route..." "no_log"
+  if [[ "$EXECUTE_" -eq 1 ]] && ! grep -q "Deleting route" "$ARCHIVE_PATH"/run.sh >/dev/null; then
     write_script_exec "echo -e \"Deleting route ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
-  if [[ -v HOSTNETDEV_0 ]]; then
-    write_script_exec "ip route flush dev \"${HOSTNETDEV_0}\"" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
+  if [[ -v HOSTNETDEV_0 ]] && ! grep -q "ip route flush dev" "$ARCHIVE_PATH"/run.sh >/dev/null; then
+    print_output "[*] Deleting route..." "no_log"
+    write_script_exec "ip route flush dev ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
   fi
 
-  if [[ "$EXECUTE_" -eq 1 ]]; then
+  if [[ "$EXECUTE_" -eq 1 ]] && ! grep -q "Bringing down TAP device" "$ARCHIVE_PATH"/run.sh >/dev/null; then
     print_output "[*] Bringing down TAP device..." "no_log"
     write_script_exec "echo -e \"Bringing down TAP device ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
-  write_script_exec "ip link set $TAPDEV_0 down" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
+  if [[ "$EXECUTE_" -lt 2 ]] && ! grep -q "ip link set ${TAPDEV_0} down" "$ARCHIVE_PATH"/run.sh >/dev/null; then
+    EXECUTE_tmp=1
+  else
+    EXECUTE_tmp="$EXECUTE_"
+  fi
+  write_script_exec "ip link set $TAPDEV_0 down" "$ARCHIVE_PATH"/run.sh "$EXECUTE_tmp"
 
-  if [[ "$EXECUTE_" -eq 1 ]]; then
+  if [[ "$EXECUTE_" -eq 1 ]] && ! grep -q "Removing VLAN" "$ARCHIVE_PATH"/run.sh >/dev/null; then
     print_output "Removing VLAN..." "no_log"
     write_script_exec "echo -e \"Removing VLAN ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
-  write_script_exec "ip link delete ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
 
-  if [[ "$EXECUTE_" -eq 1 ]]; then
+  if [[ "$EXECUTE_" -lt 2 ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh >/dev/null; then
+    EXECUTE_tmp=1
+  else
+    EXECUTE_tmp="$EXECUTE_"
+  fi
+  write_script_exec "ip link delete ${HOSTNETDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_tmp"
+
+  if [[ "$EXECUTE_" -eq 1 ]] && ! grep -q "Deleting TAP device" "$ARCHIVE_PATH"/run.sh >/dev/null; then
     print_output "Deleting TAP device ${TAPDEV_0}..." "no_log"
     write_script_exec "echo -e \"Deleting TAP device ...\n\"" "$ARCHIVE_PATH"/run.sh 0
   fi
-  write_script_exec "tunctl -d ${TAPDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_"
+
+  if [[ "$EXECUTE_" -lt 2 ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "$ARCHIVE_PATH"/run.sh >/dev/null; then
+    EXECUTE_tmp=1
+  else
+    EXECUTE_tmp="$EXECUTE_"
+  fi
+  write_script_exec "tunctl -d ${TAPDEV_0}" "$ARCHIVE_PATH"/run.sh "$EXECUTE_tmp"
 }
 
 write_script_exec() {
@@ -2267,8 +2287,8 @@ write_results() {
   # R_PATH_mod="$(echo "$R_PATH_" | sed "s#$LOG_DIR##g")"
   R_PATH_mod="${R_PATH_/$LOG_DIR/}"
   local TCP_SERV_CNT=0
-  if [[ -f "$LOG_PATH_MODULE"/"$NMAP_LOG" ]]; then
-    TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$LOG_PATH_MODULE"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
+  if [[ -f "$ARCHIVE_PATH"/"$NMAP_LOG" ]]; then
+    TCP_SERV_CNT="$(grep "udp.*open\ \|tcp.*open\ " "$ARCHIVE_PATH"/"$NMAP_LOG" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true)"
   fi
   [[ "${TCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   ARCHIVE_PATH_="$(echo "$ARCHIVE_PATH_" | rev | cut -d '/' -f1 | rev)"

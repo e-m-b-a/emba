@@ -26,28 +26,23 @@ if [ -e /etc/manual.starter ]; then
   fi
 fi
 
-
-if [ -e /etc/init.d/miniupnpd ]; then
-  if ! "${BUSYBOX}" grep -q "/etc/init.d/miniupnpd" /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}miniupnpd service${NC}"
-    "${BUSYBOX}" echo -e -n "/etc/init.d/miniupnpd start\n" >> /firmadyne/service
+for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -name "*httpd*"); do
+  if [ -e "${SERVICE}" ]; then
+    if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+      "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
+      "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+    fi
   fi
-fi
+done
 
-if [ -e /etc/init.d/lighttpd ]; then
-  if ! "${BUSYBOX}" grep -q "/etc/init.d/lighttpd" /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}lighttpd service${NC}"
-    "${BUSYBOX}" echo -e -n "/etc/init.d/lighttpd start\n" >> /firmadyne/service
+for SERVICE in $("${BUSYBOX}" find /etc/rc.d/ -name "S*httpd*"); do
+  if [ -e "${SERVICE}" ]; then
+    if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+      "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
+      "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+    fi
   fi
-fi
-
-if [ -e /etc/init.d/lighttpd.sh ]; then
-  if ! "${BUSYBOX}" grep -q "/etc/init.d/lighttpd.sh" /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}lighttpd service${NC}"
-    "${BUSYBOX}" echo -e -n "/etc/init.d/lighttpd.sh start\n" >> /firmadyne/service
-  fi
-fi
-
+done
 
 if [ -e /etc/init.d/ftpd ]; then
   if ! "${BUSYBOX}" grep -q ftpd /firmadyne/service 2>/dev/null; then
@@ -56,28 +51,20 @@ if [ -e /etc/init.d/ftpd ]; then
   fi
 fi
 
-
-# tplink_latest/Archer_C59_US__V2_161206.zip?
-if [ -e /etc/init.d/uhttpd ]; then
-  if ! "${BUSYBOX}" grep -q uhttpd /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}uhttpd service${NC}"
-    "${BUSYBOX}" echo -e -n "/etc/init.d/uhttpd start\n" >> /firmadyne/service
-  fi
-fi
-
-# FW_EA9400_1.0.3.181249_prod.img
-if [ -e /etc/init.d/service_httpd.sh ]; then
-  if ! "${BUSYBOX}" grep -q service_httpd.sh /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}httpd service${NC}"
-    "${BUSYBOX}" echo -e -n "/etc/init.d/service_httpd.sh httpd-start\n" >> /firmadyne/service
-  fi
-fi
 if [ -e /bin/boa ]; then
   if ! "${BUSYBOX}" grep -q boa /firmadyne/service 2>/dev/null; then
     "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}/bin/boa${NC}"
     "${BUSYBOX}" echo -e -n "/bin/boa\n" >> /firmadyne/service
   fi
 fi
+
+if [ -e /etc/init.d/miniupnpd ]; then
+  if ! "${BUSYBOX}" grep -q "/etc/init.d/miniupnpd" /firmadyne/service 2>/dev/null; then
+    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}miniupnpd service${NC}"
+    "${BUSYBOX}" echo -e -n "/etc/init.d/miniupnpd start\n" >> /firmadyne/service
+  fi
+fi
+
 
 # Some examples for testing:
 # mini_httpd: F9K1119_WW_1.00.01.bin
@@ -94,46 +81,46 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
     # entry for lighttpd:
     if [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "lighttpd" ]; then
       # check if this service is already in the service file:
-      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+      # if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
         # check if we have a configuration available and iterate
         for LIGHT_CONFIG in $("${BUSYBOX}" find / -name "*lighttpd*.conf" -type f); do
           # write the service starter with config file
-          "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} - ${LIGHT_CONFIG}$NC"
+          "${BUSYBOX}" echo -e "[*] Writing EMBA starter for $ORANGE${BINARY} - ${LIGHT_CONFIG}$NC"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${LIGHT_CONFIG}\n" >> /firmadyne/service
         done
-      fi
+      # fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "miniupnpd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
         for MINIUPNPD_CONFIG in $("${BUSYBOX}" find / -name "*miniupnpd*.conf" -type f); do
-          "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} - ${MINIUPNPD_CONFIG}$NC"
+          "${BUSYBOX}" echo -e "[*] Writing EMBA starter for $ORANGE${BINARY} - ${MINIUPNPD_CONFIG}$NC"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
         done
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "wscd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
         for WSCD_CONFIG in $("${BUSYBOX}" find / -name "*wscd*.conf" -type f); do
-          "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} - ${WSCD_CONFIG}$NC"
+          "${BUSYBOX}" echo -e "[*] Writing EMBA starter for $ORANGE${BINARY} - ${WSCD_CONFIG}$NC"
           "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG}\n" >> /firmadyne/service
         done
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnpd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
-        "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY}$NC"
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for $ORANGE${BINARY}$NC"
         "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
 
         # let's try upnpd with a basic configuration:
-        "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY} ppp0 eth0$NC"
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for $ORANGE${BINARY} ppp0 eth0$NC"
         "${BUSYBOX}" echo -e -n "${BINARY} ppp0 eth0\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "ftpd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
-        "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY}$NC"
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for $ORANGE${BINARY}$NC"
         "${BUSYBOX}" echo -e -n "${BINARY} -D\n" >> /firmadyne/service
       fi
     fi
     # this is the default case - without config but only if the service is not already in the service file
     if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
-      "${BUSYBOX}" echo -e "[*] Writing EMBA service for $ORANGE${BINARY}$NC"
+      "${BUSYBOX}" echo -e "[*] Writing EMBA starter for $ORANGE${BINARY}$NC"
       "${BUSYBOX}" echo -e -n "${BINARY}\n" >> /firmadyne/service
     fi
 

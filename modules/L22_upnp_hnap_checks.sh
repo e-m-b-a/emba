@@ -38,8 +38,8 @@ L22_upnp_hnap_checks() {
           return
         fi
       fi
-      if [[ -v HOSTNETDEV_0 ]]; then
-        check_basic_upnp "$HOSTNETDEV_0"
+      if [[ -v HOSTNETDEV_ARR ]]; then
+        check_basic_upnp "${HOSTNETDEV_ARR[@]}"
         check_basic_hnap
       else
         print_output "[!] No network interface found"
@@ -55,20 +55,21 @@ L22_upnp_hnap_checks() {
 }
 
 check_basic_upnp() {
-  local INTERFACE="${1:-}"
+  local INTERFACE_ARR=("$@")
 
   sub_module_title "UPnP enumeration for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
 
   if command -v upnpc > /dev/null; then
-    print_output "[*] UPnP scan with upnpc on interface $ORANGE$INTERFACE$NC"
-    upnpc -m "$INTERFACE" -P >> "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true
-    if [[ -f "$LOG_PATH_MODULE"/upnp-discovery-check.txt ]]; then
-      print_ln
-      tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/upnp-discovery-check.txt
-      print_ln
-
-      UPNP_UP=$(grep -c "desc\|IGD" "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true)
-    fi
+    for INTERFACE in "${INTERFACE_ARR[@]}"; do
+      print_output "[*] UPnP scan with upnpc on local network interface $ORANGE$INTERFACE$NC"
+      upnpc -m "$INTERFACE" -P >> "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true
+      if [[ -f "$LOG_PATH_MODULE"/upnp-discovery-check.txt ]]; then
+        print_ln
+        tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/upnp-discovery-check.txt
+        print_ln
+      fi
+    done
+    UPNP_UP=$(grep -c "desc\|IGD" "$LOG_PATH_MODULE"/upnp-discovery-check.txt || true)
   fi
 
   if [[ "$UPNP_UP" -gt 0 ]]; then
