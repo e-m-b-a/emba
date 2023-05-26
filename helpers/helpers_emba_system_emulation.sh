@@ -37,6 +37,8 @@ restart_emulation() {
   stopping_emulation_process "$IMAGE_NAME_"
   [[ "$RESTART_SCAN" -eq 0 ]] && reset_network_emulation 2
 
+  check_qemu_instance_l10
+
   # what an ugly hack - probably we are going to improve this later on
   local HOME_PATH=""
   HOME_PATH="$(pwd)"
@@ -136,5 +138,35 @@ ping_check() {
     export SYS_ONLINE=0
     export TCP="not ok"
     return 1
+  fi
+}
+
+check_qemu_instance_l10() {
+  DEP_ERROR=0
+  # using the dependency checker helper module:
+  check_emulation_port "Running Qemu service" "2001"
+  if [[ "$DEP_ERROR" -eq 1 ]]; then
+    while true; do
+      DEP_ERROR=0
+      check_emulation_port "Running Qemu service" "2001"
+      if [[ "$DEP_ERROR" -ne 1 ]]; then
+        break
+      fi
+      print_output "[-] Is there some Qemu instance already running?"
+      print_output "[-] Check TCP ports 2000 - 2003!"
+      sleep 10
+    done
+  fi
+}
+
+check_emulation_port() {
+  TOOL_NAME="${1:-}"
+  PORT_NR="${2:-}"
+  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
+  if netstat -anpt | grep -q "$PORT_NR"; then
+    echo -e "$RED""not ok""$NC"
+    echo -e "$RED""    System emulation services detected - check for running Qemu processes""$NC"
+  else
+    echo -e "$GREEN""ok""$NC"
   fi
 }

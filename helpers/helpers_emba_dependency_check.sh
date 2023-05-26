@@ -186,18 +186,6 @@ print_cve_search_failure() {
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
-check_emulation_port() {
-  TOOL_NAME="${1:-}"
-  PORT_NR="${2:-}"
-  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
-  if netstat -anpt | grep -q "$PORT_NR"; then
-    echo -e "$RED""not ok""$NC"
-    echo -e "$RED""    System emulation services detected - check for running Qemu processes""$NC"
-  else
-    echo -e "$GREEN""ok""$NC"
-  fi
-}
-
 setup_nikto() {
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$EXT_DIR"/var_lib_nikto ]]; then
     mkdir -p /var/lib/nikto
@@ -601,6 +589,7 @@ dependency_check()
       check_dep_tool "Metasploit framework" "msfconsole"
       # This port is used by our Qemu installation and should not be used by another process.
       # This check is not a blocker for the test. It is checked again by the emulation module:
+      # this function is defined in the system emulation helper file
       check_emulation_port "Running Qemu network service" "2001"
       # Port 4321 is used for Qemu telnet access and should be available
       check_emulation_port "Running Qemu telnet service" "4321"
