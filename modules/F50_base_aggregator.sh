@@ -364,6 +364,7 @@ output_config_issues() {
       print_output "$(indent "$(green "Found $ORANGE${S24_FAILED_KSETTINGS}$GREEN security related kernel settings for review.")")"
       write_link "s24"
       write_csv_log "kernel_settings" "${S24_FAILED_KSETTINGS:-0}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      DATA=1
     fi
     if [[ "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE${INT_COUNT}$GREEN interesting files and $ORANGE${POST_COUNT:-0}$GREEN files that could be useful for post-exploitation.")")"
@@ -644,7 +645,6 @@ binary_fct_output() {
       printf "$ORANGE_\t%-5.5s : %-15.15s : common linux file: NA  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-18.18s |$NC\n" "$F_COUNTER" "$BINARY" "$RELRO" "$CANARY" "$NX" "$SYMBOLS" "$NETWORKING" | tee -a "$LOG_FILE"
       write_link "$FCT_LINK"
     fi
-
   fi
 }
 
