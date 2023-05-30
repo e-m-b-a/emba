@@ -51,8 +51,8 @@ I05_emba_docker_image_dl() {
           if [ -z "${CONTAINER}" ]; then
             docker pull embeddedanalyzer/emba
           else
-            echo -e "$ORANGE""CONTAINER VARIABLE SET TO "$CONTAINER"""$NC"
-            docker pull ${CONTAINER}
+            echo -e "$ORANGE""CONTAINER VARIABLE SET TO ""$CONTAINER""$NC"
+            docker pull "${CONTAINER}"
             (cd .. && sed -i "/image:/c\  image: ${CONTAINER}" docker-compose.yml)
           fi
           export DOCKER_CLI_EXPERIMENTAL=disabled
