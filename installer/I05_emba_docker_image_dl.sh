@@ -48,12 +48,12 @@ I05_emba_docker_image_dl() {
         if command -v docker > /dev/null ; then
           export DOCKER_CLI_EXPERIMENTAL=enabled
           echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
-          if [ -z "${CONTAINER}" ]; then
+          if [ -z "${CONTAINER+isset}" ]; then
             docker pull embeddedanalyzer/emba
           else
             echo -e "$ORANGE""CONTAINER VARIABLE SET TO ""$CONTAINER""$NC"
             docker pull "${CONTAINER}"
-            (cd .. && sed -i "/image:/c\  image: ${CONTAINER}" docker-compose.yml)
+            sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
           fi
           export DOCKER_CLI_EXPERIMENTAL=disabled
           docker-compose up --no-start
