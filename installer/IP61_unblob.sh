@@ -69,12 +69,13 @@ IP61_unblob() {
         dpkg -i external/sasquatch_1.0_amd64.deb
         rm -f external/sasquatch_1.0_amd64.deb
 
-        if ! [[ -d external/unblob ]]; then
-          git clone https://github.com/EMBA-support-repos/unblob.git external/unblob
-        fi
-
         # install poetry
         python3 -m pip install --upgrade poetry --break-system-packages
+
+        if ! [[ -d external/unblob ]]; then
+          git clone https://github.com/EMBA-support-repos/unblob.git external/unblob
+          # git clone https://github.com/onekey-sec/unblob.git external/unblob
+        fi
         cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
 
         # install unblob with poetry:
