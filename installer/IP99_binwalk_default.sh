@@ -198,10 +198,11 @@ IP99_binwalk_default() {
 
         if ! [[ -d external/binwalk/ubi_reader ]]; then
           git clone https://github.com/EMBA-support-repos/ubi_reader external/binwalk/ubi_reader
+          cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
+          git checkout fbb6443bad789efde4b17479712e18d1ff7e326b
+          python3 setup.py install
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
         fi
-        cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-        python3 setup.py install
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
 
         if command -v binwalk > /dev/null ; then
           echo "WARNING: Uninstalling binwalk version"

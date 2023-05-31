@@ -35,9 +35,9 @@ L30_routersploit() {
           module_end_log "${FUNCNAME[0]}" "$MODULE_END"
           return
         fi
-        check_live_routersploit
-        MODULE_END=1
       fi
+      check_live_routersploit
+      MODULE_END=1
     else
       print_output "[!] No IP address found"
     fi

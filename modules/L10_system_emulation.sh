@@ -753,7 +753,8 @@ main_emulation() {
         else
           EXECUTE=1
         fi
-        reset_network_emulation "$EXECUTE"
+        # reset_network_emulation "$EXECUTE"
+        cleanup_emulator "$IMAGE_NAME"
               
         if [[ -f "$LOG_PATH_MODULE"/qemu.final.serial.log ]]; then
           mv "$LOG_PATH_MODULE"/qemu.final.serial.log "$LOG_PATH_MODULE"/qemu.final.serial_"$IMAGE_NAME"-"$IPS_INT_VLAN_CFG_mod"-"$INIT_FNAME".log
@@ -783,12 +784,12 @@ main_emulation() {
               # Otherwise we try to find a better solution
               # We stop the emulation now and restart it later on
               stopping_emulation_process "$IMAGE_NAME"
-              if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
-                reset_network_emulation 1
-              else
-                print_output "[-] No startup script ${ORANGE}$ARCHIVE_PATH/run.sh${NC} found - this should not be possible!"
-                reset_network_emulation 2
-              fi
+              # if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+              #  reset_network_emulation 1
+              # else
+              #  print_output "[-] No startup script ${ORANGE}$ARCHIVE_PATH/run.sh${NC} found - this should not be possible!"
+              #  reset_network_emulation 2
+              # fi
               break 2
             fi
           fi
@@ -800,11 +801,11 @@ main_emulation() {
         fi
 
         stopping_emulation_process "$IMAGE_NAME"
-        if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
-          reset_network_emulation 1
-        else
-          reset_network_emulation 2
-        fi
+        # if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+        #  reset_network_emulation 1
+        # else
+        #  reset_network_emulation 2
+        # fi
 
         if [[ -f "$LOG_PATH_MODULE"/nvram/nvram_files_final_ ]]; then
           mv "$LOG_PATH_MODULE"/nvram/nvram_files_final_ "$LOG_PATH_MODULE"/nvram/nvram_files_"$IMAGE_NAME".bak
@@ -1106,11 +1107,12 @@ identify_networking_emulation() {
   disown "$PID" 2> /dev/null || true
 
   stopping_emulation_process "$IMAGE_NAME"
-  if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
-    reset_network_emulation 1
-  else
-    reset_network_emulation 2
-  fi
+  cleanup_emulator "$IMAGE_NAME"
+  # if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+  #  reset_network_emulation 1
+  # else
+  #  reset_network_emulation 2
+  # fi
 
   if ! [[ -f "$LOG_PATH_MODULE"/qemu.initial.serial.log ]]; then
     print_output "[-] No $ORANGE$LOG_PATH_MODULE/qemu.initial.serial.log$NC log file generated."
@@ -1173,24 +1175,6 @@ run_network_id_emulation() {
   print_ln
 
   write_script_exec "$QEMU_BIN -m 2048 -M $MACHINE $CPU -kernel $KERNEL $QEMU_DISK -append \"root=$QEMU_ROOTFS console=$CONSOLE nandsim.parts=64,64,64,64,64,64,64,64,64,64 $KINIT rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic $QEMU_NETWORK $QEMU_PARAMS -serial file:$LOG_PATH_MODULE/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.$IMAGE_NAME.S1,server,nowait -monitor unix:/tmp/qemu.$IMAGE_NAME,server,nowait ; pkill -9 -f tail.*-F.*\"$LOG_PATH_MODULE\"" /tmp/do_not_create_run.sh 3
-}
-
-check_qemu_instance_l10() {
-  DEP_ERROR=0
-  # using the dependency checker helper module:
-  check_emulation_port "Running Qemu service" "2001"
-  if [[ "$DEP_ERROR" -eq 1 ]]; then
-    while true; do
-      DEP_ERROR=0
-      check_emulation_port "Running Qemu service" "2001"
-      if [[ "$DEP_ERROR" -ne 1 ]]; then
-        break
-      fi
-      print_output "[-] Is there some Qemu instance already running?"
-      print_output "[-] Check TCP ports 2000 - 2003!"
-      sleep 10
-    done
-  fi
 }
 
 get_networking_details_emulation() {
@@ -2042,11 +2026,12 @@ check_online_stat() {
   fi
 
   stopping_emulation_process "$IMAGE_NAME"
-  if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
-    reset_network_emulation 1
-  else
-    reset_network_emulation 2
-  fi
+  # if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+  #  reset_network_emulation 1
+  # else
+  #  reset_network_emulation 2
+  # fi
+  cleanup_emulator "$IMAGE_NAME"
 
   color_qemu_log "$LOG_PATH_MODULE/qemu.final.serial.log"
 
