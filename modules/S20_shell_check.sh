@@ -160,7 +160,7 @@ s20_reporter() {
       GPT_ANCHOR="$(openssl rand -hex 8)"
       write_csv_gpt "$(cut_path "$SH_SCRIPT")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this shell script:" "" "" "" "$SHELL_LOG"
       # add ChatGPT link
-      write_anchor_gpt "$GPT_ANCHOR"
+      write_anchor_gpt "$GPT_ANCHOR" "$SHELL_LOG"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi

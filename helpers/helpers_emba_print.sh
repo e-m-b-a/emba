@@ -844,7 +844,6 @@ write_csv_gpt(){
   if ! [[ -f "$CSV_DIR/gpt-checks.csv" ]]; then
     touch "$CSV_DIR/gpt-checks.csv"
   fi
-  # printf '%s;GPT-Prio-%s;%s;%s;' "$PATH_" "$PRIO_" "$QUESTION_" "$ANSWER_" >> "$CSV_DIR/gpt-checks.csv" || true
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/gpt-checks.csv" || true
   printf '\n' >> "$CSV_DIR/gpt-checks.csv" || true
 }

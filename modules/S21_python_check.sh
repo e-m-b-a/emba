@@ -110,9 +110,9 @@ s21_script_bandit() {
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
     if [[ $GPT_OPTION -gt 0 ]]; then
       GPT_ANCHOR="$(openssl rand -hex 8)"
-      write_csv_gpt "$(cut_path "$PY_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this python code:" "" "" ""
-      # add ChatGPT link
-      write_anchor_gpt "$GPT_ANCHOR"
+      write_csv_gpt "$(cut_path "$PY_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this python code:" "" "" "" "$PY_LOG"
+      # add ChatGPT link to output file
+      write_anchor_gpt "$GPT_ANCHOR" "$PY_LOG"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi

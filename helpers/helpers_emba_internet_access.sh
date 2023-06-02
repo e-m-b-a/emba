@@ -217,7 +217,7 @@ ask_chatgpt(){
             # write new
             write_csv_gpt "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_"
             # append to output file
-            # TODO append at top of html file
+            sed -i "s/$GPT_ANCHOR_/$GPT_RESPONSE_\n/" "$GPT_OUTPUT_FILE_"
             print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}" "no_log"
             ((CHATGPT_RESULT_CNT++))
           fi
