@@ -35,7 +35,7 @@ S120_cwe_checker()
     cwe_check
 
     if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
-      CWE_CNT_=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/CWE_CNT_.tmp || true)
+      CWE_CNT_=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/CWE_CNT.tmp || true)
     fi
 
     final_cwe_log "$CWE_CNT_"

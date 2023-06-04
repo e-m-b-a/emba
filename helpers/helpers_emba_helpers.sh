@@ -64,7 +64,7 @@ max_pids_protection() {
     for PID in "${WAIT_PIDS[@]}"; do
       # print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
       if [[ -e /proc/"$PID" ]]; then
-        if ! grep -q "State:.*zombie.*" "/proc/${PID}/status"; then
+        if ! grep -q "State:.*zombie.*" "/proc/${PID}/status" 2>/dev/null; then
           TEMP_PIDS+=( "$PID" )
         fi
       fi
