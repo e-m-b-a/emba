@@ -23,7 +23,7 @@ L99_cleanup() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     # as we are running from the run.sh startup script the network is also reconfigured
-    stopping_emulation_process "$IMAGE_NAME_"
+    stopping_emulation_process "$IMAGE_NAME"
 
     module_end_log "${FUNCNAME[0]}" "$MODULE_END"
   fi
