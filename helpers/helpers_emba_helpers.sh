@@ -63,7 +63,11 @@ max_pids_protection() {
     # check for really running PIDs and re-create the array
     for PID in "${WAIT_PIDS[@]}"; do
       # print_output "[*] max pid protection: ${#WAIT_PIDS[@]}"
-      [[ -e /proc/"$PID" ]] && TEMP_PIDS+=( "$PID" )
+      if [[ -e /proc/"$PID" ]]; then
+        if ! grep -q "State:.*zombie.*" "/proc/${PID}/status" 2>/dev/null; then
+          TEMP_PIDS+=( "$PID" )
+        fi
+      fi
     done
     # if S115 is running we have to kill old qemu processes
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]] && [[ $(grep -i -c S115_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 && -n "$QRUNTIME" ]]; then
