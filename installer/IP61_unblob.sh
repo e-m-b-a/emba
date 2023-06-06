@@ -49,7 +49,7 @@ IP61_unblob() {
     print_tool_info "pkg-config" 1
     print_tool_info "pkgconf" 1
 
-    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-3/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 
     print_git_info "unblob" "EMBA-support-repos/unblob" "Unblob is a powerful firmware extractor"
 
@@ -65,7 +65,7 @@ IP61_unblob() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-3/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
         dpkg -i external/sasquatch_1.0_amd64.deb
         rm -f external/sasquatch_1.0_amd64.deb
 
