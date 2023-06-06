@@ -56,6 +56,7 @@ L10_system_emulation() {
         print_output "[*] Found finished emulation process - trying to recover old emulation process"
 
         export IP_ADDRESS_=""
+        local IMAGE_DIR=""
         export IMAGE_NAME=""
         export ARCHIVE_PATH=""
         export HOSTNETDEV_ARR=()
@@ -63,14 +64,16 @@ L10_system_emulation() {
 
         EMULATION_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1)"
         IP_ADDRESS_=$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
-        IMAGE_NAME="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
-        ARCHIVE_PATH="$OLD_LOG_DIR""/""$IMAGE_NAME"
+        IMAGE_DIR="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
+        ARCHIVE_PATH="$OLD_LOG_DIR""/""$IMAGE_DIR"
 
         print_output "[*] Recovered IP address: $ORANGE$IP_ADDRESS_$NC"
-        print_output "[*] Recovered IMAGE_NAME: $ORANGE$IMAGE_NAME$NC"
+        print_output "[*] Recovered IMAGE_DIR: $ORANGE$IMAGE_DIR$NC"
         print_output "[*] Recovered ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC"
 
         if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+          IMAGE_NAME="$(tr ' ' '\n' < "$ARCHIVE_PATH"/run.sh | grep -o "file=.*" | cut -d '/' -f2)"
+          print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC" "no_log"
           print_output "[+] Startup script (run.sh) found in old logs ... restarting emulation process now"
           mapfile -t HOSTNETDEV_ARR < <(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
 
@@ -150,19 +153,22 @@ L10_system_emulation() {
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
       export HOSTNETDEV_ARR=()
+      local IMAGE_DIR=""
       local SYS_EMUL_POS_ENTRY=""
       SYS_EMUL_POS_ENTRY="$(grep "TCP ok" "$LOG_DIR"/emulator_online_results.log | sort -t ';' -k7 -n -r | head -1 || true)"
       print_output "$(indent "$(orange "$SYS_EMUL_POS_ENTRY")")"
 
       IP_ADDRESS_=$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
-      IMAGE_NAME="$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
-      ARCHIVE_PATH="$LOG_PATH_MODULE""/""$IMAGE_NAME"
+      IMAGE_DIR="$(echo "$SYS_EMUL_POS_ENTRY" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
+      ARCHIVE_PATH="$LOG_PATH_MODULE""/""$IMAGE_DIR"
       print_ln
       print_output "[*] Identified IP address: $ORANGE$IP_ADDRESS_$NC" "no_log"
-      print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC" "no_log"
+      print_output "[*] Identified IMAGE_DIR: $ORANGE$IMAGE_DIR$NC" "no_log"
       print_output "[*] Identified ARCHIVE_PATH: $ORANGE$ARCHIVE_PATH$NC" "no_log"
 
       if [[ -v ARCHIVE_PATH ]] && [[ -f "$ARCHIVE_PATH"/run.sh ]]; then
+        IMAGE_NAME="$(tr ' ' '\n' < "$ARCHIVE_PATH"/run.sh | grep -o "file=.*" | cut -d '/' -f2)"
+        print_output "[*] Identified IMAGE_NAME: $ORANGE$IMAGE_NAME$NC" "no_log"
         print_output "[+] Identified emulation startup script (run.sh) in ARCHIVE_PATH ... starting emulation process for further analysis" "no_log"
         print_ln
         mapfile -t HOSTNETDEV_ARR < <(grep "ip link set.*up" "$ARCHIVE_PATH"/run.sh | awk '{print $4}' | sort -u)
