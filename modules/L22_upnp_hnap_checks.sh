@@ -40,7 +40,7 @@ L22_upnp_hnap_checks() {
       fi
       if [[ -v HOSTNETDEV_ARR ]]; then
         check_basic_upnp "${HOSTNETDEV_ARR[@]}"
-        check_basic_hnap
+        check_basic_hnap_jnap
       else
         print_output "[!] No network interface found"
       fi
@@ -49,7 +49,7 @@ L22_upnp_hnap_checks() {
     fi
 
     write_log ""
-    write_log "Statistics:$UPNP_UP:$HNAP_UP"
+    write_log "Statistics:$UPNP_UP:$HNAP_UP:$JNAP_UP"
     module_end_log "${FUNCNAME[0]}" "$UPNP_UP"
   fi
 }
@@ -81,16 +81,16 @@ check_basic_upnp() {
   print_output "[*] UPnP basic enumeration finished"
 }
 
-check_basic_hnap() {
+check_basic_hnap_jnap() {
   local PORT=""
   local SERVICE=""
   local SSL=0
 
-  sub_module_title "HNAP enumeration for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
+  sub_module_title "HNAP/JNAP enumeration for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
 
   if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
     for PORT_SERVICE in "${NMAP_PORTS_SERVICES[@]}"; do
-      [[ "$HNAP_UP" -eq 1 ]] && break
+      [[ "$HNAP_UP" -eq 1 && "$JNAP_UP" -eq 1 ]] && break
 
       PORT=$(echo "$PORT_SERVICE" | cut -d/ -f1 | tr -d "[:blank:]")
       SERVICE=$(echo "$PORT_SERVICE" | awk '{print $2}' | tr -d "[:blank:]")
@@ -114,12 +114,20 @@ check_basic_hnap() {
         return
       fi
 
+      # we use the following JNAP-Action for identifying JNAP services on Linksys routers:
+      JNAP_ACTION="X-JNAP-Action: http://cisco.com/jnap/core/GetDeviceInfo"
       if [[ "$SSL" -eq 0 ]]; then
+        # HNAP
         curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
         curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        # JNAP
+        curl -v -L --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
       else
+        # HNAP - SSL
         curl -v -L --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
         curl -v -L --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        # JNAP - SSL
+        curl -v -L --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" https://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
       fi
 
       if [[ -f "$LOG_PATH_MODULE"/hnap-discovery-check.txt ]]; then
@@ -131,9 +139,22 @@ check_basic_hnap() {
         HNAP_UP=$(grep -c "HNAP1" "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true)
       fi
 
+      if [[ -f "$LOG_PATH_MODULE"/jnap-discovery-check.txt ]]; then
+        print_ln
+        tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jnap-discovery-check.txt
+        print_ln
+
+        JNAP_UP=$(grep -c "/jnap/" "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true)
+      fi
+
+
       if [[ "$HNAP_UP" -gt 0 ]]; then
         HNAP_UP=1
         print_output "[+] HNAP service successfully identified"
+      fi
+      if [[ "$JNAP_UP" -gt 0 ]]; then
+        JNAP_UP=1
+        print_output "[+] JNAP service successfully identified"
       fi
 
     done
