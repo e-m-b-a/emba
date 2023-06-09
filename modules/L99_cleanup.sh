@@ -15,7 +15,6 @@
 # Description:  Stop and cleanup emulation environment
 
 L99_cleanup() {
-
   local MODULE_END=0
 
   if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
@@ -23,11 +22,9 @@ L99_cleanup() {
     module_title "Cleanup of emulated environment."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ -n "$IP_ADDRESS_" ]]; then
-      # as we are running from the run.sh startup script the network is also reconfigured
-      print_output "[*] Stopping Qemu emulation ..."
-      pkill -9 -f "qemu-system-.*$IMAGE_NAME.*" || true &>/dev/null
-    fi
+    # as we are running from the run.sh startup script the network is also reconfigured
+    stopping_emulation_process "$IMAGE_NAME"
+
     module_end_log "${FUNCNAME[0]}" "$MODULE_END"
   fi
 }

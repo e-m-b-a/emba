@@ -167,140 +167,140 @@ deeper_extractor_helper() {
     fw_bin_detector "$FILE_TMP"
 
     if [[ "$VMDK_DETECTED" -eq 1 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted"
-        fi
-      elif [[ "$UBI_IMAGE" -eq 1 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted"
-        fi
-      # now handled via unblob
-      # elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
-      #  if [[ "$THREADED" -eq 1 ]]; then
-      #    dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
-      #    BIN_PID="$!"
-      #    store_kill_pids "$BIN_PID"
-      #    disown "$BIN_PID" 2> /dev/null || true
-      #    WAIT_PIDS_P20+=( "$BIN_PID" )
-      #  else
-      #    dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted"
-      #  fi
-      # now handled via unblob
-      # elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
-      #  if [[ "$THREADED" -eq 1 ]]; then
-      #    dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted" &
-      #    BIN_PID="$!"
-      #    store_kill_pids "$BIN_PID"
-      #    disown "$BIN_PID" 2> /dev/null || true
-      #    WAIT_PIDS_P20+=( "$BIN_PID" )
-      #  else
-      #    dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted"
-      #  fi
-      elif [[ "$EXT_IMAGE" -eq 1 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted"
-        fi
-      # now handled via unblob
-      # elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
-      #  if [[ "$THREADED" -eq 1 ]]; then
-      #    engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
-      #    BIN_PID="$!"
-      #    store_kill_pids "$BIN_PID"
-      #    disown "$BIN_PID" 2> /dev/null || true
-      #    WAIT_PIDS_P20+=( "$BIN_PID" )
-      #  else
-      #    engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted"
-      #  fi
-      elif [[ "$BSD_UFS" -ne 0 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted"
-        fi
-      elif [[ "$ANDROID_OTA" -ne 0 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          android_ota_extractor "$FILE_TMP" "${FILE_TMP}_android_ota_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          android_ota_extractor "$FILE_TMP" "${FILE_TMP}_android_ota_extracted"
-        fi
-      elif [[ "$OPENSSL_ENC_DETECTED" -ne 0 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted"
-        fi
-      elif [[ "$BUFFALO_ENC_DETECTED" -ne 0 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          buffalo_enc_extractor "$FILE_TMP" "${FILE_TMP}_buffalo_enc_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          buffalo_enc_extractor "$FILE_TMP" "${FILE_TMP}_buffalo_enc_extracted"
-        fi
-      elif [[ "$ZYXEL_ZIP" -ne 0 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted"
-        fi
-      elif [[ "$QCOW_DETECTED" -ne 0 ]]; then
-        if [[ "$THREADED" -eq 1 ]]; then
-          qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted"
-        fi
-
+      if [[ "$THREADED" -eq 1 ]]; then
+        vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
       else
-        # default case to Unblob
-        if [[ "$THREADED" -eq 1 ]]; then
-          unblobber "$FILE_TMP" "${FILE_TMP}_unblob_extracted" &
-          BIN_PID="$!"
-          store_kill_pids "$BIN_PID"
-          disown "$BIN_PID" 2> /dev/null || true
-          WAIT_PIDS_P20+=( "$BIN_PID" )
-        else
-          unblobber "$FILE_TMP" "${FILE_TMP}_unblob_extracted"
-        fi
+        vmdk_extractor "$FILE_TMP" "${FILE_TMP}_vmdk_extracted"
+      fi
+    elif [[ "$UBI_IMAGE" -eq 1 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        ubi_extractor "$FILE_TMP" "${FILE_TMP}_ubi_extracted"
+      fi
+    # now handled via unblob
+    # elif [[ "$DLINK_ENC_DETECTED" -eq 1 ]]; then
+    #  if [[ "$THREADED" -eq 1 ]]; then
+    #    dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted" &
+    #    BIN_PID="$!"
+    #    store_kill_pids "$BIN_PID"
+    #    disown "$BIN_PID" 2> /dev/null || true
+    #    WAIT_PIDS_P20+=( "$BIN_PID" )
+    #  else
+    #    dlink_SHRS_enc_extractor "$FILE_TMP" "${FILE_TMP}_shrs_extracted"
+    #  fi
+    # now handled via unblob
+    # elif [[ "$DLINK_ENC_DETECTED" -eq 2 ]]; then
+    #  if [[ "$THREADED" -eq 1 ]]; then
+    #    dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted" &
+    #    BIN_PID="$!"
+    #    store_kill_pids "$BIN_PID"
+    #    disown "$BIN_PID" 2> /dev/null || true
+    #    WAIT_PIDS_P20+=( "$BIN_PID" )
+    #  else
+    #    dlink_enc_img_extractor "$FILE_TMP" "${FILE_TMP}_enc_img_extracted"
+    #  fi
+    elif [[ "$EXT_IMAGE" -eq 1 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        ext_extractor "$FILE_TMP" "${FILE_TMP}_ext_extracted"
+      fi
+    # now handled via unblob
+    # elif [[ "$ENGENIUS_ENC_DETECTED" -ne 0 ]]; then
+    #  if [[ "$THREADED" -eq 1 ]]; then
+    #    engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted" &
+    #    BIN_PID="$!"
+    #    store_kill_pids "$BIN_PID"
+    #    disown "$BIN_PID" 2> /dev/null || true
+    #    WAIT_PIDS_P20+=( "$BIN_PID" )
+    #  else
+    #    engenius_enc_extractor "$FILE_TMP" "${FILE_TMP}_engenius_extracted"
+    #  fi
+    elif [[ "$BSD_UFS" -ne 0 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        ufs_extractor "$FILE_TMP" "${FILE_TMP}_bsd_ufs_extracted"
+      fi
+    elif [[ "$ANDROID_OTA" -ne 0 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        android_ota_extractor "$FILE_TMP" "${FILE_TMP}_android_ota_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        android_ota_extractor "$FILE_TMP" "${FILE_TMP}_android_ota_extracted"
+      fi
+    elif [[ "$OPENSSL_ENC_DETECTED" -ne 0 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        foscam_enc_extractor "$FILE_TMP" "${FILE_TMP}_foscam_enc_extracted"
+      fi
+    elif [[ "$BUFFALO_ENC_DETECTED" -ne 0 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        buffalo_enc_extractor "$FILE_TMP" "${FILE_TMP}_buffalo_enc_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        buffalo_enc_extractor "$FILE_TMP" "${FILE_TMP}_buffalo_enc_extracted"
+      fi
+    elif [[ "$ZYXEL_ZIP" -ne 0 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        zyxel_zip_extractor "$FILE_TMP" "${FILE_TMP}_zyxel_enc_extracted"
+      fi
+    elif [[ "$QCOW_DETECTED" -ne 0 ]]; then
+      if [[ "$THREADED" -eq 1 ]]; then
+        qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted"
+      fi
+
+    else
+      # default case to Unblob
+      if [[ "$THREADED" -eq 1 ]]; then
+        unblobber "$FILE_TMP" "${FILE_TMP}_unblob_extracted" &
+        BIN_PID="$!"
+        store_kill_pids "$BIN_PID"
+        disown "$BIN_PID" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "$BIN_PID" )
+      else
+        unblobber "$FILE_TMP" "${FILE_TMP}_unblob_extracted"
+      fi
     fi
 
     MD5_DONE_DEEP+=( "$FILE_MD5" )
