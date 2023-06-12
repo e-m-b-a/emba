@@ -29,22 +29,23 @@ ask_chatgpt(){
   export CHATGPT_RESULT_CNT=1
 
   if [ -z "$OPENAI_API_KEY" ]; then
-    print_output "[!] There is no API key in the config file" "no_log"
-    print_output "[!] Can't ask ChatGPT with this setup" "no_log"
+    print_output "[!] There is no API key in the config file"
+    print_output "[!] Can't ask ChatGPT with this setup"
     print_output "There is no API key in the config file, aborting"
     CHATGPT_RESULT_CNT=-1
   else
     # test connection
-    print_output "[*] Testing API-Key" "no_log"
+    print_output "[*] Testing API-Key"
+    print_output "the running container is: $CONTAINER_NUMBER"
     print_output "Testing API key : $OPENAI_API_KEY "
     if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$CONFIG_DIR/gpt_template.json" &>"$LOG_DIR/chatgpt.log" ; then
-      print_output "[!] ChatGPT error while testing the API-Key" "no_log"
+      print_output "[!] ChatGPT error while testing the API-Key"
       print_output "requests aren't working, aborting"
       CHATGPT_RESULT_CNT=-1
     fi
-    print_output "[*] ChatGPT test successful" "no_log"
+    print_output "[*] ChatGPT test successful"
   fi
 
   # we wait until the s20 module is finished and hopefully has some code for us
