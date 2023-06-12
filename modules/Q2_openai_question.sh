@@ -84,7 +84,7 @@ ask_chatgpt(){
 
       if [[ -z $GPT_ANSWER_  ]] && [[ $GPT_PRIO_ -le $MINIMUM_GPT_PRIO ]]; then
         if [ -f "$SCRIPT_PATH_TMP_" ]; then
-          print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")" "no_log"
+          print_output "Asking ChatGPT about $(print_path "$SCRIPT_PATH_TMP_")"
           head -n -2 "$CONFIG_DIR/gpt_template.json" > "$TMP_DIR/chat.json"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "$SCRIPT_PATH_TMP_" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> "$TMP_DIR/chat.json"
@@ -92,9 +92,9 @@ ask_chatgpt(){
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$TMP_DIR/chat.json" -o "$TMP_DIR/response.json" --write-out "%{http_code}")
           if [[ "$HTTP_CODE_" -ne 200 ]] ; then
-            print_output "[!] Something went wrong with the ChatGPT requests" "no_log"
+            print_output "[!] Something went wrong with the ChatGPT requests"
             if [ -f "$TMP_DIR/response.json" ]; then
-              print_output "ERROR response:$(cat "$TMP_DIR/response.json")" "no_log"
+              print_output "ERROR response:$(cat "$TMP_DIR/response.json")"
             fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "$TMP_DIR"/response.json)
@@ -107,10 +107,11 @@ ask_chatgpt(){
             write_csv_gpt "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_"
             # append to output file
             sed -i "s/$GPT_ANCHOR_/$GPT_RESPONSE_\n/" "$GPT_OUTPUT_FILE_"
-            print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}" "no_log"
+            print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
             ((CHATGPT_RESULT_CNT++))
           fi
         fi
+        print_output "Couldn't find $(print_path "$SCRIPT_PATH_TMP_")"
       fi
       if [[ $GPT_OPTION -ne 2 ]]; then
         sleep 20s
