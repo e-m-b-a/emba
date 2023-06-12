@@ -108,7 +108,7 @@ check_cve_search_job() {
   done
 }
 
-# $1: module group letter [P, S, L, F]
+# $1: module group letter [P, S, L, F, Q]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
 run_modules()
@@ -388,6 +388,7 @@ main() {
   if [[ ${IN_DOCKER} -eq 1 ]] ; then
     # set external path new for docker
     export EXT_DIR="/external"
+    # TODO move to container 2
     export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
   fi
 
@@ -694,9 +695,11 @@ main() {
 
     disable_strict_mode "${STRICT_MODE}" 0
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
+      # TODO make sure both container test but figure out printing for both
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
     else
+      # TODO make sure both services get the same stuff
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
     fi
@@ -731,6 +734,18 @@ main() {
     initial_status_bar
     # Trap the window resize signal (handle window resize events).
     trap 'initial_status_bar' WINCH
+  fi
+
+  #######################################################################################
+  # Quests (Q-modules)
+  #######################################################################################
+  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+    run_modules "Q" "${THREADED}" "0"
+    exit 0
+  elif [[ ${USE_DOCKER} -eq 0 ]] ;  then 
+  # dev-mode
+    run_modules "Q" "${THREADED}" "0" &
+    export Q_MOD_PID="$!"
   fi
 
   #######################################################################################
@@ -842,6 +857,10 @@ main() {
   [[ ${DISABLE_STATUS_BAR} -eq 0 ]] && remove_status_bar
 
   write_notification "Reporting phase ended"
+
+  if [[ ${USE_DOCKER} -eq 0 && -n "$Q_MOD_PID" && ${THREADED} -eq 1 ]] ;  then
+    wait_for_pid "${Q_MOD_PID}"
+  fi
 
   if [[ "${TESTING_DONE}" -eq 1 ]]; then
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/firmware ]]; then

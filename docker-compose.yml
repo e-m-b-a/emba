@@ -47,10 +47,37 @@ services:
         - /boot:/boot:ro
     environment:
         - USER
+        - CONTAINER_NUMBER=1
     devices:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
       - SYS_ADMIN
+    ulimits:
+      core:
+        hard: 0
+        soft: 0
+
+  emba_quest:
+    depends_on:
+      - emba
+    image: embeddedanalyzer/emba:latest
+    read_only: true
+    # nosemgrep
+    privileged: false
+    tmpfs:
+      - /tmp
+    build: .
+    # /dev is needed for the system emulator (L10)
+    # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
+    # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
+    volumes:
+        - ${LOG}/:/logs
+        - ${EMBA}/:/emba:ro
+        - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
+        - /etc/localtime:/etc/localtime:ro
+    environment:
+        - USER
+        - CONTAINER_NUMBER=2
     networks:
       - emba_runs
     ulimits:
@@ -62,7 +89,6 @@ networks:
   emba_runs:
     name: emba_runs
     driver: bridge
-    internal: true
     driver_opts:
       com.docker.network.bridge.name: emba_runs
     ipam:
