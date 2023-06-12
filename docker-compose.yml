@@ -57,8 +57,6 @@ services:
       core:
         hard: 0
         soft: 0
-    depends_on:
-      - emba_quest
 
   emba_quest:
     image: embeddedanalyzer/emba:latest
@@ -86,7 +84,6 @@ services:
       core:
         hard: 0
         soft: 0
-    command: bash -c "/emba/emba -l /logs -f /firmware -i"
 
 networks:
   emba_runs:

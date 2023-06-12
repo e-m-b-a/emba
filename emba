@@ -687,16 +687,23 @@ main() {
 
     disable_strict_mode "${STRICT_MODE}" 0
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
-      # container 2
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose start emba_quest
       # container 1
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-
+      # container 2
+      # TODO could be removed
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba_quest -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      if [[ $? -ne $D_RETURN ]]; then
+        D_RETURN=1
+      fi
     else
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose start emba_quest
+
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      if [[ $? -ne $D_RETURN ]]; then
+        D_RETURN=1
+      fi
     fi
     enable_strict_mode "${STRICT_MODE}" 0
 
