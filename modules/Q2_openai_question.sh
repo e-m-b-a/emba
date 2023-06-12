@@ -15,12 +15,14 @@
 # Description: Openai questioning module for container #2
 
 Q2_openai_question(){
-  module_log_init "${FUNCNAME[0]}"
-  # Prints title to CLI and into log
-  # Required!
-  module_title "openai_question"
-  ask_chatgpt
-  module_end_log "${FUNCNAME[0]}"
+  if [[ ${GPT_OPTION} -gt 0 ]]; then
+    module_log_init "${FUNCNAME[0]}"
+    # Prints title to CLI and into log
+    # Required!
+    module_title "openai_question"
+    ask_chatgpt
+    module_end_log "${FUNCNAME[0]}"
+  fi  
 }
 
 # looks through the modules and finds chatgpt questions inside the csv

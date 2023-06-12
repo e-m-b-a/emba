@@ -465,14 +465,6 @@ main() {
       print_output "[*] Started kernel downloader thread with PID ${ORANGE}${K_DOWN_PID}${NC}" "no_log"
     fi
 
-    # chatgpt is used to identify vulnerabilities inside code snippeds
-    if [[ ${IN_DOCKER} -eq 0 ]] && [[ ${GPT_OPTION} -gt 0 ]]; then
-      ask_chatgpt &
-      ASK_GPT_PID="$!"
-      store_kill_pids "${ASK_GPT_PID}"
-      print_output "[*] Started ask_chatgpt thread with PID ${ORANGE}${ASK_GPT_PID}${NC}" "no_log"
-    fi
-
     if [[ ${IN_DOCKER} -eq 0 ]]; then
       echo "${LOG_DIR}" > "${TMP_DIR}"/orig_logdir
     fi
@@ -695,13 +687,14 @@ main() {
 
     disable_strict_mode "${STRICT_MODE}" 0
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
+      # container 2
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose start emba_quest
       # container 1
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      # container 2
-      # TODO make sure both container test but figure out printing for both
+
     else
-      # TODO make sure both services get the same stuff
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose start emba_quest
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
     fi

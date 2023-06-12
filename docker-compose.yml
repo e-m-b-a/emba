@@ -72,6 +72,7 @@ services:
     # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
     # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
+        - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/logs
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
@@ -85,7 +86,7 @@ services:
       core:
         hard: 0
         soft: 0
-    command: /emba/emba -l /logs -f /firmware -i
+    command: bash -c "/emba/emba -l /logs -f /firmware -i"
 
 networks:
   emba_runs:
