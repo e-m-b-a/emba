@@ -57,10 +57,10 @@ services:
       core:
         hard: 0
         soft: 0
+    depends_on:
+      - emba_quest
 
   emba_quest:
-    depends_on:
-      - emba
     image: embeddedanalyzer/emba:latest
     read_only: true
     # nosemgrep

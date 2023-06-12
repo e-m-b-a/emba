@@ -695,9 +695,11 @@ main() {
 
     disable_strict_mode "${STRICT_MODE}" 0
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
-      # TODO make sure both container test but figure out printing for both
+      # container 1
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
+      # container 2
+      # TODO make sure both container test but figure out printing for both
     else
       # TODO make sure both services get the same stuff
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
@@ -742,7 +744,7 @@ main() {
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     run_modules "Q" "${THREADED}" "0"
     exit 0
-  elif [[ ${USE_DOCKER} -eq 0 ]] ;  then 
+  elif [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ;  then 
   # dev-mode
     run_modules "Q" "${THREADED}" "0" &
     export Q_MOD_PID="$!"
