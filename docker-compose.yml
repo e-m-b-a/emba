@@ -85,7 +85,7 @@ services:
       core:
         hard: 0
         soft: 0
-    command: bash -c '/emba/emba -l /logs -f /firmware -i'
+    command: /emba/emba -l /logs -f /firmware -i
 
 networks:
   emba_runs:
