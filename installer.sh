@@ -43,6 +43,10 @@ if [[ "$STRICT_MODE" -eq 1 ]]; then
   trap 'wickStrictModeFail $? | tee -a /tmp/emba_installer.log' ERR  # The ERR trap is triggered when a script catches an error
 fi
 
+if ! [[ -v CONTAINER ]]; then
+  CONTAINER="embeddedanalyzer/emba"
+fi
+
 # install docker EMBA
 export IN_DOCKER=0
 # list dependencies

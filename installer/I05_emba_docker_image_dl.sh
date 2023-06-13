@@ -26,11 +26,7 @@ I05_emba_docker_image_dl() {
     echo -e "Description: EMBA docker images used for firmware analysis."
 
     if command -v docker > /dev/null; then
-      if [ -z "${CONTAINER+isset}" ]; then
-        f="$(docker manifest inspect embeddedanalyzer/emba:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
-      else
-        f="$(docker manifest inspect "${CONTAINER}" | grep "size" | sed -e 's/[^0-9 ]//g')"
-      fi
+      f="$(docker manifest inspect "${CONTAINER}" | grep "size" | sed -e 's/[^0-9 ]//g')"
       echo "Download-Size : ""$(("$(( "${f//$'\n'/+}" ))"/1048576))"" MB"
     fi
 
@@ -52,13 +48,9 @@ I05_emba_docker_image_dl() {
         if command -v docker > /dev/null ; then
           export DOCKER_CLI_EXPERIMENTAL=enabled
           echo -e "$ORANGE""EMBA docker image will be downloaded.""$NC"
-          if [ -z "${CONTAINER+isset}" ]; then
-            docker pull embeddedanalyzer/emba
-          else
-            echo -e "$ORANGE""CONTAINER VARIABLE SET TO ""$CONTAINER""$NC"
-            docker pull "${CONTAINER}"
-            sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
-          fi
+          echo -e "$ORANGE""CONTAINER VARIABLE SET TO ""$CONTAINER""$NC"
+          docker pull "${CONTAINER}"
+          sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
           export DOCKER_CLI_EXPERIMENTAL=disabled
           docker-compose up --no-start
         else
