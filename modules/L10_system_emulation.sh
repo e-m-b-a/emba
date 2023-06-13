@@ -1503,9 +1503,9 @@ iterate_vlans() {
 
     # check this later
     # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth0" "$VLAN_ID" "$NETWORK_MODE"
-    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth0" "NONE" "$NETWORK_MODE"
+    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth0" "0" "$NETWORK_MODE"
     # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth1" "$VLAN_ID" "$NETWORK_MODE"
-    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth1" "NONE" "$NETWORK_MODE"
+    # store_interface_details "$IP_ADDRESS_" "$NETWORK_DEVICE" "eth1" "0" "$NETWORK_MODE"
 
     # if we have entries without an interface name, we need to identify an interface name:
     # register_vlan_dev[PID: 212 (vconfig)]: dev:vlan1 vlan_id:1

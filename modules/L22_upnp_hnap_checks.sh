@@ -41,6 +41,7 @@ L22_upnp_hnap_checks() {
       if [[ -v HOSTNETDEV_ARR ]]; then
         check_basic_upnp "${HOSTNETDEV_ARR[@]}"
         check_basic_hnap_jnap
+        [[ "$JNAP_UP" -gt 0 ]] && check_jnap_access
       else
         print_output "[!] No network interface found"
       fi
@@ -161,6 +162,56 @@ check_basic_hnap_jnap() {
   fi
 
   print_ln
-  print_output "[*] HNAP basic enumeration finished"
+  print_output "[*] HNAP/JNAP basic enumeration finished"
 }
 
+check_jnap_access() {
+  sub_module_title "JNAP enumeration for unauthenticated JNAP endpoints"
+  local JNAP_ENDPOINTS=()
+  local SYSINFO_CGI_ARR=()
+  local SYSINFO_CGI=""
+  local JNAP_EPT=""
+
+  mapfile -t JNAP_ENDPOINTS < <(find "$LOG_DIR"/firmware -type f -exec grep "\[.*/jnap/.*\]\ =" {} \; | cut -d\' -f2 | sort -u 2>/dev/null || true)
+
+  # Todo: PORT!!!
+  local PORT=80
+
+  # https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt
+  mapfile -t SYSINFO_CGI_ARR < <(find "$LOG_DIR"/firmware -type f -name "sysinfo.cgi" -o -name "getstinfo.cgi"| sort -u 2>/dev/null || true)
+
+  for SYSINFO_CGI in "${SYSINFO_CGI_ARR[@]}"; do
+    print_output "[*] Testing for sysinfo.cgi" "no_log"
+    curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/"${SYSINFO_CGI}" > "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log || true
+
+    if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log; then
+      print_output "[+] Found sensitive information in sysinfo.cgi - see https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt:"
+      grep "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log | tee -a "$LOG_FILE"
+    fi
+  done
+
+  for JNAP_EPT in "${JNAP_ENDPOINTS[@]}"; do
+    print_output "[*] Testing JNAP action: ${ORANGE}${JNAP_EPT}${NC}" "no_log"
+    JNAP_EPT_NAME="$(echo "${JNAP_EPT}" | rev | cut -d '/' -f1 | rev)"
+    JNAP_ACTION="X-JNAP-Action: ${JNAP_EPT}"
+    DATA="{}"
+    curl -v -L --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "${DATA}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ > "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log || true
+
+    if [[ -s "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log ]]; then
+      if grep -q "_ErrorUnauthorized" "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log; then
+        print_output "[-] Authentication needed for ${ORANGE}${JNAP_EPT}${NC}" "no_log"
+        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log ]] && rm "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log
+      fi
+      if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log ]] && grep -q "_ErrorInvalidInput" "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log; then
+        print_output "[-] Invalid request detected for ${ORANGE}${JNAP_EPT}${NC}" "no_log"
+        [[ -f "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log ]] && rm "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log
+      fi
+    else
+      rm "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log
+    fi
+
+    if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log ]]; then
+      print_output "[+] Unauthenticated JNAP endpoint detected - ${ORANGE}${JNAP_EPT_NAME}${NC}" "" "${LOG_PATH_MODULE}/JNAP_${JNAP_EPT_NAME}.log"
+    fi
+  done
+}
