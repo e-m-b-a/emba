@@ -26,7 +26,11 @@ I05_emba_docker_image_dl() {
     echo -e "Description: EMBA docker images used for firmware analysis."
 
     if command -v docker > /dev/null; then
-      f="$(docker manifest inspect embeddedanalyzer/emba:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
+      if [ -z "${CONTAINER+isset}" ]; then
+        f="$(docker manifest inspect embeddedanalyzer/emba:latest | grep "size" | sed -e 's/[^0-9 ]//g')"
+      else
+        f="$(docker manifest inspect ${CONTAINER} | grep "size" | sed -e 's/[^0-9 ]//g')"
+      fi
       echo "Download-Size : ""$(("$(( "${f//$'\n'/+}" ))"/1048576))"" MB"
     fi
 
