@@ -323,7 +323,9 @@ web_access_crawler() {
 
   if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" ]]; then
     grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "200 OK" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" || true
+    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "401 Unauth" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" || true
     CRAWL_RESP_200=$(wc -l "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" | awk '{print $1}')
+    CRAWL_RESP_401=$(wc -l "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" | awk '{print $1}')
 
     # Colorizing the log file:
     sed -i -r "s/.*HTTP\/.*\ 200\ .*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
@@ -331,6 +333,9 @@ web_access_crawler() {
 
     if [[ "$CRAWL_RESP_200" -gt 0 ]]; then
       print_output "[+] Found $ORANGE$CRAWL_RESP_200$GREEN valid responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+    fi
+    if [[ "$CRAWL_RESP_401" -gt 0 ]]; then
+      print_output "[+] Found $ORANGE$CRAWL_RESP_401$GREEN unauthorized responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
     fi
 
     if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" ]] && [[ -f "$LOG_DIR"/s22_php_check/semgrep_php_results_xml.log ]]; then
