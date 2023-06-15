@@ -150,7 +150,6 @@ done
 
 if ! $flagCUsed; then
   CONTAINER="embeddedanalyzer/emba"
-  echo "NOT USED"
 fi
 
 if [[ "$LIST_DEP" -eq 1 ]]; then
