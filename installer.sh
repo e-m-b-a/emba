@@ -84,7 +84,7 @@ echo ""
 echo -e "==> ""$GREEN""Imported ""$INSTALLER_COUNT"" installer module files""$NC"
 echo ""
 
-if [ "$#" -le 1 ] && [ "$#" -gt 2 ]; then
+if [[ "$#" -le 1 ]] && [[ "$#" -gt 2 ]]; then
   echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
   echo -e "\n\n------------------------------------------------------------------"
   echo -e "If you are going to install EMBA in default mode you can use:"
@@ -93,8 +93,6 @@ if [ "$#" -le 1 ] && [ "$#" -gt 2 ]; then
   print_help
   exit 1
 fi
-
-flagCUsed=false
 
 while getopts CdDFghlrc: OPT ; do
   case $OPT in
@@ -138,7 +136,6 @@ while getopts CdDFghlrc: OPT ; do
       ;;
     c)
       export CONTAINER="$OPTARG"
-      flagCUsed=true
       ;;
     *)
       echo -e "$RED""$BOLD""Invalid option""$NC"
@@ -148,7 +145,7 @@ while getopts CdDFghlrc: OPT ; do
   esac
 done
 
-if ! $flagCUsed; then
+if ! [[ -v CONTAINER ]]; then
   CONTAINER="embeddedanalyzer/emba"
 fi
 
