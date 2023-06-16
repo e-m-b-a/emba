@@ -62,7 +62,6 @@ ask_chatgpt(){
   local MINIMUM_GPT_PRIO=2
   print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower" "no_log"
   while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
-    # ~read_csv_gpt()
     local GPT_PRIO_=3
     # default vars
     local GPT_QUESTION_="Please identify all vulnerabilities in this code: "
@@ -104,12 +103,15 @@ ask_chatgpt(){
           # GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//$'\n'/}" #remove newlines from response
           GPT_TOKENS_=$(jq '.usage.total_tokens' "$TMP_DIR"/response.json)
           if [[ $GPT_TOKENS_ -ne 0 ]]; then
-            # remove old line
-            sed -i "/.*$GPT_ANCHOR_.*/d" "$CSV_DIR/gpt-checks.csv"
-            # write new
+            GPT_OUTPUT_FILE_=$(find ~+ -iname "$(basename "$GPT_OUTPUT_FILE_")" )
+            # write new into done csv
             write_csv_gpt "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_"
             # append to output file
-            sed -i "s/$GPT_ANCHOR_/$GPT_RESPONSE_\n/" "$GPT_OUTPUT_FILE_"
+            if ! [ -f "$GPT_OUTPUT_FILE_" ]; then
+              print_output "[!] Something went wrong with the Output file $GPT_OUTPUT_FILE_"
+            else
+              sed -i "s/$GPT_ANCHOR_/$GPT_QUESTION_\n$GPT_RESPONSE_\n/" "$GPT_OUTPUT_FILE_"
+            fi
             print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
             ((CHATGPT_RESULT_CNT++))
           fi
@@ -119,7 +121,11 @@ ask_chatgpt(){
       if [[ $GPT_OPTION -ne 2 ]]; then
         sleep 20s
       fi
-    done < <( grep -v "cost=" "$CSV_DIR/gpt-checks.csv")
+    done < "$CSV_DIR/Q2_openai_question.csv.tmp"
+    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
+      GPT_ANCHOR_="${COL2_}"
+      sed -i "/$GPT_ANCHOR_/d" "$CSV_DIR/Q2_openai_question.csv.tmp"
+    done < "$CSV_DIR/Q2_openai_question.csv"
   done
   unset OPENAI_API_KEY
 }

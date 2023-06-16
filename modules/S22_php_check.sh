@@ -169,7 +169,7 @@ s22_vuln_check() {
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "NA"
     if [[ $GPT_OPTION -gt 0 ]]; then
       GPT_ANCHOR="$(openssl rand -hex 8)"
-      write_csv_gpt "$(cut_path "$PHP_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this php code:" "" "" ""
+      write_csv_gpt_tmp "$(cut_path "$PHP_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this php code:" "" "" ""
       # add ChatGPT link
       write_anchor_gpt "$GPT_ANCHOR"
     fi

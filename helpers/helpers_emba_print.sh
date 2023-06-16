@@ -841,11 +841,26 @@ write_csv_gpt(){
     print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
     return
   fi
-  if ! [[ -f "$CSV_DIR/gpt-checks.csv" ]]; then
-    touch "$CSV_DIR/gpt-checks.csv"
+  if ! [[ -f "$CSV_DIR/Q2_openai_question.csv" ]]; then
+    touch "$CSV_DIR/Q2_openai_question.csv"
   fi
-  printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/gpt-checks.csv" || true
-  printf '\n' >> "$CSV_DIR/gpt-checks.csv" || true
+  printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/Q2_openai_question.csv" || true
+  printf '\n' >> "$CSV_DIR/Q2_openai_question.csv" || true
+}
+
+# writes inputs into tmp csv for chatgpt
+write_csv_gpt_tmp(){
+  local CSV_ITEMS=("$@")
+
+  if ! [[ -d "$CSV_DIR" ]]; then
+    print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
+    return
+  fi
+  if ! [[ -f "$CSV_DIR/Q2_openai_question.csv.tmp" ]]; then
+    touch "$CSV_DIR/Q2_openai_question.csv.tmp"
+  fi
+  printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/Q2_openai_question.csv.tmp" || true
+  printf '\n' >> "$CSV_DIR/Q2_openai_question.csv.tmp" || true
 }
 
 write_anchor_gpt()
