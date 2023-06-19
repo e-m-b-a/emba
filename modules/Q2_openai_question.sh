@@ -13,55 +13,57 @@
 # Author(s): Benedikt Kuehne
 
 # Description: Openai questioning module for container #2
+# Note:   Important requirement for Q-modules is the self termination when a certain phase ends
 
 Q2_openai_question(){
   if [[ ${GPT_OPTION} -gt 0 ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
-    # Required!
     module_title "openai_question"
-    ask_chatgpt
+    export "$(grep -v '^#' "$CONFIG_DIR/gpt_config.env" | xargs || true )" # readin of all vars in that env file
+    export CHATGPT_RESULT_CNT=1
+
+    if [ -z "$OPENAI_API_KEY" ]; then
+      print_output "[!] There is no API key in the config file"
+      print_output "[!] Can't ask ChatGPT with this setup"
+      print_output "There is no API key in the config file, aborting"
+      CHATGPT_RESULT_CNT=-1
+    else
+      # test connection
+      print_output "[*] Testing API-Key"
+      print_output "the running container is: $CONTAINER_NUMBER"
+      print_output "Testing API key : $OPENAI_API_KEY "
+      if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $OPENAI_API_KEY" \
+              -d @"$CONFIG_DIR/gpt_template.json" &>"$LOG_DIR/chatgpt.log" ; then
+        print_output "[!] ChatGPT error while testing the API-Key"
+        print_output "requests aren't working, aborting"
+        CHATGPT_RESULT_CNT=-1
+      fi
+      print_output "[*] ChatGPT test successful"
+    fi
+    # we wait until the s20 module is finished and hopefully has some code for us
+    while ! [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; do
+      sleep 10
+    done
+    if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
+      while ! [[ -f  "$CSV_DIR/Q2_openai_question.csv.tmp" ]]; do
+        sleep 3
+      done
+    fi
+    while ! grep -q "Testing phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; do
+      ask_chatgpt
+    done
+    unset OPENAI_API_KEY
     module_end_log "${FUNCNAME[0]}"
   fi  
 }
 
 # looks through the modules and finds chatgpt questions inside the csv
 ask_chatgpt(){
-  export "$(grep -v '^#' "$CONFIG_DIR/gpt_config.env" | xargs || true )" # readin of all vars in that env file
-  export CHATGPT_RESULT_CNT=1
-
-  if [ -z "$OPENAI_API_KEY" ]; then
-    print_output "[!] There is no API key in the config file"
-    print_output "[!] Can't ask ChatGPT with this setup"
-    print_output "There is no API key in the config file, aborting"
-    CHATGPT_RESULT_CNT=-1
-  else
-    # test connection
-    print_output "[*] Testing API-Key"
-    print_output "the running container is: $CONTAINER_NUMBER"
-    print_output "Testing API key : $OPENAI_API_KEY "
-    if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $OPENAI_API_KEY" \
-            -d @"$CONFIG_DIR/gpt_template.json" &>"$LOG_DIR/chatgpt.log" ; then
-      print_output "[!] ChatGPT error while testing the API-Key"
-      print_output "requests aren't working, aborting"
-      CHATGPT_RESULT_CNT=-1
-    fi
-    print_output "[*] ChatGPT test successful"
-  fi
-
-  # we wait until the s20 module is finished and hopefully has some code for us
-  while ! [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; do
-    sleep 10
-  done
-  if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-    while ! [[ -f  "$CSV_DIR/gpt-checks.csv" ]]; do
-        sleep 3
-    done
-  fi
   local MINIMUM_GPT_PRIO=2
   print_output "[*] checking scripts with ChatGPT that have priority $MINIMUM_GPT_PRIO or lower" "no_log"
-  while [ $CHATGPT_RESULT_CNT -gt 0 ]; do
+  if [ $CHATGPT_RESULT_CNT -gt 0 ]; then
     local GPT_PRIO_=3
     # default vars
     local GPT_QUESTION_="Please identify all vulnerabilities in this code: "
@@ -119,6 +121,5 @@ ask_chatgpt(){
       GPT_ANCHOR_="${COL2_}"
       sed -i "/$GPT_ANCHOR_/d" "$CSV_DIR/Q2_openai_question.csv.tmp"
     done < "$CSV_DIR/Q2_openai_question.csv"
-  done
-  unset OPENAI_API_KEY
+  fi
 }

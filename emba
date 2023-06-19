@@ -686,6 +686,7 @@ main() {
     [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
     disable_strict_mode "${STRICT_MODE}" 0
+    docker-compose up --no-start
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       # container 1
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
@@ -697,11 +698,12 @@ main() {
         D_RETURN=1
       fi
     else
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c 'echo container quest running > /logs/emba.log ; ./emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       # EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      
+      # stop quest container too
+      docker-compose down
     fi
     enable_strict_mode "${STRICT_MODE}" 0
 
