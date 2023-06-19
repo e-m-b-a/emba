@@ -89,3 +89,5 @@ EGI-Federation/SVG-advisories
 chorankates/Help
 actions-marketplace-validations/ajinkya599_container-scan
 0xsyr0/OSCP
+jasona7/ChatCVE
+fkie-cad/nvd-json-data-feeds
