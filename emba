@@ -392,7 +392,6 @@ main() {
     export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
   fi
 
-  docker-compose up --no-start
   # Check all dependencies of EMBA
   dependency_check
 
@@ -704,6 +703,7 @@ main() {
       D_RETURN=$?
       # stop quest container too
       docker-compose down
+      docker-compose up --no-start
     fi
     enable_strict_mode "${STRICT_MODE}" 0
 
