@@ -69,7 +69,6 @@ F50_base_aggregator() {
   output_overview
   output_details
   output_config_issues
-  output_chatgpt
   output_binaries
   output_cve_exploits
 

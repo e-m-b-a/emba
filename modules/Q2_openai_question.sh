@@ -103,15 +103,8 @@ ask_chatgpt(){
           # GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//$'\n'/}" #remove newlines from response
           GPT_TOKENS_=$(jq '.usage.total_tokens' "$TMP_DIR"/response.json)
           if [[ $GPT_TOKENS_ -ne 0 ]]; then
-            GPT_OUTPUT_FILE_=$(find ~+ -iname "$(basename "$GPT_OUTPUT_FILE_")" )
             # write new into done csv
             write_csv_gpt "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_"
-            # append to output file
-            if ! [ -f "$GPT_OUTPUT_FILE_" ]; then
-              print_output "[!] Something went wrong with the Output file $GPT_OUTPUT_FILE_"
-            else
-              sed -i "s/$GPT_ANCHOR_/$GPT_QUESTION_\n$GPT_RESPONSE_\n/" "$GPT_OUTPUT_FILE_"
-            fi
             print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
             ((CHATGPT_RESULT_CNT++))
           fi
