@@ -392,6 +392,7 @@ main() {
     export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
   fi
 
+  docker-compose up --no-start
   # Check all dependencies of EMBA
   dependency_check
 
@@ -686,7 +687,6 @@ main() {
     [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
     disable_strict_mode "${STRICT_MODE}" 0
-    docker-compose up --no-start
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       # container 1
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
