@@ -48,7 +48,8 @@ services:
     environment:
         - USER
         - CONTAINER_NUMBER=1
-    network_mode: none
+    networks:
+      - emba_runs
     devices:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
@@ -100,8 +101,7 @@ services:
     environment:
         - USER
         - CONTAINER_NUMBER=2
-    networks:
-      - emba_runs
+    network_mode: host
     ulimits:
       core:
         hard: 0
@@ -111,6 +111,7 @@ networks:
   emba_runs:
     name: emba_runs
     driver: bridge
+    internal: true
     driver_opts:
       com.docker.network.bridge.name: emba_runs
     ipam:

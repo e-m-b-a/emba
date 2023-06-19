@@ -42,7 +42,7 @@ Q2_openai_question(){
       fi
       print_output "[*] ChatGPT test successful"
     fi
-    # we wait until the s20 module is finished and hopefully has some code for us
+    # we wait until there arer entries in the question csv
     while ! [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; do
       sleep 10
     done
@@ -92,6 +92,7 @@ ask_chatgpt(){
           head -n -2 "$CONFIG_DIR/gpt_template.json" > "$TMP_DIR/chat.json"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "$SCRIPT_PATH_TMP_" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "$GPT_QUESTION_" "$CHATGPT_CODE_" >> "$TMP_DIR/chat.json"
+          print_output "The Combined Cost of the OpenAI request / the length is: ${#GPT_QUESTION_} + ${#CHATGPT_CODE_}"
           HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @"$TMP_DIR/chat.json" -o "$TMP_DIR/response.json" --write-out "%{http_code}")
