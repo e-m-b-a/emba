@@ -33,5 +33,6 @@ jobs:
       - name: EMBA container build
         uses: nick-fields/retry@v2
         with:
-          command: docker-compose build --no-cache --pull && ./emba -d 2 -y -j
+          timeout_minutes: 1
           max_attempts: 3
+          command: docker-compose build --no-cache --pull && ./emba -d 2 -y -j
