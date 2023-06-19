@@ -6,7 +6,7 @@ on:
 
 jobs:
   docker-build:
-    if: github.repository_owner == 'e-m-b-a'
+    # if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +22,7 @@ jobs:
           large-packages: false
           swap-storage: true
       - name: EMBA container build
-        uses: Wandalen/wretry.action@master
+        uses: nick-fields/retry@v2
         with:
           command: docker-compose build --no-cache --pull && ./emba -d 2 -y -j
-          attempt_limit: 3
+          max_attempts: 3
