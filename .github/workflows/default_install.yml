@@ -30,10 +30,11 @@ jobs:
           large-packages: false
           swap-storage: true
       - name: EMBA default install
-        uses: Wandalen/wretry.action@master
+        uses: nick-fields/retry@v2
         with:
+          timeout_minutes: 600
+          max_attempts: 3
           command: sudo ./installer.sh -g && sudo ./emba -d 1 -y -j
-          attempt_limit: 3
       - name: EMBA firmware download
         run: |
             sudo apt-get update
