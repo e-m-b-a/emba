@@ -149,6 +149,7 @@ s22_vuln_check() {
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
   local GPT_PRIO=3
+  local GPT_QUESTION_="Please identify all vulnerabilities in this php code and give me a step by step desciption on how to exploit them:"
   if [[ "$VULNS" -gt 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -169,7 +170,7 @@ s22_vuln_check() {
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "NA"
     if [[ $GPT_OPTION -gt 0 ]]; then
       GPT_ANCHOR="$(openssl rand -hex 8)"
-      write_csv_gpt_tmp "$(cut_path "$PHP_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this php code:" "" "" ""
+      write_csv_gpt_tmp "$(cut_path "$PHP_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "$GPT_QUESTION_" "" "" ""
       # add ChatGPT link
       write_anchor_gpt "$GPT_ANCHOR"
     fi

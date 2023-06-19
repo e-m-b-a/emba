@@ -135,6 +135,7 @@ s20_reporter() {
   local SHELL_LOG="${3:0}"
   local GPT_PRIO=2
   local GPT_ANCHOR=""
+  local GPT_QUESTION_="The following code is a shell script and I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
   if [[ "$VULNS" -ne 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -158,7 +159,8 @@ s20_reporter() {
     write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
     if [[ $GPT_OPTION -gt 0 ]]; then
       GPT_ANCHOR="$(openssl rand -hex 8)"
-      write_csv_gpt_tmp "$(cut_path "$SH_SCRIPT")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this shell script:" "" "" "" "$SHELL_LOG"
+
+      write_csv_gpt_tmp "$(cut_path "$SH_SCRIPT")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "$GPT_QUESTION_" "" "" "" "$SHELL_LOG"
       # add ChatGPT link
       write_anchor_gpt "$GPT_ANCHOR" "$SHELL_LOG"
     fi

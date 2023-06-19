@@ -79,6 +79,7 @@ s21_script_bandit() {
   local VULNS=""
   local GPT_PRIO=3
   local GPT_ANCHOR=""
+  local GPT_QUESTION_="Please identify all vulnerabilities in this python code and give me a describtion on how to exploit them:"
 
   NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit_""$NAME"".txt"
@@ -110,7 +111,7 @@ s21_script_bandit() {
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
     if [[ $GPT_OPTION -gt 0 ]]; then
       GPT_ANCHOR="$(openssl rand -hex 8)"
-      write_csv_gpt_tmp "$(cut_path "$PY_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Please identify all vulnerabilities in this python code:" "" "" "" "$PY_LOG"
+      write_csv_gpt_tmp "$(cut_path "$PY_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "$GPT_QUESTION_" "" "" "" "$PY_LOG"
       # add ChatGPT link to output file
       write_anchor_gpt "$GPT_ANCHOR" "$PY_LOG"
     fi
