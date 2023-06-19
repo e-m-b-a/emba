@@ -53,6 +53,7 @@ Q2_openai_question(){
     fi
     while ! grep -q "Testing phase ended" "$LOG_DIR"/"$MAIN_LOG_FILE"; do
       ask_chatgpt
+      sleep 20
     done
     unset OPENAI_API_KEY
     module_end_log "${FUNCNAME[0]}"
