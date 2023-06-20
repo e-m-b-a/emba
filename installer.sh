@@ -22,6 +22,8 @@ STRICT_MODE=1
 ORIG_USER="${SUDO_USER:-${USER}}"
 ORIG_GROUP=$(groups "$ORIG_USER" | cut -d: -f2 | awk '{print $1}')
 
+echo $ORIG_USER
+
 export DEBIAN_FRONTEND=noninteractive
 export INSTALL_APP_LIST=()
 export DOWNLOAD_FILE_LIST=()
