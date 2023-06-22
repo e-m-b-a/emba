@@ -15,7 +15,7 @@
 # Description: Openai questioning module for container #2
 # Note:   Important requirement for Q-modules is the self termination when a certain phase ends
 
-Q2_openai_question(){
+Q02_openai_question(){
   if [[ ${GPT_OPTION} -gt 0 ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
@@ -47,7 +47,7 @@ Q2_openai_question(){
       sleep 10
     done
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while ! [[ -f  "$CSV_DIR/q2_openai_question.csv.tmp" ]]; do
+      while ! [[ -f  "$CSV_DIR/q02_openai_question.csv.tmp" ]]; do
         sleep 3
       done
     fi
@@ -118,10 +118,10 @@ ask_chatgpt(){
       if [[ $GPT_OPTION -ne 2 ]]; then
         sleep 20s
       fi
-    done < "$CSV_DIR/q2_openai_question.csv.tmp"
+    done < "$CSV_DIR/q02_openai_question.csv.tmp"
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
       GPT_ANCHOR_="${COL2_}"
-      sed -i "/$GPT_ANCHOR_/d" "$CSV_DIR/q2_openai_question.csv.tmp"
-    done < "$CSV_DIR/q2_openai_question.csv"
+      sed -i "/$GPT_ANCHOR_/d" "$CSV_DIR/q02_openai_question.csv.tmp"
+    done < "$CSV_DIR/q02_openai_question.csv"
   fi
 }

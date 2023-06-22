@@ -46,5 +46,5 @@ Q2_resolver(){
         fi
       fi
 
-  done < "$CSV_DIR/q2_openai_question.csv"
+  done < "$CSV_DIR/q02_openai_question.csv"
 }
