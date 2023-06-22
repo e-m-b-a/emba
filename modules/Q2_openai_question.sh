@@ -79,7 +79,7 @@ ask_chatgpt(){
       GPT_QUESTION_="${COL4_}"
       GPT_RESPONSE_="${COL5_}"
       GPT_TOKENS_="${COL6_//cost\=/}"
-      GPT_OUTPUT_FILE_="${COL7_//\;/}"
+      GPT_OUTPUT_FILE_="${COL7_}"
       GPT_INPUT_FILE_="$(basename "$SCRIPT_PATH_TMP_")"
       
       print_output "trying to check inside $LOG_DIR/firmware"

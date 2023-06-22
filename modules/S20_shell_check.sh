@@ -160,7 +160,7 @@ s20_reporter() {
     if [[ $GPT_OPTION -gt 0 ]]; then
       GPT_ANCHOR="$(openssl rand -hex 8)"
       # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_"
-      write_csv_gpt_tmp "$(cut_path "$SH_SCRIPT")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "$GPT_QUESTION_" "" "" "" "$SHELL_LOG"
+      write_csv_gpt_tmp "$(cut_path "$SH_SCRIPT")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "$GPT_QUESTION_" "" "" "$SHELL_LOG"
       # add ChatGPT link
       write_anchor_gpt "$GPT_ANCHOR" "$SHELL_LOG"
     fi
