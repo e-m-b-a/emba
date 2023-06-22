@@ -26,7 +26,6 @@ F5_qs_resolver(){
 
 Q2_resolver(){
   # runs after all S and Q modules are done
-  # 4. link the page to the Q2 module report
   
   while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
       SCRIPT_PATH_TMP_="${COL1_}"
@@ -47,5 +46,5 @@ Q2_resolver(){
         fi
       fi
 
-  done < "$CSV_DIR/Q2_openai_question.csv"
+  done < "$CSV_DIR/q2_openai_question.csv"
 }

@@ -47,7 +47,7 @@ Q2_openai_question(){
       sleep 10
     done
     if [[ -f "$LOG_DIR"/"$MAIN_LOG_FILE" ]]; then
-      while ! [[ -f  "$CSV_DIR/Q2_openai_question.csv.tmp" ]]; do
+      while ! [[ -f  "$CSV_DIR/q2_openai_question.csv.tmp" ]]; do
         sleep 3
       done
     fi
@@ -79,7 +79,7 @@ ask_chatgpt(){
       GPT_QUESTION_="${COL4_}"
       GPT_RESPONSE_="${COL5_}"
       GPT_TOKENS_="${COL6_//cost\=/}"
-      GPT_OUTPUT_FILE_="${COL7_}"
+      GPT_OUTPUT_FILE_="${COL7_//\;/}"
       GPT_INPUT_FILE_="$(basename "$SCRIPT_PATH_TMP_")"
       
       print_output "trying to check inside $LOG_DIR/firmware"
@@ -118,10 +118,10 @@ ask_chatgpt(){
       if [[ $GPT_OPTION -ne 2 ]]; then
         sleep 20s
       fi
-    done < "$CSV_DIR/Q2_openai_question.csv.tmp"
+    done < "$CSV_DIR/q2_openai_question.csv.tmp"
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
       GPT_ANCHOR_="${COL2_}"
-      sed -i "/$GPT_ANCHOR_/d" "$CSV_DIR/Q2_openai_question.csv.tmp"
-    done < "$CSV_DIR/Q2_openai_question.csv"
+      sed -i "/$GPT_ANCHOR_/d" "$CSV_DIR/q2_openai_question.csv.tmp"
+    done < "$CSV_DIR/q2_openai_question.csv"
   fi
 }
