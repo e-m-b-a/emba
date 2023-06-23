@@ -34,7 +34,9 @@ jobs:
         with:
           timeout_minutes: 600
           max_attempts: 3
-          command: sudo ./installer.sh -g && sudo ./emba -d 1 -y -j
+          command: |
+            sudo rm -r ./external || true
+            sudo ./installer.sh -g && sudo ./emba -d 1 -y -j
       - name: EMBA firmware download
         run: |
             sudo apt-get update
