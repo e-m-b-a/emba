@@ -78,10 +78,6 @@ S20_shell_check()
 
   if [[ $SEMGREP -eq 1 ]] ; then
     sub_module_title "Check scripts with semgrep"
-    # semgrep has issues if we are running throught a complete filesystem with /proc and other filesystems are in use
-    # This results that we need to wait for for S115_usermode_emulator and unmounted /proc filesytem
-    # check emba.log for S115_usermode_emulator
-    [[ "$THREADED" -eq 1 ]] && module_wait "S115_usermode_emulator"
     local S20_SEMGREP_SCRIPTS=0
     local S20_SEMGREP_VULNS=0
     local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
