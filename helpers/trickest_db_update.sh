@@ -68,8 +68,8 @@ if [[ -d "$EMBA_EXT_DIR"/trickest-cve ]]; then
         echo "$TRICKEST_FS:$TRICKEST_URL" >> "$TRICKEST_DB_PATH"
       fi
     done < /tmp/trickest_db-cleaned.txt
-  else
-    exit 1
+  # else
+  #  exit 1
   fi
 
   if [[ -f "$TRICKEST_DB_PATH" ]]; then

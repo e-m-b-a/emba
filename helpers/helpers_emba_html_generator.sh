@@ -92,6 +92,7 @@ add_link_tags() {
     readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "$LINK_FILE" | cut -d':' -f1 )
     for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
       REF_LINK="$(sed "$REF_LINK_NUMBER""q;d" "$LINK_FILE" | cut -c12- | cut -d'<' -f1 || true)"
+      URL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "$REF_LINK" | cut -d"#" -f1)" ]] ; then
         if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
           REF_ANCHOR=""
@@ -122,7 +123,9 @@ add_link_tags() {
           if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""Download Qemu emulation archive.""$LINK_END"
-          sed -i "s@Qemu emulation archive created in log directory.*@$HTML_LINK$P_END@" "$LINK_FILE"
+          # echo "REF_LINK: $REF_LINK"
+          # echo "HTML_LINK: $HTML_LINK"
+          sed -i "s@Qemu emulation archive created in log directory.*$(basename "$REF_LINK").*@$HTML_LINK$P_END@" "$LINK_FILE"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true
@@ -150,7 +153,6 @@ add_link_tags() {
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
         fi
-      URL_REGEX='(www.|https?|ftp|file):\/\/'
       elif [[ "$REF_LINK" =~ $URL_REGEX ]] ; then
         LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
         while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
@@ -269,7 +271,7 @@ add_link_tags() {
       for SNYK_KEY in "${SNYK_KEY_F[@]}" ; do
         SNYK_ID_LINE="$(echo "$SNYK_KEY" | cut -d ":" -f 1)"
         SNYK_ID_STRING="$(echo "$SNYK_KEY" | cut -d ":" -f 2-)"
-        readarray -t SNYK_KEY_STRING_ARR < <(echo "$SNYK_ID_STRING" | tr " " "\n" | grep "SNYK-" | uniq)
+        readarray -t SNYK_KEY_STRING_ARR < <(echo "$SNYK_ID_STRING" | tr " " "\n" | grep "SNYK-" | uniq || true)
         for SNYK_KEY_ELEM in "${SNYK_KEY_STRING_ARR[@]}" ; do
           HTML_LINK="$(echo "$SNYK_LINK" | sed -e "s@LINKNAME@$SNYK_KEY_ELEM@g" | sed -e "s@LINK@$SNYK_KEY_ELEM@g")""$SNYK_KEY_ELEM""$LINK_END"
           LINK_COMMAND_ARR+=( "$SNYK_ID_LINE"'s@'"$SNYK_KEY_ELEM"'@'"$HTML_LINK"'@' )
@@ -282,7 +284,7 @@ add_link_tags() {
       for PSS_KEY in "${PSS_KEY_F[@]}" ; do
         PSS_ID_LINE="$(echo "$PSS_KEY" | cut -d ":" -f 1)"
         PSS_ID_STRING="$(echo "$PSS_KEY" | cut -d ":" -f 2-)"
-        readarray -t PSS_KEY_STRING_ARR < <(echo "$PSS_ID_STRING" | tr " " "\n" | grep -E "[0-9]+/.*\.html" | uniq)
+        readarray -t PSS_KEY_STRING_ARR < <(echo "$PSS_ID_STRING" | tr " " "\n" | grep -E "[0-9]+/.*\.html" | uniq || true)
         for PSS_KEY_NAME in "${PSS_KEY_STRING_ARR[@]}" ; do
           # PSS_KEY_NAME="$(echo "$PSS_KEY_ELEM" | tr "/" "_")"
           HTML_LINK="$(echo "$PSS_LINK" | sed -e "s@LINKNAME@$PSS_KEY_NAME@g" | sed -e "s@LINK@$PSS_KEY_NAME@g")""$PSS_KEY_NAME""$LINK_END"

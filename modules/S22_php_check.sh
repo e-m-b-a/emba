@@ -46,7 +46,7 @@ S22_php_check()
   else
     print_output "[-] PHP check is disabled ... no tests performed"
   fi
-  module_end_log "${FUNCNAME[0]}" "$(( "$S22_PHP_VULNS" + "$S22_PHP_INI_ISSUES" + "$S22_PHPINFO_ISSUES" ))"
+  module_end_log "${FUNCNAME[0]}" "$(( "$S22_PHP_VULNS" + "$S22_PHP_INI_ISSUES" + "$S22_PHPINFO_ISSUES" + "$S22_SEMGREP_ISSUES" ))"
 }
 
 s22_phpinfo_check() {
@@ -66,18 +66,17 @@ s22_phpinfo_check() {
 
 s22_vuln_check_semgrep() {
   sub_module_title "PHP script vulnerabilities - semgrep"
-  local PHP_SEMGREP_LOG="$LOG_PATH_MODULE"/semgrep_php_results.log
+  local PHP_SEMGREP_LOG="$LOG_PATH_MODULE"/semgrep_php_results_xml.log
   local S22_SEMGREP_VULNS=0
 
-  semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/php "$LOG_DIR"/firmware/ > "$PHP_SEMGREP_LOG" 2>&1 || true
+  semgrep --disable-version-check --junit-xml --config "$EXT_DIR"/semgrep-rules/php "$LOG_DIR"/firmware/ > "$PHP_SEMGREP_LOG" 2>&1 || true
 
   if [[ -f "$PHP_SEMGREP_LOG" ]]; then
-    S22_SEMGREP_ISSUES=$(grep "\ findings\." "$PHP_SEMGREP_LOG" | cut -d: -f2 | awk '{print $1}' || true)
+    S22_SEMGREP_ISSUES=$(grep -c "testcase name" "$PHP_SEMGREP_LOG" || true)
     S22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "$PHP_SEMGREP_LOG" || true)
-    S22_SEMGREP_SCRIPTS=$(grep "\ findings\." "$PHP_SEMGREP_LOG" | awk '{print $5}' || true)
+    S22_SEMGREP_SCRIPTS=$(grep "Scanning\ .* rules\." "$PHP_SEMGREP_LOG" | awk '{print $2}' || true)
     print_ln
 
-    sub_module_title "Summary of php issues (semgrep)"
     if [[ "$S22_SEMGREP_VULNS" -gt 0 ]]; then
       print_output "[+] Found ""$ORANGE""$S22_SEMGREP_ISSUES"" issues""$GREEN"" (""$ORANGE""$S22_SEMGREP_VULNS"" vulnerabilites${GREEN}) in ""$ORANGE""$S22_SEMGREP_SCRIPTS""$GREEN"" php files""$NC" "" "$PHP_SEMGREP_LOG"
     elif [[ "$S22_SEMGREP_ISSUES" -gt 0 ]]; then
@@ -92,7 +91,7 @@ s22_vuln_check_semgrep() {
 }
 
 s22_vuln_check_caller() {
-  sub_module_title "PHP script vulnerabilities"
+  sub_module_title "PHP script vulnerabilities (progpilot)"
   write_csv_log "Script path" "PHP issues detected" "common linux file"
   local PHP_SCRIPTS=("$@")
   local VULNS=0
@@ -182,7 +181,7 @@ s22_vuln_check() {
 }
 
 s22_check_php_ini(){
-  sub_module_title "PHP configuration checks"
+  sub_module_title "PHP configuration checks (php.ini)"
   local PHP_INI_FAILURE
   local PHP_INI_LIMIT_EXCEEDED
   local PHP_INI_WARNINGS

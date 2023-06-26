@@ -20,6 +20,7 @@ export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
 export FULL_EMULATION=1
+export SELECT_MODULES=( "S21" "S22" "S23" "S24")
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
@@ -34,5 +35,8 @@ if [[ $IN_DOCKER -ne 1 ]] ; then
     print_output "$(indent "$(orange "Enables automated qemu emulation tests")")" "no_log"
   fi
   print_output "$(indent "$(orange "Runs EMBA in docker container")")" "no_log"
+  for MODULE_ in "${SELECT_MODULES[@]}"; do
+    print_output "$(indent "$(orange "Enabled module: $MODULE_")")" "no_log"
+  done
   export USE_DOCKER=1
 fi

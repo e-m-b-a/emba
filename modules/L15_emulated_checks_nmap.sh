@@ -69,9 +69,8 @@ check_live_nmap_basic() {
     done
   else
     # if no Nmap results are found we initiate a scan
-    if ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
-      restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
-      if ! ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+    if ! system_online_check "${IP_ADDRESS_}" ; then
+      if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
         print_output "[-] System not responding - Not performing Nmap checks"
         return
       fi
@@ -82,7 +81,7 @@ check_live_nmap_basic() {
 
   # extract only the service details from gnmap output file:
   mapfile -t NMAP_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/*.gnmap | cut -d: -f2- | sed s/'\t'/'\n\t'/g | sed s/'\/, '/'\n\t\t'/g | sed s/'Ports: '/'Ports:\n\t\t'/g | grep -v "/closed/\|filtered/" | grep -v "Host: \|Ports:\|Ignored State:\|OS: \|Seq Index: \|Status: \|IP ID Seq: \|^# " | sed 's/^[[:blank:]].*\/\///' | sed 's/\/$//g'| sort -u || true)
-  mapfile -t NMAP_PORTS_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/*.nmap | cut -d: -f2- | awk '{print $1,$3}' | sort -u || true)
+  mapfile -t NMAP_PORTS_SERVICES < <(grep "open" "$LOG_PATH_MODULE"/*.nmap | cut -d: -f2- | awk '{print $1,$3}' | grep "[0-9]" | sort -u || true)
   # extract cpe information like the following:
   # Service Info: OS: Linux; Device: WAP; CPE: cpe:/h:dlink:dir-300:2.14, cpe:/o:linux:linux_kernel, cpe:/h:d-link:dir-300
   mapfile -t NMAP_CPE_DETECTION < <(grep -ah "Service Info: " "$LOG_PATH_MODULE"/*.nmap | grep -a "CPE: .*" | sort -u || true)

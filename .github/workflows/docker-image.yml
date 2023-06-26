@@ -4,6 +4,16 @@ on:
   schedule:
     - cron: '0 0 * * *' # do it every day
 
+      #on:
+      #push:
+      #branches:
+      #- '**'        # matches every branch
+      #pull_request:
+      #branches:
+      #- '**'
+      ## Allows you to run this workflow manually from the Actions tab
+      #workflow_dispatch:
+
 jobs:
   docker-build:
     if: github.repository_owner == 'e-m-b-a'
@@ -22,7 +32,8 @@ jobs:
           large-packages: false
           swap-storage: true
       - name: EMBA container build
-        uses: Wandalen/wretry.action@master
+        uses: nick-fields/retry@v2
         with:
+          timeout_minutes: 600
+          max_attempts: 3
           command: docker-compose build --no-cache --pull && ./emba -d 2 -y -j
-          attempt_limit: 3

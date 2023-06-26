@@ -89,3 +89,10 @@ EGI-Federation/SVG-advisories
 chorankates/Help
 actions-marketplace-validations/ajinkya599_container-scan
 0xsyr0/OSCP
+jasona7/ChatCVE
+fkie-cad/nvd-json-data-feeds
+mawinkler/c1-ws-ansible
+MarcusGutierrez/complex-vulnerabilities
+johe123qwe/github-trending
+HtmlUnit/htmlunit
+goheea/goheea
