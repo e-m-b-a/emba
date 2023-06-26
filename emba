@@ -701,7 +701,7 @@ main() {
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --detach --rm emba_quest -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba_quest -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       if [[ $? -ne ${D_RETURN} ]]; then
         D_RETURN=1
       fi
