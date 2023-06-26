@@ -63,8 +63,6 @@ services:
     image: embeddedanalyzer/emba:latest
     read_only: true
     # nosemgrep
-    privileged: false
-    # TODO remove
     tmpfs:
       - /tmp
       - /root/.config/
