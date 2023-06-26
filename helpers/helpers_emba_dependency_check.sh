@@ -267,7 +267,6 @@ dependency_check()
   # As the container runs as root we should not run into issues within the container.
   # Outside the container we can run mostly without root privs - this is currently under evaluation
   # Some other nice features like restarting the mongod will not work without root privs.
-  print_output "    user permissions" "no_log"
   if [[ $QEMULATION -eq 1 && $EUID -ne 0 ]] || [[ $USE_DOCKER -eq 1 && $EUID -ne 0 ]] || [[ $FULL_EMULATION -eq 1 && $EUID -ne 0 ]]; then
     if [[ $QEMULATION -eq 1 && $USE_DOCKER -eq 0 ]] || [[ $FULL_EMULATION -eq 1 && $USE_DOCKER -eq 0 ]]; then
       print_output "    user permission - emulation mode - \\c" "no_log"
