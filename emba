@@ -704,14 +704,14 @@ main() {
         D_RETURN=1
       fi
     else
-      local QUEST_CONTAINER
-      QUEST_CONTAINER="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-      print_output "[*] Quest docker container started and detached.\\n" "main"
+      local QUEST_CONTAINER_=""
+      QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      print_output "[*] Quest docker container ${QUEST_CONTAINER} started and detached.\\n" "main"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       # stop quest container
       if [ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" )" = "running" ]; then
-        docker kill "${QUEST_CONTAINER}"
+        docker kill "${QUEST_CONTAINER_}"
       fi
     fi
     enable_strict_mode "${STRICT_MODE}" 0
@@ -751,7 +751,7 @@ main() {
   # Quests (Q-modules)
   #######################################################################################
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
-    while ! grep -q "Pre-checking phase started" "$LOG_DIR"/"$MAIN_LOG_FILE"; do
+    while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
       sleep 1
     done
     run_modules "Q" "${THREADED}" "0"
@@ -759,7 +759,7 @@ main() {
     print_output "[!] Quest container done" "main"
     exit 0
   elif [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ;  then
-    while ! grep -q "Pre-checking phase started" "$LOG_DIR"/"$MAIN_LOG_FILE"; do
+    while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
       sleep 1
     done
     # dev-mode
