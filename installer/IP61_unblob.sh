@@ -49,7 +49,7 @@ IP61_unblob() {
     print_tool_info "pkg-config" 1
     print_tool_info "pkgconf" 1
 
-    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-3/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 
     print_git_info "unblob" "EMBA-support-repos/unblob" "Unblob is a powerful firmware extractor"
 
@@ -65,16 +65,17 @@ IP61_unblob() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-3/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
         dpkg -i external/sasquatch_1.0_amd64.deb
         rm -f external/sasquatch_1.0_amd64.deb
 
-        if ! [[ -d external/unblob ]]; then
-          git clone https://github.com/EMBA-support-repos/unblob.git external/unblob
-        fi
-
         # install poetry
         python3 -m pip install --upgrade poetry --break-system-packages
+
+        if ! [[ -d external/unblob ]]; then
+          git clone https://github.com/EMBA-support-repos/unblob.git external/unblob
+          # git clone https://github.com/onekey-sec/unblob.git external/unblob
+        fi
         cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
 
         # install unblob with poetry:

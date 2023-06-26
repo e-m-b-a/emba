@@ -114,7 +114,35 @@ IF20_cve_search() {
         else
             echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
         fi
+
+        cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
         if [[ "$CVE_INST" -eq 1 ]]; then
+          if ! dpkg -s libssl1.1 &>/dev/null; then
+            # libssl1.1 missing
+            echo -e "\\n""$BOLD""Installing libssl1.1 for mongodb!""$NC"
+            # echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
+            for i in {21..29}; do
+              echo "Testing download of libssl package version libssl1.1_1.1.1-1ubuntu2.1~18.04.${i}_amd64.deb"
+              wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04."${i}"_amd64.deb -O external/libssl-dev.deb || true
+                # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
+              wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04."${i}"_amd64.deb -O external/libssl.deb || true
+                # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
+              if [[ "$(file external/libssl.deb)" == *"Debian binary package (format 2.0), with control.tar.xz, data compression xz"* ]]; then
+                break
+              else
+                [[ -f external/libssl.deb ]] && rm external/libssl.deb
+                [[ -f external/libssl-dev.deb ]] && rm external/libssl-dev.deb
+              fi
+            done
+
+            ! [[ -f external/libssl.deb ]] && ( "Could not install libssl" && exit 1)
+            ! [[ -f external/libssl-dev.deb ]] && ( "Could not install libssl-dev" && exit 1)
+            dpkg -i external/libssl.deb
+            dpkg -i external/libssl-dev.deb
+            [[ -f external/libssl.deb ]] && rm external/libssl.deb
+            [[ -f external/libssl-dev.deb ]] && rm external/libssl-dev.deb
+          fi
+
           wget --no-check-certificate -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/mongodb.gpg > /dev/null
           echo "deb [ signed-by=/etc/apt/trusted.gpg.d/mongodb.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
           apt-get update -y
@@ -135,6 +163,7 @@ IF20_cve_search() {
             mongod --config /etc/mongod.conf &
           fi
 
+          cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
           echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
           CVE_INST=1
           echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"

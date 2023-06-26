@@ -879,3 +879,23 @@ write_anchor_gpt()
     fi
   fi
 }
+
+print_running_modules() {
+  sleep 1h
+  while true; do
+    local STARTED_EMBA_PROCESSES=()
+    local EMBA_STARTED_PROC=""
+    mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${LOG_DIR}""/""${MAIN_LOG_FILE}" | cut -d '-' -f2 | awk '{print $1}' || true)
+
+    for EMBA_STARTED_PROC in "${STARTED_EMBA_PROCESSES[@]}"; do
+      if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+        print_output "[*] EMBA module ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
+      fi
+    done
+    sleep 1h
+  done
+}
+
+show_runtime() {
+  date -ud "@$SECONDS" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"
+}

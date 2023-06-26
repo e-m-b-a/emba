@@ -100,7 +100,7 @@ radare_decompilation(){
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
     # We analyse only 200 functions per binary
-    r2 -e io.cache=true -e scr.color=false -q -A -c \
+    timeout --preserve-status --signal SIGINT 3600 r2 -e io.cache=true -e scr.color=false -q -A -c \
       'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 200 > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}"'_usage`' "$BINARY" 2> /dev/null >> "$FUNC_LOG" || true
 
     if [[ -f "$FUNC_LOG" ]] && [[ $(wc -l "$FUNC_LOG" | awk '{print $1}') -gt 3 ]] ; then

@@ -27,9 +27,8 @@ L25_web_checks() {
     pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ -v IP_ADDRESS_ ]]; then
-      if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
-        if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+      if ! system_online_check "${IP_ADDRESS_}" ; then
+        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 0 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing web checks"
           module_end_log "${FUNCNAME[0]}" "$WEB_RESULTS"
           return
@@ -67,20 +66,20 @@ main_web_check() {
       # handle first https and afterwards http
       if [[ "$SERVICE" == *"ssl|http"* ]] || [[ "$SERVICE" == *"ssl/http"* ]];then
         SSL=1
-        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+        if system_online_check "${IP_ADDRESS_}"; then
           # we make a screenshot for every web server
           make_web_screenshot "$IP_ADDRESS_" "$PORT"
         else
           print_output "[-] System not responding - No screenshot possible"
         fi
 
-        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+        if system_online_check "${IP_ADDRESS_}" ; then
           testssl_check "$IP_ADDRESS_" "$PORT"
         else
           print_output "[-] System not responding - No SSL test possible"
         fi
 
-        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+        if system_online_check "${IP_ADDRESS_}" ; then
           web_access_crawler "$IP_ADDRESS_" "$PORT" "$SSL"
         else
           print_output "[-] System not responding - Not performing crawler checks"
@@ -90,7 +89,7 @@ main_web_check() {
         # Note: this is not a full vulnerability scan. The checks are running only for
         # a limited time! At the end the tester needs to perform further investigation!
         if [[ "$WEB_DONE" -eq 0 ]]; then
-          if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          if system_online_check "${IP_ADDRESS_}" ; then
             sub_module_title "Nikto web server analysis for $ORANGE$IP_ADDRESS_:$PORT$NC"
             timeout --preserve-status --signal SIGINT 600 nikto -timeout 3 -nointeractive -maxtime 8m -ssl -port "$PORT" -host "$IP_ADDRESS_" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt || true
             cat "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt >> "$LOG_FILE"
@@ -102,7 +101,7 @@ main_web_check() {
             print_output "[-] System not responding - Not performing Nikto checks"
           fi
 
-          if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          if system_online_check "${IP_ADDRESS_}" ; then
             arachni_scan "$IP_ADDRESS_" "$PORT" "$SSL"
             WEB_DONE=1
           else
@@ -111,14 +110,21 @@ main_web_check() {
         fi
       elif [[ "$SERVICE" == *"http"* ]];then
         SSL=0
-        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+        if system_online_check "${IP_ADDRESS_}" ; then
+          check_for_basic_auth_init "$IP_ADDRESS_" "$PORT"
+        else
+          print_output "[-] System not responding - No basic auth check possible"
+        fi
+
+
+        if system_online_check "${IP_ADDRESS_}" ; then
           # we make a screenshot for every web server
           make_web_screenshot "$IP_ADDRESS_" "$PORT"
         else
           print_output "[-] System not responding - No screenshot possible"
         fi
 
-        if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+        if system_online_check "${IP_ADDRESS_}" ; then
           web_access_crawler "$IP_ADDRESS_" "$PORT" "$SSL"
         else
           print_output "[-] System not responding - Not performing crawler checks"
@@ -126,7 +132,7 @@ main_web_check() {
 
         if [[ "$WEB_DONE" -eq 0 ]]; then
 
-          if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          if system_online_check "${IP_ADDRESS_}" ; then
             sub_module_title "Nikto web server analysis for $ORANGE$IP_ADDRESS_:$PORT$NC"
             timeout --preserve-status --signal SIGINT 600 nikto -timeout 3 -nointeractive -maxtime 8m -port "$PORT" -host "$IP_ADDRESS_" | tee -a "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt || true
             cat "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt >> "$LOG_FILE"
@@ -138,7 +144,7 @@ main_web_check() {
             print_output "[-] System not responding - Not performing Nikto checks"
           fi
 
-          if ping -c 1 "$IP_ADDRESS_" &> /dev/null; then
+          if system_online_check "${IP_ADDRESS_}" ; then
             arachni_scan "$IP_ADDRESS_" "$PORT" "$SSL"
             WEB_DONE=1
           else
@@ -170,6 +176,46 @@ main_web_check() {
   fi
 
   print_output "[*] Web server checks for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
+}
+
+check_for_basic_auth_init() {
+  local IP_="${1:-}"
+  local PORT_="${2:-}"
+  local CREDS="NA"
+
+  BASIC_AUTH=$(find "$LOG_DIR"/l15_emulated_checks_nmap/ -name "nmap*" -exec grep -i "401 Unauthorized" {} \; | wc -l)
+
+  if [[ "$BASIC_AUTH" -gt 0 ]]; then
+    disable_strict_mode 1
+    print_output "[*] Web server with basic auth protected ... performing login attempt"
+    # basic auth from nmap found
+    curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+    CURL_RET="$?"
+
+    # if authentication required, we try user "admin" without password and "admin":"password"
+    if [[ "$CURL_RET" == 22 ]]; then
+      local CREDS="admin:"
+      curl -v -L --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+      local CURL_RET="$?"
+    fi
+    if [[ "$CURL_RET" == 22 ]]; then
+      local CREDS="user:"
+      curl -v -L --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+      local CURL_RET="$?"
+    fi
+    if [[ "$CURL_RET" == 22 ]]; then
+      local CREDS="admin:password"
+      curl -v -L --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+      local CURL_RET="$?"
+    fi
+    enable_strict_mode 1
+    if [[ "$CURL_RET" != 22 ]] && [[ "$CREDS" != "NA" ]]; then
+      print_output "[+] Basic auth credentials for web server found: $ORANGE$CREDS$NC"
+      export CURL_CREDS=(-u "${CREDS}")
+    fi
+  else
+      print_output "[*] No basic auth found in Nmap logs"
+  fi
 }
 
 testssl_check() {
@@ -215,6 +261,7 @@ web_access_crawler() {
   local WEB_DIR_L2=""
   local WEB_DIR_L3=""
   local CURL_OPTS=( -sS -D )
+  [[ -v CURL_CREDS ]] && local CURL_OPTS+=( "${CURL_CREDS}" )
   local CRAWLED_ARR=()
 
   if [[ "$SSL_" -eq 1 ]]; then
@@ -235,7 +282,7 @@ web_access_crawler() {
     mapfile -t FILE_ARR_EXT < <(find "." -type f -o -type l || true)
 
     for WEB_PATH in "${FILE_ARR_EXT[@]}"; do
-      if ! ping -c 1 "$IP_" &> /dev/null; then
+      if ! system_online_check "${IP_}" ; then
         print_output "[-] System not responding - Stopping crawling"
         break
       fi
@@ -276,7 +323,9 @@ web_access_crawler() {
 
   if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" ]]; then
     grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "200 OK" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" || true
+    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "401 Unauth" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" || true
     CRAWL_RESP_200=$(wc -l "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" | awk '{print $1}')
+    CRAWL_RESP_401=$(wc -l "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" | awk '{print $1}')
 
     # Colorizing the log file:
     sed -i -r "s/.*HTTP\/.*\ 200\ .*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
@@ -285,6 +334,46 @@ web_access_crawler() {
     if [[ "$CRAWL_RESP_200" -gt 0 ]]; then
       print_output "[+] Found $ORANGE$CRAWL_RESP_200$GREEN valid responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
     fi
+    if [[ "$CRAWL_RESP_401" -gt 0 ]]; then
+      print_output "[+] Found $ORANGE$CRAWL_RESP_401$GREEN unauthorized responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+    fi
+
+    if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" ]] && [[ -f "$LOG_DIR"/s22_php_check/semgrep_php_results_xml.log ]]; then
+      while read -r WEB_PATH; do
+        WEB_NAME="$(basename "${WEB_PATH}")"
+        mapfile -t CRAWLED_VULNS < <(grep "semgrep-rules.php.lang.security.*${WEB_NAME}" "$LOG_DIR"/s22_php_check/semgrep_php_results_xml.log || true)
+        for C_VULN in "${CRAWLED_VULNS[@]}"; do
+          VULN_NAME=$(echo "$C_VULN" | tr ' ' '\n' | grep "^name=" | cut -d '=' -f2 || true)
+          VULN_FILE=$(echo "$C_VULN" | tr ' ' '\n' | grep "^file=" | cut -d '=' -f2 || true)
+
+          if ! [[ -f "$CSV_DIR"/l25_web_checks.csv ]]; then
+            write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
+          fi
+          print_output "[+] Found possible vulnerability ${ORANGE}${VULN_NAME}${GREEN} in semgrep analysis for ${ORANGE}${WEB_NAME}${NC}." "" "$LOG_DIR"/s22_php_check/semgrep_php_results_xml.log
+          write_csv_log "$WEB_NAME" "semgrep" "php" "$VULN_NAME" "$VULN_FILE"
+        done
+      done  < "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log"
+    fi
+
+    if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" ]] && [[ -f "$LOG_DIR"/23_lua_check.txt ]]; then
+      while read -r WEB_PATH; do
+        WEB_NAME="$(basename "${WEB_PATH}")"
+        mapfile -t CRAWLED_VULNS < <(grep "Found lua.*${WEB_NAME}.*capabilities" "$LOG_DIR"/23_lua_check.txt || true)
+        for C_VULN in "${CRAWLED_VULNS[@]}"; do
+          [[ "$C_VULN" == *"command execution"* ]] && VULN_NAME="os exec"
+          [[ "$C_VULN" == *"file access"* ]] && VULN_NAME="file read/write"
+
+          if ! [[ -f "$CSV_DIR"/l25_web_checks.csv ]]; then
+            write_csv_log "vuln file crawled" "source of vuln" "language" "vuln name" "filesystem path with vuln"
+          fi
+          print_output "[+] Found possible vulnerability in lua analysis for ${ORANGE}${WEB_NAME}${NC}." "$LOG_DIR"/s23_lua_check.txt
+          write_csv_log "$WEB_NAME" "lua check" "lua" "$VULN_NAME" "$WEB_PATH"
+        done
+      done  < "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log"
+    fi
+
+
+    # todo: Python, further PHP analysis
 
     print_output "[*] Finished web server crawling." "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
   else

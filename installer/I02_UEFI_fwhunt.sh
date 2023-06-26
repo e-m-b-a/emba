@@ -28,7 +28,7 @@ I02_UEFI_fwhunt() {
     print_pip_info "uefi_firmware"
     print_pip_info "pyyaml"
     print_pip_info "click"
-    print_git_info "rizin" "rizinorg/rizin" ""
+    print_git_info "rizin" "rizinorg/rizin" "Rizin is a fork of the radare2 reverse engineering framework with a focus on usability, working features and code cleanliness."
     print_git_info "fwhunt-scan" "EMBA-support-repos/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
     print_git_info "fwhunt-rules" "EMBA-support-repos/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
     print_git_info "BIOSUtilities" "EMBA-support-repos/BIOSUtilities" "Various BIOS Utilities for Modding/Research"

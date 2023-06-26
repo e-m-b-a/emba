@@ -84,7 +84,7 @@ echo ""
 echo -e "==> ""$GREEN""Imported ""$INSTALLER_COUNT"" installer module files""$NC"
 echo ""
 
-if [ "$#" -ne 1 ]; then
+if [[ "$#" -le 1 ]] && [[ "$#" -gt 2 ]]; then
   echo -e "$RED""$BOLD""Invalid number of arguments""$NC"
   echo -e "\n\n------------------------------------------------------------------"
   echo -e "If you are going to install EMBA in default mode you can use:"
@@ -94,7 +94,7 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-while getopts cCdDFghlr OPT ; do
+while getopts CdDFghlrc: OPT ; do
   case $OPT in
     d)
       export DOCKER_SETUP=1
@@ -134,6 +134,9 @@ while getopts cCdDFghlr OPT ; do
       export REMOVE=1
       echo -e "$GREEN""$BOLD""Remove EMBA from the system""$NC"
       ;;
+    c)
+      export CONTAINER="$OPTARG"
+      ;;
     *)
       echo -e "$RED""$BOLD""Invalid option""$NC"
       print_help
@@ -141,6 +144,10 @@ while getopts cCdDFghlr OPT ; do
       ;;
   esac
 done
+
+if ! [[ -v CONTAINER ]]; then
+  CONTAINER="embeddedanalyzer/emba"
+fi
 
 if [[ "$LIST_DEP" -eq 1 ]]; then
   echo -e "\n${ORANGE}WARNING: This feature is deprecated and not maintained anymore.$NC"

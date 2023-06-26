@@ -18,7 +18,7 @@
 
 L30_routersploit() {
 
-  local MODULE_END=0
+  export MODULE_END=0
 
   if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
@@ -29,16 +29,14 @@ L30_routersploit() {
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
     if [[ -v IP_ADDRESS_ ]]; then
-      if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
-        restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME"
-        if ! ping -c 2 "$IP_ADDRESS_" &> /dev/null; then
+      if ! system_online_check "${IP_ADDRESS_}"; then
+        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing routersploit checks"
           module_end_log "${FUNCNAME[0]}" "$MODULE_END"
           return
         fi
-        check_live_routersploit
-        MODULE_END=1
       fi
+      check_live_routersploit
     else
       print_output "[!] No IP address found"
     fi
@@ -65,12 +63,14 @@ check_live_routersploit() {
     print_output "[+] Found the following vulnerabilities:" "" "$LOG_PATH_MODULE/routersploit-$IP_ADDRESS_.txt"
     grep -B 1 "Target is vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE"
     print_ln
+    MODULE_END=1
   fi
   if grep -q "Target seems to be vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt; then
     print_ln
     print_output "[+] Found the following possible vulnerabilities:" "" "$LOG_PATH_MODULE/routersploit-$IP_ADDRESS_.txt"
     grep -B 1 "Target seems to be vulnerable" "$LOG_PATH_MODULE"/routersploit-"$IP_ADDRESS_".txt | tee -a "$LOG_FILE"
     print_ln
+    MODULE_END=1
   fi
 
   color_routersploit_log "$LOG_PATH_MODULE/routersploit-$IP_ADDRESS_.txt"
