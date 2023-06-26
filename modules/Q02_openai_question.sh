@@ -64,7 +64,7 @@ Q02_openai_question(){
 ask_chatgpt(){
   
   print_output "[*] checking scripts with ChatGPT that have priority ${MINIMUM_GPT_PRIO} or lower" "no_log"
-  if [ ${CHATGPT_RESULT_CNT} -gt 0 ]; then
+  if [[ ${CHATGPT_RESULT_CNT} -gt 0 ]]; then
     local GPT_PRIO_=3
     # default vars
     local GPT_QUESTION_="" 

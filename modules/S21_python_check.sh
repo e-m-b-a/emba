@@ -112,7 +112,7 @@ s21_script_bandit() {
       GPT_ANCHOR_="$(openssl rand -hex 8)"
       write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "" "" "${PY_LOG}"
       # add ChatGPT link to output file
-      write_anchor_gpt "${GPT_ANCHOR}" "${PY_LOG}"
+      write_anchor_gpt "${GPT_ANCHOR_}" "${PY_LOG}"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi
