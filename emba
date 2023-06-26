@@ -393,7 +393,18 @@ main() {
   fi
 
   # Check all dependencies of EMBA
-  dependency_check
+  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+    print_output "    internet connection - docker mode - \\c" "no_log"
+    if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      print_output "[-] ERROR: Quest container has no internet connection!" "main"
+      exit 1
+    fi
+    echo -e "$GREEN""ok""$NC"
+    exit 0
+  else
+    dependency_check
+  fi
 
   if [[ "${ONLY_DEP}" -eq 0 ]]; then
     if [[ "${UPDATE}" -eq 1 ]]; then
@@ -686,27 +697,19 @@ main() {
     [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
     disable_strict_mode "${STRICT_MODE}" 0
+    local QUEST_CONTAINER
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
-      # container 1
+      QUEST_CONTAINER="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      # container 2
-      # TODO could be removed
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba_quest -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-      if [[ $? -ne $D_RETURN ]]; then
-        D_RETURN=1
-      fi
     else
-      print_output "[*] Quest docker container started.\\n" "main"
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-      # EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      QUEST_CONTAINER="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      print_output "[*] Quest docker container started and detached.\\n" "main"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       # stop quest container too
-      # TODO stop the right container 
-      docker-compose down
-      docker-compose up --no-start
     fi
+    docker kill "${QUEST_CONTAINER}"
     enable_strict_mode "${STRICT_MODE}" 0
 
     if [[ "${D_RETURN}" -eq 0 ]] ; then
