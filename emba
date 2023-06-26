@@ -697,7 +697,6 @@ main() {
     [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
     disable_strict_mode "${STRICT_MODE}" 0
-    local QUEST_CONTAINER
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
@@ -706,13 +705,16 @@ main() {
         D_RETURN=1
       fi
     else
+      local QUEST_CONTAINER
       QUEST_CONTAINER="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       print_output "[*] Quest docker container started and detached.\\n" "main"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      # stop quest container too
+      # stop quest container
+      if [ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" )" = "running" ]; then
+        docker kill "${QUEST_CONTAINER}"
+      fi
     fi
-    docker kill "${QUEST_CONTAINER}"
     enable_strict_mode "${STRICT_MODE}" 0
 
     if [[ "${D_RETURN}" -eq 0 ]] ; then
