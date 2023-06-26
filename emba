@@ -697,11 +697,13 @@ main() {
         D_RETURN=1
       fi
     else
+      print_output "[*] Quest docker container started.\\n" "main"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       # EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       # stop quest container too
+      # TODO stop the right container 
       docker-compose down
       docker-compose up --no-start
     fi
@@ -746,7 +748,7 @@ main() {
       sleep 1
     done
     run_modules "Q" "${THREADED}" "0"
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
+    [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
     print_output "[!] Quest container done" "main"
     exit 0
   elif [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ;  then
