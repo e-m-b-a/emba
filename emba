@@ -706,11 +706,11 @@ main() {
     else
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-      print_output "[*] Quest docker container ${QUEST_CONTAINER} started and detached.\\n" "main"
+      print_output "[*] Quest docker container ${QUEST_CONTAINER_} started and detached.\\n" "main"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       # stop quest container
-      if [ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" )" = "running" ]; then
+      if [ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" = "running" ]; then
         docker kill "${QUEST_CONTAINER_}"
       fi
     fi
