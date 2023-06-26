@@ -77,9 +77,8 @@ s21_script_bandit() {
   local NAME=""
   local PY_LOG=""
   local VULNS=""
-  local GPT_PRIO=3
-  local GPT_ANCHOR=""
-  local GPT_QUESTION_="Please identify all vulnerabilities in this python code and give me a describtion on how to exploit them:"
+  local GPT_PRIO_=3
+  local GPT_ANCHOR_=""
 
   NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit_""$NAME"".txt"
@@ -103,17 +102,17 @@ s21_script_bandit() {
     fi
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" ""  "$PY_LOG"
-      GPT_PRIO=2 
+      GPT_PRIO_=2 
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" "" "$PY_LOG"
     fi
     
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
-    if [[ $GPT_OPTION -gt 0 ]]; then
-      GPT_ANCHOR="$(openssl rand -hex 8)"
-      write_csv_gpt_tmp "$(cut_path "$PY_SCRIPT_")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "$GPT_QUESTION_" "" "" "$PY_LOG"
+    if [[ ${GPT_OPTION} -gt 0 ]]; then
+      GPT_ANCHOR_="$(openssl rand -hex 8)"
+      write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "" "" "${PY_LOG}"
       # add ChatGPT link to output file
-      write_anchor_gpt "$GPT_ANCHOR" "$PY_LOG"
+      write_anchor_gpt "${GPT_ANCHOR}" "${PY_LOG}"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi

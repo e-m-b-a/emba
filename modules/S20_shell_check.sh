@@ -129,9 +129,8 @@ s20_reporter() {
   local VULNS="${1:0}"
   local SH_SCRIPT_="${2:0}"
   local SHELL_LOG="${3:0}"
-  local GPT_PRIO=2
-  local GPT_ANCHOR=""
-  local GPT_QUESTION_="The following code is a shell script and I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
+  local GPT_PRIO_=2
+  local GPT_ANCHOR_=""
   if [[ "$VULNS" -ne 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -148,17 +147,17 @@ s20_reporter() {
 
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
-      GPT_PRIO=1
+      GPT_PRIO_=1
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     fi
     write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
-    if [[ $GPT_OPTION -gt 0 ]]; then
-      GPT_ANCHOR="$(openssl rand -hex 8)"
+    if [[ ${GPT_OPTION} -gt 0 ]]; then
+      GPT_ANCHOR_="$(openssl rand -hex 8)"
       # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_"
-      write_csv_gpt_tmp "$(cut_path "$SH_SCRIPT")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "$GPT_QUESTION_" "" "" "$SHELL_LOG"
+      write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "" "" "${SHELL_LOG}"
       # add ChatGPT link
-      write_anchor_gpt "$GPT_ANCHOR" "$SHELL_LOG"
+      write_anchor_gpt "${GPT_ANCHOR_}" "${SHELL_LOG}"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi

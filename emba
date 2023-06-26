@@ -401,7 +401,6 @@ main() {
       exit 1
     fi
     echo -e "$GREEN""ok""$NC"
-    exit 0
   else
     dependency_check
   fi

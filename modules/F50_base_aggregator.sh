@@ -59,7 +59,7 @@ F50_base_aggregator() {
   L30_LOG="l30_routersploit.txt"
   L35_CSV_LOG="$CSV_DIR""/l35_metasploit_check.csv"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
-  # CHATGPT_CSV_LOG="$CSV_DIR/gpt-checks.csv"
+  # Q02_CSV_LOG="$CSV_DIR/q02_openai_question.csv"
 
   if [[ "$RESTART" -eq 1 ]] && [[ -f "$LOG_FILE" ]]; then
     rm "$LOG_FILE"
