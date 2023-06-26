@@ -13,7 +13,7 @@
 # Author(s): Benedikt Kuehne
 
 # Description: Openai questioning module for container #2
-# Note:   Important requirement for Q-modules is the self termination when a certain phase ends
+# Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
 Q02_openai_question(){
   if [[ ${GPT_OPTION} -gt 0 ]]; then
@@ -56,7 +56,7 @@ Q02_openai_question(){
       sleep 20
     done
     unset OPENAI_API_KEY
-    module_end_log "${FUNCNAME[0]}"
+    module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
   fi  
 }
 

@@ -746,7 +746,7 @@ main() {
       sleep 1
     done
     run_modules "Q" "${THREADED}" "0"
-    [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
     print_output "[!] Quest container done" "main"
     exit 0
   elif [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ;  then
@@ -868,7 +868,7 @@ main() {
 
   write_notification "Reporting phase ended"
 
-  if [[ ${USE_DOCKER} -eq 0 && -n "$Q_MOD_PID" && ${THREADED} -eq 1 ]] ;  then
+  if [[ ${USE_DOCKER} -eq 0 && ${THREADED} -eq 1 && ${IN_DOCKER} -eq 0 ]] && [[ -n "$Q_MOD_PID" ]];  then
     wait_for_pid "${Q_MOD_PID}"
   fi
 

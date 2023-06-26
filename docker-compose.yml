@@ -79,7 +79,6 @@ services:
       - /var/tmp
       - /var/lock
       - /var/lib/nikto:exec
-      - /external/freetz-ng/.fakeroot-cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp
@@ -90,14 +89,14 @@ services:
     # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
     # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
-        - ${FIRMWARE}/:/firmware:ro
+        # - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/logs
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
-        - /lib/modules:/lib/modules:ro
-        - /boot:/boot:ro
+      #  - /lib/modules:/lib/modules:ro
+        # - /boot:/boot:ro
     environment:
         - USER
         - CONTAINER_NUMBER=2
