@@ -62,7 +62,6 @@ services:
   emba_quest:
     image: embeddedanalyzer/emba:latest
     read_only: true
-    # nosemgrep
     tmpfs:
       - /tmp
       - /root/.config/
@@ -103,6 +102,8 @@ services:
       core:
         hard: 0
         soft: 0
+    security_opt:
+        - no-new-privileges:true
 
 networks:
   emba_runs:
