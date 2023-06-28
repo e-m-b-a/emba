@@ -48,7 +48,8 @@ F05_qs_resolver(){
               print_output "    there is no file name for anchor: ${GPT_ANCHOR_}"
             fi
           else
-            sed -i "s/${GPT_ANCHOR_}/${GPT_QUESTION_}\n${GPT_RESPONSE_}\n/1" "${GPT_OUTPUT_FILE_}"
+            sed -i "s/${GPT_ANCHOR_}/Q\: ${GPT_QUESTION_}\nA\: /1" "${GPT_OUTPUT_FILE_}"
+            printf '%s\n' "${GPT_RESPONSE_}" >> "${GPT_OUTPUT_FILE_}"
           fi
         fi
       done < "${CSV_DIR}/q02_openai_question.csv"
