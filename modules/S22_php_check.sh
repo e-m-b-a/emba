@@ -68,6 +68,7 @@ s22_vuln_check_semgrep() {
   sub_module_title "PHP script vulnerabilities - semgrep"
   local PHP_SEMGREP_LOG="$LOG_PATH_MODULE"/semgrep_php_results_xml.log
   local S22_SEMGREP_VULNS=0
+  local SEMG_SOURCES_ARR=()
 
   semgrep --disable-version-check --junit-xml --config "$EXT_DIR"/semgrep-rules/php "$LOG_DIR"/firmware/ > "$PHP_SEMGREP_LOG" 2>&1 || true
 
@@ -84,6 +85,32 @@ s22_vuln_check_semgrep() {
     fi
     # highlight security findings in semgrep log:
     sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "$PHP_SEMGREP_LOG"
+
+    mapfile -t SEMG_SOURCES_ARR < <(grep -E -o "name=.* file=.*\" line=\"[0-9]+" "$PHP_SEMGREP_LOG" | sort -u || true)
+
+    for SEMG_SOURCE_NOTE in "${SEMG_SOURCES_ARR[@]}"; do
+      local SEMG_ISSUE_NAME=""
+      local SEMG_SOURCE_FILE=""
+      local SEMG_SOURCE_FILE_NAME=""
+      local SEMG_LINE_NR=""
+
+      ! [[ -d "$LOG_PATH_MODULE"/semgrep_sources/ ]] && mkdir "$LOG_PATH_MODULE"/semgrep_sources/
+
+      SEMG_ISSUE_NAME=$(echo "${SEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^name=")
+      SEMG_ISSUE_NAME="$(echo "$SEMG_ISSUE_NAME" | sed 's/name=\"//' | tr -d '"')"
+
+      SEMG_SOURCE_FILE=$(echo "${SEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^file=")
+      SEMG_SOURCE_FILE="$(echo "$SEMG_SOURCE_FILE" | sed 's/file=\"//' | tr -d '"')"
+      SEMG_SOURCE_FILE_NAME=$(basename "${SEMG_SOURCE_FILE}")
+
+      [[ -f "$SEMG_SOURCE_FILE" && ! -f "$LOG_PATH_MODULE"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log ]] && cp "$SEMG_SOURCE_FILE" "$LOG_PATH_MODULE"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log
+
+      SEMG_LINE_NR=$(echo "${SEMG_SOURCE_NOTE}" | tr ' ' '\n' | grep "^line=")
+      SEMG_LINE_NR="$(echo "$SEMG_LINE_NR" | sed 's/line=\"//' | tr -d '"')"
+
+      sed -i -r "${SEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log
+      print_output "[+] Found possible PHP vulnerability ${ORANGE}${SEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${SEMG_SOURCE_FILE_NAME}${GREEN}" "" "$LOG_PATH_MODULE/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+    done
   fi
 
   write_log ""
