@@ -102,14 +102,17 @@ ask_chatgpt(){
             if [ -f "${TMP_DIR}/response.json" ]; then
               print_output "ERROR response:$(cat "${TMP_DIR}/response.json")"
             fi
+            if jq '.error.type' "${TMP_DIR}"/response.json | grep -q "insufficient_quota" ; then
+              break 2
+            fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}"/response.json)
           # GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//$'\n'/}" #remove newlines from response
           GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}"/response.json)
           if [[ ${GPT_TOKENS_} -ne 0 ]]; then
             # write new into done csv
-            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_RESPONSE_}" "cost=${GPT_TOKENS_}" "${GPT_OUTPUT_FILE_}"
-            print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_}"
+            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_RESPONSE_//\"/}" "cost=${GPT_TOKENS_}" "${GPT_OUTPUT_FILE_}"
+            print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_//\"/}"
             ((CHATGPT_RESULT_CNT++))
           fi
         fi
