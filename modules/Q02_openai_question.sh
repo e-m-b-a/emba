@@ -102,6 +102,9 @@ ask_chatgpt(){
             if [ -f "${TMP_DIR}/response.json" ]; then
               print_output "ERROR response:$(cat "${TMP_DIR}/response.json")"
             fi
+            if jq '.error.type' "${TMP_DIR}"/response.json | grep -q "insufficient_quota" ; then
+              break 2
+            fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}"/response.json)
           # GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//$'\n'/}" #remove newlines from response
