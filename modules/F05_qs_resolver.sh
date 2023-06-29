@@ -36,7 +36,7 @@ F05_qs_resolver(){
         GPT_ANCHOR_="${COL2_}"
         _GPT_PRIO_="${COL3_//GPT-Prio-/}"
         GPT_QUESTION_="${COL4_}"
-        GPT_RESPONSE_="${COL5_}"
+        GPT_RESPONSE_="${COL5_//\"/}"
         GPT_TOKENS_="${COL6_//cost\=/}"
         GPT_OUTPUT_FILE_="${COL7_}"
 
