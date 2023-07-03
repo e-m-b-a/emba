@@ -31,14 +31,14 @@ F05_qs_resolver(){
     local GPT_OUTPUT_FILE_=""
 
     if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
-      while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ _COL5_ COL6_ COL7_; do
+      while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
         _GPT_INPUT_FILE_="${COL1_}"
         GPT_ANCHOR_="${COL2_}"
         _GPT_PRIO_="${COL3_//GPT-Prio-/}"
         GPT_QUESTION_="${COL4_}"
-        # GPT_RESPONSE_="${COL5_}"
+        GPT_OUTPUT_FILE_="${COL5_}"
         GPT_TOKENS_="${COL6_//cost\=/}"
-        GPT_OUTPUT_FILE_="${COL7_}"
+        GPT_RESPONSE_="${COL7_//\;/}"
 
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           GPT_OUTPUT_FILE_="$(find "${LOG_DIR}" -iname "$(basename "${GPT_OUTPUT_FILE_}")" 2>/dev/null)"
@@ -49,8 +49,8 @@ F05_qs_resolver(){
             fi
           else
             sed -i "s/${GPT_ANCHOR_}/Q\: ${GPT_QUESTION_}\nA\: /1" "${GPT_OUTPUT_FILE_}"
-            grep "${GPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f5 >> "${GPT_OUTPUT_FILE_}"
-            # printf '%s\n' "${GPT_RESPONSE_}" >> "${GPT_OUTPUT_FILE_}"
+            # grep "${GPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${GPT_OUTPUT_FILE_}"
+            printf '%q\n' "${GPT_RESPONSE_}" >> "${GPT_OUTPUT_FILE_}"
           fi
         fi
       done < "${CSV_DIR}/q02_openai_question.csv"

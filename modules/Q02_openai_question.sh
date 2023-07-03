@@ -77,9 +77,9 @@ ask_chatgpt(){
       GPT_ANCHOR_="${COL2_}"
       GPT_PRIO_="${COL3_//GPT-Prio-/}"
       GPT_QUESTION_="${COL4_}"
-      GPT_RESPONSE_="${COL5_}"
+      GPT_OUTPUT_FILE_="${COL5_}"
       GPT_TOKENS_="${COL6_//cost\=/}"
-      GPT_OUTPUT_FILE_="${COL7_}"
+      GPT_RESPONSE_="${COL7_}"
       GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
       
       print_output "trying to check inside ${LOG_DIR}/firmware"
@@ -111,7 +111,8 @@ ask_chatgpt(){
           GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}"/response.json)
           if [[ ${GPT_TOKENS_} -ne 0 ]]; then
             # write new into done csv
-            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "'${GPT_RESPONSE_//\"/}'" "cost=${GPT_TOKENS_}" "${GPT_OUTPUT_FILE_}"
+            # TODO use printf secure option for response + set at end column printf %q
+            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "cost=${GPT_TOKENS_}" "${GPT_OUTPUT_FILE_}" "'${GPT_RESPONSE_//\'/\"}'"
             print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_//\"/}"
             ((CHATGPT_RESULT_CNT++))
           fi

@@ -110,7 +110,7 @@ s23_luaseccheck() {
       write_csv_log "$(print_path "$QUERY_FILE")" "0" "$ISSUES_FILE" "NA"
       if [[ ${GPT_OPTION} -gt 0 ]]; then
         GPT_ANCHOR_="$(openssl rand -hex 8)"
-        write_csv_gpt_tmp "$(cut_path "${QUERY_FILE}")" "${GPT_ANCHOR_}" "GPT-Prio-2" "${GPT_QUESTION}" "" "" "${CSV_DIR}/s23_lua_check.csv"
+        write_csv_gpt_tmp "$(cut_path "${QUERY_FILE}")" "${GPT_ANCHOR_}" "GPT-Prio-2" "${GPT_QUESTION}" "" "${CSV_DIR}/s23_lua_check.csv" ""
         # add ChatGPT link
         write_anchor_gpt "${GPT_ANCHOR_}"
       fi

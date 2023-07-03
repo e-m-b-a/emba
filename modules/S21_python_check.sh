@@ -110,7 +110,7 @@ s21_script_bandit() {
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
     if [[ ${GPT_OPTION} -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"
-      write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "" "" "${PY_LOG}"
+      write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "" "${PY_LOG}" ""
       # add ChatGPT link to output file
       write_anchor_gpt "${GPT_ANCHOR_}" "${PY_LOG}"
     fi

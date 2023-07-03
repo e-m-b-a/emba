@@ -154,8 +154,8 @@ s20_reporter() {
     write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
     if [[ ${GPT_OPTION} -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"
-      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_RESPONSE_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_"
-      write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "" "" "${SHELL_LOG}"
+      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_" "$GPT_RESPONSE_"
+      write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "" "${SHELL_LOG}" ""
       # add ChatGPT link
       write_anchor_gpt "${GPT_ANCHOR_}" "${SHELL_LOG}"
     fi
