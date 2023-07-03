@@ -38,7 +38,7 @@ F05_qs_resolver(){
         GPT_QUESTION_="${COL4_}"
         GPT_OUTPUT_FILE_="${COL5_}"
         GPT_TOKENS_="${COL6_//cost\=/}"
-        GPT_RESPONSE_="${COL7_//\;/}"
+        GPT_RESPONSE_="${COL7_//\"/}"
 
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           GPT_OUTPUT_FILE_="$(find "${LOG_DIR}" -iname "$(basename "${GPT_OUTPUT_FILE_}")" 2>/dev/null)"

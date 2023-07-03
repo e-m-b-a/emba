@@ -70,6 +70,7 @@ ask_chatgpt(){
     local GPT_QUESTION_="" 
     local CHATGPT_CODE_=""
     local GPT_RESPONSE_=""
+    local GPT_RESPONSE_CLEANED_=""
     local GPT_TOKENS_=0
     local HTTP_CODE_=200
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
@@ -107,12 +108,11 @@ ask_chatgpt(){
             fi
           fi
           GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}"/response.json)
-          # GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//$'\n'/}" #remove newlines from response
+          GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//\;/}" #remove ; from response
           GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}"/response.json)
           if [[ ${GPT_TOKENS_} -ne 0 ]]; then
             # write new into done csv
-            # TODO use printf secure option for response + set at end column printf %q
-            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "cost=${GPT_TOKENS_}" "${GPT_OUTPUT_FILE_}" "'${GPT_RESPONSE_//\'/\"}'"
+            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_CLEANED_//\'/\"}"
             print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_//\"/}"
             ((CHATGPT_RESULT_CNT++))
           fi

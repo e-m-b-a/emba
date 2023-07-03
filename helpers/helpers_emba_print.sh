@@ -844,6 +844,7 @@ write_csv_gpt(){
   if ! [[ -f "$CSV_DIR/q02_openai_question.csv" ]]; then
     touch "$CSV_DIR/q02_openai_question.csv"
   fi
+  # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_" "$GPT_RESPONSE_"
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/q02_openai_question.csv" || true
   printf '\n' >> "$CSV_DIR/q02_openai_question.csv" || true
 }
@@ -859,6 +860,7 @@ write_csv_gpt_tmp(){
   if ! [[ -f "$CSV_DIR/q02_openai_question.csv.tmp" ]]; then
     touch "$CSV_DIR/q02_openai_question.csv.tmp"
   fi
+  # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_" "$GPT_RESPONSE_"
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/q02_openai_question.csv.tmp" || true
   printf '\n' >> "$CSV_DIR/q02_openai_question.csv.tmp" || true
 }
