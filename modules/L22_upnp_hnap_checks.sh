@@ -20,6 +20,7 @@ L22_upnp_hnap_checks() {
 
   export UPNP_UP=0
   export HNAP_UP=0
+  export JNAP_UP=0
 
   if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
@@ -131,7 +132,7 @@ check_basic_hnap_jnap() {
         curl -v -L --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" https://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
       fi
 
-      if [[ -f "$LOG_PATH_MODULE"/hnap-discovery-check.txt ]]; then
+      if [[ -s "$LOG_PATH_MODULE"/hnap-discovery-check.txt ]]; then
         print_ln
         # tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/hnap-discovery-check.txt
         sed 's/></>\n</g' "$LOG_PATH_MODULE"/hnap-discovery-check.txt | tee -a "$LOG_FILE"
@@ -140,7 +141,7 @@ check_basic_hnap_jnap() {
         HNAP_UP=$(grep -c "HNAP1" "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true)
       fi
 
-      if [[ -f "$LOG_PATH_MODULE"/jnap-discovery-check.txt ]]; then
+      if [[ -s "$LOG_PATH_MODULE"/jnap-discovery-check.txt ]]; then
         print_ln
         tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/jnap-discovery-check.txt
         print_ln

@@ -39,7 +39,7 @@ jobs:
           docker save -o vuln-image.tar embeddedanalyzer/emba
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
           input: /github/workspace/vuln-image.tar
           timeout: "60m"
