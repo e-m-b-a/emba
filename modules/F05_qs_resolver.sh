@@ -54,7 +54,7 @@ F05_qs_resolver(){
             # grep "${GPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${GPT_OUTPUT_FILE_}"
             printf '%q\n' "${GPT_RESPONSE_}" >> "${GPT_OUTPUT_FILE_}"
             # replace anchor in html-report with link to response          
-            GPT_OUTPUT_FILE_HTML_="$(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_}.html")" 2>/dev/null)"
+            GPT_OUTPUT_FILE_HTML_="$(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)"
             GPT_REFERSE_LINK_="$(write_link "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}")"
             sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REFERSE_LINK_}/1" "${GPT_OUTPUT_FILE_HTML_}"
           fi
