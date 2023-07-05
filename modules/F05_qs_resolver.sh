@@ -29,7 +29,7 @@ F05_qs_resolver(){
     # local GPT_RESPONSE_=""
     local GPT_TOKENS_=0
     local GPT_OUTPUT_FILE_=""
-    local GPT_OUTPUT_FILE_HTML_=""
+    local GPT_OUTPUT_FILE_HTML_ARR_=()
     local GPT_REFERSE_LINK_=""
 
     if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
@@ -53,10 +53,12 @@ F05_qs_resolver(){
             sed -i "s/${GPT_ANCHOR_}/Q\: ${GPT_QUESTION_}\nA\: /1" "${GPT_OUTPUT_FILE_}"
             # grep "${GPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${GPT_OUTPUT_FILE_}"
             printf '%q\n' "${GPT_RESPONSE_}" >> "${GPT_OUTPUT_FILE_}"
-            # replace anchor in html-report with link to response          
-            GPT_OUTPUT_FILE_HTML_="$(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)"
-            GPT_REFERSE_LINK_="$(write_link "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}")"
-            sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REFERSE_LINK_}/1" "${GPT_OUTPUT_FILE_HTML_}"
+            # replace anchor in html-report with link to response
+            readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)    
+            for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
+              GPT_REFERSE_LINK_="$(write_link "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}")"
+              sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REFERSE_LINK_}/1" "${HTML_FILE_}"
+            done
           fi
         fi
       done < "${CSV_DIR}/q02_openai_question.csv"
