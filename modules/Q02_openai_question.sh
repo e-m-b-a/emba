@@ -16,6 +16,7 @@
 # Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
 Q02_openai_question(){
+  local GPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files/"
   if [[ ${GPT_OPTION} -gt 0 ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
@@ -46,6 +47,7 @@ Q02_openai_question(){
     while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
       sleep 10
     done
+    mkdir "${GPT_FILE_DIR_}"
     if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
       while ! [[ -f  "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
         sleep 3
@@ -73,6 +75,8 @@ ask_chatgpt(){
     local GPT_RESPONSE_CLEANED_=""
     local GPT_TOKENS_=0
     local HTTP_CODE_=200
+    local ORIGIN_MODULE_=""
+
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
       SCRIPT_PATH_TMP_="${COL1_}"
       GPT_ANCHOR_="${COL2_}"
@@ -83,18 +87,19 @@ ask_chatgpt(){
       GPT_RESPONSE_="${COL7_}"
       GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
       
-      print_output "trying to check inside ${LOG_DIR}/firmware"
+      print_output "trying to check inside ${LOG_DIR}/firmware" "no_log"
       SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}")"
-      print_output "trying to check ${SCRIPT_PATH_TMP_} with Question ${GPT_QUESTION_} "
-      print_output "Prio is ${GPT_PRIO_}"
+      cp "${GPT_INPUT_FILE_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+      print_output "trying to check ${SCRIPT_PATH_TMP_} with Question ${GPT_QUESTION_} " "no_log"
+      print_output "Prio is ${GPT_PRIO_}"  "no_log"
 
       if [[ -z ${GPT_ANSWER_}  ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]]; then
         if [ -f "${SCRIPT_PATH_TMP_}" ]; then
-          print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")"
+          print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
           head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
-          print_output "The Combined Cost of the OpenAI request / the length is: ${#GPT_QUESTION_} + ${#CHATGPT_CODE_}"
+          print_output "The Combined Cost of the OpenAI request / the length is: ${#GPT_QUESTION_} + ${#CHATGPT_CODE_}" "no_log"
           HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${OPENAI_API_KEY}" \
             -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/response.json" --write-out "%{http_code}")
@@ -112,8 +117,13 @@ ask_chatgpt(){
           GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}"/response.json)
           if [[ ${GPT_TOKENS_} -ne 0 ]]; then
             # write new into done csv
-            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_CLEANED_//\'/\"}"
-            print_output "Q:${GPT_QUESTION_} $(print_path "${SCRIPT_PATH_TMP_}") CHATGPT:${GPT_RESPONSE_//\"/}"
+            write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
+            # print openai response
+            print_output "CHATGPT:${GPT_RESPONSE_//\"/}"
+            # add proper module link
+            print_output "[+] Further results available for $GPT_INPUT_FILE_"
+            ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1))"
+            write_link "${ORIGIN_MODULE_}"
             ((CHATGPT_RESULT_CNT++))
           fi
         fi
