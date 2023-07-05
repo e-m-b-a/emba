@@ -30,10 +30,11 @@ F05_qs_resolver(){
     local GPT_TOKENS_=0
     local GPT_OUTPUT_FILE_=""
     local GPT_OUTPUT_FILE_HTML_=""
+    local GPT_REFERSE_LINK_=""
 
     if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
       while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
-        _GPT_INPUT_FILE_="${COL1_}"
+        GPT_INPUT_FILE_="${COL1_}"
         GPT_ANCHOR_="${COL2_}"
         _GPT_PRIO_="${COL3_//GPT-Prio-/}"
         GPT_QUESTION_="${COL4_}"
@@ -52,9 +53,10 @@ F05_qs_resolver(){
             sed -i "s/${GPT_ANCHOR_}/Q\: ${GPT_QUESTION_}\nA\: /1" "${GPT_OUTPUT_FILE_}"
             # grep "${GPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${GPT_OUTPUT_FILE_}"
             printf '%q\n' "${GPT_RESPONSE_}" >> "${GPT_OUTPUT_FILE_}"
-            # replace in html-report
+            # replace anchor in html-report with link to response          
             GPT_OUTPUT_FILE_HTML_="$(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_}.html")" 2>/dev/null)"
-            sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_RESPONSE_}/1" "${GPT_OUTPUT_FILE_HTML_}"
+            GPT_REFERSE_LINK_="$(write_link "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}")"
+            sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REFERSE_LINK_}/1" "${GPT_OUTPUT_FILE_HTML_}"
           fi
         fi
       done < "${CSV_DIR}/q02_openai_question.csv"

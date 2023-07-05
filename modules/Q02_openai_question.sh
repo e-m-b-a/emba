@@ -95,6 +95,8 @@ ask_chatgpt(){
 
       if [[ -z ${GPT_ANSWER_}  ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]]; then
         if [ -f "${SCRIPT_PATH_TMP_}" ]; then
+          # add navbar-item for file
+          sub_module_title "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}"
           print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
           head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
