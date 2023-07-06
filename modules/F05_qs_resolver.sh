@@ -56,7 +56,8 @@ F05_qs_resolver(){
             # replace anchor in html-report with link to response
             readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)    
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
-              GPT_REFERSE_LINK_="$(write_link "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}")"
+              # should point back to q02-submodule with name "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}"
+              GPT_REFERSE_LINK_="$(format_log "[REF] q02\#""${GPT_INPUT_FILE_}${GPT_ANCHOR_}")"
               sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REFERSE_LINK_}/1" "${HTML_FILE_}"
             done
           fi

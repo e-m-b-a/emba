@@ -97,7 +97,7 @@ ask_chatgpt(){
         if [ -f "${SCRIPT_PATH_TMP_}" ]; then
           # add navbar-item for file
           sub_module_title "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}"
-          print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+          print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"  # TODO PATH??
           head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
@@ -125,11 +125,13 @@ ask_chatgpt(){
             # add proper module link
             print_output "[+] Further results available for $GPT_INPUT_FILE_"
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1))"
+            print_output "   inside module ${ORIGIN_MODULE_}"
             write_link "${ORIGIN_MODULE_}"
             ((CHATGPT_RESULT_CNT++))
           fi
+        else
+          print_output "Couldn't find $(print_path "${SCRIPT_PATH_TMP_}")"
         fi
-        print_output "Couldn't find $(print_path "${SCRIPT_PATH_TMP_}")"
       fi
       if [[ ${GPT_OPTION} -ne 2 ]]; then
         sleep 20s
@@ -138,6 +140,7 @@ ask_chatgpt(){
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
       GPT_ANCHOR_="${COL2_}"
       sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
+      # TODO remove [CHATGPT] line in output file
     done < "${CSV_DIR}/q02_openai_question.csv"
   fi
 }
