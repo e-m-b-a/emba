@@ -159,7 +159,7 @@ main_web_check() {
       mapfile -t VERSIONS < <(grep "+ Server: " "$LOG_PATH_MODULE"/nikto-scan-"$IP_ADDRESS_".txt | cut -d: -f2 | sort -u | grep -v "null" | grep -e "[0-9]" | sed 's/^\ //' || true)
       for VERSION in "${VERSIONS[@]}"; do
         if [[ "$VERSION" != *"Server banner has changed from"* ]]; then
-          l15_version_detector "$VERSION" "Nikto web server scanning log"
+          l15_version_detector "$VERSION" "Nikto web server scanning"
         fi
       done
 

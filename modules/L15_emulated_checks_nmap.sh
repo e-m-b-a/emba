@@ -206,6 +206,8 @@ l15_version_detector() {
       print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in $TYPE_ log."
       # use get_csv_rule from s09:
       get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+      # get rid of ; which destroys our csv:
+      VERSION_FINDER="${VERSION_FINDER/;}"
       write_csv_log "---" "$IDENTIFIER" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE_"
       continue
     fi
