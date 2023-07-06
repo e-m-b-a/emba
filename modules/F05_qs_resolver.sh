@@ -58,9 +58,8 @@ F05_qs_resolver(){
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
               # should point back to q02-submodule with name "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}"
               GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}${GPT_ANCHOR_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
-              GPT_REVERSE_LINK_="<a class=\"submodul\" href=\"${HTML_PATH}/q02_openai_question.html\#${GPT_REVERSE_LINK_}\" title=\"${GPT_REVERSE_LINK_}\" >"
               print_output "[*] trying to print ${GPT_REVERSE_LINK_} into ${HTML_FILE_}" "no_log"
-              sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REVERSE_LINK_} /1" "${HTML_FILE_}"
+              sed -i "s/${GPT_ANCHOR_}/AI\: \<a class\=\"submodul\" href\=\"file\:\/\/${HTML_PATH}\/q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\n/1" "${HTML_FILE_}"
             done
           fi
         fi
