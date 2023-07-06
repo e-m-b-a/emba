@@ -30,7 +30,7 @@ F05_qs_resolver(){
     local GPT_TOKENS_=0
     local GPT_OUTPUT_FILE_=""
     local GPT_OUTPUT_FILE_HTML_ARR_=()
-    local GPT_REFERSE_LINK_=""
+    local GPT_REVERSE_LINK_=""
 
     if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
       while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
@@ -57,8 +57,10 @@ F05_qs_resolver(){
             readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)    
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
               # should point back to q02-submodule with name "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}"
-              GPT_REFERSE_LINK_="[REF] ${HTML_PATH}/q02_openai_question.html\#""$(format_log "${GPT_INPUT_FILE_}${GPT_ANCHOR_}" 1)"
-              sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REFERSE_LINK_}/1" "${HTML_FILE_}"
+              GPT_REVERSE_LINK_="$(format_log "${GPT_INPUT_FILE_}${GPT_ANCHOR_}" 1)"
+              GPT_REVERSE_LINK_="<a class=\"submodul\" href=\"${HTML_PATH}\/q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title=\"${GPT_REVERSE_LINK_}\" >"
+              print_output "[*] trying to print ${GPT_REVERSE_LINK_} into ${HTML_FILE_}"
+              sed -i "s/${GPT_ANCHOR_}/AI\: ${GPT_REVERSE_LINK_} /1" "${HTML_FILE_}"
             done
           fi
         fi
