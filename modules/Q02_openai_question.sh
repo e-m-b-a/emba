@@ -124,7 +124,7 @@ ask_chatgpt(){
             print_output "CHATGPT:${GPT_RESPONSE_//\"/}"
             # add proper module link
             print_output "[+] Further results available for $GPT_INPUT_FILE_"
-            ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1))"
+            ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
             print_output "   inside module ${ORIGIN_MODULE_}"
             write_link "${ORIGIN_MODULE_}"
             ((CHATGPT_RESULT_CNT++))
