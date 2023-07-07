@@ -28,6 +28,7 @@ Q02_openai_question(){
       print_output "[!] There is no API key in the config file"
       print_output "[!] Can't ask ChatGPT with this setup"
       print_output "There is no API key in the config file, aborting"
+      print_output "[!] go to https://github.com/e-m-b-a/emba/wiki/AI for more information"
       CHATGPT_RESULT_CNT=-1
     else
       # test connection
