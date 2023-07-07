@@ -254,7 +254,7 @@ dependency_check()
     print_output "    internet connection - docker mode - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
-      print_output "[-] ERROR: Quest container has no internet connection!" "main"
+      print_output "[-] ERROR: Quest container has no internet connection!" "no_log"
       exit 1
     else
       echo -e "$GREEN""ok""$NC"
@@ -262,21 +262,22 @@ dependency_check()
     print_output "    OpenAI-API key  - questing    - \\c" "no_log"
     if [ -z "${OPENAI_API_KEY}" ]; then
       echo -e "$RED""not ok""$NC"
-      print_output "[-] Can't ask ChatGPT with this setup" "main"
-      print_output "There is no API key in the config file, aborting" "main"
-      print_output "[-] go to https://github.com/e-m-b-a/emba/wiki/AI for more information" "main"
+      print_output "[-] Can't ask ChatGPT with this setup" "no_log"
+      print_output "There is no API key in the config file, aborting" "no_log"
+      print_output "[-] go to https://github.com/e-m-b-a/emba/wiki/AI for more information" "no_log"
       exit 1
     else
       # test connection
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-              -d @"${CONFIG_DIR}/gpt_template.json" &>"${LOG_DIR}/chatgpt.log" ; then
+              -d @"${CONFIG_DIR}/gpt_template.json" &>chatgpt-test.log ; then
         echo -e "$RED""not ok""$NC"
-        print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "main"
-        print_output "[-] The API-Key is probably expired or has reached its quota" "main"
+        print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
+        print_output "[-] The API-Key is probably expired or has reached its quota" "no_log"
         exit 1
       fi
       echo -e "$GREEN""ok""$NC"
+      rm chatgpt-test.log
     fi
     if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
       exit 0
