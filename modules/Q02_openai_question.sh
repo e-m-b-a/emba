@@ -19,7 +19,7 @@ Q02_openai_question() {
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
-    module_title "openai_question"
+    module_title "AI analysis via OpenAI"
     export CHATGPT_RESULT_CNT=1
 
     # we wait until there arer entries in the question csv
@@ -77,18 +77,18 @@ ask_chatgpt() {
         if [ -f "${SCRIPT_PATH_TMP_}" ]; then
           # add navbar-item for file
           sub_module_title "${GPT_INPUT_FILE_}"
-          print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+          print_output "[*] Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
           head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
-          print_output "The Combined Cost of the OpenAI request / the length is: ${#GPT_QUESTION_} + ${#CHATGPT_CODE_}" "no_log"
+          print_output "[*] The Combined Cost of the OpenAI request / the length is: ${#GPT_QUESTION_} + ${#CHATGPT_CODE_}" "no_log"
           HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${OPENAI_API_KEY}" \
             -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/response.json" --write-out "%{http_code}")
           if [[ "${HTTP_CODE_}" -ne 200 ]] ; then
             print_output "[-] Something went wrong with the ChatGPT requests"
             if [ -f "${TMP_DIR}/response.json" ]; then
-              print_output "ERROR response:$(cat "${TMP_DIR}/response.json")"
+              print_output "[-] ERROR response:$(cat "${TMP_DIR}/response.json")"
             fi
             if jq '.error.type' "${TMP_DIR}"/response.json | grep -q "insufficient_quota" ; then
               CHATGPT_RESULT_CNT=-1
@@ -110,7 +110,7 @@ ask_chatgpt() {
             ((CHATGPT_RESULT_CNT++))
           fi
         else
-          print_output "[-]Couldn't find $(print_path "${SCRIPT_PATH_TMP_}")"
+          print_output "[-] Couldn't find $(print_path "${SCRIPT_PATH_TMP_}")"
         fi
       fi
       if [[ "${GPT_OPTION}" -ne 2 ]]; then

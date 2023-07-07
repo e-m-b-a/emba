@@ -251,7 +251,8 @@ dependency_check()
   #######################################################################################
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
-    print_output "    internet connection - docker mode - \\c" "no_log"
+    print_output "[*] Container Internet connection:" "no_log"
+    print_output "    Internet connection - docker mode - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
       print_output "[-] ERROR: Quest container has no internet connection!" "no_log"
