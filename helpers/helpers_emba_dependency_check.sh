@@ -259,25 +259,24 @@ dependency_check()
     else
       echo -e "$GREEN""ok""$NC"
     fi
+    print_output "    OpenAI-API key  - questing    - \\c" "no_log"
     if [ -z "${OPENAI_API_KEY}" ]; then
-      print_output "[!] There is no API key in the config file"
-      print_output "[!] Can't ask ChatGPT with this setup"
-      print_output "There is no API key in the config file, aborting"
-      print_output "[!] go to https://github.com/e-m-b-a/emba/wiki/AI for more information"
+      echo -e "$RED""not ok""$NC"
+      print_output "[-] Can't ask ChatGPT with this setup" "main"
+      print_output "There is no API key in the config file, aborting" "main"
+      print_output "[-] go to https://github.com/e-m-b-a/emba/wiki/AI for more information" "main"
       exit 1
     else
       # test connection
-      print_output "[*] Testing API-Key"
-      print_output "[*]the running container is: ${CONTAINER_NUMBER}" "no_log"
-      print_output "Testing API key : ${OPENAI_API_KEY} "
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
               -d @"${CONFIG_DIR}/gpt_template.json" &>"${LOG_DIR}/chatgpt.log" ; then
-        print_output "[-] ChatGPT error while testing the API-Key"
-        print_output "requests aren't working, aborting"
+        echo -e "$RED""not ok""$NC"
+        print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "main"
+        print_output "[-] The API-Key is probably expired or has reached its quota" "main"
         exit 1
       fi
-      print_output "[*] ChatGPT test successful"
+      echo -e "$GREEN""ok""$NC"
     fi
     if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
       exit 0
