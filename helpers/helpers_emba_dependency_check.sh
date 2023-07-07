@@ -260,16 +260,17 @@ dependency_check()
       echo -e "$GREEN""ok""$NC"
     fi
   fi
-  if [[ "${GPT_OPTION}" -gt 0 ]] && [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
+  if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
-    print_output "    OpenAI-API key  - questing    - \\c" "no_log"
     if [ -z "${OPENAI_API_KEY}" ]; then
-      echo -e "$RED""not ok""$NC"
-      print_output "[-] Can't ask ChatGPT with this setup" "no_log"
-      print_output "There is no API key in the config file, aborting" "no_log"
-      print_output "[-] go to https://github.com/e-m-b-a/emba/wiki/AI for more information" "no_log"
-      exit 1
+      # print_output "    OpenAI-API key  - questing    - \\c" "no_log"
+      # echo -e "$RED""not ok""$NC"
+      print_output "[*] Can't ask ChatGPT with this setup" "no_log"
+      # print_output "There is no API key in the config file" "no_log"
+      print_output "[*] go to https://github.com/e-m-b-a/emba/wiki/AI for more information" "no_log"
+      # exit 1
     else
+      print_output "    OpenAI-API key  - questing    - \\c" "no_log"
       # test connection
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
