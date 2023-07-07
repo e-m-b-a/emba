@@ -15,8 +15,7 @@
 # Description: Openai questioning module for container #2
 # Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
-Q02_openai_question() {
-  
+Q02_openai_question() { 
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
@@ -44,22 +43,24 @@ Q02_openai_question() {
       fi
       print_output "[*] ChatGPT test successful"
     fi
-    # we wait until there arer entries in the question csv
-    while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
-      sleep 10
-    done
-    mkdir "${GPT_FILE_DIR_}"
-    if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
-      while ! [[ -f  "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
-        sleep 3
+    if [[ ${CHATGPT_RESULT_CNT} -gt 0 ]]; then
+      # we wait until there arer entries in the question csv
+      while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
+        sleep 10
       done
+      mkdir "${GPT_FILE_DIR_}"
+      if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
+        while ! [[ -f  "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
+          sleep 3
+        done
+      fi
+      while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+        ask_chatgpt
+        sleep 20
+      done
+      unset OPENAI_API_KEY
+      module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
     fi
-    while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
-      ask_chatgpt
-      sleep 20
-    done
-    unset OPENAI_API_KEY
-    module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
   fi  
 }
 
@@ -67,7 +68,6 @@ Q02_openai_question() {
 ask_chatgpt() {
   local GPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files/"
   print_output "[*] Checking scripts with ChatGPT that have priority ${MINIMUM_GPT_PRIO} or lower" "no_log"
-  if [[ ${CHATGPT_RESULT_CNT} -gt 0 ]]; then
     local GPT_PRIO_=3
     # default vars
     local GPT_QUESTION_="" 
@@ -142,5 +142,4 @@ ask_chatgpt() {
       sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
       # TODO remove [CHATGPT] line in output file
     done < "${CSV_DIR}/q02_openai_question.csv"
-  fi
 }
