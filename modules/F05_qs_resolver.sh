@@ -52,7 +52,7 @@ F05_qs_resolver(){
           else
             sed -i "s/${GPT_ANCHOR_}/Q\: ${GPT_QUESTION_}\nA\: /1" "${GPT_OUTPUT_FILE_}"
             # grep "${GPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${GPT_OUTPUT_FILE_}"
-            printf '%q\n' "${GPT_RESPONSE_}" >> "${GPT_OUTPUT_FILE_}"
+            printf '%q\n' "${GPT_RESPONSE_//\\/}" >> "${GPT_OUTPUT_FILE_}"
             # replace anchor in html-report with link to response
             readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)    
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do

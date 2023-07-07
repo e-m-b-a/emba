@@ -16,7 +16,7 @@
 # Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
 Q02_openai_question(){
-  local GPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files/"
+  
   if [[ ${GPT_OPTION} -gt 0 ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
@@ -64,7 +64,7 @@ Q02_openai_question(){
 
 # looks through the modules and finds chatgpt questions inside the csv
 ask_chatgpt(){
-  
+  local GPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files/"
   print_output "[*] checking scripts with ChatGPT that have priority ${MINIMUM_GPT_PRIO} or lower" "no_log"
   if [[ ${CHATGPT_RESULT_CNT} -gt 0 ]]; then
     local GPT_PRIO_=3
@@ -97,7 +97,7 @@ ask_chatgpt(){
         if [ -f "${SCRIPT_PATH_TMP_}" ]; then
           # add navbar-item for file
           sub_module_title "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}"
-          print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"  # TODO PATH??
+          print_output "Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
           head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
           printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
@@ -125,7 +125,6 @@ ask_chatgpt(){
             # add proper module link
             print_output "[+] Further results available for $GPT_INPUT_FILE_"
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
-            print_output "   inside module ${ORIGIN_MODULE_}"
             write_link "${ORIGIN_MODULE_}"
             ((CHATGPT_RESULT_CNT++))
           fi
