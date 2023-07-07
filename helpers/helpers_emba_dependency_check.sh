@@ -247,6 +247,22 @@ dependency_check()
 
   print_ln "no_log"
   #######################################################################################
+  # Quest Container
+  #######################################################################################
+  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+    print_output "    internet connection - docker mode - \\c" "no_log"
+    if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      print_output "[-] ERROR: Quest container has no internet connection!" "main"
+      exit 1
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+    if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
+      exit 0
+    fi
+  fi
+  #######################################################################################
   # Elementary checks
   #######################################################################################
   print_output "[*] Elementary:" "no_log"
