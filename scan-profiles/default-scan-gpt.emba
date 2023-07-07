@@ -28,6 +28,7 @@ if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Activate multi threading (destroys regular console output)")")" "no_log"
   print_output "$(indent "$(orange "Prints only relative paths")")" "no_log"
   print_output "$(indent "$(orange "Activates web report creation in log path")")" "no_log"
+  print_output "$(indent "$(orange "Activates AI checks via OpenAI-API")")" "no_log"
   if [[ "$USE_DOCKER" -ne 1 ]]; then
     print_output "$(indent "$(orange "Enables automated qemu emulation tests (WARNING this module could harm your host!)")")" "no_log"
   else
