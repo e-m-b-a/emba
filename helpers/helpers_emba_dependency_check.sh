@@ -270,14 +270,14 @@ dependency_check()
       # test connection
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-              -d @"${CONFIG_DIR}/gpt_template.json" &>chatgpt-test.log ; then
+              -d @"${CONFIG_DIR}/gpt_template.json" &>/tmp/chatgpt-test.log ; then
         echo -e "$RED""not ok""$NC"
         print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
         print_output "[-] The API-Key is probably expired or has reached its quota" "no_log"
         exit 1
       fi
       echo -e "$GREEN""ok""$NC"
-      rm chatgpt-test.log
+      rm /tmp/chatgpt-test.log
     fi
     if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
       exit 0
