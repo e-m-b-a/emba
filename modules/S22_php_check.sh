@@ -167,7 +167,7 @@ s22_vuln_check() {
     fi
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
     write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "NA"
-    if [[ ${GPT_OPTION} -gt 0 ]]; then
+    if [[ "${GPT_OPTION}" -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"
       # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
       write_csv_gpt_tmp "$(cut_path "${PHP_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${TMP_DIR}/S22_VULNS.tmp" "" ""

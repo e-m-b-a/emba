@@ -108,7 +108,7 @@ s21_script_bandit() {
     fi
     
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
-    if [[ ${GPT_OPTION} -gt 0 ]]; then
+    if [[ "${GPT_OPTION}" -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"
       # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
       write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${PY_LOG}" "" ""

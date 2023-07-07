@@ -388,7 +388,6 @@ main() {
   if [[ ${IN_DOCKER} -eq 1 ]] ; then
     # set external path new for docker
     export EXT_DIR="/external"
-    # TODO move to container 2
     export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
   fi
 
@@ -401,6 +400,9 @@ main() {
       exit 1
     fi
     echo -e "$GREEN""ok""$NC"
+    if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
+      exit 0
+    fi
   else
     dependency_check
   fi
@@ -717,7 +719,7 @@ main() {
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       # stop quest container
-      if [ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" = "running" ]; then
+      if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
         docker kill "${QUEST_CONTAINER_}"
       fi
     fi
@@ -762,10 +764,10 @@ main() {
       sleep 1
     done
     run_modules "Q" "${THREADED}" "0"
-    [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
     print_output "[!] Quest container done" "main"
     exit 0
-  elif [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ;  then
+  elif [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]] ;  then
     while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
       sleep 1
     done
@@ -884,7 +886,7 @@ main() {
 
   write_notification "Reporting phase ended"
 
-  if [[ ${USE_DOCKER} -eq 0 && ${THREADED} -eq 1 && ${IN_DOCKER} -eq 0 ]] && [[ -n "$Q_MOD_PID" ]];  then
+  if [[ "${USE_DOCKER}" -eq 0 && "${THREADED}" -eq 1 && "${IN_DOCKER}" -eq 0 ]] && [[ -n "${Q_MOD_PID}" ]];  then
     wait_for_pid "${Q_MOD_PID}"
   fi
 

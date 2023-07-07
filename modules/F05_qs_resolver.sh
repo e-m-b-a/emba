@@ -14,10 +14,10 @@
 
 # Description:  Resolves all dependancies and links between Q- and S-Modules
 
-F05_qs_resolver(){
+F05_qs_resolver() {
   module_log_init "${FUNCNAME[0]}"
   module_title "QS-Resolver"
-  if [[ ${GPT_OPTION} -gt 0 ]]; then
+  if [[ "${GPT_OPTION}" -gt 0 ]]; then
     # wait for Q02 to end
     while ! grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
       sleep 1
@@ -56,8 +56,8 @@ F05_qs_resolver(){
             # replace anchor in html-report with link to response
             readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)    
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
-              # should point back to q02-submodule with name "${GPT_INPUT_FILE_}-${GPT_ANCHOR_}"
-              GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}${GPT_ANCHOR_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
+              # should point back to q02-submodule with name "${GPT_INPUT_FILE_}"
+              GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
               print_output "[*] trying to print ${GPT_REVERSE_LINK_} into ${HTML_FILE_}" "no_log"
               sed -i "s/${GPT_ANCHOR_}/AI\: \<a class\=\"submodul\" href\=\"\.\.\/q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>OpenAI had this to say\<\/a\>\n/1" "${HTML_FILE_}"
             done

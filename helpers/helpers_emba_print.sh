@@ -834,15 +834,12 @@ print_notification() {
 }
 
 # writes inputs into csv for chatgpt
-write_csv_gpt(){
+write_csv_gpt() {
   local CSV_ITEMS=("$@")
 
   if ! [[ -d "$CSV_DIR" ]]; then
-    print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
+    print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
-  fi
-  if ! [[ -f "$CSV_DIR/q02_openai_question.csv" ]]; then
-    touch "$CSV_DIR/q02_openai_question.csv"
   fi
   # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_" "$GPT_RESPONSE_"
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/q02_openai_question.csv" || true
@@ -850,23 +847,19 @@ write_csv_gpt(){
 }
 
 # writes inputs into tmp csv for chatgpt
-write_csv_gpt_tmp(){
+write_csv_gpt_tmp() {
   local CSV_ITEMS=("$@")
 
   if ! [[ -d "$CSV_DIR" ]]; then
-    print_output "[-] WARNING: CSV directory $ORANGE$CSV_DIR$NC not found"
+    print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
-  fi
-  if ! [[ -f "$CSV_DIR/q02_openai_question.csv.tmp" ]]; then
-    touch "$CSV_DIR/q02_openai_question.csv.tmp"
   fi
   # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_" "$GPT_RESPONSE_"
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/q02_openai_question.csv.tmp" || true
   printf '\n' >> "$CSV_DIR/q02_openai_question.csv.tmp" || true
 }
 
-write_anchor_gpt()
-{
+write_anchor_gpt() {
   if [[ $HTML -eq 1 ]] ; then
     local LINK
     LINK="${1:-}"
