@@ -92,7 +92,10 @@ cleaner() {
     print_output "[*] Interrupt detected!" "no_log"
   fi
   print_output "[*] Final cleanup started." "no_log"
-
+  if [[ -n "${QUEST_CONTAINER_}" ]]; then
+    print_output "[*] Stopping Quest Container ..."
+    docker kill "${QUEST_CONTAINER_}"
+  fi
   # stop inotifywait on host
   if [[ "$IN_DOCKER" -eq 0 ]] && pgrep -f "inotifywait.*$LOG_DIR.*" &> /dev/null 2>&1; then
     print_output "[*] Stopping inotify ..."
