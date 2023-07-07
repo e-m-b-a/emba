@@ -261,7 +261,7 @@ dependency_check()
     fi
   fi
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-    export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
+    export "$(grep -v '^#' "./config/gpt_config.env" | xargs || true )" # readin gpt_config.env
     if [ -z "${OPENAI_API_KEY}" ]; then
       # print_output "    OpenAI-API key  - questing    - \\c" "no_log"
       # echo -e "$RED""not ok""$NC"
@@ -274,7 +274,7 @@ dependency_check()
       # test connection
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-              -d @"${CONFIG_DIR}/gpt_template.json" &>/tmp/chatgpt-test.log ; then
+              -d @"./config/gpt_template.json" &>/tmp/chatgpt-test.log ; then
         echo -e "$RED""not ok""$NC"
         print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
         print_output "[-] The API-Key is probably expired or has reached its quota" "no_log"
