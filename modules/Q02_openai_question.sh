@@ -20,48 +20,27 @@ Q02_openai_question() {
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
     module_title "openai_question"
-    export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
     export CHATGPT_RESULT_CNT=1
 
-    if [ -z "${OPENAI_API_KEY}" ]; then
-      print_output "[!] There is no API key in the config file"
-      print_output "[!] Can't ask ChatGPT with this setup"
-      print_output "There is no API key in the config file, aborting"
-      print_output "[!] go to https://github.com/e-m-b-a/emba/wiki/AI for more information"
-      CHATGPT_RESULT_CNT=-1
-    else
-      # test connection
-      print_output "[*] Testing API-Key"
-      print_output "[*]the running container is: ${CONTAINER_NUMBER}" "no_log"
-      print_output "Testing API key : ${OPENAI_API_KEY} "
-      if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
-              -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-              -d @"${CONFIG_DIR}/gpt_template.json" &>"${LOG_DIR}/chatgpt.log" ; then
-        print_output "[-] ChatGPT error while testing the API-Key"
-        print_output "requests aren't working, aborting"
-        CHATGPT_RESULT_CNT=-1
-      fi
-      print_output "[*] ChatGPT test successful"
-    fi
-    if [[ ${CHATGPT_RESULT_CNT} -gt 0 ]]; then
-      # we wait until there arer entries in the question csv
-      while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
-        sleep 10
+    # we wait until there arer entries in the question csv
+    while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
+      sleep 10
+    done
+    mkdir "${GPT_FILE_DIR_}"
+    if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
+      while ! [[ -f  "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
+        sleep 3
       done
-      mkdir "${GPT_FILE_DIR_}"
-      if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
-        while ! [[ -f  "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; do
-          sleep 3
-        done
-      fi
-      while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+    fi
+    while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+      if [[ "${CHATGPT_RESULT_CNT}" -gt 0 ]]; then
         ask_chatgpt
-        sleep 20
-      done
-      unset OPENAI_API_KEY
-      module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
-    fi
-  fi  
+      fi
+      sleep 20
+    done
+    unset OPENAI_API_KEY
+    module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
+  fi
 }
 
 # looks through the modules and finds chatgpt questions inside the csv
@@ -112,6 +91,7 @@ ask_chatgpt() {
               print_output "ERROR response:$(cat "${TMP_DIR}/response.json")"
             fi
             if jq '.error.type' "${TMP_DIR}"/response.json | grep -q "insufficient_quota" ; then
+              CHATGPT_RESULT_CNT=-1
               break 2
             fi
           fi

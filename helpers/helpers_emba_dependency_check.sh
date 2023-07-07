@@ -250,6 +250,7 @@ dependency_check()
   # Quest Container
   #######################################################################################
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+    export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
     print_output "    internet connection - docker mode - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
@@ -257,6 +258,26 @@ dependency_check()
       exit 1
     else
       echo -e "$GREEN""ok""$NC"
+    fi
+    if [ -z "${OPENAI_API_KEY}" ]; then
+      print_output "[!] There is no API key in the config file"
+      print_output "[!] Can't ask ChatGPT with this setup"
+      print_output "There is no API key in the config file, aborting"
+      print_output "[!] go to https://github.com/e-m-b-a/emba/wiki/AI for more information"
+      exit 1
+    else
+      # test connection
+      print_output "[*] Testing API-Key"
+      print_output "[*]the running container is: ${CONTAINER_NUMBER}" "no_log"
+      print_output "Testing API key : ${OPENAI_API_KEY} "
+      if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+              -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+              -d @"${CONFIG_DIR}/gpt_template.json" &>"${LOG_DIR}/chatgpt.log" ; then
+        print_output "[-] ChatGPT error while testing the API-Key"
+        print_output "requests aren't working, aborting"
+        exit 1
+      fi
+      print_output "[*] ChatGPT test successful"
     fi
     if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
       exit 0
