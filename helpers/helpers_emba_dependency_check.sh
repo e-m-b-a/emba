@@ -250,7 +250,6 @@ dependency_check()
   # Quest Container
   #######################################################################################
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
-    export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
     print_output "[*] Container Internet connection:" "no_log"
     print_output "    Internet connection - docker mode - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
@@ -260,6 +259,9 @@ dependency_check()
     else
       echo -e "$GREEN""ok""$NC"
     fi
+  fi
+  if [[ "${GPT_OPTION}" -gt 0 ]] && [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
+    export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
     print_output "    OpenAI-API key  - questing    - \\c" "no_log"
     if [ -z "${OPENAI_API_KEY}" ]; then
       echo -e "$RED""not ok""$NC"
@@ -280,6 +282,8 @@ dependency_check()
       echo -e "$GREEN""ok""$NC"
       rm /tmp/chatgpt-test.log
     fi
+  fi
+  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
       exit 0
     fi
