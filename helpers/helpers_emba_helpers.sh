@@ -93,7 +93,7 @@ cleaner() {
   fi
   print_output "[*] Final cleanup started." "no_log"
   if [[ -n "${QUEST_CONTAINER_}" ]]; then
-    print_output "[*] Stopping Quest Container ..."
+    print_output "[*] Stopping Quest Container ..." "no_log"
     docker kill "${QUEST_CONTAINER_}"
   fi
   # stop inotifywait on host

@@ -247,10 +247,16 @@ dependency_check()
 
   print_ln "no_log"
   #######################################################################################
-  # Quest Container
+  # Elementary checks
+  #######################################################################################
+  print_output "[*] Elementary:" "no_log"
+
+  #######################################################################################
+  ## Quest Container
   #######################################################################################
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     print_output "[*] Container Internet connection:" "no_log"
+    print_ln "no_log"
     print_output "    Internet connection - docker mode - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
@@ -274,7 +280,7 @@ dependency_check()
       print_output "[*] go to https://github.com/e-m-b-a/emba/wiki/AI for more information" "no_log"
       # exit 1
     else
-      print_output "    OpenAI-API key  - questing    - \\c" "no_log"
+      print_output "    OpenAI-API key  - \\c" "no_log"
       # test connection
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
@@ -293,10 +299,6 @@ dependency_check()
       exit 0
     fi
   fi
-  #######################################################################################
-  # Elementary checks
-  #######################################################################################
-  print_output "[*] Elementary:" "no_log"
 
   # currently we need root privileges for emulation and multiple extractors
   # As the container runs as root we should not run into issues within the container.
