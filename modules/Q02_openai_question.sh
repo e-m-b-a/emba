@@ -45,7 +45,7 @@ Q02_openai_question() {
 
 # looks through the modules and finds chatgpt questions inside the csv
 ask_chatgpt() {
-  local GPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files/"
+  local GPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files"
   local GPT_PRIO_=3
   # default vars
   local GPT_QUESTION_="" 
