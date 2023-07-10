@@ -20,7 +20,7 @@ Q02_openai_question() {
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
     module_title "AI analysis via OpenAI"
-    export CHATGPT_RESULT_CNT=1
+    export CHATGPT_RESULT_CNT=0
 
     # we wait until there arer entries in the question csv
     while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
@@ -33,7 +33,7 @@ Q02_openai_question() {
       done
     fi
     while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
-      if [[ "${CHATGPT_RESULT_CNT}" -gt 0 ]]; then
+      if [[ "${CHATGPT_RESULT_CNT}" -ge 0 ]]; then
         ask_chatgpt
       fi
       sleep 20
