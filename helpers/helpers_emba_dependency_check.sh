@@ -294,7 +294,7 @@ dependency_check()
     fi
   fi
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
-    if [[ $ONLY_DEP -gt 0 ]] || [[ $FORCE -eq 0 ]]; then
+    if [[ $ONLY_DEP -gt 0 ]] && [[ $FORCE -ne 0 ]]; then
       exit 0
     fi
   fi
