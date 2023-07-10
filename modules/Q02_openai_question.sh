@@ -69,7 +69,7 @@ ask_chatgpt() {
     
     print_output "[*]trying to check inside ${LOG_DIR}/firmware" "no_log"
     SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}")"
-    cp "${GPT_INPUT_FILE_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+    cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
     print_output "[*]trying to check ${SCRIPT_PATH_TMP_} with Question ${GPT_QUESTION_} " "no_log"
     print_output "[*]Prio is ${GPT_PRIO_}"  "no_log"
 
