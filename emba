@@ -700,8 +700,9 @@ main() {
         D_RETURN=1
       fi
     else
-      export QUEST_CONTAINER_=""
+      local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[*] Quest docker container ${QUEST_CONTAINER_} started and detached.\\n" "main"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?

@@ -275,6 +275,7 @@ dependency_check()
     if [ -z "${OPENAI_API_KEY}" ]; then
       # print_output "    OpenAI-API key  - questing    - \\c" "no_log"
       # echo -e "$RED""not ok""$NC"
+      print_ln "no_log"
       print_output "[*] Can't ask ChatGPT with this setup" "no_log"
       # print_output "There is no API key in the config file" "no_log"
       print_output "[*] go to https://github.com/e-m-b-a/emba/wiki/AI for more information" "no_log"
