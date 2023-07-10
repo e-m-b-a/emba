@@ -1,0 +1,16 @@
+/etc/scripts/dns-helper.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/init0.d/S41inf.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/init.d/S19init.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/init0.d/S41autowan.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/init0.d/S21layout.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/init0.d/S41autowanv6.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/conntrack_flush.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/ping.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/settime.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/killpid.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/upnp/NOTIFYAB.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/delpathbytarget.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/events/WANV6_ppp_chk.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/init0.d/S40gpioevent.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/mldproxy_helper.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;
+/etc/scripts/upwifistatshlper.sh (-rw-r--r-- root root);GPT-Prio-2;Please identify all vulnerabilities in this shell script:;;;;

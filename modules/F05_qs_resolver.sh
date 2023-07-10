@@ -66,5 +66,5 @@ F05_qs_resolver() {
       done < "${CSV_DIR}/q02_openai_question.csv"
     fi
   fi
-  module_end_log "${FUNCNAME[0]}" 1
+  module_end_log "${FUNCNAME[0]}" 0
 }

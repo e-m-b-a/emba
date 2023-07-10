@@ -1,0 +1,8 @@
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+      {
+          "role": "user",
+          "content":
+"Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly: #!/bin/shecho\"CheckFWNow...\"fwinfo=\"/tmp/fwinfo.xml\"model=\"`xmldbc-g/runtime/device/modelname`\"srv=\"wrpd.dlink.com.tw\"reqstr=\"/router/firmware/query.asp\"old_major=`cat/etc/config/buildver|cut-d'.'-f1`old_minor=`cat/etc/config/buildver|cut-d'.'-f2|cut-c1-2`buildver=\"_0\"$old_major$old_minorglobal=\"Bx_Default_FW\"$buildverreqstr=$reqstr\"?model=$model_$global\"reqstr=\"GET$reqstrHTTP/1.1Accept:*/*User-Agent:Mozilla/4.0(compatible;MSIE6.0;WindowsNT5.1;SV1)Host:$srvConnection:Close\"rm-f$fwinfoxmldbc-X/runtime/firmware#echo\"tcprequest\"$reqstr\"\"$srv\"80-f\"$fwinfo\"-t5-s\"`tcprequest\"$reqstr\"\"$srv\"80-f\"$fwinfo\"-t5-s`if[-f$fwinfo];then#getfirmwareinformationnew_major=`grepMajor/tmp/fwinfo.xml|sed's/^[\t]*//'|sed's/<Major>//'|sed's/<\/Major>//'`new_minor=`grepMinor/tmp/fwinfo.xml|sed's/^[\t]*//'|sed's/<Minor>//'|sed's/<\/Minor>//'`if[\"$new_major\"!=\"\"]||[\"$new_minor\"!=\"\"];thenxmldbc-s/runtime/firmware/fwversion/Major$new_majorxmldbc-s/runtime/firmware/fwversion/Minor$new_minorfifiif[\"$new_major\"!=\"\"];thenif[$new_major-gt$old_major-o$new_major-eq$old_major-a$new_minor-gt$old_minor];thenecho\"HavenewFirmware\"xmldbc-s/runtime/firmware/havenewfirmware1fifi"
+}]}
