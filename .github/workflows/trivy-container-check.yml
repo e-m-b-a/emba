@@ -8,11 +8,16 @@ name: Trivy EMBA docker image security check
   #on:
   #schedule:
   #  - cron: '0 0 * * *' # do it every day
+
 on:
   push:
-    branches:
-    - master
+    branches:    
+      - '**'        # matches every branch
   pull_request:
+    branches:
+      - '**'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: read
