@@ -321,6 +321,35 @@ web_access_crawler() {
     cd "${HOME_}" || exit 1
   done
 
+  # extract started processes from all our qemu logs:
+  #
+  # find all qemu logs:
+  mapfile -t FILENAME_ARR_QEMU_START < <(find "${LOG_DIR}/l10_system_emulation" -type f -name "qemu.serial.log" | sort -u || true)
+  for FILENAME_QEMU_START in "${FILENAME_ARR_QEMU_START[@]}"; do
+    # find open service names from qemu logs:
+    print_output "[*] Testing Qemu log file: ${FILENAME_QEMU_START}" "no_log"
+    mapfile -t FILENAME_STARTED_PROCESSES_ARR < <(grep -a "inet_bind" "${FILENAME_QEMU_START}" | cut -d: -f3 | awk -F[\(\)] '{print $2}' | sort -u || true)
+    for FILENAME_QEMU_STARTED in "${FILENAME_STARTED_PROCESSES_ARR[@]}"; do
+      print_output "[*] Searching for filename: ${FILENAME_QEMU_STARTED}" "no_log"
+      # find the names in the filesystem:
+      mapfile -t FILEPATH_QEMU_START_ARR < <(find "${LOG_DIR}"/firmware -name "${FILENAME_QEMU_STARTED}" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      # check every file for further possible files to crawl:
+      for FILE_QEMU_START in "${FILEPATH_QEMU_START_ARR[@]}"; do
+        if ! file "${FILE_QEMU_START}" | grep -q "ELF"; then
+          continue
+        fi
+        print_output "[*] Identification of possible web files in: ${FILE_QEMU_START}" "no_log"
+        mapfile -t POSSIBLE_FILES_ARR < <(strings "${FILE_QEMU_START}" | grep -o -E '[-_a-zA-Z0-9]+\.[a-zA-Z0-9]{3}$' | sort -u || true)
+        # crawl all the files:
+        for FILE_QEMU_TEST in "${POSSIBLE_FILES_ARR[@]}"; do
+          print_output "[*] Testing ${ORANGE}${PROTO}://${IP_}:${PORT_}/${FILE_QEMU_TEST}${NC}" "no_log"
+          echo -e "\\n[*] Testing ${ORANGE}${PROTO}://${IP_}:${PORT_}/${FILE_QEMU_TEST}${NC}" >> "${LOG_PATH_MODULE}/crawling_${IP_}-${PORT_}.log"
+          timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "${PROTO}""://""${IP_}":"${PORT_}""/""${FILE_QEMU_TEST}" -o /dev/null >> "${LOG_PATH_MODULE}/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+        done
+      done
+    done
+  done
+
   if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" ]]; then
     grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "200 OK" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" || true
     grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "401 Unauth" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" || true
