@@ -388,7 +388,7 @@ dependency_check()
     # binwalk
     check_dep_tool "binwalk extractor" "binwalk"
     if command -v binwalk > /dev/null ; then
-      export BINWALK_BIN=""
+      export BINWALK_BIN=()
       BINWALK_BIN=("python3" "-Wignore" "$(which binwalk)")
       BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then

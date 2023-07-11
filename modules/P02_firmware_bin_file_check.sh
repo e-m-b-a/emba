@@ -55,11 +55,7 @@ P02_firmware_bin_file_check() {
       mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
     else
-      if [[ -x /usr/local/bin/binwalk ]]; then
-        print_output "$(python3 -Wignore /usr/local/bin/binwalk -E -F -J "$FIRMWARE_PATH")"
-      else
-        print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
-      fi
+      print_output "$("${BINWALK_BIN[@]}" -E -F -J "$FIRMWARE_PATH")"
       mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
     fi
   fi
@@ -135,11 +131,11 @@ generate_entropy_graph() {
     # Docker container and binwalk fails to save the entropy picture there
     if [[ $IN_DOCKER -eq 1 ]] ; then
       cd "$LOG_DIR" || return
-      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BIN")"
+      print_output "$("${BINWALK_BIN[@]}" -E -F -J "$FIRMWARE_PATH_BIN")"
       mv "$(basename "$FIRMWARE_PATH_BIN".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
     else
-      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH_BIN")"
+      print_output "$("${BINWALK_BIN[@]}" -E -F -J "$FIRMWARE_PATH_BIN")"
       mv "$(basename "$FIRMWARE_PATH_BIN".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
     fi
   fi
@@ -158,9 +154,9 @@ fw_bin_detector() {
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
   AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
-  QNAP_ENC_CHECK=$(binwalk -y "qnap encrypted" "$CHECK_FILE")
+  QNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "$CHECK_FILE")
   # we are running binwalk on the file to analyze the output afterwards:
-  binwalk "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
+  "${BINWALK_BIN[@]}" "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
   UEFI_CHECK=$(grep -c "UEFI" "$TMP_DIR"/s02_binwalk_output.txt || true)
   UEFI_CHECK=$(( "$UEFI_CHECK" + "$(grep -c "UEFI" "$CHECK_FILE" || true)" ))
 
