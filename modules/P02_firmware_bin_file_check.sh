@@ -51,11 +51,19 @@ P02_firmware_bin_file_check() {
     # Docker container and binwalk fails to save the entropy picture there
     if [[ $IN_DOCKER -eq 1 ]] ; then
       cd "$LOG_DIR" || return
-      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      if [[ -x /usr/local/bin/binwalk ]]; then
+        print_output "$(python3 -Wignore /usr/local/bin/binwalk -E -F -J "$FIRMWARE_PATH")"
+      else
+        print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      fi
       mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
       cd /emba || return
     else
-      print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      if [[ -x /usr/local/bin/binwalk ]]; then
+        print_output "$(python3 -Wignore /usr/local/bin/binwalk -E -F -J "$FIRMWARE_PATH")"
+      else
+        print_output "$(binwalk -E -F -J "$FIRMWARE_PATH")"
+      fi
       mv "$(basename "$FIRMWARE_PATH".png)" "$LOG_DIR"/firmware_entropy.png 2> /dev/null || true
     fi
   fi

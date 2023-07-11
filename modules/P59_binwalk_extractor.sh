@@ -131,7 +131,12 @@ binwalking() {
   sub_module_title "Analyze binary firmware blob with binwalk"
 
   print_output "[*] Basic analysis with binwalk"
-  binwalk "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
+  # just a quick fix for ignoring the warnings. As binwalk is nearly not used anymore this does not affect EMBA
+  if [[ -x /usr/local/bin/binwalk ]]; then
+    python3 -Wignore /usr/local/bin/binwalk "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
+  else
+    binwalk "$FIRMWARE_PATH_" | tee -a "$LOG_FILE"
+  fi
 
   print_ln "no_log"
 
@@ -182,16 +187,32 @@ binwalk_deep_extract_helper() {
 
   if [[ "$BINWALK_VER_CHECK" == 1 ]]; then
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      if [[ -x /usr/local/bin/binwalk ]]; then
+        python3 -Wignore /usr/local/bin/binwalk --run-as=root --preserve-symlinks --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      else
+        binwalk --run-as=root --preserve-symlinks --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      fi
     else
       # no more Matryoshka mode ... we are doing it manually and check the files every round via MD5
-      binwalk --run-as=root --preserve-symlinks --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      if [[ -x /usr/local/bin/binwalk ]]; then
+        python3 -Wignore /usr/local/bin/binwalk --run-as=root --preserve-symlinks --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      else
+        binwalk --run-as=root --preserve-symlinks --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      fi
     fi
   else
     if [[ "$MATRYOSHKA_" -eq 1 ]]; then
-      binwalk --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      if [[ -x /usr/local/bin/binwalk ]]; then
+        python3 -Wignore /usr/local/bin/binwalk --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      else
+        binwalk --dd='.*' -e -M -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      fi
     else
-      binwalk --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      if [[ -x /usr/local/bin/binwalk ]]; then
+        python3 -Wignore /usr/local/bin/binwalk --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      else
+        binwalk --dd='.*' -e -C "$DEST_FILE_" "$FILE_TO_EXTRACT_" | tee -a "$LOG_FILE" || true
+      fi
     fi
   fi
 }
