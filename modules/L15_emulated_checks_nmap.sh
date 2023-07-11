@@ -127,7 +127,7 @@ check_live_nmap_basic() {
         if [[ "${#S09_L15_CHECK[@]}" -gt 0 ]]; then
           for S09_L15_MATCH in "${S09_L15_CHECK[@]}"; do
             echo "$S09_L15_MATCH" >> "$CSV_DIR"/l15_emulated_checks_nmap.csv
-            S09_L15_MATCH=$(echo ${S09_L15_MATCH} | cut -d ';' -f3)
+            S09_L15_MATCH=$(echo "${S09_L15_MATCH}" | cut -d ';' -f3)
             print_output "[+] Service also detected with static analysis (S09): ${ORANGE}${S09_L15_MATCH}${NC}"
           done
         fi
@@ -138,7 +138,7 @@ check_live_nmap_basic() {
         if [[ "${#S116_L15_CHECK[@]}" -gt 0 ]]; then
           for S116_L15_MATCH in "${S116_L15_CHECK[@]}"; do
             echo "$S116_L15_MATCH" >> "$CSV_DIR"/l15_emulated_checks_nmap.csv
-            S116_L15_MATCH=$(echo ${S116_L15_MATCH} | cut -d ';' -f3)
+            S116_L15_MATCH=$(echo "${S116_L15_MATCH}" | cut -d ';' -f3)
             print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116): ${ORANGE}${S116_L15_MATCH}${NC}"
           done
         fi
