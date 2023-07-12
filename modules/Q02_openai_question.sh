@@ -73,7 +73,7 @@ ask_chatgpt() {
     print_output "[*]trying to check ${SCRIPT_PATH_TMP_} with Question ${GPT_QUESTION_} " "no_log"
     print_output "[*]Prio is ${GPT_PRIO_}"  "no_log"
 
-    if [[ -z ${GPT_ANSWER_}  ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]]; then
+    if [[ -z ${GPT_RESPONSE_}  ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]]; then
       if [ -f "${SCRIPT_PATH_TMP_}" ]; then
         # add navbar-item for file
         sub_module_title "${GPT_INPUT_FILE_}"
