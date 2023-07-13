@@ -92,7 +92,7 @@ ask_chatgpt() {
           fi
           if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
             CHATGPT_RESULT_CNT=-1
-            break 2
+            break
           fi
         fi
         GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
@@ -107,7 +107,7 @@ ask_chatgpt() {
           print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_}${NC}"
           ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           write_link "${ORIGIN_MODULE_}"
-          ((CHATGPT_RESULT_CNT++))
+          ((CHATGPT_RESULT_CNT+=1))
         fi
       else
         print_output "[-] Couldn't find ${ORANGE}$(print_path "${SCRIPT_PATH_TMP_}")${NC}"
@@ -117,9 +117,11 @@ ask_chatgpt() {
       sleep 20s
     fi
   done < "${CSV_DIR}/q02_openai_question.csv.tmp"
-  while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
-    GPT_ANCHOR_="${COL2_}"
-    sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
-    # TODO remove [CHATGPT] line in output file
-  done < "${CSV_DIR}/q02_openai_question.csv"
+  if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
+    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
+        GPT_ANCHOR_="${COL2_}"
+        sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
+        # TODO remove [CHATGPT] line in output file
+    done < "${CSV_DIR}/q02_openai_question.csv"
+  fi
 }
