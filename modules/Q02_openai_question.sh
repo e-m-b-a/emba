@@ -91,6 +91,7 @@ ask_chatgpt() {
             print_output "[-] ERROR response:$(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
           fi
           if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
+            print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
             CHATGPT_RESULT_CNT=-1
             break
           fi
