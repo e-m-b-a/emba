@@ -103,7 +103,7 @@ ask_chatgpt() {
           # write new into done csv
           write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
           # print openai response
-          print_output "CHATGPT:${GPT_RESPONSE_//\"/}"
+          print_output "[*] OpenAI responded with the following details:${GPT_RESPONSE_//\"/}"
           # add proper module link
           print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_}${NC}"
           ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
