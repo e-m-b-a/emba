@@ -20,6 +20,9 @@ F05_qs_resolver() {
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
     # wait for Q02 to end
     while ! grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+      if grep -q "Quest container done" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+        break
+      fi
       sleep 1
     done
     local _GPT_INPUT_FILE_=""

@@ -67,50 +67,50 @@ ask_chatgpt() {
     GPT_RESPONSE_="${COL7_}"
     GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
     
-    print_output "[*]trying to check inside ${LOG_DIR}/firmware" "no_log"
+    print_output "[*] Trying to check inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
     SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}")"
     cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
-    print_output "[*]trying to check ${SCRIPT_PATH_TMP_} with Question ${GPT_QUESTION_} " "no_log"
+    print_output "[*] Trying to check ${ORANGE} ${SCRIPT_PATH_TMP_} ${NC}with Question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
     print_output "[*]Prio is ${GPT_PRIO_}"  "no_log"
 
     if [[ -z ${GPT_ANSWER_}  ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]]; then
       if [ -f "${SCRIPT_PATH_TMP_}" ]; then
         # add navbar-item for file
         sub_module_title "${GPT_INPUT_FILE_}"
-        print_output "[*] Asking ChatGPT about $(print_path "${SCRIPT_PATH_TMP_}")" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+        print_output "[*] Asking ChatGPT about ${ORANGE}$(print_path "${SCRIPT_PATH_TMP_}")${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
         head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
         CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
         printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
-        print_output "[*] The Combined Cost of the OpenAI request / the length is: ${#GPT_QUESTION_} + ${#CHATGPT_CODE_}" "no_log"
+        print_output "[*] The Combined Cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-          -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/response.json" --write-out "%{http_code}")
+          -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" --write-out "%{http_code}")
         if [[ "${HTTP_CODE_}" -ne 200 ]] ; then
           print_output "[-] Something went wrong with the ChatGPT requests"
-          if [ -f "${TMP_DIR}/response.json" ]; then
-            print_output "[-] ERROR response:$(cat "${TMP_DIR}/response.json")"
+          if [ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]; then
+            print_output "[-] ERROR response:$(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
           fi
-          if jq '.error.type' "${TMP_DIR}"/response.json | grep -q "insufficient_quota" ; then
+          if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
             CHATGPT_RESULT_CNT=-1
             break 2
           fi
         fi
-        GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}"/response.json)
+        GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
         GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//\;/}" #remove ; from response
-        GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}"/response.json)
+        GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           # write new into done csv
           write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
           # print openai response
           print_output "CHATGPT:${GPT_RESPONSE_//\"/}"
           # add proper module link
-          print_output "[+] Further results available for $GPT_INPUT_FILE_"
+          print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_}${NC}"
           ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           write_link "${ORIGIN_MODULE_}"
           ((CHATGPT_RESULT_CNT++))
         fi
       else
-        print_output "[-] Couldn't find $(print_path "${SCRIPT_PATH_TMP_}")"
+        print_output "[-] Couldn't find ${ORANGE}$(print_path "${SCRIPT_PATH_TMP_}")${NC}"
       fi
     fi
     if [[ "${GPT_OPTION}" -ne 2 ]]; then
