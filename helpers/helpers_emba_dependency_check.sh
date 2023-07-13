@@ -269,7 +269,14 @@ dependency_check()
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
-        export "$(grep -v '^#' "${CONFIG_DIR}/gpt_config.env" | xargs || true )" # readin gpt_config.env
+        # readin gpt_config.env
+        while read -r LINE; do
+          local ENV_VAR
+          if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
+            ENV_VAR="$(echo "${LINE}" | envsubst)"
+            eval "declare ${ENV_VAR}"
+          fi
+        done < "${CONFIG_DIR}/gpt_config.env"
       fi
     fi
     if [ -z "${OPENAI_API_KEY}" ]; then
