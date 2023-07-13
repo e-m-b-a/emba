@@ -279,6 +279,7 @@ dependency_check()
       # print_output "There is no API key in the config file" "no_log"
       # exit 1
     else
+      local HTTP_CODE_=200
       print_output "    OpenAI-API key  - \\c" "no_log"
       # test connection
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
@@ -289,8 +290,18 @@ dependency_check()
         print_output "[-] The API-Key is probably expired or has reached its quota" "no_log"
         exit 1
       fi
-      echo -e "$GREEN""ok""$NC"
-      rm /tmp/chatgpt-test.log
+      HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+              -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+              -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.log -sS)
+      if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
+        echo -e "$GREEN""ok""$NC"
+        rm /tmp/chatgpt-test.log
+      else
+        echo -e "$RED""not ok""$NC"
+        print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
+        print_output "[-] The API-Key is incorrect" "no_log"
+        exit 1
+      fi
     fi
   fi
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
