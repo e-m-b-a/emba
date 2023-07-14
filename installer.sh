@@ -255,6 +255,10 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   apt-get -y update
 fi
 
+# setup the python virtual environment
+apt-get install python3-venv
+create_pipenv ".emba_venv"
+activate_pipenv ".emba_venv"
 
 # initial installation of the host environment:
 I01_default_apps_host
@@ -289,7 +293,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I13_disasm
 
-  I05_emba_docker_image_dl
+#  I05_emba_docker_image_dl
 
   IP00_extractors
 
@@ -327,6 +331,7 @@ fi
 
 # cve-search is always installed on the host:
 IF20_cve_search
+deactivate
 
 cd "$HOME_PATH" || exit 1
 
