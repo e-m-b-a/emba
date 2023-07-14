@@ -21,7 +21,7 @@ services:
       - /root
       - /root/.cargo/bin:exec
       - /run/lock
-      - /var
+        # - /var
       - /var/run
       - /var/tmp
       - /var/lock
