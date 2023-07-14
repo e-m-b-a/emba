@@ -297,6 +297,7 @@ dependency_check()
         print_output "[-] The API-Key is probably expired or has reached its quota" "no_log"
         exit 1
       fi
+      sleep 20s
       HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
               -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.log -sS)
