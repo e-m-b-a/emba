@@ -306,7 +306,7 @@ dependency_check()
       else
         echo -e "$RED""not ok""$NC"
         print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
-        print_output "[-] The API-Key is incorrect" "no_log"
+        print_output "[-] ERROR response:$(cat /tmp/chatgpt-test.log)"
         exit 1
       fi
     fi
