@@ -288,7 +288,7 @@ dependency_check()
     else
       local HTTP_CODE_=200
       print_output "    OpenAI-API key  - \\c" "no_log"
-      # test connection
+      # test connection #TODO might wanna redo this with only one curl!
       if ! curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
               -H "Authorization: Bearer ${OPENAI_API_KEY}" \
               -d @"${CONFIG_DIR}/gpt_template.json" &>/tmp/chatgpt-test.log ; then
