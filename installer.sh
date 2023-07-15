@@ -256,7 +256,7 @@ if [[ $LIST_DEP -eq 0 ]] ; then
 fi
 
 # setup the python virtual environment
-apt-get install python3-venv
+apt-get -y install python3-venv
 create_pipenv ".emba_venv"
 activate_pipenv ".emba_venv"
 
@@ -293,7 +293,7 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I13_disasm
 
-#  I05_emba_docker_image_dl
+  I05_emba_docker_image_dl
 
   IP00_extractors
 
