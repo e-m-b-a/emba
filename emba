@@ -383,6 +383,7 @@ main() {
   fi
 
   # activate the virtual environment - we should have it in external which fits also the docker environment
+  # shellcheck source=/dev/null
   [[ -f "./external/emba_venv/bin/activate" ]] && source "./external/emba_venv/bin/activate"
 
   # print it only once per EMBA run - not again from started container
