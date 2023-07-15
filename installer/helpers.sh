@@ -271,5 +271,6 @@ create_pipenv() {
 activate_pipenv() {
   local PENV="${1}"
   echo -e "\\n""$ORANGE""$BOLD""Activating Python Environment - ${PENV}""$NC"
+  # shellcheck source=/dev/null
   source "${PENV}"/bin/activate
 }

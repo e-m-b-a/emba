@@ -255,10 +255,11 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   apt-get -y update
 fi
 
-# setup the python virtual environment
+# setup the python virtual environment in external directory
+# external is also setup in the docker image
 apt-get -y install python3-venv
-create_pipenv ".emba_venv"
-activate_pipenv ".emba_venv"
+create_pipenv "./external/emba_venv"
+activate_pipenv "./external/emba_venv"
 
 # initial installation of the host environment:
 I01_default_apps_host
