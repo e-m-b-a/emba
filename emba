@@ -384,7 +384,7 @@ main() {
 
   # activate the virtual environment - we should have it in external which fits also the docker environment
   # shellcheck source=/dev/null
-  [[ -f "./external/emba_venv/bin/activate" ]] && source "./external/emba_venv/bin/activate"
+  [[ -f "${EXT_DIR}/emba_venv/bin/activate" ]] && source "${EXT_DIR}/emba_venv/bin/activate"
 
   # print it only once per EMBA run - not again from started container
   [[ ${IN_DOCKER} -eq 0 ]] && banner_printer
