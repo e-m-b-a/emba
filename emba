@@ -382,13 +382,6 @@ main() {
     fi
   fi
 
-  # activate the virtual environment - we should have it in external which fits also the docker environment
-  # shellcheck source=/dev/null
-  if [[ -f "${EXT_DIR}/emba_venv/bin/activate" ]]; then
-    print_output "[*] Enable python virtual environment ${ORANGE}${EXT_DIR}/emba_venv${NC}"
-    source "${EXT_DIR}/emba_venv/bin/activate"
-  fi
-
   # print it only once per EMBA run - not again from started container
   [[ ${IN_DOCKER} -eq 0 ]] && banner_printer
 
@@ -396,6 +389,13 @@ main() {
     # set external path new for docker
     export EXT_DIR="/external"
     export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
+  fi
+
+  # activate the virtual environment - we should have it in external which fits also the docker environment
+  # shellcheck source=/dev/null
+  if [[ -f "${EXT_DIR}/emba_venv/bin/activate" ]]; then
+    print_output "[*] Enable python virtual environment ${ORANGE}${EXT_DIR}/emba_venv${NC}" "no_log"
+    source "${EXT_DIR}/emba_venv/bin/activate"
   fi
 
   # Check all dependencies of EMBA
