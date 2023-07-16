@@ -392,7 +392,7 @@ dependency_check()
     check_dep_tool "binwalk extractor" "binwalk"
     if command -v binwalk > /dev/null ; then
       export BINWALK_BIN=()
-      BINWALK_BIN="$(which binwalk)"
+      BINWALK_BIN=("$(which binwalk)")
       BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
         echo -e "$ORANGE""    binwalk version $BINWALK_VER - not optimal""$NC"
