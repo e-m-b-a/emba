@@ -397,9 +397,6 @@ dependency_check()
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
         echo -e "$ORANGE""    binwalk version $BINWALK_VER - not optimal""$NC"
         echo -e "$ORANGE""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
-        export BINWALK_VER_CHECK=0
-      else
-        export BINWALK_VER_CHECK=1
       fi
       # this is typically needed in the read only docker container:
       if ! [[ -d "$HOME"/.config/binwalk/modules/ ]]; then
@@ -417,7 +414,8 @@ dependency_check()
     fi
     export MPLCONFIGDIR="$TMP_DIR"
 
-    setup_unblob "unblob"
+    # setup_unblob "unblob"
+    check_dep_tool "unblob"
     check_dep_tool "unrar" "unrar"
     setup_nikto
 

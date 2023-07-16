@@ -48,12 +48,13 @@ IP61_unblob() {
     print_tool_info "python3-magic" 1
     print_tool_info "pkg-config" 1
     print_tool_info "pkgconf" 1
+    print_tool_info "unblob" 1
 
-    print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+    # print_file_info "sasquatch_1.0_amd64.deb" "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
 
-    print_git_info "unblob" "EMBA-support-repos/unblob" "Unblob is a powerful firmware extractor"
+    # print_git_info "unblob" "EMBA-support-repos/unblob" "Unblob is a powerful firmware extractor"
 
-    echo -e "$ORANGE""Unblob will be downloaded and installed via poetry.""$NC"
+    # echo -e "$ORANGE""Unblob will be downloaded and installed via poetry.""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -63,36 +64,36 @@ IP61_unblob() {
     fi
     case ${ANSWER:0:1} in
       y|Y )
-        apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
+        apt-get install "${INSTALL_APP_LIST[@]}" -y
 
-        download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
-        dpkg -i external/sasquatch_1.0_amd64.deb
-        rm -f external/sasquatch_1.0_amd64.deb
+        # download_file "sasquatch_1.0_amd64.deb" "https://github.com/onekey-sec/sasquatch/releases/download/sasquatch-v4.5.1-4/sasquatch_1.0_amd64.deb" "external/sasquatch_1.0_amd64.deb"
+        # dpkg -i external/sasquatch_1.0_amd64.deb
+        # rm -f external/sasquatch_1.0_amd64.deb
 
         # install poetry
-        python3 -m pip install --upgrade poetry --break-system-packages
+        # python3 -m pip install --upgrade poetry --break-system-packages
 
-        if ! [[ -d external/unblob ]]; then
-          git clone https://github.com/EMBA-support-repos/unblob.git external/unblob
+        # if ! [[ -d external/unblob ]]; then
+        #   git clone https://github.com/EMBA-support-repos/unblob.git external/unblob
           # git clone https://github.com/onekey-sec/unblob.git external/unblob
-        fi
-        cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
+        # fi
+        # cd external/unblob || ( echo "Could not install EMBA component unblob" && exit 1 )
 
         # install unblob with poetry:
-        poetry install --only main
-        UNBLOB_PATH=$(poetry env info --path)
+        # poetry install --only main
+        # UNBLOB_PATH=$(poetry env info --path)
 
         # Temp solution to install hyperscan in a recent version which is installable on Kali:
         # sed -i 's/hyperscan\ =\ \"0.2.0\"//' pyproject.toml
         # poetry env use "$UNBLOB_PATH"
         # poetry add hyperscan
 
-        if [[ -f "$UNBLOB_PATH""/bin/unblob" ]]; then
-          export PATH=$PATH:"$UNBLOB_PATH""/bin"
-          echo -e "${GREEN}Identified unblob path: $ORANGE$UNBLOB_PATH$NC"
-        else
-          cd "$HOME_PATH" && ( echo "Could not install EMBA component unblob" && exit 1 )
-        fi
+        # if [[ -f "$UNBLOB_PATH""/bin/unblob" ]]; then
+        #   export PATH=$PATH:"$UNBLOB_PATH""/bin"
+        #   echo -e "${GREEN}Identified unblob path: $ORANGE$UNBLOB_PATH$NC"
+        # else
+        #   cd "$HOME_PATH" && ( echo "Could not install EMBA component unblob" && exit 1 )
+        # fi
 
         cd "$HOME_PATH" || ( echo "Could not install EMBA component unblob" && exit 1 )
 
@@ -105,12 +106,12 @@ IP61_unblob() {
           echo
         fi
 
-        echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
-        if [[ -d "$HOME"/.cache ]] && [[ "$IN_DOCKER" -eq 1 ]]; then
-          echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
-          cp -pr "$HOME"/.cache external/unblob/root_cache
-          rm -rf "$HOME"/.cache || true
-        fi
+        # echo "$UNBLOB_PATH" > external/unblob/unblob_path.cfg
+        # if [[ -d "$HOME"/.cache ]] && [[ "$IN_DOCKER" -eq 1 ]]; then
+        #   echo -e "${GREEN}Backup unblob environment for read only docker container: $ORANGE$UNBLOB_PATH$NC"
+        #   cp -pr "$HOME"/.cache external/unblob/root_cache
+        #   rm -rf "$HOME"/.cache || true
+        # fi
         # we have seen issues with the installed sasquatch version - lets move it to another name and link to it
         # during the testing phase. With this we are also able to install the binwalk sasquatch version in ||
         # if [[ -e /usr/bin/sasquatch ]]; then
