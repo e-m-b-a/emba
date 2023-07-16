@@ -38,6 +38,7 @@ IP99_binwalk_default() {
     print_tool_info "p7zip-full" 1
     print_tool_info "cabextract" 1
     print_tool_info "util-linux" 1
+    print_tool_info "python3-matplotlib" 1
 
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
