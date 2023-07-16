@@ -82,14 +82,14 @@ IP99_binwalk_default() {
     echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
     print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
     echo -e "$ORANGE""yaffshiv will be downloaded.""$NC"
-    print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
-    echo -e "$ORANGE""sasquatch will be downloaded.""$NC"
+    # print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
+    # echo -e "$ORANGE""sasquatch will be downloaded.""$NC"
     print_git_info "jefferson" "sviehb/jefferson" "JFFS2 filesystem extraction tool"
     echo -e "$ORANGE""jefferson will be downloaded.""$NC"
     print_git_info "cramfs-tools" "npitre/cramfs-tools" "Cramfs - cram a filesystem onto a small ROM"
     echo -e "$ORANGE""cramfs-tools will be downloaded.""$NC"
-    print_git_info "ubi_reader" "jrspruitt/ubi_reader" "UBI Reader is a Python module and collection of scripts capable of extracting the contents of UBI and UBIFS images"
-    echo -e "$ORANGE""ubi_reader will be downloaded.""$NC"
+    # print_git_info "ubi_reader" "jrspruitt/ubi_reader" "UBI Reader is a Python module and collection of scripts capable of extracting the contents of UBI and UBIFS images"
+    # echo -e "$ORANGE""ubi_reader will be downloaded.""$NC"
     print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "https://downloads.tuxfamily.org/sdtraces/BottinHTML/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
@@ -136,24 +136,24 @@ IP99_binwalk_default() {
           echo -e "$GREEN""yaffshiv already installed""$NC"
         fi
 
-        if ! [[ -d external/binwalk/sasquatch ]]; then
-          # git clone https://github.com/EMBA-support-repos/sasquatch external/binwalk/sasquatch
-          git clone --quiet --depth 1 --branch "master" https://github.com/devttys0/sasquatch external/binwalk/sasquatch
-        fi
-        cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+        # if ! [[ -d external/binwalk/sasquatch ]]; then
+        #  # git clone https://github.com/EMBA-support-repos/sasquatch external/binwalk/sasquatch
+        #  git clone --quiet --depth 1 --branch "master" https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+        # fi
+        # cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
         # https://github.com/ReFirmLabs/binwalk/issues/618#issuecomment-1432373715
         # wget https://github.com/devttys0/sasquatch/pull/47.patch
         # patch -p1 < 47.patch
-        wget https://github.com/devttys0/sasquatch/pull/51.patch && patch -p1 <51.patch
-        CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+        # wget https://github.com/devttys0/sasquatch/pull/51.patch && patch -p1 <51.patch
+        # CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
+        # cd "$HOME_PATH" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
 
         # we have seen issues with the unblob sasquatch version - lets move the binwalk version to another name and link to it
         # during the testing phase. With this in place we are able to install both versions in ||
-        if [[ -e /usr/local/bin/sasquatch ]]; then
-          echo -e "${GREEN}Backup binwalk sasquatch version to $ORANGE/usr/local/bin/sasquatch_binwalk$NC"
-          mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
-        fi
+        # if [[ -e /usr/local/bin/sasquatch ]]; then
+        #   echo -e "${GREEN}Backup binwalk sasquatch version to $ORANGE/usr/local/bin/sasquatch_binwalk$NC"
+        #   mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
+        # fi
 
         if ! command -v jefferson > /dev/null ; then
           if ! [[ -d external/binwalk/jefferson ]]; then
@@ -196,13 +196,13 @@ IP99_binwalk_default() {
           echo -e "$GREEN""cramfsck already installed""$NC"
         fi
 
-        if ! [[ -d external/binwalk/ubi_reader ]]; then
-          git clone https://github.com/EMBA-support-repos/ubi_reader external/binwalk/ubi_reader
-          cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-          git checkout fbb6443bad789efde4b17479712e18d1ff7e326b
-          python3 setup.py install
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-        fi
+        # if ! [[ -d external/binwalk/ubi_reader ]]; then
+        #   git clone https://github.com/EMBA-support-repos/ubi_reader external/binwalk/ubi_reader
+        #   cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
+        #   git checkout fbb6443bad789efde4b17479712e18d1ff7e326b
+        #   python3 setup.py install
+        #   cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
+        # fi
 
         if command -v binwalk > /dev/null ; then
           echo "WARNING: Uninstalling binwalk version"

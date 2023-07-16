@@ -113,10 +113,10 @@ IP61_unblob() {
         fi
         # we have seen issues with the installed sasquatch version - lets move it to another name and link to it
         # during the testing phase. With this we are also able to install the binwalk sasquatch version in ||
-        if [[ -e /usr/bin/sasquatch ]]; then
-          echo -e "${GREEN}Backup unblob sasquatch version to $ORANGE/usr/local/bin/sasquatch_unblob$NC"
-          mv /usr/bin/sasquatch /usr/local/bin/sasquatch_unblob
-        fi
+        # if [[ -e /usr/bin/sasquatch ]]; then
+        #  echo -e "${GREEN}Backup unblob sasquatch version to $ORANGE/usr/local/bin/sasquatch_unblob$NC"
+        #  mv /usr/bin/sasquatch /usr/local/bin/sasquatch_unblob
+        # fi
       ;;
     esac
   fi
