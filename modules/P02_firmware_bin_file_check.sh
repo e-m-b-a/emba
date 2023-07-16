@@ -144,7 +144,7 @@ fw_bin_detector() {
   # we are running binwalk on the file to analyze the output afterwards:
   "${BINWALK_BIN[@]}" "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
   if [[ -f "$TMP_DIR"/s02_binwalk_output.txt ]]; then
-    QNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "$TMP_DIR"/s02_binwalk_output.txt)
+    QNAP_ENC_CHECK=$(grep -a -i "qnap encrypted" "$TMP_DIR"/s02_binwalk_output.txt || true)
   else
     QNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "$CHECK_FILE")
   fi

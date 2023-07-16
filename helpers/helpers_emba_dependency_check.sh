@@ -321,7 +321,7 @@ dependency_check()
   fi
 
   # Python virtual environment in external directory
-  check_dep_file "Python virtual environment" "$EXT_DIR""/emba_venv/bin/activate"
+  # check_dep_file "Python virtual environment" "$EXT_DIR""/emba_venv/bin/activate"
 
   print_ln "no_log"
   print_output "[*] Necessary utils on system:" "no_log"
@@ -613,7 +613,7 @@ dependency_check()
     fi
 
     # Python virtual environment in external directory
-    check_dep_file "Python virtual environment" "$EXT_DIR""/emba_venv/bin/activate"
+    # check_dep_file "Python virtual environment" "$EXT_DIR""/emba_venv/bin/activate"
   fi
 
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then
