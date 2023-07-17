@@ -122,3 +122,7 @@ uptane/asn1
 sgoldthorpe/karmalb
 jgsqware/clairctl
 Live-Hack-CVE/
+jasnow/585-652-ruby-advisory-db
+pvergain/github-stars
+scordero1234/java_sec_demo-main
+BFHS-Robotics/BFHS-
