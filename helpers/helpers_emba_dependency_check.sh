@@ -274,7 +274,7 @@ dependency_check()
           local ENV_VAR
           if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
             ENV_VAR="$(echo "${LINE}" | envsubst)"
-            eval "declare ${ENV_VAR}"
+            eval "declare -gA ${ENV_VAR}"
           fi
         done < "${CONFIG_DIR}/gpt_config.env"
       fi
