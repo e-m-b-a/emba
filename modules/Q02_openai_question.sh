@@ -119,9 +119,8 @@ ask_chatgpt() {
           # print openai response
           print_output "[*] OpenAI responded with the following details:${GPT_RESPONSE_//\"/}"
           # add proper module link
-          print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_}${NC}"
           ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
-          write_link "${ORIGIN_MODULE_}"
+          print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${ORIGIN_MODULE_}"
           ((CHATGPT_RESULT_CNT+=1))
         fi
       else
