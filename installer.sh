@@ -146,7 +146,11 @@ while getopts CdDFghlrc: OPT ; do
 done
 
 if ! [[ -v CONTAINER ]]; then
-  CONTAINER="embeddedanalyzer/emba"
+  if [[ -f docker-compose.yml ]]; then
+    CONTAINER="$(grep image docker-compose.yml | awk '{print $2}')"
+  else
+    CONTAINER="embeddedanalyzer/emba"
+  fi
 fi
 
 if [[ "$LIST_DEP" -eq 1 ]]; then
