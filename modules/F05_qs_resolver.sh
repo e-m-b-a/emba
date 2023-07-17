@@ -19,8 +19,8 @@ F05_qs_resolver() {
   module_title "QS-Resolver"
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
     # wait for Q02 to end
-    while ! grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
-      if grep -q -E "Quest container done|Quest container failed" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+    while [[ $(grep -c "Q02_openai_question" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -eq 1 ]]; do
+      if grep -q -E "Quest container done" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
         break
       fi
       sleep 1
