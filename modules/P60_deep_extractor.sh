@@ -327,4 +327,34 @@ deeper_extractor_helper() {
   [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
 }
 
+linux_basic_identification_helper() {
+  local FIRMWARE_PATH_CHECK="${1:-}"
+  if ! [[ -d "$FIRMWARE_PATH_CHECK" ]]; then
+    LINUX_PATH_COUNTER=0
+    return
+  fi
+  LINUX_PATH_COUNTER="$(find "$FIRMWARE_PATH_CHECK" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  backup_var "LINUX_PATH_COUNTER" "$LINUX_PATH_COUNTER"
+}
 
+wait_for_extractor() {
+  export OUTPUT_DIR="$FIRMWARE_PATH_CP"
+  local SEARCHER=""
+  SEARCHER=$(basename "$FIRMWARE_PATH")
+
+  # this is not solid and we probably have to adjust it in the future
+  # but for now it works
+  SEARCHER="$(safe_echo "$SEARCHER" | tr "(" "." | tr ")" ".")"
+
+  for PID in "${WAIT_PIDS[@]}"; do
+    local running=1
+    while [[ $running -eq 1 ]]; do
+      print_dot
+      if ! pgrep -v grep | grep -q "$PID"; then
+        running=0
+      fi
+      disk_space_protection "$SEARCHER"
+      sleep 1
+    done
+  done
+}
