@@ -55,6 +55,8 @@ ask_chatgpt() {
   local GPT_TOKENS_=0
   local HTTP_CODE_=200
   local ORIGIN_MODULE_=""
+  local GPT_SERVER_ERROR_CNT_=0
+
   print_output "[*] Checking scripts with ChatGPT that have priority ${MINIMUM_GPT_PRIO} or lower" "no_log"
   if ! [[ -d "${GPT_FILE_DIR_}" ]]; then
     mkdir "${GPT_FILE_DIR_}"
@@ -96,6 +98,14 @@ ask_chatgpt() {
             print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
             CHATGPT_RESULT_CNT=-1
             break
+          elif jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "server_error" ; then
+            ((GPT_SERVER_ERROR_CNT_+=1))
+            if [[ "${GPT_SERVER_ERROR_CNT_}" -ge 5 ]]; then
+              # more than 5 failes we stop trying until the newxt round
+              print_output "[-] Stopping OpenAI requests since the Server seems to be overloaded"
+              CHATGPT_RESULT_CNT=-1
+              break
+            fi
           fi
         fi
         GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
