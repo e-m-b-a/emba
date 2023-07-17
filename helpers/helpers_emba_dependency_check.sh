@@ -297,7 +297,8 @@ dependency_check()
       else
         echo -e "$RED""not ok""$NC"
         print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
-        print_output "[-] ERROR response:$(cat /tmp/chatgpt-test.log)"
+        print_output "[-] ERROR response:$(cat /tmp/chatgpt-test.log)" "no_log"
+        print_output "[!] Quest container failed\\n" "main"
         exit 1
       fi
     fi
