@@ -56,7 +56,9 @@ ask_chatgpt() {
   local HTTP_CODE_=200
   local ORIGIN_MODULE_=""
   print_output "[*] Checking scripts with ChatGPT that have priority ${MINIMUM_GPT_PRIO} or lower" "no_log"
-  mkdir "${GPT_FILE_DIR_}"
+  if ! [[ -d "${GPT_FILE_DIR_}" ]]; then
+    mkdir "${GPT_FILE_DIR_}"
+  fi
   while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
     SCRIPT_PATH_TMP_="${COL1_}"
     GPT_ANCHOR_="${COL2_}"
