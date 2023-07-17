@@ -106,6 +106,8 @@ ask_chatgpt() {
               CHATGPT_RESULT_CNT=-1
               break
             fi
+            sleep 30s
+            continue
           fi
         fi
         GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
