@@ -193,54 +193,6 @@ setup_nikto() {
   fi
 }
 
-setup_unblob() {
-  TOOL_NAME="${1:-}"
-
-  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
-
-  if command -v unblob; then
-    echo -e "$GREEN""ok""$NC"
-  elif ! command -v unblob && [[ -f "$EXT_DIR"/unblob/unblob_path.cfg ]]; then
-    # recover unblob installation - usually we are in the docker container
-    if ! [[ -d "$HOME"/.cache ]]; then
-      mkdir "$HOME"/.cache
-    fi
-    if [[ "$IN_DOCKER" -eq 1 ]]; then
-      if [[ -d "$EXT_DIR"/unblob/root_cache ]]; then
-        cp -pr "$EXT_DIR"/unblob/root_cache/* "$HOME"/.cache/
-      else
-        echo -e "$RED""not ok""$NC"
-        DEP_EXIT=1
-      fi
-    fi
-    if [[ -e $(cat "$EXT_DIR"/unblob/unblob_path.cfg)/bin/"$UNBLOB_BIN" ]]; then
-      UNBLOB_PATH="$(cat "$EXT_DIR"/unblob/unblob_path.cfg)""/bin/"
-      export PATH=$PATH:"$UNBLOB_PATH"
-      echo -e "$GREEN""ok""$NC"
-    else
-      echo -e "$RED""not ok""$NC"
-      DEP_EXIT=1
-    fi
-  else
-    echo -e "$RED""not ok""$NC"
-    DEP_EXIT=1
-  fi
-  print_output "    ""sasquatch"" - \\c" "no_log"
-  if [[ -f /usr/local/bin/sasquatch_binwalk ]]; then
-    [[ -L "$UNBLOB_PATH"/sasquatch ]] && rm  "$UNBLOB_PATH"/sasquatch
-    ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch
-    echo -e "$GREEN""ok""$NC"
-  elif [[ -f /usr/local/bin/sasquatch_unblob ]]; then
-    [[ -L "$UNBLOB_PATH"/sasquatch ]] && rm  "$UNBLOB_PATH"/sasquatch
-    ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch
-    echo -e "$ORANGE""warning""$NC"
-    DEP_EXIT=1
-  else
-    echo -e "$RED""not ok""$NC"
-    DEP_EXIT=1
-  fi
-}
-
 dependency_check() 
 {
   module_title "Dependency check" "no_log"
@@ -414,7 +366,6 @@ dependency_check()
     fi
     export MPLCONFIGDIR="$TMP_DIR"
 
-    # setup_unblob "unblob"
     check_dep_tool "unblob"
     check_dep_tool "unrar" "unrar"
     setup_nikto
