@@ -132,6 +132,9 @@ ask_chatgpt() {
         print_output "[-] Couldn't find ${ORANGE}$(print_path "${SCRIPT_PATH_TMP_}")${NC}"
       fi
     fi
+    if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+      break
+    fi
     if [[ "${GPT_OPTION}" -ne 2 ]]; then
       sleep 20s
     fi
