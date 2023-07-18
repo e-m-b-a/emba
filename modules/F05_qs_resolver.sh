@@ -18,8 +18,9 @@ F05_qs_resolver() {
   module_log_init "${FUNCNAME[0]}"
   module_title "QS-Resolver"
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
-    if [[ -f "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; then
-      sleep 10
+    # wait for completion or 1m
+    if grep -q "Q02_openai_question starting" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+      grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || sleep 1m
     fi
     local _GPT_INPUT_FILE_=""
     local GPT_ANCHOR_=""
