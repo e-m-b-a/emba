@@ -246,16 +246,12 @@ dependency_check()
   module_title "Dependency check" "no_log"
 
   print_ln "no_log"
-  #######################################################################################
-  # Elementary checks
-  #######################################################################################
-  print_output "[*] Elementary:" "no_log"
 
   #######################################################################################
   ## Quest Container
   #######################################################################################
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
-    print_output "[*] Container Internet connection:" "no_log"
+    print_output "[*] Network connection:" "no_log"
     print_ln "no_log"
     print_output "    Internet connection - docker mode - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
@@ -271,10 +267,8 @@ dependency_check()
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
         # readin gpt_config.env
         while read -r LINE; do
-          local ENV_VAR
           if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
-            ENV_VAR="$(echo "${LINE}" | envsubst)"
-            eval "declare -gA ${ENV_VAR}"
+            export "$(echo "${LINE}" | xargs)"
           fi
         done < "${CONFIG_DIR}/gpt_config.env"
       fi
@@ -307,6 +301,11 @@ dependency_check()
       exit 0
     fi
   fi
+  print_ln "no_log"
+  #######################################################################################
+  # Elementary checks
+  #######################################################################################
+  print_output "[*] Elementary:" "no_log"
 
   # currently we need root privileges for emulation and multiple extractors
   # As the container runs as root we should not run into issues within the container.
