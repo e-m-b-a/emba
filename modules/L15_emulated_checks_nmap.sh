@@ -126,8 +126,9 @@ check_live_nmap_basic() {
         mapfile -t S09_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s09_firmware_base_version_check.csv || true)
         if [[ "${#S09_L15_CHECK[@]}" -gt 0 ]]; then
           for S09_L15_MATCH in "${S09_L15_CHECK[@]}"; do
-            print_output "[+] Service also detected with static analysis (S09):\\n$(indent "$ORANGE$S09_L15_MATCH$NC")"
             echo "$S09_L15_MATCH" >> "$CSV_DIR"/l15_emulated_checks_nmap.csv
+            S09_L15_MATCH=$(echo "${S09_L15_MATCH}" | cut -d ';' -f3)
+            print_output "[+] Service also detected with static analysis (S09): ${ORANGE}${S09_L15_MATCH}${NC}"
           done
         fi
       fi
@@ -136,8 +137,9 @@ check_live_nmap_basic() {
         mapfile -t S116_L15_CHECK < <(awk -v IGNORECASE=1 -F\; '$2 $3 ~ /'"$SERVICE_NAME"'/' "$CSV_DIR"/s116_qemu_version_detection.csv || true)
         if [[ "${#S116_L15_CHECK[@]}" -gt 0 ]]; then
           for S116_L15_MATCH in "${S116_L15_CHECK[@]}"; do
-            print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116):\\n $(indent "$ORANGE$S116_L15_MATCH$NC")"
             echo "$S116_L15_MATCH" >> "$CSV_DIR"/l15_emulated_checks_nmap.csv
+            S116_L15_MATCH=$(echo "${S116_L15_MATCH}" | cut -d ';' -f3)
+            print_output "[+] Service also detected with dynamic user-mode emulation (S115/S116): ${ORANGE}${S116_L15_MATCH}${NC}"
           done
         fi
       fi
@@ -206,6 +208,8 @@ l15_version_detector() {
       print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in $TYPE_ log."
       # use get_csv_rule from s09:
       get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+      # get rid of ; which destroys our csv:
+      VERSION_FINDER="${VERSION_FINDER/;}"
       write_csv_log "---" "$IDENTIFIER" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE_"
       continue
     fi

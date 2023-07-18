@@ -23,7 +23,7 @@ S23_lua_check()
   local S23_LUA_VULNS=0
   local LUA_SCRIPT=""
   local S23_LUA_SCRIPTS=()
-  export ISSUE_FOUND=0
+  export S23_ISSUE_FOUND=0
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnarabilities detected" "common linux file"
   mapfile -t S23_LUA_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.lua" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
@@ -57,7 +57,7 @@ S23_lua_check()
 
   write_log ""
   write_log "[*] Statistics:$S23_LUA_VULNS:${#LUA_CGI_FILES[@]}"
-  module_end_log "${FUNCNAME[0]}" "$ISSUE_FOUND"
+  module_end_log "${FUNCNAME[0]}" "$S23_ISSUE_FOUND"
 }
 
 # this is a very basic checker for LUA issues
@@ -85,25 +85,25 @@ s23_luaseccheck() {
         S23_LUA_VULNS=$((S23_LUA_VULNS+1))
         ISSUES_FILE=$((ISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${ENTRY}${GREEN} in file ${ORANGE}${QUERY_FILE}${GREEN} with file access capabilities."
-        ISSUE_FOUND=1
+        S23_ISSUE_FOUND=1
       fi
       if grep "$ENTRY" "${QUERY_FILE}" | grep -q "os.execute"; then
         # command exec - critical
         S23_LUA_VULNS=$((S23_LUA_VULNS+1))
         ISSUES_FILE=$((ISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${ENTRY}${GREEN} in file ${ORANGE}${QUERY_FILE}${GREEN} with command execution capabilities."
-        ISSUE_FOUND=1
+        S23_ISSUE_FOUND=1
       fi
     done
     if [[ "${ISSUES_FILE}" -eq 0 ]] && grep -q "os.execute" "${QUERY_FILE}"; then
       # command exec - not our parameter but we check it
       print_output "[*] Found lua file ${ORANGE}${QUERY_FILE}${NC} with possible command execution for review."
-      ISSUE_FOUND=1
+      S23_ISSUE_FOUND=1
     fi
     if [[ "${ISSUES_FILE}" -eq 0 ]] && grep -E -q "io\.(p)?open" "${QUERY_FILE}"; then
       # command exec - not our parameter but we check it
       print_output "[*] Found lua file ${ORANGE}${QUERY_FILE}${NC} with possible file access for review."
-      ISSUE_FOUND=1
+      S23_ISSUE_FOUND=1
     fi
 
     if [[ "${ISSUES_FILE}" -gt 0 ]]; then
@@ -132,7 +132,7 @@ s23_luacheck() {
 
   ISSUES=$(strip_color_codes "$(grep Total "$LUA_LOG" | awk '{print $2}' 2> /dev/null || true)")
   if [[ "$ISSUES" -gt 0 ]] ; then
-    ISSUE_FOUND=1
+    S23_ISSUE_FOUND=1
     # check if this is common linux file:
     local COMMON_FILES_FOUND
     local CFF
