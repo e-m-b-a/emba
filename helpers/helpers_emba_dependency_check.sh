@@ -253,7 +253,7 @@ dependency_check()
   print_output "[*] Network connection:" "no_log"
   print_ln "no_log"
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-    print_output "    Internet connection - docker mode - \\c" "no_log"
+    print_output "    Internet connection - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
       print_output "[-] ERROR: Quest container has no internet connection!" "no_log"
