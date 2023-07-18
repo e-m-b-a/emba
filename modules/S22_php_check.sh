@@ -93,6 +93,8 @@ s22_vuln_check_semgrep() {
       local SEMG_SOURCE_FILE=""
       local SEMG_SOURCE_FILE_NAME=""
       local SEMG_LINE_NR=""
+      local GPT_PRIO_=3
+      local GPT_ANCHOR_=""
 
       ! [[ -d "$LOG_PATH_MODULE"/semgrep_sources/ ]] && mkdir "$LOG_PATH_MODULE"/semgrep_sources/
 
@@ -110,10 +112,17 @@ s22_vuln_check_semgrep() {
 
       sed -i -r "${SEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log
       print_output "[+] Found possible PHP vulnerability ${ORANGE}${SEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${SEMG_SOURCE_FILE_NAME}${GREEN}" "" "$LOG_PATH_MODULE/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+      
+      if [[ "${GPT_OPTION}" -gt 0 ]]; then
+        GPT_ANCHOR_="$(openssl rand -hex 8)"
+        # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+        write_csv_gpt_tmp "$(cut_path "${SEMG_SOURCE_FILE}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" c "" ""
+        # add ChatGPT link
+        printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+        write_anchor_gpt "${GPT_ANCHOR_}" "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+      fi
     done
   fi
-  # check with OPENAI
-  # TODO
   write_log ""
   write_log "[*] Statistics1:$S22_SEMGREP_ISSUES:$S22_SEMGREP_SCRIPTS"
 }
