@@ -172,8 +172,7 @@ s22_vuln_check() {
       # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
       write_csv_gpt_tmp "$(cut_path "${PHP_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${TMP_DIR}/S22_VULNS.tmp" "" ""
       # add ChatGPT link
-      print_ln
-      print_ln
+      printf '%s\n\n' "" >> "${TMP_DIR}"/S22_VULNS.tmp
       write_anchor_gpt "${GPT_ANCHOR_}" "${TMP_DIR}"/S22_VULNS.tmp
     fi
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp

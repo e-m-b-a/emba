@@ -157,8 +157,7 @@ s20_reporter() {
       # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
       write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
       # add ChatGPT link
-      print_ln
-      print_ln
+      printf '%s\n\n' "" >> "${SHELL_LOG}"
       write_anchor_gpt "${GPT_ANCHOR_}" "${SHELL_LOG}"
     fi
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
