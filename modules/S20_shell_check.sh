@@ -30,7 +30,7 @@ S20_shell_check()
   local SEMGREP=1
   local NEG_LOG=0
 
-  mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 || true )
+  mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -type f -exec file {} \; | grep "shell script, ASCII text executable" 2>/dev/null | cut -d: -f1 | sort -u || true )
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
@@ -111,7 +111,27 @@ S20_shell_check()
     print_output "[-] Semgrepper is disabled ... no tests performed"
   fi
 
+  s20_eval_script_check "${SH_SCRIPTS[@]}"
+
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+}
+
+s20_eval_script_check() {
+  local SH_SCRIPTS_=("${@}")
+  local SH_SCRIPT=""
+
+  sub_module_title "Check shell scripts for eval usage"
+
+  for SH_SCRIPT in "${SH_SCRIPTS_[@]}" ; do
+    print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
+    if grep "eval " "${SH_SCRIPT}" | grep -q -v "^#.*"; then
+      SH_SCRIPT_NAME="$(basename "${SH_SCRIPT}")"
+      ! [[ -d "$LOG_PATH_MODULE"/sh_eval_sources/ ]] && mkdir "$LOG_PATH_MODULE"/sh_eval_sources/
+      [[ -f "${SH_SCRIPT}" ]] && cp "${SH_SCRIPT}" "$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
+      sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
+      print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${SH_SCRIPT_NAME}${NC}" "" "${LOG_PATH_MODULE}/sh_eval_sources/${SH_SCRIPT_NAME}.log"
+    fi
+  done
 }
 
 s20_script_check() {
