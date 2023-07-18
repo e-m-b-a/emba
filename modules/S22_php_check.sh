@@ -85,7 +85,8 @@ s22_vuln_check_semgrep() {
     # highlight security findings in semgrep log:
     sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "$PHP_SEMGREP_LOG"
   fi
-
+  # check with OPENAI
+  # TODO
   write_log ""
   write_log "[*] Statistics1:$S22_SEMGREP_ISSUES:$S22_SEMGREP_SCRIPTS"
 }
