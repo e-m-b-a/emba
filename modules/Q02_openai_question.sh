@@ -16,7 +16,7 @@
 # Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
 Q02_openai_question() { 
-  if [[ "${GPT_OPTION}" -gt 0 ]]; then
+  if [[ "${GPT_OPTION}" -gt 0 ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
     module_title "AI analysis via OpenAI"
