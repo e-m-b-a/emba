@@ -252,7 +252,7 @@ dependency_check()
   #######################################################################################
   print_output "[*] Network connection:" "no_log"
   print_ln "no_log"
-  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+  if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - docker mode - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
@@ -261,8 +261,6 @@ dependency_check()
     else
       echo -e "$GREEN""ok""$NC"
     fi
-  fi
-  if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
         # readin gpt_config.env
