@@ -192,7 +192,9 @@ radare_decomp_print_top10_statistics() {
           fi
           if [[ -f "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt" ]]; then
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
+            # FIXME
             if [[ "${GPT_OPTION}" -gt 0 ]]; then
+              print_output "[*] Asking OpenAI chatbot about ${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
               GPT_ANCHOR_="$(openssl rand -hex 8)"
               # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
               write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "${GPT_ANCHOR}" "GPT-Prio-${GPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "" ""
