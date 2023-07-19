@@ -115,8 +115,8 @@ ask_chatgpt() {
           sleep 30s
           continue
         fi
-        GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
-        GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//\;/}" #remove ; from response
+        GPT_RESPONSE_=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")")
+        GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_[*]//\;/}" #remove ; from response
         GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           # write new into done csv
@@ -124,11 +124,11 @@ ask_chatgpt() {
           # print openai response
           print_ln
           print_output "[*] ${ORANGE}OpenAI responded with the following details:${NC}"
-          echo -e "${GPT_RESPONSE_//\"/}" | tee -a "${LOG_FILE}"
+          echo -e "${GPT_RESPONSE_[*]}" | tee -a "${LOG_FILE}"
           # add proper module link
           print_ln
           if [[ "${GPT_OUTPUT_FILE_}" == '/logs/'* ]]; then
-            ORIGIN_MODULE_="$(echo "${GPT_OUTPUT_FILE_}" | cut -d / -f3)"
+            ORIGIN_MODULE_="$(echo "${GPT_OUTPUT_FILE_}" | cut -d / -f3 | cut -d_ -f1)"
           else
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           fi

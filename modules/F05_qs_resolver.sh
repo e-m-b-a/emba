@@ -53,7 +53,13 @@ F05_qs_resolver() {
             # grep "${GPT_ANCHOR_}" "${CSV_DIR}/q02_openai_question.csv" | cut -d";" -f7 >> "${GPT_OUTPUT_FILE_}"
             printf '%q\n' "${GPT_RESPONSE_//\\/}" >> "${GPT_OUTPUT_FILE_}"
             # replace anchor in html-report with link to response
-            readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")" 2>/dev/null)    
+
+            if [[ "${GPT_OUTPUT_FILE_}" == *".log" ]]; then
+              GPT_OUTPUT_FILE_NAME="$(basename "${GPT_OUTPUT_FILE_//\.log/}.html")"
+            elif [[ "${GPT_OUTPUT_FILE_}" == *".txt" ]]; then
+              GPT_OUTPUT_FILE_NAME="$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")"
+            fi
+            readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "${GPT_OUTPUT_FILE_NAME}" 2>/dev/null)
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
               # should point back to q02-submodule with name "${GPT_INPUT_FILE_}"
               GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
