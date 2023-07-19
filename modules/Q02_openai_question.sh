@@ -32,12 +32,14 @@ Q02_openai_question() {
         sleep 3
       done
     fi
+
     while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
       if [[ "${CHATGPT_RESULT_CNT}" -ge 0 ]]; then
         ask_chatgpt
       fi
       sleep 20
     done
+
     unset OPENAI_API_KEY
     module_end_log "${FUNCNAME[0]}" "${CHATGPT_RESULT_CNT}"
   fi
@@ -57,10 +59,11 @@ ask_chatgpt() {
   local ORIGIN_MODULE_=""
   local GPT_SERVER_ERROR_CNT_=0
 
-  print_output "[*] Checking scripts with ChatGPT that have priority ${MINIMUM_GPT_PRIO} or lower" "no_log"
+  print_output "[*] Checking scripts with ChatGPT that have priority ${ORANGE}${MINIMUM_GPT_PRIO}${NC} or lower" "no_log"
   if ! [[ -d "${GPT_FILE_DIR_}" ]]; then
     mkdir "${GPT_FILE_DIR_}"
   fi
+
   while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
     SCRIPT_PATH_TMP_="${COL1_}"
     GPT_ANCHOR_="${COL2_}"
@@ -94,11 +97,13 @@ ask_chatgpt() {
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
           -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" --write-out "%{http_code}" || true)
+
         if [[ "${HTTP_CODE_}" -ne 200 ]] ; then
           print_output "[-] Something went wrong with the ChatGPT requests"
           if [ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]; then
             print_output "[-] ERROR response:$(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
           fi
+
           if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
             print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
             CHATGPT_RESULT_CNT=-1
@@ -116,13 +121,16 @@ ask_chatgpt() {
             CHATGPT_RESULT_CNT=-1
             break
           fi
+
           cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
           sleep 30s
           continue
         fi
+
         GPT_RESPONSE_=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")")
         GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_[*]//\;/}" #remove ; from response
         GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
+
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           # write new into done csv
           write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
@@ -132,11 +140,13 @@ ask_chatgpt() {
           echo -e "${GPT_RESPONSE_[*]}" | tee -a "${LOG_FILE}"
           # add proper module link
           print_ln
+
           if [[ "${GPT_OUTPUT_FILE_}" == '/logs/'* ]]; then
             ORIGIN_MODULE_="$(echo "${GPT_OUTPUT_FILE_}" | cut -d / -f3 | cut -d_ -f1)"
           else
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           fi
+
           print_output "[*] Trying to link to module: ${ORIGIN_MODULE_}" "no_log"
           print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_//./}${GREEN} script" "" "${ORIGIN_MODULE_}"
           print_ln
