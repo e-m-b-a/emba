@@ -93,7 +93,7 @@ s22_vuln_check_semgrep() {
       local SEMG_SOURCE_FILE=""
       local SEMG_SOURCE_FILE_NAME=""
       local SEMG_LINE_NR=""
-      local GPT_PRIO_=3
+      local GPT_PRIO_=1
       local GPT_ANCHOR_=""
 
       ! [[ -d "$LOG_PATH_MODULE"/semgrep_sources/ ]] && mkdir "$LOG_PATH_MODULE"/semgrep_sources/
