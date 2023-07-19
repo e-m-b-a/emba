@@ -251,7 +251,6 @@ dependency_check()
   ## Quest Container
   #######################################################################################
   print_output "[*] Network connection:" "no_log"
-  print_ln "no_log"
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
