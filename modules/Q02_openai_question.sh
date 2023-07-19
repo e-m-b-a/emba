@@ -106,13 +106,14 @@ ask_chatgpt() {
               CHATGPT_RESULT_CNT=-1
               break
             fi
-            sleep 30s
-            continue
           elif jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "rate_limit_exceeded" ; then
             print_output "[-] Stopping OpenAI requests since the API key has reached its rate_limit"
             CHATGPT_RESULT_CNT=-1
             break
           fi
+          cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
+          sleep 30s
+          continue
         fi
         GPT_RESPONSE_=$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
         GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_//\;/}" #remove ; from response
