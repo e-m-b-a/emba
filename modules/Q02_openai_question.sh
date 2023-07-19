@@ -127,8 +127,8 @@ ask_chatgpt() {
           echo -e "${GPT_RESPONSE_//\"/}" | tee -a "${LOG_FILE}"
           # add proper module link
           print_ln
-          if [[ "${GPT_OUTPUT_FILE_}" == /logs/* ]]; then
-            ORIGIN_MODULE_="$(cut -d / -f3)"
+          if [[ "${GPT_OUTPUT_FILE_}" == '/logs/'* ]]; then
+            ORIGIN_MODULE_="$(echo "${GPT_OUTPUT_FILE_}" | cut -d / -f3)"
           else
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           fi
