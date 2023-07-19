@@ -159,7 +159,7 @@ radare_decomp_print_top10_statistics() {
   local RESULTS=()
   local BINARY=""
   local GPT_ANCHOR=""
-  local GPT_PRIO=0
+  local GPT_PRIO=2
 
   sub_module_title "Top 10 legacy C functions - Radare2 decompilation mode"
 
@@ -192,12 +192,13 @@ radare_decomp_print_top10_statistics() {
           fi
           if [[ -f "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt" ]]; then
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
-            if [[ $GPT_OPTION -gt 0 ]]; then
-              GPT_PRIO=2
-              GPT_ANCHOR="$(openssl rand -hex 8)"
-                # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
-              write_csv_gpt_tmp "$(cut_path "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt")" "$GPT_ANCHOR" "GPT-Prio-$GPT_PRIO" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "" "" ""
-              write_anchor_gpt "$GPT_ANCHOR"
+            if [[ "${GPT_OPTION}" -gt 0 ]]; then
+              GPT_ANCHOR_="$(openssl rand -hex 8)"
+              # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+              write_csv_gpt_tmp "$(cut_path "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt")" "${GPT_ANCHOR}" "GPT-Prio-${GPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "" "" ""
+              # add ChatGPT link
+              printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
+              write_anchor_gpt "${GPT_ANCHOR_}" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
             fi
           fi
         done
