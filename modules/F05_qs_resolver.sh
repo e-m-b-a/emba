@@ -17,11 +17,13 @@
 F05_qs_resolver() {
   module_log_init "${FUNCNAME[0]}"
   module_title "GPT Resolver"
+
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
     # wait for completion or 1m
     if grep -q "Q02_openai_question starting" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
       grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || sleep 1m
     fi
+
     local _GPT_INPUT_FILE_=""
     local GPT_ANCHOR_=""
     local _GPT_PRIO_=3
@@ -61,7 +63,9 @@ F05_qs_resolver() {
             elif [[ "${GPT_OUTPUT_FILE_}" == *".txt" ]]; then
               GPT_OUTPUT_FILE_NAME="$(basename "${GPT_OUTPUT_FILE_//\.txt/}.html")"
             fi
+
             readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${LOG_DIR}/html-report" -iname "${GPT_OUTPUT_FILE_NAME}" 2>/dev/null)
+
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
               # should point back to q02-submodule with name "${GPT_INPUT_FILE_}"
               GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
@@ -73,6 +77,7 @@ F05_qs_resolver() {
       done < "${CSV_DIR}/q02_openai_question.csv"
     fi
   fi
+
   # we always set it to 0 -> no web report should be generated for this module
   module_end_log "${FUNCNAME[0]}" 0
 }
