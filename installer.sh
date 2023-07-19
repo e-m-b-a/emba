@@ -147,7 +147,7 @@ done
 
 if ! [[ -v CONTAINER ]]; then
   if [[ -f docker-compose.yml ]]; then
-    CONTAINER="$(grep image docker-compose.yml | awk '{print $2}')"
+    CONTAINER="$(grep image docker-compose.yml | awk '{print $2}' | sort -u)"
   else
     CONTAINER="embeddedanalyzer/emba"
   fi
