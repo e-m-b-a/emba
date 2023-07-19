@@ -132,8 +132,12 @@ ask_chatgpt() {
           else
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           fi
+<<<<<<< HEAD
           print_output "[*] Trying to link to module: ${ORIGIN_MODULE_}" "no_log"
           print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_//./}${NC}" "" "${ORIGIN_MODULE_}"
+=======
+          print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_//./}${GREEN} script" "" "${ORIGIN_MODULE_}"
+>>>>>>> 7fa4f4da (output)
           print_ln
           ((CHATGPT_RESULT_CNT+=1))
         fi
