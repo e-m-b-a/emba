@@ -77,7 +77,7 @@ ask_chatgpt() {
     print_output "[*] Trying to check ${ORANGE} ${SCRIPT_PATH_TMP_} ${NC}with Question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
     print_output "[*] Prio is ${GPT_PRIO_}"  "no_log"
 
-    if [[ -z ${GPT_RESPONSE_}  ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]] && [[ "${SCRIPT_PATH_TMP_}" != '' ]]; then
+    if [[ -z ${GPT_RESPONSE_} ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]] && [[ "${SCRIPT_PATH_TMP_}" != '' ]]; then
       if [[ -f "${SCRIPT_PATH_TMP_}" ]]; then
         # add navbar-item for file
         sub_module_title "${GPT_INPUT_FILE_}"
