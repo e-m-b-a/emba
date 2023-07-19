@@ -16,7 +16,7 @@
 
 F05_qs_resolver() {
   module_log_init "${FUNCNAME[0]}"
-  module_title "QS-Resolver"
+  module_title "GPT Resolver"
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
     # wait for completion or 1m
     if grep -q "Q02_openai_question starting" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
@@ -58,7 +58,7 @@ F05_qs_resolver() {
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
               # should point back to q02-submodule with name "${GPT_INPUT_FILE_}"
               GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
-              print_output "[*] trying to print ${GPT_REVERSE_LINK_} into ${HTML_FILE_}" "no_log"
+              print_output "[*] Linking GPT results ${ORANGE}${GPT_REVERSE_LINK_}${NC} into ${ORANGE}${HTML_FILE_}${NC}" "no_log"
               sed -i "s/${GPT_ANCHOR_}/AI\: \<a class\=\"submodul\" href\=\"\.\.\/q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>OpenAI had this to say\<\/a\>\n/1" "${HTML_FILE_}"
             done
           fi
@@ -66,5 +66,6 @@ F05_qs_resolver() {
       done < "${CSV_DIR}/q02_openai_question.csv"
     fi
   fi
+  # we always set it to 0 -> no web report should be generated for this module
   module_end_log "${FUNCNAME[0]}" 0
 }

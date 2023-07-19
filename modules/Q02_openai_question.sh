@@ -124,7 +124,7 @@ ask_chatgpt() {
           # print openai response
           print_ln
           print_output "[*] ${ORANGE}OpenAI responded with the following details:${NC}"
-          echo "${GPT_RESPONSE_//\"/}" | tee -a "${LOG_FILE}"
+          echo -e "${GPT_RESPONSE_//\"/}" | tee -a "${LOG_FILE}"
           # add proper module link
           print_ln
           ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
