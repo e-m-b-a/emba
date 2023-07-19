@@ -834,27 +834,25 @@ print_notification() {
 }
 
 # writes inputs into csv for chatgpt
+# Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
 write_csv_gpt() {
   local CSV_ITEMS=("$@")
-
   if ! [[ -d "$CSV_DIR" ]]; then
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_" "$GPT_RESPONSE_"
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/q02_openai_question.csv" || true
   printf '\n' >> "$CSV_DIR/q02_openai_question.csv" || true
 }
 
 # writes inputs into tmp csv for chatgpt
+# Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
 write_csv_gpt_tmp() {
   local CSV_ITEMS=("$@")
-
   if ! [[ -d "$CSV_DIR" ]]; then
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "cost=$GPT_TOKENS_" "$GPT_OUTPUT_FILE_" "$GPT_RESPONSE_"
   printf '%s;' "${CSV_ITEMS[@]}" >> "$CSV_DIR/q02_openai_question.csv.tmp" || true
   printf '\n' >> "$CSV_DIR/q02_openai_question.csv.tmp" || true
 }
