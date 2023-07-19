@@ -43,7 +43,6 @@ F05_qs_resolver() {
         GPT_RESPONSE_="${COL7_//\"/}"
 
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
-          GPT_OUTPUT_FILE_="$(find "${LOG_DIR}" -iname "$(basename "${GPT_OUTPUT_FILE_}")" 2>/dev/null)"
           if ! [ -f "${GPT_OUTPUT_FILE_}" ]; then
             print_output "[-] Something went wrong with the Output file ${GPT_OUTPUT_FILE_}"
             if [[ -z ${GPT_OUTPUT_FILE_} ]]; then
