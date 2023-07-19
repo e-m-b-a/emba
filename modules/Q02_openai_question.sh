@@ -71,11 +71,16 @@ ask_chatgpt() {
     GPT_RESPONSE_="${COL7_}"
     GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
     
+    # in case we have nothing we are going to move on
+    [[ -z "${SCRIPT_PATH_TMP_}" ]] && continue
     print_output "[*] Trying to check inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
     SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}")"
+    # in case we have nothing we are going to move on
+    ! [[ -f "${SCRIPT_PATH_TMP_}" ]] && continue
     [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
-    print_output "[*] Trying to check ${ORANGE} ${SCRIPT_PATH_TMP_} ${NC}with Question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
-    print_output "[*] Prio is ${GPT_PRIO_}"  "no_log"
+
+    print_output "[*] Trying to check ${ORANGE}${SCRIPT_PATH_TMP_}${NC} with Question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
+    print_output "[*] Prio for testing is ${GPT_PRIO_}" "no_log"
 
     if [[ -z ${GPT_RESPONSE_} ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]] && [[ "${SCRIPT_PATH_TMP_}" != '' ]]; then
       if [[ -f "${SCRIPT_PATH_TMP_}" ]]; then
