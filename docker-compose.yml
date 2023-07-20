@@ -2,7 +2,7 @@ version: "3"
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:pip_env
+    image: embeddedanalyzer/emba:latest
     read_only: true
     # all pre-checker mount modules need privileged mode
     # nosemgrep
