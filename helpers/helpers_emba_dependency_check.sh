@@ -193,54 +193,6 @@ setup_nikto() {
   fi
 }
 
-setup_unblob() {
-  TOOL_NAME="${1:-}"
-
-  print_output "    ""$TOOL_NAME"" - \\c" "no_log"
-
-  if command -v unblob; then
-    echo -e "$GREEN""ok""$NC"
-  elif ! command -v unblob && [[ -f "$EXT_DIR"/unblob/unblob_path.cfg ]]; then
-    # recover unblob installation - usually we are in the docker container
-    if ! [[ -d "$HOME"/.cache ]]; then
-      mkdir "$HOME"/.cache
-    fi
-    if [[ "$IN_DOCKER" -eq 1 ]]; then
-      if [[ -d "$EXT_DIR"/unblob/root_cache ]]; then
-        cp -pr "$EXT_DIR"/unblob/root_cache/* "$HOME"/.cache/
-      else
-        echo -e "$RED""not ok""$NC"
-        DEP_EXIT=1
-      fi
-    fi
-    if [[ -e $(cat "$EXT_DIR"/unblob/unblob_path.cfg)/bin/"$UNBLOB_BIN" ]]; then
-      UNBLOB_PATH="$(cat "$EXT_DIR"/unblob/unblob_path.cfg)""/bin/"
-      export PATH=$PATH:"$UNBLOB_PATH"
-      echo -e "$GREEN""ok""$NC"
-    else
-      echo -e "$RED""not ok""$NC"
-      DEP_EXIT=1
-    fi
-  else
-    echo -e "$RED""not ok""$NC"
-    DEP_EXIT=1
-  fi
-  print_output "    ""sasquatch"" - \\c" "no_log"
-  if [[ -f /usr/local/bin/sasquatch_binwalk ]]; then
-    [[ -L "$UNBLOB_PATH"/sasquatch ]] && rm  "$UNBLOB_PATH"/sasquatch
-    ln -s /usr/local/bin/sasquatch_binwalk "$UNBLOB_PATH"/sasquatch
-    echo -e "$GREEN""ok""$NC"
-  elif [[ -f /usr/local/bin/sasquatch_unblob ]]; then
-    [[ -L "$UNBLOB_PATH"/sasquatch ]] && rm  "$UNBLOB_PATH"/sasquatch
-    ln -s /usr/local/bin/sasquatch_unblob "$UNBLOB_PATH"/sasquatch
-    echo -e "$ORANGE""warning""$NC"
-    DEP_EXIT=1
-  else
-    echo -e "$RED""not ok""$NC"
-    DEP_EXIT=1
-  fi
-}
-
 dependency_check() 
 {
   module_title "Dependency check" "no_log"
@@ -320,6 +272,9 @@ dependency_check()
     fi
   fi
 
+  # Python virtual environment in external directory
+  check_dep_file "Python virtual environment" "$EXT_DIR""/emba_venv/bin/activate"
+
   print_ln "no_log"
   print_output "[*] Necessary utils on system:" "no_log"
 
@@ -389,14 +344,11 @@ dependency_check()
     check_dep_tool "binwalk extractor" "binwalk"
     if command -v binwalk > /dev/null ; then
       export BINWALK_BIN=()
-      BINWALK_BIN=("python3" "-Wignore" "$(which binwalk)")
+      BINWALK_BIN=("$(which binwalk)")
       BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
       if ! [ "$(version "$BINWALK_VER")" -ge "$(version "2.3.3")" ]; then
         echo -e "$ORANGE""    binwalk version $BINWALK_VER - not optimal""$NC"
         echo -e "$ORANGE""    Upgrade your binwalk to version 2.3.3 or higher""$NC"
-        export BINWALK_VER_CHECK=0
-      else
-        export BINWALK_VER_CHECK=1
       fi
       # this is typically needed in the read only docker container:
       if ! [[ -d "$HOME"/.config/binwalk/modules/ ]]; then
@@ -414,7 +366,7 @@ dependency_check()
     fi
     export MPLCONFIGDIR="$TMP_DIR"
 
-    setup_unblob "unblob"
+    check_dep_tool "unblob"
     check_dep_tool "unrar" "unrar"
     setup_nikto
 
@@ -608,6 +560,9 @@ dependency_check()
         DEP_ERROR=1
       fi
     fi
+
+    # Python virtual environment in external directory
+    check_dep_file "Python virtual environment" "$EXT_DIR""/emba_venv/bin/activate"
   fi
 
   if [[ $DEP_ERROR -gt 0 ]] || [[ $DEP_EXIT -gt 0 ]]; then

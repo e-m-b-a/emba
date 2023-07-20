@@ -146,7 +146,11 @@ while getopts CdDFghlrc: OPT ; do
 done
 
 if ! [[ -v CONTAINER ]]; then
-  CONTAINER="embeddedanalyzer/emba"
+  if [[ -f docker-compose.yml ]]; then
+    CONTAINER="$(grep image docker-compose.yml | awk '{print $2}' | sort -u)"
+  else
+    CONTAINER="embeddedanalyzer/emba"
+  fi
 fi
 
 if [[ "$LIST_DEP" -eq 1 ]]; then
@@ -255,6 +259,11 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   apt-get -y update
 fi
 
+# setup the python virtual environment in external directory
+# external is also setup in the docker image
+apt-get -y install python3-venv
+create_pipenv "./external/emba_venv"
+activate_pipenv "./external/emba_venv"
 
 # initial installation of the host environment:
 I01_default_apps_host
@@ -327,6 +336,7 @@ fi
 
 # cve-search is always installed on the host:
 IF20_cve_search
+deactivate
 
 cd "$HOME_PATH" || exit 1
 
