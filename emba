@@ -708,9 +708,15 @@ main() {
       fi
     else
       local QUEST_CONTAINER_=""
-      QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c 'sleep 20s && ./emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "main"
+      print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "main"
+      # wait for quest container to finish network checks
+      while ! docker logs "${QUEST_CONTAINER}" | grep -q "------------------------------"; do
+        sleep 1
+      done
+      docker logs "${QUEST_CONTAINER}"
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       # stop quest container
@@ -754,6 +760,7 @@ main() {
   #######################################################################################
   # Quests (Q-modules)
   #######################################################################################
+
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
       sleep 1
@@ -769,6 +776,8 @@ main() {
     # dev-mode
     run_modules "Q" "${THREADED}" "0" &
     export Q_MOD_PID="$!"
+  elif [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
+    docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${QUEST_CONTAINER_} failed the dependancy check" "main"
   fi
 
   #######################################################################################
