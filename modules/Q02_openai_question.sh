@@ -37,7 +37,7 @@ Q02_openai_question() {
       if [[ "${CHATGPT_RESULT_CNT}" -ge 0 ]]; then
         ask_chatgpt
       fi
-      sleep 20
+      sleep 2
     done
 
     unset OPENAI_API_KEY
@@ -106,6 +106,7 @@ ask_chatgpt() {
             if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
               print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
               CHATGPT_RESULT_CNT=-1
+              sleep 20
               break
             elif jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "server_error" ; then
               ((GPT_SERVER_ERROR_CNT_+=1))
@@ -113,11 +114,13 @@ ask_chatgpt() {
                 # more than 5 failes we stop trying until the newxt round
                 print_output "[-] Stopping OpenAI requests since the Server seems to be overloaded"
                 CHATGPT_RESULT_CNT=-1
+                sleep 20
                 break
               fi
             elif jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "rate_limit_exceeded" ; then
               print_output "[-] Stopping OpenAI requests since the API key has reached its rate_limit"
               CHATGPT_RESULT_CNT=-1
+              sleep 20
               break
             fi
 
