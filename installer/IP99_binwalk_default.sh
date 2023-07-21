@@ -38,6 +38,7 @@ IP99_binwalk_default() {
     print_tool_info "p7zip-full" 1
     print_tool_info "cabextract" 1
     print_tool_info "util-linux" 1
+    print_tool_info "python3-matplotlib" 1
 
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
@@ -56,41 +57,18 @@ IP99_binwalk_default() {
     print_tool_info "default-jdk" 1
     print_tool_info "lzop" 1
     print_tool_info "cpio" 1
-
     print_tool_info "python3-pip" 1
     print_tool_info "python3-opengl" 1
     print_tool_info "python3-pyqt5" 1
     print_tool_info "python3-pyqt5.qtopengl" 1
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
-    # print_tool_info "python3-lzo" 1
-    print_pip_info "python-lzo"
-    # python-setuptools is needed for ubireader installation
     print_tool_info "python-setuptools" 1
     print_tool_info "srecord" 1
     print_tool_info "unrar-free" 1
     print_tool_info "unrar" 1
-
-    print_pip_info "nose"
-    print_pip_info "coverage"
-    print_pip_info "pyqtgraph"
-    print_pip_info "capstone"
-    print_pip_info "cstruct"
-    print_pip_info "matplotlib"
-
-    print_git_info "binwalk" "EMBA-support-repos/binwalk" "Binwalk is a fast, easy to use tool for analyzing, reverse engineering, and extracting firmware images."
-    echo -e "$ORANGE""binwalk will be downloaded and installed from source.""$NC"
-    print_git_info "yaffshiv" "devttys0/yaffshiv" "A simple YAFFS file system parser and extractor, written in Python."
-    echo -e "$ORANGE""yaffshiv will be downloaded.""$NC"
-    print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
-    echo -e "$ORANGE""sasquatch will be downloaded.""$NC"
-    print_git_info "jefferson" "sviehb/jefferson" "JFFS2 filesystem extraction tool"
-    echo -e "$ORANGE""jefferson will be downloaded.""$NC"
-    print_git_info "cramfs-tools" "npitre/cramfs-tools" "Cramfs - cram a filesystem onto a small ROM"
-    echo -e "$ORANGE""cramfs-tools will be downloaded.""$NC"
-    print_git_info "ubi_reader" "jrspruitt/ubi_reader" "UBI Reader is a Python module and collection of scripts capable of extracting the contents of UBI and UBIFS images"
-    echo -e "$ORANGE""ubi_reader will be downloaded.""$NC"
-    print_file_info "stuffit520.611linux-i386.tar.gz" "Extract StuffIt archive files" "https://downloads.tuxfamily.org/sdtraces/BottinHTML/stuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/tuffit520.611linux-i386.tar.gz" "external/binwalk/unstuff/"
+    print_tool_info "binwalk" 1
+    print_tool_info "python3-binwalk" 1
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
@@ -102,19 +80,6 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        pip_install "nose"
-        pip_install "coverage"
-        pip_install "pyqtgraph"
-        pip_install "capstone"
-        pip_install "cstruct"
-        pip_install "matplotlib"
-        pip_install "python-lzo>=1.14"
-
-        if ! [[ -d external/binwalk ]]; then
-          # git clone https://github.com/ReFirmLabs/binwalk.git external/binwalk
-          git clone https://github.com/EMBA-support-repos/binwalk.git external/binwalk
-        fi
-
         if ! [[ -d external/cpu_rec ]]; then
           git clone https://github.com/EMBA-support-repos/cpu_rec.git external/cpu_rec
           # this does not make sense for the read only docker container - we have to do it
@@ -125,104 +90,8 @@ IP99_binwalk_default() {
           cp -pr external/cpu_rec/cpu_rec.py "$HOME"/.config/binwalk/modules/
           cp -pr external/cpu_rec/cpu_rec_corpus "$HOME"/.config/binwalk/modules/
         fi
-        if ! command -v yaffshiv > /dev/null ; then
-          if ! [[ -d external/binwalk/yaffshiv ]]; then
-            git clone https://github.com/EMBA-support-repos/yaffshiv external/binwalk/yaffshiv
-          fi
-          cd ./external/binwalk/yaffshiv/ || ( echo "Could not install EMBA component yaffshiv" && exit 1 )
-          python3 setup.py install
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component yaffshiv" && exit 1 )
-        else
-          echo -e "$GREEN""yaffshiv already installed""$NC"
-        fi
-
-        if ! [[ -d external/binwalk/sasquatch ]]; then
-          # git clone https://github.com/EMBA-support-repos/sasquatch external/binwalk/sasquatch
-          git clone --quiet --depth 1 --branch "master" https://github.com/devttys0/sasquatch external/binwalk/sasquatch
-        fi
-        cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
-        # https://github.com/ReFirmLabs/binwalk/issues/618#issuecomment-1432373715
-        # wget https://github.com/devttys0/sasquatch/pull/47.patch
-        # patch -p1 < 47.patch
-        wget https://github.com/devttys0/sasquatch/pull/51.patch && patch -p1 <51.patch
-        CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
-
-        # we have seen issues with the unblob sasquatch version - lets move the binwalk version to another name and link to it
-        # during the testing phase. With this in place we are able to install both versions in ||
-        if [[ -e /usr/local/bin/sasquatch ]]; then
-          echo -e "${GREEN}Backup binwalk sasquatch version to $ORANGE/usr/local/bin/sasquatch_binwalk$NC"
-          mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
-        fi
-
-        if ! command -v jefferson > /dev/null ; then
-          if ! [[ -d external/binwalk/jefferson ]]; then
-            git clone https://github.com/EMBA-support-repos/jefferson external/binwalk/jefferson
-          fi
-
-          while read -r TOOL_NAME; do
-            print_pip_info "$TOOL_NAME"
-          done < ./external/binwalk/jefferson/requirements.txt
-
-          pip3 install -r ./external/binwalk/jefferson/requirements.txt --break-system-packages
-          cd ./external/binwalk/jefferson/ || ( echo "Could not install EMBA component jefferson" && exit 1 )
-          python3 ./setup.py install
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component jefferson" && exit 1 )
-        else
-          echo -e "$GREEN""jefferson already installed""$NC"
-        fi
-
-        if ! command -v unstuff > /dev/null ; then
-          mkdir -p ./external/binwalk/unstuff
-          wget --no-check-certificate -O ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz https://downloads.tuxfamily.org/sdtraces/BottinHTML/stuffit520.611linux-i386.tar.gz
-          tar -zxv -f ./external/binwalk/unstuff/stuffit520.611linux-i386.tar.gz -C ./external/binwalk/unstuff
-          cp ./external/binwalk/unstuff/bin/unstuff /usr/local/bin/
-        else
-          echo -e "$GREEN""unstuff already installed""$NC"
-        fi
-
-        if ! command -v cramfsck > /dev/null ; then
-          if [[ -f "/opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck" ]]; then
-            ln -s /opt/firmware-mod-kit/trunk/src/cramfs-2.x/cramfsck /usr/bin/cramfsck
-          fi
-
-          if ! [[ -d external/binwalk/cramfs-tools ]]; then
-            git clone https://github.com/EMBA-support-repos/cramfs-tools external/binwalk/cramfs-tools
-          fi
-          make -C ./external/binwalk/cramfs-tools/
-          install ./external/binwalk/cramfs-tools/mkcramfs /usr/local/bin
-          install ./external/binwalk/cramfs-tools/cramfsck /usr/local/bin
-        else
-          echo -e "$GREEN""cramfsck already installed""$NC"
-        fi
-
-        if ! [[ -d external/binwalk/ubi_reader ]]; then
-          git clone https://github.com/EMBA-support-repos/ubi_reader external/binwalk/ubi_reader
-          cd ./external/binwalk/ubi_reader || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-          git checkout fbb6443bad789efde4b17479712e18d1ff7e326b
-          python3 setup.py install
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component ubi_reader" && exit 1 )
-        fi
 
         if command -v binwalk > /dev/null ; then
-          echo "WARNING: Uninstalling binwalk version"
-          cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
-          sudo apt remove binwalk python3-binwalk -y
-          python3 setup.py uninstall
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
-        fi
-
-        if ! command -v binwalk > /dev/null ; then
-          cd ./external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
-          python3 setup.py install
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
-        fi
-
-        if [[ -d ./external/binwalk ]]; then
-          rm ./external/binwalk -r
-        fi
-
-        if [[ -f "/usr/local/bin/binwalk" ]] ; then
           echo -e "$GREEN""binwalk installed successfully""$NC"
         elif [[ ! -f "/usr/local/bin/binwalk" ]] ; then
           echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
