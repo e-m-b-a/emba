@@ -118,10 +118,24 @@ ask_chatgpt() {
                 break
               fi
             elif jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "rate_limit_exceeded" ; then
-              print_output "[-] Stopping OpenAI requests since the API key has reached its rate_limit"
-              CHATGPT_RESULT_CNT=-1
-              sleep 20
-              break
+              # rate limit handling - if we got a response like:
+              # Please try again in 7m12s.
+              # then we will wate ~10mins and try it afterwards again
+              # in this time we need to check if the Testing phase is running or not
+              if jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "Please try again in " ; then
+                local CNT=0
+                while [[ "${CNT}" -lt 1000 ]]; do
+                  CNT=$((CNT+1))
+                  if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+                    break 2
+                  fi
+                  sleep 1
+                done
+              else
+                print_output "[-] Stopping OpenAI requests since the API key has reached its rate_limit"
+                CHATGPT_RESULT_CNT=-1
+                break
+              fi
             fi
 
             cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
