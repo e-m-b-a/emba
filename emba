@@ -708,7 +708,7 @@ main() {
       fi
     else
       local QUEST_CONTAINER_=""
-      QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c 'sleep 20s && ./emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "main"
       print_ln "no_log"
