@@ -101,7 +101,7 @@ ask_chatgpt() {
         if [[ "${HTTP_CODE_}" -ne 200 ]] ; then
           print_output "[-] Something went wrong with the ChatGPT requests"
           if [[ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]]; then
-            print_output "[-] ERROR response:$(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
+            print_output "[-] ERROR response: $(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
 
             if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
               print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
@@ -122,7 +122,7 @@ ask_chatgpt() {
               # Please try again in 7m12s.
               # then we will wate ~10mins and try it afterwards again
               # in this time we need to check if the Testing phase is running or not
-              if jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "Please try again in " ; then
+              if jq '.error.message' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "Please try again in " ; then
                 local CNT=0
                 while [[ "${CNT}" -lt 1000 ]]; do
                   CNT=$((CNT+1))
