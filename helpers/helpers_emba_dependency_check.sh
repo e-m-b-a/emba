@@ -229,21 +229,36 @@ dependency_check()
       # print_output "There is no API key in the config file" "no_log"
       # exit 1
     else
-      local HTTP_CODE_=400
-      print_output "    OpenAI-API key  - \\c" "no_log"
-      HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
-              -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-              -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.log -sS)
-      if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
-        echo -e "$GREEN""ok""$NC"
-        rm /tmp/chatgpt-test.log
-      else
-        echo -e "$RED""not ok""$NC"
-        print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
-        print_output "[-] ERROR response:$(cat /tmp/chatgpt-test.log)" "no_log"
-        exit 1
-      fi
+      local RETRIES_=0
+      while true; do
+        local HTTP_CODE_=400
+        print_output "    OpenAI-API key  - \\c" "no_log"
+        HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+                -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+                -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json -sS)
+        if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
+          echo -e "$GREEN""ok""$NC"
+          rm /tmp/chatgpt-test.json
+          break
+        else
+          if jq '.error.code' /tmp/chatgpt-test.json | grep -q "rate_limit_exceeded" ; then
+            # rate limit handling - if we got a response like:
+            # Please try again in 20s
+            if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in 20s" ; then
+              sleep 20s
+              ((RETRIES_+=1))
+              [[ "${RETRIES_}" -lt 3 ]] && continue
+            fi
+          fi
+          echo -e "$RED""not ok""$NC"
+          print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
+          print_output "[-] ERROR response:$(cat /tmp/chatgpt-test.log)" "no_log"
+          exit 1
+        fi
+      done
     fi
+  else
+    print_output "    Isolation  - ${GREEN}""ok""${NC}" "no_log"
   fi
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     if [[ $ONLY_DEP -gt 0 ]] && [[ $FORCE -ne 0 ]]; then
