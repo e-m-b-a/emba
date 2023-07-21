@@ -100,33 +100,38 @@ ask_chatgpt() {
 
         if [[ "${HTTP_CODE_}" -ne 200 ]] ; then
           print_output "[-] Something went wrong with the ChatGPT requests"
-          if [ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]; then
+          if [[ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]]; then
             print_output "[-] ERROR response:$(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
-          fi
 
-          if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
-            print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
-            CHATGPT_RESULT_CNT=-1
-            break
-          elif jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "server_error" ; then
-            ((GPT_SERVER_ERROR_CNT_+=1))
-            if [[ "${GPT_SERVER_ERROR_CNT_}" -ge 5 ]]; then
-              # more than 5 failes we stop trying until the newxt round
-              print_output "[-] Stopping OpenAI requests since the Server seems to be overloaded"
+            if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
+              print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
+              CHATGPT_RESULT_CNT=-1
+              break
+            elif jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "server_error" ; then
+              ((GPT_SERVER_ERROR_CNT_+=1))
+              if [[ "${GPT_SERVER_ERROR_CNT_}" -ge 5 ]]; then
+                # more than 5 failes we stop trying until the newxt round
+                print_output "[-] Stopping OpenAI requests since the Server seems to be overloaded"
+                CHATGPT_RESULT_CNT=-1
+                break
+              fi
+            elif jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "rate_limit_exceeded" ; then
+              print_output "[-] Stopping OpenAI requests since the API key has reached its rate_limit"
               CHATGPT_RESULT_CNT=-1
               break
             fi
-          elif jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "rate_limit_exceeded" ; then
-            print_output "[-] Stopping OpenAI requests since the API key has reached its rate_limit"
-            CHATGPT_RESULT_CNT=-1
-            break
-          fi
 
-          cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
-          sleep 30s
-          continue
+            cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
+            sleep 30s
+            continue
+          fi
         fi
 
+        if ! [[ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]]; then
+          # catches: (56) Recv failure: Connection reset by peer
+          print_output "[-] Something went wrong with the ChatGPT request for ${GPT_INPUT_FILE_}"
+          break
+        fi
         GPT_RESPONSE_=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")")
         GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_[*]//\;/}" #remove ; from response
         GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
