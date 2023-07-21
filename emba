@@ -713,7 +713,7 @@ main() {
       print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "main"
       print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "main"
       # wait for quest container to finish network checks
-      while ! docker logs "${QUEST_CONTAINER}" | grep -q "------------------------------"; do
+      while ! docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; do
         sleep 1
       done
       docker logs "${QUEST_CONTAINER}"
