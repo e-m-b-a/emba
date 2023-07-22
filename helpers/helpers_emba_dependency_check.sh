@@ -231,11 +231,13 @@ dependency_check()
       fi
     else
       local RETRIES_=0
+      # on the host we try it only 10 times:
       local MAX_RETRIES=10
-      local SLEEPTIME=30
       if [[ "$IN_DOCKER" -eq 1 ]]; then
+        # within the Quest container we can keep trying it as it does not matter if the container starts up later
         MAX_RETRIES=200
       fi
+      local SLEEPTIME=30
       while true; do
         local HTTP_CODE_=400
         print_output "    OpenAI-API key  - \\c" "no_log"
@@ -255,6 +257,7 @@ dependency_check()
             if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in " ; then
               # print_output "GPT API test #${RETRIES_} - \\c" "no_log"
               sleep "${SLEEPTIME}"s
+              # sleeptime gets adjusted on every failure
               SLEEPTIME=$((SLEEPTIME+5))
               ((RETRIES_+=1))
               [[ "${RETRIES_}" -lt "${MAX_RETRIES}" ]] && continue
