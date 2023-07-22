@@ -21,20 +21,6 @@ INVOCATION_PATH="."
 MODULE_COUNT=0
 
 
-check_quest_container() {
-  print_ln "no_log"
-  print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
-  # wait for quest container to finish network checks
-  while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
-    if docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; then
-      break
-    fi
-    sleep 0.1
-  done
-  docker logs "${QUEST_CONTAINER}"
-  print_ln "no_log"
-}
-
 import_helper()
 {
   local HELPERS=()
@@ -121,6 +107,25 @@ check_cve_search_job() {
     check_cve_search
     sleep 90
   done
+}
+
+check_quest_container() {
+  print_ln "no_log"
+  print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
+  # wait for quest container to finish network checks
+  while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
+    if docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; then
+      break
+    fi
+    sleep 0.1
+  done
+  reset
+  print_ln "no_log"
+  print_output "[*] Quest container ${QUEST_CONTAINER} dependency checks: \\n" "no_log"
+  docker logs "${QUEST_CONTAINER}"
+  print_output "[*] Finished Quest container ${QUEST_CONTAINER} dependency checks \\n" "no_log"
+  print_ln "no_log"
+  reset
 }
 
 # $1: module group letter [P, S, L, F, Q]

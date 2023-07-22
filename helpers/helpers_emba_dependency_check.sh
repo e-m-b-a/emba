@@ -222,12 +222,13 @@ dependency_check()
         done < "${CONFIG_DIR}/gpt_config.env"
       fi
     fi
-    if [ -z "${OPENAI_API_KEY}" ]; then
-      # print_output "    OpenAI-API key  - questing    - \\c" "no_log"
-      # echo -e "$RED""not ok""$NC"
-      print_output "$(indent "ChatGPT-API key not set - see https://github.com/e-m-b-a/emba/wiki/AI-supported-firmware-analysis for more information")" "no_log"
-      # print_output "There is no API key in the config file" "no_log"
-      # exit 1
+    if [[ -z "${OPENAI_API_KEY}" ]]; then
+      print_output "$(indent "ChatGPT-API key not set - ${ORANGE}see https://github.com/e-m-b-a/emba/wiki/AI-supported-firmware-analysis for more information${NC}")" "no_log"
+      # The following if clause is currently not working! We have not loaded the profile in this stage
+      # TODO: Find a workaround!
+      if [[ "${GPT_OPTION}" -eq 1 ]]; then
+        DEP_ERROR=1
+      fi
     else
       local RETRIES_=0
       local MAX_RETRIES=10
@@ -262,6 +263,8 @@ dependency_check()
           echo -e "$RED""not ok""$NC"
           print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
           print_output "[-] ERROR response: $(cat /tmp/chatgpt-test.json)" "no_log"
+          # Note: we are running into issues in the case where the key can't be verified, but GPT is not enabled at all
+          #       In such a case we will fail the check without the need of GPT
           DEP_ERROR=1
         fi
         if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
