@@ -58,6 +58,7 @@ F50_base_aggregator() {
   L20_LOG="l20_snmp_checks.txt"
   L25_LOG="l25_web_checks.txt"
   L30_LOG="l30_routersploit.txt"
+  Q02_LOG="q02_openai_question.txt"
   L35_CSV_LOG="$CSV_DIR""/l35_metasploit_check.csv"
   SYS_EMU_RESULTS="$LOG_DIR"/emulator_online_results.log
 
@@ -106,6 +107,13 @@ output_overview() {
     write_csv_log "FW_path" "$FIRMWARE_PATH" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
     print_output "[+] EMBA start command:""$ORANGE"" ""$EMBA_COMMAND""$NC"
     write_csv_log "emba_command" "$EMBA_COMMAND" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+  fi
+
+  if [[ -f "${LOG_DIR}"/"${Q02_LOG}" ]] && [[ "${GPT_OPTION}" -gt 0 ]]; then
+    GPT_RESULTS=$(grep -c "OpenAI responded with the following details" "${LOG_DIR}"/"${Q02_LOG}" || true)
+    if [[ "${GPT_RESULTS}" -gt 0 ]]; then
+      print_output "[+] EMBA AI analysis enabled."
+    fi
   fi
 
   if [[ -n "$ARCH" ]]; then
@@ -242,8 +250,12 @@ output_details() {
     DATA=1
   fi
 
-  if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR:-0}" -gt 0 ]]; then
+  if [[ "${GPT_RESULTS}" -gt 0 ]]; then
+    print_output "[+] EMBA AI tests identified ${ORANGE}${GPT_RESULTS}${GREEN} results via ChatGPT."
+    write_csv_log "AI results" "${GPT_RESULTS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+  fi
 
+  if [[ "${BOOTED:-0}" -gt 0 ]] || [[ "${IP_ADDR:-0}" -gt 0 ]]; then
     STATE="$ORANGE(""$GREEN""booted"
     EMU_STATE="booted"
     if [[ "$IP_ADDR" -gt 0 ]]; then
@@ -790,6 +802,7 @@ get_data() {
   export K_CVE_VERIFIED_SYMBOLS=0
   export K_CVE_VERIFIED_COMPILED=0
   export APK_ISSUES=0
+  export GPT_RESULTS=0
 
   if [[ -f "$P02_CSV_LOG" ]]; then
     ENTROPY=$(grep -a "Entropy" "$P02_CSV_LOG" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
