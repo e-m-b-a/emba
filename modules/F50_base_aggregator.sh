@@ -113,6 +113,7 @@ output_overview() {
     GPT_RESULTS=$(grep -c "OpenAI responded with the following details" "${LOG_DIR}"/"${Q02_LOG}" || true)
     if [[ "${GPT_RESULTS}" -gt 0 ]]; then
       print_output "[+] EMBA AI analysis enabled."
+      write_link "q02"
     fi
   fi
 
@@ -252,6 +253,7 @@ output_details() {
 
   if [[ "${GPT_RESULTS}" -gt 0 ]]; then
     print_output "[+] EMBA AI tests identified ${ORANGE}${GPT_RESULTS}${GREEN} results via ChatGPT."
+    write_link "q02"
     write_csv_log "AI results" "${GPT_RESULTS}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
 
