@@ -20,6 +20,21 @@
 INVOCATION_PATH="."
 MODULE_COUNT=0
 
+
+check_quest_container() {
+  print_ln "no_log"
+  print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
+  # wait for quest container to finish network checks
+  while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
+    if docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; then
+      break
+    fi
+    sleep 0.1
+  done
+  docker logs "${QUEST_CONTAINER}"
+  print_ln "no_log"
+}
+
 import_helper()
 {
   local HELPERS=()
@@ -712,13 +727,12 @@ main() {
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "main"
       print_ln "no_log"
-      print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
-      # wait for quest container to finish network checks
-      while ! docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; do
-        sleep 0.1
-      done
-      docker logs "${QUEST_CONTAINER}"
-      print_ln "no_log"
+
+      check_quest_container "${QUEST_CONTAINER}" &
+      QUEST_PID="$!"
+      store_kill_pids "${QUEST_PID}"
+      disown "${QUEST_PID}" 2> /dev/null || true
+
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       # stop quest container

@@ -230,12 +230,18 @@ dependency_check()
       # exit 1
     else
       local RETRIES_=0
+      local MAX_RETRIES=10
+      local SLEEPTIME=30
+      if [[ "$IN_DOCKER" -eq 1 ]]; then
+        MAX_RETRIES=200
+      fi
       while true; do
         local HTTP_CODE_=400
         print_output "    OpenAI-API key  - \\c" "no_log"
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
                 -H "Authorization: Bearer ${OPENAI_API_KEY}" \
                 -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json -sS)
+
         if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
           echo -e "$GREEN""ok""$NC"
           rm /tmp/chatgpt-test.json
@@ -244,16 +250,24 @@ dependency_check()
           if jq '.error.code' /tmp/chatgpt-test.json | grep -q "rate_limit_exceeded" ; then
             # rate limit handling - if we got a response like:
             # Please try again in 20s
-            if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in 20s" ; then
-              sleep 20s
+            echo -e "$RED""not ok (rate limit issues)""$NC"
+            if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in " ; then
+              # print_output "GPT API test #${RETRIES_} - \\c" "no_log"
+              sleep "${SLEEPTIME}"s
+              SLEEPTIME=$((SLEEPTIME+5))
               ((RETRIES_+=1))
-              [[ "${RETRIES_}" -lt 3 ]] && continue
+              [[ "${RETRIES_}" -lt "${MAX_RETRIES}" ]] && continue
             fi
           fi
           echo -e "$RED""not ok""$NC"
           print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
-          print_output "[-] ERROR response:$(cat /tmp/chatgpt-test.json)" "no_log"
-          exit 1
+          print_output "[-] ERROR response: $(cat /tmp/chatgpt-test.json)" "no_log"
+          DEP_ERROR=1
+        fi
+        if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+          print_output "    Testing phase ended  - \\c" "no_log"
+          echo -e "$RED""exit now""$NC"
+          DEP_ERROR=1
         fi
       done
     fi
