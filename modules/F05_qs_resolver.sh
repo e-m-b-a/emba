@@ -24,7 +24,7 @@ F05_qs_resolver() {
       grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || sleep 1m
     fi
 
-    local _GPT_INPUT_FILE_=""
+    # local _GPT_INPUT_FILE_=""
     local GPT_ANCHOR_=""
     local _GPT_PRIO_=3
     local GPT_QUESTION_=""

@@ -69,6 +69,13 @@ For further details on EMBA's system-emulation engine check the [wiki](https://g
 sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan-emulation.emba
 
 ```
+## Quick start with AI-assisted analysis enabled
+For further details on EMBA's AI analysis engine check the [wiki](https://github.com/e-m-b-a/emba/wiki/AI-supported-firmware-analysis).
+```console
+sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan-gpt.emba
+
+```
+
 ---
 *EMBA* supports multiple testing and reporting [options](https://github.com/e-m-b-a/emba/wiki/Usage#arguments). For more details check the [wiki](https://github.com/e-m-b-a/emba/wiki/Usage).
 

@@ -197,7 +197,7 @@ radare_decomp_print_top10_statistics() {
               print_output "[*] Asking OpenAI chatbot about ${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
               GPT_ANCHOR_="$(openssl rand -hex 8)"
               # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
-              write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "${GPT_ANCHOR}" "GPT-Prio-${GPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "" ""
+              write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "${GPT_ANCHOR}" "${GPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "" ""
               # add ChatGPT link
               printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
               write_anchor_gpt "${GPT_ANCHOR_}" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"

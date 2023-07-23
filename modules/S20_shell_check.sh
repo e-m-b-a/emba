@@ -115,6 +115,8 @@ S20_shell_check()
 s20_eval_script_check() {
   local SH_SCRIPTS_=("${@}")
   local SH_SCRIPT=""
+  local GPT_PRIO_=3
+  local GPT_ANCHOR_=""
 
   sub_module_title "Check shell scripts for eval usage"
 
@@ -122,10 +124,20 @@ s20_eval_script_check() {
     print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
     if grep "eval " "${SH_SCRIPT}" | grep -q -v "^#.*"; then
       SH_SCRIPT_NAME="$(basename "${SH_SCRIPT}")"
+      local SHELL_LOG="$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
       ! [[ -d "$LOG_PATH_MODULE"/sh_eval_sources/ ]] && mkdir "$LOG_PATH_MODULE"/sh_eval_sources/
-      [[ -f "${SH_SCRIPT}" ]] && cp "${SH_SCRIPT}" "$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
-      sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
-      print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${SH_SCRIPT_NAME}${NC}" "" "${LOG_PATH_MODULE}/sh_eval_sources/${SH_SCRIPT_NAME}.log"
+      [[ -f "${SH_SCRIPT}" ]] && cp "${SH_SCRIPT}" "${SHELL_LOG}"
+      sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "${SHELL_LOG}"
+      print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${SH_SCRIPT_NAME}${NC}" "" "${SHELL_LOG}"
+
+      if [[ "${GPT_OPTION}" -gt 0 ]]; then
+        GPT_ANCHOR_="$(openssl rand -hex 8)"
+        # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+        write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
+        # add ChatGPT link
+        printf '%s\n\n' "" >> "${SHELL_LOG}"
+        write_anchor_gpt "${GPT_ANCHOR_}" "${SHELL_LOG}"
+      fi
     fi
   done
 }
@@ -151,6 +163,7 @@ s20_reporter() {
   local SHELL_LOG="${3:0}"
   local GPT_PRIO_=2
   local GPT_ANCHOR_=""
+
   if [[ "$VULNS" -ne 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -172,14 +185,16 @@ s20_reporter() {
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     fi
     write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
+
     if [[ "${GPT_OPTION}" -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"
       # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
-      write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
+      write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
       # add ChatGPT link
       printf '%s\n\n' "" >> "${SHELL_LOG}"
       write_anchor_gpt "${GPT_ANCHOR_}" "${SHELL_LOG}"
     fi
+
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi
 }
