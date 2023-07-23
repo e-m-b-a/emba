@@ -77,6 +77,8 @@ s21_script_bandit() {
   local NAME=""
   local PY_LOG=""
   local VULNS=""
+  local GPT_PRIO_=3
+  local GPT_ANCHOR_=""
 
   NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
   PY_LOG="$LOG_PATH_MODULE""/bandit_""$NAME"".txt"
@@ -100,10 +102,20 @@ s21_script_bandit() {
     fi
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" ""  "$PY_LOG"
+      GPT_PRIO_=2 
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" "" "$PY_LOG"
     fi
-    write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF"
+    
+    write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
+    if [[ "${GPT_OPTION}" -gt 0 ]]; then
+      GPT_ANCHOR_="$(openssl rand -hex 8)"
+      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+      write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${PY_LOG}" "" ""
+      # add ChatGPT link to output file
+      printf '%s\n\n' "" >> "${PY_LOG}"
+      write_anchor_gpt "${GPT_ANCHOR_}" "${PY_LOG}"
+    fi
     echo "$VULNS" >> "$TMP_DIR"/S21_VULNS.tmp
   fi
 }

@@ -20,6 +20,7 @@
 INVOCATION_PATH="."
 MODULE_COUNT=0
 
+
 import_helper()
 {
   local HELPERS=()
@@ -108,7 +109,26 @@ check_cve_search_job() {
   done
 }
 
-# $1: module group letter [P, S, L, F]
+check_quest_container() {
+  print_ln "no_log"
+  print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
+  # wait for quest container to finish network checks
+  while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
+    if docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; then
+      break
+    fi
+    sleep 0.1
+  done
+  reset
+  print_ln "no_log"
+  print_output "[*] Quest container ${QUEST_CONTAINER} dependency checks: \\n" "no_log"
+  docker logs "${QUEST_CONTAINER}"
+  print_output "[*] Finished Quest container ${QUEST_CONTAINER} dependency checks \\n" "no_log"
+  print_ln "no_log"
+  reset
+}
+
+# $1: module group letter [P, S, L, F, Q]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
 run_modules()
@@ -702,9 +722,28 @@ main() {
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba_quest -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      if [[ $? -ne ${D_RETURN} ]]; then
+        D_RETURN=1
+      fi
     else
+      local QUEST_CONTAINER_=""
+      QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+      export QUEST_CONTAINER="${QUEST_CONTAINER_}"
+      print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "main"
+      print_ln "no_log"
+
+      check_quest_container "${QUEST_CONTAINER}" &
+      QUEST_PID="$!"
+      store_kill_pids "${QUEST_PID}"
+      disown "${QUEST_PID}" 2> /dev/null || true
+
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
+      # stop quest container
+      if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
+        docker kill "${QUEST_CONTAINER_}"
+      fi
     fi
     enable_strict_mode "${STRICT_MODE}" 0
 
@@ -737,6 +776,29 @@ main() {
     initial_status_bar
     # Trap the window resize signal (handle window resize events).
     trap 'initial_status_bar' WINCH
+  fi
+
+  #######################################################################################
+  # Quests (Q-modules)
+  #######################################################################################
+
+  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+    while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+      sleep 1
+    done
+    run_modules "Q" "${THREADED}" "0"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
+    print_output "[*] Quest container done" "main"
+    exit 0
+  elif [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]] ;  then
+    while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+      sleep 1
+    done
+    # dev-mode
+    run_modules "Q" "${THREADED}" "0" &
+    export Q_MOD_PID="$!"
+  elif [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
+    docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${QUEST_CONTAINER_} failed the dependancy check" "main"
   fi
 
   #######################################################################################
@@ -848,6 +910,10 @@ main() {
   [[ ${DISABLE_STATUS_BAR} -eq 0 ]] && remove_status_bar
 
   write_notification "Reporting phase ended"
+
+  if [[ "${USE_DOCKER}" -eq 0 && "${THREADED}" -eq 1 && "${IN_DOCKER}" -eq 0 ]] && [[ -n "${Q_MOD_PID}" ]];  then
+    wait_for_pid "${Q_MOD_PID}"
+  fi
 
   if [[ "${TESTING_DONE}" -eq 1 ]]; then
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/firmware ]]; then

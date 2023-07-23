@@ -10,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner
+# Author(s): Michael Messner, Benedikt Kuehne
 
 # Description: Multiple useful helpers used to access online resources
 
@@ -132,4 +132,3 @@ kernel_downloader() {
     write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
   done
 }
-
