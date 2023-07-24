@@ -93,6 +93,8 @@ s22_vuln_check_semgrep() {
       local SEMG_SOURCE_FILE=""
       local SEMG_SOURCE_FILE_NAME=""
       local SEMG_LINE_NR=""
+      local GPT_PRIO_=2
+      local GPT_ANCHOR_=""
 
       ! [[ -d "$LOG_PATH_MODULE"/semgrep_sources/ ]] && mkdir "$LOG_PATH_MODULE"/semgrep_sources/
 
@@ -110,9 +112,17 @@ s22_vuln_check_semgrep() {
 
       sed -i -r "${SEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log
       print_output "[+] Found possible PHP vulnerability ${ORANGE}${SEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${SEMG_SOURCE_FILE_NAME}${GREEN}" "" "$LOG_PATH_MODULE/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+      
+      if [[ "${GPT_OPTION}" -gt 0 ]]; then
+        GPT_ANCHOR_="$(openssl rand -hex 8)"
+        # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+        write_csv_gpt_tmp "$(cut_path "${SEMG_SOURCE_FILE}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION} And I think there might be something in line ${SEMG_LINE_NR}" "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log" "" ""
+        # add ChatGPT link
+        printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+        write_anchor_gpt "${GPT_ANCHOR_}" "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
+      fi
     done
   fi
-
   write_log ""
   write_log "[*] Statistics1:$S22_SEMGREP_ISSUES:$S22_SEMGREP_SCRIPTS"
 }
@@ -174,7 +184,8 @@ s22_vuln_check() {
   ulimit -Sv unlimited
 
   VULNS=$(grep -c "vuln_name" "$PHP_LOG" 2> /dev/null || true)
-
+  local GPT_PRIO_=3
+  local GPT_ANCHOR_=""
   if [[ "$VULNS" -gt 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -185,13 +196,22 @@ s22_vuln_check() {
       if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
         COMMON_FILES_FOUND=" (""${CYAN}""common linux file: yes""${GREEN}"")"
         CFF="yes"
+        GPT_PRIO_=1
       fi
     else
       COMMON_FILES_FOUND=""
       CFF="NA"
     fi
     print_output "[+] Found ""$ORANGE""$VULNS"" vulnerabilities""$GREEN"" in php file"": ""$ORANGE""$(print_path "$PHP_SCRIPT_")""$GREEN""$COMMON_FILES_FOUND""$NC" "" "$PHP_LOG"
-    write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF"
+    write_csv_log "$(print_path "$PHP_SCRIPT_")" "$VULNS" "$CFF" "NA"
+    if [[ "${GPT_OPTION}" -gt 0 ]]; then
+      GPT_ANCHOR_="$(openssl rand -hex 8)"
+      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+      write_csv_gpt_tmp "$(cut_path "${PHP_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${TMP_DIR}/S22_VULNS.tmp" "" ""
+      # add ChatGPT link
+      printf '%s\n\n' "" >> "${TMP_DIR}"/S22_VULNS.tmp
+      write_anchor_gpt "${GPT_ANCHOR_}" "${TMP_DIR}"/S22_VULNS.tmp
+    fi
     echo "$VULNS" >> "$TMP_DIR"/S22_VULNS.tmp
   else
     # print_output "[*] Warning: No VULNS detected in $PHP_LOG" "no_log"

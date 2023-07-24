@@ -132,9 +132,9 @@ add_link_tags() {
           HTML_LINK="$(echo "$IMAGE_LINK" | sed -e 's@PICTURE@'"$(basename "$REF_LINK")"'@' || true)"
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
         fi
-      elif [[ ("$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
+      elif [[ ("$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
         REF_ANCHOR=""
-        if [[ "$REF_LINK" =~ ^(p|l|s|f){1}[0-9]{2,3}\#.*$ ]] ; then
+        if [[ "$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}\#.*$ ]] ; then
           REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2 || true)"
           REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
         fi
@@ -662,8 +662,10 @@ add_arrows()
   readarray -t L_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./l[0-9]*.*" | sort -V || true)
   local F_MODULE_ARR
   readarray -t F_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./f[0-9]*.*" | sort -V || true)
+  local Q_MODULE_ARR
+  readarray -t Q_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./q[0-9]*.*" | sort -V || true)
   local ALL_MODULE_ARR
-  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}" )
+  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
   for M_NUM in "${!ALL_MODULE_ARR[@]}"; do 
     if [[ "$M_NUM" -gt 0 ]] ; then
       FIRST_LINK="${ALL_MODULE_ARR[$(( M_NUM - 1 ))]}"

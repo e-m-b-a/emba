@@ -272,7 +272,7 @@ check_tools() {
   done
   if ! [[ -d ./external/semgrep-rules/bash ]]; then
     echo -e "\\n""${RED}""${BOLD}""Please install semgrep-rules to directory ./external to perform all checks""${NC}""\\n"
-    echo -e "${ORANGE}git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rule${NC}"
+    echo -e "${ORANGE}git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules${NC}"
     exit 1
   fi
 }

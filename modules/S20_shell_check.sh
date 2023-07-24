@@ -30,7 +30,7 @@ S20_shell_check()
   local SEMGREP=1
   local NEG_LOG=0
 
-  mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -iname "*.sh" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 || true )
+  mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -type f -exec file {} \; | grep "shell script, ASCII text executable" 2>/dev/null | cut -d: -f1 | sort -u || true )
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
   if [[ $SHELLCHECK -eq 1 ]] ; then
@@ -78,10 +78,6 @@ S20_shell_check()
 
   if [[ $SEMGREP -eq 1 ]] ; then
     sub_module_title "Check scripts with semgrep"
-    # semgrep has issues if we are running throught a complete filesystem with /proc and other filesystems are in use
-    # This results that we need to wait for for S115_usermode_emulator and unmounted /proc filesytem
-    # check emba.log for S115_usermode_emulator
-    [[ "$THREADED" -eq 1 ]] && module_wait "S115_usermode_emulator"
     local S20_SEMGREP_SCRIPTS=0
     local S20_SEMGREP_VULNS=0
     local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
@@ -111,7 +107,27 @@ S20_shell_check()
     print_output "[-] Semgrepper is disabled ... no tests performed"
   fi
 
+  s20_eval_script_check "${SH_SCRIPTS[@]}"
+
   module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+}
+
+s20_eval_script_check() {
+  local SH_SCRIPTS_=("${@}")
+  local SH_SCRIPT=""
+
+  sub_module_title "Check shell scripts for eval usage"
+
+  for SH_SCRIPT in "${SH_SCRIPTS_[@]}" ; do
+    print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
+    if grep "eval " "${SH_SCRIPT}" | grep -q -v "^#.*"; then
+      SH_SCRIPT_NAME="$(basename "${SH_SCRIPT}")"
+      ! [[ -d "$LOG_PATH_MODULE"/sh_eval_sources/ ]] && mkdir "$LOG_PATH_MODULE"/sh_eval_sources/
+      [[ -f "${SH_SCRIPT}" ]] && cp "${SH_SCRIPT}" "$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
+      sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
+      print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${SH_SCRIPT_NAME}${NC}" "" "${LOG_PATH_MODULE}/sh_eval_sources/${SH_SCRIPT_NAME}.log"
+    fi
+  done
 }
 
 s20_script_check() {
@@ -133,7 +149,8 @@ s20_reporter() {
   local VULNS="${1:0}"
   local SH_SCRIPT_="${2:0}"
   local SHELL_LOG="${3:0}"
-
+  local GPT_PRIO_=2
+  local GPT_ANCHOR_=""
   if [[ "$VULNS" -ne 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
@@ -150,11 +167,19 @@ s20_reporter() {
 
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
+      GPT_PRIO_=1
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
     fi
     write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
-    
+    if [[ "${GPT_OPTION}" -gt 0 ]]; then
+      GPT_ANCHOR_="$(openssl rand -hex 8)"
+      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+      write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
+      # add ChatGPT link
+      printf '%s\n\n' "" >> "${SHELL_LOG}"
+      write_anchor_gpt "${GPT_ANCHOR_}" "${SHELL_LOG}"
+    fi
     echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
   fi
 }

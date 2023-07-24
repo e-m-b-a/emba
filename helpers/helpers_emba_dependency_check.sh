@@ -198,6 +198,94 @@ dependency_check()
   module_title "Dependency check" "no_log"
 
   print_ln "no_log"
+
+  #######################################################################################
+  ## Quest Container
+  #######################################################################################
+  print_output "[*] Network connection:" "no_log"
+  if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
+    print_output "    Internet connection - \\c" "no_log"
+    if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
+      echo -e "$RED""not ok""$NC"
+      print_output "[-] ERROR: Quest container has no internet connection!" "no_log"
+      exit 1
+    else
+      echo -e "$GREEN""ok""$NC"
+    fi
+    if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
+      if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
+        # readin gpt_config.env
+        while read -r LINE; do
+          if [[ "${LINE}" == *'='* ]] && [[ "${LINE}" != '#'* ]]; then
+            export "$(echo "${LINE}" | xargs)"
+          fi
+        done < "${CONFIG_DIR}/gpt_config.env"
+      fi
+    fi
+    if [[ -z "${OPENAI_API_KEY}" ]]; then
+      print_output "$(indent "ChatGPT-API key not set - ${ORANGE}see https://github.com/e-m-b-a/emba/wiki/AI-supported-firmware-analysis for more information${NC}")" "no_log"
+      # The following if clause is currently not working! We have not loaded the profile in this stage
+      # TODO: Find a workaround!
+      if [[ "${GPT_OPTION}" -eq 1 ]]; then
+        DEP_ERROR=1
+      fi
+    else
+      local RETRIES_=0
+      # on the host we try it only 10 times:
+      local MAX_RETRIES=10
+      if [[ "$IN_DOCKER" -eq 1 ]]; then
+        # within the Quest container we can keep trying it as it does not matter if the container starts up later
+        MAX_RETRIES=200
+      fi
+      local SLEEPTIME=30
+      while true; do
+        local HTTP_CODE_=400
+        print_output "    OpenAI-API key  - \\c" "no_log"
+        HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+                -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+                -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json -sS)
+
+        if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
+          echo -e "$GREEN""ok""$NC"
+          rm /tmp/chatgpt-test.json
+          break
+        else
+          if jq '.error.code' /tmp/chatgpt-test.json | grep -q "rate_limit_exceeded" ; then
+            # rate limit handling - if we got a response like:
+            # Please try again in 20s
+            echo -e "$RED""not ok (rate limit issues)""$NC"
+            if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in " ; then
+              # print_output "GPT API test #${RETRIES_} - \\c" "no_log"
+              sleep "${SLEEPTIME}"s
+              # sleeptime gets adjusted on every failure
+              SLEEPTIME=$((SLEEPTIME+5))
+              ((RETRIES_+=1))
+              [[ "${RETRIES_}" -lt "${MAX_RETRIES}" ]] && continue
+            fi
+          fi
+          echo -e "$RED""not ok""$NC"
+          print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
+          print_output "[-] ERROR response: $(cat /tmp/chatgpt-test.json)" "no_log"
+          # Note: we are running into issues in the case where the key can't be verified, but GPT is not enabled at all
+          #       In such a case we will fail the check without the need of GPT
+          DEP_ERROR=1
+        fi
+        if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+          print_output "    Testing phase ended  - \\c" "no_log"
+          echo -e "$RED""exit now""$NC"
+          DEP_ERROR=1
+        fi
+      done
+    fi
+  else
+    print_output "    Isolation  - ${GREEN}""ok""${NC}" "no_log"
+  fi
+  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+    if [[ $ONLY_DEP -gt 0 ]] && [[ $FORCE -ne 0 ]]; then
+      exit 0
+    fi
+  fi
+  print_ln "no_log"
   #######################################################################################
   # Elementary checks
   #######################################################################################
@@ -207,7 +295,6 @@ dependency_check()
   # As the container runs as root we should not run into issues within the container.
   # Outside the container we can run mostly without root privs - this is currently under evaluation
   # Some other nice features like restarting the mongod will not work without root privs.
-  print_output "    user permissions" "no_log"
   if [[ $QEMULATION -eq 1 && $EUID -ne 0 ]] || [[ $USE_DOCKER -eq 1 && $EUID -ne 0 ]] || [[ $FULL_EMULATION -eq 1 && $EUID -ne 0 ]]; then
     if [[ $QEMULATION -eq 1 && $USE_DOCKER -eq 0 ]] || [[ $FULL_EMULATION -eq 1 && $USE_DOCKER -eq 0 ]]; then
       print_output "    user permission - emulation mode - \\c" "no_log"

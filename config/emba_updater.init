@@ -10,6 +10,10 @@ LOG_DIR="/var/log"
 [ -x /etc/init.d/redis-server ] || exit 0
 [ -d "$LOG_DIR" ] || exit 0
 
+if [ -f EMBA_INSTALL_PATH/external/emba_venv/bin/activate ]; then
+  source EMBA_INSTALL_PATH/external/emba_venv/bin/activate
+fi
+
 if command -v cve_searchsploit > /dev/null ; then
   echo "[*] EMBA update - cve_searchsploit update" | tee -a "$LOG_DIR"/emba_update.log
   cve_searchsploit -u | tee -a "$LOG_DIR"/emba_update.log
@@ -28,3 +32,7 @@ EMBA_INSTALL_PATH/external/cve-search/sbin/db_updater.py -v | tee -a "$LOG_DIR"/
 
 echo "[*] EMBA update - update local docker image" | tee -a "$LOG_DIR"/emba_update.log
 docker pull embeddedanalyzer/emba | tee -a "$LOG_DIR"/emba_update.log
+
+if [ -f EMBA_INSTALL_PATH/external/emba_venv/bin/activate ]; then
+  deactivate
+fi
