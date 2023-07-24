@@ -391,6 +391,13 @@ main() {
     export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
   fi
 
+  # activate the virtual environment - we should have it in external which fits also the docker environment
+  # shellcheck source=/dev/null
+  if [[ -f "${EXT_DIR}/emba_venv/bin/activate" ]]; then
+    print_output "[*] Enable python virtual environment ${ORANGE}${EXT_DIR}/emba_venv${NC}" "no_log"
+    source "${EXT_DIR}/emba_venv/bin/activate"
+  fi
+
   # Check all dependencies of EMBA
   dependency_check
 
@@ -667,7 +674,7 @@ main() {
     # try it 10 times before exit
     local CNT_DOCK=0
     for CNT_DOCK in {1..10}; do
-      if ! docker images | grep -qE "emba[[:space:]]*latest"; then
+      if ! docker images | grep -qE "embeddedanalyzer/emba[[:space:]]"; then
         sleep 1
       else
         break
@@ -873,6 +880,9 @@ main() {
     print_output "[*] Web report created HTML report in ${ORANGE}${LOG_DIR}/html-report${NC}\\n" "main"
     print_output "[*] Open the web-report with${ORANGE} firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
   fi
+
+  # deactivate the python virtual env
+  [[ -v VIRTUAL_ENV ]] && deactivate
 
   # we need to change the permissions of the LOG_DIR to the orig. user from the host
   [[ "${IN_DOCKER}" -eq 1 ]] && restore_permissions
