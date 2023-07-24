@@ -77,7 +77,7 @@ s21_script_bandit() {
   local NAME=""
   local PY_LOG=""
   local VULNS=""
-  local GPT_PRIO_=3
+  local GPT_PRIO_=2
   local GPT_ANCHOR_=""
 
   NAME=$(basename "$PY_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
@@ -110,8 +110,8 @@ s21_script_bandit() {
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
     if [[ "${GPT_OPTION}" -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"
-      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
-      write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION}" "${PY_LOG}" "" ""
+      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+      write_csv_gpt_tmp "$(cut_path "${PY_SCRIPT_}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${PY_LOG}" "" ""
       # add ChatGPT link to output file
       printf '%s\n\n' "" >> "${PY_LOG}"
       write_anchor_gpt "${GPT_ANCHOR_}" "${PY_LOG}"

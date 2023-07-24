@@ -33,6 +33,7 @@ Q02_openai_question() {
       done
     fi
 
+    export GTP_CHECKED_ARR=()
     while ! grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
       if [[ "${CHATGPT_RESULT_CNT}" -ge 0 ]]; then
         ask_chatgpt
@@ -64,36 +65,58 @@ ask_chatgpt() {
     mkdir "${GPT_FILE_DIR_}"
   fi
 
-  while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
-    SCRIPT_PATH_TMP_="${COL1_}"
-    GPT_ANCHOR_="${COL2_}"
-    GPT_PRIO_="${COL3_//GPT-Prio-/}"
-    GPT_QUESTION_="${COL4_}"
-    GPT_OUTPUT_FILE_="${COL5_}"
-    GPT_TOKENS_="${COL6_//cost\=/}"
-    GPT_RESPONSE_="${COL7_}"
+  # generating Array for GPT requests - sorting according the prio in field 3
+  # this array gets regenerated on every round
+  readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+
+  for (( ELE_INDEX=0; ELE_INDEX<"${#Q02_OPENAI_QUESTIONS[@]}"; ELE_INDEX++ )); do
+    ELEM="${Q02_OPENAI_QUESTIONS["${ELE_INDEX}"]}"
+    SCRIPT_PATH_TMP_="$(echo "${ELEM}" | cut -d\; -f1)"
+
+    # as we always start with the highest rated entry, we need to check if this entry was already tested:
+    if [[ " ${GTP_CHECKED_ARR[*]} " =~ ${SCRIPT_PATH_TMP_} ]]; then
+      print_output "[*] GPT - Already tested ${SCRIPT_PATH_TMP_}" "no_log"
+      # lets test the next entry
+      continue
+    fi
+
+    GPT_ANCHOR_="$(echo "${ELEM}" | cut -d\; -f2)"
+    GPT_PRIO_="$(echo "${ELEM}" | cut -d\; -f3)"
+    # GPT_PRIO_="${GPT_PRIO_//GPT-Prio-/}"
+    GPT_QUESTION_="$(echo "${ELEM}" | cut -d\; -f4)"
+    GPT_OUTPUT_FILE_="$(echo "${ELEM}" | cut -d\; -f5)"
+    GPT_TOKENS_="$(echo "${ELEM}" | cut -d\; -f6)"
+    GPT_TOKENS_="${GPT_TOKENS_//cost\=/}"
+    GPT_RESPONSE_="$(echo "${ELEM}" | cut -d\; -f7)"
     GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
     
     # in case we have nothing we are going to move on
     [[ -z "${SCRIPT_PATH_TMP_}" ]] && continue
-    print_output "[*] Trying to check inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
+    print_output "[*] Identification of ${ORANGE}${SCRIPT_PATH_TMP_} / ${GPT_INPUT_FILE_}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
     SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}")"
+
     # in case we have nothing we are going to move on
     ! [[ -f "${SCRIPT_PATH_TMP_}" ]] && continue
     [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
 
-    print_output "[*] Trying to check ${ORANGE}${SCRIPT_PATH_TMP_}${NC} with Question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
-    print_output "[*] Prio for testing is ${GPT_PRIO_}" "no_log"
+    print_output "[*] AI-Assisted analysis of script ${ORANGE}${SCRIPT_PATH_TMP_}${NC} with question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
+    print_output "[*] Current priority for testing is ${GPT_PRIO_}" "no_log"
 
-    if [[ -z ${GPT_RESPONSE_} ]] && [[ ${GPT_PRIO_} -le ${MINIMUM_GPT_PRIO} ]] && [[ "${SCRIPT_PATH_TMP_}" != '' ]]; then
+    if [[ -z ${GPT_RESPONSE_} ]] && [[ ${GPT_PRIO_} -ge ${MINIMUM_GPT_PRIO} ]] && [[ "${SCRIPT_PATH_TMP_}" != '' ]]; then
       if [[ -f "${SCRIPT_PATH_TMP_}" ]]; then
         # add navbar-item for file
         sub_module_title "${GPT_INPUT_FILE_}"
-        print_output "[*] Asking ChatGPT about ${ORANGE}$(print_path "${SCRIPT_PATH_TMP_}")${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+
+        print_output "[*] AI-Assisted analysis for ${ORANGE}$(print_path "${SCRIPT_PATH_TMP_}")${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
         head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
         CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
         printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
         print_output "[*] The Combined Cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
+        if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
+          print_output "[-] GPT request is too big ... skipping it now"
+          continue
+        fi
+
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
           -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" --write-out "%{http_code}" || true)
@@ -104,7 +127,7 @@ ask_chatgpt() {
             print_output "[-] ERROR response: $(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
 
             if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
-              print_output "[-] Stopping OpenAI requests since the API key has reached its quota"
+              print_output "[-] Stopping OpenAI requests since the API key has reached its quota limit"
               CHATGPT_RESULT_CNT=-1
               sleep 20
               break
@@ -132,6 +155,7 @@ ask_chatgpt() {
                   fi
                   sleep 1
                 done
+                # TODO: now we should redo the last test
               else
                 print_output "[-] Stopping OpenAI requests since the API key has reached its rate_limit"
                 CHATGPT_RESULT_CNT=-1
@@ -140,6 +164,9 @@ ask_chatgpt() {
             fi
 
             cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
+            readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+            # reset the array index to start again with the highest rated entry
+            ELE_INDEX=0
             sleep 30s
             continue
           fi
@@ -150,16 +177,18 @@ ask_chatgpt() {
           print_output "[-] Something went wrong with the ChatGPT request for ${GPT_INPUT_FILE_}"
           break
         fi
+
         GPT_RESPONSE_=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")")
         GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_[*]//\;/}" #remove ; from response
         GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
 
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
+          GTP_CHECKED_ARR+=("${SCRIPT_PATH_TMP_}")
           # write new into done csv
-          write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
+          write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
           # print openai response
           print_ln
-          print_output "[*] ${ORANGE}OpenAI responded with the following details:${NC}"
+          print_output "[*] ${ORANGE}AI-assisted analysis results via OpenAI ChatGPT:${NC}\\n"
           echo -e "${GPT_RESPONSE_[*]}" | tee -a "${LOG_FILE}"
           # add proper module link
           print_ln
@@ -187,11 +216,18 @@ ask_chatgpt() {
     if [[ "${GPT_OPTION}" -ne 2 ]]; then
       sleep 20s
     fi
-  done < "${CSV_DIR}/q02_openai_question.csv.tmp"
+
+    # reload q02 results:
+    print_output "[*] Regenerate analysis array ..." "no_log"
+    readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+    # reset the array index to start again with the highest rated entry
+    ELE_INDEX=0
+  done
 
   if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
-    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
-      GPT_ANCHOR_="${COL2_}"
+    local GPT_ENTRY_LINE=""
+    while read -r GPT_ENTRY_LINE; do
+      GPT_ANCHOR_="$(echo "${GPT_ENTRY_LINE}" | cut -d ';' -f2)"
       sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
     done < "${CSV_DIR}/q02_openai_question.csv"
   fi

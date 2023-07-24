@@ -71,7 +71,7 @@ set_defaults() {
   export QUEST_CONTAINER=""
   export GPT_OPTION=0           # 0 -> off 1-> unpayed plan 2 -> no rate-limit
   export GPT_QUESTION="For the following code I need you to tell me how an attacker could exploit it and point out all vulnerabilities:"
-  export MINIMUM_GPT_PRIO=2     # [3 downto 0] 3 -> everything gets checked; 0 -> nothing gets checked 
+  export MINIMUM_GPT_PRIO=1     # everything above this value gets checked
 
   export SHORT_PATH=0           # short paths in cli output
   export THREADED=0             # 0 -> single thread
