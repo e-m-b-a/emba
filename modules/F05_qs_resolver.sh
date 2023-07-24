@@ -24,7 +24,7 @@ F05_qs_resolver() {
       grep -q "Q02_openai_question finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}" || sleep 1m
     fi
 
-    local _GPT_INPUT_FILE_=""
+    # local _GPT_INPUT_FILE_=""
     local GPT_ANCHOR_=""
     local _GPT_PRIO_=3
     local GPT_QUESTION_=""
@@ -38,13 +38,13 @@ F05_qs_resolver() {
       while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
         GPT_INPUT_FILE_="${COL1_}"
         GPT_ANCHOR_="${COL2_}"
-        _GPT_PRIO_="${COL3_//GPT-Prio-/}"
+        _GPT_PRIO_="${COL3_}"
         GPT_QUESTION_="${COL4_}"
         GPT_OUTPUT_FILE_="${COL5_}"
         GPT_TOKENS_="${COL6_//cost\=/}"
         GPT_RESPONSE_="${COL7_//\"/}"
 
-        print_output "[*] Trying to resolve Anchor=${GPT_ANCHOR_} in Output_file=${GPT_OUTPUT_FILE_}"
+        print_output "[*] Trying to resolve ${ORANGE}Anchor ${GPT_ANCHOR_}${NC} in ${ORANGE}Output_file ${GPT_OUTPUT_FILE_}${NC}."
         
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           if ! [ -f "${GPT_OUTPUT_FILE_}" ]; then

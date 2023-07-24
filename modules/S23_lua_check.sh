@@ -65,6 +65,7 @@ s23_luaseccheck() {
   local NAME=""
   local LUA_LOG=""
   local GPT_ANCHOR_=""
+  local GPT_PRIO_=2
   sub_module_title "LUA Security checks module"
 
   mapfile -t LUA_CGI_FILES < <(find "${FIRMWARE_PATH}" -type f -exec grep -H cgilua\. {} \; 2>/dev/null | cut -d ':' -f1 | sort -u)
@@ -86,6 +87,7 @@ s23_luaseccheck() {
         ISSUES_FILE=$((ISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${ENTRY}${GREEN} in file ${ORANGE}${QUERY_FILE}${GREEN} with file access capabilities."
         S23_ISSUE_FOUND=1
+        GPT_PRIO=$((GPT_PRIO+1))
       fi
       if grep "$ENTRY" "${QUERY_FILE}" | grep -q "os.execute"; then
         # command exec - critical
@@ -93,6 +95,7 @@ s23_luaseccheck() {
         ISSUES_FILE=$((ISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${ENTRY}${GREEN} in file ${ORANGE}${QUERY_FILE}${GREEN} with command execution capabilities."
         S23_ISSUE_FOUND=1
+        GPT_PRIO=$((GPT_PRIO+1))
       fi
     done
     if [[ "${ISSUES_FILE}" -eq 0 ]] && grep -q "os.execute" "${QUERY_FILE}"; then
@@ -110,8 +113,8 @@ s23_luaseccheck() {
       write_csv_log "$(print_path "$QUERY_FILE")" "0" "$ISSUES_FILE" "NA"
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
         GPT_ANCHOR_="$(openssl rand -hex 8)"
-        # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
-        write_csv_gpt_tmp "$(cut_path "${QUERY_FILE}")" "${GPT_ANCHOR_}" "GPT-Prio-2" "${GPT_QUESTION}" "${CSV_DIR}/s23_lua_check.csv" "" ""
+        # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+        write_csv_gpt_tmp "$(cut_path "${QUERY_FILE}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${CSV_DIR}/s23_lua_check.csv" "" ""
         # add ChatGPT link
         print_ln
         print_ln

@@ -834,7 +834,7 @@ print_notification() {
 }
 
 # writes inputs into csv for chatgpt
-# Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
+# Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
 write_csv_gpt() {
   local CSV_ITEMS=("$@")
   if ! [[ -d "$CSV_DIR" ]]; then
@@ -846,7 +846,7 @@ write_csv_gpt() {
 }
 
 # writes inputs into tmp csv for chatgpt
-# Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
+# Args: "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "${GPT_RESPONSE_}"
 write_csv_gpt_tmp() {
   local CSV_ITEMS=("$@")
   if ! [[ -d "$CSV_DIR" ]]; then
