@@ -1,0 +1,104 @@
+
+EMBA version 1.3.0 - AI-Assited Firmware Analysis
+
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNKkdc:,...        ..',;cox0XWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNKxc,.                        ..;oOXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o,.                                 .ckXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXx;.                                       'l0WMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXd'            .':loxkOO00OOkdoc:,.            .cONNXK000000KXNWWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNx'          .,lkKNWMMMMMMMMMMMMMMWWXOd:.          .'....    ....,;cok0NWMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMWK:          ,o0NMMMMMMMMMMMMMMMMMMMMMMMMWXx,                           .':oOXWMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMWk'         ;kNMMMMMMMMMMMMMMMMMMMMMMMMMMWKxc.                                'ckXWMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMWx.        'xNMMMMMMMMMMMMMMMMMMMMMMMMWNOo;.                                      'l0WMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMWx.       .cKWMMMMMMMMMMMMMMMMMMMMMWKxc;'             ..;cldxkOOOOkxol:,.            .cOWMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMWNk'       .oNMMMMMMMMMMMMMMMMMMMMNOo;.              'cd0XWMMMMMMMMMMMMMMWXOd:.          .cKWMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMWXOxl:,.       .oNMMMMMMMMMMMMMMMMMWKxc'              .;oONMMMMMMMMMMMMMMMMMMMMMMMWXx:.         .xNMMMMMMMMMMM
+MMMMMMMMMMMMMMWXkl;.             :XMMMMMMMMMMMMMMMN0o;.              'cxKWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWKl.        .cXMMMMMMMMMM
+MMMMMMMMMMMWXx:.                .kMMMMMMMMMMMMWXkc'.             .,oOXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWKl.        :KMMMMMMMMM
+MMMMMMMMMW0l.                   ;XMMMMMMMMMWXd:.             .:dOKWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWk'        ;KMMMMMMMM
+MMMMMMMWO:.            .        lNMMMMMMMMM0,            .,lkXWMMMMMMMMMMMMMMMMWXOocclxKWMMMMMMMMMMMMMMMMMMMW0;        cXMMMMMMM
+MMMMMWKc.          .;oOx.       lWMMMMMMMMWo          .:d0NMMMMMMMMMMMMMMMMMWKx:.      .;oONMMMMMMMMMMMMMMMMMM0,       .dWMMMMMM
+MMMMNx'         .:xKWMM0'       lWMMMMMMMMWl      .,lkXWMMMMMMMMMMMMMMMMWXOo,.            .'lkXWMMMMMMMMMMMMMMMk.       ,KMMMMMM
+MMMXl.        .c0WMMMMM0'       lWMMMMMMMMWo     ,ONMMMMMMMMMMMMMMMMMWKxc'                    .:d0NMMMMMMMMMMMMNl       .xMMMMMM
+MMXc        .:0WMMMMMMM0'       lWMMMMMMMMWo     lNMMMMMMMMMMMMMMMNOo;.       .'coc'.            .,lkXWMMMMMMMMMk.       lNMMMMM
+MXc        .xNMMMMMMMMM0'       lWMMMMMMMMWo     lNMMMMMMMMMMWKxoc'        .;oONMMMN0o;.             .:xKWMMMMMM0'       :XMMMMM
+No.       ,OWMMMMMMMMMM0'       lWMMMMMMMMWo     lNMMMMMMMNOo;.         'cxKWMMMMMMMMMWKxc'             .,oONWMMK,       :XMMMMM
+k.       'OMMMMMMMMMMMM0'       lWMMMMMMMMWo     lNMMMWKkc'.           ;ONMMMMMMMMMMMMMMMMNOo;.             'cxKO'       cNMMMMM
+:       .xWMMMMMMMMMMMM0'       lWMMMMMMMMWo     lNN0d;.                .;d0NMMMMMMMMMMMMMMMMWKxc'             ..        oWMMMMM
+.       :XMMMMMMMMMMMMM0'       lWMMMMMMMMWo     'c'.       .,lxxo,.       .'lkXWMMMMMMMMMMMMMMMWXOo;.                  .OMMMMMM
+        dWMMMMMMMMMMMMM0'       lWMMMMMMMMWo             .:d0NMMMMWKx:.        .:d0NMMMMMMMMMMMMMMMMWKx:.               cNMMMMMM
+       .kMMMMMMMMMMMMMM0'       lWMMMMMMMMWo         .,lkXWMMMMMMMMMMWXOl,.       .,lkXWMMMMMMMMMMMMMMMWXOl,.           cXMMMMMM
+       .kMMMMMMMMMMMMMM0'       lWMMMMMMMMWo      .:d0NMMMMMMMMMMMMMMMMMMN0d:.        .:d0WMMMMMMMMMMMMMMMMN0o,.         ;OWMMMM
+       .xWMMMMMMMMMMMMM0'       lWMMMMMMMMWo     :KWMMMMMMMMMMMMMMMMMMMMMMMMWKc          .,oOXWMMMMMMMMMMMMMMMNO:.        .dNMMM
+.       cNMMMMMMMMMMMMM0'       lWMMMMMMMMWo     lNMMMMMMMMMMMMMMMMMMMMMMMMMMWo              'cxKWMMMMMMMMMMMMMMWO;        .lNMM
+,       .OMMMMMMMMMMMMM0'       lWMMMMMMMMWl     lNMMMMMMMMMMMMMMMMMMMMMMMMMMWo     ;dl'.       .;oONWMMMMMMMMMMMMXo.        lNM
+d.       :XMMMMMMMMMMMMK,       'dKWMMMMMMWl     lNMMMMMMMMMMMMMMMMMMMMMMMMMMWo     lNMN0o;.        'ckNMMMMMMMMMMMWk.       .dW
+X:        cXMMMMMMMMMMMWO;.       .;oOXWMMNl     lNMMMMMMMMMMMMMMMMMMMMMMMMMMWo     lNMMMMWKxc'        cXMMMMMMMMMMMWk.       'O
+M0'        cKMMMMMMMMMMMMNOo;.        'cxKXl     lNMMMMMMMMMMMMMMMMMMMMMMMMMMWo     lNMMMMMMMWX:       .kMMMMMMMMMMMMWd.       c
+MWO'        ,kNMMMMMMMMMMMMMWKxc'        .,.     lNMMMMMMMMMMMMMMMMMMMMMMMMMMWo     lNMMMMMMMMWl       .kMMMMMMMMMMMMMX;       .
+MMWO,        .:0WMMMMMMMMMMMMMMWNOo;.            lNMMMMMMMMMMMMMMMMMMMMMMMMMMWo     lNMMMMMMMMWl       .kMMMMMMMMMMMMMWd.      .
+MMMMK:         .:kXWMMMMMMMMMMMMMMMWKx:'         .oONMMMMMMMMMMMMMMMMMMMMMMN0o'     lNMMMMMMMMWl       .kMMMMMMMMMMMMMMk.       
+MMMMMNx.          'lkXWMMMMMMMMMMMMMMMWXOl,.       .'ckXWMMMMMMMMMMMMMMWXkl,.       lNMMMMMMMMWl       .kMMMMMMMMMMMMMMO.       
+MMMMMMWo             .:d0NMMMMMMMMMMMMMMMMNKd:.        .;d0NMMMMMMMMN0d:.           lNMMMMMMMMWl       .kMMMMMMMMMMMMMMk.       
+MMMMMMK;                .,lkXWMMMMMMMMMMMMMMMWXkl,.       .'lkXWWXOl,.       .      lNMMMMMMMMWl       .kMMMMMMMMMMMMMWo       .
+MMMMMWx.                    .:x0NMMMMMMMMMMMMMMMMN0d:.        .,,.        .;dOc     lNMMMMMMMMWl       .kMMMMMMMMMMMMM0,       ,
+MMMMMWl       .:c'             .,oOXWMMMMMMMMMMMMMMMWXkl'             .'ckKWMWo     lNMMMMMMMMWl       .kMMMMMMMMMMMMNl        o
+MMMMMX:       '0WNOo;.             .cxKWMMMMMMMMMMMMMWKd;          .;o0NMMMMMWo     lNMMMMMMMMWl       .kMMMMMMMMMMMNd.       ;K
+MMMMMX:       '0MMMMWKxc'             .;oONWMMMMMWNOo;.        ';cxKWMMMMMMMMWo     lNMMMMMMMMWl       .kMMMMMMMMMMNo.       .OW
+MMMMMNc       .OMMMMMMMWXOo,.             'cxKNKxc'        .;oONWMMMMMMMMMMMMWo     lNMMMMMMMMWl       .kMMMMMMMMW0:        .xWM
+MMMMMWo       .dWMMMMMMMMMMWKd:.             .'.        'cxKWMMMMMMMMMMMMMMMMWo     lNMMMMMMMMWl       .kMMMMMMWXd.        .kWMM
+MMMMMMO.       ;KMMMMMMMMMMMMMWXkl,.                .,oOXWMMMMMMMMMMMMMMMMWXkc.     lNMMMMMMMMWl       .kMMMMWKo'         ,OWMMM
+MMMMMMNc        oNMMMMMMMMMMMMMMMMN0d:.          .:xKWMMMMMMMMMMMMMMMMMN0d:.        lNMMMMMMMMWl       .kMWKx:.         .oXMMMMM
+MMMMMMM0'       .dNMMMMMMMMMMMMMMMMMMWXkl,.  .,lOXWMMMMMMMMMMMMMMMMWXkl,.          .dWMMMMMMMMWl        ;l,.          .:OWMMMMMM
+MMMMMMMWx.       .oNMMMMMMMMMMMMMMMMMMMMMNKO0KNMMMMMMMMMMMMMMMMNX0d:.             .oXMMMMMMMMMNc                    .:ONMMMMMMMM
+MMMMMMMMNd.        :0WMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWXOl,..            .'ckXWMMMMMMMMMMK,                 .,o0WMMMMMMMMMM
+MMMMMMMMMWx.        .oKWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWKx:.              .;oONMMMMMMMMMMMMMWd.              .;oONMMMMMMMMMMMMM
+MMMMMMMMMMWO,         .l0WMMMMMMMMMMMMMMMMMMMMMMMMMMWXOo;.              'cxKWMMMMMMMMMMMMMMMM0'          .':okKWMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMXl.         .;d0NWMMMMMMMMMMMMMMMMMMMNKxc'              .;oONWMMMMMMMMMMMMMMMMMMK;        :xOKNMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMWO:.          .':ok0XNWWMMMMMWNXKOdc,.             ..cxKWMMMMMMMMMMMMMMMMMMMMW0;        :XMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMWOc.             ..',;::c::;'..              .,oOKXWMMMMMMMMMMMMMMMMMMMMMMNx'        ;KMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMWKo,.                                   .:xKWMMMMMMMMMMMMMMMMMMMMMMMMMWO:.        :KMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMN0o;.                              ,xXWMMMMMMMMMMMMMMMMMMMMMMMMMWXk:.        .lXMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMWXOo:,..                        .;d0NMMMMMMMMMMMMMMMMMMMMMWXOl'          'kNMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0kdolc::::::cloo:.          .,cdOKXNWMMMMMMMMWNX0ko:.           .oXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWWMMMMMMNOc.             ...,;ccllcc:;'..             'oKWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMW0o,                                     .:xXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNOo;.                              .:xKWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWKko:'.                   ..,cdOXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWXOdc,'..        ..';lxKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+
+#   ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄               ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄  
+#  ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌             ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░▌ 
+#  ▐░█▀▀▀▀▀▀▀█░▌ ▀▀▀▀█░█▀▀▀▀              ▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌
+#  ▐░▌       ▐░▌     ▐░▌                  ▐░▌       ▐░▌▐░▌          ▐░▌               ▐░▌     ▐░▌               ▐░▌     ▐░▌          ▐░▌       ▐░▌
+#  ▐░█▄▄▄▄▄▄▄█░▌     ▐░▌      ▄▄▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄▄▄      ▐░▌     ▐░█▄▄▄▄▄▄▄▄▄      ▐░▌     ▐░█▄▄▄▄▄▄▄▄▄ ▐░▌       ▐░▌
+#  ▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░▌       ▐░▌
+#  ▐░█▀▀▀▀▀▀▀█░▌     ▐░▌      ▀▀▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌ ▀▀▀▀▀▀▀▀▀█░▌ ▀▀▀▀▀▀▀▀▀█░▌     ▐░▌      ▀▀▀▀▀▀▀▀▀█░▌     ▐░▌     ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌       ▐░▌
+#  ▐░▌       ▐░▌     ▐░▌                  ▐░▌       ▐░▌          ▐░▌          ▐░▌     ▐░▌               ▐░▌     ▐░▌     ▐░▌          ▐░▌       ▐░▌
+#  ▐░▌       ▐░▌ ▄▄▄▄█░█▄▄▄▄              ▐░▌       ▐░▌ ▄▄▄▄▄▄▄▄▄█░▌ ▄▄▄▄▄▄▄▄▄█░▌ ▄▄▄▄█░█▄▄▄▄  ▄▄▄▄▄▄▄▄▄█░▌     ▐░▌     ▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄█░▌
+#  ▐░▌       ▐░▌▐░░░░░░░░░░░▌             ▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░░░░░░░░░░▌ 
+#   ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀               ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀  
+#                                                                                                                                                 
+#   ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄       ▄▄  ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄                                        
+#  ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░▌     ▐░░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌                                       
+#  ▐░█▀▀▀▀▀▀▀▀▀  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀█░▌▐░▌░▌   ▐░▐░▌▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀▀▀▀▀▀                                        
+#  ▐░▌               ▐░▌     ▐░▌       ▐░▌▐░▌▐░▌ ▐░▌▐░▌▐░▌       ▐░▌▐░▌       ▐░▌▐░▌       ▐░▌▐░▌                                                 
+#  ▐░█▄▄▄▄▄▄▄▄▄      ▐░▌     ▐░█▄▄▄▄▄▄▄█░▌▐░▌ ▐░▐░▌ ▐░▌▐░▌   ▄   ▐░▌▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄▄▄                                        
+#  ▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░▌  ▐░▌  ▐░▌▐░▌  ▐░▌  ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌                                       
+#  ▐░█▀▀▀▀▀▀▀▀▀      ▐░▌     ▐░█▀▀▀▀█░█▀▀ ▐░▌   ▀   ▐░▌▐░▌ ▐░▌░▌ ▐░▌▐░█▀▀▀▀▀▀▀█░▌▐░█▀▀▀▀█░█▀▀ ▐░█▀▀▀▀▀▀▀▀▀                                        
+#  ▐░▌               ▐░▌     ▐░▌     ▐░▌  ▐░▌       ▐░▌▐░▌▐░▌ ▐░▌▐░▌▐░▌       ▐░▌▐░▌     ▐░▌  ▐░▌                                                 
+#  ▐░▌           ▄▄▄▄█░█▄▄▄▄ ▐░▌      ▐░▌ ▐░▌       ▐░▌▐░▌░▌   ▐░▐░▌▐░▌       ▐░▌▐░▌      ▐░▌ ▐░█▄▄▄▄▄▄▄▄▄                                        
+#  ▐░▌          ▐░░░░░░░░░░░▌▐░▌       ▐░▌▐░▌       ▐░▌▐░░▌     ▐░░▌▐░▌       ▐░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌                                       
+#   ▀            ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀  ▀         ▀  ▀▀       ▀▀  ▀         ▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀                                        
+#                                                                                                                                                 
+#   ▄▄▄▄▄▄▄▄▄▄▄  ▄▄        ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄            ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄                                        
+#  ▐░░░░░░░░░░░▌▐░░▌      ▐░▌▐░░░░░░░░░░░▌▐░▌          ▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌                                       
+#  ▐░█▀▀▀▀▀▀▀█░▌▐░▌░▌     ▐░▌▐░█▀▀▀▀▀▀▀█░▌▐░▌          ▐░▌       ▐░▌▐░█▀▀▀▀▀▀▀▀▀  ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀                                        
+#  ▐░▌       ▐░▌▐░▌▐░▌    ▐░▌▐░▌       ▐░▌▐░▌          ▐░▌       ▐░▌▐░▌               ▐░▌     ▐░▌                                                 
+#  ▐░█▄▄▄▄▄▄▄█░▌▐░▌ ▐░▌   ▐░▌▐░█▄▄▄▄▄▄▄█░▌▐░▌          ▐░█▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄▄▄      ▐░▌     ▐░█▄▄▄▄▄▄▄▄▄                                        
+#  ▐░░░░░░░░░░░▌▐░▌  ▐░▌  ▐░▌▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌                                       
+#  ▐░█▀▀▀▀▀▀▀█░▌▐░▌   ▐░▌ ▐░▌▐░█▀▀▀▀▀▀▀█░▌▐░▌           ▀▀▀▀█░█▀▀▀▀  ▀▀▀▀▀▀▀▀▀█░▌     ▐░▌      ▀▀▀▀▀▀▀▀▀█░▌                                       
+#  ▐░▌       ▐░▌▐░▌    ▐░▌▐░▌▐░▌       ▐░▌▐░▌               ▐░▌               ▐░▌     ▐░▌               ▐░▌                                       
+#  ▐░▌       ▐░▌▐░▌     ▐░▐░▌▐░▌       ▐░▌▐░█▄▄▄▄▄▄▄▄▄      ▐░▌      ▄▄▄▄▄▄▄▄▄█░▌ ▄▄▄▄█░█▄▄▄▄  ▄▄▄▄▄▄▄▄▄█░▌                                       
+#  ▐░▌       ▐░▌▐░▌      ▐░░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌     ▐░▌     ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌                                       
+#   ▀         ▀  ▀        ▀▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀                                        
