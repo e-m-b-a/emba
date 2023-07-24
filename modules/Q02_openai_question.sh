@@ -210,14 +210,14 @@ ask_chatgpt() {
     fi
 
     # reload q02 results:
-    print_output "[*] Regenerate analysis array ..."
+    print_output "[*] Regenerate analysis array ..." "no_log"
     readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
   done
-  # done < "${CSV_DIR}/q02_openai_question.csv.tmp"
 
   if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
-    while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
-      GPT_ANCHOR_="${COL2_}"
+    local GPT_ENTRY_LINE=""
+    while read -r GPT_ENTRY_LINE; do
+      GPT_ANCHOR_="$(echo "${GPT_ENTRY_LINE}" | cut -d ';' -f2)"
       sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
       # TODO remove [CHATGPT] line in output file
     done < "${CSV_DIR}/q02_openai_question.csv"
