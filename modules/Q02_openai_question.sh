@@ -69,12 +69,14 @@ ask_chatgpt() {
   # this array gets regenerated on every round
   readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
 
-  for ELEM in "${Q02_OPENAI_QUESTIONS[@]}"; do
+  for (( ELE_INDEX=0; ELE_INDEX<"${#Q02_OPENAI_QUESTIONS[@]}"; ELE_INDEX++ )); do
+    ELEM="${Q02_OPENAI_QUESTIONS["${ELE_INDEX}"]}"
     SCRIPT_PATH_TMP_="$(echo "${ELEM}" | cut -d\; -f1)"
 
-    # already tested entry:
+    # as we always start with the highest rated entry, we need to check if this entry was already tested:
     if [[ " ${GTP_CHECKED_ARR[*]} " =~ ${SCRIPT_PATH_TMP_} ]]; then
       print_output "[*] GPT - Already tested ${SCRIPT_PATH_TMP_}" "no_log"
+      # lets test the next entry
       continue
     fi
 
@@ -110,6 +112,10 @@ ask_chatgpt() {
         CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
         printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
         print_output "[*] The Combined Cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
+        if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
+          print_output "[-] GPT request is too big ... skipping it now"
+          continue
+        fi
 
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
@@ -159,6 +165,8 @@ ask_chatgpt() {
 
             cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
             readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+            # reset the array index to start again with the highest rated entry
+            ELE_INDEX=0
             sleep 30s
             continue
           fi
@@ -212,6 +220,8 @@ ask_chatgpt() {
     # reload q02 results:
     print_output "[*] Regenerate analysis array ..." "no_log"
     readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+    # reset the array index to start again with the highest rated entry
+    ELE_INDEX=0
   done
 
   if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
