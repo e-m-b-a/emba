@@ -110,7 +110,7 @@ output_overview() {
   fi
 
   if [[ -f "${LOG_DIR}"/"${Q02_LOG}" ]] && [[ "${GPT_OPTION}" -gt 0 ]]; then
-    GPT_RESULTS=$(grep -c "OpenAI responded with the following details" "${LOG_DIR}"/"${Q02_LOG}" || true)
+    GPT_RESULTS=$(grep -c "AI-assisted analysis results via OpenAI ChatGPT" "${LOG_DIR}"/"${Q02_LOG}" || true)
     if [[ "${GPT_RESULTS}" -gt 0 ]]; then
       print_output "[+] EMBA AI analysis enabled."
       write_link "q02"
