@@ -193,7 +193,6 @@ ask_chatgpt() {
     while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
       GPT_ANCHOR_="${COL2_}"
       sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
-      # TODO remove [CHATGPT] line in output file
     done < "${CSV_DIR}/q02_openai_question.csv"
   fi
 }
