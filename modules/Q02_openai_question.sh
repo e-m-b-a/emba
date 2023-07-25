@@ -75,7 +75,7 @@ ask_chatgpt() {
 
     # as we always start with the highest rated entry, we need to check if this entry was already tested:
     if [[ " ${GTP_CHECKED_ARR[*]} " =~ ${SCRIPT_PATH_TMP_} ]]; then
-      print_output "[*] GPT - Already tested ${SCRIPT_PATH_TMP_}" "no_log"
+      # print_output "[*] GPT - Already tested ${SCRIPT_PATH_TMP_}" "no_log"
       # lets test the next entry
       continue
     fi
@@ -114,6 +114,7 @@ ask_chatgpt() {
         print_output "[*] The Combined Cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
         if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
           print_output "[-] GPT request is too big ... skipping it now"
+          GTP_CHECKED_ARR+=("${SCRIPT_PATH_TMP_}")
           continue
         fi
 
@@ -229,7 +230,6 @@ ask_chatgpt() {
     while read -r GPT_ENTRY_LINE; do
       GPT_ANCHOR_="$(echo "${GPT_ENTRY_LINE}" | cut -d ';' -f2)"
       sed -i "/${GPT_ANCHOR_}/d" "${CSV_DIR}/q02_openai_question.csv.tmp"
-      # TODO remove [CHATGPT] line in output file
     done < "${CSV_DIR}/q02_openai_question.csv"
   fi
 }
