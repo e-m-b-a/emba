@@ -75,7 +75,7 @@ ask_chatgpt() {
 
     # as we always start with the highest rated entry, we need to check if this entry was already tested:
     if [[ " ${GTP_CHECKED_ARR[*]} " =~ ${SCRIPT_PATH_TMP_} ]]; then
-      print_output "[*] GPT - Already tested ${SCRIPT_PATH_TMP_}" "no_log"
+      # print_output "[*] GPT - Already tested ${SCRIPT_PATH_TMP_}" "no_log"
       # lets test the next entry
       continue
     fi
