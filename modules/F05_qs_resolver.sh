@@ -17,7 +17,6 @@
 F05_qs_resolver() {
   module_log_init "${FUNCNAME[0]}"
   module_title "GPT Resolver"
-  local F05_RESULTS=0
 
   if [[ "${GPT_OPTION}" -gt 0 ]]; then
     # wait for completion or 1m
@@ -79,7 +78,6 @@ F05_qs_resolver() {
     fi
 
     if [[ -f "${CSV_DIR}/q02_openai_question.csv.tmp" ]]; then
-      F05_RESULTS=1
       while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do
         GPT_INPUT_FILE_="${COL1_}"
         GPT_ANCHOR_="${COL2_}"
