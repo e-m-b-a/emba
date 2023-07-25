@@ -120,5 +120,6 @@ F05_qs_resolver() {
     fi
   fi
 
-  module_end_log "${FUNCNAME[0]}" "${F05_RESULTS}"
+  # do not create a web reporter page
+  module_end_log "${FUNCNAME[0]}" 0
 }

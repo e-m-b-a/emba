@@ -114,6 +114,7 @@ ask_chatgpt() {
         print_output "[*] The Combined Cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
         if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
           print_output "[-] GPT request is too big ... skipping it now"
+          GTP_CHECKED_ARR+=("${SCRIPT_PATH_TMP_}")
           continue
         fi
 
