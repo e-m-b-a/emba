@@ -207,8 +207,7 @@ dependency_check()
     print_output "    Internet connection - \\c" "no_log"
     if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
-      print_output "[-] ERROR: Quest container has no internet connection!" "no_log"
-      exit 1
+      print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "$GREEN""ok""$NC"
     fi
