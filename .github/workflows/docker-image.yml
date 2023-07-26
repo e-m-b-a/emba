@@ -37,7 +37,8 @@ jobs:
           timeout_minutes: 600
           max_attempts: 3
           command: docker image prune -f && docker container prune -f && \
-            apt install python3-venv -y && \
+            sudo apt-get update -y && \
+            sudo apt-get install python3-venv -y && \
             create_pipenv "./external/emba_venv" && \
             activate_pipenv "./external/emba_venv" &&\ 
             docker-compose build --no-cache --pull && ./emba -d 2 -y -j
