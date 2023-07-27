@@ -41,6 +41,7 @@ jobs:
             sudo docker container prune -f
             sudo apt-get update -y
             sudo apt-get install python3-venv -y
+            mkdir ./external
             create_pipenv "./external/emba_venv"
             activate_pipenv "./external/emba_venv"
             sudo docker-compose build --no-cache --pull && sudo ./emba -d 2 -y -j
