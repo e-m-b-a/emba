@@ -640,10 +640,12 @@ main() {
       disown "${TMP_PID}" 2> /dev/null || true
     fi
 
-    disk_space_monitor "${EMBA_PID}" &
-    local TMP_PID="$!"
-    store_kill_pids "${TMP_PID}"
-    disown "${TMP_PID}" 2> /dev/null || true
+    # disk space monitor not fully working -> removed for now
+    # Todo: check it and fix it
+    # disk_space_monitor "${EMBA_PID}" &
+    # local TMP_PID="$!"
+    # store_kill_pids "${TMP_PID}"
+    # disown "${TMP_PID}" 2> /dev/null || true
 
     # if $CONTAINER_EXTRACT is set we extract the docker container with id $CONTAINER_ID outside of the
     # EMBA container into log directory
