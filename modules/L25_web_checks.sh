@@ -287,12 +287,14 @@ web_access_crawler() {
         break
       fi
       print_dot
+
       WEB_FILE="$(basename "$WEB_PATH")"
       if [[ -n "${WEB_FILE}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_FILE} "* ]]; then
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/$WEB_FILE$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
         timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
         CRAWLED_ARR+=( "${WEB_FILE}" )
       fi
+
       WEB_DIR_L1="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1 | rev)"
       WEB_DIR_L1="${WEB_DIR_L1#\.}"
       WEB_DIR_L1="${WEB_DIR_L1#\/}"
@@ -301,6 +303,7 @@ web_access_crawler() {
         timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
         CRAWLED_ARR+=( "${WEB_DIR_L1}/${WEB_FILE}" )
       fi
+
       WEB_DIR_L2="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-2 | rev)"
       WEB_DIR_L2="${WEB_DIR_L2#\.}"
       WEB_DIR_L2="${WEB_DIR_L2#\/}"
@@ -309,6 +312,7 @@ web_access_crawler() {
         timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
         CRAWLED_ARR+=( "${WEB_DIR_L2}/${WEB_FILE}" )
       fi
+
       WEB_DIR_L3="$(dirname "$WEB_PATH" | rev | cut -d'/' -f1-3 | rev)"
       WEB_DIR_L3="${WEB_DIR_L3#\.}"
       WEB_DIR_L3="${WEB_DIR_L3#\/}"
@@ -316,6 +320,11 @@ web_access_crawler() {
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L3}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
         timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
         CRAWLED_ARR+=( "${WEB_DIR_L3}/${WEB_FILE}" )
+      fi
+
+      if [[ "$(grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 -c "200 OK")" -gt 1000 ]]; then
+        print_output "[-] WARNING: Too many http responses identified - Stopping web crawling for ${IP_}:${PORT_} now"
+        break
       fi
     done
     cd "${HOME_}" || exit 1

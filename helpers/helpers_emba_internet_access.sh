@@ -92,7 +92,7 @@ kernel_downloader() {
       enable_strict_mode "$STRICT_MODE" 0
 
       if [[ -f "$TMP_DIR"/wget.log ]]; then
-        print_ln
+        print_ln "no_log"
         tee -a "$LOG_DIR/kernel_downloader.log" < "$TMP_DIR"/wget.log
         rm "$TMP_DIR"/wget.log
       fi
