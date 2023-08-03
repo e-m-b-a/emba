@@ -48,7 +48,11 @@ S60_cert_file_check()
           CERT_NAME=$(basename "$LINE")
           CERT_LOG="$LOG_PATH_MODULE/cert_details_$CERT_NAME.txt"
           write_log "[*] Cert file: $LINE\n" "$CERT_LOG"
-          timeout --preserve-status --signal SIGINT 10 openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG" || true
+          if [[ "$LINE" == *.pem ]]; then
+              timeout --preserve-status --signal SIGINT 10 openssl storeutl -noout -text -certs "$LINE" 2>/dev/null | head -n -1 >> "$CERT_LOG"
+          else
+            timeout --preserve-status --signal SIGINT 10 openssl x509 -in "$LINE" -text 2>/dev/null >> "$CERT_LOG" || true
+          fi
           if [[ $CERT_DATE_ -lt $CURRENT_DATE ]]; then
             print_output "  ${RED}$CERT_DATE - $(print_path "$LINE")${NC}" "" "$CERT_LOG"
             write_csv_log "$LINE" "$CERT_DATE_" "yes"
