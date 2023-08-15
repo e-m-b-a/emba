@@ -54,14 +54,14 @@ S60_cert_file_check()
           CERT_LOG="$LOG_PATH_MODULE/cert_details_$CERT_NAME.txt"
           write_log "[*] Cert file: $LINE\n" "$CERT_LOG"
           timeout --preserve-status --signal SIGINT 10 openssl storeutl -noout -text -certs "$LINE" 2>/dev/null >> "$CERT_LOG"
-          NESTED_CERT_CNT=$(cat "$CERT_LOG" | tail -n 1 | grep -o '[0-9]\+')
+          NESTED_CERT_CNT=$(tail -n 1 < "$CERT_LOG" | grep -o '[0-9]\+')
           ((TOTAL_CERT_CNT+=NESTED_CERT_CNT))
           for ((i=1; i<=NESTED_CERT_CNT; i++)); do
               index=$((i - 1))
               CERT_DATE=$(date --date="$(grep 'Not After :' "$CERT_LOG" | awk -v cnt="$i" 'NR==cnt {sub(/.*: /, ""); print}')" --iso-8601 || true)
               CERT_DATE_=$(date --date="$(grep 'Not After :' "$CERT_LOG" | awk -v cnt="$i" 'NR==cnt {sub(/.*: /, ""); print}')" +%s || true)
               SIGNATURE=$(sed -n '/Signature Value:/!b;n;p' "$CERT_LOG" | sed -n "${i}p" | xargs)
-              SPECIFIC_CERT=$(cat "$CERT_LOG" | head -n -1 | awk -v idx="$index" '
+              SPECIFIC_CERT=$(head -n -1 < "$CERT_LOG" | awk -v idx="$index" '
               BEGIN { found = 0 }
               /^[0-9]+: Certificate$/ {
                   if (found) {
@@ -88,7 +88,7 @@ S60_cert_file_check()
                 ((CERT_OUT_CNT+=1))
               elif [[ $CERT_DATE_ -le $FUTURE_DATE ]]; then
                 print_output "  ${ORANGE}$CERT_DATE - $(print_path "$LINE") $SIGNATURE ${NC}" "" "$SPECIFIC_CERT"
-                write_csv_log "$LINE" "$CERT_DATE_" "expire within $EXPIRE_WATCH_DATE"
+                write_csv_log "$LINE" "$CERT_DATE_" "expires within $EXPIRE_WATCH_DATE"
                 ((CERT_WARNING_CNT+=1))
               else
                 print_output "  ${GREEN}$CERT_DATE - $(print_path "$LINE") $SIGNATURE ${NC}" "" "$SPECIFIC_CERT"
