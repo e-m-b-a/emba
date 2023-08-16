@@ -256,6 +256,8 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
+  sed -i 's/deb http:\/\//deb https:\/\//g' /etc/apt/sources.list
+  sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
   apt-get -y update
 fi
 
