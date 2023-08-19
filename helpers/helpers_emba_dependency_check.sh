@@ -457,6 +457,15 @@ dependency_check()
     export MPLCONFIGDIR="$TMP_DIR"
 
     check_dep_tool "unblob"
+    if command -v unblob > /dev/null ; then
+      UNBLOB_VER=$(unblob --version 2>&1 || true)
+      if ! [ "$(version "$UNBLOB_VER")" -ge "$(version "23.8.11")" ]; then
+        echo -e "$RED""    Unblob version $UNBLOB_VER - not supported""$NC"
+        echo -e "$RED""    Upgrade your unblob installation to version 23.8.11 or higher""$NC"
+        DEP_ERROR=1
+      fi
+    fi
+
     check_dep_tool "unrar" "unrar"
     setup_nikto
 
