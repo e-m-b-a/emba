@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # /etc/cron.daily/emba_updater: Daily EMBA maintenance script
 # Written by Michael Messner and Pascal Eckmann for EMBA https://github.com/e-m-b-a/emba
 
