@@ -262,6 +262,10 @@ dependency_check()
               [[ "${RETRIES_}" -lt "${MAX_RETRIES}" ]] && continue
             fi
           fi
+          if jq '.error.code' /tmp/chatgpt-test.json | grep -q "insufficient_quota" ; then
+            echo -e "$RED""not ok (quota limit issues)""$NC"
+            break
+          fi
           echo -e "$RED""not ok""$NC"
           print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
           print_output "[-] ERROR response: $(cat /tmp/chatgpt-test.json)" "no_log"
@@ -269,7 +273,7 @@ dependency_check()
           #       In such a case we will fail the check without the need of GPT
           DEP_ERROR=1
         fi
-        if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+        if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}" 2>/dev/null; then
           print_output "    Testing phase ended  - \\c" "no_log"
           echo -e "$RED""exit now""$NC"
           DEP_ERROR=1
@@ -453,6 +457,15 @@ dependency_check()
     export MPLCONFIGDIR="$TMP_DIR"
 
     check_dep_tool "unblob"
+    if command -v unblob > /dev/null ; then
+      UNBLOB_VER=$(unblob --version 2>&1 || true)
+      if ! [ "$(version "$UNBLOB_VER")" -ge "$(version "23.8.11")" ]; then
+        echo -e "$RED""    Unblob version $UNBLOB_VER - not supported""$NC"
+        echo -e "$RED""    Upgrade your unblob installation to version 23.8.11 or higher""$NC"
+        DEP_ERROR=1
+      fi
+    fi
+
     check_dep_tool "unrar" "unrar"
     setup_nikto
 
