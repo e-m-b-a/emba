@@ -316,7 +316,7 @@ output_details() {
 output_config_issues() {
   local DATA=0
 
-  if [[ "${PW_COUNTER:-0}" -gt 0 || "${S85_SSH_VUL_CNT:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 || "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 || "${MOD_DATA_COUNTER:-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 || "${S55_HISTORY_COUNTER:-0}" -gt 0 || "${S50_AUTH_ISSUES:-0}" -gt 0 || "${PASS_FILES_FOUND:-0}" -gt 0 || "${CERT_CNT:-0}" -gt 0 || "${S24_FAILED_KSETTINGS:-0}" -gt 0 ]]; then
+  if [[ "${PW_COUNTER:-0}" -gt 0 || "${S85_SSH_VUL_CNT:-0}" -gt 0 || "${STACS_HASHES:-0}" -gt 0 || "${INT_COUNT:-0}" -gt 0 || "${POST_COUNT:-0}" -gt 0 || "${MOD_DATA_COUNTER:-0}" -gt 0 || "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 || "${S55_HISTORY_COUNTER:-0}" -gt 0 || "${S50_AUTH_ISSUES:-0}" -gt 0 || "${PASS_FILES_FOUND:-0}" -gt 0 || "${TOTAL_CERT_CNT:-0}" -gt 0 || "${S24_FAILED_KSETTINGS:-0}" -gt 0 ]]; then
     print_output "[+] Found the following configuration issues:"
     if [[ "${S40_WEAK_PERM_COUNTER:-0}" -gt 0 ]]; then
       print_output "$(indent "$(green "Found $ORANGE$S40_WEAK_PERM_COUNTER$GREEN areas with weak permissions.")")"
@@ -360,11 +360,13 @@ output_config_issues() {
       fi
       DATA=1
     fi
-    if [[ "${CERT_CNT:-0}" -gt 0 ]]; then
-      print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates in $ORANGE$CERT_CNT$GREEN certificates.")")"
+    if [[ "${TOTAL_CERT_CNT:-0}" -gt 0 ]]; then
+      print_output "$(indent "$(green "Found $ORANGE$CERT_OUT_CNT$GREEN outdated certificates and $ORANGE$CERT_WARNING_CNT expiring certificates in $ORANGE$CERT_CNT$GREEN certificate files and in a total of $ORANGE$TOTAL_CERT_CNT$GREEN certificates.")")"
       write_link "s60"
-      write_csv_log "certificates" "$CERT_CNT" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "total_certificates" "$TOTAL_CERT_CNT" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "certificate_files" "$CERT_CNT" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       write_csv_log "certificates_outdated" "$CERT_OUT_CNT" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "certificates_expiring" "$CERT_WARNING_CNT" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       DATA=1
     fi
     if [[ "${MOD_DATA_COUNTER:-0}" -gt 0 ]]; then
@@ -780,8 +782,10 @@ get_data() {
   export PASS_FILES_FOUND=0
   export S50_AUTH_ISSUES=0
   export S55_HISTORY_COUNTER=0
+  export TOTAL_CERT_CNT=0
   export CERT_CNT=0
   export CERT_OUT_CNT=0
+  export CERT_WARNING_CNT=0
   export S85_SSH_VUL_CNT=0
   export INT_COUNT=0
   export POST_COUNT=0
@@ -896,8 +900,10 @@ get_data() {
     S55_HISTORY_COUNTER=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S55_LOG" | cut -d: -f2 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S60_LOG" ]]; then
-    CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2 || true)
-    CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3 || true)
+    TOTAL_CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f2 || true)
+    CERT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f3 || true)
+    CERT_OUT_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f4 || true)
+    CERT_WARNING_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S60_LOG" | cut -d: -f5 || true)
   fi
   if [[ -f "$LOG_DIR"/"$S85_LOG" ]]; then
     S85_SSH_VUL_CNT=$(grep -a "\[\*\]\ Statistics:" "$LOG_DIR"/"$S85_LOG" | cut -d: -f2 || true)
