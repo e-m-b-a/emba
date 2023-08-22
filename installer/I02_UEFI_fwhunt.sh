@@ -79,8 +79,8 @@ I02_UEFI_fwhunt() {
         # ldconfig
         # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
         # python3 setup.py install
-        # pip_install "fwhunt-scan"
-        pip3 install --no-deps fwhunt-scan
+        pip_install "fwhunt-scan"
+        # pip3 install --no-deps fwhunt-scan
         cd "$HOME_PATH" || ( echo "Could not install EMBA component fwhunt-scan" && exit 1 )
       ;;
     esac

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # /etc/cron.weekly/emba_updater_data: Weekly EMBA exploit databases update script
 # Written by Michael Messner for EMBA https://github.com/e-m-b-a/emba
 
