@@ -10,7 +10,7 @@ See LICENSE file for usage of this software.
 
 EMBA is licensed under GPLv3
 
-Author(s): Michael Messner, Pascal Eckmann
+Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 -->
 
 <p align="center">
