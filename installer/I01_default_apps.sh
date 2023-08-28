@@ -20,6 +20,7 @@ I01_default_apps(){
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]] ; then
+    print_tool_info "file" 1
     print_tool_info "jq" 1
     print_tool_info "make" 1
     print_tool_info "tree" 1
