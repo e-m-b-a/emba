@@ -256,8 +256,13 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
-  sed -i 's/deb http:\/\//deb https:\/\//g' /etc/apt/sources.list
-  sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
+  # we only update Kali repos to https. This makes sense as multiple proxy environments are blocking "hacking" packages like Metasploit
+  # with https they usually do not inspect the traffic and so they do not block anything
+  # As we got reports on issues with Ubuntu we only change this for Kali - see here https://github.com/e-m-b-a/emba/issues/765
+  if grep -q "kali" /etc/debian_version 2>/dev/null ; then
+    sed -i 's/deb http:\/\//deb https:\/\//g' /etc/apt/sources.list
+    sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
+  fi
   apt-get -y update
 fi
 
