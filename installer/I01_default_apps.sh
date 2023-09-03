@@ -49,6 +49,9 @@ I01_default_apps(){
     print_tool_info "python3-pip" 1
     print_pip_info "requests"
 
+    # Ubuntu not installing ping - see https://github.com/e-m-b-a/embark/issues/151
+    print_tool_info "iputils-ping" 1
+
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1
