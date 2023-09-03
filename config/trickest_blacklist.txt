@@ -126,3 +126,5 @@ jasnow/585-652-ruby-advisory-db
 pvergain/github-stars
 scordero1234/java_sec_demo-main
 BFHS-Robotics/BFHS-
+Kuromesi/Py4CSKG
+scmanjarrez/CVEScannerV2
