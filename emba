@@ -784,23 +784,26 @@ main() {
   # Quests (Q-modules)
   #######################################################################################
 
-  if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
-    while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
-      sleep 1
-    done
-    run_modules "Q" "${THREADED}" "0"
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
-    print_output "[*] Quest container done" "main"
-    exit 0
-  elif [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]] ;  then
-    while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
-      sleep 1
-    done
-    # dev-mode
-    run_modules "Q" "${THREADED}" "0" &
-    export Q_MOD_PID="$!"
-  elif [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
-    docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${QUEST_CONTAINER_} failed the dependancy check" "main"
+  if [[ -v CONTAINER_NUMBER ]]; then
+    if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+      while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+        sleep 1
+      done
+      run_modules "Q" "${THREADED}" "0"
+      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
+      print_output "[*] Quest container done" "main"
+      exit 0
+    elif [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]] ;  then
+      # currently we do not support the Quest containers in dev mode
+      while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
+        sleep 1
+      done
+      # dev-mode
+      run_modules "Q" "${THREADED}" "0" &
+      export Q_MOD_PID="$!"
+    elif [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
+      docker logs "${QUEST_CONTAINER}" --follow | grep "ok" && print_output "[*] Quest container ${QUEST_CONTAINER_} failed the dependancy check" "main"
+    fi
   fi
 
   #######################################################################################
