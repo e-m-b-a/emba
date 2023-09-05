@@ -21,7 +21,10 @@ S109_jtr_local_pw_cracking()
   module_log_init "${FUNCNAME[0]}"
 
   local PW_FILE="$CSV_DIR"/s108_stacs_password_search.csv
+  local PW_FILE_S107="$CSV_DIR"/s107_deep_password_search.csv
   local NEG_LOG=0
+  local HASHES_S107=()
+  local HASHES_S108=()
   local HASHES=()
   local HASH=""
   local HASH_SOURCE=""
@@ -33,15 +36,20 @@ S109_jtr_local_pw_cracking()
   # optional wordlist for JTR - if no wordlist is there JTR runs in default mode
   local JTR_WORDLIST="$CONFIG_DIR/jtr_wordlist.txt"
 
-  # This module waits for S108_stacs_password_search
+  # This module waits for S108_stacs_password_search and S107_deep_password_search
   # check emba.log for S108_stacs_password_search starting
+  module_wait "S107_deep_password_search"
   module_wait "S108_stacs_password_search"
 
   module_title "Cracking identified password hashes"
   pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ -f "$PW_FILE" ]]; then
-    mapfile -t HASHES < <(cut -d\; -f1,2,3 "$PW_FILE" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
+    mapfile -t HASHES_S108 < <(cut -d\; -f1,2,3 "$PW_FILE" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
+    mapfile -t HASHES_S107 < <(cut -d\; -f1,2,3 "$PW_FILE_S107" | grep -v "PW_HASH" | sort -k 2 -t \; -u)
+
+    HASHES=("${HASHES_S107[@]}" "${HASHES_S108[@]}")
+
     for HASH in "${HASHES[@]}"; do
       HASH_DESCRIPTION=$(basename "$(echo "$HASH" | cut -d\; -f1)")
       HASH_SOURCE=$(basename "$(echo "$HASH" | cut -d\; -f2)")

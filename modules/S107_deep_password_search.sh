@@ -23,6 +23,7 @@ S107_deep_password_search()
   local PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
   local PW_COUNTER=0
   local PW_PATH=""
+  local PW_HASHES=()
   local PW_HASH=""
 
   find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP_DIR"/pw_hashes.txt
@@ -32,10 +33,12 @@ S107_deep_password_search()
     write_csv_log "PW_PATH" "PW_HASH"
     while read -r PW_HASH; do
       PW_PATH=$(echo "$PW_HASH" | cut -d: -f1)
-      PW_HASH=$(echo "$PW_HASH" | cut -d: -f2- | sed -r "s/[[:blank:]]+/\ /g")
-      print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
-      write_csv_log "$PW_PATH" "$PW_HASH"
-      ((PW_COUNTER+=1))
+      mapfile -t PW_HASHES < <(strings "$PW_PATH" | grep --color -a -E -f "$PW_HASH_CONFIG")
+      for PW_HASH in "${PW_HASHES[@]}"; do
+        print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
+        write_csv_log "NA" "$PW_PATH" "$PW_HASH"
+        ((PW_COUNTER+=1))
+      done
     done < "$TMP_DIR"/pw_hashes.txt
 
     print_ln
