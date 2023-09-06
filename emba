@@ -916,7 +916,7 @@ main() {
 
   write_notification "Reporting phase ended"
 
-  if [[ "${USE_DOCKER}" -eq 0 && "${THREADED}" -eq 1 && "${IN_DOCKER}" -eq 0 ]] && [[ -v Q_MOD_PID ]];  then
+  if [[ "${USE_DOCKER}" -eq 0 && "${THREADED}" -eq 1 && "${IN_DOCKER}" -eq 0 ]] && [[ -n "${Q_MOD_PID}" ]];  then
     wait_for_pid "${Q_MOD_PID}"
   fi
 

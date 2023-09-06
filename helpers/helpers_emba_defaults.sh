@@ -127,4 +127,5 @@ set_defaults() {
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
+  export Q_MOD_PID=""
 }
