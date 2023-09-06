@@ -93,7 +93,7 @@ kernel_downloader() {
 
       if [[ -f "$TMP_DIR"/wget.log ]]; then
         print_ln "no_log"
-        tee -a "$LOG_DIR/kernel_downloader.log" < "$TMP_DIR"/wget.log
+        tee -a "$LOG_DIR/kernel_downloader.log" < "$TMP_DIR"/wget.log || true
         rm "$TMP_DIR"/wget.log
       fi
       # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which
