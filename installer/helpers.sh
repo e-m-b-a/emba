@@ -26,6 +26,7 @@ print_help()
   echo -e "$CYAN""-h""$NC""         Print this help message"
   echo -e "$CYAN""-l""$NC""         List all dependencies of EMBA (deprecated)"
   echo -e "$CYAN""-r""$NC""         Remove a default installation of EMBA"
+  echo -e "$CYAN""-s""$NC""         Switch to HTTPS repositories"
   echo -e "$CYAN""-c {x}""$NC""     Choose docker image to install (replace {x} with the name)"
   echo
 }
