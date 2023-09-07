@@ -54,6 +54,7 @@ export OTHER_OS=0
 export UBUNTU_OS=0
 export WSL=0
 export GH_ACTION=0
+export SSL_REPOS=0
 
 ## Color definition
 export RED="\033[0;31m"
@@ -94,7 +95,7 @@ if [[ "$#" -le 1 ]] && [[ "$#" -gt 2 ]]; then
   exit 1
 fi
 
-while getopts CdDFghlrc: OPT ; do
+while getopts CdDFghlrsc: OPT ; do
   case $OPT in
     d)
       export DOCKER_SETUP=1
@@ -134,6 +135,9 @@ while getopts CdDFghlrc: OPT ; do
       export REMOVE=1
       echo -e "$GREEN""$BOLD""Remove EMBA from the system""$NC"
       ;;
+    s)
+      export SSL_REPOS=1
+      echo -e "$GREEN""$BOLD""HTTPS repos are used for installation""$NC"
     c)
       export CONTAINER="$OPTARG"
       ;;
@@ -256,10 +260,7 @@ if [[ $LIST_DEP -eq 0 ]] ; then
   fi
 
   echo -e "\\n""$ORANGE""Update package lists.""$NC"
-  # we only update Kali repos to https. This makes sense as multiple proxy environments are blocking "hacking" packages like Metasploit
-  # with https they usually do not inspect the traffic and so they do not block anything
-  # As we got reports on issues with Ubuntu we only change this for Kali - see here https://github.com/e-m-b-a/emba/issues/765
-  if grep -q "kali" /etc/debian_version 2>/dev/null ; then
+  if [[ "${SSL_REPOS}" -eq 1 ]]; then
     sed -i 's/deb http:\/\//deb https:\/\//g' /etc/apt/sources.list
     sed -i 's/deb-src http:\/\//deb-src https:\/\//g' /etc/apt/sources.list
   fi
@@ -309,9 +310,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   IP00_extractors
 
-  # deprecated - remove for next release
-  IP18_qnap_decryptor
-
   IP35_uefi_extraction
 
   IP61_unblob
@@ -326,6 +324,8 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
 
   I24_25_kernel_tools
 
+  I108_stacs_password_search
+
   I110_yara_check
 
   I199_default_tools_github
@@ -337,8 +337,6 @@ if [[ "$CVE_SEARCH" -ne 1 ]] || [[ "$DOCKER_SETUP" -ne 1 ]] || [[ "$IN_DOCKER" -
   IL15_emulated_checks_init
 
   IF50_aggregator_common
-
-  I108_stacs_password_search
 fi
 
 # cve-search is always installed on the host:

@@ -52,6 +52,10 @@ I01_default_apps(){
     # Ubuntu not installing ping - see https://github.com/e-m-b-a/embark/issues/151
     print_tool_info "iputils-ping" 1
 
+    # diffing firmware
+    print_tool_info "colordiff" 1
+    print_tool_info "ssdeep" 1
+
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1
