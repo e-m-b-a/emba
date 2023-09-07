@@ -138,6 +138,7 @@ while getopts CdDFghlrsc: OPT ; do
     s)
       export SSL_REPOS=1
       echo -e "$GREEN""$BOLD""HTTPS repos are used for installation""$NC"
+      ;;
     c)
       export CONTAINER="$OPTARG"
       ;;
