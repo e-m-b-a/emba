@@ -57,7 +57,7 @@ SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
 ANCHOR="<a class=\"anc\" id=\"ANCHOR\">"
 TITLE_ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
-IMAGE_LINK="<img class=\"image\" src=\".$STYLE_PATH/PICTURE\">"
+DEPTH="."
 ARACHNI_LINK="<a href=\"./l25_web_checks/arachni_report/index.html\" title=\"Arachni web report\" target=\"_blank\" >"
 
 
@@ -92,31 +92,47 @@ add_link_tags() {
     readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "$LINK_FILE" | cut -d':' -f1 )
     for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
       REF_LINK="$(sed "$REF_LINK_NUMBER""q;d" "$LINK_FILE" | cut -c12- | cut -d'<' -f1 || true)"
+      echo "REF_LINK out: $REF_LINK"
+      echo "REF_LINK out cut: $(echo "$REF_LINK" | cut -d"#" -f1)"
       URL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "$REF_LINK" | cut -d"#" -f1)" ]] ; then
+        echo "REF_LINK 1: $REF_LINK"
         if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
+          echo "REF_LINK 2: $REF_LINK"
           REF_ANCHOR=""
           if [[ ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
             REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2 || true)"
             REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
           fi
+          echo "REF_LINK 3: $REF_LINK"
           # generate reference file
-          if [[ $THREADED -eq 1 ]]; then
-            generate_info_file "$REF_LINK" "$BACK_LINK" &
-            WAIT_PIDS_WR+=( "$!" )
-          else
-            generate_info_file "$REF_LINK" "$BACK_LINK"
+          generate_info_file "$REF_LINK" "$BACK_LINK" &
+          WAIT_PIDS_WR+=( "$!" )
+          echo "REF_LINK 4: $REF_LINK"
+          echo "REFERENCE_LINK: $REFERENCE_LINK"
+
+          # we need to handle deeper hyrarchies - this is suboptimal but works for now!
+          # TODO: Currently it only works for the first subdirectory
+          if [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev)" == "${LOG_DIR}" ]]; then
+            DEPTH=".."
+          elif [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev)" == "${LOG_DIR}" ]]; then
+            DEPTH="."
           fi
+
           if [[ -n "$REF_ANCHOR" ]] ; then
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
           else
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
           fi
+          echo "REF_LINK: $REF_LINK"
+          echo "REF_ANCHOR: $REF_ANCHOR"
+          echo "HTML_LINK: $HTML_LINK"
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
+          echo "LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
         elif [[ "${REF_LINK: -7}" == ".tar.gz" ]] ; then
           local RES_PATH
           RES_PATH="$ABS_HTML_PATH""/""$(echo "$BACK_LINK" | cut -d"." -f1 )""/res"
@@ -129,12 +145,29 @@ add_link_tags() {
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true
+          echo "png copy:"
+          echo "LINK_FILE: $LINK_FILE"
+          echo "ABS_HTML_PATH: $ABS_HTML_PATH"
+          echo "STYLE_PATH: $STYLE_PATH"
+
+          echo "REF_LINK: $REF_LINK"
+          echo "LOG_DIR: $LOG_DIR"
+          echo "LOG_DIR? -> $(echo "${REF_LINK}" | rev | cut -d '/' -f2- | rev)"
+          if [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev)" == "${LOG_DIR}" ]]; then
+            DEPTH=".."
+          elif [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev)" == "${LOG_DIR}" ]]; then
+            DEPTH="."
+          fi
+          IMAGE_LINK="<img class=\"image\" src=\"${DEPTH}${STYLE_PATH}/PICTURE\">"
           HTML_LINK="$(echo "$IMAGE_LINK" | sed -e 's@PICTURE@'"$(basename "$REF_LINK")"'@' || true)"
+          echo "IMAGE_LINK: $IMAGE_LINK"
+          echo "HTML_LINK: $HTML_LINK"
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
+          echo "LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
         fi
-      elif [[ ("$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
+      elif [[ ("$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
         REF_ANCHOR=""
-        if [[ "$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}\#.*$ ]] ; then
+        if [[ "$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}\#.*$ ]] ; then
           REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2 || true)"
           REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
         fi
@@ -211,12 +244,12 @@ add_link_tags() {
           EXPLOIT_FILE="$LOG_DIR""/f20_vul_aggregator/exploit/""$EXPLOIT_ID"".txt"
           if [[ -f "$EXPLOIT_FILE" ]] ; then
             # generate exploit file
-            if [[ $THREADED -eq 1 ]]; then
+            #if [[ $THREADED -eq 1 ]]; then
               generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
               WAIT_PIDS_WR+=( "$!" )
-            else
-              generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
-            fi
+            #else
+            #  generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
+            #fi
             HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
           else
             HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
@@ -406,9 +439,7 @@ add_link_tags() {
     fi
   fi
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_WR[@]}"
-  fi
+  wait_for_pid "${WAIT_PIDS_WR[@]}"
   if [[ -f "$LINK_FILE" ]]; then
     sed -i -E 's@^<pre>((\[REF\])|(\[ANC\])).*</pre>@@g' "$LINK_FILE" || true
   fi
@@ -425,6 +456,8 @@ generate_info_file()
   INFO_FILE=${1:-}
   SRC_FILE=${2:-}
   CUSTOM_SUB_PATH=${3:-}
+  echo "generate_info_file - INFO_FILE $INFO_FILE"
+  echo "generate_info_file - SRC_FILE $SRC_FILE"
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%."${INFO_FILE##*.}"}"".html")"
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
@@ -449,6 +482,8 @@ generate_info_file()
       sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
     fi
 
+    echo "INFO_FILE: $INFO_FILE"
+    echo "TMP_INFO_FILE: $TMP_INFO_FILE"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true
@@ -654,6 +689,8 @@ scan_report()
 
 add_arrows()
 {
+  local D_MODULE_ARR
+  readarray -t D_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./d[0-9]*.*" | sort -V || true)
   local P_MODULE_ARR
   readarray -t P_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./p[0-9]*.*" | sort -V || true)
   local S_MODULE_ARR
@@ -665,7 +702,7 @@ add_arrows()
   local Q_MODULE_ARR
   readarray -t Q_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./q[0-9]*.*" | sort -V || true)
   local ALL_MODULE_ARR
-  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
+  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${D_MODULE_ARR[@]}" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
   for M_NUM in "${!ALL_MODULE_ARR[@]}"; do 
     if [[ "$M_NUM" -gt 0 ]] ; then
       FIRST_LINK="${ALL_MODULE_ARR[$(( M_NUM - 1 ))]}"

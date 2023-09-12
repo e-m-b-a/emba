@@ -547,11 +547,15 @@ main() {
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/firmware_docker_extracted.tar
       export OUTPUT_DIR="${FIRMWARE_PATH}"
       export FIRMWARE=1
-    elif [[ -f "${FIRMWARE_PATH}" ]]; then
+    elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -z "${FIRMWARE_PATH1}" ]]; then
       PRE_CHECK=1
       print_output "[*] Firmware binary detected." "no_log"
       print_output "    EMBA starts with the pre-testing phase." "no_log"
       export OUTPUT_DIR="${FIRMWARE_PATH}"
+    elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -f "${FIRMWARE_PATH1}" ]]; then
+      DIFF_MODE=1
+      print_output "[*] Multiple firmware binarie detected." "no_log"
+      print_output "    EMBA starts in firmware diff mode ." "no_log"
     elif [[ -f "${KERNEL_CONFIG}" && "${KERNEL}" -eq 1 ]]; then
       print_output "[*] Kernel configuration file detected." "no_log"
     else
@@ -675,9 +679,9 @@ main() {
 
     OPTIND=1
     ARGUMENTS=()
-    while getopts a:A:BcC:d:De:Ef:Fghijk:l:m:N:op:P:QrsStT:UX:yY:WxzZ: OPT ; do
+    while getopts a:A:BcC:d:De:Ef:Fghijk:l:m:N:o:p:P:QrsStT:UX:yY:WxzZ: OPT ; do
       case ${OPT} in
-        D|f|i|l)
+        D|f|i|l|o)
           ;;
         *)
           if [[ -v OPTARG[@] ]] ; then
@@ -722,13 +726,19 @@ main() {
 
     disable_strict_mode "${STRICT_MODE}" 0
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
+      # check dependencies mode:
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" docker-compose run --rm emba_quest -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       if [[ $? -ne ${D_RETURN} ]]; then
         D_RETURN=1
       fi
+    elif [[ "${DIFF_MODE}" -gt 0 ]]; then
+      # firmware diff mode - needs two firmware files:
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run -v "${FIRMWARE_PATH1}":/firmware2 --rm emba -c './emba -l /logs -f /firmware -o /firmware2 -i "$@"' _ "${ARGUMENTS[@]}"
+      D_RETURN=$?
     else
+      # default EMBA analysis mode:
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker-compose run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
@@ -784,7 +794,7 @@ main() {
   # Quests (Q-modules)
   #######################################################################################
 
-  if [[ -v CONTAINER_NUMBER ]]; then
+  if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
       while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
         sleep 1
@@ -809,7 +819,7 @@ main() {
   #######################################################################################
   # Pre-Check (P-modules)
   #######################################################################################
-  if [[ "${PRE_CHECK}" -eq 1 ]] ; then
+  if [[ "${PRE_CHECK}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
@@ -845,10 +855,52 @@ main() {
   fi
 
   #######################################################################################
+  # Diff mode (D-modules - currently not public)
+  #######################################################################################
+  if [[ "${DIFF_MODE}" -eq 1 ]] ; then
+
+    # Diff mode is unthreaded
+    export THREADED=0
+
+    print_ln "no_log"
+    if [[ -d "${LOG_DIR}" ]]; then
+      print_output "[!] Diff mode started on ""$(date)" "main"
+      print_output "$(indent "${NC}""1st Firmware binary path: ""${FIRMWARE_PATH}")" "main"
+      print_output "$(indent "${NC}""2nd Firmware binary path: ""${FIRMWARE_PATH1}")" "main"
+    else
+      print_output "[!] Diff mode started on ""$(date)"
+      print_output "$(indent "${NC}""1st Firmware binary path: ""${FIRMWARE_PATH}")" "no_log"
+      print_output "$(indent "${NC}""2nd Firmware binary path: ""${FIRMWARE_PATH1}")" "no_log"
+    fi
+    write_notification "Diff mode started"
+
+    if [[ -f "${MOD_DIR_LOCAL}"/D10_firmware_diffing.sh ]]; then
+      run_modules "D" "${THREADED}" "0"
+    else
+      if [[ -d "${LOG_DIR}" ]]; then
+        print_output "[!] Diff mode currently not supported in this EMBA installation." "main"
+      else
+        print_output "[!] Diff mode currently not supported in this EMBA installation." "no_log"
+      fi
+      exit 1
+    fi
+
+    if [[ -d "${LOG_DIR}" ]]; then
+      print_output "[!] Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+    else
+      print_output "[!] Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+    fi
+    write_notification "Diff mode finished"
+
+    TESTING_DONE=1
+
+  fi
+
+  #######################################################################################
   # Firmware-Check (S modules)
   #######################################################################################
   WAIT_PIDS=()
-  if [[ ${FIRMWARE} -eq 1 ]] ; then
+  if [[ ${FIRMWARE} -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     print_output "\n=================================================================\n" "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
@@ -878,7 +930,7 @@ main() {
   #######################################################################################
   # Live Emulation - Check (L-modules)
   #######################################################################################
-  if [[ "${FULL_EMULATION}" -eq 1 ]] ; then
+  if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     print_output "\n=================================================================\n" "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
       print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main" 

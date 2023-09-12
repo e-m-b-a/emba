@@ -55,6 +55,7 @@ I01_default_apps(){
     # diffing firmware
     print_tool_info "colordiff" 1
     print_tool_info "ssdeep" 1
+    print_tool_info "xdot" 1
 
     # tools only available on Kali Linux:
     if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then

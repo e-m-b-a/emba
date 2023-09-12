@@ -35,18 +35,8 @@ P02_firmware_bin_file_check() {
   fi
 
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    SHA512_CHECKSUM="$(sha512sum "$FIRMWARE_PATH" | awk '{print $1}')"
-    write_csv_log "SHA512" "${SHA512_CHECKSUM:-}" "NA"
-    SHA1_CHECKSUM="$(sha1sum "$FIRMWARE_PATH" | awk '{print $1}')"
-    write_csv_log "SHA1" "${SHA1_CHECKSUM:-}" "NA"
-    MD5_CHECKSUM="$(md5sum "$FIRMWARE_PATH" | awk '{print $1}')"
-    write_csv_log "MD5" "${MD5_CHECKSUM:-}" "NA"
-
-     # entropy checking on binary file
-    ENTROPY="$(ent "$FIRMWARE_PATH" | grep Entropy | sed -e 's/^Entropy\ \=\ //')"
-    write_csv_log "Entropy" "${ENTROPY:-}" "NA"
-
-    generate_entropy_graph "$FIRMWARE_PATH"
+    get_fw_file_details "${FIRMWARE_PATH}"
+    generate_entropy_graph "${FIRMWARE_PATH}"
   fi
 
   local FILE_LS_OUT
@@ -58,29 +48,55 @@ P02_firmware_bin_file_check() {
   print_output "$(indent "$FILE_LS_OUT")"
   print_ln
   if [[ -f "$FIRMWARE_PATH" ]]; then
-    print_ln
-    print_output "$(indent "$(file "$FIRMWARE_PATH")")"
-    print_ln
-    hexdump -C "$FIRMWARE_PATH"| head | tee -a "$LOG_FILE" || true
-    print_ln
-    print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
-    print_ln
-    print_output "$(indent "$ENTROPY")"
-    print_ln
-    if [[ -x "$EXT_DIR"/pixde ]]; then
-      print_output "[*] Visualized firmware file (first 2000 bytes):\n"
-      "$EXT_DIR"/pixde -r-0x2000 "$FIRMWARE_PATH" | tee -a "$LOG_DIR"/p02_pixd.txt
-      print_ln
-      python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "$LOG_DIR"/pixd.png -p 10 > /dev/null
-      write_link "$LOG_DIR"/pixd.png
-    fi
-
-    fw_bin_detector "$FIRMWARE_PATH"
-
+    print_fw_file_details "${FIRMWARE_PATH}"
+    generate_pixde "${FIRMWARE_PATH}"
+    fw_bin_detector "${FIRMWARE_PATH}"
     backup_p02_vars
   fi
 
   module_end_log "${FUNCNAME[0]}" 1
+}
+
+get_fw_file_details() {
+  local FIRMWARE_PATH_BIN="${1:-}"
+
+  SHA512_CHECKSUM="$(sha512sum "${FIRMWARE_PATH_BIN}" | awk '{print $1}')"
+  write_csv_log "SHA512" "${SHA512_CHECKSUM:-}" "NA"
+  SHA1_CHECKSUM="$(sha1sum "${FIRMWARE_PATH_BIN}" | awk '{print $1}')"
+  write_csv_log "SHA1" "${SHA1_CHECKSUM:-}" "NA"
+  MD5_CHECKSUM="$(md5sum "${FIRMWARE_PATH_BIN}" | awk '{print $1}')"
+  write_csv_log "MD5" "${MD5_CHECKSUM:-}" "NA"
+
+  # entropy checking on binary file
+  ENTROPY="$(ent "${FIRMWARE_PATH_BIN}" | grep Entropy | sed -e 's/^Entropy\ \=\ //')"
+  write_csv_log "Entropy" "${ENTROPY:-}" "NA"
+}
+
+print_fw_file_details() {
+  local FIRMWARE_PATH_BIN="${1:-}"
+
+  print_ln
+  print_output "$(indent "$(file "${FIRMWARE_PATH_BIN}")")"
+  print_ln
+  hexdump -C "${FIRMWARE_PATH_BIN}"| head | tee -a "$LOG_FILE" || true
+  print_ln
+  print_output "[*] SHA512 checksum: $ORANGE$SHA512_CHECKSUM$NC"
+  print_ln
+  print_output "$(indent "$ENTROPY")"
+  print_ln
+}
+
+generate_pixde() {
+  local FIRMWARE_PATH_BIN="${1:-}"
+  local PIXD_PNG_PATH="$LOG_DIR"/pixd.png
+
+  if [[ -x "$EXT_DIR"/pixde ]]; then
+    print_output "[*] Visualized firmware file (first 2000 bytes):\n"
+    "$EXT_DIR"/pixde -r-0x2000 "${FIRMWARE_PATH_BIN}" | tee -a "$LOG_DIR"/p02_pixd.txt
+    print_ln
+    python3 "$EXT_DIR"/pixd_png.py -i "$LOG_DIR"/p02_pixd.txt -o "${PIXD_PNG_PATH}" -p 10 > /dev/null
+    write_link "${PIXD_PNG_PATH}"
+  fi
 }
 
 set_p02_default_exports() {
@@ -111,8 +127,9 @@ set_p02_default_exports() {
 
 generate_entropy_graph() {
   local FIRMWARE_PATH_BIN="${1:-}"
+
   # we use the original FIRMWARE_PATH for entropy testing, just if it is a file
-  if [[ -f $FIRMWARE_PATH_BIN ]] && ! [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
+  if [[ -f "${FIRMWARE_PATH_BIN}" ]] && ! [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
     print_output "[*] Entropy testing with binwalk ... "
     # we have to change the working directory for binwalk, because everything except the log directory is read-only in
     # Docker container and binwalk fails to save the entropy picture there

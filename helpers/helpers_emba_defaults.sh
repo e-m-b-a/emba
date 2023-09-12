@@ -18,8 +18,8 @@
 
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
-  export EMBA_VERSION="1.3.0"
+  export RELEASE=0
+  export EMBA_VERSION="1.3.x"
 
   export CLEANED=0              # used for the final cleaner function for not running it multiple times
   export STRICT_MODE=0
@@ -89,7 +89,7 @@ set_defaults() {
   export EXT_DIR="$INVOCATION_PATH""/external"
   export HELP_DIR="$INVOCATION_PATH""/helpers"
   export MOD_DIR="$INVOCATION_PATH""/modules"
-  export MOD_DIR_LOCAL="$INVOCATION_PATH""/modules_local"
+  export MOD_DIR_LOCAL="$INVOCATION_PATH""/EMBA-Non-free/modules_local"
   export PID_LOGGING=0
   # this will be in TMP_DIR/pid_notes.log
   export PID_LOG_FILE="pid_notes.log"

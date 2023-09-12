@@ -51,6 +51,11 @@ a.submodul:hover {
   background-color:#6e6e6e;
 }
 
+a.d {
+  background:linear-gradient(270deg,#088b83 10px,rgba(0,0,0,0) 0px);
+  padding-right:18px!important;
+}
+
 a.p {
   background:linear-gradient(270deg,#088a83 10px,rgba(0,0,0,0) 0px);
   padding-right:18px!important;
