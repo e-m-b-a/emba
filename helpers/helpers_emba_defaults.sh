@@ -40,6 +40,8 @@ set_defaults() {
   export KERNEL=0
   export KERNEL_CONFIG=""
   export FIRMWARE_PATH=""
+  export FIRMWARE_PATH1=""
+  export DIFF_MODE=0
   export FW_VENDOR=""
   export FW_VERSION=""
   export FW_DEVICE=""

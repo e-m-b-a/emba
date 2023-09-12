@@ -244,12 +244,8 @@ add_link_tags() {
           EXPLOIT_FILE="$LOG_DIR""/f20_vul_aggregator/exploit/""$EXPLOIT_ID"".txt"
           if [[ -f "$EXPLOIT_FILE" ]] ; then
             # generate exploit file
-            #if [[ $THREADED -eq 1 ]]; then
-              generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
-              WAIT_PIDS_WR+=( "$!" )
-            #else
-            #  generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
-            #fi
+            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
+            WAIT_PIDS_WR+=( "$!" )
             HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
           else
             HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
