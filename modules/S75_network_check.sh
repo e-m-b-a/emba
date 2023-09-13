@@ -54,7 +54,9 @@ check_resolv()
       fi
     fi
   done
-  [[ $CHECK -eq 0 ]] && print_output "[-] No or empty network configuration found"
+  if [[ $CHECK -eq 0 ]]; then
+    print_output "[-] No or empty network configuration found"
+  fi
 }
 
 check_iptables()
@@ -73,7 +75,9 @@ check_iptables()
       ((NET_CFG_FOUND+=1))
     fi
   done
-  [[ $CHECK -eq 0 ]] && print_output "[-] No iptables configuration found"
+  if [[ $CHECK -eq 0 ]]; then
+    print_output "[-] No iptables configuration found"
+  fi
 }
 
 # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_snmp
@@ -102,7 +106,9 @@ check_snmp()
       fi
     fi
   done
-  [[ $CHECK -eq 0 ]] && print_output "[-] No SNMP configuration found"
+  if [[ $CHECK -eq 0 ]]; then
+    print_output "[-] No SNMP configuration found"
+  fi
 }
 
 check_network_configs()

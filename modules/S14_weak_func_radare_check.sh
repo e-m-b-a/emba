@@ -436,7 +436,7 @@ radare_function_check_x86_64() {
           STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
         elif [[ "$FUNCTION" == "mmap"  ]] ; then
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
-          COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null)
+          COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "$FUNC_LOG"  2> /dev/null || true)
         fi
         radare_log_func_footer "$NAME" "$FUNCTION"
         radare_output_function_details "$BINARY_" "$FUNCTION"
