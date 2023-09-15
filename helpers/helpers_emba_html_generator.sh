@@ -116,25 +116,21 @@ add_link_tags() {
           echo "REF_LINK 4: $REF_LINK"
           echo "REFERENCE_LINK: $REFERENCE_LINK"
 
-          # we need to handle deeper hyrarchies - this is suboptimal but works for now!
-          # TODO: Currently it only works for the first subdirectory
-          if [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev)" == "${LOG_DIR}" ]]; then
-            echo "depth 2: "
-            echo "REF_LINK: $REF_LINK"
-            echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev
-            DEPTH=".."
-          elif [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev)" == "${LOG_DIR}" ]]; then
-            echo "depth 1: "
-            echo "REF_LINK: $REF_LINK"
-            echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev
-            DEPTH="."
-          fi
-
-          echo "BACK_LINK: $BACK_LINK"
-          if [[ -n "$REF_ANCHOR" ]] ; then
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
+          if [[ "${BACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}.*$ ]]; then
+            # first level links
+            if [[ -n "$REF_ANCHOR" ]] ; then
+              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
+            else
+              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            fi
           else
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            # deeper level links
+            # TODO: further testing
+            if [[ -n "$REF_ANCHOR" ]] ; then
+              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
+            else
+              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            fi
           fi
           echo "REF_LINK: $REF_LINK"
           echo "REF_ANCHOR: $REF_ANCHOR"
@@ -466,12 +462,14 @@ generate_info_file()
   CUSTOM_SUB_PATH=${3:-}
   echo "generate_info_file - INFO_FILE $INFO_FILE"
   echo "generate_info_file - SRC_FILE $SRC_FILE"
+  echo "generate_info_file - CUSTOM_SUB_PATH $CUSTOM_SUB_PATH"
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%."${INFO_FILE##*.}"}"".html")"
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
     INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 )"
   else
     INFO_PATH="$ABS_HTML_PATH""/""$CUSTOM_SUB_PATH"
+    echo "INFO_PATH hit: $INFO_PATH"
   fi
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
@@ -503,7 +501,7 @@ generate_info_file()
     sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_INFO_FILE" || true
     
     # add link tags to links/generate info files and link to them and write line to tmp file
-    add_link_tags "$TMP_INFO_FILE" "$INFO_HTML_FILE"
+    add_link_tags "$TMP_INFO_FILE" "${INFO_HTML_FILE}"
 
     readarray -t EXPLOITS_IDS_INFO < <( grep -a 'Exploit DB Id:' "$INFO_FILE" | sed -e 's@[^0-9\ ]@@g ; s@\ @@g' | sort -u || true)
     for EXPLOIT_ID_INFO in "${EXPLOITS_IDS_INFO[@]}" ; do
