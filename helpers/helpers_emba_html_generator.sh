@@ -105,8 +105,13 @@ add_link_tags() {
             REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
           fi
           echo "REF_LINK 3: $REF_LINK"
+          echo "LOG_DIR: $LOG_DIR"
+          echo "$(dirname ${REF_LINK} | sed 's#'${LOG_DIR}'##')"
+          CUSTOM_SUB_PATH_CALLER="$(dirname "${REF_LINK}" | sed 's#'"${LOG_DIR}"'##')"
+          CUSTOM_SUB_PATH_CALLER="${CUSTOM_SUB_PATH_CALLER#/}"
+          echo "CUSTOM_SUB_PATH_CALLER: $CUSTOM_SUB_PATH_CALLER"
           # generate reference file
-          generate_info_file "$REF_LINK" "$BACK_LINK" &
+          generate_info_file "$REF_LINK" "$BACK_LINK" "${CUSTOM_SUB_PATH_CALLER}" &
           WAIT_PIDS_WR+=( "$!" )
           echo "REF_LINK 4: $REF_LINK"
           echo "REFERENCE_LINK: $REFERENCE_LINK"
@@ -114,15 +119,23 @@ add_link_tags() {
           # we need to handle deeper hyrarchies - this is suboptimal but works for now!
           # TODO: Currently it only works for the first subdirectory
           if [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev)" == "${LOG_DIR}" ]]; then
+            echo "depth 2: "
+            echo "REF_LINK: $REF_LINK"
+            echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev
             DEPTH=".."
           elif [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev)" == "${LOG_DIR}" ]]; then
+            echo "depth 1: "
+            echo "REF_LINK: $REF_LINK"
+            echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev
             DEPTH="."
           fi
 
+          echo "BACK_LINK: $BACK_LINK"
           if [[ -n "$REF_ANCHOR" ]] ; then
             HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
           else
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            # HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
           fi
           echo "REF_LINK: $REF_LINK"
           echo "REF_ANCHOR: $REF_ANCHOR"
@@ -480,6 +493,7 @@ generate_info_file()
 
     echo "INFO_FILE: $INFO_FILE"
     echo "TMP_INFO_FILE: $TMP_INFO_FILE"
+    echo "INFO_HTML_FILE: $INFO_HTML_FILE"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true
