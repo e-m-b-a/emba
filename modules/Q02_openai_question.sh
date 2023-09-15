@@ -93,7 +93,16 @@ ask_chatgpt() {
     # in case we have nothing we are going to move on
     [[ -z "${SCRIPT_PATH_TMP_}" ]] && continue
     print_output "[*] Identification of ${ORANGE}${SCRIPT_PATH_TMP_} / ${GPT_INPUT_FILE_}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
-    SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}")"
+    if [[ "${SCRIPT_PATH_TMP_}" == ".""${LOG_DIR}"* ]]; then
+      print_output "[*] Warning: System path is not stripped with the root directory - we try to fix it now" "no_log"
+      # remove the '.'
+      SCRIPT_PATH_TMP_="${SCRIPT_PATH_TMP_:1}"
+      # remove the LOG_DIR
+      SCRIPT_PATH_TMP_="$(echo "${SCRIPT_PATH_TMP_}" | sed 's#'"${LOG_DIR}"'##')"
+      print_output "[*] Stripped path $SCRIPT_PATH_TMP_" "no_log"
+    fi
+    # dirty fix - Todo: use array in future
+    SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}" | head -1)"
 
     # in case we have nothing we are going to move on
     ! [[ -f "${SCRIPT_PATH_TMP_}" ]] && continue
