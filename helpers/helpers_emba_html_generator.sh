@@ -92,29 +92,19 @@ add_link_tags() {
     readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "$LINK_FILE" | cut -d':' -f1 )
     for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
       REF_LINK="$(sed "$REF_LINK_NUMBER""q;d" "$LINK_FILE" | cut -c12- | cut -d'<' -f1 || true)"
-      echo "REF_LINK out: $REF_LINK"
-      echo "REF_LINK out cut: $(echo "$REF_LINK" | cut -d"#" -f1)"
       URL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "$REF_LINK" | cut -d"#" -f1)" ]] ; then
-        echo "REF_LINK 1: $REF_LINK"
         if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
-          echo "REF_LINK 2: $REF_LINK"
           REF_ANCHOR=""
           if [[ ( ("$REF_LINK" == *".txt#"*) || ("$REF_LINK" == *".log#"*) ) ]] ; then
             REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2 || true)"
             REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
           fi
-          echo "REF_LINK 3: $REF_LINK"
-          echo "LOG_DIR: $LOG_DIR"
-          echo "$(dirname ${REF_LINK} | sed 's#'${LOG_DIR}'##')"
           CUSTOM_SUB_PATH_CALLER="$(dirname "${REF_LINK}" | sed 's#'"${LOG_DIR}"'##')"
           CUSTOM_SUB_PATH_CALLER="${CUSTOM_SUB_PATH_CALLER#/}"
-          echo "CUSTOM_SUB_PATH_CALLER: $CUSTOM_SUB_PATH_CALLER"
           # generate reference file
           generate_info_file "$REF_LINK" "$BACK_LINK" "${CUSTOM_SUB_PATH_CALLER}" &
           WAIT_PIDS_WR+=( "$!" )
-          echo "REF_LINK 4: $REF_LINK"
-          echo "REFERENCE_LINK: $REFERENCE_LINK"
 
           if [[ "${BACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}.*$ ]]; then
             # first level links
@@ -132,35 +122,22 @@ add_link_tags() {
               HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
             fi
           fi
-          echo "REF_LINK: $REF_LINK"
-          echo "REF_ANCHOR: $REF_ANCHOR"
-          echo "HTML_LINK: $HTML_LINK"
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
-          echo "LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
         elif [[ "${REF_LINK: -7}" == ".tar.gz" ]] ; then
           local RES_PATH
           RES_PATH="$ABS_HTML_PATH""/""$(echo "$BACK_LINK" | cut -d"." -f1 )""/res"
           if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""Download Qemu emulation archive.""$LINK_END"
-          # echo "REF_LINK: $REF_LINK"
-          # echo "HTML_LINK: $HTML_LINK"
           sed -i "s@Qemu emulation archive created in log directory.*$(basename "$REF_LINK").*@$HTML_LINK$P_END@" "$LINK_FILE"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true
-          echo "png copy:"
-          echo "LINK_FILE: $LINK_FILE"
-          echo "ABS_HTML_PATH: $ABS_HTML_PATH"
-          echo "STYLE_PATH: $STYLE_PATH"
 
-          echo "REF_LINK: $REF_LINK"
-          echo "LOG_DIR: $LOG_DIR"
-          echo "LOG_DIR? -> $(echo "${REF_LINK}" | rev | cut -d '/' -f2- | rev)"
           if [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev)" == "${LOG_DIR}" ]]; then
             DEPTH=".."
           elif [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev)" == "${LOG_DIR}" ]]; then
@@ -168,10 +145,7 @@ add_link_tags() {
           fi
           IMAGE_LINK="<img class=\"image\" src=\"${DEPTH}${STYLE_PATH}/PICTURE\">"
           HTML_LINK="$(echo "$IMAGE_LINK" | sed -e 's@PICTURE@'"$(basename "$REF_LINK")"'@' || true)"
-          echo "IMAGE_LINK: $IMAGE_LINK"
-          echo "HTML_LINK: $HTML_LINK"
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
-          echo "LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
         fi
       elif [[ ("$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
         REF_ANCHOR=""
@@ -460,16 +434,12 @@ generate_info_file()
   INFO_FILE=${1:-}
   SRC_FILE=${2:-}
   CUSTOM_SUB_PATH=${3:-}
-  echo "generate_info_file - INFO_FILE $INFO_FILE"
-  echo "generate_info_file - SRC_FILE $SRC_FILE"
-  echo "generate_info_file - CUSTOM_SUB_PATH $CUSTOM_SUB_PATH"
 
   INFO_HTML_FILE="$(basename "${INFO_FILE%."${INFO_FILE##*.}"}"".html")"
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
     INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 )"
   else
     INFO_PATH="$ABS_HTML_PATH""/""$CUSTOM_SUB_PATH"
-    echo "INFO_PATH hit: $INFO_PATH"
   fi
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
@@ -488,9 +458,6 @@ generate_info_file()
       sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
     fi
 
-    echo "INFO_FILE: $INFO_FILE"
-    echo "TMP_INFO_FILE: $TMP_INFO_FILE"
-    echo "INFO_HTML_FILE: $INFO_HTML_FILE"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true
