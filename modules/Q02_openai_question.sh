@@ -98,6 +98,7 @@ ask_chatgpt() {
       # remove the '.'
       SCRIPT_PATH_TMP_="${SCRIPT_PATH_TMP_:1}"
       # remove the LOG_DIR
+      # shellcheck disable=SC2001
       SCRIPT_PATH_TMP_="$(echo "${SCRIPT_PATH_TMP_}" | sed 's#'"${LOG_DIR}"'##')"
       print_output "[*] Stripped path $SCRIPT_PATH_TMP_" "no_log"
     fi
