@@ -134,8 +134,13 @@ add_link_tags() {
           if [[ -n "$REF_ANCHOR" ]] ; then
             HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
           else
+<<<<<<< Updated upstream
             # HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
             HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+=======
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            # HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+>>>>>>> Stashed changes
           fi
           echo "REF_LINK: $REF_LINK"
           echo "REF_ANCHOR: $REF_ANCHOR"
