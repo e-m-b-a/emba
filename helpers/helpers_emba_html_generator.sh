@@ -100,28 +100,29 @@ add_link_tags() {
             REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2 || true)"
             REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
           fi
-          CUSTOM_SUB_PATH_CALLER="$(dirname "${REF_LINK}" | sed 's#'"${LOG_DIR}"'##')"
-          CUSTOM_SUB_PATH_CALLER="${CUSTOM_SUB_PATH_CALLER#/}"
+          # CUSTOM_SUB_PATH_CALLER="$(dirname "${REF_LINK}" | sed 's#'"${LOG_DIR}"'##')"
+          # CUSTOM_SUB_PATH_CALLER="${CUSTOM_SUB_PATH_CALLER#/}"
           # generate reference file
-          generate_info_file "$REF_LINK" "$BACK_LINK" "${CUSTOM_SUB_PATH_CALLER}" &
+          # generate_info_file "$REF_LINK" "$BACK_LINK" "${CUSTOM_SUB_PATH_CALLER}" &
+          generate_info_file "$REF_LINK" "$BACK_LINK" &
           WAIT_PIDS_WR+=( "$!" )
 
-          if [[ "${BACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}.*$ ]]; then
+          # if [[ "${BACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}.*$ ]]; then
             # first level links
             if [[ -n "$REF_ANCHOR" ]] ; then
               HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
             else
               HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
             fi
-          else
+          # else
             # deeper level links
             # TODO: further testing
-            if [[ -n "$REF_ANCHOR" ]] ; then
-              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
-            else
-              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
-            fi
-          fi
+            # if [[ -n "$REF_ANCHOR" ]] ; then
+            #   HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
+            # else
+            #   HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            # fi
+          # fi
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
