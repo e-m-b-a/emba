@@ -130,9 +130,11 @@ F20_vul_aggregator() {
       if [[ -f "$MSF_DB_PATH" ]]; then
         MSF_SEARCH=1
       fi
-      if [[ -f "$TRICKEST_DB_PATH" ]]; then
-        TRICKEST_SEARCH=1
-      fi
+      # We do not enable the TRICKEST exploit search because of the high false positive rate
+      # uncomment if needed but be warned, we will remove it in the future
+      # if [[ -f "$TRICKEST_DB_PATH" ]]; then
+      #   TRICKEST_SEARCH=1
+      # fi
       if [[ -f "$CONFIG_DIR"/routersploit_cve-db.txt || -f "$CONFIG_DIR"/routersploit_exploit-db.txt ]]; then
         RS_SEARCH=1
       fi
