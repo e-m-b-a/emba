@@ -251,6 +251,29 @@ testssl_check() {
   print_bar ""
 }
 
+check_curl_ret() {
+  local IP_="${1:-}"
+  local PORT_="${2:-}"
+  local CURL_RET="${3:-}"
+
+  local CURL_RET_CODE=""
+  local CURL_RET_SIZE=""
+
+  CURL_RET_CODE="$(echo "${CURL_RET}" | cut -d: -f1 || true)"
+  CURL_RET_SIZE="$(echo "${CURL_RET}" | cut -d: -f2 || true)"
+  # print_output "[*] CURL_RET: $CURL_RET / ${HTTP_RAND_REF_SIZE} / Port: ${PORT_}" "no_log"
+
+  if [[ "${CURL_RET_CODE}" -eq 200 ]]; then
+    if [[ "${HTTP_RAND_REF_SIZE}" == "NA" ]] || [[ "${CURL_RET_SIZE}" != "${HTTP_RAND_REF_SIZE}" ]]; then
+      echo "${CURL_RET_CODE} OK:${CURL_RET_SIZE}" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+    fi
+  elif [[ "${CURL_RET_CODE}" == "401" ]] && [[ "${CURL_RET_SIZE}" != "${HTTP_RAND_REF_SIZE}" ]]; then
+    echo "${CURL_RET_CODE} Unauth:${CURL_RET_SIZE}" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+  else
+    echo "${CURL_RET_CODE}:${CURL_RET_SIZE}" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+  fi
+}
+
 web_access_crawler() {
   local IP_="$1"
   local PORT_="$2"
@@ -260,9 +283,10 @@ web_access_crawler() {
   local WEB_DIR_L1=""
   local WEB_DIR_L2=""
   local WEB_DIR_L3=""
-  local CURL_OPTS=( -sS -D )
+  local CURL_OPTS=( -sS )
   [[ -v CURL_CREDS ]] && local CURL_OPTS+=( "${CURL_CREDS}" )
   local CRAWLED_ARR=()
+  local CURL_RET=""
 
   if [[ "$SSL_" -eq 1 ]]; then
     PROTO="https"
@@ -274,24 +298,35 @@ web_access_crawler() {
   sub_module_title "Starting web server crawling for $ORANGE$IP_:$PORT$NC"
   print_ln
 
+  # the refernce size is used for identifying incorrect 200 ok results
+  CURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/EMBA/""$RANDOM""/""$RANDOM"."$RANDOM" -o /dev/null -w '%{http_code}:%{size_download}')
+  CURL_RET_CODE="$(echo "${CURL_RET}" | cut -d: -f1 || true)"
+  if [[ "${CURL_RET_CODE}" -eq 200 ]]; then
+    # we only use the reponse size if we get a 200 ok on a non existing site
+    # otherwise we set it to "NA" which means that we do need to check the response size on further requests
+    HTTP_RAND_REF_SIZE="$(echo "${CURL_RET}" | cut -d: -f2 || true)"
+    print_output "[*] HTTP status detection - 200 ok on random site with reference size: $HTTP_RAND_REF_SIZE"
+  else
+    HTTP_RAND_REF_SIZE="NA"
+  fi
+  print_output "[*] Init CURL_RET: $CURL_RET / $HTTP_RAND_REF_SIZE" "no_log"
+
   local HOME_=""
   HOME_=$(pwd)
+  disable_strict_mode "${STRICT_MODE}" 0
   for R_PATH in "${ROOT_PATH[@]}" ; do
     # we need files and links (for cgi files)
     cd "${R_PATH}" || exit 1
     mapfile -t FILE_ARR_EXT < <(find "." -type f -o -type l || true)
 
     for WEB_PATH in "${FILE_ARR_EXT[@]}"; do
-      if ! system_online_check "${IP_}" ; then
-        print_output "[-] System not responding - Stopping crawling"
-        break
-      fi
       print_dot
 
       WEB_FILE="$(basename "$WEB_PATH")"
       if [[ -n "${WEB_FILE}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_FILE} "* ]]; then
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/$WEB_FILE$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-        timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+        CURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" -o /dev/null -w '%{http_code}:%{size_download}')"
+        check_curl_ret "${IP_}" "${PORT_}" "${CURL_RET}"
         CRAWLED_ARR+=( "${WEB_FILE}" )
       fi
 
@@ -300,7 +335,8 @@ web_access_crawler() {
       WEB_DIR_L1="${WEB_DIR_L1#\/}"
       if [[ -n "${WEB_DIR_L1}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_DIR_L1}/${WEB_FILE} "* ]]; then
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L1}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-        timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+        CURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L1}""/""$WEB_FILE" -o /dev/null -w '%{http_code}:%{size_download}')"
+        check_curl_ret "${IP_}" "${PORT_}" "${CURL_RET}"
         CRAWLED_ARR+=( "${WEB_DIR_L1}/${WEB_FILE}" )
       fi
 
@@ -309,7 +345,8 @@ web_access_crawler() {
       WEB_DIR_L2="${WEB_DIR_L2#\/}"
       if [[ -n "${WEB_DIR_L2}" ]] && [[ "${WEB_DIR_L2}" != "${WEB_DIR_L1}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_DIR_L2}/${WEB_FILE} "* ]]; then
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L2}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-        timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+        CURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L2}""/""$WEB_FILE" -o /dev/null -w '%{http_code}:%{size_download}')"
+        check_curl_ret "${IP_}" "${PORT_}" "${CURL_RET}"
         CRAWLED_ARR+=( "${WEB_DIR_L2}/${WEB_FILE}" )
       fi
 
@@ -318,17 +355,23 @@ web_access_crawler() {
       WEB_DIR_L3="${WEB_DIR_L3#\/}"
       if [[ -n "${WEB_DIR_L3}" ]] && [[ "${WEB_DIR_L3}" != "${WEB_DIR_L2}" ]] && [[ "${WEB_DIR_L3}" != "${WEB_DIR_L1}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_DIR_L3}/${WEB_FILE} "* ]]; then
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/${WEB_DIR_L3}/${WEB_FILE}$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
-        timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" -o /dev/null >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+        CURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/""${WEB_DIR_L3}""/""$WEB_FILE" -o /dev/null -w '%{http_code}:%{size_download}')"
+        check_curl_ret "${IP_}" "${PORT_}" "${CURL_RET}"
+
         CRAWLED_ARR+=( "${WEB_DIR_L3}/${WEB_FILE}" )
       fi
 
-      if [[ "$(grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 -c "200 OK")" -gt 1000 ]]; then
-        print_output "[-] WARNING: Too many http responses identified - Stopping web crawling for ${IP_}:${PORT_} now"
-        break
+      if ! system_online_check "${IP_ADDRESS_}" ; then
+        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 0 "${STATE_CHECK_MECHANISM}"; then
+          print_output "[-] System not responding - Not performing web crawling"
+          enable_strict_mode "${STRICT_MODE}" 0
+          return
+        fi
       fi
     done
     cd "${HOME_}" || exit 1
   done
+  enable_strict_mode "${STRICT_MODE}" 0
 
   # extract started processes from all our qemu logs:
   #
@@ -353,15 +396,16 @@ web_access_crawler() {
         for FILE_QEMU_TEST in "${POSSIBLE_FILES_ARR[@]}"; do
           print_output "[*] Testing ${ORANGE}${PROTO}://${IP_}:${PORT_}/${FILE_QEMU_TEST}${NC}" "no_log"
           echo -e "\\n[*] Testing ${ORANGE}${PROTO}://${IP_}:${PORT_}/${FILE_QEMU_TEST}${NC}" >> "${LOG_PATH_MODULE}/crawling_${IP_}-${PORT_}.log"
-          timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" - "${PROTO}""://""${IP_}":"${PORT_}""/""${FILE_QEMU_TEST}" -o /dev/null >> "${LOG_PATH_MODULE}/crawling_$IP_-$PORT_.log" 2>/dev/null || true
+          CURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/""${FILE_QEMU_TEST}" -o /dev/null -w '%{http_code}:%{size_download}' || true)"
+          check_curl_ret "${IP_}" "${PORT_}" "${CURL_RET}"
         done
       done
     done
   done
 
   if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" ]]; then
-    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "200 OK" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" || true
-    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "401 Unauth" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" || true
+    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "200 OK:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" || true
+    grep -A1 Testing "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log" | grep -i -B1 "401 Unauth:" | grep Testing | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/.*$IP_:$PORT//" | sort -u >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" || true
     CRAWL_RESP_200=$(wc -l "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" | awk '{print $1}')
     CRAWL_RESP_401=$(wc -l "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-401Unauth.log" | awk '{print $1}')
 
@@ -370,10 +414,10 @@ web_access_crawler() {
     sed -i -r "s/.*HTTP\/.*\ [3-9][0-9][0-9]\ .*/\x1b[31m&\x1b[0m/" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
 
     if [[ "$CRAWL_RESP_200" -gt 0 ]]; then
-      print_output "[+] Found $ORANGE$CRAWL_RESP_200$GREEN valid responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+      print_output "[+] Found $ORANGE$CRAWL_RESP_200$GREEN unique valid responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
     fi
     if [[ "$CRAWL_RESP_401" -gt 0 ]]; then
-      print_output "[+] Found $ORANGE$CRAWL_RESP_401$GREEN unauthorized responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+      print_output "[+] Found $ORANGE$CRAWL_RESP_401$GREEN unique unauthorized responses - please check the log for further details" "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
     fi
 
     if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" ]] && [[ -f "$LOG_DIR"/s22_php_check/semgrep_php_results_xml.log ]]; then
@@ -410,12 +454,11 @@ web_access_crawler() {
       done  < "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log"
     fi
 
-
     # todo: Python, further PHP analysis
 
-    print_output "[*] Finished web server crawling." "" "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
+    print_output "[*] Finished web server crawling for ${ORANGE}${IP_}:${PORT}${NC}." "" "${LOG_PATH_MODULE}/crawling_${IP_}-${PORT_}.log"
   else
-    print_output "[*] Finished web server crawling."
+    print_output "[*] Finished web server crawling for ${ORANGE}${IP_}:${PORT}${NC}."
   fi
   print_bar ""
 }
