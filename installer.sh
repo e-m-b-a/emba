@@ -174,7 +174,7 @@ if grep -q -i wsl /proc/version; then
 fi
 
 # distribution check
-if ! grep -Eq "ID_LIKE=(\")?(ubuntu)?( )?(debian)?" /etc/os-release 2>/dev/null ; then
+if ! grep -Eq "ID(_LIKE)?=(\")?(ubuntu)?( )?(debian)?" /etc/os-release 2>/dev/null ; then
   echo -e "\\n""$RED""EMBA only supports debian based distributions!""$NC\\n"
   print_help
   exit 1
