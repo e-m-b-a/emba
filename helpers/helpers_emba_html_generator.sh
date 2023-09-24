@@ -434,7 +434,9 @@ generate_info_file()
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
 
-  ! [[ -d "$INFO_PATH" ]] && mkdir "$INFO_PATH" || true
+  if ! [[ -d "$INFO_PATH" ]]; then
+    mkdir "$INFO_PATH" || true
+  fi
 
   if [[ ! -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE" || true
