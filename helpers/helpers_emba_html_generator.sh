@@ -107,22 +107,11 @@ add_link_tags() {
           generate_info_file "$REF_LINK" "$BACK_LINK" &
           WAIT_PIDS_WR+=( "$!" )
 
-          # if [[ "${BACK_LINK}" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}.*$ ]]; then
-            # first level links
-            if [[ -n "$REF_ANCHOR" ]] ; then
-              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
-            else
-              HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
-            fi
-          # else
-            # deeper level links
-            # TODO: further testing
-            # if [[ -n "$REF_ANCHOR" ]] ; then
-            #   HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
-            # else
-            #   HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
-            # fi
-          # fi
+          if [[ -n "$REF_ANCHOR" ]] ; then
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
+          else
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+          fi
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
@@ -445,7 +434,7 @@ generate_info_file()
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
 
-  if [[ ! -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" || true ; fi
+  ! [[ -d "$INFO_PATH" ]] && mkdir "$INFO_PATH" || true
 
   if [[ ! -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE" || true
@@ -459,6 +448,7 @@ generate_info_file()
       sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
     fi
 
+    echo "Copy $INFO_FILE to $TMP_INFO_FILE"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true
