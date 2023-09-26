@@ -451,6 +451,8 @@ generate_info_file()
     fi
 
     echo "Copy $INFO_FILE to $TMP_INFO_FILE"
+    echo "LOG_PATH_MODULE: $LOG_PATH_MODULE"
+    echo "$LOG_PATH_MODULE" | sed -e "s#""$LOG_DIR""##g"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true

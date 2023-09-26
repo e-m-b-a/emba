@@ -505,6 +505,7 @@ main() {
       echo "${SUDO_USER:-${USER}}" > "${LOG_DIR}"/orig_user.log
       echo "UID: $(id -u "${SUDO_USER:-${USER}}")" >> "${LOG_DIR}"/orig_user.log
       echo "GID: $(id -g "${SUDO_USER:-${USER}}")" >> "${LOG_DIR}"/orig_user.log
+      echo "PROXY: $(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2)" >> "${LOG_DIR}"/orig_user.log
     fi
 
     if [[ "${IN_DOCKER}" -eq 0 ]]; then

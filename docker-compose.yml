@@ -72,17 +72,9 @@ services:
       - /root
       - /root/.cargo/bin:exec
       - /run/lock
-      - /var
       - /var/run
       - /var/tmp
       - /var/lock
-      - /var/lib/nikto:exec
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/../logs
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/home
-        # build: .
     # /dev is needed for the system emulator (L10)
     # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
     # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
@@ -93,8 +85,6 @@ services:
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
-      #  - /lib/modules:/lib/modules:ro
-        # - /boot:/boot:ro
     environment:
         - USER
         - CONTAINER_NUMBER=2
@@ -104,7 +94,7 @@ services:
         hard: 0
         soft: 0
     security_opt:
-        - no-new-privileges:true
+      - no-new-privileges:true
 
 networks:
   emba_runs:

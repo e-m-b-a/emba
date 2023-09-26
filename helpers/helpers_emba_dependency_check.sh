@@ -199,14 +199,19 @@ dependency_check()
 
   print_ln "no_log"
 
+  USER_PROXY="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2 | sort -u || true)"
+  export CURL_OPTS=""
+  if [[ -n "${USER_PROXY}" ]]; then
+    CURL_OPTS="--proxy ${USER_PROXY}"
+  fi
+
   #######################################################################################
   ## Quest Container
   #######################################################################################
   print_output "[*] Network connection:" "no_log"
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - \\c" "no_log"
-    # if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
-    if ! curl -Is https://www.google.com &>/dev/null ; then
+    if ! curl "${CURL_OPTS}" -Is https://www.google.com &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
@@ -241,35 +246,39 @@ dependency_check()
       while true; do
         local HTTP_CODE_=400
         print_output "    OpenAI-API key  - \\c" "no_log"
-        HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
+        HTTP_CODE_=$(curl -sS https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
                 -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-                -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json -sS)
+                -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json)
 
         if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
           echo -e "$GREEN""ok""$NC"
           rm /tmp/chatgpt-test.json
           break
         else
-          if jq '.error.code' /tmp/chatgpt-test.json | grep -q "rate_limit_exceeded" ; then
-            # rate limit handling - if we got a response like:
-            # Please try again in 20s
-            echo -e "$RED""not ok (rate limit issues)""$NC"
-            if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in " ; then
-              # print_output "GPT API test #${RETRIES_} - \\c" "no_log"
-              sleep "${SLEEPTIME}"s
-              # sleeptime gets adjusted on every failure
-              SLEEPTIME=$((SLEEPTIME+5))
-              ((RETRIES_+=1))
-              [[ "${RETRIES_}" -lt "${MAX_RETRIES}" ]] && continue
+          if [[ -f /tmp/chatgpt-test.json ]]; then
+            if jq '.error.code' /tmp/chatgpt-test.json | grep -q "rate_limit_exceeded" ; then
+              # rate limit handling - if we got a response like:
+              # Please try again in 20s
+              echo -e "$RED""not ok (rate limit issues)""$NC"
+              if jq '.error.message' /tmp/chatgpt-test.json | grep -q "Please try again in " ; then
+                # print_output "GPT API test #${RETRIES_} - \\c" "no_log"
+                sleep "${SLEEPTIME}"s
+                # sleeptime gets adjusted on every failure
+                SLEEPTIME=$((SLEEPTIME+5))
+                ((RETRIES_+=1))
+                [[ "${RETRIES_}" -lt "${MAX_RETRIES}" ]] && continue
+              fi
             fi
-          fi
-          if jq '.error.code' /tmp/chatgpt-test.json | grep -q "insufficient_quota" ; then
-            echo -e "$RED""not ok (quota limit issues)""$NC"
-            break
+            if jq '.error.code' /tmp/chatgpt-test.json | grep -q "insufficient_quota" ; then
+              echo -e "$RED""not ok (quota limit issues)""$NC"
+              break
+            fi
           fi
           echo -e "$RED""not ok""$NC"
           print_output "[-] ChatGPT error while testing the API-Key: ${OPENAI_API_KEY}" "no_log"
-          print_output "[-] ERROR response: $(cat /tmp/chatgpt-test.json)" "no_log"
+          if [[ -f /tmp/chatgpt-test.json ]]; then
+            print_output "[-] ERROR response: $(cat /tmp/chatgpt-test.json)" "no_log"
+          fi
           # Note: we are running into issues in the case where the key can't be verified, but GPT is not enabled at all
           #       In such a case we will fail the check without the need of GPT
           DEP_ERROR=1
