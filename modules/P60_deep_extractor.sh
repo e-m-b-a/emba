@@ -40,7 +40,7 @@ P60_deep_extractor() {
     DISK_SPACE_CRIT=1
   fi
 
-  print_ln
+  sub_module_title "Extration results"
 
   FILES_EXT=$(find "$FIRMWARE_PATH_CP" -xdev -type f | wc -l )
   UNIQUE_FILES=$(find "$FIRMWARE_PATH_CP" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
@@ -54,7 +54,7 @@ P60_deep_extractor() {
     print_output "[*] Found $ORANGE$FILES_EXT$NC files ($ORANGE$UNIQUE_FILES$NC unique files) and $ORANGE$DIRS_EXT$NC directories at all."
     print_output "[*] Found $ORANGE$BINS$NC binaries."
     print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER$NC."
-    print_ln
+
     tree -csh "$FIRMWARE_PATH_CP" | tee -a "$LOG_FILE"
 
     # now it should be fine to also set the FIRMWARE_PATH ot the FIRMWARE_PATH_CP

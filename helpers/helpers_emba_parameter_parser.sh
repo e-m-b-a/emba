@@ -129,6 +129,7 @@ emba_parameter_parsing() {
         export FIRMWARE=1
         export FIRMWARE_PATH1=""
         FIRMWARE_PATH1="$(escape_echo "$OPTARG")"
+        export HTML=1
         ;;
       p)
         check_path_input "$OPTARG"
