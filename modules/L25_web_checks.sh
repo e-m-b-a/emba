@@ -323,6 +323,10 @@ web_access_crawler() {
       print_dot
 
       WEB_FILE="$(basename "$WEB_PATH")"
+
+      # some basic filtering to not handle defect file names
+      ! [[ "${WEB_FILE}" =~ ^[a-zA-Z0-9./_~'-']+$ ]] && continue
+
       if [[ -n "${WEB_FILE}" ]] && ! [[ "${CRAWLED_ARR[*]}" == *" ${WEB_FILE} "* ]]; then
         echo -e "\\n[*] Testing $ORANGE$PROTO://$IP_:$PORT_/$WEB_FILE$NC" >> "$LOG_PATH_MODULE/crawling_$IP_-$PORT_.log"
         CURL_RET="$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/""$WEB_FILE" -o /dev/null -w '%{http_code}:%{size_download}')"
