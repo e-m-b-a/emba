@@ -73,7 +73,16 @@ F50_base_aggregator() {
   output_binaries
   output_cve_exploits
 
+  # dedicated firmware diff output function
+  if [[ "${DIFF_MODE}" -gt 0 ]]; then
+    output_diff
+  fi
+
   module_end_log "${FUNCNAME[0]}" 1 
+}
+
+output_diff() {
+  print_output "[!] Aggregator integration of firmware diffing mode not available" "no_log"
 }
 
 output_overview() {
@@ -95,11 +104,15 @@ output_overview() {
   fi  
 
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/fw_name.log ]] && [[ -f "$TMP_DIR"/emba_command.log ]]; then
+    local FW_PATH_ORIG_ARR=()
+    local FW_PATH_ORIG=""
     # we need to rewrite this firmware path to the original path
-    FW_PATH_ORIG="$(sort -u "$TMP_DIR"/fw_name.log)"
+    mapfile -t FW_PATH_ORIG_ARR < <(sort -u "$TMP_DIR"/fw_name.log)
     EMBA_COMMAND_ORIG="$(sort -u "$TMP_DIR"/emba_command.log)"
-    print_output "[+] Tested firmware:""$ORANGE"" ""$FW_PATH_ORIG""$NC"
-    write_csv_log "FW_path" "$FW_PATH_ORIG" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    for FW_PATH_ORIG in "${FW_PATH_ORIG_ARR[@]}"; do
+      print_output "[+] Tested firmware:""$ORANGE"" ""$FW_PATH_ORIG""$NC"
+      write_csv_log "FW_path" "$FW_PATH_ORIG" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+    done
     print_output "[+] EMBA start command:""$ORANGE"" ""$EMBA_COMMAND_ORIG""$NC"
     write_csv_log "emba_command" "$EMBA_COMMAND_ORIG" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   else

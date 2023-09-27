@@ -719,6 +719,9 @@ main() {
     if [[ "${ONLY_DEP}" -eq 0 ]]; then
       # store some details that we do not have in the docker container:
       echo "${FIRMWARE_PATH}" >> "${TMP_DIR}"/fw_name.log
+      if [[ "${DIFF_MODE}" -gt 0 ]]; then
+        echo "${FIRMWARE_PATH1}" >> "${TMP_DIR}"/fw_name.log
+      fi
       echo "${LOG_DIR}" >> "${TMP_DIR}"/emba_log_dir.log
       echo "${EMBA_COMMAND}" >> "${TMP_DIR}"/emba_command.log
     fi
