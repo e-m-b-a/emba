@@ -93,7 +93,13 @@ L10_system_emulation() {
       if [[ "$SYS_ONLINE" -ne 1 ]] && [[ "$TCP" != "ok" ]]; then
         for R_PATH in "${ROOT_PATH[@]}" ; do
           print_output "[*] Testing root path ($ORANGE$R_PATH_CNT$NC/$ORANGE${#ROOT_PATH[@]}$NC): $ORANGE$R_PATH$NC"
-          [[ -f "$LOG_DIR"/p55_unblob_extractor.txt ]] && write_link "p55"
+          if grep -q "P55_unblob_extractor nothing reported" "$LOG_DIR"/p55_unblob_extractor.txt 2>/dev/null; then
+            if ! grep -q "P60_deep_extractor nothing reported" "$LOG_DIR"/p60_deep_extractor.txt 2>/dev/null; then
+              [[ -f "$LOG_DIR"/p60_deep_extractor.txt ]] && write_link "p60"
+            fi
+          else
+            [[ -f "$LOG_DIR"/p55_unblob_extractor.txt ]] && write_link "p55"
+          fi
 
           if [[ -n "$D_END" ]]; then
             TAPDEV_0="tap0_0"

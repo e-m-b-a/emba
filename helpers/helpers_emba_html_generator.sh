@@ -434,9 +434,6 @@ generate_info_file()
   LOG_DIR_MODULE="${LOG_DIR_MODULE//\/}"
   SRC_FILE_NAME="$(echo "$SRC_FILE" | cut -d"." -f1 )"
 
-  echo "LOG_DIR_MODULE: $LOG_DIR_MODULE"
-  echo "SRC_FILE_NAME: $SRC_FILE_NAME"
-
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
     if [[ "${LOG_DIR_MODULE}" !=  "${SRC_FILE_NAME}" ]]; then
       INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}/""${SRC_FILE_NAME}"
@@ -449,7 +446,6 @@ generate_info_file()
   else
     INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}/""$CUSTOM_SUB_PATH"
   fi
-  echo "INFO_PATH: $INFO_PATH"
 
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
@@ -460,16 +456,11 @@ generate_info_file()
 
   if [[ ! -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE" || true
-    #sed -i -e "s:\.\/:\.\/\.\.\/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
     sed -i -e "s:\.\/:""${DEPTH_HTML_HEADER}""/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
-    # TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
 
-    echo "SRC_FILE: $SRC_FILE"
-    echo "INFO_FILE: $INFO_FILE"
     SUB_PATH="$(dirname "$(echo "$INFO_FILE" | sed -e "s#""$LOG_DIR""##g")")"
     TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""${SUB_PATH}""/""$INFO_HTML_FILE"
     TMP_INFO_DIR="$ABS_HTML_PATH""$TEMP_PATH""/""${SUB_PATH}"
-    echo "SUB_PATH01: $SUB_PATH"
 
     # add back Link anchor to navigation
     if [[ -n "$SRC_FILE" ]] ; then
@@ -477,12 +468,6 @@ generate_info_file()
       NAV_INFO_BACK_LINK="$(echo "$MODUL_LINK" | sed -e "s@LINK@./../$SRC_FILE@g")"
       sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
     fi
-
-    echo "Copy $INFO_FILE to $TMP_INFO_FILE"
-    echo "LOG_PATH_MODULE: $LOG_PATH_MODULE"
-    echo "TMP_INFO_FILEx: $TMP_INFO_FILE"
-    echo "TMP_INFO_DIRx: $TMP_INFO_DIR"
-    # echo "SRC_FILE: $SRC_FILE"
 
     ! [[ -d "${TMP_INFO_DIR}" ]] && mkdir -p "${TMP_INFO_DIR}"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
