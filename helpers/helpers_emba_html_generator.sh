@@ -653,7 +653,7 @@ update_index()
   add_arrows
 
   # remove tempory files from web report
-  # rm -R "$ABS_HTML_PATH$TEMP_PATH"
+  rm -R "$ABS_HTML_PATH$TEMP_PATH"
   rmdir "$ABS_HTML_PATH$ERR_PATH" 2>/dev/null || true
   rm -R "$ABS_HTML_PATH"/qemu_init* 2>/dev/null || true
 }
