@@ -425,23 +425,51 @@ generate_info_file()
   SRC_FILE=${2:-}
   CUSTOM_SUB_PATH=${3:-}
 
+  local DEPTH_HTML_HEADER="./.."
+
   INFO_HTML_FILE="$(basename "${INFO_FILE%."${INFO_FILE##*.}"}"".html")"
+
+  # extract just the log directory name of the module:
+  LOG_DIR_MODULE="$(echo "$LOG_PATH_MODULE" | sed -e "s#""$LOG_DIR""##g")"
+  LOG_DIR_MODULE="${LOG_DIR_MODULE//\/}"
+  SRC_FILE_NAME="$(echo "$SRC_FILE" | cut -d"." -f1 )"
+
+  echo "LOG_DIR_MODULE: $LOG_DIR_MODULE"
+  echo "SRC_FILE_NAME: $SRC_FILE_NAME"
+
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
-    INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 )"
+    if [[ "${LOG_DIR_MODULE}" !=  "${SRC_FILE_NAME}" ]]; then
+      INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}/""${SRC_FILE_NAME}"
+      # INFO: now we have another directory depth and we need to adjust the html header
+      DEPTH_HTML_HEADER="./../.."
+    else
+      INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}"
+      DEPTH_HTML_HEADER="./.."
+    fi
   else
-    INFO_PATH="$ABS_HTML_PATH""/""$CUSTOM_SUB_PATH"
+    INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}/""$CUSTOM_SUB_PATH"
   fi
+  echo "INFO_PATH: $INFO_PATH"
+
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
 
   if ! [[ -d "$INFO_PATH" ]]; then
-    mkdir "$INFO_PATH" || true
+    mkdir -p "$INFO_PATH" || true
   fi
 
   if [[ ! -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE" || true
-    sed -i -e "s:\.\/:\.\/\.\.\/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
-    TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
+    #sed -i -e "s:\.\/:\.\/\.\.\/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
+    sed -i -e "s:\.\/:""${DEPTH_HTML_HEADER}""/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
+    # TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
+
+    echo "SRC_FILE: $SRC_FILE"
+    echo "INFO_FILE: $INFO_FILE"
+    SUB_PATH="$(dirname "$(echo "$INFO_FILE" | sed -e "s#""$LOG_DIR""##g")")"
+    TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""${SUB_PATH}""/""$INFO_HTML_FILE"
+    TMP_INFO_DIR="$ABS_HTML_PATH""$TEMP_PATH""/""${SUB_PATH}"
+    echo "SUB_PATH01: $SUB_PATH"
 
     # add back Link anchor to navigation
     if [[ -n "$SRC_FILE" ]] ; then
@@ -452,8 +480,13 @@ generate_info_file()
 
     echo "Copy $INFO_FILE to $TMP_INFO_FILE"
     echo "LOG_PATH_MODULE: $LOG_PATH_MODULE"
-    echo "$LOG_PATH_MODULE" | sed -e "s#""$LOG_DIR""##g"
+    echo "TMP_INFO_FILEx: $TMP_INFO_FILE"
+    echo "TMP_INFO_DIRx: $TMP_INFO_DIR"
+    # echo "SRC_FILE: $SRC_FILE"
+
+    ! [[ -d "${TMP_INFO_DIR}" ]] && mkdir -p "${TMP_INFO_DIR}"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
+
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true
 
@@ -635,7 +668,7 @@ update_index()
   add_arrows
 
   # remove tempory files from web report
-  rm -R "$ABS_HTML_PATH$TEMP_PATH"
+  # rm -R "$ABS_HTML_PATH$TEMP_PATH"
   rmdir "$ABS_HTML_PATH$ERR_PATH" 2>/dev/null || true
   rm -R "$ABS_HTML_PATH"/qemu_init* 2>/dev/null || true
 }
