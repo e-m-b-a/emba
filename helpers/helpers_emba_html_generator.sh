@@ -100,10 +100,7 @@ add_link_tags() {
             REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2 || true)"
             REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
           fi
-          # CUSTOM_SUB_PATH_CALLER="$(dirname "${REF_LINK}" | sed 's#'"${LOG_DIR}"'##')"
-          # CUSTOM_SUB_PATH_CALLER="${CUSTOM_SUB_PATH_CALLER#/}"
           # generate reference file
-          # generate_info_file "$REF_LINK" "$BACK_LINK" "${CUSTOM_SUB_PATH_CALLER}" &
           generate_info_file "$REF_LINK" "$BACK_LINK" &
           WAIT_PIDS_WR+=( "$!" )
 
@@ -250,7 +247,7 @@ add_link_tags() {
     fi 
 
     # Trickest key links to Github
-    # Todo: link to local trickest files, currently we link to the github link
+    # Todo: Remove trickest integration
     if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
       readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (G)//g' | sed 's/Github: //' | sed 's/).*//' | uniq || true)
       for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
