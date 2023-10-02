@@ -203,9 +203,15 @@ dependency_check()
   ## Quest Container
   #######################################################################################
   print_output "[*] Network connection:" "no_log"
+
+  if [[ -n "${PROXY_SETTINGS}" ]]; then
+    export http_proxy="${PROXY_SETTINGS}"
+    export https_proxy="${PROXY_SETTINGS}"
+    print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
+  fi
+
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - \\c" "no_log"
-    # if ! ping 8.8.8.8 -q -c 1 -W 1 &>/dev/null ; then
     if ! curl -Is https://www.google.com &>/dev/null ; then
       echo -e "$RED""not ok""$NC"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
