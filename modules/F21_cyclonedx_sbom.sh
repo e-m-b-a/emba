@@ -41,7 +41,7 @@ F21_cyclonedx_sbom() {
 
     write_csv_log "Type" "MimeType" "Supplier" "Author" "Publisher" "Group" "Name" "Version" "Scope" "LicenseExpressions" "LicenseNames" "Copyright" "Cpe" "Purl" "Modified" "SwidTagId" "SwidName" "SwidVersion" "SwidTagVersion" "SwidPatch" "SwidTextContentType" "SwidTextEncoding" "SwidTextContent" "SwidUrl" "MD5" "SHA-1" "SHA-256" "SHA-512" "BLAKE2b-256" "BLAKE2b-384" "BLAKE2b-512" "SHA-384" "SHA3-256" "SHA3-384" "SHA3-512" "BLAKE3" "Description"
     print_output "[*] Collect SBOM details of module $(basename "$F20_LOG")."
-    mapfile -t BIN_VER_SBOM_ARR < <(cut -d\; -f1,2 "$F20_LOG" | grep -v "BINARY;VERSION" | sort -u)
+    mapfile -t BIN_VER_SBOM_ARR < <(cut -d\; -f1,2 "$F20_LOG" | tail -n +2 | sort -u)
     for BIN_VER_SBOM_ENTRY in "${BIN_VER_SBOM_ARR[@]}"; do
       BINARY=$(echo "$BIN_VER_SBOM_ENTRY" | cut -d\; -f1)
       VERSION=$(echo "$BIN_VER_SBOM_ENTRY" | cut -d\; -f2)
