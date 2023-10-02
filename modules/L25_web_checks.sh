@@ -189,23 +189,23 @@ check_for_basic_auth_init() {
     disable_strict_mode 1
     print_output "[*] Web server with basic auth protected ... performing login attempt"
     # basic auth from nmap found
-    curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+    curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
     CURL_RET="$?"
 
     # if authentication required, we try user "admin" without password and "admin":"password"
     if [[ "$CURL_RET" == 22 ]]; then
       local CREDS="admin:"
-      curl -v -L --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+      curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
       local CURL_RET="$?"
     fi
     if [[ "$CURL_RET" == 22 ]]; then
       local CREDS="user:"
-      curl -v -L --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+      curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
       local CURL_RET="$?"
     fi
     if [[ "$CURL_RET" == 22 ]]; then
       local CREDS="admin:password"
-      curl -v -L --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
+      curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "$LOG_FILE")
       local CURL_RET="$?"
     fi
     enable_strict_mode 1
@@ -283,7 +283,7 @@ web_access_crawler() {
   local WEB_DIR_L1=""
   local WEB_DIR_L2=""
   local WEB_DIR_L3=""
-  local CURL_OPTS=( -sS )
+  local CURL_OPTS=( -sS --noproxy '*' )
   [[ -v CURL_CREDS ]] && local CURL_OPTS+=( "${CURL_CREDS}" )
   local CRAWLED_ARR=()
   local CURL_RET=""
