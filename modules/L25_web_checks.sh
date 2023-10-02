@@ -298,6 +298,7 @@ web_access_crawler() {
   sub_module_title "Starting web server crawling for $ORANGE$IP_:$PORT$NC"
   print_ln
 
+  disable_strict_mode "${STRICT_MODE}" 0
   # the refernce size is used for identifying incorrect 200 ok results
   CURL_RET=$(timeout --preserve-status --signal SIGINT 2 curl "${CURL_OPTS[@]}" "$PROTO""://""$IP_":"$PORT_""/EMBA/""$RANDOM""/""$RANDOM"."$RANDOM" -o /dev/null -w '%{http_code}:%{size_download}')
   CURL_RET_CODE="$(echo "${CURL_RET}" | cut -d: -f1 || true)"
@@ -313,7 +314,6 @@ web_access_crawler() {
 
   local HOME_=""
   HOME_=$(pwd)
-  disable_strict_mode "${STRICT_MODE}" 0
   for R_PATH in "${ROOT_PATH[@]}" ; do
     # we need files and links (for cgi files)
     cd "${R_PATH}" || exit 1
