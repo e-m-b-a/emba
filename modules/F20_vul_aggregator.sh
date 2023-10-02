@@ -1068,7 +1068,7 @@ cve_extractor() {
   write_anchor "cve_$BINARY"
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_ln
-    grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE" || true
+    tail -n +2 "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE" || true
     if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then 
       print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$GREEN CVEs ($RED$KERNEL_VERIFIED_VULN verified$GREEN) and $RED$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
     else
@@ -1077,7 +1077,7 @@ cve_extractor() {
     print_ln
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
     print_ln
-    grep -v "Statistics" "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
+    tail -n +2 "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
     if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then 
       print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$GREEN CVEs ($ORANGE$KERNEL_VERIFIED_VULN verified$GREEN) and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
     else
@@ -1126,9 +1126,9 @@ get_firmware_base_version_check() {
     print_output "[*] Collect version details of module $(basename "$S09_LOG")."
     # if we have already kernel information:
     if [[ "$KERNELV" -eq 1 ]]; then
-      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | grep -v "kernel" | sort -u  || true)
+      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | tail -n +2 | grep -v "kernel" | sort -u  || true)
     else
-      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | grep -v "csv_rule" | sort -u || true)
+      readarray -t VERSIONS_STAT_CHECK < <(cut -d\; -f4 "$S09_LOG" | tail -n +2 | sort -u || true)
     fi
   fi
 }
@@ -1139,7 +1139,7 @@ get_kernel_check() {
 
   if [[ -f "$S25_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S25_LOG")."
-    readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "$S25_LOG" | grep -v "CVE identifier" | sort -u || true)
+    readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "$S25_LOG" | tail -n +2 | sort -u || true)
     # we get something like this: "kernel;5.10.59;CVE-2021-3490"
   fi
 }
@@ -1165,7 +1165,7 @@ get_usermode_emulator() {
 
   if [[ -f "$S116_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S116_LOG")."
-    readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | grep -v "csv_rule" | sort -u || true)
+    readarray -t VERSIONS_EMULATOR < <(cut -d\; -f4 "$S116_LOG" | tail -n +2 | sort -u || true)
   fi
 }
 
@@ -1175,7 +1175,7 @@ get_systemmode_emulator() {
 
   if [[ -f "$L15_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$L15_LOG")."
-    readarray -t VERSIONS_SYS_EMULATOR < <(cut -d\; -f4 "$L15_LOG" | grep -v "csv_rule" | sort -u || true)
+    readarray -t VERSIONS_SYS_EMULATOR < <(cut -d\; -f4 "$L15_LOG" | tail -n +2 | sort -u || true)
   fi
 }
 
@@ -1186,7 +1186,7 @@ get_systemmode_webchecks() {
   # disabled for now
   # if [[ -f "$L25_LOG" ]]; then
   #  print_output "[*] Collect version details of module $(basename "$L25_LOG")."
-  #  readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | grep -v "csv_rule" | sort -u || true)
+  #  readarray -t VERSIONS_SYS_EMULATOR_WEB < <(cut -d\; -f4 "$L25_LOG" | tail -n +2 | sort -u || true)
   # fi
 }
 
@@ -1196,7 +1196,7 @@ get_msf_verified() {
 
   if [[ -f "$L35_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$L35_LOG")."
-    readarray -t CVE_L35_DETAILS < <(cut -d\; -f3 "$L35_LOG" | grep -v "^CVE$" | grep -v "NA" | sort -u || true)
+    readarray -t CVE_L35_DETAILS < <(cut -d\; -f3 "$L35_LOG" | tail -n +2 | grep -v "NA" | sort -u || true)
   fi
 }
 
@@ -1206,7 +1206,7 @@ get_uefi_details() {
 
   if [[ -f "$S02_LOG" ]]; then
     print_output "[*] Collect CVE details of module $(basename "$S02_LOG")."
-    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "$S02_LOG" | grep -v "CVE identifier" | sort -u || true)
+    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "$S02_LOG" | tail -n +2 | sort -u || true)
   fi
 }
 
@@ -1216,7 +1216,7 @@ get_firmware_details() {
 
   if [[ -f "$S06_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S06_LOG")."
-    readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | grep -v "csv_rule" | sort -u || true)
+    readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "$S06_LOG" | tail -n +2 | sort -u || true)
   fi
 }
 
@@ -1226,6 +1226,6 @@ get_package_details() {
 
   if [[ -f "$S08_LOG" ]]; then
     print_output "[*] Collect version details of module $(basename "$S08_LOG")."
-    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "$S08_LOG" | grep -v "package\;stripped version" | sort -u | tr ';' ':'|| true)
+    readarray -t VERSIONS_S08_PACKAGE_DETAILS < <(cut -d\; -f3,5 "$S08_LOG" | tail -n +2 | sort -u | tr ';' ':'|| true)
   fi
 }
