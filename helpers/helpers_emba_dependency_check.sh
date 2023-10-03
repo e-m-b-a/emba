@@ -199,12 +199,6 @@ dependency_check()
 
   print_ln "no_log"
 
-  USER_PROXY="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2 | sort -u || true)"
-  export CURL_OPTS=""
-  if [[ -n "${USER_PROXY}" ]]; then
-    CURL_OPTS="--proxy ${USER_PROXY}"
-  fi
-
   #######################################################################################
   ## Quest Container
   #######################################################################################
