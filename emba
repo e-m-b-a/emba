@@ -418,6 +418,20 @@ main() {
     source "${EXT_DIR}/emba_venv/bin/activate"
   fi
 
+  # EMBA should be started with "sudo -E" to access the proxy settings from the user
+  export PROXY_SETTINGS=""
+  PROXY_SETTINGS="$(env | grep "http_proxy=http" | cut -d = -f2 | sort -u | head -1)"
+  if [[ -n "${PROXY_SETTINGS}" ]]; then
+    # 2nd try with the original user:
+    PROXY_SETTINGS="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http_proxy=http" | cut -d = -f2 | sort -u | head -1)"
+  else
+    if [[ -f "${LOG_DIR}"/orig_user.log ]]; then
+      if grep -q "PROXY: http" "${LOG_DIR}"/orig_user.log; then
+        PROXY_SETTINGS="$(grep "PROXY: http" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
+      fi
+    fi
+  fi
+
   # Check all dependencies of EMBA
   dependency_check
 

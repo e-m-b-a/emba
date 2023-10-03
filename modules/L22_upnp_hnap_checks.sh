@@ -120,16 +120,16 @@ check_basic_hnap_jnap() {
       JNAP_ACTION="X-JNAP-Action: http://cisco.com/jnap/core/GetDeviceInfo"
       if [[ "$SSL" -eq 0 ]]; then
         # HNAP
-        curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
-        curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
         # JNAP
-        curl -v -L --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
       else
         # HNAP - SSL
-        curl -v -L --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
-        curl -v -L --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
         # JNAP - SSL
-        curl -v -L --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" https://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
+        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" https://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
       fi
 
       if [[ -s "$LOG_PATH_MODULE"/hnap-discovery-check.txt ]]; then
@@ -183,7 +183,7 @@ check_jnap_access() {
 
   for SYSINFO_CGI in "${SYSINFO_CGI_ARR[@]}"; do
     print_output "[*] Testing for sysinfo.cgi" "no_log"
-    curl -v -L --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/"${SYSINFO_CGI}" > "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log || true
+    curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/"${SYSINFO_CGI}" > "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log || true
 
     if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log ]]; then
       if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log; then
@@ -198,7 +198,7 @@ check_jnap_access() {
     JNAP_EPT_NAME="$(echo "${JNAP_EPT}" | rev | cut -d '/' -f1 | rev)"
     JNAP_ACTION="X-JNAP-Action: ${JNAP_EPT}"
     DATA="{}"
-    curl -v -L --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "${DATA}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ > "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log || true
+    curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "${DATA}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ > "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log || true
 
     if [[ -s "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log ]]; then
       if grep -q "_ErrorUnauthorized" "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log; then
