@@ -53,7 +53,7 @@ S60_cert_file_check()
           CERT_NAME=$(basename "$LINE")
           CERT_LOG="$LOG_PATH_MODULE/cert_details_$CERT_NAME.txt"
           write_log "[*] Cert file: $LINE\n" "$CERT_LOG"
-          timeout --preserve-status --signal SIGINT 10 openssl storeutl -noout -text -certs "$LINE" 2>/dev/null >> "$CERT_LOG"
+          timeout --preserve-status --signal SIGINT 10 openssl storeutl -noout -text -certs "$LINE" 2>/dev/null >> "$CERT_LOG" || true
           NESTED_CERT_CNT=$(tail -n 1 < "$CERT_LOG" | grep -o '[0-9]\+')
           ((TOTAL_CERT_CNT+=NESTED_CERT_CNT))
           for ((i=1; i<=NESTED_CERT_CNT; i++)); do

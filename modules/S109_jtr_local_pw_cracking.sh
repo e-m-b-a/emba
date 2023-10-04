@@ -44,9 +44,12 @@ S109_jtr_local_pw_cracking()
   module_title "Cracking identified password hashes"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  if [[ -f "$PW_FILE_S107" ]]; then
+    mapfile -t HASHES_S107 < <(cut -d\; -f1,2,3 "$PW_FILE_S107" | grep -v "PW_HASH" | sort -k 2 -t \; -u)
+  fi
+
   if [[ -f "$PW_FILE" ]]; then
     mapfile -t HASHES_S108 < <(cut -d\; -f1,2,3 "$PW_FILE" | grep -v "PW_PATH;PW_HASH" | sort -k 2 -t \; -u)
-    mapfile -t HASHES_S107 < <(cut -d\; -f1,2,3 "$PW_FILE_S107" | grep -v "PW_HASH" | sort -k 2 -t \; -u)
 
     HASHES=("${HASHES_S107[@]}" "${HASHES_S108[@]}")
 

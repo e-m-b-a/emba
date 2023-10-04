@@ -111,11 +111,14 @@ P55_unblob_extractor() {
 unblobber() {
   local FIRMWARE_PATH_="${1:-}"
   local OUTPUT_DIR_UNBLOB="${2:-}"
+  local VERBOSE="${3:-1}"
   local UNBLOB_BIN="unblob"
 
   # unblob should be checked in the dependency checker
 
-  sub_module_title "Analyze binary firmware blob with unblob"
+  if [[ "${DIFF_MODE}" -ne 1 ]]; then
+    sub_module_title "Analyze binary firmware blob with unblob"
+  fi
 
   print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_UNBLOB$NC"
 
@@ -123,7 +126,11 @@ unblobber() {
     mkdir -p "$OUTPUT_DIR_UNBLOB"
   fi
 
-  timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -v -k --log "$LOG_PATH_MODULE"/unblob_"$(basename "$FIRMWARE_PATH_")".log -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
+  if [[ "${VERBOSE}" -eq 1 ]]; then
+    timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -v -k --log "$LOG_PATH_MODULE"/unblob_"$(basename "$FIRMWARE_PATH_")".log -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
+  else
+    COLUMNS=100 timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -k --log "$LOG_PATH_MODULE"/unblob_"$(basename "$FIRMWARE_PATH_")".log -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
+  fi
 
   print_ln
 }

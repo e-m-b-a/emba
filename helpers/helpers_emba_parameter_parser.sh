@@ -17,7 +17,7 @@
 
 
 emba_parameter_parsing() {
-  while getopts a:bBA:cC:d:De:Ef:Fghijk:l:m:N:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:d:De:Ef:Fghijk:l:m:N:o:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
     case "$OPT" in
       a)
         check_alnum "$OPTARG"
@@ -77,6 +77,7 @@ emba_parameter_parsing() {
         FIRMWARE_PATH="$(escape_echo "$OPTARG")"
         readonly FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
         export FIRMWARE_PATH_BAK                      # we store the original firmware path variable and make it readonly
+        # for firmware diff option, see option o
         ;;
       F)
         export FORCE=1
@@ -121,6 +122,14 @@ emba_parameter_parsing() {
         check_notes "$OPTARG"
         export FW_NOTES=""
         FW_NOTES="$(escape_echo "$OPTARG")"
+        ;;
+      o)
+        # other firmware file -> we do a diff check
+        check_path_input "$OPTARG"
+        export FIRMWARE=1
+        export FIRMWARE_PATH1=""
+        FIRMWARE_PATH1="$(escape_echo "$OPTARG")"
+        export HTML=1
         ;;
       p)
         check_path_input "$OPTARG"

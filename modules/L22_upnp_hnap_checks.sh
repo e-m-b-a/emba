@@ -173,7 +173,7 @@ check_jnap_access() {
   local SYSINFO_CGI=""
   local JNAP_EPT=""
 
-  mapfile -t JNAP_ENDPOINTS < <(find "$LOG_DIR"/firmware -type f -exec grep "\[.*/jnap/.*\]\ =" {} \; | cut -d\' -f2 | sort -u 2>/dev/null || true)
+  mapfile -t JNAP_ENDPOINTS < <(find "$LOG_DIR"/firmware -type f -exec grep -a "\[.*/jnap/.*\]\ =" {} \; | cut -d\' -f2 | sort -u 2>/dev/null || true)
 
   # Todo: PORT!!!
   local PORT=80
@@ -185,9 +185,11 @@ check_jnap_access() {
     print_output "[*] Testing for sysinfo.cgi" "no_log"
     curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/"${SYSINFO_CGI}" > "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log || true
 
-    if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log; then
-      print_output "[+] Found sensitive information in sysinfo.cgi - see https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt:"
-      grep "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log | tee -a "$LOG_FILE"
+    if [[ -f "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log ]]; then
+      if grep -q "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log; then
+        print_output "[+] Found sensitive information in sysinfo.cgi - see https://korelogic.com/Resources/Advisories/KL-001-2015-006.txt:"
+        grep "wl0_ssid=\|wl1_ssid=\|wl0_passphrase=\|wl1_passphrase=\|wps_pin=\|default_passphrase=" "${LOG_PATH_MODULE}"/JNAP_"${SYSINFO_CGI}".log | tee -a "$LOG_FILE"
+      fi
     fi
   done
 

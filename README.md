@@ -30,11 +30,9 @@ Author(s): Michael Messner, Pascal Eckmann, Benedikt Kühne
 # EMBA
 ## The security analyzer for firmware of embedded devices
 
-*EMBA* is designed as the central firmware analysis tool for penetration testers. It supports the complete security analysis process starting with the *firmware extraction* process, doing *static analysis* and *dynamic analysis* via emulation and finally generating a web report. *EMBA* automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts or hard-coded passwords. *EMBA* is a command line tool with the option to generate an easy to use web report for further analysis.
+*EMBA* is designed as the central firmware analysis tool for penetration testers and product security teams. It supports the complete security analysis process starting with *firmware extraction*, doing *static analysis* and *dynamic analysis* via emulation and finally generating a web report. *EMBA* automatically discovers possible weak spots and vulnerabilities in firmware. Examples are insecure binaries, old and outdated software components, potentially vulnerable scripts, or hard-coded passwords. *EMBA* is a command line tool with the possibility to generate an easy-to-use web report for further analysis.
 
-*EMBA* combines multiple established analysis tools and can be started with one simple command. Afterwards it tests the firmware for possible security risks and interesting areas for further investigation. No manual installation of all helpers, once the integrated installation script has been executed, you are ready to test your firmware.
-
-*EMBA* is designed to assist penetration testers and not as a standalone tool without human interaction. *EMBA* should provide as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results. 
+*EMBA* assists the penetration testers and product security teams in the identification of weak spots and vulnerabilities in the firmware image. *EMBA* provides as much information as possible about the firmware, that the tester can decide on focus areas and is responsible for verifying and interpreting the results.
 
 [![Watch EMBA](https://raw.githubusercontent.com/wiki/e-m-b-a/emba/images/youtube-emba.png)](https://youtu.be/_dvdy3klFFY "Watch EMBA")
 

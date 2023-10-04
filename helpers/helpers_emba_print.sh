@@ -91,14 +91,23 @@ module_title()
   SUB_MODULE_COUNT=0
 }
 
+# $1: sub module title
+# $2: (optional) log file to log -> this is typically used in combination with write_log to write another log file
 sub_module_title()
 {
-  local SUB_MODULE_TITLE
-  SUB_MODULE_TITLE="${1:-}"
-  local SUB_MODULE_TITLE_FORMAT
+  local SUB_MODULE_TITLE="${1:-}"
+  local LOG_FILE_TO_LOG="${2:-}"
+  # if $2 is not set, we are going to log to the original LOG_FILE
+  if ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
+    LOG_FILE_TO_LOG="${LOG_FILE}"
+  fi
+
+  local SUB_MODULE_TITLE_FORMAT=""
+
   SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""$SUB_MODULE_TITLE""${NC}""\\n-----------------------------------------------------------------"
   echo -e "$SUB_MODULE_TITLE_FORMAT" || true
-  echo -e "$(format_log "$SUB_MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE" >/dev/null || true
+  echo -e "$(format_log "$SUB_MODULE_TITLE_FORMAT")" | tee -a "$LOG_FILE_TO_LOG" >/dev/null || true
+
   if [[ $LOG_GREP -eq 1 ]] ; then
     SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
     write_grep_log "$SUB_MODULE_TITLE" "SUB_MODULE_TITLE"
@@ -598,6 +607,7 @@ print_help()
   echo -e "$CYAN""-t""$NC""                Activate multi threading (destroys regular console output)"
   echo -e "$CYAN""-r""$NC""                Remove temporary firmware directory after testing"
   echo -e "$CYAN""-b""$NC""                Just print a random banner and exit"
+  echo -e "$CYAN""-o [./path]""$NC""       2nd Firmware path to diff against the main firmware file - diff mode only (no other firmware analysis)"
   echo -e "\\nModify output"
   echo -e "$CYAN""-s""$NC""                Prints only relative paths"
   echo -e "$CYAN""-z""$NC""                Adds ANSI color codes to log"

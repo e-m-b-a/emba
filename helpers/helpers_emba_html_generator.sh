@@ -57,7 +57,7 @@ SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
 ANCHOR="<a class=\"anc\" id=\"ANCHOR\">"
 TITLE_ANCHOR="<a id=\"ANCHOR\">"
 LINK_END="</a>"
-IMAGE_LINK="<img class=\"image\" src=\".$STYLE_PATH/PICTURE\">"
+DEPTH="."
 ARACHNI_LINK="<a href=\"./l25_web_checks/arachni_report/index.html\" title=\"Arachni web report\" target=\"_blank\" >"
 
 
@@ -101,16 +101,13 @@ add_link_tags() {
             REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
           fi
           # generate reference file
-          if [[ $THREADED -eq 1 ]]; then
-            generate_info_file "$REF_LINK" "$BACK_LINK" &
-            WAIT_PIDS_WR+=( "$!" )
-          else
-            generate_info_file "$REF_LINK" "$BACK_LINK"
-          fi
+          generate_info_file "$REF_LINK" "$BACK_LINK" &
+          WAIT_PIDS_WR+=( "$!" )
+
           if [[ -n "$REF_ANCHOR" ]] ; then
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html""#anchor_$REF_ANCHOR@g" || true)"
           else
-            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
+            HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
           fi
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
           while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
@@ -123,18 +120,23 @@ add_link_tags() {
           if [[ ! -d "$RES_PATH" ]] ; then mkdir -p "$RES_PATH" > /dev/null || true ; fi
           cp "$REF_LINK" "$RES_PATH""/""$(basename "$REF_LINK")" || true
           HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/res/$(basename "$REF_LINK")@g" || true)""Download Qemu emulation archive.""$LINK_END"
-          # echo "REF_LINK: $REF_LINK"
-          # echo "HTML_LINK: $HTML_LINK"
           sed -i "s@Qemu emulation archive created in log directory.*$(basename "$REF_LINK").*@$HTML_LINK$P_END@" "$LINK_FILE"
         elif [[ "${REF_LINK: -4}" == ".png" ]] ; then
           LINE_NUMBER_INFO_PREV="$(grep -a -n -m 1 -E "\[REF\] ""$REF_LINK" "$LINK_FILE" | cut -d":" -f1 || true)"
           cp "$REF_LINK" "$ABS_HTML_PATH$STYLE_PATH""/""$(basename "$REF_LINK")" || true
+
+          if [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f4- | rev)" == "${LOG_DIR}" ]]; then
+            DEPTH=".."
+          elif [[ "$(echo "${REF_LINK}" | rev | cut -d '/' -f3- | rev)" == "${LOG_DIR}" ]]; then
+            DEPTH="."
+          fi
+          IMAGE_LINK="<img class=\"image\" src=\"${DEPTH}${STYLE_PATH}/PICTURE\">"
           HTML_LINK="$(echo "$IMAGE_LINK" | sed -e 's@PICTURE@'"$(basename "$REF_LINK")"'@' || true)"
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@$@'"$HTML_LINK"'@' )
         fi
-      elif [[ ("$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
+      elif [[ ("$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}$ ) || ("$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}\#.*$ ) ]] ; then
         REF_ANCHOR=""
-        if [[ "$REF_LINK" =~ ^(p|l|s|q|f){1}[0-9]{2,3}\#.*$ ]] ; then
+        if [[ "$REF_LINK" =~ ^(d|p|l|s|q|f){1}[0-9]{2,3}\#.*$ ]] ; then
           REF_ANCHOR="$(echo "$REF_LINK" | cut -d"#" -f2 || true)"
           REF_LINK="$(echo "$REF_LINK" | cut -d"#" -f1 || true)"
         fi
@@ -211,12 +213,8 @@ add_link_tags() {
           EXPLOIT_FILE="$LOG_DIR""/f20_vul_aggregator/exploit/""$EXPLOIT_ID"".txt"
           if [[ -f "$EXPLOIT_FILE" ]] ; then
             # generate exploit file
-            if [[ $THREADED -eq 1 ]]; then
-              generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
-              WAIT_PIDS_WR+=( "$!" )
-            else
-              generate_info_file "$EXPLOIT_FILE" "$BACK_LINK"
-            fi
+            generate_info_file "$EXPLOIT_FILE" "$BACK_LINK" &
+            WAIT_PIDS_WR+=( "$!" )
             HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./$(echo "$BACK_LINK" | cut -d"." -f1 )/$EXPLOIT_ID.html@g")""$EXPLOIT_ID""$LINK_END"
           else
             HTML_LINK="$(echo "$EXPLOIT_LINK" | sed -e "s@LINK@$EXPLOIT_ID@g")""$EXPLOIT_ID""$LINK_END"
@@ -249,7 +247,7 @@ add_link_tags() {
     fi 
 
     # Trickest key links to Github
-    # Todo: link to local trickest files, currently we link to the github link
+    # Todo: Remove trickest integration
     if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
       readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (G)//g' | sed 's/Github: //' | sed 's/).*//' | uniq || true)
       for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
@@ -406,9 +404,7 @@ add_link_tags() {
     fi
   fi
 
-  if [[ $THREADED -eq 1 ]]; then
-    wait_for_pid "${WAIT_PIDS_WR[@]}"
-  fi
+  wait_for_pid "${WAIT_PIDS_WR[@]}"
   if [[ -f "$LINK_FILE" ]]; then
     sed -i -E 's@^<pre>((\[REF\])|(\[ANC\])).*</pre>@@g' "$LINK_FILE" || true
   fi
@@ -426,21 +422,42 @@ generate_info_file()
   SRC_FILE=${2:-}
   CUSTOM_SUB_PATH=${3:-}
 
+  local DEPTH_HTML_HEADER="./.."
+
   INFO_HTML_FILE="$(basename "${INFO_FILE%."${INFO_FILE##*.}"}"".html")"
+
+  # extract just the log directory name of the module:
+  LOG_DIR_MODULE="$(echo "$LOG_PATH_MODULE" | sed -e "s#""$LOG_DIR""##g")"
+  LOG_DIR_MODULE="${LOG_DIR_MODULE//\/}"
+  SRC_FILE_NAME="$(echo "$SRC_FILE" | cut -d"." -f1 )"
+
   if [[ -z "$CUSTOM_SUB_PATH" ]] ; then
-    INFO_PATH="$ABS_HTML_PATH""/""$(echo "$SRC_FILE" | cut -d"." -f1 )"
+    if [[ "${LOG_DIR_MODULE}" !=  "${SRC_FILE_NAME}" ]]; then
+      INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}/""${SRC_FILE_NAME}"
+      # INFO: now we have another directory depth and we need to adjust the html header
+      DEPTH_HTML_HEADER="./../.."
+    else
+      INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}"
+      DEPTH_HTML_HEADER="./.."
+    fi
   else
-    INFO_PATH="$ABS_HTML_PATH""/""$CUSTOM_SUB_PATH"
+    INFO_PATH="$ABS_HTML_PATH""/${LOG_DIR_MODULE}/""$CUSTOM_SUB_PATH"
   fi
+
   local RES_PATH
   RES_PATH="$INFO_PATH""/res"
 
-  if [[ ! -d "$INFO_PATH" ]] ; then mkdir "$INFO_PATH" || true ; fi
+  if ! [[ -d "$INFO_PATH" ]]; then
+    mkdir -p "$INFO_PATH" || true
+  fi
 
   if [[ ! -f "$INFO_PATH""/""$INFO_HTML_FILE" ]] && [[ -f "$INFO_FILE" ]] ; then
     cp "./helpers/base.html" "$INFO_PATH""/""$INFO_HTML_FILE" || true
-    sed -i -e "s:\.\/:\.\/\.\.\/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
-    TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""$INFO_HTML_FILE"
+    sed -i -e "s:\.\/:""${DEPTH_HTML_HEADER}""/:g" "$INFO_PATH""/""$INFO_HTML_FILE"
+
+    SUB_PATH="$(dirname "$(echo "$INFO_FILE" | sed -e "s#""$LOG_DIR""##g")")"
+    TMP_INFO_FILE="$ABS_HTML_PATH""$TEMP_PATH""/""${SUB_PATH}""/""$INFO_HTML_FILE"
+    TMP_INFO_DIR="$ABS_HTML_PATH""$TEMP_PATH""/""${SUB_PATH}"
 
     # add back Link anchor to navigation
     if [[ -n "$SRC_FILE" ]] ; then
@@ -449,7 +466,9 @@ generate_info_file()
       sed -i "$LINE_NUMBER_INFO_NAV""i""$NAV_INFO_BACK_LINK""&laquo; Back to ""$(basename "${SRC_FILE%.html}")""$LINK_END" "$INFO_PATH""/""$INFO_HTML_FILE"
     fi
 
+    ! [[ -d "${TMP_INFO_DIR}" ]] && mkdir -p "${TMP_INFO_DIR}"
     cp "$INFO_FILE" "$TMP_INFO_FILE" 2>/dev/null || true
+
     sed -i -e 's@&@\&amp;@g ; s/@/\&commat;/g ; s@<@\&lt;@g ; s@>@\&gt;@g' "$TMP_INFO_FILE" || true
     sed -i '\@\[\*\]\ Statistics@d' "$TMP_INFO_FILE" || true
 
@@ -459,7 +478,7 @@ generate_info_file()
     sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_INFO_FILE" || true
     
     # add link tags to links/generate info files and link to them and write line to tmp file
-    add_link_tags "$TMP_INFO_FILE" "$INFO_HTML_FILE"
+    add_link_tags "$TMP_INFO_FILE" "${INFO_HTML_FILE}"
 
     readarray -t EXPLOITS_IDS_INFO < <( grep -a 'Exploit DB Id:' "$INFO_FILE" | sed -e 's@[^0-9\ ]@@g ; s@\ @@g' | sort -u || true)
     for EXPLOIT_ID_INFO in "${EXPLOITS_IDS_INFO[@]}" ; do
@@ -654,6 +673,8 @@ scan_report()
 
 add_arrows()
 {
+  local D_MODULE_ARR
+  readarray -t D_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./d[0-9]*.*" | sort -V || true)
   local P_MODULE_ARR
   readarray -t P_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./p[0-9]*.*" | sort -V || true)
   local S_MODULE_ARR
@@ -665,7 +686,7 @@ add_arrows()
   local Q_MODULE_ARR
   readarray -t Q_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./q[0-9]*.*" | sort -V || true)
   local ALL_MODULE_ARR
-  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
+  ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${D_MODULE_ARR[@]}" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
   for M_NUM in "${!ALL_MODULE_ARR[@]}"; do 
     if [[ "$M_NUM" -gt 0 ]] ; then
       FIRST_LINK="${ALL_MODULE_ARR[$(( M_NUM - 1 ))]}"
