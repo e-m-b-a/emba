@@ -187,9 +187,10 @@ print_cve_search_failure() {
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
 setup_nikto() {
-  if [[ "$IN_DOCKER" -eq 1 ]] && [[ -d "$EXT_DIR"/var_lib_nikto ]]; then
+  # setup Nikto only in main EMBA container (container number 1):
+  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -d "${EXT_DIR}"/var_lib_nikto ]] && [[ "${CONTAINER_NUMBER}" -eq 1 ]]; then
     mkdir -p /var/lib/nikto
-    cp -r "$EXT_DIR"/var_lib_nikto/nikto/* /var/lib/nikto/
+    cp -r "${EXT_DIR}"/var_lib_nikto/nikto/* /var/lib/nikto/
   fi
 }
 

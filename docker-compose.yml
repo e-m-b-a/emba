@@ -68,9 +68,7 @@ services:
       - /root/.config/
       - /root/.local/
       - /root/.cache/
-      - /root/.cache/pypoetry/virtualenvs:exec
       - /root
-      - /root/.cargo/bin:exec
       - /run/lock
       - /var/run
       - /var/tmp
