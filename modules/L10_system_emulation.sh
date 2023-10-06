@@ -496,6 +496,7 @@ main_emulation() {
     fi
 
     # we deal with a startup script
+    local FS_MOUNTS_INIT=()
     if file "$MNT_POINT""$INIT_FILE" | grep -q "text executable\|ASCII text"; then
       INIT_OUT="$MNT_POINT""$INIT_FILE"
       find "$INIT_OUT" -xdev -maxdepth 1 -ls || true
@@ -504,7 +505,7 @@ main_emulation() {
       BAK_INIT_BACKUP="$LOG_PATH_MODULE"/"$(basename "$INIT_OUT".init)"
       cp -pr "$INIT_OUT" "$BAK_INIT_BACKUP"
 
-      mapfile -t FS_MOUNTS < <(grep -E "^mount\ -t\ .*\ .*mtd.* /.*" "$INIT_OUT" || true)
+      mapfile -t FS_MOUNTS_INIT < <(grep -E "^mount\ -t\ .*\ .*mtd.* /.*" "$INIT_OUT" | sort -u || true)
 
       # just in case we have issues with permissions
       chmod +x "$INIT_OUT"
@@ -513,6 +514,15 @@ main_emulation() {
       sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "$INIT_OUT"
     fi
 
+    # Beside the check of init we also try to find other mounts for further filesystems
+    # probably we need to tweak this further to also find mounts in binaries - strings?!?
+    local FS_MOUNTS_FS=()
+    if [[ -d "${FIRMWARE_PATH}" ]]; then
+      mapfile -t FS_MOUNTS_FS < <(grep -h -E -R "^mount\ -t\ .*\ .*mtd.* /.*" "${FIRMWARE_PATH}" | sort -u || true)
+    fi
+
+    FS_MOUNTS=( "${FS_MOUNTS_INIT[@]}" "${FS_MOUNTS_FS[@]}" )
+    eval "FS_MOUNTS=($(for i in "${FS_MOUNTS[@]}" ; do echo "\"$i\"" ; done | sort -u))"
     handle_fs_mounts "${FS_MOUNTS[@]}"
 
     print_output "[*] Add network.sh entry to $ORANGE$INIT_OUT$NC"
@@ -875,8 +885,19 @@ handle_fs_mounts() {
     # as the original mount will not work, we need to remove it from the startup file:
     sed -i 's|'"$FS_MOUNT"'|\#'"$FS_MOUNT"'|g' "$MNT_POINT""$INIT_FILE"
 
-    MOUNT_PT=$(echo "$FS_MOUNT" | awk '{print $NF}')
+    MOUNT_PT=$(echo "$FS_MOUNT" | awk '{print $5}')
     MOUNT_FS=$(echo "$FS_MOUNT" | grep " \-t " | sed 's/.*-t //g' | awk '{print $1}')
+    if [[ "${MOUNT_FS}" != *"jffs"* ]] || [[ "${MOUNT_FS}" != *"cramfs"* ]]; then
+      print_output "[-] Warning: ${ORANGE}${MOUNT_FS}${NC} filesystem currently not supported"
+      print_output "[-] Warning: If further results are wrong please open a ticket"
+    fi
+    if [[ "${MOUNT_PT}" != *"/"* ]]; then
+      MOUNT_PT=$(echo "$FS_MOUNT" | awk '{print $NF}')
+      if [[ "${MOUNT_PT}" != *"/"* ]]; then
+        print_output "[-] Warning: Mount point ${ORANGE}${MOUNT_PT}${NC} currently not supported"
+        print_output "[-] Warning: If further results are wrong please open a ticket"
+      fi
+    fi
     # we test for paths including the MOUNT_FS part like "jffs2" in the path
     FS_FIND=$(find "$LOG_DIR"/firmware -path "*/*$MOUNT_FS*_extract" | head -1 || true)
 
@@ -930,6 +951,10 @@ handle_fs_mounts() {
       cp -prn "$N_PATH"* "$MNT_POINT""$MOUNT_PT"
       find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     done
+
+    print_output "[*] Final copy of ${ORANGE}${FS_FIND}${NC} to ${ORANGE}${MNT_POINT}${MOUNT_PT}${NC} ..."
+    cp -prn "${FS_FIND}"/* "${MNT_POINT}""${MOUNT_PT}"
+    find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
   done
 
   # Todo: move this to somewhere, where we only need to do this once
