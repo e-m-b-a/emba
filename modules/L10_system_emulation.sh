@@ -887,7 +887,7 @@ handle_fs_mounts() {
 
     MOUNT_PT=$(echo "$FS_MOUNT" | awk '{print $5}')
     MOUNT_FS=$(echo "$FS_MOUNT" | grep " \-t " | sed 's/.*-t //g' | awk '{print $1}')
-    if [[ "${MOUNT_FS}" != *"jffs"* ]] || [[ "${MOUNT_FS}" != *"cramfs"* ]]; then
+    if [[ "${MOUNT_FS}" != *"jffs"* ]] && [[ "${MOUNT_FS}" != *"cramfs"* ]]; then
       print_output "[-] Warning: ${ORANGE}${MOUNT_FS}${NC} filesystem currently not supported"
       print_output "[-] Warning: If further results are wrong please open a ticket"
     fi
@@ -954,7 +954,8 @@ handle_fs_mounts() {
 
     print_output "[*] Final copy of ${ORANGE}${FS_FIND}${NC} to ${ORANGE}${MNT_POINT}${MOUNT_PT}${NC} ..."
     cp -prn "${FS_FIND}"/* "${MNT_POINT}""${MOUNT_PT}"
-    find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
+    # find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
+    ls -lh "${MNT_POINT}""${MOUNT_PT}"
   done
 
   # Todo: move this to somewhere, where we only need to do this once
