@@ -126,8 +126,8 @@ check_basic_hnap_jnap() {
         curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
       else
         # HNAP - SSL
-        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
-        curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        curl -v -L -k --noproxy '*' --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
+        curl -v -L -k --noproxy '*' --max-redir 0 -f -m 5 -s -X GET https://"${IP_ADDRESS_}":"${PORT}"/HNAP1/ >> "$LOG_PATH_MODULE"/hnap-discovery-check.txt || true
         # JNAP - SSL
         curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "{}" https://"${IP_ADDRESS_}":"${PORT}"/JNAP/ >> "$LOG_PATH_MODULE"/jnap-discovery-check.txt || true
       fi
