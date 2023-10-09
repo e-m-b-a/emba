@@ -25,6 +25,7 @@ IP00_extractors(){
     print_pip_info "protobuf"
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
+    print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
     # ubireader:
     # print_tool_info "python3-lzo" 1
     print_tool_info "liblzo2-dev" 1
@@ -63,6 +64,15 @@ IP00_extractors(){
           git pull
           cd "$HOME_PATH" || ( echo "Could not install EMBA component payload dumper" && exit 1 )
         fi
+
+        if ! [[ -d external/smcbmc ]]; then
+          git clone https://github.com/EMBA-support-repos/smcbmc.git external/smcbmc
+        else
+          cd external/smcbmc || ( echo "Could not install EMBA component smcbmc" && exit 1 )
+          git pull
+          cd "$HOME_PATH" || ( echo "Could not install EMBA component smcbmc" && exit 1 )
+        fi
+
 
         if ! [[ -f "./external/buffalo-enc.elf" ]] ; then
           # Buffalo decryptor:

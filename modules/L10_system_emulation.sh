@@ -25,6 +25,7 @@
 #               network connectivity.
 
 L10_system_emulation() {
+  export DEBUG_MODE=1
   module_log_init "${FUNCNAME[0]}"
   module_title "System emulation of Linux based embedded devices."
 
@@ -137,7 +138,11 @@ L10_system_emulation() {
 
             if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
               # do not test other root paths if we are already online (some ports are available)
-              break
+              if [[ "${DEBUG_MODE}" -eq 1 ]]; then
+                print_output "[!] Debug mode: We do not stop here ..."
+              else
+                break
+              fi
             fi
           else
             print_output "[!] No supported architecture detected"
@@ -812,11 +817,16 @@ main_emulation() {
               #  print_output "[-] No startup script ${ORANGE}$ARCHIVE_PATH/run.sh${NC} found - this should not be possible!"
               #  reset_network_emulation 2
               # fi
-              break 2
+              if [[ "${DEBUG_MODE}" -ne 1 ]]; then
+                break 2
+              fi
             fi
           fi
         else
           print_output "[-] No working emulation - removing emulation archive."
+          if [[ "${DEBUG_MODE}" -ne 1 ]]; then
+            create_emulation_archive "$ARCHIVE_PATH"
+          fi
           # print_output "[-] Emulation archive: $ARCHIVE_PATH."
           # create_emulation_archive "$ARCHIVE_PATH"
           rm -r "$ARCHIVE_PATH" || true
