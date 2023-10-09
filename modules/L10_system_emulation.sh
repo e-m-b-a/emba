@@ -527,7 +527,7 @@ main_emulation() {
     # probably we need to tweak this further to also find mounts in binaries - strings?!?
     local FS_MOUNTS_FS=()
     if [[ -d "${FIRMWARE_PATH}" ]]; then
-      mapfile -t FS_MOUNTS_FS < <(grep -h -E -R "^mount\ -t\ .*\ .*mtd.* /.*" "${FIRMWARE_PATH}" | sort -u || true)
+      mapfile -t FS_MOUNTS_FS < <(find "${FIRMWARE_PATH}"  -xdev -type f -exec grep -a -h -E "^mount\ -t\ .*\ .*mtd.* /.*" {} \; 2>/dev/null | sort -u || true)
     fi
 
     FS_MOUNTS=( "${FS_MOUNTS_INIT[@]}" "${FS_MOUNTS_FS[@]}" )
