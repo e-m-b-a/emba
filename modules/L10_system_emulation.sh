@@ -830,10 +830,11 @@ main_emulation() {
           print_output "[-] No working emulation - removing emulation archive."
           if [[ "${DEBUG_MODE}" -ne 1 ]]; then
             create_emulation_archive "$ARCHIVE_PATH"
+          else
+            # print_output "[-] Emulation archive: $ARCHIVE_PATH."
+            # create_emulation_archive "$ARCHIVE_PATH"
+            rm -r "$ARCHIVE_PATH" || true
           fi
-          # print_output "[-] Emulation archive: $ARCHIVE_PATH."
-          # create_emulation_archive "$ARCHIVE_PATH"
-          rm -r "$ARCHIVE_PATH" || true
         fi
 
         stopping_emulation_process "$IMAGE_NAME"
