@@ -25,9 +25,13 @@
 #               network connectivity.
 
 L10_system_emulation() {
-  export DEBUG_MODE=1
   module_log_init "${FUNCNAME[0]}"
   module_title "System emulation of Linux based embedded devices."
+
+  # enable DEBUG_MODE for further debugging capabilities:
+  # * create_emulation_archive for all attempts
+  # * do not stop after 2 deteted network services
+  export DEBUG_MODE=0
 
   export SYS_ONLINE=0
   export TCP=""
