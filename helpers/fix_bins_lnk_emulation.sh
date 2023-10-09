@@ -28,11 +28,13 @@ chmod +x "$ROOT_DIR"/busybox
 
 echo "[*] Identifying possible executable files"
 mapfile -t POSSIBLE_ELFS < <(find "$ROOT_DIR" -type f -exec file {} \; | grep "ELF\|executable" | cut -d: -f1)
+mapfile -t POSSIBLE_SH < <(find "$ROOT_DIR" -type f -name "*.sh")
+POSSIBLE_EXES_ARR=( "${POSSIBLE_ELFS[@]}" "${POSSIBLE_SH[@]}" )
 
-for POSSIBLE_ELF in "${POSSIBLE_ELFS[@]}"; do
-  [[ -x "${POSSIBLE_ELF}" ]] && continue
-  echo "[*] Processing executable $(basename "$POSSIBLE_ELF") - chmod privileges"
-  chmod +x "$POSSIBLE_ELF"
+for POSSIBLE_EXE in "${POSSIBLE_EXES_ARR[@]}"; do
+  [[ -x "${POSSIBLE_EXE}" ]] && continue
+  echo "[*] Processing executable $(basename "$POSSIBLE_EXE") - chmod privileges"
+  chmod +x "$POSSIBLE_EXE"
 done
 
 HOME_DIR="$(pwd)"

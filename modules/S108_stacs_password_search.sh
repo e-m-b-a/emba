@@ -37,7 +37,7 @@ S108_stacs_password_search()
     if [[ -f "$TMP_DIR"/stacs.err ]]; then
       print_ln
       print_output "[*] STACS log:"
-      tee -a "$LOG_FILE" < "$TMP_DIR"/stacs.err
+      tee -a "$LOG_FILE" < "$TMP_DIR"/stacs.err || true
     fi
 
     if [[ -f "$STACS_LOG_FILE" && $(jq ".runs[0] .results[] | .message[]" "$STACS_LOG_FILE" | wc -l) -gt 0 ]]; then

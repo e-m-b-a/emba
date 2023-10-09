@@ -131,4 +131,6 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
   fi
 done
 
+"${BUSYBOX}" sort -u -o /firmadyne/service /firmadyne/service
+
 "${BUSYBOX}" echo "[*] EMBA inferService script finished ..."

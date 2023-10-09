@@ -516,11 +516,12 @@ main() {
       disown "${NOTIFICATION_PID}" 2> /dev/null || true
       print_output "[*] Original user: ${ORANGE}${SUDO_USER:-${USER}}${NC}" "no_log"
       print_output "[*] Notification process started with PID ${ORANGE}${NOTIFICATION_PID}${NC}" "no_log"
+      PROXY="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2 || true)"
       echo "${SUDO_USER:-${USER}}" > "${LOG_DIR}"/orig_user.log
       {
         echo "UID: $(id -u "${SUDO_USER:-${USER}}")"
         echo "GID: $(id -g "${SUDO_USER:-${USER}}")"
-        echo "PROXY: $(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2)"
+        echo "PROXY: ${PROXY}"
       } >> "${LOG_DIR}"/orig_user.log
     fi
 
