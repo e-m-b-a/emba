@@ -135,8 +135,8 @@ IF20_cve_search() {
               fi
             done
 
-            ! [[ -f external/libssl.deb ]] && ( "Could not install libssl" && exit 1)
-            ! [[ -f external/libssl-dev.deb ]] && ( "Could not install libssl-dev" && exit 1)
+            ! [[ -f external/libssl.deb ]] && ( echo "Could not install libssl" && exit 1)
+            ! [[ -f external/libssl-dev.deb ]] && ( echo "Could not install libssl-dev" && exit 1)
             dpkg -i external/libssl.deb
             dpkg -i external/libssl-dev.deb
             [[ -f external/libssl.deb ]] && rm external/libssl.deb
