@@ -31,7 +31,7 @@ L10_system_emulation() {
   # enable DEBUG_MODE for further debugging capabilities:
   # * create_emulation_archive for all attempts
   # * do not stop after 2 deteted network services
-  export DEBUG_MODE=1
+  export DEBUG_MODE=0
 
   export SYS_ONLINE=0
   export TCP=""
