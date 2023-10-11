@@ -109,10 +109,10 @@ IF20_cve_search() {
         echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
         cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-            CVE_INST=0
-            echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
+          CVE_INST=0
+          echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
         else
-            echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
+          echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
         fi
 
         cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
@@ -128,6 +128,8 @@ IF20_cve_search() {
               wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04."${i}"_amd64.deb -O external/libssl.deb || true
                 # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
               if [[ -f external/libssl.deb ]]; then
+                sleep 1
+                echo "Testing downloaded libssl packages ..."
                 file external/libssl.deb
                 file external/libssl-dev.deb
               fi
