@@ -134,8 +134,10 @@ IF20_cve_search() {
                 file external/libssl-dev.deb
               fi
               if [[ "$(file external/libssl.deb)" == *"Debian binary package (format 2.0), with control.tar.xz, data compression xz"* ]]; then
+                echo "We break now ..."
                 break
               else
+                echo "Removing downloaded files and go to the next round ..."
                 [[ -f external/libssl.deb ]] && rm external/libssl.deb
                 [[ -f external/libssl-dev.deb ]] && rm external/libssl-dev.deb
               fi
