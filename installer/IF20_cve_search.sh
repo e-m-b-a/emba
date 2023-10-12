@@ -109,10 +109,10 @@ IF20_cve_search() {
         echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
         cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-            CVE_INST=0
-            echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
+          CVE_INST=0
+          echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
         else
-            echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
+          echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
         fi
 
         cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
@@ -124,10 +124,10 @@ IF20_cve_search() {
             for i in {21..29}; do
               echo "Testing download of libssl package version libssl1.1_1.1.1-1ubuntu2.1~18.04.${i}_amd64.deb"
               wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04."${i}"_amd64.deb -O external/libssl-dev.deb || true
-                # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
+                # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
               wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04."${i}"_amd64.deb -O external/libssl.deb || true
-                # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
-              if [[ "$(file external/libssl.deb)" == *"Debian binary package (format 2.0), with control.tar.xz, data compression xz"* ]]; then
+                # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
+              if [[ "$(file external/libssl.deb)" == *"Debian binary package (format 2.0)"* ]]; then
                 break
               else
                 [[ -f external/libssl.deb ]] && rm external/libssl.deb
@@ -135,8 +135,8 @@ IF20_cve_search() {
               fi
             done
 
-            ! [[ -f external/libssl.deb ]] && ( "Could not install libssl" && exit 1)
-            ! [[ -f external/libssl-dev.deb ]] && ( "Could not install libssl-dev" && exit 1)
+            ! [[ -f external/libssl.deb ]] && ( echo "Could not install libssl" && exit 1)
+            ! [[ -f external/libssl-dev.deb ]] && ( echo "Could not install libssl-dev" && exit 1)
             dpkg -i external/libssl.deb
             dpkg -i external/libssl-dev.deb
             [[ -f external/libssl.deb ]] && rm external/libssl.deb

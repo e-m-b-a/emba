@@ -827,10 +827,11 @@ main_emulation() {
             fi
           fi
         else
-          print_output "[-] No working emulation - removing emulation archive."
-          if [[ "${DEBUG_MODE}" -ne 1 ]]; then
+          if [[ "${DEBUG_MODE}" -eq 1 ]]; then
+            print_output "[-] ${ORANGE}Debug mode:${NC} No working emulation - ${ORANGE}creating${NC} emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
             create_emulation_archive "${ARCHIVE_PATH}"
           else
+            print_output "[-] No working emulation - removing emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
             # print_output "[-] Emulation archive: $ARCHIVE_PATH."
             # create_emulation_archive "$ARCHIVE_PATH"
             rm -r "${ARCHIVE_PATH}" || true
@@ -1667,6 +1668,8 @@ write_network_config_to_filesystem() {
 
     # if there were missing files found -> we try to fix this now
     if [[ -v MISSING_FILES[@] ]]; then
+      eval "MISSING_FILES=($(for i in "${MISSING_FILES[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+
       for FILE_PATH_MISSING in "${MISSING_FILES[@]}"; do
         [[ "${FILE_PATH_MISSING}" == *"firmadyne"* ]] && continue
         [[ "${FILE_PATH_MISSING}" == *"/proc/"* ]] && continue
@@ -1676,15 +1679,15 @@ write_network_config_to_filesystem() {
 
         FILENAME_MISSING=$(basename "${FILE_PATH_MISSING}")
         [[ "${FILENAME_MISSING}" == '*' ]] && continue
-        print_output "[*] Found missing area ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
+        print_output "[*] Found missing area ${ORANGE}${FILE_PATH_MISSING}${NC} in filesystem ... trying to fix this now"
         DIR_NAME_MISSING=$(dirname "${FILE_PATH_MISSING}")
         if ! [[ -d "${MNT_POINT}""${DIR_NAME_MISSING}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}${DIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
-          mkdir -p "${MNT_POINT}""${DIR_NAME_MISSING}"
+          mkdir -p "${MNT_POINT}""${DIR_NAME_MISSING}" || true
         fi
         FOUND_MISSING=$(find "${MNT_POINT}" -name "${FILENAME_MISSING}" | head -1 || true)
         if [[ -f ${FOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""${DIR_NAME_MISSING}"/"${FOUND_MISSING}" ]]; then
-          print_output "[*] Recover missing file ${ORANGE}${FILENAME_MISSING}${NC} in filesystem ... trying to fix this now"
+          print_output "[*] Recover missing file ${ORANGE}${FILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}${DIR_NAME_MISSING}/${FOUND_MISSING}${NC}) ... trying to fix this now"
           cp -n "${FOUND_MISSING}" "${MNT_POINT}""${DIR_NAME_MISSING}"/ || true
         fi
       done
