@@ -127,14 +127,7 @@ IF20_cve_search() {
                 # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
               wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04."${i}"_amd64.deb -O external/libssl.deb || true
                 # http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
-              if [[ -f external/libssl.deb ]]; then
-                sleep 1
-                echo "Testing downloaded libssl packages ..."
-                file external/libssl.deb
-                file external/libssl-dev.deb
-              fi
-              if [[ "$(file external/libssl.deb)" == *"Debian binary package (format 2.0), with control.tar.xz, data compression xz"* ]]; then
-                echo "We break now ..."
+              if [[ "$(file external/libssl.deb)" == *"Debian binary package (format 2.0)"* ]]; then
                 break
               else
                 echo "Removing downloaded files and go to the next round ..."
