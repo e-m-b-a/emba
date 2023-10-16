@@ -723,7 +723,7 @@ main() {
       else
         break
       fi
-      if [[ "$CNT_DOCK" -ge 10 ]]; then
+      if [[ "${CNT_DOCK}" -ge 10 ]]; then
         print_output "[-] EMBA docker environment not ready!" "no_log"
         exit 1
       fi
