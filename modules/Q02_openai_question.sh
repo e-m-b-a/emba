@@ -160,7 +160,7 @@ ask_chatgpt() {
                 local CNT=0
                 while [[ "${CNT}" -lt 1000 ]]; do
                   CNT=$((CNT+1))
-                  temp = "$(( "${CNT}" % 100 ))"
+                  temp="$(( "${CNT}" % 100 ))"
                   (( "${temp}" == 0 )) && print_output "[*] Rate limit handling ... sleep mode - ${CNT}" "no_log"
                   if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
                     break 2
