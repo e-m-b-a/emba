@@ -27,7 +27,7 @@ if ("${FIRMAE_ETC}"); then
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
         "${BUSYBOX}" echo "[*] Starting $BINARY_NAME service ..."
-        ${BINARY} &
+        "${BINARY}" &
         "${BUSYBOX}" sleep 5
         "${BUSYBOX}" echo "[*] Netstat output ..."
         "${BUSYBOX}" netstat -antu
