@@ -472,6 +472,7 @@ arachni_scan() {
   local PORT_="${2:-}"
   local SSL_="${3:-}"
   local PROTO="http"
+  local ARACHNI_USER="${SUDO_USER:-${USER}}"
   if [[ "$SSL_" -eq 1 ]]; then
     PROTO="https"
   fi
@@ -496,13 +497,14 @@ arachni_scan() {
     chown arachni:arachni "$EXT_DIR"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp -R
     chown arachni:arachni "$EXT_DIR"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/../logs -R
     chown arachni:arachni "$EXT_DIR"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/home -R
+    ARACHNI_USER="arachni"
   fi
 
   # as we are running with a low priv arachni user we report to /tmp and proceed afterwards
   if [[ -f "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" ]]; then
-    sudo -H -u arachni "$ARACHNI_BIN_PATH"/arachni --output-only-positives --report-save-path /tmp/arachni_report_"$IP_"-"$PORT_".afr --http-request-concurrency=5 --timeout 00:30:00 --scope-extend-paths "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" --checks="$ARACHNI_CHECKS" "$PROTO"://"$IP_":"$PORT_"/ || true
+    sudo -H -u "${ARACHNI_USER}" "$ARACHNI_BIN_PATH"/arachni --output-only-positives --report-save-path /tmp/arachni_report_"$IP_"-"$PORT_".afr --http-request-concurrency=5 --timeout 00:30:00 --scope-extend-paths "$LOG_PATH_MODULE/crawling_$IP_-$PORT_-200ok.log" --checks="$ARACHNI_CHECKS" "$PROTO"://"$IP_":"$PORT_"/ || true
   else
-    sudo -H -u arachni "$ARACHNI_BIN_PATH"/arachni --output-only-positives --report-save-path /tmp/arachni_report_"$IP_"-"$PORT_".afr --http-request-concurrency=5 --timeout 00:30:00 --checks="$ARACHNI_CHECKS" "$PROTO"://"$IP_":"$PORT_"/ || true
+    sudo -H -u "${ARACHNI_USER}" "$ARACHNI_BIN_PATH"/arachni --output-only-positives --report-save-path /tmp/arachni_report_"$IP_"-"$PORT_".afr --http-request-concurrency=5 --timeout 00:30:00 --checks="$ARACHNI_CHECKS" "$PROTO"://"$IP_":"$PORT_"/ || true
   fi
 
   if [[ -f /tmp/arachni_report_"$IP_"-"$PORT_".afr ]]; then
@@ -511,9 +513,9 @@ arachni_scan() {
 
   if [[ -f "$LOG_PATH_MODULE"/arachni_report_"$IP_"-"$PORT_".afr ]]; then
     # as we are running with a low priv arachni user we report to /tmp and proceed afterwards
-    sudo -H -u arachni "$ARACHNI_BIN_PATH"/arachni_reporter "$LOG_PATH_MODULE"/arachni_report_"$IP_"-"$PORT_".afr | sudo -u arachni tee /tmp/arachni_report.tmp
+    sudo -H -u "${ARACHNI_USER}" "$ARACHNI_BIN_PATH"/arachni_reporter "$LOG_PATH_MODULE"/arachni_report_"$IP_"-"$PORT_".afr | sudo -u arachni tee /tmp/arachni_report.tmp
     mv /tmp/arachni_report.tmp "$LOG_PATH_MODULE"
-    sudo -H -u arachni "$ARACHNI_BIN_PATH"/arachni_reporter "$LOG_PATH_MODULE"/arachni_report_"$IP_"-"$PORT_".afr --reporter=html:outfile=/tmp/arachni_report_"$IP_"_"$PORT_".html.zip
+    sudo -H -u "${ARACHNI_USER}" "$ARACHNI_BIN_PATH"/arachni_reporter "$LOG_PATH_MODULE"/arachni_report_"$IP_"-"$PORT_".afr --reporter=html:outfile=/tmp/arachni_report_"$IP_"_"$PORT_".html.zip
     if [[ -f /tmp/arachni_report_"$IP_"_"$PORT_".html.zip ]]; then
       mv /tmp/arachni_report_"$IP_"_"$PORT_".html.zip "$LOG_PATH_MODULE"
     fi
