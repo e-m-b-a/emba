@@ -179,7 +179,7 @@ IF20_cve_search() {
           if [[ "$GH_ACTION" -eq 0 ]] && [[ "$CVE_INST" -eq 1 ]]; then
             /etc/init.d/redis-server restart
             CNT=0
-            while "${CVE_INST}" -eq 1; do
+            while [[ "${CVE_INST}" -eq 1 ]]; do
               ./sbin/db_mgmt_cpe_dictionary.py -p || true
               ./sbin/db_mgmt_json.py -p || true
               ./sbin/db_updater.py -f || true
