@@ -178,9 +178,19 @@ IF20_cve_search() {
           # also do not update if we are running as github action (GH_ACTION set to 1)
           if [[ "$GH_ACTION" -eq 0 ]] && [[ "$CVE_INST" -eq 1 ]]; then
             /etc/init.d/redis-server restart
-            ./sbin/db_mgmt_cpe_dictionary.py -p || true
-            ./sbin/db_mgmt_json.py -p || true
-            ./sbin/db_updater.py -f || true
+            CNT=0
+            while [[ "${CVE_INST}" -eq 1 ]]; do
+              ./sbin/db_mgmt_cpe_dictionary.py -p || true
+              ./sbin/db_mgmt_json.py -p || true
+              ./sbin/db_updater.py -f || true
+              if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+                break
+              fi
+              if [[ "${CNT}" -gt 4 ]]; then
+                break
+              fi
+              CNT=$((CNT+1))
+            done
           else
             echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
           fi
