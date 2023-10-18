@@ -184,7 +184,7 @@ IF20_cve_search() {
               ./sbin/db_mgmt_json.py -p || true
               ./sbin/db_updater.py -f || true
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-                CVE_INST=0
+                break
               fi
               if [[ "${CNT}" -gt 4 ]]; then
                 break
