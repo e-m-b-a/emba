@@ -40,8 +40,14 @@ D10_firmware_diffing() {
     return
   fi
 
+  local FW_FILES1=()
+  local FW_FILES2=()
+  local HOME_DIR=""
+  HOME_DIR="$(pwd)"
+
   local MD5_FW_BIN1=""
   local MD5_FW_BIN2=""
+
   # shellcheck disable=SC2153
   MD5_FW_BIN1=$(md5sum "${FIRMWARE_PATH}")
   # shellcheck disable=SC2153
@@ -54,11 +60,6 @@ D10_firmware_diffing() {
 
   ! [[ -d "${OUTPUT_DIR_UNBLOB1}" ]] && (echo "No firmware directory 1 found" && return)
   ! [[ -d "${OUTPUT_DIR_UNBLOB2}" ]] && (echo "No firmware directory 2 found" && return)
-
-  local FW_FILES1=()
-  local FW_FILES2=()
-  local HOME_DIR=""
-  HOME_DIR="$(pwd)"
 
   # create an overview of the files in both firmware directories
   cd "${OUTPUT_DIR_UNBLOB1}" || return

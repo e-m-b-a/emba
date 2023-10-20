@@ -25,6 +25,11 @@ D05_firmware_diffing_extractor() {
   module_title "Firmware diffing - extractor module"
   local NEG_LOG=0  
 
+  local MD5_FW_BIN1=""
+  local MD5_FW_BIN2=""
+  export OUTPUT_DIR_UNBLOB1=""
+  export OUTPUT_DIR_UNBLOB2=""
+
   # shellcheck disable=SC2153
   MD5_FW_BIN1=$(md5sum "${FIRMWARE_PATH}")
   # shellcheck disable=SC2153
@@ -34,9 +39,6 @@ D05_firmware_diffing_extractor() {
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
-
-  export OUTPUT_DIR_UNBLOB1=""
-  export OUTPUT_DIR_UNBLOB2=""
 
   sub_module_title "Firmware extraction - firmware image 1"
   OUTPUT_DIR_UNBLOB1="${LOG_PATH_MODULE}"/extractor_"$(basename "${FIRMWARE_PATH}")"

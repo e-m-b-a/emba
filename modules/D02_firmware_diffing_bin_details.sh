@@ -33,6 +33,9 @@ D02_firmware_diffing_bin_details() {
     return
   fi
 
+  local MD5_FW_BIN1=""
+  local MD5_FW_BIN2=""
+
   # shellcheck disable=SC2153
   MD5_FW_BIN1=$(md5sum "${FIRMWARE_PATH}")
   # shellcheck disable=SC2153
