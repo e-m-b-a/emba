@@ -877,7 +877,7 @@ main() {
   fi
 
   #######################################################################################
-  # Diff mode (D-modules - currently not public)
+  # Diff mode (D-modules)
   #######################################################################################
   if [[ "${DIFF_MODE}" -eq 1 ]] ; then
 
@@ -896,18 +896,7 @@ main() {
     fi
     write_notification "Diff mode started"
 
-    if [[ "$(find "${MOD_DIR_LOCAL}" -name "D[0-9][0-9]_*.sh" | wc -l)" -gt 0 ]] || [[ "$(find "${MOD_DIR}" -name "D[0-9][0-9]_*.sh" | wc -l)" -gt 0 ]]; then
-      run_modules "D" "${THREADED}" "0"
-    else
-      if [[ -d "${LOG_DIR}" ]]; then
-        print_output "[!] Diff mode currently not supported in this EMBA installation." "main"
-        print_output "[!] EMBA exits now." "main"
-      else
-        print_output "[!] Diff mode currently not supported in this EMBA installation." "no_log"
-        print_output "[!] EMBA exits now." "no_log"
-      fi
-      exit 1
-    fi
+    run_modules "D" "${THREADED}" "0"
 
     if [[ -d "${LOG_DIR}" ]]; then
       print_output "[!] Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
