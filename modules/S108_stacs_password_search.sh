@@ -23,7 +23,7 @@ S108_stacs_password_search()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local STACS_RULES_DIR="$EXT_DIR"/stacs-rules
-  local STACS_LOG_FILE="$LOG_DIR"/etc/stacs_pw_hashes.json
+  local STACS_LOG_FILE="$LOG_PATH_MODULE"/stacs_pw_hashes.json
   local ELEMENTS=0
   local ELEMENTS_=0
   local PW_PATH=""
