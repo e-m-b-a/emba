@@ -249,10 +249,10 @@ radare_decomp_output_function_details() {
     SEARCH_TERM=$(basename "$BINARY_")
     if grep -q "^$SEARCH_TERM\$" "$BASE_LINUX_FILES" 2>/dev/null; then
       COMMON_FILES_FOUND="${CYAN}"" - common linux file: yes - "
-      write_log "[+] File $(print_path "$BINARY_") found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
+      write_log "[+] File $(print_path "$BINARY_") found in default Linux file dictionary" "$LOG_PATH_MODULE/common_linux_files.txt"
       CFF_CSV="true"
     else
-      write_log "[+] File $(print_path "$BINARY_") not found in default Linux file dictionary" "$SUPPL_PATH/common_linux_files.txt"
+      write_log "[+] File $(print_path "$BINARY_") not found in default Linux file dictionary" "$LOG_PATH_MODULE/common_linux_files.txt"
       COMMON_FILES_FOUND="${RED}"" - common linux file: no -"
       CFF_CSV="false"
     fi
