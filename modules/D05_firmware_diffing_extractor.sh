@@ -23,7 +23,7 @@
 D05_firmware_diffing_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware diffing - extractor module"
-  local NEG_LOG=0  
+  local NEG_LOG=0
 
   local MD5_FW_BIN1=""
   local MD5_FW_BIN2=""
@@ -45,7 +45,7 @@ D05_firmware_diffing_extractor() {
   unblobber "${FIRMWARE_PATH}" "${OUTPUT_DIR_UNBLOB1}" 0
 
   if [[ -d "$OUTPUT_DIR_UNBLOB1" ]]; then
-    NEG_LOG=1  
+    NEG_LOG=1
     linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB1}"
     FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB1" -xdev -type f | wc -l )
     UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB1" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
@@ -70,7 +70,7 @@ D05_firmware_diffing_extractor() {
   unblobber "${FIRMWARE_PATH1}" "${OUTPUT_DIR_UNBLOB2}" 0
 
   if [[ -d "$OUTPUT_DIR_UNBLOB2" ]]; then
-    NEG_LOG=1  
+    NEG_LOG=1
     linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB2}"
     FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB2" -xdev -type f | wc -l )
     UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB2" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )

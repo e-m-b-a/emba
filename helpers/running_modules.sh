@@ -14,7 +14,7 @@
 # Author(s): Michael Messner
 
 # Description:  EMBA helper script to identify currently running EMBA modules
-#               start it with "watch". E.g., 
+#               start it with "watch". E.g.,
 #               watch -c ./helpers/running_modules.sh ~/firmware-stuff/emba_logs_dir300_new_bins
 
 

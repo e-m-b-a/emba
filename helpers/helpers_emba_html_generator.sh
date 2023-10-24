@@ -87,7 +87,7 @@ add_link_tags() {
   LINK_COMMAND_ARR=()
   local WAIT_PIDS_WR=()
 
-  # [REF] anchor 
+  # [REF] anchor
   if ( grep -a -q -E '\[REF\]' "$LINK_FILE" ) ; then
     readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "$LINK_FILE" | cut -d':' -f1 )
     for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
@@ -110,7 +110,7 @@ add_link_tags() {
             HTML_LINK="$(echo "$REFERENCE_LINK" | sed -e "s@LINK@${DEPTH}/$(echo "$BACK_LINK" | cut -d"." -f1)/$(basename "${REF_LINK%."${REF_LINK##*.}"}").html@g" || true)"
           fi
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
-          while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
+          while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
@@ -150,14 +150,14 @@ add_link_tags() {
             HTML_LINK="$(echo "$REFERENCE_MODUL_LINK" | sed -e "s@LINK@./$(basename "${MODUL_ARR_LINK_E%.sh}").html@" || true)"
           fi
           LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
-          while [[ "$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do 
+          while [[ "$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END" ]] ; do
             LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
           done
           LINK_COMMAND_ARR+=( "$LINE_NUMBER_INFO_PREV"'s@^@'"$HTML_LINK"'@' "$LINE_NUMBER_INFO_PREV"'s@$@'"$LINK_END"'@')
         fi
       elif [[ "$REF_LINK" =~ $URL_REGEX ]] ; then
         LINE_NUMBER_INFO_PREV="$(( REF_LINK_NUMBER - 1 ))"
-        while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do 
+        while [[ ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$P_START$SPAN_END$P_END") || ("$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")" == "$BR" ) ]] ; do
           LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
         done
         HTML_LINK="$(echo "$REFERENCE_MODUL_EXT_LINK" | sed -e "s@LINK@$REF_LINK@")""$(sed "$LINE_NUMBER_INFO_PREV""q;d" "$LINK_FILE")""$LINK_END"
@@ -168,7 +168,7 @@ add_link_tags() {
     done
   fi
 
-  if [[ $IGNORE_LINKS -eq 0 ]] ; then 
+  if [[ $IGNORE_LINKS -eq 0 ]] ; then
     # web links
     if ( grep -a -q -E '(https?|ftp|file):\/\/' "$LINK_FILE" ) ; then
       readarray -t WEB_LINKS < <( grep -a -n -o -E '(\b(https?|ftp|file):\/\/) ?[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~a_|]' "$LINK_FILE" | uniq || true)
@@ -186,7 +186,7 @@ add_link_tags() {
     # linux exploit suggester links
     if ( grep -a -q -E 'Exploit \(linux-exploit-suggester' "$LINK_FILE" ) ; then
       readarray -t LES_LINE_ARR < <( grep -a -o -n -E 'Exploit \(linux-exploit-suggester' "$LINK_FILE" | cut -d":" -f1)
-      for LES_LINE in "${LES_LINE_ARR[@]}" ; do 
+      for LES_LINE in "${LES_LINE_ARR[@]}" ; do
         HTML_LINK="$(echo "$LOCAL_LINK" | sed -e "s@LINK@./s25_kernel_check.html@g")""linux-exploit-suggester""$LINK_END"
         LINK_COMMAND_ARR+=( "$LES_LINE""s@linux-exploit-suggester@""$HTML_LINK"'@' )
       done
@@ -227,7 +227,7 @@ add_link_tags() {
     # MSF key links and additional files
     if ( grep -a -q -E 'Exploit.*MSF' "$LINK_FILE" ) ; then
       readarray -t MSF_KEY_F < <( grep -a -n -o -E "MSF: (([0-9a-z_][\ ]?)+)*" "$LINK_FILE" | uniq || true)
-      for MSF_KEY in "${MSF_KEY_F[@]}" ; do 
+      for MSF_KEY in "${MSF_KEY_F[@]}" ; do
         MSF_KEY_LINE="$(echo "$MSF_KEY" | cut -d ":" -f 1)"
         MSF_KEY_STRING="$(echo "$MSF_KEY" | cut -d ":" -f 3- | sed -e 's/^[[:space:]]*//')"
         readarray -t MSF_KEY_STRING_ARR < <(echo "$MSF_KEY_STRING" | tr " " "\n" | uniq )
@@ -244,13 +244,13 @@ add_link_tags() {
           fi
         done
       done
-    fi 
+    fi
 
     # Trickest key links to Github
     # Todo: Remove trickest integration
     if ( grep -a -q -E 'Exploit.*Github' "$LINK_FILE" ) ; then
       readarray -t TRICKEST_KEY_F < <( grep -a -n -o -E "Github: .*" "$LINK_FILE" | sed 's/ (G)//g' | sed 's/Github: //' | sed 's/).*//' | uniq || true)
-      for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do 
+      for TRICKEST_KEY in "${TRICKEST_KEY_F[@]}" ; do
         TRICKEST_ID_LINE="$(echo "$TRICKEST_KEY" | cut -d ":" -f 1)"
         TRICKEST_ID_STRING="$(echo "$TRICKEST_KEY" | cut -d ":" -f 2-)"
         readarray -t TRICKEST_KEY_STRING_ARR < <(echo "$TRICKEST_ID_STRING" | tr " " "\n" | uniq)
@@ -262,7 +262,7 @@ add_link_tags() {
           LINK_COMMAND_ARR+=( "$TRICKEST_ID_LINE"'s@'"$TRICKEST_KEY_ELEM"'@'"$HTML_LINK"'@' )
         done
       done
-    fi 
+    fi
 
     if ( grep -a -q -E 'Exploit.*Snyk' "$LINK_FILE" ) ; then
       readarray -t SNYK_KEY_F < <( grep -a -n -o -E "Snyk: .*" "$LINK_FILE" | sed 's/Snyk: //' | uniq || true)
@@ -476,7 +476,7 @@ generate_info_file()
     # add html tags for style
     add_color_tags "$TMP_INFO_FILE"
     sed -i -e "s:[=]{65}:$HR_DOUBLE:g ; s:^[-]{65}$:$HR_MONO:g" "$TMP_INFO_FILE" || true
-    
+
     # add link tags to links/generate info files and link to them and write line to tmp file
     add_link_tags "$TMP_INFO_FILE" "${INFO_HTML_FILE}"
 
@@ -560,7 +560,7 @@ generate_report_file()
     sed -i -e "s:^:$P_START: ; s:$:$P_END:" "$TMP_FILE" || true
     # this fixes the </pre> lines instead of <pre></pre> - something weird with \r\n
     sed -i -E "s:\r$P_END:$P_END:" "$TMP_FILE" || true
-    
+
     # add html tags for style
     add_color_tags "$TMP_FILE"
 
@@ -608,7 +608,7 @@ add_link_to_index() {
   readarray -t INDEX_NAV_GROUP_ARR < <(printf -- '%s\n' "${INDEX_NAV_ARR[@]}" | grep -a "$CLASS" || true)
 
   if [[ ${#INDEX_NAV_GROUP_ARR[@]} -eq 0 ]] ; then
-    # due the design of EMBA, which are already groups the modules (even threaded), it isn't necessary to check - 
+    # due the design of EMBA, which are already groups the modules (even threaded), it isn't necessary to check -
     # insert new entry at bottom of the navigation
     insert_line "navigation end" "$MODUL_NAME"
   else
@@ -636,7 +636,7 @@ update_index()
   generate_report_file "$MAIN_LOG"
   sed -i -e "s@buttonTimeInvisible@buttonTime@ ; s@TIMELINK@.\/$(basename "${MAIN_LOG%."${MAIN_LOG##*.}"}"".html")@" "$ABS_HTML_PATH""/""$INDEX_FILE"
 
-  # generate files in $SUPPL_PATH (supplementary files from modules) 
+  # generate files in $SUPPL_PATH (supplementary files from modules)
   readarray -t SUPPL_FILES < <(find "$SUPPL_PATH" ! -path "$SUPPL_PATH")
   if [[ "${#SUPPL_FILES[@]}" -gt 0 ]] ; then
     sed -i 's@expand_njs hidden@expand_njs@g' "$ABS_HTML_PATH""/""$INDEX_FILE"
@@ -688,7 +688,7 @@ add_arrows()
   readarray -t Q_MODULE_ARR < <(find "$ABS_HTML_PATH" -maxdepth 1 -name "*.html" | grep -a -E "./q[0-9]*.*" | sort -V || true)
   local ALL_MODULE_ARR
   ALL_MODULE_ARR=( "$ABS_HTML_PATH""/""$INDEX_FILE" "${D_MODULE_ARR[@]}" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
-  for M_NUM in "${!ALL_MODULE_ARR[@]}"; do 
+  for M_NUM in "${!ALL_MODULE_ARR[@]}"; do
     if [[ "$M_NUM" -gt 0 ]] ; then
       FIRST_LINK="${ALL_MODULE_ARR[$(( M_NUM - 1 ))]}"
       LINE_NUMBER_A_BUTTON=$(grep -a -m 1 -n "buttonForward" "${ALL_MODULE_ARR[$M_NUM]}" | cut -d ":" -f 1 || true)
@@ -707,7 +707,7 @@ add_arrows()
 prepare_report()
 {
   ABS_HTML_PATH="$(abs_path "$HTML_PATH")"
-  
+
   if [ ! -d "$ABS_HTML_PATH$STYLE_PATH" ] ; then
     mkdir -p "$ABS_HTML_PATH$STYLE_PATH" || true
     cp "$HELP_DIR/style.css" "$ABS_HTML_PATH$STYLE_PATH/style.css" || true

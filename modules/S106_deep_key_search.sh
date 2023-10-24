@@ -73,7 +73,7 @@ deep_key_search() {
           D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
         fi
       done
-      print_output "$D_S_FINDINGS" 
+      print_output "$D_S_FINDINGS"
       write_log "" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
       write_log "[*] Deep search results:" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
       write_log "$D_S_FINDINGS" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"

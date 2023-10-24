@@ -93,7 +93,7 @@ system_load_util_str() {
 }
 
 # Update first box "SYSTEM LOAD"
-# we need to use the tmp file for the cpu load, because it takes about a second to get the information and therefore we 
+# we need to use the tmp file for the cpu load, because it takes about a second to get the information and therefore we
 # load this information in the background, write it to the file in a rythm of .2s and when needed, it will be readed from it
 update_box_system_load() {
   update_cpu() {

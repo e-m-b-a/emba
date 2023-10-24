@@ -14,13 +14,13 @@
 # Author(s): Michael Messner, Pascal Eckmann
 # Contributor(s): Stefan Haboeck, Nikolas Papaioannou
 
-# Description:  Installs common aggregator tools for EMBA 
+# Description:  Installs common aggregator tools for EMBA
 
 IF50_aggregator_common() {
   module_title "${FUNCNAME[0]}"
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-  
+
     INSTALL_APP_LIST=()
     print_tool_info "python3-pip" 1
     print_tool_info "net-tools" 1
@@ -67,4 +67,4 @@ IF50_aggregator_common() {
   # we were running into issues that this package was removed somehow during the installation process
   # Todo: figure out why and solve it somehow
   apt-get install p7zip-full -y
-} 
+}

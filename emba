@@ -355,7 +355,7 @@ run_modules()
 }
 
 main() {
-  set -a 
+  set -a
   trap cleaner INT
 
   INVOCATION_PATH="$(dirname "${0}")"
@@ -917,7 +917,7 @@ main() {
     print_output "\n=================================================================\n" "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main" 
+      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
     else
       print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
@@ -946,7 +946,7 @@ main() {
   if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     print_output "\n=================================================================\n" "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main" 
+      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
     else
       print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
@@ -969,12 +969,12 @@ main() {
   # Reporting (F-modules)
   #######################################################################################
   if [[ -d "${LOG_DIR}" ]]; then
-    print_output "[!] Reporting phase started on ""$(date)""\\n" "main" 
+    print_output "[!] Reporting phase started on ""$(date)""\\n" "main"
   else
-    print_output "[!] Reporting phase started on ""$(date)""\\n" "no_log" 
+    print_output "[!] Reporting phase started on ""$(date)""\\n" "no_log"
   fi
   write_notification "Reporting phase started"
- 
+
   run_modules "F" "0" "${HTML}"
 
   [[ ${DISABLE_STATUS_BAR} -eq 0 ]] && remove_status_bar
@@ -987,7 +987,7 @@ main() {
 
   if [[ "${TESTING_DONE}" -eq 1 ]]; then
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/firmware ]]; then
-      print_output "[*] Removing temp firmware directory\\n" "no_log" 
+      print_output "[*] Removing temp firmware directory\\n" "no_log"
       rm -r "${LOG_DIR}"/firmware 2>/dev/null
     fi
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/p61_unblob_eval/unblob_extracted ]]; then

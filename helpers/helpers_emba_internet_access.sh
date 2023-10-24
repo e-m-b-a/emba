@@ -56,7 +56,7 @@ kernel_downloader() {
     local K_VER_1st=""
     local K_VER_2nd=""
     # local K_VER_3rd=""
-  
+
     K_VER_1st=$(echo "$K_VERSION" | cut -d. -f1)
     K_VER_2nd=$(echo "$K_VERSION" | cut -d. -f2)
     # K_VER_3rd=$(echo "$K_VERSION" | cut -d. -f3)
@@ -75,7 +75,7 @@ kernel_downloader() {
       # for download we need to modify versions like 3.1.0 to 3.1
       K_VERSION=${K_VERSION%.0}
     fi
-  
+
     # we check if the sources archive is already available and is a valid tgz file:
     if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]] || ! gunzip -t "$KERNEL_ARCH_PATH/linux-$K_VERSION.tar.gz" > /dev/null; then
       local OUTPUTTER="[*] Kernel download for version $ORANGE$K_VERSION$NC"
@@ -114,7 +114,7 @@ kernel_downloader() {
       print_output "$OUTPUTTER" "no_log"
       write_log "$OUTPUTTER" "$LOG_DIR/kernel_downloader.log"
     fi
-  
+
     if ! [[ -f "$KERNEL_ARCH_PATH"/linux-"$K_VERSION".tar.gz ]]; then
       local OUTPUTTER="[-] Kernel sources not available ..."
       print_output "$OUTPUTTER" "no_log"

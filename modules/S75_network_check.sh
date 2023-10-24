@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  A more exceptional search for files like resolv.conf, iptables.conf and snmpf.conf and analyzes their content. 
+# Description:  A more exceptional search for files like resolv.conf, iptables.conf and snmpf.conf and analyzes their content.
 #               Checks systemd network configuration files.
 
 S75_network_check()

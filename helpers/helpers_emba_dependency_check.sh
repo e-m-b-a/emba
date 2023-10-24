@@ -194,7 +194,7 @@ setup_nikto() {
   fi
 }
 
-dependency_check() 
+dependency_check()
 {
   module_title "Dependency check" "no_log"
 
@@ -208,7 +208,7 @@ dependency_check()
 
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - \\c" "no_log"
-    
+
     if [[ -n "${PROXY_SETTINGS}" ]]; then
       export http_proxy="${PROXY_SETTINGS}"
       export https_proxy="${PROXY_SETTINGS}"
@@ -340,7 +340,7 @@ dependency_check()
   fi
 
   # EMBA is developed for and on KALI Linux
-  # In our experience we can say that it runs on most Debian based systems without any problems 
+  # In our experience we can say that it runs on most Debian based systems without any problems
   if [[ $USE_DOCKER -eq 0 ]] ; then
     print_output "    host distribution - \\c" "no_log"
     if grep -q "kali" /etc/debian_version 2>/dev/null ; then
@@ -416,7 +416,7 @@ dependency_check()
           echo -e "$GREEN""ok""$NC"
         fi
       fi
-    done 
+    done
 
 
     #######################################################################################
@@ -531,10 +531,10 @@ dependency_check()
 
     check_dep_tool "ubireader image extractor" "ubireader_extract_images"
     check_dep_tool "ubireader file extractor" "ubireader_extract_files"
-    
+
     # UEFI
     check_dep_tool "UEFI image extractor" "$EXT_DIR""/UEFITool/UEFIExtract"
-    
+
     if function_exists F20_vul_aggregator; then
       # CVE-search
       # TODO change to portcheck and write one for external hosts

@@ -41,7 +41,7 @@ if [[ -f "${EMBA_CONFIG_PATH}"/PS_PoC_results.csv ]]; then
   ENTRIES_BEFORE="$(wc -l "${EMBA_CONFIG_PATH}"/PS_PoC_results.csv | awk '{print $1}')"
   echo -e "${GREEN}[+] Current Packetstorm PoC file has ${ORANGE}${ENTRIES_BEFORE}${GREEN} exploit entries.${NC}"
 fi
- 
+
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 
@@ -50,7 +50,7 @@ while ( true ); do
   FAIL_CNT=0
 
   # Download and error handling:
-  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" > "${SAVE_PATH}"/"${LINKS}"; do 
+  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" > "${SAVE_PATH}"/"${LINKS}"; do
     ((CUR_SLEEP_TIME+=$(shuf -i 1-5 -n 1)))
     ((FAIL_CNT+=1))
     if [[ "${FAIL_CNT}" -gt 20 ]]; then
@@ -122,7 +122,7 @@ while ( true ); do
         TYPE="DoS"
       fi
     fi
-    
+
     mapfile -t CVEs < <(sed '/\['"${CURRENT_MARKER}"'\]/,/\['"${NEXT_MARKER}"'\]/!d' "${SAVE_PATH}"/"${LINKS}" \
       | grep -o -E "\[[0-9]+\]CVE-[0-9]+-[0-9]+" | sed 's/\[[0-9]*\]//' | sort -u)
     if [[ -v CVEs ]]; then

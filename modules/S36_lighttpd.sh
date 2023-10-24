@@ -77,7 +77,7 @@ lighttpd_binary_analysis() {
       VERSION_IDENTIFIER="$(safe_echo "$VERSION_LINE" | cut -d\; -f4)"
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
       VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
- 
+
       for BIN in "${LIGHTTP_BIN_ARR[@]}" ; do
         VERSION_FINDER=$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)
         if [[ -n $VERSION_FINDER ]]; then
@@ -103,7 +103,7 @@ lighttpd_binary_analysis() {
       cve_db_lookup_version "$LIGHT_VER"
     done
   fi
-  
+
   # check for binary protections on lighttpd binaries
   print_ln
   print_output "[*] Testing lighttpd binaries for binary protection mechanisms:\\n"

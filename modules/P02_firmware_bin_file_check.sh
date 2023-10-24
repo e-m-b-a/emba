@@ -41,7 +41,7 @@ P02_firmware_bin_file_check() {
 
   local FILE_LS_OUT
   FILE_LS_OUT=$(ls -lh "$FIRMWARE_PATH")
-  
+
   print_ln
   print_output "[*] Details of the firmware file:"
   print_ln
@@ -107,7 +107,7 @@ set_p02_default_exports() {
   export DLINK_ENC_DETECTED=0
   export VMDK_DETECTED=0
   export UBOOT_IMAGE=0
-  export EXT_IMAGE=0 
+  export EXT_IMAGE=0
   export AVM_DETECTED=0
   export UBI_IMAGE=0
   export OPENSSL_ENC_DETECTED=0
