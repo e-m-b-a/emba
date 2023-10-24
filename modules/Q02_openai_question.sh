@@ -15,7 +15,7 @@
 # Description: Openai questioning module for container #2
 # Note:        Important requirement for Q-modules is the self termination when a certain phase ends
 
-Q02_openai_question() { 
+Q02_openai_question() {
   if [[ "${GPT_OPTION}" -gt 0 ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
@@ -51,7 +51,7 @@ ask_chatgpt() {
   local GPT_FILE_DIR_="${LOG_PATH_MODULE}""/gpt_files"
   local GPT_PRIO_=3
   # default vars
-  local GPT_QUESTION_="" 
+  local GPT_QUESTION_=""
   local CHATGPT_CODE_=""
   local GPT_RESPONSE_=""
   local GPT_RESPONSE_CLEANED_=""
@@ -89,7 +89,7 @@ ask_chatgpt() {
     GPT_TOKENS_="${GPT_TOKENS_//cost\=/}"
     GPT_RESPONSE_="$(echo "${ELEM}" | cut -d\; -f7)"
     GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
-    
+
     # in case we have nothing we are going to move on
     [[ -z "${SCRIPT_PATH_TMP_}" ]] && continue
     print_output "[*] Identification of ${ORANGE}${SCRIPT_PATH_TMP_} / ${GPT_INPUT_FILE_}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
@@ -160,7 +160,8 @@ ask_chatgpt() {
                 local CNT=0
                 while [[ "${CNT}" -lt 1000 ]]; do
                   CNT=$((CNT+1))
-                  (( "${CNT}" % 100 == 0 )) && print_output "[*] Rate limit handling ... sleep mode - ${CNT}" "no_log"
+                  local TEMP_VAR="$(( "${CNT}" % 100 ))"
+                  (( "${TEMP_VAR}" == 0 )) && print_output "[*] Rate limit handling ... sleep mode - ${CNT}" "no_log"
                   if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
                     break 2
                   fi

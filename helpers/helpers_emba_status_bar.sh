@@ -57,7 +57,7 @@ system_load_util_str() {
   local UTIL_STR="${UTIL_TYPES[$UTIL_TYPE_NO]}"
   local UTIL_BAR_COLOR=""
   local UTIL_BAR_BLANK=""
-  local UTIL_PERCENTAGE=$((PERCENTAGE/(100/12)))
+  local UTIL_PERCENTAGE=$(("$PERCENTAGE"/(100/12)))
 
   local A=0
   local BAR_COUNT=0
@@ -76,7 +76,7 @@ system_load_util_str() {
     UTIL_BAR_COLOR="\033[31m$UTIL_BAR_COLOR\033[0m"
   elif [[ $BAR_COUNT -gt 4 ]] ; then
     UTIL_BAR_COLOR="\033[33m$UTIL_BAR_COLOR\033[0m"
-  else 
+  else
     UTIL_BAR_COLOR="\033[32m$UTIL_BAR_COLOR\033[0m"
   fi
 
@@ -369,11 +369,11 @@ initial_status_bar() {
   # create new tmp file with empty lines
   STATUS_TMP_PATH="$TMP_DIR/status"
   if [[ ! -f "$STATUS_TMP_PATH" && -d "$TMP_DIR" ]] ; then
-    echo -e "\\n\\n\\n\\n" > "$STATUS_TMP_PATH" 
+    echo -e "\\n\\n\\n\\n" > "$STATUS_TMP_PATH"
   fi
   # calculate boxes fitting and draw them
   local INITIAL_STR=""
-  INITIAL_STR="\e[${LINE_POS};1f\e[0J\e[0;${LINE_POS}r\e[${LINE_POS};1f" 
+  INITIAL_STR="\e[${LINE_POS};1f\e[0J\e[0;${LINE_POS}r\e[${LINE_POS};1f"
   if [[ $LINES -gt 10 ]] ; then
     # column has to be increased with 2 characters because of possible arrow column
     local ARROW_POS=0
@@ -391,7 +391,7 @@ initial_status_bar() {
     if [[ $COLUMNS -ge 80 ]] ; then
       INITIAL_STR+="$(draw_box 26 "MODULES" 53)"
       STATUS_BAR_BOX_COUNT=3
-      ARROW_POS=79 
+      ARROW_POS=79
     fi
     if [[ $COLUMNS -ge 104 ]] ; then
       INITIAL_STR+="$(draw_box 26 "STATUS 2" 79)"

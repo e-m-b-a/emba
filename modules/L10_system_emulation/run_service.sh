@@ -22,12 +22,13 @@ if ("${FIRMAE_ETC}"); then
   fi
 
   while (true); do
-    while IFS= read -r BINARY; do
-      BINARY_NAME=$("${BUSYBOX}" echo "${BINARY}" | "${BUSYBOX}" cut -d\  -f1)
+    while IFS= read -r _BINARY; do
+      BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
         "${BUSYBOX}" echo "[*] Starting $BINARY_NAME service ..."
-        ${BINARY} &
+        #BINARY variable could be something like: binary parameter parameter ...
+        ${_BINARY} &
         "${BUSYBOX}" sleep 5
         "${BUSYBOX}" echo "[*] Netstat output ..."
         "${BUSYBOX}" netstat -antu

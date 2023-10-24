@@ -486,7 +486,7 @@ detect_root_dir_helper() {
   local R_PATH
   local MECHANISM=""
 
-  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed s/,\ .*$// | sort -u 2>/dev/null || true)
+  mapfile -t INTERPRETER_FULL_PATH < <(find "$SEARCH_PATH" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
 
   if [[ "${#INTERPRETER_FULL_PATH[@]}" -gt 0 ]]; then
     for INTERPRETER_PATH in "${INTERPRETER_FULL_PATH[@]}"; do

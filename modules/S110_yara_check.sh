@@ -43,7 +43,8 @@ S110_yara_check()
     ulimit -Sv unlimited
 
     while read -r YARA_OUT_LINE; do
-      if [[ "$YARA_OUT_LINE" == *" [] [author="* ]]; then
+      local AUTHOR_STRING=" [] [author="
+      if [[ "${YARA_OUT_LINE}" == *"${AUTHOR_STRING}"* ]]; then
         YRULE=$(echo "$YARA_OUT_LINE" | awk '{print $1}')
         MATCH_FILE=$(echo "$YARA_OUT_LINE" | grep "\ \[\]\ \[author=\"" | rev | awk '{print $1}' | rev)
         MATCH_FILE_NAME=$(basename "$MATCH_FILE")

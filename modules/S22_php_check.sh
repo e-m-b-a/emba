@@ -239,7 +239,7 @@ s22_check_php_ini(){
   for PHP_FILE in "${PHP_INI_FILE[@]}" ;  do
     # print_output "[*] iniscan check of ""$(print_path "$PHP_FILE")"
     mapfile -t INISCAN_RESULT < <( "$PHP_INISCAN_PATH" scan --path="$PHP_FILE" || true)
-    for LINE in "${INISCAN_RESULT[@]}" ; do  
+    for LINE in "${INISCAN_RESULT[@]}" ; do
       local LIMIT_CHECK
       IFS='|' read -ra LINE_ARR <<< "$LINE"
       # TODO: STRICT mode not working here:
@@ -266,7 +266,7 @@ s22_check_php_ini(){
         elif ( echo "$LINE" | grep -q "passing" ) ; then
           IFS=' ' read -ra LINE_ARR <<< "$LINE"
           # semgrep does not like the following line of code:
-          LINE_ARR[0]=$(( LINE_ARR[0]-PHP_INI_LIMIT_EXCEEDED ))
+          LINE_ARR[0]=$(( "${LINE_ARR[0]}" - "${PHP_INI_LIMIT_EXCEEDED}" ))
         fi
       fi
     done
