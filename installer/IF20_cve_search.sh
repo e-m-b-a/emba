@@ -21,15 +21,13 @@ IF20_cve_search() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $CVE_SEARCH -eq 1 ]] || [[ $FULL -eq 1 ]]; then
 
-    print_git_info "trickest cve database" "EMBA-support-repos/trickest-cve" "Trickest CVE to github exploit database"
-    echo -e "$ORANGE""trickest poc database will be downloaded.""$NC"
     print_git_info "cve-search" "EMBA-support-repos/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
     echo -e "$ORANGE""cve-search will be downloaded.""$NC"
 
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""trickest, cve-search and mongodb will be downloaded, installed and populated!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
       ANSWER=("y")
     fi
 
@@ -70,7 +68,7 @@ IF20_cve_search() {
       pip_install "tqdm==4.64.0"
       pip_install "pymongo==3.12.1"
       pip_install "dicttoxml==1.7.4"
-      pip_install "redis==4.2.2"
+      pip_install "redis==4.5.4"
       pip_install "ijson==3.1.4"
       pip_install "jsonpickle==3.0.1"
       pip_install "requirements-parser==0.5.0"
@@ -203,15 +201,6 @@ IF20_cve_search() {
           echo -e "$MAGENTA""$BOLD""For automatic updates it should be checked and copied to /etc/cron.daily/""$NC"
         fi
         cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
-
-        # get trickest repository
-        if ! [[ -d external/trickest-cve ]]; then
-          git clone https://github.com/EMBA-support-repos/trickest-cve.git external/trickest-cve
-        else
-          cd external/trickest-cve || ( echo "Could not install EMBA component Trickest" && exit 1 )
-          git pull
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component Trickest" && exit 1 )
-        fi
       ;;
     esac
   fi

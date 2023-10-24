@@ -32,7 +32,7 @@ IF50_aggregator_common() {
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""cyclonedx, net-tools, pip3, cve-search, trickest and cve_searchsploit (if not already on the system) will be downloaded and installed!""$NC"
+      echo -e "\\n""$MAGENTA""$BOLD""cyclonedx, net-tools, pip3, cve-search and cve_searchsploit (if not already on the system) will be downloaded and installed!""$NC"
       ANSWER=("y")
     fi
 
