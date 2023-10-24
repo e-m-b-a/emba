@@ -13,8 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Emulates executables from the firmware with qemu to get version information. 
-#               Currently this is an experimental module and needs to be activated separately via the -E switch. 
+# Description:  Emulates executables from the firmware with qemu to get version information.
+#               Currently this is an experimental module and needs to be activated separately via the -E switch.
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
 # Threading priority - if set to 1, these modules will be executed first
@@ -622,14 +622,14 @@ emulate_binary() {
     chmod +x "$FULL_BIN_PATH"
   fi
   emulate_strace_run "$CPU_CONFIG_" "$BIN_EMU_NAME"
-  
+
   # emulate binary with different command line parameters:
   if [[ "$BIN_" == *"bash"* ]]; then
     EMULATION_PARAMS=("--help" "--version")
   else
     EMULATION_PARAMS=("" "-v" "-V" "-h" "-help" "--help" "--version" "version")
   fi
-  
+
   for PARAM in "${EMULATION_PARAMS[@]}"; do
     [[ -z "$PARAM" ]] && PARAM="NONE"
 

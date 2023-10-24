@@ -13,7 +13,7 @@
 # Author(s): Michael Messner
 
 # Description:  This module identifies binaries that are using weak functions and creates a ranking of areas to look first.
-#               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg). 
+#               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg).
 #               The analysis is done via the r2dec plugin from radara2 (see https://github.com/wargio/r2dec-js)
 
 # Threading priority - if set to 1, these modules will be executed first
@@ -168,7 +168,7 @@ radare_decomp_print_top10_statistics() {
       local SEARCH_TERM=""
       local F_COUNTER=0
       readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null || true)
-  
+
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_ln
         print_output "[+] ""$FUNCTION"" - top 10 results:"
@@ -186,7 +186,7 @@ radare_decomp_print_top10_statistics() {
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE" || true
             else
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE" || true
-            fi  
+            fi
           else
             print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM")")"
           fi
@@ -205,12 +205,12 @@ radare_decomp_print_top10_statistics() {
           fi
         done
         print_ln
-      fi  
+      fi
     done
   else
     print_output "$(indent "$(orange "No weak binary functions found - check it manually")")"
   fi
-} 
+}
 
 radare_decomp_color_output() {
   local FUNCTION="${1:-}"
@@ -266,7 +266,7 @@ radare_decomp_output_function_details() {
   if [[ -f "$LOG_FILE_LOC_OLD" ]]; then
     mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null || true
   fi
-  
+
   if [[ "$NETWORKING" -gt 1 ]]; then
     local NW_CSV="yes"
     local NETWORKING_="${ORANGE}networking: ${NW_CSV}${NC}"

@@ -16,7 +16,7 @@
 
 # Description:  Checks for vulnerabilities in php scripts.
 #               Checks for configuration issues in php.ini files
- 
+
 S22_php_check()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -112,7 +112,7 @@ s22_vuln_check_semgrep() {
 
       sed -i -r "${SEMG_LINE_NR}s/.*/\x1b[32m&\x1b[0m/" "$LOG_PATH_MODULE"/semgrep_sources/"${SEMG_SOURCE_FILE_NAME}".log
       print_output "[+] Found possible PHP vulnerability ${ORANGE}${SEMG_ISSUE_NAME}${GREEN} in ${ORANGE}${SEMG_SOURCE_FILE_NAME}${GREEN}" "" "$LOG_PATH_MODULE/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log"
-      
+
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
         GPT_ANCHOR_="$(openssl rand -hex 8)"
         # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
@@ -155,7 +155,7 @@ s22_vuln_check_caller() {
   if [[ -f "$TMP_DIR"/S22_VULNS.tmp ]]; then
     S22_PHP_VULNS=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S22_VULNS.tmp)
   fi
- 
+
   print_ln
   if [[ "$S22_PHP_VULNS" -gt 0 ]]; then
     print_output "[+] Found ""$ORANGE""$S22_PHP_VULNS"" vulnerabilities""$GREEN"" in ""$ORANGE""$S22_PHP_SCRIPTS""$GREEN"" php files.""$NC""\\n"

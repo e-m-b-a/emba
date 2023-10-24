@@ -27,7 +27,7 @@
 # Description:  Initial implementation of the great grepit tool from CRASS (code review audit script scanner)
 #               CRASS: https://github.com/floyd-fuh/crass/
 #               Grepit: https://github.com/floyd-fuh/crass/blob/master/grep-it.sh
-#               Original grepit description: 
+#               Original grepit description:
 #               A simple greper for code, loot, IT-tech-stuff-the-customer-throws-at-you.
 #               Tries to find IT security and privacy related stuff.
 
@@ -73,7 +73,7 @@ S99_grepit() {
   write_csv_log "Grepit test" "Number of results" "Used args for grep" "Regex used" "Grepit comment"
 
   if [[ $THREADED -eq 1 ]]; then
-    for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do 
+    for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do
       "$GREPIT_MODULE" &
       local TMP_PID="$!"
       WAIT_PIDS_S99+=( "$TMP_PID" )
@@ -81,7 +81,7 @@ S99_grepit() {
       max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S99[@]}"
     done
   else
-    for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do 
+    for GREPIT_MODULE in "${GREPIT_MODULES[@]}"; do
       "$GREPIT_MODULE"
     done
   fi
@@ -171,7 +171,7 @@ grepit_search() {
         LINES_OF_OUTPUT=$(( "$(wc -l "$LOG_PATH_MODULE/$OUTFILE" | awk '{print $1}')" -1 ))
       fi
       CURRENT_TEST=$(basename -s .txt "$OUTFILE")
-      # this is the output to the terminal. For the final report we wait till all tests are finished and then we 
+      # this is the output to the terminal. For the final report we wait till all tests are finished and then we
       # parse the csv output file and sort it according the test priority - 1-9, where 1 is more interesting
       # (low false positive rate, certainty of "vulnerability") and 9 is only "you might want to have a look when you are desperately looking for vulns")
       print_output "[*] $ORANGE$LINES_OF_OUTPUT$NC results of grepit module $ORANGE$CURRENT_TEST$NC." "no_log"

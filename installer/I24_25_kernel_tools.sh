@@ -22,14 +22,14 @@ I24_25_kernel_tools() {
     print_tool_info "python3-pip" 1
     print_pip_info "python-lzo"
     print_git_info "kconfig-hardened-check" "EMBA-support-repos/kconfig-hardened-check" "There are plenty of security hardening options for the Linux kernel. This tool checks them."
-  
+
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
       ANSWER=("y")
     fi
-  
+
     case ${ANSWER:0:1} in
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
@@ -48,4 +48,4 @@ I24_25_kernel_tools() {
       ;;
     esac
   fi
-} 
+}

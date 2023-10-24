@@ -15,7 +15,7 @@
 # Description:  After module s24 was able to identify the kernel, the downloader
 #               helper function "kernel_downloader" has downloaded the kernel sources
 #               This module checks if we have symbols and/or the kernel config extracted,
-#               identifies vulnerabilities via the version number and tries to verify the 
+#               identifies vulnerabilities via the version number and tries to verify the
 #               CVEs
 
 S26_kernel_vuln_verifier()
@@ -427,7 +427,7 @@ compile_verifier() {
     print_output "[+] $CVE_ ($CVSS) - $K_PATH verified - compiled path"
     echo "$CVE_ ($CVSS) - $K_VERSION - compiled path verified - $K_PATH" >> "$LOG_PATH_MODULE""/${CVE_}_compiled_verified.txt"
   fi
-} 
+}
 
 compile_kernel() {
   # this is based on the great work shown here https://arxiv.org/pdf/2209.05217.pdf

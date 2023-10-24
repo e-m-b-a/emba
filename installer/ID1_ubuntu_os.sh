@@ -14,7 +14,7 @@
 # Contributor(s): Michael Messner
 
 # Description: Helper/preinstaller module for (unix)-OS other than kali
-# 
+#
 
 ID1_ubuntu_os() {
   module_title "${FUNCNAME[0]}"

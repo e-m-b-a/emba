@@ -102,11 +102,11 @@ s21_script_bandit() {
     fi
     if [[ "$VULNS" -gt 20 ]] ; then
       print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" ""  "$PY_LOG"
-      GPT_PRIO_=2 
+      GPT_PRIO_=2
     else
       print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$PY_SCRIPT_")" "" "$PY_LOG"
     fi
-    
+
     write_csv_log "$(print_path "$PY_SCRIPT_")" "$VULNS" "$CFF" "NA"
     if [[ "${GPT_OPTION}" -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"

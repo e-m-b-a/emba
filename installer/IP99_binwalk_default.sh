@@ -99,4 +99,4 @@ IP99_binwalk_default() {
       ;;
     esac
   fi
-} 
+}

@@ -132,7 +132,7 @@ check_bootloader()
   if [[ $CHECK -eq 0 ]] ; then
     print_output "[-] No Grub configuration file found"
   fi
-  
+
   # Grub configuration
   local FIND=""
   local FIND2=""
@@ -152,7 +152,7 @@ check_bootloader()
       FOUND=1
     # GRUB2: Superusers AND password should be defined
     elif [[ -n "${FIND3}" ]] ; then
-      if [[ -n "${FIND4}" ]] || [[ -n "${FIND5}" ]] ; then 
+      if [[ -n "${FIND4}" ]] || [[ -n "${FIND5}" ]] ; then
         FOUND=1;
         ((STARTUP_FINDS+=1))
       fi

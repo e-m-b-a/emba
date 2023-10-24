@@ -25,7 +25,7 @@ S55_history_file_check()
   local LINE=""
 
   mapfile -t HIST_FILES < <(config_find "$CONFIG_DIR""/history_files.cfg")
-  
+
   if [[ "${HIST_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#HIST_FILES[@]}" -ne 0 ]] ; then
       print_output "[+] Found history files:"

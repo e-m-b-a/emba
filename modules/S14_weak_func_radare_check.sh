@@ -15,7 +15,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  This module identifies binaries that are using weak functions and creates a ranking of areas to look first.
-#               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg). 
+#               It iterates through all executables and searches with radare for interesting functions like strcpy (defined in helpers.cfg).
 #               As the module runs quite long with high CPU load it only gets executed when the objdump module fails.
 
 # Threading priority - if set to 1, these modules will be executed first
@@ -309,7 +309,7 @@ radare_function_check_ARM32() {
         STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       elif [[ "$FUNCTION" == "mmap" ]] ; then
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
-        # Check this testcase. Not sure if it works in all cases! 
+        # Check this testcase. Not sure if it works in all cases!
         # TODO: check this in radare2
         # COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null)
         COUNT_MMAP_OK="NA"
@@ -459,7 +459,7 @@ radare_print_top10_statistics() {
       local SEARCH_TERM=""
       local F_COUNTER=0
       readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null || true)
-  
+
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_ln
         print_output "[+] ""$FUNCTION"" - top 10 results:"
@@ -477,7 +477,7 @@ radare_print_top10_statistics() {
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE" || true
             else
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE" || true
-            fi  
+            fi
           else
             print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM")")"
           fi
@@ -487,12 +487,12 @@ radare_print_top10_statistics() {
         done
         print_ln
         echo "${#RESULTS[@]}" >> "$TMP_DIR"/S14_FCT_CNT.tmp
-      fi  
+      fi
     done
   else
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
-} 
+}
 
 radare_color_output() {
   local FUNCTION="${1:-}"
@@ -580,7 +580,7 @@ radare_output_function_details()
   if [[ -f "$LOG_FILE_LOC_OLD" ]]; then
     mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null || true
   fi
-  
+
   if [[ "$NETWORKING" -gt 1 ]]; then
     NETWORKING_="${ORANGE}networking: yes${NC}"
     NW_CSV="yes"

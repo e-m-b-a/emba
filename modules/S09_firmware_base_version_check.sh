@@ -13,9 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Iterates through a static list with version details layout 
-#               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and 
-#               checks if these fit on a binary in the firmware. 
+# Description:  Iterates through a static list with version details layout
+#               (e.g. busybox:binary:"BusyBox\ v[0-9]\.[0-9][0-9]\.[0-9]\ .*\ multi-call\ binary" ) of all executables and
+#               checks if these fit on a binary in the firmware.
 
 # Threading priority - if set to 1, these modules will be executed first
 export THREAD_PRIO=1
@@ -116,7 +116,7 @@ S09_firmware_base_version_check() {
         write_csv_log "binwalk logs" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
         print_dot
       fi
-      
+
       print_dot
 
       if [[ $FIRMWARE -eq 0 || -f $FIRMWARE_PATH ]]; then
@@ -127,9 +127,9 @@ S09_firmware_base_version_check() {
           print_output "[+] Version information found ${RED}""$VERSION_FINDER""${NC}${GREEN} in original firmware file (license: $ORANGE$LIC$GREEN) (${ORANGE}static$GREEN)."
           get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
           write_csv_log "firmware" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
-        fi  
+        fi
         print_dot
-      fi  
+      fi
 
       if [[ "$THREADED" -eq 1 ]]; then
         # this will burn the CPU but in most cases the time of testing is cut into half

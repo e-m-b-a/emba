@@ -170,6 +170,17 @@ check() {
     fi
   done
 
+  echo -e "\\n""${GREEN}""Check all source for correct space usage:""${NC}""\\n"
+  for SOURCE in "${SOURCES[@]}"; do
+    echo -e "\\n""${GREEN}""Run ${ORANGE}space check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+    if ! grep -q -E ' +$' "${SOURCE}"; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
+    else
+      grep -E -H -n ' +$' "${SOURCE}"
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR_COMMENT+=("${SOURCE}")
+    fi
+  done
 
   echo -e "\\n""${GREEN}""Run shellcheck and semgrep:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do

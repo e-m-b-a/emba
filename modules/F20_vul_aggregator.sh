@@ -23,7 +23,7 @@ F20_vul_aggregator() {
 
   pre_module_reporter "${FUNCNAME[0]}"
   print_ln
-  
+
   if [[ -d "$LOG_PATH_MODULE"/cve_sum ]]; then
     rm -r "$LOG_PATH_MODULE"/cve_sum
   fi
@@ -108,7 +108,7 @@ F20_vul_aggregator() {
     get_msf_verified "$L35_LOG"
 
     aggregate_versions
-    
+
     check_cve_search
 
     if [[ "$CVE_SEARCH" -eq 0 ]]; then
@@ -1049,7 +1049,7 @@ cve_extractor() {
       write_csv_log "$BINARY" "$VERSION" "$CVE_VALUE" "$CVSS_VALUE" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "$LOCAL" "$REMOTE" "$DOS" "${#KNOWN_EXPLOITED_VULNS[@]}" "$KERNEL_VERIFIED"
     done
   fi
-  
+
   { echo ""
     echo "[+] Statistics:$CVE_COUNTER_VERSION|$EXPLOIT_COUNTER_VERSION|$VERSION_orig"
   } >> "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE"
@@ -1069,7 +1069,7 @@ cve_extractor() {
   if [[ "$EXPLOIT_COUNTER_VERSION" -gt 0 ]]; then
     print_ln
     tail -n +2 "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE" || true
-    if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then 
+    if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then
       print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$GREEN CVEs ($RED$KERNEL_VERIFIED_VULN verified$GREEN) and $RED$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
     else
       print_output "[+] Found $RED$BOLD$CVE_COUNTER_VERSION$GREEN CVEs and $RED$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
@@ -1078,7 +1078,7 @@ cve_extractor() {
   elif [[ "$CVE_COUNTER_VERSION" -gt 0 ]]; then
     print_ln
     tail -n +2 "$LOG_PATH_MODULE"/cve_sum/"$AGG_LOG_FILE" | tee -a "$LOG_FILE"
-    if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then 
+    if [[ "$KERNEL_VERIFIED_VULN" -gt 0 ]]; then
       print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$GREEN CVEs ($ORANGE$KERNEL_VERIFIED_VULN verified$GREEN) and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"
     else
       print_output "[+] Found $ORANGE$BOLD$CVE_COUNTER_VERSION$GREEN CVEs and $ORANGE$BOLD$EXPLOIT_COUNTER_VERSION$GREEN exploits (including POC's) in $ORANGE$BINARY$GREEN with version $ORANGE$VERSION$GREEN (source ${ORANGE}$VSOURCE$GREEN).${NC}"

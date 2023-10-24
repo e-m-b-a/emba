@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  This module was the first module that existed in emba. The main idea was to identify the binaries that were using weak 
+# Description:  This module was the first module that existed in emba. The main idea was to identify the binaries that were using weak
 #               functions and to establish a ranking of areas to look at first.
 
 S10_binaries_basic_check()
