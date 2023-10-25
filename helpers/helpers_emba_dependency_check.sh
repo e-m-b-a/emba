@@ -599,6 +599,9 @@ dependency_check()
     # yara
     check_dep_tool "yara"
 
+    # ssdeep
+    check_dep_tool "ssdeep"
+
     # cyclonedx - converting csv sbom to json sbom
     if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
       export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/
