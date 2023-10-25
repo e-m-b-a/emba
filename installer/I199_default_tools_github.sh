@@ -28,17 +28,17 @@ I199_default_tools_github() {
     print_file_info "pixd" "pixd is a tool for visualizing binary data using a colour palette." "https://raw.githubusercontent.com/p4cx/pixd_image/master/pixd.c" "external/pixd"
     print_file_info "progpilot" "progpilot is a tool for static security tests on php files." "https://github.com/designsecurity/progpilot/releases/download/v1.0.2/progpilot_v1.0.2.phar" "external/progpilot"
     print_file_info "EnGenius decryptor" "Decrypts EnGenius firmware files." "https://raw.githubusercontent.com/EMBA-support-repos/enfringement/main/decrypt.py" "external/engenius-decrypt.py"
-  
+
     print_pip_info "pillow"
     print_git_info "jchroot" "EMBA-support-repos/jchroot" "jchroot - a chroot with more isolation"
-  
+
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
       ANSWER=("y")
     fi
-  
+
     case ${ANSWER:0:1} in
       y|Y )
         download_file "linux-exploit-suggester" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
@@ -47,7 +47,7 @@ I199_default_tools_github() {
         download_file "sudo-parser.pl" "https://raw.githubusercontent.com/CiscoCXSecurity/sudo-parser/master/sudo-parser.pl" "external/sudo-parser.pl"
         download_file "progpilot" "https://github.com/designsecurity/progpilot/releases/download/v1.0.2/progpilot_v1.0.2.phar" "external/progpilot"
         download_file "EnGenius decryptor" "https://raw.githubusercontent.com/EMBA-support-repos/enfringement/main/decrypt.py" "external/engenius-decrypt.py"
-  
+
         # pixd installation
         pip_install "pillow"
         echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"
@@ -78,4 +78,4 @@ I199_default_tools_github() {
       ;;
     esac
   fi
-} 
+}

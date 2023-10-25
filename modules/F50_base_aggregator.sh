@@ -78,7 +78,7 @@ F50_base_aggregator() {
     output_diff
   fi
 
-  module_end_log "${FUNCNAME[0]}" 1 
+  module_end_log "${FUNCNAME[0]}" 1
 }
 
 output_diff() {
@@ -89,19 +89,19 @@ output_overview() {
   if [[ -n "$FW_VENDOR" ]]; then
     print_output "[+] Tested Firmware vendor: ""$ORANGE""$FW_VENDOR""$NC"
     write_csv_log "Firmware_vendor" "$FW_VENDOR" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-  fi  
+  fi
   if [[ -n "$FW_VERSION" ]]; then
     print_output "[+] Tested Firmware version: ""$ORANGE""$FW_VERSION""$NC"
     write_csv_log "Firmware_version" "$FW_VERSION" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-  fi  
+  fi
   if [[ -n "$FW_DEVICE" ]]; then
     print_output "[+] Tested Firmware from device: ""$ORANGE""$FW_DEVICE""$NC"
     write_csv_log "Device" "$FW_DEVICE" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-  fi  
+  fi
   if [[ -n "$FW_NOTES" ]]; then
     print_output "[+] Additional notes: ""$ORANGE""$FW_NOTES""$NC"
     write_csv_log "FW_notes" "$FW_NOTES" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
-  fi  
+  fi
 
   if [[ "$IN_DOCKER" -eq 1 ]] && [[ -f "$TMP_DIR"/fw_name.log ]] && [[ -f "$TMP_DIR"/emba_command.log ]]; then
     local FW_PATH_ORIG_ARR=()
@@ -445,7 +445,7 @@ output_binaries() {
         (( BINS_CHECKED-- ))
       fi
     fi
-  
+
     if [[ "${CANARY:-0}" -gt 0 ]]; then
       CAN_PER=$(bc -l <<< "$CANARY/($BINS_CHECKED/100)" 2>/dev/null)
       CAN_PER=$(printf "%.0f" "$CAN_PER" 2>/dev/null || true)

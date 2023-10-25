@@ -32,17 +32,17 @@ I02_UEFI_fwhunt() {
     print_git_info "fwhunt-scan" "EMBA-support-repos/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
     print_git_info "fwhunt-rules" "EMBA-support-repos/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
     print_git_info "BIOSUtilities" "EMBA-support-repos/BIOSUtilities" "Various BIOS Utilities for Modding/Research"
-  
+
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
       echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
       ANSWER=("y")
     fi
-  
+
     case ${ANSWER:0:1} in
       y|Y )
-  
+
         pip_install "rzpipe"
         pip_install "click"
         pip_install "pyyaml"
@@ -85,4 +85,4 @@ I02_UEFI_fwhunt() {
       ;;
     esac
   fi
-} 
+}

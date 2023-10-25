@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Counts the number of files and executables in firmware and prints firmware tree in the log files. 
+# Description:  Counts the number of files and executables in firmware and prints firmware tree in the log files.
 #               It also searches through possible release files config/release_files.cfg for strings.
 
 S05_firmware_details()
@@ -24,7 +24,7 @@ S05_firmware_details()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local DETECTED_DIR
-  
+
   # we use the file FILE_ARR from helpers module
   if [[ $RTOS -eq 0 ]]; then
     # Linux:
@@ -33,7 +33,7 @@ S05_firmware_details()
     # RTOS:
     DETECTED_DIR=$(find "$OUTPUT_DIR" -xdev -type d 2>/dev/null | wc -l)
   fi
-  
+
   print_output "[*] $ORANGE${#FILE_ARR[@]}$NC files and $ORANGE$DETECTED_DIR$NC directories detected."
 
   release_info

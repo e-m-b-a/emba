@@ -45,7 +45,7 @@ F05_qs_resolver() {
         GPT_RESPONSE_="${COL7_//\"/}"
 
         print_output "[*] Trying to resolve ${ORANGE}Anchor ${GPT_ANCHOR_}${NC} in ${ORANGE}Output_file ${GPT_OUTPUT_FILE_}${NC}."
-        
+
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           if ! [ -f "${GPT_OUTPUT_FILE_}" ]; then
             print_output "[-] Something went wrong with the Output file ${GPT_OUTPUT_FILE_}"
@@ -88,7 +88,7 @@ F05_qs_resolver() {
         GPT_RESPONSE_="${COL7_//\"/}"
 
         print_output "[*] Trying to resolve Anchor=${GPT_ANCHOR_} in Output_file=${GPT_OUTPUT_FILE_}"
-        
+
         if ! [ -f "${GPT_OUTPUT_FILE_}" ]; then
           print_output "[-] Something went wrong with the Output file ${GPT_OUTPUT_FILE_}"
           if [[ -z ${GPT_OUTPUT_FILE_} ]]; then

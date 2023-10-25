@@ -13,7 +13,7 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Scans everything for setuid, setgid, world writable and shadow files and checks if all rc.d and init.d files 
+# Description:  Scans everything for setuid, setgid, world writable and shadow files and checks if all rc.d and init.d files
 #               have weak permissions.
 
 S40_weak_perm_check() {

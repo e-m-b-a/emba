@@ -13,7 +13,7 @@
 # Author(s): Michael Messner
 
 # Description:  Tests the emulated live system which is build and started in L10
-#               Currently this is an experimental module and needs to be activated separately via the -Q switch. 
+#               Currently this is an experimental module and needs to be activated separately via the -Q switch.
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
 L20_snmp_checks() {

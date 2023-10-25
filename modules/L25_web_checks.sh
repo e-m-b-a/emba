@@ -13,7 +13,7 @@
 # Author(s): Michael Messner
 
 # Description:  Performs web server tests of the emulated live system which is build and started in L10
-#               Currently this is an experimental module and needs to be activated separately via the -Q switch. 
+#               Currently this is an experimental module and needs to be activated separately via the -Q switch.
 #               It is also recommended to only use this technique in a dockerized or virtualized environment.
 
 L25_web_checks() {
@@ -487,7 +487,7 @@ arachni_scan() {
     print_output "[-] Arachni user not found!"
     return
   fi
- 
+
   sub_module_title "Starting Arachni web server testing for ${ORANGE}${IP_}:${PORT_}${NC}"
 
   if [[ "${IN_DOCKER}" -eq 1 ]]; then

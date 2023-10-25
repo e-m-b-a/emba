@@ -21,11 +21,11 @@ I108_stacs_password_search() {
 
   if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
     INSTALL_APP_LIST=()
-  
+
     cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
-  
+
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
-  
+
     print_tool_info "python3-pip" 1
     print_tool_info "libarchive13" 1
     print_tool_info "libarchive-dev" 1
@@ -34,7 +34,7 @@ I108_stacs_password_search() {
     # print_pip_info "stacs"
     print_git_info "stacs" "stacscan/stacs" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
     print_git_info "stacs-rules" "stacscan/stacs-rules" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
-  
+
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else
@@ -73,4 +73,4 @@ I108_stacs_password_search() {
       ;;
     esac
   fi
-} 
+}

@@ -60,7 +60,7 @@ IF20_cve_search() {
 
       # this is a temp solution - Currently needed to fulfill broken deps:
       # python3 -m pip install -Iv crackmapexec==5.1.7.dev0
-      
+
       # we do not need to install the Flask web environment - we do it manually
       # python3 -m pip install -r requirements.txt
       pip_install "requests==2.28.1"
@@ -204,4 +204,4 @@ IF20_cve_search() {
       ;;
     esac
   fi
-} 
+}

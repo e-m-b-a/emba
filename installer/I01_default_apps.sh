@@ -63,7 +63,7 @@ I01_default_apps(){
     else
       echo -e "$RED""$BOLD""Not installing metasploit-framework. Your EMBA installation will be incomplete""$NC"
     fi
-  
+
     if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
       ANSWER=("n")
     else

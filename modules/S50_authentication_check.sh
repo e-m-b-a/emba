@@ -13,8 +13,8 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Checks for users with UID 0; for non-unique accounts, group IDs, group names; scans all available user accounts 
-#               and possible NIS(+) authentication support. It looks up sudoers file and analyzes it for possible vulnerabilities. 
+# Description:  Checks for users with UID 0; for non-unique accounts, group IDs, group names; scans all available user accounts
+#               and possible NIS(+) authentication support. It looks up sudoers file and analyzes it for possible vulnerabilities.
 #               It also searches for PAM authentication files and analyze their usage.
 
 # This module is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_authentication

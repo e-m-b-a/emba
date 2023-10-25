@@ -94,7 +94,7 @@ S60_cert_file_check()
                 print_output "  ${GREEN}$CERT_DATE - $(print_path "$LINE") $SIGNATURE ${NC}" "" "$SPECIFIC_CERT"
                 write_csv_log "$LINE" "$CERT_DATE_" "no"
               fi
-          done 
+          done
         else
           print_output "$(indent "$(orange "$(print_path "$LINE")")")"
           write_csv_log "$LINE" "unknown" "unknown"

@@ -22,7 +22,7 @@
 D10_firmware_diffing() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware diff analysis"
-  local NEG_LOG=0  
+  local NEG_LOG=0
 
   if ! command -v ssdeep > /dev/null ; then
     print_output "[-] Missing ssdeep installation"

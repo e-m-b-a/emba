@@ -13,9 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  This module was the first module that existed in emba. The main idea was to identify the binaries that were using weak 
+# Description:  This module was the first module that existed in emba. The main idea was to identify the binaries that were using weak
 #               functions and to establish a ranking of areas to look at first.
-#               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg). 
+#               It iterates through all executables and searches with objdump for interesting functions like strcpy (defined in helpers.cfg).
 
 # Threading priority - if set to 1, these modules will be executed first
 # do not prio s13 and s14 as the dependency check during runtime will fail!
@@ -362,7 +362,7 @@ function_check_ARM32() {
         STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
       elif [[ "$FUNCTION" == "mmap" ]] ; then
         # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
-        # Check this testcase. Not sure if it works in all cases! 
+        # Check this testcase. Not sure if it works in all cases!
         COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "$FUNC_LOG"  2> /dev/null || true)
       fi
       log_func_footer "$NAME" "$FUNCTION"
@@ -467,7 +467,7 @@ print_top10_statistics() {
       local SEARCH_TERM=""
       local F_COUNTER=0
       readarray -t RESULTS < <( find "$LOG_PATH_MODULE" -xdev -iname "vul_func_*_""$FUNCTION""-*.txt" 2> /dev/null | sed "s/.*vul_func_//" | sort -g -r | head -10 | sed "s/_""$FUNCTION""-/  /" | sed "s/\.txt//" 2> /dev/null || true)
-  
+
       if [[ "${#RESULTS[@]}" -gt 0 ]]; then
         print_ln
         print_output "[+] ""$FUNCTION"" - top 10 results:"
@@ -486,21 +486,21 @@ print_top10_statistics() {
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE" || true
             else
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "$F_COUNTER" "$SEARCH_TERM" | tee -a "$LOG_FILE" || true
-            fi  
+            fi
           else
             print_output "$(indent "$(orange "$F_COUNTER""\t:\t""$SEARCH_TERM")")"
-          fi  
+          fi
           if [[ -f "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt" ]]; then
             write_link "$LOG_PATH_MODULE""/vul_func_""$F_COUNTER""_""$FUNCTION"-"$SEARCH_TERM"".txt"
           fi
         done
         print_ln
-      fi  
+      fi
     done
   else
     print_output "$(indent "$(orange "No weak binary functions found - check it manually with readelf and objdump -D")")"
   fi
-} 
+}
 
 log_bin_hardening() {
   local NAME="${1:-}"
@@ -588,7 +588,7 @@ output_function_details()
   if [[ -f "$LOG_FILE_LOC_OLD" ]]; then
     mv "$LOG_FILE_LOC_OLD" "$LOG_FILE_LOC" 2> /dev/null || true
   fi
-  
+
   if [[ "$NETWORKING" -gt 1 ]]; then
     NETWORKING_="${ORANGE}networking: yes${NC}"
     NW_CSV="yes"

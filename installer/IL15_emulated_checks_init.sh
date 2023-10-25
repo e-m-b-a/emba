@@ -65,9 +65,9 @@ IL15_emulated_checks_init() {
 
     case ${ANSWER:0:1} in
       y|Y )
-  
+
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
- 
+
       download_file "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz"
       if ! [[ -d external/arachni/ ]]; then
         mkdir external/arachni/

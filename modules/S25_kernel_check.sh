@@ -13,9 +13,9 @@
 #
 # Author(s): Michael Messner, Pascal Eckmann
 
-# Description:  Determines kernel version and description and checks for kernel configuration. 
-#               It uses linux-exploit-suggester to check for possible kernel exploits and analyzes kernel modules to find which 
-#               license they have and if they are stripped. 
+# Description:  Determines kernel version and description and checks for kernel configuration.
+#               It uses linux-exploit-suggester to check for possible kernel exploits and analyzes kernel modules to find which
+#               license they have and if they are stripped.
 #               It also looks for the modprobe.d directory and lists its content.
 
 S25_kernel_check()
@@ -197,7 +197,7 @@ get_kernel_vulns() {
       print_output "$(indent "$ORANGE$VER$NC")"
     done
     print_ln
-  
+
     if [[ -f "$EXT_DIR""/linux-exploit-suggester.sh" ]] ; then
       # sometimes our kernel version is wasted with some "-" -> so we exchange them with spaces for the exploit suggester
       demess_kv_version "${KERNEL_VERSION[@]}"

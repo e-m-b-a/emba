@@ -20,7 +20,7 @@
 # Description:  Builds and emulates Linux firmware - this module is based on the great work of firmadyne and firmAE
 #               Check out the original firmadyne project at https://github.com/firmadyne
 #               Check out the original FirmAE project at https://github.com/pr0v3rbs/FirmAE
-#               Currently this is an experimental module and needs to be activated separately via the -Q switch. 
+#               Currently this is an experimental module and needs to be activated separately via the -Q switch.
 # Warning:      This module changes your network configuration and it could happen that your system looses
 #               network connectivity.
 
@@ -213,7 +213,7 @@ print_system_emulation_results() {
     local EMU_RES=""
 
     while read -r EMU_RES; do
-      EMU_RES=$(echo "${EMU_RES}" | cut -d\; -f2-) 
+      EMU_RES=$(echo "${EMU_RES}" | cut -d\; -f2-)
       if [[ "${EMU_RES}" == *"ICMP ok"* ]] || [[ "${EMU_RES}" == *"TCP-0 ok"* ]] || [[ "${EMU_RES}" == *"TCP ok"* ]]; then
         print_output "[+] ${EMU_RES}"
       else
@@ -481,7 +481,7 @@ main_emulation() {
       BAK_INIT_BACKUP=""
       BAK_INIT_ORIG=""
     fi
- 
+
     print_output "[*] Init file details:"
     file "${MNT_POINT}""${INIT_FILE}" | tee -a "${LOG_FILE}"
 
@@ -786,7 +786,7 @@ main_emulation() {
         fi
         # reset_network_emulation "${EXECUTE}"
         cleanup_emulator "${IMAGE_NAME}"
-              
+
         if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
           mv "${LOG_PATH_MODULE}"/qemu.final.serial.log "${LOG_PATH_MODULE}"/qemu.final.serial_"${IMAGE_NAME}"-"${IPS_INT_VLAN_CFG_mod}"-"${INIT_FNAME}".log
         fi
@@ -1248,7 +1248,7 @@ get_networking_details_emulation() {
 
     local TCP_PORT=""
     local UDP_PORT=""
-  
+
     mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //'| sort -u || true)
     mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f4- | sort -u || true)
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
@@ -1739,7 +1739,7 @@ nvram_check() {
       wait_for_pid "${WAIT_PIDS_AE[@]}"
       cd "${CURRENT_DIR}" || exit
     fi
- 
+
     if [[ -f "${LOG_PATH_MODULE}"/nvram/nvram_files_final ]]; then
       if [[ "$(wc -l "${LOG_PATH_MODULE}"/nvram/nvram_files_final | awk '{print $1}')" -gt 0 ]]; then
         # print_output "[*] Identified the following NVRAM files:"
@@ -1935,7 +1935,7 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] Starting firmware emulation ${ORANGE}${QEMU_BIN} / ${ARCH_END} / ${IMAGE_NAME} / ${IP_ADDRESS_}${NC} ... use Ctrl-a + x to exit\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log${NC} file\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321${NC} via telnet\n\"" "${ARCHIVE_PATH}"/run.sh 0
- 
+
   write_script_exec "${QEMU_BIN} -m 2048 -M ${QEMU_MACHINE} ${CPU} -kernel ${KERNEL} ${QEMU_DISK} -append \"root=${QEMU_ROOTFS} console=${CONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${QEMU_NETWORK} ${QEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${IMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${IMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
 }
 
@@ -2056,7 +2056,7 @@ check_online_stat() {
       TCP_SERV="T:""${TCP_SERV}"
       TCP_SERV="${TCP_SERV%,}"
       UDP_SERV="${UDP_SERV%,}"
-      
+
       local PORTS_TO_SCAN=""
       if [[ "${TCP_SERV}" =~ ^T:[0-9].* ]]; then
         print_output "[*] Detected TCP services ${ORANGE}${TCP_SERV}${NC}"

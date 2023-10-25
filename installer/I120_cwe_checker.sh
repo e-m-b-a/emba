@@ -42,12 +42,12 @@ I120_cwe_checker() {
       echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
       ANSWER=("y")
     fi
- 
+
     case ${ANSWER:0:1} in
       y|Y )
         echo
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
-  
+
         if ! [[ -d ./external/cwe_checker ]]; then
 
           # cleanup first
@@ -102,4 +102,4 @@ I120_cwe_checker() {
       ;;
     esac
   fi
-} 
+}

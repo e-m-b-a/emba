@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This script is based on the firmadyne script: 
+# This script is based on the firmadyne script:
 # https://github.com/firmadyne/firmadyne/blob/master/scripts/fixImage.sh
 
 # use busybox statically-compiled version of all binaries
