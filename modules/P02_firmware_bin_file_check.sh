@@ -278,7 +278,7 @@ fw_bin_detector() {
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
   # Currently this detection mechanism works quite good on the known firmware images
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ a3\ 01\  ]]; then
-    GPG_CHECK="$(gpg --list-packets "$FIRMWARE_PATH" | grep "compressed packet:")"
+    GPG_CHECK="$(gpg --list-packets "$FIRMWARE_PATH" | grep "compressed packet:" || true)"
     if [[ "$GPG_CHECK" == *"compressed packet: algo="* ]]; then
       print_output "[+] Identified GPG compressed firmware - using GPG extraction module"
       export GPG_COMPRESS=1
