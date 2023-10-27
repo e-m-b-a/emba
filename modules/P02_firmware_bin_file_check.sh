@@ -109,6 +109,7 @@ set_p02_default_exports() {
   export UBOOT_IMAGE=0
   export EXT_IMAGE=0
   export AVM_DETECTED=0
+  export BMC_ENC_DETECTED=0
   export UBI_IMAGE=0
   export OPENSSL_ENC_DETECTED=0
   export ENGENIUS_ENC_DETECTED=0
@@ -228,6 +229,11 @@ fw_bin_detector() {
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
     write_csv_log "EnGenius encrypted" "yes" "NA"
+  fi
+  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ ..\ 00\ 00\ ea\ ..\ f0\ 9f\ e5\ \ ..\ f0\ 9f\ e5\ ..\ f0\ 9f\ 35 ]]; then
+    print_output "[+] Identified Supermicro BMC encrpyted firmware - using BMC extraction module"
+    export BMC_ENC_DETECTED=1
+    write_csv_log "BMC encrypted" "yes" "NA"
   fi
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
