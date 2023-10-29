@@ -47,7 +47,7 @@ bmc_extractor() {
   sub_module_title "BMC encrypted firmware extractor"
 
   "${EXT_DIR}"/smcbmc/smcbmc.py "${BMC_FILE_PATH_}" "${EXTRACTION_FILE_}"
-  
+
   print_ln
   if [[ -f "${EXTRACTION_FILE_}" ]]; then
     export FIRMWARE_PATH="${EXTRACTION_FILE_}"
