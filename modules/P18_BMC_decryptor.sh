@@ -13,7 +13,7 @@
 # Author(s): Michael Messner
 
 # Description:  Decrypts and extracts firmware images from Supermicro BMC
-# 		Using https://github.com/c0d3z3r0/smcbmc
+#               Using https://github.com/c0d3z3r0/smcbmc
 
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 export PRE_THREAD_ENA=0
