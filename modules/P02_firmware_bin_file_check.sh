@@ -158,7 +158,8 @@ fw_bin_detector() {
 
   FILE_BIN_OUT=$(file "$CHECK_FILE")
   DLINK_ENC_CHECK=$(hexdump -C "$CHECK_FILE" | head -1 || true)
-  AVM_CHECK=$(strings "$CHECK_FILE" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
+  AVM_CHECK=$(strings "${CHECK_FILE}" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
+  BMC_CHECK=$(strings "${CHECK_FILE}" | grep -c "libipmi.so" || true)
   # we are running binwalk on the file to analyze the output afterwards:
   "${BINWALK_BIN[@]}" "$CHECK_FILE" > "$TMP_DIR"/s02_binwalk_output.txt
   if [[ -f "$TMP_DIR"/s02_binwalk_output.txt ]]; then
@@ -179,6 +180,11 @@ fw_bin_detector() {
     fi
   fi
 
+  if [[ "${BMC_CHECK}" -gt 0 ]]; then
+    print_output "[+] Identified possible Supermicro BMC encrpyted firmware - using BMC extraction module"
+    export BMC_ENC_DETECTED=1
+    write_csv_log "BMC encrypted" "yes" "NA"
+  fi
   if [[ "$UEFI_CHECK" -gt 0 ]]; then
     print_output "[+] Identified possible UEFI firmware - using fwhunt-scan vulnerability scanning module"
     export UEFI_DETECTED=1
@@ -229,11 +235,6 @@ fw_bin_detector() {
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
     write_csv_log "EnGenius encrypted" "yes" "NA"
-  fi
-  if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ ..\ 00\ 00\ ea\ ..\ f0\ 9f\ e5\ \ ..\ f0\ 9f\ e5\ ..\ f0\ 9f\ 35 ]]; then
-    print_output "[+] Identified Supermicro BMC encrpyted firmware - using BMC extraction module"
-    export BMC_ENC_DETECTED=1
-    write_csv_log "BMC encrypted" "yes" "NA"
   fi
   if [[ "$DLINK_ENC_CHECK" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
