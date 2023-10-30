@@ -83,30 +83,30 @@ set_defaults() {
   export JUMP_OVER_CVESEARCH_CHECK=0 # ignore long CVEsearch check in dep check
 
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
-  export LOG_DIR="$INVOCATION_PATH""/logs"
-  export TMP_DIR="$LOG_DIR""/tmp"
-  export CSV_DIR="$LOG_DIR""/csv_logs"
+  export LOG_DIR="${INVOCATION_PATH}""/logs"
+  export TMP_DIR="${LOG_DIR}""/tmp"
+  export CSV_DIR="${LOG_DIR}""/csv_logs"
   export MAIN_LOG_FILE="emba.log"
-  export CONFIG_DIR="$INVOCATION_PATH""/config"
-  export EXT_DIR="$INVOCATION_PATH""/external"
-  export HELP_DIR="$INVOCATION_PATH""/helpers"
-  export MOD_DIR="$INVOCATION_PATH""/modules"
-  export MOD_DIR_LOCAL="$INVOCATION_PATH""/EMBA-Non-free/modules_local"
+  export CONFIG_DIR="${INVOCATION_PATH}""/config"
+  export EXT_DIR="${INVOCATION_PATH}""/external"
+  export HELP_DIR="${INVOCATION_PATH}""/helpers"
+  export MOD_DIR="${INVOCATION_PATH}""/modules"
+  export MOD_DIR_LOCAL="${INVOCATION_PATH}""/EMBA-Non-free/modules_local"
   export PID_LOGGING=0
   # this will be in TMP_DIR/pid_notes.log
   export PID_LOG_FILE="pid_notes.log"
-  export BASE_LINUX_FILES="$CONFIG_DIR""/linux_common_files.txt"
-  export PATH_CVE_SEARCH="$EXT_DIR""/cve-search/bin/search.py"
-  if [[ -f "$CONFIG_DIR"/known_exploited_vulnerabilities.csv ]]; then
-    export KNOWN_EXP_CSV="$CONFIG_DIR"/known_exploited_vulnerabilities.csv
+  export BASE_LINUX_FILES="${CONFIG_DIR}""/linux_common_files.txt"
+  export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
+  if [[ -f "${CONFIG_DIR}"/known_exploited_vulnerabilities.csv ]]; then
+    export KNOWN_EXP_CSV="${CONFIG_DIR}"/known_exploited_vulnerabilities.csv
   fi
-  if [[ -f "$CONFIG_DIR"/msf_cve-db.txt ]]; then
-    export MSF_DB_PATH="$CONFIG_DIR"/msf_cve-db.txt
+  if [[ -f "${CONFIG_DIR}"/msf_cve-db.txt ]]; then
+    export MSF_DB_PATH="${CONFIG_DIR}"/msf_cve-db.txt
   fi
-  if [[ -f "$CONFIG_DIR"/trickest_cve-db.txt ]]; then
-    export TRICKEST_DB_PATH="$CONFIG_DIR"/trickest_cve-db.txt
+  if [[ -f "${CONFIG_DIR}"/trickest_cve-db.txt ]]; then
+    export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
   fi
-  export GTFO_CFG="$CONFIG_DIR"/gtfobins_urls.cfg         # gtfo urls
+  export GTFO_CFG="${CONFIG_DIR}"/gtfobins_urls.cfg         # gtfo urls
   export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
   export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
@@ -115,16 +115,16 @@ set_defaults() {
   fi
   export NOTIFICATION_ID=0          # initial notification id - needed for notification overlay/replacement
   export EMBA_ICON=""
-  EMBA_ICON=$(realpath "$HELP_DIR"/emba.svg)
+  EMBA_ICON=$(realpath "${HELP_DIR}"/emba.svg)
   export WSL=0    # wsl environment detected
   export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
                   # currently the extracted results are not further used. The current implementation
                   # is for evaluation purposes
-  export CVE_BLACKLIST="$CONFIG_DIR"/cve-blacklist.txt  # include the blacklisted CVE values to this file
-  export CVE_WHITELIST="$CONFIG_DIR"/cve-whitelist.txt  # include the whitelisted CVE values to this file
+  export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt  # include the blacklisted CVE values to this file
+  export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt  # include the whitelisted CVE values to this file
   export MODULE_BLACKLIST=()
-  if [[ -f "$CONFIG_DIR"/module_blacklist.txt ]]; then
-    readarray -t MODULE_BLACKLIST < "$CONFIG_DIR"/module_blacklist.txt
+  if [[ -f "${CONFIG_DIR}"/module_blacklist.txt ]]; then
+    readarray -t MODULE_BLACKLIST < "${CONFIG_DIR}"/module_blacklist.txt
   fi
   # usually no memory limit is needed, but some modules/tools are wild and we need to protect our system
   export TOTAL_MEMORY=0

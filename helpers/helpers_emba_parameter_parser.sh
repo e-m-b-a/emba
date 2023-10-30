@@ -18,16 +18,16 @@
 
 emba_parameter_parsing() {
   while getopts a:bBA:cC:d:De:Ef:Fghijk:l:m:N:o:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
-    case "$OPT" in
+    case "${OPT}" in
       a)
-        check_alnum "$OPTARG"
+        check_alnum "${OPTARG}"
         export ARCH=""
-        ARCH="$(escape_echo "$OPTARG")"
+        ARCH="$(escape_echo "${OPTARG}")"
         ;;
       A)
-        check_alnum "$OPTARG"
+        check_alnum "${OPTARG}"
         export ARCH=""
-        ARCH="$(escape_echo "$OPTARG")"
+        ARCH="$(escape_echo "${OPTARG}")"
         export ARCH_CHECK=0
         ;;
       b)
@@ -40,20 +40,20 @@ emba_parameter_parsing() {
       C)
         # container extract only works outside the docker container
         # lets extract it outside and afterwards start the EMBA docker
-        check_alnum "$OPTARG"
+        check_alnum "${OPTARG}"
         export CONTAINER_ID=""
-        CONTAINER_ID="$(escape_echo "$OPTARG")"
+        CONTAINER_ID="$(escape_echo "${OPTARG}")"
         export CONTAINER_EXTRACT=1
         ;;
       c)
         export CWE_CHECKER=1
         ;;
       d)
-        check_int "$OPTARG"
-        export ONLY_DEP="$OPTARG"
+        check_int "${OPTARG}"
+        export ONLY_DEP="${OPTARG}"
         # a value of 1 means dep check on host and in container
         # a value of 2 means dep check only in container
-        ! [[ "$ONLY_DEP" =~ [12] ]] && exit 1
+        ! [[ "${ONLY_DEP}" =~ [12] ]] && exit 1
         # on dependency check we need to check all deps -> activate all modules:
         export CWE_CHECKER=1
         export FULL_EMULATION=1
@@ -64,18 +64,18 @@ emba_parameter_parsing() {
         export USE_DOCKER=0
         ;;
       e)
-        check_path_input "$OPTARG"
-        export EXCLUDE=("${EXCLUDE[@]}" "$(escape_echo "$OPTARG")")
+        check_path_input "${OPTARG}"
+        export EXCLUDE=("${EXCLUDE[@]}" "$(escape_echo "${OPTARG}")")
         ;;
       E)
         export QEMULATION=1
         ;;
       f)
-        check_path_input "$OPTARG"
+        check_path_input "${OPTARG}"
         export FIRMWARE=1
         export FIRMWARE_PATH=""
-        FIRMWARE_PATH="$(escape_echo "$OPTARG")"
-        readonly FIRMWARE_PATH_BAK="$FIRMWARE_PATH"   # as we rewrite the firmware path variable in the pre-checker phase
+        FIRMWARE_PATH="$(escape_echo "${OPTARG}")"
+        readonly FIRMWARE_PATH_BAK="${FIRMWARE_PATH}"   # as we rewrite the firmware path variable in the pre-checker phase
         export FIRMWARE_PATH_BAK                      # we store the original firmware path variable and make it readonly
         # for firmware diff option, see option o
         ;;
@@ -98,52 +98,52 @@ emba_parameter_parsing() {
         export JUMP_OVER_CVESEARCH_CHECK=1
         ;;
       k)
-        check_path_input "$OPTARG"
+        check_path_input "${OPTARG}"
         export KERNEL=1
         export KERNEL_CONFIG=""
-        KERNEL_CONFIG="$(escape_echo "$OPTARG")"
-        if [[ "$FIRMWARE" -ne 1 ]]; then
+        KERNEL_CONFIG="$(escape_echo "${OPTARG}")"
+        if [[ "${FIRMWARE}" -ne 1 ]]; then
           # this is little hack to enable kernel config only checks
-          export FIRMWARE_PATH="$KERNEL_CONFIG"
+          export FIRMWARE_PATH="${KERNEL_CONFIG}"
         fi
         ;;
       l)
-        check_path_input "$OPTARG"
+        check_path_input "${OPTARG}"
         export LOG_DIR=""
-        LOG_DIR="$(escape_echo "$OPTARG")"
-        export TMP_DIR="$LOG_DIR""/tmp"
-        export CSV_DIR="$LOG_DIR""/csv_logs"
+        LOG_DIR="$(escape_echo "${OPTARG}")"
+        export TMP_DIR="${LOG_DIR}""/tmp"
+        export CSV_DIR="${LOG_DIR}""/csv_logs"
         ;;
       m)
-        check_alnum "$OPTARG"
-        SELECT_MODULES=("${SELECT_MODULES[@]}" "$(escape_echo "$OPTARG")")
+        check_alnum "${OPTARG}"
+        SELECT_MODULES=("${SELECT_MODULES[@]}" "$(escape_echo "${OPTARG}")")
         ;;
       N)
-        check_notes "$OPTARG"
+        check_notes "${OPTARG}"
         export FW_NOTES=""
-        FW_NOTES="$(escape_echo "$OPTARG")"
+        FW_NOTES="$(escape_echo "${OPTARG}")"
         ;;
       o)
         # other firmware file -> we do a diff check
-        check_path_input "$OPTARG"
+        check_path_input "${OPTARG}"
         export FIRMWARE=1
         export FIRMWARE_PATH1=""
-        FIRMWARE_PATH1="$(escape_echo "$OPTARG")"
+        FIRMWARE_PATH1="$(escape_echo "${OPTARG}")"
         export HTML=1
         ;;
       p)
-        check_path_input "$OPTARG"
+        check_path_input "${OPTARG}"
         export PROFILE=""
-        PROFILE="$(escape_echo "$OPTARG")"
-        if ! [[ -f "$PROFILE" ]]; then
+        PROFILE="$(escape_echo "${OPTARG}")"
+        if ! [[ -f "${PROFILE}" ]]; then
           print_output "[-] No profile found!" "no_log"
           exit 1
         fi
        ;;
       P)
-        check_int "$OPTARG"
+        check_int "${OPTARG}"
         export MAX_MODS=""
-        MAX_MODS="$(escape_echo "$OPTARG")"
+        MAX_MODS="$(escape_echo "${OPTARG}")"
         ;;
       Q)
         export FULL_EMULATION=1
@@ -161,15 +161,15 @@ emba_parameter_parsing() {
         export THREADED=1
         ;;
       T)
-        check_int "$OPTARG"
+        check_int "${OPTARG}"
         export MAX_MOD_THREADS=""
-        MAX_MOD_THREADS="$(escape_echo "$OPTARG")"
+        MAX_MOD_THREADS="$(escape_echo "${OPTARG}")"
         ;;
       U)
         export UPDATE=1
         ;;
       V)
-        print_output "[+] EMBA version: $ORANGE$EMBA_VERSION$NC" "no_log"
+        print_output "[+] EMBA version: ${ORANGE}${EMBA_VERSION}${NC}" "no_log"
         exit 0
         ;;
       x)
@@ -179,25 +179,25 @@ emba_parameter_parsing() {
         export HTML=1
         ;;
       X)
-        check_version "$OPTARG"
+        check_version "${OPTARG}"
         export FW_VERSION=""
-        FW_VERSION="$(escape_echo "$OPTARG")"
+        FW_VERSION="$(escape_echo "${OPTARG}")"
         ;;
       y)
         export OVERWRITE_LOG=1
         ;;
       Y)
-        check_vendor "$OPTARG"
+        check_vendor "${OPTARG}"
         export FW_VENDOR=""
-        FW_VENDOR="$(escape_echo "$OPTARG")"
+        FW_VENDOR="$(escape_echo "${OPTARG}")"
         ;;
       z)
         export FORMAT_LOG=1
         ;;
       Z)
-        check_vendor "$OPTARG"
+        check_vendor "${OPTARG}"
         export FW_DEVICE=""
-        FW_DEVICE="$(escape_echo "$OPTARG")"
+        FW_DEVICE="$(escape_echo "${OPTARG}")"
         ;;
       *)
         print_output "[-] Invalid option" "no_log"

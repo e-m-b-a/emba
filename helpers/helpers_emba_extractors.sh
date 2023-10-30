@@ -16,25 +16,25 @@
 
 docker_container_extractor() {
   local CONT_ID="${1:-}"
-  LOG_FILE="$LOG_DIR"/p00_docker_extractor.txt
-  if ! [[ -d "$LOG_DIR"/firmware/ ]]; then
-    mkdir "$LOG_DIR"/firmware/
+  LOG_FILE="${LOG_DIR}"/p00_docker_extractor.txt
+  if ! [[ -d "${LOG_DIR}"/firmware/ ]]; then
+    mkdir "${LOG_DIR}"/firmware/
   fi
-  if docker container ls -a | grep -q "$CONT_ID"; then
+  if docker container ls -a | grep -q "${CONT_ID}"; then
     print_output "[*] Found docker container for extraction:"
-    docker container ls -a | grep "$CONT_ID" | tee -a "$LOG_FILE"
+    docker container ls -a | grep "${CONT_ID}" | tee -a "${LOG_FILE}"
     print_ln
   else
-    print_output "[-] Warning: Docker container with ID $ORANGE$CONT_ID$NC not found"
+    print_output "[-] Warning: Docker container with ID ${ORANGE}${CONT_ID}${NC} not found"
     exit 1
   fi
 
-  docker export -o "$LOG_DIR"/firmware/firmware_docker_extracted.tar "$CONT_ID"
+  docker export -o "${LOG_DIR}"/firmware/firmware_docker_extracted.tar "${CONT_ID}"
 
-  if [[ -f "$LOG_DIR"/firmware/firmware_docker_extracted.tar ]]; then
-    print_output "[+] Exported docker container to $ORANGE$LOG_DIR/firmware/firmware_docker_extracted.tar$NC"
+  if [[ -f "${LOG_DIR}"/firmware/firmware_docker_extracted.tar ]]; then
+    print_output "[+] Exported docker container to ${ORANGE}${LOG_DIR}/firmware/firmware_docker_extracted.tar${NC}"
   else
-    print_output "[-] Warning: Docker export for container ID $ORANGE$CONT_ID$NC failed"
+    print_output "[-] Warning: Docker export for container ID ${ORANGE}${CONT_ID}${NC} failed"
     exit 1
   fi
 }
