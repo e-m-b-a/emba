@@ -18,16 +18,16 @@
 IP35_uefi_extraction() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
 
     print_file_info "UEFIExtract_NE_A62_linux_x86_64.zip" "Release-version A62" "https://github.com/LongSoft/UEFITool/releases/download/A62/UEFIExtract_NE_A62_linux_x86_64.zip" "external/UEFITool/UEFIExtract_NE_A62_linux_x86_64.zip"
     print_tool_info "unzip" 1
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]]; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]]; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""UEFI Extraction Tool"" will be downloaded (if not already on the system) installed!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""UEFI Extraction Tool"" will be downloaded (if not already on the system) installed!""${NC}"
       ANSWER=("y")
     fi
 
@@ -43,7 +43,7 @@ IP35_uefi_extraction() {
             unzip external/UEFITool/UEFIExtract_NE_A62_linux_x86_64.zip -d external/UEFITool
           fi
         else
-          echo -e "$ORANGE""UEFITool installation failed - check it manually""$NC"
+          echo -e "${ORANGE}""UEFITool installation failed - check it manually""${NC}"
         fi
         ;;
     esac

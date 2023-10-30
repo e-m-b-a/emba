@@ -18,9 +18,9 @@
 
 ID1_ubuntu_os() {
   module_title "${FUNCNAME[0]}"
-  if [[ "$OTHER_OS" -eq 1 ]] && [[ "$UBUNTU_OS" -eq 1 ]]; then
+  if [[ "${OTHER_OS}" -eq 1 ]] && [[ "${UBUNTU_OS}" -eq 1 ]]; then
     # mongodb / cve-search
-    echo -e "\\n""$MAGENTA""$BOLD""Installations for Ubuntu:jammy!""$NC"
+    echo -e "\\n""${MAGENTA}""${BOLD}""Installations for Ubuntu:jammy!""${NC}"
 
     print_tool_info "notification-daemon" 1
     print_tool_info "dbus" 1
@@ -30,7 +30,7 @@ ID1_ubuntu_os() {
     if [[ -f /etc/apt/apt.conf.d/20auto-upgrades ]]; then
       echo "[*] Testing for unattended update settings"
       if awk '{print $2}' /etc/apt/apt.conf.d/20auto-upgrades | grep -q "1"; then
-        echo -e "\\n""$MAGENTA""$BOLD""Automatic updates are enabled - this could result in unexpected behavior during installation!""$NC"
+        echo -e "\\n""${MAGENTA}""${BOLD}""Automatic updates are enabled - this could result in unexpected behavior during installation!""${NC}"
       fi
     fi
 
@@ -42,9 +42,9 @@ ID1_ubuntu_os() {
       echo "Exec=/usr/lib/notification-daemon/notification-daemon" >> /usr/share/dbus-1/services/org.freedesktop.Notifications.service
     fi
 
-    if [[ "$WSL" -eq 1 ]]; then
+    if [[ "${WSL}" -eq 1 ]]; then
       # docker installation on Ubuntu jammy in WSL environment is somehow broken
-      echo -e "\\n""$MAGENTA""$BOLD""Docker installation for Ubuntu:jammy in WSL environment!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""Docker installation for Ubuntu:jammy in WSL environment!""${NC}"
 
       apt-get install lsb-release ca-certificates apt-transport-https software-properties-common -y
 

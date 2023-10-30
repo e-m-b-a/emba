@@ -19,10 +19,10 @@
 I108_stacs_password_search() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
 
-    cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
+    cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
 
     echo -e "\\nTo find password hashes in firmware files we install STACS and the default rules."
 
@@ -35,10 +35,10 @@ I108_stacs_password_search() {
     print_git_info "stacs" "stacscan/stacs" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
     print_git_info "stacs-rules" "stacscan/stacs-rules" "STACS is a fast, easy to use tool for searching of password hashes in firmware files."
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""STACS and the default rules (if not already on the system) will be downloaded!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""STACS and the default rules (if not already on the system) will be downloaded!""${NC}"
       ANSWER=("y")
     fi
     case ${ANSWER:0:1} in
@@ -53,7 +53,7 @@ I108_stacs_password_search() {
         pip_install "setuptools" "-U"
         pip_install "stacs"
         # python3 setup.py install
-        # cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
+        # cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
 
         if ! [[ -d external/stacs-rules ]]; then
           git clone https://github.com/stacscan/stacs-rules.git external/stacs-rules
@@ -63,12 +63,12 @@ I108_stacs_password_search() {
           | xargs -I{} bash -c "\
             mkdir -p ./tests/fixtures/{}/{positive,negative} ; \
             touch ./tests/fixtures/{}/{negative,positive}/.gitignore" || true
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component STACS" && exit 1 )
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component STACS" && exit 1 )
 
         if command -v stacs > /dev/null ; then
-          echo -e "$GREEN""STACS installed successfully""$NC"
+          echo -e "${GREEN}""STACS installed successfully""${NC}"
         else
-          echo -e "$ORANGE""STACS installation failed - check it manually""$NC"
+          echo -e "${ORANGE}""STACS installation failed - check it manually""${NC}"
         fi
       ;;
     esac

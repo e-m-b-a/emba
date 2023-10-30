@@ -19,8 +19,8 @@
 IP99_binwalk_default() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
-    cd "$HOME_PATH" || ( echo "Could not install EMBA component binwalk" && exit 1 )
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
+    cd "${HOME_PATH}" || ( echo "Could not install EMBA component binwalk" && exit 1 )
     INSTALL_APP_LIST=()
 
     print_tool_info "git" 1
@@ -41,11 +41,11 @@ IP99_binwalk_default() {
     print_tool_info "python3-matplotlib" 1
 
     # tools only available on Kali Linux:
-    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+    if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       # firmware-mod-kit is only available on Kali Linux
       print_tool_info "firmware-mod-kit" 1
     else
-      echo -e "$RED""$BOLD""Not installing firmware-mod-kit. Your EMBA installation will be incomplete""$NC"
+      echo -e "${RED}""${BOLD}""Not installing firmware-mod-kit. Your EMBA installation will be incomplete""${NC}"
     fi
 
     print_tool_info "cramfsswap" 1
@@ -70,10 +70,10 @@ IP99_binwalk_default() {
     print_tool_info "binwalk" 1
     print_tool_info "python3-binwalk" 1
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and installed!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""binwalk, yaffshiv, sasquatch, jefferson, unstuff, cramfs-tools and ubi_reader (if not already on the system) will be downloaded and installed!""${NC}"
       ANSWER=("y")
     fi
     case ${ANSWER:0:1} in
@@ -84,17 +84,17 @@ IP99_binwalk_default() {
           git clone https://github.com/EMBA-support-repos/cpu_rec.git external/cpu_rec
           # this does not make sense for the read only docker container - we have to do it
           # during EMBA startup
-          if ! [[ -d "$HOME"/.config/binwalk/modules/ ]]; then
-            mkdir -p "$HOME"/.config/binwalk/modules/
+          if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
+            mkdir -p "${HOME}"/.config/binwalk/modules/
           fi
-          cp -pr external/cpu_rec/cpu_rec.py "$HOME"/.config/binwalk/modules/
-          cp -pr external/cpu_rec/cpu_rec_corpus "$HOME"/.config/binwalk/modules/
+          cp -pr external/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
+          cp -pr external/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
         fi
 
         if command -v binwalk > /dev/null ; then
-          echo -e "$GREEN""binwalk installed successfully""$NC"
+          echo -e "${GREEN}""binwalk installed successfully""${NC}"
         elif [[ ! -f "/usr/local/bin/binwalk" ]] ; then
-          echo -e "$ORANGE""binwalk installation failed - check it manually""$NC"
+          echo -e "${ORANGE}""binwalk installation failed - check it manually""${NC}"
         fi
       ;;
     esac

@@ -19,9 +19,9 @@
 IL10_system_emulator() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
-    cd "$HOME_PATH" || ( echo "Could not install EMBA component system emulator" && exit 1 )
+    cd "${HOME_PATH}" || ( echo "Could not install EMBA component system emulator" && exit 1 )
 
     print_tool_info "busybox-static" 1
     print_tool_info "bash-static" 1
@@ -128,10 +128,10 @@ IL10_system_emulator() {
     print_file_info "vmlinux.x86el" "vmlinux x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/vmlinux.x86el" "external/EMBA_Live_bins/vmlinux.x86el"
     print_file_info "bzImage.x86el" "bzImage x86el" "https://github.com/EMBA-support-repos/FirmAE_kernel-v4.1/releases/download/all-new-binaries/bzImage.x86el" "external/EMBA_Live_bins/bzImage.x86el"
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""The system emulation dependencies (if not already on the system) will be downloaded and installed!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""The system emulation dependencies (if not already on the system) will be downloaded and installed!""${NC}"
       ANSWER=("y")
     fi
 

@@ -19,14 +19,14 @@
 I13_disasm() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
 
     BINUTIL_VERSION_NAME="binutils-2.35.1"
 
     INSTALL_APP_LIST=()
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] ; then
-      print_file_info "$BINUTIL_VERSION_NAME" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz" "external/objdump"
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] ; then
+      print_file_info "${BINUTIL_VERSION_NAME}" "The GNU Binutils are a collection of binary tools." "https://ftp.gnu.org/gnu/binutils/${BINUTIL_VERSION_NAME}.tar.gz" "external/${BINUTIL_VERSION_NAME}.tar.gz" "external/objdump"
       print_tool_info "texinfo" 1
       print_tool_info "git" 1
       print_tool_info "gcc" 1
@@ -38,17 +38,17 @@ I13_disasm() {
       print_tool_info "python3" 1
       print_tool_info "python-is-python3" 1
       print_tool_info "libzip-dev" 1
-      # if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+      # if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       #  print_tool_info "radare2" 1
       # else
-      #  echo -e "$RED""$BOLD""Not installing radare2. Your EMBA installation will be incomplete""$NC"
+      #  echo -e "${RED}""${BOLD}""Not installing radare2. Your EMBA installation will be incomplete""${NC}"
       # fi
     fi
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""$BINUTIL_VERSION_NAME"" will be downloaded (if not already on the system) and objdump compiled!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""${BINUTIL_VERSION_NAME}"" will be downloaded (if not already on the system) and objdump compiled!""${NC}"
     fi
 
     case ${ANSWER:0:1} in
@@ -57,39 +57,39 @@ I13_disasm() {
         apt-get install "${INSTALL_APP_LIST[@]}" -y
 
         if ! [[ -f "external/objdump" ]] ; then
-          download_file "$BINUTIL_VERSION_NAME" "https://ftp.gnu.org/gnu/binutils/$BINUTIL_VERSION_NAME.tar.gz" "external/$BINUTIL_VERSION_NAME.tar.gz"
-          if [[ -f "external/$BINUTIL_VERSION_NAME.tar.gz" ]] ; then
-            tar -zxf external/"$BINUTIL_VERSION_NAME".tar.gz -C external
-            cd external/"$BINUTIL_VERSION_NAME"/ || ( echo "Could not install EMBA component binutils" && exit 1 )
-            echo -e "$ORANGE""$BOLD""Compile objdump""$NC"
+          download_file "${BINUTIL_VERSION_NAME}" "https://ftp.gnu.org/gnu/binutils/${BINUTIL_VERSION_NAME}.tar.gz" "external/${BINUTIL_VERSION_NAME}.tar.gz"
+          if [[ -f "external/${BINUTIL_VERSION_NAME}.tar.gz" ]] ; then
+            tar -zxf external/"${BINUTIL_VERSION_NAME}".tar.gz -C external
+            cd external/"${BINUTIL_VERSION_NAME}"/ || ( echo "Could not install EMBA component binutils" && exit 1 )
+            echo -e "${ORANGE}""${BOLD}""Compile objdump""${NC}"
             ./configure --enable-targets=all
             make
-            cd "$HOME_PATH" || ( echo "Could not install EMBA component binutils" && exit 1 )
+            cd "${HOME_PATH}" || ( echo "Could not install EMBA component binutils" && exit 1 )
           fi
-          if [[ -f "external/$BINUTIL_VERSION_NAME/binutils/objdump" ]] ; then
-            mv "external/$BINUTIL_VERSION_NAME/binutils/objdump" "external/objdump"
-            rm -R "external/""$BINUTIL_VERSION_NAME"
-            rm "external/""$BINUTIL_VERSION_NAME"".tar.gz"
+          if [[ -f "external/${BINUTIL_VERSION_NAME}/binutils/objdump" ]] ; then
+            mv "external/${BINUTIL_VERSION_NAME}/binutils/objdump" "external/objdump"
+            rm -R "external/""${BINUTIL_VERSION_NAME}"
+            rm "external/""${BINUTIL_VERSION_NAME}"".tar.gz"
             if [[ -f "external/objdump" ]] ; then
-              echo -e "$GREEN""objdump installed successfully""$NC"
+              echo -e "${GREEN}""objdump installed successfully""${NC}"
             fi
           else
-            echo -e "$ORANGE""objdump installation failed - check it manually""$NC"
+            echo -e "${ORANGE}""objdump installation failed - check it manually""${NC}"
           fi
         else
-          echo -e "$GREEN""objdump already installed - no further action performed.""$NC"
+          echo -e "${GREEN}""objdump already installed - no further action performed.""${NC}"
         fi
 
         # radare2
-        echo -e "$ORANGE""$BOLD""Install radare2""$NC"
+        echo -e "${ORANGE}""${BOLD}""Install radare2""${NC}"
         apt-get install radare2 libradare2-dev libradare2-common libradare2-5.0.0 -y
 
-        echo -e "$ORANGE""$BOLD""Install radare2 package r2dec""$NC"
+        echo -e "${ORANGE}""${BOLD}""Install radare2 package r2dec""${NC}"
         r2pm init
         r2pm update
         # r2pm install r2dec
         r2pm -cgi r2dec
-        echo -e "$ORANGE""$BOLD""Installed r2 plugins:""$NC"
+        echo -e "${ORANGE}""${BOLD}""Installed r2 plugins:""${NC}"
         r2pm -l
         # cp -pri /root/.local/share/radare2 external/radare_local_bak
       ;;

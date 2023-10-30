@@ -19,7 +19,7 @@
 I01_default_apps(){
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]] ; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]] ; then
     print_tool_info "file" 1
     print_tool_info "jq" 1
     print_tool_info "make" 1
@@ -58,16 +58,16 @@ I01_default_apps(){
     print_tool_info "xdot" 1
 
     # tools only available on Kali Linux:
-    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+    if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       print_tool_info "metasploit-framework" 1
     else
-      echo -e "$RED""$BOLD""Not installing metasploit-framework. Your EMBA installation will be incomplete""$NC"
+      echo -e "${RED}""${BOLD}""Not installing metasploit-framework. Your EMBA installation will be incomplete""${NC}"
     fi
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""These applications will be installed/updated!""${NC}"
       ANSWER=("y")
     fi
 
