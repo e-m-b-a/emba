@@ -563,6 +563,9 @@ dependency_check()
     # sudo-parser.pl
     check_dep_file "sudo-parser script" "$EXT_DIR""/sudo-parser.pl"
 
+    # BMC firmware decryptor - https://github.com/c0d3z3r0/smcbmc
+    check_dep_file "BMC decryptor" "$EXT_DIR""/smcbmc/smcbmc.py"
+
     # sh3llcheck - I know it's a typo, but this particular tool nags about it
     check_dep_tool "shellcheck script" "shellcheck"
 

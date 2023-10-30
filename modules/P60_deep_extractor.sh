@@ -289,7 +289,16 @@ deeper_extractor_helper() {
       else
         qcow_extractor "$FILE_TMP" "${FILE_TMP}_qemu_qcow_extracted"
       fi
-
+    elif [[ "${BMC_ENC_DETECTED}" -ne 0 ]]; then
+      if [[ "${THREADED}" -eq 1 ]]; then
+        bmc_extractor "${FILE_TMP}" "${FILE_TMP}_bmc_decrypted" &
+        BIN_PID="$!"
+        store_kill_pids "${BIN_PID}"
+        disown "${BIN_PID}" 2> /dev/null || true
+        WAIT_PIDS_P20+=( "${BIN_PID}" )
+      else
+        bmc_extractor "${FILE_TMP}" "${FILE_TMP}_qemu_bmc_decrypted"
+      fi
     else
       # default case to Unblob
       if [[ "$THREADED" -eq 1 ]]; then

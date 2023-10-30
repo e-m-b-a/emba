@@ -26,6 +26,7 @@ IP00_extractors(){
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
+    print_pip_info "pycryptodome"
     # ubireader:
     # print_tool_info "python3-lzo" 1
     print_tool_info "liblzo2-dev" 1
