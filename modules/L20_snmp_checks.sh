@@ -20,26 +20,26 @@ L20_snmp_checks() {
 
   export SNMP_UP=0
 
-  if [[ "$SYS_ONLINE" -eq 1 ]] && [[ "$TCP" == "ok" ]]; then
+  if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Live SNMP tests of emulated device."
     pre_module_reporter "${FUNCNAME[0]}"
 
-    if [[ $IN_DOCKER -eq 0 ]] ; then
+    if [[ ${IN_DOCKER} -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode and could harm your host environment."
     fi
 
     if [[ -v IP_ADDRESS_ ]]; then
       if ! system_online_check "${IP_ADDRESS_}" ; then
-        if ! restart_emulation "$IP_ADDRESS_" "$IMAGE_NAME" 1 "${STATE_CHECK_MECHANISM}"; then
+        if ! restart_emulation "${IP_ADDRESS_}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System not responding - Not performing SNMP checks"
-          module_end_log "${FUNCNAME[0]}" "$SNMP_UP"
+          module_end_log "${FUNCNAME[0]}" "${SNMP_UP}"
           return
         fi
       fi
       if [[ "${NMAP_PORTS_SERVICES[*]}" == *"snmp"* ]]; then
-        check_basic_snmp "$IP_ADDRESS_"
-        check_snmp_vulns "$IP_ADDRESS_"
+        check_basic_snmp "${IP_ADDRESS_}"
+        check_snmp_vulns "${IP_ADDRESS_}"
       else
         print_output "[*] No SNMP services detected"
       fi
@@ -48,56 +48,56 @@ L20_snmp_checks() {
     fi
 
     write_log ""
-    write_log "Statistics:$SNMP_UP"
-    module_end_log "${FUNCNAME[0]}" "$SNMP_UP"
+    write_log "Statistics:${SNMP_UP}"
+    module_end_log "${FUNCNAME[0]}" "${SNMP_UP}"
   fi
 }
 
 check_basic_snmp() {
   local IP_ADDRESS_="${1:-}"
 
-  sub_module_title "SNMP enumeration for emulated system with IP $ORANGE$IP_ADDRESS_$NC"
+  sub_module_title "SNMP enumeration for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC}"
 
   if command -v snmp-check > /dev/null; then
-    print_output "[*] SNMP scan with community name ${ORANGE}public$NC"
-    snmp-check -w "$IP_ADDRESS_" >> "$LOG_PATH_MODULE"/snmp-check-public-"$IP_ADDRESS_".txt
-    if [[ -f "$LOG_PATH_MODULE"/snmp-check-public-"$IP_ADDRESS_".txt ]]; then
-      write_link "$LOG_PATH_MODULE"/snmp-check-public-"$IP_ADDRESS_".txt
-      cat "$LOG_PATH_MODULE"/snmp-check-public-"$IP_ADDRESS_".txt
+    print_output "[*] SNMP scan with community name ${ORANGE}public${NC}"
+    snmp-check -w "${IP_ADDRESS_}" >> "${LOG_PATH_MODULE}"/snmp-check-public-"${IP_ADDRESS_}".txt
+    if [[ -f "${LOG_PATH_MODULE}"/snmp-check-public-"${IP_ADDRESS_}".txt ]]; then
+      write_link "${LOG_PATH_MODULE}"/snmp-check-public-"${IP_ADDRESS_}".txt
+      cat "${LOG_PATH_MODULE}"/snmp-check-public-"${IP_ADDRESS_}".txt
     fi
     print_ln
-    print_output "[*] SNMP scan with community name ${ORANGE}private$NC"
-    snmp-check -c private -w "$IP_ADDRESS_" >> "$LOG_PATH_MODULE"/snmp-check-private-"$IP_ADDRESS_".txt
-    if [[ -f "$LOG_PATH_MODULE"/snmp-check-private-"$IP_ADDRESS_".txt ]]; then
-      write_link "$LOG_PATH_MODULE"/snmp-check-private-"$IP_ADDRESS_".txt
-      cat "$LOG_PATH_MODULE"/snmp-check-private-"$IP_ADDRESS_".txt
+    print_output "[*] SNMP scan with community name ${ORANGE}private${NC}"
+    snmp-check -c private -w "${IP_ADDRESS_}" >> "${LOG_PATH_MODULE}"/snmp-check-private-"${IP_ADDRESS_}".txt
+    if [[ -f "${LOG_PATH_MODULE}"/snmp-check-private-"${IP_ADDRESS_}".txt ]]; then
+      write_link "${LOG_PATH_MODULE}"/snmp-check-private-"${IP_ADDRESS_}".txt
+      cat "${LOG_PATH_MODULE}"/snmp-check-private-"${IP_ADDRESS_}".txt
     fi
   fi
 
-  print_output "[*] SNMP walk with community name ${ORANGE}public$NC"
-  snmpwalk -v2c -c public "$IP_ADDRESS_" .iso | tee "$LOG_PATH_MODULE"/snmpwalk-public-"$IP_ADDRESS_".txt || true
-  if [[ -f "$LOG_PATH_MODULE"/snmpwalk-public-"$IP_ADDRESS_".txt ]]; then
-    write_link "$LOG_PATH_MODULE"/snmpwalk-public-"$IP_ADDRESS_".txt
-    cat "$LOG_PATH_MODULE"/snmpwalk-public-"$IP_ADDRESS_".txt
+  print_output "[*] SNMP walk with community name ${ORANGE}public${NC}"
+  snmpwalk -v2c -c public "${IP_ADDRESS_}" .iso | tee "${LOG_PATH_MODULE}"/snmpwalk-public-"${IP_ADDRESS_}".txt || true
+  if [[ -f "${LOG_PATH_MODULE}"/snmpwalk-public-"${IP_ADDRESS_}".txt ]]; then
+    write_link "${LOG_PATH_MODULE}"/snmpwalk-public-"${IP_ADDRESS_}".txt
+    cat "${LOG_PATH_MODULE}"/snmpwalk-public-"${IP_ADDRESS_}".txt
   fi
   print_ln
-  print_output "[*] SNMP walk with community name ${ORANGE}private$NC"
-  snmpwalk -v2c -c private "$IP_ADDRESS_" .iso | tee "$LOG_PATH_MODULE"/snmapwalk-private-"$IP_ADDRESS_".txt || true
-  if [[ -f "$LOG_PATH_MODULE"/snmpwalk-private-"$IP_ADDRESS_".txt ]]; then
-    write_link "$LOG_PATH_MODULE"/snmpwalk-private-"$IP_ADDRESS_".txt
-    cat "$LOG_PATH_MODULE"/snmpwalk-private-"$IP_ADDRESS_".txt
+  print_output "[*] SNMP walk with community name ${ORANGE}private${NC}"
+  snmpwalk -v2c -c private "${IP_ADDRESS_}" .iso | tee "${LOG_PATH_MODULE}"/snmapwalk-private-"${IP_ADDRESS_}".txt || true
+  if [[ -f "${LOG_PATH_MODULE}"/snmpwalk-private-"${IP_ADDRESS_}".txt ]]; then
+    write_link "${LOG_PATH_MODULE}"/snmpwalk-private-"${IP_ADDRESS_}".txt
+    cat "${LOG_PATH_MODULE}"/snmpwalk-private-"${IP_ADDRESS_}".txt
   fi
 
-  SNMP_UP=$(wc -l "$LOG_PATH_MODULE"/snmp* | tail -1 | awk '{print $1}')
+  SNMP_UP=$(wc -l "${LOG_PATH_MODULE}"/snmp* | tail -1 | awk '{print $1}')
 
-  if [[ "$SNMP_UP" -gt 20 ]]; then
+  if [[ "${SNMP_UP}" -gt 20 ]]; then
     SNMP_UP=1
   else
     SNMP_UP=0
   fi
 
   print_ln
-  print_output "[*] SNMP basic tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
+  print_output "[*] SNMP basic tests for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC} finished"
 }
 
 check_snmp_vulns() {
@@ -114,29 +114,29 @@ check_snmp_vulns() {
     "iso.3.6.1.4.1.4526.100.7.10.1.7" )
 
   for OID in "${OIDs[@]}"; do
-    print_output "[*] Testing OID ${ORANGE}${OID}${NC} on IP address $ORANGE$IP_ADDRESS_$NC ..."
-    snmpwalk -v 2c -c public "${IP_ADDRESS_}" "${OID}" >> "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt || true
-    snmpwalk -v 1 -c public "${IP_ADDRESS_}" "${OID}" >> "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt || true
+    print_output "[*] Testing OID ${ORANGE}${OID}${NC} on IP address ${ORANGE}${IP_ADDRESS_}${NC} ..."
+    snmpwalk -v 2c -c public "${IP_ADDRESS_}" "${OID}" >> "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${IP_ADDRESS_}"-"${OID}".txt || true
+    snmpwalk -v 1 -c public "${IP_ADDRESS_}" "${OID}" >> "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${IP_ADDRESS_}"-"${OID}".txt || true
     # remove "No Such Object" entries from the counting results:
-    if [[ $(grep -v -c "No Such Object" "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt) -gt 0 ]]; then
+    if [[ $(grep -v -c "No Such Object" "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${IP_ADDRESS_}"-"${OID}".txt) -gt 0 ]]; then
       print_ln
       print_output "[+] Possible credential disclosure detected (${ORANGE}CVE-2016-1557 / CVE-2016-1559${GREEN}):${NC}"
-      tee -a "$LOG_FILE" < "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt
+      tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${IP_ADDRESS_}"-"${OID}".txt
       print_ln
     else
-      rm "$LOG_PATH_MODULE"/snmpwalk-firmadyne_disclosure-"$IP_ADDRESS_"-"${OID}".txt || true
+      rm "${LOG_PATH_MODULE}"/snmpwalk-firmadyne_disclosure-"${IP_ADDRESS_}"-"${OID}".txt || true
     fi
   done
 
-  SNMP_UP_tmp=$(wc -l "$LOG_PATH_MODULE"/snmp* | tail -1 | awk '{print $1}')
+  SNMP_UP_tmp=$(wc -l "${LOG_PATH_MODULE}"/snmp* | tail -1 | awk '{print $1}')
 
-  if [[ "$SNMP_UP_tmp" -gt 20 ]]; then
+  if [[ "${SNMP_UP_tmp}" -gt 20 ]]; then
     SNMP_UP=1
   fi
 
   # TODO: check output for vulnerability and integrate it into f20/f50
 
   print_ln
-  print_output "[*] SNMP vulnerability tests for emulated system with IP $ORANGE$IP_ADDRESS_$NC finished"
+  print_output "[*] SNMP vulnerability tests for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC} finished"
 
 }

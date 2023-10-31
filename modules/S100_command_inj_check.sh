@@ -22,7 +22,7 @@ S100_command_inj_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local CMD_INJ_DIRS
-  mapfile -t CMD_INJ_DIRS < <(config_find "$CONFIG_DIR""/check_command_inj_dirs.cfg")
+  mapfile -t CMD_INJ_DIRS < <(config_find "${CONFIG_DIR}""/check_command_inj_dirs.cfg")
   local DIR=""
   local FILE_ARRX=()
   local FILE_S=""
@@ -33,25 +33,25 @@ S100_command_inj_check()
   elif [[ "${#CMD_INJ_DIRS[@]}" -ne 0 ]] ; then
     print_output "[+] Found directories and files used for web scripts:"
     for DIR in "${CMD_INJ_DIRS[@]}" ; do
-      if [[ -d "$DIR" ]] ; then
-        print_output "$(indent "$(print_path "$DIR")")"
-        mapfile -t FILE_ARRX < <( find "$DIR" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+      if [[ -d "${DIR}" ]] ; then
+        print_output "$(indent "$(print_path "${DIR}")")"
+        mapfile -t FILE_ARRX < <( find "${DIR}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
         for FILE_S in "${FILE_ARRX[@]}" ; do
-          if file "$FILE_S" | grep -q -E "script.*executable" ; then
-            print_output "$( indent "$(orange "$(print_path "$FILE_S")"" -> Executable script")")"
+          if file "${FILE_S}" | grep -q -E "script.*executable" ; then
+            print_output "$( indent "$(orange "$(print_path "${FILE_S}")"" -> Executable script")")"
 
             local QUERY_L
-            mapfile -t QUERY_L < <(config_list "$CONFIG_DIR""/check_command_injections.cfg" "")
+            mapfile -t QUERY_L < <(config_list "${CONFIG_DIR}""/check_command_injections.cfg" "")
             for QUERY in "${QUERY_L[@]}" ; do
               # without this check we always have an empty search string and get every file as result
-              if [[ -n "$QUERY" ]]; then
-                mapfile -t CHECK < <(grep -H -h "$QUERY" "$FILE_S" | sort -u || true)
+              if [[ -n "${QUERY}" ]]; then
+                mapfile -t CHECK < <(grep -H -h "${QUERY}" "${FILE_S}" | sort -u || true)
                 if [[ "${#CHECK[@]}" -gt 0 ]] ; then
                   print_ln
-                  print_output "$(indent "[$GREEN+$NC]$GREEN Found ""$QUERY"" in ""$(print_path "$FILE_S")$NC")"
+                  print_output "$(indent "[${GREEN}+${NC}]${GREEN} Found ""${QUERY}"" in ""$(print_path "${FILE_S}")${NC}")"
                   for CHECK_ in "${CHECK[@]}" ; do
-                    print_output "$(indent "[$GREEN+$NC]$GREEN $CHECK_$NC")"
+                    print_output "$(indent "[${GREEN}+${NC}]${GREEN} ${CHECK_}${NC}")"
                   done
                   print_ln
                 fi

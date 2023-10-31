@@ -20,17 +20,17 @@ export PRE_THREAD_ENA=0
 P21_buffalo_decryptor() {
   local NEG_LOG=0
 
-  if [[ "$BUFFALO_ENC_DETECTED" -ne 0 ]]; then
+  if [[ "${BUFFALO_ENC_DETECTED}" -ne 0 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Buffalo encrypted firmware extractor"
     pre_module_reporter "${FUNCNAME[0]}"
 
-    EXTRACTION_FILE="$LOG_DIR"/firmware/firmware_buffalo_dec.bin
+    EXTRACTION_FILE="${LOG_DIR}"/firmware/firmware_buffalo_dec.bin
 
-    buffalo_enc_extractor "$FIRMWARE_PATH" "$EXTRACTION_FILE"
+    buffalo_enc_extractor "${FIRMWARE_PATH}" "${EXTRACTION_FILE}"
 
     NEG_LOG=1
-    module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+    module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
   fi
 }
 
@@ -39,58 +39,58 @@ buffalo_enc_extractor() {
   local EXTRACTION_FILE_="${2:-}"
   local BUFFALO_FILE_CHECK=""
 
-  if ! [[ -f "$BUFFALO_ENC_PATH_" ]]; then
+  if ! [[ -f "${BUFFALO_ENC_PATH_}" ]]; then
     print_output "[-] No file for decryption provided"
     return
   fi
 
   sub_module_title "Buffalo encrypted firmware extractor"
 
-  hexdump -C "$BUFFALO_ENC_PATH_" | head | tee -a "$LOG_FILE" || true
+  hexdump -C "${BUFFALO_ENC_PATH_}" | head | tee -a "${LOG_FILE}" || true
   print_ln
 
   BUFFALO_DECRYTED=0
   local BUFFALO_ENC_PATH_STRIPPED
-  BUFFALO_ENC_PATH_STRIPPED="$LOG_DIR/firmware/$(basename "$BUFFALO_ENC_PATH_").stripped"
+  BUFFALO_ENC_PATH_STRIPPED="${LOG_DIR}/firmware/$(basename "${BUFFALO_ENC_PATH_}").stripped"
 
   print_output "[*] Removing initial 208 bytes from header to prepare firmware for decryption"
   # on other tests we had 208 -> check again with firmware that failed here:
-  dd bs=208 skip=1 if="$BUFFALO_ENC_PATH_" of="$BUFFALO_ENC_PATH_STRIPPED""_208" || true
+  dd bs=208 skip=1 if="${BUFFALO_ENC_PATH_}" of="${BUFFALO_ENC_PATH_STRIPPED}""_208" || true
 
-  if [[ -f "$BUFFALO_ENC_PATH_STRIPPED""_208" ]]; then
-    hexdump -C "$BUFFALO_ENC_PATH_STRIPPED""_208" | head | tee -a "$LOG_FILE" || true
+  if [[ -f "${BUFFALO_ENC_PATH_STRIPPED}""_208" ]]; then
+    hexdump -C "${BUFFALO_ENC_PATH_STRIPPED}""_208" | head | tee -a "${LOG_FILE}" || true
     print_ln
   fi
 
   print_output "[*] Removing initial 228 bytes from header to prepare firmware for decryption"
-  dd bs=228 skip=1 if="$BUFFALO_ENC_PATH_" of="$BUFFALO_ENC_PATH_STRIPPED""_228" || true
+  dd bs=228 skip=1 if="${BUFFALO_ENC_PATH_}" of="${BUFFALO_ENC_PATH_STRIPPED}""_228" || true
 
-  if [[ -f "$BUFFALO_ENC_PATH_STRIPPED""_228" ]]; then
-    hexdump -C "$BUFFALO_ENC_PATH_STRIPPED""_228" | head | tee -a "$LOG_FILE" || true
+  if [[ -f "${BUFFALO_ENC_PATH_STRIPPED}""_228" ]]; then
+    hexdump -C "${BUFFALO_ENC_PATH_STRIPPED}""_228" | head | tee -a "${LOG_FILE}" || true
     print_ln
   fi
 
   print_output "[*] Decrypting firmware ... offset 208"
-  "$EXT_DIR"/buffalo-enc.elf -d -i "$BUFFALO_ENC_PATH_STRIPPED""_208" -o "$EXTRACTION_FILE_" || true
-  if ! [[ -f "$EXTRACTION_FILE_" ]]; then
+  "${EXT_DIR}"/buffalo-enc.elf -d -i "${BUFFALO_ENC_PATH_STRIPPED}""_208" -o "${EXTRACTION_FILE_}" || true
+  if ! [[ -f "${EXTRACTION_FILE_}" ]]; then
     print_output "[*] Decrypting firmware ... offset 228"
-    "$EXT_DIR"/buffalo-enc.elf -d -i "$BUFFALO_ENC_PATH_STRIPPED""_228" -o "$EXTRACTION_FILE_" || true
+    "${EXT_DIR}"/buffalo-enc.elf -d -i "${BUFFALO_ENC_PATH_STRIPPED}""_228" -o "${EXTRACTION_FILE_}" || true
   fi
-  hexdump -C "$EXTRACTION_FILE_" | head | tee -a "$LOG_FILE" || true
+  hexdump -C "${EXTRACTION_FILE_}" | head | tee -a "${LOG_FILE}" || true
   print_ln
 
-  if [[ -f "$EXTRACTION_FILE_" ]]; then
-    BUFFALO_FILE_CHECK=$(file "$EXTRACTION_FILE_")
-    if [[ "$BUFFALO_FILE_CHECK" =~ .*u-boot\ legacy\ uImage,\ .* ]]; then
+  if [[ -f "${EXTRACTION_FILE_}" ]]; then
+    BUFFALO_FILE_CHECK=$(file "${EXTRACTION_FILE_}")
+    if [[ "${BUFFALO_FILE_CHECK}" =~ .*u-boot\ legacy\ uImage,\ .* ]]; then
       print_ln
-      print_output "[+] Decrypted Buffalo firmware file to $ORANGE$EXTRACTION_FILE_$NC"
-      MD5_DONE_DEEP+=( "$(md5sum "$BUFFALO_ENC_PATH_" | awk '{print $1}')" )
-      export FIRMWARE_PATH="$EXTRACTION_FILE_"
-      backup_var "FIRMWARE_PATH" "$FIRMWARE_PATH"
+      print_output "[+] Decrypted Buffalo firmware file to ${ORANGE}${EXTRACTION_FILE_}${NC}"
+      MD5_DONE_DEEP+=( "$(md5sum "${BUFFALO_ENC_PATH_}" | awk '{print $1}')" )
+      export FIRMWARE_PATH="${EXTRACTION_FILE_}"
+      backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       print_ln
-      print_output "[*] Firmware file details: $ORANGE$(file "$EXTRACTION_FILE_")$NC"
+      print_output "[*] Firmware file details: ${ORANGE}$(file "${EXTRACTION_FILE_}")${NC}"
       write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
-      write_csv_log "Buffalo decryptor" "$BUFFALO_ENC_PATH_" "$EXTRACTION_FILE_" "1" "NA" "NA"
+      write_csv_log "Buffalo decryptor" "${BUFFALO_ENC_PATH_}" "${EXTRACTION_FILE_}" "1" "NA" "NA"
       BUFFALO_DECRYTED=1
       if [[ -z "${FW_VENDOR:-}" ]]; then
         FW_VENDOR="BUFFALO"
@@ -98,7 +98,7 @@ buffalo_enc_extractor() {
     fi
   fi
 
-  if [[ "$BUFFALO_DECRYTED" -ne 1 ]]; then
+  if [[ "${BUFFALO_DECRYTED}" -ne 1 ]]; then
     print_output "[-] Decryption of Buffalo firmware file failed"
   fi
 }

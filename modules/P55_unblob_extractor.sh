@@ -24,24 +24,24 @@ P55_unblob_extractor() {
   module_log_init "${FUNCNAME[0]}"
 
   # shellcheck disable=SC2153
-  if [[ -d "${FIRMWARE_PATH}" ]] && [[ "$RTOS" -eq 1 ]]; then
-    detect_root_dir_helper "$FIRMWARE_PATH"
+  if [[ -d "${FIRMWARE_PATH}" ]] && [[ "${RTOS}" -eq 1 ]]; then
+    detect_root_dir_helper "${FIRMWARE_PATH}"
   fi
 
   # If we have not found a linux filesystem we try to do an unblob extraction round
-  if [[ $RTOS -eq 0 ]] ; then
+  if [[ ${RTOS} -eq 0 ]] ; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
 
-  if [[ -f "$TMP_DIR""/unblob_disable.cfg" ]]; then
+  if [[ -f "${TMP_DIR}""/unblob_disable.cfg" ]]; then
     # if we disable unblob from a background module we need to work with a file to
     # store the state of this variable (bash rules ;))
-    UNBLOB="$(cat "$TMP_DIR"/unblob_disable.cfg)"
+    UNBLOB="$(cat "${TMP_DIR}"/unblob_disable.cfg)"
   fi
 
-  if [[ "$UNBLOB" -eq 0 ]]; then
-    if [[ -f "$TMP_DIR""/unblob_disable.cfg" ]]; then
+  if [[ "${UNBLOB}" -eq 0 ]]; then
+    if [[ -f "${TMP_DIR}""/unblob_disable.cfg" ]]; then
       print_output "[-] Unblob module automatically disabled from other module."
     else
       print_output "[-] Unblob module currently disabled - enable it in emba setting the UNBLOB variable to 1"
@@ -50,9 +50,9 @@ P55_unblob_extractor() {
     return
   fi
 
-  local FW_PATH_UNBLOB="$FIRMWARE_PATH"
+  local FW_PATH_UNBLOB="${FIRMWARE_PATH}"
 
-  if [[ -d "$FW_PATH_UNBLOB" ]]; then
+  if [[ -d "${FW_PATH_UNBLOB}" ]]; then
     print_output "[-] Unblob module only deals with firmware files - directories are handled via deep extractor"
     module_end_log "${FUNCNAME[0]}" 0
     return
@@ -72,40 +72,40 @@ P55_unblob_extractor() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   export LINUX_PATH_COUNTER_UNBLOB=0
-  export OUTPUT_DIR_UNBLOB="$LOG_DIR"/firmware/unblob_extracted
+  export OUTPUT_DIR_UNBLOB="${LOG_DIR}"/firmware/unblob_extracted
 
-  if [[ -f "$FW_PATH_UNBLOB" ]]; then
-    unblobber "$FW_PATH_UNBLOB" "$OUTPUT_DIR_UNBLOB"
+  if [[ -f "${FW_PATH_UNBLOB}" ]]; then
+    unblobber "${FW_PATH_UNBLOB}" "${OUTPUT_DIR_UNBLOB}"
   fi
 
-  linux_basic_identification_unblobber "$OUTPUT_DIR_UNBLOB"
+  linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB}"
 
   print_ln
 
-  if [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
-    FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type f | wc -l )
-    UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-    DIRS_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB" -xdev -type d | wc -l )
-    BINS_UB=$(find "$OUTPUT_DIR_UNBLOB" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+  if [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
+    FILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l )
+    UNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+    DIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type d | wc -l )
+    BINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
   fi
 
-  if [[ "$BINS_UB" -gt 0 ]] || [[ "$FILES_EXT_UB" -gt 0 ]]; then
+  if [[ "${BINS_UB}" -gt 0 ]] || [[ "${FILES_EXT_UB}" -gt 0 ]]; then
     sub_module_title "Firmware extraction details"
-    print_output "[*] ${ORANGE}Unblob$NC results:"
-    print_output "[*] Found $ORANGE$FILES_EXT_UB$NC files ($ORANGE$UNIQUE_FILES_UB$NC unique files) and $ORANGE$DIRS_EXT_UB$NC directories at all."
-    print_output "[*] Found $ORANGE$BINS_UB$NC binaries."
-    print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER_UNBLOB$NC."
+    print_output "[*] ${ORANGE}Unblob${NC} results:"
+    print_output "[*] Found ${ORANGE}${FILES_EXT_UB}${NC} files (${ORANGE}${UNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${DIRS_EXT_UB}${NC} directories at all."
+    print_output "[*] Found ${ORANGE}${BINS_UB}${NC} binaries."
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_UNBLOB}${NC}."
     print_ln
-    tree -sh "$OUTPUT_DIR_UNBLOB" | tee -a "$LOG_FILE"
+    tree -sh "${OUTPUT_DIR_UNBLOB}" | tee -a "${LOG_FILE}"
     print_ln
 
-    detect_root_dir_helper "$OUTPUT_DIR_UNBLOB"
+    detect_root_dir_helper "${OUTPUT_DIR_UNBLOB}"
 
     write_csv_log "FILES Unblob" "UNIQUE FILES Unblob" "directories Unblob" "Binaries Unblob" "LINUX_PATH_COUNTER Unblob"
-    write_csv_log "$FILES_EXT_UB" "$UNIQUE_FILES_UB" "$DIRS_EXT_UB" "$BINS_UB" "$LINUX_PATH_COUNTER_UNBLOB"
+    write_csv_log "${FILES_EXT_UB}" "${UNIQUE_FILES_UB}" "${DIRS_EXT_UB}" "${BINS_UB}" "${LINUX_PATH_COUNTER_UNBLOB}"
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$FILES_EXT_UB"
+  module_end_log "${FUNCNAME[0]}" "${FILES_EXT_UB}"
 }
 
 unblobber() {
@@ -120,16 +120,16 @@ unblobber() {
     sub_module_title "Analyze binary firmware blob with unblob"
   fi
 
-  print_output "[*] Extracting firmware to directory $ORANGE$OUTPUT_DIR_UNBLOB$NC"
+  print_output "[*] Extracting firmware to directory ${ORANGE}${OUTPUT_DIR_UNBLOB}${NC}"
 
-  if ! [[ -d "$OUTPUT_DIR_UNBLOB" ]]; then
-    mkdir -p "$OUTPUT_DIR_UNBLOB"
+  if ! [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
+    mkdir -p "${OUTPUT_DIR_UNBLOB}"
   fi
 
   if [[ "${VERBOSE}" -eq 1 ]]; then
-    timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -v -k --log "$LOG_PATH_MODULE"/unblob_"$(basename "$FIRMWARE_PATH_")".log -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
+    timeout --preserve-status --signal SIGINT 300 "${UNBLOB_BIN}" -v -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${FIRMWARE_PATH_}")".log -e "${OUTPUT_DIR_UNBLOB}" "${FIRMWARE_PATH_}" | tee -a "${LOG_FILE}" || true
   else
-    COLUMNS=100 timeout --preserve-status --signal SIGINT 300 "$UNBLOB_BIN" -k --log "$LOG_PATH_MODULE"/unblob_"$(basename "$FIRMWARE_PATH_")".log -e "$OUTPUT_DIR_UNBLOB" "$FIRMWARE_PATH_" | tee -a "$LOG_FILE" || true
+    COLUMNS=100 timeout --preserve-status --signal SIGINT 300 "${UNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${FIRMWARE_PATH_}")".log -e "${OUTPUT_DIR_UNBLOB}" "${FIRMWARE_PATH_}" | tee -a "${LOG_FILE}" || true
   fi
 
   print_ln
@@ -137,8 +137,8 @@ unblobber() {
 
 linux_basic_identification_unblobber() {
   local FIRMWARE_PATH_CHECK="${1:-}"
-  if ! [[ -d "$FIRMWARE_PATH_CHECK" ]]; then
+  if ! [[ -d "${FIRMWARE_PATH_CHECK}" ]]; then
     return
   fi
-  LINUX_PATH_COUNTER_UNBLOB="$(find "$FIRMWARE_PATH_CHECK" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  LINUX_PATH_COUNTER_UNBLOB="$(find "${FIRMWARE_PATH_CHECK}" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 }

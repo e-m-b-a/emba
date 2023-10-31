@@ -210,7 +210,7 @@ D10_firmware_diffing() {
 
   check_for_new_files
 
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
 check_for_new_files() {
