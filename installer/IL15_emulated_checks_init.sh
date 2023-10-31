@@ -18,9 +18,9 @@
 IL15_emulated_checks_init() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
     INSTALL_APP_LIST=()
-    cd "$HOME_PATH" || ( echo "Could not install EMBA component system emulator" && exit 1 )
+    cd "${HOME_PATH}" || ( echo "Could not install EMBA component system emulator" && exit 1 )
     print_git_info "routersploit" "m-1-k-3/routersploit" "The RouterSploit Framework is an open-source exploitation framework dedicated to embedded devices. (EMBA fork)"
     print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
     print_git_info "testssl" "EMBA-support-repos/testssl.sh.git" "TestSSL.sh"
@@ -31,10 +31,10 @@ IL15_emulated_checks_init() {
     print_tool_info "snmp" 1
     print_tool_info "nikto" 1
     # tools only available on Kali Linux:
-    if [[ "$OTHER_OS" -eq 0 ]] && [[ "$UBUNTU_OS" -eq 0 ]]; then
+    if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       print_tool_info "snmpcheck" 1
     else
-      echo -e "$RED""$BOLD""Not installing snmpcheck. Your EMBA installation will be incomplete""$NC"
+      echo -e "${RED}""${BOLD}""Not installing snmpcheck. Your EMBA installation will be incomplete""${NC}"
     fi
     print_tool_info "python3-pip" 1
     # mini UPnP client
@@ -56,10 +56,10 @@ IL15_emulated_checks_init() {
     print_pip_info "upnpclient"
     print_pip_info "beautifulsoup4"
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""The live testing dependencies (if not already on the system) will be downloaded and installed!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""The live testing dependencies (if not already on the system) will be downloaded and installed!""${NC}"
       ANSWER=("y")
     fi
 
@@ -96,7 +96,7 @@ IL15_emulated_checks_init() {
         download_file "routersploit_patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "docs/routersploit_patch"
         patch -f -p1 < docs/routersploit_patch || true
       else
-        echo -e "$GREEN""routersploit_patch already downloaded""$NC"
+        echo -e "${GREEN}""routersploit_patch already downloaded""${NC}"
       fi
 
       python3 -m pip install -r requirements.txt --break-system-packages
@@ -105,7 +105,7 @@ IL15_emulated_checks_init() {
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
       fi
 
-      cd "$HOME_PATH" || ( echo "Could not install EMBA component routersploit" && exit 1 )
+      cd "${HOME_PATH}" || ( echo "Could not install EMBA component routersploit" && exit 1 )
 
       # we need to safe /var/lib/nikto now
       if [[ -d /var/lib/nikto ]]; then

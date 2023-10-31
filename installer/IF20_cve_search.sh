@@ -19,19 +19,19 @@
 IF20_cve_search() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] || [[ $CVE_SEARCH -eq 1 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] || [[ "${CVE_SEARCH}" -eq 1 ]] || [[ "${FULL}" -eq 1 ]]; then
 
     print_git_info "cve-search" "EMBA-support-repos/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
-    echo -e "$ORANGE""cve-search will be downloaded.""$NC"
+    echo -e "${ORANGE}""cve-search will be downloaded.""${NC}"
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""cve-search and mongodb will be downloaded, installed and populated!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""cve-search and mongodb will be downloaded, installed and populated!""${NC}"
       ANSWER=("y")
     fi
 
-    if [[ "$LIST_DEP" -ne 1 ]] ; then
+    if [[ "${LIST_DEP}" -ne 1 ]] ; then
 
       # we always need the cve-search stuff:
       if ! [[ -d external/cve-search ]]; then
@@ -43,19 +43,19 @@ IF20_cve_search() {
       fi
 
       while read -r TOOL_NAME; do
-        print_tool_info "$TOOL_NAME" 1
+        print_tool_info "${TOOL_NAME}" 1
       done < requirements.system
 
       # we do not need to install the Flask web environment - we do it manually
       # while read -r TOOL_NAME; do
-      #  PIP_NAME=$(echo "$TOOL_NAME" | cut -d= -f1)
-      #  TOOL_VERSION=$(echo "$TOOL_NAME" | cut -d= -f3)
-      #  print_pip_info "$PIP_NAME" "$TOOL_VERSION"
+      #  PIP_NAME=$(echo "${TOOL_NAME}" | cut -d= -f1)
+      #  TOOL_VERSION=$(echo "${TOOL_NAME}" | cut -d= -f3)
+      #  print_pip_info "${PIP_NAME}" "${TOOL_VERSION}"
       # done < requirements.txt
 
       # xargs sudo apt-get install -y < requirements.system
       while read -r TOOL_NAME; do
-        apt-get install -y "$TOOL_NAME" --no-install-recommends
+        apt-get install -y "${TOOL_NAME}" --no-install-recommends
       done < requirements.system
 
       # this is a temp solution - Currently needed to fulfill broken deps:
@@ -88,36 +88,36 @@ IF20_cve_search() {
       sed -i "s/^LoginRequired:\ False/LoginRequired:\ True/g" ./etc/configuration.ini
 
       # if we setup a docker container we do not need to configure the redis passwords
-      if [[ $IN_DOCKER -ne 1 ]]; then
+      if [[ "${IN_DOCKER}" -ne 1 ]]; then
         echo -e "[*] Setting password for Redis environment - ./external/cve-search/etc/configuration.ini"
-        sed -i "s/^Password:\ .*/Password:\ $REDIS_PW/g" ./etc/configuration.ini
+        sed -i "s/^Password:\ .*/Password:\ ${REDIS_PW}/g" ./etc/configuration.ini
 
         echo -e "[*] Setting password for Redis environment - /etc/redis/redis.conf"
-        sed -i "s/^\#\ requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
-        sed -i "s/^requirepass\ .*/requirepass\ $REDIS_PW/g" /etc/redis/redis.conf
+        sed -i "s/^\#\ requirepass\ .*/requirepass\ ${REDIS_PW}/g" /etc/redis/redis.conf
+        sed -i "s/^requirepass\ .*/requirepass\ ${REDIS_PW}/g" /etc/redis/redis.conf
       fi
     fi
 
     case ${ANSWER:0:1} in
       y|Y )
 
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
 
         CVE_INST=1
-        echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
+        echo -e "\\n""${MAGENTA}""Check if the cve-search database is already installed and populated.""${NC}"
         cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
         if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
           CVE_INST=0
-          echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
+          echo -e "\\n""${GREEN}""cve-search database already installed - no further action performed.""${NC}"
         else
-          echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
+          echo -e "\\n""${MAGENTA}""cve-search database not ready.""${NC}"
         fi
 
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
-        if [[ "$CVE_INST" -eq 1 ]]; then
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+        if [[ "${CVE_INST}" -eq 1 ]]; then
           if ! dpkg -s libssl1.1 &>/dev/null; then
             # libssl1.1 missing
-            echo -e "\\n""$BOLD""Installing libssl1.1 for mongodb!""$NC"
+            echo -e "\\n""${BOLD}""Installing libssl1.1 for mongodb!""${NC}"
             # echo "deb http://security.ubuntu.com/ubuntu impish-security main" | tee /etc/apt/sources.list.d/impish-security.list
             for i in {21..29}; do
               echo "Testing download of libssl package version libssl1.1_1.1.1-1ubuntu2.1~18.04.${i}_amd64.deb"
@@ -151,7 +151,7 @@ IF20_cve_search() {
           fi
           sed -i 's/bindIp\:\ 127.0.0.1/bindIp\:\ 172.36.0.1/g' /etc/mongod.conf
 
-          if [[ "$WSL" -eq 0 ]]; then
+          if [[ "${WSL}" -eq 0 ]]; then
             systemctl daemon-reload
             systemctl start mongod
             systemctl enable mongod
@@ -162,19 +162,19 @@ IF20_cve_search() {
           fi
 
           cd ./external/cve-search/ || ( echo "Could not install EMBA component cve-search" && exit 1 )
-          echo -e "\\n""$MAGENTA""$BOLD""The cve-search database will be downloaded and updated!""$NC"
+          echo -e "\\n""${MAGENTA}""${BOLD}""The cve-search database will be downloaded and updated!""${NC}"
           CVE_INST=1
-          echo -e "\\n""$MAGENTA""Check if the cve-search database is already installed and populated.""$NC"
+          echo -e "\\n""${MAGENTA}""Check if the cve-search database is already installed and populated.""${NC}"
           if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
             CVE_INST=0
-            echo -e "\\n""$GREEN""cve-search database already installed - no further action performed.""$NC"
+            echo -e "\\n""${GREEN}""cve-search database already installed - no further action performed.""${NC}"
           else
-            echo -e "\\n""$MAGENTA""cve-search database not ready.""$NC"
-            echo -e "\\n""$MAGENTA""The installer is going to populate the database.""$NC"
+            echo -e "\\n""${MAGENTA}""cve-search database not ready.""${NC}"
+            echo -e "\\n""${MAGENTA}""The installer is going to populate the database.""${NC}"
           fi
           # only update and install the database if we have no working database
           # also do not update if we are running as github action (GH_ACTION set to 1)
-          if [[ "$GH_ACTION" -eq 0 ]] && [[ "$CVE_INST" -eq 1 ]]; then
+          if [[ "${GH_ACTION}" -eq 0 ]] && [[ "${CVE_INST}" -eq 1 ]]; then
             /etc/init.d/redis-server restart
             CNT=0
             while [[ "${CVE_INST}" -eq 1 ]]; do
@@ -190,17 +190,17 @@ IF20_cve_search() {
               CNT=$((CNT+1))
             done
           else
-            echo -e "\\n""$GREEN""$BOLD""CVE database is up and running. No installation process performed!""$NC"
+            echo -e "\\n""${GREEN}""${BOLD}""CVE database is up and running. No installation process performed!""${NC}"
           fi
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+          cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
           sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
           sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater_data.init > config/emba_updater_data
           chmod +x config/emba_updater
           chmod +x config/emba_updater_data
-          echo -e "\\n""$MAGENTA""$BOLD""The cron.daily update script for EMBA is located in config/emba_updater""$NC"
-          echo -e "$MAGENTA""$BOLD""For automatic updates it should be checked and copied to /etc/cron.daily/""$NC"
+          echo -e "\\n""${MAGENTA}""${BOLD}""The cron.daily update script for EMBA is located in config/emba_updater""${NC}"
+          echo -e "${MAGENTA}""${BOLD}""For automatic updates it should be checked and copied to /etc/cron.daily/""${NC}"
         fi
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
       ;;
     esac
   fi

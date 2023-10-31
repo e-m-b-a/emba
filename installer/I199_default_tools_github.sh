@@ -19,7 +19,7 @@
 I199_default_tools_github() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
 
     print_file_info "linux-exploit-suggester" "Linux privilege escalation auditing tool" "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" "external/linux-exploit-suggester.sh"
     print_file_info "checksec" "Check the properties of executables (like PIE, RELRO, PaX, Canaries, ASLR, Fortify Source)" "https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec" "external/checksec"
@@ -32,10 +32,10 @@ I199_default_tools_github() {
     print_pip_info "pillow"
     print_git_info "jchroot" "EMBA-support-repos/jchroot" "jchroot - a chroot with more isolation"
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""These applications (if not already on the system) will be downloaded!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""These applications (if not already on the system) will be downloaded!""${NC}"
       ANSWER=("y")
     fi
 
@@ -50,18 +50,18 @@ I199_default_tools_github() {
 
         # pixd installation
         pip_install "pillow"
-        echo -e "\\n""$ORANGE""$BOLD""Downloading of pixd""$NC"
+        echo -e "\\n""${ORANGE}""${BOLD}""Downloading of pixd""${NC}"
         git clone https://github.com/p4cx/pixd_image external/pixd
         cd ./external/pixd/ || ( echo "Could not install EMBA component pixd" && exit 1 )
         make
         mv pixd ../pixde
         mv pixd_png.py ../pixd_png.py
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component pixd" && exit 1 )
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component pixd" && exit 1 )
         rm -r ./external/pixd/
         # pixd installation finished
 
         # jchroot
-        echo -e "\\n""$ORANGE""$BOLD""Download and install jchroot""$NC"
+        echo -e "\\n""${ORANGE}""${BOLD}""Download and install jchroot""${NC}"
         if [[ -d "external/jchroot" ]]; then
           rm -r external/jchroot
         fi
@@ -74,7 +74,7 @@ I199_default_tools_github() {
         if [[ -e ./jchroot ]]; then
           cp -r jchroot /usr/sbin/
         fi
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component jchroot" && exit 1 )
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component jchroot" && exit 1 )
       ;;
     esac
   fi

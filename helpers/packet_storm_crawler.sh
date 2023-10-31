@@ -86,7 +86,7 @@ while ( true ); do
     ADV_NAME=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f2 | cut -d\  -f1-7)
 
     # with the following search we are going to find the URL of the marker
-    ADV_URL=$(grep " $CURRENT_MARKER\.\ " "$SAVE_PATH"/"$LINKS" | awk '{print $2}' | sort -u)
+    ADV_URL=$(grep " ${CURRENT_MARKER}\.\ " "${SAVE_PATH}"/"${LINKS}" | awk '{print $2}' | sort -u)
 
     # check if the next element is available
     if [[ -v MARKERS[index+1] ]]; then

@@ -20,7 +20,7 @@ I01_default_apps_host() {
   module_title "${FUNCNAME[0]}"
 
   echo -e "\\nTo use EMBA, some applications must be installed and some data (database for CVS for example) downloaded and parsed."
-  echo -e "\\n""$ORANGE""$BOLD""These applications will be installed/updated:""$NC"
+  echo -e "\\n""${ORANGE}""${BOLD}""These applications will be installed/updated:""${NC}"
   print_tool_info "jq" 1
   print_tool_info "shellcheck" 1
   print_tool_info "unzip" 1
@@ -41,10 +41,10 @@ I01_default_apps_host() {
   print_tool_info "python3-pip" 1
   print_pip_info "requests"
 
-  if [[ "$LIST_DEP" -eq 1 ]] ; then
+  if [[ "${LIST_DEP}" -eq 1 ]] ; then
     ANSWER=("n")
   else
-    echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
+    echo -e "\\n""${MAGENTA}""${BOLD}""These applications will be installed/updated!""${NC}"
     ANSWER=("y")
   fi
   case ${ANSWER:0:1} in

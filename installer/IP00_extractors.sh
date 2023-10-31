@@ -18,7 +18,7 @@
 IP00_extractors(){
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]] ; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]] ; then
 
     print_tool_info "python3-pip" 1
     print_tool_info "patool" 1
@@ -40,10 +40,10 @@ IP00_extractors(){
     print_tool_info "gcc" 1
     print_tool_info "libc6-dev" 1
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""These applications will be installed/updated!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""These applications will be installed/updated!""${NC}"
       ANSWER=("y")
     fi
 
@@ -63,7 +63,7 @@ IP00_extractors(){
         else
           cd external/payload_dumper || ( echo "Could not install EMBA component payload dumper" && exit 1 )
           git pull
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component payload dumper" && exit 1 )
+          cd "${HOME_PATH}" || ( echo "Could not install EMBA component payload dumper" && exit 1 )
         fi
 
         if ! [[ -d external/smcbmc ]]; then
@@ -71,7 +71,7 @@ IP00_extractors(){
         else
           cd external/smcbmc || ( echo "Could not install EMBA component smcbmc" && exit 1 )
           git pull
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component smcbmc" && exit 1 )
+          cd "${HOME_PATH}" || ( echo "Could not install EMBA component smcbmc" && exit 1 )
         fi
 
 
@@ -84,13 +84,13 @@ IP00_extractors(){
           sed -i 's/#include "buffalo-lib.h"/#include "buffalo-lib.h"\n#include "buffalo-lib.c"/g' buffalo-enc.c
           gcc -o buffalo-enc.elf buffalo-enc.c
           rm buffalo-enc.c buffalo-lib.c buffalo-lib.h
-          cd "$HOME_PATH" || ( echo "Could not install EMBA component buffalo decryptor" && exit 1 )
+          cd "${HOME_PATH}" || ( echo "Could not install EMBA component buffalo decryptor" && exit 1 )
 
         fi
         if [[ -f "./external/buffalo-enc.elf" ]] ; then
-          echo -e "$GREEN""Buffalo decryptor installed successfully""$NC"
+          echo -e "${GREEN}""Buffalo decryptor installed successfully""${NC}"
         else
-          echo -e "$ORANGE""Buffalo decryptor installation failed - check it manually""$NC"
+          echo -e "${ORANGE}""Buffalo decryptor installation failed - check it manually""${NC}"
         fi
       ;;
     esac

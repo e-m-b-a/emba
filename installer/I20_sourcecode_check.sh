@@ -20,9 +20,9 @@
 I20_sourcecode_check() {
   module_title "${FUNCNAME[0]}"
 
-  if [[ "$LIST_DEP" -eq 1 ]] || [[ $IN_DOCKER -eq 1 ]] || [[ $DOCKER_SETUP -eq 0 ]] || [[ $FULL -eq 1 ]]; then
+  if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 0 ]] || [[ "${FULL}" -eq 1 ]]; then
 
-    cd "$HOME_PATH" || ( echo "Could not install EMBA components for code scanning" && exit 1 )
+    cd "${HOME_PATH}" || ( echo "Could not install EMBA components for code scanning" && exit 1 )
     INSTALL_APP_LIST=()
 
     echo -e "\\nTo check the php.ini config for common security practices we have to install Composer and inicheck."
@@ -35,10 +35,10 @@ I20_sourcecode_check() {
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
 
-    if [[ "$LIST_DEP" -eq 1 ]] || [[ $DOCKER_SETUP -eq 1 ]] ; then
+    if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""$MAGENTA""$BOLD""Composer, iniscan, luacheck  and semgrep (if not already on the system) will be downloaded!""$NC"
+      echo -e "\\n""${MAGENTA}""${BOLD}""Composer, iniscan, luacheck  and semgrep (if not already on the system) will be downloaded!""${NC}"
       ANSWER=("y")
     fi
 
@@ -60,8 +60,8 @@ I20_sourcecode_check() {
         cd ./external/iniscan || ( echo "Could not install EMBA component iniscan" && exit 1 )
         php composer.phar build --no-interaction || true
         php composer.phar global require psecio/iniscan --no-interaction || true
-        cd "$HOME_PATH" || ( echo "Could not install EMBA component iniscan" && exit 1 )
-        cp -r "$HOME""/.config/composer/vendor/" "./external/iniscan/"
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component iniscan" && exit 1 )
+        cp -r "${HOME}""/.config/composer/vendor/" "./external/iniscan/"
       ;;
     esac
   fi
