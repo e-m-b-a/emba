@@ -265,10 +265,9 @@ try_decompress() {
 
 check_kconfig() {
   local KCONFIG_FILE="${1:-}"
+  local KCONF_HARD_CHECKER="${EXT_DIR}"/kconfig-hardened-check/bin/kernel-hardening-checker
 
-  if [[ -e "$EXT_DIR"/kconfig-hardened-check/bin/kconfig-hardened-check ]]; then
-    KCONF_HARD_CHECKER="$EXT_DIR/kconfig-hardened-check/bin/kconfig-hardened-check"
-  else
+  if ! [[ -e "${KCONF_HARD_CHECKER}" ]]; then
     print_output "[-] Kernel config hardening checker not found"
     return
   fi
