@@ -131,6 +131,17 @@ S09_firmware_base_version_check() {
         print_dot
       fi
 
+      if [[ $RTOS -eq 1 ]]; then
+        # in RTOS mode we also test the original firmware file
+        VERSION_FINDER=$(find "${FIRMWARE_PATH_BAK}" -xdev -type f -print0 2>/dev/null | xargs -0 strings | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2>/dev/null || true)
+        if [[ -n $VERSION_FINDER ]]; then
+          print_ln "no_log"
+          print_output "[+] Version information found ${RED}""${VERSION_FINDER}""${NC}${GREEN} in original firmware file (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
+          get_csv_rule "$VERSION_FINDER" "$CSV_REGEX"
+          write_csv_log "firmware" "$BIN_NAME" "$VERSION_FINDER" "$CSV_RULE" "$LIC" "$TYPE"
+        fi
+      fi
+
       if [[ "$THREADED" -eq 1 ]]; then
         # this will burn the CPU but in most cases the time of testing is cut into half
         bin_string_checker &
@@ -193,6 +204,8 @@ bin_string_checker() {
         fi
       fi
     else
+      # this is RTOS mode
+      # echo "Testing $BIN - $VERSION_IDENTIFIER"
       VERSION_FINDER="$(strings "$BIN" | grep -o -a -E "$VERSION_IDENTIFIER" | head -1 2> /dev/null || true)"
       if [[ -n $VERSION_FINDER ]]; then
         print_ln "no_log"
