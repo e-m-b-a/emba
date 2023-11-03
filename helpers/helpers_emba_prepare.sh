@@ -341,11 +341,9 @@ architecture_check()
         export ARCH
       fi
     else
-      print_output "$(indent "$(red "No architecture in firmware found")")"
+      print_output "$(indent "$(red "Based on binary identification no architecture was detected.")")"
       if [[ -n "${ARCH}" ]] ; then
         print_output "[*] Your set architecture (""${ARCH}"") will be used."
-      else
-        print_output "[!] Since no architecture could be detected, you should set one."
       fi
     fi
     backup_var "ARCH" "${ARCH}"
