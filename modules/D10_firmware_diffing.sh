@@ -23,6 +23,8 @@ D10_firmware_diffing() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware diff analysis"
   local NEG_LOG=0
+  # we only look at files ranking lt 95 in ssdeep - probably we need to adjust this in the future
+  local SSDEEP_MIN_RANK=95
 
   if ! command -v ssdeep > /dev/null ; then
     print_output "[-] Missing ssdeep installation"
@@ -75,6 +77,13 @@ D10_firmware_diffing() {
     FW_FILE1="${OUTPUT_DIR_UNBLOB1}""${FW_FILE1#.}"
 
     FW_FILE_NAME1=$(basename "${FW_FILE1}")
+    # From extraction process we often get a huge amount of files called "gzip.uncompressed"
+    # Currently we just skip them. In the future we probably need to respect the directory name right before:
+    #   /lib/modules/4.19.163/kernel/net/netfilter/xt_LOG.ko.gz_extract/gzip.uncompressed
+    #   -> the name that we need to take care of is xt_LOG.ko.gz
+    if [[ "${FW_FILE_NAME1}" == "gzip.uncompressed" ]]; then
+      continue
+    fi
     # print_output "[*] Testing $FW_FILE1"
 
     # find the file in OUTPUT_DIR_UNBLOB2
@@ -98,8 +107,7 @@ D10_firmware_diffing() {
 
           ! [[ -d "${LOG_PATH_MODULE_SUB}" ]] && mkdir "${LOG_PATH_MODULE_SUB}"
 
-          # we only look at files ranking lt 90 in ssdeep - probably we need to adjust this in the future
-          if [[ "${SSDEEP_RANK}" -lt 90 ]]; then
+          if [[ "${SSDEEP_RANK}" -lt "${SSDEEP_MIN_RANK}" ]]; then
             print_ln "no_log"
             if [[ "$(file "${FW_FILE1}")" == *"text"* ]]; then
               print_output "[+] Found modified ASCII file ${ORANGE}${FW_FILE_NAME1}${GREEN} in 2nd firmware directory - Ranking ${ORANGE}${SSDEEP_RANK}${NC}" "" "${LOG_FILE_DETAILS}"
@@ -151,9 +159,11 @@ D10_firmware_diffing() {
               write_log "[*] Non matching functions in ${ORANGE}$(basename "${FW_FILE1}")${NC}:" "${LOG_FILE_DETAILS}"
               print_output "[*] Non matching functions in ${ORANGE}$(basename "${FW_FILE1}")${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/r2_diff_fct_${FW_FILE_NAME1}_${FW_FILE_NAME1}.txt${NC}" "no_log"
               # get the functions which are different with radiff2:
-              radiff2 -AC "${FW_FILE1}" "${FW_FILE2}" 2>/dev/null | grep UNMATCH > "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt
-              cat "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt >> "${LOG_FILE_DETAILS}"
-              mapfile -t UNMATCHED_FCTs < <(awk '{print $1}' "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt | sort -u)
+              radiff2 -AC "${FW_FILE1}" "${FW_FILE2}" 2>/dev/null | grep UNMATCH > "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt || true
+              if [[ -f "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt ]]; then
+                cat "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt >> "${LOG_FILE_DETAILS}"
+                mapfile -t UNMATCHED_FCTs < <(awk '{print $1}' "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt | sort -u)
+              fi
               write_log "" "${LOG_FILE_DETAILS}"
 
               sub_module_title "R2 diff for binary file ${FW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
@@ -180,6 +190,7 @@ D10_firmware_diffing() {
                 write_log "" "${LOG_FILE_DETAILS}"
                 radiff2 -e bin.cache=true -md -g "${FCT}" "${FW_FILE2}" "${FW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot
                 if [[ -s "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot ]]; then
+                  print_output "[*] Generating png for function ${FCT} of binary ${FW_FILE_NAME1}" "no_log"
                   dot -Tpng "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".png || true
                 fi
                 if [[ -s "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" ]]; then
