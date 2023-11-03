@@ -189,9 +189,12 @@ D10_firmware_diffing() {
               for FCT in "${UNMATCHED_FCTs[@]}"; do
                 write_log "" "${LOG_FILE_DETAILS}"
                 radiff2 -e bin.cache=true -md -g "${FCT}" "${FW_FILE2}" "${FW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot
+                # we only print the graph if the log file was generated and has content and it has multiple addresses (0x) included
                 if [[ -s "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot ]]; then
-                  print_output "[*] Generating png for function ${FCT} of binary ${FW_FILE_NAME1}" "no_log"
-                  dot -Tpng "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".png || true
+                  if [[ "$(grep -c "0x" "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null)" -gt 1 ]]; then
+                    print_output "[*] Generating png for function ${FCT} of binary ${FW_FILE_NAME1}" "no_log"
+                    dot -Tpng "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".png || true
+                  fi
                 fi
                 if [[ -s "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" ]]; then
                   write_log "[*] Radare2 binary function diff for function ${ORANGE}${FCT}${NC} in binary ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
