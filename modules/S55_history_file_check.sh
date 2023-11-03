@@ -24,13 +24,13 @@ S55_history_file_check()
   local HIST_FILES=()
   local LINE=""
 
-  mapfile -t HIST_FILES < <(config_find "$CONFIG_DIR""/history_files.cfg")
+  mapfile -t HIST_FILES < <(config_find "${CONFIG_DIR}""/history_files.cfg")
 
   if [[ "${HIST_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#HIST_FILES[@]}" -ne 0 ]] ; then
       print_output "[+] Found history files:"
       for LINE in "${HIST_FILES[@]}" ; do
-        print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+        print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
       done
   else
     print_output "[-] No history files found"

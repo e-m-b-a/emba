@@ -29,7 +29,7 @@ S75_network_check()
   check_snmp
   check_network_configs
 
-  module_end_log "${FUNCNAME[0]}" "$NET_CFG_FOUND"
+  module_end_log "${FUNCNAME[0]}" "${NET_CFG_FOUND}"
 }
 
 check_resolv()
@@ -43,18 +43,18 @@ check_resolv()
 
   mapfile -t RES_CONF_PATHS < <(mod_path "/ETC_PATHS/resolv.conf")
   for RES_INFO_P in "${RES_CONF_PATHS[@]}"; do
-    if [[ -e "$RES_INFO_P" ]] ; then
+    if [[ -e "${RES_INFO_P}" ]] ; then
       CHECK=1
-      print_output "[+] DNS config ""$(print_path "$RES_INFO_P")"
+      print_output "[+] DNS config ""$(print_path "${RES_INFO_P}")"
 
-      DNS_INFO=$(grep "nameserver" "$RES_INFO_P" 2>/dev/null || true)
-      if [[ "$DNS_INFO" ]] ; then
-        print_output "$(indent "$DNS_INFO")"
+      DNS_INFO=$(grep "nameserver" "${RES_INFO_P}" 2>/dev/null || true)
+      if [[ "${DNS_INFO}" ]] ; then
+        print_output "$(indent "${DNS_INFO}")"
         ((NET_CFG_FOUND+=1))
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]]; then
+  if [[ ${CHECK} -eq 0 ]]; then
     print_output "[-] No or empty network configuration found"
   fi
 }
@@ -69,13 +69,13 @@ check_iptables()
 
   mapfile -t IPT_CONF_PATHS < <(mod_path "/ETC_PATHS/iptables")
   for IPT_INFO_P in "${IPT_CONF_PATHS[@]}"; do
-    if [[ -e "$IPT_INFO_P" ]] ; then
+    if [[ -e "${IPT_INFO_P}" ]] ; then
       CHECK=1
-      print_output "[+] iptables config ""$(print_path "$IPT_INFO_P")"
+      print_output "[+] iptables config ""$(print_path "${IPT_INFO_P}")"
       ((NET_CFG_FOUND+=1))
     fi
   done
-  if [[ $CHECK -eq 0 ]]; then
+  if [[ ${CHECK} -eq 0 ]]; then
     print_output "[-] No iptables configuration found"
   fi
 }
@@ -93,20 +93,20 @@ check_snmp()
 
   mapfile -t SNMP_CONF_PATHS < <(mod_path "/ETC_PATHS/snmp/snmpd.conf")
   for SNMP_CONF_P in "${SNMP_CONF_PATHS[@]}"; do
-    if [[ -e "$SNMP_CONF_P" ]] ; then
+    if [[ -e "${SNMP_CONF_P}" ]] ; then
       CHECK=1
-      print_output "[+] SNMP config ""$(print_path "$SNMP_CONF_P")"
-      mapfile -t FIND < <(awk '/^com2sec/ { print $4 }' "$SNMP_CONF_P")
+      print_output "[+] SNMP config ""$(print_path "${SNMP_CONF_P}")"
+      mapfile -t FIND < <(awk '/^com2sec/ { print $4 }' "${SNMP_CONF_P}")
       if [[ "${#FIND[@]}" -ne 0 ]] ; then
         print_output "[*] com2sec line/s:"
         for I in "${FIND[@]}"; do
-          print_output "$(indent "$(orange "$I")")"
+          print_output "$(indent "$(orange "${I}")")"
           ((NET_CFG_FOUND+=1))
         done
       fi
     fi
   done
-  if [[ $CHECK -eq 0 ]]; then
+  if [[ ${CHECK} -eq 0 ]]; then
     print_output "[-] No SNMP configuration found"
   fi
 }
@@ -118,13 +118,13 @@ check_network_configs()
   local NETWORK_CONFS=()
   local LINE=""
 
-  readarray -t NETWORK_CONFS < <(printf '%s' "$(config_find "$CONFIG_DIR""/network_conf_files.cfg")")
+  readarray -t NETWORK_CONFS < <(printf '%s' "$(config_find "${CONFIG_DIR}""/network_conf_files.cfg")")
 
   if [[ "${NETWORK_CONFS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#NETWORK_CONFS[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#NETWORK_CONFS[@]}"" possible network configs:"
     for LINE in "${NETWORK_CONFS[@]}" ; do
-      print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+      print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
       ((NET_CFG_FOUND+=1))
     done
   else
