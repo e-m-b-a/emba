@@ -8,7 +8,7 @@
 BUSYBOX=/firmadyne/busybox
 ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)
 
-"${BUSYBOX}" echo "[*] Network configuration - ACTION: $ACTION" 
+"${BUSYBOX}" echo "[*] Network configuration - ACTION: ${ACTION}" 
 
 if ("${FIRMAE_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
@@ -16,9 +16,9 @@ if ("${FIRMAE_NET}"); then
 
   if [ "${ACTION}" = "default" ]; then
     IP_DEFAULT=$("${BUSYBOX}" cat /firmadyne/ip_default)
-    "${BUSYBOX}" echo "[*] starting network configuration br0 - $IP_DEFAULT"
+    "${BUSYBOX}" echo "[*] starting network configuration br0 - ${IP_DEFAULT}"
     "${BUSYBOX}" brctl addbr br0
-    "${BUSYBOX}" ifconfig br0 "$IP_DEFAULT"
+    "${BUSYBOX}" ifconfig br0 "${IP_DEFAULT}"
     "${BUSYBOX}" echo "[*] starting network configuration eth0 - 0.0.0.0"
     "${BUSYBOX}" brctl addif br0 eth0
     "${BUSYBOX}" ifconfig eth0 0.0.0.0 up
@@ -30,7 +30,7 @@ if ("${FIRMAE_NET}"); then
     CNT=0
     while (true); do
       CNT=$((CNT+1))
-      echo "[*] Waiting CNT: $CNT / 40"
+      echo "[*] Waiting CNT: ${CNT} / 40"
       "${BUSYBOX}" sleep 5
       if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_BRIDGE}"); then
         break
@@ -47,10 +47,10 @@ if ("${FIRMAE_NET}"); then
       # shellcheck disable=SC2016
       if ("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1); then
         IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
-        "${BUSYBOX}" echo "[*] Identified IP address: $IP"
+        "${BUSYBOX}" echo "[*] Identified IP address: ${IP}"
       else
         IP=$("${BUSYBOX}" cat /firmadyne/ip_default)
-        "${BUSYBOX}" echo "[*] Setting default IP address: $IP"
+        "${BUSYBOX}" echo "[*] Setting default IP address: ${IP}"
       fi
       # tplink TL-WA860RE_EU_UK_US__V5_171116
       "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
@@ -72,10 +72,10 @@ if ("${FIRMAE_NET}"); then
       # shellcheck disable=SC2016
       if ("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1); then
         IP=$("${BUSYBOX}" ip addr show "${NET_BRIDGE}" | "${BUSYBOX}" grep -m1 "inet\b" | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" cut -d/ -f1)
-        "${BUSYBOX}" echo "[*] Identified IP address: $IP"
+        "${BUSYBOX}" echo "[*] Identified IP address: ${IP}"
       else
         IP=$("${BUSYBOX}" cat /firmadyne/ip_default)
-        "${BUSYBOX}" echo "[*] Setting default IP address: $IP"
+        "${BUSYBOX}" echo "[*] Setting default IP address: ${IP}"
       fi
 
       "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
