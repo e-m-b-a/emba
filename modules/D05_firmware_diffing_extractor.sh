@@ -44,24 +44,24 @@ D05_firmware_diffing_extractor() {
   OUTPUT_DIR_UNBLOB1="${LOG_PATH_MODULE}"/extractor_"$(basename "${FIRMWARE_PATH}")"
   unblobber "${FIRMWARE_PATH}" "${OUTPUT_DIR_UNBLOB1}" 0
 
-  if [[ -d "$OUTPUT_DIR_UNBLOB1" ]]; then
+  if [[ -d "${OUTPUT_DIR_UNBLOB1}" ]]; then
     NEG_LOG=1
     linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB1}"
-    FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB1" -xdev -type f | wc -l )
-    UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB1" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-    DIRS_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB1" -xdev -type d | wc -l )
-    tree -Csh "$OUTPUT_DIR_UNBLOB1" > "${LOG_PATH_MODULE}"/firmware_image1.txt
+    FILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f | wc -l )
+    UNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+    DIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB1}" -xdev -type d | wc -l )
+    tree -Csh "${OUTPUT_DIR_UNBLOB1}" > "${LOG_PATH_MODULE}"/firmware_image1.txt
 
     print_ln
-    print_output "[*] ${ORANGE}Unblob$NC results:"
-    print_output "[*] Found $ORANGE$FILES_EXT_UB$NC files ($ORANGE$UNIQUE_FILES_UB$NC unique files) and $ORANGE$DIRS_EXT_UB$NC directories at all."
+    print_output "[*] ${ORANGE}Unblob${NC} results:"
+    print_output "[*] Found ${ORANGE}${FILES_EXT_UB}${NC} files (${ORANGE}${UNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${DIRS_EXT_UB}${NC} directories at all."
     if [[ -f "${LOG_PATH_MODULE}"/firmware_image1.txt ]]; then
       write_link "${LOG_PATH_MODULE}"/firmware_image1.txt
     fi
-    print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER_UNBLOB$NC."
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_UNBLOB}${NC}."
     prepare_binary_arr "${OUTPUT_DIR_UNBLOB1}"
     architecture_check
-    detect_root_dir_helper "$OUTPUT_DIR_UNBLOB1"
+    detect_root_dir_helper "${OUTPUT_DIR_UNBLOB1}"
     print_ln
   fi
 
@@ -69,24 +69,24 @@ D05_firmware_diffing_extractor() {
   OUTPUT_DIR_UNBLOB2="${LOG_PATH_MODULE}"/extractor_"$(basename "${FIRMWARE_PATH1}")"
   unblobber "${FIRMWARE_PATH1}" "${OUTPUT_DIR_UNBLOB2}" 0
 
-  if [[ -d "$OUTPUT_DIR_UNBLOB2" ]]; then
+  if [[ -d "${OUTPUT_DIR_UNBLOB2}" ]]; then
     NEG_LOG=1
     linux_basic_identification_unblobber "${OUTPUT_DIR_UNBLOB2}"
-    FILES_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB2" -xdev -type f | wc -l )
-    UNIQUE_FILES_UB=$(find "$OUTPUT_DIR_UNBLOB2" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
-    DIRS_EXT_UB=$(find "$OUTPUT_DIR_UNBLOB2" -xdev -type d | wc -l )
-    tree -Csh "$OUTPUT_DIR_UNBLOB2" > "${LOG_PATH_MODULE}"/firmware_image2.txt
+    FILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f | wc -l )
+    UNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
+    DIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB2}" -xdev -type d | wc -l )
+    tree -Csh "${OUTPUT_DIR_UNBLOB2}" > "${LOG_PATH_MODULE}"/firmware_image2.txt
 
     print_ln
-    print_output "[*] ${ORANGE}Unblob$NC results:"
-    print_output "[*] Found $ORANGE$FILES_EXT_UB$NC files ($ORANGE$UNIQUE_FILES_UB$NC unique files) and $ORANGE$DIRS_EXT_UB$NC directories at all."
+    print_output "[*] ${ORANGE}Unblob${NC} results:"
+    print_output "[*] Found ${ORANGE}${FILES_EXT_UB}${NC} files (${ORANGE}${UNIQUE_FILES_UB}${NC} unique files) and ${ORANGE}${DIRS_EXT_UB}${NC} directories at all."
     if [[ -f "${LOG_PATH_MODULE}"/firmware_image2.txt ]]; then
       write_link "${LOG_PATH_MODULE}"/firmware_image2.txt
     fi
-    print_output "[*] Additionally the Linux path counter is $ORANGE$LINUX_PATH_COUNTER_UNBLOB$NC."
+    print_output "[*] Additionally the Linux path counter is ${ORANGE}${LINUX_PATH_COUNTER_UNBLOB}${NC}."
     prepare_binary_arr "${OUTPUT_DIR_UNBLOB2}"
     architecture_check
-    detect_root_dir_helper "$OUTPUT_DIR_UNBLOB2"
+    detect_root_dir_helper "${OUTPUT_DIR_UNBLOB2}"
 
     # detect_root_dir_helper includes a link to a module that is usually not executed in diff mode
     # let's remove this link now:
@@ -96,6 +96,6 @@ D05_firmware_diffing_extractor() {
     print_ln
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 

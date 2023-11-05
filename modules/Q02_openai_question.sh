@@ -100,7 +100,7 @@ ask_chatgpt() {
       # remove the LOG_DIR
       # shellcheck disable=SC2001
       SCRIPT_PATH_TMP_="$(echo "${SCRIPT_PATH_TMP_}" | sed 's#'"${LOG_DIR}"'##')"
-      print_output "[*] Stripped path $SCRIPT_PATH_TMP_" "no_log"
+      print_output "[*] Stripped path ${SCRIPT_PATH_TMP_}" "no_log"
     fi
     # dirty fix - Todo: use array in future
     SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}" | head -1)"

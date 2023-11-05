@@ -34,7 +34,7 @@ S65_config_file_check()
     NEG_LOG=1
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
 scan_config()
@@ -42,13 +42,13 @@ scan_config()
   sub_module_title "Search for config file"
   local LINE=""
 
-  readarray -t CONF_FILES_ARR < <(config_find "$CONFIG_DIR""/config_files.cfg")
+  readarray -t CONF_FILES_ARR < <(config_find "${CONFIG_DIR}""/config_files.cfg")
 
   if [[ "${CONF_FILES_ARR[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ ${#CONF_FILES_ARR[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#CONF_FILES_ARR[@]}"" possible configuration files:"
     for LINE in "${CONF_FILES_ARR[@]}" ; do
-      print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+      print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
     done
   else
     print_output "[-] No configuration files found"
@@ -71,7 +71,7 @@ check_fstab()
   if [[ ${#FSTAB_USER_FILES[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#FSTAB_USER_FILES[@]}"" fstab files with user details included:"
     for LINE in "${FSTAB_USER_FILES[@]}"; do
-      print_output "$(indent "$(print_path "$LINE")")"
+      print_output "$(indent "$(print_path "${LINE}")")"
     done
     print_ln "no_log"
   else
@@ -81,7 +81,7 @@ check_fstab()
   if [[ ${#FSTAB_PASS_FILES[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#FSTAB_PASS_FILES[@]}"" fstab files with password credentials included:"
     for LINE in "${FSTAB_PASS_FILES[@]}"; do
-      print_output "$(indent "$(print_path "$LINE")")"
+      print_output "$(indent "$(print_path "${LINE}")")"
     done
     print_ln "no_log"
   else

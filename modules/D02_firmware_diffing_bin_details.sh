@@ -24,11 +24,11 @@ D02_firmware_diffing_bin_details() {
   module_title "Firmware differ - binary details"
   local NEG_LOG=0
 
-  if ! [[ -f "$FIRMWARE_PATH" ]]; then
+  if ! [[ -f "${FIRMWARE_PATH}" ]]; then
     print_output "[-] No 1st file for diffing provided"
     return
   fi
-  if ! [[ -f "$FIRMWARE_PATH1" ]]; then
+  if ! [[ -f "${FIRMWARE_PATH1}" ]]; then
     print_output "[-] No 2nd file for diffing provided"
     return
   fi
@@ -53,8 +53,8 @@ D02_firmware_diffing_bin_details() {
   print_fw_file_details "${FIRMWARE_PATH}"
   # generate_pixde "${FIRMWARE_PATH}"
   fw_bin_detector "${FIRMWARE_PATH}"
-  if [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
-    mv "$LOG_DIR"/firmware_entropy.png "${LOG_PATH_MODULE}"/firmware1_entropy.png
+  if [[ -f "${LOG_DIR}"/firmware_entropy.png ]]; then
+    mv "${LOG_DIR}"/firmware_entropy.png "${LOG_PATH_MODULE}"/firmware1_entropy.png
     write_link "${LOG_PATH_MODULE}"/firmware1_entropy.png
   fi
 
@@ -64,10 +64,10 @@ D02_firmware_diffing_bin_details() {
   print_fw_file_details "${FIRMWARE_PATH1}"
   # generate_pixde "${FIRMWARE_PATH1}"
   fw_bin_detector "${FIRMWARE_PATH1}"
-  if [[ -f "$LOG_DIR"/firmware_entropy.png ]]; then
-    mv "$LOG_DIR"/firmware_entropy.png "${LOG_PATH_MODULE}"/firmware2_entropy.png
+  if [[ -f "${LOG_DIR}"/firmware_entropy.png ]]; then
+    mv "${LOG_DIR}"/firmware_entropy.png "${LOG_PATH_MODULE}"/firmware2_entropy.png
     write_link "${LOG_PATH_MODULE}"/firmware2_entropy.png
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }

@@ -26,38 +26,38 @@ S23_lua_check()
   export S23_ISSUE_FOUND=0
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnarabilities detected" "common linux file"
-  mapfile -t S23_LUA_SCRIPTS < <(find "$FIRMWARE_PATH" -xdev -type f -iname "*.lua" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t S23_LUA_SCRIPTS < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   sub_module_title "LUA linter checks module"
 
   for LUA_SCRIPT in "${S23_LUA_SCRIPTS[@]}" ; do
-    if [[ "$THREADED" -eq 1 ]]; then
+    if [[ "${THREADED}" -eq 1 ]]; then
       # linting check:
-      s23_luacheck "$LUA_SCRIPT" &
+      s23_luacheck "${LUA_SCRIPT}" &
       local TMP_PID="$!"
-      store_kill_pids "$TMP_PID"
-      WAIT_PIDS_S23+=( "$TMP_PID" )
-      max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S23[@]}"
+      store_kill_pids "${TMP_PID}"
+      WAIT_PIDS_S23+=( "${TMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S23[@]}"
       continue
     else
-      s23_luacheck "$LUA_SCRIPT"
+      s23_luacheck "${LUA_SCRIPT}"
     fi
   done
 
-  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S23[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S23[@]}"
 
   # simple lua checks to identify files which should be analysed in more detail
   print_ln
   s23_luaseccheck
 
-  if [[ "$S23_LUA_VULNS" -gt 0 ]]; then
+  if [[ "${S23_LUA_VULNS}" -gt 0 ]]; then
     print_ln
-    print_output "[+] Found ""$ORANGE""$S23_LUA_VULNS"" security issues""$GREEN"" in ""$ORANGE""${#LUA_CGI_FILES[@]}""$GREEN"" lua files""$NC""\\n"
+    print_output "[+] Found ""${ORANGE}""${S23_LUA_VULNS}"" security issues""${GREEN}"" in ""${ORANGE}""${#LUA_CGI_FILES[@]}""${GREEN}"" lua files""${NC}""\\n"
   fi
 
   write_log ""
-  write_log "[*] Statistics:$S23_LUA_VULNS:${#LUA_CGI_FILES[@]}"
-  module_end_log "${FUNCNAME[0]}" "$S23_ISSUE_FOUND"
+  write_log "[*] Statistics:${S23_LUA_VULNS}:${#LUA_CGI_FILES[@]}"
+  module_end_log "${FUNCNAME[0]}" "${S23_ISSUE_FOUND}"
 }
 
 # this is a very basic checker for LUA issues
@@ -77,11 +77,11 @@ s23_luaseccheck() {
        | sed 's/.*cgilua.QUERY.//' | grep -o -E "^[[:alnum:]]+" | grep -v "^local$" | sort -u || true)
 
     for ENTRY in "${QUERY_ENTRIES[@]}"; do
-      ENTRY="$(echo "$ENTRY" | tr -dc '[:print:]')"
-      [[ -z "$ENTRY" ]] && continue
-      ! [[ "$ENTRY" =~ ^[a-zA-Z0-9_-]+$ ]] && continue
+      ENTRY="$(echo "${ENTRY}" | tr -dc '[:print:]')"
+      [[ -z "${ENTRY}" ]] && continue
+      ! [[ "${ENTRY}" =~ ^[a-zA-Z0-9_-]+$ ]] && continue
 
-      if grep "$ENTRY" "${QUERY_FILE}" | grep -E -q "io\.(p)?open"; then
+      if grep "${ENTRY}" "${QUERY_FILE}" | grep -E -q "io\.(p)?open"; then
         # possible file access
         S23_LUA_VULNS=$((S23_LUA_VULNS+1))
         ISSUES_FILE=$((ISSUES_FILE+1))
@@ -89,7 +89,7 @@ s23_luaseccheck() {
         S23_ISSUE_FOUND=1
         GPT_PRIO=$((GPT_PRIO+1))
       fi
-      if grep "$ENTRY" "${QUERY_FILE}" | grep -q "os.execute"; then
+      if grep "${ENTRY}" "${QUERY_FILE}" | grep -q "os.execute"; then
         # command exec - critical
         S23_LUA_VULNS=$((S23_LUA_VULNS+1))
         ISSUES_FILE=$((ISSUES_FILE+1))
@@ -110,10 +110,10 @@ s23_luaseccheck() {
     fi
 
     if [[ "${ISSUES_FILE}" -gt 0 ]]; then
-      write_csv_log "$(print_path "$QUERY_FILE")" "0" "$ISSUES_FILE" "NA"
+      write_csv_log "$(print_path "${QUERY_FILE}")" "0" "${ISSUES_FILE}" "NA"
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
         GPT_ANCHOR_="$(openssl rand -hex 8)"
-        # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+        # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
         write_csv_gpt_tmp "$(cut_path "${QUERY_FILE}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${CSV_DIR}/s23_lua_check.csv" "" ""
         # add ChatGPT link
         print_ln
@@ -129,20 +129,20 @@ s23_luacheck() {
   local NAME=""
   local LUA_LOG=""
 
-  NAME=$(basename "$LUA_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
-  LUA_LOG="$LOG_PATH_MODULE""/luacheck_""$NAME"".txt"
-  luacheck "$LUA_SCRIPT_" > "$LUA_LOG" 2> /dev/null || true
+  NAME=$(basename "${LUA_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
+  LUA_LOG="${LOG_PATH_MODULE}""/luacheck_""${NAME}"".txt"
+  luacheck "${LUA_SCRIPT_}" > "${LUA_LOG}" 2> /dev/null || true
 
-  ISSUES=$(strip_color_codes "$(grep Total "$LUA_LOG" | awk '{print $2}' 2> /dev/null || true)")
-  if [[ "$ISSUES" -gt 0 ]] ; then
+  ISSUES=$(strip_color_codes "$(grep Total "${LUA_LOG}" | awk '{print $2}' 2> /dev/null || true)")
+  if [[ "${ISSUES}" -gt 0 ]] ; then
     S23_ISSUE_FOUND=1
     # check if this is common linux file:
     local COMMON_FILES_FOUND
     local CFF
-    if [[ -f "$BASE_LINUX_FILES" ]]; then
+    if [[ -f "${BASE_LINUX_FILES}" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
       CFF="no"
-      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+      if grep -q "^${NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
         CFF="yes"
       fi
@@ -150,7 +150,7 @@ s23_luacheck() {
       COMMON_FILES_FOUND=""
       CFF="NA"
     fi
-    print_output "[+] Found ""$ORANGE""$ISSUES"" coding issues""$GREEN"" in lua script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$LUA_SCRIPT_")" "" "$LUA_LOG"
-    write_csv_log "$(print_path "$LUA_SCRIPT_")" "$ISSUES" "0" "$CFF"
+    print_output "[+] Found ""${ORANGE}""${ISSUES}"" coding issues""${GREEN}"" in lua script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${LUA_SCRIPT_}")" "" "${LUA_LOG}"
+    write_csv_log "$(print_path "${LUA_SCRIPT_}")" "${ISSUES}" "0" "${CFF}"
   fi
 }

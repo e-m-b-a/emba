@@ -20,32 +20,32 @@ S107_deep_password_search()
   module_title "Deep analysis of files for password hashes"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local PW_HASH_CONFIG="$CONFIG_DIR"/password_regex.cfg
+  local PW_HASH_CONFIG="${CONFIG_DIR}"/password_regex.cfg
   local PW_COUNTER=0
   local PW_PATH=""
   local PW_HASHES=()
   local PW_HASH=""
 
-  find "$FIRMWARE_PATH" -xdev -type f -exec grep --color -n -a -E -H -f "$PW_HASH_CONFIG" {} \; > "$TMP_DIR"/pw_hashes.txt
+  find "${FIRMWARE_PATH}" -xdev -type f -exec grep --color -n -a -E -H -f "${PW_HASH_CONFIG}" {} \; > "${TMP_DIR}"/pw_hashes.txt
 
-  if [[ $(wc -l "$TMP_DIR"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
+  if [[ $(wc -l "${TMP_DIR}"/pw_hashes.txt | awk '{print $1}') -gt 0 ]]; then
     print_output "[+] Found the following password hash values:"
     write_csv_log "PW_PATH" "PW_HASH"
     while read -r PW_HASH; do
-      PW_PATH=$(echo "$PW_HASH" | cut -d: -f1)
-      mapfile -t PW_HASHES < <(strings "$PW_PATH" | grep --color -a -E -f "$PW_HASH_CONFIG")
+      PW_PATH=$(echo "${PW_HASH}" | cut -d: -f1)
+      mapfile -t PW_HASHES < <(strings "${PW_PATH}" | grep --color -a -E -f "${PW_HASH_CONFIG}")
       for PW_HASH in "${PW_HASHES[@]}"; do
-        print_output "[+] PATH: $ORANGE$(print_path "$PW_PATH")$GREEN\t-\tHash: $ORANGE$PW_HASH$GREEN."
-        write_csv_log "NA" "$PW_PATH" "$PW_HASH"
+        print_output "[+] PATH: ${ORANGE}$(print_path "${PW_PATH}")${GREEN}\t-\tHash: ${ORANGE}${PW_HASH}${GREEN}."
+        write_csv_log "NA" "${PW_PATH}" "${PW_HASH}"
         ((PW_COUNTER+=1))
       done
-    done < "$TMP_DIR"/pw_hashes.txt
+    done < "${TMP_DIR}"/pw_hashes.txt
 
     print_ln
-    print_output "[*] Found $ORANGE$PW_COUNTER$NC password hashes."
+    print_output "[*] Found ${ORANGE}${PW_COUNTER}${NC} password hashes."
   fi
   write_log ""
-  write_log "[*] Statistics:$PW_COUNTER"
+  write_log "[*] Statistics:${PW_COUNTER}"
 
-  module_end_log "${FUNCNAME[0]}" "$PW_COUNTER"
+  module_end_log "${FUNCNAME[0]}" "${PW_COUNTER}"
 }
