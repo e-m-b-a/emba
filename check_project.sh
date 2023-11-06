@@ -185,7 +185,7 @@ check() {
   echo -e "\\n""${GREEN}""Run shellcheck and semgrep:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
     echo -e "\\n""${GREEN}""Run ${ORANGE}shellcheck${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    if shellcheck -x -P "${INSTALLER_DIR}":"${HELP_DIR}":"${MOD_DIR}":"${MOD_DIR_LOCAL}" "${SOURCE}" || [[ $? -ne 1 && $? -ne 2 ]]; then
+    if shellcheck -x -o require-variable-braces -P "${INSTALLER_DIR}":"${HELP_DIR}":"${MOD_DIR}":"${MOD_DIR_LOCAL}" "${SOURCE}" || [[ $? -ne 1 && $? -ne 2 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"

@@ -239,6 +239,7 @@ enable_strict_mode() {
     # http://redsymbol.net/articles/unofficial-bash-strict-mode/
     # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
     # shellcheck source=./installer/wickStrictModeFail.sh
+    # shellcheck disable=SC1091
     source ./installer/wickStrictModeFail.sh
     load_strict_mode_settings
     trap 'wickStrictModeFail $? | tee -a "${LOG_DIR}"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
