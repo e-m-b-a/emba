@@ -27,5 +27,5 @@ jobs:
       - name: ShellCheck EMBA
         uses: ludeeus/action-shellcheck@master
         env:
-          SHELLCHECK_OPTS: -x
+          SHELLCHECK_OPTS: -x -o require-variable-braces
 
