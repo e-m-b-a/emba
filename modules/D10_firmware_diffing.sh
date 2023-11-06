@@ -90,7 +90,7 @@ D10_firmware_diffing() {
       analyse_fw_files "${FW_FILE1}"
     fi
   done
-  [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10[@]}"
 
   check_for_new_files
 
@@ -228,17 +228,17 @@ analyse_fw_files() {
             # walk through all changed functions:
             for FCT in "${UNMATCHED_FCTs[@]}"; do
               # Threading currently mangles the links
-              if [[ "$THREADED" -eq 2 ]]; then
+              if [[ "${THREADED}" -eq 2 ]]; then
                 analyse_bin_fct "${FCT}" &
                 local TMP_PID="$!"
-                store_kill_pids "$TMP_PID"
-                WAIT_PIDS_D10+=( "$TMP_PID" )
-                max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_D10[@]}"
+                store_kill_pids "${TMP_PID}"
+                WAIT_PIDS_D10+=( "${TMP_PID}" )
+                max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_D10[@]}"
               else
                 analyse_bin_fct "${FCT}"
               fi
             done
-            [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10[@]}"
+            [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10[@]}"
           fi
           write_log "" "${LOG_FILE_DETAILS}"
         fi

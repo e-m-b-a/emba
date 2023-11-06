@@ -253,7 +253,6 @@ dependency_check()
                 -H "Authorization: Bearer ${OPENAI_API_KEY}" \
                 -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json)
 
-        echo "API request finished ... $HTTP_CODE_"
         if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
           echo -e "${GREEN}""ok""${NC}"
           rm /tmp/chatgpt-test.json
