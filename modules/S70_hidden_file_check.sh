@@ -24,12 +24,12 @@ S70_hidden_file_check()
   local HIDDEN_FILES=()
   local LINE=""
 
-  mapfile -t HIDDEN_FILES < <(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -name ".*" -type f)
+  mapfile -t HIDDEN_FILES < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name ".*" -type f)
 
   if [[ ${#HIDDEN_FILES[@]} -gt 0 ]] ; then
     print_output "[+] Found ""${#HIDDEN_FILES[@]}"" hidden files:"
     for LINE in "${HIDDEN_FILES[@]}" ; do
-      print_output "$(indent "$(orange "$(print_path "$LINE")")")"
+      print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
     done
   else
     print_output "[-] No hidden files found!"

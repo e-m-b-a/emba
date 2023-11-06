@@ -30,86 +30,86 @@ S20_shell_check()
   local SEMGREP=1
   local NEG_LOG=0
 
-  mapfile -t SH_SCRIPTS < <( find "$FIRMWARE_PATH" -xdev -type f -type f -exec file {} \; | grep "shell script, ASCII text executable" 2>/dev/null | cut -d: -f1 | sort -u || true )
+  mapfile -t SH_SCRIPTS < <( find "${FIRMWARE_PATH}" -xdev -type f -type f -exec file {} \; | grep "shell script, ASCII text executable" 2>/dev/null | cut -d: -f1 | sort -u || true )
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
 
-  if [[ $SHELLCHECK -eq 1 ]] ; then
+  if [[ ${SHELLCHECK} -eq 1 ]] ; then
     sub_module_title "Check scripts with shellcheck"
     for SH_SCRIPT in "${SH_SCRIPTS[@]}" ; do
-      if ( file "$SH_SCRIPT" | grep -q "shell script" ) ; then
+      if ( file "${SH_SCRIPT}" | grep -q "shell script" ) ; then
         ((S20_SCRIPTS+=1))
-        if [[ "$THREADED" -eq 1 ]]; then
-          s20_script_check "$SH_SCRIPT" &
+        if [[ "${THREADED}" -eq 1 ]]; then
+          s20_script_check "${SH_SCRIPT}" &
           local TMP_PID="$!"
-          store_kill_pids "$TMP_PID"
-          WAIT_PIDS_S20+=( "$TMP_PID" )
-          max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S20[@]}"
+          store_kill_pids "${TMP_PID}"
+          WAIT_PIDS_S20+=( "${TMP_PID}" )
+          max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S20[@]}"
           continue
         else
-          s20_script_check "$SH_SCRIPT"
+          s20_script_check "${SH_SCRIPT}"
         fi
       fi
     done
 
-    [[ "$THREADED" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S20[@]}"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S20[@]}"
 
-    if [[ -f "$TMP_DIR"/S20_VULNS.tmp ]]; then
-      S20_SHELL_VULNS=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/S20_VULNS.tmp)
-      rm "$TMP_DIR"/S20_VULNS.tmp
+    if [[ -f "${TMP_DIR}"/S20_VULNS.tmp ]]; then
+      S20_SHELL_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S20_VULNS.tmp)
+      rm "${TMP_DIR}"/S20_VULNS.tmp
     fi
-    [[ "$S20_SHELL_VULNS" -gt 0 ]] && NEG_LOG=1
+    [[ "${S20_SHELL_VULNS}" -gt 0 ]] && NEG_LOG=1
 
     print_ln
-    if [[ "$S20_SHELL_VULNS" -gt 0 ]]; then
+    if [[ "${S20_SHELL_VULNS}" -gt 0 ]]; then
       sub_module_title "Summary of shell issues (shellcheck)"
-      print_output "[+] Found ""$ORANGE""$S20_SHELL_VULNS"" issues""$GREEN"" in ""$ORANGE""$S20_SCRIPTS""$GREEN"" shell scripts""$NC""\\n"
+      print_output "[+] Found ""${ORANGE}""${S20_SHELL_VULNS}"" issues""${GREEN}"" in ""${ORANGE}""${S20_SCRIPTS}""${GREEN}"" shell scripts""${NC}""\\n"
     fi
     write_log ""
-    write_log "[*] Statistics:$S20_SHELL_VULNS:$S20_SCRIPTS"
+    write_log "[*] Statistics:${S20_SHELL_VULNS}:${S20_SCRIPTS}"
 
-    mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "$LOG_PATH_MODULE"/shellchecker_* 2>/dev/null | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1 || true)
+    mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "${LOG_PATH_MODULE}"/shellchecker_* 2>/dev/null | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1 || true)
     for VTYPE in "${S20_VULN_TYPES[@]}" ; do
-      print_output "$(indent "$NC""[""$GREEN""+""$NC""]""$GREEN"" ""$VTYPE""$NC")"
+      print_output "$(indent "${NC}""[""${GREEN}""+""${NC}""]""${GREEN}"" ""${VTYPE}""${NC}")"
     done
 
   else
     print_output "[-] Shellchecker is disabled ... no tests performed"
   fi
 
-  if [[ $SEMGREP -eq 1 ]] ; then
+  if [[ ${SEMGREP} -eq 1 ]] ; then
     sub_module_title "Check scripts with semgrep"
     local S20_SEMGREP_SCRIPTS=0
     local S20_SEMGREP_VULNS=0
-    local SHELL_LOG="$LOG_PATH_MODULE"/semgrep.log
+    local SHELL_LOG="${LOG_PATH_MODULE}"/semgrep.log
 
-    semgrep --disable-version-check --config "$EXT_DIR"/semgrep-rules/bash "$LOG_DIR"/firmware/ > "$SHELL_LOG" 2>&1 || true
+    semgrep --disable-version-check --config "${EXT_DIR}"/semgrep-rules/bash "${LOG_DIR}"/firmware/ > "${SHELL_LOG}" 2>&1 || true
 
-    if [[ -f "$SHELL_LOG" ]]; then
-      S20_SEMGREP_ISSUES=$(grep "\ findings\." "$SHELL_LOG" | cut -d: -f2 | awk '{print $1}' || true)
-      S20_SEMGREP_VULNS=$(grep -c "semgrep-rules.bash.lang.security" "$SHELL_LOG" || true)
-      S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "$SHELL_LOG" | awk '{print $5}' || true)
+    if [[ -f "${SHELL_LOG}" ]]; then
+      S20_SEMGREP_ISSUES=$(grep "\ findings\." "${SHELL_LOG}" | cut -d: -f2 | awk '{print $1}' || true)
+      S20_SEMGREP_VULNS=$(grep -c "semgrep-rules.bash.lang.security" "${SHELL_LOG}" || true)
+      S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "${SHELL_LOG}" | awk '{print $5}' || true)
       print_ln
       sub_module_title "Summary of shell issues (semgrep)"
-      if [[ "$S20_SEMGREP_VULNS" -gt 0 ]]; then
-        print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" (""$ORANGE""$S20_SEMGREP_VULNS"" vulnerabilites${GREEN}) in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
-      elif [[ "$S20_SEMGREP_ISSUES" -gt 0 ]]; then
-        print_output "[+] Found ""$ORANGE""$S20_SEMGREP_ISSUES"" issues""$GREEN"" in ""$ORANGE""$S20_SEMGREP_SCRIPTS""$GREEN"" shell scripts""$NC" "" "$SHELL_LOG"
+      if [[ "${S20_SEMGREP_VULNS}" -gt 0 ]]; then
+        print_output "[+] Found ""${ORANGE}""${S20_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${S20_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${S20_SEMGREP_SCRIPTS}""${GREEN}"" shell scripts""${NC}" "" "${SHELL_LOG}"
+      elif [[ "${S20_SEMGREP_ISSUES}" -gt 0 ]]; then
+        print_output "[+] Found ""${ORANGE}""${S20_SEMGREP_ISSUES}"" issues""${GREEN}"" in ""${ORANGE}""${S20_SEMGREP_SCRIPTS}""${GREEN}"" shell scripts""${NC}" "" "${SHELL_LOG}"
       fi
       # highlight security findings in semgrep log:
-      sed -i -r "s/.*external\.semgrep-rules\.bash\.lang\.security.*/\x1b[32m&\x1b[0m/" "$SHELL_LOG"
+      sed -i -r "s/.*external\.semgrep-rules\.bash\.lang\.security.*/\x1b[32m&\x1b[0m/" "${SHELL_LOG}"
     fi
 
-    [[ "$S20_SEMGREP_ISSUES" -gt 0 ]] && NEG_LOG=1
+    [[ "${S20_SEMGREP_ISSUES}" -gt 0 ]] && NEG_LOG=1
 
     write_log ""
-    write_log "[*] Statistics1:$S20_SEMGREP_ISSUES:$S20_SEMGREP_SCRIPTS"
+    write_log "[*] Statistics1:${S20_SEMGREP_ISSUES}:${S20_SEMGREP_SCRIPTS}"
   else
     print_output "[-] Semgrepper is disabled ... no tests performed"
   fi
 
   s20_eval_script_check "${SH_SCRIPTS[@]}"
 
-  module_end_log "${FUNCNAME[0]}" "$NEG_LOG"
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
 
 s20_eval_script_check() {
@@ -124,15 +124,15 @@ s20_eval_script_check() {
     print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
     if grep "eval " "${SH_SCRIPT}" | grep -q -v "^#.*"; then
       SH_SCRIPT_NAME="$(basename "${SH_SCRIPT}")"
-      local SHELL_LOG="$LOG_PATH_MODULE"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
-      ! [[ -d "$LOG_PATH_MODULE"/sh_eval_sources/ ]] && mkdir "$LOG_PATH_MODULE"/sh_eval_sources/
+      local SHELL_LOG="${LOG_PATH_MODULE}"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
+      ! [[ -d "${LOG_PATH_MODULE}"/sh_eval_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/sh_eval_sources/
       [[ -f "${SH_SCRIPT}" ]] && cp "${SH_SCRIPT}" "${SHELL_LOG}"
       sed -i -r "s/.*eval\ .*/\x1b[32m&\x1b[0m/" "${SHELL_LOG}"
       print_output "[+] Found ${ORANGE}eval${GREEN} usage in ${ORANGE}${SH_SCRIPT_NAME}${NC}" "" "${SHELL_LOG}"
 
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
         GPT_ANCHOR_="$(openssl rand -hex 8)"
-        # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+        # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-$GPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
         write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
         # add ChatGPT link
         printf '%s\n\n' "" >> "${SHELL_LOG}"
@@ -149,12 +149,12 @@ s20_script_check() {
   local SHELL_LOG=""
   local VULNS=""
 
-  NAME=$(basename "$SH_SCRIPT_" 2> /dev/null | sed -e 's/:/_/g')
-  SHELL_LOG="$LOG_PATH_MODULE""/shellchecker_""$NAME"".txt"
-  shellcheck -C "$SH_SCRIPT_" > "$SHELL_LOG" 2> /dev/null || true
-  VULNS=$(grep -c "\\^-- SC" "$SHELL_LOG" 2> /dev/null || true)
+  NAME=$(basename "${SH_SCRIPT_}" 2> /dev/null | sed -e 's/:/_/g')
+  SHELL_LOG="${LOG_PATH_MODULE}""/shellchecker_""${NAME}"".txt"
+  shellcheck -C "${SH_SCRIPT_}" > "${SHELL_LOG}" 2> /dev/null || true
+  VULNS=$(grep -c "\\^-- SC" "${SHELL_LOG}" 2> /dev/null || true)
 
-  s20_reporter "$VULNS" "$SH_SCRIPT_" "$SHELL_LOG"
+  s20_reporter "${VULNS}" "${SH_SCRIPT_}" "${SHELL_LOG}"
 }
 
 s20_reporter() {
@@ -164,13 +164,13 @@ s20_reporter() {
   local GPT_PRIO_=2
   local GPT_ANCHOR_=""
 
-  if [[ "$VULNS" -ne 0 ]] ; then
+  if [[ "${VULNS}" -ne 0 ]] ; then
     # check if this is common linux file:
     local COMMON_FILES_FOUND
-    if [[ -f "$BASE_LINUX_FILES" ]]; then
+    if [[ -f "${BASE_LINUX_FILES}" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
       CFF="no"
-      if grep -q "^$NAME\$" "$BASE_LINUX_FILES" 2>/dev/null; then
+      if grep -q "^${NAME}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
         COMMON_FILES_FOUND="(""${CYAN}""common linux file: yes""${GREEN}"")"
         CFF="yes"
       fi
@@ -178,23 +178,23 @@ s20_reporter() {
       COMMON_FILES_FOUND=""
     fi
 
-    if [[ "$VULNS" -gt 20 ]] ; then
-      print_output "[+] Found ""$RED""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
+    if [[ "${VULNS}" -gt 20 ]] ; then
+      print_output "[+] Found ""${RED}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${SH_SCRIPT}")" "" "${SHELL_LOG}"
       GPT_PRIO_=1
     else
-      print_output "[+] Found ""$ORANGE""$VULNS"" issues""$GREEN"" in script ""$COMMON_FILES_FOUND"":""$NC"" ""$(print_path "$SH_SCRIPT")" "" "$SHELL_LOG"
+      print_output "[+] Found ""${ORANGE}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${SH_SCRIPT}")" "" "${SHELL_LOG}"
     fi
-    write_csv_log "$(print_path "$SH_SCRIPT")" "$VULNS" "$CFF" "NA"
+    write_csv_log "$(print_path "${SH_SCRIPT}")" "${VULNS}" "${CFF}" "NA"
 
     if [[ "${GPT_OPTION}" -gt 0 ]]; then
       GPT_ANCHOR_="$(openssl rand -hex 8)"
-      # "${GPT_INPUT_FILE_}" "$GPT_ANCHOR_" "GPT-Prio-$GPT_PRIO_" "$GPT_QUESTION_" "$GPT_OUTPUT_FILE_" "cost=$GPT_TOKENS_" "$GPT_RESPONSE_"
+      # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-$GPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
       write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
       # add ChatGPT link
       printf '%s\n\n' "" >> "${SHELL_LOG}"
       write_anchor_gpt "${GPT_ANCHOR_}" "${SHELL_LOG}"
     fi
 
-    echo "$VULNS" >> "$TMP_DIR"/S20_VULNS.tmp
+    echo "${VULNS}" >> "${TMP_DIR}"/S20_VULNS.tmp
   fi
 }

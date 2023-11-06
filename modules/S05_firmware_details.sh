@@ -26,21 +26,21 @@ S05_firmware_details()
   local DETECTED_DIR
 
   # we use the file FILE_ARR from helpers module
-  if [[ $RTOS -eq 0 ]]; then
+  if [[ ${RTOS} -eq 0 ]]; then
     # Linux:
-    DETECTED_DIR=$(find "$FIRMWARE_PATH" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
+    DETECTED_DIR=$(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
   else
     # RTOS:
-    DETECTED_DIR=$(find "$OUTPUT_DIR" -xdev -type d 2>/dev/null | wc -l)
+    DETECTED_DIR=$(find "${OUTPUT_DIR}" -xdev -type d 2>/dev/null | wc -l)
   fi
 
-  print_output "[*] $ORANGE${#FILE_ARR[@]}$NC files and $ORANGE$DETECTED_DIR$NC directories detected."
+  print_output "[*] ${ORANGE}${#FILE_ARR[@]}${NC} files and ${ORANGE}${DETECTED_DIR}${NC} directories detected."
 
   release_info
   filesystem_tree
 
   write_log ""
-  write_log "[*] Statistics:${#FILE_ARR[@]}:$DETECTED_DIR"
+  write_log "[*] Statistics:${#FILE_ARR[@]}:${DETECTED_DIR}"
 
   module_end_log "${FUNCNAME[0]}" "${#FILE_ARR[@]}"
 }
@@ -48,23 +48,23 @@ S05_firmware_details()
 filesystem_tree() {
   sub_module_title "Filesystem information"
   write_anchor "file_dirs"
-  if [[ $RTOS -eq 0 ]]; then
-    local LPATH="$FIRMWARE_PATH"
+  if [[ ${RTOS} -eq 0 ]]; then
+    local LPATH="${FIRMWARE_PATH}"
   else
-    local LPATH="$OUTPUT_DIR"
+    local LPATH="${OUTPUT_DIR}"
   fi
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
-    if [[ $FORMAT_LOG -eq 1 ]] ; then
-      tree -p -s -a -C "$LPATH" >> "$LOG_FILE" || true
+    if [[ ${FORMAT_LOG} -eq 1 ]] ; then
+      tree -p -s -a -C "${LPATH}" >> "${LOG_FILE}" || true
     else
-      tree -p -s -a -n "$LPATH" >> "$LOG_FILE" || true
+      tree -p -s -a -n "${LPATH}" >> "${LOG_FILE}" || true
     fi
   else
-    if [[ $FORMAT_LOG -eq 1 ]] ; then
-      ls -laR "$LPATH" >> "$LOG_FILE"
+    if [[ ${FORMAT_LOG} -eq 1 ]] ; then
+      ls -laR "${LPATH}" >> "${LOG_FILE}"
     else
-      ls -laR --color=never "$LPATH" >> "$LOG_FILE"
+      ls -laR --color=never "${LPATH}" >> "${LOG_FILE}"
     fi
   fi
 }
@@ -76,22 +76,22 @@ release_info() {
   local RELEASE=""
 
   declare -a RELEASE_STUFF=()
-  mapfile -t RELEASE_STUFF < <(config_find "$CONFIG_DIR""/release_files.cfg")
+  mapfile -t RELEASE_STUFF < <(config_find "${CONFIG_DIR}""/release_files.cfg")
   if [[ "${RELEASE_STUFF[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#RELEASE_STUFF[@]}" -gt 0 ]] ; then
     print_output "[+] Specific release/version information of target:"
     for R_INFO in "${RELEASE_STUFF[@]}" ; do
-      if [[ -f "$R_INFO" ]] ; then
-        if file "$R_INFO" | grep -a -q text; then
-          print_output "\\n""$( print_path "$R_INFO")"
-          RELEASE="$( cat "$R_INFO" )"
-          if [[ "$RELEASE" ]] ; then
+      if [[ -f "${R_INFO}" ]] ; then
+        if file "${R_INFO}" | grep -a -q text; then
+          print_output "\\n""$( print_path "${R_INFO}")"
+          RELEASE="$( cat "${R_INFO}" )"
+          if [[ "${RELEASE}" ]] ; then
             print_ln
-            print_output "$(indent "$(magenta "$RELEASE")")"
+            print_output "$(indent "$(magenta "${RELEASE}")")"
           fi
         fi
       else
-        print_output "\\n""$(magenta "Directory:")"" ""$( print_path "$R_INFO")""\\n"
+        print_output "\\n""$(magenta "Directory:")"" ""$( print_path "${R_INFO}")""\\n"
       fi
     done
   else

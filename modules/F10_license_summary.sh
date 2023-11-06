@@ -34,8 +34,8 @@ F10_license_summary() {
   local LICENSE=""
   local TYPE=""
 
-  mapfile -t LICENSE_DETECTION_STATIC < <(grep -v "version_rule" "$CSV_DIR"/s09_*.csv 2>/dev/null | cut -d\; -f1,4,5 | sort -u || true)
-  mapfile -t LICENSE_DETECTION_DYN < <(grep -v "version_rule" "$CSV_DIR"/s116_*.csv 2>/dev/null | cut -d\; -f1,4,5 |sort -u || true)
+  mapfile -t LICENSE_DETECTION_STATIC < <(grep -v "version_rule" "${CSV_DIR}"/s09_*.csv 2>/dev/null | cut -d\; -f1,4,5 | sort -u || true)
+  mapfile -t LICENSE_DETECTION_DYN < <(grep -v "version_rule" "${CSV_DIR}"/s116_*.csv 2>/dev/null | cut -d\; -f1,4,5 |sort -u || true)
   # TODO: Currently the final kernel details from s25 are missing
 
   write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
@@ -44,16 +44,16 @@ F10_license_summary() {
   if [[ "${#LICENSE_DETECTION_STATIC[@]}" -gt 0 ]]; then
     TYPE="static"
     for ENTRY in "${LICENSE_DETECTION_STATIC[@]}"; do
-      if [[ -z "$ENTRY" ]]; then
+      if [[ -z "${ENTRY}" ]]; then
         continue
       fi
 
-      BINARY="$(safe_echo "$ENTRY" | cut -d\; -f1)"
-      VERSION="$(safe_echo "$ENTRY" | cut -d\; -f2 | cut -d: -f2-)"
-      LICENSE="$(safe_echo "$ENTRY" |  cut -d\; -f3)"
+      BINARY="$(safe_echo "${ENTRY}" | cut -d\; -f1)"
+      VERSION="$(safe_echo "${ENTRY}" | cut -d\; -f2 | cut -d: -f2-)"
+      LICENSE="$(safe_echo "${ENTRY}" |  cut -d\; -f3)"
 
-      print_output "[+] Binary: $ORANGE$(basename "$BINARY" | cut -d\  -f1)$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
-      write_csv_log "$BINARY" "$VERSION_RULE" "$VERSION" "$CSV_RULE" "$LICENSE" "$TYPE"
+      print_output "[+] Binary: ${ORANGE}$(basename "${BINARY}" | cut -d\  -f1)${GREEN} / Version: ${ORANGE}${VERSION}${GREEN} / License: ${ORANGE}${LICENSE}${NC}"
+      write_csv_log "${BINARY}" "${VERSION_RULE}" "${VERSION}" "${CSV_RULE}" "${LICENSE}" "${TYPE}"
       ((COUNT_LIC+=1))
     done
   fi
@@ -62,19 +62,19 @@ F10_license_summary() {
   if [[ "${#LICENSE_DETECTION_DYN[@]}" -gt 0 ]]; then
     TYPE="emulation"
     for ENTRY in "${LICENSE_DETECTION_DYN[@]}"; do
-      if [[ -z "$ENTRY" ]]; then
+      if [[ -z "${ENTRY}" ]]; then
         continue
       fi
 
-      BINARY="$(safe_echo "$ENTRY" | cut -d\; -f1)"
-      VERSION="$(safe_echo "$ENTRY" | cut -d\; -f2 | cut -d: -f2-)"
-      LICENSE="$(safe_echo "$ENTRY" |  cut -d\; -f3)"
+      BINARY="$(safe_echo "${ENTRY}" | cut -d\; -f1)"
+      VERSION="$(safe_echo "${ENTRY}" | cut -d\; -f2 | cut -d: -f2-)"
+      LICENSE="$(safe_echo "${ENTRY}" |  cut -d\; -f3)"
 
-      print_output "[+] Binary: $ORANGE$(basename "$BINARY")$GREEN / Version: $ORANGE$VERSION$GREEN / License: $ORANGE$LICENSE$NC"
-      write_csv_log "$BINARY" "$VERSION_RULE" "$VERSION" "$CSV_RULE" "$LICENSE" "$TYPE"
+      print_output "[+] Binary: ${ORANGE}$(basename "${BINARY}")${GREEN} / Version: ${ORANGE}${VERSION}${GREEN} / License: ${ORANGE}${LICENSE}${NC}"
+      write_csv_log "${BINARY}" "${VERSION_RULE}" "${VERSION}" "${CSV_RULE}" "${LICENSE}" "${TYPE}"
       ((COUNT_LIC+=1))
     done
   fi
 
-  module_end_log "${FUNCNAME[0]}" "$COUNT_LIC"
+  module_end_log "${FUNCNAME[0]}" "${COUNT_LIC}"
 }

@@ -23,12 +23,12 @@ S106_deep_key_search()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local PATTERNS
-  PATTERNS="$(config_list "$CONFIG_DIR""/deep_key_search.cfg" "")"
+  PATTERNS="$(config_list "${CONFIG_DIR}""/deep_key_search.cfg" "")"
 
-  readarray -t PATTERN_LIST < <(printf '%s' "$PATTERNS")
+  readarray -t PATTERN_LIST < <(printf '%s' "${PATTERNS}")
 
   for PATTERN in "${PATTERN_LIST[@]}";do
-    print_output "[*] Pattern: $PATTERN"
+    print_output "[*] Pattern: ${PATTERN}"
   done
 
   SORTED_OCC_LIST=()
@@ -47,36 +47,36 @@ deep_key_search() {
   local FILE_NAME=""
 
   for PATTERN in "${PATTERN_LIST[@]}" ; do
-    GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""$PATTERN"".{0,15}" )
+    GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""${PATTERN}"".{0,15}" )
   done
   print_ln
-  readarray -t MATCH_FILES < <(grep -E -l -R "${GREP_PATTERN_COMMAND[@]}" -D skip "$LOG_DIR"/firmware 2>/dev/null || true)
+  readarray -t MATCH_FILES < <(grep -E -l -R "${GREP_PATTERN_COMMAND[@]}" -D skip "${LOG_DIR}"/firmware 2>/dev/null || true)
   if [[ ${#MATCH_FILES[@]} -gt 0 ]] ; then
     for MATCH_FILE in "${MATCH_FILES[@]}" ; do
-      if ! [[ -f "$MATCH_FILE" ]]; then
+      if ! [[ -f "${MATCH_FILE}" ]]; then
         continue
       fi
 
-      FILE_NAME=$(basename "$MATCH_FILE")
+      FILE_NAME=$(basename "${MATCH_FILE}")
       # we just write the FILE_PATH in the beginning to the file (e.g., the log file is not available -> we create it)
-      if ! [[ -f "$LOG_PATH_MODULE"/deep_key_search_"$FILE_NAME".txt ]]; then
-        write_log "[*] FILE_PATH: $(print_path "$MATCH_FILE")" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
-        write_log "" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
+      if ! [[ -f "${LOG_PATH_MODULE}"/deep_key_search_"${FILE_NAME}".txt ]]; then
+        write_log "[*] FILE_PATH: $(print_path "${MATCH_FILE}")" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
+        write_log "" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
       fi
-      grep -A 2 --no-group-separator -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "$MATCH_FILE" 2>/dev/null | tr -d '\0' >> "$LOG_PATH_MODULE"/deep_key_search_"$FILE_NAME".txt || true
-      print_output "[+] $(print_path "$MATCH_FILE")"
-      write_link "$LOG_PATH_MODULE""/deep_key_search_""$FILE_NAME"".txt"
+      grep -A 2 --no-group-separator -E -n -a -h "${GREP_PATTERN_COMMAND[@]}" -D skip "${MATCH_FILE}" 2>/dev/null | tr -d '\0' >> "${LOG_PATH_MODULE}"/deep_key_search_"${FILE_NAME}".txt || true
+      print_output "[+] $(print_path "${MATCH_FILE}")"
+      write_link "${LOG_PATH_MODULE}""/deep_key_search_""${FILE_NAME}"".txt"
       local D_S_FINDINGS=""
       for PATTERN in "${PATTERN_LIST[@]}" ; do
-        F_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_"$FILE_NAME"".txt" || true)
-        if [[ $F_COUNT -gt 0 ]] ; then
-          D_S_FINDINGS="$D_S_FINDINGS""    ""$F_COUNT""\t:\t""$PATTERN""\n"
+        F_COUNT=$(grep -c "${PATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_"${FILE_NAME}"".txt" || true)
+        if [[ ${F_COUNT} -gt 0 ]] ; then
+          D_S_FINDINGS="${D_S_FINDINGS}""    ""${F_COUNT}""\t:\t""${PATTERN}""\n"
         fi
       done
-      print_output "$D_S_FINDINGS"
-      write_log "" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
-      write_log "[*] Deep search results:" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
-      write_log "$D_S_FINDINGS" "$LOG_PATH_MODULE/deep_key_search_$FILE_NAME.txt"
+      print_output "${D_S_FINDINGS}"
+      write_log "" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
+      write_log "[*] Deep search results:" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
+      write_log "${D_S_FINDINGS}" "${LOG_PATH_MODULE}/deep_key_search_${FILE_NAME}.txt"
     done
   fi
 }
@@ -84,9 +84,9 @@ deep_key_search() {
 deep_key_reporter() {
   OCC_LIST=()
   for PATTERN in "${PATTERN_LIST[@]}" ; do
-    P_COUNT=$(grep -c "$PATTERN" "$LOG_PATH_MODULE"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
-    if [[ "$P_COUNT" -gt 0 ]]; then
-      OCC_LIST=( "${OCC_LIST[@]}" "$P_COUNT"": ""$PATTERN" )
+    P_COUNT=$(grep -c "${PATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
+    if [[ "${P_COUNT}" -gt 0 ]]; then
+      OCC_LIST=( "${OCC_LIST[@]}" "${P_COUNT}"": ""${PATTERN}" )
     fi
   done
 
@@ -97,7 +97,7 @@ deep_key_reporter() {
       SORTED_OCC_LIST=("$(printf '%s\n' "${OCC_LIST[@]}" | sort -r --version-sort)")
       if [[ "${#SORTED_OCC_LIST[@]}" -gt 0 ]]; then
         for OCC in "${SORTED_OCC_LIST[@]}"; do
-          print_output "$( indent "$(orange "$OCC" )")""\n"
+          print_output "$( indent "$(orange "${OCC}" )")""\n"
         done
       fi
     fi

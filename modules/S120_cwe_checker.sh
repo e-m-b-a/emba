@@ -24,25 +24,25 @@ export THREAD_PRIO=1
 
 S120_cwe_checker()
 {
-  if [[ $CWE_CHECKER -eq 1 ]] ; then
+  if [[ ${CWE_CHECKER} -eq 1 ]] ; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Check binaries with cwe-checker"
     pre_module_reporter "${FUNCNAME[0]}"
     local CWE_CNT_=0
 
-    [[ "$IN_DOCKER" -eq 1 ]] && cwe_container_prepare
+    [[ "${IN_DOCKER}" -eq 1 ]] && cwe_container_prepare
 
     cwe_check
 
-    if [[ -f "$TMP_DIR"/CWE_CNT.tmp ]]; then
-      CWE_CNT_=$(awk '{sum += $1 } END { print sum }' "$TMP_DIR"/CWE_CNT.tmp || true)
+    if [[ -f "${TMP_DIR}"/CWE_CNT.tmp ]]; then
+      CWE_CNT_=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/CWE_CNT.tmp || true)
     fi
 
-    final_cwe_log "$CWE_CNT_"
+    final_cwe_log "${CWE_CNT_}"
 
     write_log ""
-    write_log "[*] Statistics:$CWE_CNT_"
-    module_end_log "${FUNCNAME[0]}" "$CWE_CNT_"
+    write_log "[*] Statistics:${CWE_CNT_}"
+    module_end_log "${FUNCNAME[0]}" "${CWE_CNT_}"
   else
     print_output "[!] Check with cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
@@ -53,61 +53,61 @@ cwe_container_prepare() {
   # as we are in a read only docker environment we need to trick a bit:
   # /root is mounted as a writable tempfs. With this we need to set it up
   # on every run from scratch:
-  if [[ -d "$EXT_DIR"/cwe_checker/.config ]]; then
+  if [[ -d "${EXT_DIR}"/cwe_checker/.config ]]; then
     print_output "[*] Restoring config directory in read-only container" "no_log"
-    if ! [[ -d "$HOME"/.config/ ]]; then
-      mkdir -p "$HOME"/.config
+    if ! [[ -d "${HOME}"/.config/ ]]; then
+      mkdir -p "${HOME}"/.config
     fi
-    cp -pr "$EXT_DIR"/cwe_checker/.config/cwe_checker "$HOME"/.config/
-    cp -pr "$EXT_DIR"/cwe_checker/.local/share "$HOME"/.local/
+    cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
+    cp -pr "${EXT_DIR}"/cwe_checker/.local/share "${HOME}"/.local/
   fi
-  if ! [[ -d "$HOME"/.cargo ]]; then
-    mkdir -p "$HOME"/.cargo/bin
+  if ! [[ -d "${HOME}"/.cargo ]]; then
+    mkdir -p "${HOME}"/.cargo/bin
   fi
-  if [[ -d "$EXT_DIR"/cwe_checker/bin ]]; then
+  if [[ -d "${EXT_DIR}"/cwe_checker/bin ]]; then
     print_output "[*] Restoring cargo bin directory in read-only container" "no_log"
-    cp -pr "$EXT_DIR"/cwe_checker/bin/* "$HOME"/.cargo/bin/
+    cp -pr "${EXT_DIR}"/cwe_checker/bin/* "${HOME}"/.cargo/bin/
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
     return
   fi
   # Todo: move this to dependency check
-  export PATH=$PATH:"$HOME"/.cargo/bin/:"$EXT_DIR"/jdk/bin/
+  export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
 }
 
 cwe_check() {
   local BINARY=""
 
-  if [[ -d "$HOME"/.cargo/bin ]]; then
-    export PATH="$PATH":"$HOME"/.cargo/bin
+  if [[ -d "${HOME}"/.cargo/bin ]]; then
+    export PATH="${PATH}":"${HOME}"/.cargo/bin
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
     return
   fi
 
   for BINARY in "${BINARIES[@]}" ; do
-    if ( file "$BINARY" | grep -q ELF ) ; then
+    if ( file "${BINARY}" | grep -q ELF ) ; then
       # do not try to analyze kernel modules:
-      [[ "$BINARY" == *".ko" ]] && continue
-      if [[ "$THREADED" -eq 1 ]]; then
+      [[ "${BINARY}" == *".ko" ]] && continue
+      if [[ "${THREADED}" -eq 1 ]]; then
         local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
-        if [[ $(grep -i -c S09_ "$LOG_DIR"/"$MAIN_LOG_FILE" || true) -eq 1 ]]; then
+        if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
           local MAX_MOD_THREADS=1
         fi
 
-        cwe_checker_threaded "$BINARY" &
+        cwe_checker_threaded "${BINARY}" &
         local TMP_PID="$!"
-        store_kill_pids "$TMP_PID"
-        WAIT_PIDS_S120+=( "$TMP_PID" )
-        max_pids_protection "$MAX_MOD_THREADS" "${WAIT_PIDS_S120[@]}"
+        store_kill_pids "${TMP_PID}"
+        WAIT_PIDS_S120+=( "${TMP_PID}" )
+        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S120[@]}"
         continue
       else
-        cwe_checker_threaded "$BINARY"
+        cwe_checker_threaded "${BINARY}"
       fi
     fi
   done
 
-  [[ $THREADED -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S120[@]}"
+  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S120[@]}"
 }
 
 cwe_checker_threaded () {
@@ -118,47 +118,47 @@ cwe_checker_threaded () {
   local CWE=""
   local CWE_DESC=""
   local CWE_CNT=0
-  local MEM_LIMIT=$(( "$TOTAL_MEMORY"/2 ))
+  local MEM_LIMIT=$(( "${TOTAL_MEMORY}"/2 ))
 
   local NAME=""
-  NAME=$(basename "$BINARY_")
-  local OLD_LOG_FILE="$LOG_FILE"
-  local LOG_FILE="$LOG_PATH_MODULE""/cwe_check_""$NAME"".txt"
-  BINARY_=$(readlink -f "$BINARY_")
+  NAME=$(basename "${BINARY_}")
+  local OLD_LOG_FILE="${LOG_FILE}"
+  local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${NAME}"".txt"
+  BINARY_=$(readlink -f "${BINARY_}")
 
-  ulimit -Sv "$MEM_LIMIT"
-  "$HOME"/.cargo/bin/cwe_checker "$BINARY" --json --out "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null|| true
+  ulimit -Sv "${MEM_LIMIT}"
+  "${HOME}"/.cargo/bin/cwe_checker "${BINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
   ulimit -Sv unlimited
-  print_output "[*] Tested $ORANGE""$(print_path "$BINARY_")""$NC"
+  print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}"
 
-  if [[ -s "$LOG_PATH_MODULE"/cwe_"$NAME".log ]]; then
-    jq -r '.[] | "\(.name) - \(.description)"' "$LOG_PATH_MODULE"/cwe_"$NAME".log | sort -u || true
-    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_PATH_MODULE"/cwe_"$NAME".log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+  if [[ -s "${LOG_PATH_MODULE}"/cwe_"${NAME}".log ]]; then
+    jq -r '.[] | "\(.name) - \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${NAME}".log | sort -u || true
+    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${NAME}".log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
       print_ln
-      print_output "[+] cwe-checker found ""$ORANGE""${#CWE_OUT[@]}""$GREEN"" different security issues in ""$ORANGE""$NAME""$GREEN"":" "" "$LOG_PATH_MODULE"/cwe_"$NAME".log
+      print_output "[+] cwe-checker found ""${ORANGE}""${#CWE_OUT[@]}""${GREEN}"" different security issues in ""${ORANGE}""${NAME}""${GREEN}"":" "" "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
       for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "$CWE_LINE" | awk '{print $1}')"
-        CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
-        CWE_CNT="$(grep -c "$CWE" "$LOG_PATH_MODULE"/cwe_"$NAME".log 2>/dev/null || true)"
-        echo "$CWE_CNT" >> "$TMP_DIR"/CWE_CNT.tmp
-        print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
+        CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
+        CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"
+        CWE_CNT="$(grep -c "${CWE}" "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true)"
+        echo "${CWE_CNT}" >> "${TMP_DIR}"/CWE_CNT.tmp
+        print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
       done
       print_ln
     else
       print_ln
-      print_output "[-] Nothing found in ""$ORANGE""$NAME""$NC""\\n"
-      rm "$LOG_PATH_MODULE"/cwe_"$NAME".log
+      print_output "[-] Nothing found in ""${ORANGE}""${NAME}""${NC}""\\n"
+      rm "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
     fi
   fi
   [[ ${#TEST_OUTPUT[@]} -ne 0 ]] && print_ln
 
-  if [[ -f "$LOG_FILE" ]]; then
-    cat "$LOG_FILE" >> "$OLD_LOG_FILE"
-    rm "$LOG_FILE" 2> /dev/null
+  if [[ -f "${LOG_FILE}" ]]; then
+    cat "${LOG_FILE}" >> "${OLD_LOG_FILE}"
+    rm "${LOG_FILE}" 2> /dev/null
   fi
-  LOG_FILE="$OLD_LOG_FILE"
+  LOG_FILE="${OLD_LOG_FILE}"
 }
 
 final_cwe_log() {
@@ -169,19 +169,19 @@ final_cwe_log() {
   local CWE_DESC=""
   local CWE_CNT=""
 
-  if [[ -d "$LOG_PATH_MODULE" ]]; then
-    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "$LOG_PATH_MODULE"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+  if [[ -d "${LOG_PATH_MODULE}" ]]; then
+    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
     print_ln
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_bar
-      print_output "[+] cwe-checker found a total of ""$ORANGE""$TOTAL_CWE_CNT""$GREEN"" of the following security issues:"
+      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
       for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "$CWE_LINE" | awk '{print $1}')"
-        CWE_DESC="$(echo "$CWE_LINE" | cut -d\  -f2-)"
+        CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
+        CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"
         # do not change this to grep -c!
         # shellcheck disable=SC2126
-        CWE_CNT="$(grep "$CWE" "$LOG_PATH_MODULE"/cwe_*.log 2>/dev/null | wc -l || true)"
-        print_output "$(indent "$(orange "$CWE""$GREEN"" - ""$CWE_DESC"" - ""$ORANGE""$CWE_CNT"" times.")")"
+        CWE_CNT="$(grep "${CWE}" "${LOG_PATH_MODULE}"/cwe_*.log 2>/dev/null | wc -l || true)"
+        print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
       done
       print_bar
       print_ln
