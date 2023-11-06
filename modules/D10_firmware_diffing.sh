@@ -314,7 +314,21 @@ analyse_bin_fct() {
         write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_diff.txt
         # colorize diff changes orange (see the sed part):
         diff -yb --color=always "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_mod_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_mod_dir2.txt \
-          | sed 's/.*[[:blank:]]|[[:blank:]].*/\x1b[33m&\x1b[0m/' >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_diff.txt || true
+          | sed 's/.*[[:blank:]]|[[:blank:]].*/\x1b[33m&\x1b[0m/' > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_tmp.txt || true
+
+        # we need to ensure a correct formatting of our output
+        while read -r line; do
+          local COLOR="${NC}"
+          local DIFF_1st=""
+          DIFF_1st="$(echo "${line}" | cut -d $'\t' -f1)"
+          local DIFF_2nd=""
+          DIFF_2nd="$(echo "${line}" | cut -d $'\t' -f2- | sed -e 's/^[ \t]*//g')"
+
+          [[ "${DIFF_2nd:0:1}" == "|" ]] && COLOR="${ORANGE}"
+          [[ "${DIFF_2nd:0:1}" == ">" ]] && COLOR="${GREEN}"
+          [[ "${DIFF_2nd:0:1}" == "<" ]] && COLOR="${RED}"
+          printf "${COLOR}\t%-60.60s\t%-60.60s${NC}\n" "${DIFF_1st}" "${DIFF_2nd}" >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_diff.txt
+        done < "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_tmp.txt
       fi
 
       if [[ -s "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_diff.txt ]]; then
