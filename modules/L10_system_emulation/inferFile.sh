@@ -16,7 +16,7 @@ if ("${FIRMAE_BOOT}"); then
     do
       # shellcheck disable=SC2016
       FULL_PATH=$("${BUSYBOX}" echo "${FILE}" | "${BUSYBOX}" awk '{split($0,a,"="); print a[2]}')
-      "${BUSYBOX}" echo "[*] Found kernelInit $FULL_PATH"
+      "${BUSYBOX}" echo "[*] Found kernelInit ${FULL_PATH}"
       arr+=("${FULL_PATH}")
     done
   fi
@@ -28,19 +28,19 @@ if ("${FIRMAE_BOOT}"); then
   fi
   for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc")
   do
-    "${BUSYBOX}" echo "[*] Found boot file $FILE"
+    "${BUSYBOX}" echo "[*] Found boot file ${FILE}"
     arr+=("${FILE}")
   done
 
   # find and parse inittab file
   for FILE in $("${BUSYBOX}" find / -name "inittab" -type f)
   do
-    "${BUSYBOX}" echo "[*] Found boot file $FILE"
+    "${BUSYBOX}" echo "[*] Found boot file ${FILE}"
     # sysinit entry is the one to look for
     # shellcheck disable=SC2016
-    for STARTUP_FILE in $("${BUSYBOX}" grep "^:.*sysinit:" "$FILE" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u)
+    for STARTUP_FILE in $("${BUSYBOX}" grep "^:.*sysinit:" "${FILE}" | "${BUSYBOX}" rev | "${BUSYBOX}" cut -d: -f1 | "${BUSYBOX}" rev | "${BUSYBOX}" awk '{print $1}' | "${BUSYBOX}" sort -u)
     do
-      "${BUSYBOX}" echo "[*] Found possible startup file $STARTUP_FILE"
+      "${BUSYBOX}" echo "[*] Found possible startup file ${STARTUP_FILE}"
       arr+=("${STARTUP_FILE}")
       #if [ -e "${STARTUP_FILE}" ]; then
       #  arr+=("${STARTUP_FILE}")
@@ -59,7 +59,7 @@ if ("${FIRMAE_BOOT}"); then
       if [ -d "${FILE}" ]; then
         continue
       fi
-      if [ "$FILE" = "/firmadyne/init" ]; then
+      if [ "${FILE}" = "/firmadyne/init" ]; then
         # skip our own init
         continue
       fi
@@ -72,14 +72,14 @@ if ("${FIRMAE_BOOT}"); then
         FILE_NAME=$("${BUSYBOX}" basename "${FILE}")
         if ("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" grep -qr "${FILE_NAME}" {} \;); then
           TARGET_FILE=$("${BUSYBOX}" find /bin /sbin /usr/sbin /usr/sbin -type f -exec "${BUSYBOX}" egrep -rl "${FILE_NAME}" {} \; | "${BUSYBOX}" head -1)
-          "${BUSYBOX}" echo "[*] Re-creating symlink $TARGET_FILE -> $FILE"
+          "${BUSYBOX}" echo "[*] Re-creating symlink ${TARGET_FILE} -> ${FILE}"
           "${BUSYBOX}" ln -s "${TARGET_FILE}" "${FILE}"
         else
           continue
         fi
       fi
       if [ -e "${FILE}" ]; then
-        "${BUSYBOX}" echo "[*] Writing firmadyne init $FILE"
+        "${BUSYBOX}" echo "[*] Writing firmadyne init ${FILE}"
         "${BUSYBOX}" echo "${FILE}" >> /firmadyne/init_tmp
       fi
     done

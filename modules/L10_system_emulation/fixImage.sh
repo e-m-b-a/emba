@@ -12,11 +12,11 @@ BUSYBOX="/busybox"
 
 # print input if not symlink, otherwise attempt to resolve symlink
 resolve_link() {
-  TARGET=$("$BUSYBOX" readlink "$1")
-  if [ -z "$TARGET" ]; then
-    echo "$1"
+  TARGET=$("${BUSYBOX}" readlink "${1}")
+  if [ -z "${TARGET}" ]; then
+    echo "${1}"
   fi
-  echo "$TARGET"
+  echo "${TARGET}"
 }
 
 if ("${FIRMAE_BOOT}"); then
@@ -77,8 +77,8 @@ fi
 # make /dev and add default device nodes if current /dev does not have greater
 # than 5 device nodes
 mkdir -p "$(resolve_link /dev)"
-FILECOUNT="$("$BUSYBOX" find /dev -maxdepth 1 -type b -o -type c -print | "$BUSYBOX" wc -l)"
-if [ "$FILECOUNT" -lt "5" ]; then
+FILECOUNT="$("${BUSYBOX}" find /dev -maxdepth 1 -type b -o -type c -print | "${BUSYBOX}" wc -l)"
+if [ "${FILECOUNT}" -lt "5" ]; then
   echo "Warning: Recreating device nodes!"
 
   if ("${FIRMAE_ETC}"); then
@@ -185,9 +185,9 @@ if [ "$FILECOUNT" -lt "5" ]; then
 fi
 
 # create a gpio file required for linksys to make the watchdog happy
-if ("$BUSYBOX" grep -sq "/dev/gpio/in" /bin/gpio) ||
-  ("$BUSYBOX" grep -sq "/dev/gpio/in" /usr/lib/libcm.so) ||
-  ("$BUSYBOX" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
+if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
+  ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libcm.so) ||
+  ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
     echo "Creating /dev/gpio/in!"
     if ("${FIRMAE_BOOT}"); then
       rm /dev/gpio
@@ -205,32 +205,32 @@ echo "Removing /etc/scripts/sys_resetbutton!"
 rm -f /etc/scripts/sys_resetbutton
 
 # add some default nvram entries
-if "$BUSYBOX" grep -sq "ipv6_6to4_lan_ip" /sbin/rc; then
+if "${BUSYBOX}" grep -sq "ipv6_6to4_lan_ip" /sbin/rc; then
   echo "Creating default ipv6_6to4_lan_ip!"
   echo -n "2002:7f00:0001::" > /firmadyne/libnvram.override/ipv6_6to4_lan_ip
 fi
 
-if "$BUSYBOX" grep -sq "time_zone_x" /lib/libacos_shared.so; then
+if "${BUSYBOX}" grep -sq "time_zone_x" /lib/libacos_shared.so; then
   echo "Creating default time_zone_x!"
   echo -n "0" > /firmadyne/libnvram.override/time_zone_x
 fi
 
-if "$BUSYBOX" grep -sq "rip_multicast" /usr/sbin/httpd; then
+if "${BUSYBOX}" grep -sq "rip_multicast" /usr/sbin/httpd; then
   echo "Creating default rip_multicast!"
   echo -n "0" > /firmadyne/libnvram.override/rip_multicast
 fi
 
-if "$BUSYBOX" grep -sq "bs_trustedip_enable" /usr/sbin/httpd; then
+if "${BUSYBOX}" grep -sq "bs_trustedip_enable" /usr/sbin/httpd; then
   echo "Creating default bs_trustedip_enable!"
   echo -n "0" > /firmadyne/libnvram.override/bs_trustedip_enable
 fi
 
-if "$BUSYBOX" grep -sq "filter_rule_tbl" /usr/sbin/httpd; then
+if "${BUSYBOX}" grep -sq "filter_rule_tbl" /usr/sbin/httpd; then
   echo "Creating default filter_rule_tbl!"
   echo -n "" > /firmadyne/libnvram.override/filter_rule_tbl
 fi
 
-if "$BUSYBOX" grep -sq "rip_enable" /sbin/acos_service; then
+if "${BUSYBOX}" grep -sq "rip_enable" /sbin/acos_service; then
   echo "Creating default rip_enable!"
   echo -n "0" > /firmadyne/libnvram.override/rip_enable
 fi
