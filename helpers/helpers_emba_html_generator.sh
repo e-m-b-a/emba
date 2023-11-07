@@ -91,6 +91,7 @@ add_link_tags() {
   if ( grep -a -q -E '\[REF\]' "${LINK_FILE}" ) ; then
     readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "${LINK_FILE}" | cut -d':' -f1 )
     for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
+      DEPTH="."
       REF_LINK="$(sed "${REF_LINK_NUMBER}""q;d" "${LINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       URL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "${REF_LINK}" | cut -d"#" -f1)" ]] ; then

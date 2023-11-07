@@ -205,7 +205,6 @@ dependency_check()
   #######################################################################################
   print_output "[*] Network connection:" "no_log"
 
-
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - \\c" "no_log"
 
@@ -285,7 +284,7 @@ dependency_check()
           fi
           # Note: we are running into issues in the case where the key can't be verified, but GPT is not enabled at all
           #       In such a case we will fail the check without the need of GPT
-          DEP_ERROR=1
+          # DEP_ERROR=1
         fi
         if grep -q "Testing phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}" 2>/dev/null; then
           print_output "    Testing phase ended  - \\c" "no_log"

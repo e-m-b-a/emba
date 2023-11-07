@@ -19,6 +19,8 @@
 #               unblob extraction from module p55. There is currently no deep extraction
 #               mode supported.
 
+export PRE_THREAD_ENA=0
+
 
 D05_firmware_diffing_extractor() {
   module_log_init "${FUNCNAME[0]}"

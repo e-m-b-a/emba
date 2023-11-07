@@ -18,6 +18,9 @@
 #               This module is doing some basic checks on the firmware. It uses mainly
 #               the functionality from the p02 module but on both firmware images.
 
+export PRE_THREAD_ENA=0
+
+
 D02_firmware_diffing_bin_details() {
 
   module_log_init "${FUNCNAME[0]}"

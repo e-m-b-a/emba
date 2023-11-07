@@ -172,7 +172,7 @@ run_modules()
       fi
       local MOD_FIN=0
       if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]] ; then
-        if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+        if [[ "${MODULE_GROUP^^}" == "P" ]] || [[ "${MODULE_GROUP^^}" == "D" ]]; then
           # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
           # export PRE_THREAD_ENA=1/0
           # shellcheck source=/dev/null
@@ -295,7 +295,7 @@ run_modules()
           fi
           local MOD_FIN=0
           if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]] ; then
-            if [[ "${MODULE_GROUP^^}" == "P" ]]; then
+            if [[ "${MODULE_GROUP^^}" == "P" ]] || [[ "${MODULE_GROUP^^}" == "D" ]]; then
               # we are able to enable/disable threading on module basis in the the pre-checker modules with the header:
               # export PRE_THREAD_ENA=1/0
               # shellcheck source=/dev/null
@@ -880,9 +880,6 @@ main() {
   # Diff mode (D-modules)
   #######################################################################################
   if [[ "${DIFF_MODE}" -eq 1 ]] ; then
-
-    # Diff mode is unthreaded
-    export THREADED=0
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
