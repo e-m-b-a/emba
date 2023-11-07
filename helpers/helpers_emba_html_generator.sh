@@ -661,9 +661,9 @@ scan_report()
 {
   # at the end of an EMBA run, we have to disable all non-valid links to modules
   local LINK_ARR
-  readarray -t LINK_ARR < <(grep -a -R -E "class\=\"refmodul\" href=\"(.*)" "${ABS_HTML_PATH}" | cut -d"\"" -f 4 | cut -d"#" -f 1 | sort -u || true)
+  readarray -t LINK_ARR < <(grep -a -r -E "class\=\"refmodul\" href=\"(.*)" "${ABS_HTML_PATH}" | cut -d"\"" -f 4 | cut -d"#" -f 1 | sort -u || true)
   local LINK_FILE_ARR
-  readarray -t LINK_FILE_ARR < <(grep -a -R -E -l "class\=\"refmodul\" href=\"(.*)" "${ABS_HTML_PATH}" || true)
+  readarray -t LINK_FILE_ARR < <(grep -a -r -E -l "class\=\"refmodul\" href=\"(.*)" "${ABS_HTML_PATH}" || true)
   for LINK in "${LINK_ARR[@]}" ; do
     for FILE in "${LINK_FILE_ARR[@]}" ; do
       if ! [[ -f "${ABS_HTML_PATH}""/""${LINK}" ]] ; then
