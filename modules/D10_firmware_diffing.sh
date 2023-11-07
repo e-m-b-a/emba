@@ -90,9 +90,19 @@ D10_firmware_diffing() {
       analyse_fw_files "${FW_FILE1}"
     fi
   done
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10[@]}"
 
-  check_for_new_files
+  for FW_FILE2 in "${FW_FILES2[@]}"; do
+    if [[ "${THREADED}" -eq 1 ]]; then
+      check_for_new_files "${FW_FILE2}" &
+      local TMP_PID="$!"
+      store_kill_pids "${TMP_PID}"
+      WAIT_PIDS_D10+=( "${TMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_D10[@]}"
+    else
+      check_for_new_files "${FW_FILE2}"
+    fi
+  done
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10[@]}"
 
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
@@ -172,15 +182,38 @@ analyse_fw_files() {
           else
             sub_module_title "Diff for binary file ${FW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
             # binary handling - colordiffing the hex dump and some radare2 diffing
-            diff -yb --color=always --suppress-common-lines <(xxd "${FW_FILE1}") <(xxd "${FW_FILE2}") > "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt || true
+            diff -yb --suppress-common-lines <(xxd "${FW_FILE1}") <(xxd "${FW_FILE2}") > "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt || true
             if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt ]]; then
-              print_output "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt${NC}" "no_log"
-              write_log "" "${LOG_FILE_DETAILS}"
-              # we only link to the binary colordiff in the web report:
-              # on the cli output we do not see the complete diff
-              write_log "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
-              write_link "${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt" "${LOG_FILE_DETAILS}"
-              write_log "" "${LOG_FILE_DETAILS}"
+               print_output "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt${NC}" "no_log"
+               write_log "" "${LOG_FILE_DETAILS}"
+
+            # the following approach is more beautiful but is very slow:
+            # diff -yb --suppress-common-lines <(xxd "${FW_FILE1}") <(xxd "${FW_FILE2}") > "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".tmp || true
+            # if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".tmp ]]; then
+            #   print_output "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt${NC}" "no_log"
+            #   write_log "" "${LOG_FILE_DETAILS}"
+            #  # we only link to the binary colordiff in the web report:
+            #  # on the cli output we do not see the complete diff
+            #  while read -r line; do
+            #    local COLOR="${NC}"
+            #    local DIFF_1st=""
+            #    DIFF_1st="$(echo "${line}" | cut -d $'\t' -f1)"
+            #    local DIFF_2nd=""
+            #    DIFF_2nd="$(echo "${line}" | cut -d $'\t' -f2-)"
+            #    ACTION="${DIFF_1st:0-1}"
+            #    [[ "${ACTION}" == "|" ]] && COLOR="${ORANGE}"
+            #    [[ "${ACTION}" == ">" ]] && COLOR="${GREEN}"
+            #    [[ "${ACTION}" == "<" ]] && COLOR="${RED}"
+
+            #    printf "${COLOR}\t%-60.60s\t%1.1s\t%-60.60s${NC}\n" "${DIFF_1st}" "${ACTION}" "${DIFF_2nd}" >> "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt
+            #  done < "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".tmp
+
+              if [[ -s "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt ]]; then
+                write_log "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
+                write_link "${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.tmp" "${LOG_FILE_DETAILS}"
+                write_log "" "${LOG_FILE_DETAILS}"
+              fi
+
             fi
             write_log "" "${LOG_FILE_DETAILS}"
 
@@ -232,13 +265,13 @@ analyse_fw_files() {
                 analyse_bin_fct "${FCT}" &
                 local TMP_PID="$!"
                 store_kill_pids "${TMP_PID}"
-                WAIT_PIDS_D10+=( "${TMP_PID}" )
-                max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_D10[@]}"
+                WAIT_PIDS_D10_1+=( "${TMP_PID}" )
+                max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_D10_1[@]}"
               else
                 analyse_bin_fct "${FCT}"
               fi
             done
-            [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10[@]}"
+            [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10_1[@]}"
           fi
           write_log "" "${LOG_FILE_DETAILS}"
         fi
@@ -343,26 +376,25 @@ analyse_bin_fct() {
 
 check_for_new_files() {
   # check for files that are not in the first directory -> new files in the second firmware
-  for FW_FILE2 in "${FW_FILES2[@]}"; do
-    FW_FILE2="${OUTPUT_DIR_UNBLOB2}""${FW_FILE2#.}"
-    # print_output "[*] Testing $FW_FILE2" "no_log"
+  local FW_FILE2="${1:-}"
+  FW_FILE2="${OUTPUT_DIR_UNBLOB2}""${FW_FILE2#.}"
+  # print_output "[*] Testing $FW_FILE2" "no_log"
 
-    FW_FILE_NAME2=$(basename "${FW_FILE2}")
+  FW_FILE_NAME2=$(basename "${FW_FILE2}")
 
-    # find the file in OUTPUT_DIR_UNBLOB1 - the first firmware directory
-    mapfile -t FW_FILES1 < <(find "${OUTPUT_DIR_UNBLOB1}" -type f -name "${FW_FILE_NAME2}" | head -1)
+  # find the file in OUTPUT_DIR_UNBLOB1 - the first firmware directory
+  mapfile -t FW_FILES1 < <(find "${OUTPUT_DIR_UNBLOB1}" -type f -name "${FW_FILE_NAME2}" | head -1)
 
-    # if we do not find a file in our first directory this file is a new file in the 2nd firmware
-    if [[ "${#FW_FILES1[@]}" -eq 0 ]]; then
-      if [[ -f "${FW_FILE2}" ]]; then
-        if file "${FW_FILE2}" | grep -q ASCII; then
-          cp "${FW_FILE2}" "${LOG_PATH_MODULE}"/"${FW_FILE_NAME2}".log
-          print_output "[+] Firmware ASCII file ${ORANGE}${FW_FILE_NAME2}${GREEN} is a new file in ${ORANGE}${OUTPUT_DIR_UNBLOB2}${GREEN}."
-          [[ -f "${LOG_PATH_MODULE}"/"${FW_FILE_NAME2}".log ]] && write_link "${LOG_PATH_MODULE}/${FW_FILE_NAME2}.log"
-        else
-          print_output "[+] Firmware binary file ${ORANGE}${FW_FILE_NAME2}${GREEN} is a new file in ${ORANGE}${OUTPUT_DIR_UNBLOB2}${GREEN}."
-        fi
+  # if we do not find a file in our first directory this file is a new file in the 2nd firmware
+  if [[ "${#FW_FILES1[@]}" -eq 0 ]]; then
+    if [[ -f "${FW_FILE2}" ]]; then
+      if file "${FW_FILE2}" | grep -q ASCII; then
+        cp "${FW_FILE2}" "${LOG_PATH_MODULE}"/"${FW_FILE_NAME2}".log
+        print_output "[+] Firmware ASCII file ${ORANGE}${FW_FILE_NAME2}${GREEN} is a new file in ${ORANGE}${OUTPUT_DIR_UNBLOB2}${GREEN}."
+        [[ -f "${LOG_PATH_MODULE}"/"${FW_FILE_NAME2}".log ]] && write_link "${LOG_PATH_MODULE}/${FW_FILE_NAME2}.log"
+      else
+        print_output "[+] Firmware binary file ${ORANGE}${FW_FILE_NAME2}${GREEN} is a new file in ${ORANGE}${OUTPUT_DIR_UNBLOB2}${GREEN}."
       fi
     fi
-  done
+  fi
 }
