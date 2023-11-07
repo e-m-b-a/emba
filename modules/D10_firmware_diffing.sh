@@ -177,16 +177,16 @@ analyse_fw_files() {
               write_log "" "${LOG_FILE_DETAILS}"
               write_log "[*] Diffing results from clear text file ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
               write_log "" "${LOG_FILE_DETAILS}"
-              cat "${LOG_PATH_MODULE_SUB}"/colordiff_"$(basename "${FW_FILE1}")".txt >> "${LOG_FILE_DETAILS}"
+              cat "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt >> "${LOG_FILE_DETAILS}"
             fi
           else
-            sub_module_title "Diff for binary file ${FW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
+            sub_module_title "Diffing of binary file ${FW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
             # binary handling - colordiffing the hex dump and some radare2 diffing
             diff -yb --suppress-common-lines <(xxd "${FW_FILE1}") <(xxd "${FW_FILE2}") > "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt || true
             if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt ]]; then
               print_output "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt${NC}" "no_log"
-              write_log "" "${LOG_FILE_DETAILS}"
 
+              write_log "" "${LOG_FILE_DETAILS}"
               write_log "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
               write_link "${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt" "${LOG_FILE_DETAILS}"
               write_log "" "${LOG_FILE_DETAILS}"
@@ -200,10 +200,12 @@ analyse_fw_files() {
             if [[ -s "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt ]]; then
               sub_module_title "Non matching functions for binary file ${FW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
               cat "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt
-              write_log "" "${LOG_FILE_DETAILS}"
               print_ln "no_log"
-              write_log "[*] Non matching functions in ${ORANGE}$(basename "${FW_FILE1}")${NC}:" "${LOG_FILE_DETAILS}"
-              print_output "[*] Non matching functions in ${ORANGE}$(basename "${FW_FILE1}")${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/r2_diff_fct_${FW_FILE_NAME1}_${FW_FILE_NAME1}.txt${NC}" "no_log"
+              print_output "[*] Non matching functions in ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/r2_diff_fct_${FW_FILE_NAME1}_${FW_FILE_NAME1}.txt${NC}" "no_log"
+
+              write_log "" "${LOG_FILE_DETAILS}"
+              write_log "[*] Non matching functions in binary ${ORANGE}${FW_FILE_NAME1}${NC}:" "${LOG_FILE_DETAILS}"
+              write_log "" "${LOG_FILE_DETAILS}"
               cat "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt >> "${LOG_FILE_DETAILS}"
               mapfile -t UNMATCHED_FCTs < <(awk '{print $1}' "${LOG_PATH_MODULE_SUB}"/r2_diff_fct_"${FW_FILE_NAME1}"_"${FW_FILE_NAME1}".txt | sort -u)
             else
@@ -217,13 +219,15 @@ analyse_fw_files() {
             r2 -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${FW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_dir1.txt
             # create disassembly from file in second directory:
             # shellcheck disable=SC2016
-            r2 -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${FW_FILE2}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"$(basename "${FW_FILE2}")"_dir2.txt
+            r2 -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${FW_FILE2}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt
             # create diff of both disassemblies:
-            diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/r2_disasm_"$(basename "${FW_FILE1}")"_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"$(basename "${FW_FILE2}")"_dir2.txt 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"$(basename "${FW_FILE1}")".txt || true
+            diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"${FW_FILE_NAME1}".txt || true
 
             if [[ -s "${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"${FW_FILE_NAME1}".txt ]]; then
-              sub_module_title "R2 diff for binary file ${FW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
+              sub_module_title "Radare2 diff for binary file ${FW_FILE_NAME1}" "${LOG_FILE_DETAILS}"
               print_output "[*] Radare2 binary diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_FILE_DETAILS}${NC}." "no_log"
+
+              write_log "" "${LOG_FILE_DETAILS}"
               write_log "[*] Radare2 binary diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
               write_link "${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"${FW_FILE_NAME1}".txt "${LOG_FILE_DETAILS}"
               write_log "" "${LOG_FILE_DETAILS}"
@@ -232,10 +236,12 @@ analyse_fw_files() {
             # now we check diff all the functions with differences and generate a xdot and png picture
             # see also https://book.rada.re/tools/radiff2/binary_diffing.html
             ! [[ -d "${LOG_PATH_MODULE}"/r2_fct_graphing/ ]] && mkdir "${LOG_PATH_MODULE}"/r2_fct_graphing/
-            write_log "[*] Radare2 binary function diff for ${ORANGE}${FW_FILE_NAME1}${NC}:" "${LOG_FILE_DETAILS}"
+            write_log "" "${LOG_FILE_DETAILS}"
+            sub_module_title "Radare2 binary function diff for ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
 
             # walk through all changed functions:
             for FCT in "${UNMATCHED_FCTs[@]}"; do
+              write_log "[*] Analysis of function ${ORANGE}${FCT}${NC} of binary ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
               analyse_bin_fct "${FCT}"
             done
           fi
@@ -332,7 +338,7 @@ analyse_bin_fct() {
     fi
 
     write_log "" "${LOG_FILE_DETAILS}"
-    write_log "[*] Radare2 binary function diff for function ${ORANGE}${FCT}${NC} in binary ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
+    write_log "$(indent "Radare2 binary function diff for function ${ORANGE}${FCT}${NC} in binary ${ORANGE}${FW_FILE_NAME1}${NC}")" "${LOG_FILE_DETAILS}"
     write_link "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" "${LOG_FILE_DETAILS}"
 
   # else
@@ -343,6 +349,9 @@ analyse_bin_fct() {
 check_for_new_files() {
   # check for files that are not in the first directory -> new files in the second firmware
   local FW_FILE2="${1:-}"
+  local FW_FILE_NAME2=""
+  local FW_FILES1=()
+
   FW_FILE2="${OUTPUT_DIR_UNBLOB2}""${FW_FILE2#.}"
   # print_output "[*] Testing $FW_FILE2" "no_log"
 
