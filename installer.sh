@@ -205,6 +205,11 @@ if ! uname -m | grep -q "x86_64" 2>/dev/null; then
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 fi
 
+if ! grep -q "ssse3" /proc/cpuinfo 2>/dev/null; then
+  echo -e "\n${ORANGE}WARNING: CPU type and feature set probably unsupported - Missing SSSE3 support detected!${NC}"
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+fi
+
 if ! [[ ${EUID} -eq 0 ]] && [[ ${LIST_DEP} -eq 0 ]] ; then
   echo -e "\\n""${RED}""Run EMBA installation script with root permissions!""${NC}\\n"
   print_help
