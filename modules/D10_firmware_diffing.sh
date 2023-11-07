@@ -241,7 +241,6 @@ analyse_fw_files() {
 
             # walk through all changed functions:
             for FCT in "${UNMATCHED_FCTs[@]}"; do
-              write_log "[*] Analysis of function ${ORANGE}${FCT}${NC} of binary ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
               analyse_bin_fct "${FCT}"
             done
           fi
@@ -271,22 +270,25 @@ analyse_bin_fct() {
   write_log "" "${LOG_FILE_DETAILS}"
   radiff2 -e bin.cache=true -md -g "${FCT}" "${FW_FILE2}" "${FW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot
 
+  if ! [[ -s "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot ]]; then
+    return
+  fi
+
   # we only print the graph if the log file was generated and has content and it has multiple addresses (0x) included
-  if [[ -s "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot ]]; then
-    if [[ "$(grep -c "0x" "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null)" -gt 1 ]]; then
-      print_output "[*] Generating diff image for function ${ORANGE}${FCT}${NC} of binary ${ORANGE}${FW_FILE_NAME1}${NC}" "no_log"
-      dot -Tpng "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".png || true
+  write_log "[*] Function analysis ${ORANGE}${FCT}${NC} of binary ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
+  if [[ "$(grep -c "0x" "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null)" -gt 1 ]]; then
+    print_output "[*] Generating diff image for function ${ORANGE}${FCT}${NC} of binary ${ORANGE}${FW_FILE_NAME1}${NC}" "no_log"
+    dot -Tpng "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".xdot 2>/dev/null > "${LOG_PATH_MODULE}"/r2_fct_graphing/r2_fct_graph_"${FW_FILE_NAME1}"_"${FCT}".png || true
 
-      print_output "[*] Generating disasm for function ${ORANGE}${FCT}${NC} of binary ${ORANGE}${FW_FILE_NAME1}${NC}" "no_log"
-      # now we need to generate the disassembly of the current function of both files to include it in the report for further manual tear-down
-      write_log "[*] Disassembly function ${ORANGE}${FCT}${NC} of ${ORANGE}${FW_FILE_NAME1}${NC} in ${ORANGE}first${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt
-      write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt
-      r2 -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE1}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt || true
+    print_output "[*] Generating disasm for function ${ORANGE}${FCT}${NC} of binary ${ORANGE}${FW_FILE_NAME1}${NC}" "no_log"
+    # now we need to generate the disassembly of the current function of both files to include it in the report for further manual tear-down
+    write_log "[*] Disassembly function ${ORANGE}${FCT}${NC} of ${ORANGE}${FW_FILE_NAME1}${NC} in ${ORANGE}first${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt
+    write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt
+    r2 -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE1}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt || true
 
-      write_log "[*] Disassembly function ${ORANGE}${FCT}${NC} of ${ORANGE}${FW_FILE_NAME2}${NC} in ${ORANGE}second${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt
-      write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt
-      r2 -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE2}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt || true
-    fi
+    write_log "[*] Disassembly function ${ORANGE}${FCT}${NC} of ${ORANGE}${FW_FILE_NAME2}${NC} in ${ORANGE}second${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt
+    write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt
+    r2 -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE2}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt || true
   fi
 
   if [[ -s "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" ]]; then
@@ -340,9 +342,6 @@ analyse_bin_fct() {
     write_log "" "${LOG_FILE_DETAILS}"
     write_log "$(indent "Radare2 binary function diff for function ${ORANGE}${FCT}${NC} in binary ${ORANGE}${FW_FILE_NAME1}${NC}")" "${LOG_FILE_DETAILS}"
     write_link "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" "${LOG_FILE_DETAILS}"
-
-  # else
-    #  write_log "[-] No function graph available for ${ORANGE}${FCT}${NC}" "${LOG_FILE_DETAILS}"
   fi
 }
 
