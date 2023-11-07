@@ -185,7 +185,9 @@ check() {
 
   echo -e "\\n""${GREEN}""Check all scripts for not using grep -R:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
+    [[ "${SOURCE}" == *"check_project.sh" ]] && continue
     echo -e "\\n""${GREEN}""Run ${ORANGE}recursive grep check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+
     if [[ $(grep -cP "grep.* -R " "${SOURCE}") -eq 0 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
@@ -193,7 +195,6 @@ check() {
       MODULES_TO_CHECK_ARR_GREP+=("${SOURCE}")
     fi
   done
-
 
   echo -e "\\n""${GREEN}""Run shellcheck and semgrep:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
@@ -285,7 +286,7 @@ summary() {
   fi
   if [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]]; then
     echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
-    echo -e "Modules to check (grep -R usage): ${#MODULES_TO_CHECK_ARR_GREP[@]}\\n"
+    echo -e "Modules to check (recursive grep usage -R): ${#MODULES_TO_CHECK_ARR_GREP[@]}\\n"
     for MODULE in "${MODULES_TO_CHECK_ARR_GREP[@]}"; do
       echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
     done
