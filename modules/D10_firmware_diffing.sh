@@ -184,36 +184,12 @@ analyse_fw_files() {
             # binary handling - colordiffing the hex dump and some radare2 diffing
             diff -yb --suppress-common-lines <(xxd "${FW_FILE1}") <(xxd "${FW_FILE2}") > "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt || true
             if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt ]]; then
-               print_output "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt${NC}" "no_log"
-               write_log "" "${LOG_FILE_DETAILS}"
+              print_output "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt${NC}" "no_log"
+              write_log "" "${LOG_FILE_DETAILS}"
 
-            # the following approach is more beautiful but is very slow:
-            # diff -yb --suppress-common-lines <(xxd "${FW_FILE1}") <(xxd "${FW_FILE2}") > "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".tmp || true
-            # if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".tmp ]]; then
-            #   print_output "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC} logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt${NC}" "no_log"
-            #   write_log "" "${LOG_FILE_DETAILS}"
-            #  # we only link to the binary colordiff in the web report:
-            #  # on the cli output we do not see the complete diff
-            #  while read -r line; do
-            #    local COLOR="${NC}"
-            #    local DIFF_1st=""
-            #    DIFF_1st="$(echo "${line}" | cut -d $'\t' -f1)"
-            #    local DIFF_2nd=""
-            #    DIFF_2nd="$(echo "${line}" | cut -d $'\t' -f2-)"
-            #    ACTION="${DIFF_1st:0-1}"
-            #    [[ "${ACTION}" == "|" ]] && COLOR="${ORANGE}"
-            #    [[ "${ACTION}" == ">" ]] && COLOR="${GREEN}"
-            #    [[ "${ACTION}" == "<" ]] && COLOR="${RED}"
-
-            #    printf "${COLOR}\t%-60.60s\t%1.1s\t%-60.60s${NC}\n" "${DIFF_1st}" "${ACTION}" "${DIFF_2nd}" >> "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt
-            #  done < "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".tmp
-
-              if [[ -s "${LOG_PATH_MODULE_SUB}"/colordiff_"${FW_FILE_NAME1}".txt ]]; then
-                write_log "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
-                write_link "${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.tmp" "${LOG_FILE_DETAILS}"
-                write_log "" "${LOG_FILE_DETAILS}"
-              fi
-
+              write_log "[*] Diffing results from binary file ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
+              write_link "${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt" "${LOG_FILE_DETAILS}"
+              write_log "" "${LOG_FILE_DETAILS}"
             fi
             write_log "" "${LOG_FILE_DETAILS}"
 
@@ -260,18 +236,8 @@ analyse_fw_files() {
 
             # walk through all changed functions:
             for FCT in "${UNMATCHED_FCTs[@]}"; do
-              # Threading currently mangles the links
-              if [[ "${THREADED}" -eq 2 ]]; then
-                analyse_bin_fct "${FCT}" &
-                local TMP_PID="$!"
-                store_kill_pids "${TMP_PID}"
-                WAIT_PIDS_D10_1+=( "${TMP_PID}" )
-                max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_D10_1[@]}"
-              else
-                analyse_bin_fct "${FCT}"
-              fi
+              analyse_bin_fct "${FCT}"
             done
-            [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_D10_1[@]}"
           fi
           write_log "" "${LOG_FILE_DETAILS}"
         fi
@@ -292,7 +258,6 @@ analyse_fw_files() {
     fi
   fi
 }
-
 
 analyse_bin_fct() {
   local FCT="${1:-}"
@@ -319,10 +284,6 @@ analyse_bin_fct() {
   fi
 
   if [[ -s "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" ]]; then
-    write_log "" "${LOG_FILE_DETAILS}"
-    write_log "[*] Radare2 binary function diff for function ${ORANGE}${FCT}${NC} in binary ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
-    write_link "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" "${LOG_FILE_DETAILS}"
-
     if [[ -s "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt ]]; then
       write_log "$(indent "Disassembly function ${ORANGE}${FCT}${NC} of ${ORANGE}${FW_FILE_NAME1}${NC} in ${ORANGE}first${NC} firmware directory")" "${LOG_FILE_DETAILS}"
       write_link "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt "${LOG_FILE_DETAILS}"
@@ -369,6 +330,11 @@ analyse_bin_fct() {
         write_link "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_diff.txt "${LOG_FILE_DETAILS}"
       fi
     fi
+
+    write_log "" "${LOG_FILE_DETAILS}"
+    write_log "[*] Radare2 binary function diff for function ${ORANGE}${FCT}${NC} in binary ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
+    write_link "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" "${LOG_FILE_DETAILS}"
+
   # else
     #  write_log "[-] No function graph available for ${ORANGE}${FCT}${NC}" "${LOG_FILE_DETAILS}"
   fi
