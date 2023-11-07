@@ -49,6 +49,7 @@ MODULES_TO_CHECK_ARR_SEMGREP=()
 MODULES_TO_CHECK_ARR_DOCKER=()
 MODULES_TO_CHECK_ARR_PERM=()
 MODULES_TO_CHECK_ARR_COMMENT=()
+MODULES_TO_CHECK_ARR_GREP=()
 
 import_config_scripts() {
   mapfile -t HELPERS < <(find "${CONF_DIR}" -iname "*.sh" 2>/dev/null)
@@ -161,10 +162,10 @@ check() {
   echo -e "\\n""${GREEN}""Check all source for correct comment usage:""${NC}""\\n"
   for SOURCE in "${SOURCES[@]}"; do
     echo -e "\\n""${GREEN}""Run ${ORANGE}comment check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
-    if [[ $(grep -E -R "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|/bin/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
+    if [[ $(grep -E -r "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|/bin/sh\|shellcheck" | grep -v -E -c "#$") -eq 0 ]]; then
       echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
     else
-      grep -E -R -n "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|shellcheck" | grep -v -E "#$"
+      grep -E -r -n "^( )+?#" "${SOURCE}" | grep -v "#\ \|bash\|shellcheck" | grep -v -E "#$"
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
       MODULES_TO_CHECK_ARR_COMMENT+=("${SOURCE}")
     fi
@@ -179,6 +180,19 @@ check() {
       grep -E -H -n ' +$' "${SOURCE}"
       echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
       MODULES_TO_CHECK_ARR_COMMENT+=("${SOURCE}")
+    fi
+  done
+
+  echo -e "\\n""${GREEN}""Check all scripts for not using grep -R:""${NC}""\\n"
+  for SOURCE in "${SOURCES[@]}"; do
+    [[ "${SOURCE}" == *"check_project.sh" ]] && continue
+    echo -e "\\n""${GREEN}""Run ${ORANGE}recursive grep check${GREEN} on ${ORANGE}${SOURCE}""${NC}""\\n"
+
+    if [[ $(grep -cP "grep.* -R " "${SOURCE}") -eq 0 ]]; then
+      echo -e "${GREEN}""${BOLD}""==> SUCCESS""${NC}""\\n"
+    else
+      echo -e "\\n""${ORANGE}""${BOLD}""==> FIX ERRORS""${NC}""\\n"
+      MODULES_TO_CHECK_ARR_GREP+=("${SOURCE}")
     fi
   done
 
@@ -270,6 +284,15 @@ summary() {
     done
     echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
+  if [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
+    echo -e "Modules to check (recursive grep usage -R): ${#MODULES_TO_CHECK_ARR_GREP[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR_GREP[@]}"; do
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
+    done
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+
 }
 
 # check that all tools are installed
@@ -297,6 +320,6 @@ summary
 if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]]; then
+  [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]]; then
   exit 1
 fi

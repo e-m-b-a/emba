@@ -50,7 +50,7 @@ deep_key_search() {
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""${PATTERN}"".{0,15}" )
   done
   print_ln
-  readarray -t MATCH_FILES < <(grep -E -l -R "${GREP_PATTERN_COMMAND[@]}" -D skip "${LOG_DIR}"/firmware 2>/dev/null || true)
+  readarray -t MATCH_FILES < <(grep -E -l -r "${GREP_PATTERN_COMMAND[@]}" -D skip "${LOG_DIR}"/firmware 2>/dev/null || true)
   if [[ ${#MATCH_FILES[@]} -gt 0 ]] ; then
     for MATCH_FILE in "${MATCH_FILES[@]}" ; do
       if ! [[ -f "${MATCH_FILE}" ]]; then
