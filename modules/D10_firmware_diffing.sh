@@ -339,7 +339,7 @@ analyse_bin_fct() {
       fi
     fi
 
-    write_log "" "${LOG_FILE_DETAILS}"
+    write_log "\n" "${LOG_FILE_DETAILS}"
     write_log "$(indent "Radare2 binary function diff for function ${ORANGE}${FCT}${NC} in binary ${ORANGE}${FW_FILE_NAME1}${NC}")" "${LOG_FILE_DETAILS}"
     write_link "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" "${LOG_FILE_DETAILS}"
   fi
