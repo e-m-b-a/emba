@@ -27,8 +27,8 @@ S25_kernel_check()
   export KERNEL_VERSION=()
   export KERNEL_DESC=()
   export KERNEL_MODULES=()
-  FOUND=0
-  KMOD_BAD=0
+  local FOUND=0
+  export KMOD_BAD=0
 
   # This module waits for S24_kernel_bin_identifier
   # check emba.log for S24_kernel_bin_identifier starting
@@ -216,7 +216,7 @@ get_kernel_vulns() {
             KNOWN_EXPLOITED=0
             if [[ -f "${KNOWN_EXP_CSV}" ]]; then
               if grep -q \""${LES_CVE}"\", "${KNOWN_EXP_CSV}"; then
-                print_output "[+] ${ORANGE}WARNING:${GREEN }Vulnerability ${ORANGE}${LES_CVE}${GREEN} is a known exploited vulnerability."
+                print_output "[+] ${ORANGE}WARNING: ${GREEN}Vulnerability ${ORANGE}${LES_CVE}${GREEN} is a known exploited vulnerability.${NC}"
                 KNOWN_EXPLOITED=1
               fi
             fi
