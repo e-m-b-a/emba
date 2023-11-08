@@ -26,7 +26,9 @@ P60_deep_extractor() {
   export DISK_SPACE_CRIT=0
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
-  if [[ ${RTOS} -eq 0 ]] ; then
+  # If we already know it is a linux (RTOS -> 0) or it is UEFI (VERIFIED_UEFI -> 1) we do not need to run
+  # the deep extractor
+  if [[ "${RTOS}" -eq 0 ]] || [[ "${VERIFIED_UEFI}" -eq 1 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi

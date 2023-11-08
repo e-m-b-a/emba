@@ -340,6 +340,10 @@ architecture_check()
         ARCH="${D_ARCH}"
         export ARCH
       fi
+    elif [[ -n "${EFI_ARCH}" ]]; then
+      print_output "$(indent "Detected architecture of the UEFI firmware: ""${ORANGE}""${EFI_ARCH}""${NC}")""\\n"
+      ARCH="${EFI_ARCH}"
+      export ARCH
     else
       print_output "$(indent "$(red "Based on binary identification no architecture was detected.")")"
       if [[ -n "${ARCH}" ]] ; then
