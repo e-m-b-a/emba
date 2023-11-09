@@ -98,7 +98,6 @@ fwhunter_logging() {
     local CVE_RESULTS_BINARLY=()
 
     FWHUNTER_RESULT_FILE=$(echo "${FWHUNTER_RESULT}" | cut -d: -f1)
-    # FWHUNTER_BINARLY_ID=$(echo "${FWHUNTER_RESULT}" | sed 's/.*\ BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g')
     FWHUNTER_BINARLY_ID=$(echo "${FWHUNTER_RESULT}" | sed 's/.*\ BRLY-/BRLY-/' | awk '{print $1}' | sort -u)
     mapfile -t FWHUNTER_BINARLY_ID_FILES < <(find "${EXT_DIR}"/fwhunt-scan/rules -iname "${FWHUNTER_BINARLY_ID}*")
     for BINARLY_ID_FILE in "${FWHUNTER_BINARLY_ID_FILES[@]}"; do
@@ -108,21 +107,21 @@ fwhunter_logging() {
     done
     mapfile -t FWHUNTER_BINARY_MATCH_ARR < <(basename "$(grep "Running FwHunt on" "${FWHUNTER_RESULT_FILE}" | cut -d\  -f5-)" | sort -u)
     FWHUNTER_RESULT=$(echo "${FWHUNTER_RESULT}" | cut -d: -f2-)
-    BINARLY_RULE=$(echo "${FWHUNTER_RESULT}" | sed -e 's/.*\ BRLY/BRLY/' | sed -e 's/\ .variant\:\ .*//')
     if [[ "${FWHUNTER_RESULT}" == *"rule has been triggered and threat detected"* ]]; then
       if [[ "${#CVE_RESULTS_BINARLY[@]}" -gt 0 ]]; then
         for BINARLY_ID_CVE in "${CVE_RESULTS_BINARLY[@]}"; do
           for FWHUNTER_BINARY_MATCH in "${FWHUNTER_BINARY_MATCH_ARR[@]}"; do
             # if we have CVE details we include it into our reporting
-            print_output "[+] ${FWHUNTER_BINARY_MATCH} ${ORANGE}:${GREEN} ${FWHUNTER_RESULT}${GREEN} - CVE: ${ORANGE}${BINARLY_ID_CVE}${NC}" "" "https://binarly.io/advisories/${BINARLY_RULE}"
-            write_csv_log "${FWHUNTER_BINARY_MATCH}" "unknown" "${BINARLY_ID_CVE}" "unknown" "${BINARLY_RULE}"
+            print_output "[+] ${FWHUNTER_BINARY_MATCH} ${ORANGE}:${GREEN} ${FWHUNTER_RESULT}${GREEN}" "" "https://binarly.io/advisories/${FWHUNTER_BINARLY_ID}"
+            print_output "$(indent "${GREEN}CVE: ${ORANGE}${BINARLY_ID_CVE}${NC}")"
+            write_csv_log "${FWHUNTER_BINARY_MATCH}" "unknown" "${BINARLY_ID_CVE}" "unknown" "${FWHUNTER_BINARLY_ID}"
           done
         done
       else
         for FWHUNTER_BINARY_MATCH in "${FWHUNTER_BINARY_MATCH_ARR[@]}"; do
           # if we do not have CVE details we can't include it into our reporting
-          print_output "[+] ${FWHUNTER_BINARY_MATCH} ${ORANGE}:${GREEN} ${FWHUNTER_RESULT}${NC}" "" "https://binarly.io/advisories/${BINARLY_RULE}"
-          write_csv_log "${FWHUNTER_BINARY_MATCH}" "unknown" "NA" "unknown" "${BINARLY_RULE}"
+          print_output "[+] ${FWHUNTER_BINARY_MATCH} ${ORANGE}:${GREEN} ${FWHUNTER_RESULT}${NC}" "" "https://binarly.io/advisories/${FWHUNTER_BINARLY_ID}"
+          write_csv_log "${FWHUNTER_BINARY_MATCH}" "unknown" "NA" "unknown" "${FWHUNTER_BINARLY_ID}"
         done
       fi
     fi

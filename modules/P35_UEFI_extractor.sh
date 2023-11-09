@@ -22,7 +22,7 @@ P35_UEFI_extractor() {
 
   if [[ "${UEFI_DETECTED}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
-    module_title "UEFI extractor"
+    module_title "UEFI extraction module"
     pre_module_reporter "${FUNCNAME[0]}"
     export FILES_UEFI=0
 
@@ -56,7 +56,7 @@ P35_UEFI_extractor() {
 }
 
 ami_extractor() {
-  sub_module_title "AMI capsule extractor"
+  sub_module_title "AMI capsule UEFI extractor"
 
   local FIRMWARE_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
@@ -95,7 +95,7 @@ ami_extractor() {
 }
 
 uefi_extractor(){
-  sub_module_title "UEFI Extractor"
+  sub_module_title "UEFITool extractor"
 
   local FIRMWARE_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
@@ -159,5 +159,5 @@ uefi_extractor(){
   print_ln
 
   write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "UEFI architecture"
-  write_csv_log "UEFI extractor" "${FIRMWARE_PATH_}" "${EXTRACTION_DIR_}" "${FILES_UEFI}" "${DIRS_UEFI}" "${EFI_ARCH}"
+  write_csv_log "UEFITool extractor" "${FIRMWARE_PATH_}" "${EXTRACTION_DIR_}" "${FILES_UEFI}" "${DIRS_UEFI}" "${EFI_ARCH}"
 }
