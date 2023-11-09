@@ -65,8 +65,14 @@ P99_prepare_analyzer() {
   print_ln "no_log"
   if [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
     print_output "[+] UEFI firmware detected"
+    if [[ -f "${LOG_DIR}"/p35_uefi_extractor.txt ]]; then
+      write_link "p35"
+    fi
   elif [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; then
     print_output "[*] Possible UEFI firmware detected"
+    if [[ -f "${LOG_DIR}"/p02_firmware_bin_file_check.txt ]]; then
+      write_link "p02"
+    fi
   elif [[ "${RTOS}" -eq 1 ]]; then
     print_output "[*] Possible RTOS system detected"
   fi
