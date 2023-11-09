@@ -26,8 +26,10 @@ P35_UEFI_extractor() {
     pre_module_reporter "${FUNCNAME[0]}"
     export FILES_UEFI=0
 
-    EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction
 
+    uefi_firmware_parsing "${FIRMWARE_PATH}"
+
+    EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction
     uefi_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
     if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
       EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_ami_capsule
@@ -55,6 +57,20 @@ P35_UEFI_extractor() {
   fi
 }
 
+uefi_firmware_parsing() {
+  sub_module_title "UEFI firmware-parsing analysis"
+  local FIRMWARE_PATH_="${1:-}"
+
+  uefi-firmware-parser -b "${FIRMWARE_PATH_}" | tee -a "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt
+
+  if [[ -s "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt ]]; then
+    print_ln
+    print_output "[*] UEFI firmware parser results." "" "${LOG_PATH_MODULE}/uefi-firmware-parser.txt"
+    print_ln
+    # Todo: further analysis to set UEFI_VERIFIED
+  fi
+}
+
 ami_extractor() {
   sub_module_title "AMI capsule UEFI extractor"
 
@@ -70,7 +86,7 @@ ami_extractor() {
 
   FIRMWARE_NAME_="$(basename "${FIRMWARE_PATH_}")"
 
-  echo -ne '\n' | python3 "${EXT_DIR}"/BIOSUtilities/AMI_PFAT_Extract.py -o "${EXTRACTION_DIR_}" "${FIRMWARE_PATH_}" &> "${LOG_PATH_MODULE}"/uefi_ami_"${FIRMWARE_NAME_}".log
+  echo -ne '\n' | python3 "${EXT_DIR}"/BIOSUtilities/AMI_PFAT_Extract.py -o "${EXTRACTION_DIR_}" "${FIRMWARE_PATH_}" &> "${LOG_PATH_MODULE}"/uefi_ami_"${FIRMWARE_NAME_}".log || true
 
   if [[ -f "${LOG_PATH_MODULE}"/uefi_ami_"${FIRMWARE_NAME_}".log ]]; then
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/uefi_ami_"${FIRMWARE_NAME_}".log
