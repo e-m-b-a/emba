@@ -69,6 +69,9 @@ IP99_binwalk_default() {
     print_tool_info "unrar" 1
     print_tool_info "binwalk" 1
     print_tool_info "python3-binwalk" 1
+    print_tool_info "capstone-tool" 1
+    print_tool_info "libcapstone4:amd64" 1
+    print_tool_info "python3-capstone" 1
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
