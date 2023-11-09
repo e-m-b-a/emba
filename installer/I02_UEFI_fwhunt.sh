@@ -32,6 +32,7 @@ I02_UEFI_fwhunt() {
     print_git_info "fwhunt-scan" "EMBA-support-repos/fwhunt-scan" "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules."
     print_git_info "fwhunt-rules" "EMBA-support-repos/FwHunt" "The Binarly Firmware Hunt (FwHunt) rule format was designed to scan for known vulnerabilities in UEFI firmware."
     print_git_info "BIOSUtilities" "EMBA-support-repos/BIOSUtilities" "Various BIOS Utilities for Modding/Research"
+    print_git_info "BGScriptTool" "platomav/BGScriptTool" "The tool allows you to assemble and disassemble BIOS Guard script."
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -66,7 +67,14 @@ I02_UEFI_fwhunt() {
         if [[ -d external/BIOSUtilities ]]; then
           rm -r external/BIOSUtilities
         fi
+        if [[ -d external/BGScriptTool ]]; then
+          rm -r external/BGScriptTool
+        fi
         git clone https://github.com/EMBA-support-repos/BIOSUtilities.git external/BIOSUtilities
+        git clone https://github.com/platomav/BGScriptTool.git external/BGScriptTool
+        if [[ -f external/BGScriptTool/big_script_tool.py ]]; then
+          cp external/BGScriptTool/big_script_tool.py external/BIOSUtilities/
+        fi
 
         echo -e "${ORANGE}""${BOLD}""Installing FwHunt""${NC}"
         if [[ -d external/fwhunt-scan ]]; then
