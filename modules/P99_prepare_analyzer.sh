@@ -50,7 +50,7 @@ P99_prepare_analyzer() {
   prepare_file_arr "${FIRMWARE_PATH}"
   print_ln
   prepare_binary_arr "${FIRMWARE_PATH}"
-  print_ln
+  prepare_file_arr_limited "${LOG_DIR}"/firmware
 
   if [[ ${KERNEL} -eq 0 ]] ; then
     architecture_check "${FIRMWARE_PATH}"
@@ -63,10 +63,12 @@ P99_prepare_analyzer() {
 
   set_etc_paths
   print_ln "no_log"
-  if [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; then
+  if [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+    print_output "[+] UEFI firmware detected"
+  elif [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; then
     print_output "[*] Possible UEFI firmware detected"
   elif [[ "${RTOS}" -eq 1 ]]; then
-    print_output "[*] RTOS system detected"
+    print_output "[*] Possible RTOS system detected"
   fi
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]] && ! [[ -f "${CSV_DIR}"/p99_prepare_analyzer.csv ]]; then

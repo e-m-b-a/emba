@@ -124,7 +124,7 @@ set_p02_default_exports() {
   export UEFI_AMI_CAPSULE=0
   export ZYXEL_ZIP=0
   export QCOW_DETECTED=0
-  export VERIFIED_UEFI=0
+  export UEFI_VERIFIED=0
 }
 
 generate_entropy_graph() {

@@ -455,6 +455,7 @@ generate_cve_details_cves() {
 
   local CVES_AGGREGATED=("$@")
   local CVE_ENTRY=""
+  CVE_COUNTER=0
 
   for CVE_ENTRY in "${CVES_AGGREGATED[@]}"; do
     if [[ "${THREADED}" -eq 1 ]]; then
