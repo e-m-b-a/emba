@@ -68,7 +68,11 @@ uefi_firmware_parser() {
     print_output "[*] UEFI firmware parser results." "" "${LOG_PATH_MODULE}/uefi-firmware-parser.txt"
     cat "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt
     print_ln
-    # Todo: further analysis to set UEFI_VERIFIED
+
+    if [[ "$(grep -c "Found volume magic at \|Firmware Volume:" "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt)" -gt 1 ]]; then
+      # with UEFI_VERIFIED=1 we do not run deep-extraction
+      export UEFI_VERIFIED=1
+    fi
   else
     print_output "[-] No results from UEFI firmware-parser"
   fi
