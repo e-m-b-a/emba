@@ -128,20 +128,20 @@ fwhunter_logging() {
     fi
   done
 
-  mapfile -t FWHUNTER_CVEs < <(grep "CVE:" "${LOG_FILE}" | sed 's/.*CVE://' | sort -u || true)
+  mapfile -t FWHUNTER_CVEs < <(grep "CVE: " "${LOG_FILE}" | sed 's/.*CVE: //' | sort -u || true)
   mapfile -t FWHUNTER_BINARLY_IDs < <(grep "FwHunt rule has been triggered and threat detected" "${LOG_PATH_MODULE}"/* | sed 's/.*BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g' | sort -u || true)
 
-  print_ln
-  print_ln
   # default: output of CVE data
   # backup: output of binarly IDs
   if [[ "${#FWHUNTER_CVEs[@]}" -gt 0 ]]; then
+    print_ln
     print_output "[*] Detected ${ORANGE}${#FWHUNTER_CVEs[@]}${NC} firmware issues with valid CVE identifier in UEFI firmware:"
     for BINARLY_CVE in "${FWHUNTER_CVEs[@]}"; do
       print_output "$(indent "$(orange "${BINARLY_CVE}")")"
     done
   fi
   if [[ "${#FWHUNTER_BINARLY_IDs[@]}" -gt 0 ]]; then
+    print_ln
     print_output "[*] Detected ${ORANGE}${#FWHUNTER_BINARLY_IDs[@]}${NC} firmware issues with valid binarly id in UEFI firmware:"
     for BINARLY_ID in "${FWHUNTER_BINARLY_IDs[@]}"; do
       print_output "$(indent "$(orange "${BINARLY_ID}")")"
