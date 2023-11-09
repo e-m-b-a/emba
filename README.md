@@ -74,7 +74,7 @@ sudo ./emba -l ~/log -f ~/firmware -p ./scan-profiles/default-scan-gpt.emba
 
 ```
 ## Quick start in firmware diffing mode
-For further details on EMBA's AI analysis engine check the [wiki](https://github.com/e-m-b-a/emba/wiki/Firmware-diffing).
+For further details on EMBA's firmware diffing mechanism check the [wiki](https://github.com/e-m-b-a/emba/wiki/Firmware-diffing).
 ```console
 sudo ./emba -l ~/log -f ~/1st-firmware -o ~/2nd-newer-firmware -t
 
