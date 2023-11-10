@@ -133,14 +133,14 @@ fwhunter_logging() {
   print_ln
   if [[ "${#FWHUNTER_CVEs[@]}" -gt 0 ]]; then
     print_ln
-    print_output "[+] Detected ${ORANGE}${#FWHUNTER_CVEs[@]}${NC} firmware issues with valid CVE identifier in UEFI firmware:"
+    print_output "[+] Detected ${ORANGE}${#FWHUNTER_CVEs[@]}${GREEN} firmware issues with valid CVE identifier in UEFI firmware:"
     for BINARLY_CVE in "${FWHUNTER_CVEs[@]}"; do
       print_output "$(indent "$(orange "${BINARLY_CVE}")")"
     done
   fi
   if [[ "${#FWHUNTER_BINARLY_IDs[@]}" -gt 0 ]]; then
     print_ln
-    print_output "[+] Detected ${ORANGE}${#FWHUNTER_BINARLY_IDs[@]}${NC} firmware issues with valid binarly id in UEFI firmware:"
+    print_output "[+] Detected ${ORANGE}${#FWHUNTER_BINARLY_IDs[@]}${GREEN} firmware issues with valid binarly id in UEFI firmware:"
     for BINARLY_ID in "${FWHUNTER_BINARLY_IDs[@]}"; do
       print_output "$(indent "$(orange "${BINARLY_ID}")")"
     done
