@@ -1,0 +1,38 @@
+name: First interaction
+
+on:
+  - pull_request_target
+  - issues
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        issue-message: |
+          Thank you for contributing an issue!
+
+          **Welcome to the EMBA firmware analysis community!**
+
+          We are glad you are here and appreciate your contribution. Please keep in mind our contributing guidelines [here](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTING.md) and [here](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md).
+          Also, please check [existing open issues](https://github.com/e-m-b-a/emba/issues) and consider to open a discussion in the dedicated [discussion area](https://github.com/e-m-b-a/emba/discussions).
+          Additionally, we have collected a lot of details around EMBA, the installation and the usage of EMBA in our [Wiki](https://github.com/e-m-b-a/emba/wiki).
+
+          This is an automatic message. Allow for time for the EMBA community to be able to read the issue and comment on it.
+
+        pr-message: |
+          Thank you for contributing a pull request!
+
+          **Welcome to the EMBA firmware analysis community!**
+
+          We are glad you are here and appreciate your contribution. Please keep in mind our contributing guidelines [here](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTING.md) and [here](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md).
+          Also, please check [existing open issues](https://github.com/e-m-b-a/emba/issues) and consider to open a discussion in the dedicated [discussion area](https://github.com/e-m-b-a/emba/discussions).
+          Additionally, we have collected a lot of details around EMBA, the installation and the usage of EMBA in our [Wiki](https://github.com/e-m-b-a/emba/wiki).
+          
+          This is an automatic message. Allow for time for the EMBA community to be able to read the pull request and comment on it.
