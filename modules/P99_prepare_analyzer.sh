@@ -62,7 +62,7 @@ P99_prepare_analyzer() {
   fi
 
   set_etc_paths
-  print_ln "no_log"
+  print_ln
   if [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
     print_output "[+] UEFI firmware detected"
     if [[ -f "${LOG_DIR}"/p35_uefi_extractor.txt ]]; then
