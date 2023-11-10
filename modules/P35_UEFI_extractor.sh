@@ -38,11 +38,11 @@ P35_UEFI_extractor() {
 
     if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
       # do a second round with unblob
-      unblobber "${FIRMWARE_PATH_}" "${EXTRACTION_DIR_}_unblob_extracted"
+      unblobber "${FIRMWARE_PATH}" "${EXTRACTION_DIR}_unblob_extracted"
 
-      if [[ -d "${EXTRACTION_DIR_}_unblob_extracted" ]]; then
-        FILES_UEFI_UNBLOB=$(find "${EXTRACTION_DIR_}_unblob_extracted" -type f | wc -l)
-        DIRS_UEFI_UNBLOB=$(find "${EXTRACTION_DIR_}_unblob_extracted" -type d | wc -l)
+      if [[ -d "${EXTRACTION_DIR}_unblob_extracted" ]]; then
+        FILES_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}_unblob_extracted" -type f | wc -l)
+        DIRS_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}_unblob_extracted" -type d | wc -l)
         print_output "[*] Extracted ${ORANGE}${FILES_UEFI_UNBLOB}${NC} files and ${ORANGE}${DIRS_UEFI_UNBLOB}${NC} directories from UEFI firmware image (with unblob)."
       fi
     fi
@@ -155,6 +155,10 @@ uefi_extractor(){
 
   if [[ -f "${LOG_PATH_MODULE}"/uefi_extractor_"${FIRMWARE_NAME_}".log ]]; then
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/uefi_extractor_"${FIRMWARE_NAME_}".log
+    if grep -q "parse: not a single Volume Top File is found, the image may be corrupted" "${LOG_PATH_MODULE}"/uefi_extractor_"${FIRMWARE_NAME_}".log; then
+      print_output "[-] No results from UEFITool UEFI Extractor"
+      return
+    fi
   fi
 
   print_ln
