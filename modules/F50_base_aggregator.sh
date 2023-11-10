@@ -817,6 +817,7 @@ get_data() {
   export CVE_COUNTER=0
   export CVE_SEARCH=1
   export FWHUNTER_CNT=0
+  # export FWHUNTER_CNT_CVE=0
   export MSF_VERIFIED=0
   export K_CVE_VERIFIED_SYMBOLS=0
   export K_CVE_VERIFIED_COMPILED=0
@@ -841,7 +842,8 @@ get_data() {
   fi
 
   if [[ -f "${LOG_DIR}"/"${S02_LOG}" ]]; then
-    FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S02_LOG}" | cut -d: -f2 || true)
+    # FWHUNTER_CNT_CVE=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S02_LOG}" | cut -d: -f2 || true)
+    FWHUNTER_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S02_LOG}" | cut -d: -f3 || true)
   fi
   if [[ -f "${LOG_DIR}"/"${S03_LOG}" ]]; then
     PRE_ARCH="$(strip_color_codes "$(grep -a "Possible architecture details found" "${LOG_DIR}"/"${S03_LOG}" | cut -d: -f2 | sed 's/\ //g' | tr '\r\n' ' ' | sed 's/\ /\ \//' || true)")"

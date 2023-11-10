@@ -148,5 +148,5 @@ fwhunter_logging() {
   print_ln
 
   write_log ""
-  write_log "[*] Statistics:${#FWHUNTER_CVEs[@]}"
+  write_log "[*] Statistics:${#FWHUNTER_CVEs[@]}:${#FWHUNTER_BINARLY_IDs[@]}"
 }
