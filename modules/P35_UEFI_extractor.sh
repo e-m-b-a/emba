@@ -26,6 +26,16 @@ P35_UEFI_extractor() {
     pre_module_reporter "${FUNCNAME[0]}"
     export FILES_UEFI=0
 
+    if [[ -d "${FIRMWARE_PATH}" ]]; then
+      # as we currently handle only firmware files in the UEFI extraction module
+      # we need to work with the original firmware file - if this is also a directory
+      # we exit the module now
+      FIRMWARE_PATH="${FIRMWARE_PATH_BAK}"
+      if [[ -d "${FIRMWARE_PATH}" ]]; then
+        module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+        return
+      fi
+    fi
 
     uefi_firmware_parser "${FIRMWARE_PATH}"
 
@@ -47,6 +57,20 @@ P35_UEFI_extractor() {
       fi
     fi
 
+    if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
+      # finally, let's check every file with uefi-firmware-parser
+      # probably we have now something extracted that looks more like UEFI
+      local TMP_UEFI_FILES=()
+      local UEFI_FILE=""
+      mapfile -t TMP_UEFI_FILES < <(find "${LOG_DIR}"/firmware -xdev -type f)
+      for UEFI_FILE in "${TMP_UEFI_FILES[@]}"; do
+        uefi_firmware_parser "${UEFI_FILE}"
+        if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+          break
+        fi
+      done
+    fi
+
     if [[ "${FILES_UEFI}" -gt 0 ]]; then
       MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
@@ -60,21 +84,23 @@ P35_UEFI_extractor() {
 uefi_firmware_parser() {
   sub_module_title "UEFI firmware-parser analysis"
   local FIRMWARE_PATH_="${1:-}"
+  local FW_NAME_=""
+  FW_NAME_="$(basename "${FIRMWARE_PATH_}")"
 
-  uefi-firmware-parser -b "${FIRMWARE_PATH_}" > "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt
+  uefi-firmware-parser -b "${FIRMWARE_PATH_}" > "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${FW_NAME_}".txt
 
-  if [[ -s "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt ]]; then
+  if [[ -s "${LOG_PATH_MODULE}"/uefi-firmware-parser"${FW_NAME_}".txt ]]; then
     print_ln
-    print_output "[*] UEFI firmware parser results." "" "${LOG_PATH_MODULE}/uefi-firmware-parser.txt"
-    cat "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt
+    print_output "[*] UEFI firmware parser results for ${FW_NAME_}." "" "${LOG_PATH_MODULE}/uefi-firmware-parser_${FW_NAME_}.txt"
+    cat "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${FW_NAME_}".txt
     print_ln
 
-    if [[ "$(grep -c "Found volume magic at \|Firmware Volume:" "${LOG_PATH_MODULE}"/uefi-firmware-parser.txt)" -gt 1 ]]; then
+    if [[ "$(grep -c "Found volume magic at \|Firmware Volume:" "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${FW_NAME_}".txt)" -gt 1 ]]; then
       # with UEFI_VERIFIED=1 we do not run deep-extraction
       export UEFI_VERIFIED=1
     fi
   else
-    print_output "[-] No results from UEFI firmware-parser"
+    print_output "[-] No results from UEFI firmware-parser for ${ORANGE}${FIRMWARE_PATH_}${NC}."
   fi
 }
 
