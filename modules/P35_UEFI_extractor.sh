@@ -218,8 +218,9 @@ uefi_extractor(){
   PE32_IMAGE=$(grep -c "PE32 image" "${UEFI_EXTRACT_REPORT_FILE}" || true)
   DRIVER_COUNT=$(grep -c "DXE driver" "${UEFI_EXTRACT_REPORT_FILE}" || true)
   EFI_ARCH=$(find "${EXTRACTION_DIR_}" -name 'info.txt' -exec grep 'Machine type:' {} \; | sed -E 's/Machine\ type\:\ //g' | uniq | head -n 1)
-  FILES_UEFI=$(grep -c "File" "${UEFI_EXTRACT_REPORT_FILE}" || true)
+  # FILES_UEFI=$(grep -c "File" "${UEFI_EXTRACT_REPORT_FILE}" || true)
   DIRS_UEFI=$(find "${EXTRACTION_DIR_}" -type d | wc -l)
+  FILES_UEFI=$(find "${EXTRACTION_DIR_}" -type f | wc -l)
 
   print_output "[*] Extracted ${ORANGE}${FILES_UEFI}${NC} files and ${ORANGE}${DIRS_UEFI}${NC} directories from UEFI firmware image."
   print_output "[*] Found ${ORANGE}${NVARS}${NC} NVARS and ${ORANGE}${DRIVER_COUNT}${NC} drivers."
