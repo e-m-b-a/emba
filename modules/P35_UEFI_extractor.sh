@@ -54,26 +54,48 @@ P35_UEFI_extractor() {
         FILES_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}_unblob_extracted" -type f | wc -l)
         DIRS_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}_unblob_extracted" -type d | wc -l)
         print_output "[*] Extracted ${ORANGE}${FILES_UEFI_UNBLOB}${NC} files and ${ORANGE}${DIRS_UEFI_UNBLOB}${NC} directories from UEFI firmware image (with unblob)."
+
+        # lets check for UEFI firmware
+        local TMP_UEFI_FILES=()
+        local UEFI_FILE=""
+        mapfile -t TMP_UEFI_FILES < <(find "${EXTRACTION_DIR}_unblob_extracted" -xdev -type f)
+        for UEFI_FILE in "${TMP_UEFI_FILES[@]}"; do
+          uefi_firmware_parser "${UEFI_FILE}"
+          if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+            break
+          fi
+        done
       fi
     fi
 
     if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
-      # finally, let's check every file with uefi-firmware-parser
-      # probably we have now something extracted that looks more like UEFI
-      local TMP_UEFI_FILES=()
-      local UEFI_FILE=""
-      mapfile -t TMP_UEFI_FILES < <(find "${LOG_DIR}"/firmware -xdev -type f)
-      for UEFI_FILE in "${TMP_UEFI_FILES[@]}"; do
-        uefi_firmware_parser "${UEFI_FILE}"
-        if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
-          break
-        fi
-      done
+      # do an additional backup round with binwalk
+      binwalker_matryoshka "${FIRMWARE_PATH}" "${EXTRACTION_DIR}_binwalk_extracted"
+
+      if [[ -d "${EXTRACTION_DIR}_binwalk_extracted" ]]; then
+        FILES_UEFI_BINWALK=$(find "${EXTRACTION_DIR}_binwalk_extracted" -type f | wc -l)
+        DIRS_UEFI_BINWALK=$(find "${EXTRACTION_DIR}_binwalk_extracted" -type d | wc -l)
+        print_output "[*] Extracted ${ORANGE}${FILES_UEFI_BINWALK}${NC} files and ${ORANGE}${DIRS_UEFI_BINWALK}${NC} directories from UEFI firmware image (with binwalk)."
+
+        local TMP_UEFI_FILES=()
+        local UEFI_FILE=""
+        mapfile -t TMP_UEFI_FILES < <(find "${LOG_DIR}"/firmware -xdev -type f)
+        for UEFI_FILE in "${TMP_UEFI_FILES[@]}"; do
+          uefi_firmware_parser "${UEFI_FILE}"
+          if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+            break
+          fi
+        done
+      fi
     fi
 
     if [[ "${FILES_UEFI}" -gt 0 ]]; then
       MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
+      NEG_LOG=1
+    fi
+
+    if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
       NEG_LOG=1
     fi
 
@@ -89,7 +111,7 @@ uefi_firmware_parser() {
 
   uefi-firmware-parser -b "${FIRMWARE_PATH_}" > "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${FW_NAME_}".txt
 
-  if [[ -s "${LOG_PATH_MODULE}"/uefi-firmware-parser"${FW_NAME_}".txt ]]; then
+  if [[ -s "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${FW_NAME_}".txt ]]; then
     print_ln
     print_output "[*] UEFI firmware parser results for ${FW_NAME_}." "" "${LOG_PATH_MODULE}/uefi-firmware-parser_${FW_NAME_}.txt"
     cat "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${FW_NAME_}".txt
