@@ -57,7 +57,7 @@ P99_prepare_analyzer() {
     architecture_dep_check
   fi
 
-  if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
+  if [[ "${UEFI_VERIFIED}" -ne 1 ]] && [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
     detect_root_dir_helper "${FIRMWARE_PATH}" "main"
   fi
 
