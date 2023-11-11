@@ -52,6 +52,6 @@ binwalker_matryoshka() {
     mkdir -p "${OUTPUT_DIR_BINWALK}"
   fi
 
-  timeout --preserve-status --signal SIGINT 300 "${BINWALK_BIN}" --run-as=root -e -M --dd='.*' -C "${OUTPUT_DIR_BINWALK}" "${FIRMWARE_PATH_}" | tee -a "${LOG_FILE}" || true
+  timeout --preserve-status --signal SIGINT 300 "${BINWALK_BIN}" --run-as=root --preserve-symlinks -e -M --dd='.*' -C "${OUTPUT_DIR_BINWALK}" "${FIRMWARE_PATH_}" | tee -a "${LOG_FILE}" || true
   print_ln
 }
