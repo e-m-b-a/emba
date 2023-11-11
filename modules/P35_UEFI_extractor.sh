@@ -42,16 +42,16 @@ P35_UEFI_extractor() {
 
     uefi_firmware_parser "${FIRMWARE_PATH}"
 
-    EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME}"
+    EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME_}"
     uefi_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
     if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
-      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_ami_capsule_"${FW_NAME}"
+      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_ami_capsule_"${FW_NAME_}"
       ami_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
     fi
 
     if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
       # do a second round with unblob
-      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME}"_unblob_extracted
+      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME_}"_unblob_extracted
       unblobber "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
       if [[ -d "${EXTRACTION_DIR}" ]]; then
@@ -74,7 +74,7 @@ P35_UEFI_extractor() {
 
     if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
       # do an additional backup round with binwalk
-      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME}"_binwalk_extracted
+      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME_}"_binwalk_extracted
       binwalker_matryoshka "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
       if [[ -d "${EXTRACTION_DIR}" ]]; then
