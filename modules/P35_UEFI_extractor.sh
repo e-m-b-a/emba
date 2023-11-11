@@ -37,28 +37,32 @@ P35_UEFI_extractor() {
       fi
     fi
 
+    local FW_NAME_=""
+    FW_NAME_="$(basename "${FIRMWARE_PATH_}")"
+
     uefi_firmware_parser "${FIRMWARE_PATH}"
 
-    EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction
+    EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME}"
     uefi_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
     if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
-      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_ami_capsule
+      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_ami_capsule_"${FW_NAME}"
       ami_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
     fi
 
     if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
       # do a second round with unblob
-      unblobber "${FIRMWARE_PATH}" "${EXTRACTION_DIR}_unblob_extracted"
+      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME}"_unblob_extracted
+      unblobber "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
-      if [[ -d "${EXTRACTION_DIR}_unblob_extracted" ]]; then
-        FILES_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}_unblob_extracted" -type f | wc -l)
-        DIRS_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}_unblob_extracted" -type d | wc -l)
+      if [[ -d "${EXTRACTION_DIR}" ]]; then
+        FILES_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}" -type f | wc -l)
+        DIRS_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}" -type d | wc -l)
         print_output "[*] Extracted ${ORANGE}${FILES_UEFI_UNBLOB}${NC} files and ${ORANGE}${DIRS_UEFI_UNBLOB}${NC} directories from UEFI firmware image (with unblob)."
 
         # lets check for UEFI firmware
         local TMP_UEFI_FILES=()
         local UEFI_FILE=""
-        mapfile -t TMP_UEFI_FILES < <(find "${EXTRACTION_DIR}_unblob_extracted" -xdev -type f)
+        mapfile -t TMP_UEFI_FILES < <(find "${EXTRACTION_DIR}" -xdev -type f)
         for UEFI_FILE in "${TMP_UEFI_FILES[@]}"; do
           uefi_firmware_parser "${UEFI_FILE}"
           if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
@@ -70,11 +74,12 @@ P35_UEFI_extractor() {
 
     if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
       # do an additional backup round with binwalk
-      binwalker_matryoshka "${FIRMWARE_PATH}" "${EXTRACTION_DIR}_binwalk_extracted"
+      EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME}"_binwalk_extracted
+      binwalker_matryoshka "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
-      if [[ -d "${EXTRACTION_DIR}_binwalk_extracted" ]]; then
-        FILES_UEFI_BINWALK=$(find "${EXTRACTION_DIR}_binwalk_extracted" -type f | wc -l)
-        DIRS_UEFI_BINWALK=$(find "${EXTRACTION_DIR}_binwalk_extracted" -type d | wc -l)
+      if [[ -d "${EXTRACTION_DIR}" ]]; then
+        FILES_UEFI_BINWALK=$(find "${EXTRACTION_DIR}" -type f | wc -l)
+        DIRS_UEFI_BINWALK=$(find "${EXTRACTION_DIR}" -type d | wc -l)
         print_output "[*] Extracted ${ORANGE}${FILES_UEFI_BINWALK}${NC} files and ${ORANGE}${DIRS_UEFI_BINWALK}${NC} directories from UEFI firmware image (with binwalk)."
 
         local TMP_UEFI_FILES=()
@@ -118,11 +123,11 @@ uefi_firmware_parser() {
     print_ln
 
     if [[ "$(grep -c "Found volume magic at \|Firmware Volume:" "${LOG_PATH_MODULE}"/uefi-firmware-parser_"${FW_NAME_}".txt)" -gt 1 ]]; then
-      # with UEFI_VERIFIED=1 we do not run deep-extraction
+      # with UEFI_VERIFIED=1 we do not further run deep-extraction
       export UEFI_VERIFIED=1
     fi
   else
-    print_output "[-] No results from UEFI firmware-parser for ${ORANGE}${FIRMWARE_PATH_}${NC}."
+    print_output "[-] No results from UEFI firmware-parser for ${ORANGE}${FIRMWARE_PATH_}${NC}." "no_log"
   fi
 }
 

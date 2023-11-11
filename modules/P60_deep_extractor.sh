@@ -12,7 +12,7 @@
 #
 # Author(s): Michael Messner
 
-# Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware to the log directory.
+# Description:  Analyzes firmware with unblob, checks entropy and extracts firmware to the log directory.
 
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
@@ -133,7 +133,7 @@ deep_extractor() {
 
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 ]]; then
     print_output "[*] Deep extraction - 4th round"
-    print_output "[*] Walking through all files and try to extract what ever possible with binwalk matryoshka mode"
+    print_output "[*] Walking through all files and try to extract what ever possible with unblob mode"
     print_output "[*] WARNING: This is the last extraction round that is executed."
 
     # if we are already that far we do a final matryoshka extraction mode
