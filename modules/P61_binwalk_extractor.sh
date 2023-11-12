@@ -14,6 +14,7 @@
 
 # Description:  Extracts firmware with binwalk to the module log directory.
 #               This module is a fallback module for the very rare case that our extraction process was failing
+#               e.g. in cases like this https://github.com/onekey-sec/sasquatch/issues/19
 
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
