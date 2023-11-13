@@ -124,6 +124,7 @@ set_p02_default_exports() {
   export UEFI_AMI_CAPSULE=0
   export ZYXEL_ZIP=0
   export QCOW_DETECTED=0
+  export UEFI_VERIFIED=0
 }
 
 generate_entropy_graph() {
@@ -167,8 +168,8 @@ fw_bin_detector() {
   else
     QNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${CHECK_FILE}")
   fi
-  UEFI_CHECK=$(grep -c "UEFI" "${TMP_DIR}"/s02_binwalk_output.txt || true)
-  UEFI_CHECK=$(( "${UEFI_CHECK}" + "$(grep -c "UEFI" "${CHECK_FILE}" || true)" ))
+  UEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/s02_binwalk_output.txt || true)
+  UEFI_CHECK=$(( "${UEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${CHECK_FILE}" || true)" ))
 
   if [[ -f "${KERNEL_CONFIG}" ]] && [[ "${KERNEL}" -eq 1 ]]; then
     # we set the FIRMWARE_PATH to the kernel config path if we have only -k parameter
@@ -186,7 +187,7 @@ fw_bin_detector() {
     write_csv_log "BMC encrypted" "yes" "NA"
   fi
   if [[ "${UEFI_CHECK}" -gt 0 ]]; then
-    print_output "[+] Identified possible UEFI firmware - using fwhunt-scan vulnerability scanning module"
+    print_output "[+] Identified possible UEFI/BIOS firmware - using UEFI extraction module"
     export UEFI_DETECTED=1
     UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${TMP_DIR}"/s02_binwalk_output.txt || true)
     if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then

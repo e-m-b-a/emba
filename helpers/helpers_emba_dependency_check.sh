@@ -214,7 +214,7 @@ dependency_check()
       print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
     fi
 
-    if ! curl -Is https://www.google.com &>/dev/null ; then
+    if ! curl --connect-timeout 5 -Is https://www.google.com &>/dev/null ; then
       echo -e "${RED}""not ok""${NC}"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
@@ -729,6 +729,8 @@ architecture_dep_check() {
     ARCH_STR="i386"
   elif [[ "${ARCH}" == "x64" ]] ; then
     # ARCH_STR="i386:x86-64"
+    ARCH_STR="x86-64"
+  elif [[ "${ARCH}" == "x86-64" ]] ; then
     ARCH_STR="x86-64"
   elif [[ "${ARCH}" == "PPC" ]] ; then
     # ARCH_STR="powerpc:common"

@@ -47,6 +47,7 @@ set_defaults() {
   export FW_DEVICE=""
   export FW_NOTES=""
   export ARCH=""
+  export EFI_ARCH=""
   export EXLUDE=()
   export SELECT_MODULES=()
   export MODULES_EXPORTED=()

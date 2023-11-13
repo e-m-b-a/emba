@@ -23,6 +23,11 @@ export PRE_THREAD_ENA=0
 P55_unblob_extractor() {
   module_log_init "${FUNCNAME[0]}"
 
+  if [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+    module_end_log "${FUNCNAME[0]}" 0
+    return
+  fi
+
   # shellcheck disable=SC2153
   if [[ -d "${FIRMWARE_PATH}" ]] && [[ "${RTOS}" -eq 1 ]]; then
     detect_root_dir_helper "${FIRMWARE_PATH}"

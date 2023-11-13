@@ -186,7 +186,7 @@ check_for_basic_auth_init() {
   BASIC_AUTH=$(find "${LOG_DIR}"/l15_emulated_checks_nmap/ -name "nmap*" -exec grep -i "401 Unauthorized" {} \; | wc -l)
 
   if [[ "${BASIC_AUTH}" -gt 0 ]]; then
-    disable_strict_mode 1
+    disable_strict_mode "${STRICT_MODE}" 1
     print_output "[*] Web server with basic auth protected ... performing login attempt"
     # basic auth from nmap found
     curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET http://"${IP_}"/ 2> >(tee -a "${LOG_FILE}")
@@ -208,7 +208,7 @@ check_for_basic_auth_init() {
       curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET -u "${CREDS}" http://"${IP_}"/ 2> >(tee -a "${LOG_FILE}")
       local CURL_RET="$?"
     fi
-    enable_strict_mode 1
+    enable_strict_mode "${STRICT_MODE}" 1
     if [[ "${CURL_RET}" != 22 ]] && [[ "${CREDS}" != "NA" ]]; then
       print_output "[+] Basic auth credentials for web server found: ${ORANGE}${CREDS}${NC}"
       export CURL_CREDS=(-u "${CREDS}")

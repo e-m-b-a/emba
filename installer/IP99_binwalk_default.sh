@@ -69,6 +69,11 @@ IP99_binwalk_default() {
     print_tool_info "unrar" 1
     print_tool_info "binwalk" 1
     print_tool_info "python3-binwalk" 1
+    print_tool_info "capstone-tool" 1
+    print_tool_info "libcapstone4:amd64" 1
+    print_tool_info "python3-capstone" 1
+    print_git_info "sasquatch" "devttys0/sasquatch" "The sasquatch project is a set of patches to the standard unsquashfs utility (part of squashfs-tools) that attempts to add support for as many hacked-up vendor-specific SquashFS implementations as possible."
+    echo -e "${ORANGE}""devttys0 - sasquatch will be downloaded.""${NC}"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -89,6 +94,24 @@ IP99_binwalk_default() {
           fi
           cp -pr external/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
           cp -pr external/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
+        fi
+
+        if ! [[ -d external/binwalk/sasquatch ]]; then
+          mkdir -p external/binwalk
+          git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+        fi
+        cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+        wget https://github.com/devttys0/sasquatch/pull/47.patch
+        patch -p1 < 47.patch
+        CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+
+        # we have seen issues with the unblob sasquatch version - lets move the binwalk version to another name and link to it
+        # during the testing phase. With this in place we are able to install both versions in ||
+        if [[ -e /usr/local/bin/sasquatch ]]; then
+          echo -e "${GREEN}Backup binwalk sasquatch version to ${ORANGE}/usr/local/bin/sasquatch_binwalk${NC}"
+          mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
+          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/lib/python3/dist-packages/binwalk/config/extract.conf
         fi
 
         if command -v binwalk > /dev/null ; then

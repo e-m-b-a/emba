@@ -12,7 +12,7 @@
 #
 # Author(s): Michael Messner
 
-# Description:  Analyzes firmware with binwalk, checks entropy and extracts firmware to the log directory.
+# Description:  Analyzes firmware with unblob, checks entropy and extracts firmware to the log directory.
 
 # Pre-checker threading mode - if set to 1, these modules will run in threaded mode
 # This module extracts the firmware and is blocking modules that needs executed before the following modules can run
@@ -26,7 +26,9 @@ P60_deep_extractor() {
   export DISK_SPACE_CRIT=0
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
-  if [[ ${RTOS} -eq 0 ]] ; then
+  # If we already know it is a linux (RTOS -> 0) or it is UEFI (UEFI_VERIFIED -> 1) we do not need to run
+  # the deep extractor
+  if [[ "${RTOS}" -eq 0 ]] || [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -131,7 +133,7 @@ deep_extractor() {
 
   if [[ ${RTOS} -eq 1 && "${DISK_SPACE_CRIT}" -eq 0 ]]; then
     print_output "[*] Deep extraction - 4th round"
-    print_output "[*] Walking through all files and try to extract what ever possible with binwalk matryoshka mode"
+    print_output "[*] Walking through all files and try to extract what ever possible with unblob mode"
     print_output "[*] WARNING: This is the last extraction round that is executed."
 
     # if we are already that far we do a final matryoshka extraction mode

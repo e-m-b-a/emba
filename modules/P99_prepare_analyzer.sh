@@ -50,23 +50,31 @@ P99_prepare_analyzer() {
   prepare_file_arr "${FIRMWARE_PATH}"
   print_ln
   prepare_binary_arr "${FIRMWARE_PATH}"
-  print_ln
+  prepare_file_arr_limited "${LOG_DIR}"/firmware
 
   if [[ ${KERNEL} -eq 0 ]] ; then
     architecture_check "${FIRMWARE_PATH}"
     architecture_dep_check
   fi
 
-  if [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
+  if [[ "${UEFI_VERIFIED}" -ne 1 ]] && [[ "${#ROOT_PATH[@]}" -eq 0 ]]; then
     detect_root_dir_helper "${FIRMWARE_PATH}" "main"
   fi
 
   set_etc_paths
-  print_ln "no_log"
-  if [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; then
+  print_ln
+  if [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+    print_output "[+] UEFI firmware detected"
+    if [[ -f "${LOG_DIR}"/p35_uefi_extractor.txt ]]; then
+      write_link "p35"
+    fi
+  elif [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; then
     print_output "[*] Possible UEFI firmware detected"
+    if [[ -f "${LOG_DIR}"/p02_firmware_bin_file_check.txt ]]; then
+      write_link "p02"
+    fi
   elif [[ "${RTOS}" -eq 1 ]]; then
-    print_output "[*] RTOS system detected"
+    print_output "[*] Possible RTOS system detected"
   fi
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 ]] && ! [[ -f "${CSV_DIR}"/p99_prepare_analyzer.csv ]]; then

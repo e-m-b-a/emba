@@ -66,7 +66,11 @@ It also sketches the typical integration process of patches.
 
 - Don't use backticks anymore, use $(..) instead
 
+- Don't use `grep -R` for recursive grep search. Instead use `find -type f -exec grep something {} \;` or use `grep -r`
+
 - Use double square \[[]] brackets (conditional expressions) instead of single square [] brackets
+
+- We require variable braces. Instead of using `$VARIABLE` please use `${VARIABLE}`
 
 - Whenever possible try to avoid `tr` `sed` `awk` and use bash internal functions instead, see e.g. [bash shell parameter substitution](http://www.cyberciti.biz/tips/bash-shell-parameter-substitution-2.html). Using bash internals is faster as it does not fork, fopen and pipes the results back.
 

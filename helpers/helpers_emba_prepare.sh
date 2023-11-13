@@ -340,6 +340,10 @@ architecture_check()
         ARCH="${D_ARCH}"
         export ARCH
       fi
+    elif [[ -n "${EFI_ARCH}" ]]; then
+      print_output "$(indent "Detected architecture of the UEFI firmware: ""${ORANGE}""${EFI_ARCH}""${NC}")""\\n"
+      ARCH="${EFI_ARCH}"
+      export ARCH
     else
       print_output "$(indent "$(red "Based on binary identification no architecture was detected.")")"
       if [[ -n "${ARCH}" ]] ; then
@@ -468,8 +472,7 @@ check_firmware()
   fi
 
   if [[ ${DIR_COUNT} -lt 5 ]] && [[ "${RTOS}" -eq 1 ]]; then
-    print_ln "no_log"
-    print_output "[!] Your firmware looks not like a regular Linux system, sure that you have entered the correct path?"
+    print_output "[-] Your firmware does not look like a regular Linux system."
   fi
   if [[ "${RTOS}" -eq 0 ]] || [[ ${DIR_COUNT} -gt 4 ]]; then
     print_output "[+] Your firmware looks like a regular Linux system."
