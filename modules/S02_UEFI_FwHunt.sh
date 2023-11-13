@@ -10,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner
+# Author(s): Michael Messner, Endri Hoxha
 # Credits:   Binarly for support
 
 # Description:  Uses FwHunt for identification of vulnerabilities in possible UEFI firmware
