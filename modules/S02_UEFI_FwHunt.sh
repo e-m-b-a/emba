@@ -10,7 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Endri Hoxha
+# Author(s): Michael Messner
 # Credits:   Binarly for support
 
 # Description:  Uses FwHunt for identification of vulnerabilities in possible UEFI firmware
@@ -30,7 +30,7 @@ S02_UEFI_FwHunt() {
   local EXTRACTED_FILE=""
 
   if [[ "${UEFI_VERIFIED}" -eq 1 ]] || { [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; }; then
-    print_output "[*] Starting FwHunter UEFI firmware vulnerability detection"      
+    print_output "[*] Starting FwHunter UEFI firmware vulnerability detection"
     fwhunter "${FIRMWARE_PATH_BAK}"
     if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true) -eq 0 ]]; then
       for EXTRACTED_FILE in "${FILE_ARR_LIMITED[@]}"; do
