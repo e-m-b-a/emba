@@ -31,7 +31,15 @@ S02_UEFI_FwHunt() {
 
   if [[ "${UEFI_VERIFIED}" -eq 1 ]] || { [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; }; then
     print_output "[*] Starting FwHunter UEFI firmware vulnerability detection"
-    fwhunter "${FIRMWARE_PATH_BAK}"
+    if [[ ${THREADED} -eq 1 ]]; then
+      fwhunter "${FIRMWARE_PATH_BAK}" &
+      local TMP_PID="$!"
+      store_kill_pids "${TMP_PID}"
+      WAIT_PIDS_S02+=( "${TMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S02[@]}"
+    else
+      fwhunter "${FIRMWARE_PATH_BAK}"
+    fi
     if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"*) -eq 0 ]]; then
       for EXTRACTED_FILE in "${FILE_ARR_LIMITED[@]}"; do
         if [[ ${THREADED} -eq 1 ]]; then
