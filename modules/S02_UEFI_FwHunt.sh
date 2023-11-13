@@ -32,7 +32,7 @@ S02_UEFI_FwHunt() {
   if [[ "${UEFI_VERIFIED}" -eq 1 ]] || { [[ "${RTOS}" -eq 1 ]] && [[ "${UEFI_DETECTED}" -eq 1 ]]; }; then
     print_output "[*] Starting FwHunter UEFI firmware vulnerability detection"      
     fwhunter "${FIRMWARE_PATH_BAK}"
-    if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_firmware.txt" ) -eq 0 ]]; then
+    if [[ $(grep -c "FwHunt rule" "${LOG_PATH_MODULE}""/fwhunt_scan_"* | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true) -eq 0 ]]; then
       for EXTRACTED_FILE in "${FILE_ARR_LIMITED[@]}"; do
         if [[ ${THREADED} -eq 1 ]]; then
           fwhunter "${EXTRACTED_FILE}" &
