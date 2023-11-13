@@ -168,7 +168,7 @@ fw_bin_detector() {
   else
     QNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${CHECK_FILE}")
   fi
-  UEFI_CHECK=$(grep -c "UEFI" "${TMP_DIR}"/s02_binwalk_output.txt || true)
+  UEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/s02_binwalk_output.txt || true)
   UEFI_CHECK=$(( "${UEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${CHECK_FILE}" || true)" ))
 
   if [[ -f "${KERNEL_CONFIG}" ]] && [[ "${KERNEL}" -eq 1 ]]; then
