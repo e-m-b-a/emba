@@ -38,7 +38,7 @@ P35_UEFI_extractor() {
     fi
 
     local FW_NAME_=""
-    FW_NAME_="$(basename "${FIRMWARE_PATH_}")"
+    FW_NAME_="$(basename "${FIRMWARE_PATH}")"
 
     uefi_firmware_parser "${FIRMWARE_PATH}"
 
