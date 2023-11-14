@@ -196,10 +196,10 @@ setup_nikto() {
 
 check_emba_version(){
   local LATEST_EMBA_VERSION=""
-  LATEST_EMBA_VERSION="$(curl -s -o - https://raw.githubusercontent.com/HoxhaEndri/emba/master/VERSION.txt)"
+  LATEST_EMBA_VERSION="$(curl -s -o - https://raw.githubusercontent.com/e-m-b-a/emba/master/VERSION.txt)"
   if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
     echo -e "    ${GREEN}You are on the latest version available.${NC}"
-  else 
+  else
     echo -e "    ${RED}Your emba version is outdated! Please check the github page for the latest release.${NC}"
   fi
 }
