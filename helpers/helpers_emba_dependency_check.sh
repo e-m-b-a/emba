@@ -194,6 +194,17 @@ setup_nikto() {
   fi
 }
 
+check_version(){
+  local LATEST_EMBA_VERSION=""
+  LATEST_EMBA_VERSION="$(curl -o - https://github.com/HoxhaEndri/emba/blob/master/VERSION.txt)"
+  print_output "${LATEST_EMBA_VERSION}"
+  if [[ "${LATEST_EMBA_VERSION}" -lt "${EMBA_VERSION}" ]]; then
+    print_output "Your emba version is outdated! Please check the github page for the latest release."
+  else 
+    print_output "You are on the latest version available." 
+  fi
+}
+
 dependency_check()
 {
   module_title "Dependency check" "no_log"
@@ -219,6 +230,7 @@ dependency_check()
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "${GREEN}""ok""${NC}"
+      check_version
     fi
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
