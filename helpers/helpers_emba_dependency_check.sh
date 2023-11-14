@@ -195,8 +195,6 @@ setup_nikto() {
 }
 
 check_emba_version(){
-  local LATEST_EMBA_VERSION=""
-  LATEST_EMBA_VERSION="$(curl -s -o - https://raw.githubusercontent.com/e-m-b-a/emba/master/VERSION.txt)"
   if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
     echo -e "    ${GREEN}You are on the latest version available.${NC}"
   else
@@ -206,6 +204,7 @@ check_emba_version(){
 
 dependency_check()
 {
+  export LATEST_EMBA_VERSION=""
   module_title "Dependency check" "no_log"
 
   print_ln "no_log"
@@ -224,7 +223,8 @@ dependency_check()
       print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
     fi
 
-    if ! curl --connect-timeout 5 -Is https://www.google.com &>/dev/null ; then
+    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://raw.githubusercontent.com/HoxhaEndri/emba/master/config/VERSION.txt)"
+    if [[ -z "${LATEST_EMBA_VERSION}" ]] ; then
       echo -e "${RED}""not ok""${NC}"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
