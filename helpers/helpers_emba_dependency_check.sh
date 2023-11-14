@@ -102,14 +102,16 @@ version_extended() # $1-a $2-op $3-$b
   esac
 }
 
-check_version(){
+# https://www.baeldung.com/linux/compare-dot-separated-version-string
+ver() { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
+
+check_emba_version(){
   local LATEST_EMBA_VERSION=""
-  LATEST_EMBA_VERSION="$(curl -o - https://github.com/HoxhaEndri/emba/blob/master/VERSION.txt)"
-  print_output "${LATEST_EMBA_VERSION}"
-  if [[ "${LATEST_EMBA_VERSION}" -lt "${EMBA_VERSION}" ]]; then
-    print_output "Your emba version is outdated! Please check the github page for the latest release."
+  LATEST_EMBA_VERSION="$(curl -s -o - https://raw.githubusercontent.com/HoxhaEndri/emba/master/VERSION.txt)"
+  if [[ $(ver "${LATEST_EMBA_VERSION}") -gt $(ver "${EMBA_VERSION}") ]]; then
+    echo -e "    ${RED}Your emba version is outdated! Please check the github page for the latest release.${NC}"
   else 
-    print_output "You are on the latest version available." 
+    echo -e "    ${GREEN}You are on the latest version available.${NC}"
   fi
 }
 
@@ -138,7 +140,7 @@ dependency_check()
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "${GREEN}""ok""${NC}"
-      check_version
+      check_emba_version
     fi
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
