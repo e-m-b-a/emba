@@ -194,16 +194,13 @@ setup_nikto() {
   fi
 }
 
-# https://www.baeldung.com/linux/compare-dot-separated-version-string
-ver() { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
-
 check_emba_version(){
   local LATEST_EMBA_VERSION=""
   LATEST_EMBA_VERSION="$(curl -s -o - https://raw.githubusercontent.com/HoxhaEndri/emba/master/VERSION.txt)"
-  if [[ $(ver "${LATEST_EMBA_VERSION}") -gt $(ver "${EMBA_VERSION}") ]]; then
-    echo -e "    ${RED}Your emba version is outdated! Please check the github page for the latest release.${NC}"
-  else 
+  if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
     echo -e "    ${GREEN}You are on the latest version available.${NC}"
+  else 
+    echo -e "    ${RED}Your emba version is outdated! Please check the github page for the latest release.${NC}"
   fi
 }
 
