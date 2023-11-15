@@ -179,9 +179,10 @@ IF20_cve_search() {
             /etc/init.d/redis-server restart
             CNT=0
             while [[ "${CVE_INST}" -eq 1 ]]; do
-              ./sbin/db_mgmt_cpe_dictionary.py -p || true
-              ./sbin/db_mgmt_json.py -p || true
-              ./sbin/db_updater.py -f || true
+              MONGODB_HOST="172.36.0.1" cvexplore database update
+              # ./sbin/db_mgmt_cpe_dictionary.py -p || true
+              # ./sbin/db_mgmt_json.py -p || true
+              # ./sbin/db_updater.py -f || true
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 break
               fi
@@ -194,6 +195,7 @@ IF20_cve_search() {
             echo -e "\\n""${GREEN}""${BOLD}""CVE database is up and running. No installation process performed!""${NC}"
           fi
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+          # TODO change the cron too
           sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
           sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater_data.init > config/emba_updater_data
           chmod +x config/emba_updater
