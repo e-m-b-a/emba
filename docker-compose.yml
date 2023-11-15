@@ -29,7 +29,6 @@ services:
     build: .
     # /dev is needed for the system emulator (L10)
     # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
-    # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
         - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/logs
@@ -37,7 +36,6 @@ services:
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
-        - /boot:/boot:ro
     environment:
         - USER
         - CONTAINER_NUMBER=1
