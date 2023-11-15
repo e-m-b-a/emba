@@ -121,8 +121,12 @@ set_defaults() {
   export UNBLOB=1 # additional extraction with unblob - https://github.com/onekey-sec/unblob
                   # currently the extracted results are not further used. The current implementation
                   # is for evaluation purposes
+
   export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt  # include the blacklisted CVE values to this file
   export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt  # include the whitelisted CVE values to this file
+  export MONGODB_HOST="172.36.0.1"  # cveXplore mondodb host
+  # export MONGODB_PORT=27017  # cveXplore mondodb port
+
   export MODULE_BLACKLIST=()
   if [[ -f "${CONFIG_DIR}"/module_blacklist.txt ]]; then
     readarray -t MODULE_BLACKLIST < "${CONFIG_DIR}"/module_blacklist.txt

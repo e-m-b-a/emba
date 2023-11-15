@@ -71,17 +71,17 @@ check_dep_port()
 check_docker_env() {
   TOOL_NAME="MongoDB"
   print_output "    ""${TOOL_NAME}"" - \\c" "no_log"
-  if ! grep -q "bindIp: 172.36.0.1" /etc/mongod.conf; then
+  if ! grep -q "bindIp: ${MONGODB_HOST}" /etc/mongod.conf; then
     echo -e "${RED}""not ok""${NC}"
     echo -e "${RED}""    Wrong ""mongodb config"" - check your installation""${NC}"
-    echo -e "${RED}""    RE-run installation - bindIp should be set to 172.36.0.1""${NC}"
+    echo -e "${RED}""    RE-run installation - bindIp should be set to ${MONGODB_HOST}""${NC}"
     DEP_ERROR=1
   else
     echo -e "${GREEN}""ok""${NC}"
   fi
   TOOL_NAME="Docker Interface"
   print_output "    ""${TOOL_NAME}"" -""${RED}"" \\c" "no_log"
-  if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+  if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
     echo -e "${RED}""    Missing ""Docker-Interface"" - check your installation""${NC}"
     if [[ "${WSL}" -eq 1 ]]; then
       echo -e "${RED}""    Is dockerd running (e.g., sudo dockerd --iptables=false &)""${NC}"
@@ -91,7 +91,7 @@ check_docker_env() {
         echo -e "${ORANGE}""    Trying to auto-maintain the docker interface ...""${NC}"
         systemctl restart NetworkManager docker
       fi
-      if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+      if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
         echo -e "${RED}""    Use  \$systemctl restart NetworkManager docker or reset the docker interface manually (\$ docker network rm emba_runs)""${NC}"
         DEP_ERROR=1
       else
@@ -105,7 +105,7 @@ check_docker_env() {
 }
 
 check_nw_interface() {
-  if ! ip a show emba_runs | grep -q "172.36.0.1" ; then
+  if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
     echo -e "${RED}""    Network interface not available"" - trying to restart now""${NC}"
     systemctl restart NetworkManager docker
     echo -e "${GREEN}""    docker-networks restarted""${NC}"
