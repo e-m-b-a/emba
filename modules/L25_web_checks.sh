@@ -91,7 +91,7 @@ main_web_check() {
         if [[ "${WEB_DONE}" -eq 0 ]]; then
           if system_online_check "${IP_ADDRESS_}" ; then
             sub_module_title "Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
-            timeout --preserve-status --signal SIGINT 600 nikto -timeout 3 -nointeractive -maxtime 8m -ssl -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
+            timeout --preserve-status --signal SIGINT 600 "${EXT_DIR}"/nikto/program/nikto.pl -timeout 3 -nointeractive -maxtime 8m -ssl -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
             cat "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt >> "${LOG_FILE}"
             WEB_DONE=1
             print_output "[*] Finished Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
@@ -134,7 +134,7 @@ main_web_check() {
 
           if system_online_check "${IP_ADDRESS_}" ; then
             sub_module_title "Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
-            timeout --preserve-status --signal SIGINT 600 nikto -timeout 3 -nointeractive -maxtime 8m -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
+            timeout --preserve-status --signal SIGINT 600 "${EXT_DIR}"/nikto/program/nikto.pl -timeout 3 -nointeractive -maxtime 8m -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
             cat "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt >> "${LOG_FILE}"
             WEB_DONE=1
             print_output "[*] Finished Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
