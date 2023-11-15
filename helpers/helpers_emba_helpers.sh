@@ -93,7 +93,7 @@ cleaner() {
   fi
   print_output "[*] Final cleanup started." "no_log"
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${QUEST_CONTAINER}" ]]; then
-    if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" )" == "running" ]]; then
+    if [[ "$(docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" 2>/dev/null)" == "running" ]]; then
       print_output "[*] Stopping Quest Container ..." "no_log"
       docker kill "${QUEST_CONTAINER}"
     fi
