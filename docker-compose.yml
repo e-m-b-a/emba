@@ -61,9 +61,6 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /root/.config/
-      - /root/.local/
-      - /root/.cache/
       - /root
       - /run/lock
       - /var/run
