@@ -11,7 +11,6 @@ services:
     # /root/.config is needed for binwalk - further recovery for other tools needed
     # /root/.cache is needed for unblob -> further recovery of this directory needed
     # /external/arachni/... needed by arachni (full system emulator modules)
-    # /external/freetz-ng/.fakeroot-cache needed by freetz-ng (AVM extractor)
     # Todo: cleanup of tmpfs entries
     tmpfs:
       - /tmp
@@ -25,8 +24,6 @@ services:
       - /var/run
       - /var/tmp
       - /var/lock
-      - /var/lib/nikto:exec
-      - /external/freetz-ng/.fakeroot-cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
       - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp

@@ -1249,10 +1249,11 @@ get_networking_details_emulation() {
     local TCP_PORT=""
     local UDP_PORT=""
 
-    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //'| sort -u || true)
+    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //' \
+     | sort -u | grep -v -E " = -[0-9][0-9]" || true)
     mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f4- | sort -u || true)
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
-    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sort -u | grep -v -E " = -[0-9][0-9]" || true)
     mapfile -t PANICS < <(grep -a "Kernel panic - " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u || true)
     mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $3}' | grep -a -E '[[:alnum:]]{3,50}' | sort -u || true)
     # mapfile -t NVRAM_SET < <(grep -a "nvram_set" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2 | sed 's/^\ //g' | cut -d\  -f1 | sed 's/\"//g' | grep -v "^#" | grep -E '[[:alnum:]]{3,50}'| sort -u || true)
