@@ -56,6 +56,7 @@ I120_cwe_checker() {
           rm external/rustup -r -f
 
           # curl https://sh.rustup.rs -sSf | sh -s -- -y
+          # see https://github.com/rust-lang/rustup/issues/2383
           curl https://sh.rustup.rs -sSf | env RUSTUP_HOME=/opt/rust/rustup CARGO_HOME=/opt/rust/cargo sh -s -- --default-toolchain stable --profile default --no-modify-path -y
 
           # export PATH="${PATH}":"${HOME}"/.cargo/bin
