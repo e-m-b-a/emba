@@ -378,6 +378,40 @@ dependency_check()
   # Python virtual environment in external directory
   check_dep_file "Python virtual environment" "${EXT_DIR}""/emba_venv/bin/activate"
 
+  if [[ "${IN_DOCKER}" -eq 0 ]]; then
+    print_ln "no_log"
+    print_output "[*] Load kernel modules on host system:" "no_log"
+    modprobe ufs
+    modprobe nandsim first_id_byte=0x2c second_id_byte=0xac third_id_byte=0x90 fourth_id_byte=0x15
+    modprobe ubi
+    modprobe nbd max_part=8
+
+    print_output "    ufs kernel module - \\c" "no_log"
+    if lsmod | grep -q ufs; then
+      echo -e "${GREEN}""ok""${NC}"
+    else
+      echo -e "${ORANGE}""not ok""${NC}"
+    fi
+    print_output "    nandsim kernel module - \\c" "no_log"
+    if lsmod | grep -q nandsim; then
+      echo -e "${GREEN}""ok""${NC}"
+    else
+      echo -e "${ORANGE}""not ok""${NC}"
+    fi
+    print_output "    ubi kernel module - \\c" "no_log"
+    if lsmod | grep -q ubi; then
+      echo -e "${GREEN}""ok""${NC}"
+    else
+      echo -e "${ORANGE}""not ok""${NC}"
+    fi
+    print_output "    nbd kernel module - \\c" "no_log"
+    if lsmod | grep -q nbd; then
+      echo -e "${GREEN}""ok""${NC}"
+    else
+      echo -e "${ORANGE}""not ok""${NC}"
+    fi
+  fi
+
   print_ln "no_log"
   print_output "[*] Necessary utils on system:" "no_log"
 
@@ -480,7 +514,8 @@ dependency_check()
     fi
 
     check_dep_tool "unrar" "unrar"
-    setup_nikto
+    # setup_nikto
+    # check_dep_file "Nikto web scanner" "${EXT_DIR}""/nikto/program/nikto.pl"
 
     # jtr
     check_dep_tool "john"

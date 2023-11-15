@@ -37,7 +37,6 @@ services:
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
-        - /lib/modules:/lib/modules:ro
         - /boot:/boot:ro
     environment:
         - USER

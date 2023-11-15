@@ -55,7 +55,7 @@ ufs_extractor() {
 
   mkdir -p "${TMP_UFS_MOUNT}" 2>/dev/null || true
   print_output "[*] Trying to mount ${ORANGE}${UFS_PATH_}${NC} to ${ORANGE}${TMP_UFS_MOUNT}${NC} directory"
-  modprobe ufs
+  # modprobe ufs
   mount -r -t ufs -o ufstype=ufs2 "${UFS_PATH_}" "${TMP_UFS_MOUNT}"
 
   if mount | grep -q ufs_mount; then

@@ -122,22 +122,22 @@ foscam_ubi_extractor() {
 
   if [[ -f "${EXTRACTION_DIR_GZ}"/app_ubifs ]]; then
     print_output "[*] 2nd extraction round successful - ${ORANGE}app_ubifs${NC} found"
-    print_output "[*] Loading nandsim kernel module"
-    if lsmod | grep -q "^nandsim[[:space:]]"; then
-      # we need to load nandsim with some parameters - unload it before
-      modprobe -r nandsim
-    fi
-    modprobe nandsim first_id_byte=0x2c second_id_byte=0xac third_id_byte=0x90 fourth_id_byte=0x15
+    # print_output "[*] Loading nandsim kernel module"
+    # if lsmod | grep -q "^nandsim[[:space:]]"; then
+    #   # we need to load nandsim with some parameters - unload it before
+    #   modprobe -r nandsim
+    # fi
+    # modprobe nandsim first_id_byte=0x2c second_id_byte=0xac third_id_byte=0x90 fourth_id_byte=0x15
     MTD_DEVICE=$(grep "mtd[0-9]" /proc/mtd | cut -d: -f1)
     print_output "[*] Found ${ORANGE}/dev/${MTD_DEVICE}${NC} MTD device"
     print_output "[*] Erasing ${ORANGE}/dev/${MTD_DEVICE}${NC} MTD device"
     flash_erase /dev/"${MTD_DEVICE}" 0 0 || true
     print_output "[*] Formating ${ORANGE}/dev/${MTD_DEVICE}${NC} MTD device"
     ubiformat /dev/"${MTD_DEVICE}" -O 2048 -f "${EXTRACTION_DIR_GZ}"/app_ubifs || true
-    if ! lsmod | grep -q "^ubi[[:space:]]"; then
-      print_output "[*] Loading ubi kernel module"
-      modprobe ubi
-    fi
+    # if ! lsmod | grep -q "^ubi[[:space:]]"; then
+    #   print_output "[*] Loading ubi kernel module"
+    #   modprobe ubi
+    # fi
     print_output "[*] Attaching ubi device"
     ubiattach -p /dev/"${MTD_DEVICE}" -O 2048
 
@@ -158,10 +158,10 @@ foscam_ubi_extractor() {
     # do some cleanup
     print_output "[*] Detaching ubi device"
     ubidetach -d 0 || true
-    print_output "[*] Unloading nandsim module"
-    modprobe -r nandsim || true
-    print_output "[*] Unloading ubi module"
-    modprobe -r ubi || true
+    # print_output "[*] Unloading nandsim module"
+    # modprobe -r nandsim || true
+    # print_output "[*] Unloading ubi module"
+    # modprobe -r ubi || true
 
     if [[ -d "${EXTRACTION_DIR_}" ]]; then
       FOSCAM_UBI_FILES=$(find "${EXTRACTION_DIR_}" -type f | wc -l)

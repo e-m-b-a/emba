@@ -76,8 +76,8 @@ qcow_extractor() {
   if ! [[ -d /var/lock ]]; then
     mkdir /var/lock || true
   fi
-  print_output "[*] Load kernel module ${ORANGE}nbd${NC}."
-  modprobe nbd max_part=8
+  # print_output "[*] Load kernel module ${ORANGE}nbd${NC}."
+  # modprobe nbd max_part=8
   print_output "[*] Qemu disconnect device ${ORANGE}/dev/nbd${NC}."
   qemu-nbd --disconnect /dev/nbd0
   print_output "[*] Qemu connect device ${ORANGE}/dev/nbd${NC}."
