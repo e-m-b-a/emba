@@ -11,16 +11,12 @@ services:
     # /root/.config is needed for binwalk - further recovery for other tools needed
     # /root/.config is needed for cwe_checker
     # /root/.local is needed for cwe_checker
-    # /root/.cache is needed for unblob -> further recovery of this directory needed
     # /external/arachni/... needed by arachni (full system emulator modules)
-    # Todo: cleanup of tmpfs entries
     tmpfs:
       - /tmp
       - /root/.config/
       - /root/.local/
-      - /root/.cache/
       - /root
-      - /root/.cargo/bin:exec
       - /run/lock
       - /var/run
       - /var/tmp
@@ -68,8 +64,6 @@ services:
       - /var/run
       - /var/tmp
       - /var/lock
-    # /dev is needed for the system emulator (L10)
-    # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
     # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
         - ${FIRMWARE}/:/firmware:ro
@@ -77,7 +71,6 @@ services:
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
         - /etc/localtime:/etc/localtime:ro
-        - /dev:/dev
     environment:
         - USER
         - CONTAINER_NUMBER=2
