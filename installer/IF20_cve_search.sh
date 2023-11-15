@@ -179,7 +179,7 @@ IF20_cve_search() {
             /etc/init.d/redis-server restart
             CNT=0
             while [[ "${CVE_INST}" -eq 1 ]]; do
-              MONGODB_HOST="172.36.0.1" cvexplore database update
+              MONGODB_HOST="172.36.0.1" cvexplore database populate
               # ./sbin/db_mgmt_cpe_dictionary.py -p || true
               # ./sbin/db_mgmt_json.py -p || true
               # ./sbin/db_updater.py -f || true
