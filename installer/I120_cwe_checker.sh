@@ -55,8 +55,12 @@ I120_cwe_checker() {
           rm "${HOME}"/.config -r -f
           rm external/rustup -r -f
 
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          export PATH="${PATH}":"${HOME}"/.cargo/bin
+          # curl https://sh.rustup.rs -sSf | sh -s -- -y
+          curl https://sh.rustup.rs -sSf | env RUSTUP_HOME=/opt/rust/rustup CARGO_HOME=/opt/rust/cargo sh -s -- --default-toolchain stable --profile default --no-modify-path -y
+
+          # export PATH="${PATH}":"${HOME}"/.cargo/bin
+          export RUSTUP_HOME=/opt/rust/cargo
+          export PATH="${PATH}":/opt/rust/cargo/bin
 
           # Java SDK for ghidra
           if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
@@ -85,12 +89,12 @@ I120_cwe_checker() {
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "${IN_DOCKER}" -eq 1 ]]; then
-            cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
-            echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > /root/.config/cwe_checker/ghidra.json
+            # cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
+            echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
 
             # save .config as we remount /root with tempfs -> now we can restore it in the module
-            cp -pr /root/.config ./external/cwe_checker/
-            cp -pr /root/.local ./external/cwe_checker/
+            cp -pr "${HOME}"/.config ./external/cwe_checker/
+            cp -pr "${HOME}"/.local ./external/cwe_checker/
 
             # cleanup
             rm "${HOME}"/.cargo -r -f || true

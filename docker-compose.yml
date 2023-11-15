@@ -9,6 +9,8 @@ services:
     # nosemgrep
     privileged: true
     # /root/.config is needed for binwalk - further recovery for other tools needed
+    # /root/.config is needed for cwe_checker
+    # /root/.local is needed for cwe_checker
     # /root/.cache is needed for unblob -> further recovery of this directory needed
     # /external/arachni/... needed by arachni (full system emulator modules)
     # Todo: cleanup of tmpfs entries

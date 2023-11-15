@@ -61,18 +61,20 @@ cwe_container_prepare() {
     cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share "${HOME}"/.local/
   fi
-  if ! [[ -d "${HOME}"/.cargo ]]; then
-    mkdir -p "${HOME}"/.cargo/bin
-  fi
-  if [[ -d "${EXT_DIR}"/cwe_checker/bin ]]; then
-    print_output "[*] Restoring cargo bin directory in read-only container" "no_log"
-    cp -pr "${EXT_DIR}"/cwe_checker/bin/* "${HOME}"/.cargo/bin/
-  else
-    print_output "[!] CWE checker installation broken ... please check it manually!"
-    return
-  fi
+  #if ! [[ -d "${HOME}"/.cargo ]]; then
+  #  mkdir -p "${HOME}"/.cargo/bin
+  #fi
+  #if [[ -d "${EXT_DIR}"/cwe_checker/bin ]]; then
+  #  print_output "[*] Restoring cargo bin directory in read-only container" "no_log"
+  #  cp -pr "${EXT_DIR}"/cwe_checker/bin/* "${HOME}"/.cargo/bin/
+  #else
+  #  print_output "[!] CWE checker installation broken ... please check it manually!"
+  #  return
+  #fi
   # Todo: move this to dependency check
-  export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
+  # export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
+  export RUSTUP_HOME=/opt/rust/cargo
+  export PATH="${PATH}":/opt/rust/cargo/bin/:"${EXT_DIR}"/jdk/bin/
 }
 
 cwe_check() {
@@ -127,7 +129,8 @@ cwe_checker_threaded () {
   BINARY_=$(readlink -f "${BINARY_}")
 
   ulimit -Sv "${MEM_LIMIT}"
-  "${HOME}"/.cargo/bin/cwe_checker "${BINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
+  # "${HOME}"/.cargo/bin/cwe_checker "${BINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
+  cwe_checker "${BINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}"
 

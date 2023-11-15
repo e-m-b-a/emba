@@ -1612,7 +1612,7 @@ setup_network_emulation() {
     TAPDEV_0="tap${TAP_ID}_0"
   fi
   HOSTNETDEV_0="${TAPDEV_0}"
-  print_output "[*] Creating TAP device ${ORANGE}${TAPDEV_0}${NC}..."
+  print_output "[*] Creating TAP device ${ORANGE}${TAPDEV_0}${NC} ..."
   write_script_exec "echo -e \"Creating TAP device ${TAPDEV_0}\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation - install uml-utilities package\" && exit 1)" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "tunctl -t ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh 1
