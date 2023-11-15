@@ -6,6 +6,7 @@ BASE_PATH="$(pwd)"
 LOG_DIR="/var/log"
 
 [ -d EMBA_INSTALL_PATH ] || exit 0
+[ -x EMBA_INSTALL_PATH/external/cve-search/sbin/db_updater.py ] || exit 0
 [ -x /etc/init.d/redis-server ] || exit 0
 [ -d "$LOG_DIR" ] || exit 0
 
@@ -27,7 +28,7 @@ echo "[*] EMBA update - cve-search update" | tee -a "$LOG_DIR"/emba_update.log
 service mongod start | tee -a "$LOG_DIR"/emba_update.log
 /etc/init.d/redis-server start | tee -a "$LOG_DIR"/emba_update.log
 
-cvexplore database update | tee -a "$LOG_DIR"/emba_update.log
+EMBA_INSTALL_PATH/external/cve-search/sbin/db_updater.py -v | tee -a "$LOG_DIR"/emba_update.log
 
 echo "[*] EMBA update - update local docker image" | tee -a "$LOG_DIR"/emba_update.log
 docker pull embeddedanalyzer/emba | tee -a "$LOG_DIR"/emba_update.log
