@@ -1262,7 +1262,7 @@ get_networking_details_emulation() {
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
     # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
-    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | sort -u || true)
+    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | sort -u || true)
     MISSING_FILES+=( "${MISSING_FILES_TMP[@]}" )
 
     NVRAM_TMP=( "${NVRAM[@]}" )
