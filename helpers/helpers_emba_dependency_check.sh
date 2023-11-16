@@ -381,10 +381,18 @@ dependency_check()
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
     print_ln "no_log"
     print_output "[*] Load kernel modules on host system:" "no_log"
-    modprobe ufs || true
-    modprobe nandsim first_id_byte=0x2c second_id_byte=0xac third_id_byte=0x90 fourth_id_byte=0x15 || true
-    modprobe ubi || true
-    modprobe nbd max_part=8 || true
+    if ! lsmod | grep -q ufs; then
+      modprobe ufs || true
+    fi
+    if ! lsmod | grep -q nandsim; then
+      modprobe nandsim first_id_byte=0x2c second_id_byte=0xac third_id_byte=0x90 fourth_id_byte=0x15 || true
+    fi
+    if ! lsmod | grep -q ubi; then
+      modprobe ubi || true
+    fi
+    if ! lsmod | grep -q nbd; then
+      modprobe nbd max_part=8 || true
+    fi
 
     print_output "    ufs kernel module - \\c" "no_log"
     if lsmod | grep -q ufs; then

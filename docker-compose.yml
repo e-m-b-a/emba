@@ -16,15 +16,16 @@ services:
       - /tmp
       - /root/.config/
       - /root/.local/
+      - /root/.cache/
       - /run/lock
       - /var/run
       - /var/tmp
       - /var/lock
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/../logs
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/home
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/config/component_cache
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/db
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/tmp
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/home
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/logs
     build: .
     # /dev is needed for the system emulator (L10)
     volumes:

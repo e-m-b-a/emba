@@ -492,11 +492,11 @@ arachni_scan() {
 
   if [[ "${IN_DOCKER}" -eq 1 ]]; then
     # we need to prepare the directories mounted as tempfs for arachni user:
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/../logs -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/home -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/config/component_cache -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/db -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/tmp -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/home -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/logs -R
     ARACHNI_USER="arachni"
   fi
 
