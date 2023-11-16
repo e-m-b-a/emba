@@ -179,9 +179,7 @@ IF20_cve_search() {
             /etc/init.d/redis-server restart
             CNT=0
             while [[ "${CVE_INST}" -eq 1 ]]; do
-              ./sbin/db_mgmt_cpe_dictionary.py -p || true
-              ./sbin/db_mgmt_json.py -p || true
-              ./sbin/db_updater.py -f || true
+              cvexplore database initialize
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 break
               fi
