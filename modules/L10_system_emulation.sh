@@ -300,7 +300,7 @@ create_emulation_filesystem() {
 
     if [[ -f "${HELP_DIR}"/fix_bins_lnk_emulation.sh ]] && [[ $(find "${MNT_POINT}" -type l | wc -l) -lt 10 ]]; then
       print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
-      # CHECK: "${HELP_DIR}"/fix_bins_lnk_emulation.sh "${MNT_POINT}"
+      "${HELP_DIR}"/fix_bins_lnk_emulation.sh "${MNT_POINT}"
     else
       # ensure that the needed permissions for exec files are set correctly
       # This is needed at some firmwares have corrupted permissions on ELF or sh files
@@ -532,7 +532,7 @@ main_emulation() {
 
     FS_MOUNTS=( "${FS_MOUNTS_INIT[@]}" "${FS_MOUNTS_FS[@]}" )
     eval "FS_MOUNTS=($(for i in "${FS_MOUNTS[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    # CHECK: handle_fs_mounts "${FS_MOUNTS[@]}"
+    handle_fs_mounts "${FS_MOUNTS[@]}"
 
     print_output "[*] Add network.sh entry to ${ORANGE}${INIT_OUT}${NC}"
 
