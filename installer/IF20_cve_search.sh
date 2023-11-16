@@ -63,6 +63,7 @@ IF20_cve_search() {
 
       # we do not need to install the Flask web environment - we do it manually
       # python3 -m pip install -r requirements.txt
+      # stick to requests==2.28.1 -> see also https://github.com/e-m-b-a/emba/issues/187
       pip_install "requests==2.28.1"
       pip_install "Whoosh==2.7.4"
       pip_install "tqdm==4.64.0"
@@ -78,7 +79,7 @@ IF20_cve_search() {
       pip_install "dnspython==2.2.1"
       pip_install "Werkzeug"
       pip_install "python-dateutil"
-      pip_install "CveXplore"
+      pip_install "CveXplore==0.3.15"
 
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 
