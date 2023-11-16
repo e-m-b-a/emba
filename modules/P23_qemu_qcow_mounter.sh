@@ -47,8 +47,8 @@ P23_qemu_qcow_mounter() {
       MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
+      NEG_LOG=1
     fi
-    NEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
   fi
 }
@@ -70,12 +70,19 @@ qcow_extractor() {
   mkdir -p "${TMP_QCOW_MOUNT}" 2>/dev/null || true
   print_output "[*] Trying to mount ${ORANGE}${QCOW_PATH_}${NC} to ${ORANGE}${TMP_QCOW_MOUNT}${NC} directory"
 
-  if lsmod | grep -q nbd; then
-    rmmod nbd || true
-  fi
+  # if lsmod | grep -q nbd; then
+  #   rmmod nbd || true
+  # fi
   if ! [[ -d /var/lock ]]; then
     mkdir /var/lock || true
   fi
+
+  print_output "[*] Checking nandsim kernel module"
+  if ! lsmod | grep -q "^nbd[[:space:]]"; then
+    print_output "[-] WARNING: nbd kernel module not loaded - can't proceed"
+    return
+  fi
+
   # print_output "[*] Load kernel module ${ORANGE}nbd${NC}."
   # modprobe nbd max_part=8
   print_output "[*] Qemu disconnect device ${ORANGE}/dev/nbd${NC}."

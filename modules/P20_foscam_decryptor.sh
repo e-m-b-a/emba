@@ -115,18 +115,20 @@ foscam_ubi_extractor() {
   tar -xzf "${FIRMWARE_PATH_}" -C "${EXTRACTION_DIR_GZ}" || true
 
   # check if we have the kernel modules available - special interest in docker
-  if ! [[ -d "/lib/modules/" ]]; then
-    print_output "[-] Kernel modules not mounted from host system - please update your docker-compose file!"
-    return
-  fi
+  # if ! [[ -d "/lib/modules/" ]]; then
+  #   print_output "[-] Kernel modules not mounted from host system - please update your docker-compose file!"
+  #   return
+  # fi
 
   if [[ -f "${EXTRACTION_DIR_GZ}"/app_ubifs ]]; then
     print_output "[*] 2nd extraction round successful - ${ORANGE}app_ubifs${NC} found"
-    # print_output "[*] Loading nandsim kernel module"
-    # if lsmod | grep -q "^nandsim[[:space:]]"; then
-    #   # we need to load nandsim with some parameters - unload it before
-    #   modprobe -r nandsim
-    # fi
+    print_output "[*] Checking nandsim kernel module"
+    if ! lsmod | grep -q "^nandsim[[:space:]]"; then
+      print_output "[-] WARNING: Nandsim kernel module not loaded - can't proceed"
+      return
+      #   # we need to load nandsim with some parameters - unload it before
+      #   modprobe -r nandsim
+    fi
     # modprobe nandsim first_id_byte=0x2c second_id_byte=0xac third_id_byte=0x90 fourth_id_byte=0x15
     MTD_DEVICE=$(grep "mtd[0-9]" /proc/mtd | cut -d: -f1)
     print_output "[*] Found ${ORANGE}/dev/${MTD_DEVICE}${NC} MTD device"
