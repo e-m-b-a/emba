@@ -61,21 +61,21 @@ cwe_container_prepare() {
     cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share "${HOME}"/.local/
   fi
-  # if ! [[ -d "${HOME}"/.cargo ]]; then
-  #  mkdir -p "${HOME}"/.cargo/bin
-  # fi
-  # if [[ -d "${EXT_DIR}"/cwe_checker/bin ]]; then
-  #  print_output "[*] Restoring cargo bin directory in read-only container" "no_log"
-  #  cp -pr "${EXT_DIR}"/cwe_checker/bin/* "${HOME}"/.cargo/bin/
-  # else
-  #  print_output "[!] CWE checker installation broken ... please check it manually!"
-  #  return
-  # fi
+  if ! [[ -d "${HOME}"/.cargo ]]; then
+    mkdir -p "${HOME}"/.cargo/bin
+  fi
+  if [[ -d "${EXT_DIR}"/cwe_checker/bin ]]; then
+    print_output "[*] Restoring cargo bin directory in read-only container" "no_log"
+    cp -pr "${EXT_DIR}"/cwe_checker/bin/* "${HOME}"/.cargo/bin/
+  else
+    print_output "[!] CWE checker installation broken ... please check it manually!"
+    return
+  fi
   # Todo: move this to dependency check
-  # export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
+  export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
   # see https://github.com/rust-lang/rustup/issues/2383
-  export RUSTUP_HOME=/opt/rust/cargo
-  export PATH="${PATH}":/opt/rust/cargo/bin/:"${EXT_DIR}"/jdk/bin/
+  # export RUSTUP_HOME=/opt/rust/cargo
+  # export PATH="${PATH}":/opt/rust/cargo/bin/:"${EXT_DIR}"/jdk/bin/
 }
 
 cwe_check() {

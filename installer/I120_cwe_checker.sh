@@ -33,7 +33,6 @@ I120_cwe_checker() {
     print_git_info "cwe-checker" "EMBA-support-repos/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
     echo -e "${ORANGE}""cwe-checker will be downloaded.""${NC}"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
-    # print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.2.3_build/ghidra_10.2.3_PUBLIC_20230208.zip" "external/ghidra.zip"
     print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip" "external/ghidra.zip"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
@@ -55,13 +54,13 @@ I120_cwe_checker() {
           rm "${HOME}"/.config -r -f
           rm external/rustup -r -f
 
-          # curl https://sh.rustup.rs -sSf | sh -s -- -y
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
           # see https://github.com/rust-lang/rustup/issues/2383
-          curl https://sh.rustup.rs -sSf | env RUSTUP_HOME=/opt/rust/rustup CARGO_HOME=/opt/rust/cargo sh -s -- --default-toolchain stable --profile default --no-modify-path -y
+          # curl https://sh.rustup.rs -sSf | env RUSTUP_HOME=/opt/rust/rustup CARGO_HOME=/opt/rust/cargo sh -s -- --default-toolchain stable --profile default --no-modify-path -y
 
-          # export PATH="${PATH}":"${HOME}"/.cargo/bin
-          export RUSTUP_HOME=/opt/rust/cargo
-          export PATH="${PATH}":/opt/rust/cargo/bin
+          export PATH="${PATH}":"${HOME}"/.cargo/bin
+          # export RUSTUP_HOME=/opt/rust/cargo
+          # export PATH="${PATH}":/opt/rust/cargo/bin
 
           # Java SDK for ghidra
           if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
@@ -90,7 +89,7 @@ I120_cwe_checker() {
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "${IN_DOCKER}" -eq 1 ]]; then
-            # cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
+            cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
             echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
 
             # save .config as we remount /root with tempfs -> now we can restore it in the module
