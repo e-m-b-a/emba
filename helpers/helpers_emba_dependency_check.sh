@@ -186,14 +186,6 @@ print_cve_search_failure() {
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
-setup_nikto() {
-  # setup Nikto only in main EMBA container (container number 1):
-  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -d "${EXT_DIR}"/var_lib_nikto ]] && [[ "${CONTAINER_NUMBER}" -eq 1 ]]; then
-    mkdir -p /var/lib/nikto
-    cp -r "${EXT_DIR}"/var_lib_nikto/nikto/* /var/lib/nikto/
-  fi
-}
-
 dependency_check()
 {
   module_title "Dependency check" "no_log"
@@ -522,8 +514,6 @@ dependency_check()
     fi
 
     check_dep_tool "unrar" "unrar"
-    # setup_nikto
-    # check_dep_file "Nikto web scanner" "${EXT_DIR}""/nikto/program/nikto.pl"
 
     # jtr
     check_dep_tool "john"
@@ -695,7 +685,7 @@ dependency_check()
 
       check_dep_file "Arachni web scanner installation" "${EXT_DIR}""/arachni/arachni-1.6.1.3-0.6.1.1/bin/arachni"
       check_dep_file "TestSSL.sh installation" "${EXT_DIR}""/testssl.sh/testssl.sh"
-      check_dep_tool "Nikto web server analyzer" "nikto"
+      check_dep_file "Nikto web server analyzer" "${EXT_DIR}""/nikto/program/nikto.pl"
       check_dep_tool "Cutycapt screenshot tool" "cutycapt"
       check_dep_tool "snmp-check tool" "snmp-check"
       check_dep_tool "Nmap portscanner" "nmap"
