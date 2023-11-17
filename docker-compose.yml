@@ -17,6 +17,7 @@ services:
       - /root/.config/
       - /root/.local/
       - /root/.cache/
+      - /root/.semgrep/
       - /run/lock
       - /var/run
       - /var/tmp
