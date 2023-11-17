@@ -89,7 +89,7 @@ I120_cwe_checker() {
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "${IN_DOCKER}" -eq 1 ]]; then
-            # cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
+            cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
             echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
 
             # save .config as we remount /root with tempfs -> now we can restore it in the module
