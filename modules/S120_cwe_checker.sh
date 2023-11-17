@@ -53,16 +53,6 @@ cwe_container_prepare() {
   # as we are in a read only docker environment we need to trick a bit:
   # /root is mounted as a writable tempfs. With this we need to set it up
   # on every run from scratch:
-  if ! [[ -d "${HOME}"/.cargo ]]; then
-    mkdir -p "${HOME}"/.cargo/bin
-  fi
-  if [[ -d "${EXT_DIR}"/cwe_checker/bin ]]; then
-    print_output "[*] Restoring cargo bin directory in read-only container" "no_log"
-    cp -pr "${EXT_DIR}"/cwe_checker/bin/* "${HOME}"/.cargo/bin/
-  else
-    print_output "[!] CWE checker installation broken ... please check it manually!"
-    return
-  fi
   if [[ -d "${EXT_DIR}"/cwe_checker/.config ]]; then
     print_output "[*] Restoring config directory in read-only container" "no_log"
     if ! [[ -d "${HOME}"/.config/ ]]; then
