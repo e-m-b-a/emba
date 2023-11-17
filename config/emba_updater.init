@@ -14,23 +14,23 @@ if [ -f EMBA_INSTALL_PATH/external/emba_venv/bin/activate ]; then
 fi
 
 if command -v cve_searchsploit > /dev/null ; then
-  echo "[*] EMBA update - cve_searchsploit update" | tee -a "$LOG_DIR"/emba_update.log
-  cve_searchsploit -u | tee -a "$LOG_DIR"/emba_update.log
+  echo "[*] EMBA update - cve_searchsploit update" | tee -a "${LOG_DIR}"/emba_update.log
+  cve_searchsploit -u | tee -a "${LOG_DIR}"/emba_update.log
 fi
 
-echo "[*] EMBA update - main repository" | tee -a "$LOG_DIR"/emba_update.log
+echo "[*] EMBA update - main repository" | tee -a "${LOG_DIR}"/emba_update.log
 cd EMBA_INSTALL_PATH || exit
-git pull origin master | tee -a "$LOG_DIR"/emba_update.log
-cd "$BASE_PATH" || exit
+git pull origin master | tee -a "${LOG_DIR}"/emba_update.log
+cd "${BASE_PATH}" || exit
 
-echo "[*] EMBA update - cve-search update" | tee -a "$LOG_DIR"/emba_update.log
-service mongod start | tee -a "$LOG_DIR"/emba_update.log
-/etc/init.d/redis-server start | tee -a "$LOG_DIR"/emba_update.log
+echo "[*] EMBA update - cve-search update" | tee -a "${LOG_DIR}"/emba_update.log
+service mongod start | tee -a "${LOG_DIR}"/emba_update.log
+/etc/init.d/redis-server start | tee -a "${LOG_DIR}"/emba_update.log
 
-cvexplore database update | tee -a "$LOG_DIR"/emba_update.log
+MONGODB_HOST="172.36.0.1" cvexplore database update | tee -a "${LOG_DIR}"/emba_update.log
 
-echo "[*] EMBA update - update local docker image" | tee -a "$LOG_DIR"/emba_update.log
-docker pull embeddedanalyzer/emba | tee -a "$LOG_DIR"/emba_update.log
+echo "[*] EMBA update - update local docker image" | tee -a "${LOG_DIR}"/emba_update.log
+docker pull embeddedanalyzer/emba | tee -a "${LOG_DIR}"/emba_update.log
 
 if [ -f EMBA_INSTALL_PATH/external/emba_venv/bin/activate ]; then
   deactivate
