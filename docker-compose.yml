@@ -18,7 +18,6 @@ services:
       - /root/.local/
       - /root/.cache/
       - /root/.semgrep/
-      - /root/.cargo/bin:exec
       - /root/.ghidra/
       - /root/.rsf_history/
       - /root/.msf4
