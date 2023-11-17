@@ -20,6 +20,8 @@ services:
       - /root/.semgrep/
       - /root/.cargo/bin:exec
       - /root/.ghidra/
+      - /root/.rsf_history/
+      - /root/.msf4
       - /run/lock
       - /var/run
       - /var/tmp
