@@ -71,19 +71,18 @@ cwe_container_prepare() {
     cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share "${HOME}"/.local/
   fi
+
   # Todo: move this to dependency check
-  export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
-}
-
-cwe_check() {
-  local BINARY=""
-
   if [[ -d "${HOME}"/.cargo/bin ]]; then
-    export PATH="${PATH}":"${HOME}"/.cargo/bin
+    export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
   else
     print_output "[!] CWE checker installation broken ... please check it manually!"
     return
   fi
+}
+
+cwe_check() {
+  local BINARY=""
 
   for BINARY in "${BINARIES[@]}" ; do
     if ( file "${BINARY}" | grep -q ELF ) ; then
