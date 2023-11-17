@@ -18,7 +18,8 @@ services:
       - /root/.local/
       - /root/.cache/
       - /root/.semgrep/
-      - /root/.cargo/
+      - /root/.cargo/bin:exec
+      - /root/.ghidra/
       - /run/lock
       - /var/run
       - /var/tmp
