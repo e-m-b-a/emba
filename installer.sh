@@ -55,9 +55,14 @@ export UBUNTU_OS=0
 export WSL=0
 export GH_ACTION=0
 export SSL_REPOS=0
+
 # cve_search
 export MONGODB_HOST="172.36.0.1"
 # export MONGODB_PORT=27017
+# NVD_NIST_API_KEY=XXX
+if [[ -n "${https_proxy}" ]]; then
+  export HTTP_PROXY_STRING="${https_proxy}"
+fi
 
 ## Color definition
 export RED="\033[0;31m"

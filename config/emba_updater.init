@@ -7,7 +7,7 @@ LOG_DIR="/var/log"
 
 [ -d EMBA_INSTALL_PATH ] || exit 0
 [ -x /etc/init.d/redis-server ] || exit 0
-[ -d "$LOG_DIR" ] || exit 0
+[ -d "${LOG_DIR}" ] || exit 0
 
 if [ -f EMBA_INSTALL_PATH/external/emba_venv/bin/activate ]; then
   source EMBA_INSTALL_PATH/external/emba_venv/bin/activate
@@ -27,7 +27,9 @@ echo "[*] EMBA update - cve-search update" | tee -a "${LOG_DIR}"/emba_update.log
 service mongod start | tee -a "${LOG_DIR}"/emba_update.log
 /etc/init.d/redis-server start | tee -a "${LOG_DIR}"/emba_update.log
 
-MONGODB_HOST="172.36.0.1" cvexplore database update | tee -a "${LOG_DIR}"/emba_update.log
+# NVD_NIST_API_KEY=XXX
+# TODO get from config?
+MONGODB_HOST="172.36.0.1" HTTP_PROXY_STRING="${https_proxy}" cvexplore database update | tee -a "${LOG_DIR}"/emba_update.log
 
 echo "[*] EMBA update - update local docker image" | tee -a "${LOG_DIR}"/emba_update.log
 docker pull embeddedanalyzer/emba | tee -a "${LOG_DIR}"/emba_update.log
