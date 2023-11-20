@@ -226,6 +226,12 @@ run_modules()
       fi
     done
   else
+    # in full emulation mode we need to ensure that module s24 is always running
+    if [[ "${MODULE_GROUP}" == "S" ]] && [[ "${FULL_EMULATION}" -eq 1 ]] && [[ ! "${SELECT_MODULES[@]}" =~ [sS]24 ]]; then
+      print_output "[*] Automatically enable module S24 for system emulation mode"
+      SELECT_MODULES+=("S24")
+    fi
+
     for SELECT_NUM in "${SELECT_MODULES[@]}" ; do
       local MOD_FIN=0
       if [[ "${SELECT_NUM}" =~ ^["${MODULE_GROUP,,}","${MODULE_GROUP^^}"]{1}[0-9]+ ]]; then
