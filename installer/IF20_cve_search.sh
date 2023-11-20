@@ -186,11 +186,9 @@ IF20_cve_search() {
             set +o allexport
           fi
           # independently checking if a NIST API key is set
-          set -o nounset
-          if [[ -z "${NVD_NIST_API_KEY}" ]]; then
+          if [[ -z "${NVD_NIST_API_KEY:-}" ]]; then
             echo -e "\\n""${ORANGE}""${BOLD}""No NVD-NIST API key set. Trying to initialize the database without it""${NC}"
           fi
-          set +o nounset
           # only update and install the database if we have no working database
           # also do not update if we are running as github action (GH_ACTION set to 1)
           if [[ "${GH_ACTION}" -eq 0 ]] && [[ "${CVE_INST}" -eq 1 ]]; then
