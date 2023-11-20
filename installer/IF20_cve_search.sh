@@ -179,7 +179,7 @@ IF20_cve_search() {
             export HTTP_PROXY_STRING="${https_proxy}"
           fi
           # Find and set NVD_NIST_API_KEY for cvexplore
-          if [[ -f "/home/${USER}/.cvexplore/.env" ]]; then
+          if [[ -f "/home/${SUDO_USER}/.cvexplore/.env" ]]; then
             set -o allexport
             # shellcheck source=/dev/null
             source "/home/${SUDO_USER}/.cvexplore/.env"
