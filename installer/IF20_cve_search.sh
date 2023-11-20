@@ -179,7 +179,7 @@ IF20_cve_search() {
             export HTTP_PROXY_STRING="${https_proxy}"
           elif [[ -n "${HTTPS_PROXY:-}" ]]; then
             echo -e "\\n""${MAGENTA}""Found a https-proxy settings, will be routing traffic for cvexplore through:""${BOLD}""${HTTPS_PROXY}""${NC}"
-            export HTTP_PROXY_STRING="$HTTPS_PROXY}"
+            export HTTP_PROXY_STRING="${HTTPS_PROXY}"
           fi
           # Find and set NVD_NIST_API_KEY for cvexplore
           if [[ -f "/home/${SUDO_USER}/.cvexplore/.env" ]]; then
