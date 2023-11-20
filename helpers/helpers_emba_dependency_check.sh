@@ -131,7 +131,7 @@ dependency_check()
       print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
     fi
 
-    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://raw.githubusercontent.com/HoxhaEndri/emba/master/config/VERSION.txt)"
+    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/HoxhaEndri/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/')"
     if [[ -z "${LATEST_EMBA_VERSION}" ]] ; then
       echo -e "${RED}""not ok""${NC}"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
