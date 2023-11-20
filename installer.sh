@@ -58,11 +58,7 @@ export SSL_REPOS=0
 
 # cve_search
 export MONGODB_HOST="172.36.0.1"
-# export MONGODB_PORT=27017
-# NVD_NIST_API_KEY=XXX
-if [[ -n "${https_proxy}" ]]; then
-  export HTTP_PROXY_STRING="${https_proxy}"
-fi
+export MONGODB_PORT=27017
 
 ## Color definition
 export RED="\033[0;31m"
