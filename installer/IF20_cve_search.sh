@@ -78,6 +78,7 @@ IF20_cve_search() {
       pip_install "dnspython==2.2.1"
       pip_install "Werkzeug"
       pip_install "python-dateutil"
+      # pip_install "CveXplore"
       pip_install "git+https://github.com/cve-search/CveXplore"
 
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
