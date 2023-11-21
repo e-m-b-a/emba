@@ -12,7 +12,7 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Stefan Haboeck, Nikolas Papaioannou
+# Contributor(s): Stefan Haboeck, Nikolas Papaioannou, Benedikt Kuehne
 
 # Description: Installs cve-search for CVE search module in EMBA (F20)
 
@@ -78,7 +78,7 @@ IF20_cve_search() {
       pip_install "dnspython==2.2.1"
       pip_install "Werkzeug"
       pip_install "python-dateutil"
-      pip_install "CveXplore>=0.3.16"
+      pip_install "CveXplore"
 
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 
@@ -173,15 +173,32 @@ IF20_cve_search() {
             echo -e "\\n""${MAGENTA}""cve-search database not ready.""${NC}"
             echo -e "\\n""${MAGENTA}""The installer is going to populate the database.""${NC}"
           fi
+          # Find and set Proxy-settings for cvexplore
+          if [[ -n "${https_proxy:-}" ]]; then
+            echo -e "\\n""${MAGENTA}""Found a https-proxy settings, will be routing traffic for cvexplore through:""${BOLD}""${https_proxy}""${NC}"
+            export HTTP_PROXY_STRING="${https_proxy}"
+          elif [[ -n "${HTTPS_PROXY:-}" ]]; then
+            echo -e "\\n""${MAGENTA}""Found a https-proxy settings, will be routing traffic for cvexplore through:""${BOLD}""${HTTPS_PROXY}""${NC}"
+            export HTTP_PROXY_STRING="${HTTPS_PROXY}"
+          fi
+          # Find and set NVD_NIST_API_KEY for cvexplore
+          if [[ -f "/home/${SUDO_USER}/.cvexplore/.env" ]]; then
+            set -o allexport
+            # shellcheck source=/dev/null
+            source "/home/${SUDO_USER}/.cvexplore/.env"
+            set +o allexport
+          fi
+          # independently checking if a NIST API key is set
+          if [[ -z "${NVD_NIST_API_KEY:-}" ]]; then
+            echo -e "\\n""${ORANGE}""${BOLD}""No NVD-NIST API key set. Trying to initialize the database without it""${NC}"
+          fi
           # only update and install the database if we have no working database
           # also do not update if we are running as github action (GH_ACTION set to 1)
           if [[ "${GH_ACTION}" -eq 0 ]] && [[ "${CVE_INST}" -eq 1 ]]; then
             /etc/init.d/redis-server restart
             CNT=0
             while [[ "${CVE_INST}" -eq 1 ]]; do
-              ./sbin/db_mgmt_cpe_dictionary.py -p || true
-              ./sbin/db_mgmt_json.py -p || true
-              ./sbin/db_updater.py -f || true
+              cvexplore database initialize
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 break
               fi
