@@ -9,33 +9,29 @@ services:
     # nosemgrep
     privileged: true
     # /root/.config is needed for binwalk - further recovery for other tools needed
-    # /root/.cache is needed for unblob -> further recovery of this directory needed
+    # /root/.config is needed for cwe_checker
+    # /root/.local is needed for cwe_checker
     # /external/arachni/... needed by arachni (full system emulator modules)
-    # /external/freetz-ng/.fakeroot-cache needed by freetz-ng (AVM extractor)
-    # Todo: cleanup of tmpfs entries
     tmpfs:
       - /tmp
       - /root/.config/
       - /root/.local/
       - /root/.cache/
-      - /root/.cache/pypoetry/virtualenvs:exec
-      - /root
-      - /root/.cargo/bin:exec
+      - /root/.semgrep/
+      - /root/.ghidra/
+      - /root/.rsf_history/
+      - /root/.msf4
       - /run/lock
       - /var/run
       - /var/tmp
       - /var/lock
-      - /var/lib/nikto:exec
-      - /external/freetz-ng/.fakeroot-cache
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/../logs
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/home
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/config/component_cache
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/db
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/tmp
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/home
+      - /external/arachni/arachni-1.6.1.3-0.6.1.1/logs
     build: .
     # /dev is needed for the system emulator (L10)
-    # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
-    # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
         - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/logs
@@ -43,8 +39,6 @@ services:
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
-        - /lib/modules:/lib/modules:ro
-        - /boot:/boot:ro
     environment:
         - USER
         - CONTAINER_NUMBER=1
@@ -65,24 +59,17 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /root/.config/
-      - /root/.local/
-      - /root/.cache/
       - /root
       - /run/lock
       - /var/run
       - /var/tmp
       - /var/lock
-    # /dev is needed for the system emulator (L10)
-    # /lib/modules is needed for modules which are loading kernel modules (e.g. extractors)
-    # /boot is needed for modules which are loading kernel modules (e.g. extractors like P10)
     volumes:
         - ${FIRMWARE}/:/firmware:ro
         - ${LOG}/:/logs
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources
         - /etc/localtime:/etc/localtime:ro
-        - /dev:/dev
     environment:
         - USER
         - CONTAINER_NUMBER=2

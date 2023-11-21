@@ -33,8 +33,8 @@ P19_bsd_ufs_mounter() {
       MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
+      NEG_LOG=1
     fi
-    NEG_LOG=1
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
   fi
 }
@@ -55,7 +55,11 @@ ufs_extractor() {
 
   mkdir -p "${TMP_UFS_MOUNT}" 2>/dev/null || true
   print_output "[*] Trying to mount ${ORANGE}${UFS_PATH_}${NC} to ${ORANGE}${TMP_UFS_MOUNT}${NC} directory"
-  modprobe ufs
+  # modprobe ufs
+  if ! lsmod | grep -q "^ufs[[:space:]]"; then
+    print_output "[-] WARNING: Ufs kernel module not loaded - can't proceed"
+    return
+  fi
   mount -r -t ufs -o ufstype=ufs2 "${UFS_PATH_}" "${TMP_UFS_MOUNT}"
 
   if mount | grep -q ufs_mount; then

@@ -63,6 +63,7 @@ IF20_cve_search() {
 
       # we do not need to install the Flask web environment - we do it manually
       # python3 -m pip install -r requirements.txt
+      # stick to requests==2.28.1 -> see also https://github.com/e-m-b-a/emba/issues/187
       pip_install "requests==2.28.1"
       pip_install "Whoosh==2.7.4"
       pip_install "tqdm==4.64.0"

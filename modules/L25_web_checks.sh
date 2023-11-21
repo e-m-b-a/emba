@@ -91,7 +91,7 @@ main_web_check() {
         if [[ "${WEB_DONE}" -eq 0 ]]; then
           if system_online_check "${IP_ADDRESS_}" ; then
             sub_module_title "Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
-            timeout --preserve-status --signal SIGINT 600 nikto -timeout 3 -nointeractive -maxtime 8m -ssl -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
+            timeout --preserve-status --signal SIGINT 600 "${EXT_DIR}"/nikto/program/nikto.pl -timeout 3 -nointeractive -maxtime 8m -ssl -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
             cat "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt >> "${LOG_FILE}"
             WEB_DONE=1
             print_output "[*] Finished Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
@@ -134,7 +134,7 @@ main_web_check() {
 
           if system_online_check "${IP_ADDRESS_}" ; then
             sub_module_title "Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
-            timeout --preserve-status --signal SIGINT 600 nikto -timeout 3 -nointeractive -maxtime 8m -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
+            timeout --preserve-status --signal SIGINT 600 "${EXT_DIR}"/nikto/program/nikto.pl -timeout 3 -nointeractive -maxtime 8m -port "${PORT}" -host "${IP_ADDRESS_}" | tee -a "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt || true
             cat "${LOG_PATH_MODULE}"/nikto-scan-"${IP_ADDRESS_}".txt >> "${LOG_FILE}"
             WEB_DONE=1
             print_output "[*] Finished Nikto web server analysis for ${ORANGE}${IP_ADDRESS_}:${PORT}${NC}"
@@ -492,11 +492,11 @@ arachni_scan() {
 
   if [[ "${IN_DOCKER}" -eq 1 ]]; then
     # we need to prepare the directories mounted as tempfs for arachni user:
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/config/component_cache -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/db -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/arachni-ui-web/tmp -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/../logs -R
-    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/bin/../.system/home -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/config/component_cache -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/db -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/tmp -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/.system/home -R
+    chown arachni:arachni "${EXT_DIR}"/arachni/arachni-1.6.1.3-0.6.1.1/logs -R
     ARACHNI_USER="arachni"
   fi
 
