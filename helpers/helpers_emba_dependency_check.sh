@@ -110,6 +110,33 @@ check_emba_version(){
   fi
 }
 
+check_git_hash(){
+  local REMOTE_HASH=""
+  local LOCAL_HASH=""
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
+    REMOTE_HASH="$(sudo -E -u "${SUDO_USER:-${USER}}" git ls-remote origin -h refs/heads/master | awk '{print $1}')"
+    LOCAL_HASH="$(sudo -E -u "${SUDO_USER:-${USER}}" git log -n 1 --pretty=format:%H origin/master)"
+    if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
+      echo -e "    ${GREEN}You are on the latest git commit.${NC}"
+    else
+      echo -e "    ${RED}There are new available commits online! Please check the github page and execute git pull for the latest updates.${NC}"
+    fi
+  fi
+}
+
+check_docker_image(){
+  local LOCAL_DOCKER_HASH=""
+  local REMOTE_DOCKER_HASH=""
+  LOCAL_DOCKER_HASH="$(sudo docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' )"
+  REMOTE_DOCKER_HASH="$(sudo docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/')"
+
+  if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
+    echo -e "    ${GREEN}You have the latest docker image.${NC}"
+  else
+    echo -e "    ${RED}There is a new docker image available! Please execute docker pull embeddedanalyzer/emba:latest for the latest docker image.${NC}"
+  fi
+}
+
 dependency_check()
 {
   export LATEST_EMBA_VERSION=""
@@ -138,6 +165,8 @@ dependency_check()
     else
       echo -e "${GREEN}""ok""${NC}"
       check_emba_version
+      check_docker_image
+      check_git_hash
     fi
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
