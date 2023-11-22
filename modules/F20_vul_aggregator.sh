@@ -1047,6 +1047,15 @@ cve_extractor() {
         fi
         ((LOW_CVE_COUNTER+=1))
       fi
+      print_output "[!] Write CSV for ${CVE_VALUE}"
+      print_output "BINARY: $BINARY"
+      print_output "VERSION: $VERSION"
+      print_output "EXPLOIT_AVAIL: ${EXPLOIT_AVAIL[*]}"
+      print_output "EXPLOIT_AVAIL_MSF: ${EXPLOIT_AVAIL_MSF[*]}"
+      print_output "EXPLOIT_AVAIL_TRICKEST: ${EXPLOIT_AVAIL_TRICKEST[*]}"
+      print_output "EXPLOIT_AVAIL_SNYK: ${EXPLOIT_AVAIL_SNYK[*]}"
+      print_output "EXPLOIT_AVAIL_PACKETSTORM: ${EXPLOIT_AVAIL_PACKETSTORM[*]}"
+      print_output "LOCAL / REMOTE / DOS /KEV: ${LOCAL} / ${REMOTE} / ${DOS} / ${KNOWN_EXPLOITED_VULNS[*]}"
       write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
     done
   fi
@@ -1069,7 +1078,7 @@ cve_extractor() {
   write_anchor "cve_${BINARY}"
   if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
     print_ln
-    tail -n +2 "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" | tee -a "${LOG_FILE}" || true
+    grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" | tee -a "${LOG_FILE}" || true
     if [[ "${KERNEL_VERIFIED_VULN}" -gt 0 ]]; then
       print_output "[+] Found ${RED}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${RED}${KERNEL_VERIFIED_VULN} verified${GREEN}) and ${RED}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}"
     else
@@ -1078,7 +1087,7 @@ cve_extractor() {
     print_ln
   elif [[ "${CVE_COUNTER_VERSION}" -gt 0 ]]; then
     print_ln
-    tail -n +2 "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" | tee -a "${LOG_FILE}"
+    grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" | tee -a "${LOG_FILE}" || true
     if [[ "${KERNEL_VERIFIED_VULN}" -gt 0 ]]; then
       print_output "[+] Found ${ORANGE}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${ORANGE}${KERNEL_VERIFIED_VULN} verified${GREEN}) and ${ORANGE}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}"
     else
@@ -1207,7 +1216,7 @@ get_uefi_details() {
 
   if [[ -f "${S02_LOG}" ]]; then
     print_output "[*] Collect CVE details of module $(basename "${S02_LOG}")."
-    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "${S02_LOG}" | tail -n +2 | sort -u || true)
+    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "${S02_LOG}" | tail -n +2 | sort -u | grep -v "^CVE-" || true)
   fi
 }
 
