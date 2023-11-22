@@ -1047,15 +1047,6 @@ cve_extractor() {
         fi
         ((LOW_CVE_COUNTER+=1))
       fi
-      print_output "[!] Write CSV for ${CVE_VALUE}"
-      print_output "BINARY: $BINARY"
-      print_output "VERSION: $VERSION"
-      print_output "EXPLOIT_AVAIL: ${EXPLOIT_AVAIL[*]}"
-      print_output "EXPLOIT_AVAIL_MSF: ${EXPLOIT_AVAIL_MSF[*]}"
-      print_output "EXPLOIT_AVAIL_TRICKEST: ${EXPLOIT_AVAIL_TRICKEST[*]}"
-      print_output "EXPLOIT_AVAIL_SNYK: ${EXPLOIT_AVAIL_SNYK[*]}"
-      print_output "EXPLOIT_AVAIL_PACKETSTORM: ${EXPLOIT_AVAIL_PACKETSTORM[*]}"
-      print_output "LOCAL / REMOTE / DOS /KEV: ${LOCAL} / ${REMOTE} / ${DOS} / ${KNOWN_EXPLOITED_VULNS[*]}"
       write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
     done
   fi
