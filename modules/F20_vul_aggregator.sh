@@ -1207,7 +1207,7 @@ get_uefi_details() {
 
   if [[ -f "${S02_LOG}" ]]; then
     print_output "[*] Collect CVE details of module $(basename "${S02_LOG}")."
-    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "${S02_LOG}" | tail -n +2 | sort -u | grep -v "^CVE-" || true)
+    readarray -t CVE_S02_DETAILS < <(cut -d\; -f3 "${S02_LOG}" | tail -n +2 | sort -u | grep "^CVE-" || true)
   fi
 }
 
