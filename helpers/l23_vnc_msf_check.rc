@@ -11,7 +11,7 @@ def help_me
 
   Usage:
     ./msfconsole -r [rc_path] [ip_address] [port]
-    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1
+    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1 9000
   |
 
   help = help.gsub(/^\t/, '')
