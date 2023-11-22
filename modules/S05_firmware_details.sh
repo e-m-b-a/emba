@@ -26,13 +26,7 @@ S05_firmware_details()
   local DETECTED_DIR
 
   # we use the file FILE_ARR from helpers module
-  if [[ ${RTOS} -eq 0 ]]; then
-    # Linux:
-    DETECTED_DIR=$(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type d 2>/dev/null | wc -l)
-  else
-    # RTOS:
-    DETECTED_DIR=$(find "${OUTPUT_DIR}" -xdev -type d 2>/dev/null | wc -l)
-  fi
+  DETECTED_DIR=$(find "${LOG_DIR}/firmware" -xdev -type d 2>/dev/null | wc -l)
 
   print_output "[*] ${ORANGE}${#FILE_ARR[@]}${NC} files and ${ORANGE}${DETECTED_DIR}${NC} directories detected."
 
@@ -48,11 +42,8 @@ S05_firmware_details()
 filesystem_tree() {
   sub_module_title "Filesystem information"
   write_anchor "file_dirs"
-  if [[ ${RTOS} -eq 0 ]]; then
-    local LPATH="${FIRMWARE_PATH}"
-  else
-    local LPATH="${OUTPUT_DIR}"
-  fi
+  local LPATH="${LOG_DIR}/firmware"
+
   # excluded paths will be also printed
   if command -v tree > /dev/null 2>&1 ; then
     if [[ ${FORMAT_LOG} -eq 1 ]] ; then
