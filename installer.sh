@@ -55,9 +55,10 @@ export UBUNTU_OS=0
 export WSL=0
 export GH_ACTION=0
 export SSL_REPOS=0
+
 # cve_search
 export MONGODB_HOST="172.36.0.1"
-# export MONGODB_PORT=27017
+export MONGODB_PORT=27017
 
 ## Color definition
 export RED="\033[0;31m"

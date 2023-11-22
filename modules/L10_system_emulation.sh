@@ -1249,10 +1249,11 @@ get_networking_details_emulation() {
     local TCP_PORT=""
     local UDP_PORT=""
 
-    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //'| sort -u || true)
+    mapfile -t INTERFACE_CANDIDATES < <(grep -a "__inet_insert_ifa" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sed -E 's/.*__inet_insert_ifa\[PID:\ [0-9]+\ //' \
+     | sort -u | grep -v -E " = -[0-9][0-9]" || true)
     mapfile -t BRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f4- | sort -u || true)
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
-    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sort -u || true)
+    mapfile -t VLAN_INFOS < <(grep -a "register_vlan_dev" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sort -u | grep -v -E " = -[0-9][0-9]" || true)
     mapfile -t PANICS < <(grep -a "Kernel panic - " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u || true)
     mapfile -t NVRAM < <(grep -a "\[NVRAM\] " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $3}' | grep -a -E '[[:alnum:]]{3,50}' | sort -u || true)
     # mapfile -t NVRAM_SET < <(grep -a "nvram_set" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2 | sed 's/^\ //g' | cut -d\  -f1 | sed 's/\"//g' | grep -v "^#" | grep -E '[[:alnum:]]{3,50}'| sort -u || true)
@@ -1261,7 +1262,7 @@ get_networking_details_emulation() {
     mapfile -t VLAN_HW_INFO_DEV < <(grep -a -E "adding VLAN [0-9] to HW filter on device eth[0-9]" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk -F\  '{print $NF}' | sort -u || true)
 
     # we handle missing files in setup_network_config -> there we already remount the filesystem and we can perform the changes
-    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | sort -u || true)
+    mapfile -t MISSING_FILES_TMP < <(grep -a -E "No such file or directory" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | tr ' ' '\n' | grep -a "/" | grep -a -v proc | tr -d ':' | tr -d "'" | tr -d '`' | sort -u || true)
     MISSING_FILES+=( "${MISSING_FILES_TMP[@]}" )
 
     NVRAM_TMP=( "${NVRAM[@]}" )
@@ -1611,7 +1612,7 @@ setup_network_emulation() {
     TAPDEV_0="tap${TAP_ID}_0"
   fi
   HOSTNETDEV_0="${TAPDEV_0}"
-  print_output "[*] Creating TAP device ${ORANGE}${TAPDEV_0}${NC}..."
+  print_output "[*] Creating TAP device ${ORANGE}${TAPDEV_0}${NC} ..."
   write_script_exec "echo -e \"Creating TAP device ${TAPDEV_0}\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation - install uml-utilities package\" && exit 1)" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "tunctl -t ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh 1

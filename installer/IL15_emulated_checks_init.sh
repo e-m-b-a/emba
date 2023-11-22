@@ -25,11 +25,13 @@ IL15_emulated_checks_init() {
     print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
     print_git_info "testssl" "EMBA-support-repos/testssl.sh.git" "TestSSL.sh"
     print_file_info "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "Arachni web application scanner" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni"
+    print_git_info "Nikto" "sullo/nikto" "external/nikto"
 
     print_tool_info "dnsutils" 1
     print_tool_info "nmap" 1
     print_tool_info "snmp" 1
-    print_tool_info "nikto" 1
+    # nikto is somehow complicated with our read only container -> we install it manually
+    # print_tool_info "nikto" 1
     # tools only available on Kali Linux:
     if [[ "${OTHER_OS}" -eq 0 ]] && [[ "${UBUNTU_OS}" -eq 0 ]]; then
       print_tool_info "snmpcheck" 1
@@ -82,6 +84,10 @@ IL15_emulated_checks_init() {
 
       if ! [[ -d external/testssl.sh ]]; then
         git clone --depth 1 https://github.com/EMBA-support-repos/testssl.sh.git external/testssl.sh
+      fi
+
+      if ! [[ -d external/nikto ]]; then
+        git clone https://github.com/sullo/nikto.git external/nikto
       fi
 
       if ! [[ -d external/routersploit ]]; then

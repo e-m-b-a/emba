@@ -33,7 +33,6 @@ I120_cwe_checker() {
     print_git_info "cwe-checker" "EMBA-support-repos/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
     echo -e "${ORANGE}""cwe-checker will be downloaded.""${NC}"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
-    # print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.2.3_build/ghidra_10.2.3_PUBLIC_20230208.zip" "external/ghidra.zip"
     print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip" "external/ghidra.zip"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
@@ -56,6 +55,7 @@ I120_cwe_checker() {
           rm external/rustup -r -f
 
           curl https://sh.rustup.rs -sSf | sh -s -- -y
+
           export PATH="${PATH}":"${HOME}"/.cargo/bin
 
           # Java SDK for ghidra
@@ -85,15 +85,14 @@ I120_cwe_checker() {
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component cwe_checker" && exit 1 )
 
           if [[ "${IN_DOCKER}" -eq 1 ]]; then
-            cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
-            echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > /root/.config/cwe_checker/ghidra.json
+            # cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
+            echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
 
             # save .config as we remount /root with tempfs -> now we can restore it in the module
-            cp -pr /root/.config ./external/cwe_checker/
-            cp -pr /root/.local ./external/cwe_checker/
+            cp -pr "${HOME}"/.config ./external/cwe_checker/
+            cp -pr "${HOME}"/.local ./external/cwe_checker/
 
             # cleanup
-            rm "${HOME}"/.cargo -r -f || true
             rm "${HOME}"/.config -r -f || true
           fi
         else
