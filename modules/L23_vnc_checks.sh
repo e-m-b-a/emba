@@ -38,7 +38,7 @@ L23_vnc_checks() {
         fi
       fi
       if [[ "$(grep -c "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap 2>/dev/null | cut -d ':' -f2 | awk '{s+=$1} END {print s}')" -gt 0 ]]; then
-        mapfile -t VNC_PORT_ARR < <(grep -h "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u)
+        mapfile -t VNC_PORT_ARR < <(grep -h "open.*vnc" "${LOG_DIR}"/l15_emulated_checks_nmap/nmap_emba_*.nmap | awk '{print $1}' | cut -d '/' -f1 | sort -u || true)
         for VNC_PORT in "${VNC_PORT_ARR[@]}"; do
           check_basic_vnc "${VNC_PORT}"
           check_msf_vnc "${VNC_PORT}"
@@ -74,7 +74,7 @@ check_basic_vnc() {
   fi
 
   print_ln
-  print_output "[*] VNC basic enumeration finished"
+  print_output "[*] VNC basic enumeration for ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC} finished"
 }
 
 check_msf_vnc() {
@@ -93,5 +93,5 @@ check_msf_vnc() {
 
   timeout --preserve-status --signal SIGINT -k 10m msfconsole -q -n -r "${HELP_DIR}"/l23_vnc_msf_check.rc "${IP_ADDRESS_}" "${VNC_PORT}" | tee -a "${LOG_PATH_MODULE}"/metasploit-vnc-check-"${IP_ADDRESS_}".txt || true
 
-  print_output "[*] Metasploit VNC tests for emulated system ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC} finished"
+  print_output "[*] VNC Metasploit enumeration for ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC} finished"
 }
