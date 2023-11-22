@@ -1,0 +1,91 @@
+<ruby>
+
+def help_me
+  help = %Q|
+  Description:
+    This Metasploit RC script is part of the firmware analyzer EMBA.
+    The script runs through multiple Metasploit VNC modules and tests them against
+    the host under test.
+    You can also setup the emulated device afterwards manually and check the 
+    Metasploit RC script against it with the following arguments.
+
+  Usage:
+    ./msfconsole -r [rc_path] [ip_address] [port]
+    ./msfconsole -r ./helpers/msf-check.rc 127.0.0.1
+  |
+
+  help = help.gsub(/^\t/, '')
+  print_line(help)
+end
+
+def run_scanner(host:, mod_name:, port:)
+  begin
+    print_status("Testing #{mod_name} against host #{host} ...")
+    run_single("use #{mod_name}")
+    run_single("set RPORT #{port}")
+    run_single("set RHOSTS #{host}")
+    run_single("run")
+  rescue ::Exception => e
+    print_error(e.message)
+  end
+end
+
+def vnc_checker(host, port)
+  print_status("Checking host #{host} for VNC issues ...")
+  begin
+    # VNC checks:
+    [ 'auxiliary/scanner/http/thinvnc_traversal',
+      'auxiliary/scanner/vnc/vnc_none_auth' 
+    ].each do |mod|
+      run_scanner(host: host, mod_name: mod.to_s, port: port)
+    end
+  rescue ::Exception => e
+    print_error(e.message)
+  end
+  print_status("All VNC modules sent to #{host} ...")
+end
+
+#
+# Initialize our arguments
+#
+def init_args
+  args = {}
+  if ARGV.join('') =~ /^help$/i
+    args[:help] = true
+    return args
+  end
+
+  datastore        = framework.datastore
+  args[:host]      = ARGV.shift || ''
+  args[:port]      = ARGV.shift || ''
+
+  raise ArgumentError, "Missing a host ip address" if args[:host].empty?
+  raise ArgumentError, "Missing a VNC port" if args[:port].empty?
+
+  print_status("VNC host: #{args[:host]}")
+  print_status("VNC ports: #{args[:port]}")
+
+  return args
+end
+
+
+#
+# main
+#
+print_status("Starting Metasploit VNC analysis ...")
+begin
+  args = init_args
+  if args[:help]
+    help_me
+    return
+  end
+
+  vnc_checker(args[:host], args[:port])
+rescue ArgumentError => e
+  print_error("Invalid argument: #{e.message}")
+  return
+end
+
+run_single("exit -y")
+
+</ruby>

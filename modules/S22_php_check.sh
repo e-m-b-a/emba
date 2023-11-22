@@ -61,6 +61,9 @@ s22_phpinfo_check() {
       ((S22_PHPINFO_ISSUES+=1))
     fi
   done
+  if [[ "${S22_PHPINFO_ISSUES}" -eq 0 ]]; then
+    print_output "[-] No phpinfo files found"
+  fi
   print_ln
 }
 
@@ -82,6 +85,8 @@ s22_vuln_check_semgrep() {
       print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${S22_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${S22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${PHP_SEMGREP_LOG}"
     elif [[ "${S22_SEMGREP_ISSUES}" -gt 0 ]]; then
       print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" in ""${ORANGE}""${S22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${PHP_SEMGREP_LOG}"
+    else
+      print_output "[-] No PHP issues found with semgrep"
     fi
     # highlight security findings in semgrep log:
     sed -i -r "s/.*external\.semgrep-rules\.php\.lang\.security.*/\x1b[32m&\x1b[0m/" "${PHP_SEMGREP_LOG}"
@@ -159,6 +164,8 @@ s22_vuln_check_caller() {
   print_ln
   if [[ "${S22_PHP_VULNS}" -gt 0 ]]; then
     print_output "[+] Found ""${ORANGE}""${S22_PHP_VULNS}"" vulnerabilities""${GREEN}"" in ""${ORANGE}""${S22_PHP_SCRIPTS}""${GREEN}"" php files.""${NC}""\\n"
+  else
+    print_output "[-] No PHP issues found with progpilot"
   fi
 }
 
@@ -274,6 +281,8 @@ s22_check_php_ini(){
       print_ln
       print_output "[+] Found ""${ORANGE}""${S22_PHP_INI_ISSUES}""${GREEN}"" PHP configuration issues in php config file :""${ORANGE}"" ""$(print_path "${PHP_FILE}")"
       print_ln
+    else
+      print_output "[-] No PHP.ini issues found"
     fi
   done
   enable_strict_mode "${STRICT_MODE}"
