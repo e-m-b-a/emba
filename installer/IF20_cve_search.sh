@@ -200,12 +200,14 @@ IF20_cve_search() {
             /etc/init.d/redis-server restart
             CNT=0
             while [[ "${CVE_INST}" -eq 1 ]]; do
-              cvexplore database initialize
+              cvexplore database initialize || true
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 break
               fi
               if [[ "${CNT}" -gt 4 ]]; then
                 break
+              else
+                echo -e "\\n""${ORANGE}""${BOLD}""CVE database is not read - we try the update again.""${NC}"
               fi
               CNT=$((CNT+1))
             done
