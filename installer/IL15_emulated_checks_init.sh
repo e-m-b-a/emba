@@ -110,15 +110,15 @@ IL15_emulated_checks_init() {
       if ! grep -q "/tmp/routersploit.log" rsf.py; then
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
       fi
+      # patch some code to write the history files to a subdirectory in /root
+      if grep -q  '~/.history' ./routersploit/interpreter.py; then
+        sed -i 's/~\/\.history/~\/\.routersploit\/\.history/' ./routersploit/interpreter.py
+      fi
+      if grep -q  '~/.rsf_history' ./routersploit/interpreter.py; then
+        sed -i 's/~\/\.rsf_history/~\/\.routersploit\/\.rsf_history/' ./routersploit/interpreter.py
+      fi
 
       cd "${HOME_PATH}" || ( echo "Could not install EMBA component routersploit" && exit 1 )
-
-      # we need to safe /var/lib/nikto now
-      if [[ -d /var/lib/nikto ]]; then
-        echo "[*] Backup nikto directory to /external"
-        mkdir external/var_lib_nikto
-        cp -pr /var/lib/nikto external/var_lib_nikto
-      fi
 
       # future extension
       pip_install "upnpclient"
