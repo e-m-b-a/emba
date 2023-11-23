@@ -206,6 +206,8 @@ IF20_cve_search() {
               fi
               if [[ "${CNT}" -gt 4 ]]; then
                 break
+              else
+                echo -e "\\n""${ORANGE}""${BOLD}""CVE database is not read - we try the update again.""${NC}"
               fi
               CNT=$((CNT+1))
             done
