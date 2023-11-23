@@ -19,7 +19,7 @@ services:
       - /root/.cache/
       - /root/.semgrep/
       - /root/.ghidra/
-      - /root/.rsf_history/
+      - /root/.routersploit/
       - /root/.msf4
       - /run/lock
       - /var/run
