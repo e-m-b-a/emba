@@ -42,14 +42,14 @@ jobs:
           large-packages: false
           swap-storage: true
 
-      - name: Pull EMBA docker image
-        run: |
-          docker pull embeddedanalyzer/emba:latest
+            #- name: Pull EMBA docker image
+            #run: |
+            #docker pull embeddedanalyzer/emba
 
       - name: Run Trivy vulnerability scanner on EMBA image
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          image-ref: 'embeddedanalyzer/emba:latest'
+          image-ref: 'embeddedanalyzer/emba'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
