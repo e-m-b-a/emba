@@ -17,7 +17,7 @@
 
 
 emba_parameter_parsing() {
-  while getopts a:bBA:cC:d:De:Ef:Fghijk:l:m:N:o:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:d:De:Ef:Fghik:l:m:N:o:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
     case "${OPT}" in
       a)
         check_alnum "${OPTARG}"
@@ -93,9 +93,6 @@ emba_parameter_parsing() {
         # for detecting the execution in docker container:
         export IN_DOCKER=1
         export USE_DOCKER=0
-        ;;
-      j)
-        export JUMP_OVER_CVESEARCH_CHECK=1
         ;;
       k)
         check_path_input "${OPTARG}"

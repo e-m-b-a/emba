@@ -68,121 +68,6 @@ check_dep_port()
   fi
 }
 
-check_docker_env() {
-  TOOL_NAME="MongoDB"
-  print_output "    ""${TOOL_NAME}"" - \\c" "no_log"
-  if ! grep -q "bindIp: ${MONGODB_HOST}" /etc/mongod.conf; then
-    echo -e "${RED}""not ok""${NC}"
-    echo -e "${RED}""    Wrong ""mongodb config"" - check your installation""${NC}"
-    echo -e "${RED}""    RE-run installation - bindIp should be set to ${MONGODB_HOST}""${NC}"
-    DEP_ERROR=1
-  else
-    echo -e "${GREEN}""ok""${NC}"
-  fi
-  TOOL_NAME="Docker Interface"
-  print_output "    ""${TOOL_NAME}"" -""${RED}"" \\c" "no_log"
-  if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
-    echo -e "${RED}""    Missing ""Docker-Interface"" - check your installation""${NC}"
-    if [[ "${WSL}" -eq 1 ]]; then
-      echo -e "${RED}""    Is dockerd running (e.g., sudo dockerd --iptables=false &)""${NC}"
-      DEP_ERROR=1
-    else
-      if [[ "${EUID}" -eq 0 ]]; then
-        echo -e "${ORANGE}""    Trying to auto-maintain the docker interface ...""${NC}"
-        systemctl restart NetworkManager docker
-      fi
-      if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
-        echo -e "${RED}""    Use  \$systemctl restart NetworkManager docker or reset the docker interface manually (\$ docker network rm emba_runs)""${NC}"
-        DEP_ERROR=1
-      else
-        print_output "    ""${TOOL_NAME}"" -""${RED}"" \\c" "no_log"
-        echo -e "${GREEN}""ok""${NC}"
-      fi
-    fi
-  else
-    echo -e "${GREEN}""ok""${NC}"
-  fi
-}
-
-check_nw_interface() {
-  if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
-    echo -e "${RED}""    Network interface not available"" - trying to restart now""${NC}"
-    systemctl restart NetworkManager docker
-    echo -e "${GREEN}""    docker-networks restarted""${NC}"
-  fi
-}
-
-check_cve_search() {
-  # CVE_STATUS_PRINT is used to disable the printing of the regular status check
-  # this was confusing for EMBA users
-  CVE_STATUS_PRINT="${1:-0}"
-
-  if [[ "${JUMP_OVER_CVESEARCH_CHECK}" -eq 1 ]] ; then
-    # no cve check -> just return and enforce CVE_SEARCH
-    export CVE_SEARCH=1
-    return
-  fi
-  TOOL_NAME="cve-search"
-  if [[ "${CVE_STATUS_PRINT}" -eq 1 ]]; then
-    print_output "    ""${TOOL_NAME}"" - testing" "no_log"
-  fi
-  local CVE_SEARCH_=0 # local checker variable
-  # check if the cve-search produces results:
-  if ! [[ $("${PATH_CVE_SEARCH}" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-    # we can restart the mongod database only in dev mode and not in docker mode:
-    if [[ "${IN_DOCKER}" -eq 0 ]]; then
-      print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
-      if [[ "${WSL}" -eq 1 ]]; then
-        pkill -f mongod
-        mongod --config /etc/mongod.conf &
-      else
-        service mongod restart
-      fi
-      sleep 10
-
-      # do a second try
-      if ! [[ $("${PATH_CVE_SEARCH}" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-        print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
-        if [[ "${WSL}" -eq 1 ]]; then
-          pkill -f mongod
-          mongod --config /etc/mongod.conf &
-        else
-          service mongod restart
-        fi
-        sleep 10
-
-        if [[ $("${PATH_CVE_SEARCH}" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-          CVE_SEARCH_=1
-        fi
-      else
-        CVE_SEARCH_=1
-      fi
-    else
-      CVE_SEARCH_=1
-    fi
-  else
-    CVE_SEARCH_=1
-  fi
-
-  if [[ "${CVE_SEARCH_}" -eq 0 ]]; then
-    print_output "    ""${TOOL_NAME}"" - ""${RED}""not ok""${NC}" "no_log"
-    print_cve_search_failure
-    export CVE_SEARCH=0
-  else
-    if [[ "${CVE_STATUS_PRINT}" -eq 1 ]]; then
-      print_output "    ""${TOOL_NAME}"" - ""${GREEN}""ok""${NC}" "no_log"
-    fi
-    export CVE_SEARCH=1
-  fi
-}
-
-print_cve_search_failure() {
-  print_output "[-] The needed CVE database is not responding as expected." "no_log"
-  print_output "[-] CVE checks are currently not possible!" "no_log"
-  print_output "[-] Please check the following documentation on Github: https://github.com/e-m-b-a/emba/issues/187" "no_log"
-  print_output "[-] If this does not help, open a new issue here: https://github.com/e-m-b-a/emba/issues" "no_log"
-}
-
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
@@ -422,8 +307,6 @@ dependency_check()
     local TMP_VER=0
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
-    check_docker_env
-    check_cve_search 1
     check_dep_tool "inotifywait"
     check_dep_tool "notify-send"
     print_output "    urllib3 version - \\c" "no_log"
@@ -592,16 +475,7 @@ dependency_check()
       check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
 
       if function_exists F20_vul_aggregator; then
-        # CVE-search
-        # TODO change to portcheck and write one for external hosts
-        check_dep_file "cve-search script" "${EXT_DIR}""/cve-search/bin/search.py"
-        # we have already checked it outside the docker - do not need it again
-        [[ "${IN_DOCKER}" -eq 0 ]] && check_cve_search 1
-        if [[ "${IN_DOCKER}" -eq 0 ]]; then
-          # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
-          check_dep_tool "mongo database" "mongod"
-          # check_cve_search
-        fi
+        check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
         # CVE searchsploit
         check_dep_tool "CVE Searchsploit" "cve_searchsploit"
 

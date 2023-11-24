@@ -109,20 +109,7 @@ F20_vul_aggregator() {
 
     aggregate_versions
 
-    check_cve_search
-
-    if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-      print_output "[*] Waiting for the cve-search environment ..."
-      sleep 120
-      check_cve_search
-
-      if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-        print_output "[*] Waiting for the cve-search environment ..."
-        sleep 120
-        check_cve_search
-      fi
-    fi
-
+    CVE_SEARCH=1
     if [[ "${CVE_SEARCH}" -eq 1 ]]; then
       if command -v cve_searchsploit > /dev/null ; then
         CVE_SEARCHSPLOIT=1
@@ -130,11 +117,6 @@ F20_vul_aggregator() {
       if [[ -f "${MSF_DB_PATH}" ]]; then
         MSF_SEARCH=1
       fi
-      # We do not enable the TRICKEST exploit search because of the high false positive rate
-      # uncomment if needed but be warned, we will remove it in the future
-      # if [[ -f "${TRICKEST_DB_PATH}" ]]; then
-      #   TRICKEST_SEARCH=1
-      # fi
       if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
         RS_SEARCH=1
       fi
@@ -159,11 +141,6 @@ F20_vul_aggregator() {
       print_cve_search_failure
       CVE_SEARCH=0
     fi
-  else
-    print_output "[-] CVE search binary search.py not found."
-    print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
-    print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
-    CVE_SEARCH=0
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)
@@ -497,18 +474,17 @@ generate_cve_details_versions() {
 
 cve_db_lookup_cve () {
   local CVE_ENTRY="${1:-}"
+  local CVE_ID=""
+  local CVE_V2=""
+  local CVE_V31=""
   print_output "[*] CVE database lookup with CVE information: ${ORANGE}${CVE_ENTRY}${NC}" "no_log"
 
-  # CVE search:
-  if [[ "${STRICT_MODE}" -eq 1 ]]; then
-    set +e
-  fi
-
-  if ! "${PATH_CVE_SEARCH}" -c "${CVE_ENTRY}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt; then
-    "${PATH_CVE_SEARCH}" -c "${CVE_ENTRY}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt || true
-  fi
-  if [[ "${STRICT_MODE}" -eq 1 ]]; then
-    set -e
+  CVE_SOURCE=$(find "${NVD_DIR}" -name "${CVE_ENTRY}.json" | sort -u)
+  if [[ -f "${CVE_SOURCE}" ]]; then
+    CVE_ID=$(jq -r '.id' "${CVE_SOURCE}")
+    CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_SOURCE}")
+    CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_SOURCE}")
+    echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt || true
   fi
 
   if [[ "${THREADED}" -eq 1 ]]; then
@@ -524,22 +500,40 @@ cve_db_lookup_cve () {
 cve_db_lookup_version() {
   # BIN_VERSION_ is something like "binary:1.2.3"
   local BIN_VERSION_="${1:-}"
+  local CVE_ID=""
+  local CVE_V2=""
+  local CVE_V31=""
 
   # we create something like "binary_1.2.3" for log paths
   local VERSION_PATH="${BIN_VERSION_//:/_}"
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  if ! "${PATH_CVE_SEARCH}" -p "${BIN_VERSION_}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt; then
-    "${PATH_CVE_SEARCH}" -p "${BIN_VERSION_}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt || true
-  fi
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*${BIN_VERSION_}" "${NVD_DIR}")
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "${BIN_VERSION_}" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${ORANGE}${VERSION_SEARCHx}${NC}" "no_log"
-    "${PATH_CVE_SEARCH}" -p "${VERSION_SEARCHx}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r >> "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe.*${VERSION_SEARCHx}" "${NVD_DIR}")
+    CVE_VER_SOURCES_ARR+=( "${CVE_VER_SOURCES_ARR_DLINK[@]}" )
   fi
+
+  eval "CVE_VER_SOURCES_ARR=($(for i in "${CVE_VER_SOURCES_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+
+  for CVE_VER_SOURCES_FILE in "${CVE_VER_SOURCES_ARR[@]}"; do
+    CVE_ID=$(jq -r '.id' "${CVE_VER_SOURCES_FILE}")
+    CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
+    CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
+    if [[ -f "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt ]]; then
+      # check if we have already an entry for this CVE - if not, we will write it to the output file
+      if ! grep -q "^${CVE_ID}:" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt; then
+        echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" >> "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt || true
+      fi
+    else
+      echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" > "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt || true
+    fi
+  done
 
   if [[ "${THREADED}" -eq 1 ]]; then
     cve_extractor "${BIN_VERSION_}" &

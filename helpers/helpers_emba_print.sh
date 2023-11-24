@@ -592,7 +592,6 @@ print_help()
   echo -e "${CYAN}""-S""${NC}""                STRICT mode - developer option to improve code quality (not enabled by default)"
   echo -e "${CYAN}""-i""${NC}""                Ignores log path check"
   echo -e "${CYAN}""-y""${NC}""                Overwrite log directory automaticially, even if it is not empty"
-  echo -e "${CYAN}""-j""${NC}""                No check for cve-search"
   echo -e "\\nWeb reporter"
   echo -e "${CYAN}""-W""${NC}""                Activates web report creation in log path (overwrites -z)"
   echo -e "\\nSystem check"

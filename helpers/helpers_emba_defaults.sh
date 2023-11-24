@@ -81,8 +81,6 @@ set_defaults() {
                                 # 1 -> multi threaded
   export YARA=1
   export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
-  export JUMP_OVER_CVESEARCH_CHECK=0 # ignore long CVEsearch check in dep check
-
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="${INVOCATION_PATH}""/logs"
   export TMP_DIR="${LOG_DIR}""/tmp"
@@ -97,7 +95,6 @@ set_defaults() {
   # this will be in TMP_DIR/pid_notes.log
   export PID_LOG_FILE="pid_notes.log"
   export BASE_LINUX_FILES="${CONFIG_DIR}""/linux_common_files.txt"
-  export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
   if [[ -f "${CONFIG_DIR}"/known_exploited_vulnerabilities.csv ]]; then
     export KNOWN_EXP_CSV="${CONFIG_DIR}"/known_exploited_vulnerabilities.csv
   fi
@@ -124,8 +121,7 @@ set_defaults() {
 
   export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt  # include the blacklisted CVE values to this file
   export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt  # include the whitelisted CVE values to this file
-  export MONGODB_HOST="172.36.0.1"  # cveXplore mondodb host
-  # export MONGODB_PORT=27017  # cveXplore mondodb port
+  export NVD_DIR="${EXT_DIR}"/nvd-json-data-feeds
 
   export MODULE_BLACKLIST=()
   if [[ -f "${CONFIG_DIR}"/module_blacklist.txt ]]; then

@@ -24,6 +24,10 @@ S26_kernel_vuln_verifier()
   module_title "Kernel vulnerability identification and verification"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  # disabled until cve topic is finished
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  return
+
   HOME_DIR="$(pwd)"
   # KERNEL_ARCH_PATH is the directory where we store all the kernels
   KERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"

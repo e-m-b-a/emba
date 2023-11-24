@@ -84,31 +84,6 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
-# lets check cve-search in a background job
-check_cve_search_job() {
-  local EMBA_PID="${1:-}"
-
-  if ! [[ "${EMBA_PID}" =~ [0-9]+ ]]; then
-    print_output "[-] WARNING: No EMBA PID detected ... are we really running?!?"
-    return
-  fi
-
-  while true; do
-    if [[ -f "${LOG_DIR}"/emba.log ]]; then
-      if grep -q "Test ended\|EMBA failed" "${LOG_DIR}"/emba.log 2>/dev/null; then
-        break
-      fi
-    fi
-    # shellcheck disable=SC2009
-    if ! ps aux | grep -v grep | grep -q "${EMBA_PID}"; then
-      break
-    fi
-    check_nw_interface
-    check_cve_search
-    sleep 90
-  done
-}
-
 check_quest_container() {
   print_ln "no_log"
   print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
@@ -414,7 +389,6 @@ main() {
   if [[ ${IN_DOCKER} -eq 1 ]] ; then
     # set external path new for docker
     export EXT_DIR="/external"
-    export PATH_CVE_SEARCH="${EXT_DIR}""/cve-search/bin/search.py"
   fi
 
   # activate the virtual environment - we should have it in external which fits also the docker environment
@@ -659,13 +633,6 @@ main() {
           fi
         fi
       fi
-    fi
-
-    if [[ ${IN_DOCKER} -eq 0 ]] ; then
-      check_cve_search_job "${EMBA_PID}" &
-      local TMP_PID="$!"
-      store_kill_pids "${TMP_PID}"
-      disown "${TMP_PID}" 2> /dev/null || true
     fi
 
     # disk space monitor not fully working -> removed for now
