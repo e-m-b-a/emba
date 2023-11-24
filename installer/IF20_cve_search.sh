@@ -37,7 +37,7 @@ IF20_cve_search() {
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
 
         echo -e "\\n""${MAGENTA}""Check if the cve-search database is already installed and populated.""${NC}"
-        git clone https://github.com/EMBA-support-repos/nvd-json-data-feeds.git external/nvd-json-data-feeds
+        git clone --depth 1 -b main https://github.com/EMBA-support-repos/nvd-json-data-feeds.git external/nvd-json-data-feeds
         if [[ $(grep -l -E "cpe.*busybox:" external/nvd-json-data-feeds/* -r 2>/dev/null | wc -l) -gt 18 ]]; then
           echo -e "\\n""${GREEN}""cve-search database already installed - no further action performed.""${NC}"
         else
