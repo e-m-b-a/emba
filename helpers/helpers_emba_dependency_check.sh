@@ -451,7 +451,6 @@ dependency_check()
       fi
     done
 
-
     #######################################################################################
     # Check external tools
     #######################################################################################
@@ -534,22 +533,13 @@ dependency_check()
     check_dep_tool "luacheck"
 
     # APKHunt for android apk analysis
-    # hard requirement for v1.2.2
-    # check_dep_file "APKHunt apk scanner" "${EXT_DIR}""/APKHunt/apkhunt.go"
+    check_dep_file "APKHunt apk scanner" "${EXT_DIR}""/APKHunt/apkhunt.go"
 
     # rpm for checking package management system
-    # hard requirement for v1.2.2
-    # check_dep_tool "rpm"
-
+    check_dep_tool "rpm"
 
     # patool extractor - https://wummel.github.io/patool/
     check_dep_tool "patool"
-
-    # Freetz-NG - replaced by unblob
-    # check_dep_file "Freetz-NG fwmod" "${EXT_DIR}""/freetz-ng/fwmod"
-
-    # AVM fitimg extraction script - replaced by unblob
-    # check_dep_file "fitimg script" "${EXT_DIR}""/fitimg-0.8/fitimg"
 
     # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
     check_dep_file "EnGenius decryptor" "${EXT_DIR}""/engenius-decrypt.py"
@@ -586,129 +576,127 @@ dependency_check()
       check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
     fi
 
-    # checksec
-    check_dep_file "checksec script" "${EXT_DIR}""/checksec"
+    # we should check all the dependencies if they are needed in our quest container:
+    if [[ "${CONTAINER_NUMBER}" -ne 2 ]]; then
+      # checksec
+      check_dep_file "checksec script" "${EXT_DIR}""/checksec"
 
-    # sshdcc
-    check_dep_file "sshdcc script" "${EXT_DIR}""/sshdcc"
+      # sshdcc
+      check_dep_file "sshdcc script" "${EXT_DIR}""/sshdcc"
 
-    # sudo-parser.pl
-    check_dep_file "sudo-parser script" "${EXT_DIR}""/sudo-parser.pl"
+      # sudo-parser.pl
+      check_dep_file "sudo-parser script" "${EXT_DIR}""/sudo-parser.pl"
 
-    # BMC firmware decryptor - https://github.com/c0d3z3r0/smcbmc
-    check_dep_file "BMC decryptor" "${EXT_DIR}""/smcbmc/smcbmc.py"
+      # BMC firmware decryptor - https://github.com/c0d3z3r0/smcbmc
+      check_dep_file "BMC decryptor" "${EXT_DIR}""/smcbmc/smcbmc.py"
 
-    # sh3llcheck - I know it's a typo, but this particular tool nags about it
-    check_dep_tool "shellcheck script" "shellcheck"
+      # sh3llcheck - I know it's a typo, but this particular tool nags about it
+      check_dep_tool "shellcheck script" "shellcheck"
 
-    # fdtdump (device tree compiler)
-    export DTBDUMP
-    DTBDUMP_M="$(check_dep_tool "fdtdump" "fdtdump")"
-    if echo "${DTBDUMP_M}" | grep -q "not ok" ; then
-      DTBDUMP=0
-    else
-      DTBDUMP=1
-    fi
-    echo -e "${DTBDUMP_M}"
-
-    # linux-exploit-suggester.sh script
-    check_dep_file "linux-exploit-suggester.sh script" "${EXT_DIR}""/linux-exploit-suggester.sh"
-
-    if function_exists S13_weak_func_check; then
-      # objdump
-      OBJDUMP="${EXT_DIR}""/objdump"
-      check_dep_file "objdump disassembler" "${OBJDUMP}"
-    fi
-
-    if function_exists S14_weak_func_radare_check; then
-      # radare2
-      check_dep_tool "radare2" "r2"
-    fi
-
-    # bandit python security tester
-    check_dep_tool "bandit - python vulnerability scanner" "bandit"
-
-    # qemu
-    check_dep_tool "qemu-[ARCH]-static" "qemu-mips-static"
-
-    # yara
-    check_dep_tool "yara"
-
-    # ssdeep
-    check_dep_tool "ssdeep"
-
-    # cyclonedx - converting csv sbom to json sbom
-    if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
-      export PATH=${PATH}:/home/linuxbrew/.linuxbrew/bin/
-    fi
-    if [[ -d "/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/" ]]; then
-      # check this - currently cyclone is installed in this dir in our docker image:
-      export PATH=${PATH}:/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/
-    fi
-    check_dep_tool "cyclonedx"
-
-    check_dep_file "vmlinux-to-elf" "${EXT_DIR}""/vmlinux-to-elf/vmlinux-to-elf"
-
-    if function_exists S108_stacs_password_search; then
-      # stacs - https://github.com/stacscan/stacs
-      check_dep_tool "STACS hash detection" "stacs"
-    fi
-
-    # Full system emulation modules (L*)
-    if [[ "${FULL_EMULATION}" -eq 1 ]]; then
-      check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
-      check_dep_tool "Qemu system emulator ARM64" "qemu-system-aarch64"
-      check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
-      check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
-      check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
-      check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
-      check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
-      check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
-      # check_dep_tool "Qemu system emulator RISC-V" "qemu-system-riscv32"
-      # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
-
-      # check only some of the needed files
-      check_dep_file "console.*" "${EXT_DIR}""/EMBA_Live_bins/console.x86el"
-      check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox.mipsel"
-      check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram.so.armel"
-      check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl.so.mips64v1el"
-      check_dep_file "vmlinux.mips*" "${EXT_DIR}""/EMBA_Live_bins/vmlinux.mips64r2el.4"
-      check_dep_file "zImage.armel" "${EXT_DIR}""/EMBA_Live_bins/zImage.armel"
-
-      check_dep_file "fixImage.sh" "${MOD_DIR}""/L10_system_emulation/fixImage.sh"
-      check_dep_file "preInit.sh" "${MOD_DIR}""/L10_system_emulation/preInit.sh"
-      check_dep_file "inferFile.sh" "${MOD_DIR}""/L10_system_emulation/inferFile.sh"
-      check_dep_file "inferService.sh" "${MOD_DIR}""/L10_system_emulation/inferService.sh"
-
-      # routersploit for full system emulation
-      check_dep_file "Routersploit installation" "${EXT_DIR}""/routersploit/rsf.py"
-
-      check_dep_file "Arachni web scanner installation" "${EXT_DIR}""/arachni/arachni-1.6.1.3-0.6.1.1/bin/arachni"
-      check_dep_file "TestSSL.sh installation" "${EXT_DIR}""/testssl.sh/testssl.sh"
-      check_dep_file "Nikto web server analyzer" "${EXT_DIR}""/nikto/program/nikto.pl"
-      check_dep_tool "Cutycapt screenshot tool" "cutycapt"
-      check_dep_tool "snmp-check tool" "snmp-check"
-      check_dep_tool "Nmap portscanner" "nmap"
-      check_dep_tool "hping3" "hping3"
-      check_dep_tool "ping" "ping"
-      check_dep_tool "Metasploit framework" "msfconsole"
-      # This port is used by our Qemu installation and should not be used by another process.
-      # This check is not a blocker for the test. It is checked again by the emulation module:
-      # this function is defined in the system emulation helper file
-      check_emulation_port "Running Qemu network service" "2001"
-      # Port 4321 is used for Qemu telnet access and should be available
-      check_emulation_port "Running Qemu telnet service" "4321"
-    fi
-
-    if [[ "${CWE_CHECKER}" -eq 1 ]]; then
-      print_output "    cwe-checker environment - \\c" "no_log"
-      if [[ -f "${EXT_DIR}""/cwe_checker/bin/cwe_checker" ]] || [[ -f "/root/.cargo/bin/cwe_checker" ]]; then
-        echo -e "${GREEN}""ok""${NC}"
+      # fdtdump (device tree compiler)
+      export DTBDUMP
+      DTBDUMP_M="$(check_dep_tool "fdtdump" "fdtdump")"
+      if echo "${DTBDUMP_M}" | grep -q "not ok" ; then
+        DTBDUMP=0
       else
-        echo -e "${RED}""not ok""${NC}"
-        echo -e "${RED}""    Missing cwe-checker start script - check your installation""${NC}"
-        export CWE_CHECKER=0
-        DEP_ERROR=1
+        DTBDUMP=1
+      fi
+      echo -e "${DTBDUMP_M}"
+
+      # linux-exploit-suggester.sh script
+      check_dep_file "linux-exploit-suggester.sh script" "${EXT_DIR}""/linux-exploit-suggester.sh"
+
+      if function_exists S13_weak_func_check; then
+        # objdump
+        OBJDUMP="${EXT_DIR}""/objdump"
+        check_dep_file "objdump disassembler" "${OBJDUMP}"
+      fi
+
+      if function_exists S14_weak_func_radare_check; then
+        # radare2
+        check_dep_tool "radare2" "r2"
+      fi
+
+      # bandit python security tester
+      check_dep_tool "bandit - python vulnerability scanner" "bandit"
+
+      # qemu
+      check_dep_tool "qemu-[ARCH]-static" "qemu-mips-static"
+
+      # yara
+      check_dep_tool "yara"
+
+      # ssdeep
+      check_dep_tool "ssdeep"
+
+      # cyclonedx - converting csv sbom to json sbom
+      if [[ -d "/home/linuxbrew/.linuxbrew/bin/" ]]; then
+        export PATH=${PATH}:/home/linuxbrew/.linuxbrew/bin/
+      fi
+      if [[ -d "/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/" ]]; then
+        # check this - currently cyclone is installed in this dir in our docker image:
+        export PATH=${PATH}:/home/linuxbrew/.linuxbrew/Cellar/cyclonedx-cli/0.24.0.reinstall/bin/
+      fi
+      check_dep_tool "cyclonedx"
+
+      check_dep_file "vmlinux-to-elf" "${EXT_DIR}""/vmlinux-to-elf/vmlinux-to-elf"
+
+      if function_exists S108_stacs_password_search; then
+        # stacs - https://github.com/stacscan/stacs
+        check_dep_tool "STACS hash detection" "stacs"
+      fi
+
+      # Full system emulation modules (L*)
+      if [[ "${FULL_EMULATION}" -eq 1 ]]; then
+        check_dep_tool "Qemu system emulator ARM" "qemu-system-arm"
+        check_dep_tool "Qemu system emulator ARM64" "qemu-system-aarch64"
+        check_dep_tool "Qemu system emulator MIPS" "qemu-system-mips"
+        check_dep_tool "Qemu system emulator MIPSel" "qemu-system-mipsel"
+        check_dep_tool "Qemu system emulator MIPS64" "qemu-system-mips64"
+        check_dep_tool "Qemu system emulator MIPS64el" "qemu-system-mips64el"
+        check_dep_tool "Qemu system emulator NIOS2" "qemu-system-nios2"
+        check_dep_tool "Qemu system emulator x86" "qemu-system-x86_64"
+        # check_dep_tool "Qemu system emulator RISC-V" "qemu-system-riscv32"
+        # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
+
+        # check only some of the needed files
+        check_dep_file "console.*" "${EXT_DIR}""/EMBA_Live_bins/console.x86el"
+        check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox.mipsel"
+        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram.so.armel"
+        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl.so.mips64v1el"
+        check_dep_file "vmlinux.mips*" "${EXT_DIR}""/EMBA_Live_bins/vmlinux.mips64r2el.4"
+        check_dep_file "zImage.armel" "${EXT_DIR}""/EMBA_Live_bins/zImage.armel"
+
+        check_dep_file "fixImage.sh" "${MOD_DIR}""/L10_system_emulation/fixImage.sh"
+        check_dep_file "preInit.sh" "${MOD_DIR}""/L10_system_emulation/preInit.sh"
+        check_dep_file "inferFile.sh" "${MOD_DIR}""/L10_system_emulation/inferFile.sh"
+        check_dep_file "inferService.sh" "${MOD_DIR}""/L10_system_emulation/inferService.sh"
+
+        # routersploit for full system emulation
+        check_dep_file "Routersploit installation" "${EXT_DIR}""/routersploit/rsf.py"
+
+        check_dep_file "Arachni web scanner installation" "${EXT_DIR}""/arachni/arachni-1.6.1.3-0.6.1.1/bin/arachni"
+        check_dep_file "TestSSL.sh installation" "${EXT_DIR}""/testssl.sh/testssl.sh"
+        check_dep_file "Nikto web server analyzer" "${EXT_DIR}""/nikto/program/nikto.pl"
+        check_dep_tool "Cutycapt screenshot tool" "cutycapt"
+        check_dep_tool "snmp-check tool" "snmp-check"
+        check_dep_tool "Nmap portscanner" "nmap"
+        check_dep_tool "hping3" "hping3"
+        check_dep_tool "ping" "ping"
+        check_dep_tool "Metasploit framework" "msfconsole"
+        # This port is used by our Qemu installation and should not be used by another process.
+        # This check is not a blocker for the test. It is checked again by the emulation module:
+        # this function is defined in the system emulation helper file
+        check_emulation_port "Running Qemu network service" "2001"
+        # Port 4321 is used for Qemu telnet access and should be available
+        check_emulation_port "Running Qemu telnet service" "4321"
+      fi
+
+      if [[ "${CWE_CHECKER}" -eq 1 ]]; then
+        if [[ -d "${HOME}"/.cargo/bin ]]; then
+          export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
+        fi
+        check_dep_tool "CWE Checker" "cwe_checker"
       fi
     fi
 
