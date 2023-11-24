@@ -63,8 +63,6 @@ IF20_cve_search() {
 
       # we do not need to install the Flask web environment - we do it manually
       # python3 -m pip install -r requirements.txt
-      # stick to requests==2.28.1 -> see also https://github.com/e-m-b-a/emba/issues/187
-      pip_install "requests==2.28.1"
       pip_install "Whoosh==2.7.4"
       pip_install "tqdm==4.64.0"
       pip_install "pymongo==3.12.1"
@@ -79,8 +77,12 @@ IF20_cve_search() {
       pip_install "dnspython==2.2.1"
       pip_install "Werkzeug"
       pip_install "python-dateutil"
-      # pip_install "CveXplore"
-      pip_install "git+https://github.com/cve-search/CveXplore"
+      pip_install "CveXplore"
+      # pip_install "git+https://github.com/cve-search/CveXplore"
+      # stick to requests<2.29 -> see also https://github.com/e-m-b-a/emba/issues/187
+      # stick to urllib3<2 -> see also https://github.com/YKonovalov/tf-kolla-ansible/commit/3e92d742715da68d49a1c8e874b4e3defbe3a183
+      pip_install "requests<2.29.0"
+      pip_install "urllib3<2"
 
       REDIS_PW="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 || true)"
 
@@ -208,11 +210,14 @@ IF20_cve_search() {
               fi
 
               taskset -c 0 cvexplore database initialize || true
+
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 break
               fi
               if [[ "${CNT}" -gt 4 ]]; then
                 break
+              else
+                echo -e "\\n""${ORANGE}""${BOLD}""CVE database is not read - we try the update again.""${NC}"
               fi
 
               # if we were not able to populate the database we set the workers to 1 for the next try:
