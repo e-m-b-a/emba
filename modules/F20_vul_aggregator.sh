@@ -78,7 +78,7 @@ F20_vul_aggregator() {
     print_output "[!] WARNING: CVE blacklisting activated"
   fi
 
-  if [[ -f ${PATH_CVE_SEARCH} ]]; then
+  if [[ -d ${NVD_DIR} ]]; then
     print_output "[*] Aggregate vulnerability details"
 
     # get the kernel version from s25:
@@ -109,38 +109,32 @@ F20_vul_aggregator() {
 
     aggregate_versions
 
-    CVE_SEARCH=1
-    if [[ "${CVE_SEARCH}" -eq 1 ]]; then
-      if command -v cve_searchsploit > /dev/null ; then
-        CVE_SEARCHSPLOIT=1
-      fi
-      if [[ -f "${MSF_DB_PATH}" ]]; then
-        MSF_SEARCH=1
-      fi
-      if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
-        RS_SEARCH=1
-      fi
-      if [[ -f "${CONFIG_DIR}"/PS_PoC_results.csv ]]; then
-        PS_SEARCH=1
-      fi
-      if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
-        SNYK_SEARCH=1
-      fi
-
-      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "Snyk PoC" "Packetstormsecurity PoC" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln" "kernel vulnerability verified"
-
-      if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
-        generate_cve_details_versions "${VERSIONS_AGGREGATED[@]}"
-      fi
-      if [[ "${#CVES_AGGREGATED[@]}" -gt 0 ]]; then
-        generate_cve_details_cves "${CVES_AGGREGATED[@]}"
-      fi
-
-      generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
-    else
-      print_cve_search_failure
-      CVE_SEARCH=0
+    if command -v cve_searchsploit > /dev/null ; then
+      CVE_SEARCHSPLOIT=1
     fi
+    if [[ -f "${MSF_DB_PATH}" ]]; then
+      MSF_SEARCH=1
+    fi
+    if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
+      RS_SEARCH=1
+    fi
+    if [[ -f "${CONFIG_DIR}"/PS_PoC_results.csv ]]; then
+      PS_SEARCH=1
+    fi
+    if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
+      SNYK_SEARCH=1
+    fi
+
+    write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "Snyk PoC" "Packetstormsecurity PoC" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln" "kernel vulnerability verified"
+
+    if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+      generate_cve_details_versions "${VERSIONS_AGGREGATED[@]}"
+    fi
+    if [[ "${#CVES_AGGREGATED[@]}" -gt 0 ]]; then
+      generate_cve_details_cves "${CVES_AGGREGATED[@]}"
+    fi
+
+    generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)

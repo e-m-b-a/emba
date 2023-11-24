@@ -26,6 +26,10 @@ S36_lighttpd() {
   module_title "Lighttpd analysis"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  # Disable it until cve migration is finished
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+  return
+
   local NEG_LOG=0
   local LIGHTTP_CFG_ARR=()
   local LIGHTTP_BIN_ARR=()
