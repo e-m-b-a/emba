@@ -501,114 +501,115 @@ dependency_check()
     # 7zip
     check_dep_tool "7z"
 
-    # jchroot - https://github.com/vincentbernat/jchroot
-    check_dep_tool "jchroot"
-
-    # mkimage (uboot)
-    check_dep_tool "uboot mkimage" "mkimage"
-
-    # binwalk
-    check_dep_tool "binwalk extractor" "binwalk"
-    if command -v binwalk > /dev/null ; then
-      export BINWALK_BIN=()
-      BINWALK_BIN=("$(which binwalk)")
-      BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
-      if ! [ "$(version "${BINWALK_VER}")" -ge "$(version "2.3.3")" ]; then
-        echo -e "${ORANGE}""    binwalk version ${BINWALK_VER} - not optimal""${NC}"
-        echo -e "${ORANGE}""    Upgrade your binwalk to version 2.3.3 or higher""${NC}"
-      fi
-      # this is typically needed in the read only docker container:
-      if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
-        mkdir -p "${HOME}"/.config/binwalk/modules/
-      fi
-      print_output "    cpu_rec - \\c" "no_log"
-      if [[ -d "${EXT_DIR}"/cpu_rec/ ]]; then
-        cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
-        cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
-        echo -e "${GREEN}""ok""${NC}"
-      else
-        echo -e "${RED}""not ok""${NC}"
-        # DEP_ERROR=1
-      fi
-    fi
-    export MPLCONFIGDIR="${TMP_DIR}"
-
-    check_dep_tool "unblob"
-    if command -v unblob > /dev/null ; then
-      UNBLOB_VER=$(unblob --version 2>&1 || true)
-      if ! [ "$(version "${UNBLOB_VER}")" -ge "$(version "23.8.11")" ]; then
-        echo -e "${RED}""    Unblob version ${UNBLOB_VER} - not supported""${NC}"
-        echo -e "${RED}""    Upgrade your unblob installation to version 23.8.11 or higher""${NC}"
-        DEP_ERROR=1
-      fi
-    fi
-
-    check_dep_tool "unrar" "unrar"
-
-    # jtr
-    check_dep_tool "john"
-
-    # pixd
-    check_dep_file "pixd visualizer" "${EXT_DIR}""/pixde"
-
-    # php iniscan
-    check_dep_file "PHP iniscan" "${EXT_DIR}""/iniscan/vendor/bin/iniscan"
-
-    # pixd image
-    check_dep_file "pixd image renderer" "${EXT_DIR}""/pixd_png.py"
-
-    # progpilot for php code checks
-    check_dep_file "progpilot php ini checker" "${EXT_DIR}""/progpilot"
-
-    # luacheck - lua linter
-    check_dep_tool "luacheck"
-
-    # APKHunt for android apk analysis
-    check_dep_file "APKHunt apk scanner" "${EXT_DIR}""/APKHunt/apkhunt.go"
-
-    # rpm for checking package management system
-    check_dep_tool "rpm"
-
-    # patool extractor - https://wummel.github.io/patool/
-    check_dep_tool "patool"
-
-    # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
-    check_dep_file "EnGenius decryptor" "${EXT_DIR}""/engenius-decrypt.py"
-
-    # Android payload.bin extractor
-    check_dep_file "Android payload.bin extractor" "${EXT_DIR}""/payload_dumper/payload_dumper.py"
-
-    # check_dep_file "QNAP decryptor" "${EXT_DIR}""/PC1"
-
-    check_dep_file "Buffalo decryptor" "${EXT_DIR}""/buffalo-enc.elf"
-
-    check_dep_tool "ubireader image extractor" "ubireader_extract_images"
-    check_dep_tool "ubireader file extractor" "ubireader_extract_files"
-
-    # UEFI
-    check_dep_tool "UEFI image extractor" "${EXT_DIR}""/UEFITool/UEFIExtract"
-
-    if function_exists F20_vul_aggregator; then
-      # CVE-search
-      # TODO change to portcheck and write one for external hosts
-      check_dep_file "cve-search script" "${EXT_DIR}""/cve-search/bin/search.py"
-      # we have already checked it outside the docker - do not need it again
-      [[ "${IN_DOCKER}" -eq 0 ]] && check_cve_search 1
-      if [[ "${IN_DOCKER}" -eq 0 ]]; then
-        # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
-        check_dep_tool "mongo database" "mongod"
-        # check_cve_search
-      fi
-      # CVE searchsploit
-      check_dep_tool "CVE Searchsploit" "cve_searchsploit"
-
-      check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
-      check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"
-      check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
-    fi
-
     # we should check all the dependencies if they are needed in our quest container:
     if [[ "${CONTAINER_NUMBER}" -ne 2 ]]; then
+      # jchroot - https://github.com/vincentbernat/jchroot
+      check_dep_tool "jchroot"
+
+      # mkimage (uboot)
+      check_dep_tool "uboot mkimage" "mkimage"
+
+      # binwalk
+      check_dep_tool "binwalk extractor" "binwalk"
+      if command -v binwalk > /dev/null ; then
+        export BINWALK_BIN=()
+        BINWALK_BIN=("$(which binwalk)")
+        BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
+        if ! [ "$(version "${BINWALK_VER}")" -ge "$(version "2.3.3")" ]; then
+          echo -e "${ORANGE}""    binwalk version ${BINWALK_VER} - not optimal""${NC}"
+          echo -e "${ORANGE}""    Upgrade your binwalk to version 2.3.3 or higher""${NC}"
+        fi
+        # this is typically needed in the read only docker container:
+        if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
+          mkdir -p "${HOME}"/.config/binwalk/modules/
+        fi
+        print_output "    cpu_rec - \\c" "no_log"
+        if [[ -d "${EXT_DIR}"/cpu_rec/ ]]; then
+          cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
+          cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
+          echo -e "${GREEN}""ok""${NC}"
+        else
+          echo -e "${RED}""not ok""${NC}"
+          # DEP_ERROR=1
+        fi
+      fi
+      export MPLCONFIGDIR="${TMP_DIR}"
+
+      check_dep_tool "unblob"
+      if command -v unblob > /dev/null ; then
+        UNBLOB_VER=$(unblob --version 2>&1 || true)
+        if ! [ "$(version "${UNBLOB_VER}")" -ge "$(version "23.8.11")" ]; then
+          echo -e "${RED}""    Unblob version ${UNBLOB_VER} - not supported""${NC}"
+          echo -e "${RED}""    Upgrade your unblob installation to version 23.8.11 or higher""${NC}"
+          DEP_ERROR=1
+        fi
+      fi
+
+      check_dep_tool "unrar" "unrar"
+
+      # jtr
+      check_dep_tool "john"
+
+      # pixd
+      check_dep_file "pixd visualizer" "${EXT_DIR}""/pixde"
+
+      # php iniscan
+      check_dep_file "PHP iniscan" "${EXT_DIR}""/iniscan/vendor/bin/iniscan"
+
+      # pixd image
+      check_dep_file "pixd image renderer" "${EXT_DIR}""/pixd_png.py"
+
+      # progpilot for php code checks
+      check_dep_file "progpilot php ini checker" "${EXT_DIR}""/progpilot"
+
+      # luacheck - lua linter
+      check_dep_tool "luacheck"
+
+      # APKHunt for android apk analysis
+      check_dep_file "APKHunt apk scanner" "${EXT_DIR}""/APKHunt/apkhunt.go"
+
+      # rpm for checking package management system
+      check_dep_tool "rpm"
+
+      # patool extractor - https://wummel.github.io/patool/
+      check_dep_tool "patool"
+
+      # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
+      check_dep_file "EnGenius decryptor" "${EXT_DIR}""/engenius-decrypt.py"
+
+      # Android payload.bin extractor
+      check_dep_file "Android payload.bin extractor" "${EXT_DIR}""/payload_dumper/payload_dumper.py"
+
+      check_dep_file "Buffalo decryptor" "${EXT_DIR}""/buffalo-enc.elf"
+
+      check_dep_tool "ubireader image extractor" "ubireader_extract_images"
+      check_dep_tool "ubireader file extractor" "ubireader_extract_files"
+
+      # UEFI
+      check_dep_tool "UEFI Firmware parser" "uefi-firmware-parser"
+      check_dep_file "UEFI image extractor" "${EXT_DIR}""/UEFITool/UEFIExtract"
+      check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/AMI_PFAT_Extract.py"
+      check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
+
+      if function_exists F20_vul_aggregator; then
+        # CVE-search
+        # TODO change to portcheck and write one for external hosts
+        check_dep_file "cve-search script" "${EXT_DIR}""/cve-search/bin/search.py"
+        # we have already checked it outside the docker - do not need it again
+        [[ "${IN_DOCKER}" -eq 0 ]] && check_cve_search 1
+        if [[ "${IN_DOCKER}" -eq 0 ]]; then
+          # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
+          check_dep_tool "mongo database" "mongod"
+          # check_cve_search
+        fi
+        # CVE searchsploit
+        check_dep_tool "CVE Searchsploit" "cve_searchsploit"
+
+        check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
+        check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"
+        check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
+      fi
+
       # checksec
       check_dep_file "checksec script" "${EXT_DIR}""/checksec"
 
@@ -730,9 +731,6 @@ dependency_check()
         check_dep_tool "CWE Checker" "cwe_checker"
       fi
     fi
-
-    # Python virtual environment in external directory
-    check_dep_file "Python virtual environment" "${EXT_DIR}""/emba_venv/bin/activate"
   fi
 
   if [[ "${DEP_ERROR}" -gt 0 ]] || [[ "${DEP_EXIT}" -gt 0 ]]; then
