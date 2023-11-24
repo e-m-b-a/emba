@@ -148,32 +148,6 @@ S26_kernel_vuln_verifier()
 
     CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.json"
 
-    if ! [[ -f ${PATH_CVE_SEARCH} ]]; then
-      print_output "[-] CVE search binary search.py not found."
-      print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
-      print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
-      module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
-      return
-    fi
-
-    check_cve_search
-
-    if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-      print_output "[*] Waiting for the cve-search environment ..."
-      sleep 120
-      check_cve_search
-
-      if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-        print_output "[*] Waiting for the cve-search environment ..."
-        sleep 120
-        check_cve_search
-      fi
-    fi
-    if [[ "${CVE_SEARCH}" -ne 1 ]]; then
-      print_cve_search_failure
-      return
-    fi
-
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
     fi

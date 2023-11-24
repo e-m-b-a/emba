@@ -26,10 +26,6 @@ S36_lighttpd() {
   module_title "Lighttpd analysis"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  # Disable it until cve migration is finished
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
-  return
-
   local NEG_LOG=0
   local LIGHTTP_CFG_ARR=()
   local LIGHTTP_BIN_ARR=()
@@ -151,9 +147,6 @@ prepare_cve_search_module() {
   fi
   if [[ -f "${MSF_DB_PATH}" ]]; then
     export MSF_SEARCH=1
-  fi
-  if [[ -f "${TRICKEST_DB_PATH}" ]]; then
-    export TRICKEST_SEARCH=1
   fi
   if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
     export RS_SEARCH=1
