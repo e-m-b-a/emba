@@ -48,7 +48,7 @@ jobs:
           docker images
 
       - name: Run Trivy vulnerability scanner on EMBA image
-        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'embeddedanalyzer/emba'
           format: 'template'
