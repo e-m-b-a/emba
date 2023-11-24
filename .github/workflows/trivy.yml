@@ -45,7 +45,7 @@ jobs:
       - name: Build trivy
         run: |
           git clone https://github.com/aquasecurity/trivy-action.git /tmp/trivy-action
-          sudo docker build -t d6f297:4714451b1eca4e41a4cc10f0a8a8c25a -f "/tmp/trivy-action/master/Dockerfile" "/tmp/trivy-action/master"
+          sudo docker build -t d6f297:4714451b1eca4e41a4cc10f0a8a8c25a -f "/tmp/trivy-action/Dockerfile" "/tmp/trivy-action/"
 
       - name: Run Trivy vulnerability scanner on EMBA image
         run: |
