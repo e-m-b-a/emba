@@ -309,36 +309,6 @@ dependency_check()
     check_dep_tool "docker-compose"
     check_dep_tool "inotifywait"
     check_dep_tool "notify-send"
-    print_output "    urllib3 version - \\c" "no_log"
-    TMP_VER=$(pip3 list | grep "^urllib3\ " | awk '{print $2}')
-    if [[ "$(version "${TMP_VER}")" -ge "$(version "1.99.99")" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    urllib3 version ${TMP_VER} - not optimal""${NC}"
-      echo -e "${ORANGE}""    Downgrade your urllib3 pip package to version <2""${NC}"
-      DEP_ERROR=1
-    elif [[ "$(version "${TMP_VER}")" == "0000000000" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    urllib3 package missing""${NC}"
-      echo -e "${ORANGE}""    Install urllib3 pip package with version <2""${NC}"
-      DEP_ERROR=1
-    else
-      echo -e "${GREEN}""ok""${NC}"
-    fi
-    print_output "    requests version - \\c" "no_log"
-    TMP_VER=$(pip3 list | grep "^requests\ " | awk '{print $2}')
-    if [[ "$(version "${TMP_VER}")" -ge "$(version "2.29.0")" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    requests version ${TMP_VER} - not optimal""${NC}"
-      echo -e "${ORANGE}""    Downgrade your requests pip package to version <2.29.0""${NC}"
-      DEP_ERROR=1
-    elif [[ "$(version "${TMP_VER}")" == "0000000000" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    requests package missing""${NC}"
-      echo -e "${ORANGE}""    Install requests pip package with version <2.29.0""${NC}"
-      DEP_ERROR=1
-    else
-      echo -e "${GREEN}""ok""${NC}"
-    fi
   fi
 
   #######################################################################################
