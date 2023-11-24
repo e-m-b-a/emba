@@ -499,7 +499,7 @@ cve_db_lookup_version() {
   local VERSION_PATH="${BIN_VERSION_//:/_}"
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*${BIN_VERSION_}" "${NVD_DIR}")
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*${BIN_VERSION_}" "${NVD_DIR}" || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
@@ -511,7 +511,6 @@ cve_db_lookup_version() {
   fi
 
   for CVE_VER_SOURCES_FILE in "${CVE_VER_SOURCES_ARR[@]}"; do
-    print_output "[*] CVE_VER_SOURCES_FILE: $CVE_VER_SOURCES_FILE"
     CVE_ID=$(jq -r '.id' "${CVE_VER_SOURCES_FILE}")
     CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
     CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
