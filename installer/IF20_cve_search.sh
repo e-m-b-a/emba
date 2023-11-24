@@ -202,7 +202,15 @@ IF20_cve_search() {
             /etc/init.d/redis-server restart
             CNT=0
             while [[ "${CVE_INST}" -eq 1 ]]; do
-              cvexplore database initialize || true
+              # we have seen a lot issues reagarding download errors
+              # this could help a bit
+              taskset -c 0 cvexplore database update || true
+              if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
+                break
+              fi
+
+              taskset -c 0 cvexplore database initialize || true
+
               if [[ $(./bin/search.py -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
                 break
               fi
@@ -211,6 +219,9 @@ IF20_cve_search() {
               else
                 echo -e "\\n""${ORANGE}""${BOLD}""CVE database is not read - we try the update again.""${NC}"
               fi
+
+              # if we were not able to populate the database we set the workers to 1 for the next try:
+              export MAX_DOWNLOAD_WORKERS=1
               CNT=$((CNT+1))
             done
           else
