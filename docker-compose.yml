@@ -43,8 +43,6 @@ services:
     environment:
         - USER
         - CONTAINER_NUMBER=1
-    networks:
-      - emba_runs
     devices:
       - /dev/fuse:/dev/fuse:rwm
     cap_add:
@@ -82,13 +80,3 @@ services:
     security_opt:
       - no-new-privileges:true
 
-networks:
-  emba_runs:
-    name: emba_runs
-    driver: bridge
-    internal: true
-    driver_opts:
-      com.docker.network.bridge.name: emba_runs
-    ipam:
-      config:
-        - subnet: "172.36.0.0/16"

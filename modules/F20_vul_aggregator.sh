@@ -134,13 +134,10 @@ F20_vul_aggregator() {
       generate_cve_details_cves "${CVES_AGGREGATED[@]}"
     fi
 
-    generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
+     generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)
-
-  write_log ""
-  write_log "[*] Statistics:${CVE_SEARCH}"
 
   module_end_log "${FUNCNAME[0]}" "${FOUND_CVE}"
 }
@@ -509,13 +506,12 @@ cve_db_lookup_version() {
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "${BIN_VERSION_}" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${ORANGE}${VERSION_SEARCHx}${NC}" "no_log"
-    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe.*${VERSION_SEARCHx}" "${NVD_DIR}")
+    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe.*${VERSION_SEARCHx}" "${NVD_DIR}" || true)
     CVE_VER_SOURCES_ARR+=( "${CVE_VER_SOURCES_ARR_DLINK[@]}" )
   fi
 
-  eval "CVE_VER_SOURCES_ARR=($(for i in "${CVE_VER_SOURCES_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-
   for CVE_VER_SOURCES_FILE in "${CVE_VER_SOURCES_ARR[@]}"; do
+    print_output "[*] CVE_VER_SOURCES_FILE: $CVE_VER_SOURCES_FILE"
     CVE_ID=$(jq -r '.id' "${CVE_VER_SOURCES_FILE}")
     CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
     CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")

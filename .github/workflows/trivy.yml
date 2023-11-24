@@ -4,24 +4,20 @@
 # documentation.
 
 name: trivy
-
 on:
-  push:
-    branches:
-      - '**'        # matches every branch
-  pull_request:
-    branches:
-      - '**'
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-    #  schedule:
-    #- cron: '26 1 * * 0'
-
-permissions:
-  contents: read
-
+  schedule:
+    - cron: '0 0 * * *' # do it every day
+#  push:
+#    branches:
+#      - '**'        # matches every branch
+#  pull_request:
+#    branches:
+#      - '**'
+#  # Allows you to run this workflow manually from the Actions tab
+#  workflow_dispatch:
 jobs:
   build:
+    if: github.repository_owner == 'e-m-b-a'
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
