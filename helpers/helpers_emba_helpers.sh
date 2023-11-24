@@ -190,7 +190,8 @@ cleaner() {
 
 emba_updater() {
   print_output "[*] EMBA update starting ..." "no_log"
-  local HOME_DIR=$(pwd)
+  local HOME_DIR=""
+  HOME_DIR=$(pwd)
 
   if [[ -d ./.git ]]; then
     git pull origin master
