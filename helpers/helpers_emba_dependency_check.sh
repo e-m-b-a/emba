@@ -304,7 +304,6 @@ dependency_check()
   # Docker for EMBA with docker
   #######################################################################################
   if [[ "${USE_DOCKER}" -eq 1 ]] && [[ "${ONLY_DEP}" -ne 2 ]]; then
-    local TMP_VER=0
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
     check_dep_tool "inotifywait"
