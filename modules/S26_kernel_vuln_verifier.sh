@@ -345,7 +345,7 @@ get_cve_kernel_data() {
 
   print_output "[*] Extract CVE data for kernel version ${ORANGE}${K_VERSION_}${NC}"
   # "linux_kernel:""${K_VERSION_}"":" -o json > "${CVE_K_PATH}"
-  mapfile -t CVE_VER_SOURCES_ARR_KERNEL < <(grep -l -r "cpe.*linux_kernel:${K_VERSION_}:" "${NVD_DIR}" || true)
+  mapfile -t CVE_VER_SOURCES_ARR_KERNEL < <(grep -l -r "cpe.*linux_kernel:${K_VERSION_}:\|cpe.*linux_kernel:\*:" "${NVD_DIR}" | sort -u || true)
   for CVE_VER_SOURCES_FILE in "${CVE_VER_SOURCES_ARR_KERNEL[@]}"; do
     CVE_ID=$(jq -r '.id' "${CVE_VER_SOURCES_FILE}")
     CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")

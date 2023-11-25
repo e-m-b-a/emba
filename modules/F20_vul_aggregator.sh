@@ -499,7 +499,8 @@ cve_db_lookup_version() {
   local VERSION_PATH="${BIN_VERSION_//:/_}"
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*${BIN_VERSION_}" "${NVD_DIR}" || true)
+  local BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d\: -f1)
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*:${BIN_VERSION_}:\|cpe.*:${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
