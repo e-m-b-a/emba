@@ -494,12 +494,13 @@ cve_db_lookup_version() {
   local CVE_ID=""
   local CVE_V2=""
   local CVE_V31=""
+  local BIN_NAME=""
 
   # we create something like "binary_1.2.3" for log paths
   local VERSION_PATH="${BIN_VERSION_//:/_}"
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  local BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d\: -f1)
+  BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d\: -f1)
   mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*:${BIN_VERSION_}:\|cpe.*:${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then

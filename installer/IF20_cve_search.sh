@@ -21,30 +21,37 @@ IF20_cve_search() {
 
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] || [[ "${CVE_SEARCH}" -eq 1 ]] || [[ "${FULL}" -eq 1 ]]; then
 
-    print_git_info "cve-search" "EMBA-support-repos/cve-search" "CVE-Search is a tool to import CVE and CPE into a database to facilitate search and processing of CVEs."
-    echo -e "${ORANGE}""cve-search will be downloaded.""${NC}"
+    print_git_info "NVD JSON data feed" "EMBA-support-repos/nvd-json-data-feeds" "The NVD data feed is JSON database to facilitate search and processing of CVEs."
+    echo -e "${ORANGE}""NVD JSON data feed will be downloaded.""${NC}"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] ; then
       ANSWER=("n")
     else
-      echo -e "\\n""${MAGENTA}""${BOLD}""cve-search and mongodb will be downloaded, installed and populated!""${NC}"
+      echo -e "\\n""${MAGENTA}""${BOLD}""NVD JSON data feed will be downloaded, installed and populated!""${NC}"
       ANSWER=("y")
     fi
 
     case ${ANSWER:0:1} in
       y|Y )
 
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
 
-        echo -e "\\n""${MAGENTA}""Check if the cve-search database is already installed and populated.""${NC}"
+        echo -e "\\n""${MAGENTA}""Check if the NVD JSON data feed is already installed and populated.""${NC}"
         git clone --depth 1 -b main https://github.com/EMBA-support-repos/nvd-json-data-feeds.git external/nvd-json-data-feeds
         if [[ $(grep -l -E "cpe.*busybox:" external/nvd-json-data-feeds/* -r 2>/dev/null | wc -l) -gt 18 ]]; then
-          echo -e "\\n""${GREEN}""cve-search database already installed - no further action performed.""${NC}"
+          echo -e "\\n""${GREEN}""NVD JSON data feed is already installed - no further action performed.""${NC}"
         else
-          echo -e "\\n""${MAGENTA}""cve-search database not ready.""${NC}"
+          echo -e "\\n""${MAGENTA}""NVD JSON data feed is not ready.""${NC}"
         fi
 
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component cve-search" && exit 1 )
+        sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
+        sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater_data.init > config/emba_updater_data
+        chmod +x config/emba_updater
+        chmod +x config/emba_updater_data
+        echo -e "\\n""${MAGENTA}""${BOLD}""The cron.daily update script for EMBA is located in config/emba_updater""${NC}"
+        echo -e "${MAGENTA}""${BOLD}""For automatic updates it should be checked and copied to /etc/cron.daily/""${NC}"
+
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
       ;;
     esac
   fi
