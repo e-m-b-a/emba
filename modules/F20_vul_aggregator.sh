@@ -463,7 +463,7 @@ generate_cve_details_versions() {
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19[@]}"
 }
 
-cve_db_lookup_cve () {
+cve_db_lookup_cve() {
   local CVE_ENTRY="${1:-}"
   local CVE_ID=""
   local CVE_V2=""
