@@ -495,12 +495,18 @@ cve_db_lookup_version() {
   local CVE_V2=""
   local CVE_V31=""
   local BIN_NAME=""
+  local BIN_VERSION_ONLY=""
+  local CVE_VER_START_INCL=""
+  local CVE_VER_START_EXCL=""
+  local CVE_VER_END_INCL=""
+  local CVE_VER_END_EXCL=""
 
   # we create something like "binary_1.2.3" for log paths
   local VERSION_PATH="${BIN_VERSION_//:/_}"
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d\: -f1)
+  BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
+  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_}" | cut -d':' -f2)
   mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*:${BIN_VERSION_}:\|cpe.*:${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
@@ -514,26 +520,214 @@ cve_db_lookup_version() {
 
   for CVE_VER_SOURCES_FILE in "${CVE_VER_SOURCES_ARR[@]}"; do
     CVE_ID=$(jq -r '.id' "${CVE_VER_SOURCES_FILE}")
-    CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
-    CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
-    if [[ -f "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt ]]; then
-      # check if we have already an entry for this CVE - if not, we will write it to the output file
-      if ! grep -q "^${CVE_ID}:" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt; then
-        echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" >> "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt || true
-      fi
-    else
-      echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" > "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt || true
+    CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
+    CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
+    # we need to check if any cpe of the CVE is vulnerable
+    # └─$ cat external/nvd-json-data-feeds/CVE-2011/CVE-2011-24xx/CVE-2011-2416.json | jq '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' | grep linux
+    if [[ "$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep -c "${BIN_NAME}")" -eq 0 ]]; then
+      print_output "[!] No matching criteria found - binary $BIN_NAME not vulnerable for CVE $CVE_ID" "no_log"
+      continue
     fi
+
+    # if our cpe with the binary version matches we have a vuln and we can continue
+    if grep -q "cpe.*:${BIN_VERSION_}:" "${CVE_VER_SOURCES_FILE}"; then
+      print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} / BIN: ${BIN_VERSION_}" "no_log"
+      write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+      continue
+    fi
+
+    # extract valid CPEs matching our cpe.*:binary:*: from the CVE details
+    # usually this should only one cpe but in case we are using ARR. With this cpe ARR we can further check for versions from the CVE details like
+    #   .versionStartIncluding
+    #   .versionStartExcluding
+    #   .versionEndIncluding
+    #   .versionEndExcluding
+    mapfile -t CVE_CPEs_vuln_ARR < <(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep -E "cpe.*:${BIN_NAME}:\*:" || true)
+
+    for CVE_CPE_vuln in "${CVE_CPEs_vuln_ARR[@]}"; do
+      # we need to check the version more in details in case we have no version in our cpe identifier
+      # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
+
+      print_output "[*] Binary ${BIN_VERSION_} - Found no version identifier in our cpe for ${CVE_VER_SOURCES_FILE} - check for further version details with $CVE_CPE_vuln" "no_log"
+
+      # extract further version details form the current cpe under test
+      CVE_VER_START_INCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionStartIncluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+      CVE_VER_START_EXCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionStartExcluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+      CVE_VER_END_INCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionEndIncluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+      CVE_VER_END_EXCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionEndExcluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+
+      # if we have found some version details we need to further check them now:
+      if [[ -n "${CVE_VER_START_INCL}" || -n "${CVE_VER_START_EXCL}" || -n "${CVE_VER_END_INCL}" || -n "${CVE_VER_END_EXCL}" ]]; then
+        print_output "[*] Binary ${BIN_VERSION_} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - $CVE_VER_START_INCL / $CVE_VER_START_EXCL / $CVE_VER_END_INCL / $CVE_VER_END_EXCL"
+
+        ## first check CVE_VER_START_INCL >= VERSION <= CVE_VER_END_INCL
+        if [[ -n "${CVE_VER_START_INCL}" ]]; then
+          print_output "[*] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_START_INCL: ${CVE_VER_START_INCL} - $(version "${BIN_VERSION_ONLY}") vs $(version "${CVE_VER_START_INCL}")" "no_log"
+          if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
+            print_output "[*] ${CVE_ID} - CVE_VER_START_INCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is higher (incl) as CVE version $(version "${CVE_VER_START_INCL}")" "no_log"
+            # Todo: check for VERSION <= CVE_VER_END_INCL
+            if [[ -n "${CVE_VER_END_INCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -le "$(version "${CVE_VER_END_INCL}")" ]]; then
+                print_output "[+] CVE_VER_START_INCL / CVE_VER_END_INCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+                print_output "[!] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_START_INCL: ${CVE_VER_START_INCL} / CVE_VER_END_INCL: ${CVE_VER_END_INCL}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              fi
+              continue
+            else
+              print_output "[!] CVE_VER_START_INCL / CVE_VER_END_INCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+            ## first check VERSION < CVE_VER_END_EXCL
+            if [[ -n "${CVE_VER_END_EXCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -lt "$(version "${CVE_VER_END_EXCL}")" ]]; then
+                print_output "[+] CVE_VER_START_INCL / CVE_VER_END_EXCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+                print_output "[!] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_START_INCL: ${CVE_VER_START_INCL} / CVE_VER_END_EXCL: ${CVE_VER_END_EXCL}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              fi
+              continue
+            else
+              print_output "[!] CVE_VER_START_INCL / CVE_VER_END_EXCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+          else
+            continue
+          fi
+        fi
+
+        if [[ -n "${CVE_VER_START_EXCL}" ]]; then
+          print_output "[*] ${BIN_VERSION_ONLY} - ${CVE_ID} - CVE_VER_START_EXCL: ${CVE_VER_START_INCL}" "no_log"
+          if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
+            print_output "[*] ${CVE_ID} - CVE_VER_START_EXCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is higher (excl) as CVE version $(version "${CVE_VER_START_EXCL}")" "no_log"
+            if [[ -n "${CVE_VER_END_INCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -le "$(version "${CVE_VER_END_INCL}")" ]]; then
+                print_output "[+] CVE_VER_START_EXCL / CVE_VER_END_INCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              fi
+              continue
+            else
+              print_output "[+] CVE_VER_START_EXCL / CVE_VER_END_INCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+            if [[ -n "${CVE_VER_END_EXCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -lt "$(version "${CVE_VER_END_EXCL}")" ]]; then
+                print_output "[+] CVE_VER_START_EXCL / CVE_VER_END_EXCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              fi
+              continue
+            else
+              print_output "[+] CVE_VER_START_EXCL / CVE_VER_END_EXCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+          else
+            continue
+          fi
+        fi
+
+        if [[ -n "${CVE_VER_END_INCL}" ]]; then
+          if [[ "$(version "${BIN_VERSION_ONLY}")" -le "$(version "${CVE_VER_END_INCL}")" ]]; then
+            print_output "[*] ${CVE_ID} - CVE_VER_END_INCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is lower (incl) CVE version $(version "${CVE_VER_END_INCL}")" "no_log"
+            print_output "[*] ${CVE_ID} - CVE_VER_END_INCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is lower (incl) CVE version $(version "${CVE_VER_END_INCL}") - CVE_VER_START_INCL: $CVE_VER_START_INCL" "no_log"
+            # our version is le the needed version
+            if [[ -n "${CVE_VER_START_INCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
+                print_output "[+] CVE_VER_END_INCL / CVE_VER_START_INCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+                print_output "[!] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_END_INCL: ${CVE_VER_END_INCL} / CVE_VER_START_INCL: ${CVE_VER_START_INCL}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              fi
+              continue
+            else
+              print_output "[!] CVE_VER_END_INCL / CVE_VER_START_INCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+            if [[ -n "${CVE_VER_START_EXCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
+                print_output "[+] CVE_VER_END_INCL / CVE_VER_START_EXCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_}" "no_log"
+                print_output "[!] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_END_INCL: ${CVE_VER_END_INCL} / CVE_VER_START_EXCL: ${CVE_VER_START_EXCL}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              fi
+              continue
+            else
+              print_output "[!] CVE_VER_END_INCL / CVE_VER_START_EXCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+          else
+            continue
+          fi
+        fi
+
+        if [[ -n "${CVE_VER_END_EXCL}" ]]; then
+          if [[ "$(version "${BIN_VERSION_ONLY}")" -lt "$(version "${CVE_VER_END_EXCL}")" ]]; then
+            print_output "[*] ${CVE_ID} - CVE_VER_END_EXCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is lower (excl) CVE version $(version "${CVE_VER_END_EXCL}")" "no_log"
+            # our version is le the needed version
+            if [[ -n "${CVE_VER_START_EXCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
+                print_output "[+] CVE_VER_END_EXCL / CVE_VER_START_EXCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+                print_output "[!] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_END_EXCL: ${CVE_VER_END_EXCL} / CVE_VER_START_EXCL: ${CVE_VER_START_EXCL}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+                continue
+              fi
+            else
+              print_output "[!] CVE_VER_END_EXCL / CVE_VER_START_EXCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - CVE ${CVE_VER_SOURCES_FILE}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+            if [[ -n "${CVE_VER_START_INCL}" ]]; then
+              if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
+                print_output "[+] CVE_VER_END_EXCL / CVE_VER_START_INCL - CVE: ${CVE_ID} - binary ${BIN_VERSION_}" "no_log"
+                print_output "[!] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_END_EXCL: ${CVE_VER_END_EXCL} / CVE_VER_START_INCL: ${CVE_VER_START_INCL}" "no_log"
+                write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+                continue
+              fi
+            else
+              print_output "[!] CVE_VER_END_EXCL / CVE_VER_START_INCL:NA - CVE: ${CVE_ID} - binary ${BIN_VERSION_}" "no_log"
+              write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+              continue
+            fi
+          else
+            continue
+          fi
+        fi
+      else
+        # if we have not found further version limitations, we assume that all versions are vulnerable:
+        print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") - no further version limitations detected" "no_log"
+        write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+      fi
+    done
+
+    # write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
   done
 
   if [[ "${THREADED}" -eq 1 ]]; then
-    cve_extractor "${BIN_VERSION_}" &
+    # cve_extractor "${BIN_VERSION_}" &
+    cve_extractor "${BIN_VERSION_}"
     WAIT_PIDS_F19_2+=( "$!" )
   else
     cve_extractor "${BIN_VERSION_}"
   fi
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
+}
+
+write_cve_log() {
+  local lCVE_ID="${1:-}"
+  local lCVE_V2="${2:-}"
+  local lCVE_V31="${3:-}"
+  local lLOG_FILE="${4:-}"
+
+  if [[ -s "${lLOG_FILE}" ]]; then
+    # check if we have already an entry for this CVE - if not, we will write it to the output file
+    if ! grep -q "^${lCVE_ID}:" "${lLOG_FILE}" 2>/dev/null; then
+      echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}" >> "${lLOG_FILE}" || true
+    fi
+  else
+    echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}" > "${lLOG_FILE}" || true
+  fi
 }
 
 cve_extractor() {
