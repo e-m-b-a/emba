@@ -507,14 +507,14 @@ cve_db_lookup_version() {
 
   BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
   BIN_VERSION_ONLY=$(echo "${BIN_VERSION_}" | cut -d':' -f2)
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe.*:${BIN_VERSION_}:\|cpe.*:${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "${BIN_VERSION_}" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${ORANGE}${VERSION_SEARCHx}${NC}" "no_log"
-    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe.*${VERSION_SEARCHx}" "${NVD_DIR}" || true)
+    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${VERSION_SEARCHx}" "${NVD_DIR}" || true)
     CVE_VER_SOURCES_ARR+=( "${CVE_VER_SOURCES_ARR_DLINK[@]}" )
   fi
 
@@ -542,7 +542,7 @@ cve_db_lookup_version() {
     #   .versionStartExcluding
     #   .versionEndIncluding
     #   .versionEndExcluding
-    mapfile -t CVE_CPEs_vuln_ARR < <(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep -E "cpe.*:${BIN_NAME}:\*:" || true)
+    mapfile -t CVE_CPEs_vuln_ARR < <(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" || true)
 
     for CVE_CPE_vuln in "${CVE_CPEs_vuln_ARR[@]}"; do
       # we need to check the version more in details in case we have no version in our cpe identifier
