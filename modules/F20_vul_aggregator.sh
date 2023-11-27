@@ -461,7 +461,7 @@ generate_cve_details_versions() {
       # cve-search/mongodb calls called in parallel
       cve_db_lookup_version "${BIN_VERSION}" &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_F19[@]}"
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup_version "${BIN_VERSION}"
     fi
@@ -526,9 +526,9 @@ cve_db_lookup_version() {
       # analysis of cve json files in parallel
       check_cve_sources "${CVE_ID}" "${BIN_VERSION_}" "${CVE_VER_SOURCES_FILE}" &
       WAIT_PIDS_F19_CVE_SOURCE+=( "$!" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_F19_CVE_SOURCE[@]}"
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${WAIT_PIDS_F19_CVE_SOURCE[@]}"
     else
-      check_cve_sources "${BIN_VERSION}"
+      check_cve_sources "${CVE_ID}" "${BIN_VERSION_}" "${CVE_VER_SOURCES_FILE}"
     fi
   done
 
@@ -576,7 +576,7 @@ check_cve_sources() {
   # if our cpe with the binary version matches we have a vuln and we can continue
   if grep -q "cpe.*:${BIN_VERSION_}:" "${CVE_VER_SOURCES_FILE}"; then
     # print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} / BIN: ${BIN_VERSION_}" "no_log"
-    write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+    write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
     return
   fi
 
@@ -618,24 +618,24 @@ check_cve_sources() {
         if [[ -n "${CVE_VER_END_INCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -le "$(version "${CVE_VER_END_INCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
         ## first check VERSION < CVE_VER_END_EXCL
         if [[ -n "${CVE_VER_END_EXCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -lt "$(version "${CVE_VER_END_EXCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
       fi
@@ -652,23 +652,23 @@ check_cve_sources() {
         if [[ -n "${CVE_VER_END_INCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -le "$(version "${CVE_VER_END_INCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
         if [[ -n "${CVE_VER_END_EXCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -lt "$(version "${CVE_VER_END_EXCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_EXCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
       fi
@@ -685,23 +685,23 @@ check_cve_sources() {
         if [[ -n "${CVE_VER_START_INCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
         if [[ -n "${CVE_VER_START_EXCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
       fi
@@ -718,30 +718,30 @@ check_cve_sources() {
         if [[ -n "${CVE_VER_START_EXCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
             continue
           fi
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
         if [[ -n "${CVE_VER_START_INCL}" ]]; then
           if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_INCL" "no_log"
-            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
             continue
           fi
         else
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
       fi
     else
       # if we have not found further version limitations, we assume that all versions are vulnerable:
       # print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") - no further version limitations detected" "no_log"
-      write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+      write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
     fi
   done
 }
