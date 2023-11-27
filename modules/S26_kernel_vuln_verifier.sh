@@ -142,7 +142,7 @@ S26_kernel_vuln_verifier()
       continue
     fi
 
-    local CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.json"
+    local CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/linux_kernel_${K_VERSION}.txt"
 
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
@@ -189,7 +189,7 @@ S26_kernel_vuln_verifier()
       tar -xzf "${KERNEL_ARCH_PATH}/linux-${K_VERSION_KORG}.tar.gz" -C "${LOG_PATH_MODULE}"
     fi
 
-    get_cve_kernel_data "${K_VERSION}" "${CVE_DETAILS_PATH}"
+    cve_db_lookup_version "linux_kernel:${K_VERSION}"
 
     if ! [[ -f "${CVE_DETAILS_PATH}" ]]; then
       print_output "[-] No CVE details generated ... check for further kernel version"
@@ -330,36 +330,6 @@ split_symbols_file() {
   split -l 100 "${LOG_PATH_MODULE}"/symbols_uniq.txt "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.
   sed -i 's/^/EXPORT_SYMBOL_GPL\(/' "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.*
   sed -i 's/$/\)/' "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.*
-}
-
-get_cve_kernel_data() {
-  sub_module_title "Version based vulnerability detection"
-  local K_VERSION_="${1:-}"
-  local CVE_K_PATH="${2:-}"
-
-  local CVE_VER_SOURCES_ARR_KERNEL=()
-  local CVE_VER_SOURCES_FILE=""
-  local CVE_ID=""
-  local CVE_V2=""
-  local CVE_V31=""
-
-  print_output "[*] Extract CVE data for kernel version ${ORANGE}${K_VERSION_}${NC}"
-  # "linux_kernel:""${K_VERSION_}"":" -o json > "${CVE_K_PATH}"
-  mapfile -t CVE_VER_SOURCES_ARR_KERNEL < <(grep -l -r "cpe.*linux_kernel:${K_VERSION_}:\|cpe.*linux_kernel:\*:" "${NVD_DIR}" | sort -u || true)
-  for CVE_VER_SOURCES_FILE in "${CVE_VER_SOURCES_ARR_KERNEL[@]}"; do
-    CVE_ID=$(jq -r '.id' "${CVE_VER_SOURCES_FILE}")
-    CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
-    CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}")
-    CVE_SUMMARY=$(jq '.descriptions[] | select(.lang|startswith("en")) | .value' "${CVE_VER_SOURCES_FILE}" || true)
-    if [[ -f "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt ]]; then
-      # check if we have already an entry for this CVE - if not, we will write it to the output file
-      if ! grep -q "^${CVE_ID}:" "${LOG_PATH_MODULE}"/kernel_"${K_VERSION_}"-vulns.txt; then
-        echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}:${CVE_SUMMARY}" >> "${CVE_K_PATH}" || true
-      fi
-    else
-      echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}:${CVE_SUMMARY}" >> "${CVE_K_PATH}" || true
-    fi
-  done
 }
 
 extract_kernel_arch() {
