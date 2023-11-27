@@ -556,7 +556,7 @@ cve_db_lookup_version() {
       # we need to check the version more in details in case we have no version in our cpe identifier
       # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
 
-      print_output "[*] Binary ${BIN_VERSION_} - Found no version identifier in our cpe for ${CVE_VER_SOURCES_FILE} - check for further version details with $CVE_CPE_vuln" "no_log"
+      print_output "[*] Binary ${BIN_VERSION_} - Found no version identifier in our cpe for ${CVE_VER_SOURCES_FILE} - check for further version details with ${CVE_CPE_vuln}" "no_log"
 
       # extract further version details form the current cpe under test
       CVE_VER_START_INCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionStartIncluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
@@ -566,7 +566,7 @@ cve_db_lookup_version() {
 
       # if we have found some version details we need to further check them now:
       if [[ -n "${CVE_VER_START_INCL}" || -n "${CVE_VER_START_EXCL}" || -n "${CVE_VER_END_INCL}" || -n "${CVE_VER_END_EXCL}" ]]; then
-        print_output "[*] Binary ${BIN_VERSION_} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - $CVE_VER_START_INCL / $CVE_VER_START_EXCL / $CVE_VER_END_INCL / $CVE_VER_END_EXCL" "no_log"
+        print_output "[*] Binary ${BIN_VERSION_} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - ${CVE_VER_START_INCL} / ${CVE_VER_START_EXCL} / ${CVE_VER_END_INCL} / ${CVE_VER_END_EXCL}" "no_log"
 
         ## first check CVE_VER_START_INCL >= VERSION <= CVE_VER_END_INCL
         if [[ -n "${CVE_VER_START_INCL}" ]]; then
