@@ -55,6 +55,7 @@ F20_vul_aggregator() {
   local S09_LOG="${CSV_DIR}"/s09_firmware_base_version_check.csv
   local S25_LOG="${CSV_DIR}"/s25_kernel_check.csv
   local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
+  local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
   local S116_LOG="${CSV_DIR}"/s116_qemu_version_detection.csv
   local L15_LOG="${CSV_DIR}"/l15_emulated_checks_nmap.csv
   local L25_LOG="${CSV_DIR}"/l25_web_checks.csv
@@ -100,6 +101,7 @@ F20_vul_aggregator() {
     get_uefi_details "${S02_LOG}"
     get_firmware_details "${S06_LOG}"
     get_package_details "${S08_LOG}"
+    get_lighttpd_details "${S36_LOG}"
     get_firmware_base_version_check "${S09_LOG}"
     get_usermode_emulator "${S116_LOG}"
     get_systemmode_emulator "${L15_LOG}"
@@ -150,7 +152,7 @@ aggregate_versions() {
 
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
     ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
-    ${#KERNEL_CVE_VERIFIED[@]} -gt 0 ]]; then
+    "${#VERSIONS_S36_DETAILS[@]}" -gt 0 || ${#KERNEL_CVE_VERIFIED[@]} -gt 0 ]]; then
 
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
@@ -165,6 +167,12 @@ aggregate_versions() {
         continue
       fi
       print_output "[+] Found Version details (${ORANGE}package management system check${GREEN}): ""${ORANGE}${VERSION}${NC}"
+    done
+    for VERSION in "${VERSIONS_S36_DETAILS[@]}"; do
+      if [ -z "${VERSION}" ]; then
+        continue
+      fi
+      print_output "[+] Found Version details (${ORANGE}lighttpd statical check${GREEN}): ""${ORANGE}${VERSION}${NC}"
     done
     for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
       if [ -z "${VERSION}" ]; then
@@ -239,7 +247,7 @@ aggregate_versions() {
     done
 
     print_ln
-    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
+    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_S36_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
 
     # if we get from a module CVE details we also need to handle them
     CVES_AGGREGATED=("${CVE_S02_DETAILS[@]}" "${CVE_L35_DETAILS[@]}")
@@ -558,7 +566,7 @@ cve_db_lookup_version() {
 
       # if we have found some version details we need to further check them now:
       if [[ -n "${CVE_VER_START_INCL}" || -n "${CVE_VER_START_EXCL}" || -n "${CVE_VER_END_INCL}" || -n "${CVE_VER_END_EXCL}" ]]; then
-        print_output "[*] Binary ${BIN_VERSION_} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - $CVE_VER_START_INCL / $CVE_VER_START_EXCL / $CVE_VER_END_INCL / $CVE_VER_END_EXCL"
+        print_output "[*] Binary ${BIN_VERSION_} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - $CVE_VER_START_INCL / $CVE_VER_START_EXCL / $CVE_VER_END_INCL / $CVE_VER_END_EXCL" "no_log"
 
         ## first check CVE_VER_START_INCL >= VERSION <= CVE_VER_END_INCL
         if [[ -n "${CVE_VER_START_INCL}" ]]; then
@@ -827,6 +835,17 @@ cve_extractor() {
       fi
     fi
   fi
+
+  if [[ -v S36_LOG ]]; then
+    if grep -q "${BINARY};.*${VERSION}" "${S36_LOG}" 2>/dev/null; then
+      if [[ "${VSOURCE}" == "unknown" ]]; then
+        VSOURCE="STAT"
+      else
+        VSOURCE="${VSOURCE}""/STAT"
+      fi
+    fi
+  fi
+
 
   if [[ -v L15_LOG && -v L25_LOG ]]; then
     if grep -q "${VERSION_orig}" "${L15_LOG}" 2>/dev/null || grep -q "${VERSION_orig}" "${L25_LOG}" 2>/dev/null; then
@@ -1353,6 +1372,17 @@ get_firmware_details() {
   if [[ -f "${S06_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S06_LOG}")."
     readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "${S06_LOG}" | tail -n +2 | sort -u || true)
+  fi
+}
+
+get_lighttpd_details() {
+  local S36_LOG="${1:-}"
+  export VERSIONS_S36_DETAILS=()
+
+  if [[ -f "${S36_LOG}" ]]; then
+    print_output "[*] Collect version details of module $(basename "${S36_LOG}")."
+    # └─$ cat ~/firmware-stuff/emba_logs_cve/csv_logs/s36_lighttpd.csv | grep ";CVE-" | cut -d\; -f1-2 | sort -u
+    readarray -t VERSIONS_S36_DETAILS < <(grep ";CVE-" "${S36_LOG}" | cut -d\; -f1-2 | sort -u | tr ';' ':'|| true)
   fi
 }
 
