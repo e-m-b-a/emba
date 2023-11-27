@@ -437,7 +437,7 @@ generate_cve_details_cves() {
       # cve-search/mongodb calls called in parallel
       cve_db_lookup_cve "${CVE_ENTRY}" &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_F19[@]}"
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup_cve "${CVE_ENTRY}"
     fi
@@ -456,12 +456,10 @@ generate_cve_details_versions() {
 
   for BIN_VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # BIN_VERSION is something like "binary:1.2.3"
-    # we can use this format in cve-search
     if [[ "${THREADED}" -eq 1 ]]; then
-      # cve-search/mongodb calls called in parallel
       cve_db_lookup_version "${BIN_VERSION}" &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${WAIT_PIDS_F19[@]}"
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*3))" "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup_version "${BIN_VERSION}"
     fi
@@ -534,13 +532,13 @@ cve_db_lookup_version() {
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_CVE_SOURCE[@]}"
 
-  if [[ "${THREADED}" -eq 1 ]]; then
-    cve_extractor "${BIN_VERSION_}" &
-    WAIT_PIDS_F19+=( "$!" )
+  # if [[ "${THREADED}" -eq 1 ]]; then
+  #  cve_extractor "${BIN_VERSION_}" &
+  #  WAIT_PIDS_F19+=( "$!" )
     # WAIT_PIDS_F19_2+=( "$!" )
-  else
-    cve_extractor "${BIN_VERSION_}"
-  fi
+  # else
+  cve_extractor "${BIN_VERSION_}"
+  # fi
 
 #   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
 }
