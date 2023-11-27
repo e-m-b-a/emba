@@ -26,10 +26,6 @@ S36_lighttpd() {
   module_title "Lighttpd analysis"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
-  print_output "[!] This module is currently not working!"
-  return
-
   local NEG_LOG=0
   local LIGHTTP_CFG_ARR=()
   local LIGHTTP_BIN_ARR=()
@@ -104,6 +100,7 @@ lighttpd_binary_analysis() {
       mkdir "${LOG_PATH_MODULE}"/cve_sum
     fi
     for LIGHT_VER in "${LIGHT_VERSIONS[@]}"; do
+      # cve_db_lookup_version writes the logs to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
       cve_db_lookup_version "${LIGHT_VER}"
     done
   fi
