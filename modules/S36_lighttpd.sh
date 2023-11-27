@@ -158,6 +158,7 @@ prepare_cve_search_module() {
   if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
     export SNYK_SEARCH=1
   fi
+  ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]] && mkdir -p "${LOG_PATH_MODULE}""/exploit/"
 }
 
 lighttpd_config_analysis() {

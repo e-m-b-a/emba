@@ -643,12 +643,6 @@ identify_exploits() {
       EXP="${EXP}(KNOWN)"
     fi
   fi
-  if [[ -f "${TRICKEST_DB_PATH}" ]]; then
-    if grep -q -E "${CVE_VALUE}\.md" "${TRICKEST_DB_PATH}"; then
-      POC_DETECTED="yes"
-      POC="${POC}(GH)"
-    fi
-  fi
   if [[ -f "${CONFIG_DIR}/Snyk_PoC_results.csv" ]]; then
     if grep -q -E "^${CVE_VALUE};" "${CONFIG_DIR}/Snyk_PoC_results.csv"; then
       POC_DETECTED="yes"

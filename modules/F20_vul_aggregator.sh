@@ -41,7 +41,6 @@ F20_vul_aggregator() {
   CVE_SEARCHSPLOIT=0
   RS_SEARCH=0
   MSF_SEARCH=0
-  TRICKEST_SEARCH=0
   CVE_SEARCHSPLOIT=0
   MSF_INSTALL_PATH="/usr/share/metasploit-framework"
 
@@ -709,15 +708,15 @@ write_cve_log() {
   local lCVE_ID="${1:-}"
   local lCVE_V2="${2:-}"
   local lCVE_V31="${3:-}"
-  local lLOG_FILE="${4:-}"
+  local lCVE_LOG_FILE="${4:-}"
 
-  if [[ -s "${lLOG_FILE}" ]]; then
+  if [[ -s "${lCVE_LOG_FILE}" ]]; then
     # check if we have already an entry for this CVE - if not, we will write it to the output file
-    if ! grep -q "^${lCVE_ID}:" "${lLOG_FILE}" 2>/dev/null; then
-      echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}" >> "${lLOG_FILE}" || true
+    if ! grep -q "^${lCVE_ID}:" "${lCVE_LOG_FILE}" 2>/dev/null; then
+      echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}" >> "${lCVE_LOG_FILE}" || true
     fi
   else
-    echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}" > "${lLOG_FILE}" || true
+    echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}" > "${lCVE_LOG_FILE}" || true
   fi
 }
 
@@ -939,17 +938,13 @@ cve_extractor() {
         fi
       fi
 
-      if [[ "${CVE_SEARCHSPLOIT}" -eq 1 || "${MSF_SEARCH}" -eq 1 || "${TRICKEST_SEARCH}" -eq 1 || "${SNYK_SEARCH}" -eq 1 || "${PS_SEARCH}" -eq 1 ]] ; then
+      if [[ "${CVE_SEARCHSPLOIT}" -eq 1 || "${MSF_SEARCH}" -eq 1 || "${SNYK_SEARCH}" -eq 1 || "${PS_SEARCH}" -eq 1 ]] ; then
         if [[ ${CVE_SEARCHSPLOIT} -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "${CVE_VALUE}" 2>/dev/null || true)
         fi
 
         if [[ ${MSF_SEARCH} -eq 1 ]]; then
           mapfile -t EXPLOIT_AVAIL_MSF < <(grep -E "${CVE_VALUE}"$ "${MSF_DB_PATH}" 2>/dev/null || true)
-        fi
-
-        if [[ ${TRICKEST_SEARCH} -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL_TRICKEST < <(grep -E "${CVE_VALUE}\.md" "${TRICKEST_DB_PATH}" 2>/dev/null | sort -u || true)
         fi
 
         if [[ ${PS_SEARCH} -eq 1 ]]; then
@@ -1104,36 +1099,6 @@ cve_extractor() {
 
           if [[ ${EDB} -eq 0 ]]; then
             # only count the packetstorm exploit if we have not already count an other exploit
-            # otherwise we count an exploit for one CVE multiple times
-            ((EXPLOIT_COUNTER_VERSION+=1))
-            EDB=1
-          fi
-        fi
-
-        if [[ ${#EXPLOIT_AVAIL_TRICKEST[@]} -gt 0 ]]; then
-          if [[ "${EXPLOIT}" == "No exploit available" ]]; then
-            EXPLOIT="Exploit (Github:"
-          else
-            EXPLOIT="${EXPLOIT}"" ""/ Github:"
-          fi
-
-          for EXPLOIT_TRICKEST in "${EXPLOIT_AVAIL_TRICKEST[@]}" ; do
-            EXPLOIT_PATH=$(echo "${EXPLOIT_TRICKEST}" | cut -d: -f1)
-            EXPLOIT_NAME=$(echo "${EXPLOIT_TRICKEST}" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g')
-            EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"" (G)"
-            # we remove slashes from the github url and use this as exploit name:
-            EXPLOIT_NAME_=$(echo "${EXPLOIT_TRICKEST}" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g' | tr '/' '_')
-            if [[ -f "${EXPLOIT_PATH}" ]] ; then
-              # for the web reporter we copy the original metasploit module into the EMBA log directory
-              if ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]]; then
-                mkdir "${LOG_PATH_MODULE}""/exploit/"
-              fi
-              cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/trickest_""${EXPLOIT_NAME_}".md
-            fi
-          done
-
-          if [[ ${EDB} -eq 0 ]]; then
-            # only count the github exploit if we have not already count an other exploit
             # otherwise we count an exploit for one CVE multiple times
             ((EXPLOIT_COUNTER_VERSION+=1))
             EDB=1
