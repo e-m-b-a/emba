@@ -536,13 +536,13 @@ cve_db_lookup_version() {
 
   if [[ "${THREADED}" -eq 1 ]]; then
     cve_extractor "${BIN_VERSION_}" &
-    WAIT_PIDS_F19_2+=( "$!" )
+    WAIT_PIDS_F19+=( "$!" )
+    # WAIT_PIDS_F19_2+=( "$!" )
   else
     cve_extractor "${BIN_VERSION_}"
   fi
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
-
+#   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
 }
 
 # Test the identified JSON files for CPE details and version information
