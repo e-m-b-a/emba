@@ -137,30 +137,6 @@ lighttpd_binary_analysis() {
   done
 }
 
-prepare_cve_search_module() {
-  # we need to setup different exports for F20
-  export CVE_COUNTER=0
-  export HIGH_CVE_COUNTER=0
-  export MEDIUM_CVE_COUNTER=0
-  export LOW_CVE_COUNTER=0
-  if command -v cve_searchsploit > /dev/null ; then
-    export CVE_SEARCHSPLOIT=1
-  fi
-  if [[ -f "${MSF_DB_PATH}" ]]; then
-    export MSF_SEARCH=1
-  fi
-  if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
-    export RS_SEARCH=1
-  fi
-  if [[ -f "${CONFIG_DIR}"/PS_PoC_results.csv ]]; then
-    export PS_SEARCH=1
-  fi
-  if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
-    export SNYK_SEARCH=1
-  fi
-  ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]] && mkdir -p "${LOG_PATH_MODULE}""/exploit/"
-}
-
 lighttpd_config_analysis() {
   local LIGHTTPD_CONFIG="${1:-}"
   shift

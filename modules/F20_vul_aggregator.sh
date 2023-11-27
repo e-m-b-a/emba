@@ -24,25 +24,7 @@ F20_vul_aggregator() {
   pre_module_reporter "${FUNCNAME[0]}"
   print_ln
 
-  if [[ -d "${LOG_PATH_MODULE}"/cve_sum ]]; then
-    rm -r "${LOG_PATH_MODULE}"/cve_sum
-  fi
-  mkdir "${LOG_PATH_MODULE}"/cve_sum
-
-  if [[ -d "${LOG_PATH_MODULE}"/exploit ]]; then
-    rm -r "${LOG_PATH_MODULE}"/exploit
-  fi
-  mkdir "${LOG_PATH_MODULE}"/exploit
-
-  KERNELV=0
-  HIGH_CVE_COUNTER=0
-  MEDIUM_CVE_COUNTER=0
-  LOW_CVE_COUNTER=0
-  CVE_SEARCHSPLOIT=0
-  RS_SEARCH=0
-  MSF_SEARCH=0
-  CVE_SEARCHSPLOIT=0
-  MSF_INSTALL_PATH="/usr/share/metasploit-framework"
+  prepare_cve_search_module
 
   local FOUND_CVE=0
   local S26_LOGS_ARR=()
@@ -141,6 +123,38 @@ F20_vul_aggregator() {
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)
 
   module_end_log "${FUNCNAME[0]}" "${FOUND_CVE}"
+}
+
+prepare_cve_search_module() {
+  # we need to setup different exports for F20
+  export CVE_COUNTER=0
+  export HIGH_CVE_COUNTER=0
+  export MEDIUM_CVE_COUNTER=0
+  export LOW_CVE_COUNTER=0
+  export KERNELV=0
+  export CVE_SEARCHSPLOIT=0
+  export RS_SEARCH=0
+  export MSF_SEARCH=0
+  export CVE_SEARCHSPLOIT=0
+  export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
+
+  if command -v cve_searchsploit > /dev/null ; then
+    export CVE_SEARCHSPLOIT=1
+  fi
+  if [[ -f "${MSF_DB_PATH}" ]]; then
+    export MSF_SEARCH=1
+  fi
+  if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
+    export RS_SEARCH=1
+  fi
+  if [[ -f "${CONFIG_DIR}"/PS_PoC_results.csv ]]; then
+    export PS_SEARCH=1
+  fi
+  if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
+    export SNYK_SEARCH=1
+  fi
+  ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]] && mkdir -p "${LOG_PATH_MODULE}""/exploit/"
+  ! [[ -d "${LOG_PATH_MODULE}""/cve_sum/" ]] && mkdir -p "${LOG_PATH_MODULE}""/cve_sum/"
 }
 
 aggregate_versions() {
