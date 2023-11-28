@@ -2,7 +2,6 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2023 Siemens AG
 # Copyright 2020-2023 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
@@ -11,8 +10,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner, Pascal Eckmann
-# Contributor(s): Stefan Haboeck, Nikolas Papaioannou, Benedikt Kuehne
+# Author(s): Michael Messner
 
 # Description: Installs the NVD data feed for CVE identification in EMBA (F20)
 
