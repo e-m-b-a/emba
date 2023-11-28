@@ -569,6 +569,10 @@ check_cve_sources() {
   mapfile -t CVE_CPEs_vuln_ARR < <(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep "cpe:[0-9]\.[0-9]:[a-z]:.*:${BIN_NAME}:\*:" || true)
 
   for CVE_CPE_vuln in "${CVE_CPEs_vuln_ARR[@]}"; do
+    if ! "$(echo "${CVE_CPE_vuln}" | cut -d ':' -f1-8 | grep -q "${BIN_NAME}")"; then
+      # ensure our binary is in the first 8 fields of the cpe identifier
+      continue
+    fi
     # we need to check the version more in details in case we have no version in our cpe identifier
     # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
 
