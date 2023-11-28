@@ -71,6 +71,7 @@ check_dep_port()
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
+# shellcheck disable=SC1009,SC1072,SC1073
 version_extended() # $1-a $2-op $3-$b
 # see https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 # see https://stackoverflow.com/a/48487783
