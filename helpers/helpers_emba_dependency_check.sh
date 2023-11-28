@@ -68,123 +68,39 @@ check_dep_port()
   fi
 }
 
-check_docker_env() {
-  TOOL_NAME="MongoDB"
-  print_output "    ""${TOOL_NAME}"" - \\c" "no_log"
-  if ! grep -q "bindIp: ${MONGODB_HOST}" /etc/mongod.conf; then
-    echo -e "${RED}""not ok""${NC}"
-    echo -e "${RED}""    Wrong ""mongodb config"" - check your installation""${NC}"
-    echo -e "${RED}""    RE-run installation - bindIp should be set to ${MONGODB_HOST}""${NC}"
-    DEP_ERROR=1
-  else
-    echo -e "${GREEN}""ok""${NC}"
-  fi
-  TOOL_NAME="Docker Interface"
-  print_output "    ""${TOOL_NAME}"" -""${RED}"" \\c" "no_log"
-  if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
-    echo -e "${RED}""    Missing ""Docker-Interface"" - check your installation""${NC}"
-    if [[ "${WSL}" -eq 1 ]]; then
-      echo -e "${RED}""    Is dockerd running (e.g., sudo dockerd --iptables=false &)""${NC}"
-      DEP_ERROR=1
-    else
-      if [[ "${EUID}" -eq 0 ]]; then
-        echo -e "${ORANGE}""    Trying to auto-maintain the docker interface ...""${NC}"
-        systemctl restart NetworkManager docker
-      fi
-      if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
-        echo -e "${RED}""    Use  \$systemctl restart NetworkManager docker or reset the docker interface manually (\$ docker network rm emba_runs)""${NC}"
-        DEP_ERROR=1
-      else
-        print_output "    ""${TOOL_NAME}"" -""${RED}"" \\c" "no_log"
-        echo -e "${GREEN}""ok""${NC}"
-      fi
-    fi
-  else
-    echo -e "${GREEN}""ok""${NC}"
-  fi
-}
-
-check_nw_interface() {
-  if ! ip a show emba_runs | grep -q "${MONGODB_HOST}" ; then
-    echo -e "${RED}""    Network interface not available"" - trying to restart now""${NC}"
-    systemctl restart NetworkManager docker
-    echo -e "${GREEN}""    docker-networks restarted""${NC}"
-  fi
-}
-
-check_cve_search() {
-  # CVE_STATUS_PRINT is used to disable the printing of the regular status check
-  # this was confusing for EMBA users
-  CVE_STATUS_PRINT="${1:-0}"
-
-  if [[ "${JUMP_OVER_CVESEARCH_CHECK}" -eq 1 ]] ; then
-    # no cve check -> just return and enforce CVE_SEARCH
-    export CVE_SEARCH=1
-    return
-  fi
-  TOOL_NAME="cve-search"
-  if [[ "${CVE_STATUS_PRINT}" -eq 1 ]]; then
-    print_output "    ""${TOOL_NAME}"" - testing" "no_log"
-  fi
-  local CVE_SEARCH_=0 # local checker variable
-  # check if the cve-search produces results:
-  if ! [[ $("${PATH_CVE_SEARCH}" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-    # we can restart the mongod database only in dev mode and not in docker mode:
-    if [[ "${IN_DOCKER}" -eq 0 ]]; then
-      print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
-      if [[ "${WSL}" -eq 1 ]]; then
-        pkill -f mongod
-        mongod --config /etc/mongod.conf &
-      else
-        service mongod restart
-      fi
-      sleep 10
-
-      # do a second try
-      if ! [[ $("${PATH_CVE_SEARCH}" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-        print_output "[*] CVE-search not working - restarting Mongo database for CVE-search" "no_log"
-        if [[ "${WSL}" -eq 1 ]]; then
-          pkill -f mongod
-          mongod --config /etc/mongod.conf &
-        else
-          service mongod restart
-        fi
-        sleep 10
-
-        if [[ $("${PATH_CVE_SEARCH}" -p busybox 2>/dev/null | grep -c ":\ CVE-") -gt 18 ]]; then
-          CVE_SEARCH_=1
-        fi
-      else
-        CVE_SEARCH_=1
-      fi
-    else
-      CVE_SEARCH_=1
-    fi
-  else
-    CVE_SEARCH_=1
-  fi
-
-  if [[ "${CVE_SEARCH_}" -eq 0 ]]; then
-    print_output "    ""${TOOL_NAME}"" - ""${RED}""not ok""${NC}" "no_log"
-    print_cve_search_failure
-    export CVE_SEARCH=0
-  else
-    if [[ "${CVE_STATUS_PRINT}" -eq 1 ]]; then
-      print_output "    ""${TOOL_NAME}"" - ""${GREEN}""ok""${NC}" "no_log"
-    fi
-    export CVE_SEARCH=1
-  fi
-}
-
-print_cve_search_failure() {
-  print_output "[-] The needed CVE database is not responding as expected." "no_log"
-  print_output "[-] CVE checks are currently not possible!" "no_log"
-  print_output "[-] Please check the following documentation on Github: https://github.com/e-m-b-a/emba/issues/187" "no_log"
-  print_output "[-] If this does not help, open a new issue here: https://github.com/e-m-b-a/emba/issues" "no_log"
-}
-
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+
+# shellcheck disable=SC1009,SC1072,SC1073
+version_extended() # $1-a $2-op $3-$b
+# see https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+# see https://stackoverflow.com/a/48487783
+# Compare a and b as version strings. Rules:
+# R1: a and b : dot-separated sequence of items. Items are numeric. The last item can optionally end with letters, i.e., 2.5 or 2.5a.
+# R2: Zeros are automatically inserted to compare the same number of items, i.e., 1.0 < 1.0.1 means 1.0.0 < 1.0.1 => yes.
+# R3: op can be '=' '==' '!=' '<' '<=' '>' '>=' (lexicographic).
+# R4: Unrestricted number of digits of any item, i.e., 3.0003 > 3.0000004.
+# R5: Unrestricted number of items.
+{
+  local a=$1 op=$2 b=$3 al=${1##*.} bl=${3##*.}
+  while [[ $al =~ ^[[:digit:]] ]]; do al=${al:1}; done
+  while [[ $bl =~ ^[[:digit:]] ]]; do bl=${bl:1}; done
+  local ai=${a%$al} bi=${b%$bl}
+
+  local ap=${ai//[[:digit:]]} bp=${bi//[[:digit:]]}
+  ap=${ap//./.0} bp=${bp//./.0}
+
+  local w=1 fmt=$a.$b x IFS=.
+  for x in $fmt; do [ ${#x} -gt $w ] && w=${#x}; done
+  fmt=${*//[^.]}; fmt=${fmt//./%${w}s}
+  printf -v a $fmt $ai$bp; printf -v a "%s-%${w}s" $a $al
+  printf -v b $fmt $bi$ap; printf -v b "%s-%${w}s" $b $bl
+
+  case $op in
+    '<='|'>=' ) [ "$a" ${op:0:1} "$b" ] || [ "$a" = "$b" ] ;;
+    * )         [ "$a" $op "$b" ] ;;
+  esac
+}
 
 dependency_check()
 {
@@ -419,43 +335,10 @@ dependency_check()
   # Docker for EMBA with docker
   #######################################################################################
   if [[ "${USE_DOCKER}" -eq 1 ]] && [[ "${ONLY_DEP}" -ne 2 ]]; then
-    local TMP_VER=0
     check_dep_tool "docker"
     check_dep_tool "docker-compose"
-    check_docker_env
-    check_cve_search 1
     check_dep_tool "inotifywait"
     check_dep_tool "notify-send"
-    print_output "    urllib3 version - \\c" "no_log"
-    TMP_VER=$(pip3 list | grep "^urllib3\ " | awk '{print $2}')
-    if [[ "$(version "${TMP_VER}")" -ge "$(version "1.99.99")" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    urllib3 version ${TMP_VER} - not optimal""${NC}"
-      echo -e "${ORANGE}""    Downgrade your urllib3 pip package to version <2""${NC}"
-      DEP_ERROR=1
-    elif [[ "$(version "${TMP_VER}")" == "0000000000" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    urllib3 package missing""${NC}"
-      echo -e "${ORANGE}""    Install urllib3 pip package with version <2""${NC}"
-      DEP_ERROR=1
-    else
-      echo -e "${GREEN}""ok""${NC}"
-    fi
-    print_output "    requests version - \\c" "no_log"
-    TMP_VER=$(pip3 list | grep "^requests\ " | awk '{print $2}')
-    if [[ "$(version "${TMP_VER}")" -ge "$(version "2.29.0")" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    requests version ${TMP_VER} - not optimal""${NC}"
-      echo -e "${ORANGE}""    Downgrade your requests pip package to version <2.29.0""${NC}"
-      DEP_ERROR=1
-    elif [[ "$(version "${TMP_VER}")" == "0000000000" ]]; then
-      echo -e "${RED}""not ok""${NC}"
-      echo -e "${ORANGE}""    requests package missing""${NC}"
-      echo -e "${ORANGE}""    Install requests pip package with version <2.29.0""${NC}"
-      DEP_ERROR=1
-    else
-      echo -e "${GREEN}""ok""${NC}"
-    fi
   fi
 
   #######################################################################################
@@ -501,114 +384,106 @@ dependency_check()
     # 7zip
     check_dep_tool "7z"
 
-    # jchroot - https://github.com/vincentbernat/jchroot
-    check_dep_tool "jchroot"
-
-    # mkimage (uboot)
-    check_dep_tool "uboot mkimage" "mkimage"
-
-    # binwalk
-    check_dep_tool "binwalk extractor" "binwalk"
-    if command -v binwalk > /dev/null ; then
-      export BINWALK_BIN=()
-      BINWALK_BIN=("$(which binwalk)")
-      BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
-      if ! [ "$(version "${BINWALK_VER}")" -ge "$(version "2.3.3")" ]; then
-        echo -e "${ORANGE}""    binwalk version ${BINWALK_VER} - not optimal""${NC}"
-        echo -e "${ORANGE}""    Upgrade your binwalk to version 2.3.3 or higher""${NC}"
-      fi
-      # this is typically needed in the read only docker container:
-      if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
-        mkdir -p "${HOME}"/.config/binwalk/modules/
-      fi
-      print_output "    cpu_rec - \\c" "no_log"
-      if [[ -d "${EXT_DIR}"/cpu_rec/ ]]; then
-        cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
-        cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
-        echo -e "${GREEN}""ok""${NC}"
-      else
-        echo -e "${RED}""not ok""${NC}"
-        # DEP_ERROR=1
-      fi
-    fi
-    export MPLCONFIGDIR="${TMP_DIR}"
-
-    check_dep_tool "unblob"
-    if command -v unblob > /dev/null ; then
-      UNBLOB_VER=$(unblob --version 2>&1 || true)
-      if ! [ "$(version "${UNBLOB_VER}")" -ge "$(version "23.8.11")" ]; then
-        echo -e "${RED}""    Unblob version ${UNBLOB_VER} - not supported""${NC}"
-        echo -e "${RED}""    Upgrade your unblob installation to version 23.8.11 or higher""${NC}"
-        DEP_ERROR=1
-      fi
-    fi
-
-    check_dep_tool "unrar" "unrar"
-
-    # jtr
-    check_dep_tool "john"
-
-    # pixd
-    check_dep_file "pixd visualizer" "${EXT_DIR}""/pixde"
-
-    # php iniscan
-    check_dep_file "PHP iniscan" "${EXT_DIR}""/iniscan/vendor/bin/iniscan"
-
-    # pixd image
-    check_dep_file "pixd image renderer" "${EXT_DIR}""/pixd_png.py"
-
-    # progpilot for php code checks
-    check_dep_file "progpilot php ini checker" "${EXT_DIR}""/progpilot"
-
-    # luacheck - lua linter
-    check_dep_tool "luacheck"
-
-    # APKHunt for android apk analysis
-    check_dep_file "APKHunt apk scanner" "${EXT_DIR}""/APKHunt/apkhunt.go"
-
-    # rpm for checking package management system
-    check_dep_tool "rpm"
-
-    # patool extractor - https://wummel.github.io/patool/
-    check_dep_tool "patool"
-
-    # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
-    check_dep_file "EnGenius decryptor" "${EXT_DIR}""/engenius-decrypt.py"
-
-    # Android payload.bin extractor
-    check_dep_file "Android payload.bin extractor" "${EXT_DIR}""/payload_dumper/payload_dumper.py"
-
-    # check_dep_file "QNAP decryptor" "${EXT_DIR}""/PC1"
-
-    check_dep_file "Buffalo decryptor" "${EXT_DIR}""/buffalo-enc.elf"
-
-    check_dep_tool "ubireader image extractor" "ubireader_extract_images"
-    check_dep_tool "ubireader file extractor" "ubireader_extract_files"
-
-    # UEFI
-    check_dep_tool "UEFI image extractor" "${EXT_DIR}""/UEFITool/UEFIExtract"
-
-    if function_exists F20_vul_aggregator; then
-      # CVE-search
-      # TODO change to portcheck and write one for external hosts
-      check_dep_file "cve-search script" "${EXT_DIR}""/cve-search/bin/search.py"
-      # we have already checked it outside the docker - do not need it again
-      [[ "${IN_DOCKER}" -eq 0 ]] && check_cve_search 1
-      if [[ "${IN_DOCKER}" -eq 0 ]]; then
-        # really basic check, if cve-search database is running - no check, if populated and also no check, if EMBA in docker
-        check_dep_tool "mongo database" "mongod"
-        # check_cve_search
-      fi
-      # CVE searchsploit
-      check_dep_tool "CVE Searchsploit" "cve_searchsploit"
-
-      check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
-      check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"
-      check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
-    fi
-
     # we should check all the dependencies if they are needed in our quest container:
     if [[ "${CONTAINER_NUMBER}" -ne 2 ]]; then
+      # jchroot - https://github.com/vincentbernat/jchroot
+      check_dep_tool "jchroot"
+
+      # mkimage (uboot)
+      check_dep_tool "uboot mkimage" "mkimage"
+
+      # binwalk
+      check_dep_tool "binwalk extractor" "binwalk"
+      if command -v binwalk > /dev/null ; then
+        export BINWALK_BIN=()
+        BINWALK_BIN=("$(which binwalk)")
+        BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
+        if ! [ "$(version "${BINWALK_VER}")" -ge "$(version "2.3.3")" ]; then
+          echo -e "${ORANGE}""    binwalk version ${BINWALK_VER} - not optimal""${NC}"
+          echo -e "${ORANGE}""    Upgrade your binwalk to version 2.3.3 or higher""${NC}"
+        fi
+        # this is typically needed in the read only docker container:
+        if ! [[ -d "${HOME}"/.config/binwalk/modules/ ]]; then
+          mkdir -p "${HOME}"/.config/binwalk/modules/
+        fi
+        print_output "    cpu_rec - \\c" "no_log"
+        if [[ -d "${EXT_DIR}"/cpu_rec/ ]]; then
+          cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec.py "${HOME}"/.config/binwalk/modules/
+          cp -pr "${EXT_DIR}"/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
+          echo -e "${GREEN}""ok""${NC}"
+        else
+          echo -e "${RED}""not ok""${NC}"
+          # DEP_ERROR=1
+        fi
+      fi
+      export MPLCONFIGDIR="${TMP_DIR}"
+
+      check_dep_tool "unblob"
+      if command -v unblob > /dev/null ; then
+        UNBLOB_VER=$(unblob --version 2>&1 || true)
+        if ! [ "$(version "${UNBLOB_VER}")" -ge "$(version "23.8.11")" ]; then
+          echo -e "${RED}""    Unblob version ${UNBLOB_VER} - not supported""${NC}"
+          echo -e "${RED}""    Upgrade your unblob installation to version 23.8.11 or higher""${NC}"
+          DEP_ERROR=1
+        fi
+      fi
+
+      check_dep_tool "unrar" "unrar"
+
+      # jtr
+      check_dep_tool "john"
+
+      # pixd
+      check_dep_file "pixd visualizer" "${EXT_DIR}""/pixde"
+
+      # php iniscan
+      check_dep_file "PHP iniscan" "${EXT_DIR}""/iniscan/vendor/bin/iniscan"
+
+      # pixd image
+      check_dep_file "pixd image renderer" "${EXT_DIR}""/pixd_png.py"
+
+      # progpilot for php code checks
+      check_dep_file "progpilot php ini checker" "${EXT_DIR}""/progpilot"
+
+      # luacheck - lua linter
+      check_dep_tool "luacheck"
+
+      # APKHunt for android apk analysis
+      check_dep_file "APKHunt apk scanner" "${EXT_DIR}""/APKHunt/apkhunt.go"
+
+      # rpm for checking package management system
+      check_dep_tool "rpm"
+
+      # patool extractor - https://wummel.github.io/patool/
+      check_dep_tool "patool"
+
+      # EnGenius decryptor - https://gist.github.com/ryancdotorg/914f3ad05bfe0c359b79716f067eaa99
+      check_dep_file "EnGenius decryptor" "${EXT_DIR}""/engenius-decrypt.py"
+
+      # Android payload.bin extractor
+      check_dep_file "Android payload.bin extractor" "${EXT_DIR}""/payload_dumper/payload_dumper.py"
+
+      check_dep_file "Buffalo decryptor" "${EXT_DIR}""/buffalo-enc.elf"
+
+      check_dep_tool "ubireader image extractor" "ubireader_extract_images"
+      check_dep_tool "ubireader file extractor" "ubireader_extract_files"
+
+      # UEFI
+      check_dep_tool "UEFI Firmware parser" "uefi-firmware-parser"
+      check_dep_file "UEFI image extractor" "${EXT_DIR}""/UEFITool/UEFIExtract"
+      check_dep_file "UEFI AMI PFAT extractor" "${EXT_DIR}""/BIOSUtilities/AMI_PFAT_Extract.py"
+      check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
+
+      if function_exists F20_vul_aggregator; then
+        check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
+        # CVE searchsploit
+        check_dep_tool "CVE Searchsploit" "cve_searchsploit"
+
+        check_dep_file "Routersploit EDB database" "${CONFIG_DIR}""/routersploit_exploit-db.txt"
+        check_dep_file "Routersploit CVE database" "${CONFIG_DIR}""/routersploit_cve-db.txt"
+        check_dep_file "Metasploit CVE database" "${CONFIG_DIR}""/msf_cve-db.txt"
+      fi
+
       # checksec
       check_dep_file "checksec script" "${EXT_DIR}""/checksec"
 
@@ -730,9 +605,6 @@ dependency_check()
         check_dep_tool "CWE Checker" "cwe_checker"
       fi
     fi
-
-    # Python virtual environment in external directory
-    check_dep_file "Python virtual environment" "${EXT_DIR}""/emba_venv/bin/activate"
   fi
 
   if [[ "${DEP_ERROR}" -gt 0 ]] || [[ "${DEP_EXIT}" -gt 0 ]]; then

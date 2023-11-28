@@ -24,26 +24,7 @@ F20_vul_aggregator() {
   pre_module_reporter "${FUNCNAME[0]}"
   print_ln
 
-  if [[ -d "${LOG_PATH_MODULE}"/cve_sum ]]; then
-    rm -r "${LOG_PATH_MODULE}"/cve_sum
-  fi
-  mkdir "${LOG_PATH_MODULE}"/cve_sum
-
-  if [[ -d "${LOG_PATH_MODULE}"/exploit ]]; then
-    rm -r "${LOG_PATH_MODULE}"/exploit
-  fi
-  mkdir "${LOG_PATH_MODULE}"/exploit
-
-  KERNELV=0
-  HIGH_CVE_COUNTER=0
-  MEDIUM_CVE_COUNTER=0
-  LOW_CVE_COUNTER=0
-  CVE_SEARCHSPLOIT=0
-  RS_SEARCH=0
-  MSF_SEARCH=0
-  TRICKEST_SEARCH=0
-  CVE_SEARCHSPLOIT=0
-  MSF_INSTALL_PATH="/usr/share/metasploit-framework"
+  prepare_cve_search_module
 
   local FOUND_CVE=0
   local S26_LOGS_ARR=()
@@ -54,8 +35,10 @@ F20_vul_aggregator() {
   local S06_LOG="${CSV_DIR}"/s06_distribution_identification.csv
   local S08_LOG="${CSV_DIR}"/s08_package_mgmt_extractor.csv
   local S09_LOG="${CSV_DIR}"/s09_firmware_base_version_check.csv
+  # S24 CSV missing!!!
   local S25_LOG="${CSV_DIR}"/s25_kernel_check.csv
   local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
+  local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
   local S116_LOG="${CSV_DIR}"/s116_qemu_version_detection.csv
   local L15_LOG="${CSV_DIR}"/l15_emulated_checks_nmap.csv
   local L25_LOG="${CSV_DIR}"/l25_web_checks.csv
@@ -78,7 +61,7 @@ F20_vul_aggregator() {
     print_output "[!] WARNING: CVE blacklisting activated"
   fi
 
-  if [[ -f ${PATH_CVE_SEARCH} ]]; then
+  if [[ -d ${NVD_DIR} ]]; then
     print_output "[*] Aggregate vulnerability details"
 
     # get the kernel version from s25:
@@ -101,6 +84,7 @@ F20_vul_aggregator() {
     get_uefi_details "${S02_LOG}"
     get_firmware_details "${S06_LOG}"
     get_package_details "${S08_LOG}"
+    get_lighttpd_details "${S36_LOG}"
     get_firmware_base_version_check "${S09_LOG}"
     get_usermode_emulator "${S116_LOG}"
     get_systemmode_emulator "${L15_LOG}"
@@ -109,69 +93,51 @@ F20_vul_aggregator() {
 
     aggregate_versions
 
-    check_cve_search
+    write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "Snyk PoC" "Packetstormsecurity PoC" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln" "kernel vulnerability verified"
 
-    if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-      print_output "[*] Waiting for the cve-search environment ..."
-      sleep 120
-      check_cve_search
-
-      if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-        print_output "[*] Waiting for the cve-search environment ..."
-        sleep 120
-        check_cve_search
-      fi
+    if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
+      generate_cve_details_versions "${VERSIONS_AGGREGATED[@]}"
+    fi
+    if [[ "${#CVES_AGGREGATED[@]}" -gt 0 ]]; then
+      generate_cve_details_cves "${CVES_AGGREGATED[@]}"
     fi
 
-    if [[ "${CVE_SEARCH}" -eq 1 ]]; then
-      if command -v cve_searchsploit > /dev/null ; then
-        CVE_SEARCHSPLOIT=1
-      fi
-      if [[ -f "${MSF_DB_PATH}" ]]; then
-        MSF_SEARCH=1
-      fi
-      # We do not enable the TRICKEST exploit search because of the high false positive rate
-      # uncomment if needed but be warned, we will remove it in the future
-      # if [[ -f "${TRICKEST_DB_PATH}" ]]; then
-      #   TRICKEST_SEARCH=1
-      # fi
-      if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
-        RS_SEARCH=1
-      fi
-      if [[ -f "${CONFIG_DIR}"/PS_PoC_results.csv ]]; then
-        PS_SEARCH=1
-      fi
-      if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
-        SNYK_SEARCH=1
-      fi
-
-      write_csv_log "BINARY" "VERSION" "CVE identifier" "CVSS rating" "exploit db exploit available" "metasploit module" "trickest PoC" "Routersploit" "Snyk PoC" "Packetstormsecurity PoC" "local exploit" "remote exploit" "DoS exploit" "known exploited vuln" "kernel vulnerability verified"
-
-      if [[ "${#VERSIONS_AGGREGATED[@]}" -gt 0 ]]; then
-        generate_cve_details_versions "${VERSIONS_AGGREGATED[@]}"
-      fi
-      if [[ "${#CVES_AGGREGATED[@]}" -gt 0 ]]; then
-        generate_cve_details_cves "${CVES_AGGREGATED[@]}"
-      fi
-
-      generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
-    else
-      print_cve_search_failure
-      CVE_SEARCH=0
-    fi
-  else
-    print_output "[-] CVE search binary search.py not found."
-    print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
-    print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
-    CVE_SEARCH=0
+     generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)
 
-  write_log ""
-  write_log "[*] Statistics:${CVE_SEARCH}"
-
   module_end_log "${FUNCNAME[0]}" "${FOUND_CVE}"
+}
+
+prepare_cve_search_module() {
+  # we need to setup different exports for F20
+  export CVE_COUNTER=0
+  export KERNELV=0
+  export CVE_SEARCHSPLOIT=0
+  export RS_SEARCH=0
+  export MSF_SEARCH=0
+  export CVE_SEARCHSPLOIT=0
+  export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
+
+  if command -v cve_searchsploit > /dev/null ; then
+    export CVE_SEARCHSPLOIT=1
+  fi
+  if [[ -f "${MSF_DB_PATH}" ]]; then
+    export MSF_SEARCH=1
+  fi
+  if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
+    export RS_SEARCH=1
+  fi
+  if [[ -f "${CONFIG_DIR}"/PS_PoC_results.csv ]]; then
+    export PS_SEARCH=1
+  fi
+  if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
+    export SNYK_SEARCH=1
+  fi
+
+  ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]] && mkdir -p "${LOG_PATH_MODULE}""/exploit/"
+  ! [[ -d "${LOG_PATH_MODULE}""/cve_sum/" ]] && mkdir -p "${LOG_PATH_MODULE}""/cve_sum/"
 }
 
 aggregate_versions() {
@@ -183,7 +149,7 @@ aggregate_versions() {
 
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
     ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
-    ${#KERNEL_CVE_VERIFIED[@]} -gt 0 ]]; then
+    "${#VERSIONS_S36_DETAILS[@]}" -gt 0 || ${#KERNEL_CVE_VERIFIED[@]} -gt 0 ]]; then
 
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
@@ -198,6 +164,12 @@ aggregate_versions() {
         continue
       fi
       print_output "[+] Found Version details (${ORANGE}package management system check${GREEN}): ""${ORANGE}${VERSION}${NC}"
+    done
+    for VERSION in "${VERSIONS_S36_DETAILS[@]}"; do
+      if [ -z "${VERSION}" ]; then
+        continue
+      fi
+      print_output "[+] Found Version details (${ORANGE}lighttpd statical check${GREEN}): ""${ORANGE}${VERSION}${NC}"
     done
     for VERSION in "${VERSIONS_STAT_CHECK[@]}"; do
       if [ -z "${VERSION}" ]; then
@@ -272,7 +244,7 @@ aggregate_versions() {
     done
 
     print_ln
-    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
+    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_S36_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
 
     # if we get from a module CVE details we also need to handle them
     CVES_AGGREGATED=("${CVE_S02_DETAILS[@]}" "${CVE_L35_DETAILS[@]}")
@@ -459,10 +431,9 @@ generate_cve_details_cves() {
 
   for CVE_ENTRY in "${CVES_AGGREGATED[@]}"; do
     if [[ "${THREADED}" -eq 1 ]]; then
-      # cve-search/mongodb calls called in parallel
       cve_db_lookup_cve "${CVE_ENTRY}" &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection "${MAX_MODS}" "${WAIT_PIDS_F19[@]}"
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup_cve "${CVE_ENTRY}"
     fi
@@ -481,12 +452,10 @@ generate_cve_details_versions() {
 
   for BIN_VERSION in "${VERSIONS_AGGREGATED[@]}"; do
     # BIN_VERSION is something like "binary:1.2.3"
-    # we can use this format in cve-search
     if [[ "${THREADED}" -eq 1 ]]; then
-      # cve-search/mongodb calls called in parallel
       cve_db_lookup_version "${BIN_VERSION}" &
       WAIT_PIDS_F19+=( "$!" )
-      max_pids_protection "${MAX_MODS}" "${WAIT_PIDS_F19[@]}"
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${WAIT_PIDS_F19[@]}"
     else
       cve_db_lookup_version "${BIN_VERSION}"
     fi
@@ -495,60 +464,313 @@ generate_cve_details_versions() {
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19[@]}"
 }
 
-cve_db_lookup_cve () {
+cve_db_lookup_cve() {
   local CVE_ENTRY="${1:-}"
+  local CVE_ID=""
+  local CVE_V2=""
+  local CVE_V31=""
   print_output "[*] CVE database lookup with CVE information: ${ORANGE}${CVE_ENTRY}${NC}" "no_log"
 
-  # CVE search:
-  if [[ "${STRICT_MODE}" -eq 1 ]]; then
-    set +e
+  # there should be only one CVE file available
+  CVE_SOURCE=$(find "${NVD_DIR}" -name "${CVE_ENTRY}.json" | sort -u | head -1)
+  if [[ -f "${CVE_SOURCE}" ]]; then
+    CVE_ID=$(jq -r '.id' "${CVE_SOURCE}")
+    CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_SOURCE}")
+    # CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_SOURCE}"
+    CVE_V31=$(jq -r '.metrics.cvssMetricV31[]? | select(.type=="Primary") | .cvssData.baseScore' "${CVE_SOURCE}")
+    echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt || true
   fi
 
-  if ! "${PATH_CVE_SEARCH}" -c "${CVE_ENTRY}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt; then
-    "${PATH_CVE_SEARCH}" -c "${CVE_ENTRY}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt || true
-  fi
-  if [[ "${STRICT_MODE}" -eq 1 ]]; then
-    set -e
-  fi
-
-  if [[ "${THREADED}" -eq 1 ]]; then
-    cve_extractor "${CVE_ENTRY}" &
-    WAIT_PIDS_F19_2+=( "$!" )
-  else
-    cve_extractor "${CVE_ENTRY}"
-  fi
-
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
+  cve_extractor "${CVE_ENTRY}"
 }
 
 cve_db_lookup_version() {
   # BIN_VERSION_ is something like "binary:1.2.3"
+  # function writes log files to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
   local BIN_VERSION_="${1:-}"
+  local CVE_ID=""
+  local BIN_NAME=""
 
   # we create something like "binary_1.2.3" for log paths
   local VERSION_PATH="${BIN_VERSION_//:/_}"
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  if ! "${PATH_CVE_SEARCH}" -p "${BIN_VERSION_}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt; then
-    "${PATH_CVE_SEARCH}" -p "${BIN_VERSION_}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r > "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt || true
-  fi
+  BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
     # do a second cve-database check
     VERSION_SEARCHx="$(echo "${BIN_VERSION_}" | sed 's/dlink/d-link/' | sed 's/_firmware//')"
     print_output "[*] CVE database lookup with version information: ${ORANGE}${VERSION_SEARCHx}${NC}" "no_log"
-    "${PATH_CVE_SEARCH}" -p "${VERSION_SEARCHx}" -o json | jq -rc '"\(.id):\(.cvss):\(.cvss3)"' | sort -t ':' -k3 -r >> "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+    mapfile -t CVE_VER_SOURCES_ARR_DLINK < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${VERSION_SEARCHx}" "${NVD_DIR}" || true)
+    CVE_VER_SOURCES_ARR+=( "${CVE_VER_SOURCES_ARR_DLINK[@]}" )
   fi
 
-  if [[ "${THREADED}" -eq 1 ]]; then
-    cve_extractor "${BIN_VERSION_}" &
-    WAIT_PIDS_F19_2+=( "$!" )
+  for CVE_VER_SOURCES_FILE in "${CVE_VER_SOURCES_ARR[@]}"; do
+    CVE_ID=$(jq -r '.id' "${CVE_VER_SOURCES_FILE}")
+    if [[ "${THREADED}" -eq 1 ]]; then
+      # analysis of cve json files in parallel
+      check_cve_sources "${CVE_ID}" "${BIN_VERSION_}" "${CVE_VER_SOURCES_FILE}" &
+      WAIT_PIDS_F19_CVE_SOURCE+=( "$!" )
+      max_pids_protection "$(("${MAX_MOD_THREADS}"*2))" "${WAIT_PIDS_F19_CVE_SOURCE[@]}"
+    else
+      check_cve_sources "${CVE_ID}" "${BIN_VERSION_}" "${CVE_VER_SOURCES_FILE}"
+    fi
+  done
+
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_CVE_SOURCE[@]}"
+
+  cve_extractor "${BIN_VERSION_}"
+}
+
+# Test the identified JSON files for CPE details and version information
+# to ensure our BIN_VERSION is affected
+check_cve_sources() {
+  local CVE_ID="${1:-}"
+  local BIN_VERSION_="${2:-}"
+  local CVE_VER_SOURCES_FILE="${3:-}"
+
+  local BIN_VERSION_ONLY=""
+  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_}" | cut -d':' -f2)
+  local BIN_NAME=""
+  BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
+  local CVE_VER_START_INCL=""
+  local CVE_VER_START_EXCL=""
+  local CVE_VER_END_INCL=""
+  local CVE_VER_END_EXCL=""
+  local CVE_V2=""
+  local CVE_V31=""
+
+  CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
+  # CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
+  CVE_V31=$(jq -r '.metrics.cvssMetricV31[]? | select(.type=="Primary") | .cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
+  CVE_SUMMARY=$(escape_echo "$(jq -r '.descriptions[] | select(.lang=="en") | .value' "${CVE_VER_SOURCES_FILE}")")
+  # we need to check if any cpe of the CVE is vulnerable
+  # └─$ cat external/nvd-json-data-feeds/CVE-2011/CVE-2011-24xx/CVE-2011-2416.json | jq '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' | grep linux
+  if [[ "$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep -c "${BIN_NAME}")" -eq 0 ]]; then
+    # print_output "[-] No matching criteria found - binary ${BIN_NAME} not vulnerable for CVE ${CVE_ID}" "no_log"
+    return
+  fi
+
+  # if our cpe with the binary version matches we have a vuln and we can continue
+  if grep -q "cpe.*:${BIN_VERSION_}:" "${CVE_VER_SOURCES_FILE}"; then
+    # print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} / BIN: ${BIN_VERSION_}" "no_log"
+    write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-NA}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+    return
+  fi
+
+  # extract valid CPEs matching our cpe.*:binary:*: from the CVE details
+  # usually this should only one cpe but in case we are using ARR. With this cpe ARR we can further check for versions from the CVE details like
+  #   .versionStartIncluding
+  #   .versionStartExcluding
+  #   .versionEndIncluding
+  #   .versionEndExcluding
+  mapfile -t CVE_CPEs_vuln_ARR < <(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep "cpe:[0-9]\.[0-9]:[a-z]:.*:${BIN_NAME}:\*:" || true)
+
+  for CVE_CPE_vuln in "${CVE_CPEs_vuln_ARR[@]}"; do
+    if ! echo "${CVE_CPE_vuln}" | cut -d ':' -f1-8 | grep -q "${BIN_NAME}"; then
+      # ensure our binary is in the first 8 fields of the cpe identifier
+      continue
+    fi
+    # we need to check the version more in details in case we have no version in our cpe identifier
+    # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
+
+    # print_output "[*] Binary ${BIN_VERSION_} - Found no version identifier in our cpe for ${CVE_VER_SOURCES_FILE} - check for further version details with ${CVE_CPE_vuln}" "no_log"
+
+    # extract further version details form the current cpe under test
+    # Limitation: we currently only respect one version identifier per cpe. If we have something like the following we do not handle all the versions in a correct way:
+    # └─$ cat external/nvd-json-data-feeds/CVE-2022/CVE-2022-12xx/CVE-2022-1292.json | grep "cpe.*openssl:openssl" -A2
+    #          "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
+    #          "versionStartIncluding": "1.0.2",
+    #          "versionEndExcluding": "1.0.2ze",
+    # --
+    #          "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
+    #          "versionStartIncluding": "1.1.1",
+    #          "versionEndExcluding": "1.1.1o",
+    # --
+    #          "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
+    #          "versionStartIncluding": "3.0.0",
+    #          "versionEndExcluding": "3.0.3",
+
+    CVE_VER_START_INCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionStartIncluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+    CVE_VER_START_EXCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionStartExcluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+    CVE_VER_END_INCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionEndIncluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+    CVE_VER_END_EXCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionEndExcluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+
+    # if we have found some version details we need to further check them now:
+    if [[ -n "${CVE_VER_START_INCL}" || -n "${CVE_VER_START_EXCL}" || -n "${CVE_VER_END_INCL}" || -n "${CVE_VER_END_EXCL}" ]]; then
+      # print_output "[*] Binary ${BIN_VERSION_} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - ${CVE_VER_START_INCL} / ${CVE_VER_START_EXCL} / ${CVE_VER_END_INCL} / ${CVE_VER_END_EXCL}" "no_log"
+
+      ## first check CVE_VER_START_INCL >= VERSION <= CVE_VER_END_INCL
+      if [[ -n "${CVE_VER_START_INCL}" ]]; then
+        # print_output "[*] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_START_INCL: ${CVE_VER_START_INCL} - $(version "${BIN_VERSION_ONLY}") vs $(version "${CVE_VER_START_INCL}")" "no_log"
+        # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -lt "$(version_extended "${CVE_VER_START_INCL}")" ]]; then
+        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_START_INCL}")" ]]; then
+          # BIN_VERSION is lt CVE_VER_START_INCL -> we can move on
+          continue
+        fi
+
+        # Case: if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
+        # print_output "[*] ${CVE_ID} - CVE_VER_START_INCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is higher (incl) as CVE version $(version "${CVE_VER_START_INCL}")" "no_log"
+        # Todo: check for VERSION <= CVE_VER_END_INCL
+        if [[ -n "${CVE_VER_END_INCL}" ]]; then
+          # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -le "$(version_extended "${CVE_VER_END_INCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          fi
+          continue
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+        ## first check VERSION < CVE_VER_END_EXCL
+        if [[ -n "${CVE_VER_END_EXCL}" ]]; then
+          # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -lt "$(version_extended "${CVE_VER_END_EXCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_EXCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          fi
+          continue
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+      fi
+
+      if [[ -n "${CVE_VER_START_EXCL}" ]]; then
+        # print_output "[*] ${BIN_VERSION_ONLY} - ${CVE_ID} - CVE_VER_START_EXCL: ${CVE_VER_START_INCL}" "no_log"
+        # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -le "$(version_extended "${CVE_VER_START_EXCL}")" ]]; then
+        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_START_EXCL}")" ]]; then
+          # BIN_VERSION is le CVE_VER_START_EXCL -> we can move on
+          continue
+        fi
+
+        # Case: if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
+        # print_output "[*] ${CVE_ID} - CVE_VER_START_EXCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is higher (excl) as CVE version $(version "${CVE_VER_START_EXCL}")" "no_log"
+        if [[ -n "${CVE_VER_END_INCL}" ]]; then
+          # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -le "$(version_extended "${CVE_VER_END_INCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          fi
+          continue
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+        if [[ -n "${CVE_VER_END_EXCL}" ]]; then
+          # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -lt "$(version_extended "${CVE_VER_END_EXCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_END_EXCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_EXCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          fi
+          continue
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+      fi
+
+      if [[ -n "${CVE_VER_END_INCL}" ]]; then
+        # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -gt "$(version_extended "${CVE_VER_END_INCL}")" ]]; then
+        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_END_INCL}")" ]]; then
+          # BIN_VERSION is gt CVE_VER_END_INCL -> we can move on
+          continue
+        fi
+
+        # This is the case: if [[ "$(version "${BIN_VERSION_ONLY}")" -le "$(version "${CVE_VER_END_INCL}")" ]]; then
+        # print_output "[*] ${CVE_ID} - CVE_VER_END_INCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is lower (incl) CVE version $(version "${CVE_VER_END_INCL}")" "no_log"
+        # our version is le the needed version
+        if [[ -n "${CVE_VER_START_INCL}" ]]; then
+          # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -ge "$(version_extended "${CVE_VER_START_INCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>=' "${CVE_VER_START_INCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          fi
+          continue
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+        if [[ -n "${CVE_VER_START_EXCL}" ]]; then
+          # if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_START_EXCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          fi
+          continue
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+      fi
+
+      if [[ -n "${CVE_VER_END_EXCL}" ]]; then
+        # if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_END_EXCL}")" ]]; then
+        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>=' "${CVE_VER_END_EXCL}")" ]]; then
+          # BIN_VERSION is ge CVE_VER_END_EXCL -> we can move on
+          continue
+        fi
+
+        # Case handling: if [[ "$(version "${BIN_VERSION_ONLY}")" -lt "$(version "${CVE_VER_END_EXCL}")" ]]; then
+        # print_output "[*] ${CVE_ID} - CVE_VER_END_EXCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is lower (excl) CVE version $(version "${CVE_VER_END_EXCL}")" "no_log"
+        # our version is le the needed version
+        if [[ -n "${CVE_VER_START_EXCL}" ]]; then
+          # if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_START_EXCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            continue
+          fi
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN}" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+        if [[ -n "${CVE_VER_START_INCL}" ]]; then
+          # if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
+          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>='  "${CVE_VER_START_INCL}")" ]]; then
+            # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_INCL" "no_log"
+            write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            continue
+          fi
+        else
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
+          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          continue
+        fi
+      fi
+    else
+      # if we have not found further version limitations, we assume that all versions are vulnerable:
+      # print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") - no further version limitations detected" "no_log"
+      write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+    fi
+  done
+}
+
+write_cve_log() {
+  local lCVE_ID="${1:-}"
+  local lCVE_V2="${2:-}"
+  local lCVE_V31="${3:-}"
+  local lCVE_SUMMARY="${4:-}"
+  local lCVE_LOG_FILE="${5:-}"
+
+  if [[ -s "${lCVE_LOG_FILE}" ]]; then
+    # check if we have already an entry for this CVE - if not, we will write it to the output file
+    if ! grep -q "^${lCVE_ID}:" "${lCVE_LOG_FILE}" 2>/dev/null; then
+      echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}:${lCVE_SUMMARY:-"NA"}" >> "${lCVE_LOG_FILE}" || true
+    fi
   else
-    cve_extractor "${BIN_VERSION_}"
+    echo "${lCVE_ID}:${lCVE_V2:-"NA"}:${lCVE_V31:-"NA"}:${lCVE_SUMMARY:-"NA"}" > "${lCVE_LOG_FILE}" || true
   fi
-
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_2[@]}"
 }
 
 cve_extractor() {
@@ -557,15 +779,15 @@ cve_extractor() {
   local VERSION_orig="${1:-}"
   local VERSION=""
   local BINARY=""
-  local CVE_VALUE=""
+  export CVE_VALUE=""
   local CVSS_VALUE=""
   local VSOURCE="unknown"
-  local EXPLOIT_AVAIL=()
-  local EXPLOIT_AVAIL_MSF=()
-  local EXPLOIT_AVAIL_TRICKEST=()
-  local EXPLOIT_AVAIL_ROUTERSPLOIT=()
-  local EXPLOIT_AVAIL_ROUTERSPLOIT1=()
-  local KNOWN_EXPLOITED_VULNS=()
+  export EXPLOIT_AVAIL=()
+  export EXPLOIT_AVAIL_MSF=()
+  export EXPLOIT_AVAIL_TRICKEST=()
+  export EXPLOIT_AVAIL_ROUTERSPLOIT=()
+  export EXPLOIT_AVAIL_ROUTERSPLOIT1=()
+  export KNOWN_EXPLOITED_VULNS=()
   local KNOWN_EXPLOITED=0
   local LOCAL=0
   local REMOTE=0
@@ -659,6 +881,16 @@ cve_extractor() {
     fi
   fi
 
+  if [[ -v S36_LOG ]]; then
+    if grep -q "${BINARY};.*${VERSION}" "${S36_LOG}" 2>/dev/null; then
+      if [[ "${VSOURCE}" == "unknown" ]]; then
+        VSOURCE="STAT"
+      else
+        VSOURCE="${VSOURCE}""/STAT"
+      fi
+    fi
+  fi
+
   if [[ -v L15_LOG && -v L25_LOG ]]; then
     if grep -q "${VERSION_orig}" "${L15_LOG}" 2>/dev/null || grep -q "${VERSION_orig}" "${L25_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
@@ -669,11 +901,10 @@ cve_extractor() {
     fi
   fi
 
-
   EXPLOIT_COUNTER_VERSION=0
   CVE_COUNTER_VERSION=0
   if [[ -f "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" ]]; then
-    readarray -t CVEs_OUTPUT < "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" || true
+    readarray -t CVEs_OUTPUT < <(cut -d ':' -f1-3 "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" | grep "^CVE-" || true)
   fi
 
   # if cve-search does not show results we could use the results of linux-exploit-suggester
@@ -694,376 +925,43 @@ cve_extractor() {
     if [[ "${#CVEs_OUTPUT[@]}" == 0 ]]; then
       write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE:-NA}" "${CVSS_VALUE:-NA}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL:-NA}" "${REMOTE:-NA}" "${DOS:-NA}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED:-NA}"
     fi
+
+    local WAIT_PIDS_TACTOR=()
     for CVE_OUTPUT in "${CVEs_OUTPUT[@]}"; do
-      local CVEv2_TMP=0
-      local KERNEL_VERIFIED="no"
-      CVE_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f1)
-
-      # if we find a blacklist file we check if the current CVE value is in the blacklist
-      # if we find it this CVE is not further processed
-      if [[ -f "${CVE_BLACKLIST}" ]]; then
-        if grep -q ^"${CVE_VALUE}"$ "${CVE_BLACKLIST}"; then
-          print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${BINARY}${NC} blacklisted and ignored." "no_log"
-          continue
-        fi
-      fi
-      # if we find a whitelist file we check if the current CVE value is in the whitelist
-      # only if we find this CVE in the whitelist it is further processed
-      if [[ -f "${CVE_WHITELIST}" ]]; then
-        # do a quick check if there is some data in the whitelist config file
-        if [[ $(grep -E -c "^CVE-[0-9]+-[0-9]+$" "${CVE_WHITELIST}") -gt 0 ]]; then
-          if ! grep -q ^"${CVE_VALUE}"$ "${CVE_WHITELIST}"; then
-            print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${BINARY}${NC} not in whitelist -> ignored." "no_log"
-            continue
-          fi
-        fi
-      fi
-
+      # CVE_OUTPUT is for one CVE value
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
-      KNOWN_EXPLOITED=0
-      CVSSv2_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f2)
-      CVSS_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f3)
-
-      # check if the CVE is known as a knwon exploited vulnerability:
-      if [[ -f "${KNOWN_EXP_CSV}" ]]; then
-        if grep -q \""${CVE_VALUE}"\", "${KNOWN_EXP_CSV}"; then
-          print_output "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a known exploited vulnerability."
-          echo -e "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a known exploited vulnerability." >> "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log
-          KNOWN_EXPLOITED=1
-        fi
-      fi
-
-      # default value
-      EXPLOIT="No exploit available"
-
-      EDB=0
-      # as we already know about a bunch of kernel exploits - lets search them first
-      if [[ "${BINARY}" == *kernel* ]]; then
-        for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
-          KERNEL_CVE_EXPLOIT=$(echo "${KERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
-          if [[ "${KERNEL_CVE_EXPLOIT}" == "${CVE_VALUE}" ]]; then
-            EXPLOIT="Exploit (linux-exploit-suggester"
-            ((EXPLOIT_COUNTER_VERSION+=1))
-            EDB=1
-          fi
-        done
-
-        if [[ -f "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv ]]; then
-          # check if the current CVE is a verified kernel CVE from s26 module
-          if grep -q ";${CVE_VALUE};.*;.*;1;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-            print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!"
-            ((KERNEL_VERIFIED_VULN+=1))
-            KERNEL_VERIFIED="yes"
-          fi
-          if grep -q ";${CVE_VALUE};.*;.*;1;0" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-            print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!"
-            ((KERNEL_VERIFIED_VULN+=1))
-            KERNEL_VERIFIED="yes"
-          fi
-          if grep -q ";${CVE_VALUE};.*;.*;0;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-            print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!"
-            ((KERNEL_VERIFIED_VULN+=1))
-            KERNEL_VERIFIED="yes"
-          fi
-        fi
-      fi
-
-      if [[ "${CVE_SEARCHSPLOIT}" -eq 1 || "${MSF_SEARCH}" -eq 1 || "${TRICKEST_SEARCH}" -eq 1 || "${SNYK_SEARCH}" -eq 1 || "${PS_SEARCH}" -eq 1 ]] ; then
-        if [[ ${CVE_SEARCHSPLOIT} -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "${CVE_VALUE}" 2>/dev/null || true)
-        fi
-
-        if [[ ${MSF_SEARCH} -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL_MSF < <(grep -E "${CVE_VALUE}"$ "${MSF_DB_PATH}" 2>/dev/null || true)
-        fi
-
-        if [[ ${TRICKEST_SEARCH} -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL_TRICKEST < <(grep -E "${CVE_VALUE}\.md" "${TRICKEST_DB_PATH}" 2>/dev/null | sort -u || true)
-        fi
-
-        if [[ ${PS_SEARCH} -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL_PACKETSTORM < <(grep -E "^${CVE_VALUE}\;" "${CONFIG_DIR}"/PS_PoC_results.csv 2>/dev/null || true)
-        fi
-
-        if [[ ${SNYK_SEARCH} -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL_SNYK < <(grep -E "^${CVE_VALUE}\;" "${CONFIG_DIR}"/Snyk_PoC_results.csv 2>/dev/null || true)
-        fi
-        # routersploit db search
-        if [[ ${RS_SEARCH} -eq 1 ]]; then
-          mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT < <(grep -E "${CVE_VALUE}"$ "${CONFIG_DIR}/routersploit_cve-db.txt" 2>/dev/null || true)
-
-          # now, we check the exploit-db results if we have a routersploit module:
-          if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
-            for EID_VALUE in "${EXPLOIT_AVAIL[@]}"; do
-              if ! echo "${EID_VALUE}" | grep -q "Exploit DB Id:"; then
-                continue
-              fi
-              EID_VALUE=$(echo "${EID_VALUE}" | grep "Exploit DB Id:" | cut -d: -f2)
-              mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT1 < <(grep "${EID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
-            done
-          fi
-        fi
-
-        if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
-          readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
-          if [[ "${EXPLOIT}" == "No exploit available" ]]; then
-            EXPLOIT="Exploit (EDB ID:"
-          else
-            EXPLOIT="${EXPLOIT}"" / EDB ID:"
-          fi
-
-          for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
-            LOCAL=0
-            REMOTE=0
-            DOS=0
-            EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_ID}"
-            echo -e "[+] Exploit for ${CVE_VALUE}:\\n" >> "${LOG_PATH_MODULE}""/exploit/""${EXPLOIT_ID}"".txt"
-            for LINE in "${EXPLOIT_AVAIL[@]}"; do
-              echo "${LINE}" >> "${LOG_PATH_MODULE}""/exploit/""${EXPLOIT_ID}"".txt"
-              if [[ "${LINE}" =~ "Platform: local" && "${LOCAL}" -eq 0 ]]; then
-                EXPLOIT="${EXPLOIT}"" (L)"
-                LOCAL=1
-              fi
-              if [[ "${LINE}" =~ "Platform: remote" && "${REMOTE}" -eq 0 ]]; then
-                EXPLOIT="${EXPLOIT}"" (R)"
-                REMOTE=1
-              fi
-              if [[ "${LINE}" =~ "Platform: dos" && "${DOS}" -eq 0 ]]; then
-                EXPLOIT="${EXPLOIT}"" (D)"
-                DOS=1
-              fi
-            done
-            EDB=1
-            ((EXPLOIT_COUNTER_VERSION+=1))
-          done
-
-          # copy the exploit-db exploits to the report
-          for LINE in "${EXPLOIT_AVAIL[@]}"; do
-            if [[ "${LINE}" =~ "File:" ]]; then
-              E_FILE=$(echo "${LINE}" | awk '{print $2}')
-              if [[ -f "${E_FILE}" ]] ; then
-                cp "${E_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${E_FILE}")"
-              fi
-            fi
-          done
-        fi
-
-        if [[ ${#EXPLOIT_AVAIL_MSF[@]} -gt 0 ]]; then
-          if [[ "${EXPLOIT}" == "No exploit available" ]]; then
-            EXPLOIT="Exploit (MSF:"
-          else
-            EXPLOIT="${EXPLOIT}"" ""/ MSF:"
-          fi
-
-          for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
-            if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
-              EXPLOIT_PATH=$(echo "${EXPLOIT_MSF}" | cut -d: -f1)
-            else
-              EXPLOIT_PATH="${MSF_INSTALL_PATH}"$(echo "${EXPLOIT_MSF}" | cut -d: -f1)
-            fi
-            EXPLOIT_NAME=$(basename -s .rb "${EXPLOIT_PATH}")
-            EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
-            if [[ -f "${EXPLOIT_PATH}" ]] ; then
-              # for the web reporter we copy the original metasploit module into the EMBA log directory
-              cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/msf_""${EXPLOIT_NAME}".rb
-              if grep -q "< Msf::Exploit::Remote" "${EXPLOIT_PATH}"; then
-                EXPLOIT="${EXPLOIT}"" (R)"
-              fi
-              if grep -q "< Msf::Exploit::Local" "${EXPLOIT_PATH}"; then
-                EXPLOIT="${EXPLOIT}"" (L)"
-              fi
-              if grep -q "include Msf::Auxiliary::Dos" "${EXPLOIT_PATH}"; then
-                EXPLOIT="${EXPLOIT}"" (D)"
-              fi
-            fi
-          done
-
-          if [[ ${EDB} -eq 0 ]]; then
-            # only count the msf exploit if we have not already count an other exploit
-            # otherwise we count an exploit for one CVE multiple times
-            ((EXPLOIT_COUNTER_VERSION+=1))
-            EDB=1
-          fi
-        fi
-
-        if [[ ${#EXPLOIT_AVAIL_SNYK[@]} -gt 0 ]]; then
-          if [[ "${EXPLOIT}" == "No exploit available" ]]; then
-            EXPLOIT="Exploit (Snyk:"
-          else
-            EXPLOIT="${EXPLOIT}"" ""/ Snyk:"
-          fi
-
-          for EXPLOIT_SNYK in "${EXPLOIT_AVAIL_SNYK[@]}" ; do
-            EXPLOIT_NAME=$(echo "${EXPLOIT_SNYK}" | cut -d\; -f2)
-            EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"" (S)"
-          done
-
-          if [[ ${EDB} -eq 0 ]]; then
-            # only count the snyk exploit if we have not already count an other exploit
-            # otherwise we count an exploit for one CVE multiple times
-            ((EXPLOIT_COUNTER_VERSION+=1))
-            EDB=1
-          fi
-        fi
-
-        if [[ ${#EXPLOIT_AVAIL_PACKETSTORM[@]} -gt 0 ]]; then
-          if [[ "${EXPLOIT}" == "No exploit available" ]]; then
-            EXPLOIT="Exploit (PSS:"
-          else
-            EXPLOIT="${EXPLOIT}"" ""/ PSS:"
-          fi
-
-          for EXPLOIT_PS in "${EXPLOIT_AVAIL_PACKETSTORM[@]}" ; do
-            # we use the html file as EXPLOIT_NAME.
-            EXPLOIT_NAME=$(echo "${EXPLOIT_PS}" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
-            EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
-            TYPE=$(grep "^${CVE_VALUE};" "${CONFIG_DIR}"/PS_PoC_results.csv | grep "${EXPLOIT_NAME}" | cut -d\; -f4 || true)
-            if [[ "${TYPE}" == "remote" ]]; then
-              TYPE="R"
-            elif [[ "${TYPE}" == "local" ]]; then
-              TYPE="L"
-            elif [[ "${TYPE}" == "DoS" ]]; then
-              TYPE="D"
-            else
-              # fallback to P for packetstorm exploit with unknownt type
-              TYPE="P"
-            fi
-            EXPLOIT="${EXPLOIT}"" (${TYPE})"
-          done
-
-          if [[ ${EDB} -eq 0 ]]; then
-            # only count the packetstorm exploit if we have not already count an other exploit
-            # otherwise we count an exploit for one CVE multiple times
-            ((EXPLOIT_COUNTER_VERSION+=1))
-            EDB=1
-          fi
-        fi
-
-        if [[ ${#EXPLOIT_AVAIL_TRICKEST[@]} -gt 0 ]]; then
-          if [[ "${EXPLOIT}" == "No exploit available" ]]; then
-            EXPLOIT="Exploit (Github:"
-          else
-            EXPLOIT="${EXPLOIT}"" ""/ Github:"
-          fi
-
-          for EXPLOIT_TRICKEST in "${EXPLOIT_AVAIL_TRICKEST[@]}" ; do
-            EXPLOIT_PATH=$(echo "${EXPLOIT_TRICKEST}" | cut -d: -f1)
-            EXPLOIT_NAME=$(echo "${EXPLOIT_TRICKEST}" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g')
-            EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"" (G)"
-            # we remove slashes from the github url and use this as exploit name:
-            EXPLOIT_NAME_=$(echo "${EXPLOIT_TRICKEST}" | cut -d: -f2- | sed -e 's/https\:\/\/github\.com\///g' | tr '/' '_')
-            if [[ -f "${EXPLOIT_PATH}" ]] ; then
-              # for the web reporter we copy the original metasploit module into the EMBA log directory
-              if ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]]; then
-                mkdir "${LOG_PATH_MODULE}""/exploit/"
-              fi
-              cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/trickest_""${EXPLOIT_NAME_}".md
-            fi
-          done
-
-          if [[ ${EDB} -eq 0 ]]; then
-            # only count the github exploit if we have not already count an other exploit
-            # otherwise we count an exploit for one CVE multiple times
-            ((EXPLOIT_COUNTER_VERSION+=1))
-            EDB=1
-          fi
-        fi
-
-        if [[ -v EXPLOIT_AVAIL_ROUTERSPLOIT[@] || -v EXPLOIT_AVAIL_ROUTERSPLOIT1[@] ]]; then
-          if [[ "${EXPLOIT}" == "No exploit available" ]]; then
-            EXPLOIT="Exploit (Routersploit:"
-          else
-            EXPLOIT="${EXPLOIT}"" ""/ Routersploit:"
-          fi
-          EXPLOIT_ROUTERSPLOIT=("${EXPLOIT_AVAIL_ROUTERSPLOIT[@]}" "${EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}")
-          for EXPLOIT_RS in "${EXPLOIT_ROUTERSPLOIT[@]}" ; do
-            EXPLOIT_PATH=$(echo "${EXPLOIT_RS}" | cut -d: -f1)
-            EXPLOIT_NAME=$(basename -s .py "${EXPLOIT_PATH}")
-            EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
-            if [[ -f "${EXPLOIT_PATH}" ]] ; then
-              # for the web reporter we copy the original metasploit module into the EMBA log directory
-              cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/routersploit_""${EXPLOIT_NAME}".py
-              if grep -q Port "${EXPLOIT_PATH}"; then
-                EXPLOIT="${EXPLOIT}"" (R)"
-              fi
-            fi
-          done
-
-          if [[ ${EDB} -eq 0 ]]; then
-            # only count the routersploit exploit if we have not already count an other exploit
-            # otherwise we count an exploit for one CVE multiple times
-            ((EXPLOIT_COUNTER_VERSION+=1))
-            EDB=1
-          fi
-        fi
-      fi
-
-      if [[ ${KNOWN_EXPLOITED} -eq 1 ]]; then
-        EXPLOIT="${EXPLOIT}"" (X)"
-      fi
-
-      if [[ ${EDB} -eq 1 ]]; then
-        EXPLOIT="${EXPLOIT}"")"
-      fi
-
-      # just in case CVSSv3 value is missing -> switch to CVSSv2
-      if [[ "${CVSS_VALUE}" == "null" ]]; then
-        print_output "[*] Missing CVSSv3 value for vulnerability ${ORANGE}${CVE_VALUE}${NC} - setting default CVSS to CVSSv2 ${ORANGE}${CVSSv2_VALUE}${NC}" "no_log"
-        CVSS_VALUE="${CVSSv2_VALUE}"
-        CVEv2_TMP=1
-      fi
-
-      # if this CVE is a kernel verified CVE we add a V to the CVE
-      if [[ "${KERNEL_VERIFIED}" == "yes" ]]; then CVE_VALUE="${CVE_VALUE}"" (V)"; fi
-
-      # we do not deal with output formatting the usual way -> we use printf
-      if (( $(echo "${CVSS_VALUE} > 6.9" | bc -l) )); then
-        # put a note in the output if we have switched to CVSSv2
-        if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
-        if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
-          "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
-        else
-          printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
-        fi
-        ((HIGH_CVE_COUNTER+=1))
-      elif (( $(echo "${CVSS_VALUE} > 3.9" | bc -l) )); then
-        if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
-        if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
-          "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
-        else
-          printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
-        fi
-        ((MEDIUM_CVE_COUNTER+=1))
+      if [[ "${THREADED}" -eq 1 ]]; then
+        cve_extractor_thread_actor "${CVE_OUTPUT}" &
+        WAIT_PIDS_TACTOR+=( "$!" )
+        max_pids_protection "$(("${MAX_MOD_THREADS}"*3))" "${WAIT_PIDS_TACTOR[@]}"
       else
-        if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
-        if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
-          "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-          printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
-        else
-          printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
-        fi
-        ((LOW_CVE_COUNTER+=1))
+        cve_extractor_thread_actor "${CVE_OUTPUT}" &
       fi
-      write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
     done
+
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_TACTOR[@]}"
+  fi
+
+  local KNOWN_EXPLOITED=0
+  local KERNEL_VERIFIED_VULN="no"
+  local EXPLOIT_COUNTER_VERSION=0
+
+  if [[ -s "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log ]]; then
+    KNOWN_EXPLOITED=1
+  fi
+  if [[ -f "${CSV_LOG}" ]]; then
+    # very weak search for the end of the entry - if yes we have a verified kernel vuln
+    # Todo: Improve this search on field base
+    KERNEL_VERIFIED_VULN=$(grep -c "^${BINARY};.*;yes;$" "${CSV_LOG}" || true)
+  fi
+  if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
+    EXPLOIT_COUNTER_VERSION=$(grep -c "${BINARY}" "${TMP_DIR}/exploit_cnt.tmp" || true)
   fi
 
   { echo ""
     echo "[+] Statistics:${CVE_COUNTER_VERSION}|${EXPLOIT_COUNTER_VERSION}|${VERSION_orig}"
   } >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
-
-  if [[ ${LOW_CVE_COUNTER} -gt 0 ]]; then
-    echo "${LOW_CVE_COUNTER}" >> "${TMP_DIR}"/LOW_CVE_COUNTER.tmp
-  fi
-  if [[ ${MEDIUM_CVE_COUNTER} -gt 0 ]]; then
-    echo "${MEDIUM_CVE_COUNTER}" >> "${TMP_DIR}"/MEDIUM_CVE_COUNTER.tmp
-  fi
-  if [[ ${HIGH_CVE_COUNTER} -gt 0 ]]; then
-    echo "${HIGH_CVE_COUNTER}" >> "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp
-  fi
 
   print_output "[*] Vulnerability details for ${ORANGE}${BINARY}${NC} / version ${ORANGE}${VERSION}${NC} / source ${ORANGE}${VSOURCE}${NC}:"
   write_anchor "cve_${BINARY}"
@@ -1110,13 +1008,364 @@ cve_extractor() {
       echo "${BINARY};${VERSION};${CVEs};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
     fi
   elif [[ "${CVEs}" -eq 0 && "${EXPLOITS}" -eq 0 ]]; then
-      printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
+    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
     echo "${BINARY};${VERSION};${CVEs};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
   else
     # this should never happen ...
     printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-10.10s:   Source: %-15.15s\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
     echo "${BINARY};${VERSION};${CVEs};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
   fi
+}
+
+cve_extractor_thread_actor() {
+  local CVE_OUTPUT="${1:-}"
+  local CVEv2_TMP=0
+  local KERNEL_VERIFIED="no"
+  local CVE_VALUE=""
+  local CVSSv2_VALUE=""
+  local CVSS_VALUE=""
+  local KNOWN_EXPLOITED=0
+  local HIGH_CVE_COUNTER=0
+  local MEDIUM_CVE_COUNTER=0
+  local LOW_CVE_COUNTER=0
+
+  CVE_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f1 | tr -dc '[:print:]' | grep "^CVE-" || true)
+  if [[ -z "${CVE_VALUE}" ]]; then
+    return
+  fi
+
+  # if we find a blacklist file we check if the current CVE value is in the blacklist
+  # if we find it this CVE is not further processed
+  if [[ -f "${CVE_BLACKLIST}" ]]; then
+    if grep -q ^"${CVE_VALUE}"$ "${CVE_BLACKLIST}"; then
+      print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${BINARY}${NC} blacklisted and ignored." "no_log"
+      return
+    fi
+  fi
+  # if we find a whitelist file we check if the current CVE value is in the whitelist
+  # only if we find this CVE in the whitelist it is further processed
+  if [[ -f "${CVE_WHITELIST}" ]]; then
+    # do a quick check if there is some data in the whitelist config file
+    if [[ $(grep -E -c "^CVE-[0-9]+-[0-9]+$" "${CVE_WHITELIST}") -gt 0 ]]; then
+      if ! grep -q ^"${CVE_VALUE}"$ "${CVE_WHITELIST}"; then
+        print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${BINARY}${NC} not in whitelist -> ignored." "no_log"
+        return
+      fi
+    fi
+  fi
+
+  CVSSv2_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f2)
+  CVSS_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f3)
+
+  # check if the CVE is known as a knwon exploited vulnerability:
+  if [[ -f "${KNOWN_EXP_CSV}" ]]; then
+    if grep -q \""${CVE_VALUE}"\", "${KNOWN_EXP_CSV}"; then
+      print_output "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a known exploited vulnerability."
+      echo -e "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a known exploited vulnerability." >> "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log
+      KNOWN_EXPLOITED=1
+    fi
+  fi
+
+  # default value
+  EXPLOIT="No exploit available"
+
+  EDB=0
+  # as we already know about a bunch of kernel exploits - lets search them first
+  if [[ "${BINARY}" == *kernel* ]]; then
+    for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
+      KERNEL_CVE_EXPLOIT=$(echo "${KERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
+      if [[ "${KERNEL_CVE_EXPLOIT}" == "${CVE_VALUE}" ]]; then
+        EXPLOIT="Exploit (linux-exploit-suggester"
+        ((EXPLOIT_COUNTER_VERSION+=1))
+        echo "${BINARY};${CVE_VALUE};kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
+        EDB=1
+      fi
+    done
+
+    if [[ -f "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv ]]; then
+      # check if the current CVE is a verified kernel CVE from s26 module
+      if grep -q ";${CVE_VALUE};.*;.*;1;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!"
+        ((KERNEL_VERIFIED_VULN+=1))
+        KERNEL_VERIFIED="yes"
+      fi
+      if grep -q ";${CVE_VALUE};.*;.*;1;0" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!"
+        ((KERNEL_VERIFIED_VULN+=1))
+        KERNEL_VERIFIED="yes"
+      fi
+      if grep -q ";${CVE_VALUE};.*;.*;0;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!"
+        ((KERNEL_VERIFIED_VULN+=1))
+        KERNEL_VERIFIED="yes"
+      fi
+    fi
+  fi
+
+  if [[ "${CVE_SEARCHSPLOIT}" -eq 1 || "${MSF_SEARCH}" -eq 1 || "${SNYK_SEARCH}" -eq 1 || "${PS_SEARCH}" -eq 1 ]] ; then
+    if [[ ${CVE_SEARCHSPLOIT} -eq 1 ]]; then
+      mapfile -t EXPLOIT_AVAIL < <(cve_searchsploit "${CVE_VALUE}" 2>/dev/null || true)
+    fi
+
+    if [[ ${MSF_SEARCH} -eq 1 ]]; then
+      mapfile -t EXPLOIT_AVAIL_MSF < <(grep -E "${CVE_VALUE}"$ "${MSF_DB_PATH}" 2>/dev/null || true)
+    fi
+
+    if [[ ${PS_SEARCH} -eq 1 ]]; then
+      mapfile -t EXPLOIT_AVAIL_PACKETSTORM < <(grep -E "^${CVE_VALUE}\;" "${CONFIG_DIR}"/PS_PoC_results.csv 2>/dev/null || true)
+    fi
+
+    if [[ ${SNYK_SEARCH} -eq 1 ]]; then
+      mapfile -t EXPLOIT_AVAIL_SNYK < <(grep -E "^${CVE_VALUE}\;" "${CONFIG_DIR}"/Snyk_PoC_results.csv 2>/dev/null || true)
+    fi
+    # routersploit db search
+    if [[ ${RS_SEARCH} -eq 1 ]]; then
+      mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT < <(grep -E "${CVE_VALUE}"$ "${CONFIG_DIR}/routersploit_cve-db.txt" 2>/dev/null || true)
+
+      # now, we check the exploit-db results if we have a routersploit module:
+      if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
+        for EID_VALUE in "${EXPLOIT_AVAIL[@]}"; do
+          if ! echo "${EID_VALUE}" | grep -q "Exploit DB Id:"; then
+            continue
+          fi
+          EID_VALUE=$(echo "${EID_VALUE}" | grep "Exploit DB Id:" | cut -d: -f2)
+          mapfile -t EXPLOIT_AVAIL_ROUTERSPLOIT1 < <(grep "${EID_VALUE}" "${CONFIG_DIR}/routersploit_exploit-db.txt" 2>/dev/null || true)
+        done
+      fi
+    fi
+
+    if [[ " ${EXPLOIT_AVAIL[*]} " =~ "Exploit DB Id:" ]]; then
+      readarray -t EXPLOIT_IDS < <(echo "${EXPLOIT_AVAIL[@]}" | grep "Exploit DB Id:" | cut -d ":" -f 2 | sed 's/[^0-9]*//g' | sed 's/\ //' | sort -u)
+      if [[ "${EXPLOIT}" == "No exploit available" ]]; then
+        EXPLOIT="Exploit (EDB ID:"
+      else
+        EXPLOIT="${EXPLOIT}"" / EDB ID:"
+      fi
+
+      for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
+        LOCAL=0
+        REMOTE=0
+        DOS=0
+        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_ID}"
+        echo -e "[+] Exploit for ${CVE_VALUE}:\\n" >> "${LOG_PATH_MODULE}""/exploit/""${EXPLOIT_ID}"".txt"
+        for LINE in "${EXPLOIT_AVAIL[@]}"; do
+          echo "${LINE}" >> "${LOG_PATH_MODULE}""/exploit/""${EXPLOIT_ID}"".txt"
+          if [[ "${LINE}" =~ "Platform: local" && "${LOCAL}" -eq 0 ]]; then
+            EXPLOIT="${EXPLOIT}"" (L)"
+            LOCAL=1
+          fi
+          if [[ "${LINE}" =~ "Platform: remote" && "${REMOTE}" -eq 0 ]]; then
+            EXPLOIT="${EXPLOIT}"" (R)"
+            REMOTE=1
+          fi
+          if [[ "${LINE}" =~ "Platform: dos" && "${DOS}" -eq 0 ]]; then
+            EXPLOIT="${EXPLOIT}"" (D)"
+            DOS=1
+          fi
+        done
+        EDB=1
+        ((EXPLOIT_COUNTER_VERSION+=1))
+        echo "${BINARY};${CVE_VALUE};exploit_db" >> "${TMP_DIR}"/exploit_cnt.tmp
+      done
+
+      # copy the exploit-db exploits to the report
+      for LINE in "${EXPLOIT_AVAIL[@]}"; do
+        if [[ "${LINE}" =~ "File:" ]]; then
+          E_FILE=$(echo "${LINE}" | awk '{print $2}')
+          if [[ -f "${E_FILE}" ]] ; then
+            cp "${E_FILE}" "${LOG_PATH_MODULE}""/exploit/edb_""$(basename "${E_FILE}")"
+          fi
+        fi
+      done
+    fi
+
+    if [[ ${#EXPLOIT_AVAIL_MSF[@]} -gt 0 ]]; then
+      if [[ "${EXPLOIT}" == "No exploit available" ]]; then
+        EXPLOIT="Exploit (MSF:"
+      else
+        EXPLOIT="${EXPLOIT}"" ""/ MSF:"
+      fi
+
+      for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
+        if ! [[ -d "${MSF_INSTALL_PATH}" ]]; then
+          EXPLOIT_PATH=$(echo "${EXPLOIT_MSF}" | cut -d: -f1)
+        else
+          EXPLOIT_PATH="${MSF_INSTALL_PATH}"$(echo "${EXPLOIT_MSF}" | cut -d: -f1)
+        fi
+        EXPLOIT_NAME=$(basename -s .rb "${EXPLOIT_PATH}")
+        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
+        if [[ -f "${EXPLOIT_PATH}" ]] ; then
+          # for the web reporter we copy the original metasploit module into the EMBA log directory
+          cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/msf_""${EXPLOIT_NAME}".rb
+          if grep -q "< Msf::Exploit::Remote" "${EXPLOIT_PATH}"; then
+            EXPLOIT="${EXPLOIT}"" (R)"
+          fi
+          if grep -q "< Msf::Exploit::Local" "${EXPLOIT_PATH}"; then
+            EXPLOIT="${EXPLOIT}"" (L)"
+          fi
+          if grep -q "include Msf::Auxiliary::Dos" "${EXPLOIT_PATH}"; then
+            EXPLOIT="${EXPLOIT}"" (D)"
+          fi
+        fi
+      done
+
+      if [[ ${EDB} -eq 0 ]]; then
+        # only count the msf exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        ((EXPLOIT_COUNTER_VERSION+=1))
+        echo "${BINARY};${CVE_VALUE};MSF" >> "${TMP_DIR}"/exploit_cnt.tmp
+        EDB=1
+      fi
+    fi
+
+    if [[ ${#EXPLOIT_AVAIL_SNYK[@]} -gt 0 ]]; then
+      if [[ "${EXPLOIT}" == "No exploit available" ]]; then
+        EXPLOIT="Exploit (Snyk:"
+      else
+        EXPLOIT="${EXPLOIT}"" ""/ Snyk:"
+      fi
+
+      for EXPLOIT_SNYK in "${EXPLOIT_AVAIL_SNYK[@]}" ; do
+        EXPLOIT_NAME=$(echo "${EXPLOIT_SNYK}" | cut -d\; -f2)
+        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"" (S)"
+      done
+
+      if [[ ${EDB} -eq 0 ]]; then
+        # only count the snyk exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        ((EXPLOIT_COUNTER_VERSION+=1))
+        echo "${BINARY};${CVE_VALUE};SNYK" >> "${TMP_DIR}"/exploit_cnt.tmp
+        EDB=1
+      fi
+    fi
+
+    if [[ ${#EXPLOIT_AVAIL_PACKETSTORM[@]} -gt 0 ]]; then
+      if [[ "${EXPLOIT}" == "No exploit available" ]]; then
+        EXPLOIT="Exploit (PSS:"
+      else
+        EXPLOIT="${EXPLOIT}"" ""/ PSS:"
+      fi
+
+      for EXPLOIT_PS in "${EXPLOIT_AVAIL_PACKETSTORM[@]}" ; do
+        # we use the html file as EXPLOIT_NAME.
+        EXPLOIT_NAME=$(echo "${EXPLOIT_PS}" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
+        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
+        TYPE=$(grep "^${CVE_VALUE};" "${CONFIG_DIR}"/PS_PoC_results.csv | grep "${EXPLOIT_NAME}" | cut -d\; -f4 || true)
+        if [[ "${TYPE}" == "remote" ]]; then
+          TYPE="R"
+        elif [[ "${TYPE}" == "local" ]]; then
+          TYPE="L"
+        elif [[ "${TYPE}" == "DoS" ]]; then
+          TYPE="D"
+        else
+          # fallback to P for packetstorm exploit with unknownt type
+          TYPE="P"
+        fi
+        EXPLOIT="${EXPLOIT}"" (${TYPE})"
+      done
+
+      if [[ ${EDB} -eq 0 ]]; then
+        # only count the packetstorm exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        ((EXPLOIT_COUNTER_VERSION+=1))
+        echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
+        EDB=1
+      fi
+    fi
+
+    if [[ -v EXPLOIT_AVAIL_ROUTERSPLOIT[@] || -v EXPLOIT_AVAIL_ROUTERSPLOIT1[@] ]]; then
+      if [[ "${EXPLOIT}" == "No exploit available" ]]; then
+        EXPLOIT="Exploit (Routersploit:"
+      else
+        EXPLOIT="${EXPLOIT}"" ""/ Routersploit:"
+      fi
+      EXPLOIT_ROUTERSPLOIT=("${EXPLOIT_AVAIL_ROUTERSPLOIT[@]}" "${EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}")
+      for EXPLOIT_RS in "${EXPLOIT_ROUTERSPLOIT[@]}" ; do
+        EXPLOIT_PATH=$(echo "${EXPLOIT_RS}" | cut -d: -f1)
+        EXPLOIT_NAME=$(basename -s .py "${EXPLOIT_PATH}")
+        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
+        if [[ -f "${EXPLOIT_PATH}" ]] ; then
+          # for the web reporter we copy the original metasploit module into the EMBA log directory
+          cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/routersploit_""${EXPLOIT_NAME}".py
+          if grep -q Port "${EXPLOIT_PATH}"; then
+            EXPLOIT="${EXPLOIT}"" (R)"
+          fi
+        fi
+      done
+
+      if [[ ${EDB} -eq 0 ]]; then
+        # only count the routersploit exploit if we have not already count an other exploit
+        # otherwise we count an exploit for one CVE multiple times
+        ((EXPLOIT_COUNTER_VERSION+=1))
+        echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
+        EDB=1
+      fi
+    fi
+  fi
+
+  if [[ ${KNOWN_EXPLOITED} -eq 1 ]]; then
+    EXPLOIT="${EXPLOIT}"" (X)"
+  fi
+
+  if [[ ${EDB} -eq 1 ]]; then
+    EXPLOIT="${EXPLOIT}"")"
+  fi
+
+  # just in case CVSSv3 value is missing -> switch to CVSSv2
+  if [[ "${CVSS_VALUE}" == "NA" ]]; then
+    # print_output "[*] Missing CVSSv3 value for vulnerability ${ORANGE}${CVE_VALUE}${NC} - setting default CVSS to CVSSv2 ${ORANGE}${CVSSv2_VALUE}${NC}" "no_log"
+    CVSS_VALUE="${CVSSv2_VALUE}"
+    CVEv2_TMP=1
+  fi
+
+  # if this CVE is a kernel verified CVE we add a V to the CVE
+  if [[ "${KERNEL_VERIFIED}" == "yes" ]]; then CVE_VALUE="${CVE_VALUE}"" (V)"; fi
+
+  # we do not deal with output formatting the usual way -> we use printf
+  if (( $(echo "${CVSS_VALUE} > 6.9" | bc -l) )); then
+    # put a note in the output if we have switched to CVSSv2
+    if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
+    if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
+      "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+    else
+      printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+    fi
+    ((HIGH_CVE_COUNTER+=1))
+  elif (( $(echo "${CVSS_VALUE} > 3.9" | bc -l) )); then
+    if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
+    if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
+      "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+    else
+      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+    fi
+    ((MEDIUM_CVE_COUNTER+=1))
+  else
+    if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
+    if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
+      "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+    else
+      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+    fi
+    ((LOW_CVE_COUNTER+=1))
+  fi
+
+  if [[ ${LOW_CVE_COUNTER} -gt 0 ]]; then
+    echo "${LOW_CVE_COUNTER}" >> "${TMP_DIR}"/LOW_CVE_COUNTER.tmp
+  fi
+  if [[ ${MEDIUM_CVE_COUNTER} -gt 0 ]]; then
+    echo "${MEDIUM_CVE_COUNTER}" >> "${TMP_DIR}"/MEDIUM_CVE_COUNTER.tmp
+  fi
+  if [[ ${HIGH_CVE_COUNTER} -gt 0 ]]; then
+    echo "${HIGH_CVE_COUNTER}" >> "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp
+  fi
+
+  write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
+
 }
 
 get_firmware_base_version_check() {
@@ -1218,6 +1467,17 @@ get_firmware_details() {
   if [[ -f "${S06_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S06_LOG}")."
     readarray -t VERSIONS_S06_FW_DETAILS < <(cut -d\; -f4 "${S06_LOG}" | tail -n +2 | sort -u || true)
+  fi
+}
+
+get_lighttpd_details() {
+  local S36_LOG="${1:-}"
+  export VERSIONS_S36_DETAILS=()
+
+  if [[ -f "${S36_LOG}" ]]; then
+    print_output "[*] Collect version details of module $(basename "${S36_LOG}")."
+    # └─$ cat ~/firmware-stuff/emba_logs_cve/csv_logs/s36_lighttpd.csv | grep ";CVE-" | cut -d\; -f1-2 | sort -u
+    readarray -t VERSIONS_S36_DETAILS < <(grep ";CVE-" "${S36_LOG}" | cut -d\; -f1-2 | sort -u | tr ';' ':'|| true)
   fi
 }
 

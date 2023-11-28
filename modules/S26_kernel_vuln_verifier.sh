@@ -142,33 +142,7 @@ S26_kernel_vuln_verifier()
       continue
     fi
 
-    CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.json"
-
-    if ! [[ -f ${PATH_CVE_SEARCH} ]]; then
-      print_output "[-] CVE search binary search.py not found."
-      print_output "[-] Run the installer or install it from here: https://github.com/cve-search/cve-search."
-      print_output "[-] Installation instructions can be found on github.io: https://cve-search.github.io/cve-search/getting_started/installation.html#installation"
-      module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
-      return
-    fi
-
-    check_cve_search
-
-    if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-      print_output "[*] Waiting for the cve-search environment ..."
-      sleep 120
-      check_cve_search
-
-      if [[ "${CVE_SEARCH}" -eq 0 ]]; then
-        print_output "[*] Waiting for the cve-search environment ..."
-        sleep 120
-        check_cve_search
-      fi
-    fi
-    if [[ "${CVE_SEARCH}" -ne 1 ]]; then
-      print_cve_search_failure
-      return
-    fi
+    local CVE_DETAILS_PATH="${LOG_PATH_MODULE}""/linux_kernel_${K_VERSION}.txt"
 
     if [[ -f "${KERNEL_ELF_PATH}" ]]; then
       extract_kernel_arch "${KERNEL_ELF_PATH}"
@@ -215,8 +189,8 @@ S26_kernel_vuln_verifier()
       tar -xzf "${KERNEL_ARCH_PATH}/linux-${K_VERSION_KORG}.tar.gz" -C "${LOG_PATH_MODULE}"
     fi
 
-    # we get a json result file with the results in $CVE_DETAILS_PATH
-    get_cve_kernel_data "${K_VERSION}"
+    prepare_cve_search_module
+    cve_db_lookup_version "linux_kernel:${K_VERSION}"
 
     if ! [[ -f "${CVE_DETAILS_PATH}" ]]; then
       print_output "[-] No CVE details generated ... check for further kernel version"
@@ -224,9 +198,10 @@ S26_kernel_vuln_verifier()
     fi
 
     print_output "[*] Create CVE vulnerabilities array for kernel version ${ORANGE}${K_VERSION}${NC} ..."
-    mapfile -t ALL_KVULNS < <(jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${CVE_DETAILS_PATH}")
+    # mapfile -t ALL_KVULNS < <(jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${CVE_DETAILS_PATH}")
+    mapfile -t ALL_KVULNS < "${CVE_DETAILS_PATH}"
     # readable log file for the web report:
-    jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${CVE_DETAILS_PATH}" > "${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.log"
+    # jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${CVE_DETAILS_PATH}" > "${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.log"
 
     print_ln
     print_output "[+] Extracted ${ORANGE}${#ALL_KVULNS[@]}${GREEN} vulnerabilities based on kernel version only" "" "${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.log"
@@ -356,13 +331,6 @@ split_symbols_file() {
   split -l 100 "${LOG_PATH_MODULE}"/symbols_uniq.txt "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.
   sed -i 's/^/EXPORT_SYMBOL_GPL\(/' "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.*
   sed -i 's/$/\)/' "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.*
-}
-
-get_cve_kernel_data() {
-  sub_module_title "Version based vulnerability detection"
-  local K_VERSION_="${1:-}"
-  print_output "[*] Extract CVE data for kernel version ${ORANGE}${K_VERSION_}${NC}"
-  "${PATH_CVE_SEARCH}" -p "linux_kernel:""${K_VERSION_}"":" -o json > "${CVE_DETAILS_PATH}"
 }
 
 extract_kernel_arch() {
@@ -640,12 +608,6 @@ identify_exploits() {
     if grep -q \""${CVE_VALUE}"\", "${KNOWN_EXP_CSV}"; then
       EXPLOIT_DETECTED="yes"
       EXP="${EXP}(KNOWN)"
-    fi
-  fi
-  if [[ -f "${TRICKEST_DB_PATH}" ]]; then
-    if grep -q -E "${CVE_VALUE}\.md" "${TRICKEST_DB_PATH}"; then
-      POC_DETECTED="yes"
-      POC="${POC}(GH)"
     fi
   fi
   if [[ -f "${CONFIG_DIR}/Snyk_PoC_results.csv" ]]; then

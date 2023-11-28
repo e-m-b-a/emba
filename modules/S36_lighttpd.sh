@@ -100,6 +100,7 @@ lighttpd_binary_analysis() {
       mkdir "${LOG_PATH_MODULE}"/cve_sum
     fi
     for LIGHT_VER in "${LIGHT_VERSIONS[@]}"; do
+      # cve_db_lookup_version writes the logs to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
       cve_db_lookup_version "${LIGHT_VER}"
     done
   fi
@@ -134,32 +135,6 @@ lighttpd_binary_analysis() {
       radare_function_check_hexagon "${BIN}" "${VULNERABLE_FUNCTIONS[@]}"
     fi
   done
-}
-
-prepare_cve_search_module() {
-  # we need to setup different exports for F20
-  export CVE_COUNTER=0
-  export HIGH_CVE_COUNTER=0
-  export MEDIUM_CVE_COUNTER=0
-  export LOW_CVE_COUNTER=0
-  if command -v cve_searchsploit > /dev/null ; then
-    export CVE_SEARCHSPLOIT=1
-  fi
-  if [[ -f "${MSF_DB_PATH}" ]]; then
-    export MSF_SEARCH=1
-  fi
-  if [[ -f "${TRICKEST_DB_PATH}" ]]; then
-    export TRICKEST_SEARCH=1
-  fi
-  if [[ -f "${CONFIG_DIR}"/routersploit_cve-db.txt || -f "${CONFIG_DIR}"/routersploit_exploit-db.txt ]]; then
-    export RS_SEARCH=1
-  fi
-  if [[ -f "${CONFIG_DIR}"/PS_PoC_results.csv ]]; then
-    export PS_SEARCH=1
-  fi
-  if [[ -f "${CONFIG_DIR}"/Snyk_PoC_results.csv ]]; then
-    export SNYK_SEARCH=1
-  fi
 }
 
 lighttpd_config_analysis() {

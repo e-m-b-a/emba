@@ -190,6 +190,8 @@ cleaner() {
 
 emba_updater() {
   print_output "[*] EMBA update starting ..." "no_log"
+  local HOME_DIR=""
+  HOME_DIR=$(pwd)
 
   if [[ -d ./.git ]]; then
     git pull origin master
@@ -204,11 +206,19 @@ emba_updater() {
     cve_searchsploit -u
   fi
 
-  print_output "[*] EMBA update - cve-search update" "no_log"
-  /etc/init.d/redis-server start
-  "${EXT_DIR}"/cve-search/sbin/db_updater.py -v
+  if [[ -d "${EXT_DIR}"nvd-json-data-feeds ]]; then
+    print_output "[*] EMBA update - CVE database update" "no_log"
+    cd "${EXT_DIR}"/nvd-json-data-feeds || ( echo "Could not update EMBA" && exit 1 )
+    git pull origin master
+    cd "${HOME_DIR}" || ( echo "Could not update EMBA" && exit 1 )
+  else
+    print_output "[-] INFO: Can't update CVE database"
+  fi
 
-  print_output "[*] Please note that this was only a data update and no installed packages were updated." "no_log"
+  print_output "[*] EMBA update - docker image" "no_log"
+  docker pull embeddedanalyzer/emba
+
+  print_output "[*] Please note that this was no update of installed packages." "no_log"
   print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
 }
 
