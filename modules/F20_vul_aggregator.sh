@@ -918,7 +918,6 @@ cve_extractor() {
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
       if [[ "${THREADED}" -eq 1 ]]; then
-        ### WARNING - NOT WORKING!!!
         cve_extractor_thread_actor "${CVE_OUTPUT}" &
         WAIT_PIDS_TACTOR+=( "$!" )
         max_pids_protection "$(("${MAX_MOD_THREADS}"*3))" "${WAIT_PIDS_TACTOR[@]}"
