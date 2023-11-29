@@ -566,13 +566,17 @@ check_cve_sources() {
   #   .versionStartExcluding
   #   .versionEndIncluding
   #   .versionEndExcluding
-  mapfile -t CVE_CPEs_vuln_ARR < <(jq -r '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true) | .criteria' "${CVE_VER_SOURCES_FILE}" | grep "cpe:[0-9]\.[0-9]:[a-z]:.*:${BIN_NAME}:\*:" || true)
+  mapfile -t CVE_CPEs_vuln_ARR < <(jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' "${CVE_VER_SOURCES_FILE}" | grep "cpe:[0-9]\.[0-9]:[a-z]:.*:${BIN_NAME}:\*:" || true)
+  # the result looks like the following:
+  # └─$ jq -rc '.configurations[].nodes[].cpeMatch[] | select(.vulnerable==true)' external/nvd-json-data-feeds/CVE-2023/CVE-2023-02xx/CVE-2023-0215.json
+  # {"vulnerable":true,"criteria":"cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*","versionStartIncluding":"1.0.2","versionEndExcluding":"1.0.2zg","matchCriteriaId":"70985D55-A574-4151-B451-4D500CBFC29A"}
+  # {"vulnerable":true,"criteria":"cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*","versionStartIncluding":"1.1.1","versionEndExcluding":"1.1.1t","matchCriteriaId":"DE0061D6-8F81-45D3-B254-82A94915FD08"}
+  # {"vulnerable":true,"criteria":"cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*","versionStartIncluding":"3.0.0","versionEndExcluding":"3.0.8","matchCriteriaId":"A6DC5D88-4E99-48F2-8892-610ACA9B5B86"}
+  # {"vulnerable":true,"criteria":"cpe:2.3:a:stormshield:stormshield_management_center:*:*:*:*:*:*:*:*","versionEndExcluding":"3.3.3","matchCriteriaId":"62A933C5-C56E-485C-AD49-3B6A2C329131"}
 
-  for CVE_CPE_vuln in "${CVE_CPEs_vuln_ARR[@]}"; do
-    if ! echo "${CVE_CPE_vuln}" | cut -d ':' -f1-8 | grep -q "${BIN_NAME}"; then
-      # ensure our binary is in the first 8 fields of the cpe identifier
-      continue
-    fi
+
+  # Now we walk through all the CPEMatch entries and extract the version details for further analysis
+  for CVE_CPEMATCH in "${CVE_CPEs_vuln_ARR[@]}"; do
     # we need to check the version more in details in case we have no version in our cpe identifier
     # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
 
@@ -593,14 +597,14 @@ check_cve_sources() {
     #          "versionStartIncluding": "3.0.0",
     #          "versionEndExcluding": "3.0.3",
 
-    CVE_VER_START_INCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionStartIncluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
-    CVE_VER_START_EXCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionStartExcluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
-    CVE_VER_END_INCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionEndIncluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
-    CVE_VER_END_EXCL=$(jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="'"${CVE_CPE_vuln}"'") | .versionEndExcluding' "${CVE_VER_SOURCES_FILE}" | grep -v "null" | sort -u | head -1 || true)
+    CVE_VER_START_INCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionStartIncluding' | grep -v "null" || true)
+    CVE_VER_START_EXCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionStartExcluding' | grep -v "null" || true)
+    CVE_VER_END_INCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionEndIncluding' | grep -v "null" || true)
+    CVE_VER_END_EXCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionEndExcluding' | grep -v "null" || true)
 
     # if we have found some version details we need to further check them now:
     if [[ -n "${CVE_VER_START_INCL}" || -n "${CVE_VER_START_EXCL}" || -n "${CVE_VER_END_INCL}" || -n "${CVE_VER_END_EXCL}" ]]; then
-      # print_output "[*] Binary ${BIN_VERSION_} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - ${CVE_VER_START_INCL} / ${CVE_VER_START_EXCL} / ${CVE_VER_END_INCL} / ${CVE_VER_END_EXCL}" "no_log"
+      print_output "[*] Binary ${BIN_VERSION_} - CVE ${CVE_ID} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - ${CVE_VER_START_INCL} / ${CVE_VER_START_EXCL} / ${CVE_VER_END_INCL} / ${CVE_VER_END_EXCL}" "no_log"
 
       ## first check CVE_VER_START_INCL >= VERSION <= CVE_VER_END_INCL
       if [[ -n "${CVE_VER_START_INCL}" ]]; then
@@ -621,10 +625,6 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-          continue
         fi
         ## first check VERSION < CVE_VER_END_EXCL
         if [[ -n "${CVE_VER_END_EXCL}" ]]; then
@@ -634,8 +634,10 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
+        fi
+
+        if ! [[ -n "${CVE_VER_END_EXCL}" && -n "${CVE_VER_START_INCL}" ]]; then
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
@@ -658,10 +660,6 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-          continue
         fi
         if [[ -n "${CVE_VER_END_EXCL}" ]]; then
           # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -lt "$(version_extended "${CVE_VER_END_EXCL}")" ]]; then
@@ -670,8 +668,9 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
+        fi
+        if ! [[ -n "${CVE_VER_END_EXCL}" && -n "${CVE_VER_END_INCL}" ]]; then
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN} / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
@@ -694,10 +693,6 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-          continue
         fi
         if [[ -n "${CVE_VER_START_EXCL}" ]]; then
           # if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
@@ -706,8 +701,10 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           fi
           continue
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
+        fi
+
+        if ! [[ -n "${CVE_VER_START_EXCL}" && "${CVE_VER_START_INCL}" ]]; then
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL: ${ORANGE}NA${GREEN} / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
@@ -730,10 +727,6 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
             continue
           fi
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN}" "no_log"
-          write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
-          continue
         fi
         if [[ -n "${CVE_VER_START_INCL}" ]]; then
           # if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
@@ -742,8 +735,9 @@ check_cve_sources() {
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
             continue
           fi
-        else
-          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
+        fi
+        if ! [[ -n "${CVE_VER_START_INCL}" && -n "${CVE_VER_START_EXCL}" ]]; then
+          # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
           continue
         fi
