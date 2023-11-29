@@ -103,7 +103,7 @@ version_extended() # $1-a $2-op $3-$b
 }
 
 check_emba_version(){
-  LATEST_EMBA_VERSION="$(echo "${LATEST_EMBA_VERSION}" | cut -d "-" -f1)"
+  local LATEST_EMBA_VERSION="${1:-}"
   if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
     echo -e "    EMBA version - ${GREEN}ok${NC}"
   else
@@ -115,7 +115,7 @@ check_git_hash(){
   local REMOTE_HASH=""
   local LOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba | grep "spoofed_commit_check" | sed -E 's/.*commit_check\/([a-zA-Z0-9]{8}).*/\1/')"
+    REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba | grep "spoofed_commit_check" | sed -E 's/.*commit_check\/([a-zA-Z0-9]{8}).*/\1/' || true)"
     LOCAL_HASH="$(cut -d "-" -f2 ./config/VERSION.txt)"
 
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
@@ -129,8 +129,8 @@ check_git_hash(){
 check_docker_image(){
   local LOCAL_DOCKER_HASH=""
   local REMOTE_DOCKER_HASH=""
-  LOCAL_DOCKER_HASH="$(sudo docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' )"
-  REMOTE_DOCKER_HASH="$(sudo docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/')"
+  LOCAL_DOCKER_HASH="$(sudo docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' || true)"
+  REMOTE_DOCKER_HASH="$(sudo docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/' || true)"
 
   if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
     echo -e "    Docker image version - ${GREEN}ok${NC}"
@@ -141,7 +141,7 @@ check_docker_image(){
 
 dependency_check()
 {
-  export LATEST_EMBA_VERSION=""
+  local LATEST_EMBA_VERSION=""
   module_title "Dependency check" "no_log"
 
   print_ln "no_log"
@@ -160,7 +160,7 @@ dependency_check()
       print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
     fi
 
-    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/')"
+    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/' || true)"
     if [[ -z "${LATEST_EMBA_VERSION}" ]] ; then
       echo -e "${RED}""not ok""${NC}"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
@@ -168,7 +168,7 @@ dependency_check()
       echo -e "${GREEN}""ok""${NC}"
       source ./helpers/create_version.sh
       create_version
-      check_emba_version
+      check_emba_version "${LATEST_EMBA_VERSION}"
       check_docker_image
       check_git_hash
     fi
