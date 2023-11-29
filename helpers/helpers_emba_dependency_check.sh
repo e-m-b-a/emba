@@ -115,7 +115,7 @@ check_git_hash(){
   local REMOTE_HASH=""
   local LOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/HoxhaEndri/emba | grep "spoofed_commit_check" | sed -E 's/.*commit_check\/([a-zA-Z0-9]{8}).*/\1/')"
+    REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba | grep "spoofed_commit_check" | sed -E 's/.*commit_check\/([a-zA-Z0-9]{8}).*/\1/')"
     LOCAL_HASH="$(cut -d "-" -f2 ./config/VERSION.txt)"
 
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
@@ -160,7 +160,7 @@ dependency_check()
       print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
     fi
 
-    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/HoxhaEndri/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/')"
+    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/')"
     if [[ -z "${LATEST_EMBA_VERSION}" ]] ; then
       echo -e "${RED}""not ok""${NC}"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
