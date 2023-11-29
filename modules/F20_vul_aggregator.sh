@@ -583,20 +583,6 @@ check_cve_sources() {
     # print_output "[*] Binary ${BIN_VERSION_} - Found no version identifier in our cpe for ${CVE_VER_SOURCES_FILE} - check for further version details with ${CVE_CPE_vuln}" "no_log"
 
     # extract further version details form the current cpe under test
-    # Limitation: we currently only respect one version identifier per cpe. If we have something like the following we do not handle all the versions in a correct way:
-    # └─$ cat external/nvd-json-data-feeds/CVE-2022/CVE-2022-12xx/CVE-2022-1292.json | grep "cpe.*openssl:openssl" -A2
-    #          "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
-    #          "versionStartIncluding": "1.0.2",
-    #          "versionEndExcluding": "1.0.2ze",
-    # --
-    #          "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
-    #          "versionStartIncluding": "1.1.1",
-    #          "versionEndExcluding": "1.1.1o",
-    # --
-    #          "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
-    #          "versionStartIncluding": "3.0.0",
-    #          "versionEndExcluding": "3.0.3",
-
     CVE_VER_START_INCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionStartIncluding' | grep -v "null" || true)
     CVE_VER_START_EXCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionStartExcluding' | grep -v "null" || true)
     CVE_VER_END_INCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionEndIncluding' | grep -v "null" || true)
@@ -604,7 +590,7 @@ check_cve_sources() {
 
     # if we have found some version details we need to further check them now:
     if [[ -n "${CVE_VER_START_INCL}" || -n "${CVE_VER_START_EXCL}" || -n "${CVE_VER_END_INCL}" || -n "${CVE_VER_END_EXCL}" ]]; then
-      print_output "[*] Binary ${BIN_VERSION_} - CVE ${CVE_ID} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - ${CVE_VER_START_INCL} / ${CVE_VER_START_EXCL} / ${CVE_VER_END_INCL} / ${CVE_VER_END_EXCL}" "no_log"
+      # print_output "[*] Binary ${BIN_VERSION_} - CVE ${CVE_ID} - CVE_VER_START_INCL / CVE_VER_START_EXCL / CVE_VER_END_INCL / CVE_VER_END_EXCL - ${CVE_VER_START_INCL} / ${CVE_VER_START_EXCL} / ${CVE_VER_END_INCL} / ${CVE_VER_END_EXCL}" "no_log"
 
       ## first check CVE_VER_START_INCL >= VERSION <= CVE_VER_END_INCL
       if [[ -n "${CVE_VER_START_INCL}" ]]; then
