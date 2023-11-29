@@ -116,7 +116,7 @@ check_git_hash(){
   local LOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
     REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba | grep "spoofed_commit_check" | sed -E 's/.*commit_check\/([a-zA-Z0-9]{8}).*/\1/' || true)"
-    LOCAL_HASH="$(cut -d "-" -f2 ./config/VERSION.txt)"
+    LOCAL_HASH="$(git describe --always)"
 
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
       echo -e "    EMBA github version - ${GREEN}ok${NC}"
@@ -166,8 +166,6 @@ dependency_check()
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "${GREEN}""ok""${NC}"
-      source ./helpers/create_version.sh
-      create_version
       check_emba_version "${LATEST_EMBA_VERSION}"
       check_docker_image
       check_git_hash
