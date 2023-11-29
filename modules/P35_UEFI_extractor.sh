@@ -54,7 +54,10 @@ P35_UEFI_extractor() {
       EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME_}"_unblob_extracted
       unblobber "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
-      if [[ -d "${EXTRACTION_DIR}" ]]; then
+      detect_root_dir_helper "${EXTRACTION_DIR}"
+      # detect_root_dir_helper sets RTOS to 1 if no Linux rootfs is found
+      # we only further test for UEFI systems if we have not Linux rootfs detected
+      if [[ -d "${EXTRACTION_DIR}" && "${RTOS}" -eq 1 ]]; then
         FILES_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}" -type f | wc -l)
         DIRS_UEFI_UNBLOB=$(find "${EXTRACTION_DIR}" -type d | wc -l)
         print_output "[*] Extracted ${ORANGE}${FILES_UEFI_UNBLOB}${NC} files and ${ORANGE}${DIRS_UEFI_UNBLOB}${NC} directories from UEFI firmware image (with unblob)."
@@ -78,7 +81,10 @@ P35_UEFI_extractor() {
       EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME_}"_binwalk_extracted
       binwalker_matryoshka "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
-      if [[ -d "${EXTRACTION_DIR}" ]]; then
+      detect_root_dir_helper "${EXTRACTION_DIR}"
+      # detect_root_dir_helper sets RTOS to 1 if no Linux rootfs is found
+      # we only further test for UEFI systems if we have not Linux rootfs detected
+      if [[ -d "${EXTRACTION_DIR}" && "${RTOS}" -eq 1 ]]; then
         FILES_UEFI_BINWALK=$(find "${EXTRACTION_DIR}" -type f | wc -l)
         DIRS_UEFI_BINWALK=$(find "${EXTRACTION_DIR}" -type d | wc -l)
         print_output "[*] Extracted ${ORANGE}${FILES_UEFI_BINWALK}${NC} files and ${ORANGE}${DIRS_UEFI_BINWALK}${NC} directories from UEFI firmware image (with binwalk)."
