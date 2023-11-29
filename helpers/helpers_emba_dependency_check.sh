@@ -103,10 +103,11 @@ version_extended() # $1-a $2-op $3-$b
 }
 
 check_emba_version(){
+  LATEST_EMBA_VERSION="$(echo "${LATEST_EMBA_VERSION}" | cut -d "-" -f1)"
   if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
-    echo -e "    ${GREEN}You are on the latest version available.${NC}"
+    echo -e "    EMBA version - ${GREEN}ok${NC}"
   else
-    echo -e "    ${RED}Your emba version is outdated! Please check the github page for the latest release.${NC}"
+    echo -e "    EMBA version - ${ORANGE}Updates available${NC}"
   fi
 }
 
@@ -114,12 +115,14 @@ check_git_hash(){
   local REMOTE_HASH=""
   local LOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    REMOTE_HASH="$(sudo -E -u "${SUDO_USER:-${USER}}" git ls-remote origin -h refs/heads/master | awk '{print $1}')"
-    LOCAL_HASH="$(sudo -E -u "${SUDO_USER:-${USER}}" git log -n 1 --pretty=format:%H origin/master)"
+    #REMOTE_HASH="$(sudo -E -u "${SUDO_USER:-${USER}}" git ls-remote origin -h refs/heads/master | awk '{print $1}')"
+    #LOCAL_HASH="$(sudo -E -u "${SUDO_USER:-${USER}}" git log -n 1 --pretty=format:%H origin/master)"
+    LOCAL_HASH="$(cat /config/VERSION.txt | cut -d "-" -f2)"
+    REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba | grep 'href="/e-m-b-a/emba/commit/' | grep "primary" | head -n 1 | sed -E 's/.*\/commit\/([a-zA-Z0-9]{7}).*/\1/')"
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
-      echo -e "    ${GREEN}You are on the latest git commit.${NC}"
+      echo -e "    EMBA github version - ${GREEN}ok${NC}"
     else
-      echo -e "    ${RED}There are new available commits online! Please check the github page and execute git pull for the latest updates.${NC}"
+      echo -e "    EMBA github version - ${ORANGE}Updates available${NC}"
     fi
   fi
 }
@@ -131,9 +134,9 @@ check_docker_image(){
   REMOTE_DOCKER_HASH="$(sudo docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/')"
 
   if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
-    echo -e "    ${GREEN}You have the latest docker image.${NC}"
+    echo -e "    Docker image version - ${GREEN}ok${NC}"
   else
-    echo -e "    ${RED}There is a new docker image available! Please execute docker pull embeddedanalyzer/emba:latest for the latest docker image.${NC}"
+    echo -e "    Docker image version - ${ORANGE}Updates available${NC}"
   fi
 }
 
@@ -164,6 +167,8 @@ dependency_check()
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "${GREEN}""ok""${NC}"
+      source create_version.sh
+      create_version
       check_emba_version
       check_docker_image
       check_git_hash
