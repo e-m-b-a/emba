@@ -75,7 +75,7 @@ P35_UEFI_extractor() {
       fi
     fi
 
-    if [[ "${UEFI_VERIFIED}" -ne 1 ]]; then
+    if [[ "${UEFI_VERIFIED}" -ne 1 && "${RTOS}" -eq 1 ]]; then
       # do an additional backup round with binwalk
       # e.g. https://ftp.hp.com/pub/softpaq/sp148001-148500/sp148108.exe
       EXTRACTION_DIR="${LOG_DIR}"/firmware/uefi_extraction_"${FW_NAME_}"_binwalk_extracted
