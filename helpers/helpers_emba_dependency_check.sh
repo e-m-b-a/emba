@@ -102,8 +102,46 @@ version_extended() # $1-a $2-op $3-$b
   esac
 }
 
+check_emba_version(){
+  local LATEST_EMBA_VERSION="${1:-}"
+  if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
+    echo -e "    EMBA release version - ${GREEN}ok${NC}"
+  else
+    echo -e "    EMBA release version - ${ORANGE}Updates available${NC}"
+  fi
+}
+
+check_git_hash(){
+  local REMOTE_HASH=""
+  local LOCAL_HASH=""
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
+    REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba | grep "spoofed_commit_check" | sed -E 's/.*commit_check\/([a-zA-Z0-9]{8}).*/\1/' || true)"
+    LOCAL_HASH="$(git describe --always)"
+
+    if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
+      echo -e "    EMBA github version - ${GREEN}ok${NC}"
+    else
+      echo -e "    EMBA github version - ${ORANGE}Updates available${NC}"
+    fi
+  fi
+}
+
+check_docker_image(){
+  local LOCAL_DOCKER_HASH=""
+  local REMOTE_DOCKER_HASH=""
+  LOCAL_DOCKER_HASH="$(sudo docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' || true)"
+  REMOTE_DOCKER_HASH="$(sudo docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/' || true)"
+
+  if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
+    echo -e "    Docker image version - ${GREEN}ok${NC}"
+  else
+    echo -e "    Docker image version - ${ORANGE}Updates available${NC}"
+  fi
+}
+
 dependency_check()
 {
+  local LATEST_EMBA_VERSION=""
   module_title "Dependency check" "no_log"
 
   print_ln "no_log"
@@ -122,11 +160,15 @@ dependency_check()
       print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
     fi
 
-    if ! curl --connect-timeout 5 -Is https://www.google.com &>/dev/null ; then
+    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/' || true)"
+    if [[ -z "${LATEST_EMBA_VERSION}" ]] ; then
       echo -e "${RED}""not ok""${NC}"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "${GREEN}""ok""${NC}"
+      check_emba_version "${LATEST_EMBA_VERSION}"
+      check_docker_image
+      check_git_hash
     fi
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
