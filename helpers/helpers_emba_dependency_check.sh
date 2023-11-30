@@ -105,9 +105,9 @@ version_extended() # $1-a $2-op $3-$b
 check_emba_version(){
   local LATEST_EMBA_VERSION="${1:-}"
   if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
-    echo -e "    EMBA version - ${GREEN}ok${NC}"
+    echo -e "    EMBA release version - ${GREEN}ok${NC}"
   else
-    echo -e "    EMBA version - ${ORANGE}Updates available${NC}"
+    echo -e "    EMBA release version - ${ORANGE}Updates available${NC}"
   fi
 }
 
