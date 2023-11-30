@@ -261,10 +261,11 @@ S26_kernel_vuln_verifier()
       CVSS2="$(echo "${VULN}" | cut -d: -f2)"
       CVSS3="$(echo "${VULN}" | cut -d: -f3)"
       SUMMARY="$(echo "${VULN}" | cut -d: -f4-)"
+      # print_output "$(indent "CVSSv2: ${ORANGE}${CVSS2}${NC} / CVSSv3: ${ORANGE}${CVSS3}${NC} / Summary: ${ORANGE}${SUMMARY}${NC}")"
 
       # extract kernel source paths from summary -> we use these paths to check if they are used by our
       # symbols or during kernel compilation
-      mapfile -t K_PATHS < <(echo "${SUMMARY}" | tr ' ' '\n' | grep ".*\.[chS]$" | sed -r 's/CVE-[0-9]+-[0-9]+:[0-9].*://' \
+      mapfile -t K_PATHS < <(echo "${SUMMARY}" | tr ' ' '\n' | sed 's/\\$//' | grep ".*\.[chS]$" | sed -r 's/CVE-[0-9]+-[0-9]+:[0-9].*://' \
         | sed -r 's/CVE-[0-9]+-[0-9]+:null.*://' | sed 's/^(//' | sed 's/)$//' | sed 's/,$//' | sed 's/\.$//' | cut -d: -f1 || true)
 
       for K_PATH in "${K_PATHS[@]}"; do
