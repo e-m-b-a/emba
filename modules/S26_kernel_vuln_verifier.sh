@@ -192,6 +192,8 @@ S26_kernel_vuln_verifier()
     print_output "[*] Kernel version ${ORANGE}${K_VERSION}${NC} CVE detection ... "
     prepare_cve_search_module
     export F20_DEEP=0
+    export S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
+
     cve_db_lookup_version "linux_kernel:${K_VERSION}"
 
     if ! [[ -f "${CVE_DETAILS_PATH}" ]]; then
@@ -520,7 +522,7 @@ final_log_kernel_vulns() {
     echo "${K_VERSION};${ORIG_K_ARCH};${CVE};${CVSS2};${CVSS3};${CVE_SYMBOL_FOUND};${CVE_COMPILE_FOUND}" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv
   done
 
-  SYM_USAGE_VERIFIED=$(wc -l "${LOG_PATH_MODULE}"/CVE-*symbol_* | tail -1 | awk '{print $1}' 2>/dev/null || true)
+  SYM_USAGE_VERIFIED=$(wc -l "${LOG_PATH_MODULE}"/CVE-*symbol_* 2>/dev/null | tail -1 | awk '{print $1}' 2>/dev/null || true)
   # nosemgrep
   VULN_PATHS_VERIFIED_SYMBOLS=$(cat "${LOG_PATH_MODULE}"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | sed 's/.*verified - //' | sed 's/.*verified (GPL) - //' | sort -u | wc -l || true)
   # nosemgrep

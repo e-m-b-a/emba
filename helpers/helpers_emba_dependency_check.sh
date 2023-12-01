@@ -166,9 +166,12 @@ dependency_check()
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "${GREEN}""ok""${NC}"
-      check_emba_version "${LATEST_EMBA_VERSION}"
-      check_docker_image
-      check_git_hash
+      # ensure this only runs on the host and not in any container
+      if [[ "${IN_DOCKER}" -eq 0 ]]; then
+        check_emba_version "${LATEST_EMBA_VERSION}"
+        check_docker_image
+        check_git_hash
+      fi
     fi
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then

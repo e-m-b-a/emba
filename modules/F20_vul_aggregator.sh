@@ -40,7 +40,7 @@ F20_vul_aggregator() {
   local S09_LOG="${CSV_DIR}"/s09_firmware_base_version_check.csv
   local S24_LOG="${CSV_DIR}"/s24_kernel_bin_identifier.csv
   local S25_LOG="${CSV_DIR}"/s25_kernel_check.csv
-  local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
+  export S26_LOG_DIR="${LOG_DIR}"/s26_kernel_vuln_verifier/
   local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
   local S116_LOG="${CSV_DIR}"/s116_qemu_version_detection.csv
   local L15_LOG="${CSV_DIR}"/l15_emulated_checks_nmap.csv
@@ -786,7 +786,6 @@ cve_extractor() {
   local DOS=0
   local CVEs_OUTPUT=()
   local CVE_OUTPUT=""
-  local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier"
   local KERNEL_VERIFIED_VULN=0
 
   if ! [[ "${VERSION_orig}" == "CVE-"* ]]; then
@@ -820,6 +819,18 @@ cve_extractor() {
   if [[ -v S25_LOG ]]; then
     if [[ "${BINARY}" == *"kernel"* ]]; then
       if grep -q "kernel;${VERSION};" "${S25_LOG}" 2>/dev/null; then
+        if [[ "${VSOURCE}" == "unknown" ]]; then
+          VSOURCE="STAT"
+        elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
+          VSOURCE="${VSOURCE}""/STAT"
+        fi
+      fi
+    fi
+  fi
+
+  if [[ -v S24_LOG ]]; then
+    if [[ "${BINARY}" == *"kernel"* ]]; then
+      if tail -n +2 "${S24_LOG}" | grep -i -q "linux" "${S24_LOG}" 2>/dev/null; then
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
@@ -1388,7 +1399,7 @@ get_kernel_check() {
   fi
   if [[ -f "${S24_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S24_LOG}")."
-    readarray -t KERNEL_VERSION_S24 < <(cut -d\; -f1-3 "${S25_LOG}" | tail -n +2 | sort -u | sed 's/^/linux_kernel;/' | sed 's/$/;NA/' || true)
+    readarray -t KERNEL_VERSION_S24 < <(cut -d\; -f2 "${S24_LOG}" | tail -n +2 | sort -u | sed 's/^/linux_kernel;/' | sed 's/$/;NA/' || true)
     # we get something like this: "linux_kernel;5.10.59;NA"
     KERNEL_CVE_EXPLOITS+=( "${KERNEL_VERSION_S24[@]}" )
   fi
@@ -1398,7 +1409,6 @@ get_kernel_check() {
 get_kernel_verified() {
   local S26_LOGS_ARR=("$@")
   local KERNEL_CVE_VERIFIEDX=()
-  local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
 
   for S26_LOG in "${S26_LOGS_ARR[@]}"; do
     if [[ -f "${S26_LOG}" ]]; then
