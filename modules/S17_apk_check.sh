@@ -90,7 +90,7 @@ apk_checker_helper() {
   fi
 
   APK_DIR_NAME=$(dirname "${APK}")
-  APK_STACS_DIR=$(grep "APK Static Analysis Path" "${APK_DIR_NAME}"/APKHunt_"$(basename -s .apk "${APK}")"*.txt)
+  APK_STACS_DIR=$(grep "APK Static Analysis Path" "${APK_DIR_NAME}"/APKHunt_"$(basename -s .apk "${APK}")"*.txt || true)
   APK_JAR="${APK_DIR_NAME}"/"$(basename -s .apk "${APK}")".jar
   [[ -d "${APK_STACS_DIR}" ]] && rm -rf "${APK_STACS_DIR}"
   [[ -f "${APK_JAR}" ]] && rm -rf "${APK_JAR}"
