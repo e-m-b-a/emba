@@ -189,6 +189,7 @@ S26_kernel_vuln_verifier()
       tar -xzf "${KERNEL_ARCH_PATH}/linux-${K_VERSION_KORG}.tar.gz" -C "${LOG_PATH_MODULE}"
     fi
 
+    print_output "[*] Kernel version ${ORANGE}${K_VERSION}${NC} CVE detection ... "
     prepare_cve_search_module
     cve_db_lookup_version "linux_kernel:${K_VERSION}"
 

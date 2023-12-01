@@ -131,4 +131,5 @@ set_defaults() {
   export TOTAL_MEMORY=0
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   export Q_MOD_PID=""
+  export F20_SOURCE=""      # F20 module - set to cve-discovery caller for further processing
 }

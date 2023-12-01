@@ -22,6 +22,9 @@ F20_vul_aggregator() {
   module_title "Final vulnerability aggregator"
 
   pre_module_reporter "${FUNCNAME[0]}"
+
+  # we use this for later decisions:
+  export F20_SOURCE="${FUNCNAME[0]}"
   print_ln
 
   prepare_cve_search_module
@@ -481,7 +484,11 @@ cve_db_lookup_cve() {
     echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt || true
   fi
 
-  cve_extractor "${CVE_ENTRY}"
+  # only do further analysis if needed
+  # in case we come from s26 module we do not need all the upcoming analysis
+  if [[ "${F20_SOURCE}" == "F20_vul_aggregator" ]]; then
+    cve_extractor "${CVE_ENTRY}"
+  fi
 }
 
 cve_db_lookup_version() {
@@ -493,6 +500,7 @@ cve_db_lookup_version() {
 
   # we create something like "binary_1.2.3" for log paths
   local VERSION_PATH="${BIN_VERSION_//:/_}"
+  # we test for the binary_name:version and for binary_name:*:
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
   BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
@@ -521,7 +529,11 @@ cve_db_lookup_version() {
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_CVE_SOURCE[@]}"
 
-  cve_extractor "${BIN_VERSION_}"
+  # only do further analysis if needed
+  # in case we come from s26 module we do not need all the upcoming analysis
+  if [[ "${F20_SOURCE}" == "F20_vul_aggregator" ]]; then
+    cve_extractor "${BIN_VERSION_}"
+  fi
 }
 
 # Test the identified JSON files for CPE details and version information
@@ -865,7 +877,7 @@ cve_extractor() {
     if grep -q "${BINARY};.*${VERSION}" "${S36_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="STAT"
-      else
+      elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
         VSOURCE="${VSOURCE}""/STAT"
       fi
     fi

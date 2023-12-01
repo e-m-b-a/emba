@@ -77,7 +77,7 @@ S20_shell_check()
   fi
 
   if [[ ${SEMGREP} -eq 1 ]] ; then
-    sub_module_title "Check scripts with semgrep"
+    sub_module_title "Check shell scripts with semgrep"
     local S20_SEMGREP_SCRIPTS=0
     local S20_SEMGREP_VULNS=0
     local SHELL_LOG="${LOG_PATH_MODULE}"/semgrep.log
@@ -117,8 +117,6 @@ s20_eval_script_check() {
   local SH_SCRIPT=""
   local GPT_PRIO_=3
   local GPT_ANCHOR_=""
-
-  sub_module_title "Check shell scripts for eval usage"
 
   for SH_SCRIPT in "${SH_SCRIPTS_[@]}" ; do
     print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
