@@ -1,3 +1,3 @@
 #!/bin/bash
 
-print_output "The authentication checking moudle performs various authentication checks."
+print_output "The authentication checking module performs various authentication checks."
