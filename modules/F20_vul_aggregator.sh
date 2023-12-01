@@ -24,7 +24,7 @@ F20_vul_aggregator() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   # we use this for later decisions:
-  export F20_SOURCE="${FUNCNAME[0]}"
+  export F20_DEEP=1
   print_ln
 
   prepare_cve_search_module
@@ -486,7 +486,7 @@ cve_db_lookup_cve() {
 
   # only do further analysis if needed
   # in case we come from s26 module we do not need all the upcoming analysis
-  if [[ "${F20_SOURCE}" == "F20_vul_aggregator" ]]; then
+  if [[ "${F20_DEEP}" == 1 ]]; then
     cve_extractor "${CVE_ENTRY}"
   fi
 }
@@ -531,7 +531,7 @@ cve_db_lookup_version() {
 
   # only do further analysis if needed
   # in case we come from s26 module we do not need all the upcoming analysis
-  if [[ "${F20_SOURCE}" == "F20_vul_aggregator" ]]; then
+  if [[ "${F20_DEEP}" == 1 ]]; then
     cve_extractor "${BIN_VERSION_}"
   fi
 }
@@ -936,7 +936,7 @@ cve_extractor() {
   fi
 
   local KNOWN_EXPLOITED=0
-  local KERNEL_VERIFIED_VULN="no"
+  local KERNEL_VERIFIED_VULN=0
   local EXPLOIT_COUNTER_VERSION=0
 
   if [[ -s "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log ]]; then

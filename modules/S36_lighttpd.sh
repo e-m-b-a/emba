@@ -101,6 +101,8 @@ lighttpd_binary_analysis() {
     fi
     for LIGHT_VER in "${LIGHT_VERSIONS[@]}"; do
       # cve_db_lookup_version writes the logs to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
+      export F20_DEEP=1
+      export local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
       cve_db_lookup_version "${LIGHT_VER}"
     done
   fi

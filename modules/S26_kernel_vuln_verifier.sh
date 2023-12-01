@@ -191,6 +191,7 @@ S26_kernel_vuln_verifier()
 
     print_output "[*] Kernel version ${ORANGE}${K_VERSION}${NC} CVE detection ... "
     prepare_cve_search_module
+    export F20_DEEP=0
     cve_db_lookup_version "linux_kernel:${K_VERSION}"
 
     if ! [[ -f "${CVE_DETAILS_PATH}" ]]; then
