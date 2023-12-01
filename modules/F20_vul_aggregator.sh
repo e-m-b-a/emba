@@ -38,7 +38,7 @@ F20_vul_aggregator() {
   local S06_LOG="${CSV_DIR}"/s06_distribution_identification.csv
   local S08_LOG="${CSV_DIR}"/s08_package_mgmt_extractor.csv
   local S09_LOG="${CSV_DIR}"/s09_firmware_base_version_check.csv
-  # S24 CSV missing!!!
+  local S24_LOG="${CSV_DIR}"/s24_kernel_bin_identifier.csv
   local S25_LOG="${CSV_DIR}"/s25_kernel_check.csv
   local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
   local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
@@ -67,8 +67,8 @@ F20_vul_aggregator() {
   if [[ -d ${NVD_DIR} ]]; then
     print_output "[*] Aggregate vulnerability details"
 
-    # get the kernel version from s25:
-    get_kernel_check "${S25_LOG}"
+    # get the kernel version from s24 and s25:
+    get_kernel_check "${S24_LOG}" "${S25_LOG}"
     # if we found a kernel in the kernel checker module we are going to use this kernel version (usually this version is better)
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
@@ -1376,14 +1376,23 @@ get_firmware_base_version_check() {
 }
 
 get_kernel_check() {
-  local S25_LOG="${1:-}"
+  local S24_LOG="${1:-}"
+  local S25_LOG="${2:-}"
+  local KERNEL_VERSION_S24=()
   export KERNEL_CVE_EXPLOITS=()
 
   if [[ -f "${S25_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S25_LOG}")."
     readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "${S25_LOG}" | tail -n +2 | sort -u || true)
-    # we get something like this: "kernel;5.10.59;CVE-2021-3490"
+    # we get something like this: "linux_kernel;5.10.59;CVE-2021-3490"
   fi
+  if [[ -f "${S24_LOG}" ]]; then
+    print_output "[*] Collect version details of module $(basename "${S24_LOG}")."
+    readarray -t KERNEL_VERSION_S24 < <(cut -d\; -f1-3 "${S25_LOG}" | tail -n +2 | sort -u | sed 's/^/linux_kernel;/' | sed 's/$/;NA/' || true)
+    # we get something like this: "linux_kernel;5.10.59;NA"
+    KERNEL_CVE_EXPLOITS+=( "${KERNEL_VERSION_S24[@]}" )
+  fi
+
 }
 
 get_kernel_verified() {
