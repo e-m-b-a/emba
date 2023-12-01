@@ -830,7 +830,7 @@ cve_extractor() {
 
   if [[ -v S24_LOG ]]; then
     if [[ "${BINARY}" == *"kernel"* ]]; then
-      if tail -n +2 "${S24_LOG}" | grep -i -q "linux" "${S24_LOG}" 2>/dev/null; then
+      if tail -n +2 "${S24_LOG}" | grep -i -q "linux.*${VERSION}" "${S24_LOG}" 2>/dev/null; then
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
