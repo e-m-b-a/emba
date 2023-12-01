@@ -19,7 +19,7 @@
 S17_apk_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Android apk checks"
-
+  pre_module_reporter "${FUNCNAME[0]}"
   apk_identifier
   apk_checker
 

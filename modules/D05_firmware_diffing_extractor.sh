@@ -25,6 +25,7 @@ export PRE_THREAD_ENA=0
 D05_firmware_diffing_extractor() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Firmware diffing - extractor module"
+  pre_module_reporter "${FUNCNAME[0]}"
   local NEG_LOG=0
 
   local MD5_FW_BIN1=""

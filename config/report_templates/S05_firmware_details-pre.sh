@@ -1,3 +1,3 @@
 #!/bin/bash
 
-print_output "This module is responsible for providing details about the firmware and testing information. It detects the number of files and directories present in the firmware, offers insights into release/vetsion information and generates a filesystem tree to visualize the directory structure."
+print_output "The firmware details module is responsible for providing details about the firmware and testing information. It detects the number of files and directories present in the firmware, offers insights into release/vetsion information and generates a filesystem tree to visualize the directory structure."
