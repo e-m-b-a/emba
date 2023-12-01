@@ -520,6 +520,8 @@ dependency_check()
       check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
 
       if function_exists F20_vul_aggregator; then
+        # ensure this check is not running as github action:
+        # "${CONFIG_DIR}"/gh_action is created from the installer
         if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
           check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
         fi
