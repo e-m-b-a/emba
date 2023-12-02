@@ -87,7 +87,7 @@ s23_luaseccheck() {
         ISSUES_FILE=$((ISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${ENTRY}${GREEN} in file ${ORANGE}${QUERY_FILE}${GREEN} with file access capabilities."
         S23_ISSUE_FOUND=1
-        GPT_PRIO=$((GPT_PRIO+1))
+        GPT_PRIO_=$((GPT_PRIO_+1))
       fi
       if grep "${ENTRY}" "${QUERY_FILE}" | grep -q "os.execute"; then
         # command exec - critical
@@ -95,7 +95,7 @@ s23_luaseccheck() {
         ISSUES_FILE=$((ISSUES_FILE+1))
         print_output "[+] Found lua QUERY (GET/POST) entry: ${ORANGE}${ENTRY}${GREEN} in file ${ORANGE}${QUERY_FILE}${GREEN} with command execution capabilities."
         S23_ISSUE_FOUND=1
-        GPT_PRIO=$((GPT_PRIO+1))
+        GPT_PRIO_=$((GPT_PRIO_+1))
       fi
     done
     if [[ "${ISSUES_FILE}" -eq 0 ]] && grep -q "os.execute" "${QUERY_FILE}"; then
