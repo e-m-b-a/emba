@@ -495,15 +495,26 @@ cve_db_lookup_version() {
   # BIN_VERSION_ is something like "binary:1.2.3"
   # function writes log files to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
   local BIN_VERSION_="${1:-}"
+
   local CVE_ID=""
   local BIN_NAME=""
-
-  # we create something like "binary_1.2.3" for log paths
-  local VERSION_PATH="${BIN_VERSION_//:/_}"
-  # we test for the binary_name:version and for binary_name:*:
-  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
-
   BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
+  # we create something like "binary_1.2.3" for log paths
+  # remove last : if it is there
+  local VERSION_PATH="${BIN_VERSION_%:}"
+  VERSION_PATH="${VERSION_PATH//:/_}"
+
+  # if we did the CVE analysis already in module s26, we can just use these results for our further analysis
+  # -> we skip the complete CVE analysis here:
+  if [[ "${BIN_NAME}" == *"linux_kernel"* ]] && [[ -s "${LOG_DIR}"/s26_kernel_vuln_verifier/"${VERSION_PATH}".txt ]]; then
+    print_output "[*] Detected kernel vulnerability details from module S26 - going to use these details"
+    cp "${LOG_DIR}"/s26_kernel_vuln_verifier/"${VERSION_PATH}".txt "${LOG_PATH_MODULE}" || (print_output "[-] S26 kernel vulns file found, but something was going wrong")
+    cve_extractor "${BIN_VERSION_}"
+    return
+  fi
+  # we test for the binary_name:version and for binary_name:*:
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}"
+
   mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
@@ -844,7 +855,9 @@ cve_extractor() {
       BINARY="$(echo "${VERSION_orig}" | cut -d ":" -f2)"
       VERSION="$(echo "${VERSION_orig}" | cut -d ":" -f3-)"
     fi
-    local VERSION_PATH="${VERSION_orig//:/_}"
+    local VERSION_PATH="${VERSION_orig%:}"
+    VERSION_PATH="${VERSION_PATH//:/_}"
+    # remove last : if it is there
     AGG_LOG_FILE="${VERSION_PATH}".txt
   else
     AGG_LOG_FILE="${VERSION_orig}".txt
@@ -1135,17 +1148,17 @@ cve_extractor_thread_actor() {
     if [[ -f "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv ]]; then
       # check if the current CVE is a verified kernel CVE from s26 module
       if grep -q ";${CVE_VALUE};.*;.*;1;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!"
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!" "no_log"
         ((KERNEL_VERIFIED_VULN+=1))
         KERNEL_VERIFIED="yes"
       fi
       if grep -q ";${CVE_VALUE};.*;.*;1;0" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!"
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!" "no_log"
         ((KERNEL_VERIFIED_VULN+=1))
         KERNEL_VERIFIED="yes"
       fi
       if grep -q ";${CVE_VALUE};.*;.*;0;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!"
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!" "no_log"
         ((KERNEL_VERIFIED_VULN+=1))
         KERNEL_VERIFIED="yes"
       fi

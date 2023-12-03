@@ -361,12 +361,7 @@ chmod 755 ./external
 
 if [[ "${LIST_DEP}" -eq 0 ]] || [[ ${IN_DOCKER} -eq 0 ]] || [[ ${DOCKER_SETUP} -eq 1 ]] || [[ ${FULL} -eq 1 ]]; then
   echo -e "\\n""${MAGENTA}""${BOLD}""Installation notes:""${NC}"
-  echo -e "\\n""${MAGENTA}""INFO: The cron.daily update script for EMBA is located in config/emba_updater""${NC}"
-  echo -e "${MAGENTA}""INFO: For automatic updates it should be copied to /etc/cron.daily/""${NC}"
-  echo -e "${MAGENTA}""INFO: For manual updates just start it via sudo ./config/emba_updater""${NC}"
-
   echo -e "\\n""${MAGENTA}""WARNING: If you plan using the emulator (-E switch) your host and your internal network needs to be protected.""${NC}"
-
   echo -e "\\n""${MAGENTA}""INFO: Do not forget to checkout current development of EMBA at https://github.com/e-m-b-a.""${NC}"
 fi
 if [[ "${WSL}" -eq 1 ]]; then
