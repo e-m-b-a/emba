@@ -20,6 +20,7 @@ export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
 export DISABLE_NOTIFICATIONS=1
+export MODULE_BLACKLIST=( "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
