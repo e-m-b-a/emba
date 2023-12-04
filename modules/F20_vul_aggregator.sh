@@ -22,6 +22,9 @@ F20_vul_aggregator() {
   module_title "Final vulnerability aggregator"
 
   pre_module_reporter "${FUNCNAME[0]}"
+
+  # we use this for later decisions:
+  export F20_DEEP=1
   print_ln
 
   prepare_cve_search_module
@@ -35,9 +38,9 @@ F20_vul_aggregator() {
   local S06_LOG="${CSV_DIR}"/s06_distribution_identification.csv
   local S08_LOG="${CSV_DIR}"/s08_package_mgmt_extractor.csv
   local S09_LOG="${CSV_DIR}"/s09_firmware_base_version_check.csv
-  # S24 CSV missing!!!
+  local S24_LOG="${CSV_DIR}"/s24_kernel_bin_identifier.csv
   local S25_LOG="${CSV_DIR}"/s25_kernel_check.csv
-  local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
+  export S26_LOG_DIR="${LOG_DIR}"/s26_kernel_vuln_verifier/
   local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
   local S116_LOG="${CSV_DIR}"/s116_qemu_version_detection.csv
   local L15_LOG="${CSV_DIR}"/l15_emulated_checks_nmap.csv
@@ -64,8 +67,8 @@ F20_vul_aggregator() {
   if [[ -d ${NVD_DIR} ]]; then
     print_output "[*] Aggregate vulnerability details"
 
-    # get the kernel version from s25:
-    get_kernel_check "${S25_LOG}"
+    # get the kernel version from s24 and s25:
+    get_kernel_check "${S24_LOG}" "${S25_LOG}"
     # if we found a kernel in the kernel checker module we are going to use this kernel version (usually this version is better)
     # [+] Found Version details (base check): Linux kernel version 2.6.33
     # vs:
@@ -213,7 +216,7 @@ aggregate_versions() {
       if [ -z "${VERSION}" ]; then
         continue
       fi
-      VERSION="$(echo "${VERSION}" | cut -d\; -f1 | sed 's/^/kernel:/')"
+      VERSION="$(echo "${VERSION}" | cut -d\; -f1 | sed 's/^/linux_kernel:/')"
       print_output "[+] Found Version details (${ORANGE}kernel - with verified vulnerability details${GREEN}): ""${ORANGE}${VERSION}${NC}"
       # we ensure that we search for the correct kernel version by adding a : at the end of the search string
       VERSION=${VERSION/%/:}
@@ -481,21 +484,37 @@ cve_db_lookup_cve() {
     echo "${CVE_ID}:${CVE_V2:-"NA"}:${CVE_V31:-"NA"}" > "${LOG_PATH_MODULE}"/"${CVE_ENTRY}".txt || true
   fi
 
-  cve_extractor "${CVE_ENTRY}"
+  # only do further analysis if needed
+  # in case we come from s26 module we do not need all the upcoming analysis
+  if [[ "${F20_DEEP}" == 1 ]]; then
+    cve_extractor "${CVE_ENTRY}"
+  fi
 }
 
 cve_db_lookup_version() {
   # BIN_VERSION_ is something like "binary:1.2.3"
   # function writes log files to "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt
   local BIN_VERSION_="${1:-}"
+
   local CVE_ID=""
   local BIN_NAME=""
-
-  # we create something like "binary_1.2.3" for log paths
-  local VERSION_PATH="${BIN_VERSION_//:/_}"
-  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
-
   BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
+  # we create something like "binary_1.2.3" for log paths
+  # remove last : if it is there
+  local VERSION_PATH="${BIN_VERSION_%:}"
+  VERSION_PATH="${VERSION_PATH//:/_}"
+
+  # if we did the CVE analysis already in module s26, we can just use these results for our further analysis
+  # -> we skip the complete CVE analysis here:
+  if [[ "${BIN_NAME}" == *"linux_kernel"* ]] && [[ -s "${LOG_DIR}"/s26_kernel_vuln_verifier/"${VERSION_PATH}".txt ]]; then
+    print_output "[*] Detected kernel vulnerability details from module S26 - going to use these details"
+    cp "${LOG_DIR}"/s26_kernel_vuln_verifier/"${VERSION_PATH}".txt "${LOG_PATH_MODULE}" || (print_output "[-] S26 kernel vulns file found, but something was going wrong")
+    cve_extractor "${BIN_VERSION_}"
+    return
+  fi
+  # we test for the binary_name:version and for binary_name:*:
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}"
+
   mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
@@ -521,7 +540,11 @@ cve_db_lookup_version() {
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19_CVE_SOURCE[@]}"
 
-  cve_extractor "${BIN_VERSION_}"
+  # only do further analysis if needed
+  # in case we come from s26 module we do not need all the upcoming analysis
+  if [[ "${F20_DEEP}" == 1 ]]; then
+    cve_extractor "${BIN_VERSION_}"
+  fi
 }
 
 # Test the identified JSON files for CPE details and version information
@@ -596,7 +619,7 @@ check_cve_sources() {
       if [[ -n "${CVE_VER_START_INCL}" ]]; then
         # print_output "[*] ${BIN_VERSION_} - ${CVE_ID} - CVE_VER_START_INCL: ${CVE_VER_START_INCL} - $(version "${BIN_VERSION_ONLY}") vs $(version "${CVE_VER_START_INCL}")" "no_log"
         # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -lt "$(version_extended "${CVE_VER_START_INCL}")" ]]; then
-        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_START_INCL}")" ]]; then
+        if version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_START_INCL}"; then
           # BIN_VERSION is lt CVE_VER_START_INCL -> we can move on
           continue
         fi
@@ -606,18 +629,24 @@ check_cve_sources() {
         # Todo: check for VERSION <= CVE_VER_END_INCL
         if [[ -n "${CVE_VER_END_INCL}" ]]; then
           # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -le "$(version_extended "${CVE_VER_END_INCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_INCL}" "${CVE_ID}"
+            fi
           fi
           continue
         fi
         ## first check VERSION < CVE_VER_END_EXCL
         if [[ -n "${CVE_VER_END_EXCL}" ]]; then
           # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -lt "$(version_extended "${CVE_VER_END_EXCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_EXCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_EXCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_INCL}" "${CVE_ID}"
+            fi
           fi
           continue
         fi
@@ -625,6 +654,9 @@ check_cve_sources() {
         if ! [[ -n "${CVE_VER_END_EXCL}" && -n "${CVE_VER_START_INCL}" ]]; then
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL: ${ORANGE}NA${GREEN}" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_INCL}" "${CVE_ID}"
+          fi
           continue
         fi
       fi
@@ -632,7 +664,7 @@ check_cve_sources() {
       if [[ -n "${CVE_VER_START_EXCL}" ]]; then
         # print_output "[*] ${BIN_VERSION_ONLY} - ${CVE_ID} - CVE_VER_START_EXCL: ${CVE_VER_START_INCL}" "no_log"
         # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -le "$(version_extended "${CVE_VER_START_EXCL}")" ]]; then
-        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_START_EXCL}")" ]]; then
+        if version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_START_EXCL}"; then
           # BIN_VERSION is le CVE_VER_START_EXCL -> we can move on
           continue
         fi
@@ -641,30 +673,41 @@ check_cve_sources() {
         # print_output "[*] ${CVE_ID} - CVE_VER_START_EXCL - binary ${BIN_VERSION_} version $(version "${BIN_VERSION_ONLY}") is higher (excl) as CVE version $(version "${CVE_VER_START_EXCL}")" "no_log"
         if [[ -n "${CVE_VER_END_INCL}" ]]; then
           # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -le "$(version_extended "${CVE_VER_END_INCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '<=' "${CVE_VER_END_INCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_INCL}" "${CVE_ID}"
+            fi
           fi
           continue
         fi
         if [[ -n "${CVE_VER_END_EXCL}" ]]; then
           # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -lt "$(version_extended "${CVE_VER_END_EXCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_END_EXCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '<' "${CVE_VER_END_EXCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_EXCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_EXCL}" "${CVE_ID}"
+            fi
           fi
           continue
         fi
         if ! [[ -n "${CVE_VER_END_EXCL}" && -n "${CVE_VER_END_INCL}" ]]; then
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL: ${ORANGE}NA${GREEN} / CVE_VER_END_EXCL: ${ORANGE}NA${GREEN}" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_EXCL}" "${CVE_ID}"
+          fi
           continue
         fi
       fi
 
       if [[ -n "${CVE_VER_END_INCL}" ]]; then
         # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -gt "$(version_extended "${CVE_VER_END_INCL}")" ]]; then
-        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_END_INCL}")" ]]; then
+        # print_output "[!] ${CVE_ID} - CVE_VER_END_INCL - binary ${BIN_VERSION_} - ${BIN_VERSION_ONLY} - CVE version ${CVE_VER_END_INCL}" "no_log"
+        if version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_END_INCL}"; then
+          # print_output "[!] ${CVE_ID} - CVE_VER_END_INCL - binary ${BIN_VERSION_} - ${BIN_VERSION_ONLY} - CVE version ${CVE_VER_END_INCL} - exit" "no_log"
           # BIN_VERSION is gt CVE_VER_END_INCL -> we can move on
           continue
         fi
@@ -674,31 +717,40 @@ check_cve_sources() {
         # our version is le the needed version
         if [[ -n "${CVE_VER_START_INCL}" ]]; then
           # if [[ "$(version_extended "${BIN_VERSION_ONLY}")" -ge "$(version_extended "${CVE_VER_START_INCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>=' "${CVE_VER_START_INCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '>=' "${CVE_VER_START_INCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL / CVE_VER_END_INCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_INCL}" "${CVE_ID}"
+            fi
           fi
           continue
         fi
         if [[ -n "${CVE_VER_START_EXCL}" ]]; then
           # if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_START_EXCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_START_EXCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_EXCL / CVE_VER_END_INCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_EXCL}" "${CVE_ID}"
+            fi
           fi
           continue
         fi
 
-        if ! [[ -n "${CVE_VER_START_EXCL}" && "${CVE_VER_START_INCL}" ]]; then
+        if ! [[ -n "${CVE_VER_START_EXCL}" && -n "${CVE_VER_START_INCL}" ]]; then
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_START_INCL: ${ORANGE}NA${GREEN} / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_END_INCL" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_INCL}" "${CVE_ID}"
+          fi
           continue
         fi
       fi
 
       if [[ -n "${CVE_VER_END_EXCL}" ]]; then
         # if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_END_EXCL}")" ]]; then
-        if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>=' "${CVE_VER_END_EXCL}")" ]]; then
+        if version_extended "${BIN_VERSION_ONLY}" '>=' "${CVE_VER_END_EXCL}"; then
           # BIN_VERSION is ge CVE_VER_END_EXCL -> we can move on
           continue
         fi
@@ -708,23 +760,32 @@ check_cve_sources() {
         # our version is le the needed version
         if [[ -n "${CVE_VER_START_EXCL}" ]]; then
           # if [[ "$(version "${BIN_VERSION_ONLY}")" -gt "$(version "${CVE_VER_START_EXCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_START_EXCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '>' "${CVE_VER_START_EXCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_EXCL}" "${CVE_ID}"
+            fi
             continue
           fi
         fi
         if [[ -n "${CVE_VER_START_INCL}" ]]; then
           # if [[ "$(version "${BIN_VERSION_ONLY}")" -ge "$(version "${CVE_VER_START_INCL}")" ]]; then
-          if [[ "$(version_extended "${BIN_VERSION_ONLY}" '>='  "${CVE_VER_START_INCL}")" ]]; then
+          if version_extended "${BIN_VERSION_ONLY}" '>='  "${CVE_VER_START_INCL}"; then
             # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_INCL" "no_log"
             write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+            if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+              check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_START_INCL}" "${CVE_ID}"
+            fi
             continue
           fi
         fi
         if ! [[ -n "${CVE_VER_START_INCL}" && -n "${CVE_VER_START_EXCL}" ]]; then
           # print_output "[+] Vulnerability identified - CVE: ${CVE_ID} - binary ${BIN_VERSION_} - source file ${CVE_VER_SOURCES_FILE} - CVE_VER_END_EXCL / CVE_VER_START_EXCL: ${ORANGE}NA${GREEN} / CVE_VER_START_INCL: ${ORANGE}NA${GREEN}" "no_log"
           write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
+          if [[ "${BIN_NAME}" == "linux_kernel" ]]; then
+            check_kernel_major_v "${BIN_VERSION_ONLY}" "${CVE_VER_END_EXCL}" "${CVE_ID}"
+          fi
           continue
         fi
       fi
@@ -734,6 +795,15 @@ check_cve_sources() {
       write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-"NA"}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
     fi
   done
+}
+
+check_kernel_major_v() {
+  local lBIN_VERSION_ONLY="${1:-}"
+  local lKERNEL_CVE_VER="${2:-}"
+  local lCVE_ID="${3:-}"
+  if [[ "${lBIN_VERSION_ONLY:0:1}" != "${lKERNEL_CVE_VER:0:1}" ]]; then
+    print_output "[-] Info for CVE ${ORANGE}${lCVE_ID}${NC} - Major kernel version not matching ${ORANGE}${lKERNEL_CVE_VER}${NC} vs ${ORANGE}${lBIN_VERSION_ONLY}${NC} - Higher false positive risk"
+  fi
 }
 
 write_cve_log() {
@@ -774,7 +844,6 @@ cve_extractor() {
   local DOS=0
   local CVEs_OUTPUT=()
   local CVE_OUTPUT=""
-  local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier"
   local KERNEL_VERIFIED_VULN=0
 
   if ! [[ "${VERSION_orig}" == "CVE-"* ]]; then
@@ -786,7 +855,9 @@ cve_extractor() {
       BINARY="$(echo "${VERSION_orig}" | cut -d ":" -f2)"
       VERSION="$(echo "${VERSION_orig}" | cut -d ":" -f3-)"
     fi
-    local VERSION_PATH="${VERSION_orig//:/_}"
+    local VERSION_PATH="${VERSION_orig%:}"
+    VERSION_PATH="${VERSION_PATH//:/_}"
+    # remove last : if it is there
     AGG_LOG_FILE="${VERSION_PATH}".txt
   else
     AGG_LOG_FILE="${VERSION_orig}".txt
@@ -808,6 +879,18 @@ cve_extractor() {
   if [[ -v S25_LOG ]]; then
     if [[ "${BINARY}" == *"kernel"* ]]; then
       if grep -q "kernel;${VERSION};" "${S25_LOG}" 2>/dev/null; then
+        if [[ "${VSOURCE}" == "unknown" ]]; then
+          VSOURCE="STAT"
+        elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
+          VSOURCE="${VSOURCE}""/STAT"
+        fi
+      fi
+    fi
+  fi
+
+  if [[ -v S24_LOG ]]; then
+    if [[ "${BINARY}" == *"kernel"* ]]; then
+      if tail -n +2 "${S24_LOG}" | grep -i -q "linux.*${VERSION}" "${S24_LOG}" 2>/dev/null; then
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
@@ -865,7 +948,7 @@ cve_extractor() {
     if grep -q "${BINARY};.*${VERSION}" "${S36_LOG}" 2>/dev/null; then
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="STAT"
-      else
+      elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
         VSOURCE="${VSOURCE}""/STAT"
       fi
     fi
@@ -924,7 +1007,7 @@ cve_extractor() {
   fi
 
   local KNOWN_EXPLOITED=0
-  local KERNEL_VERIFIED_VULN="no"
+  local KERNEL_VERIFIED_VULN=0
   local EXPLOIT_COUNTER_VERSION=0
 
   if [[ -s "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log ]]; then
@@ -1065,17 +1148,17 @@ cve_extractor_thread_actor() {
     if [[ -f "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv ]]; then
       # check if the current CVE is a verified kernel CVE from s26 module
       if grep -q ";${CVE_VALUE};.*;.*;1;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!"
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols and kernel configuration${GREEN})!" "no_log"
         ((KERNEL_VERIFIED_VULN+=1))
         KERNEL_VERIFIED="yes"
       fi
       if grep -q ";${CVE_VALUE};.*;.*;1;0" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!"
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel symbols${GREEN})!" "no_log"
         ((KERNEL_VERIFIED_VULN+=1))
         KERNEL_VERIFIED="yes"
       fi
       if grep -q ";${CVE_VALUE};.*;.*;0;1" "${S26_LOG_DIR}"/cve_results_kernel_"${VERSION}".csv; then
-        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!"
+        print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified kernel vulnerability (${ORANGE}kernel configuration${GREEN})!" "no_log"
         ((KERNEL_VERIFIED_VULN+=1))
         KERNEL_VERIFIED="yes"
       fi
@@ -1364,20 +1447,28 @@ get_firmware_base_version_check() {
 }
 
 get_kernel_check() {
-  local S25_LOG="${1:-}"
+  local S24_LOG="${1:-}"
+  local S25_LOG="${2:-}"
+  local KERNEL_VERSION_S24=()
   export KERNEL_CVE_EXPLOITS=()
 
   if [[ -f "${S25_LOG}" ]]; then
     print_output "[*] Collect version details of module $(basename "${S25_LOG}")."
     readarray -t KERNEL_CVE_EXPLOITS < <(cut -d\; -f1-3 "${S25_LOG}" | tail -n +2 | sort -u || true)
-    # we get something like this: "kernel;5.10.59;CVE-2021-3490"
+    # we get something like this: "linux_kernel;5.10.59;CVE-2021-3490"
   fi
+  if [[ -f "${S24_LOG}" ]]; then
+    print_output "[*] Collect version details of module $(basename "${S24_LOG}")."
+    readarray -t KERNEL_VERSION_S24 < <(cut -d\; -f2 "${S24_LOG}" | tail -n +2 | sort -u | sed 's/^/linux_kernel;/' | sed 's/$/;NA/' || true)
+    # we get something like this: "linux_kernel;5.10.59;NA"
+    KERNEL_CVE_EXPLOITS+=( "${KERNEL_VERSION_S24[@]}" )
+  fi
+
 }
 
 get_kernel_verified() {
   local S26_LOGS_ARR=("$@")
   local KERNEL_CVE_VERIFIEDX=()
-  local S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
 
   for S26_LOG in "${S26_LOGS_ARR[@]}"; do
     if [[ -f "${S26_LOG}" ]]; then

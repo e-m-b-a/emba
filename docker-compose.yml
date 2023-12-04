@@ -21,6 +21,7 @@ services:
       - /root/.ghidra/
       - /root/.routersploit/
       - /root/.msf4
+      - /root/.john
       - /run/lock
       - /var/run
       - /var/tmp

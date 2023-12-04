@@ -178,6 +178,12 @@ cleaner() {
     done < "${TMP_DIR}"/EXIT_KILL_PIDS.log
   fi
 
+  if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
+    if ! [[ -s "${LOG_DIR}"/emba_error.log ]]; then
+      rm "${LOG_DIR}"/emba_error.log > /dev/null || true
+    fi
+  fi
+
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -d "${TMP_DIR}" ]]; then
     rm -r "${TMP_DIR}" 2>/dev/null || true
   fi

@@ -55,6 +55,9 @@ L10_system_emulation() {
       LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
       R_PATH_CNT=1
 
+      # just to ensure nothing has already put a run.sh into our log
+      find "${LOG_PATH_MODULE}" -name "run.sh" --delete 2>/dev/null || true
+
       # handling restarted scans with old emulation processes:
       if [[ -f "${LOG_DIR}"/emulator_online_results.log ]] && grep -q "L10_system_emulation finished" "${LOG_DIR}"/emba.log; then
         print_ln

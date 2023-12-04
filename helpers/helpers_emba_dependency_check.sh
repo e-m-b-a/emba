@@ -129,8 +129,8 @@ check_git_hash(){
 check_docker_image(){
   local LOCAL_DOCKER_HASH=""
   local REMOTE_DOCKER_HASH=""
-  LOCAL_DOCKER_HASH="$(sudo docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' || true)"
-  REMOTE_DOCKER_HASH="$(sudo docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/' || true)"
+  LOCAL_DOCKER_HASH="$(docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' || true)"
+  REMOTE_DOCKER_HASH="$(docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/' || true)"
 
   if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
     echo -e "    Docker image version - ${GREEN}ok${NC}"
@@ -154,22 +154,26 @@ dependency_check()
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - \\c" "no_log"
 
-    if [[ -n "${PROXY_SETTINGS}" ]]; then
-      export http_proxy="${PROXY_SETTINGS}"
-      export https_proxy="${PROXY_SETTINGS}"
-      print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
-    fi
-
     LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/' || true)"
     if [[ -z "${LATEST_EMBA_VERSION}" ]] ; then
       echo -e "${RED}""not ok""${NC}"
       print_output "[-] Warning: Quest container has no internet connection!" "no_log"
     else
       echo -e "${GREEN}""ok""${NC}"
-      check_emba_version "${LATEST_EMBA_VERSION}"
-      check_docker_image
-      check_git_hash
+      # ensure this only runs on the host and not in any container
+      if [[ "${IN_DOCKER}" -eq 0 ]]; then
+        check_emba_version "${LATEST_EMBA_VERSION}"
+        check_docker_image
+        check_git_hash
+      fi
     fi
+
+    if [[ -n "${PROXY_SETTINGS}" ]]; then
+      export http_proxy="${PROXY_SETTINGS}"
+      export https_proxy="${PROXY_SETTINGS}"
+      print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
+    fi
+
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
         # readin gpt_config.env
@@ -517,7 +521,11 @@ dependency_check()
       check_dep_file "Binarly FwHunt analyzer" "${EXT_DIR}""/fwhunt-scan/fwhunt_scan_analyzer.py"
 
       if function_exists F20_vul_aggregator; then
-        check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
+        # ensure this check is not running as github action:
+        # "${CONFIG_DIR}"/gh_action is created from the installer
+        if ! [[ -f "${CONFIG_DIR}"/gh_action ]]; then
+          check_dep_file "NVD CVE database" "${EXT_DIR}""/nvd-json-data-feeds/README.md"
+        fi
         # CVE searchsploit
         check_dep_tool "CVE Searchsploit" "cve_searchsploit"
 
