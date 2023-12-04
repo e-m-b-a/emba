@@ -18,7 +18,7 @@
 F21_cyclonedx_sbom() {
   module_log_init "${FUNCNAME[0]}"
   module_title "CycloneDX SBOM converter"
-
+  pre_module_reporter "${FUNCNAME[0]}"
   local F20_LOG="${CSV_DIR}""/f20_vul_aggregator.csv"
   local BIN_VER_SBOM_ARR=()
   local BIN_VER_SBOM_ENTRY=""

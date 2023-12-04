@@ -53,13 +53,6 @@ IF20_nvd_feed() {
           echo -e "\\n""${MAGENTA}""NVD JSON data feed is not ready.""${NC}"
         fi
 
-        sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater.init > config/emba_updater
-        sed -e "s#EMBA_INSTALL_PATH#$(pwd)#" config/emba_updater_data.init > config/emba_updater_data
-        chmod +x config/emba_updater
-        chmod +x config/emba_updater_data
-        echo -e "\\n""${MAGENTA}""${BOLD}""The cron.daily update script for EMBA is located in config/emba_updater""${NC}"
-        echo -e "${MAGENTA}""${BOLD}""For automatic updates it should be checked and copied to /etc/cron.daily/""${NC}"
-
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component NVD JSON data feed" && exit 1 )
       ;;
     esac
