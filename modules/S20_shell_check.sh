@@ -84,12 +84,11 @@ S20_shell_check()
 
     semgrep --disable-version-check --config "${EXT_DIR}"/semgrep-rules/bash "${LOG_DIR}"/firmware/ > "${SHELL_LOG}" 2>&1 || true
 
-    if [[ -f "${SHELL_LOG}" ]]; then
+    if [[ -s "${SHELL_LOG}" ]]; then
       S20_SEMGREP_ISSUES=$(grep "\ findings\." "${SHELL_LOG}" | cut -d: -f2 | awk '{print $1}' || true)
       S20_SEMGREP_VULNS=$(grep -c "semgrep-rules.bash.lang.security" "${SHELL_LOG}" || true)
       S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "${SHELL_LOG}" | awk '{print $5}' || true)
       print_ln
-      sub_module_title "Summary of shell issues (semgrep)"
       if [[ "${S20_SEMGREP_VULNS}" -gt 0 ]]; then
         print_output "[+] Found ""${ORANGE}""${S20_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${S20_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${S20_SEMGREP_SCRIPTS}""${GREEN}"" shell scripts""${NC}" "" "${SHELL_LOG}"
       elif [[ "${S20_SEMGREP_ISSUES}" -gt 0 ]]; then
@@ -97,6 +96,8 @@ S20_shell_check()
       fi
       # highlight security findings in semgrep log:
       sed -i -r "s/.*external\.semgrep-rules\.bash\.lang\.security.*/\x1b[32m&\x1b[0m/" "${SHELL_LOG}"
+    else
+      print_output "[-] No shell issues found with semgrep"
     fi
 
     [[ "${S20_SEMGREP_ISSUES}" -gt 0 ]] && NEG_LOG=1
@@ -117,6 +118,8 @@ s20_eval_script_check() {
   local SH_SCRIPT=""
   local GPT_PRIO_=3
   local GPT_ANCHOR_=""
+
+  sub_module_title "Summary of shell eval usages"
 
   for SH_SCRIPT in "${SH_SCRIPTS_[@]}" ; do
     print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
