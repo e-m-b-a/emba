@@ -20,6 +20,7 @@ Q02_openai_question() {
     module_log_init "${FUNCNAME[0]}"
     # Prints title to CLI and into log
     module_title "AI analysis via OpenAI"
+    pre_module_reporter "${FUNCNAME[0]}"
     export CHATGPT_RESULT_CNT=0
 
     # we wait until there arer entries in the question csv

@@ -20,7 +20,7 @@ export PRE_THREAD_ENA=0
 P02_firmware_bin_file_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Binary firmware file analyzer"
-
+  pre_module_reporter "${FUNCNAME[0]}"
   set_p02_default_exports
 
   local FILE_BIN_OUT

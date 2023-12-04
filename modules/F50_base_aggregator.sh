@@ -19,6 +19,7 @@
 F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Final aggregator"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
   F20_EXPLOITS_LOG="${LOG_DIR}"/f20_vul_aggregator/exploits-overview.txt
