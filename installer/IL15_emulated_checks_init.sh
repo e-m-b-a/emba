@@ -111,10 +111,10 @@ IL15_emulated_checks_init() {
         sed -i 's/routersploit\.log/\/tmp\/routersploit\.log/' ./rsf.py
       fi
       # patch some code to write the history files to a subdirectory in /root
-      if grep -q  ~/'.history' ./routersploit/interpreter.py; then
+      if grep -q  '\~/.history' ./routersploit/interpreter.py; then
         sed -i 's/~\/\.history/~\/\.routersploit\/\.history/' ./routersploit/interpreter.py
       fi
-      if grep -q  ~/'.rsf_history' ./routersploit/interpreter.py; then
+      if grep -q  '\~/.rsf_history' ./routersploit/interpreter.py; then
         sed -i 's/~\/\.rsf_history/~\/\.routersploit\/\.rsf_history/' ./routersploit/interpreter.py
       fi
 
