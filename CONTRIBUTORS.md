@@ -36,6 +36,7 @@ These people have contributed to EMBA:
 * [nightlark](https://github.com/nightlark)
 * [HoxhaEndri](https://github.com/HoxhaEndri)
 * [413x8](https://github.com/413x8)
+* [mj138](https://github.com/mj138)
 
 
 ==========================================================================================
