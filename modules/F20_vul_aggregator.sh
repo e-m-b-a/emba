@@ -555,7 +555,7 @@ check_cve_sources() {
   local CVE_VER_SOURCES_FILE="${3:-}"
 
   local BIN_VERSION_ONLY=""
-  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_}" | cut -d':' -f2)
+  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_}" | rev | cut -d':' -f1 | rev)
   local BIN_NAME=""
   BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
   local CVE_VER_START_INCL=""
