@@ -90,8 +90,8 @@ S99_grepit() {
 
   grepit_reporter
 
-  GREPIT_RESULTS=$(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}"/[0-9]_* | cut -d: -f2 | paste -sd+ | bc)
-  print_ln
+  GREPIT_RESULTS=$(grep -v -c -E "\ Searching\ \(" "${LOG_PATH_MODULE}"/[0-9]_* | cut -d: -f2 | paste -sd+ | bc || true)
+  print_output "\n"
   print_output "[*] Found ${ORANGE}${GREPIT_RESULTS}${NC} results via grepit."
 
   module_end_log "${FUNCNAME[0]}" "${GREPIT_RESULTS}"
@@ -174,7 +174,6 @@ grepit_search() {
       # this is the output to the terminal. For the final report we wait till all tests are finished and then we
       # parse the csv output file and sort it according the test priority - 1-9, where 1 is more interesting
       # (low false positive rate, certainty of "vulnerability") and 9 is only "you might want to have a look when you are desperately looking for vulns")
-      print_ln
       print_output "[*] ${ORANGE}${LINES_OF_OUTPUT}${NC} results of grepit module ${ORANGE}${CURRENT_TEST}${NC}." "no_log"
       write_csv_log "${CURRENT_TEST}" "${LINES_OF_OUTPUT}" "${ARGS_FOR_GREP[*]}" "${SEARCH_REGEX}" "${COMMENT}"
     fi
