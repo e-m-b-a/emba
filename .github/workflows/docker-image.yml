@@ -31,11 +31,7 @@ jobs:
           large-packages: false
           swap-storage: true
       - name: EMBA container build
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 600
-          max_attempts: 3
-          command: |
+        run: |
             sudo docker image prune -f
             sudo docker container prune -f
             sudo apt-get update -y
