@@ -1,18 +1,17 @@
 name: EMBA Docker Image build
 
 on:
+  # push:
+  #  branches:
+  #    - '**'        # matches every branch
+  # pull_request:
+  #  branches:
+  #    - '**'
+      # Allows you to run this workflow manually from the Actions tab
+  # workflow_dispatch:
   schedule:
     - cron: '0 0 * * *' # do it every day
 
-#on:
-#  push:
-#    branches:
-#      - '**'        # matches every branch
-#  pull_request:
-#    branches:
-#      - '**'
-#      # Allows you to run this workflow manually from the Actions tab
-#  workflow_dispatch:
 
 jobs:
   docker-build:
@@ -32,11 +31,7 @@ jobs:
           large-packages: false
           swap-storage: true
       - name: EMBA container build
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 600
-          max_attempts: 3
-          command: |
+        run: |
             sudo docker image prune -f
             sudo docker container prune -f
             sudo apt-get update -y
@@ -44,6 +39,5 @@ jobs:
             mkdir ./external
             python3 -m venv "./external/emba_venv"
             source "./external/emba_venv/bin/activate"
-            sudo docker-compose build --no-cache --pull
-            sudo ./emba -d 2 -y
-            deactivate
+            echo "GH_action:true" > ./config/gh_action
+            sudo docker-compose build --no-cache --pull && sudo ./emba -d 2 -y

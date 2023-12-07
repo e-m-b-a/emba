@@ -159,21 +159,24 @@ final_cwe_log() {
   local CWE_CNT=""
 
   if [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
-    print_ln
-    if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
-      print_bar
-      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
-      for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
-        CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"
-        # do not change this to grep -c!
-        # shellcheck disable=SC2126
-        CWE_CNT="$(grep "${CWE}" "${LOG_PATH_MODULE}"/cwe_*.log 2>/dev/null | wc -l || true)"
-        print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
-      done
-      print_bar
+    local CWE_LOGS=("${LOG_PATH_MODULE}"/cwe_*.log)
+    if [[ "${#CWE_LOGS[@]}" -gt 0 ]]; then
+      mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
       print_ln
+      if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
+        print_bar
+        print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
+        for CWE_LINE in "${CWE_OUT[@]}"; do
+          CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
+          CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"
+          # do not change this to grep -c!
+          # shellcheck disable=SC2126
+          CWE_CNT="$(grep "${CWE}" "${LOG_PATH_MODULE}"/cwe_*.log 2>/dev/null | wc -l || true)"
+          print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
+        done
+        print_bar
+        print_ln
+      fi
     fi
   fi
 }
