@@ -87,6 +87,9 @@ I13_disasm() {
         # apt-get install radare2 libradare2-dev libradare2-common libradare2-5.0.0 -y
         git clone https://github.com/radareorg/radare2.git external/radare2
         cd external/radare2 || ( echo "Could not install EMBA component radare2" && exit 1 )
+        # we remove the line to execute the script again as sudo user (non root)
+        # this mechanism is not working with our docker container and results in an endless loop
+        sed -i '/exec sudo -u.*install.sh \$\*/d' sys/install.sh
         sys/install.sh
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component radare2" && exit 1 )
 
