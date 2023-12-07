@@ -4,15 +4,15 @@ on:
   schedule:
     - cron: '0 0 * * *' # do it every day
 
-#on:
-#  push:
-#    branches:
-#      - '**'        # matches every branch
-#  pull_request:
-#    branches:
-#      - '**'
-#      # Allows you to run this workflow manually from the Actions tab
-#  workflow_dispatch:
+on:
+  push:
+    branches:
+      - '**'        # matches every branch
+  pull_request:
+    branches:
+      - '**'
+      # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   docker-build:
