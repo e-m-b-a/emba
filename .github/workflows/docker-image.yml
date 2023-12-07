@@ -44,6 +44,4 @@ jobs:
             mkdir ./external
             python3 -m venv "./external/emba_venv"
             source "./external/emba_venv/bin/activate"
-            sudo docker-compose build --no-cache --pull
-            sudo ./emba -d 2 -y
-            deactivate
+            sudo docker-compose build --no-cache --pull && sudo ./emba -d 2 -y
