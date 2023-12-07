@@ -3,7 +3,7 @@ name: EMBA Docker Image build
 on:
   # push:
   #  branches:
-      - '**'        # matches every branch
+  #    - '**'        # matches every branch
   # pull_request:
   #  branches:
   #    - '**'
