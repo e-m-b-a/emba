@@ -32,6 +32,7 @@ I20_sourcecode_check() {
     print_tool_info "luarocks" 1
     print_pip_info "semgrep"
     print_git_info "semgrep-rules" "returntocorp/semgrep-rules" "Standard library for Semgrep rules"
+    print_git_info "0xdea C/C++ semgrep-rules" "0xdea/semgrep-rules" "C/C++ Semgrep rules by 0xdea"
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
 
@@ -51,6 +52,9 @@ I20_sourcecode_check() {
         pip_install "semgrep"
         if ! [[ -d external/semgrep-rules ]]; then
           git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules
+        fi
+        if ! [[ -d external/semgrep-rules-0xdea ]]; then
+          git clone https://github.com/0xdea/semgrep-rules.git external/semgrep-rules-0xdea
         fi
 
         if ! [[ -d "external/iniscan" ]] ; then
