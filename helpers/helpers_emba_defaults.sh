@@ -132,4 +132,5 @@ set_defaults() {
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   export Q_MOD_PID=""
   export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
+  export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
 }
