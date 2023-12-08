@@ -34,7 +34,7 @@ I120_cwe_checker() {
     echo -e "${ORANGE}""cwe-checker will be downloaded.""${NC}"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
     print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip" "external/ghidra.zip"
-    print_file_info "Ghidra Haruspex script" "Decompiled code exporter" "https://raw.githubusercontent.com/0xdea/ghidra-scripts/main/Haruspex.java" "external/ghidra_scripts"
+    print_file_info "Ghidra Haruspex script" "Decompiled code exporter" "https://raw.githubusercontent.com/EMBA-support-repos/ghidra-scripts-0xdea/main/Haruspex.java" "external/ghidra_scripts"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
