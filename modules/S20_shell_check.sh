@@ -123,7 +123,7 @@ s20_eval_script_check() {
   sub_module_title "Summary of shell eval usages"
 
   for SH_SCRIPT in "${SH_SCRIPTS_[@]}" ; do
-    print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
+    # print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
     if grep "eval " "${SH_SCRIPT}" | grep -q -v "^#.*"; then
       EVAL_RESULTS=1
       SH_SCRIPT_NAME="$(basename "${SH_SCRIPT}")"
