@@ -20,7 +20,6 @@ IF20_nvd_feed() {
   if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] || [[ "${CVE_SEARCH}" -eq 1 ]] || [[ "${FULL}" -eq 1 ]]; then
 
     print_git_info "NVD JSON data feed" "EMBA-support-repos/nvd-json-data-feeds" "The NVD data feed is JSON database to facilitate search and processing of CVEs."
-    echo -e "${ORANGE}""NVD JSON data feed will be downloaded.""${NC}"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${IN_DOCKER}" -eq 1 ]] ; then
       ANSWER=("n")
