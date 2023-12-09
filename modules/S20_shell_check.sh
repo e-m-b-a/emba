@@ -118,12 +118,14 @@ s20_eval_script_check() {
   local SH_SCRIPT=""
   local GPT_PRIO_=3
   local GPT_ANCHOR_=""
+  local EVAL_RESULTS=0
 
   sub_module_title "Summary of shell eval usages"
 
   for SH_SCRIPT in "${SH_SCRIPTS_[@]}" ; do
     print_output "[*] Testing ${ORANGE}${SH_SCRIPT}${NC} for eval usage" "no_log"
     if grep "eval " "${SH_SCRIPT}" | grep -q -v "^#.*"; then
+      EVAL_RESULTS=1
       SH_SCRIPT_NAME="$(basename "${SH_SCRIPT}")"
       local SHELL_LOG="${LOG_PATH_MODULE}"/sh_eval_sources/"${SH_SCRIPT_NAME}".log
       ! [[ -d "${LOG_PATH_MODULE}"/sh_eval_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/sh_eval_sources/
@@ -141,6 +143,9 @@ s20_eval_script_check() {
       fi
     fi
   done
+  if [[ "${EVAL_RESULTS}" -eq 0 ]]; then
+    print_output "[-] No eval usage found in shell scripts"
+  fi
 }
 
 s20_script_check() {
