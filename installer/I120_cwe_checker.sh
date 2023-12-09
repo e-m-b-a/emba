@@ -71,7 +71,7 @@ I120_cwe_checker() {
 
         # further Ghidra installation stuff:
         mkdir external/ghidra_scripts
-        download_file "Ghidra Haruspex script" "https://raw.githubusercontent.com/0xdea/ghidra-scripts/main/Haruspex.java" "external/ghidra_scripts/Haruspex.java"
+        download_file "Ghidra Haruspex script" "https://raw.githubusercontent.com/EMBA-support-repos/ghidra-scripts-0xdea/main/Haruspex.java" "external/ghidra_scripts/Haruspex.java"
 
         if ! [[ -d ./external/cwe_checker ]]; then
           # cleanup first
