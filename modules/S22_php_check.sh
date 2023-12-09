@@ -241,7 +241,7 @@ s22_check_php_ini(){
   PHP_INI_WARNINGS=0
 
   mapfile -t PHP_INI_FILE < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
-  if [[ "${#PHP_INI_FILE}" -eq 0 ]]; then
+  if [[ "${#PHP_INI_FILE[@]}" -eq 0 ]]; then
     print_output "[-] No PHP.ini issues found"
     return
   fi
