@@ -26,23 +26,25 @@ S120_cwe_checker()
 {
   if [[ ${CWE_CHECKER} -eq 1 ]] ; then
     module_log_init "${FUNCNAME[0]}"
-    module_title "Check binaries with cwe-checker"
+    module_title "Check binaries for vulnerabilities with cwe-checker"
     pre_module_reporter "${FUNCNAME[0]}"
-    local CWE_CNT_=0
+    local lCWE_CNT_=0
+    local lTESTED_BINS=0
 
     [[ "${IN_DOCKER}" -eq 1 ]] && cwe_container_prepare
 
     cwe_check
 
     if [[ -f "${TMP_DIR}"/CWE_CNT.tmp ]]; then
-      CWE_CNT_=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/CWE_CNT.tmp || true)
+      lCWE_CNT_=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/CWE_CNT.tmp || true)
+      lTESTED_BINS=$(grep -c " Tested " "${LOG_FILE}" || true)
     fi
 
-    final_cwe_log "${CWE_CNT_}"
+    final_cwe_log "${lCWE_CNT_}"
 
     write_log ""
-    write_log "[*] Statistics:${CWE_CNT_}"
-    module_end_log "${FUNCNAME[0]}" "${CWE_CNT_}"
+    write_log "[*] Statistics:${lCWE_CNT_}:${lTESTED_BINS}"
+    module_end_log "${FUNCNAME[0]}" "${lCWE_CNT_}"
   else
     print_output "[!] Check with cwe-checker is disabled!"
     print_output "[!] Enable it with the -c switch."
