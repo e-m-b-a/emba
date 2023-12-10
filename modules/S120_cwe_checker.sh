@@ -112,7 +112,7 @@ cwe_checker_threaded () {
   local NAME=""
   NAME=$(basename "${BINARY_}")
 
-  if [[ -f "${BASE_LINUX_FILES}" ]]; then
+  if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
     # if we have the base linux config file we only test non known Linux binaries
     # with this we do not waste too much time on open source Linux stuff
     if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
