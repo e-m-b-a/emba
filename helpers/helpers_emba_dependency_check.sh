@@ -648,6 +648,8 @@ dependency_check()
         check_emulation_port "Running Qemu telnet service" "4321"
       fi
 
+      check_dep_file "GHIDRA" "${GHIDRA_PATH}""/ghidraRun"
+
       if [[ "${CWE_CHECKER}" -eq 1 ]]; then
         if [[ -d "${HOME}"/.cargo/bin ]]; then
           export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/

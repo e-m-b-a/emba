@@ -802,7 +802,7 @@ check_kernel_major_v() {
   local lKERNEL_CVE_VER="${2:-}"
   local lCVE_ID="${3:-}"
   if [[ "${lBIN_VERSION_ONLY:0:1}" != "${lKERNEL_CVE_VER:0:1}" ]]; then
-    print_output "[-] Info for CVE ${ORANGE}${lCVE_ID}${NC} - Major kernel version not matching ${ORANGE}${lKERNEL_CVE_VER}${NC} vs ${ORANGE}${lBIN_VERSION_ONLY}${NC} - Higher false positive risk"
+    print_output "[-] Info for CVE ${ORANGE}${lCVE_ID}${NC} - Major kernel version not matching ${ORANGE}${lKERNEL_CVE_VER}${NC} vs ${ORANGE}${lBIN_VERSION_ONLY}${NC} - Higher false positive risk" "no_log"
   fi
 }
 

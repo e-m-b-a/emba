@@ -34,6 +34,7 @@ I120_cwe_checker() {
     echo -e "${ORANGE}""cwe-checker will be downloaded.""${NC}"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
     print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip" "external/ghidra.zip"
+    print_file_info "Ghidra Haruspex script" "Decompiled code exporter" "https://raw.githubusercontent.com/EMBA-support-repos/ghidra-scripts-0xdea/main/Haruspex.java" "external/ghidra_scripts"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -47,8 +48,32 @@ I120_cwe_checker() {
         echo
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-        if ! [[ -d ./external/cwe_checker ]]; then
+        ## GHIDRA
 
+        # Java SDK for ghidra
+        if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
+        curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
+        mkdir external/jdk 2>/dev/null
+        tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
+        rm external/jdk.tar.gz
+
+        # Ghidra
+        if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
+        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip -Sf -o external/ghidra.zip
+        mkdir external/ghidra 2>/dev/null
+        unzip -qo external/ghidra.zip -d external/ghidra
+        if [[ "${IN_DOCKER}" -eq 1 ]]; then
+          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+        else
+          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+        fi
+        rm external/ghidra.zip
+
+        # further Ghidra installation stuff:
+        mkdir external/ghidra_scripts
+        download_file "Ghidra Haruspex script" "https://raw.githubusercontent.com/EMBA-support-repos/ghidra-scripts-0xdea/main/Haruspex.java" "external/ghidra_scripts/Haruspex.java"
+
+        if ! [[ -d ./external/cwe_checker ]]; then
           # cleanup first
           rm "${HOME}"/.cargo -r -f
           rm "${HOME}"/.config -r -f
@@ -57,25 +82,6 @@ I120_cwe_checker() {
           curl https://sh.rustup.rs -sSf | sh -s -- -y
 
           export PATH="${PATH}":"${HOME}"/.cargo/bin
-
-          # Java SDK for ghidra
-          if [[ -d ./external/jdk ]] ; then rm -R ./external/jdk ; fi
-          curl -L https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -Sf -o external/jdk.tar.gz
-          mkdir external/jdk 2>/dev/null
-          tar -xzf external/jdk.tar.gz -C external/jdk --strip-components 1
-          rm external/jdk.tar.gz
-
-          # Ghidra
-          if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
-          curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip -Sf -o external/ghidra.zip
-          mkdir external/ghidra 2>/dev/null
-          unzip -qo external/ghidra.zip -d external/ghidra
-          if [[ "${IN_DOCKER}" -eq 1 ]]; then
-            sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
-          else
-            sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
-          fi
-          rm external/ghidra.zip
 
           if [[ -d ./external/cwe_checker ]] ; then rm -R ./external/cwe_checker ; fi
           mkdir ./external/cwe_checker 2>/dev/null

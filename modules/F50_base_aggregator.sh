@@ -32,6 +32,7 @@ F50_base_aggregator() {
   S12_LOG="s12_binary_protection.txt"
   S13_LOG="s13_weak_func_check.txt"
   S14_LOG="s14_weak_func_radare_check.txt"
+  S16_LOG="s16_ghidra_decompile_checks.txt"
   S17_CSV_LOG="${CSV_DIR}""/s17_apk_check.csv"
   S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
   S02_LOG="s02_uefi_fwhunt.txt"
@@ -503,6 +504,11 @@ output_binaries() {
 
   cwe_logging
 
+  if [[ "${S16_GHIDRA_SEMGREP:-0}" -gt 0 ]]; then
+    print_output "[+] Found ""${ORANGE}""${S16_GHIDRA_SEMGREP}""${GREEN}"" possible vulnerabilities (via semgrep in Ghidra decompiled code) in ""${ORANGE}""${S16_BINS_CHECKED}""${GREEN}"" tested binaries.""${NC}"
+    write_link "s16"
+  fi
+
   if [[ "${STRCPY_CNT:-0}" -gt 0 ]]; then
     print_output "[+] Found ""${ORANGE}""${STRCPY_CNT}""${GREEN}"" usages of strcpy in ""${ORANGE}""${BINS_CHECKED}""${GREEN}"" binaries.""${NC}"
     if [[ $(find "${LOG_DIR}""/s13_weak_func_check/" -type f 2>/dev/null | wc -l) -gt $(find "${LOG_DIR}""/s14_weak_func_radare_check/" -type f 2>/dev/null | wc -l) ]]; then
@@ -790,6 +796,8 @@ get_data() {
   export S22_PHP_INI_ISSUES=0
   export S22_PHP_INI_CONFIGS=0
   export S24_FAILED_KSETTINGS=0
+  export S16_GHIDRA_SEMGREP=0
+  export S16_BIN_CHECKED=0
   export MOD_DATA_COUNTER=0
   export KMOD_BAD=0
   export S40_WEAK_PERM_COUNTER=0
@@ -873,6 +881,10 @@ get_data() {
     STRCPY_CNT=$((STRCPY_CNT_14+STRCPY_CNT_13))
   else
     STRCPY_CNT="${STRCPY_CNT_13}"
+  fi
+  if [[ -f "${LOG_DIR}"/"${S16_LOG}" ]]; then
+    S16_GHIDRA_SEMGREP=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S16_LOG}" | cut -d: -f2 || true)
+    S16_BINS_CHECKED=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S16_LOG}" | cut -d: -f3 || true)
   fi
   if [[ -f "${LOG_DIR}"/"${S20_LOG}" ]]; then
     S20_SHELL_VULNS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S20_LOG}" | cut -d: -f2 || true)
@@ -1141,7 +1153,7 @@ cwe_logging() {
     mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${LOG_DIR_MOD}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
 
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
-      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
+      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in firmware binaries:"
       write_link "s120"
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
         CWE="$(echo "${CWE_ENTRY}" | awk '{print $1}')"

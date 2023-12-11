@@ -21,6 +21,7 @@ export HTML=1
 export CWE_CHECKER=1
 export QEMULATION=1
 export FULL_EMULATION=1
+export FULL_TEST=1
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
