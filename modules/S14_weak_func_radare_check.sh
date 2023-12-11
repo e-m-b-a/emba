@@ -174,9 +174,9 @@ radare_function_check_PPC32(){
       radare_log_bin_hardening "${NAME}" "${FUNCTION}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
         radare_color_output "${FUNCTION}"
@@ -214,9 +214,9 @@ radare_function_check_MIPS() {
     radare_log_bin_hardening "${NAME}" "${FUNCTION}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
       # For the mmap check we need the disasm after the call
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${BINARY_}" 2>/dev/null | grep -A 20 "^l[wd] .*${FUNCTION}""(gp)" >> "${FUNC_LOG}" || true
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${BINARY_}" 2>/dev/null | grep -A 20 "^l[wd] .*${FUNCTION}""(gp)" >> "${FUNC_LOG}" || true
     else
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${BINARY_}" 2>/dev/null | grep -A 20 -B 25 "^l[wd] .*${FUNCTION}""(gp)" >> "${FUNC_LOG}" || true
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${BINARY_}" 2>/dev/null | grep -A 20 -B 25 "^l[wd] .*${FUNCTION}""(gp)" >> "${FUNC_LOG}" || true
     fi
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
       radare_color_output "${FUNCTION}"
@@ -255,9 +255,9 @@ radare_function_check_ARM64() {
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
     radare_log_bin_hardening "${NAME}" "${FUNCTION}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     else
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 2 -B 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 2 -B 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
       radare_color_output "${FUNCTION}"
@@ -296,9 +296,9 @@ radare_function_check_ARM32() {
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
     radare_log_bin_hardening "${NAME}" "${FUNCTION}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     else
-      r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 2 -B 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+      r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 2 -B 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     fi
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
       radare_color_output "${FUNCTION}"
@@ -339,9 +339,9 @@ radare_function_check_hexagon() {
       radare_log_bin_hardening "${NAME}" "${FUNCTION}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
         radare_color_output "${FUNCTION}"
@@ -381,9 +381,9 @@ radare_function_check_x86() {
       radare_log_bin_hardening "${NAME}" "${FUNCTION}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
         radare_color_output "${FUNCTION}"
@@ -423,9 +423,9 @@ radare_function_check_x86_64() {
       radare_log_bin_hardening "${NAME}" "${FUNCTION}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       else
-        r2 -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
+        r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 2 -B 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
       fi
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
         radare_color_output "${FUNCTION}"
