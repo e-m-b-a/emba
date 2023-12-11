@@ -216,10 +216,10 @@ analyse_fw_files() {
             # let's do a diff on the complete radare2 output:
             # create disassembly from file in first directory:
             # shellcheck disable=SC2016
-            r2 -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${FW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_dir1.txt
+            r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${FW_FILE1}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_dir1.txt
             # create disassembly from file in second directory:
             # shellcheck disable=SC2016
-            r2 -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${FW_FILE2}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt
+            r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pd $s' "${FW_FILE2}" 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt
             # create diff of both disassemblies:
             diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_dir1.txt "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_dir2.txt 2>/dev/null > "${LOG_PATH_MODULE_SUB}"/colordiff_radare2_disasm_"${FW_FILE_NAME1}".txt || true
 
@@ -284,11 +284,11 @@ analyse_bin_fct() {
     # now we need to generate the disassembly of the current function of both files to include it in the report for further manual tear-down
     write_log "[*] Disassembly function ${ORANGE}${FCT}${NC} of ${ORANGE}${FW_FILE_NAME1}${NC} in ${ORANGE}first${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt
     write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt
-    r2 -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE1}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt || true
+    r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE1}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME1}"_"${FCT}"_dir1.txt || true
 
     write_log "[*] Disassembly function ${ORANGE}${FCT}${NC} of ${ORANGE}${FW_FILE_NAME2}${NC} in ${ORANGE}second${NC} firmware directory" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt
     write_log "" "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt
-    r2 -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE2}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt || true
+    r2 -e bin.cache=true -e io.cache=true -e scr.color=false -A -q -c 'pdf @ '"${FCT}" "${FW_FILE2}" 2>/dev/null >> "${LOG_PATH_MODULE_SUB}"/r2_disasm_"${FW_FILE_NAME2}"_"${FCT}"_dir2.txt || true
   fi
 
   if [[ -s "${LOG_PATH_MODULE}/r2_fct_graphing/r2_fct_graph_${FW_FILE_NAME1}_${FCT}.png" ]]; then
