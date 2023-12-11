@@ -1153,7 +1153,7 @@ cwe_logging() {
     mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${LOG_DIR_MOD}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
 
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
-      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
+      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in firmware binaries:"
       write_link "s120"
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
         CWE="$(echo "${CWE_ENTRY}" | awk '{print $1}')"
