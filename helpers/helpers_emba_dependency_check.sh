@@ -648,6 +648,7 @@ dependency_check()
         check_emulation_port "Running Qemu telnet service" "4321"
       fi
 
+      export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
       check_dep_file "GHIDRA" "${GHIDRA_PATH}""/ghidraRun"
 
       if [[ "${CWE_CHECKER}" -eq 1 ]]; then
