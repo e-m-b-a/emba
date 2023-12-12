@@ -295,6 +295,14 @@ if [[ $(version "${DOCKER_COMP_VER}") -lt $(version "1.28.5") ]]; then
   read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
 fi
 
+# check pip3 docker version TODO move into pipenv
+DOCKER_VER=$(pip3 show docker | grep Version: | awk '{print $2}')
+if [[ $(version "${DOCKER_VER}") -ge $(version "7.0.0") ]]; then
+  echo -e "\n${ORANGE}WARNING: compatibility of the used docker version is unknown!${NC}"
+  echo -e "\n${ORANGE}Please consider downgrading your pip3 docker version. \$pip3 install \"docker<7.0.0\"${NC}"
+  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+fi
+
 if [[ "${OTHER_OS}" -eq 1 ]]; then
   # UBUNTU
   if [[ "${UBUNTU_OS}" -eq 1 ]]; then
