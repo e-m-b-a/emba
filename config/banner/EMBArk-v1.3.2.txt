@@ -1,0 +1,51 @@
+
+EMBA version 1.3.2 - Hello EMBArk edt.
+
+
+
+                                                                                                                            .............
+                                                                                                                          .':c:;;;;;;;;;.   .,;;:'.
+                                                                                                     ....                 .od::;;;;;;;;;;;;;ol..;l'    .,'.
+                                                                                                    '::;c;.......  .';;.';,lo,'.'.';:::::::,;c:;c:.   .coo;.
+                                                                                                    :l. ;dc:lccll:..codl:l;l;   ..:c;;:;;;;. .','.....:l:,.      ..
+                                                                                                    .;:;:,.'::;;:cc;'',;dd;l;   'l;..:;.    .,::;;;;;:;.       .:;;:'.
+                                                                                     ... .,;,,,,,,,,,,;;.  ,:::,,..;c;. .:ox;   ,l'.c;.,:;:llol;;;;;;;;;;;;;;;:dc..:l.
+                                                                                   .;:;::,;:;;;;;;;;;;;:l;.,ccc;;c:..;l,. 'o;   ,l' .'c:...:llc:::::::c,.......,c:;c,.
+                                                                                   ,o, .oo;;;;;;;;;;;;;:dl. ..   .;.  ,;. .;'   .;.  ,;.    .coollll;''.  .;;;;;;cc:;'.
+                                                                                   .,:;:;..,::,.  .,;,..lo.   'llccccccccccdoccccccccccco:.   .,,,,;c:,',cdolllllllllc,,;:;.
+                                                                ..'..            ..,',,,,',:ccdo:;l:,:l::do;,.:k:.........,kl...........dd.','''''',',;;;;;;;;;;;;;;;;;:ccc,
+                                                               .c:;:c,............:lccclcccddc;;;co;.,oc;;;;;.:x,  'ccccccoOc   '' .'.  od.,;;;lxocl:...,;;;;;;;;;;;;;;;:c::'              ....
+                                                               ,o,.'ol;;;;;;;;;;::::::::::::,.....,:::,...... ;x,  ..''''.;kc  .oo..dl  od. ....';;;;;;:oocccccccccccccccccc:;;;;;;;;;;;;;;ccl;.
+                                                               .,;;;,.     .,...;;;;;;;;;;;;;;;;lo:;;;;;;;;;;.:x,  'ccccccoOc  .oo..xl  od.,;;;:;,.     .',''''''''''''''''''''''',:c:,'''';;:'.
+                                                                          'looc;;;;;;;;;;;;;;;;::'.  .,:::'.  ;x,  .......,kc  .oo..dl  od.   .:doo:;;;;;;;;;;;;;;;;;;;;;;;;;:,.  .loo;
+                                                           ...            .';,...'::::::::::::::;;;;;;:clddc;.:Odccccccccco0kccckkclkxccOd',;,..,;'...,c:::::::::::::::::::::c:;;;cc;,.
+                                                          .:cc:,,,,,;,,,,,,,,,,;:c;:llcllllllclllllcccloc,....:kc''''''''':Od'''''''''',xd..':c;,,,,;cddllllllllcll,...'............   .,;'.
+                                                          .;::;,,,;:lc;,;colllloc;,:olllllllldd:,,,,,,,..''''.:x,  .:cc'. .xc    .''    od.''':llllllllllllllllllll;',;::;'''''''''''';l:,:c'
+                                                            .    .:c;:c,.:lccccccccccccccccccc'.,;;'...;c:;;;.:x,  .,,,. .cOc     ..    od',;;;;;;;;;;;;;,;;;,,,,,,;;:cccc;;;;;;;;;;;;co;.;l,
+                                                                 'o;..lo;;;;;;;;;;;;;;;;;;;;;;;;llll;;:;..... ;x,  'ccc, .;Oc     ..    od. ......,;;;;;;;;;;;;;;;;;;,...             ..;;;'.
+                                                                 .';;:;.   .,,,,,,,,,,,,,,,,,,,'.''.   .::;;;.:x,  .'''.  .xc    .ol    od',;;;;;ldolllllllllllllllllc;,,,,,;'.   ....
+                                                                       .';'',;,,;cllllllllllllodl;;;;;::,.',. ;Od:::::::::lOx::::cOkc::ckd.    ...,codoc:::::::::::::::::::::;...;:;::.
+                                                                       'ood;    .,:;;;;;;;;;;;;;........ ;ooc..,;cl:;;cl:;:lc;;;cl:;;cl:;'    .::;;:oooc;ll:;;;;;;;;;;;;;;;;;;;;cd, .l:.
+                                                                       ..,;::;;;;;;;;;;;;;;;;;;;;;;;;;:;..,;'.  .:l. .l:. 'l,   'o;  ;l.    .:c,.  ..,'...::;;;;;;;;;;;;;;;;;:;..,:;:;.
+                                                                           ..........;::::::::::::::::cdd:;;,;;;c:'.;l;..:c,.   ,do:'.;c:;;cdd:;;;;;;;;;. ......................   ..
+                                                                                    .',,,,,,;cccccccc:c::c::::::;..':,':c,.    .clc:c:''::::::::::::::cc,...,;;'.
+                                                                                            .;;;;;;;;;;;;;;;;;;;;;;;;;:,.      .:::..':;;;;;;;;;;;;;;;;;;;;:lll:.
+                                                                                                                                ...                         ....
+                                                                                    .,;;;;;;;;'. .';;,.    ..;;;'. .';;;;;,,''..       .;;;'.              .;ll;.
+                                                                                    ;KWWNNXNXNO' 'OWWWk.   ;0WWWx. .xWWNXXXNNXKo.     'kWWWXc              .dMMk.
+                                                                                    ;XMWx;,,,,'. '0MMMWx. ,0MMMMk. .xMM0:';xWMMX:    .dWWNNM0,    .clc',cl'.dMMk. .:ll;.
+                                                                                    ;XMW0ddddd;. '0MWKXWd;kWKXMMk. .xMMXdco0WMNo.    cNM0cxWWk.   :XMWKKNXl.dMMk.;OWNx,.
+                                                                                    ;XMMKkkkkk:. '0MWolNNXWOcOMMx. .xMMN0OOKNMNOc.  ;KMNo.:KMNo.  ;XMNo,',..dMM0kXMK:.
+                                                                                    ;XMWl        '0MWl.oNW0,.OMMx. .xMMO' ..xWMMX: .kMMWK00NMMX:. ;XMX;    .dMMN0XMXl.
+                                                                                    ;XMW0ooooo:. '0MWl .,;' .OMMx. .xMMXdllxXMMWk'.dWMKoclclOWM0, :XMX;    .dMMk.,0WWk'
+                                                                                    ,xOOOOOOOOd. .d0O:      .oOOl. .lOOOOOOOkxd:. ,x0O:     'xOOc.,xOx,    .cO0l. 'dOOo.
+                                                                                    ...........   ....       ....   .........     ....       ....  ...      ....   .....
+
+
+
+
+
+
+
+
+
