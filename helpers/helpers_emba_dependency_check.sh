@@ -142,12 +142,14 @@ check_docker_image(){
 check_docker_version() {
   # DOCKER_VER=$(pip3 show docker | grep Version: | awk '{print $2}' || true)
   # if [[ $(version "${DOCKER_VER}") -ge $(version "7.0.0") ]]; then
-  if command -v docker 2>/dev/null; then
+  print_output "    Docker version - \\c" "no_log"
+  if command -v docker > /dev/null; then
     if docker --help | grep -q compose; then
       export DOCKER_COMPOSE=("docker" "compose")
     else
       export DOCKER_COMPOSE=("docker-compose")
     fi
+    echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
   fi
 }
 
