@@ -52,7 +52,7 @@ I05_emba_docker_image_dl() {
           docker pull "${CONTAINER}"
           sed -i "/image:/c\    image: ${CONTAINER}" docker-compose.yml
           export DOCKER_CLI_EXPERIMENTAL=disabled
-          "${DOCKER_COMPOSE}" up --no-start
+          "${DOCKER_COMPOSE[@]}" up --no-start
         else
           echo "Estimated download-Size: ~5500 MB"
           echo -e "${ORANGE}""WARNING: docker command missing - no docker pull possible.""${NC}"
