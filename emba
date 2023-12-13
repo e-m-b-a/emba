@@ -662,11 +662,6 @@ main() {
         exit 1
       fi
     fi
-    if ! command -v "${DOCKER_COMPOSE[@]}" > /dev/null ; then
-      print_output "[!] No docker-compose found" "no_log"
-      print_output "$(indent "Install docker-compose via apt-get install docker-compose to use EMBA with docker")" "no_log"
-      exit 1
-    fi
 
     OPTIND=1
     ARGUMENTS=()

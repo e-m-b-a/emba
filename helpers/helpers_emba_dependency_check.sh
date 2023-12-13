@@ -150,6 +150,9 @@ check_docker_version() {
       export DOCKER_COMPOSE=("docker-compose")
     fi
     echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
+  else
+    echo -e "${RED}""not ok""${NC}"
+    DEP_ERROR=1
   fi
 }
 
