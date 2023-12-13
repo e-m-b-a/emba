@@ -139,6 +139,15 @@ check_docker_image(){
   fi
 }
 
+check_docker_version() {
+  DOCKER_VER=$(pip3 show docker | grep Version: | awk '{print $2}' || true)
+  if [[ $(version "${DOCKER_VER}") -ge $(version "7.0.0") ]]; then
+    export DOCKER_COMPOSE="docker compose"
+  else
+    export DOCKER_COMPOSE="docker-compose"
+  fi
+}
+
 dependency_check()
 {
   local LATEST_EMBA_VERSION=""
@@ -292,6 +301,9 @@ dependency_check()
     echo -e "${GREEN}""ok""${NC}"
   fi
 
+  if [[ "${USE_DOCKER}" -eq 1 && "${IN_DOCKER}" -ne 1 ]]; then
+    check_docker_version
+  fi
   # EMBA is developed for and on KALI Linux
   # In our experience we can say that it runs on most Debian based systems without any problems
   if [[ "${USE_DOCKER}" -eq 0 ]] ; then
