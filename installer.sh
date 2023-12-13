@@ -287,24 +287,22 @@ activate_pipenv "./external/emba_venv"
 # initial installation of the host environment:
 I01_default_apps_host
 
-DOCKER_COMP_VER=$(docker-compose -v | grep version | tr '-' ' ' | awk '{print $4}' | tr -d ',' | sed 's/^v//')
-if [[ $(version "${DOCKER_COMP_VER}") -lt $(version "1.28.5") ]]; then
-  echo -e "\n${ORANGE}WARNING: compatibility of the used docker-compose version is unknown!${NC}"
-  echo -e "\n${ORANGE}Please consider updating your docker-compose installation to version 1.28.5 or later.${NC}"
-  echo -e "\n${ORANGE}Please check the EMBA wiki for further details: https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites${NC}"
-  read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
-fi
-
-# check pip3 docker version TODO move into pipenv
 export DOCKER_COMPOSE=("docker-compose")
-# DOCKER_VER=$(pip3 show docker | grep Version: | awk '{print $2}' || true)
-# if [[ $(version "${DOCKER_VER}") -ge $(version "7.0.0") ]]; then
-if command -v docker 2>/dev/null; then
+# docker moved around v7 to a new API (API v2)
+# we need to check if our installed docker version has support for the compose sub-command:
+if command -v docker > /dev/null; then
   if docker --help | grep -q compose; then
-    echo -e "\n${ORANGE}WARNING: compatibility of the used docker version is unknown!${NC}"
-    echo -e "\n${ORANGE}Please consider downgrading your pip3 docker version. \$pip3 install \"docker<7.0.0\"${NC}"
-    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    # new docker API version v2 -> docker v7
     export DOCKER_COMPOSE=("docker" "compose")
+  else
+    # we only need to check the docker-compose version if we are running on the old API with docker-compose
+    DOCKER_COMP_VER=$("${DOCKER_COMPOSE[@]}" -v | grep version | tr '-' ' ' | awk '{print $4}' | tr -d ',' | sed 's/^v//')
+    if [[ $(version "${DOCKER_COMP_VER}") -lt $(version "1.28.5") ]]; then
+      echo -e "\n${ORANGE}WARNING: compatibility of the used docker-compose version is unknown!${NC}"
+      echo -e "\n${ORANGE}Please consider updating your docker-compose installation to version 1.28.5 or later.${NC}"
+      echo -e "\n${ORANGE}Please check the EMBA wiki for further details: https://github.com/e-m-b-a/emba/wiki/Installation#prerequisites${NC}"
+      read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
+    fi
   fi
 fi
 
