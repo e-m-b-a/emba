@@ -139,6 +139,27 @@ check_docker_image(){
   fi
 }
 
+check_docker_version() {
+  # docker-compose vs docker compose - see https://docs.docker.com/compose/migrate/
+  print_output "    Docker compose version - \\c" "no_log"
+  if command -v docker > /dev/null; then
+    if docker --help | grep -q compose; then
+      export DOCKER_COMPOSE=("docker" "compose")
+      echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
+    elif command -v docker-compose > /dev/null; then
+      export DOCKER_COMPOSE=("docker-compose")
+      echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
+    else
+      echo -e "${RED}""not ok""${NC}"
+      DEP_ERROR=1
+    fi
+  else
+    # no docker at all ... not good
+    echo -e "${RED}""not ok""${NC}"
+    DEP_ERROR=1
+  fi
+}
+
 dependency_check()
 {
   local LATEST_EMBA_VERSION=""
@@ -292,6 +313,9 @@ dependency_check()
     echo -e "${GREEN}""ok""${NC}"
   fi
 
+  if [[ "${USE_DOCKER}" -eq 1 && "${IN_DOCKER}" -ne 1 ]]; then
+    check_docker_version
+  fi
   # EMBA is developed for and on KALI Linux
   # In our experience we can say that it runs on most Debian based systems without any problems
   if [[ "${USE_DOCKER}" -eq 0 ]] ; then
