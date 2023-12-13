@@ -304,7 +304,7 @@ if command -v docker 2>/dev/null; then
     echo -e "\n${ORANGE}WARNING: compatibility of the used docker version is unknown!${NC}"
     echo -e "\n${ORANGE}Please consider downgrading your pip3 docker version. \$pip3 install \"docker<7.0.0\"${NC}"
     read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
-    export DOCKER_COMPOSE=("docker compose")
+    export DOCKER_COMPOSE=("docker" "compose")
   fi
 fi
 
