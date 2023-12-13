@@ -140,17 +140,21 @@ check_docker_image(){
 }
 
 check_docker_version() {
-  # DOCKER_VER=$(pip3 show docker | grep Version: | awk '{print $2}' || true)
-  # if [[ $(version "${DOCKER_VER}") -ge $(version "7.0.0") ]]; then
-  print_output "    Docker version - \\c" "no_log"
+  # docker-compose vs docker compose - see https://docs.docker.com/compose/migrate/
+  print_output "    Docker compose version - \\c" "no_log"
   if command -v docker > /dev/null; then
     if docker --help | grep -q compose; then
       export DOCKER_COMPOSE=("docker" "compose")
-    else
+      echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
+    elif command -v docker-compose > /dev/null; then
       export DOCKER_COMPOSE=("docker-compose")
+      echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
+    else
+      echo -e "${RED}""not ok""${NC}"
+      DEP_ERROR=1
     fi
-    echo -e "${GREEN}""${DOCKER_COMPOSE[@]} ok""${NC}"
   else
+    # no docker at all ... not good
     echo -e "${RED}""not ok""${NC}"
     DEP_ERROR=1
   fi
