@@ -112,10 +112,12 @@ IL15_emulated_checks_init() {
       fi
       # patch some code to write the history files to a subdirectory in /root
       # shellcheck disable=SC2088
+      # we do not want to expand the tilde
       if grep -q  '~/.history' ./routersploit/interpreter.py; then
         sed -i 's/~\/\.history/~\/\.routersploit\/\.history/' ./routersploit/interpreter.py
       fi
       # shellcheck disable=SC2088
+      # we do not want to expand the tilde
       if grep -q  '~/.rsf_history' ./routersploit/interpreter.py; then
         sed -i 's/~\/\.rsf_history/~\/\.routersploit\/\.rsf_history/' ./routersploit/interpreter.py
       fi
