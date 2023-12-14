@@ -12,6 +12,7 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Michael Messner, Pascal Eckmann
+# Contributor(s): Benedikt Kuehne
 
 # Description:  Check all shell scripts inside ./helpers, ./modules, emba and itself with shellchecker
 
@@ -50,6 +51,7 @@ MODULES_TO_CHECK_ARR_DOCKER=()
 MODULES_TO_CHECK_ARR_PERM=()
 MODULES_TO_CHECK_ARR_COMMENT=()
 MODULES_TO_CHECK_ARR_GREP=()
+MODULES_TO_CHECK_ARR_COPYRIGHT=()
 
 import_config_scripts() {
   mapfile -t HELPERS < <(find "${CONF_DIR}" -iname "*.sh" 2>/dev/null)
@@ -311,15 +313,74 @@ check_tools() {
   fi
 }
 
+list_linter_exceptions(){
+  # lists all linter exceptions for a given toolname inside a directory 
+  # $1 tool name
+  # $2 directory
+  # $3 excluded dir for find
+  local TOOL_NAME_="${1:-}"
+  local DIR_="${2:-}"
+  local EXCLUDE_="${3:-}"
+  local SEARCH_PAR_=""
+  local SEARCH_TYPE_=""
+  echo -e "\\n""${GREEN}""Checking for ${TOOL_NAME_} exceptions inside ${DIR_}:""${NC}""\\n"
+  case "${TOOL_NAME_}" in
+    shellcheck)
+      SEARCH_PAR_="shellcheck disable"
+      SEARCH_TYPE_="sh"
+      ;;
+    semgrep)
+      SEARCH_PAR_="nosemgrep"
+      SEARCH_TYPE_="sh"
+      ;;
+  esac
+  mapfile -t EXCEPTION_SCRIPTS < <(find "${DIR_}" -type d -path "${EXCLUDE_}" -prune -false -o -iname "*.${SEARCH_TYPE_}" -exec grep -H "${SEARCH_PAR_}" {} \;)
+  if [[ "${#EXCEPTION_SCRIPTS[@]}" -gt 0 ]]; then
+    for EXCEPTION_ in "${EXCEPTION_SCRIPTS[@]}"; do
+      echo -e "\\n""${GREEN}""Found exception in ${EXCEPTION_%%:*}:""${ORANGE}""${EXCEPTION_##*:}""${NC}""\\n"
+      EXCEPTIONS_TO_CHECK_ARR+=( "${EXCEPTION_%%:*}" )
+    done
+  else
+    echo -e "\\n""${GREEN}""=> Found no exceptions for ${TOOL_NAME_}""${NC}""\\n"
+  fi
+}
+
+copy_right_check(){
+  # checks all Copyright occurences for supplied end-year 
+  # $1 end-year
+  # $2 dir to look in
+  # $3 excluded dir for find
+  local YEAR_="${1:-}"
+  local DIR_="${2:-}"
+  local EXCLUDE_="${3:-}"
+  echo -e "\\n""${ORANGE}""${BOLD}""EMBA Copyright check""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+  mapfile -t COPYRIGHT_LINE_ < <(find "${DIR_}" -type d -path "${EXCLUDE_}" -prune -false -o -iname "*.sh" -exec grep -H "Copyright" {} \;)
+  if [[ "${#COPYRIGHT_LINE_[@]}" -gt 0 ]]; then
+    for LINE_ in "${COPYRIGHT_LINE_[@]}"; do
+      if ! grep -q "${YEAR_}.*Siemens Energy AG" "${LINE_%%:*}" && ! grep -q "Siemens AG" "${LINE_%%:*}"; then
+        MODULES_TO_CHECK_ARR_COPYRIGHT+=( "${LINE_%%:*}" )  
+        echo -e "Found problem with Copyright in ${LINE_%%:*}: ${ORANGE}${LINE_##*:}""${NC}""\\n"
+        echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
+      fi
+    done
+  else
+    echo -e "\\n""${GREEN}""==> Found no problems with copyrights""${NC}""\\n"
+  fi
+}
+
 # main:
 check_tools
 check
 dockerchecker
+copy_right_check 2023 ./ ./external
+list_linter_exceptions shellcheck ./ ./external
+list_linter_exceptions semgrep ./ ./external
 summary
 
 if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]]; then
+  [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]] || \
+  [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]]; then
   exit 1
 fi
