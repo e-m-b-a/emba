@@ -567,8 +567,8 @@ generate_report_file()
 
     # Force UTF-8 charset
     iconv -c --to-code=UTF-8 < "${TMP_FILE}" > "${TMP_FILE}.new"
-    mv -f "${TMP_FILE}.new" "${TMP_FILE}" ||  print_output "[*] Failed formatting into UTF-8" "no_log"
-    
+    mv -f "${TMP_FILE}.new" "${TMP_FILE}" || print_output "[!] Failed formatting into UTF-8" "no_log"
+
     # add link tags to links/generate info files and link to them and write line to tmp file
     # also parsing for [REF] anchor and generate linked files and link it
     # to ignore all links except [REF], just add '1' as third parameter
