@@ -574,10 +574,6 @@ generate_report_file()
       add_link_tags "${TMP_FILE}" "${HTML_FILE}"
     fi
 
-    # Force UTF-8 charset
-    iconv -c --to-code=UTF-8 < "${TMP_FILE}" > "${TMP_FILE}.new"
-    mv -f "${TMP_FILE}.new" "${TMP_FILE}" ||  print_output "[*] Failed formatting into UTF-8" "no_log"
-
     # add content of temporary html into template
     if [[ ${SUPPL_FILE_GEN} -eq 1 ]] ; then
       sed -i "/content start/ r ${TMP_FILE}" "${ABS_HTML_PATH}${SUPPL_PATH_HTML}""/""${HTML_FILE}"
