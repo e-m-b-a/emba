@@ -314,7 +314,7 @@ check_tools() {
 }
 
 list_linter_exceptions(){
-  # lists all linter exceptions for a given toolname inside a directory 
+  # lists all linter exceptions for a given toolname inside a directory
   # $1 tool name
   # $2 directory
   # $3 excluded dir for find
@@ -346,7 +346,7 @@ list_linter_exceptions(){
 }
 
 copy_right_check(){
-  # checks all Copyright occurences for supplied end-year 
+  # checks all Copyright occurences for supplied end-year
   # $1 end-year
   # $2 dir to look in
   # $3 excluded dir for find
@@ -358,7 +358,7 @@ copy_right_check(){
   if [[ "${#COPYRIGHT_LINE_[@]}" -gt 0 ]]; then
     for LINE_ in "${COPYRIGHT_LINE_[@]}"; do
       if ! grep -q "${YEAR_}.*Siemens Energy AG" "${LINE_%%:*}" && ! grep -q "Siemens AG" "${LINE_%%:*}"; then
-        MODULES_TO_CHECK_ARR_COPYRIGHT+=( "${LINE_%%:*}" )  
+        MODULES_TO_CHECK_ARR_COPYRIGHT+=( "${LINE_%%:*}" )
         echo -e "Found problem with Copyright in ${LINE_%%:*}: ${ORANGE}${LINE_##*:}""${NC}""\\n"
         echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
       fi
