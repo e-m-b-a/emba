@@ -174,7 +174,7 @@ safe_echo() {
   # %b  ARGUMENT  as a string with '\' escapes interpreted, except that octal escapes are of the form \0 or
   if [[ -v 2 ]]; then
     local LOG_TO_FILE="${2:-}"
-    printf -- "%b" "${STRING_TO_ECHO}\r\n" | tee -a "${LOG_TO_FILE}" >/dev/null || true
+    printf -- "%b" "${STRING_TO_ECHO}\r\n" | iconv -c --to-code=UTF-8 | tee -a "${LOG_TO_FILE}" >/dev/null || true
   else
     printf -- "%b" "${STRING_TO_ECHO}\r\n" || true
   fi
