@@ -347,23 +347,26 @@ list_linter_exceptions(){
 
 copy_right_check(){
   # checks all Copyright occurences for supplied end-year
-  # $1 end-year
-  # $2 dir to look in
-  # $3 excluded dir for find
-  local YEAR_="${1:-}"
-  local DIR_="${2:-}"
-  local EXCLUDE_="${3:-}"
+  # $1 copyright holder
+  # $2 end-year
+  # $3 dir to look in
+  # $4 excluded dir for find
+  local OWNER_="${1:-}"
+  local YEAR_="${2:-}"
+  local DIR_="${3:-}"
+  local EXCLUDE_="${4:-}"
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA Copyright check""${NC}""\\n""${BOLD}""=================================================================""${NC}"
-  mapfile -t COPYRIGHT_LINE_ < <(find "${DIR_}" -type d -path "${EXCLUDE_}" -prune -false -o -iname "*.sh" -exec grep -H "Copyright" {} \;)
+  mapfile -t COPYRIGHT_LINE_ < <(find "${DIR_}" -type d -path "${EXCLUDE_}" -prune -false -o -type f -not -wholename "${0}" -iname "*.sh" -exec grep -H "Copyright" {} \;)
   if [[ "${#COPYRIGHT_LINE_[@]}" -gt 0 ]]; then
     for LINE_ in "${COPYRIGHT_LINE_[@]}"; do
-      if ! grep -q "${YEAR_}.*Siemens Energy AG" "${LINE_%%:*}" && ! grep -q "Siemens AG" "${LINE_%%:*}"; then
+      if [[ "${LINE_##*:}" == *"${OWNER_}" && "${LINE_##*:}" != *"${YEAR_}"* ]]; then
         MODULES_TO_CHECK_ARR_COPYRIGHT+=( "${LINE_%%:*}" )
-        echo -e "Found problem with Copyright in ${LINE_%%:*}: ${ORANGE}${LINE_##*:}""${NC}""\\n"
+        echo -e "Found problem with Copyright for ${GREEN}${OWNER_}${NC} in ${LINE_%%:*}: ${ORANGE}${LINE_##*:}""${NC}""\\n"
         echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
       fi
     done
-  else
+  fi
+  if [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -eq 0 ]]; then
     echo -e "\\n""${GREEN}""==> Found no problems with copyrights""${NC}""\\n"
   fi
 }
@@ -372,7 +375,7 @@ copy_right_check(){
 check_tools
 check
 dockerchecker
-copy_right_check 2023 ./ ./external
+copy_right_check "Siemens Energy AG" 2023 ./ ./external
 list_linter_exceptions shellcheck ./ ./external
 list_linter_exceptions semgrep ./ ./external
 summary
