@@ -152,7 +152,7 @@ grepit_search() {
     fi
 
     ulimit -Sv "${MEM_LIMIT}"
-    "${GREP_COMMAND}" "${ARGS_FOR_GREP[@]}" "${STANDARD_GREP_ARGUMENTS[@]}" -- "${SEARCH_REGEX}" "${FIRMWARE_PATH}" >> "${LOG_PATH_MODULE}/${OUTFILE}" 2>&1 || true
+    "${GREP_COMMAND}" "${ARGS_FOR_GREP[@]}" "${STANDARD_GREP_ARGUMENTS[@]}" -- "${SEARCH_REGEX}" "${FIRMWARE_PATH}" |& safe_logging "${LOG_PATH_MODULE}/${OUTFILE}" 0 || true
     ulimit -Sv unlimited
 
     if [[ "${LOG_DETAILS}" -eq 1 ]]; then

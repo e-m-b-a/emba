@@ -374,3 +374,25 @@ disk_space_monitor() {
     sleep 5
   done
 }
+
+safe_logging() {
+  # forced utf8 logging into file
+  # $1 File to log into
+  # $2 suppress stdout
+  # Example/test:
+  # printf "%b" 'Hi from foo\n' |& safe_logging ./test.log 0
+  # printf "%b" '\xE2\x98\xA0\n' |& safe_logging ./test.log 
+  # printf "%b" '\xF5\xFF\n' |& safe_logging ./test.log
+  # printf "%b" 'end from bar\n' |& safe_logging ./test.log 1
+  local LOG_FILE_="${1:-}"
+  local ALT_OUT_="${2:-}"
+
+  ## Force UTF-8 charset
+  while read -r INPUT_; do
+    if [[ "${ALT_OUT_}" -eq 1 ]]; then
+      echo "${INPUT_}" | iconv -c --to-code=UTF-8 >> "${LOG_FILE_}"
+    else
+      echo "${INPUT_}" | iconv -c --to-code=UTF-8 | tee -a "${LOG_FILE_}"
+    fi         
+  done;
+}
