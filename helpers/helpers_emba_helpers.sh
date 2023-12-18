@@ -381,7 +381,7 @@ safe_logging() {
   # $2 suppress stdout
   # Example/test:
   # printf "%b" 'Hi from foo\n' |& safe_logging ./test.log 0
-  # printf "%b" '\xE2\x98\xA0\n' |& safe_logging ./test.log 
+  # printf "%b" '\xE2\x98\xA0\n' |& safe_logging ./test.log
   # printf "%b" '\xF5\xFF\n' |& safe_logging ./test.log
   # printf "%b" 'end from bar\n' |& safe_logging ./test.log 1
   local LOG_FILE_="${1:-}"
@@ -393,6 +393,6 @@ safe_logging() {
       echo "${INPUT_}" | iconv -c --to-code=UTF-8 >> "${LOG_FILE_}"
     else
       echo "${INPUT_}" | iconv -c --to-code=UTF-8 | tee -a "${LOG_FILE_}"
-    fi         
-  done;
+    fi
+  done
 }
