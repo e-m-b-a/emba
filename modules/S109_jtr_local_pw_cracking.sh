@@ -84,10 +84,10 @@ S109_jtr_local_pw_cracking()
       print_ln
       if [[ -f "${JTR_WORDLIST}" ]]; then
         print_output "[*] Starting jtr with the following wordlist: ${ORANGE}${JTR_WORDLIST}${NC} with ${ORANGE}$(wc -l "${JTR_WORDLIST}" | awk '{print $1}')${NC} entries."
-        john --progress-every=120 --wordlist="${JTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt 2>&1 | tee -a "${LOG_FILE}" || true &
+        john --progress-every=120 --wordlist="${JTR_WORDLIST}" "${LOG_PATH_MODULE}"/jtr_hashes.txt |& safe_logging "${LOG_FILE}" 0 || true &
         PID="$!"
       else
-        john --progress-every=120 "${LOG_PATH_MODULE}"/jtr_hashes.txt 2>&1 | tee -a "${LOG_FILE}" || true &
+        john --progress-every=120 "${LOG_PATH_MODULE}"/jtr_hashes.txt |& safe_logging "${LOG_FILE}" 0 || true &
         PID="$!"
       fi
       sleep 5
