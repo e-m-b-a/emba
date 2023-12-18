@@ -384,15 +384,16 @@ safe_logging() {
   # printf "%b" '\xE2\x98\xA0\n' |& safe_logging ./test.log
   # printf "%b" '\xF5\xFF\n' |& safe_logging ./test.log
   # printf "%b" 'end from bar\n' |& safe_logging ./test.log 1
-  local LOG_FILE_="${1:-}"
-  local ALT_OUT_="${2:-}"
+  local lLOG_FILE_="${1:-}"
+  local lALT_OUT_="${2:-}"
+  local lINPUT_
 
   ## Force UTF-8 charset
-  while read -r INPUT_; do
-    if [[ "${ALT_OUT_}" -eq 1 ]]; then
-      echo "${INPUT_}" | iconv -c --to-code=UTF-8 >> "${LOG_FILE_}"
+  while read -r lINPUT_; do
+    if [[ "${lALT_OUT_}" -eq 1 ]]; then
+      echo "${lINPUT_}" | iconv -c --to-code=UTF-8 >> "${lLOG_FILE_}"
     else
-      echo "${INPUT_}" | iconv -c --to-code=UTF-8 | tee -a "${LOG_FILE_}"
+      echo "${lINPUT_}" | iconv -c --to-code=UTF-8 | tee -a "${lLOG_FILE_}"
     fi
   done
 }
