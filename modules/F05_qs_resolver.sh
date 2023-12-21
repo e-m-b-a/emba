@@ -73,12 +73,13 @@ F05_qs_resolver() {
               # should point back to q02-submodule with name "${GPT_INPUT_FILE_}"
               GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
               # we need to find the depth which we need to link to the file
-              HTML_FILE_X=$(echo ${HTML_FILE_} | sed 's#'"${HTML_PATH}"'##')
+              # shellcheck disable=SC2001
+              HTML_FILE_X=$(echo "${HTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
               print_output "[*] Linking GPT results ${ORANGE}${GPT_REVERSE_LINK_}${NC} into ${ORANGE}${HTML_FILE_X}${NC}" "no_log"
               depth_cnt="${HTML_FILE_X//[^\/]}"
               depth_cnt="$(( ${#depth_cnt}-1 ))"
               DEPTH="\.\.\/"
-              myDEPTH=$(printf "%"${depth_cnt}"s")
+              myDEPTH=$(printf "%${depth_cnt}s")
               DEPTH="${myDEPTH// /${DEPTH}}"
 
               sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>OpenAI results are available\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
@@ -127,12 +128,13 @@ F05_qs_resolver() {
             GPT_REVERSE_LINK_="$(tr "[:upper:]" "[:lower:]" <<< "${GPT_INPUT_FILE_}" | sed -e "s@[^a-zA-Z0-9]@@g")"
 
             # we need to find the depth which we need to link to the file
-            HTML_FILE_X=$(echo ${HTML_FILE_} | sed 's#'"${HTML_PATH}"'##')
+            # shellcheck disable=SC2001
+            HTML_FILE_X=$(echo "${HTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
             print_output "[*] Linking GPT results ${ORANGE}${GPT_REVERSE_LINK_}${NC} into ${ORANGE}${HTML_FILE_X}${NC}" "no_log"
             depth_cnt="${HTML_FILE_X//[^\/]}"
             depth_cnt="$(( ${#depth_cnt}-1 ))"
             DEPTH="\.\.\/"
-            myDEPTH=$(printf "%"${depth_cnt}"s")
+            myDEPTH=$(printf "%${depth_cnt}s")
             DEPTH="${myDEPTH// /${DEPTH}}"
 
             sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>OpenAI module did not finish!\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"

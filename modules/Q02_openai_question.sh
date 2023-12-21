@@ -127,7 +127,8 @@ ask_chatgpt() {
         # add navbar-item for file
         sub_module_title "${GPT_INPUT_FILE_}"
 
-        print_output "[*] AI-Assisted analysis for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+        # print_output "[*] AI-Assisted analysis for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+        print_output "[*] AI-Assisted analysis for ${GPT_INPUT_FILE_}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
         print_output "$(indent "$(orange "$(print_path "${SCRIPT_PATH_TMP_}")")")"
         head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
         CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
