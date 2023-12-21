@@ -90,7 +90,7 @@ ask_chatgpt() {
     GPT_TOKENS_="${GPT_TOKENS_//cost\=/}"
     GPT_RESPONSE_="$(echo "${ELEM}" | cut -d\; -f7)"
     GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
-    GPT_INPUT_FILE_="${GPT_INPUT_FILE_//\./}"
+    GPT_INPUT_FILE_mod="${GPT_INPUT_FILE_//\./}"
 
     # in case we have nothing we are going to move on
     [[ -z "${SCRIPT_PATH_TMP_}" ]] && continue
@@ -98,7 +98,7 @@ ask_chatgpt() {
     if [[ "${SCRIPT_PATH_TMP_}" == *"s16_ghidra_decompile_checks"* ]]; then
       # our ghidra check stores the decompiled code in the log directory. We need to copy it to the gpt log directory for further processing
       print_output "[*] Ghidra decompiled code found ${SCRIPT_PATH_TMP_}" "no_log"
-      [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+      [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_mod}.log"
     else
       # this is currently the usual case for scripts
       print_output "[*] Identification of ${ORANGE}${SCRIPT_PATH_TMP_} / ${GPT_INPUT_FILE_}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
@@ -116,7 +116,7 @@ ask_chatgpt() {
 
       # in case we have nothing we are going to move on
       ! [[ -f "${SCRIPT_PATH_TMP_}" ]] && continue
-      [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+      [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_mod}.log"
     fi
 
     print_output "[*] AI-Assisted analysis of script ${ORANGE}${SCRIPT_PATH_TMP_}${NC} with question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
@@ -125,15 +125,15 @@ ask_chatgpt() {
     if [[ -z ${GPT_RESPONSE_} ]] && [[ ${GPT_PRIO_} -ge ${MINIMUM_GPT_PRIO} ]] && [[ "${SCRIPT_PATH_TMP_}" != '' ]]; then
       if [[ -f "${SCRIPT_PATH_TMP_}" ]]; then
         # add navbar-item for file
-        sub_module_title "${GPT_INPUT_FILE_}"
+        sub_module_title "AI analysis for ${GPT_INPUT_FILE_}"
 
-        # print_output "[*] AI-Assisted analysis for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
-        print_output "[*] AI-Assisted analysis for ${GPT_INPUT_FILE_}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+        # print_output "[*] AI-Assisted analysis for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_mod}.log"
+        print_output "[*] AI-Assisted analysis for ${GPT_INPUT_FILE_mod}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_mod}.log"
         print_output "$(indent "$(orange "$(print_path "${SCRIPT_PATH_TMP_}")")")"
         head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
         CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
         if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
-          print_output "[*] GPT request is too big ... stripping it now"
+          print_output "[*] GPT request is too big ... stripping it now" "no_log"
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]' | cut -c-4560)
         fi
         printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
@@ -141,19 +141,19 @@ ask_chatgpt() {
 
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-          -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" --write-out "%{http_code}" || true)
+          -d @"${TMP_DIR}/chat.json" -o "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" --write-out "%{http_code}" || true)
 
         if [[ "${HTTP_CODE_}" -ne 200 ]] ; then
           print_output "[-] Something went wrong with the ChatGPT requests"
-          if [[ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]]; then
-            print_output "[-] ERROR response: $(cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")"
+          if [[ -f "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" ]]; then
+            print_output "[-] ERROR response: $(cat "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json")"
 
-            if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "insufficient_quota" ; then
+            if jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" | grep -q "insufficient_quota" ; then
               print_output "[-] Stopping OpenAI requests since the API key has reached its quota limit"
               CHATGPT_RESULT_CNT=-1
               sleep 20
               break
-            elif jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "server_error" ; then
+            elif jq '.error.type' "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" | grep -q "server_error" ; then
               ((GPT_SERVER_ERROR_CNT_+=1))
               if [[ "${GPT_SERVER_ERROR_CNT_}" -ge 5 ]]; then
                 # more than 5 failes we stop trying until the newxt round
@@ -162,12 +162,12 @@ ask_chatgpt() {
                 sleep 20
                 break
               fi
-            elif jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "rate_limit_exceeded" ; then
+            elif jq '.error.code' "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" | grep -q "rate_limit_exceeded" ; then
               # rate limit handling - if we got a response like:
               # Please try again in 7m12s.
               # then we will wate ~10mins and try it afterwards again
               # in this time we need to check if the Testing phase is running or not
-              if jq '.error.message' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" | grep -q "Please try again in " ; then
+              if jq '.error.message' "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" | grep -q "Please try again in " ; then
                 local CNT=0
                 while [[ "${CNT}" -lt 1000 ]]; do
                   CNT=$((CNT+1))
@@ -186,7 +186,7 @@ ask_chatgpt() {
               fi
             fi
 
-            cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
+            cat "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
             readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
             # reset the array index to start again with the highest rated entry
             ELE_INDEX=0
@@ -195,15 +195,15 @@ ask_chatgpt() {
           fi
         fi
 
-        if ! [[ -f "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" ]]; then
+        if ! [[ -f "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json" ]]; then
           # catches: (56) Recv failure: Connection reset by peer
           print_output "[-] Something went wrong with the ChatGPT request for ${GPT_INPUT_FILE_}"
           break
         fi
 
-        GPT_RESPONSE_=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")")
+        GPT_RESPONSE_=("$(jq '.choices[] | .message.content' "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json")")
         GPT_RESPONSE_CLEANED_="${GPT_RESPONSE_[*]//\;/}" #remove ; from response
-        GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json")
+        GPT_TOKENS_=$(jq '.usage.total_tokens' "${TMP_DIR}/${GPT_INPUT_FILE_mod}_response.json")
 
         if [[ ${GPT_TOKENS_} -ne 0 ]]; then
           GTP_CHECKED_ARR+=("${SCRIPT_PATH_TMP_}")
@@ -214,7 +214,7 @@ ask_chatgpt() {
           if ! [[ -d "${LOG_PATH_MODULE}"/gpt_answers ]]; then
             mkdir "${LOG_PATH_MODULE}"/gpt_answers || true
           fi
-          echo "${GPT_RESPONSE_CLEANED_}" > "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_}".log
+          echo "${GPT_RESPONSE_CLEANED_}" > "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_mod}".log
 
           # print openai response
           print_ln
@@ -232,13 +232,12 @@ ask_chatgpt() {
           fi
 
           print_ln
-          # print_output "[+] Further results for ${ORANGE}${GPT_INPUT_FILE_}${GREEN} available in module ${ORANGE}${ORIGIN_MODULE_}${NC}" "" "${ORIGIN_MODULE_}"
-          print_output "[+] Further results for ${GPT_INPUT_FILE_} available in module ${ORIGIN_MODULE_}" "" "${ORIGIN_MODULE_}"
-          print_output "[+] Analysed source file ${ORANGE}${GPT_INPUT_FILE_}${GREEN}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
-          # print_output "[+] Analysed source script popup ${ORANGE}${GPT_INPUT_FILE_}${GREEN} script"
-          # write_local_overlay_link "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
-          if [[ -f "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_}".log ]]; then
-            print_output "[+] GPT answer file for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_}".log
+          print_output "[+] Further results for ${ORANGE}${GPT_INPUT_FILE_mod}${GREEN} available in module ${ORANGE}${ORIGIN_MODULE_}${NC}" "" "${ORIGIN_MODULE_}"
+          print_output "[+] Analysed source file ${ORANGE}${GPT_INPUT_FILE_mod}${GREEN}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_mod}.log"
+          # print_output "[+] Analysed source script popup ${ORANGE}${GPT_INPUT_FILE_mod}${GREEN} script"
+          # write_local_overlay_link "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_mod}.log"
+          if [[ -f "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_mod}".log ]]; then
+            print_output "[+] GPT answer file for ${ORANGE}${GPT_INPUT_FILE_mod}${NC}" "" "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_mod}".log
           fi
 
           print_ln

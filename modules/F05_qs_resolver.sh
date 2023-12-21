@@ -82,7 +82,7 @@ F05_qs_resolver() {
               myDEPTH=$(printf "%${depth_cnt}s")
               DEPTH="${myDEPTH// /${DEPTH}}"
 
-              sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>OpenAI results are available\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
+              sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] OpenAI results are available\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
             done
           fi
         fi
@@ -137,7 +137,7 @@ F05_qs_resolver() {
             myDEPTH=$(printf "%${depth_cnt}s")
             DEPTH="${myDEPTH// /${DEPTH}}"
 
-            sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>OpenAI module did not finish!\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
+            sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>[*] OpenAI module did not finish\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
           done
         fi
       done < "${CSV_DIR}/q02_openai_question.csv.tmp"
