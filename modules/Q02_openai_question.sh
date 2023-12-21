@@ -97,7 +97,7 @@ ask_chatgpt() {
 
     if [[ "${SCRIPT_PATH_TMP_}" == *"s16_ghidra_decompile_checks"* ]]; then
       # our ghidra check stores the decompiled code in the log directory. We need to copy it to the gpt log directory for further processing
-      print_output "[*] Ghidra decompiled code found ${SCRIPT_PATH_TMP_}"
+      print_output "[*] Ghidra decompiled code found ${SCRIPT_PATH_TMP_}" "no_log"
       [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
     else
       # this is currently the usual case for scripts
@@ -136,7 +136,7 @@ ask_chatgpt() {
           CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]' | cut -c-4560)
         fi
         printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
-        print_output "[*] The Combined Cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
+        print_output "[*] The combined cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
 
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
@@ -210,7 +210,9 @@ ask_chatgpt() {
           write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
 
           # we store the answers in dedicated files for further interlinking within the report
-          ! [[ -d "${LOG_PATH_MODULE}"/gpt_answers ]] && mkdir "${LOG_PATH_MODULE}"/gpt_answers || true
+          if ! [[ -d "${LOG_PATH_MODULE}"/gpt_answers ]]; then
+            mkdir "${LOG_PATH_MODULE}"/gpt_answers || true
+          fi
           echo "${GPT_RESPONSE_CLEANED_}" > "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_}".log
 
           # print openai response
@@ -219,7 +221,6 @@ ask_chatgpt() {
           echo -e "${GPT_RESPONSE_[*]}" | tee -a "${LOG_FILE}"
 
           # add proper module link
-          print_ln
           if [[ "${GPT_OUTPUT_FILE_}" == *'/csv_logs/'* ]]; then
             # if we have a csv_logs path we need to adjust the cut
             ORIGIN_MODULE_="$(echo "${GPT_OUTPUT_FILE_}" | cut -d / -f4 | cut -d_ -f1)"
@@ -229,8 +230,9 @@ ask_chatgpt() {
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           fi
 
-
-          print_output "[+] Further results for ${ORANGE}${GPT_INPUT_FILE_}${GREEN} available in module ${ORANGE}${ORIGIN_MODULE_}${NC}" "" "${ORIGIN_MODULE_}"
+          print_ln
+          # print_output "[+] Further results for ${ORANGE}${GPT_INPUT_FILE_}${GREEN} available in module ${ORANGE}${ORIGIN_MODULE_}${NC}" "" "${ORIGIN_MODULE_}"
+          print_output "[+] Further results for ${GPT_INPUT_FILE_} available in module ${ORIGIN_MODULE_}" "" "${ORIGIN_MODULE_}"
           print_output "[+] Analysed source file ${ORANGE}${GPT_INPUT_FILE_}${GREEN}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
           # print_output "[+] Analysed source script popup ${ORANGE}${GPT_INPUT_FILE_}${GREEN} script"
           # write_local_overlay_link "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
