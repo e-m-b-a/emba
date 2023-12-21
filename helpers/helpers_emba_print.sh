@@ -116,7 +116,7 @@ sub_module_title()
 
 print_output()
 {
-  local OUTPUT="${1:-}"
+  local OUTPUT="${1:-\n}"
   local LOG_SETTING="${2:-}"
   if [[ -n "${LOG_SETTING}" && -d "$(dirname "${LOG_SETTING}")" && "${LOG_FILE:-}" != "${LOG_FILE_MOD:-}" ]]; then
     local LOG_FILE_MOD="${2:-}"
@@ -383,6 +383,28 @@ write_link()
     fi
   fi
 }
+
+# we add an entry like
+# [LOV] local_link
+# this entry is later replaced from web reporter with the
+# correct call to JS function
+write_local_overlay_link()
+{
+  if [[ ${HTML} -eq 1 ]] ; then
+    local LINK
+    LINK="${1:-}"
+    LINK="$(format_log "[LOV] ""${LINK}" 1)"
+    local LOG_FILE_ALT="${2:-}"
+    if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
+      if [[ -f "${LOG_FILE_ALT}" ]] ; then
+        echo -e "${LINK}" | tee -a "${LOG_FILE_ALT}" >/dev/null
+      else
+        echo -e "${LINK}" | tee -a "${LOG_FILE}" >/dev/null
+      fi
+    fi
+  fi
+}
+
 
 write_anchor()
 {

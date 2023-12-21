@@ -44,9 +44,7 @@ P02_firmware_bin_file_check() {
 
   print_ln
   print_output "[*] Details of the firmware file:"
-  print_ln
   print_output "$(indent "${FILE_LS_OUT}")"
-  print_ln
   if [[ -f "${FIRMWARE_PATH}" ]]; then
     print_fw_file_details "${FIRMWARE_PATH}"
     generate_pixde "${FIRMWARE_PATH}"
@@ -75,13 +73,13 @@ get_fw_file_details() {
 print_fw_file_details() {
   local FIRMWARE_PATH_BIN="${1:-}"
 
-  print_ln
   print_output "$(indent "$(file "${FIRMWARE_PATH_BIN}")")"
   print_ln
   hexdump -C "${FIRMWARE_PATH_BIN}"| head | tee -a "${LOG_FILE}" || true
   print_ln
   print_output "[*] SHA512 checksum: ${ORANGE}${SHA512_CHECKSUM}${NC}"
   print_ln
+  print_output "[*] Entropy of firmware file:"
   print_output "$(indent "${ENTROPY}")"
   print_ln
 }
@@ -91,9 +89,8 @@ generate_pixde() {
   local PIXD_PNG_PATH="${LOG_DIR}"/pixd.png
 
   if [[ -x "${EXT_DIR}"/pixde ]]; then
-    print_output "[*] Visualized firmware file (first 2000 bytes):\n"
+    print_output "[*] Visualized firmware file (first 2000 bytes):"
     "${EXT_DIR}"/pixde -r-0x2000 "${FIRMWARE_PATH_BIN}" | tee -a "${LOG_DIR}"/p02_pixd.txt
-    print_ln
     python3 "${EXT_DIR}"/pixd_png.py -i "${LOG_DIR}"/p02_pixd.txt -o "${PIXD_PNG_PATH}" -p 10 > /dev/null
     write_link "${PIXD_PNG_PATH}"
   fi

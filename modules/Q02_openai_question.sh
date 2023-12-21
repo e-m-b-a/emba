@@ -68,7 +68,7 @@ ask_chatgpt() {
 
   # generating Array for GPT requests - sorting according the prio in field 3
   # this array gets regenerated on every round
-  readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+  readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
 
   for (( ELE_INDEX=0; ELE_INDEX<"${#Q02_OPENAI_QUESTIONS[@]}"; ELE_INDEX++ )); do
     ELEM="${Q02_OPENAI_QUESTIONS["${ELE_INDEX}"]}"
@@ -90,25 +90,34 @@ ask_chatgpt() {
     GPT_TOKENS_="${GPT_TOKENS_//cost\=/}"
     GPT_RESPONSE_="$(echo "${ELEM}" | cut -d\; -f7)"
     GPT_INPUT_FILE_="$(basename "${SCRIPT_PATH_TMP_}")"
+    GPT_INPUT_FILE_="${GPT_INPUT_FILE_//\./}"
 
     # in case we have nothing we are going to move on
     [[ -z "${SCRIPT_PATH_TMP_}" ]] && continue
-    print_output "[*] Identification of ${ORANGE}${SCRIPT_PATH_TMP_} / ${GPT_INPUT_FILE_}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
-    if [[ "${SCRIPT_PATH_TMP_}" == ".""${LOG_DIR}"* ]]; then
-      print_output "[*] Warning: System path is not stripped with the root directory - we try to fix it now" "no_log"
-      # remove the '.'
-      SCRIPT_PATH_TMP_="${SCRIPT_PATH_TMP_:1}"
-      # remove the LOG_DIR
-      # shellcheck disable=SC2001
-      SCRIPT_PATH_TMP_="$(echo "${SCRIPT_PATH_TMP_}" | sed 's#'"${LOG_DIR}"'##')"
-      print_output "[*] Stripped path ${SCRIPT_PATH_TMP_}" "no_log"
-    fi
-    # dirty fix - Todo: use array in future
-    SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}" | head -1)"
 
-    # in case we have nothing we are going to move on
-    ! [[ -f "${SCRIPT_PATH_TMP_}" ]] && continue
-    [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+    if [[ "${SCRIPT_PATH_TMP_}" == *"s16_ghidra_decompile_checks"* ]]; then
+      # our ghidra check stores the decompiled code in the log directory. We need to copy it to the gpt log directory for further processing
+      print_output "[*] Ghidra decompiled code found ${SCRIPT_PATH_TMP_}"
+      [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+    else
+      # this is currently the usual case for scripts
+      print_output "[*] Identification of ${ORANGE}${SCRIPT_PATH_TMP_} / ${GPT_INPUT_FILE_}${NC} inside ${ORANGE}${LOG_DIR}/firmware${NC}" "no_log"
+      if [[ "${SCRIPT_PATH_TMP_}" == ".""${LOG_DIR}"* ]]; then
+        print_output "[*] Warning: System path is not stripped with the root directory - we try to fix it now" "no_log"
+        # remove the '.'
+        SCRIPT_PATH_TMP_="${SCRIPT_PATH_TMP_:1}"
+        # remove the LOG_DIR
+        # shellcheck disable=SC2001
+        SCRIPT_PATH_TMP_="$(echo "${SCRIPT_PATH_TMP_}" | sed 's#'"${LOG_DIR}"'##')"
+        print_output "[*] Stripped path ${SCRIPT_PATH_TMP_}" "no_log"
+      fi
+      # dirty fix - Todo: use array in future
+      SCRIPT_PATH_TMP_="$(find "${LOG_DIR}/firmware" -wholename "*${SCRIPT_PATH_TMP_}" | head -1)"
+
+      # in case we have nothing we are going to move on
+      ! [[ -f "${SCRIPT_PATH_TMP_}" ]] && continue
+      [[ -f "${SCRIPT_PATH_TMP_}" ]] && cp "${SCRIPT_PATH_TMP_}" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+    fi
 
     print_output "[*] AI-Assisted analysis of script ${ORANGE}${SCRIPT_PATH_TMP_}${NC} with question ${ORANGE}${GPT_QUESTION_}${NC}" "no_log"
     print_output "[*] Current priority for testing is ${GPT_PRIO_}" "no_log"
@@ -118,16 +127,16 @@ ask_chatgpt() {
         # add navbar-item for file
         sub_module_title "${GPT_INPUT_FILE_}"
 
-        print_output "[*] AI-Assisted analysis for ${ORANGE}$(print_path "${SCRIPT_PATH_TMP_}")${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+        print_output "[*] AI-Assisted analysis for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+        print_output "$(indent "$(orange "$(print_path "${SCRIPT_PATH_TMP_}")")")"
         head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
         CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
+        if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
+          print_output "[*] GPT request is too big ... stripping it now"
+          CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]' | cut -c-4560)
+        fi
         printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
         print_output "[*] The Combined Cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
-        if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
-          print_output "[-] GPT request is too big ... skipping it now"
-          GTP_CHECKED_ARR+=("${SCRIPT_PATH_TMP_}")
-          continue
-        fi
 
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
@@ -177,7 +186,7 @@ ask_chatgpt() {
             fi
 
             cat "${TMP_DIR}/${GPT_INPUT_FILE_}_response.json" >> "${GPT_FILE_DIR_}/openai_server_errors.log"
-            readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+            readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
             # reset the array index to start again with the highest rated entry
             ELE_INDEX=0
             sleep 30s
@@ -199,21 +208,36 @@ ask_chatgpt() {
           GTP_CHECKED_ARR+=("${SCRIPT_PATH_TMP_}")
           # write new into done csv
           write_csv_gpt "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=${GPT_TOKENS_}" "'${GPT_RESPONSE_CLEANED_//\'/}'"
+
+          # we store the answers in dedicated files for further interlinking within the report
+          ! [[ -d "${LOG_PATH_MODULE}"/gpt_answers ]] && mkdir "${LOG_PATH_MODULE}"/gpt_answers || true
+          echo "${GPT_RESPONSE_CLEANED_}" > "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_}".log
+
           # print openai response
           print_ln
-          print_output "[*] ${ORANGE}AI-assisted analysis results via OpenAI ChatGPT:${NC}\\n"
+          # print_output "[*] ${ORANGE}AI-assisted analysis results via OpenAI ChatGPT:${NC}\\n"
           echo -e "${GPT_RESPONSE_[*]}" | tee -a "${LOG_FILE}"
+
           # add proper module link
           print_ln
-
-          if [[ "${GPT_OUTPUT_FILE_}" == '/logs/'* ]]; then
+          if [[ "${GPT_OUTPUT_FILE_}" == *'/csv_logs/'* ]]; then
+            # if we have a csv_logs path we need to adjust the cut
+            ORIGIN_MODULE_="$(echo "${GPT_OUTPUT_FILE_}" | cut -d / -f4 | cut -d_ -f1)"
+          elif [[ "${GPT_OUTPUT_FILE_}" == '/logs/'* ]]; then
             ORIGIN_MODULE_="$(echo "${GPT_OUTPUT_FILE_}" | cut -d / -f3 | cut -d_ -f1)"
           else
             ORIGIN_MODULE_="$(basename "$(dirname "${GPT_OUTPUT_FILE_}")" | cut -d_ -f1)"
           fi
 
-          print_output "[*] Trying to link to module: ${ORIGIN_MODULE_}" "no_log"
-          print_output "[+] Further results available for ${ORANGE}${GPT_INPUT_FILE_//./}${GREEN} script" "" "${ORIGIN_MODULE_}"
+
+          print_output "[+] Further results for ${ORANGE}${GPT_INPUT_FILE_}${GREEN} available in module ${ORANGE}${ORIGIN_MODULE_}${NC}" "" "${ORIGIN_MODULE_}"
+          print_output "[+] Analysed source file ${ORANGE}${GPT_INPUT_FILE_}${GREEN}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+          # print_output "[+] Analysed source script popup ${ORANGE}${GPT_INPUT_FILE_}${GREEN} script"
+          # write_local_overlay_link "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_}.log"
+          if [[ -f "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_}".log ]]; then
+            print_output "[+] GPT answer file for ${ORANGE}${GPT_INPUT_FILE_}${NC}" "" "${LOG_PATH_MODULE}"/gpt_answers/gpt_response_"${GPT_INPUT_FILE_}".log
+          fi
+
           print_ln
           ((CHATGPT_RESULT_CNT+=1))
         fi
@@ -232,7 +256,7 @@ ask_chatgpt() {
 
     # reload q02 results:
     print_output "[*] Regenerate analysis array ..." "no_log"
-    readarray -t Q02_OPENAI_QUESTIONS < <(sort -u -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
+    readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
     # reset the array index to start again with the highest rated entry
     ELE_INDEX=0
   done

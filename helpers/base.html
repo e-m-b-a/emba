@@ -10,8 +10,7 @@ See LICENSE file for usage of this software.
 
 EMBA is licensed under GPLv3
 
-Author(s): Pascal Eckmann
-Contributor(s): Michael Messner, Stefan Haboeck
+Author(s) and contributors are listed here: https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTORS.md
 -->
 
 <!-- Used icons: https://github.com/CoreyGinnivan/system-uicons -->
@@ -124,6 +123,18 @@ function buttonNav() {
     button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="40" height="40" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 7.5v-5h-5"/><path d="M18.5 2.5l-6 5.929"/><path d="M7.5 18.5l-5 .023V13.5"/><path d="M8.5 12.5l-6 6"/></g></svg>';
     closeNav();
   };
+}
+
+function overlay_output(link) {
+  var rawfile = new XMLHttpRequest();
+  rawfile.open('GET', link, false);
+  rawfile.overrideMimeType("text");
+  rawfile.onreadystatechange = function()
+  {
+    alert(rawfile.responseText);
+    //console.log(rawfile.responseText);
+  }
+  rawfile.send(null);
 }
 
 document.onkeydown = function(e) {

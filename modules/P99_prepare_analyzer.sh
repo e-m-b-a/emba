@@ -45,10 +45,8 @@ P99_prepare_analyzer() {
 
   print_output "[*] Quick check if it is a real Linux system"
   check_firmware
-  print_ln
 
   prepare_file_arr "${FIRMWARE_PATH}"
-  print_ln
   prepare_binary_arr "${FIRMWARE_PATH}"
   prepare_file_arr_limited "${LOG_DIR}"/firmware
 

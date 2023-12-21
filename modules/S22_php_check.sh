@@ -73,6 +73,8 @@ s22_vuln_check_semgrep() {
   local S22_SEMGREP_VULNS=0
   local SEMG_SOURCES_ARR=()
 
+  # multiple output options would be nice. Currently we have the xml output to parse it easily for getting the line number of the issue
+  # but this output is not very beautiful to show in the report.
   semgrep --disable-version-check --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ > "${PHP_SEMGREP_LOG}" 2>&1 || true
 
   if [[ -f "${PHP_SEMGREP_LOG}" ]]; then

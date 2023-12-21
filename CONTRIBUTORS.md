@@ -26,9 +26,9 @@ See [CONTRIBUTING.md](https://github.com/e-m-b-a/emba/blob/master/CONTRIBUTING.m
 
 These people have contributed to EMBA:
 
-* [Michael Messner (original author)](https://github.com/m-1-k-3)
+* [Michael Messner (original author, maintainer)](https://github.com/m-1-k-3)
 * [Pascal Eckmann (original author)](https://github.com/p4cx)
-* [Benedikt Kuehne](https://github.com/BenediktMKuehne)
+* [Benedikt Kuehne (EMBArk maintainer)](https://github.com/BenediktMKuehne)
 * [Arnold Unterauer](https://github.com/Anemosx)
 * [seanog8](https://github.com/seanog8)
 * [Stefan Haboeck](https://github.com/StefanHaboeck)
