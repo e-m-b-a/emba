@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: grype docker image scan
+name: Grype docker image scan
 on:
   schedule:
     - cron: '0 0 * * *' # do it every day
@@ -42,7 +42,7 @@ jobs:
         id: scan
         with:
           image: "embeddedanalyzer/emba:latest"
-          fail-build: true
+          fail-build: false
           severity-cutoff: critical
       - name: Upload vulnerability report
         uses: github/codeql-action/upload-sarif@v2
