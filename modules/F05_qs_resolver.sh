@@ -11,6 +11,7 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Benedikt Kuehne
+# Contributor(s): Michael Messner
 
 # Description:  Resolves all dependancies and links between Q- and S-Modules
 
@@ -68,6 +69,11 @@ F05_qs_resolver() {
             fi
 
             readarray -t GPT_OUTPUT_FILE_HTML_ARR_ < <(find "${HTML_PATH}" -iname "${GPT_OUTPUT_FILE_NAME}" 2>/dev/null)
+            # the following search is because of inconsistency in file names.
+            # Todo: check this and fix it to only use the rules above
+            GPT_OUTPUT_FILE_NAME_bak="$(basename "${GPT_OUTPUT_FILE_//\./}.html")"
+            readarray -t GPT_OUTPUT_FILE_HTML_ARR_bak < <(find "${HTML_PATH}" -iname "${GPT_OUTPUT_FILE_NAME_bak}" 2>/dev/null)
+            GPT_OUTPUT_FILE_HTML_ARR_+=( "${GPT_OUTPUT_FILE_HTML_ARR_bak[@]}" )
 
             for HTML_FILE_ in "${GPT_OUTPUT_FILE_HTML_ARR_[@]}"; do
               # should point back to q02-submodule with name "${GPT_INPUT_FILE_}"
@@ -82,7 +88,7 @@ F05_qs_resolver() {
               myDEPTH=$(printf "%${depth_cnt}s")
               DEPTH="${myDEPTH// /${DEPTH}}"
 
-              sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\#${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] OpenAI results are available\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
+              sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\#aianalysisfor${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] OpenAI results are available\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
             done
           fi
         fi
