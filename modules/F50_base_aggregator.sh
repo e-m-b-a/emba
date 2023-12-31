@@ -505,7 +505,7 @@ output_binaries() {
   cwe_logging
 
   if [[ "${S16_GHIDRA_SEMGREP:-0}" -gt 0 ]]; then
-    print_output "[+] Found ""${ORANGE}""${S16_GHIDRA_SEMGREP}""${GREEN}"" possible vulnerabilities (via semgrep in Ghidra decompiled code) in ""${ORANGE}""${S16_BINS_CHECKED}""${GREEN}"" tested binaries.""${NC}"
+    print_output "[+] Found ""${ORANGE}""${S16_GHIDRA_SEMGREP}""${GREEN}"" possible vulnerabilities (${ORANGE}via semgrep in Ghidra decompiled code${GREEN}) in ""${ORANGE}""${S16_BINS_CHECKED}""${GREEN}"" tested binaries.""${NC}"
     write_link "s16"
   fi
 

@@ -102,7 +102,7 @@ s21_script_bandit() {
     fi
     if [[ "${VULNS}" -gt 20 ]] ; then
       print_output "[+] Found ""${RED}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${PY_SCRIPT_}")" ""  "${PY_LOG}"
-      GPT_PRIO_=2
+      GPT_PRIO_=3
     else
       print_output "[+] Found ""${ORANGE}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${PY_SCRIPT_}")" "" "${PY_LOG}"
     fi

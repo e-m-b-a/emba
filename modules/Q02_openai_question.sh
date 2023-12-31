@@ -131,12 +131,20 @@ ask_chatgpt() {
         print_output "[*] AI-Assisted analysis for ${GPT_INPUT_FILE_mod}" "" "${GPT_FILE_DIR_}/${GPT_INPUT_FILE_mod}.log"
         print_output "$(indent "$(orange "$(print_path "${SCRIPT_PATH_TMP_}")")")"
         head -n -2 "${CONFIG_DIR}/gpt_template.json" > "${TMP_DIR}/chat.json"
-        CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]')
+        CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]' | sed 's/\[ASK_GPT\].*//')
         if [[ "${#CHATGPT_CODE_}" -gt 4561 ]]; then
           print_output "[*] GPT request is too big ... stripping it now" "no_log"
-          CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]' | cut -c-4560)
+          CHATGPT_CODE_=$(sed 's/\\//g;s/"/\\\"/g' "${SCRIPT_PATH_TMP_}" | tr -d '[:space:]' | cut -c-4560 | sed 's/\[ASK_GPT\].*//')
         fi
-        printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}" >> "${TMP_DIR}/chat.json"
+        strip_color_codes "$(printf '"%s %s"\n}]}' "${GPT_QUESTION_}" "${CHATGPT_CODE_}")" >> "${TMP_DIR}/chat.json"
+
+        print_output "[*] Testing the following code with ChatGPT:" "no_log"
+        cat "${SCRIPT_PATH_TMP_}"
+        print_ln "no_log"
+        print_output "[*] Adjusted the code under test to send it to ChatGPT:" "no_log"
+        cat "${TMP_DIR}/chat.json"
+        print_ln "no_log"
+
         print_output "[*] The combined cost of the OpenAI request / the length is: ${ORANGE}${#GPT_QUESTION_} + ${#CHATGPT_CODE_}${NC}" "no_log"
 
         HTTP_CODE_=$(curl https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \

@@ -150,6 +150,14 @@ F05_qs_resolver() {
     fi
   fi
 
+  # lets remove the last [ASK_GPT] entries from the logs
+  local GPT_CLEANUP_ARR=()
+  local GPT_CLEANUP_FILE=""
+  mapfile -t GPT_CLEANUP_ARR < <(grep -rl "\[ASK_GPT\]\ " "${LOG_DIR}")
+  for GPT_CLEANUP_FILE in "${GPT_CLEANUP_ARR[@]}"; do
+    sed -i -E '/\[ASK_GPT\]\ .*/d' "${GPT_CLEANUP_FILE}"
+  done
+
   # do not create a web reporter page
   module_end_log "${FUNCNAME[0]}" 0
 }

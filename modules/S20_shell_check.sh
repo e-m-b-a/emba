@@ -186,7 +186,7 @@ s20_reporter() {
 
     if [[ "${VULNS}" -gt 20 ]] ; then
       print_output "[+] Found ""${RED}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${SH_SCRIPT}")" "" "${SHELL_LOG}"
-      GPT_PRIO_=1
+      GPT_PRIO_=$((GPT_PRIO_+1))
     else
       print_output "[+] Found ""${ORANGE}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${SH_SCRIPT}")" "" "${SHELL_LOG}"
     fi
