@@ -2,7 +2,7 @@
 EMBA - EMBEDDED LINUX ANALYZER
 
 Copyright 2020-2023 Siemens AG
-Copyright 2020-2023 Siemens Energy AG
+Copyright 2020-2024 Siemens Energy AG
 
 EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 welcome to redistribute it under the terms of the GNU General Public License.
