@@ -83,7 +83,7 @@ F05_qs_resolver() {
               HTML_FILE_X=$(echo "${HTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
               print_output "[*] Linking GPT results ${ORANGE}${GPT_REVERSE_LINK_}${NC} into ${ORANGE}${HTML_FILE_X}${NC}" "no_log"
               depth_cnt="${HTML_FILE_X//[^\/]}"
-              depth_cnt="$(( ${#depth_cnt}-1 ))"
+              depth_cnt="$(( "${#depth_cnt}"-1 ))"
               DEPTH="\.\.\/"
               myDEPTH=$(printf "%${depth_cnt}s")
               DEPTH="${myDEPTH// /${DEPTH}}"
@@ -138,7 +138,7 @@ F05_qs_resolver() {
             HTML_FILE_X=$(echo "${HTML_FILE_}" | sed 's#'"${HTML_PATH}"'##')
             print_output "[*] Linking GPT results ${ORANGE}${GPT_REVERSE_LINK_}${NC} into ${ORANGE}${HTML_FILE_X}${NC}" "no_log"
             depth_cnt="${HTML_FILE_X//[^\/]}"
-            depth_cnt="$(( ${#depth_cnt}-1 ))"
+            depth_cnt="$(( "${#depth_cnt}"-1 ))"
             DEPTH="\.\.\/"
             myDEPTH=$(printf "%${depth_cnt}s")
             DEPTH="${myDEPTH// /${DEPTH}}"

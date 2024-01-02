@@ -14,7 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Generates an overview over all modules.
-#shellcheck disable=SC2153
+# shellcheck disable=SC2153
 
 F50_base_aggregator() {
   module_log_init "${FUNCNAME[0]}"
