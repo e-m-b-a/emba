@@ -174,6 +174,8 @@ fw_bin_detector() {
       print_output "[+] Identified Linux kernel configuration file"
       write_csv_log "kernel config" "yes" "NA"
       export SKIP_PRE_CHECKERS=1
+      # for the kernel configuration only test we only need module s25
+      export SELECT_MODULES=( "S25" )
       return
     fi
   fi

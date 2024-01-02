@@ -542,15 +542,17 @@ main() {
       export FIRMWARE=1
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -z "${FIRMWARE_PATH1}" ]]; then
       PRE_CHECK=1
-      print_output "[*] Firmware binary detected." "no_log"
+      if [[ -n "${KERNEL_CONFIG}" && "${KERNEL}" -eq 1 ]]; then
+        print_output "[*] Kernel configuration file detected." "no_log"
+      else
+        print_output "[*] Firmware binary detected." "no_log"
+      fi
       print_output "    EMBA starts with the pre-testing phase." "no_log"
       export OUTPUT_DIR="${FIRMWARE_PATH}"
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -f "${FIRMWARE_PATH1}" ]]; then
       DIFF_MODE=1
       print_output "[*] Multiple firmware binarie detected." "no_log"
       print_output "    EMBA starts in firmware diff mode ." "no_log"
-    elif [[ -f "${KERNEL_CONFIG}" && "${KERNEL}" -eq 1 ]]; then
-      print_output "[*] Kernel configuration file detected." "no_log"
     else
       print_output "[!] Invalid firmware file" "no_log"
       print_help
