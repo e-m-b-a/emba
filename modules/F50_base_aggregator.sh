@@ -446,6 +446,8 @@ output_binaries() {
         # we have to remove the first line of the original output:
         (( BINS_CHECKED-- ))
       fi
+    elif [[ -f "${LOG_DIR}"/"${S13_LOG}" ]]; then
+      BINS_CHECKED=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S13_LOG}" | cut -d: -f3 || true)
     fi
 
     if [[ "${CANARY:-0}" -gt 0 ]]; then
@@ -516,7 +518,6 @@ output_binaries() {
     else
       write_link "s14"
     fi
-    print_ln
     write_csv_log "strcpy" "${STRCPY_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
   fi
 
@@ -556,6 +557,7 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
+      printf "${GREEN_}\t%-5.5s: %-15.15s : common linux file: y/n | %-7.7s / %-7.7s| %-9.9s | %-10.10s | %-10.10s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
       for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
         binary_fct_output "${DETAIL_STRCPY}"
         write_csv_log "strcpy_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -573,6 +575,7 @@ output_binaries() {
         write_link "s14#systemsummary"
       fi
       DATA=1
+      printf "${GREEN_}\t%-5.5s: %-15.15s : common linux file: y/n | %-7.7s / %-7.7s| %-9.9s | %-10.10s | %-10.10s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
       for DETAIL_SYSTEM in "${RESULTS_SYSTEM[@]}" ; do
         binary_fct_output "${DETAIL_SYSTEM}"
         write_csv_log "system_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -599,6 +602,7 @@ binary_fct_output() {
   local SYMBOLS=""
   local NETWORKING=""
   local CWE_CNT=0
+  local SEMGREP_CNT=0
 
   if grep -q "${BINARY}" "${LOG_DIR}"/"${S12_LOG}" 2>/dev/null; then
     if grep "${BINARY}" "${LOG_DIR}"/"${S12_LOG}" | grep -o -q "No RELRO"; then
@@ -639,48 +643,33 @@ binary_fct_output() {
     NETWORKING="${ORANGE_}""Networking unknown${NC_}"
   fi
 
-  # CWE checker enabled:
-  if [[ "${CWE_CHECKER}" -eq 1 ]]; then
-    # cwe-checker results per binary
-    if [[ -f "${LOG_DIR}"/s120_cwe_checker/cwe_"${BINARY}".log ]]; then
-      CWE_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}""/s120_cwe_checker/cwe_""${BINARY}"".log" || true)
-    fi
-    if [[ -f "${BASE_LINUX_FILES}" ]]; then
-      local FCT_LINK=""
-      # if we have the base linux config file we are checking it:
-      if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-        FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
-        printf "${GREEN_}\t%-5.5s: %-15.15s : common linux file: yes | CWE-check: %-2.2s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
-        write_link "${FCT_LINK}"
-      else
-        FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
-        printf "${ORANGE_}\t%-5.5s: %-15.15s : common linux file: no  | CWE-check: %-2.2s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}"| tee -a "${LOG_FILE}"
-        write_link "${FCT_LINK}"
-      fi
+  # cwe-checker and semgrep results per binary
+  if [[ -f "${LOG_DIR}"/s120_cwe_checker/cwe_"${BINARY}".log ]]; then
+    CWE_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}""/s120_cwe_checker/cwe_""${BINARY}"".log" || true)
+  fi
+  if [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".csv ]]; then
+    SEMGREP_CNT=$(wc -l "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}.csv" | awk '{print $1}' || true)
+  fi
+  if [[ -f "${BASE_LINUX_FILES}" ]]; then
+    local FCT_LINK=""
+    if [[ "${SEMGREP_CNT}" -gt 0 ]] && [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log ]]; then
+      FCT_LINK="${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log
     else
-      FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
-      printf "${ORANGE_}\t%-5.5s: %-15.15s : common linux file: NA  | CWE-check: %-2.2s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
-      write_link "${FCT_LINK}"
+      FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
     fi
+    [[ "${SEMGREP_CNT}" -eq 0 ]] && SEMGREP_CNT="NA"
+    [[ "${CWE_CNT}" -eq 0 ]] && CWE_CNT="NA"
+
+    # if we have the base linux config file we are checking it:
+    if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+      printf "${GREEN_}\t%-5.5s: %-15.15s : common linux file: yes | Vulns: %-3.3s / %-3.3s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
+    else
+      printf "${ORANGE_}\t%-5.5s: %-15.15s : common linux file: no  | Vulns: %-3.3s / %-3.3s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}"| tee -a "${LOG_FILE}"
+    fi
+    write_link "${FCT_LINK}"
   else
-    if [[ -f "${BASE_LINUX_FILES}" ]]; then
-      # No CWE checker was enabled
-      local FCT_LINK=""
-      # if we have the base linux config file we are checking it:
-      if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-        FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
-        printf "${GREEN_}\t%-5.5s : %-15.15s : common linux file: yes |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
-        write_link "${FCT_LINK}"
-      else
-        FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
-        printf "${ORANGE_}\t%-5.5s : %-15.15s : common linux file: no  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}"| tee -a "${LOG_FILE}"
-        write_link "${FCT_LINK}"
-      fi
-    else
-      FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
-      printf "${ORANGE_}\t%-5.5s : %-15.15s : common linux file: NA  |  %-14.14s  |  %-15.15s  |  %-16.16s  |  %-15.15s  |  %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
-      write_link "${FCT_LINK}"
-    fi
+    printf "${ORANGE_}\t%-5.5s: %-15.15s : common linux file: NA  | Vulns: %-3.3s / %-3.3s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
+    write_link "${FCT_LINK}"
   fi
 }
 
