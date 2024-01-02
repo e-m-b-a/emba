@@ -375,7 +375,7 @@ copy_right_check(){
 check_tools
 check
 dockerchecker
-copy_right_check "Siemens Energy AG" 2023 ./ ./external
+copy_right_check "Siemens Energy AG" 2024 ./ ./external
 list_linter_exceptions shellcheck ./ ./external
 list_linter_exceptions semgrep ./ ./external
 summary
