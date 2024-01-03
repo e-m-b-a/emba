@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 # Copyright 2020-2023 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
@@ -23,7 +23,7 @@ run_web_reporter_mod_name() {
     for LOG_FILE in "${LOG_FILES[@]}"; do
       MOD_NAME=$(basename -s .txt "${LOG_FILE}")
       generate_report_file "${LOG_FILE}"
-      sed -i -E '/^\[REF\]|\[ANC\].*/d' "${LOG_FILE}"
+      sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${LOG_FILE}"
     done
   fi
 }

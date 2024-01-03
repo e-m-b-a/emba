@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -32,6 +32,7 @@ S120_cwe_checker()
     local lTESTED_BINS=0
 
     [[ "${IN_DOCKER}" -eq 1 ]] && cwe_container_prepare
+    module_wait "S13_weak_func_check"
 
     cwe_check
 
@@ -75,27 +76,40 @@ cwe_container_prepare() {
 
 cwe_check() {
   local BINARY=""
+  local BIN_TO_CHECK=""
+  local BIN_TO_CHECK_ARR=()
+
+  if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
+    local BINARIES=()
+    # usually binaries with strcpy or system calls are more interesting for further analysis
+    # to keep analysis time low we only check these bins
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | awk '{print $1}' | sort -u)
+  fi
 
   for BINARY in "${BINARIES[@]}" ; do
-    if ( file "${BINARY}" | grep -q ELF ) ; then
-      # do not try to analyze kernel modules:
-      [[ "${BINARY}" == *".ko" ]] && continue
-      if [[ "${THREADED}" -eq 1 ]]; then
-        local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
-        if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
-          local MAX_MOD_THREADS=1
-        fi
+    # as we usually have not the full path from the s13 log, we need to search for the binary again:
+    mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -path "*${BINARY}*" | sort -u || true)
+    for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
+      if ( file "${BIN_TO_CHECK}" | grep -q ELF ) ; then
+        # do not try to analyze kernel modules:
+        [[ "${BIN_TO_CHECK}" == *".ko" ]] && continue
+        if [[ "${THREADED}" -eq 1 ]]; then
+          local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
+          if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
+            local MAX_MOD_THREADS=1
+          fi
 
-        cwe_checker_threaded "${BINARY}" &
-        local TMP_PID="$!"
-        store_kill_pids "${TMP_PID}"
-        WAIT_PIDS_S120+=( "${TMP_PID}" )
-        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S120[@]}"
-        continue
-      else
-        cwe_checker_threaded "${BINARY}"
+          cwe_checker_threaded "${BIN_TO_CHECK}" &
+          local TMP_PID="$!"
+          store_kill_pids "${TMP_PID}"
+          WAIT_PIDS_S120+=( "${TMP_PID}" )
+          max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S120[@]}"
+          continue
+        else
+          cwe_checker_threaded "${BIN_TO_CHECK}"
+        fi
       fi
-    fi
+    done
   done
 
   [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S120[@]}"
@@ -127,16 +141,15 @@ cwe_checker_threaded () {
   BINARY_=$(readlink -f "${BINARY_}")
 
   ulimit -Sv "${MEM_LIMIT}"
-  cwe_checker "${BINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
+  cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
   ulimit -Sv unlimited
-  print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}"
+  print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}" "no_log"
 
   if [[ -s "${LOG_PATH_MODULE}"/cwe_"${NAME}".log ]]; then
     jq -r '.[] | "\(.name) - \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${NAME}".log | sort -u || true
     mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${NAME}".log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
     # this is the logging after every tested file
     if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
-      print_ln
       print_output "[+] cwe-checker found ""${ORANGE}""${#CWE_OUT[@]}""${GREEN}"" different security issues in ""${ORANGE}""${NAME}""${GREEN}"":" "" "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
       for CWE_LINE in "${CWE_OUT[@]}"; do
         CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
@@ -145,10 +158,8 @@ cwe_checker_threaded () {
         echo "${CWE_CNT}" >> "${TMP_DIR}"/CWE_CNT.tmp
         print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
       done
-      print_ln
     else
-      print_ln
-      print_output "[-] Nothing found in ""${ORANGE}""${NAME}""${NC}""\\n"
+      print_output "[-] Nothing found in ""${ORANGE}""${NAME}""${NC}"
       rm "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
     fi
   fi
@@ -175,7 +186,7 @@ final_cwe_log() {
       mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
       print_ln
       if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
-        print_bar
+        sub_module_title "Results - CWE-checker binary analysis"
         print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
         for CWE_LINE in "${CWE_OUT[@]}"; do
           CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
@@ -186,7 +197,6 @@ final_cwe_log() {
           print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
         done
         print_bar
-        print_ln
       fi
     fi
   fi

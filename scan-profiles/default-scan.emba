@@ -23,7 +23,7 @@ export QEMULATION=1
 # it in the default profile.
 export CWE_CHECKER=1
 # the following modules are long running modules which are disabled in the default profile
-export MODULE_BLACKLIST=( "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
+export MODULE_BLACKLIST=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

@@ -3,7 +3,7 @@
 
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
-# Copyright (c) 2022 - 2023 Siemens Energy AG
+# Copyright (c) 2022 - 2024 Siemens Energy AG
 
 BUSYBOX=/firmadyne/busybox
 ACTION=$("${BUSYBOX}" cat /firmadyne/network_type)

@@ -4,7 +4,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -42,6 +42,7 @@ ARROW_LINK="<a href=\"LINK\" title=\"LINK\" >"
 LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
 REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
+LOCAL_OVERLAY_LINK="<a class=\"refmodul\" onclick=\"overlay_output\(\"LINK\"\) >"
 REFERENCE_MODUL_EXT_LINK="<a class=\"refmodulext\" href=\"LINK\" title=\"LINK\" target=\"_blank\">"
 EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"_blank\" >"
 CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"_blank\" >"
@@ -90,17 +91,19 @@ add_link_tags() {
   # [REF] anchor
   if ( grep -a -q -E '\[REF\]' "${LINK_FILE}" ) ; then
     readarray -t REF_LINKS_L_NUMBER < <(grep -a -n -E '\[REF\].*' "${LINK_FILE}" | cut -d':' -f1 )
+    # print_output "[*] REF link found in ${LINK_FILE}" "no_log"
     for REF_LINK_NUMBER in "${REF_LINKS_L_NUMBER[@]}" ; do
       DEPTH="."
       REF_LINK="$(sed "${REF_LINK_NUMBER}""q;d" "${LINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       URL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "${REF_LINK}" | cut -d"#" -f1)" ]] ; then
-        if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("${REF_LINK}" == *".txt#"*) || ("${REF_LINK}" == *".log#"*) ) ]] ; then
+        if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("${REF_LINK}" == *".txt#"*) || ("${REF_LINK}" == *".log#"*) || ("${REF_LINK: -2}" == ".c") ) ]] ; then
           REF_ANCHOR=""
           if [[ ( ("${REF_LINK}" == *".txt#"*) || ("${REF_LINK}" == *".log#"*) ) ]] ; then
             REF_ANCHOR="$(echo "${REF_LINK}" | cut -d"#" -f2 || true)"
             REF_LINK="$(echo "${REF_LINK}" | cut -d"#" -f1 || true)"
           fi
+          # print_output "[*] REF link ${REF_LINK} found in ${LINK_FILE}" "no_log"
           # generate reference file
           generate_info_file "${REF_LINK}" "${BACK_LINK}" &
           WAIT_PIDS_WR+=( "$!" )
@@ -370,6 +373,31 @@ add_link_tags() {
           LINK_COMMAND_ARR+=( 's@'"Arachni report created"'@'"${ARACHNI_LINK}""Arachni web application report""${LINK_END}"'@' )
         fi
       fi
+    fi
+
+    # [LOV] anchor for JS popup messages
+    if ( grep -a -q -E '\[LOV\]' "${LINK_FILE}" ) ; then
+      readarray -t LOV_LINKS_L_NUMBER < <(grep -a -n -E '\[LOV\].*' "${LINK_FILE}" | cut -d':' -f1 )
+      for LOV_LINK_NUMBER in "${LOV_LINKS_L_NUMBER[@]}" ; do
+        DEPTH="."
+        LOV_LINK="$(sed "${LOV_LINK_NUMBER}""q;d" "${LINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
+        if [[ -f "$(echo "${LOV_LINK}" | cut -d"#" -f1)" ]] ; then
+          echo "LOV_LINK: ${LOV_LINK}"
+          LINE_NUMBER_INFO_PREV="$(( LOV_LINK_NUMBER - 1 ))"
+          while [[ ("$(sed "${LINE_NUMBER_INFO_PREV}""q;d" "${LINK_FILE}")" == "${P_START}${SPAN_END}${P_END}") || ("$(sed "${LINE_NUMBER_INFO_PREV}""q;d" "${LINK_FILE}")" == "${BR}" ) ]] ; do
+            LINE_NUMBER_INFO_PREV=$(( LINE_NUMBER_INFO_PREV - 1 ))
+            echo "X LINE_NUMBER_INFO_PREV: ${LINE_NUMBER_INFO_PREV}"
+          done
+          LOV_LINE_BEFORE="$(sed "${LINE_NUMBER_INFO_PREV}""q;d" "${LINK_FILE}" || true)"
+          # HTML_LINK="$(echo "${LOV_LINK}" | sed -e "s@LINK@${DEPTH}/$(echo "${BACK_LINK}" | cut -d"." -f1)/$(basename "${LOV_LINK%."${LOV_LINK##*.}"}").html@g" || true)"
+          HTML_LINK="$(echo "${LOCAL_OVERLAY_LINK}" | sed -e "s@LINK@${LOV_LINK}@g" || true)"
+          echo "HTML_LINK: ${HTML_LINK}"
+          echo "LOV_LINE_BEFORE: ${LOV_LINE_BEFORE}"
+          echo "LINE_NUMBER_INFO_PREV: ${LINE_NUMBER_INFO_PREV}"
+          LINK_COMMAND_ARR+=( "${LINE_NUMBER_INFO_PREV}"'s@^@'"${HTML_LINK}"'@' "${LINE_NUMBER_INFO_PREV}"'s@$@'"${LINK_END}"'@')
+          echo "LINK_COMMAND_ARR: ${LINK_COMMAND_ARR[*]}"
+        fi
+      done
     fi
   fi
 

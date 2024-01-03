@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 # Copyright 2020-2023 Siemens AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
@@ -73,6 +73,8 @@ s22_vuln_check_semgrep() {
   local S22_SEMGREP_VULNS=0
   local SEMG_SOURCES_ARR=()
 
+  # multiple output options would be nice. Currently we have the xml output to parse it easily for getting the line number of the issue
+  # but this output is not very beautiful to show in the report.
   semgrep --disable-version-check --junit-xml --config "${EXT_DIR}"/semgrep-rules/php "${LOG_DIR}"/firmware/ > "${PHP_SEMGREP_LOG}" 2>&1 || true
 
   if [[ -f "${PHP_SEMGREP_LOG}" ]]; then
@@ -98,7 +100,7 @@ s22_vuln_check_semgrep() {
       local SEMG_SOURCE_FILE=""
       local SEMG_SOURCE_FILE_NAME=""
       local SEMG_LINE_NR=""
-      local GPT_PRIO_=3
+      local GPT_PRIO_=4
       local GPT_ANCHOR_=""
 
       ! [[ -d "${LOG_PATH_MODULE}"/semgrep_sources/ ]] && mkdir "${LOG_PATH_MODULE}"/semgrep_sources/
@@ -161,7 +163,6 @@ s22_vuln_check_caller() {
     S22_PHP_VULNS=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/S22_VULNS.tmp)
   fi
 
-  print_ln
   if [[ "${S22_PHP_VULNS}" -gt 0 ]]; then
     print_output "[+] Found ""${ORANGE}""${S22_PHP_VULNS}"" vulnerabilities""${GREEN}"" in ""${ORANGE}""${S22_PHP_SCRIPTS}""${GREEN}"" php files.""${NC}""\\n"
   else
@@ -191,7 +192,7 @@ s22_vuln_check() {
   ulimit -Sv unlimited
 
   VULNS=$(grep -c "vuln_name" "${PHP_LOG}" 2> /dev/null || true)
-  local GPT_PRIO_=3
+  local GPT_PRIO_=4
   local GPT_ANCHOR_=""
   if [[ "${VULNS}" -gt 0 ]] ; then
     # check if this is common linux file:

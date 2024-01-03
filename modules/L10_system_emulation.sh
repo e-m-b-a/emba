@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 # Original copyright of firmae and firmadyne:
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
@@ -1332,7 +1332,7 @@ get_networking_details_emulation() {
       IP_=""
       for _IPs in "${IP_ADDRESS[@]}"; do
         if [[ "${_IPs}" == "0x"* ]]; then
-          #shellcheck disable=SC2004
+          # shellcheck disable=SC2004
           IP_="${IP_}.$((${_IPs}))"
         fi
       done
@@ -2225,11 +2225,11 @@ write_script_exec() {
     if echo "${COMMAND}" | grep -q qemu-system-; then
       # fix path for kernel: /external/firmae/binaries/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
       # fix path for kernel: /external/EMBA_Live_bins/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
-      #shellcheck disable=SC2001
+      # shellcheck disable=SC2001
       COMMAND=$(echo "${COMMAND}" | sed 's#-kernel\ .*\/EMBA_Live_bins\/#-kernel\ .\/#g')
-      #shellcheck disable=SC2001
+      # shellcheck disable=SC2001
       COMMAND=$(echo "${COMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
-      #shellcheck disable=SC2001
+      # shellcheck disable=SC2001
       COMMAND=$(echo "${COMMAND}" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
     fi
 

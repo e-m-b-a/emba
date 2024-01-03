@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -186,7 +186,7 @@ s20_reporter() {
 
     if [[ "${VULNS}" -gt 20 ]] ; then
       print_output "[+] Found ""${RED}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${SH_SCRIPT}")" "" "${SHELL_LOG}"
-      GPT_PRIO_=1
+      GPT_PRIO_=$((GPT_PRIO_+1))
     else
       print_output "[+] Found ""${ORANGE}""${VULNS}"" issues""${GREEN}"" in script ""${COMMON_FILES_FOUND}"":""${NC}"" ""$(print_path "${SH_SCRIPT}")" "" "${SHELL_LOG}"
     fi

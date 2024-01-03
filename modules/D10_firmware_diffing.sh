@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -191,7 +191,21 @@ analyse_fw_files() {
               write_link "${LOG_PATH_MODULE_SUB}/colordiff_${FW_FILE_NAME1}.txt" "${LOG_FILE_DETAILS}"
               write_log "" "${LOG_FILE_DETAILS}"
             fi
-            write_log "" "${LOG_FILE_DETAILS}"
+            strings -d -n 6 "${FW_FILE1}" > "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME1}"_1.txt || true
+            strings -d -n 6 "${FW_FILE2}" > "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt || true
+            if [[ -f "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME1}"_1.txt ]] && [[ -f "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt ]]; then
+              diff -yb --color=always --suppress-common-lines "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME1}"_1.txt "${LOG_PATH_MODULE_SUB}"/strings_"${FW_FILE_NAME2}"_2.txt > "${LOG_PATH_MODULE_SUB}"/colordiff_strings_"${FW_FILE_NAME1}".txt || true
+              if [[ -f "${LOG_PATH_MODULE_SUB}"/colordiff_strings_"${FW_FILE_NAME1}".txt ]]; then
+                if [[ -s "${LOG_PATH_MODULE_SUB}"/colordiff_strings_"${FW_FILE_NAME1}".txt ]]; then
+                  print_output "[*] Diffing results from binary strings ${ORANGE}${FW_FILE_NAME1}${NC} - logged to ${ORANGE}${LOG_PATH_MODULE_SUB}/colordiff_strings_${FW_FILE_NAME1}.txt${NC}" "no_log"
+
+                  write_log "" "${LOG_FILE_DETAILS}"
+                  write_log "[*] Diffing results from binary strings ${ORANGE}${FW_FILE_NAME1}${NC}" "${LOG_FILE_DETAILS}"
+                  write_link "${LOG_PATH_MODULE_SUB}/colordiff_strings_${FW_FILE_NAME1}.txt" "${LOG_FILE_DETAILS}"
+                  write_log "" "${LOG_FILE_DETAILS}"
+                fi
+              fi
+            fi
 
             # radare2:
             # get the functions which are different with radiff2:

@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -149,7 +149,7 @@ S13_weak_func_check()
     fi
 
     write_log ""
-    write_log "[*] Statistics:${STRCPY_CNT}"
+    write_log "[*] Statistics:${STRCPY_CNT}:${#BINARIES[@]}"
     write_log ""
     write_log "[*] Statistics1:${ARCH}"
   fi
@@ -509,9 +509,10 @@ log_bin_hardening() {
 
   if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
     write_log "[*] Binary protection state of ${ORANGE}${NAME}${NC}" "${FUNC_LOG}"
+    write_link "s12" "${FUNC_LOG}"
     write_log "" "${FUNC_LOG}"
     # get headline:
-    HEAD_BIN_PROT=$(grep "FORTIFY Fortified" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTIFY.*//'| sort -u || true)
+    HEAD_BIN_PROT=$(grep "FORTI.*FILE" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTI.*//'| sort -u || true)
     write_log "  ${HEAD_BIN_PROT}" "${FUNC_LOG}"
     # get binary entry
     BIN_PROT=$(grep '/'"${NAME}"' ' "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)

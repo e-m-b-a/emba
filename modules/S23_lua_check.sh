@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -65,7 +65,7 @@ s23_luaseccheck() {
   local NAME=""
   local LUA_LOG=""
   local GPT_ANCHOR_=""
-  local GPT_PRIO_=2
+  local GPT_PRIO_=3
   sub_module_title "LUA Security checks module"
 
   mapfile -t LUA_CGI_FILES < <(find "${FIRMWARE_PATH}" -type f -exec grep -H cgilua\. {} \; 2>/dev/null | cut -d ':' -f1 | sort -u)

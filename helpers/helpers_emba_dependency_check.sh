@@ -3,7 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -88,12 +88,15 @@ version_extended() # $1-a $2-op $3-$b
   local ai=${a%$al} bi=${b%$bl}
 
   local ap=${ai//[[:digit:]]} bp=${bi//[[:digit:]]}
+  # nosemgrep
   ap=${ap//./.0} bp=${bp//./.0}
 
   local w=1 fmt=$a.$b x IFS=.
   for x in $fmt; do [ ${#x} -gt $w ] && w=${#x}; done
   fmt=${*//[^.]}; fmt=${fmt//./%${w}s}
+  # nosemgrep
   printf -v a $fmt $ai$bp; printf -v a "%s-%${w}s" $a $al
+  # nosemgrep
   printf -v b $fmt $bi$ap; printf -v b "%s-%${w}s" $b $bl
 
   case $op in

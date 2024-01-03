@@ -4,7 +4,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2020-2023 Siemens AG
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -85,7 +85,6 @@ sort_modules()
 }
 
 check_quest_container() {
-  print_ln "no_log"
   print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
   # wait for quest container to finish network checks
   while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
@@ -95,11 +94,9 @@ check_quest_container() {
     sleep 0.1
   done
   reset
-  print_ln "no_log"
   print_output "[*] Quest container ${QUEST_CONTAINER} dependency checks: \\n" "no_log"
   docker logs "${QUEST_CONTAINER}"
   print_output "[*] Finished Quest container ${QUEST_CONTAINER} dependency checks \\n" "no_log"
-  print_ln "no_log"
   reset
 }
 
@@ -373,11 +370,9 @@ main() {
   if [[ ${IN_DOCKER} -eq 0 ]]; then
     if grep -q -i wsl /proc/version; then
       print_bar "no_log"
-      print_ln "no_log"
       print_output "[*] INFO: System running in WSL environment!" "no_log"
       print_output "[*] INFO: WSL is currently experimental." "no_log"
       print_output "[*] INFO: Please report issues to https://github.com/e-m-b-a/emba/issues." "no_log"
-      print_ln "no_log"
       print_bar "no_log"
       export WSL=1
     fi
@@ -547,15 +542,17 @@ main() {
       export FIRMWARE=1
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -z "${FIRMWARE_PATH1}" ]]; then
       PRE_CHECK=1
-      print_output "[*] Firmware binary detected." "no_log"
+      if [[ -n "${KERNEL_CONFIG}" && "${KERNEL}" -eq 1 ]]; then
+        print_output "[*] Kernel configuration file detected." "no_log"
+      else
+        print_output "[*] Firmware binary detected." "no_log"
+      fi
       print_output "    EMBA starts with the pre-testing phase." "no_log"
       export OUTPUT_DIR="${FIRMWARE_PATH}"
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -f "${FIRMWARE_PATH1}" ]]; then
       DIFF_MODE=1
       print_output "[*] Multiple firmware binarie detected." "no_log"
       print_output "    EMBA starts in firmware diff mode ." "no_log"
-    elif [[ -f "${KERNEL_CONFIG}" && "${KERNEL}" -eq 1 ]]; then
-      print_output "[*] Kernel configuration file detected." "no_log"
     else
       print_output "[!] Invalid firmware file" "no_log"
       print_help
@@ -679,8 +676,6 @@ main() {
       esac
     done
 
-    print_ln "no_log"
-
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
     # try it 10 times before exit
@@ -733,7 +728,6 @@ main() {
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "main"
-      print_ln "no_log"
 
       check_quest_container "${QUEST_CONTAINER}" &
       QUEST_PID="$!"
