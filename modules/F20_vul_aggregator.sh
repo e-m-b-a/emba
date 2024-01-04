@@ -807,7 +807,7 @@ check_kernel_major_v() {
   if [[ "${lBIN_VERSION_ONLY:0:1}" != "${lKERNEL_CVE_VER:0:1}" ]]; then
     # print_output is for printing to cli
     # write_log is for writing the needed log file
-    local OUT_MESSAGE="[-] Info for CVE ${ORANGE}${lCVE_ID}${NC} - Major kernel version not matching ${ORANGE}${lKERNEL_CVE_VER}${NC} vs ${ORANGE}${lBIN_VERSION_ONLY}${NC} - Higher false positive risk" "no_log"
+    local OUT_MESSAGE="[-] Info for CVE ${ORANGE}${lCVE_ID}${NC} - Major kernel version not matching ${ORANGE}${lKERNEL_CVE_VER}${NC} vs ${ORANGE}${lBIN_VERSION_ONLY}${NC} - Higher false positive risk"
     print_output "${OUT_MESSAGE}" "no_log"
     write_log "${OUT_MESSAGE}" "${LOG_PATH_MODULE}/kernel_cve_version_issues.log"
   fi
