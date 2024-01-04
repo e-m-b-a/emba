@@ -57,6 +57,7 @@ S09_firmware_base_version_check() {
     VERSION_IDENTIFIER="$(safe_echo "${VERSION_LINE}" | cut -d\; -f4)"
     VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
     VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
+    print_output "[*] Found VERSION_IDENTIFIER: ${VERSION_IDENTIFIER}"
 
     if [[ "${STRICT}" == *"strict"* ]]; then
 
@@ -177,44 +178,62 @@ S09_firmware_base_version_check() {
 }
 
 bin_string_checker() {
+  IFS='&&' read -r -a VERSION_IDENTIFIERS_ARR <<< "${VERSION_IDENTIFIER}"
+
   for BIN in "${FILE_ARR[@]}"; do
-    if [[ ${RTOS} -eq 0 ]]; then
-      BIN_FILE=$(file "${BIN}" || true)
-      # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
-      if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
-        continue
-      fi
-      if [[ "${BIN_FILE}" == *ELF* ]] ; then
-        VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
+    for (( j=0; j<${#VERSION_IDENTIFIERS_ARR[@]}; j++ )); do
+      local VERSION_IDENTIFIER="${VERSION_IDENTIFIERS_ARR["${j}"]}"
+      local VERSION_FINDER=""
+      [[ -z "${VERSION_IDENTIFIER}" ]] && continue
+      VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+      VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
+      VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
+      VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
+      if [[ ${RTOS} -eq 0 ]]; then
+        BIN_FILE=$(file "${BIN}" || true)
+        # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
+        if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
+          continue 2
+        fi
+        if [[ "${BIN_FILE}" == *ELF* ]] ; then
+          VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
+          if [[ -n ${VERSION_FINDER} ]]; then
+            if [[ "${#VERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((${j}+1))" -lt "${#VERSION_IDENTIFIERS_ARR[@]}" ]]; then
+              # we found the first identifier and now we need to check the other identifiers also
+              print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${BIN}${GREEN}" "no_log"
+              continue
+            fi
+            print_ln "no_log"
+            print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
+            get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+            write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+            # we test the next binary
+            continue 2
+          fi
+        elif [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* ]] ; then
+          VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
+          if [[ -n ${VERSION_FINDER} ]]; then
+            print_ln "no_log"
+            print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in kernel image ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
+            get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
+            write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
+            continue 2
+          fi
+        fi
+      else
+        # this is RTOS mode
+        # echo "Testing $BIN - $VERSION_IDENTIFIER"
+        VERSION_FINDER="$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)"
         if [[ -n ${VERSION_FINDER} ]]; then
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
           get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
           write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
-          continue
-        fi
-      elif [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* ]] ; then
-        VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
-        if [[ -n ${VERSION_FINDER} ]]; then
-          print_ln "no_log"
-          print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in kernel image ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-          get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
-          write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
-          continue
+          continue 2
         fi
       fi
-    else
-      # this is RTOS mode
-      # echo "Testing $BIN - $VERSION_IDENTIFIER"
-      VERSION_FINDER="$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)"
-      if [[ -n ${VERSION_FINDER} ]]; then
-        print_ln "no_log"
-        print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
-        get_csv_rule "${VERSION_FINDER}" "${CSV_REGEX}"
-        write_csv_log "${BIN}" "${BIN_NAME}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE}"
-        continue
-      fi
-    fi
+      continue 2
+    done
   done
 }
 
