@@ -177,6 +177,8 @@ S09_firmware_base_version_check() {
 }
 
 bin_string_checker() {
+  VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
+  VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
   IFS='&&' read -r -a VERSION_IDENTIFIERS_ARR <<< "${VERSION_IDENTIFIER}"
 
   for BIN in "${FILE_ARR[@]}"; do
@@ -184,10 +186,11 @@ bin_string_checker() {
       local VERSION_IDENTIFIER="${VERSION_IDENTIFIERS_ARR["${j}"]}"
       local VERSION_FINDER=""
       [[ -z "${VERSION_IDENTIFIER}" ]] && continue
-      VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
-      VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
-      VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
-      VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
+      # this is a workaround to handle the new multi_grep
+      if [[ "${VERSION_IDENTIFIER: 0:1}" == '"' ]]; then
+        VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+        VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
+      fi
       if [[ ${RTOS} -eq 0 ]]; then
         BIN_FILE=$(file "${BIN}" || true)
         # as the FILE_ARR array also includes non binary stuff we have to check for relevant files now:
@@ -195,6 +198,7 @@ bin_string_checker() {
           continue 2
         fi
         if [[ "${BIN_FILE}" == *ELF* ]] ; then
+          # print_output "[*] Testing $BIN with version identifier ${VERSION_IDENTIFIER}" "no_log"
           VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
           if [[ -n ${VERSION_FINDER} ]]; then
             if [[ "${#VERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#VERSION_IDENTIFIERS_ARR[@]}" ]]; then

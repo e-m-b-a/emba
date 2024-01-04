@@ -67,6 +67,10 @@ version_detection_thread() {
   BINARY="$(echo "${VERSION_LINE}" | cut -d\; -f1)"
   local STRICT=""
   STRICT="$(echo "${VERSION_LINE}" | cut -d\; -f2)"
+  if [[ ${STRICT} == "multi_grep" ]]; then
+    print_output "[-] Multi grep version identifiers currently not available in emulation module"
+    return
+  fi
   local LIC=""
   LIC="$(echo "${VERSION_LINE}" | cut -d\; -f3)"
   local CSV_REGEX=""
