@@ -197,7 +197,7 @@ bin_string_checker() {
         if [[ "${BIN_FILE}" == *ELF* ]] ; then
           VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
           if [[ -n ${VERSION_FINDER} ]]; then
-            if [[ "${#VERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((${j}+1))" -lt "${#VERSION_IDENTIFIERS_ARR[@]}" ]]; then
+            if [[ "${#VERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#VERSION_IDENTIFIERS_ARR[@]}" ]]; then
               # we found the first identifier and now we need to check the other identifiers also
               print_output "[+] Found sub identifier ${ORANGE}${VERSION_IDENTIFIER}${GREEN} in binary ${ORANGE}${BIN}${GREEN}" "no_log"
               continue
