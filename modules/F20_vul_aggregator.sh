@@ -25,7 +25,6 @@ F20_vul_aggregator() {
 
   # we use this for later decisions:
   export F20_DEEP=1
-  print_ln
 
   prepare_cve_search_module
 
@@ -442,7 +441,9 @@ generate_cve_details_cves() {
     fi
   done
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19[@]}"
+  if [[ "${THREADED}" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_F19[@]}"
+  fi
 }
 
 generate_cve_details_versions() {
@@ -464,7 +465,9 @@ generate_cve_details_versions() {
     fi
   done
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_F19[@]}"
+  if [[ "${THREADED}" -eq 1 ]]; then
+    wait_for_pid "${WAIT_PIDS_F19[@]}"
+  fi
 }
 
 cve_db_lookup_cve() {
@@ -802,7 +805,11 @@ check_kernel_major_v() {
   local lKERNEL_CVE_VER="${2:-}"
   local lCVE_ID="${3:-}"
   if [[ "${lBIN_VERSION_ONLY:0:1}" != "${lKERNEL_CVE_VER:0:1}" ]]; then
-    print_output "[-] Info for CVE ${ORANGE}${lCVE_ID}${NC} - Major kernel version not matching ${ORANGE}${lKERNEL_CVE_VER}${NC} vs ${ORANGE}${lBIN_VERSION_ONLY}${NC} - Higher false positive risk" "no_log"
+    # print_output is for printing to cli
+    # write_log is for writing the needed log file
+    local OUT_MESSAGE="[-] Info for CVE ${ORANGE}${lCVE_ID}${NC} - Major kernel version not matching ${ORANGE}${lKERNEL_CVE_VER}${NC} vs ${ORANGE}${lBIN_VERSION_ONLY}${NC} - Higher false positive risk"
+    print_output "${OUT_MESSAGE}" "no_log"
+    write_log "${OUT_MESSAGE}" "${LOG_PATH_MODULE}/kernel_cve_version_issues.log"
   fi
 }
 

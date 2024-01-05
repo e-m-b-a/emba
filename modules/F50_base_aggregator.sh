@@ -133,7 +133,7 @@ output_overview() {
   fi
 
   if [[ -n "${ARCH}" ]]; then
-    if [[ -n "${D_END}" ]]; then
+    if [[ -n "${D_END:-"NA"}" ]]; then
       write_csv_log "architecture_verified" "${ARCH}" "${D_END}" "NA" "NA" "NA" "NA" "NA" "NA"
       print_output "[+] Detected architecture and endianness (""${ORANGE}""verified${GREEN}):""${ORANGE}"" ""${ARCH}"" / ""${D_END}""${NC}"
     else
@@ -142,7 +142,7 @@ output_overview() {
     fi
     write_link "p99"
   elif [[ -f "${P99_CSV_LOG}" ]] && [[ -n "${P99_ARCH}" ]]; then
-    if [[ -n "${D_END}" ]]; then
+    if [[ -n "${D_END:-"NA"}" ]]; then
       write_csv_log "architecture_verified" "${P99_ARCH}" "${P99_ARCH_END}" "NA" "NA" "NA" "NA" "NA" "NA"
       print_output "[+] Detected architecture and endianness (""${ORANGE}""verified${GREEN}):""${ORANGE}"" ""${P99_ARCH}"" / ""${P99_ARCH_END}""${NC}"
     else

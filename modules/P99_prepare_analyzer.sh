@@ -82,7 +82,7 @@ P99_prepare_analyzer() {
       UNIQUE_FILES=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
       DIRS_EXT=$(find "${ROOT_PATH}" -xdev -type d | wc -l )
       BINS=$(find "${ROOT_PATH}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
-      write_csv_log "${FILES_EXT}" "${UNIQUE_FILES}" "${DIRS_EXT}" "${BINS}" "${LINUX_PATH_COUNTER}" "${R_PATH}" "${ARCH}" "${D_END}"
+      write_csv_log "${FILES_EXT}" "${UNIQUE_FILES}" "${DIRS_EXT}" "${BINS}" "${LINUX_PATH_COUNTER}" "${R_PATH}" "${ARCH}" "${D_END:-"NA"}"
     done
   fi
 

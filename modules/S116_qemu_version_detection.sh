@@ -38,6 +38,16 @@ S116_qemu_version_detection() {
         if echo "${VERSION_LINE}" | grep -v -q "^[^#*/;]"; then
           continue
         fi
+        if [[ -f "${CSV_DIR}"/s116_qemu_version_detection.csv ]]; then
+          # this should prevent double checking - if a version identifier was already successful we do not need to
+          # test the other identifiers. In threaded mode this usually does not decrease testing speed
+          local BINARY=""
+          BINARY="$(echo "${VERSION_LINE}" | cut -d\; -f1)"
+          if [[ "$(tail -n +2 "${CSV_DIR}"/s116_qemu_version_detection.csv | cut -d\; -f2 | grep -c "^${BINARY}$")" -gt 0 ]]; then
+            print_output "[*] Already identified component for identifier ${ORANGE}${BINARY}${NC} ... skipping further tests" "no_log"
+            continue
+          fi
+        fi
 
         if [[ ${THREADED} -eq 1 ]]; then
           version_detection_thread "${VERSION_LINE}" &
@@ -71,6 +81,11 @@ version_detection_thread() {
   LIC="$(echo "${VERSION_LINE}" | cut -d\; -f3)"
   local CSV_REGEX=""
   CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
+
+  if [[ ${STRICT} == "multi_grep" ]]; then
+    print_output "[-] Multi grep version identifier for ${ORANGE}${CSV_REGEX}${NC} currently not supported in emulation module" "no_log"
+    return
+  fi
 
   local VERSION_IDENTIFIER=""
   # VERSION_IDENTIFIER="$(echo "${VERSION_LINE}" | cut -d\; -f4 | sed s/^\"// | sed s/\"$//)"
