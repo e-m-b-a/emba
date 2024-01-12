@@ -26,6 +26,7 @@ IP00_extractors(){
     print_pip_info "bsdiff4"
     print_git_info "payload_dumper" "EMBA-support-repos/payload_dumper" "Android OTA payload.bin extractor"
     print_git_info "smcbmc" "EMBA-support-repos/smcbmc" "Supermicro BMC firmware image decryptor"
+    print_git_info "dji-firmware-tools" "EMBA-support-repos/dji-firmware-tools" "Tools for extracting, modding and re-packaging firmwares of DJI multirotor drones."
     print_pip_info "pycryptodome"
     # ubireader:
     # print_tool_info "python3-lzo" 1
@@ -74,6 +75,13 @@ IP00_extractors(){
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component smcbmc" && exit 1 )
         fi
 
+        if ! [[ -d external/dji-firmware-tools ]]; then
+          git clone https://github.com/EMBA-support-repos/dji-firmware-tools.git external/dji-firmware-tools
+        else
+          cd external/dji-firmware-tools || ( echo "Could not install EMBA component dji-firmware-tools" && exit 1 )
+          git pull
+          cd "${HOME_PATH}" || ( echo "Could not install EMBA component dji-firmware-tools" && exit 1 )
+        fi
 
         if ! [[ -f "./external/buffalo-enc.elf" ]] ; then
           # Buffalo decryptor:
