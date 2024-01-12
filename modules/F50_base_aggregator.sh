@@ -54,7 +54,7 @@ F50_base_aggregator() {
   S108_LOG="s108_stacs_password_search.txt"
   S109_LOG="s109_jtr_local_pw_cracking.txt"
   S110_LOG="s110_yara_check.txt"
-  S120_LOG="s120_cwe_checker.txt"
+  S17_LOG="s17_cwe_checker.txt"
   # L10_LOG="l10_system_emulator.txt"
   L15_LOG="l15_emulated_checks_init.txt"
   L20_LOG="l20_snmp_checks.txt"
@@ -557,7 +557,7 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
-      printf "${GREEN_}\t%-5.5s: %-15.15s : common linux file: y/n | %-7.7s / %-7.7s| %-9.9s | %-10.10s | %-10.10s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
+      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-8.8s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
       for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
         binary_fct_output "${DETAIL_STRCPY}"
         write_csv_log "strcpy_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -575,7 +575,7 @@ output_binaries() {
         write_link "s14#systemsummary"
       fi
       DATA=1
-      printf "${GREEN_}\t%-5.5s: %-15.15s : common linux file: y/n | %-7.7s / %-7.7s| %-9.9s | %-10.10s | %-10.10s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
+      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-8.8s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
       for DETAIL_SYSTEM in "${RESULTS_SYSTEM[@]}" ; do
         binary_fct_output "${DETAIL_SYSTEM}"
         write_csv_log "system_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -644,8 +644,8 @@ binary_fct_output() {
   fi
 
   # cwe-checker and semgrep results per binary
-  if [[ -f "${LOG_DIR}"/s120_cwe_checker/cwe_"${BINARY}".log ]]; then
-    CWE_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}""/s120_cwe_checker/cwe_""${BINARY}"".log" || true)
+  if [[ -f "${LOG_DIR}"/s17_cwe_checker/cwe_"${BINARY}".log ]]; then
+    CWE_CNT=$(grep -Ec "CWE[0-9]+" "${LOG_DIR}""/s17_cwe_checker/cwe_""${BINARY}"".log" || true)
   fi
   if [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".csv ]]; then
     SEMGREP_CNT=$(wc -l "${LOG_DIR}/s16_ghidra_decompile_checks/semgrep_${BINARY}.csv" | awk '{print $1}' || true)
@@ -662,13 +662,13 @@ binary_fct_output() {
 
     # if we have the base linux config file we are checking it:
     if grep -E -q "^${BINARY}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-      printf "${GREEN_}\t%-5.5s: %-15.15s : common linux file: yes | Vulns: %-3.3s / %-3.3s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
+      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: yes | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
     else
-      printf "${ORANGE_}\t%-5.5s: %-15.15s : common linux file: no  | Vulns: %-3.3s / %-3.3s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}"| tee -a "${LOG_FILE}"
+      printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: no  | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}"| tee -a "${LOG_FILE}"
     fi
     write_link "${FCT_LINK}"
   else
-    printf "${ORANGE_}\t%-5.5s: %-15.15s : common linux file: NA  | Vulns: %-3.3s / %-3.3s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
+    printf "${ORANGE_}\t%-5.5s| %-15.15s | common linux file: NA  | Vulns: %-4.4s / %-4.4s | %-14.14s | %-15.15s | %-16.16s | %-15.15s | %-18.18s |${NC}\n" "${F_COUNTER}" "${BINARY}" "${CWE_CNT}" "${SEMGREP_CNT}" "${RELRO}" "${CANARY}" "${NX}" "${SYMBOLS}" "${NETWORKING}" | tee -a "${LOG_FILE}"
     write_link "${FCT_LINK}"
   fi
 }
@@ -941,9 +941,9 @@ get_data() {
   if [[ -f "${LOG_DIR}"/"${S110_LOG}" ]]; then
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S110_LOG}" | cut -d: -f2 || true)
   fi
-  if [[ -f "${LOG_DIR}"/"${S120_LOG}" ]]; then
+  if [[ -f "${LOG_DIR}"/"${S17_LOG}" ]]; then
     export TOTAL_CWE_CNT
-    TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S120_LOG}" | cut -d: -f2 || true)
+    TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S17_LOG}" | cut -d: -f2 || true)
   fi
   if [[ -f "${SYS_EMU_RESULTS}" ]]; then
     BOOTED=$(grep -c "Booted yes;" "${SYS_EMU_RESULTS}" || true)
@@ -1130,7 +1130,7 @@ print_os() {
 }
 
 cwe_logging() {
-  local LOG_DIR_MOD="s120_cwe_checker"
+  local LOG_DIR_MOD="s17_cwe_checker"
   local CWE_OUT=()
   local CWE_ENTRY=""
   local CWE=""
@@ -1143,7 +1143,7 @@ cwe_logging() {
 
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
       print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in firmware binaries:"
-      write_link "s120"
+      write_link "s17"
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
         CWE="$(echo "${CWE_ENTRY}" | awk '{print $1}')"
         CWE_DESC="$(echo "${CWE_ENTRY}" | cut -d\  -f2-)"
