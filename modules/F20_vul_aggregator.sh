@@ -884,20 +884,9 @@ cve_extractor() {
 
 
   if ! [[ "${VERSION_orig}" == "CVE-"* ]]; then
+    # remove last : if it is there
     VERSION=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
     BINARY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
-
-    # if [[ "$(echo "${VERSION_orig%:}" | grep -o ":" | wc -l || true)" -eq 1 ]]; then
-    #  BINARY="$(echo "${VERSION_orig}" | cut -d ":" -f1)"
-    #  VERSION="$(echo "${VERSION_orig}" | cut -d ":" -f2)"
-    #else
-    #  # DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
-    #  BINARY="$(echo "${VERSION_orig}" | cut -d ":" -f2)"
-    #  VERSION="$(echo "${VERSION_orig}" | cut -d ":" -f3-)"
-    #fi
-    local VERSION_PATH="${VERSION_orig%:}"
-    VERSION_PATH="${VERSION_PATH//:/_}"
-    # remove last : if it is there
     AGG_LOG_FILE="${VERSION_PATH}".txt
   else
     AGG_LOG_FILE="${VERSION_orig}".txt
