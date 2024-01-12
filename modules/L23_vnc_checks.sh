@@ -91,7 +91,7 @@ check_msf_vnc() {
   # auxiliary/scanner/http/thinvnc_traversal
   # auxiliary/scanner/vnc/vnc_none_auth
 
-  timeout --preserve-status --signal SIGINT -k 10m msfconsole -q -n -r "${HELP_DIR}"/l23_vnc_msf_check.rc "${IP_ADDRESS_}" "${VNC_PORT}" | tee -a "${LOG_PATH_MODULE}"/metasploit-vnc-check-"${IP_ADDRESS_}".txt || true
+  timeout --preserve-status --signal SIGINT 600 msfconsole -q -n -r "${HELP_DIR}"/l23_vnc_msf_check.rc "${IP_ADDRESS_}" "${VNC_PORT}" | tee -a "${LOG_PATH_MODULE}"/metasploit-vnc-check-"${IP_ADDRESS_}".txt || true
 
   print_output "[*] VNC Metasploit enumeration for ${ORANGE}${IP_ADDRESS_} / ${VNC_PORT}${NC} finished"
 }

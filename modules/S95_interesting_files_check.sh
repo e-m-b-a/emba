@@ -15,24 +15,28 @@
 
 # Description:  Searches explicitly for binaries like gcc or gdb and also binaries for post exploitation like wget or ftp.
 
-S95_interesting_binaries_check()
+S95_interesting_files_check()
 {
   module_log_init "${FUNCNAME[0]}"
-  module_title "Check interesting binaries"
+  module_title "Check for interesting files"
   pre_module_reporter "${FUNCNAME[0]}"
 
   local NEG_LOG=0
   local INT_COUNT=0
   local POST_COUNT=0
+  local HID_COUNT=0
 
   if [[ "${THREADED}" -eq 1 ]]; then
     interesting_binaries &
     WAIT_PIDS_S95+=( "$!" )
     post_exploitation &
     WAIT_PIDS_S95+=( "$!" )
+    hidden_files &
+    WAIT_PIDS_S95+=( "$!" )
   else
     interesting_binaries
     post_exploitation
+    hidden_files
   fi
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S95[@]}"
@@ -45,11 +49,16 @@ S95_interesting_binaries_check()
     sub_module_title "Interesting binaries for post exploitation"
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/post_exploitation_binaries.txt
   fi
+  if [[ -f "${LOG_PATH_MODULE}"/hidden_files.txt ]]; then
+    sub_module_title "Hidden files"
+    tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/hidden_files.txt
+  fi
 
-  if [[ -f "${TMP_DIR}"/INT_COUNT.tmp || -f "${TMP_DIR}"/POST_COUNT.tmp ]]; then
+  if [[ -f "${TMP_DIR}"/INT_COUNT.tmp || -f "${TMP_DIR}"/POST_COUNT.tmp || -f "${TMP_DIR}"/HID_COUNT.tmp ]]; then
     POST_COUNT=$(cat "${TMP_DIR}"/POST_COUNT.tmp 2>/dev/null || true)
     INT_COUNT=$(cat "${TMP_DIR}"/INT_COUNT.tmp 2>/dev/null || true)
-    if [[ "${POST_COUNT}" -gt 0 || "${INT_COUNT}" -gt 0 ]]; then
+    HID_COUNT=$(cat "${TMP_DIR}"/HID_COUNT.tmp 2>/dev/null || true)
+    if [[ "${POST_COUNT}" -gt 0 || "${INT_COUNT}" -gt 0 || "${HID_COUNT}" -gt 0 ]]; then
       NEG_LOG=1
     fi
   fi
@@ -58,6 +67,30 @@ S95_interesting_binaries_check()
   write_log "[*] Statistics:${INT_COUNT}:${POST_COUNT}"
 
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+}
+
+hidden_files() {
+  local HIDDEN_FILES=()
+  local LINE=""
+  local COUNT=0
+  local HID_COUNT=0
+
+  mapfile -t HIDDEN_FILES < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -name ".*" -type f)
+
+  if [[ ${#HIDDEN_FILES[@]} -gt 0 ]] ; then
+    write_log "[+] Found ""${#HIDDEN_FILES[@]}"" hidden files:" "${LOG_PATH_MODULE}"/hidden_files.txt
+    for LINE in "${HIDDEN_FILES[@]}" ; do
+      # print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
+      write_log "$(indent "$(orange "$(print_path "${LINE}")")")" "${LOG_PATH_MODULE}"/hidden_files.txt
+      ((HID_COUNT+=1))
+      COUNT=1
+    done
+  fi
+
+  if [[ ${COUNT} -eq 0 ]] ; then
+    write_log "[-] No hidden files found" "${LOG_PATH_MODULE}"/hidden_files.txt
+  fi
+  echo "${HID_COUNT}" >> "${TMP_DIR}"/HID_COUNT.tmp
 }
 
 interesting_binaries() {

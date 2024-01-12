@@ -135,6 +135,12 @@ s20_eval_script_check() {
 
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
         GPT_ANCHOR_="$(openssl rand -hex 8)"
+        if [[ -f "${BASE_LINUX_FILES}" ]]; then
+          # if we have the base linux config file we are checking it:
+          if ! grep -E -q "^${SH_SCRIPT_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+            GPT_PRIO_=$((GPT_PRIO_+1))
+          fi
+        fi
         # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "GPT-Prio-$GPT_PRIO_" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
         write_csv_gpt_tmp "$(cut_path "${SH_SCRIPT}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION}" "${SHELL_LOG}" "" ""
         # add ChatGPT link

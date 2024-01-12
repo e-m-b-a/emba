@@ -201,20 +201,20 @@ S26_kernel_vuln_verifier()
       continue
     fi
 
-    print_output "[*] Create CVE vulnerabilities array for kernel version ${ORANGE}${K_VERSION}${NC} ..."
+    print_output "[*] Generate CVE vulnerabilities array for kernel version ${ORANGE}${K_VERSION}${NC} ..." "no_log"
     # mapfile -t ALL_KVULNS < <(jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${CVE_DETAILS_PATH}")
     mapfile -t ALL_KVULNS < "${CVE_DETAILS_PATH}"
     # readable log file for the web report:
     # jq -rc '"\(.id):\(.cvss):\(.cvss3):\(.summary)"' "${CVE_DETAILS_PATH}" > "${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.log"
 
     print_ln
-    print_output "[+] Extracted ${ORANGE}${#ALL_KVULNS[@]}${GREEN} vulnerabilities based on kernel version only" "" "${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.log"
+    print_output "[+] Extracted ${ORANGE}${#ALL_KVULNS[@]}${GREEN} vulnerabilities based on kernel version only"
+    write_link "${LOG_PATH_MODULE}""/kernel-${K_VERSION}-vulns.log"
 
     if [[ -f "${KERNEL_CONFIG_PATH}" ]] && [[ -d "${KERNEL_DIR}" ]]; then
       compile_kernel "${KERNEL_CONFIG_PATH}" "${KERNEL_DIR}" "${ORIG_K_ARCH}"
     fi
 
-    print_ln
     sub_module_title "Identify kernel symbols ..."
     readelf -s "${KERNEL_ELF_PATH}" | grep "FUNC\|OBJECT" | sed 's/.*FUNC//' | sed 's/.*OBJECT//' | awk '{print $4}' | \
       sed 's/\[\.\.\.\]//' > "${LOG_PATH_MODULE}"/symbols.txt
@@ -222,7 +222,7 @@ S26_kernel_vuln_verifier()
     print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} symbols from kernel"
 
     if [[ -d "${LOG_DIR}""/firmware" ]]; then
-      print_output "[*] Identify kernel modules symbols ..."
+      print_output "[*] Identify kernel modules symbols ..." "no_log"
       find "${LOG_DIR}/firmware" -name "*.ko" -exec readelf -a {} \; | grep FUNC | sed 's/.*FUNC//' | \
         awk '{print $4}' | sed 's/\[\.\.\.\]//' >> "${LOG_PATH_MODULE}"/symbols.txt || true
     fi
@@ -237,8 +237,8 @@ S26_kernel_vuln_verifier()
 
     print_ln
     print_output "[+] Extracted ${ORANGE}${SYMBOLS_CNT}${GREEN} unique symbols"
+    write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
     print_ln
-
     split_symbols_file
 
     sub_module_title "Linux kernel vulnerability verification"
@@ -249,8 +249,7 @@ S26_kernel_vuln_verifier()
     export VULN_CNT=1
     export CNT_PATHS_FOUND_WRONG_ARCH=0
 
-    print_ln
-    print_output "[*] Checking vulnerabilities for kernel version ${ORANGE}${K_VERSION}${NC}"
+    print_output "[*] Checking vulnerabilities for kernel version ${ORANGE}${K_VERSION}${NC}" "" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
     print_ln
 
     for VULN in "${ALL_KVULNS[@]}"; do
@@ -260,7 +259,9 @@ S26_kernel_vuln_verifier()
       K_PATH="missing vulnerability path from advisory"
 
       CVE=$(echo "${VULN}" | cut -d: -f1)
-      print_output "[*] Testing vulnerability ${ORANGE}${VULN_CNT}${NC} / ${ORANGE}${#ALL_KVULNS[@]}${NC} / ${ORANGE}${CVE}${NC}"
+      local OUTx="[*] Testing vulnerability ${ORANGE}${VULN_CNT}${NC} / ${ORANGE}${#ALL_KVULNS[@]}${NC} / ${ORANGE}${CVE}${NC}"
+      print_output "${OUTx}" "no_log"
+      write_log "${OUTx}" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
 
       CVSS2="$(echo "${VULN}" | cut -d: -f2)"
       CVSS3="$(echo "${VULN}" | cut -d: -f3)"
@@ -275,7 +276,9 @@ S26_kernel_vuln_verifier()
       for K_PATH in "${K_PATHS[@]}"; do
         # we have only a filename without path -> we search for possible candidate files in the kernel sources
         if ! [[ "${K_PATH}" == *"/"* ]]; then
-          print_output "[*] Found file name ${ORANGE}${K_PATH}${NC} for ${ORANGE}${CVE}${NC} without path details ... looking for candidates now"
+          OUTx="[*] Found file name ${ORANGE}${K_PATH}${NC} for ${ORANGE}${CVE}${NC} without path details ... looking for candidates now"
+          print_output "${OUTx}" "no_log"
+          write_log "${OUTx}" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
           mapfile -t K_PATHS_FILES_TMP < <(find "${KERNEL_DIR}" -name "${K_PATH}" | sed "s&${KERNEL_DIR}\/&&")
         fi
         K_PATHS+=("${K_PATHS_FILES_TMP[@]}")
@@ -295,7 +298,9 @@ S26_kernel_vuln_verifier()
                 WAIT_PIDS_S26+=( "$!" )
               else
                 # this vulnerability is for a different architecture -> we can skip it for our kernel
-                print_output "[-] Vulnerable path for different architecture found for ${ORANGE}${K_PATH}${NC} - not further processing ${ORANGE}${CVE}${NC}"
+                OUTx="[-] Vulnerable path for different architecture found for ${ORANGE}${K_PATH}${NC} - not further processing ${ORANGE}${CVE}${NC}"
+                print_output "${OUTx}" "no_log"
+                write_log "${OUTx}" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
                 ((CNT_PATHS_FOUND_WRONG_ARCH+=1))
               fi
             else
@@ -307,13 +312,17 @@ S26_kernel_vuln_verifier()
             fi
           else
             # no source file in our kernel sources -> no vulns
-            print_output "[-] ${ORANGE}${CVE}${NC} - ${ORANGE}${K_PATH}${NC} - vulnerable source file not found in kernel sources"
+            OUTx="[-] ${ORANGE}${CVE}${NC} - ${ORANGE}${K_PATH}${NC} - vulnerable source file not found in kernel sources"
+            print_output "${OUTx}" "no_log"
+            write_log "${OUTx}" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
             ((CNT_PATHS_NOT_FOUND+=1))
           fi
           max_pids_protection 20 "${WAIT_PIDS_S26[@]}"
         done
       else
-        print_output "[-] ${CVE} - ${K_PATH}"
+        OUTx="[-] ${CVE} - ${K_PATH}"
+        print_output "${OUTx}" "no_log"
+        write_log "${OUTx}" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
         ((CNT_PATHS_UNK+=1))
       fi
       ((VULN_CNT+=1))
@@ -328,7 +337,7 @@ S26_kernel_vuln_verifier()
 }
 
 split_symbols_file() {
-  print_output "[*] Splitting symbols file for processing"
+  print_output "[*] Splitting symbols file for processing ..." "no_log"
   split -l 100 "${LOG_PATH_MODULE}"/symbols_uniq.txt "${LOG_PATH_MODULE}"/symbols_uniq.split.
   sed -i 's/^/EXPORT_SYMBOL\(/' "${LOG_PATH_MODULE}"/symbols_uniq.split.*
   sed -i 's/$/\)/' "${LOG_PATH_MODULE}"/symbols_uniq.split.*
@@ -336,6 +345,7 @@ split_symbols_file() {
   split -l 100 "${LOG_PATH_MODULE}"/symbols_uniq.txt "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.
   sed -i 's/^/EXPORT_SYMBOL_GPL\(/' "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.*
   sed -i 's/$/\)/' "${LOG_PATH_MODULE}"/symbols_uniq.split_gpl.*
+  print_output "[*] Splitting symbols file for processing ... done" "no_log"
 }
 
 extract_kernel_arch() {
@@ -363,7 +373,9 @@ symbol_verifier() {
     # echo "testing chunk file $CHUNK_FILE"
     if grep -q -f "${CHUNK_FILE}" "${KERNEL_DIR}/${K_PATH}" ; then
       # echo "verified chunk file $CHUNK_FILE"
-      print_output "[+] ${CVE} (${CVSS}) - ${K_PATH} verified - exported symbol${NC}"
+      local OUTx="[+] ${ORANGE}${CVE}${GREEN} (${ORANGE}${CVSS}${GREEN}) - ${ORANGE}${K_PATH}${GREEN} verified - exported symbol${NC}"
+      print_output "${OUTx}"
+      write_log "${OUTx}" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
       echo "${CVE} (${CVSS}) - ${K_VERSION} - exported symbol verified - ${K_PATH}" >> "${LOG_PATH_MODULE}""/${CVE}_symbol_verified.txt"
       VULN_FOUND=1
       break
@@ -378,7 +390,9 @@ symbol_verifier() {
     # echo "testing chunk file $CHUNK_FILE"
     if grep -q -f "${CHUNK_FILE}" "${KERNEL_DIR}/${K_PATH}" ; then
       # print_output "[*] verified chunk file $CHUNK_FILE (GPL)"
-      print_output "[+] ${CVE} (${CVSS}) - ${K_PATH} verified - exported symbol (gpl)${NC}"
+      local OUTx="[+] ${ORANGE}${CVE}${GREEN} (${ORANGE}${CVSS}${GREEN}) - ${ORANGE}${K_PATH}${GREEN} verified - exported symbol (GPL)${NC}"
+      print_output "${OUTx}"
+      write_log "${OUTx}" "${LOG_PATH_MODULE}/kernel_verification_${K_VERSION}_detailed.log"
       echo "${CVE} (${CVSS}) - ${K_VERSION} - exported symbol verified (gpl) - ${K_PATH}" >> "${LOG_PATH_MODULE}""/${CVE}_symbol_verified.txt"
       VULN_FOUND=1
       break
@@ -397,7 +411,7 @@ compile_verifier() {
   fi
 
   if grep -q "${K_PATH}" "${LOG_PATH_MODULE}"/kernel-compile-files_verified.log ; then
-    print_output "[+] ${CVE_} (${CVSS}) - ${K_PATH} verified - compiled path"
+    print_output "[+] ${ORANGE}${CVE_}${GREEN} (${ORANGE}${CVSS}${GREEN}) - ${ORANGE}${K_PATH}${GREEN} verified - compiled path${NC}"
     echo "${CVE_} (${CVSS}) - ${K_VERSION} - compiled path verified - ${K_PATH}" >> "${LOG_PATH_MODULE}""/${CVE_}_compiled_verified.txt"
   fi
 }
@@ -499,10 +513,13 @@ final_log_kernel_vulns() {
   local CVE_VERIFIED_OVERLAP_CRITICAL=()
   local CVE_VERIFIED_ONE_CRITICAL=()
 
-  print_ln
   print_output "[*] Generating final kernel report ..." "no_log"
   echo "Kernel version;Architecture;CVE;CVSSv2;CVSSv3;Verified with symbols;Verified with compile files" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv
 
+  if [[ -f "${LOG_PATH_MODULE}/kernel_cve_version_issues.log" ]]; then
+    print_output "[*] Multiple possible version mismatches identified and reported."
+    write_link "${LOG_PATH_MODULE}/kernel_cve_version_issues.log"
+  fi
   # we walk through the original version based kernel vulnerabilities and report the results
   # from symbols and kernel configuration
   for VULN in "${ALL_KVULNS[@]}"; do
@@ -537,8 +554,10 @@ final_log_kernel_vulns() {
   mapfile -t CVE_VERIFIED_ONE_CRITICAL < <(grep ";1;\|;1$" "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv | grep ";9.[0-9];\|;10;" || true)
 
   print_output "[+] Identified ${ORANGE}${#ALL_KVULNS[@]}${GREEN} unverified CVE vulnerabilities for kernel version ${ORANGE}${K_VERSION}${NC}"
+  write_link "${LOG_PATH_MODULE}/cve_results_kernel_${K_VERSION}.csv"
   print_output "[*] Detected architecture ${ORANGE}${ORIG_K_ARCH}${NC}"
   print_output "[*] Extracted ${ORANGE}${SYMBOLS_CNT}${NC} unique symbols from kernel and modules"
+  write_link "${LOG_PATH_MODULE}/symbols_uniq.txt"
   if [[ -v COMPILE_SOURCE_FILES ]]; then
     print_output "[*] Extracted ${ORANGE}${COMPILE_SOURCE_FILES}${NC} used source files during compilation"
   fi
