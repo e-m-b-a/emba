@@ -891,7 +891,8 @@ get_data() {
     S22_PHP_VULNS_SEMGREP=$(grep -a "\[\*\]\ Statistics1:" "${LOG_DIR}"/"${S22_LOG}" | cut -d: -f2 || true)
   fi
   if [[ -f "${LOG_DIR}"/"${S24_LOG}" ]]; then
-    S24_FAILED_KSETTINGS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S24_LOG}" | cut -d: -f2 || true)
+    # we currently only respect one kernel settings analysis in our final aggregator.
+    S24_FAILED_KSETTINGS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S24_LOG}" | cut -d: -f2 | head -1 || true)
   fi
   if [[ -f "${LOG_DIR}"/"${S25_LOG}" ]]; then
     MOD_DATA_COUNTER=$(grep -a "\[\*\]\ Statistics1:" "${LOG_DIR}"/"${S25_LOG}" | cut -d: -f2 || true)
