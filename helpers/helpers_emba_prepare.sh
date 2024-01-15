@@ -336,7 +336,7 @@ architecture_check()
           print_output "[!] Your set architecture (""${ARCH}"") is different from the automatically detected one. The set architecture will be used."
         fi
       else
-        print_output "[*] No architecture was enforced, so the automatically detected one is used."
+        print_output "[*] No architecture was enforced, so the automatically detected one is used." "no_log"
         ARCH="${D_ARCH}"
         export ARCH
       fi

@@ -509,7 +509,6 @@ log_bin_hardening() {
 
   if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
     write_log "[*] Binary protection state of ${ORANGE}${NAME}${NC}" "${FUNC_LOG}"
-    write_link "s12" "${FUNC_LOG}"
     write_log "" "${FUNC_LOG}"
     # get headline:
     HEAD_BIN_PROT=$(grep "FORTI.*FILE" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTI.*//'| sort -u || true)
