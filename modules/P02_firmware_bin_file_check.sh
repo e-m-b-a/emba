@@ -122,6 +122,8 @@ set_p02_default_exports() {
   export ZYXEL_ZIP=0
   export QCOW_DETECTED=0
   export UEFI_VERIFIED=0
+  export DJI_PRAK_DETECTED=0
+  export DJI_XV4_DETECTED=0
 }
 
 generate_entropy_graph() {
@@ -151,6 +153,8 @@ fw_bin_detector() {
   local QNAP_ENC_CHECK=""
   local AVM_CHECK=0
   local UEFI_CHECK=0
+  local DJI_PRAK_ENC_CHECK=0
+  local DJI_XV4_ENC_CHECK=0
 
   set_p02_default_exports
 
@@ -158,6 +162,8 @@ fw_bin_detector() {
   DLINK_ENC_CHECK=$(hexdump -C "${CHECK_FILE}" | head -1 || true)
   AVM_CHECK=$(strings "${CHECK_FILE}" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   BMC_CHECK=$(strings "${CHECK_FILE}" | grep -c "libipmi.so" || true)
+  DJI_PRAK_ENC_CHECK=$(strings "${CHECK_FILE}" | grep -c "PRAK\|RREK\|IAEK" || true)
+  DJI_XV4_ENC_CHECK=$(grep -coUaP "^\x78\x56\x34" "${CHECK_FILE}" || true)
   # we are running binwalk on the file to analyze the output afterwards:
   "${BINWALK_BIN[@]}" "${CHECK_FILE}" > "${TMP_DIR}"/s02_binwalk_output.txt
   if [[ -f "${TMP_DIR}"/s02_binwalk_output.txt ]]; then
@@ -165,6 +171,9 @@ fw_bin_detector() {
   else
     QNAP_ENC_CHECK=$("${BINWALK_BIN[@]}" -y "qnap encrypted" "${CHECK_FILE}")
   fi
+
+  # the following check is very weak. It should be only an indicator if the firmware could be a UEFI/BIOS firmware
+  # further checks will follow in P35
   UEFI_CHECK=$(grep -c "UEFI\|BIOS" "${TMP_DIR}"/s02_binwalk_output.txt || true)
   UEFI_CHECK=$(( "${UEFI_CHECK}" + "$(grep -c "UEFI\|BIOS" "${CHECK_FILE}" || true)" ))
 
@@ -193,6 +202,14 @@ fw_bin_detector() {
       print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
     fi
     write_csv_log "UEFI firmware detected" "yes" "NA"
+  fi
+  if [[ "${DJI_PRAK_ENC_CHECK}" -gt 0 ]]; then
+    print_output "[+] Identified possible DJI PRAK drone firmware - using DJI extraction module"
+    DJI_PRAK_DETECTED=1
+  fi
+  if [[ "${DJI_XV4_ENC_CHECK}" -gt 0 ]]; then
+    print_output "[+] Identified possible DJI xV4 drone firmware - using DJI extraction module"
+    DJI_XV4_DETECTED=1
   fi
   if [[ "${AVM_CHECK}" -gt 0 ]] || [[ "${FW_VENDOR}" == *"AVM"* ]]; then
     print_output "[+] Identified AVM firmware - using AVM extraction module"

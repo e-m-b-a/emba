@@ -125,7 +125,7 @@ unblobber() {
     sub_module_title "Analyze binary firmware blob with unblob"
   fi
 
-  print_output "[*] Extracting firmware to directory ${ORANGE}${OUTPUT_DIR_UNBLOB}${NC}"
+  print_output "[*] Extracting firmware ${ORANGE}$(basename "${FIRMWARE_PATH_}")${NC} to directory ${ORANGE}${OUTPUT_DIR_UNBLOB}${NC}"
 
   if ! [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
     mkdir -p "${OUTPUT_DIR_UNBLOB}"
