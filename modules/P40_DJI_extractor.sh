@@ -49,6 +49,8 @@ P40_DJI_extractor() {
   fi
 
   if [[ "${DJI_PRAK_DETECTED}" -eq 1 ]]; then
+    # the original firmware should be a tar archive
+    # this tar archive is hopefully already extracted to FIRMWARE_PATH
     if file "${FIRMWARE_PATH_BAK}" | grep -q "POSIX tar archive"; then
       sub_module_title "DJI IM*H firmware extraction"
       local FW_NAME_=""
@@ -88,18 +90,22 @@ dji_imah_firmware_extractor() {
   local FILES_EXT_KEY_ARR=()
   local F_EXT_KEY=""
 
-  # usually we have a tar file that we need to extract first:
-  unblobber "${FIRMWARE_PATH_BAK}" "${EXTRACTION_DIR}" 0
-  # just in case unblob was already able to extract our rootfs:
-  detect_root_dir_helper "${EXTRACTION_DIR}"
-  if [[ "${RTOS}" -ne 1 ]]; then
-    # if we have already found a Linux filesytem we do not need to walk through the rest of the module
-    # this means that unblob was already able to extract a Linux filesystem
-    print_output "[+] Found some Linux filesytem - stopping extraction module"
-    return
+  if [[ -f "${FIRMWARE_PATH}" ]]; then
+    # usually we have a tar file that we need to extract first:
+    unblobber "${FIRMWARE_PATH_BAK}" "${EXTRACTION_DIR}" 0
+    # just in case unblob was already able to extract our rootfs:
+    detect_root_dir_helper "${EXTRACTION_DIR}"
+    if [[ "${RTOS}" -ne 1 ]]; then
+      # if we have already found a Linux filesytem we do not need to walk through the rest of the module
+      # this means that unblob was already able to extract a Linux filesystem
+      print_output "[+] Found some Linux filesytem - stopping extraction module"
+      return
+    fi
+    mapfile -t PRAK_FILE_ARR < <(find "${EXTRACTION_DIR}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
+  else
+    # if we have the tar file already extracted to FIRMWARE_PATH, we can use this directory
+    mapfile -t PRAK_FILE_ARR < <(find "${FIRMWARE_PATH}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
   fi
-
-  mapfile -t PRAK_FILE_ARR < <(find "${EXTRACTION_DIR}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
 
   for PRAK_FILE in "${PRAK_FILE_ARR[@]}"; do
     if ! grep -qoUaP "^\x49\x4d\x2a\x48" "${PRAK_FILE}"; then
@@ -113,25 +119,25 @@ dji_imah_firmware_extractor() {
       print_ln
       hexdump -C "${PRAK_FILE}" | head | tee -a "${LOG_FILE}" || true
       print_ln
-      "${EXT_DIR}"/dji-firmware-tools/dji_imah_fwsig.py -u -vvv -m "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}" -f -i "${PRAK_FILE}" -k "${PRAK_KEY}" | tee -a "${LOG_PATH_MODULE}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"_extracted.log
+      "${EXT_DIR}"/dji-firmware-tools/dji_imah_fwsig.py -u -vvv -m "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}" -f -i "${PRAK_FILE}" -k "${PRAK_KEY}" | tee -a "${LOG_PATH_MODULE}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"_extracted.log || true
 
       print_ln
       # print_output "[*] Unblob extraction of ${PRAK_FILE}:"
       unblobber "${PRAK_FILE}" "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob
 
       print_output "[*] Extracted files:"
-      mapfile -t UNBLOBBED_1st < <(find "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob -type f || true)
+      mapfile -t UNBLOBBED_1st < <(find "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob -type f || print_output "[-] No Unblob extraction directory for ${EXTRACTION_DIR}/dji_${FNAME}_${PRAK_KEY}_unblob available")
       if [[ "${#UNBLOBBED_1st[@]}" -eq 0 ]]; then
-        rm -r "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob
+        rm -r "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob || true
       else
         find "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"_unblob -type f -ls | tee -a "${LOG_FILE}" || true
       fi
 
-      file "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"* | tee -a "${LOG_FILE}"
+      file "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] No results found in ${EXTRACTION_DIR}"
 
       print_ln
       print_output "[*] Binwalk test:"
-      binwalk "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"* | tee -a "${LOG_FILE}"
+      binwalk "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] Binwalk analysis failed for ${EXTRACTION_DIR}/dji_prak_${FNAME}_${PRAK_KEY}"
 
       # after the initial decryption with the dji firmware tools we walk through the results and extract
       # everything which is now decrypted with unblob
@@ -174,6 +180,7 @@ dji_imah_firmware_extractor() {
 dji_xv4_firmware_extractor() {
   sub_module_title "xV4 DJI drone firmware extractor"
   # in my current tests this module is not needed as unblob is able to extract the firmware
+  # but I'm not sure ...
 
   local FIRMWARE_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
@@ -201,6 +208,11 @@ dji_xv4_firmware_extractor() {
     if [[ -s "${LOG_PATH_MODULE}"/dji_xv4_"${FIRMWARE_NAME_}".log ]]; then
       tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/dji_xv4_"${FIRMWARE_NAME_}".log || true
     fi
+  else
+    print_output "[-] xV4 extraction mechanism failed for ${FIRMWARE_NAME_}:"
+    print_ln
+    hexdump -C "${FIRMWARE_PATH_}" | head || true
+    return
   fi
 
   if ! [[ -d "${EXTRACTION_DIR_}" ]]; then
