@@ -104,7 +104,7 @@ dji_imah_firmware_extractor() {
     # just in case unblob was already able to extract our rootfs:
     detect_root_dir_helper "${EXTRACTION_DIR}"
     if [[ "${RTOS}" -ne 1 ]]; then
-      # if we have already found a Linux filesytem we do not need to walk through the rest of the module
+    # if we have already found a Linux filesytem we do not need to walk through the rest of the module
       # this means that unblob was already able to extract a Linux filesystem
       print_output "[+] Found some Linux filesytem - stopping extraction module"
       return
@@ -127,59 +127,81 @@ dji_imah_firmware_extractor() {
     # extract the encryption key from file:
     # for header details see table 2 from https://arxiv.org/ftp/arxiv/papers/2312/2312.16818.pdf
     print_output "[*] Extract used key from firmware file ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+    print_ln
     dd if="${DJI_FILE}" of="${TMP_DIR}"/dji_enc_key.tmp skip=44 count=4 bs=1
     if [[ -f "${TMP_DIR}"/dji_enc_key.tmp ]]; then
       DJI_ENC_KEY_IDENTIFIER=$(cat "${TMP_DIR}"/dji_enc_key.tmp)
       # check if we have a key we can work with and set the correct key array for iteration
       if [[ "${DJI_ENC_KEY_IDENTIFIER}" == "UFIE" ]]; then
         DJI_KEYS_ARR=("${UFIE_KEYS_ARR[@]}")
-        print_output "[+] Identified encryption key mechanism ${ORANGE}UFIE${GREEN} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        print_output "[+] Identified encryption key mechanism ${ORANGE}UFIE${GREEN} from ${ORANGE}${FNAME}${NC}"
+        print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "PRAK" ]]; then
         DJI_KEYS_ARR=("${PRAK_KEYS_ARR[@]}")
-        print_output "[+] Identified encryption key mechanism ${ORANGE}PRAK${GREEN} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        print_output "[+] Identified encryption key mechanism ${ORANGE}PRAK${GREEN} from ${ORANGE}${FNAME}${NC}"
+        print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "PUEK" ]]; then
         DJI_KEYS_ARR=("${PUEK_KEYS_ARR[@]}")
-        print_output "[+] Identified encryption key mechanism ${ORANGE}PUEK${GREEN} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        print_output "[+] Identified encryption key mechanism ${ORANGE}PUEK${GREEN} from ${ORANGE}${FNAME}${NC}"
+        print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "IAEK" ]]; then
         DJI_KEYS_ARR=("${IAEK_KEYS_ARR[@]}")
-        print_output "[+] Identified encryption key mechanism ${ORANGE}IAEK${GREEN} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        print_output "[+] Identified encryption key mechanism ${ORANGE}IAEK${GREEN} from ${ORANGE}${FNAME}${NC}"
+        print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "TBIE" ]]; then
         DJI_KEYS_ARR=("${TBIE_KEYS_ARR[@]}")
-        print_output "[+] Identified encryption key mechanism ${ORANGE}TBIE${GREEN} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        print_output "[+] Identified encryption key mechanism ${ORANGE}TBIE${GREEN} from ${ORANGE}${FNAME}${NC}"
+        print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "RREK" ]]; then
         DJI_KEYS_ARR=("${RREK_KEYS_ARR[@]}")
-        print_output "[+] Identified encryption key mechanism ${ORANGE}RREK${GREEN} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        print_output "[+] Identified encryption key mechanism ${ORANGE}RREK${GREEN} from ${ORANGE}${FNAME}${NC}"
+        print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       else
-        print_output "[-] No valid encryption key found: ${ORANGE}${DJI_ENC_KEY_IDENTIFIER}${NC} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        print_output "[-] No valid encryption key found: ${ORANGE}${DJI_ENC_KEY_IDENTIFIER}${NC} from ${ORANGE}${FNAME}${NC}"
+        print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
         continue
       fi
       print_ln
     else
-      print_output "[-] No valid encryption key found from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+      print_output "[-] No valid encryption key found from ${ORANGE}${FNAME}${NC}"
+      print_ln
       hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       continue
     fi
 
     for DJI_KEY in "${DJI_KEYS_ARR[@]}"; do
+      sub_module_title "DJI IM*H extraction - file ${FNAME} with key ${DJI_KEY}"
       print_output "[*] Extracting ${ORANGE}${DJI_FILE}${NC} with key ${ORANGE}${DJI_KEY}${NC} ..." "" "${LOG_PATH_MODULE}/dji_prak_${FNAME}_${DJI_KEY}_extracted.log"
       print_ln
       hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       print_ln
       "${EXT_DIR}"/dji-firmware-tools/dji_imah_fwsig.py -u -vvv -m "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}" -f -i "${DJI_FILE}" -k "${DJI_KEY}" | tee -a "${LOG_PATH_MODULE}"/dji_prak_"${FNAME}"_"${DJI_KEY}"_extracted.log || true
+      mapfile -t FILES_EXT_KEY_ARR < <(find "${EXTRACTION_DIR}" -type f -wholename "*dji_prak_${FNAME}_${DJI_KEY}*" ! -size 0 || true)
+      if [[ "${#FILES_EXT_KEY_ARR[@]}" -gt 0 ]]; then
+        print_ln "no_log"
+        print_output "[+] Decrypted firmware files:"
+        find "${EXTRACTION_DIR}" -type f -wholename "*dji_prak_${FNAME}_${DJI_KEY}*" ! -size 0 -ls | tee -a "${LOG_FILE}" || true
+      else
+        # no files extracted -> try next key
+        continue
+      fi
 
       # after the initial decryption with the dji firmware tools we walk through the results and extract
-      # everything which is already decrypted with unblob
-      mapfile -t FILES_EXT_KEY_ARR < <(find "${EXTRACTION_DIR}" -type f -wholename "*dji_prak_${FNAME}_${DJI_KEY}*" || true)
+      # everything which is already decrypted. For this extraction process unblob is used
 
       for FILE_EXT_KEY in "${FILES_EXT_KEY_ARR[@]}"; do
         if [[ -f "${FILE_EXT_KEY}" ]]; then
+          if ! [[ -s "${FILE_EXT_KEY}" ]]; then
+            # just in case we created an empty file
+            continue
+          fi
           print_ln
           local OUTPUT_DIR_UNBLOB="${FILE_EXT_KEY}"_unblob
           unblobber "${FILE_EXT_KEY}" "${OUTPUT_DIR_UNBLOB}" 0
