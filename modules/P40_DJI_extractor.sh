@@ -126,10 +126,10 @@ dji_imah_firmware_extractor() {
 
     # extract the encryption key from file:
     # for header details see table 2 from https://arxiv.org/ftp/arxiv/papers/2312/2312.16818.pdf
-    print_output "[*] Extract used key from firmware file ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+    print_output "[*] Extract key identifier from firmware file ${ORANGE}$(basename "${DJI_FILE}")${NC}"
     print_ln
     dd if="${DJI_FILE}" of="${TMP_DIR}"/dji_enc_key.tmp skip=44 count=4 bs=1
-    if [[ -f "${TMP_DIR}"/dji_enc_key.tmp ]]; then
+    if [[ -f "${TMP_DIR}"/dji_enc_key.tmp ]] && [[ -s "${TMP_DIR}"/dji_enc_key.tmp ]]; then
       DJI_ENC_KEY_IDENTIFIER=$(cat "${TMP_DIR}"/dji_enc_key.tmp)
       # check if we have a key we can work with and set the correct key array for iteration
       if [[ "${DJI_ENC_KEY_IDENTIFIER}" == "UFIE" ]]; then
@@ -163,7 +163,7 @@ dji_imah_firmware_extractor() {
         print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
       else
-        print_output "[-] No valid encryption key found: ${ORANGE}${DJI_ENC_KEY_IDENTIFIER}${NC} from ${ORANGE}${FNAME}${NC}"
+        print_output "[-] No valid encryption key identified ${ORANGE}${DJI_ENC_KEY_IDENTIFIER}${NC} from ${ORANGE}${FNAME}${NC}"
         print_ln
         hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
         continue
@@ -213,12 +213,14 @@ dji_imah_firmware_extractor() {
             for EFILE in "${UB_EXTRACTED_FILES_ARR[@]}"; do
               print_output "[+] DJI firmware file extracted: $(orange "$(print_path "${EFILE}")")"
             done
-            export DJI_DETECTED=1
             # can we just stop now or are there firmware update files with more data in it?
             print_ln
             print_output "[*] Extracted ${ORANGE}${#UB_EXTRACTED_FILES_ARR[@]}${NC} files from ${ORANGE}$(basename "${FILE_EXT_KEY}")${NC}." "no_log"
-            print_output "[*] Stopping extraction process now." "no_log"
-            return
+            if [[ "${#UB_EXTRACTED_FILES_ARR[@]}" -gt 100 ]]; then
+              print_output "[*] Stopping extraction process now." "no_log"
+              export DJI_DETECTED=1
+              return
+            fi
             # Todo: if we have some further files with interesting data, we need to prcess them:
             # This could increase the extraction speed a lot!
             # continue 3
