@@ -437,7 +437,7 @@ compile_kernel() {
   print_output "[*] Install kernel config of the identified configuration of the firmware"
   cp "${KERNEL_CONFIG_FILE}" .config
   # https://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-in-the-linux-kernel-makefile
-  LANG=en make ARCH="${KARCH}" olddefconfig | tee -a "${LOG_PATH_MODULE}"/kernel-compile-olddefconfig.log
+  LANG=en make ARCH="${KARCH}" olddefconfig | tee -a "${LOG_PATH_MODULE}"/kernel-compile-olddefconfig.log || true
   print_output "[*] Finished updating kernel config with the identified firmware configuration" "" "${LOG_PATH_MODULE}/kernel-compile-olddefconfig.log"
   print_ln
 
