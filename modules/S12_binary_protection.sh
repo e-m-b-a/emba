@@ -31,7 +31,7 @@ S12_binary_protection()
 
   if [[ -f "${EXT_DIR}"/checksec ]] ; then
     echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;Fortified;Fortifiable;FILE" >> "${CSV_LOG}"
-    printf "\t%-13.13s  %-16.16s  %-11.11s  %-8.8s  %-11.11s  %-11.11s  %-11.11s  %-5.5s  %s\n" \
+    printf "\t%-13.13s  %-16.16s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-11.11s  %-5.5s  %s\n" \
       "RELRO" "CANARY" "NX" "PIE" "RPATH" "RUNPATH" "SYMBOLS" "FORTIFY" "FILE" | tee -a "${TMP_DIR}"/s12.tmp
 
     for BINARY in "${BINARIES[@]}" ; do
@@ -47,8 +47,6 @@ S12_binary_protection()
         CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(Partial\ RELRO)/${ORANGE_}&${NC_}/g")
         CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(Full\ RELRO)/${GREEN_}&${NC_}/g")
 
-        CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(DSO)/${ORANGE_}&${NC_}/g")
-
         CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(NX\ enabled)/${GREEN_}&${NC_}/g")
         CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(NX\ disabled)/${RED_}&${NC_}/g")
 
@@ -56,6 +54,8 @@ S12_binary_protection()
           CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(No\ PIE)/${RED_}&${NC_}/g")
         elif [[ "${CSV_BIN_OUT}" == *"PIE enabled"* ]]; then
           CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(PIE\ enabled)/${GREEN_}&${NC_}/g")
+        elif [[ "${CSV_BIN_OUT}" == *"DSO"* ]]; then
+          CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | sed -r "s/(DSO)/${ORANGE_}&${NC_}/g")
         elif [[ "$(echo "${CSV_BIN_OUT}" | cut -d\; -f4)" == "REL" ]]; then
           CSV_BIN_OUT=$(echo "${CSV_BIN_OUT}" | awk -F ';' -v repl="${ORANGE_}REL${NC_}" '$4 == "REL"{OFS = ";"; $4=repl}1')
         fi

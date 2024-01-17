@@ -74,6 +74,9 @@ P40_DJI_extractor() {
 dji_imah_firmware_extractor() {
   local FIRMWARE_PATH="${1:-}"
   local EXTRACTION_DIR="${2:-}"
+  if ! [[ -d "${EXTRACTION_DIR}" ]]; then
+    mkdir "${EXTRACTION_DIR}"
+  fi
 
   local FW_NAME_=""
   FW_NAME_="$(basename "${FIRMWARE_PATH}")"
@@ -83,9 +86,7 @@ dji_imah_firmware_extractor() {
   local DJI_FILE=""
   local DJI_KEY=""
   local FNAME=""
-  local UNBLOBBED_1st
   local FILES_EXT_KEY_ARR=()
-  local F_EXT_KEY=""
   local DJI_KEYS_ARR=()
 
   # found key identifiers from dji-firmware-tools - probably we missed some keys
@@ -127,7 +128,6 @@ dji_imah_firmware_extractor() {
     # for header details see table 2 from https://arxiv.org/ftp/arxiv/papers/2312/2312.16818.pdf
     print_output "[*] Extract used key from firmware file ${ORANGE}$(basename "${DJI_FILE}")${NC}"
     dd if="${DJI_FILE}" of="${TMP_DIR}"/dji_enc_key.tmp skip=44 count=4 bs=1
-    print_ln
     if [[ -f "${TMP_DIR}"/dji_enc_key.tmp ]]; then
       DJI_ENC_KEY_IDENTIFIER=$(cat "${TMP_DIR}"/dji_enc_key.tmp)
       # check if we have a key we can work with and set the correct key array for iteration
@@ -174,44 +174,28 @@ dji_imah_firmware_extractor() {
       print_ln
       "${EXT_DIR}"/dji-firmware-tools/dji_imah_fwsig.py -u -vvv -m "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}" -f -i "${DJI_FILE}" -k "${DJI_KEY}" | tee -a "${LOG_PATH_MODULE}"/dji_prak_"${FNAME}"_"${DJI_KEY}"_extracted.log || true
 
-      print_ln
-      # print_output "[*] Unblob extraction of ${DJI_FILE}:"
-      unblobber "${DJI_FILE}" "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${DJI_KEY}"_unblob
-
-      print_output "[*] Extracted files:"
-      mapfile -t UNBLOBBED_1st < <(find "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${DJI_KEY}"_unblob -type f || print_output "[-] No Unblob extraction directory for ${EXTRACTION_DIR}/dji_${FNAME}_${DJI_KEY}_unblob available")
-      if [[ "${#UNBLOBBED_1st[@]}" -eq 0 ]]; then
-        rm -r "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${DJI_KEY}"_unblob || true
-      else
-        find "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}"_unblob -type f -ls | tee -a "${LOG_FILE}" || true
-      fi
-
-      file "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] No results found in ${EXTRACTION_DIR}"
-
-      print_ln
-      print_output "[*] Binwalk test:"
-      binwalk "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] Binwalk analysis failed for ${EXTRACTION_DIR}/dji_prak_${FNAME}_${DJI_KEY}"
-
       # after the initial decryption with the dji firmware tools we walk through the results and extract
-      # everything which is now decrypted with unblob
-      mapfile -t FILES_EXT_KEY_ARR < <(find "${EXTRACTION_DIR}" -type f -name "dji_prak_${FNAME}_${DJI_KEY}*" || true)
+      # everything which is already decrypted with unblob
+      mapfile -t FILES_EXT_KEY_ARR < <(find "${EXTRACTION_DIR}" -type f -wholename "*dji_prak_${FNAME}_${DJI_KEY}*" || true)
 
       for FILE_EXT_KEY in "${FILES_EXT_KEY_ARR[@]}"; do
         if [[ -f "${FILE_EXT_KEY}" ]]; then
           print_ln
-          # print_output "[*] Unblob $(basename ${FILE_EXT_KEY}):"
           local OUTPUT_DIR_UNBLOB="${FILE_EXT_KEY}"_unblob
-          unblobber "${FILE_EXT_KEY}" "${OUTPUT_DIR_UNBLOB}" 1
+          unblobber "${FILE_EXT_KEY}" "${OUTPUT_DIR_UNBLOB}" 0
           mapfile -t UB_EXTRACTED_FILES_ARR < <(find "${OUTPUT_DIR_UNBLOB}" -type f -exec file {} \;)
           if [[ "${#UB_EXTRACTED_FILES_ARR[@]}" -gt 0 ]]; then
+            sub_module_title "Extraction results of $(basename "${FILE_EXT_KEY}")"
+            print_output "[+] Extracted the following ${ORANGE}${#UB_EXTRACTED_FILES_ARR[@]}${GREEN} files from ${ORANGE}${FILE_EXT_KEY}${GREEN}:"
             print_ln
-            print_output "[+] Extracted the following ${ORANGE}${#UB_EXTRACTED_FILES_ARR[@]}${GREEN} files from ${ORANGE}${FILE_EXT_KEY}${NC}:"
             for EFILE in "${UB_EXTRACTED_FILES_ARR[@]}"; do
               print_output "[+] DJI firmware file extracted: $(orange "$(print_path "${EFILE}")")"
             done
             export DJI_DETECTED=1
             # can we just stop now or are there firmware update files with more data in it?
-            print_output "[*] Extracted the following ${ORANGE}${#UB_EXTRACTED_FILES_ARR[@]}${NC} files from ${ORANGE}$(basename "${FILE_EXT_KEY}")${NC}. Stopping extraction process now."
+            print_ln
+            print_output "[*] Extracted ${ORANGE}${#UB_EXTRACTED_FILES_ARR[@]}${NC} files from ${ORANGE}$(basename "${FILE_EXT_KEY}")${NC}." "no_log"
+            print_output "[*] Stopping extraction process now." "no_log"
             return
             # Todo: if we have some further files with interesting data, we need to prcess them:
             # This could increase the extraction speed a lot!
@@ -219,7 +203,6 @@ dji_imah_firmware_extractor() {
           else
             rm -r "${OUTPUT_DIR_UNBLOB}" || true
           fi
-          print_ln
         fi
       done
       print_ln
@@ -228,7 +211,7 @@ dji_imah_firmware_extractor() {
       if [[ "${RTOS}" -ne 1 ]]; then
         # if we have already found a Linux filesytem we do not need to walk through the rest of the module
         # this means that unblob was already able to extract a Linux filesystem
-        print_output "[+] Found some Linux filesytem - stopping extraction module"
+        print_output "[+] Found extracted Linux filesytem - stopping extraction module"
         return
       fi
     done
