@@ -61,7 +61,7 @@ P40_DJI_extractor() {
     fi
   fi
 
-  if [[ -d "${EXTRACTION_DIR}" ]]; then
+  if [[ -d "${EXTRACTION_DIR:-}" ]]; then
     FILES_DJI=$(find "${EXTRACTION_DIR}" -type f | wc -l)
     DIRS_DJI=$(find "${EXTRACTION_DIR}" -type d | wc -l)
     print_output "[*] Extracted ${ORANGE}${FILES_DJI}${NC} files and ${ORANGE}${DIRS_DJI}${NC} directories from DJI drone firmware image."
