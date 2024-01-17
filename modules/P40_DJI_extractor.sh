@@ -210,7 +210,12 @@ dji_imah_firmware_extractor() {
               print_output "[+] DJI firmware file extracted: $(orange "$(print_path "${EFILE}")")"
             done
             export DJI_DETECTED=1
-            continue 3
+            # can we just stop now or are there firmware update files with more data in it?
+            print_output "[*] Extracted the following ${ORANGE}${#UB_EXTRACTED_FILES_ARR[@]}${NC} files from ${ORANGE}$(basename "${FILE_EXT_KEY}")${NC}. Stopping extraction process now."
+            return
+            # Todo: if we have some further files with interesting data, we need to prcess them:
+            # This could increase the extraction speed a lot!
+            # continue 3
           else
             rm -r "${OUTPUT_DIR_UNBLOB}" || true
           fi
