@@ -74,21 +74,27 @@ P40_DJI_extractor() {
 dji_imah_firmware_extractor() {
   local FIRMWARE_PATH="${1:-}"
   local EXTRACTION_DIR="${2:-}"
-  # local PRAK_KEYS_ARR=("UFIE-2021-06" "UFIE-2020-04" "UFIE-2019-11" "UFIE-2018-0" "UFIE-2018-01" "UFIE-2018-07" "PRAK-2018-01" "PRAK-2018-02" "PRAK-2020-01" "PRAK-2019-09" "PRAK-2017-12" "PRAK-2017-08" "PRAK-2017-01")
-
-  local PRAK_KEYS_ARR=("UFIE-2021-06" "UFIE-2020-04" "UFIE-2019-11" "UFIE-2018-0" "UFIE-2018-01" "UFIE-2018-07")
 
   local FW_NAME_=""
   FW_NAME_="$(basename "${FIRMWARE_PATH}")"
 
   local UB_EXTRACTED_FILES_ARR=()
-  local PRAK_FILE_ARR=()
-  local PRAK_FILE=""
-  local PRAK_KEY=""
+  local DJI_FILE_ARR=()
+  local DJI_FILE=""
+  local DJI_KEY=""
   local FNAME=""
   local UNBLOBBED_1st
   local FILES_EXT_KEY_ARR=()
   local F_EXT_KEY=""
+  local DJI_KEYS_ARR=()
+
+  # found key identifiers from dji-firmware-tools - probably we missed some keys
+  # Todo: check and add missing keys
+  local UFIE_KEYS_ARR=("UFIE-2021-06" "UFIE-2020-04" "UFIE-2019-11" "UFIE-2018-0" "UFIE-2018-01" "UFIE-2018-07")
+  local PRAK_KEYS_ARR=("PRAK-2017-01" "PRAK-2017-08" "PRAK-2017-12" "PRAK-2018-01" "PRAK-2019-09" "PRAK-2020-01")
+  local PUEK_KEYS_ARR=("PUEK-2017-01" "PUEK-2017-04" "PUEK-2017-07" "PUEK-2017-09" "PUEK-2017-11")
+  local IAEK_KEYS_ARR=("IAEK-2017-01")
+  local TBIE_KEYS_ARR=("TBIE-2018-01" "TBIE-2018-07" "TBIE-2019-11" "TBIE-2020-02" "TBIE-2020-04" "TBIE-2021-06")
 
   if [[ -f "${FIRMWARE_PATH}" ]]; then
     # usually we have a tar file that we need to extract first:
@@ -101,47 +107,89 @@ dji_imah_firmware_extractor() {
       print_output "[+] Found some Linux filesytem - stopping extraction module"
       return
     fi
-    mapfile -t PRAK_FILE_ARR < <(find "${EXTRACTION_DIR}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
+    mapfile -t DJI_FILE_ARR < <(find "${EXTRACTION_DIR}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
   else
     # if we have the tar file already extracted to FIRMWARE_PATH, we can use this directory
-    mapfile -t PRAK_FILE_ARR < <(find "${FIRMWARE_PATH}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
+    mapfile -t DJI_FILE_ARR < <(find "${FIRMWARE_PATH}" -type f -exec du -h {} + | sort -r -h | awk '{print $2}')
   fi
 
-  for PRAK_FILE in "${PRAK_FILE_ARR[@]}"; do
-    if ! grep -qoUaP "^\x49\x4d\x2a\x48" "${PRAK_FILE}"; then
-      print_output "[-] No correct IM*H header found in ${ORANGE}${PRAK_FILE}${NC}:"
-      hexdump -C "${PRAK_FILE}" | head | tee -a "${LOG_FILE}" || true
+  for DJI_FILE in "${DJI_FILE_ARR[@]}"; do
+    # check for main IMaH header:
+    if ! grep -boUaP "\x49\x4d\x2a\x48" "${DJI_FILE}" | grep -q "0:"; then
+      print_output "[-] No correct IM*H header found in ${ORANGE}${DJI_FILE}${NC}:"
+      hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
     fi
 
-    for PRAK_KEY in "${PRAK_KEYS_ARR[@]}"; do
-      FNAME=$(basename "${PRAK_FILE}")
-      print_output "[*] Extracting ${ORANGE}${PRAK_FILE}${NC} with key ${ORANGE}${PRAK_KEY}${NC} ..." "" "${LOG_PATH_MODULE}/dji_prak_${FNAME}_${PRAK_KEY}_extracted.log"
+    FNAME=$(basename "${DJI_FILE}")
+
+    # extract the encryption key from file:
+    # for header details see table 2 from https://arxiv.org/ftp/arxiv/papers/2312/2312.16818.pdf
+    print_output "[*] Extract used key from firmware file ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+    dd if="${DJI_FILE}" of="${TMP_DIR}"/dji_enc_key.tmp skip=44 count=4 bs=1
+    print_ln
+    if [[ -f "${TMP_DIR}"/dji_enc_key.tmp ]]; then
+      DJI_ENC_KEY_IDENTIFIER=$(cat "${TMP_DIR}"/dji_enc_key.tmp)
+      # check if we have a key we can work with and set the correct key array for iteration
+      if [[ "${DJI_ENC_KEY_IDENTIFIER}" == "UFIE" ]]; then
+        DJI_KEYS_ARR=("${UFIE_KEYS_ARR[@]}")
+        print_output "[+] Identified encryption key mechanism ${ORANGE}UFIE${NC} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+      elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "PRAK" ]]; then
+        DJI_KEYS_ARR=("${PRAK_KEYS_ARR[@]}")
+        print_output "[+] Identified encryption key mechanism ${ORANGE}PRAK${NC} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+      elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "PUEK" ]]; then
+        DJI_KEYS_ARR=("${PUEK_KEYS_ARR[@]}")
+        print_output "[+] Identified encryption key mechanism ${ORANGE}PUEK${NC} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+      elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "IAEK" ]]; then
+        DJI_KEYS_ARR=("${IAEK_KEYS_ARR[@]}")
+        print_output "[+] Identified encryption key mechanism ${ORANGE}IAEK${NC} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+      elif [[ "${DJI_ENC_KEY_IDENTIFIER}" == "TBIE" ]]; then
+        DJI_KEYS_ARR=("${TBIE_KEYS_ARR[@]}")
+        print_output "[+] Identified encryption key mechanism ${ORANGE}TBIE${NC} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+      else
+        print_output "[-] No valid encryption key found: ${ORANGE}${DJI_ENC_KEY_IDENTIFIER}${NC} from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+        hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+        continue
+      fi
       print_ln
-      hexdump -C "${PRAK_FILE}" | head | tee -a "${LOG_FILE}" || true
+    else
+      print_output "[-] No valid encryption key found from ${ORANGE}$(basename "${DJI_FILE}")${NC}"
+      hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+      continue
+    fi
+
+    for DJI_KEY in "${DJI_KEYS_ARR[@]}"; do
+      print_output "[*] Extracting ${ORANGE}${DJI_FILE}${NC} with key ${ORANGE}${DJI_KEY}${NC} ..." "" "${LOG_PATH_MODULE}/dji_prak_${FNAME}_${DJI_KEY}_extracted.log"
       print_ln
-      "${EXT_DIR}"/dji-firmware-tools/dji_imah_fwsig.py -u -vvv -m "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}" -f -i "${PRAK_FILE}" -k "${PRAK_KEY}" | tee -a "${LOG_PATH_MODULE}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"_extracted.log || true
+      hexdump -C "${DJI_FILE}" | head | tee -a "${LOG_FILE}" || true
+      print_ln
+      "${EXT_DIR}"/dji-firmware-tools/dji_imah_fwsig.py -u -vvv -m "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}" -f -i "${DJI_FILE}" -k "${DJI_KEY}" | tee -a "${LOG_PATH_MODULE}"/dji_prak_"${FNAME}"_"${DJI_KEY}"_extracted.log || true
 
       print_ln
-      # print_output "[*] Unblob extraction of ${PRAK_FILE}:"
-      unblobber "${PRAK_FILE}" "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob
+      # print_output "[*] Unblob extraction of ${DJI_FILE}:"
+      unblobber "${DJI_FILE}" "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${DJI_KEY}"_unblob
 
       print_output "[*] Extracted files:"
-      mapfile -t UNBLOBBED_1st < <(find "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob -type f || print_output "[-] No Unblob extraction directory for ${EXTRACTION_DIR}/dji_${FNAME}_${PRAK_KEY}_unblob available")
+      mapfile -t UNBLOBBED_1st < <(find "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${DJI_KEY}"_unblob -type f || print_output "[-] No Unblob extraction directory for ${EXTRACTION_DIR}/dji_${FNAME}_${DJI_KEY}_unblob available")
       if [[ "${#UNBLOBBED_1st[@]}" -eq 0 ]]; then
-        rm -r "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${PRAK_KEY}"_unblob || true
+        rm -r "${EXTRACTION_DIR}"/dji_"${FNAME}"_"${DJI_KEY}"_unblob || true
       else
-        find "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"_unblob -type f -ls | tee -a "${LOG_FILE}" || true
+        find "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}"_unblob -type f -ls | tee -a "${LOG_FILE}" || true
       fi
 
-      file "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] No results found in ${EXTRACTION_DIR}"
+      file "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] No results found in ${EXTRACTION_DIR}"
 
       print_ln
       print_output "[*] Binwalk test:"
-      binwalk "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${PRAK_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] Binwalk analysis failed for ${EXTRACTION_DIR}/dji_prak_${FNAME}_${PRAK_KEY}"
+      binwalk "${EXTRACTION_DIR}"/dji_prak_"${FNAME}"_"${DJI_KEY}"* | tee -a "${LOG_FILE}" || print_output "[-] Binwalk analysis failed for ${EXTRACTION_DIR}/dji_prak_${FNAME}_${DJI_KEY}"
 
       # after the initial decryption with the dji firmware tools we walk through the results and extract
       # everything which is now decrypted with unblob
-      mapfile -t FILES_EXT_KEY_ARR < <(find "${EXTRACTION_DIR}" -type f -name "dji_prak_${FNAME}_${PRAK_KEY}*" || true)
+      mapfile -t FILES_EXT_KEY_ARR < <(find "${EXTRACTION_DIR}" -type f -name "dji_prak_${FNAME}_${DJI_KEY}*" || true)
 
       for F_EXT_KEY in "${FILES_EXT_KEY_ARR[@]}"; do
         if [[ -f "${F_EXT_KEY}" ]]; then
@@ -157,7 +205,6 @@ dji_imah_firmware_extractor() {
               print_output "[+] DJI firmware file extracted: $(orange "$(print_path "${EFILE}")")"
             done
             export DJI_DETECTED=1
-            return
           else
             rm -r "${OUTPUT_DIR_UNBLOB}" || true
           fi

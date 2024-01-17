@@ -162,8 +162,8 @@ fw_bin_detector() {
   DLINK_ENC_CHECK=$(hexdump -C "${CHECK_FILE}" | head -1 || true)
   AVM_CHECK=$(strings "${CHECK_FILE}" | grep -c "AVM GmbH .*. All rights reserved.\|(C) Copyright .* AVM" || true)
   BMC_CHECK=$(strings "${CHECK_FILE}" | grep -c "libipmi.so" || true)
-  DJI_PRAK_ENC_CHECK=$(strings "${CHECK_FILE}" | grep -c "PRAK\|RREK\|IAEK" || true)
-  DJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${CHECK_FILE}" | grep -c "0:"|| true)
+  DJI_PRAK_ENC_CHECK=$(strings "${CHECK_FILE}" | grep -c "PRAK\|RREK\|IAEK\|PUEK" || true)
+  DJI_XV4_ENC_CHECK=$(grep -boUaP "\x78\x56\x34" "${CHECK_FILE}" | grep -c "^0:"|| true)
   # we are running binwalk on the file to analyze the output afterwards:
   "${BINWALK_BIN[@]}" "${CHECK_FILE}" > "${TMP_DIR}"/s02_binwalk_output.txt
   if [[ -f "${TMP_DIR}"/s02_binwalk_output.txt ]]; then
@@ -204,14 +204,16 @@ fw_bin_detector() {
     write_csv_log "UEFI firmware detected" "yes" "NA"
   fi
   if [[ "${DJI_PRAK_ENC_CHECK}" -gt 0 ]]; then
-    if file "${FIRMWARE_PATH_BAK}" | grep -q "POSIX tar archive"; then
+    if file "${FIRMWARE_PATH}" | grep -q "POSIX tar archive"; then
       print_output "[+] Identified possible DJI PRAK drone firmware - using DJI extraction module"
       DJI_PRAK_DETECTED=1
+      write_csv_log "DJI-PRAK" "yes" "tar compressed"
     fi
   fi
   if [[ "${DJI_XV4_ENC_CHECK}" -gt 0 ]]; then
     print_output "[+] Identified possible DJI xV4 drone firmware - using DJI extraction module"
     DJI_XV4_DETECTED=1
+    write_csv_log "DJI-xV4" "yes" "NA"
   fi
   if [[ "${AVM_CHECK}" -gt 0 ]] || [[ "${FW_VENDOR}" == *"AVM"* ]]; then
     print_output "[+] Identified AVM firmware - using AVM extraction module"
