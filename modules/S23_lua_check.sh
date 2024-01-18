@@ -66,6 +66,11 @@ s23_luaseccheck() {
   local LUA_LOG=""
   local GPT_ANCHOR_=""
   local GPT_PRIO_=3
+  local ENTRY=""
+  local QUERY_ENTRIES=()
+  local QUERY_FILE=""
+  export LUA_CGI_FILES=()
+
   sub_module_title "LUA Security checks module"
 
   mapfile -t LUA_CGI_FILES < <(find "${FIRMWARE_PATH}" -type f -exec grep -H cgilua\. {} \; 2>/dev/null | cut -d ':' -f1 | sort -u)
@@ -137,8 +142,8 @@ s23_luacheck() {
   if [[ "${ISSUES}" -gt 0 ]] ; then
     S23_ISSUE_FOUND=1
     # check if this is common linux file:
-    local COMMON_FILES_FOUND
-    local CFF
+    local COMMON_FILES_FOUND=""
+    local CFF=""
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
       CFF="no"

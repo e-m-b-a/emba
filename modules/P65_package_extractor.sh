@@ -27,6 +27,10 @@ P65_package_extractor() {
   local NEG_LOG=0
   export FILES_PRE_PACKAGE=0
   local FILES_POST_PACKAGE=0
+  local BINS=0
+  local DIRS_EXT=0
+  local FILES_EXT=0
+  local UNIQUE_FILES=0
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 && "${RTOS}" -eq 0 ]]; then
     FILES_PRE_PACKAGE=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
@@ -87,6 +91,7 @@ apk_extractor() {
   local APK_ARCHIVES=0
   local APK_NAME=""
   local FILES_AFTER_APK=0
+  local R_PATH=""
 
   print_output "[*] Identify apk archives and extracting it to the root directories ..."
   extract_apk_helper &
@@ -122,6 +127,7 @@ ipk_extractor() {
   local IPK_ARCHIVES=0
   local IPK_NAME=""
   local FILES_AFTER_IPK=0
+  local R_PATH=""
 
   print_output "[*] Identify ipk archives and extracting it to the root directories ..."
   extract_ipk_helper &
@@ -217,7 +223,7 @@ extract_deb_helper() {
 
 extract_deb_extractor_helper(){
   local DEB="${1:-}"
-  local DEB_NAME
+  local DEB_NAME=""
   DEB_NAME=$(basename "${DEB}")
   print_output "[*] Extracting ${ORANGE}${DEB_NAME}${NC} package to the root directory ${ORANGE}${R_PATH}${NC}."
   dpkg-deb --extract "${DEB}" "${R_PATH}" || true

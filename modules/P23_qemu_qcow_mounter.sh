@@ -58,7 +58,9 @@ qcow_extractor() {
   local EXTRACTION_DIR_="${2:-}"
   local TMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
   local DIRS_QCOW_MOUNT=0
-  FILES_QCOW_MOUNT=0
+  local NBD_DEV=""
+  local NBD_DEVS=()
+  export FILES_QCOW_MOUNT=0
 
   if ! [[ -f "${QCOW_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -106,7 +108,8 @@ qcow_extractor() {
     mount "${NBD_DEV}" "${TMP_QCOW_MOUNT}" || true
 
     if mount | grep -q "${NBD_DEV}"; then
-      EXTRACTION_DIR_FINAL="${EXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+      local EXTRACTION_DIR_FINAL="${EXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+
       copy_qemu_nbd "${TMP_QCOW_MOUNT}" "${EXTRACTION_DIR_FINAL}"
 
       FILES_QCOW_MOUNT=$(find "${EXTRACTION_DIR_FINAL}" -type f | wc -l)

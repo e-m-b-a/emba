@@ -45,7 +45,8 @@ vmdk_extractor() {
   local TMP_VMDK_MNT="${TMP_DIR}/vmdk_mount_${RANDOM}"
   local VMDK_DIRS=0
   local RET=0
-  VMDK_FILES=0
+  export VMDK_FILES=0
+  local VMDK_VIRT_FS=()
 
   if ! [[ -f "${VMDK_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"

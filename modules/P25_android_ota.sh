@@ -41,7 +41,7 @@ android_ota_extractor() {
   local OTA_INIT_PATH_="${1}"
   local EXTRACTION_DIR_="${2}"
   local DIRS_OTA=0
-  FILES_OTA=0
+  export FILES_OTA=0
 
   if ! [[ -f "${OTA_INIT_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"

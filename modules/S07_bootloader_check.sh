@@ -23,6 +23,7 @@ S07_bootloader_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   export STARTUP_FINDS=0
+  export INITTAB_V=()
 
   check_dtb
   check_bootloader
@@ -168,7 +169,9 @@ check_bootloader()
 
   # FreeBSD or DragonFly
   CHECK=0
-  local BOOT1 BOOT2 BOOTL
+  local BOOT1=()
+  local BOOT2=()
+  local BOOTL=()
   # mapfile -t BOOT1 < <(mod_path "/boot/boot1")
   mapfile -t BOOT1 < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/boot1" || true)
   # mapfile -t BOOT2 < <(mod_path "/boot/boot2")
@@ -176,6 +179,9 @@ check_bootloader()
   # mapfile -t BOOTL < <(mod_path "/boot/loader")
   mapfile -t BOOTL < <(find "${FIRMWARE_PATH}" -xdev -type f -iwholename "/boot/loader" || true)
 
+  local B1=""
+  local B2=""
+  local BL=""
   for B1 in "${BOOT1[@]}" ; do
     for B2 in "${BOOT2[@]}" ; do
       for BL in "${BOOTL[@]}" ; do
@@ -195,7 +201,7 @@ check_bootloader()
   # LILO=""
   CHECK=0
   local LILO_PATH=()
-  local LILO_FILE
+  local LILO_FILE=""
   mapfile -t LILO_PATH < <(mod_path "/ETC_PATHS/lilo.conf")
   for LILO_FILE in "${LILO_PATH[@]}" ; do
     if [[ -f "${LILO_FILE}" ]] ; then
@@ -249,7 +255,8 @@ check_bootloader()
 
   # OpenBSD
   CHECK=0
-  local OBSD_PATH1 OBSD_PATH2
+  local OBSD_PATH1=()
+  local OBSD_PATH2=()
   local OBSD_FILE1=""
   local OBSD_FILE2=""
   # mapfile -t OBSD_PATH1 < <(mod_path "/usr/mdec/biosboot")

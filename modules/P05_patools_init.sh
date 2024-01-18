@@ -44,7 +44,7 @@ patools_extractor() {
 
   local FIRMWARE_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
-  FILES_PATOOLS=0
+  export FILES_PATOOLS=0
   local DIRS_PATOOLS=0
   local FIRMWARE_NAME_=""
 

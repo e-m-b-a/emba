@@ -87,7 +87,13 @@ fwhunter_logging() {
   local BINARLY_ID_FILE=""
   local FWHUNTER_BINARLY_ID_FILES=()
   local CVE_RESULTS_BINARLY=()
-  local FWHUNTER_CVEs=""
+  local FWHUNTER_CVEs=()
+  local BINARLY_CVE=""
+  local BINARLY_ID_CVE=""
+  local CVE_RESULTS_BINARLY_=()
+  local FWHUNTER_BINARY_MATCH_ARR=()
+  local FWHUNTER_BINARY_MATCH=""
+  local FWHUNTER_BINARLY_IDs=()
 
   mapfile -t FWHUNTER_RESULTS < <(find "${LOG_PATH_MODULE}" -type f -exec grep -H "Scanner result.*FwHunt rule has been triggered" {} \;)
   if ! [[ "${#FWHUNTER_RESULTS[@]}" -gt 0 ]]; then

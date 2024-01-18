@@ -24,7 +24,7 @@ S10_binaries_basic_check()
 
   local COUNTER=0
   local BIN_COUNT=0
-  local VULNERABLE_FUNCTIONS
+  local VULNERABLE_FUNCTIONS=""
   local BINARY=""
   local VUL_FUNC_RESULT=()
   local VUL_FUNC=""

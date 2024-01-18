@@ -41,6 +41,8 @@ foscam_enc_extractor() {
   local EXTRACTION_FILE_="${2:-}"
   local FOSCAM_FILE_CHECK=""
   local KEY_FILE="${CONFIG_DIR}/foscam_enc_keys.txt"
+  local _FOSCAM_KEY=""
+  local FOSCAM_KEYS=()
 
   if ! [[ -f "${FOSCAM_ENC_PATH_}" ]]; then
     print_output "[-] No file for decryption provided"
@@ -57,7 +59,7 @@ foscam_enc_extractor() {
 
   mapfile FOSCAM_KEYS < <(grep -v "ID" "${KEY_FILE}" | cut -d\; -f2 | tr -d \')
   for _FOSCAM_KEY in "${FOSCAM_KEYS[@]}"; do
-    FOSCAM_DECRYTED=0
+    local FOSCAM_DECRYTED=0
     print_output "[*] Testing FOSCAM decryption key ${ORANGE}${_FOSCAM_KEY}${NC}."
     # shellcheck disable=SC2086
     openssl enc -d -aes-128-cbc -md md5 -k ${_FOSCAM_KEY} -in "${FOSCAM_ENC_PATH_}" > "${EXTRACTION_FILE_}" || true
@@ -75,7 +77,7 @@ foscam_enc_extractor() {
         write_csv_log "Foscam decryptor" "${FOSCAM_ENC_PATH_}" "${EXTRACTION_FILE_}" "1" "NA" "NA"
         FOSCAM_DECRYTED=1
         if [[ -z "${FW_VENDOR:-}" ]]; then
-          FW_VENDOR="Foscam"
+          export FW_VENDOR="Foscam"
         fi
 
         MD5_DONE_DEEP+=( "$(md5sum "${FOSCAM_ENC_PATH_}" | awk '{print $1}')" )
@@ -102,8 +104,8 @@ foscam_ubi_extractor() {
   local EXTRACTION_DIR_GZ="${LOG_DIR}/firmware/foscam_gz_extractor"
   local UBI_DEV=""
   local UBI_DEVS=()
-  FOSCAM_UBI_FILES=0
-  FOSCAM_UBI_DIRS=0
+  local FOSCAM_UBI_FILES=0
+  local FOSCAM_UBI_DIRS=0
 
   if ! [[ -f "${FIRMWARE_PATH_}" ]]; then
     print_output "[-] No file for extraction found"

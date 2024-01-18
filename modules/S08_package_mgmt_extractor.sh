@@ -126,6 +126,7 @@ rpm_package_files_search() {
   local RPM_DIR=""
   local PACKAGE_VERSION=""
   local PACKAGE_NAME=""
+  local PACKAGE_AND_VERSION=""
 
   mapfile -t RPM_PACKAGE_DBS < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -path "*rpm/Packages" -type f)
 

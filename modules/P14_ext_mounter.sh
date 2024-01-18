@@ -44,7 +44,7 @@ ext_extractor() {
   local EXTRACTION_DIR_="${2:-}"
   local TMP_EXT_MOUNT="${TMP_DIR}""/ext_mount_${RANDOM}"
   local DIRS_EXT_MOUNT=0
-  FILES_EXT_MOUNT=0
+  export FILES_EXT_MOUNT=0
 
   if ! [[ -f "${EXT_PATH_}" ]]; then
     print_output "[-] No file for decryption provided"

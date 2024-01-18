@@ -30,6 +30,7 @@ S14_weak_func_radare_check()
 
   local STRCPY_CNT=0
   local FCT_CNT=0
+  export FUNC_LOG=""
 
   if [[ -n "${ARCH}" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
@@ -163,6 +164,11 @@ radare_function_check_PPC32(){
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  local COUNT_STRLEN=0
+  local COUNT_MMAP_OK=0
+  export NETWORKING=0
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -204,6 +210,11 @@ radare_function_check_MIPS() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  local COUNT_STRLEN=0
+  local COUNT_MMAP_OK=0
+  export NETWORKING=0
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -246,6 +257,11 @@ radare_function_check_ARM64() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  local COUNT_STRLEN=0
+  local COUNT_MMAP_OK=0
+  export NETWORKING=0
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -287,6 +303,11 @@ radare_function_check_ARM32() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  local COUNT_STRLEN=0
+  local COUNT_MMAP_OK=0
+  export NETWORKING=0
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -328,6 +349,11 @@ radare_function_check_hexagon() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  local COUNT_STRLEN=0
+  local COUNT_MMAP_OK=0
+  export NETWORKING=0
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -370,6 +396,11 @@ radare_function_check_x86() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  local COUNT_STRLEN=0
+  local COUNT_MMAP_OK=0
+  export NETWORKING=0
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -412,6 +443,11 @@ radare_function_check_x86_64() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  local COUNT_STRLEN=0
+  local COUNT_MMAP_OK=0
+  export NETWORKING=0
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -503,6 +539,9 @@ radare_log_bin_hardening() {
   local NAME="${1:-}"
   local FUNCTION="${2:-}"
 
+  local BIN_PROT=""
+  local HEAD_BIN_PROT=""
+
   if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
     write_log "[*] Binary protection state of ${ORANGE}${NAME}${NC}" "${FUNC_LOG}"
     write_log "" "${FUNC_LOG}"
@@ -533,7 +572,7 @@ radare_output_function_details()
 {
   write_s14_log()
   {
-    OLD_LOG_FILE="${LOG_FILE}"
+    local OLD_LOG_FILE="${LOG_FILE}"
     LOG_FILE="${3}"
     print_output "${1}"
     write_link "${2}"
@@ -554,10 +593,13 @@ radare_output_function_details()
 
   local LOG_FILE_LOC
   LOG_FILE_LOC="${LOG_PATH_MODULE}"/vul_func_"${FUNCTION}"-"${NAME}".txt
+  local OUTPUT=""
 
   # check if this is common linux file:
-  local COMMON_FILES_FOUND
-  local SEARCH_TERM
+  local COMMON_FILES_FOUND=""
+  local SEARCH_TERM=""
+  local CFF_CSV=""
+
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     SEARCH_TERM=$(basename "${BINARY_}")
     if grep -q "^${SEARCH_TERM}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then

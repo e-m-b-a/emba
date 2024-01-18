@@ -71,6 +71,8 @@ apk_checker_helper() {
   local APK="${1:-}"
   ! [[ -f "${APK}" ]] && return
   local APK_ISSUES=0
+  local APK_DIR_NAME=""
+  local APK_STACS_DIR=""
 
   print_output "[*] Testing Android apk with APKHunt - ${ORANGE}$(print_path "${APK}")${NC}"
   go run "${EXT_DIR}"/APKHunt/apkhunt.go -p "${APK}" -l 2>&1 | tee -a "${LOG_PATH_MODULE}/APKHunt-$(basename -s .apk "${APK}").txt"
@@ -91,7 +93,7 @@ apk_checker_helper() {
 
   APK_DIR_NAME=$(dirname "${APK}")
   APK_STACS_DIR=$(grep "APK Static Analysis Path" "${APK_DIR_NAME}"/APKHunt_"$(basename -s .apk "${APK}")"*.txt || true)
-  APK_JAR="${APK_DIR_NAME}"/"$(basename -s .apk "${APK}")".jar
+  local APK_JAR="${APK_DIR_NAME}"/"$(basename -s .apk "${APK}")".jar
   [[ -d "${APK_STACS_DIR}" ]] && rm -rf "${APK_STACS_DIR}"
   [[ -f "${APK_JAR}" ]] && rm -rf "${APK_JAR}"
 }

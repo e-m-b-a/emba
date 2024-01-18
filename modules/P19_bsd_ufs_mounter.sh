@@ -18,6 +18,7 @@ export PRE_THREAD_ENA=0
 
 P19_bsd_ufs_mounter() {
   local NEG_LOG=0
+
   if [[ "${BSD_UFS}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "BSD UFS filesystem extractor"
@@ -44,7 +45,7 @@ ufs_extractor() {
   local EXTRACTION_DIR_="${2:-}"
   local TMP_UFS_MOUNT="${TMP_DIR}""/ufs_mount_${RANDOM}"
   local DIRS_UFS_MOUNT=0
-  FILES_UFS_MOUNT=0
+  export FILES_UFS_MOUNT=0
 
   if ! [[ -f "${UFS_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"

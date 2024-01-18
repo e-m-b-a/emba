@@ -222,7 +222,7 @@ non_unique_group_name() {
   for GROUP_PATH in "${GROUP_PATHS[@]}"; do
     if [[ -f "${GROUP_PATH}" ]] ; then
       CHECK=1
-      local FIND
+      local FIND=""
       FIND=$(grep -v '^#' "${GROUP_PATH}" | grep -v '^$' | awk -F: '{ print $1 }' | sort | uniq -d || true)
       if [[ "${FIND}" = "" ]] ; then
         print_output "[-] All group names found in ""$(print_path "${GROUP_PATH}")"" are unique"
@@ -245,13 +245,14 @@ query_user_acc() {
   local AUTH_ISSUES=0
   local PASSWD_FILE_PATHS=()
   local PASSWD_FILE=""
+
   mapfile -t PASSWD_FILE_PATHS < <(mod_path "/ETC_PATHS/passwd")
 
   for PASSWD_FILE in "${PASSWD_FILE_PATHS[@]}"; do
     if [[ -f "${PASSWD_FILE}" ]] ; then
       CHECK=1
-      local UID_MIN LOGIN_DEFS_PATH
-      UID_MIN=""
+      local UID_MIN=""
+      local LOGIN_DEFS_PATH=""
       mapfile -t LOGIN_DEFS_PATH < <(mod_path "/ETC_PATHS/login.defs")
       for LOGIN_DEF in "${LOGIN_DEFS_PATH[@]}"; do
         if [[ -f "${LOGIN_DEF}" ]] ; then
@@ -283,18 +284,22 @@ query_nis_plus_auth_supp() {
   local AUTH_ISSUES=0
   local NSS_PATH_L=()
   local NSS_PATH=""
+
   mapfile -t NSS_PATH_L < <(mod_path "/ETC_PATHS/nsswitch.conf")
 
   for NSS_PATH in "${NSS_PATH_L[@]}"; do
     if [[ -f "${NSS_PATH}" ]] ; then
       CHECK=1
       print_output "[+] ""$(print_path "${NSS_PATH}")"" exist"
-      local FIND
+      local FIND=""
       FIND="$(grep "^passwd" "${NSS_PATH}" | grep "compat|nis" | grep -v "nisplus" || true)"
       if [[ -z "${FIND}" ]] ; then
         print_output "[-] NIS/NIS+ authentication not enabled"
       else
-        local FIND2, FIND3, FIND4, FIND5
+        local FIND2=""
+        local FIND3=""
+        local FIND4=""
+        local FIND5=""
         FIND2=$(grep "^passwd_compat" "${NSS_PATH}" | grep "nis" | grep -v "nisplus" || true)
         FIND3=$(grep "^passwd" "${NSS_PATH}" | grep "nis" | grep -v "nisplus" || true)
         if [[ -n "${FIND2}" ]] || [[ -n "${FIND3}" ]] ; then
@@ -355,11 +360,13 @@ check_owner_perm_sudo_config() {
 
   if [[ "${#SUDOERS_FILES_ARR[@]}" -gt 0 ]]; then
     for FILE in "${SUDOERS_FILES_ARR[@]}"; do
-      local SUDOERS_D
-      SUDOERS_D="${FILE}"".d"
+      local SUDOERS_D="${FILE}"".d"
       if [[ -d "${SUDOERS_D}" ]] ; then
         print_output "[*] Checking drop-in directory (""$(print_path "${SUDOERS_D}")"")"
-        local FIND FIND2 FIND3 FIND4
+        local FIND=""
+        local FIND2=""
+        local FIND3=""
+        local FIND4=""
 
         FIND="$(permission_clean "${SUDOERS_D}")"
         FIND2="$(owner_clean "${SUDOERS_D}")"":""$(group_clean "${SUDOERS_D}")"
@@ -425,8 +432,14 @@ search_pam_testing_libs() {
 
   print_output "[*] Searching PAM password testing modules (cracklib, passwdqc, pwquality)"
 
-  local FILE_PATH FOUND FOUND_CRACKLIB FOUND_PASSWDQC FOUND_PWQUALITY
+  local FILE_PATH FOUND=0
+  local FOUND_CRACKLIB=0
+  local FOUND_PASSWDQC=0
+  local FOUND_PWQUALITY=0
   local AUTH_ISSUES=0
+  local PATH_F=""
+  local FILE_PATH=()
+
   mapfile -t FILE_PATH < <(mod_path_array "$(config_list "${CONFIG_DIR}""/pam_files.cfg" "")")
 
   if [[ "${FILE_PATH[0]-}" == "C_N_F" ]] ; then
@@ -438,8 +451,7 @@ search_pam_testing_libs() {
     FOUND_PWQUALITY=0
 
     for PATH_F in "${FILE_PATH[@]}"; do
-      local FULL_PATH
-      FULL_PATH="${FIRMWARE_PATH}""/""${PATH_F}"
+      local FULL_PATH="${FIRMWARE_PATH}""/""${PATH_F}"
 
       if [[ -f "${FULL_PATH}""/pam_cracklib.so" ]] ; then
         FOUND_CRACKLIB=1
@@ -505,20 +517,21 @@ scan_pam_conf() {
 
   local CHECK=0
   local AUTH_ISSUES=0
-  local PAM_PATH_L
+  local PAM_PATH_L=()
+  local PAM_PATH=""
+
   mapfile -t PAM_PATH_L < <(mod_path "/ETC_PATHS/pam.conf")
   for PAM_PATH in "${PAM_PATH_L[@]}"; do
     if [[ -f "${PAM_PATH}" ]] ; then
       CHECK=1
       print_output "[+] ""$(print_path "${PAM_PATH}")"" exist"
-      local FIND
+      local FIND=""
       FIND=$(grep -v "^#" "${PAM_PATH}" | grep -v "^$" | sed 's/[[:space:]]/ /g' | sed 's/  / /g' | sed 's/ /:space:/g' || true)
       if [[ -z "${FIND}" ]] ; then
         print_output "[-] File has no configuration options defined (empty, or only filled with comments and empty lines)"
       else
         print_output "[+] Found one or more configuration lines"
-        local LINE
-        LINE=${FIND//[[:space:]]/}
+        local LINE=${FIND//[[:space:]]/}
         print_output "$(indent "$(orange "${LINE}")")"
         ((AUTH_ISSUES+=1))
       fi
@@ -531,29 +544,32 @@ scan_pam_conf() {
 search_pam_configs() {
   sub_module_title "Searching PAM configurations and LDAP support in PAM files"
 
-  local CHECK
+  local CHECK=0
   local AUTH_ISSUES=0
-  CHECK=0
-  local PAM_PATH_L
+  local PAM_PATH_L=()
+  local FILES_ARR=()
+  local FILE=""
+  local PAM_PATH=""
+
   mapfile -t PAM_PATH_L < <(mod_path "/ETC_PATHS/pam.d")
   for PAM_PATH in "${PAM_PATH_L[@]}"; do
     if [[ -d "${PAM_PATH}" ]] ; then
       CHECK=1
       print_output "[+] ""$(print_path "${PAM_PATH}")"" exist"
-      local FIND
+      local FIND=""
       FIND=$(find "${PAM_PATH}" -xdev -not -name "*.pam-old" -type f -print | sort)
       readarray -t FILES_ARR < <(printf '%s' "${FIND}")
       for FILE in "${FILES_ARR[@]}"; do
         print_output "$(indent "$(orange "$(print_path "${FILE}")")")"
       done
-      local AUTH_FILES
+      local AUTH_FILES=""
       AUTH_FILES=("${PAM_PATH}""/common-auth" "${PAM_PATH}""/system-auth")
       for FILE in "${AUTH_FILES[@]}"; do
         print_output "[*] Check if LDAP support in PAM files"
         if [[ -f "${FILE}" ]] ; then
           ((AUTH_ISSUES+=1))
           print_output "[+] ""$(print_path "${FILE}")"" exist"
-          local FIND2
+          local FIND2=""
           FIND2=$(grep "^auth.*ldap" "${FILE}" || true)
           if [[ -n "${FIND2}" ]] ; then
             print_output "[+] LDAP module present"
@@ -578,6 +594,7 @@ search_pam_files() {
   local AUTH_ISSUES=0
   local PAM_FILES=()
   local PAM_FILE=""
+  local FIND_FILE=""
   readarray -t PAM_FILES < <(config_find "${CONFIG_DIR}""/pam_files.cfg")
 
   if [[ "${PAM_FILES[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
@@ -591,7 +608,7 @@ search_pam_files() {
       fi
       if [[ -d "${PAM_FILE}" ]] && [[ ! -L "${PAM_FILE}" ]] ; then
         print_output "$(indent "$(print_path "${PAM_FILE}")")"
-        local FIND
+        local FIND=""
         mapfile -t FIND < <(find "${PAM_FILE}" -xdev -maxdepth 1 -type f -name "pam_*.so" -print | sort)
         for FIND_FILE in "${FIND[@]}"; do
           CHECK=1
