@@ -64,8 +64,10 @@ S09_firmware_base_version_check() {
     fi
 
     VERSION_IDENTIFIER="$(safe_echo "${VERSION_LINE}" | cut -d\; -f4)"
-    VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
-    VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
+    if [[ "${VERSION_IDENTIFIER: 0:1}" == '"' ]]; then
+      VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\"}"
+      VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\"}"
+    fi
 
     if [[ "${STRICT}" == *"strict"* ]]; then
 
