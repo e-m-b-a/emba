@@ -122,6 +122,12 @@ s22_vuln_check_semgrep() {
 
       if [[ "${GPT_OPTION}" -gt 0 ]]; then
         GPT_ANCHOR_="$(openssl rand -hex 8)"
+        if [[ -f "${BASE_LINUX_FILES}" ]]; then
+          # if we have the base linux config file we are checking it:
+          if ! grep -E -q "^${SEMG_SOURCE_FILE_NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+            GPT_PRIO_=$((GPT_PRIO_+1))
+          fi
+        fi
         # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
         write_csv_gpt_tmp "$(cut_path "${SEMG_SOURCE_FILE}")" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION} And I think there might be something in line ${SEMG_LINE_NR}" "${LOG_PATH_MODULE}/semgrep_sources/${SEMG_SOURCE_FILE_NAME}.log" "" ""
         # add ChatGPT link

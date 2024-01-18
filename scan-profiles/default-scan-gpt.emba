@@ -20,6 +20,9 @@ export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
 export GPT_OPTION=1
+# cwe-checker is now only testing non-linux binaries. With this mechanism we can enable
+# it in the default profile.
+export CWE_CHECKER=1
 # disable long running modules - enable them if needed
 export MODULE_BLACKLIST=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
 

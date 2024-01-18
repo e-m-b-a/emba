@@ -42,6 +42,7 @@ F20_vul_aggregator() {
   export S26_LOG_DIR="${LOG_DIR}"/s26_kernel_vuln_verifier/
   local S36_LOG="${CSV_DIR}"/s36_lighttpd.csv
   local S116_LOG="${CSV_DIR}"/s116_qemu_version_detection.csv
+  local S118_LOG="${CSV_DIR}"/s118_busybox_verifier.csv
   local L15_LOG="${CSV_DIR}"/l15_emulated_checks_nmap.csv
   local L25_LOG="${CSV_DIR}"/l25_web_checks.csv
   local L35_LOG="${CSV_DIR}"/l35_metasploit_check.csv
@@ -92,6 +93,7 @@ F20_vul_aggregator() {
     get_systemmode_emulator "${L15_LOG}"
     get_systemmode_webchecks "${L25_LOG}"
     get_msf_verified "${L35_LOG}"
+    get_busybox_verified "${S118_LOG}"
 
     aggregate_versions
 
@@ -138,8 +140,12 @@ prepare_cve_search_module() {
     export SNYK_SEARCH=1
   fi
 
-  ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]] && mkdir -p "${LOG_PATH_MODULE}""/exploit/"
-  ! [[ -d "${LOG_PATH_MODULE}""/cve_sum/" ]] && mkdir -p "${LOG_PATH_MODULE}""/cve_sum/"
+  if ! [[ -d "${LOG_PATH_MODULE}""/exploit/" ]]; then
+    mkdir -p "${LOG_PATH_MODULE}""/exploit/"
+  fi
+  if ! [[ -d "${LOG_PATH_MODULE}""/cve_sum/" ]]; then
+    mkdir -p "${LOG_PATH_MODULE}""/cve_sum/"
+  fi
 }
 
 aggregate_versions() {
@@ -151,7 +157,7 @@ aggregate_versions() {
 
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
     ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
-    "${#VERSIONS_S36_DETAILS[@]}" -gt 0 || ${#KERNEL_CVE_VERIFIED[@]} -gt 0 ]]; then
+    "${#VERSIONS_S36_DETAILS[@]}" -gt 0 || ${#KERNEL_CVE_VERIFIED[@]} -gt 0 || ${#BUSYBOX_VERIFIED_CVE[@]} -gt 0 ]]; then
 
     print_output "[*] Software inventory initial overview:"
     write_anchor "softwareinventoryinitialoverview"
@@ -228,7 +234,7 @@ aggregate_versions() {
         continue
       fi
       if ! [[ "${CVE_ENTRY}" == *CVE-[0-9]* ]]; then
-        print_output "[-] WARNING: Broken CVE identifier found: ${ORANGE}${VERSION}${NC}"
+        print_output "[-] WARNING: Broken CVE identifier found: ${ORANGE}${CVE_ENTRY}${NC}"
         continue
       fi
       print_output "[+] Found CVE details (${ORANGE}binarly UEFI module${GREEN}): ""${ORANGE}${CVE_ENTRY}${NC}"
@@ -239,14 +245,29 @@ aggregate_versions() {
         continue
       fi
       if ! [[ "${CVE_ENTRY}" == *CVE-[0-9]* ]]; then
-        print_output "[-] WARNING: Broken CVE identifier found: ${ORANGE}${VERSION}${NC}"
+        print_output "[-] WARNING: Broken CVE identifier found: ${ORANGE}${CVE_ENTRY}${NC}"
         continue
       fi
       print_output "[+] Found CVE details (${ORANGE}verified Metasploit exploits${GREEN}): ""${ORANGE}${CVE_ENTRY}${NC}"
     done
 
-    print_ln
-    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_S36_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}")
+    local BUSYBOX_VERIFIED_VERSION=()
+    for ENTRY in "${BUSYBOX_VERIFIED_CVE[@]}"; do
+      CVE_ENTRY="${ENTRY/*\;/}"
+      if [ -z "${CVE_ENTRY}" ]; then
+        continue
+      fi
+      if ! [[ "${CVE_ENTRY}" == *CVE-[0-9]* ]]; then
+        print_output "[-] WARNING: Broken CVE identifier found: ${ORANGE}${CVE_ENTRY}${NC}"
+        continue
+      fi
+      print_output "[+] Found CVE details (${ORANGE}verified BusyBox CVE${GREEN}): ""${ORANGE}${CVE_ENTRY}${NC}"
+      print_output "[+] Found version details (${ORANGE}verified BusyBox CVE${GREEN}): ""${ORANGE}${ENTRY/\;*/}${NC}"
+      # we create a quick temp array for adding the details to the VERSIONS_AGGREGATED array
+      BUSYBOX_VERIFIED_VERSION+=( "${ENTRY/\;*/}" )
+    done
+
+    VERSIONS_AGGREGATED=("${VERSIONS_EMULATOR[@]}" "${VERSIONS_KERNEL[@]}" "${VERSIONS_STAT_CHECK[@]}" "${VERSIONS_SYS_EMULATOR[@]}" "${VERSIONS_S06_FW_DETAILS[@]}" "${VERSIONS_S08_PACKAGE_DETAILS[@]}" "${VERSIONS_S36_DETAILS[@]}" "${VERSIONS_SYS_EMULATOR_WEB[@]}" "${BUSYBOX_VERIFIED_VERSION[@]}")
 
     # if we get from a module CVE details we also need to handle them
     CVES_AGGREGATED=("${CVE_S02_DETAILS[@]}" "${CVE_L35_DETAILS[@]}")
@@ -302,7 +323,11 @@ aggregate_versions() {
       print_bar ""
       print_output "[*] Software inventory aggregated:"
       for VERSION in "${VERSIONS_AGGREGATED[@]}"; do
+        # ensure our set anchor is based on the binary name and is limited to 20 characters:
+        local ANCHOR="${VERSION/:*/}"
+        ANCHOR="cve_${ANCHOR:0:20}"
         print_output "[+] Found Version details (${ORANGE}aggregated${GREEN}): ""${ORANGE}${VERSION}${NC}"
+        write_link "f20#${ANCHOR}"
       done
       for CVE_ENTRY in "${CVES_AGGREGATED[@]}"; do
         print_output "[+] Found CVE details (${ORANGE}aggregated${GREEN}): ""${ORANGE}${CVE_ENTRY}${NC}"
@@ -424,8 +449,8 @@ generate_special_log() {
 }
 
 generate_cve_details_cves() {
-  sub_module_title "Collect CVE and exploit details from CVEs."
-  write_anchor "collectcveandexploitdetails_cves"
+  sub_module_title "CVE and exploit details."
+  write_anchor "cveandexploitdetails"
 
   local CVES_AGGREGATED=("$@")
   local CVE_ENTRY=""
@@ -516,9 +541,11 @@ cve_db_lookup_version() {
     return
   fi
   # we test for the binary_name:version and for binary_name:*:
-  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}"
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_%:}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
+
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
@@ -558,15 +585,17 @@ check_cve_sources() {
   local CVE_VER_SOURCES_FILE="${3:-}"
 
   local BIN_VERSION_ONLY=""
-  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_}" | rev | cut -d':' -f1 | rev)
+  # if we have a version identifier like binary:1.2.3: we need to remove the last ':' before cutting it correctly
+  BIN_VERSION_ONLY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
   local BIN_NAME=""
-  BIN_NAME=$(echo "${BIN_VERSION_}" | rev | cut -d':' -f2 | rev)
+  BIN_NAME=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
   local CVE_VER_START_INCL=""
   local CVE_VER_START_EXCL=""
   local CVE_VER_END_INCL=""
   local CVE_VER_END_EXCL=""
   local CVE_V2=""
   local CVE_V31=""
+  # print_output "[*] Testing binary ${BIN_NAME} with version ${BIN_VERSION_ONLY} for CVE matches ..." "no_log"
 
   CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
   # CVE_V31=$(jq -r '.metrics.cvssMetricV31[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
@@ -580,7 +609,7 @@ check_cve_sources() {
   fi
 
   # if our cpe with the binary version matches we have a vuln and we can continue
-  if grep -q "cpe.*:${BIN_VERSION_}:" "${CVE_VER_SOURCES_FILE}"; then
+  if grep -q "cpe.*:${BIN_VERSION_%:}:" "${CVE_VER_SOURCES_FILE}"; then
     # print_output "[+] CPE matches - vulnerability identified - CVE: ${CVE_ID} / BIN: ${BIN_VERSION_}" "no_log"
     write_cve_log "${CVE_ID}" "${CVE_V2:-"NA"}" "${CVE_V31:-"NA"}" "${CVE_SUMMARY:-NA}" "${LOG_PATH_MODULE}"/"${VERSION_PATH}".txt &
     return
@@ -853,18 +882,11 @@ cve_extractor() {
   local CVE_OUTPUT=""
   local KERNEL_VERIFIED_VULN=0
 
+
   if ! [[ "${VERSION_orig}" == "CVE-"* ]]; then
-    if [[ "$(echo "${VERSION_orig}" | sed 's/:$//' | grep -o ":" | wc -l || true)" -eq 1 ]]; then
-      BINARY="$(echo "${VERSION_orig}" | cut -d ":" -f1)"
-      VERSION="$(echo "${VERSION_orig}" | cut -d ":" -f2)"
-    else
-      # DETAILS="$(echo "$VERSION_orig" | cut -d ":" -f1)"
-      BINARY="$(echo "${VERSION_orig}" | cut -d ":" -f2)"
-      VERSION="$(echo "${VERSION_orig}" | cut -d ":" -f3-)"
-    fi
-    local VERSION_PATH="${VERSION_orig%:}"
-    VERSION_PATH="${VERSION_PATH//:/_}"
     # remove last : if it is there
+    VERSION=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
+    BINARY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
     AGG_LOG_FILE="${VERSION_PATH}".txt
   else
     AGG_LOG_FILE="${VERSION_orig}".txt
@@ -897,7 +919,7 @@ cve_extractor() {
 
   if [[ -v S24_LOG ]]; then
     if [[ "${BINARY}" == *"kernel"* ]]; then
-      if tail -n +2 "${S24_LOG}" | grep -i -q "linux.*${VERSION}" "${S24_LOG}" 2>/dev/null; then
+      if tail -n +2 "${S24_LOG}" | grep -i -q "linux.*${VERSION}" 2>/dev/null; then
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
@@ -993,7 +1015,7 @@ cve_extractor() {
 
   if [[ -f "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" ]]; then
     if [[ "${#CVEs_OUTPUT[@]}" == 0 ]]; then
-      write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE:-NA}" "${CVSS_VALUE:-NA}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL:-NA}" "${REMOTE:-NA}" "${DOS:-NA}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED:-NA}"
+      write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE:-NA}" "${CVSS_VALUE:-NA}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL:-NA}" "${REMOTE:-NA}" "${DOS:-NA}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED:-NA}"
     fi
 
     local WAIT_PIDS_TACTOR=()
@@ -1025,6 +1047,7 @@ cve_extractor() {
     # Todo: Improve this search on field base
     KERNEL_VERIFIED_VULN=$(grep -c "^${BINARY};.*;yes;$" "${CSV_LOG}" || true)
   fi
+
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
     EXPLOIT_COUNTER_VERSION=$(grep -c "${BINARY}" "${TMP_DIR}/exploit_cnt.tmp" || true)
   fi
@@ -1033,36 +1056,44 @@ cve_extractor() {
     echo "[+] Statistics:${CVE_COUNTER_VERSION}|${EXPLOIT_COUNTER_VERSION}|${VERSION_orig}"
   } >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
 
-  print_output "[*] Vulnerability details for ${ORANGE}${BINARY}${NC} / version ${ORANGE}${VERSION}${NC} / source ${ORANGE}${VSOURCE}${NC}:"
-  write_anchor "cve_${BINARY}"
+  local BIN_LOG="${LOG_PATH_MODULE}/cve_details_${BINARY}_${VERSION}.log"
+  write_log "[*] Vulnerability details for ${ORANGE}${BINARY}${NC} / version ${ORANGE}${VERSION}${NC} / source ${ORANGE}${VSOURCE}${NC}:" "${BIN_LOG}"
+  write_anchor "cve_${BINARY:0:20}" "${BIN_LOG}"
   if [[ "${EXPLOIT_COUNTER_VERSION}" -gt 0 ]]; then
-    print_ln
-    grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" | tee -a "${LOG_FILE}" || true
+    write_log "" "${BIN_LOG}"
+    grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" >> "${BIN_LOG}" || true
     if [[ "${KERNEL_VERIFIED_VULN}" -gt 0 ]]; then
-      print_output "[+] Found ${RED}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${RED}${KERNEL_VERIFIED_VULN} verified${GREEN}) and ${RED}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}"
+      write_log "[+] Found ${RED}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${RED}${KERNEL_VERIFIED_VULN} verified${GREEN}) and ${RED}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}" "${BIN_LOG}"
+    elif [[ "${#BUSYBOX_VERIFIED_CVE[@]}" -gt 0 ]] && [[ "${BINARY}" == *"busybox"* ]]; then
+      # we currently do not check for the specific BB version in here. This results in false results on multiple detected BB binaries
+      write_log "[+] Found ${RED}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${RED}${#BUSYBOX_VERIFIED_CVE[@]} verified${GREEN}) and ${RED}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}" "${BIN_LOG}"
     else
-      print_output "[+] Found ${RED}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs and ${RED}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}"
+      write_log "[+] Found ${RED}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs and ${RED}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}" "${BIN_LOG}"
     fi
-    print_ln
+    write_log "" "${BIN_LOG}"
   elif [[ "${CVE_COUNTER_VERSION}" -gt 0 ]]; then
-    print_ln
-    grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" | tee -a "${LOG_FILE}" || true
+    write_log "" "${BIN_LOG}"
+    grep -v "Statistics" "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}" >> "${BIN_LOG}" || true
     if [[ "${KERNEL_VERIFIED_VULN}" -gt 0 ]]; then
-      print_output "[+] Found ${ORANGE}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${ORANGE}${KERNEL_VERIFIED_VULN} verified${GREEN}) and ${ORANGE}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}"
+      write_log "[+] Found ${ORANGE}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${ORANGE}${KERNEL_VERIFIED_VULN} verified${GREEN}) and ${ORANGE}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}" "${BIN_LOG}"
+    elif [[ "${#BUSYBOX_VERIFIED_CVE[@]}" -gt 0 ]] && [[ "${BINARY}" == *"busybox"* ]]; then
+      write_log "[+] Found ${ORANGE}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs (${ORANGE}${#BUSYBOX_VERIFIED_CVE[@]} verified${GREEN}) and ${ORANGE}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}" "${BIN_LOG}"
     else
-      print_output "[+] Found ${ORANGE}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs and ${ORANGE}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}"
+      write_log "[+] Found ${ORANGE}${BOLD}${CVE_COUNTER_VERSION}${GREEN} CVEs and ${ORANGE}${BOLD}${EXPLOIT_COUNTER_VERSION}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}" "${BIN_LOG}"
     fi
-    print_ln
+    write_log "" "${BIN_LOG}"
   else
-    print_ln
-    print_output "[+] Found ${ORANGE}${BOLD}NO${NC}${GREEN} CVEs and ${ORANGE}${BOLD}NO${NC}${GREEN} exploits (including POC's) in ${ORANGE}${BINARY}${GREEN} with version ${ORANGE}${VERSION}${GREEN} (source ${ORANGE}${VSOURCE}${GREEN}).${NC}"
-    print_ln
+    write_log "[-] Found ${ORANGE}${BOLD}NO${NC}${NC} CVEs and ${ORANGE}${BOLD}NO${NC}${NC} exploits (including POC's) in ${ORANGE}${BINARY}${NC} with version ${ORANGE}${VERSION}${NC} (source ${ORANGE}${VSOURCE}${NC})." "${BIN_LOG}"
+    write_log "" "${BIN_LOG}"
   fi
 
-  # normally we only print the number of CVEs. If we have verified CVEs in the Linux Kernel we also add this detail
+  # normally we only print the number of CVEs. If we have verified CVEs in the Linux Kernel or BusyBox we also add this detail
   CVEs="${CVE_COUNTER_VERSION}"
   if [[ "${KERNEL_VERIFIED_VULN}" -gt 0 ]] && [[ "${BINARY}" == *"kernel"* ]]; then
-    CVEs="${CVEs}"" (${KERNEL_VERIFIED_VULN})"
+    CVEs="${CVEs} (${KERNEL_VERIFIED_VULN})"
+  fi
+  if [[ "${#BUSYBOX_VERIFIED_CVE[@]}" -gt 0 ]] && [[ "${BINARY}" == *"busybox"* ]]; then
+    CVEs="${CVEs} (${#BUSYBOX_VERIFIED_CVE[@]})"
   fi
   EXPLOITS="${EXPLOIT_COUNTER_VERSION}"
 
@@ -1085,12 +1116,16 @@ cve_extractor() {
     printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-10.10s:   Source: %-15.15s\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
     echo "${BINARY};${VERSION};${CVEs};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
   fi
+
+  # now, lets write the main f20 log file with the results of the current binary:
+  tee -a "${LOG_FILE}" < "${BIN_LOG}"
 }
 
 cve_extractor_thread_actor() {
   local CVE_OUTPUT="${1:-}"
   local CVEv2_TMP=0
   local KERNEL_VERIFIED="no"
+  local BUSYBOX_VERIFIED="no"
   local CVE_VALUE=""
   local CVSSv2_VALUE=""
   local CVSS_VALUE=""
@@ -1169,6 +1204,13 @@ cve_extractor_thread_actor() {
         ((KERNEL_VERIFIED_VULN+=1))
         KERNEL_VERIFIED="yes"
       fi
+    fi
+  fi
+
+  if [[ -f "${CSV_DIR}"/s118_busybox_verifier.csv ]] && [[ "${BINARY}" == "busybox" ]]; then
+    if grep -q ";${CVE_VALUE};" "${CSV_DIR}"/s118_busybox_verifier.csv; then
+      print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified BusyBox vulnerability (${ORANGE}BusyBox applet${GREEN})!" "no_log"
+      BUSYBOX_VERIFIED="yes"
     fi
   fi
 
@@ -1392,6 +1434,7 @@ cve_extractor_thread_actor() {
 
   # if this CVE is a kernel verified CVE we add a V to the CVE
   if [[ "${KERNEL_VERIFIED}" == "yes" ]]; then CVE_VALUE="${CVE_VALUE}"" (V)"; fi
+  if [[ "${BUSYBOX_VERIFIED}" == "yes" ]]; then CVE_VALUE="${CVE_VALUE}"" (V)"; fi
 
   # we do not deal with output formatting the usual way -> we use printf
   if (( $(echo "${CVSS_VALUE} > 6.9" | bc -l) )); then
@@ -1434,7 +1477,7 @@ cve_extractor_thread_actor() {
     echo "${HIGH_CVE_COUNTER}" >> "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp
   fi
 
-  write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${EXPLOIT_AVAIL_SNYK[@]}" "${EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
+  write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
 
 }
 
@@ -1470,7 +1513,16 @@ get_kernel_check() {
     # we get something like this: "linux_kernel;5.10.59;NA"
     KERNEL_CVE_EXPLOITS+=( "${KERNEL_VERSION_S24[@]}" )
   fi
+}
 
+get_busybox_verified() {
+  local S118_LOG="${1:-}"
+  export BUSYBOX_VERIFIED_CVE=()
+
+  if [[ -f "${S118_LOG}" ]]; then
+    print_output "[*] Collect version details of module $(basename "${S118_LOG}")."
+    readarray -t BUSYBOX_VERIFIED_CVE < <(cut -d\; -f1,3 "${S118_LOG}" | tail -n +2 | sort -u || true)
+  fi
 }
 
 get_kernel_verified() {

@@ -97,7 +97,7 @@ add_link_tags() {
       REF_LINK="$(sed "${REF_LINK_NUMBER}""q;d" "${LINK_FILE}" | cut -c12- | cut -d'<' -f1 || true)"
       URL_REGEX='(www.|https?|ftp|file):\/\/'
       if [[ -f "$(echo "${REF_LINK}" | cut -d"#" -f1)" ]] ; then
-        if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") ) || ( ("${REF_LINK}" == *".txt#"*) || ("${REF_LINK}" == *".log#"*) || ("${REF_LINK: -2}" == ".c") ) ]] ; then
+        if [[  ( ("${REF_LINK: -4}" == ".txt") || ("${REF_LINK: -4}" == ".log") || ("${REF_LINK: -4}" == ".csv")) || ( ("${REF_LINK}" == *".txt#"*) || ("${REF_LINK}" == *".log#"*) || ("${REF_LINK: -2}" == ".c") ) ]] ; then
           REF_ANCHOR=""
           if [[ ( ("${REF_LINK}" == *".txt#"*) || ("${REF_LINK}" == *".log#"*) ) ]] ; then
             REF_ANCHOR="$(echo "${REF_LINK}" | cut -d"#" -f2 || true)"

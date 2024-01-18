@@ -208,7 +208,10 @@ dependency_check()
         done < "${CONFIG_DIR}/gpt_config.env"
       fi
     fi
-    if [[ -z "${OPENAI_API_KEY}" ]]; then
+    if [[ -z "${LATEST_EMBA_VERSION}" ]]; then
+      # if we have no EMBA_VERSION identified, we do not need to check our GPT key now -> there is no internet
+      print_output "$(indent "${ORANGE}As there is no Internet connection available, no GPT checks performed.${NC}")" "no_log"
+    elif [[ -z "${OPENAI_API_KEY}" ]]; then
       print_output "$(indent "ChatGPT-API key not set - ${ORANGE}see https://github.com/e-m-b-a/emba/wiki/AI-supported-firmware-analysis for more information${NC}")" "no_log"
       # The following if clause is currently not working! We have not loaded the profile in this stage
       # TODO: Find a workaround!
@@ -229,7 +232,7 @@ dependency_check()
         print_output "    OpenAI-API key  - \\c" "no_log"
         HTTP_CODE_=$(curl -sS https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" \
                 -H "Authorization: Bearer ${OPENAI_API_KEY}" \
-                -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json)
+                -d @"${CONFIG_DIR}/gpt_template.json" --write-out "%{http_code}" -o /tmp/chatgpt-test.json 2>/dev/null)
 
         if [[ "${HTTP_CODE_}" -eq 200 ]] ; then
           echo -e "${GREEN}""ok""${NC}"

@@ -20,9 +20,9 @@
 #               Currently this module only work in a non docker environment!
 
 # Threading priority - if set to 1, these modules will be executed first
-export THREAD_PRIO=1
+export THREAD_PRIO=0
 
-S120_cwe_checker()
+S17_cwe_checker()
 {
   if [[ ${CWE_CHECKER} -eq 1 ]] ; then
     module_log_init "${FUNCNAME[0]}"
@@ -102,8 +102,8 @@ cwe_check() {
           cwe_checker_threaded "${BIN_TO_CHECK}" &
           local TMP_PID="$!"
           store_kill_pids "${TMP_PID}"
-          WAIT_PIDS_S120+=( "${TMP_PID}" )
-          max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S120[@]}"
+          WAIT_PIDS_S17+=( "${TMP_PID}" )
+          max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S17[@]}"
           continue
         else
           cwe_checker_threaded "${BIN_TO_CHECK}"
@@ -112,12 +112,11 @@ cwe_check() {
     done
   done
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S120[@]}"
+  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S17[@]}"
 }
 
 cwe_checker_threaded () {
   local BINARY_="${1:-}"
-  local TEST_OUTPUT=()
   local CWE_OUT=()
   local CWE_LINE=""
   local CWE=""
@@ -159,11 +158,11 @@ cwe_checker_threaded () {
         print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
       done
     else
-      print_output "[-] Nothing found in ""${ORANGE}""${NAME}""${NC}"
+      print_output "[-] Nothing found in ""${ORANGE}""${NAME}""${NC}" "no_log"
       rm "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
     fi
   fi
-  [[ ${#TEST_OUTPUT[@]} -ne 0 ]] && print_ln
+  print_ln
 
   if [[ -f "${LOG_FILE}" ]]; then
     cat "${LOG_FILE}" >> "${OLD_LOG_FILE}"

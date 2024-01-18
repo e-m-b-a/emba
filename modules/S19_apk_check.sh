@@ -16,7 +16,7 @@
 #               vulnerability test with APKHunt: https://github.com/Cyber-Buddy/APKHunt
 
 
-S17_apk_check() {
+S19_apk_check() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Android apk checks"
   pre_module_reporter "${FUNCNAME[0]}"
@@ -55,15 +55,15 @@ apk_checker() {
       apk_checker_helper "${APK}" &
       local TMP_PID="$!"
       store_kill_pids "${TMP_PID}"
-      WAIT_PIDS_S17+=( "${TMP_PID}" )
+      WAIT_PIDS_S19+=( "${TMP_PID}" )
     else
       apk_checker_helper "${APK}"
     fi
     if [[ "${THREADED}" -eq 1 ]]; then
-      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S17[@]}"
+      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S19[@]}"
     fi
   done
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S17[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S19[@]}"
   [[ -d "${GOTMPDIR}" ]] && rm -rf "${GOTMPDIR}"
 }
 
