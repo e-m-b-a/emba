@@ -105,6 +105,10 @@ gpt_resolver_csv() {
   local GPT_OUTPUT_FILE_="${5:-}"
   local GPT_TOKENS_="${6:-}"
   local GPT_RESPONSE_="${7:-}"
+  local GPT_OUTPUT_FILE_NAME=""
+  local GPT_OUTPUT_FILE_NAME_bak=""
+  local HTML_FILE_=""
+  local HTML_FILE_X=""
 
   print_output "[*] Trying to resolve ${ORANGE}Anchor ${GPT_ANCHOR_}${NC} in ${ORANGE}Output_file ${GPT_OUTPUT_FILE_}${NC}."
 
@@ -144,8 +148,8 @@ gpt_resolver_csv() {
         print_output "[*] Linking GPT results ${ORANGE}${GPT_REVERSE_LINK_}${NC} into ${ORANGE}${HTML_FILE_X}${NC}" "no_log"
         depth_cnt="${HTML_FILE_X//[^\/]}"
         depth_cnt="$(( "${#depth_cnt}"-1 ))"
-        DEPTH="\.\.\/"
-        myDEPTH=$(printf "%${depth_cnt}s")
+        local DEPTH="\.\.\/"
+        local myDEPTH=$(printf "%${depth_cnt}s")
         DEPTH="${myDEPTH// /${DEPTH}}"
 
         sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\#aianalysisfor${GPT_REVERSE_LINK_}\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"green\"\>[+] OpenAI results are available\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
@@ -162,6 +166,9 @@ gpt_resolver_csv_tmp() {
   local GPT_OUTPUT_FILE_="${5:-}"
   local GPT_TOKENS_="${6:-}"
   local GPT_RESPONSE_="${7:-}"
+  local GPT_OUTPUT_FILE_NAME=""
+  local HTML_FILE_=""
+  local HTML_FILE_X=""
 
   print_output "[*] Trying to resolve ${ORANGE}Anchor ${GPT_ANCHOR_}${NC} in ${ORANGE}output_file ${GPT_OUTPUT_FILE_}${NC}."
 
@@ -195,8 +202,8 @@ gpt_resolver_csv_tmp() {
       print_output "[*] Linking GPT results ${ORANGE}${GPT_REVERSE_LINK_}${NC} into ${ORANGE}${HTML_FILE_X}${NC}" "no_log"
       depth_cnt="${HTML_FILE_X//[^\/]}"
       depth_cnt="$(( "${#depth_cnt}"-1 ))"
-      DEPTH="\.\.\/"
-      myDEPTH=$(printf "%${depth_cnt}s")
+      local DEPTH="\.\.\/"
+      local myDEPTH=$(printf "%${depth_cnt}s")
       DEPTH="${myDEPTH// /${DEPTH}}"
 
       sed -i "s/\[ASK_GPT\]\ ${GPT_ANCHOR_}/\ \ \ \ \<a class\=\"reference\" href\=\"${DEPTH}q02\_openai\_question\.html\" title\=\"${GPT_REVERSE_LINK_}\"\ \>\<span\ class=\"orange\"\>[*] OpenAI module did not finish\<\/span\>\<\/a\>\n/1" "${HTML_FILE_}"
