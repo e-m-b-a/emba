@@ -2,7 +2,7 @@
 
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2021-2023 Siemens Energy AG
+# Copyright 2021-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,6 +11,7 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Benedikt Kuehne
+# Contributor(s): Michael Messner
 
 # Description:  Resolves all dependancies and links between Q- and S-Modules
 
@@ -46,6 +47,8 @@ F05_qs_resolver() {
         GPT_TOKENS_="${COL6_//cost\=/}"
         GPT_RESPONSE_="${COL7_//\"/}"
 
+        print_output "[*] GPT resolver - testing ${ORANGE}${CSV_DIR}/q02_openai_question.csv${NC}"
+
         if [[ "${THREADED}" -eq 1 ]]; then
           gpt_resolver_csv "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${_GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "${GPT_TOKENS_}" "${GPT_RESPONSE_}" &
           local TMP_PID="$!"
@@ -71,6 +74,8 @@ F05_qs_resolver() {
         local GPT_OUTPUT_FILE_="${COL5_}"
         local GPT_TOKENS_="${COL6_//cost\=/}"
         local GPT_RESPONSE_="${COL7_//\"/}"
+
+        print_output "[*] Trying to resolve ${ORANGE}Anchor ${GPT_ANCHOR_}${NC} in ${ORANGE}Output_file ${GPT_OUTPUT_FILE_}${NC}."
 
         if [[ "${THREADED}" -eq 1 ]]; then
           gpt_resolver_csv_tmp "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${_GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "${GPT_TOKENS_}" "${GPT_RESPONSE_}" &
@@ -147,7 +152,6 @@ gpt_resolver_csv() {
       done
     fi
   fi
-
 }
 
 gpt_resolver_csv_tmp() {
@@ -169,7 +173,7 @@ gpt_resolver_csv_tmp() {
   else
     print_output "[*] Q02 didn't check ${GPT_INPUT_FILE_}, linking to the GPT module page instead"
 
-    sed -i "s/${GPT_ANCHOR_}/Check did not finish!/1" "${GPT_OUTPUT_FILE_}"
+    # sed -i "s/${GPT_ANCHOR_}/Check did not finish!/1" "${GPT_OUTPUT_FILE_}"
 
     if [[ "${GPT_OUTPUT_FILE_}" == *".log" ]]; then
       GPT_OUTPUT_FILE_NAME="$(basename "${GPT_OUTPUT_FILE_//\.log/}.html")"
