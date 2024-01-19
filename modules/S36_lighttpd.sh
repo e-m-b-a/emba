@@ -55,6 +55,12 @@ lighttpd_binary_analysis() {
   sub_module_title "Lighttpd binary analysis"
   local LIGHTTP_BIN_ARR=("${@}")
   export LIGHT_VERSIONS=()
+  local CSV_REGEX=""
+  local LIC=""
+  local VERSION_FINDER=""
+  local VERSION_IDENTIFIER=""
+  local VULNERABLE_FUNCTIONS_VAR=""
+  local VULNERABLE_FUNCTIONS=()
 
   if [[ -f "${CSV_DIR}/s09_firmware_base_version_check.csv" ]] && grep -q "lighttpd" "${CSV_DIR}"/s09_firmware_base_version_check.csv; then
     # if we already have results from s09 we just use them
@@ -144,6 +150,10 @@ lighttpd_config_analysis() {
   shift
   local LIGHT_VERSIONS=("${@}")
   local SSL_ENABLED=0
+  local PEM_FILES=()
+  local PEM_FILE=""
+  local REAL_PEMS=()
+  local REAL_PEM=""
 
   if ! [[ -f "${LIGHTTPD_CONFIG}" ]]; then
     print_output "[-] No configuration file available"

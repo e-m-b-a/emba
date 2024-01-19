@@ -599,6 +599,8 @@ radare_output_function_details()
   local COMMON_FILES_FOUND=""
   local SEARCH_TERM=""
   local CFF_CSV=""
+  local NETWORKING_=""
+  local NW_CSV=""
 
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     SEARCH_TERM=$(basename "${BINARY_}")

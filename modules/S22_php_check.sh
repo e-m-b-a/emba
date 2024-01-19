@@ -25,10 +25,11 @@ S22_php_check()
 
   local PHP_SCRIPTS=()
   export S22_PHP_VULNS=0
-  S22_PHP_SCRIPTS=0
-  S22_PHP_INI_ISSUES=0
-  S22_PHP_INI_CONFIGS=0
-  S22_PHPINFO_ISSUES=0
+  export S22_PHP_SCRIPTS=0
+  export S22_PHP_INI_ISSUES=0
+  export S22_PHP_INI_CONFIGS=0
+  export S22_PHPINFO_ISSUES=0
+  export S22_SEMGREP_ISSUES=0
 
   if [[ ${PHP_CHECK} -eq 1 ]] ; then
     mapfile -t PHP_SCRIPTS < <( find "${FIRMWARE_PATH}" -xdev -type f -iname "*.php" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
@@ -72,6 +73,8 @@ s22_vuln_check_semgrep() {
   local PHP_SEMGREP_LOG="${LOG_PATH_MODULE}"/semgrep_php_results_xml.log
   local S22_SEMGREP_VULNS=0
   local SEMG_SOURCES_ARR=()
+  local S22_SEMGREP_SCRIPTS=""
+  local SEMG_SOURCE_NOTE=""
 
   # multiple output options would be nice. Currently we have the xml output to parse it easily for getting the line number of the issue
   # but this output is not very beautiful to show in the report.
@@ -186,6 +189,7 @@ s22_vuln_check() {
 
   local NAME=""
   local VULNS=0
+  local TOTAL_MEMORY=0
 
   TOTAL_MEMORY="$(grep MemTotal /proc/meminfo | awk '{print $2}' || true)"
   local MEM_LIMIT=$(( "${TOTAL_MEMORY}"/2 ))
@@ -202,8 +206,8 @@ s22_vuln_check() {
   local GPT_ANCHOR_=""
   if [[ "${VULNS}" -gt 0 ]] ; then
     # check if this is common linux file:
-    local COMMON_FILES_FOUND
-    local CFF
+    local COMMON_FILES_FOUND=""
+    local CFF=""
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       COMMON_FILES_FOUND=" (""${RED}""common linux file: no""${GREEN}"")"
       CFF="no"
@@ -235,17 +239,14 @@ s22_vuln_check() {
 
 s22_check_php_ini(){
   sub_module_title "PHP configuration checks (php.ini)"
-  local PHP_INI_FAILURE
-  local PHP_INI_LIMIT_EXCEEDED
-  local PHP_INI_WARNINGS
+  local PHP_INI_FAILURE=0
+  local PHP_INI_LIMIT_EXCEEDED=0
+  local PHP_INI_WARNINGS=0
   local PHP_INI_FILE=()
   local PHP_FILE=""
   local INISCAN_RESULT=()
   local LINE=""
   local PHP_INISCAN_PATH="${EXT_DIR}""/iniscan/vendor/bin/iniscan"
-  PHP_INI_FAILURE=0
-  PHP_INI_LIMIT_EXCEEDED=0
-  PHP_INI_WARNINGS=0
 
   mapfile -t PHP_INI_FILE < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname 'php.ini' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   if [[ "${#PHP_INI_FILE[@]}" -eq 0 ]]; then
@@ -258,7 +259,7 @@ s22_check_php_ini(){
     # print_output "[*] iniscan check of ""$(print_path "${PHP_FILE}")"
     mapfile -t INISCAN_RESULT < <( "${PHP_INISCAN_PATH}" scan --path="${PHP_FILE}" || true)
     for LINE in "${INISCAN_RESULT[@]}" ; do
-      local LIMIT_CHECK
+      local LIMIT_CHECK=""
       IFS='|' read -ra LINE_ARR <<< "${LINE}"
       # TODO: STRICT mode not working here:
       add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"

@@ -24,12 +24,12 @@ S26_kernel_vuln_verifier()
   module_title "Kernel vulnerability identification and verification"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  HOME_DIR="$(pwd)"
+  export HOME_DIR="$(pwd)"
   # KERNEL_ARCH_PATH is the directory where we store all the kernels
-  KERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"
+  local KERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"
   S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
-  WAIT_PIDS_S26=()
-  NEG_LOG=0
+  local WAIT_PIDS_S26=()
+  export NEG_LOG=0
 
   if ! [[ -d "${KERNEL_ARCH_PATH}" ]]; then
     print_output "[-] Missing directory for kernel sources ... exit module now"
@@ -55,6 +55,7 @@ S26_kernel_vuln_verifier()
   local ALL_KVULNS=()
   export KERNEL_CONFIG_PATH="NA"
   export KERNEL_ELF_PATH=""
+  local K_VERSION_KORG=""
 
   for K_VERSION in "${K_VERSIONS[@]}"; do
     local K_FOUND=0
@@ -154,7 +155,7 @@ S26_kernel_vuln_verifier()
       K_VERSION_KORG="${K_VERSION}"
     fi
     # we need to wait for the downloaded linux kernel sources from the host
-    WAIT_CNT=0
+    local WAIT_CNT=0
     while ! [[ -f "${KERNEL_ARCH_PATH}/linux-${K_VERSION_KORG}.tar.gz" ]]; do
       print_output "[*] Waiting for kernel sources ..." "no_log"
       ((WAIT_CNT+=1))
@@ -193,6 +194,7 @@ S26_kernel_vuln_verifier()
     prepare_cve_search_module
     export F20_DEEP=0
     export S26_LOG_DIR="${LOG_DIR}""/s26_kernel_vuln_verifier/"
+    export SYMBOLS_CNT=0
 
     cve_db_lookup_version "linux_kernel:${K_VERSION}"
 
@@ -254,8 +256,9 @@ S26_kernel_vuln_verifier()
 
     for VULN in "${ALL_KVULNS[@]}"; do
       NEG_LOG=1
-      K_PATHS=()
-      K_PATHS_FILES_TMP=()
+      local K_PATHS=()
+      local K_PATHS_FILES_TMP=()
+      local SUMMARY=""
       K_PATH="missing vulnerability path from advisory"
 
       CVE=$(echo "${VULN}" | cut -d: -f1)
@@ -368,6 +371,7 @@ symbol_verifier() {
   local K_PATH="${3:-}"
   local CVSS="${4:-}"
   local VULN_FOUND=0
+  local CHUNK_FILE=""
 
   for CHUNK_FILE in "${LOG_PATH_MODULE}"/symbols_uniq.split.* ; do
     # echo "testing chunk file $CHUNK_FILE"
@@ -422,6 +426,7 @@ compile_kernel() {
   local KERNEL_DIR="${2:-}"
   local KARCH="${3:-}"
   export COMPILE_SOURCE_FILES=0
+  local COMPILE_SOURCE_FILES_VERIFIED=""
 
   if ! [[ -f "${KERNEL_CONFIG_FILE}" ]]; then
     print_output "[-] No supported kernel config found - ${ORANGE}${KERNEL_CONFIG_FILE}${NC}"
@@ -512,6 +517,10 @@ final_log_kernel_vulns() {
   local CVE_VERIFIED_OVERLAP=0
   local CVE_VERIFIED_OVERLAP_CRITICAL=()
   local CVE_VERIFIED_ONE_CRITICAL=()
+  local CVE_VERIFIED_ONE_CRITICAL_""
+  local CVE_CRITICAL=""
+  local CVSS2_CRITICAL=""
+  local CVSS3_CRITICAL=""
 
   print_output "[*] Generating final kernel report ..." "no_log"
   echo "Kernel version;Architecture;CVE;CVSSv2;CVSSv3;Verified with symbols;Verified with compile files" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv
