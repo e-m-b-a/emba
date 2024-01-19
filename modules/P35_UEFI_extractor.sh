@@ -108,7 +108,6 @@ P35_UEFI_extractor() {
     fi
 
     if [[ "${FILES_UEFI}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       NEG_LOG=1
     fi

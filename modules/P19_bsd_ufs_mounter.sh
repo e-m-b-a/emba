@@ -31,7 +31,6 @@ P19_bsd_ufs_mounter() {
     ufs_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
     if [[ "${FILES_UFS_MOUNT}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       NEG_LOG=1

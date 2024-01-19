@@ -18,6 +18,7 @@ S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
   local VERSION_LINE=""
+  local WAIT_PIDS_S116=()
 
   if [[ "${RTOS}" -eq 0 ]]; then
     module_title "Identified software components - via usermode emulation."

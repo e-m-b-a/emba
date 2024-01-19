@@ -44,7 +44,6 @@ P23_qemu_qcow_mounter() {
     fi
 
     if [[ "${FILES_QCOW_MOUNT}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       NEG_LOG=1

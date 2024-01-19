@@ -34,6 +34,7 @@ S14_weak_func_radare_check()
   export COUNT_STRLEN=0
   export COUNT_MMAP_OK=0
   export COUNT_FUNC=0
+  local WAIT_PIDS_S14=()
 
   if [[ -n "${ARCH}" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected

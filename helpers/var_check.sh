@@ -16,12 +16,13 @@ for MODULE in "${ALL_EMBA_SCRIPTS[@]}"; do
   mapfile -t EXPORTS_ARR < <(grep -E "export( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | cut -d '=' -f1 | sed 's/.*export //' | sort -u)
 
   mapfile -t UNKNOWN_LOOP_VARS < <(grep -E "for( )+[A-Z]+[a-zA-Z0-9_]+ in .*;" "${MODULE}" | awk '{print $2}' | sort -u)
+  mapfile -t UNKNOWN_ARR_ADD < <(grep -E "^( )+[A-Z]+[a-zA-Z0-9_]+\+=" "${MODULE}" | cut -d '+' -f1 | grep -Ev "^#|^$| #|\[" | tr -d ' ' | sort -u)
   mapfile -t UNKNOWN_VARS_ARR_VAR < <(grep -E "^( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | cut -d '=' -f1 | grep -v "mapfile\|declare\|local\|export\|for\|if" | grep -Ev "^#|^$| #|\[" | tr -d ' ' | sort -u)
   mapfile -t UNKNOWN_VARS_ARR_ARR < <(grep -o -E "mapfile -t( )+[A-Z]+[a-zA-Z0-9_]+" "${MODULE}" | awk '{print $3}' | grep -v "declare\|local\|export\|for\|if" | sort -u)
   mapfile -t UNKNOWN_VARS_ARR_ARR1 < <(grep -o -E "declare -A( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | awk '{print $3}' | cut -d '=' -f1 | grep -v "mapfile\|local\|export\|for\|if" | sort -u)
   mapfile -t UNKNOWN_VARS_ARR_ARR2 < <(grep -o -E "readarray -t( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | awk '{print $3}' | cut -d '=' -f1 | grep -v "mapfile\|declare\|local\|export\|for\|if" | sort -u)
 
-  UNKNOWN_VARS_ARR=( "${UNKNOWN_LOOP_VARS[@]}" "${UNKNOWN_VARS_ARR_VAR[@]}" "${UNKNOWN_VARS_ARR_ARR[@]}" "${UNKNOWN_VARS_ARR_ARR1[@]}" "${UNKNOWN_VARS_ARR_ARR2[@]}" )
+  UNKNOWN_VARS_ARR=( "${UNKNOWN_LOOP_VARS[@]}" "${UNKNOWN_ARR_ADD[@]}" "${UNKNOWN_VARS_ARR_VAR[@]}" "${UNKNOWN_VARS_ARR_ARR[@]}" "${UNKNOWN_VARS_ARR_ARR1[@]}" "${UNKNOWN_VARS_ARR_ARR2[@]}" )
   eval "UNKNOWN_VARS_ARR=($(for i in "${UNKNOWN_VARS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
   if [[ "${#LOCALS_ARR[@]}" -gt 0 ]]; then

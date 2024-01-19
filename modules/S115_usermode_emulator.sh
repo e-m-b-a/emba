@@ -89,6 +89,7 @@ S115_usermode_emulator() {
       ((ROOT_CNT=ROOT_CNT+1))
       print_output "[*] Running emulation processes in ${ORANGE}${R_PATH}${NC} root path (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})."
 
+      local DIR=""
       DIR=$(pwd)
       mapfile -t BIN_EMU_TMP < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file {} \; 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "${DIR}" || exit)
       # we re-create the BIN_EMU_ARR array with all unique binaries for every root directory
@@ -116,6 +117,7 @@ S115_usermode_emulator() {
         local BIN_EMU_NAME_=""
         BIN_EMU_NAME_=$(basename "${FULL_BIN_PATH}")
 
+        local THOLD=0
         THOLD=$(( 25*"${ROOT_CNT}" ))
         # if we have already a log file with a lot of content we assume this binary was already emulated correct
         if [[ $(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_DIR}"/s115_usermode_emulator/qemu_init_"${BIN_EMU_NAME_}".txt 2>/dev/null | grep -c -v -E "\[\*\]\ " || true) -gt "${THOLD}" ]]; then

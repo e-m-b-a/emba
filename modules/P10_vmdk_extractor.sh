@@ -28,7 +28,6 @@ P10_vmdk_extractor() {
     vmdk_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
     if [[ "${VMDK_FILES}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     fi

@@ -245,6 +245,7 @@ analyze_kernel_module() {
 
   KMOD_BAD=0
   local KMODULE=""
+  local WAIT_PIDS_S25=()
 
   print_output "[*] Found ${ORANGE}${#KERNEL_MODULES[@]}${NC} kernel modules."
 

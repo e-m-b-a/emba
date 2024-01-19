@@ -28,6 +28,7 @@ S15_radare_decompile_checks()
 
   local STRCPY_CNT=0
   export COUNT_STRLEN=0
+  local WAIT_PIDS_S15=()
 
   if [[ -n "${ARCH}" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
@@ -58,18 +59,18 @@ S15_radare_decompile_checks()
           radare_decompilation "${BINARY}" "${VULNERABLE_FUNCTIONS[@]}" &
           local TMP_PID="$!"
           store_kill_pids "${TMP_PID}"
-          WAIT_PIDS_S14+=( "${TMP_PID}" )
+          WAIT_PIDS_S15+=( "${TMP_PID}" )
         else
           radare_decompilation "${BINARY}" "${VULNERABLE_FUNCTIONS[@]}"
         fi
       fi
 
       if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S14[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S15[@]}"
       fi
     done
 
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S14[@]}"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S15[@]}"
 
     radare_decomp_print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 

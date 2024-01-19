@@ -80,7 +80,6 @@ foscam_enc_extractor() {
           export FW_VENDOR="Foscam"
         fi
 
-        MD5_DONE_DEEP+=( "$(md5sum "${FOSCAM_ENC_PATH_}" | awk '{print $1}')" )
         foscam_ubi_extractor "${EXTRACTION_FILE_}"
         # as we have already found a working key we can now exit the loop
         break

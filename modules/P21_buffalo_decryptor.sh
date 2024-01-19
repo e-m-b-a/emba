@@ -84,7 +84,6 @@ buffalo_enc_extractor() {
     if [[ "${BUFFALO_FILE_CHECK}" =~ .*u-boot\ legacy\ uImage,\ .* ]]; then
       print_ln
       print_output "[+] Decrypted Buffalo firmware file to ${ORANGE}${EXTRACTION_FILE_}${NC}"
-      MD5_DONE_DEEP+=( "$(md5sum "${BUFFALO_ENC_PATH_}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${EXTRACTION_FILE_}"
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       print_ln

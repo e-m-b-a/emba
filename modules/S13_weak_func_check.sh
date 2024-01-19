@@ -32,6 +32,7 @@ S13_weak_func_check()
   local VULNERABLE_FUNCTIONS=()
   local VULNERABLE_FUNCTIONS_VAR=""
   local ERR_PRINTED=0
+  local WAIT_PIDS_S13=()
 
   if [[ -n "${ARCH}" ]] ; then
     # This module waits for S12 - binary protections

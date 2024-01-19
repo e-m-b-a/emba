@@ -25,13 +25,14 @@ F20_vul_aggregator() {
 
   # we use this for later decisions:
   export F20_DEEP=1
+  export WAIT_PIDS_F19=()
 
   prepare_cve_search_module
 
   local FOUND_CVE=0
   local S26_LOGS_ARR=()
 
-  CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
+  export CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
 
   local S02_LOG="${CSV_DIR}"/s02_uefi_fwhunt.csv
   local S06_LOG="${CSV_DIR}"/s06_distribution_identification.csv
@@ -887,9 +888,9 @@ cve_extractor() {
     # remove last : if it is there
     VERSION=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
     BINARY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
-    AGG_LOG_FILE="${VERSION_PATH}".txt
+    export AGG_LOG_FILE="${VERSION_PATH}".txt
   else
-    AGG_LOG_FILE="${VERSION_orig}".txt
+    export AGG_LOG_FILE="${VERSION_orig}".txt
   fi
 
   # VSOURCE is used to track the source of version details, this is relevant for the
@@ -993,8 +994,7 @@ cve_extractor() {
     fi
   fi
 
-  EXPLOIT_COUNTER_VERSION=0
-  CVE_COUNTER_VERSION=0
+  local CVE_COUNTER_VERSION=0
   if [[ -f "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" ]]; then
     readarray -t CVEs_OUTPUT < <(cut -d ':' -f1-3 "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" | grep "^CVE-" || true)
   fi

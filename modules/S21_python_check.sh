@@ -27,6 +27,7 @@ S21_python_check()
   local PYTHON_SCRIPTS=()
   local S21_VULN_TYPES=()
   local VTYPE=""
+  local WAIT_PIDS_S21=()
 
   if [[ ${PYTHON_CHECK} -eq 1 ]] ; then
     write_csv_log "Script path" "Python issues detected" "common linux file"

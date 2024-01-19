@@ -40,6 +40,8 @@ apk_identifier() {
 apk_checker() {
   sub_module_title "Android apk analysis"
   local APK=""
+  local WAIT_PIDS_S19=()
+
   if ! [[ -d "${EXT_DIR}"/APKHunt ]]; then
     print_output "[-] APKHunt installation missing."
     return

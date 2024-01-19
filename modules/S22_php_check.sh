@@ -149,6 +149,7 @@ s22_vuln_check_caller() {
   local PHP_SCRIPTS=("$@")
   local VULNS=0
   local PHP_SCRIPT=""
+  local WAIT_PIDS_S22=()
 
   for PHP_SCRIPT in "${PHP_SCRIPTS[@]}" ; do
     if ( file "${PHP_SCRIPT}" | grep -q "PHP script" ) ; then

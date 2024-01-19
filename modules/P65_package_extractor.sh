@@ -31,6 +31,7 @@ P65_package_extractor() {
   local DIRS_EXT=0
   local FILES_EXT=0
   local UNIQUE_FILES=0
+  export WAIT_PIDS_P20=()
 
   if [[ "${#ROOT_PATH[@]}" -gt 0 && "${RTOS}" -eq 0 ]]; then
     FILES_PRE_PACKAGE=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
@@ -97,7 +98,7 @@ apk_extractor() {
   extract_apk_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
-  WAIT_PIDS=( )
+  export WAIT_PIDS=( )
 
   if [[ -f "${TMP_DIR}"/apk_db.txt ]] ; then
     APK_ARCHIVES=$(wc -l "${TMP_DIR}"/apk_db.txt | awk '{print $1}')
@@ -180,7 +181,7 @@ deb_extractor() {
   extract_deb_helper &
   WAIT_PIDS+=( "$!" )
   wait_for_extractor
-  WAIT_PIDS=( )
+  export WAIT_PIDS=( )
 
   if [[ -f "${TMP_DIR}"/deb_db.txt ]] ; then
     DEB_ARCHIVES=$(wc -l "${TMP_DIR}"/deb_db.txt | awk '{print $1}')

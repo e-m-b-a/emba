@@ -25,6 +25,7 @@ S95_interesting_files_check()
   local INT_COUNT=0
   local POST_COUNT=0
   local HID_COUNT=0
+  local WAIT_PIDS_S95=()
 
   if [[ "${THREADED}" -eq 1 ]]; then
     interesting_binaries &

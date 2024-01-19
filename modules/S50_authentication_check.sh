@@ -24,6 +24,7 @@ S50_authentication_check() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local AUTH_ISSUES=0
+  local WAIT_PIDS_S50=()
 
   # disabled internal module threading as the output is not readable anymore
   if [[ "${THREADED}" -eq 9 ]]; then
