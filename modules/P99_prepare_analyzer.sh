@@ -35,7 +35,7 @@ P99_prepare_analyzer() {
   local UNIQUE_FILES=0
   local DIRS_EXT=0
   local BINS=0
-  local LINUX_PATH_COUNTER=0
+  export LINUX_PATH_COUNTER=0
   local R_PATH=""
 
   LINUX_PATH_COUNTER="$(find "${LOG_DIR}"/firmware "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
