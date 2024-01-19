@@ -155,6 +155,7 @@ aggregate_versions() {
   local VERSION=""
   export VERSIONS_AGGREGATED=()
   local VERSIONS_KERNEL=()
+  local KERNELS=()
 
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
     ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
@@ -535,6 +536,7 @@ cve_db_lookup_version() {
   local WAIT_PIDS_F19_CVE_SOURCE=()
   local CVE_VER_SOURCES_ARR=()
   local CVE_VER_SOURCES_ARR_DLINK=()
+  local VERSION_SEARCHx=""
 
   # if we did the CVE analysis already in module s26, we can just use these results for our further analysis
   # -> we skip the complete CVE analysis here:
@@ -1150,6 +1152,9 @@ cve_extractor_thread_actor() {
   local EXPLOIT_ROUTERSPLOIT=""
   local EXPLOIT_PATH=""
   local EXPLOIT_NAME=""
+  local E_FILE=""
+  local TYPE=""
+  local LINE=""
 
   CVE_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f1 | tr -dc '[:print:]' | grep "^CVE-" || true)
   if [[ -z "${CVE_VALUE}" ]]; then
