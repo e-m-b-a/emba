@@ -1045,9 +1045,9 @@ cve_extractor() {
     [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_TACTOR[@]}"
   fi
 
-  local KNOWN_EXPLOITED=0
-  local KERNEL_VERIFIED_VULN=0
-  local EXPLOIT_COUNTER_VERSION=0
+  export KNOWN_EXPLOITED=0
+  export KERNEL_VERIFIED_VULN=0
+  export EXPLOIT_COUNTER_VERSION=0
 
   if [[ -s "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log ]]; then
     KNOWN_EXPLOITED=1
