@@ -54,6 +54,7 @@ D10_firmware_diffing() {
   local MD5_FW_BIN1=""
   local MD5_FW_BIN2=""
   export FW_FILE1=""
+  local WAIT_PIDS_D10=()
 
   # shellcheck disable=SC2153
   MD5_FW_BIN1=$(md5sum "${FIRMWARE_PATH}")

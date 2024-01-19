@@ -532,6 +532,7 @@ cve_db_lookup_version() {
   # remove last : if it is there
   local VERSION_PATH="${BIN_VERSION_%:}"
   VERSION_PATH="${VERSION_PATH//:/_}"
+  local WAIT_PIDS_F19_CVE_SOURCE=()
 
   # if we did the CVE analysis already in module s26, we can just use these results for our further analysis
   # -> we skip the complete CVE analysis here:

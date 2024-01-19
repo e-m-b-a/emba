@@ -155,6 +155,7 @@ deeper_extractor_helper() {
   local FILE_MD5=""
   local BIN_PID=""
   local WAIT_PIDS_P60=()
+  local MD5_DONE_DEEP=()
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
 
