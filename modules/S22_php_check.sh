@@ -260,7 +260,7 @@ s22_check_php_ini(){
     mapfile -t INISCAN_RESULT < <( "${PHP_INISCAN_PATH}" scan --path="${PHP_FILE}" || true)
     for LINE in "${INISCAN_RESULT[@]}" ; do
       local LIMIT_CHECK=""
-      IFS='|' read -ra LINE_ARR <<< "${LINE}"
+      local IFS='|' read -ra LINE_ARR <<< "${LINE}"
       # TODO: STRICT mode not working here:
       add_recommendations "${LINE_ARR[3]}" "${LINE_ARR[4]}"
       LIMIT_CHECK="$?"

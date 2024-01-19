@@ -103,7 +103,7 @@ populate_karrays() {
   for VER in "${KERNEL_VERSION[@]}" ; do
     demess_kv_version "${VER}"
 
-    IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+    local IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     for V in "${KV_C_ARR[@]}" ; do
       if [[ -z "${V:-}" ]]; then
         # remove empty entries:
@@ -149,6 +149,7 @@ populate_karrays() {
   # if we have no kernel version identified -> we try to identify a possible identifier in the path:
   if [[ "${#KERNEL_VERSION_[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
     # remove the first part of the path:
+    local KERNEL_VERSION1=""
     KERNEL_VERSION1=$(echo "${KERNEL_MODULES[0]}" | sed 's/.*\/lib\/modules\///')
     KERNEL_VERSION_+=("${KERNEL_VERSION1}")
     # demess_kv_version removes the unneeded stuff after the version:
@@ -306,6 +307,7 @@ check_modprobe() {
   local MP_F_CHECK=0
   local MODPROBE_D_DIRS=()
   local MPROBE_DIR=""
+  local MP_CONF=""
 
   readarray -t MODPROBE_D_DIRS < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for MPROBE_DIR in "${MODPROBE_D_DIRS[@]}"; do

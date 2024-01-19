@@ -30,7 +30,7 @@ S10_binaries_basic_check()
   local VUL_FUNC=""
 
   VULNERABLE_FUNCTIONS="$(config_list "${CONFIG_DIR}""/functions.cfg")"
-  IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "${VULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ -e /g')"
+  local IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "${VULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ -e /g')"
 
   if [[ "${VULNERABLE_FUNCTIONS}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ -n "${VULNERABLE_FUNCTIONS}" ]] ; then

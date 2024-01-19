@@ -31,6 +31,9 @@ S14_weak_func_radare_check()
   local STRCPY_CNT=0
   local FCT_CNT=0
   export FUNC_LOG=""
+  export COUNT_STRLEN=0
+  export COUNT_MMAP_OK=0
+  export COUNT_FUNC=0
 
   if [[ -n "${ARCH}" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
@@ -45,7 +48,7 @@ S14_weak_func_radare_check()
 
     VULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
     print_output "[*] Vulnerable functions: ""$( echo -e "${VULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
-    IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "${VULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
+    local IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "${VULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
 
@@ -164,10 +167,8 @@ radare_function_check_PPC32(){
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
-  local COUNT_FUNC=0
-  local COUNT_STRLEN=0
-  local COUNT_MMAP_OK=0
   export NETWORKING=0
+  export COUNT_STRLEN=0
 
   if ! [[ -f "${BINARY_}" ]]; then
     return
@@ -210,9 +211,6 @@ radare_function_check_MIPS() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
-  local COUNT_FUNC=0
-  local COUNT_STRLEN=0
-  local COUNT_MMAP_OK=0
   export NETWORKING=0
 
   if ! [[ -f "${BINARY_}" ]]; then
@@ -257,9 +255,6 @@ radare_function_check_ARM64() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
-  local COUNT_FUNC=0
-  local COUNT_STRLEN=0
-  local COUNT_MMAP_OK=0
   export NETWORKING=0
 
   if ! [[ -f "${BINARY_}" ]]; then
@@ -303,9 +298,6 @@ radare_function_check_ARM32() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
-  local COUNT_FUNC=0
-  local COUNT_STRLEN=0
-  local COUNT_MMAP_OK=0
   export NETWORKING=0
 
   if ! [[ -f "${BINARY_}" ]]; then
@@ -349,9 +341,6 @@ radare_function_check_hexagon() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
-  local COUNT_FUNC=0
-  local COUNT_STRLEN=0
-  local COUNT_MMAP_OK=0
   export NETWORKING=0
 
   if ! [[ -f "${BINARY_}" ]]; then
@@ -396,9 +385,6 @@ radare_function_check_x86() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
-  local COUNT_FUNC=0
-  local COUNT_STRLEN=0
-  local COUNT_MMAP_OK=0
   export NETWORKING=0
 
   if ! [[ -f "${BINARY_}" ]]; then
@@ -443,9 +429,6 @@ radare_function_check_x86_64() {
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
-  local COUNT_FUNC=0
-  local COUNT_STRLEN=0
-  local COUNT_MMAP_OK=0
   export NETWORKING=0
 
   if ! [[ -f "${BINARY_}" ]]; then
@@ -587,6 +570,7 @@ radare_output_function_details()
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
+
   local FUNCTION="${2:-}"
   local NAME=""
   NAME=$(basename "${BINARY_}")

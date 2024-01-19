@@ -123,7 +123,7 @@ lighttpd_binary_analysis() {
   print_ln
   print_output "[*] Testing lighttpd binaries for deprecated function calls:\\n"
   VULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
-  IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "${VULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
+  local IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "${VULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
   for BIN in "${LIGHTTP_BIN_ARR[@]}" ; do
     if ( file "${BIN}" | grep -q "x86-64" ) ; then
       function_check_x86_64 "${BIN}" "${VULNERABLE_FUNCTIONS[@]}"

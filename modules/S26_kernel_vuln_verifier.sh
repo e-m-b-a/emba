@@ -24,7 +24,8 @@ S26_kernel_vuln_verifier()
   module_title "Kernel vulnerability identification and verification"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  export HOME_DIR="$(pwd)"
+  export HOME_DIR=""
+  HOME_DIR="$(pwd)"
   # KERNEL_ARCH_PATH is the directory where we store all the kernels
   local KERNEL_ARCH_PATH="${EXT_DIR}""/linux_kernel_sources"
   S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
@@ -353,6 +354,8 @@ split_symbols_file() {
 
 extract_kernel_arch() {
   KERNEL_ELF_PATH="${1:-}"
+  export ORIG_K_ARCH=""
+
   ORIG_K_ARCH=$(file "${KERNEL_ELF_PATH}" | cut -d, -f2)
 
   # for ARM -> ARM aarch64 to ARM64
@@ -517,7 +520,8 @@ final_log_kernel_vulns() {
   local CVE_VERIFIED_OVERLAP=0
   local CVE_VERIFIED_OVERLAP_CRITICAL=()
   local CVE_VERIFIED_ONE_CRITICAL=()
-  local CVE_VERIFIED_ONE_CRITICAL_""
+  local CVE_VERIFIED_ONE_CRITICAL_=""
+  local CVE_VERIFIED_OVERLAP_CRITICAL_=()
   local CVE_CRITICAL=""
   local CVSS2_CRITICAL=""
   local CVSS3_CRITICAL=""
