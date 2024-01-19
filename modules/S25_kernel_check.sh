@@ -103,7 +103,8 @@ populate_karrays() {
   for VER in "${KERNEL_VERSION[@]}" ; do
     demess_kv_version "${VER}"
 
-    local IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+    local IFS=" "
+    IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     for V in "${KV_C_ARR[@]}" ; do
       if [[ -z "${V:-}" ]]; then
         # remove empty entries:

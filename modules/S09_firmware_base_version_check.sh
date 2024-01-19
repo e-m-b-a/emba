@@ -210,7 +210,8 @@ bin_string_checker() {
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
   local VERSION_IDENTIFIERS_ARR=()
 
-  local IFS='&&' read -r -a VERSION_IDENTIFIERS_ARR <<< "${VERSION_IDENTIFIER}"
+  local IFS='&&'
+  IFS='&&' read -r -a VERSION_IDENTIFIERS_ARR <<< "${VERSION_IDENTIFIER}"
 
   local BIN=""
 
