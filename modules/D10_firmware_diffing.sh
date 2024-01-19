@@ -114,7 +114,13 @@ analyse_fw_files() {
 
   # as we searched directly in the extracted path, we need to adjust the file path with the unblob extraction directory
   FW_FILE1="${OUTPUT_DIR_UNBLOB1}""${FW_FILE1#.}"
+  export FW_FILE_NAME1=""
   FW_FILE_NAME1=$(basename "${FW_FILE1}")
+  local UNMATCHED_FCTs=()
+  local FW_FILES1in2=()
+  local SSDEEP_OUT=""
+  local SSDEEP_RANK=""
+
   # From extraction process we often get a huge amount of files called "gzip.uncompressed"
   # Currently we just skip them. In the future we probably need to respect the directory name right before:
   #   /lib/modules/4.19.163/kernel/net/netfilter/xt_LOG.ko.gz_extract/gzip.uncompressed
