@@ -60,6 +60,12 @@ ask_chatgpt() {
   local HTTP_CODE_=200
   local ORIGIN_MODULE_=""
   local GPT_SERVER_ERROR_CNT_=0
+  local ELE_INDEX=0
+  local GPT_ANCHOR_=""
+  local GPT_INPUT_FILE_=""
+  local GPT_INPUT_FILE_mod=""
+  local GPT_OUTPUT_FILE_=""
+  local SCRIPT_PATH_TMP_=""
 
   print_output "[*] Checking scripts with ChatGPT that have priority ${ORANGE}${MINIMUM_GPT_PRIO}${NC} or lower" "no_log"
   if ! [[ -d "${GPT_FILE_DIR_}" ]]; then
@@ -71,7 +77,7 @@ ask_chatgpt() {
   readarray -t Q02_OPENAI_QUESTIONS < <(sort -k 3 -t ';' -r "${CSV_DIR}/q02_openai_question.csv.tmp")
 
   for (( ELE_INDEX=0; ELE_INDEX<"${#Q02_OPENAI_QUESTIONS[@]}"; ELE_INDEX++ )); do
-    ELEM="${Q02_OPENAI_QUESTIONS["${ELE_INDEX}"]}"
+    local ELEM="${Q02_OPENAI_QUESTIONS["${ELE_INDEX}"]}"
     SCRIPT_PATH_TMP_="$(echo "${ELEM}" | cut -d\; -f1)"
 
     # as we always start with the highest rated entry, we need to check if this entry was already tested:
