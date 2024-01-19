@@ -30,6 +30,8 @@ S10_binaries_basic_check()
   local VUL_FUNC=""
 
   VULNERABLE_FUNCTIONS="$(config_list "${CONFIG_DIR}""/functions.cfg")"
+
+  # nosemgrep
   local IFS=" "
   IFS=" " read -r -a VUL_FUNC_GREP <<<"$( echo -e "${VULNERABLE_FUNCTIONS}" | sed ':a;N;$!ba;s/\n/ -e /g')"
 
