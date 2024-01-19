@@ -134,7 +134,8 @@ unblobber() {
   if [[ "${VERBOSE}" -eq 1 ]]; then
     timeout --preserve-status --signal SIGINT 300 "${UNBLOB_BIN}" -v -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${FIRMWARE_PATH_}")".log -e "${OUTPUT_DIR_UNBLOB}" "${FIRMWARE_PATH_}" |& safe_logging "${LOG_FILE}" 0 || true
   else
-    local COLUMNS=100 timeout --preserve-status --signal SIGINT 300 "${UNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${FIRMWARE_PATH_}")".log -e "${OUTPUT_DIR_UNBLOB}" "${FIRMWARE_PATH_}" |& safe_logging "${LOG_FILE}" 0 || true
+    local COLUMNS=""
+    COLUMNS=100 timeout --preserve-status --signal SIGINT 300 "${UNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${FIRMWARE_PATH_}")".log -e "${OUTPUT_DIR_UNBLOB}" "${FIRMWARE_PATH_}" |& safe_logging "${LOG_FILE}" 0 || true
   fi
 
   print_ln
