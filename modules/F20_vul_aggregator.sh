@@ -872,6 +872,7 @@ cve_extractor() {
   # VERSION_orig is usually the BINARY_NAME:VERSION
   # in some cases it is only the CVE-Identifier
   local VERSION_orig="${1:-}"
+
   local VERSION=""
   local BINARY=""
   export CVE_VALUE=""
@@ -1004,6 +1005,7 @@ cve_extractor() {
     fi
   fi
 
+  export EXPLOIT_COUNTER_VERSION=0
   local CVE_COUNTER_VERSION=0
   if [[ -f "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" ]]; then
     readarray -t CVEs_OUTPUT < <(cut -d ':' -f1-3 "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" | grep "^CVE-" || true)
@@ -1045,9 +1047,9 @@ cve_extractor() {
     [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_TACTOR[@]}"
   fi
 
-  export KNOWN_EXPLOITED=0
-  export KERNEL_VERIFIED_VULN=0
-  export EXPLOIT_COUNTER_VERSION=0
+  local KNOWN_EXPLOITED=0
+  local KERNEL_VERIFIED_VULN=0
+  local EXPLOIT_COUNTER_VERSION=0
 
   if [[ -s "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log ]]; then
     KNOWN_EXPLOITED=1
@@ -1133,6 +1135,7 @@ cve_extractor() {
 
 cve_extractor_thread_actor() {
   local CVE_OUTPUT="${1:-}"
+
   local CVEv2_TMP=0
   local KERNEL_VERIFIED="no"
   local BUSYBOX_VERIFIED="no"
@@ -1196,7 +1199,7 @@ cve_extractor_thread_actor() {
   # default value
   EXPLOIT="No exploit available"
 
-  EDB=0
+  local EDB=0
   # as we already know about a bunch of kernel exploits - lets search them first
   if [[ "${BINARY}" == *kernel* ]]; then
     for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
