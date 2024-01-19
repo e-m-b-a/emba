@@ -154,7 +154,7 @@ aggregate_versions() {
 
   local VERSION=""
   export VERSIONS_AGGREGATED=()
-  VERSIONS_KERNEL=()
+  local VERSIONS_KERNEL=()
 
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
     ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
@@ -533,6 +533,8 @@ cve_db_lookup_version() {
   local VERSION_PATH="${BIN_VERSION_%:}"
   VERSION_PATH="${VERSION_PATH//:/_}"
   local WAIT_PIDS_F19_CVE_SOURCE=()
+  local CVE_VER_SOURCES_ARR=()
+  local CVE_VER_SOURCES_ARR_DLINK=()
 
   # if we did the CVE analysis already in module s26, we can just use these results for our further analysis
   # -> we skip the complete CVE analysis here:
@@ -597,6 +599,9 @@ check_cve_sources() {
   local CVE_VER_END_EXCL=""
   local CVE_V2=""
   local CVE_V31=""
+  local CVE_CPEs_vuln_ARR=()
+  local CVE_CPEMATCH=""
+  local CVE_SUMMARY=""
   # print_output "[*] Testing binary ${BIN_NAME} with version ${BIN_VERSION_ONLY} for CVE matches ..." "no_log"
 
   CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
@@ -875,6 +880,8 @@ cve_extractor() {
   export EXPLOIT_AVAIL_TRICKEST=()
   export EXPLOIT_AVAIL_ROUTERSPLOIT=()
   export EXPLOIT_AVAIL_ROUTERSPLOIT1=()
+  export EXPLOIT_AVAIL_PACKETSTORM=()
+  export EXPLOIT_AVAIL_SNYK=()
   export KNOWN_EXPLOITED_VULNS=()
   local KNOWN_EXPLOITED=0
   local LOCAL=0
@@ -1134,6 +1141,15 @@ cve_extractor_thread_actor() {
   local HIGH_CVE_COUNTER=0
   local MEDIUM_CVE_COUNTER=0
   local LOW_CVE_COUNTER=0
+  local EID_VALUE=""
+  local EXPLOIT_ID=""
+  local EXPLOIT_MSF=""
+  local EXPLOIT_SNYK=""
+  local EXPLOIT_PS=""
+  local EXPLOIT_RS=""
+  local EXPLOIT_ROUTERSPLOIT=""
+  local EXPLOIT_PATH=""
+  local EXPLOIT_NAME=""
 
   CVE_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f1 | tr -dc '[:print:]' | grep "^CVE-" || true)
   if [[ -z "${CVE_VALUE}" ]]; then
@@ -1394,6 +1410,7 @@ cve_extractor_thread_actor() {
         EXPLOIT="${EXPLOIT}"" ""/ Routersploit:"
       fi
       EXPLOIT_ROUTERSPLOIT=("${EXPLOIT_AVAIL_ROUTERSPLOIT[@]}" "${EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}")
+
       for EXPLOIT_RS in "${EXPLOIT_ROUTERSPLOIT[@]}" ; do
         EXPLOIT_PATH=$(echo "${EXPLOIT_RS}" | cut -d: -f1)
         EXPLOIT_NAME=$(basename -s .py "${EXPLOIT_PATH}")

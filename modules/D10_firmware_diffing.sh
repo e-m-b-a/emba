@@ -120,6 +120,8 @@ analyse_fw_files() {
   local FW_FILES1in2=()
   local SSDEEP_OUT=""
   local SSDEEP_RANK=""
+  local MD5_FW_FILE1=""
+  local MD5_FW_FILE2=""
 
   # From extraction process we often get a huge amount of files called "gzip.uncompressed"
   # Currently we just skip them. In the future we probably need to respect the directory name right before:
@@ -148,9 +150,9 @@ analyse_fw_files() {
         SSDEEP_RANK=$(echo "${SSDEEP_OUT}" | rev | awk '{print $1}' | rev | tr -d '(' | tr -d ')')
         NEG_LOG=1
 
-        LOG_FILE_SUB_NAME="diff_report_${FW_FILE_NAME1}.txt"
-        LOG_PATH_MODULE_SUB="${LOG_PATH_MODULE}"/"${LOG_FILE_SUB_NAME/.txt}"
-        LOG_FILE_DETAILS="${LOG_PATH_MODULE_SUB}/${LOG_FILE_SUB_NAME}"
+        local LOG_FILE_SUB_NAME="diff_report_${FW_FILE_NAME1}.txt"
+        export LOG_PATH_MODULE_SUB="${LOG_PATH_MODULE}"/"${LOG_FILE_SUB_NAME/.txt}"
+        export LOG_FILE_DETAILS="${LOG_PATH_MODULE_SUB}/${LOG_FILE_SUB_NAME}"
 
         ! [[ -d "${LOG_PATH_MODULE_SUB}" ]] && mkdir "${LOG_PATH_MODULE_SUB}"
 
