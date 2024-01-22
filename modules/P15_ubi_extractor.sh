@@ -18,6 +18,7 @@ export PRE_THREAD_ENA=0
 
 P15_ubi_extractor() {
   local NEG_LOG=0
+
   if [[ "${UBI_IMAGE}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "UBI filesystem extractor"
@@ -29,7 +30,6 @@ P15_ubi_extractor() {
     ubi_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
     if [[ "${FILES_UBI_EXT}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     fi
@@ -46,7 +46,8 @@ ubi_extractor() {
   local UBI_1st_ROUND=""
   local UBI_DATA=""
   local DIRS_UBI_EXT=0
-  FILES_UBI_EXT=0
+  export FILES_UBI_EXT=0
+
   if ! [[ -f "${UBI_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
     return

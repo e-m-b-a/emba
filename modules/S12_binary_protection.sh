@@ -24,10 +24,21 @@ S12_binary_protection()
   module_title "Check binary protection mechanisms"
   pre_module_reporter "${FUNCNAME[0]}"
   local BIN_PROT_COUNTER=0
-  local CSV_LOG
+  local CSV_LOG=""
   CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
   CSV_LOG="${CSV_DIR}""/""${CSV_LOG}"
   local BINARY=""
+  local CANARY=""
+  local FORTIFY=""
+  local NX=""
+  local PIE=""
+  local RELRO=""
+  local RPATH=""
+  local RUNPATH=""
+  local SYMBOLS=""
+  local FILE=""
+  local CSV_BIN_OUT=""
+
 
   if [[ -f "${EXT_DIR}"/checksec ]] ; then
     echo "RELRO;STACK CANARY;NX;PIE;RPATH;RUNPATH;Symbols;FORTIFY;Fortified;Fortifiable;FILE" >> "${CSV_LOG}"

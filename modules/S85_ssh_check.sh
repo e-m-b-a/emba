@@ -89,12 +89,12 @@ search_ssh_files()
 
 # This check is based on source code from lynis: https://github.com/CISOfy/lynis/blob/master/include/tests_squid
 # Detailed tests possible, check if necessary
-check_squid()
-{
+check_squid() {
   sub_module_title "Check squid"
   local BIN_FILE=""
   local CHECK=0
   local SQUID_E=""
+  local SQUID_PATHS_ARR=()
 
   for BIN_FILE in "${BINARIES[@]}"; do
     if [[ "${BIN_FILE}" == *"squid"* ]] && ( file "${BIN_FILE}" | grep -q ELF ) ; then

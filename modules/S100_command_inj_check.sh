@@ -21,13 +21,14 @@ S100_command_inj_check()
   module_title "Search areas for command injections"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local CMD_INJ_DIRS
+  local CMD_INJ_DIRS=()
   mapfile -t CMD_INJ_DIRS < <(config_find "${CONFIG_DIR}""/check_command_inj_dirs.cfg")
   local DIR=""
   local FILE_ARRX=()
   local FILE_S=""
   local QUERY=""
   local CHECK=()
+  local CHECK_=""
 
   if [[ "${CMD_INJ_DIRS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#CMD_INJ_DIRS[@]}" -ne 0 ]] ; then
@@ -41,7 +42,7 @@ S100_command_inj_check()
           if file "${FILE_S}" | grep -q -E "script.*executable" ; then
             print_output "$( indent "$(orange "$(print_path "${FILE_S}")"" -> Executable script")")"
 
-            local QUERY_L
+            local QUERY_L=()
             mapfile -t QUERY_L < <(config_list "${CONFIG_DIR}""/check_command_injections.cfg" "")
             for QUERY in "${QUERY_L[@]}" ; do
               # without this check we always have an empty search string and get every file as result

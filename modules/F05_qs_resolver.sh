@@ -36,6 +36,7 @@ F05_qs_resolver() {
     local GPT_OUTPUT_FILE_=""
     local GPT_OUTPUT_FILE_HTML_ARR_=()
     local GPT_REVERSE_LINK_=""
+    local WAIT_PIDS_F05=()
 
     if [[ -f "${CSV_DIR}/q02_openai_question.csv" ]]; then
       while IFS=";" read -r COL1_ COL2_ COL3_ COL4_ COL5_ COL6_ COL7_; do

@@ -212,6 +212,8 @@ binary_architecture_detection() {
 binary_architecture_reporter() {
   sub_module_title "Architecture detection for RTOS based systems"
   local PRE_ARCH_=""
+  local SOURCE=""
+
   while read -r PRE_ARCH_; do
     SOURCE=$(echo "${PRE_ARCH_}" | cut -d\; -f1)
     PRE_ARCH_=$(echo "${PRE_ARCH_}" | cut -d\; -f2)

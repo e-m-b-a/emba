@@ -39,7 +39,7 @@ P02_firmware_bin_file_check() {
     generate_entropy_graph "${FIRMWARE_PATH}"
   fi
 
-  local FILE_LS_OUT
+  local FILE_LS_OUT=""
   FILE_LS_OUT=$(ls -lh "${FIRMWARE_PATH}")
 
   print_ln
@@ -98,6 +98,7 @@ generate_pixde() {
 
 set_p02_default_exports() {
   export SHA512_CHECKSUM="NA"
+  export SHA1_CHECKSUM="NA"
   export MD5_CHECKSUM="NA"
   export ENTROPY="NA"
   export PATOOLS_INIT=0
@@ -151,6 +152,8 @@ fw_bin_detector() {
   local QNAP_ENC_CHECK=""
   local AVM_CHECK=0
   local UEFI_CHECK=0
+  local BMC_CHECK=0
+  local GPG_CHECK=0
 
   set_p02_default_exports
 

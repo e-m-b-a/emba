@@ -27,6 +27,8 @@ S15_radare_decompile_checks()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local STRCPY_CNT=0
+  export COUNT_STRLEN=0
+  local WAIT_PIDS_S15=()
 
   if [[ -n "${ARCH}" ]] ; then
     # as this module is slow we only run it in case the objdump method from s13 was not working as expected
@@ -39,9 +41,12 @@ S15_radare_decompile_checks()
     local BINARY=""
     local VULNERABLE_FUNCTIONS=()
     local VULNERABLE_FUNCTIONS_VAR=""
+    export FUNC_LOG=""
 
     VULNERABLE_FUNCTIONS_VAR="$(config_list "${CONFIG_DIR}""/functions.cfg")"
     print_output "[*] Vulnerable functions: ""$( echo -e "${VULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )""\\n"
+    # nosemgrep
+    local IFS=" "
     IFS=" " read -r -a VULNERABLE_FUNCTIONS <<<"$( echo -e "${VULNERABLE_FUNCTIONS_VAR}" | sed ':a;N;$!ba;s/\n/ /g' )"
 
     write_csv_log "binary" "function" "function count" "common linux file" "networking"
@@ -54,18 +59,18 @@ S15_radare_decompile_checks()
           radare_decompilation "${BINARY}" "${VULNERABLE_FUNCTIONS[@]}" &
           local TMP_PID="$!"
           store_kill_pids "${TMP_PID}"
-          WAIT_PIDS_S14+=( "${TMP_PID}" )
+          WAIT_PIDS_S15+=( "${TMP_PID}" )
         else
           radare_decompilation "${BINARY}" "${VULNERABLE_FUNCTIONS[@]}"
         fi
       fi
 
       if [[ "${THREADED}" -eq 1 ]]; then
-        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S14[@]}"
+        max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S15[@]}"
       fi
     done
 
-    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S14[@]}"
+    [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S15[@]}"
 
     radare_decomp_print_top10_statistics "${VULNERABLE_FUNCTIONS[@]}"
 
@@ -89,6 +94,9 @@ radare_decompilation(){
   local NAME=""
   NAME=$(basename "${BINARY_}" 2> /dev/null)
   local STRCPY_CNT=0
+  local COUNT_FUNC=0
+  export NETWORKING=""
+
   if ! [[ -f "${BINARY_}" ]]; then
     return
   fi
@@ -126,6 +134,9 @@ radare_decomp_log_bin_hardening() {
   local NAME="${1:-}"
   local FUNCTION="${2:-}"
 
+  local HEAD_BIN_PROT=""
+  local BIN_PROT=""
+
   if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
     write_log "[*] Binary protection state of ${ORANGE}${NAME}${NC}" "${FUNC_LOG}"
     # write_link "$LOG_DIR/s12_binary_protection.txt" "${FUNC_LOG}"
@@ -158,7 +169,7 @@ radare_decomp_print_top10_statistics() {
   local FUNCTION=""
   local RESULTS=()
   local BINARY=""
-  local GPT_ANCHOR=""
+  local GPT_ANCHOR_=""
   local GPT_PRIO=2
 
   sub_module_title "Top 10 legacy C functions - Radare2 decompilation mode"
@@ -197,7 +208,7 @@ radare_decomp_print_top10_statistics() {
               print_output "[*] Asking OpenAI chatbot about ${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
               GPT_ANCHOR_="$(openssl rand -hex 8)"
               # "${GPT_INPUT_FILE_}" "${GPT_ANCHOR_}" "${GPT_PRIO_}" "${GPT_QUESTION_}" "${GPT_OUTPUT_FILE_}" "cost=$GPT_TOKENS_" "${GPT_RESPONSE_}"
-              write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "${GPT_ANCHOR}" "${GPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "" ""
+              write_csv_gpt_tmp "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "${GPT_ANCHOR_}" "${GPT_PRIO}" "Can you give me a side by side desciption of the following code in a table, where on the left is the code and on the right the desciption. And please use proper spacing and | to make it terminal friendly:" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt" "" ""
               # add ChatGPT link
               printf '%s\n\n' "" >> "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
               write_anchor_gpt "${GPT_ANCHOR_}" "${LOG_PATH_MODULE}/vul_func_${F_COUNTER}_${FUNCTION}-${SEARCH_TERM}.txt"
@@ -220,7 +231,7 @@ radare_decomp_color_output() {
 radare_decomp_output_function_details() {
   write_s15_log()
   {
-    OLD_LOG_FILE="${LOG_FILE}"
+    local OLD_LOG_FILE="${LOG_FILE}"
     LOG_FILE="${3}"
     print_output "${1}"
     write_link "${2}"
@@ -243,8 +254,10 @@ radare_decomp_output_function_details() {
   LOG_FILE_LOC="${LOG_PATH_MODULE}"/decompilation_vul_func_"${FUNCTION}"-"${NAME}".txt
 
   # check if this is common linux file:
-  local COMMON_FILES_FOUND
-  local SEARCH_TERM
+  local COMMON_FILES_FOUND=""
+  local SEARCH_TERM=""
+  local CFF_CSV=""
+
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     SEARCH_TERM=$(basename "${BINARY_}")
     if grep -q "^${SEARCH_TERM}\$" "${BASE_LINUX_FILES}" 2>/dev/null; then
@@ -276,6 +289,7 @@ radare_decomp_output_function_details() {
   fi
 
   if [[ ${COUNT_FUNC} -ne 0 ]] ; then
+    local OUTPUT=""
     if [[ "${FUNCTION}" == "strcpy" ]] ; then
       OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${NETWORKING_}""${NC}""\\n"
     elif [[ "${FUNCTION}" == "mmap" ]] ; then

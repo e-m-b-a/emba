@@ -87,6 +87,7 @@ check_basic_hnap_jnap() {
   local PORT=""
   local SERVICE=""
   local SSL=0
+  local PORT_SERVICE=""
 
   sub_module_title "HNAP/JNAP enumeration for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC}"
 
@@ -117,7 +118,7 @@ check_basic_hnap_jnap() {
       fi
 
       # we use the following JNAP-Action for identifying JNAP services on Linksys routers:
-      JNAP_ACTION="X-JNAP-Action: http://cisco.com/jnap/core/GetDeviceInfo"
+      local JNAP_ACTION="X-JNAP-Action: http://cisco.com/jnap/core/GetDeviceInfo"
       if [[ "${SSL}" -eq 0 ]]; then
         # HNAP
         curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X GET http://"${IP_ADDRESS_}":"${PORT}"/HNAP/ >> "${LOG_PATH_MODULE}"/hnap-discovery-check.txt || true
@@ -172,6 +173,7 @@ check_jnap_access() {
   local SYSINFO_CGI_ARR=()
   local SYSINFO_CGI=""
   local JNAP_EPT=""
+  local JNAP_EPT_NAME=""
 
   mapfile -t JNAP_ENDPOINTS < <(find "${LOG_DIR}"/firmware -type f -exec grep -a "\[.*/jnap/.*\]\ =" {} \; | cut -d\' -f2 | sort -u 2>/dev/null || true)
 
@@ -196,8 +198,8 @@ check_jnap_access() {
   for JNAP_EPT in "${JNAP_ENDPOINTS[@]}"; do
     print_output "[*] Testing JNAP action: ${ORANGE}${JNAP_EPT}${NC}" "no_log"
     JNAP_EPT_NAME="$(echo "${JNAP_EPT}" | rev | cut -d '/' -f1 | rev)"
-    JNAP_ACTION="X-JNAP-Action: ${JNAP_EPT}"
-    DATA="{}"
+    local JNAP_ACTION="X-JNAP-Action: ${JNAP_EPT}"
+    local DATA="{}"
     curl -v -L --noproxy '*' --max-redir 0 -f -m 5 -s -X POST -H "${JNAP_ACTION}" -d "${DATA}" http://"${IP_ADDRESS_}":"${PORT}"/JNAP/ > "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log || true
 
     if [[ -s "${LOG_PATH_MODULE}"/JNAP_"${JNAP_EPT_NAME}".log ]]; then

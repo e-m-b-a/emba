@@ -26,7 +26,7 @@ S40_weak_perm_check() {
   local LINE=""
   local SETUID_NAME=""
   local GTFO_LINK=""
-  local ETC_ARR
+  local ETC_ARR=""
   ETC_ARR=("$(mod_path "/ETC_PATHS")")
 
   readarray -t SETUID_FILES < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -user root -perm -4000 -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 2>/dev/null || true)

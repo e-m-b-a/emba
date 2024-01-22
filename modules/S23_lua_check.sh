@@ -24,6 +24,7 @@ S23_lua_check()
   local LUA_SCRIPT=""
   local S23_LUA_SCRIPTS=()
   export S23_ISSUE_FOUND=0
+  local WAIT_PIDS_S23=()
 
   write_csv_log "Script path" "LUA issues detected" "LUA vulnarabilities detected" "common linux file"
   mapfile -t S23_LUA_SCRIPTS < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.lua" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
@@ -66,6 +67,11 @@ s23_luaseccheck() {
   local LUA_LOG=""
   local GPT_ANCHOR_=""
   local GPT_PRIO_=3
+  local ENTRY=""
+  local QUERY_ENTRIES=()
+  local QUERY_FILE=""
+  export LUA_CGI_FILES=()
+
   sub_module_title "LUA Security checks module"
 
   mapfile -t LUA_CGI_FILES < <(find "${FIRMWARE_PATH}" -type f -exec grep -H cgilua\. {} \; 2>/dev/null | cut -d ':' -f1 | sort -u)
@@ -137,8 +143,8 @@ s23_luacheck() {
   if [[ "${ISSUES}" -gt 0 ]] ; then
     S23_ISSUE_FOUND=1
     # check if this is common linux file:
-    local COMMON_FILES_FOUND
-    local CFF
+    local COMMON_FILES_FOUND=""
+    local CFF=""
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
       CFF="no"

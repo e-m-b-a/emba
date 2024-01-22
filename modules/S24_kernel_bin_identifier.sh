@@ -42,6 +42,9 @@ S24_kernel_bin_identifier()
     local K_SYMBOLS=0
     local K_ARCH="NA"
     local K_ARCH_END="NA"
+    local K_CON_DET=""
+    local K_FILE=""
+    local K_VER_TMP=""
 
     if file "${FILE}" | grep -q "ASCII text"; then
       # reduce false positive rate
@@ -255,6 +258,7 @@ dump_config() {
 
 try_decompress() {
   # Source: https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-ikconfig
+  export POS=""
   for POS in $(tr "$1\n$2" "\n$2=" < "${IMG}" | grep -abo "^$2"); do
     POS=${POS%%:*}
     tail -c+"${POS}" "${IMG}" | "${3}" > "${TMP2}" 2> /dev/null
@@ -266,6 +270,7 @@ try_decompress() {
 check_kconfig() {
   local KCONFIG_FILE="${1:-}"
   local KCONF_HARD_CHECKER="${EXT_DIR}"/kconfig-hardened-check/bin/kernel-hardening-checker
+  local FAILED_KSETTINGS=""
 
   if ! [[ -e "${KCONF_HARD_CHECKER}" ]]; then
     print_output "[-] Kernel config hardening checker not found"

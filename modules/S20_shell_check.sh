@@ -29,6 +29,8 @@ S20_shell_check()
   local VTYPE=""
   local SEMGREP=1
   local NEG_LOG=0
+  local S20_SEMGREP_ISSUES=0
+  local WAIT_PIDS_S20=()
 
   mapfile -t SH_SCRIPTS < <( find "${FIRMWARE_PATH}" -xdev -type f -type f -exec file {} \; | grep "shell script, ASCII text executable" 2>/dev/null | cut -d: -f1 | sort -u || true )
   write_csv_log "Script path" "Shell issues detected" "common linux file" "shellcheck/semgrep"
@@ -119,6 +121,7 @@ s20_eval_script_check() {
   local GPT_PRIO_=3
   local GPT_ANCHOR_=""
   local EVAL_RESULTS=0
+  local SH_SCRIPT_NAME=""
 
   sub_module_title "Summary of shell eval usages"
 
@@ -178,7 +181,7 @@ s20_reporter() {
 
   if [[ "${VULNS}" -ne 0 ]] ; then
     # check if this is common linux file:
-    local COMMON_FILES_FOUND
+    local COMMON_FILES_FOUND=""
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
       CFF="no"

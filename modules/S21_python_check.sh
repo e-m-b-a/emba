@@ -27,6 +27,7 @@ S21_python_check()
   local PYTHON_SCRIPTS=()
   local S21_VULN_TYPES=()
   local VTYPE=""
+  local WAIT_PIDS_S21=()
 
   if [[ ${PYTHON_CHECK} -eq 1 ]] ; then
     write_csv_log "Script path" "Python issues detected" "common linux file"
@@ -87,8 +88,8 @@ s21_script_bandit() {
   VULNS=$(grep -c ">> Issue: " "${PY_LOG}" 2> /dev/null || true)
   if [[ "${VULNS}" -ne 0 ]] ; then
     # check if this is common linux file:
-    local COMMON_FILES_FOUND
-    local CFF
+    local COMMON_FILES_FOUND=""
+    local CFF=""
     if [[ -f "${BASE_LINUX_FILES}" ]]; then
       COMMON_FILES_FOUND="(""${RED}""common linux file: no""${GREEN}"")"
       CFF="no"

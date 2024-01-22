@@ -40,6 +40,8 @@ apk_identifier() {
 apk_checker() {
   sub_module_title "Android apk analysis"
   local APK=""
+  local WAIT_PIDS_S19=()
+
   if ! [[ -d "${EXT_DIR}"/APKHunt ]]; then
     print_output "[-] APKHunt installation missing."
     return
@@ -71,6 +73,9 @@ apk_checker_helper() {
   local APK="${1:-}"
   ! [[ -f "${APK}" ]] && return
   local APK_ISSUES=0
+  local APK_DIR_NAME=""
+  local APK_STACS_DIR=""
+  local APK_JAR=""
 
   print_output "[*] Testing Android apk with APKHunt - ${ORANGE}$(print_path "${APK}")${NC}"
   go run "${EXT_DIR}"/APKHunt/apkhunt.go -p "${APK}" -l 2>&1 | tee -a "${LOG_PATH_MODULE}/APKHunt-$(basename -s .apk "${APK}").txt"

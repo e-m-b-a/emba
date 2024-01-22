@@ -35,6 +35,10 @@ S109_jtr_local_pw_cracking()
   local JTR_TIMEOUT="3600"
   # optional wordlist for JTR - if no wordlist is there JTR runs in default mode
   local JTR_WORDLIST="${CONFIG_DIR}/jtr_wordlist.txt"
+  local HASH_DESCRIPTION=""
+  local JTR_FORMATS=()
+  local JTR_FORMAT=""
+  local PID=""
 
   # This module waits for S108_stacs_password_search and S107_deep_password_search
   # check emba.log for S108_stacs_password_search starting
@@ -92,7 +96,7 @@ S109_jtr_local_pw_cracking()
       fi
       sleep 5
 
-      COUNT=0
+      local COUNT=0
       while [[ "${COUNT}" -le "${JTR_TIMEOUT}" ]];do
         ((COUNT+=1))
         if ! pgrep john > /dev/null; then
