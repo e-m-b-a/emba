@@ -21,6 +21,7 @@ S06_distribution_identification()
   module_title "System identification"
   pre_module_reporter "${FUNCNAME[0]}"
 
+  export BMC_FW_VER=""
   export DLINK_FW_VER=""
   local OUTPUT=0
   local FILE_QUOTED
