@@ -196,25 +196,20 @@ fw_bin_detector() {
     export BMC_ENC_DETECTED=1
     write_csv_log "BMC encrypted" "yes" "NA"
   fi
-  if [[ "${UEFI_CHECK}" -gt 0 ]]; then
-    print_output "[+] Identified possible UEFI/BIOS firmware - using UEFI extraction module"
-    export UEFI_DETECTED=1
-    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${TMP_DIR}"/s02_binwalk_output.txt || true)
-    if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
-      print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
-    fi
-    write_csv_log "UEFI firmware detected" "yes" "NA"
-  fi
   if [[ "${DJI_PRAK_ENC_CHECK}" -gt 0 ]]; then
     if file "${FIRMWARE_PATH}" | grep -q "POSIX tar archive"; then
       print_output "[+] Identified possible DJI PRAK drone firmware - using DJI extraction module"
       DJI_PRAK_DETECTED=1
+      # UEFI is FP and we reset it now
+      UEFI_CHECK=0
       write_csv_log "DJI-PRAK" "yes" "tar compressed"
     fi
   fi
   if [[ "${DJI_XV4_ENC_CHECK}" -gt 0 ]]; then
     print_output "[+] Identified possible DJI xV4 drone firmware - using DJI extraction module"
     DJI_XV4_DETECTED=1
+    # UEFI is FP and we reset it now
+    UEFI_CHECK=0
     write_csv_log "DJI-xV4" "yes" "NA"
   fi
   if [[ "${AVM_CHECK}" -gt 0 ]] || [[ "${FW_VENDOR}" == *"AVM"* ]]; then
@@ -237,66 +232,79 @@ fw_bin_detector() {
   if [[ "${FILE_BIN_OUT}" == *"QEMU QCOW2 Image"* ]] || [[ "${FILE_BIN_OUT}" == *"QEMU QCOW Image"* ]]; then
     print_output "[+] Identified Qemu QCOW image - using QCOW extraction module"
     export QCOW_DETECTED=1
+    UEFI_CHECK=0
     write_csv_log "Qemu QCOW firmware detected" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"VMware4 disk image"* ]]; then
     print_output "[+] Identified VMWware VMDK archive file - using VMDK extraction module"
     export VMDK_DETECTED=1
+    UEFI_CHECK=0
     write_csv_log "VMDK" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"UBI image"* ]]; then
     print_output "[+] Identified UBI filesystem image - using UBI extraction module"
     export UBI_IMAGE=1
+    UEFI_CHECK=0
     write_csv_log "UBI filesystem" "yes" "NA"
   fi
   if [[ "${DLINK_ENC_CHECK}" == *"SHRS"* ]]; then
     print_output "[+] Identified D-Link SHRS encrpyted firmware - using D-Link extraction module"
     export DLINK_ENC_DETECTED=1
+    UEFI_CHECK=0
     write_csv_log "D-Link SHRS" "yes" "NA"
   fi
   if [[ "${DLINK_ENC_CHECK}" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 0.\ ..\ \ 00\ 00\ 0.\ ..\ 31\ 32\ 33\ 00 ]]; then
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
+    UEFI_CHECK=0
     write_csv_log "EnGenius encrypted" "yes" "NA"
   fi
   if [[ "${DLINK_ENC_CHECK}" =~ 00000000\ \ 00\ 00\ 00\ 00\ 00\ 00\ 01\ 01\ \ 00\ 00\ 0.\ ..\ 33\ 2e\ 3[89]\ 2e ]]; then
     print_output "[+] Identified EnGenius encrpyted firmware - using EnGenius extraction module"
     export ENGENIUS_ENC_DETECTED=1
+    UEFI_CHECK=0
     write_csv_log "EnGenius encrypted" "yes" "NA"
   fi
   if [[ "${DLINK_ENC_CHECK}" == *"encrpted_img"* ]]; then
     print_output "[+] Identified D-Link encrpted_img encrpyted firmware - using D-Link extraction module"
     export DLINK_ENC_DETECTED=2
+    UEFI_CHECK=0
     write_csv_log "D-Link encrpted_img encrypted" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"u-boot legacy uImage"* ]]; then
     print_output "[+] Identified u-boot firmware image"
     export UBOOT_IMAGE=1
+    UEFI_CHECK=0
     write_csv_log "Uboot image" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"Unix Fast File system [v2]"* ]]; then
     print_output "[+] Identified UFS filesytem - using UFS filesytem extraction module"
     export BSD_UFS=1
+    UEFI_CHECK=0
     write_csv_log "BSD UFS filesystem" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"Linux rev 1.0 ext2 filesystem data"* ]]; then
     print_output "[+] Identified Linux ext2 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
+    UEFI_CHECK=0
     write_csv_log "EXT2 filesystem" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"Linux rev 1.0 ext3 filesystem data"* ]]; then
     print_output "[+] Identified Linux ext3 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
+    UEFI_CHECK=0
     write_csv_log "EXT3 filesystem" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"Linux rev 1.0 ext4 filesystem data"* ]]; then
     print_output "[+] Identified Linux ext4 filesytem - using EXT filesytem extraction module"
     export EXT_IMAGE=1
+    UEFI_CHECK=0
     write_csv_log "EXT4 filesystem" "yes" "NA"
   fi
   if [[ "${QNAP_ENC_CHECK}" == *"QNAP encrypted firmware footer , model"* ]]; then
     print_output "[+] Identified QNAP encrpyted firmware - using QNAP extraction module"
     export QNAP_ENC_DETECTED=1
+    UEFI_CHECK=0
     write_csv_log "QNAP encrypted filesystem" "yes" "NA"
   fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
@@ -306,17 +314,20 @@ fw_bin_detector() {
     if [[ "${GPG_CHECK}" == *"compressed packet: algo="* ]]; then
       print_output "[+] Identified GPG compressed firmware - using GPG extraction module"
       export GPG_COMPRESS=1
+      UEFI_CHECK=0
       write_csv_log "GPG compressed firmware" "yes" "NA"
     fi
   fi
   if [[ "${DLINK_ENC_CHECK}" == *"CrAU"* ]]; then
     print_output "[+] Identified Android OTA payload.bin update file - using Android extraction module"
     export ANDROID_OTA=1
+    UEFI_CHECK=0
     write_csv_log "Android OTA update" "yes" "NA"
   fi
   if [[ "${FILE_BIN_OUT}" == *"openssl enc'd data with salted password"* ]]; then
     print_output "[+] Identified OpenSSL encrypted file - trying OpenSSL module for Foscam firmware"
     export OPENSSL_ENC_DETECTED=1
+    UEFI_CHECK=0
     write_csv_log "OpenSSL encrypted" "yes" "NA"
   fi
   # This check is currently only tested on one firmware - further tests needed:
@@ -331,9 +342,20 @@ fw_bin_detector() {
       # if we find a bin file with the same name then it is a Zyxel firmware image
       print_output "[+] Identified ZyXel encrpyted ZIP firmware - using ZyXel extraction module"
       export ZYXEL_ZIP=1
+      UEFI_CHECK=0
       write_csv_log "ZyXel encrypted ZIP" "yes" ""
     fi
   fi
+  if [[ "${UEFI_CHECK}" -gt 0 ]]; then
+    print_output "[+] Identified possible UEFI/BIOS firmware - using UEFI extraction module"
+    UEFI_DETECTED=1
+    UEFI_AMI_CAPSULE=$(grep -c "AMI.*EFI.*capsule" "${TMP_DIR}"/s02_binwalk_output.txt || true)
+    if [[ "${UEFI_AMI_CAPSULE}" -gt 0 ]]; then
+      print_output "[+] Identified possible UEFI-AMI capsule firmware - using capsule extractors"
+    fi
+    write_csv_log "UEFI firmware detected" "yes" "NA"
+  fi
+
   print_ln
 }
 
