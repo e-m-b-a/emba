@@ -21,13 +21,14 @@ S100_command_inj_check()
   module_title "Search areas for command injections"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local CMD_INJ_DIRS
+  local CMD_INJ_DIRS=()
   mapfile -t CMD_INJ_DIRS < <(config_find "${CONFIG_DIR}""/check_command_inj_dirs.cfg")
   local DIR=""
   local FILE_ARRX=()
   local FILE_S=""
   local QUERY=""
   local CHECK=()
+  local NEG_LOG=0
 
   if [[ "${CMD_INJ_DIRS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#CMD_INJ_DIRS[@]}" -ne 0 ]] ; then
@@ -52,6 +53,7 @@ S100_command_inj_check()
                   print_output "$(indent "[${GREEN}+${NC}]${GREEN} Found ""${QUERY}"" in ""$(print_path "${FILE_S}")${NC}")"
                   for CHECK_ in "${CHECK[@]}" ; do
                     print_output "$(indent "[${GREEN}+${NC}]${GREEN} ${CHECK_}${NC}")"
+                    NEG_LOG=1
                   done
                   print_ln
                 fi
@@ -64,5 +66,5 @@ S100_command_inj_check()
   else
     print_output "[-] No directories or files used for web scripts found"
   fi
-  module_end_log "${FUNCNAME[0]}" "${#CMD_INJ_DIRS[@]}"
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }
