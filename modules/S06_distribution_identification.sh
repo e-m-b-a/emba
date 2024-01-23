@@ -22,7 +22,6 @@ S06_distribution_identification()
   pre_module_reporter "${FUNCNAME[0]}"
 
   export DLINK_FW_VER=""
-  export BMC_FW_VER=""
   local OUTPUT=0
   local FILE_QUOTED
   local PATTERN=""
@@ -86,7 +85,7 @@ S06_distribution_identification()
 
 bmc_identifier(){
   local BMC_CONFIG="${FIRMWARE_PATH}/sbin/net-snmp-config"
-  
+
   if [[ -f "${BMC_CONFIG}" && "${ARCH}" == "ARM" ]]; then
     if grep -q "AST2400" "${BMC_CONFIG}" && grep -q "PLATFORM_SUPERMICRO" "${BMC_CONFIG}" ; then
         BMC_FW_VER="supermicrox11-bmc"
