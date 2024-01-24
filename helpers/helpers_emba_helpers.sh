@@ -98,6 +98,12 @@ cleaner() {
       docker kill "${QUEST_CONTAINER}"
     fi
   fi
+  if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${MAIN_CONTAINER}" ]]; then
+    if [[ "$(docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER}" 2>/dev/null)" == "running" ]]; then
+      print_output "[*] Stopping EMBA main Container ..." "no_log"
+      docker kill "${MAIN_CONTAINER}"
+    fi
+  fi
   # stop inotifywait on host
   if [[ "${IN_DOCKER}" -eq 0 ]] && pgrep -f "inotifywait.*${LOG_DIR}.*" &> /dev/null 2>&1; then
     print_output "[*] Stopping inotify ..."

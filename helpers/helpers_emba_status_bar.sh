@@ -51,8 +51,8 @@ draw_arrows() {
 # we have three lines per box and here we build the string for each line ($2=line)
 # Because we have to draw a colored bar, we need the percentage of the cpu load ($1)
 system_load_util_str() {
-  local PERCENTAGE="${1:0}"
-  local UTIL_TYPE_NO="${2:0}"
+  local PERCENTAGE="${1:-0}"
+  local UTIL_TYPE_NO="${2:-0}"
   local UTIL_TYPES=('CPU  ' 'MEM  ' 'DISK ')
   local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
   local UTIL_BAR_COLOR=""
@@ -113,7 +113,7 @@ update_box_system_load() {
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
     local MEM_PERCENTAGE_STR=""
-    MEM_PERCENTAGE_STR="$(system_load_util_str "$(free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
+    MEM_PERCENTAGE_STR="$(system_load_util_str "$(free | grep Mem | awk '{print int($3/$2 * 100)}')" 1 || true)"
     local DISK_PERCENTAGE_STR=""
     DISK_PERCENTAGE_STR="$(system_load_util_str "$(df "${LOG_DIR}" | tail -1 | awk '{print substr($5, 1, length($5)-1)}')" 2)"
     local ACTUAL_CPU=0

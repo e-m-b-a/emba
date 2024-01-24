@@ -632,7 +632,7 @@ print_help()
   echo -e "\\nModify output"
   echo -e "${CYAN}""-s""${NC}""                Prints only relative paths"
   echo -e "${CYAN}""-z""${NC}""                Adds ANSI color codes to log"
-  echo -e "${CYAN}""-B""${NC}""                Enables status bar (Warning: unstable on some firmware images)"
+  echo -e "${CYAN}""-B""${NC}""                Enables status bar in silent mode (Warning: unstable on some firmware images)"
   echo -e "\\nFirmware details"
   echo -e "${CYAN}""-X [version]""${NC}""      Firmware version (versions aka 1.2.3-a:b only)"
   echo -e "${CYAN}""-Y [vendor]""${NC}""       Firmware vendor (alphanummerical values only)"

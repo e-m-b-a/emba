@@ -85,6 +85,7 @@ sort_modules()
 }
 
 check_quest_container() {
+  local QUEST_CONTAINER="${1:-}"
   print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
   # wait for quest container to finish network checks
   while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
@@ -407,6 +408,7 @@ main() {
     fi
   fi
 
+
   # Check all dependencies of EMBA
   dependency_check
 
@@ -676,6 +678,12 @@ main() {
       esac
     done
 
+    if [[ "${IN_DOCKER}" -eq 0 ]] && [[ "${SILENT}" -eq 1 ]]; then
+      initial_status_bar &
+      # Trap the window resize signal (handle window resize events).
+      trap 'initial_status_bar' WINCH
+    fi
+
     print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
 
     # try it 10 times before exit
@@ -727,19 +735,57 @@ main() {
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
-      print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "main"
+      print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
 
-      check_quest_container "${QUEST_CONTAINER}" &
-      QUEST_PID="$!"
-      store_kill_pids "${QUEST_PID}"
-      disown "${QUEST_PID}" 2> /dev/null || true
+      if [[ "${SILENT}" -eq 0 ]]; then
+        check_quest_container "${QUEST_CONTAINER}" &
+        QUEST_PID="$!"
+        store_kill_pids "${QUEST_PID}"
+        disown "${QUEST_PID}" 2> /dev/null || true
+      fi
 
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
-      D_RETURN=$?
+      # EMBA startup:
+      if [[ "${SILENT}" -eq 0 ]]; then
+        # EMBA container starts in the foreground and we can see all the logs
+        EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+        D_RETURN=$?
+      else
+        # EMBA container starts in the background
+        print_output "[*] EMBA main container starting and detaching.\\n" "no_log"
+        local MAIN_CONTAINER_=""
+        MAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
+        export MAIN_CONTAINER="${MAIN_CONTAINER_}"
+
+        print_output "[*] EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
+        print_output "[*] EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "no_log"
+        if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
+          print_output "[*] EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "no_log"
+        fi
+
+        if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
+          touch "${LOG_DIR}"/emba.log
+        fi
+        tail -f "${LOG_DIR}"/emba.log &
+        TMP_PID="$!"
+        store_kill_pids "${TMP_PID}"
+        while [[ "$( docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER_}" )" == "running" ]]; do
+          sleep 1
+        done
+        remove_status_bar
+        reset
+      fi
+
       # stop quest container
       if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
         docker kill "${QUEST_CONTAINER_}"
       fi
+      if [[ "$( docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER_}" )" == "running" ]]; then
+        docker kill "${MAIN_CONTAINER_}"
+      fi
+      if [[ -f "${LOG_DIR}"/f50_base_aggregator.txt ]]; then
+        cat "${LOG_DIR}"/f50_base_aggregator.txt
+      fi
+      D_RETURN=0
     fi
     enable_strict_mode "${STRICT_MODE}" 0
 
@@ -768,11 +814,11 @@ main() {
 
   #######################################################################################
   # Start status bar
-  if [[ ${DISABLE_STATUS_BAR} -eq 0 ]] ; then
-    initial_status_bar
-    # Trap the window resize signal (handle window resize events).
-    trap 'initial_status_bar' WINCH
-  fi
+  # if [[ ${DISABLE_STATUS_BAR} -eq 0 ]] ; then
+  #  initial_status_bar
+  #  # Trap the window resize signal (handle window resize events).
+  #  trap 'initial_status_bar' WINCH
+  # fi
 
   #######################################################################################
   # Quests (Q-modules)

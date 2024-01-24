@@ -140,7 +140,7 @@ cwe_checker_threaded () {
   BINARY_=$(readlink -f "${BINARY_}")
 
   ulimit -Sv "${MEM_LIMIT}"
-  cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
+  timeout --preserve-status --signal SIGINT 1800 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}" "no_log"
 
