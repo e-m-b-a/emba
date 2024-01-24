@@ -78,6 +78,7 @@ cwe_check() {
   local BINARY=""
   local BIN_TO_CHECK=""
   local BIN_TO_CHECK_ARR=()
+  local WAIT_PIDS_S17=()
 
   if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
     local BINARIES=()

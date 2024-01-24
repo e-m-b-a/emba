@@ -103,6 +103,8 @@ check_basic_snmp() {
 check_snmp_vulns() {
   local IP_ADDRESS_="${1:-}"
   local SNMP_UP_tmp=0
+  local OID=""
+  local OIDs=()
 
   sub_module_title "SNMP firmadyne disclosure checks"
 

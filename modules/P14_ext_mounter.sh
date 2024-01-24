@@ -30,7 +30,6 @@ P14_ext_mounter() {
     ext_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
     if [[ "${FILES_EXT_MOUNT}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     fi
@@ -44,7 +43,7 @@ ext_extractor() {
   local EXTRACTION_DIR_="${2:-}"
   local TMP_EXT_MOUNT="${TMP_DIR}""/ext_mount_${RANDOM}"
   local DIRS_EXT_MOUNT=0
-  FILES_EXT_MOUNT=0
+  export FILES_EXT_MOUNT=0
 
   if ! [[ -f "${EXT_PATH_}" ]]; then
     print_output "[-] No file for decryption provided"

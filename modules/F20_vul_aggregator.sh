@@ -25,13 +25,14 @@ F20_vul_aggregator() {
 
   # we use this for later decisions:
   export F20_DEEP=1
+  export WAIT_PIDS_F19=()
 
   prepare_cve_search_module
 
   local FOUND_CVE=0
   local S26_LOGS_ARR=()
 
-  CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
+  export CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
 
   local S02_LOG="${CSV_DIR}"/s02_uefi_fwhunt.csv
   local S06_LOG="${CSV_DIR}"/s06_distribution_identification.csv
@@ -153,7 +154,8 @@ aggregate_versions() {
 
   local VERSION=""
   export VERSIONS_AGGREGATED=()
-  VERSIONS_KERNEL=()
+  local VERSIONS_KERNEL=()
+  local KERNELS=()
 
   if [[ ${#VERSIONS_STAT_CHECK[@]} -gt 0 || ${#VERSIONS_EMULATOR[@]} -gt 0 || ${#KERNEL_CVE_EXPLOITS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR[@]} -gt 0 || \
     ${#VERSIONS_S06_FW_DETAILS[@]} -gt 0 || ${#VERSIONS_SYS_EMULATOR_WEB[@]} -gt 0 || "${#CVE_S02_DETAILS[@]}" -gt 0 || "${#CVE_L35_DETAILS[@]}" -gt 0 || \
@@ -531,6 +533,10 @@ cve_db_lookup_version() {
   # remove last : if it is there
   local VERSION_PATH="${BIN_VERSION_%:}"
   VERSION_PATH="${VERSION_PATH//:/_}"
+  local WAIT_PIDS_F19_CVE_SOURCE=()
+  local CVE_VER_SOURCES_ARR=()
+  local CVE_VER_SOURCES_ARR_DLINK=()
+  local VERSION_SEARCHx=""
 
   # if we did the CVE analysis already in module s26, we can just use these results for our further analysis
   # -> we skip the complete CVE analysis here:
@@ -595,6 +601,9 @@ check_cve_sources() {
   local CVE_VER_END_EXCL=""
   local CVE_V2=""
   local CVE_V31=""
+  local CVE_CPEs_vuln_ARR=()
+  local CVE_CPEMATCH=""
+  local CVE_SUMMARY=""
   # print_output "[*] Testing binary ${BIN_NAME} with version ${BIN_VERSION_ONLY} for CVE matches ..." "no_log"
 
   CVE_V2=$(jq -r '.metrics.cvssMetricV2[]?.cvssData.baseScore' "${CVE_VER_SOURCES_FILE}" | tr -dc '[:print:]')
@@ -863,6 +872,7 @@ cve_extractor() {
   # VERSION_orig is usually the BINARY_NAME:VERSION
   # in some cases it is only the CVE-Identifier
   local VERSION_orig="${1:-}"
+
   local VERSION=""
   local BINARY=""
   export CVE_VALUE=""
@@ -873,6 +883,8 @@ cve_extractor() {
   export EXPLOIT_AVAIL_TRICKEST=()
   export EXPLOIT_AVAIL_ROUTERSPLOIT=()
   export EXPLOIT_AVAIL_ROUTERSPLOIT1=()
+  export EXPLOIT_AVAIL_PACKETSTORM=()
+  export EXPLOIT_AVAIL_SNYK=()
   export KNOWN_EXPLOITED_VULNS=()
   local KNOWN_EXPLOITED=0
   local LOCAL=0
@@ -887,9 +899,9 @@ cve_extractor() {
     # remove last : if it is there
     VERSION=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f1 | rev)
     BINARY=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
-    AGG_LOG_FILE="${VERSION_PATH}".txt
+    export AGG_LOG_FILE="${VERSION_PATH}".txt
   else
-    AGG_LOG_FILE="${VERSION_orig}".txt
+    export AGG_LOG_FILE="${VERSION_orig}".txt
   fi
 
   # VSOURCE is used to track the source of version details, this is relevant for the
@@ -993,8 +1005,8 @@ cve_extractor() {
     fi
   fi
 
-  EXPLOIT_COUNTER_VERSION=0
-  CVE_COUNTER_VERSION=0
+  export EXPLOIT_COUNTER_VERSION=0
+  local CVE_COUNTER_VERSION=0
   if [[ -f "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" ]]; then
     readarray -t CVEs_OUTPUT < <(cut -d ':' -f1-3 "${LOG_PATH_MODULE}"/"${AGG_LOG_FILE}" | grep "^CVE-" || true)
   fi
@@ -1123,6 +1135,7 @@ cve_extractor() {
 
 cve_extractor_thread_actor() {
   local CVE_OUTPUT="${1:-}"
+
   local CVEv2_TMP=0
   local KERNEL_VERIFIED="no"
   local BUSYBOX_VERIFIED="no"
@@ -1133,6 +1146,18 @@ cve_extractor_thread_actor() {
   local HIGH_CVE_COUNTER=0
   local MEDIUM_CVE_COUNTER=0
   local LOW_CVE_COUNTER=0
+  local EID_VALUE=""
+  local EXPLOIT_ID=""
+  local EXPLOIT_MSF=""
+  local EXPLOIT_SNYK=""
+  local EXPLOIT_PS=""
+  local EXPLOIT_RS=""
+  local EXPLOIT_ROUTERSPLOIT=""
+  local EXPLOIT_PATH=""
+  local EXPLOIT_NAME=""
+  local E_FILE=""
+  local TYPE=""
+  local LINE=""
 
   CVE_VALUE=$(echo "${CVE_OUTPUT}" | cut -d: -f1 | tr -dc '[:print:]' | grep "^CVE-" || true)
   if [[ -z "${CVE_VALUE}" ]]; then
@@ -1174,7 +1199,7 @@ cve_extractor_thread_actor() {
   # default value
   EXPLOIT="No exploit available"
 
-  EDB=0
+  local EDB=0
   # as we already know about a bunch of kernel exploits - lets search them first
   if [[ "${BINARY}" == *kernel* ]]; then
     for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
@@ -1393,6 +1418,7 @@ cve_extractor_thread_actor() {
         EXPLOIT="${EXPLOIT}"" ""/ Routersploit:"
       fi
       EXPLOIT_ROUTERSPLOIT=("${EXPLOIT_AVAIL_ROUTERSPLOIT[@]}" "${EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}")
+
       for EXPLOIT_RS in "${EXPLOIT_ROUTERSPLOIT[@]}" ; do
         EXPLOIT_PATH=$(echo "${EXPLOIT_RS}" | cut -d: -f1)
         EXPLOIT_NAME=$(basename -s .py "${EXPLOIT_PATH}")

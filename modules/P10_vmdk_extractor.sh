@@ -28,7 +28,6 @@ P10_vmdk_extractor() {
     vmdk_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
     if [[ "${VMDK_FILES}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     fi
@@ -45,7 +44,8 @@ vmdk_extractor() {
   local TMP_VMDK_MNT="${TMP_DIR}/vmdk_mount_${RANDOM}"
   local VMDK_DIRS=0
   local RET=0
-  VMDK_FILES=0
+  export VMDK_FILES=0
+  local VMDK_VIRT_FS=()
 
   if ! [[ -f "${VMDK_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"

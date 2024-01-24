@@ -62,8 +62,10 @@ check_live_metasploit() {
   local PORTS_ARR=()
   local MSF_VULN=""
   local MSF_VULNS_VERIFIED=()
+  local MSF_CVEs=()
   local MSF_MODULE=""
   local ARCH_END=""
+  local D_END=""
 
   if [[ -v ARCHIVE_PATH ]]; then
     mapfile -t PORTS_ARR < <(find "${ARCHIVE_PATH}" -name "*.xml" -exec grep -a -h "<state state=\"open\"" {} \; | grep -o -E "portid=\"[0-9]+" | cut -d\" -f2 | sort -u || true)

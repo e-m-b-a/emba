@@ -31,15 +31,20 @@ P99_prepare_analyzer() {
   module_log_init "${FUNCNAME[0]}"
   module_title "Analysis preparation"
   pre_module_reporter "${FUNCNAME[0]}"
+  local FILES_EXT=0
+  local UNIQUE_FILES=0
+  local DIRS_EXT=0
+  local BINS=0
+  export LINUX_PATH_COUNTER=0
+  local R_PATH=""
 
   LINUX_PATH_COUNTER="$(find "${LOG_DIR}"/firmware "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 
   # we have a linux:
   if [[ ${LINUX_PATH_COUNTER} -gt 0 || ${#ROOT_PATH[@]} -gt 1 ]] ; then
     export FIRMWARE=1
-    export FIRMWARE_PATH
     # FIRMWARE_PATH="$(abs_path "${OUTPUT_DIR}")"
-    FIRMWARE_PATH="${LOG_DIR}"/firmware
+    export FIRMWARE_PATH="${LOG_DIR}"/firmware
     backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
   fi
 

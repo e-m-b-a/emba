@@ -49,8 +49,8 @@ buffalo_enc_extractor() {
   hexdump -C "${BUFFALO_ENC_PATH_}" | head | tee -a "${LOG_FILE}" || true
   print_ln
 
-  BUFFALO_DECRYTED=0
-  local BUFFALO_ENC_PATH_STRIPPED
+  local BUFFALO_DECRYTED=0
+  local BUFFALO_ENC_PATH_STRIPPED=""
   BUFFALO_ENC_PATH_STRIPPED="${LOG_DIR}/firmware/$(basename "${BUFFALO_ENC_PATH_}").stripped"
 
   print_output "[*] Removing initial 208 bytes from header to prepare firmware for decryption"
@@ -84,7 +84,6 @@ buffalo_enc_extractor() {
     if [[ "${BUFFALO_FILE_CHECK}" =~ .*u-boot\ legacy\ uImage,\ .* ]]; then
       print_ln
       print_output "[+] Decrypted Buffalo firmware file to ${ORANGE}${EXTRACTION_FILE_}${NC}"
-      MD5_DONE_DEEP+=( "$(md5sum "${BUFFALO_ENC_PATH_}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${EXTRACTION_FILE_}"
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       print_ln
@@ -93,7 +92,7 @@ buffalo_enc_extractor() {
       write_csv_log "Buffalo decryptor" "${BUFFALO_ENC_PATH_}" "${EXTRACTION_FILE_}" "1" "NA" "NA"
       BUFFALO_DECRYTED=1
       if [[ -z "${FW_VENDOR:-}" ]]; then
-        FW_VENDOR="BUFFALO"
+        export FW_VENDOR="BUFFALO"
       fi
     fi
   fi

@@ -173,6 +173,8 @@ path_handling() {
   # locations will be added there
   # Add placeholder "ETC_PATHS" instead of path "etc"
   CHECK=0
+  local TEST_PATHS=()
+  local TEST_E=""
   mapfile -t TEST_PATHS < <(mod_path "/ETC_PATHS/xy.cfg")
 
   for TEST_E in "${TEST_PATHS[@]}" ; do
@@ -186,6 +188,7 @@ path_handling() {
   fi
 
   # Using multiple paths as array:
+  local TEST_PATHS_ARR=()
   mapfile -t TEST_PATHS_ARR < <(mod_path_array "$(config_list "${CONFIG_DIR}""/test_files.cfg" "")")
 
   if [[ "${TEST_PATHS_ARR[0]}" == "C_N_F" ]] ; then

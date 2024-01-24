@@ -32,6 +32,9 @@ D05_firmware_diffing_extractor() {
   local MD5_FW_BIN2=""
   export OUTPUT_DIR_UNBLOB1=""
   export OUTPUT_DIR_UNBLOB2=""
+  local DIRS_EXT_UB=0
+  local UNIQUE_FILES_UB=0
+  local FILES_EXT_UB=0
 
   # shellcheck disable=SC2153
   MD5_FW_BIN1=$(md5sum "${FIRMWARE_PATH}")

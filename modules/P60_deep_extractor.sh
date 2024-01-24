@@ -24,6 +24,11 @@ P60_deep_extractor() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   export DISK_SPACE_CRIT=0
+  local FILES_EXT=0
+  local UNIQUE_FILES=0
+  local DIRS_EXT=0
+  local BINS=0
+  local R_PATH=""
 
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
   # If we already know it is a linux (RTOS -> 0) or it is UEFI (UEFI_VERIFIED -> 1) we do not need to run
@@ -101,9 +106,8 @@ disk_space_protection() {
 
 deep_extractor() {
   sub_module_title "Deep extraction mode"
-
-  FILE_MD5=""
-
+  local FILES_AFTER_DEEP=0
+  local FILES_BEFORE_DEEP=0
   FILES_BEFORE_DEEP=$(find "${FIRMWARE_PATH_CP}" -xdev -type f | wc -l )
 
   # if we run into the deep extraction mode we always do at least one extraction round:
@@ -149,6 +153,9 @@ deep_extractor() {
 deeper_extractor_helper() {
   local FILE_TMP=""
   local FILE_MD5=""
+  local BIN_PID=""
+  local WAIT_PIDS_P60=()
+  local MD5_DONE_DEEP=()
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
 
@@ -174,7 +181,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         vmdk_extractor "${FILE_TMP}" "${FILE_TMP}_vmdk_extracted"
       fi
@@ -184,7 +191,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         ubi_extractor "${FILE_TMP}" "${FILE_TMP}_ubi_extracted"
       fi
@@ -195,7 +202,7 @@ deeper_extractor_helper() {
     #    BIN_PID="$!"
     #    store_kill_pids "${BIN_PID}"
     #    disown "${BIN_PID}" 2> /dev/null || true
-    #    WAIT_PIDS_P20+=( "${BIN_PID}" )
+    #    WAIT_PIDS_P60+=( "${BIN_PID}" )
     #  else
     #    dlink_SHRS_enc_extractor "${FILE_TMP}" "${FILE_TMP}_shrs_extracted"
     #  fi
@@ -206,7 +213,7 @@ deeper_extractor_helper() {
     #    BIN_PID="$!"
     #    store_kill_pids "${BIN_PID}"
     #    disown "${BIN_PID}" 2> /dev/null || true
-    #    WAIT_PIDS_P20+=( "${BIN_PID}" )
+    #    WAIT_PIDS_P60+=( "${BIN_PID}" )
     #  else
     #    dlink_enc_img_extractor "${FILE_TMP}" "${FILE_TMP}_enc_img_extracted"
     #  fi
@@ -216,7 +223,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         ext_extractor "${FILE_TMP}" "${FILE_TMP}_ext_extracted"
       fi
@@ -227,7 +234,7 @@ deeper_extractor_helper() {
     #    BIN_PID="$!"
     #    store_kill_pids "${BIN_PID}"
     #    disown "${BIN_PID}" 2> /dev/null || true
-    #    WAIT_PIDS_P20+=( "${BIN_PID}" )
+    #    WAIT_PIDS_P60+=( "${BIN_PID}" )
     #  else
     #    engenius_enc_extractor "${FILE_TMP}" "${FILE_TMP}_engenius_extracted"
     #  fi
@@ -237,7 +244,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         ufs_extractor "${FILE_TMP}" "${FILE_TMP}_bsd_ufs_extracted"
       fi
@@ -247,7 +254,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         android_ota_extractor "${FILE_TMP}" "${FILE_TMP}_android_ota_extracted"
       fi
@@ -257,7 +264,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         foscam_enc_extractor "${FILE_TMP}" "${FILE_TMP}_foscam_enc_extracted"
       fi
@@ -267,7 +274,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         buffalo_enc_extractor "${FILE_TMP}" "${FILE_TMP}_buffalo_enc_extracted"
       fi
@@ -277,7 +284,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         zyxel_zip_extractor "${FILE_TMP}" "${FILE_TMP}_zyxel_enc_extracted"
       fi
@@ -287,7 +294,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         qcow_extractor "${FILE_TMP}" "${FILE_TMP}_qemu_qcow_extracted"
       fi
@@ -297,7 +304,7 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         bmc_extractor "${FILE_TMP}" "${FILE_TMP}_qemu_bmc_decrypted"
       fi
@@ -308,14 +315,14 @@ deeper_extractor_helper() {
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
-        WAIT_PIDS_P20+=( "${BIN_PID}" )
+        WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
         unblobber "${FILE_TMP}" "${FILE_TMP}_unblob_extracted"
       fi
     fi
 
     MD5_DONE_DEEP+=( "${FILE_MD5}" )
-    max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_P20[@]}"
+    max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_P60[@]}"
 
     check_disk_space
 
@@ -335,7 +342,7 @@ deeper_extractor_helper() {
     fi
   done
 
-  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P20[@]}"
+  [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_P60[@]}"
 }
 
 linux_basic_identification_helper() {
