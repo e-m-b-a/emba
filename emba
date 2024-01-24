@@ -694,12 +694,12 @@ main() {
         break
       fi
       if [[ "${CNT_DOCK}" -ge 10 ]]; then
-        print_output "[-] EMBA docker environment not ready!" "no_log"
+        print_output "[-] $(date) - EMBA docker environment not ready!" "no_log"
         exit 1
       fi
     done
 
-    print_output "[*] EMBA initializes docker container.\\n" "no_log"
+    print_output "[*] $(date) - EMBA initializes docker container.\\n" "no_log"
 
     if [[ "${ONLY_DEP}" -eq 0 ]]; then
       # store some details that we do not have in the docker container:
@@ -734,7 +734,7 @@ main() {
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
-      print_output "[*] Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
+      print_output "[+] $(date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
 
       if [[ "${SILENT}" -eq 0 ]]; then
         check_quest_container "${QUEST_CONTAINER}" &
@@ -750,15 +750,17 @@ main() {
         D_RETURN=$?
       else
         # EMBA container starts in the background
-        print_output "[*] EMBA main container starting and detaching.\\n" "no_log"
+        print_output "[*] $(date) - EMBA main container starting and detaching.\\n" "no_log"
         local MAIN_CONTAINER_=""
         MAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
         export MAIN_CONTAINER="${MAIN_CONTAINER_}"
 
-        print_output "[*] EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
-        print_output "[*] EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "no_log"
+        print_output "[+] $(date) - EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
+        welcome
+        print_ln "no_log"
+        print_output "[*] $(date) - EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "no_log"
         if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
-          print_output "[*] EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "no_log"
+          print_output "[*] $(date) - EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "no_log"
         fi
 
         if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
@@ -790,12 +792,12 @@ main() {
 
     if [[ "${D_RETURN}" -eq 0 ]] ; then
       if [[ "${ONLY_DEP}" -eq 0 ]] ; then
-        print_output "[*] EMBA finished analysis in docker container.\\n" "no_log"
+        print_output "[*] $(date) - EMBA finished analysis in docker container.\\n" "no_log"
         write_notification "EMBA finished analysis in default mode"
-        print_output "[*] Firmware tested: ${ORANGE}${FIRMWARE_PATH}${NC}" "no_log"
-        print_output "[*] Log directory: ${ORANGE}${LOG_DIR}${NC}" "no_log"
+        print_output "[*] $(date) - Firmware tested: ${ORANGE}${FIRMWARE_PATH}${NC}" "no_log"
+        print_output "[*] $(date) - Log directory: ${ORANGE}${LOG_DIR}${NC}" "no_log"
         if [[ -v HTML_PATH ]] && [[ -f "${HTML_PATH}"/index.html ]]; then
-          print_output "[*] Open the web-report with${ORANGE} firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
+          print_output "[*] $(date) - Access the web-report with ${ORANGE}firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
         fi
         cleaner 0
       else
@@ -804,7 +806,7 @@ main() {
       fi
       exit 0
     else
-      print_output "[-] EMBA failed in docker mode!" "main"
+      print_output "[-] $(date) - EMBA failed in docker mode!" "main"
       cleaner 0
       write_notification "EMBA failed analysis in default mode"
       exit 1
@@ -830,7 +832,7 @@ main() {
       done
       run_modules "Q" "${THREADED}" "0"
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
-      print_output "[*] Quest container finished" "main"
+      print_output "[*] $(date) - Quest container finished" "main"
       exit 0
     elif [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]] ;  then
       # currently we do not support the Quest containers in dev mode
@@ -852,9 +854,9 @@ main() {
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "main"
+      print_output "[!] $(date) - Pre-checking phase started on ""$(date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "main"
     else
-      print_output "[!] Pre-checking phase started on ""$(date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "no_log"
+      print_output "[!] $(date) - Pre-checking phase started on ""$(date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "no_log"
     fi
     write_notification "Pre-checking phase started"
 
@@ -869,9 +871,9 @@ main() {
     print_ln "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(date) - Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(date) - Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Pre-checking phase finished"
 
@@ -890,11 +892,11 @@ main() {
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Diff mode started on ""$(date)" "main"
+      print_output "[!] $(date) - Diff mode started on ""$(date)" "main"
       print_output "$(indent "${NC}""1st Firmware binary path: ""${FIRMWARE_PATH}")" "main"
       print_output "$(indent "${NC}""2nd Firmware binary path: ""${FIRMWARE_PATH1}")" "main"
     else
-      print_output "[!] Diff mode started on ""$(date)"
+      print_output "[!] $(date) - Diff mode started on ""$(date)"
       print_output "$(indent "${NC}""1st Firmware binary path: ""${FIRMWARE_PATH}")" "no_log"
       print_output "$(indent "${NC}""2nd Firmware binary path: ""${FIRMWARE_PATH1}")" "no_log"
     fi
@@ -903,9 +905,9 @@ main() {
     run_modules "D" "${THREADED}" "0"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(date) - Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(date) - Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Diff mode finished"
 
@@ -921,9 +923,9 @@ main() {
     print_output "\n=================================================================\n" "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
+      print_output "[!] $(date) - Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
     else
-      print_output "[!] Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
+      print_output "[!] $(date) - Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
     write_notification "Testing phase finished"
     write_grep_log "$(date)" "TIMESTAMP"
@@ -935,9 +937,9 @@ main() {
     print_ln "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(date) - Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(date) - Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Testing phase ended"
 
@@ -950,9 +952,9 @@ main() {
   if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     print_output "\n=================================================================\n" "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
+      print_output "[!] $(date) - System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
     else
-      print_output "[!] System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
+      print_output "[!] $(date) - System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
     write_notification "System emulation phase started"
 
@@ -962,9 +964,9 @@ main() {
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] System emulation phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(date) - System emulation phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] System emulation ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(date) - System emulation ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "System emulation phase ended"
   fi
@@ -973,9 +975,9 @@ main() {
   # Reporting (F-modules)
   #######################################################################################
   if [[ -d "${LOG_DIR}" ]]; then
-    print_output "[!] Reporting phase started on ""$(date)""\\n" "main"
+    print_output "[!] $(date) - Reporting phase started on ""$(date)""\\n" "main"
   else
-    print_output "[!] Reporting phase started on ""$(date)""\\n" "no_log"
+    print_output "[!] $(date) - Reporting phase started on ""$(date)""\\n" "no_log"
   fi
   write_notification "Reporting phase started"
 
@@ -991,25 +993,25 @@ main() {
 
   if [[ "${TESTING_DONE}" -eq 1 ]]; then
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/firmware ]]; then
-      print_output "[*] Removing temp firmware directory\\n" "no_log"
+      print_output "[*] $(date) - Removing temp firmware directory\\n" "no_log"
       rm -r "${LOG_DIR}"/firmware 2>/dev/null
     fi
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/p61_unblob_eval/unblob_extracted ]]; then
-      print_output "[*] Removing unblob firmware directory\\n" "no_log"
+      print_output "[*] $(date) - Removing unblob firmware directory\\n" "no_log"
       rm -r "${LOG_DIR}"/p61_unblob_eval/unblob_extracted 2>/dev/null
     fi
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(date) - Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
       write_notification "EMBA finished analysis"
       rm -r "${TMP_DIR}" 2>/dev/null || true
     else
-      print_output "[!] Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(date) - Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_grep_log "$(date)" "TIMESTAMP"
     write_grep_log "$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)" "DURATION"
   else
-    print_output "[!] No extracted firmware found" "no_log"
+    print_output "[!] $(date) - No extracted firmware found" "no_log"
     print_output "$(indent "Try using binwalk or something else to extract the firmware")"
     exit 1
   fi
@@ -1017,8 +1019,8 @@ main() {
   [[ "${HTML}" -eq 1 ]] && update_index
 
   if [[ -f "${HTML_PATH}"/index.html ]] && [[ "${IN_DOCKER}" -eq 0 ]]; then
-    print_output "[*] Web report created HTML report in ${ORANGE}${LOG_DIR}/html-report${NC}\\n" "main"
-    print_output "[*] Open the web-report with${ORANGE} firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
+    print_output "[*] $(date) - Web report created HTML report in ${ORANGE}${LOG_DIR}/html-report${NC}\\n" "main"
+    print_output "[*] $(date) - Open the web-report with${ORANGE} firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
   fi
 
   # deactivate the python virtual env
