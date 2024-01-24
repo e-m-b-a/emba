@@ -94,11 +94,11 @@ check_quest_container() {
     fi
     sleep 0.1
   done
-  reset
+  # reset
   print_output "[*] Quest container ${QUEST_CONTAINER} dependency checks: \\n" "no_log"
   docker logs "${QUEST_CONTAINER}"
   print_output "[*] Finished Quest container ${QUEST_CONTAINER} dependency checks \\n" "no_log"
-  reset
+  # reset
 }
 
 # $1: module group letter [P, S, L, F, Q]
@@ -733,7 +733,7 @@ main() {
       # default EMBA analysis mode:
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-      export QUEST_CONTAINER="${QUEST_CONTAINER_}"
+      QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[+] $(print_date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
 
       if [[ "${SILENT}" -eq 0 ]]; then
@@ -753,22 +753,15 @@ main() {
         print_output "[*] $(print_date) - EMBA main container starting and detaching.\\n" "no_log"
         local MAIN_CONTAINER_=""
         MAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-        export MAIN_CONTAINER="${MAIN_CONTAINER_}"
+        MAIN_CONTAINER="${MAIN_CONTAINER_}"
 
         print_output "[+] $(print_date) - EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
-        welcome
         print_ln "no_log"
         print_output "[*] $(print_date) - EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "no_log"
         if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
           print_output "[*] $(print_date) - EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "no_log"
         fi
 
-        if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
-          touch "${LOG_DIR}"/emba.log
-        fi
-        tail -f "${LOG_DIR}"/emba.log &
-        TMP_PID="$!"
-        store_kill_pids "${TMP_PID}"
         while [[ "$( docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER_}" )" == "running" ]]; do
           sleep 1
         done

@@ -137,4 +137,6 @@ set_defaults() {
   export Q_MOD_PID=""
   export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
   export UEFI_VERIFIED=0
+  export MAIN_CONTAINER=""
+  export QUEST_CONTAINER=""
 }
