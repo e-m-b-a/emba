@@ -180,7 +180,7 @@ update_box_status() {
     RUNTIME="$(date -d@"$(( "$(date +%s)" - "${DATE_STR}" ))" -u +%H:%M:%S)"
     LOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
     # if we are running in a docker environment, we can count the processes withing our containers:
-    if [[ -z "${${MAIN_CONTAINER_}}" ]]; then
+    if [[ -n "${MAIN_CONTAINER_}" ]]; then
       RUN_EMBA_PROCESSES="$(docker exec ${MAIN_CONTAINER_} ps 2>/dev/null | wc -l || true)"
       RUN_EMBA_PROCESSES_QUEST="$(docker exec ${QUEST_CONTAINER_} ps 2>/dev/null | wc -l || true)"
       RUN_EMBA_PROCESSES=$((RUN_EMBA_PROCESSES + RUN_EMBA_PROCESSES_QUEST))
