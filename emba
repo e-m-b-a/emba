@@ -408,7 +408,6 @@ main() {
     fi
   fi
 
-
   # Check all dependencies of EMBA
   dependency_check
 
@@ -831,7 +830,7 @@ main() {
       done
       run_modules "Q" "${THREADED}" "0"
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
-      print_output "[*] Quest container done" "main"
+      print_output "[*] Quest container finished" "main"
       exit 0
     elif [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]] ;  then
       # currently we do not support the Quest containers in dev mode

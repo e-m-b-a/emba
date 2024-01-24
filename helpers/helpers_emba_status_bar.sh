@@ -3,6 +3,7 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
 # Copyright 2022 Siemens AG
+# Copyright 2022-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -11,13 +12,14 @@
 # EMBA is licensed under GPLv3
 #
 # Author(s): Pascal Eckmann
+# Contributor(s): Michael Messner
 
 # Description: Show stats about EMBA run on the bottom of the terminal window
 
 # helper for box drawing
 repeat_char(){
   local REP_CHAR="${1:-}"
-  local REP_COUNT="${2:0}"
+  local REP_COUNT="${2:-0}"
   local RET=""
   local A=0
   for ((A=1; A<=REP_COUNT; A++)) ; do RET+="${REP_CHAR}"; done
@@ -25,10 +27,10 @@ repeat_char(){
 }
 
 draw_box() {
-  local BOX_W="${1:0}"
+  local BOX_W="${1:-0}"
   local BOX_TITLE="${2:-}"
   BOX_TITLE=" ${BOX_TITLE} "
-  local BOX_L="${3:0}"
+  local BOX_L="${3:-0}"
   local BOX=""
   BOX+="\e[$((LINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[0m$(repeat_char "─" "$((BOX_W - "${#BOX_TITLE}" - 2))")┐"
   BOX+="\e[$((LINES - 3));${BOX_L}f│""$(repeat_char " " "$((BOX_W - 2))")""│"
@@ -39,7 +41,7 @@ draw_box() {
 }
 
 draw_arrows() {
-  local ARROW_L="${1:0}"
+  local ARROW_L="${1:-0}"
   local ARROWS=""
   ARROWS+="\e[$((LINES - 3));${ARROW_L}f \033[1m>\033[0m"
   ARROWS+="\e[$((LINES - 2));${ARROW_L}f \033[1m>\033[0m"
@@ -97,7 +99,7 @@ system_load_util_str() {
 # load this information in the background, write it to the file in a rythm of .2s and when needed, it will be readed from it
 update_box_system_load() {
   update_cpu() {
-    local CPU_LOG_STR_
+    local CPU_LOG_STR_=""
     CPU_LOG_STR_="$(system_load_util_str "$((100-"$(vmstat 1 2 | tail -1 | awk '{print $15}')"))" 0 2> /dev/null || true)"
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       sed -i "2s/.*/${CPU_LOG_STR_}/" "${STATUS_TMP_PATH}" 2> /dev/null || true
@@ -134,7 +136,7 @@ update_box_system_load() {
 # Helper second box "STATUS"
 # we have three lines per box and here we build the string for each line ($1=line)
 status_util_str() {
-  local UTIL_TYPE_NO="${1:0}"
+  local UTIL_TYPE_NO="${1:-0}"
   local UTIL_TYPES=('RUN' 'LOG_DIR' 'PROCESSES')
   local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
   local UTIL_VALUE="${2:-}"
@@ -189,7 +191,7 @@ update_box_status() {
 # we have three lines per box and here we build the string for each line ($1=line)
 # we also need to show a value: $2
 module_util_str() {
-  local UTIL_TYPE_NO="${1:0}"
+  local UTIL_TYPE_NO="${1:-0}"
   local UTIL_TYPES=('RUNNING' 'LAST FINISHED' 'PROGRESS')
   local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
   local UTIL_VALUE="${2:-}"
@@ -256,7 +258,7 @@ update_box_modules() {
 # we have three lines per box and here we build the string for each line ($1=line)
 # we also need to show a value: $2
 status_2_util_str() {
-  local UTIL_TYPE_NO="${1:0}"
+  local UTIL_TYPE_NO="${1:-0}"
   local UTIL_TYPES=('PHASE' 'MODE' '')
   local UTIL_STR="${UTIL_TYPES[${UTIL_TYPE_NO}]}"
   local UTIL_VALUE="${2:-}"

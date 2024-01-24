@@ -913,7 +913,7 @@ print_running_modules() {
 
     for EMBA_STARTED_PROC in "${STARTED_EMBA_PROCESSES[@]}"; do
       if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
-        print_output "[*] EMBA module ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
+        print_output "[*] $(date) - ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
       fi
     done
     sleep 1h
