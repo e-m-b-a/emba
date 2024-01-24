@@ -38,22 +38,22 @@ P65_package_extractor() {
     if [[ "${DISK_SPACE_CRIT}" -ne 1 ]]; then
       deb_extractor
     else
-      print_output "[!] $(date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(date) - Ending extraction processes - no deb extraction performed" "main"
+      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+      print_output "[!] $(print_date) - Ending extraction processes - no deb extraction performed" "main"
       DISK_SPACE_CRIT=1
     fi
     if [[ "${DISK_SPACE_CRIT}" -ne 1 ]]; then
       ipk_extractor
     else
-      print_output "[!] $(date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(date) - Ending extraction processes - no ipk extraction performed" "main"
+      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+      print_output "[!] $(print_date) - Ending extraction processes - no ipk extraction performed" "main"
       DISK_SPACE_CRIT=1
     fi
     if [[ "${DISK_SPACE_CRIT}" -ne 1 ]]; then
       apk_extractor
     else
-      print_output "[!] $(date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(date) - Ending extraction processes - apk extraction performed" "main"
+      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+      print_output "[!] $(print_date) - Ending extraction processes - apk extraction performed" "main"
       DISK_SPACE_CRIT=1
     fi
 

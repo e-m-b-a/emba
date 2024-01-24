@@ -49,7 +49,7 @@ kernel_downloader() {
   mapfile -t K_VERSIONS < <(cut -d\; -f2 "${LOG_FILE_KERNEL}" | tail -n +2 | sort -u | grep -E "[0-9]+(\.[0-9]+)+?" || true)
 
   for K_VERSION in "${K_VERSIONS[@]}"; do
-    local OUTPUTTER="[*] Checking download of kernel version ${ORANGE}${K_VERSION}${NC}"
+    local OUTPUTTER="[*] $(print_date) - Checking download of kernel version ${ORANGE}${K_VERSION}${NC}"
     print_output "${OUTPUTTER}" "no_log"
     write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
     local K_VER_DOWNLOAD=""
@@ -78,7 +78,7 @@ kernel_downloader() {
 
     # we check if the sources archive is already available and is a valid tgz file:
     if ! [[ -f "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz ]] || ! gunzip -t "${KERNEL_ARCH_PATH}/linux-${K_VERSION}.tar.gz" > /dev/null; then
-      local OUTPUTTER="[*] Kernel download for version ${ORANGE}${K_VERSION}${NC}"
+      local OUTPUTTER="[*] $(print_date) - Kernel download for version ${ORANGE}${K_VERSION}${NC}"
       print_output "${OUTPUTTER}" "no_log"
       write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
 
@@ -100,7 +100,7 @@ kernel_downloader() {
       # checks for the file "${TMP_DIR}"/linux_download_failed. If this file is available it stops waiting for the kernel
       # sources
       if [[ ${D_RETURN} -ne 0 ]] ; then
-        local OUTPUTTER="[-] Kernel download for version ${ORANGE}${K_VERSION}${NC} failed"
+        local OUTPUTTER="[-] $(print_date) - Kernel download for version ${ORANGE}${K_VERSION}${NC} failed"
         print_output "${OUTPUTTER}" "no_log"
         write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
 
@@ -110,24 +110,24 @@ kernel_downloader() {
         fi
       fi
     else
-      local OUTPUTTER="[*] Kernel sources of version ${ORANGE}${K_VERSION}${NC} already available"
+      local OUTPUTTER="[*] $(print_date) - Kernel sources of version ${ORANGE}${K_VERSION}${NC} already available"
       print_output "${OUTPUTTER}" "no_log"
       write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
     fi
 
     if ! [[ -f "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz ]]; then
-      local OUTPUTTER="[-] Kernel sources not available ..."
+      local OUTPUTTER="[-] $(print_date) - Kernel sources not available ..."
       print_output "${OUTPUTTER}" "no_log"
       write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
       continue
     fi
     if ! file "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz | grep -q "gzip compressed data"; then
-      local OUTPUTTER="[-] Kernel sources not available ..."
+      local OUTPUTTER="[-] $(print_date) - Kernel sources not available ..."
       print_output "${OUTPUTTER}" "no_log"
       write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
       continue
     fi
-    local OUTPUTTER="[*] Kernel source for version ${ORANGE}${K_VERSION}${NC} stored in ${ORANGE}${KERNEL_ARCH_PATH}${NC}"
+    local OUTPUTTER="[*] $(print_date) - Kernel source for version ${ORANGE}${K_VERSION}${NC} stored in ${ORANGE}${KERNEL_ARCH_PATH}${NC}"
     print_output "${OUTPUTTER}" "no_log"
     write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
   done

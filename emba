@@ -136,11 +136,11 @@ run_modules()
       # check if "${MODULE_NAME}" is in blacklist from config directory and skip it
       MODULE_NAME=$(basename -s .sh "${MODULE_FILE}")
       if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
-        print_output "[*] $(date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
+        print_output "[*] $(print_date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
         continue
       fi
       if [[ "${SKIP_PRE_CHECKERS}" == 1 ]] && [[ "${MODULE_GROUP}" == "P" ]]; then
-        print_output "[*] $(date) - ${MODULE_NAME} not executed - skip pre-checkers is set " "main"
+        print_output "[*] $(print_date) - ${MODULE_NAME} not executed - skip pre-checkers is set " "main"
         continue
       fi
       local MOD_FIN=0
@@ -160,10 +160,10 @@ run_modules()
         if [[ "${RESTART}" -eq 1 ]]; then
           if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
             if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
-              print_output "[*] Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
+              print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
               MOD_FIN=0
             else
-              print_output "[*] Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
+              print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
               MOD_FIN=1
               if [[ ${HTML} -eq 1 ]] ; then
                 # we need to build the web reporter links for skipping modules
@@ -219,10 +219,10 @@ run_modules()
           if [[ "${RESTART}" -eq 1 ]]; then
             if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
               if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
-                print_output "[*] Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
+                print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
                 MOD_FIN=0
               else
-                print_output "[*] Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
+                print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
                 MOD_FIN=1
                 if [[ ${HTML} -eq 1 ]] ; then
                   # we need to build the web reporter links for skipping modules
@@ -269,7 +269,7 @@ run_modules()
           # check if "${MODULE_NAME}" is in blacklist from config directory and skip it
           MODULE_NAME=$(basename -s .sh "${MODULE_FILE}")
           if [[ " ${MODULE_BLACKLIST[*]} " =~  ${MODULE_NAME}  ]]; then
-            print_output "[*] $(date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
+            print_output "[*] $(print_date) - ${MODULE_NAME} not executed - blacklist triggered " "main"
             continue
           fi
           local MOD_FIN=0
@@ -290,10 +290,10 @@ run_modules()
             if [[ "${RESTART}" -eq 1 ]]; then
               if [[ $(grep -i -c "${MODULE_MAIN} finished" "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
                 if [[ "${MODULE_MAIN}" == "P99_"* ]] || [[ "${MODULE_MAIN}" == "L1"* ]]; then
-                  print_output "[*] Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
+                  print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished but essential - rerun it" "main"
                   MOD_FIN=0
                 else
-                  print_output "[*] Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
+                  print_output "[*] $(print_date) - Module ${ORANGE}${MODULE_MAIN}${NC} already finished ... skipping" "main"
                   MOD_FIN=1
                   if [[ ${HTML} -eq 1 ]] ; then
                     # we need to build the web reporter links for skipping modules
@@ -371,9 +371,9 @@ main() {
   if [[ ${IN_DOCKER} -eq 0 ]]; then
     if grep -q -i wsl /proc/version; then
       print_bar "no_log"
-      print_output "[*] INFO: System running in WSL environment!" "no_log"
-      print_output "[*] INFO: WSL is currently experimental." "no_log"
-      print_output "[*] INFO: Please report issues to https://github.com/e-m-b-a/emba/issues." "no_log"
+      print_output "[*] $(print_date) - INFO: System running in WSL environment!" "no_log"
+      print_output "[*] $(print_date) - INFO: WSL is currently experimental." "no_log"
+      print_output "[*] $(print_date) - INFO: Please report issues to https://github.com/e-m-b-a/emba/issues." "no_log"
       print_bar "no_log"
       export WSL=1
     fi
@@ -390,7 +390,7 @@ main() {
   # activate the virtual environment - we should have it in external which fits also the docker environment
   # shellcheck source=/dev/null
   if [[ -f "${EXT_DIR}/emba_venv/bin/activate" ]]; then
-    print_output "[*] Enable python virtual environment ${ORANGE}${EXT_DIR}/emba_venv${NC}" "no_log"
+    print_output "[*] $(print_date) - Enable python virtual environment ${ORANGE}${EXT_DIR}/emba_venv${NC}" "no_log"
     source "${EXT_DIR}/emba_venv/bin/activate"
   fi
 
@@ -420,7 +420,7 @@ main() {
 
     if [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]]; then
       print_bar "no_log"
-      print_output "[!] WARNING: EMBA running in developer mode!" "no_log"
+      print_output "[!] $(print_date) - WARNING: EMBA running in developer mode!" "no_log"
       write_notification "WARNING: EMBA running in developer mode"
       print_bar "no_log"
     fi
@@ -432,17 +432,17 @@ main() {
       if [[ -f "${PROFILE}" ]]; then
         print_bar "no_log"
         if [[ ${IN_DOCKER} -ne 1 ]] ; then
-          print_output "[*] Loading EMBA scan profile with the following settings:" "no_log"
+          print_output "[*] $(print_date) - Loading EMBA scan profile with the following settings:" "no_log"
         else
-          print_output "[*] Loading EMBA scan profile." "no_log"
+          print_output "[*] $(print_date) - Loading EMBA scan profile." "no_log"
         fi
         # all profile output and settings are done by the profile file located in ./scan-profiles/
         # shellcheck source=/dev/null
         source "${PROFILE}"
-        print_output "[*] Profile ${PROFILE} loaded." "no_log"
+        print_output "[*] $(print_date) - Profile ${PROFILE} loaded." "no_log"
         print_bar "no_log"
       else
-        print_output "[!] Profile ${PROFILE} not found." "no_log"
+        print_output "[!] $(print_date) - Profile ${PROFILE} not found." "no_log"
         exit 1
       fi
     fi
@@ -457,7 +457,7 @@ main() {
     # restart file gets generated during startup if old log dir is found:
     if [[ ${USE_DOCKER} -eq 1 && ${IN_DOCKER} -eq 1 ]] || [[ "${USE_DOCKER}" -eq 0 ]]; then
       if [[ -f "${TMP_DIR}"/restart ]]; then
-        print_output "[!] Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
+        print_output "[!] $(print_date) - Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
         export RESTART=1
         rm "${TMP_DIR}"/restart
         # shellcheck source=/dev/null
@@ -478,7 +478,7 @@ main() {
       kernel_downloader &
       K_DOWN_PID="$!"
       store_kill_pids "${K_DOWN_PID}"
-      print_output "[*] Started kernel downloader thread with PID ${ORANGE}${K_DOWN_PID}${NC}" "no_log"
+      print_output "[*] $(print_date) - Started kernel downloader thread with PID ${ORANGE}${K_DOWN_PID}${NC}" "no_log"
     fi
 
     if [[ ${IN_DOCKER} -eq 0 ]]; then
@@ -490,8 +490,8 @@ main() {
       NOTIFICATION_PID="$!"
       store_kill_pids "${NOTIFICATION_PID}"
       disown "${NOTIFICATION_PID}" 2> /dev/null || true
-      print_output "[*] Original user: ${ORANGE}${SUDO_USER:-${USER}}${NC}" "no_log"
-      print_output "[*] Notification process started with PID ${ORANGE}${NOTIFICATION_PID}${NC}" "no_log"
+      print_output "[*] $(print_date) - Original user: ${ORANGE}${SUDO_USER:-${USER}}${NC}" "no_log"
+      print_output "[*] $(print_date) - Notification process started with PID ${ORANGE}${NOTIFICATION_PID}${NC}" "no_log"
       PROXY="$(sudo -E -u "${SUDO_USER:-${USER}}" env | grep -E "http(s)_proxy" | cut -d = -f2 || true)"
       echo "${SUDO_USER:-${USER}}" > "${LOG_DIR}"/orig_user.log
       {
@@ -522,8 +522,8 @@ main() {
     # copy the firmware outside of the docker and not a second time within the docker
     if [[ -d "${FIRMWARE_PATH}" ]] ; then
       PRE_CHECK=1
-      print_output "[*] Firmware directory detected." "no_log"
-      print_output "[*] EMBA starts with testing the environment." "no_log"
+      print_output "[*] $(print_date) - Firmware directory detected." "no_log"
+      print_output "[*] $(print_date) - EMBA starts with testing the environment." "no_log"
       if [[ ${IN_DOCKER} -eq 0 ]] ; then
         # in docker environment the firmware is already available
         print_output "    The provided firmware will be copied to ${ORANGE}""${FIRMWARE_PATH_CP}""/""$(basename "${FIRMWARE_PATH}")""${NC}" "no_log"
@@ -536,7 +536,7 @@ main() {
       fi
     elif [[ "${CONTAINER_EXTRACT}" -eq 1 ]]; then
       PRE_CHECK=1
-      print_output "[*] Firmware analysis of docker image starting." "no_log"
+      print_output "[*] $(print_date) - Firmware analysis of docker image starting." "no_log"
       print_output "    EMBA starts with extracting the docker image ${ORANGE}${CONTAINER_ID}${NC}." "no_log"
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/firmware_docker_extracted.tar
       export OUTPUT_DIR="${FIRMWARE_PATH}"
@@ -544,18 +544,18 @@ main() {
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -z "${FIRMWARE_PATH1}" ]]; then
       PRE_CHECK=1
       if [[ -n "${KERNEL_CONFIG}" && "${KERNEL}" -eq 1 ]]; then
-        print_output "[*] Kernel configuration file detected." "no_log"
+        print_output "[*] $(print_date) - Kernel configuration file detected." "no_log"
       else
-        print_output "[*] Firmware binary detected." "no_log"
+        print_output "[*] $(print_date) - Firmware binary detected." "no_log"
       fi
       print_output "    EMBA starts with the pre-testing phase." "no_log"
       export OUTPUT_DIR="${FIRMWARE_PATH}"
     elif [[ -f "${FIRMWARE_PATH}" ]] && [[ -f "${FIRMWARE_PATH1}" ]]; then
       DIFF_MODE=1
-      print_output "[*] Multiple firmware binarie detected." "no_log"
+      print_output "[*] $(print_date) - Multiple firmware binarie detected." "no_log"
       print_output "    EMBA starts in firmware diff mode ." "no_log"
     else
-      print_output "[!] Invalid firmware file" "no_log"
+      print_output "[!] $(print_date) - Invalid firmware file" "no_log"
       print_help
       exit 1
     fi
@@ -591,9 +591,9 @@ main() {
     if [[ ${HTML} -eq 1 ]] ; then
       if [[ ${FORMAT_LOG} -eq 0 ]] ; then
         FORMAT_LOG=1
-        print_output "[*] Activate colored log for webreport" "no_log"
+        print_output "[*] $(print_date) - Activate colored log for webreport" "no_log"
       fi
-      print_output "[*] Prepare webreport" "no_log"
+      print_output "[*] $(print_date) - Prepare webreport" "no_log"
       prepare_report
     fi
 
@@ -617,7 +617,7 @@ main() {
       fi
 
       if ! [[ -f "${KERNEL_CONFIG}" ]] ; then
-        print_output "[-] Invalid kernel configuration file: ${ORANGE}${KERNEL_CONFIG}${NC}" "no_log"
+        print_output "[-] $(print_date) - Invalid kernel configuration file: ${ORANGE}${KERNEL_CONFIG}${NC}" "no_log"
         exit 1
       else
         if [[ ${IN_DOCKER} -eq 0 ]] ; then
@@ -626,7 +626,7 @@ main() {
           if [[ -d "${LOG_DIR}" ]] ; then
             cp "${KERNEL_CONFIG}" "${LOG_DIR}"/kernel_config
           else
-            print_output "[!] Missing log directory" "no_log"
+            print_output "[!] $(print_date) - Missing log directory" "no_log"
             exit 1
           fi
         fi
@@ -654,7 +654,7 @@ main() {
   if [[ ${USE_DOCKER} -eq 1 ]] ; then
     if ! [[ ${EUID} -eq 0 ]] ; then
       if ! groups | grep -qw docker; then
-        print_output "[!] Using EMBA with docker-compose requires root permissions" "no_log"
+        print_output "[!] $(print_date) - Using EMBA with docker-compose requires root permissions" "no_log"
         print_output "$(indent "Run EMBA with root permissions or add your user to docker group")" "no_log"
         print_output "$(indent "e.g., sudo usermod -aG docker [non-root user]")" "no_log"
         exit 1
@@ -683,7 +683,7 @@ main() {
       trap 'initial_status_bar' WINCH
     fi
 
-    print_output "[*] EMBA sets up the docker environment.\\n" "no_log"
+    print_output "[*] $(print_date) - EMBA sets up the docker environment.\\n" "no_log"
 
     # try it 10 times before exit
     local CNT_DOCK=0
@@ -694,12 +694,12 @@ main() {
         break
       fi
       if [[ "${CNT_DOCK}" -ge 10 ]]; then
-        print_output "[-] $(date) - EMBA docker environment not ready!" "no_log"
+        print_output "[-] $(print_date) - EMBA docker environment not ready!" "no_log"
         exit 1
       fi
     done
 
-    print_output "[*] $(date) - EMBA initializes docker container.\\n" "no_log"
+    print_output "[*] $(print_date) - EMBA initializes docker container.\\n" "no_log"
 
     if [[ "${ONLY_DEP}" -eq 0 ]]; then
       # store some details that we do not have in the docker container:
@@ -734,7 +734,7 @@ main() {
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
-      print_output "[+] $(date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
+      print_output "[+] $(print_date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
 
       if [[ "${SILENT}" -eq 0 ]]; then
         check_quest_container "${QUEST_CONTAINER}" &
@@ -750,17 +750,17 @@ main() {
         D_RETURN=$?
       else
         # EMBA container starts in the background
-        print_output "[*] $(date) - EMBA main container starting and detaching.\\n" "no_log"
+        print_output "[*] $(print_date) - EMBA main container starting and detaching.\\n" "no_log"
         local MAIN_CONTAINER_=""
         MAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
         export MAIN_CONTAINER="${MAIN_CONTAINER_}"
 
-        print_output "[+] $(date) - EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
+        print_output "[+] $(print_date) - EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
         welcome
         print_ln "no_log"
-        print_output "[*] $(date) - EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "no_log"
+        print_output "[*] $(print_date) - EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "no_log"
         if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
-          print_output "[*] $(date) - EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "no_log"
+          print_output "[*] $(print_date) - EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "no_log"
         fi
 
         if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
@@ -792,12 +792,12 @@ main() {
 
     if [[ "${D_RETURN}" -eq 0 ]] ; then
       if [[ "${ONLY_DEP}" -eq 0 ]] ; then
-        print_output "[*] $(date) - EMBA finished analysis in docker container.\\n" "no_log"
+        print_output "[*] $(print_date) - EMBA finished analysis in docker container.\\n" "no_log"
         write_notification "EMBA finished analysis in default mode"
-        print_output "[*] $(date) - Firmware tested: ${ORANGE}${FIRMWARE_PATH}${NC}" "no_log"
-        print_output "[*] $(date) - Log directory: ${ORANGE}${LOG_DIR}${NC}" "no_log"
+        print_output "[*] $(print_date) - Firmware tested: ${ORANGE}${FIRMWARE_PATH}${NC}" "no_log"
+        print_output "[*] $(print_date) - Log directory: ${ORANGE}${LOG_DIR}${NC}" "no_log"
         if [[ -v HTML_PATH ]] && [[ -f "${HTML_PATH}"/index.html ]]; then
-          print_output "[*] $(date) - Access the web-report with ${ORANGE}firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
+          print_output "[*] $(print_date) - Access the web-report with ${ORANGE}firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
         fi
         cleaner 0
       else
@@ -806,7 +806,7 @@ main() {
       fi
       exit 0
     else
-      print_output "[-] $(date) - EMBA failed in docker mode!" "main"
+      print_output "[-] $(print_date) - EMBA failed in docker mode!" "main"
       cleaner 0
       write_notification "EMBA failed analysis in default mode"
       exit 1
@@ -832,7 +832,7 @@ main() {
       done
       run_modules "Q" "${THREADED}" "0"
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS[@]}"
-      print_output "[*] $(date) - Quest container finished" "main"
+      print_output "[*] $(print_date) - Quest container finished" "main"
       exit 0
     elif [[ "${USE_DOCKER}" -eq 0 && "${IN_DOCKER}" -eq 0 ]] ;  then
       # currently we do not support the Quest containers in dev mode
@@ -854,9 +854,9 @@ main() {
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - Pre-checking phase started on ""$(date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "main"
+      print_output "[!] $(print_date) - Pre-checking phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "main"
     else
-      print_output "[!] $(date) - Pre-checking phase started on ""$(date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "no_log"
+      print_output "[!] $(print_date) - Pre-checking phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware binary path: ""${FIRMWARE_PATH}")" "no_log"
     fi
     write_notification "Pre-checking phase started"
 
@@ -871,9 +871,9 @@ main() {
     print_ln "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(print_date) - Pre-checking phase ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] $(date) - Pre-checking phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(print_date) - Pre-checking phase ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Pre-checking phase finished"
 
@@ -892,11 +892,11 @@ main() {
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - Diff mode started on ""$(date)" "main"
+      print_output "[!] $(print_date) - Diff mode started on ""$(print_date)" "main"
       print_output "$(indent "${NC}""1st Firmware binary path: ""${FIRMWARE_PATH}")" "main"
       print_output "$(indent "${NC}""2nd Firmware binary path: ""${FIRMWARE_PATH1}")" "main"
     else
-      print_output "[!] $(date) - Diff mode started on ""$(date)"
+      print_output "[!] $(print_date) - Diff mode started on ""$(print_date)"
       print_output "$(indent "${NC}""1st Firmware binary path: ""${FIRMWARE_PATH}")" "no_log"
       print_output "$(indent "${NC}""2nd Firmware binary path: ""${FIRMWARE_PATH1}")" "no_log"
     fi
@@ -905,9 +905,9 @@ main() {
     run_modules "D" "${THREADED}" "0"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(print_date) - Diff mode ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] $(date) - Diff mode ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(print_date) - Diff mode ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Diff mode finished"
 
@@ -923,12 +923,12 @@ main() {
     print_output "\n=================================================================\n" "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
+      print_output "[!] $(print_date) - Testing phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
     else
-      print_output "[!] $(date) - Testing phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
+      print_output "[!] $(print_date) - Testing phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
     write_notification "Testing phase finished"
-    write_grep_log "$(date)" "TIMESTAMP"
+    write_grep_log "$(print_date)" "TIMESTAMP"
 
     run_modules "S" "${THREADED}" "${HTML}"
 
@@ -937,9 +937,9 @@ main() {
     print_ln "no_log"
 
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(print_date) - Testing phase ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] $(date) - Testing phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(print_date) - Testing phase ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "Testing phase ended"
 
@@ -952,21 +952,21 @@ main() {
   if [[ "${FULL_EMULATION}" -eq 1 ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     print_output "\n=================================================================\n" "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
+      print_output "[!] $(print_date) - System emulation phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "main"
     else
-      print_output "[!] $(date) - System emulation phase started on ""$(date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
+      print_output "[!] $(print_date) - System emulation phase started on ""$(print_date)""\\n""$(indent "${NC}""Firmware path: ""${FIRMWARE_PATH}")" "no_log"
     fi
     write_notification "System emulation phase started"
 
-    write_grep_log "$(date)" "TIMESTAMP"
+    write_grep_log "$(print_date)" "TIMESTAMP"
     # these modules are not threaded!
     run_modules "L" "0" "${HTML}"
 
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - System emulation phase ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(print_date) - System emulation phase ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
     else
-      print_output "[!] $(date) - System emulation ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(print_date) - System emulation ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
     write_notification "System emulation phase ended"
   fi
@@ -975,9 +975,9 @@ main() {
   # Reporting (F-modules)
   #######################################################################################
   if [[ -d "${LOG_DIR}" ]]; then
-    print_output "[!] $(date) - Reporting phase started on ""$(date)""\\n" "main"
+    print_output "[!] $(print_date) - Reporting phase started on ""$(print_date)""\\n" "main"
   else
-    print_output "[!] $(date) - Reporting phase started on ""$(date)""\\n" "no_log"
+    print_output "[!] $(print_date) - Reporting phase started on ""$(print_date)""\\n" "no_log"
   fi
   write_notification "Reporting phase started"
 
@@ -993,25 +993,25 @@ main() {
 
   if [[ "${TESTING_DONE}" -eq 1 ]]; then
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/firmware ]]; then
-      print_output "[*] $(date) - Removing temp firmware directory\\n" "no_log"
+      print_output "[*] $(print_date) - Removing temp firmware directory\\n" "no_log"
       rm -r "${LOG_DIR}"/firmware 2>/dev/null
     fi
     if [[ "${FINAL_FW_RM}" -eq 1 && -d "${LOG_DIR}"/p61_unblob_eval/unblob_extracted ]]; then
-      print_output "[*] $(date) - Removing unblob firmware directory\\n" "no_log"
+      print_output "[*] $(print_date) - Removing unblob firmware directory\\n" "no_log"
       rm -r "${LOG_DIR}"/p61_unblob_eval/unblob_extracted 2>/dev/null
     fi
     print_ln "no_log"
     if [[ -d "${LOG_DIR}" ]]; then
-      print_output "[!] $(date) - Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "main"
+      print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
       write_notification "EMBA finished analysis"
       rm -r "${TMP_DIR}" 2>/dev/null || true
     else
-      print_output "[!] $(date) - Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     fi
-    write_grep_log "$(date)" "TIMESTAMP"
+    write_grep_log "$(print_date)" "TIMESTAMP"
     write_grep_log "$(date -d@"${SECONDS}" -u +%d:%H:%M:%S)" "DURATION"
   else
-    print_output "[!] $(date) - No extracted firmware found" "no_log"
+    print_output "[!] $(print_date) - No extracted firmware found" "no_log"
     print_output "$(indent "Try using binwalk or something else to extract the firmware")"
     exit 1
   fi
@@ -1019,8 +1019,8 @@ main() {
   [[ "${HTML}" -eq 1 ]] && update_index
 
   if [[ -f "${HTML_PATH}"/index.html ]] && [[ "${IN_DOCKER}" -eq 0 ]]; then
-    print_output "[*] $(date) - Web report created HTML report in ${ORANGE}${LOG_DIR}/html-report${NC}\\n" "main"
-    print_output "[*] $(date) - Open the web-report with${ORANGE} firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
+    print_output "[*] $(print_date) - Web report created HTML report in ${ORANGE}${LOG_DIR}/html-report${NC}\\n" "main"
+    print_output "[*] $(print_date) - Open the web-report with${ORANGE} firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
   fi
 
   # deactivate the python virtual env

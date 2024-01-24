@@ -169,6 +169,7 @@ update_box_status() {
 
   local LOG_DIR_SIZE=""
   local RUN_EMBA_PROCESSES=0
+  local RUN_EMBA_PROCESSES_QUEST=0
 
   local BOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
@@ -178,7 +179,17 @@ update_box_status() {
     local RUNTIME=0
     RUNTIME="$(date -d@"$(( "$(date +%s)" - "${DATE_STR}" ))" -u +%H:%M:%S)"
     LOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
-    RUN_EMBA_PROCESSES="$(ps -C emba | wc -l || true)"
+    # if we are running in a docker environment, we can count the processes withing our containers:
+    if [[ -z "${${MAIN_CONTAINER_}}" ]]; then
+      RUN_EMBA_PROCESSES="$(docker exec ${MAIN_CONTAINER_} ps 2>/dev/null | wc -l || true)"
+      RUN_EMBA_PROCESSES_QUEST="$(docker exec ${QUEST_CONTAINER_} ps 2>/dev/null | wc -l || true)"
+      RUN_EMBA_PROCESSES=$((RUN_EMBA_PROCESSES + RUN_EMBA_PROCESSES_QUEST))
+    else
+      # this is a dirty solution if we have not MAIN_CONTAINER set
+      # this happens in dev mode or in non silent mode -> but in both modes
+      # the status bar is not supported
+      RUN_EMBA_PROCESSES="$(ps -C emba | wc -l || true)"
+    fi
     printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( LINES - 3 ))" "$(status_util_str 0 "${RUNTIME}")" "$(( LINES - 2 ))" "$(status_util_str 1 "${LOG_DIR_SIZE}")" "$(( LINES - 1 ))" "$(status_util_str 2 "${RUN_EMBA_PROCESSES}")" || true
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then

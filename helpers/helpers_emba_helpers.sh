@@ -195,7 +195,7 @@ cleaner() {
   fi
   export CLEANED=1
   if [[ "${INTERRUPT_CLEAN}" -eq 1 ]]; then
-    print_output "[!] Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+    print_output "[!] Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     exit 1
   fi
 }
@@ -324,7 +324,7 @@ module_wait() {
   local MODULE_TO_WAIT="${1:-}"
   # if the module we should wait is not in our module array we return without waiting
   if ! [[ " ${MODULES_EXPORTED[*]} " == *"${MODULE_TO_WAIT}"* ]]; then
-    print_output "[-] $(date) - ${MODULE_TO_WAIT} not in module array - this will result in unexpected behavior" "main"
+    print_output "[-] $(print_date) - ${MODULE_TO_WAIT} not in module array - this will result in unexpected behavior" "main"
     return
   fi
 
@@ -334,7 +334,7 @@ module_wait() {
 
   while [[ $(grep -i -c "${MODULE_TO_WAIT} finished" "${MAIN_LOG}" || true) -ne 1 ]]; do
     if grep -q "${MODULE_TO_WAIT} not executed - blacklist triggered" "${MAIN_LOG}"; then
-      print_output "[-] $(date) - ${MODULE_TO_WAIT} blacklisted - not waiting" "main"
+      print_output "[-] $(print_date) - ${MODULE_TO_WAIT} blacklisted - not waiting" "main"
       # if our module which we are waiting is on the blacklist we can just return
       return
     fi
