@@ -108,7 +108,6 @@ update_box_system_load() {
 
   update_cpu
 
-  shopt -s checkwinsize; (:;:)
   local BOX_SIZE=0
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
@@ -154,8 +153,6 @@ status_util_str() {
 # Update second box "STATUS"
 # we need to use the tmp file for the start time point, because the content of the boxes will be refreshed in the background
 update_box_status() {
-  shopt -s checkwinsize; (:;:)
-
   local DATE_STR=""
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     DATE_STR="$(sed '3q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
@@ -219,8 +216,6 @@ module_util_str() {
 
 # Update third box "MODULES"
 update_box_modules() {
-  shopt -s checkwinsize; (:;:)
-
   local STARTED_MODULE_STR=""
   local FINISHED_MODULE_STR=""
   local LAST_FINISHED_MODULE_STR=""
@@ -286,7 +281,6 @@ status_2_util_str() {
 
 # Update fourth box "STATUS 2"
 update_box_status_2() {
-  shopt -s checkwinsize; (:;:)
   local PHASE_STR=""
   local MODE_STR=""
   if [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ; then
@@ -403,7 +397,11 @@ initial_status_bar() {
   export STATUS_TMP_PATH=""
 
   # overwrites $LINES and "${COLUMNS}" with the actual values of the window
-  shopt -s checkwinsize; (:;:)
+  # shopt -s checkwinsize; (:;:)
+  shopt -s checkwinsize
+  # echo "LINES: $LINES" >> "${TMP_DIR}"/shopts.log
+  # echo "COLUMNS: $COLUMNS" >> "${TMP_DIR}"/shopts.log
+
   local LINE_POS="$(( LINES - 6 ))"
   printf "\e[%s;1f\e[0J\e[%s;1f" "${LINE_POS}" "${LINE_POS}"
 
@@ -412,7 +410,7 @@ initial_status_bar() {
   if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
     touch "${LOG_DIR}"/emba.log
   fi
-  clear && reset
+  reset && clear
   tail -n 500 -f "${LOG_DIR}"/emba.log &
   local TAIL_PID="$!"
   disown "${TAIL_PID}" 2> /dev/null || true

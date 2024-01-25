@@ -733,7 +733,7 @@ main() {
       # default EMBA analysis mode:
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-      QUEST_CONTAINER="${QUEST_CONTAINER_}"
+      export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[+] $(print_date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
 
       if [[ "${SILENT}" -eq 0 ]]; then
@@ -753,7 +753,7 @@ main() {
         print_output "[*] $(print_date) - EMBA main container starting and detaching.\\n" "no_log"
         local MAIN_CONTAINER_=""
         MAIN_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
-        MAIN_CONTAINER="${MAIN_CONTAINER_}"
+        export MAIN_CONTAINER="${MAIN_CONTAINER_}"
 
         print_output "[+] $(print_date) - EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
         print_ln "no_log"
