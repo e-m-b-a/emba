@@ -79,18 +79,22 @@ cwe_check() {
   local BIN_TO_CHECK=""
   local BIN_TO_CHECK_ARR=()
   local WAIT_PIDS_S17=()
+  local BINS_CHECKED_ARR=()
 
   if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | awk '{print $1}' | sort -u)
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}')
   fi
 
   for BINARY in "${BINARIES[@]}" ; do
     # as we usually have not the full path from the s13 log, we need to search for the binary again:
     mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -path "*${BINARY}*" | sort -u || true)
     for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
+      if [[ "${BIN_TO_CHECK_ARR[*]}" == *"${BIN_TO_CHECK}"* ]]; then
+        continue
+      fi
       if ( file "${BIN_TO_CHECK}" | grep -q ELF ) ; then
         # do not try to analyze kernel modules:
         [[ "${BIN_TO_CHECK}" == *".ko" ]] && continue
@@ -101,6 +105,7 @@ cwe_check() {
           fi
 
           cwe_checker_threaded "${BIN_TO_CHECK}" &
+          BINS_CHECKED_ARR+=("${BIN_TO_CHECK}")
           local TMP_PID="$!"
           store_kill_pids "${TMP_PID}"
           WAIT_PIDS_S17+=( "${TMP_PID}" )
