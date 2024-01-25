@@ -178,7 +178,7 @@ update_box_status() {
     LOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
     # if we are running in a docker environment, we can count the processes withing our containers:
     if [[ -n "${MAIN_CONTAINER}" ]]; then
-      RUN_EMBA_PROCESSES="$(docker exec "${MAIN_CONTAINER_}" ps 2>/dev/null | wc -l || true)"
+      RUN_EMBA_PROCESSES="$(docker exec "${MAIN_CONTAINER}" ps 2>/dev/null | wc -l || true)"
       RUN_EMBA_PROCESSES_QUEST="$(docker exec "${QUEST_CONTAINER}" ps 2>/dev/null | wc -l || true)"
       RUN_EMBA_PROCESSES=$((RUN_EMBA_PROCESSES + RUN_EMBA_PROCESSES_QUEST))
     else
@@ -380,13 +380,13 @@ kill_box_pid() {
 initial_status_bar() {
   # PID for box updater threads
   export PID_SYSTEM_LOAD=""
-  [[ -f "${TMP_DIR}"/PID_SYSTEM_LOAD.log ]] && export PID_SYSTEM_LOAD="$(cat "${TMP_DIR}"/PID_SYSTEM_LOAD.log)"
+  [[ -f "${TMP_DIR}"/PID_SYSTEM_LOAD.log ]] && PID_SYSTEM_LOAD="$(cat "${TMP_DIR}"/PID_SYSTEM_LOAD.log)"
   export PID_STATUS=""
-  [[ -f "${TMP_DIR}"/PID_STATUS.log ]] && export PID_STATUS="$(cat "${TMP_DIR}"/PID_STATUS.log)"
+  [[ -f "${TMP_DIR}"/PID_STATUS.log ]] && PID_STATUS="$(cat "${TMP_DIR}"/PID_STATUS.log)"
   export PID_MODULES=""
-  [[ -f "${TMP_DIR}"/PID_MODULES.log ]] && export PID_MODULES="$(cat "${TMP_DIR}"/PID_MODULES.log)"
+  [[ -f "${TMP_DIR}"/PID_MODULES.log ]] && PID_MODULES="$(cat "${TMP_DIR}"/PID_MODULES.log)"
   export PID_STATUS_2=""
-  [[ -f "${TMP_DIR}"/PID_STATUS_2.log ]] && export PID_STATUS_2="$(cat "${TMP_DIR}"/PID_STATUS_2.log)"
+  [[ -f "${TMP_DIR}"/PID_STATUS_2.log ]] && PID_STATUS_2="$(cat "${TMP_DIR}"/PID_STATUS_2.log)"
 
   # Path to status tmp file
   # each line is dedicated to a specific function
