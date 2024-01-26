@@ -124,6 +124,7 @@ prepare_cve_search_module() {
   export MSF_SEARCH=0
   export CVE_SEARCHSPLOIT=0
   export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
+  export BUSYBOX_VERIFIED_CVE=()
 
   if command -v cve_searchsploit > /dev/null ; then
     export CVE_SEARCHSPLOIT=1
