@@ -778,11 +778,12 @@ main() {
 
     if [[ "${D_RETURN}" -eq 0 ]] ; then
       if [[ "${ONLY_DEP}" -eq 0 ]] ; then
-        print_output "[*] $(print_date) - EMBA finished analysis in docker container.\\n" "no_log"
+        print_output "[*] $(print_date) - EMBA finished analysis in default mode (docker container).\\n" "no_log"
         write_notification "EMBA finished analysis in default mode"
         print_output "[*] $(print_date) - Firmware tested: ${ORANGE}${FIRMWARE_PATH}${NC}" "no_log"
         print_output "[*] $(print_date) - Log directory: ${ORANGE}${LOG_DIR}${NC}" "no_log"
         if [[ -v HTML_PATH ]] && [[ -f "${HTML_PATH}"/index.html ]]; then
+          print_ln "main"
           print_output "[*] $(print_date) - Access the web-report with ${ORANGE}firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
         fi
         cleaner 0
@@ -790,7 +791,7 @@ main() {
         # we do not need the log dir from dependency checker
         [[ -d "${LOG_DIR}" ]] && rm -rf "${LOG_DIR}"
       fi
-      print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+      print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
       exit 0
     else
       print_output "[-] $(print_date) - EMBA failed in docker mode!" "main"

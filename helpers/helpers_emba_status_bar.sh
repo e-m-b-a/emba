@@ -414,7 +414,6 @@ initial_status_bar() {
   shopt -s checkwinsize
   # echo "LINES: $LINES" >> "${TMP_DIR}"/shopts.log
   # echo "COLUMNS: $COLUMNS" >> "${TMP_DIR}"/shopts.log
-
   local LINE_POS="$(( LINES - 6 ))"
   printf "\e[%s;1f\e[0J\e[%s;1f" "${LINE_POS}" "${LINE_POS}"
 
@@ -423,8 +422,11 @@ initial_status_bar() {
   if ! [[ -f "${LOG_DIR}"/emba.log ]]; then
     touch "${LOG_DIR}"/emba.log
   fi
-  reset && clear
-  tail -n 500 -f "${LOG_DIR}"/emba.log &
+  # reset
+  # clear
+  printf "\x1Bc"
+
+  tail -f "${LOG_DIR}"/emba.log &
   local TAIL_PID="$!"
   disown "${TAIL_PID}" 2> /dev/null || true
 

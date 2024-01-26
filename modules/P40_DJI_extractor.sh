@@ -67,6 +67,9 @@ P40_DJI_extractor() {
   fi
 
   if [[ -d "${EXTRACTION_DIR:-}" ]]; then
+    local FILES_DJI=0
+    local DIRS_DJI=0
+
     FILES_DJI=$(find "${EXTRACTION_DIR}" -type f | wc -l)
     DIRS_DJI=$(find "${EXTRACTION_DIR}" -type d | wc -l)
     print_output "[*] Extracted ${ORANGE}${FILES_DJI}${NC} files and ${ORANGE}${DIRS_DJI}${NC} directories from DJI drone firmware image."
@@ -91,8 +94,11 @@ dji_imah_firmware_extractor() {
   local DJI_FILE=""
   local DJI_KEY=""
   local FNAME=""
+  local EFILE=""
   local FILES_EXT_KEY_ARR=()
+  local FILE_EXT_KEY=""
   local DJI_KEYS_ARR=()
+  local DJI_ENC_KEY_IDENTIFIER=""
 
   # found key identifiers from dji-firmware-tools - probably we missed some keys
   # Todo: check and add missing keys
