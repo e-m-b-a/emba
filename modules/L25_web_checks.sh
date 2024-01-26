@@ -50,8 +50,11 @@ main_web_check() {
   local PORT=""
   local SERVICE=""
   local SSL=0
+  local PORT_SERVICE=""
+  local VERSIONS=()
+  local VERSION=""
+  local WEB_DONE=0
   WEB_RESULTS=0
-  WEB_DONE=0
 
   # NMAP_PORTS_SERVICES from L15
   if [[ "${#NMAP_PORTS_SERVICES[@]}" -gt 0 ]]; then
@@ -182,6 +185,7 @@ check_for_basic_auth_init() {
   local IP_="${1:-}"
   local PORT_="${2:-}"
   local CREDS="NA"
+  local BASIC_AUTH=0
 
   BASIC_AUTH=$(find "${LOG_DIR}"/l15_emulated_checks_nmap/ -name "nmap*" -exec grep -i "401 Unauthorized" {} \; | wc -l)
 
@@ -286,7 +290,26 @@ web_access_crawler() {
   local CURL_OPTS=( -sS --noproxy '*' )
   [[ -v CURL_CREDS ]] && local CURL_OPTS+=( "${CURL_CREDS}" )
   local CRAWLED_ARR=()
+  local CRAWLED_VULNS=()
   local CURL_RET=""
+  local CRAWL_RESP_200=0
+  local CRAWL_RESP_401=0
+  local C_VULN=""
+  local FILE_ARR_EXT=()
+  local FILENAME_STARTED_PROCESSES_ARR=()
+  local FILEPATH_QEMU_START_ARR=()
+  local FILENAME_ARR_QEMU_START=()
+  local FILENAME_QEMU_START=""
+  local FILENAME_QEMU_STARTED=""
+  local FILE_QEMU_START=""
+  local FILE_QEMU_TEST=""
+  export HTTP_RAND_REF_SIZE=""
+  local POSSIBLE_FILES_ARR=()
+  local R_PATH=""
+  local VULN_FILE=""
+  local VULN_NAME=""
+  local WEB_NAME=""
+  local WEB_PATH=""
 
   if [[ "${SSL_}" -eq 1 ]]; then
     PROTO="https"
@@ -473,6 +496,8 @@ arachni_scan() {
   local SSL_="${3:-}"
   local PROTO="http"
   local ARACHNI_USER="${SUDO_USER:-${USER}}"
+  local ARACHNI_ISSUES=""
+
   if [[ "${SSL_}" -eq 1 ]]; then
     PROTO="https"
   fi

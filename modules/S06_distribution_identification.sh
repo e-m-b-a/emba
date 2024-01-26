@@ -33,6 +33,7 @@ S06_distribution_identification()
   local FILE=""
   local SEARCH_FILE=""
   local FOUND_FILES=()
+  export CSV_RULE=""
 
   write_csv_log "file" "type" "identifier" "csv_rule"
 
@@ -83,6 +84,10 @@ S06_distribution_identification()
 dlink_image_sign() {
   # the firmware version can be found in /config/buildver
   local DLINK_BUILDVER=()
+  local DLINK_BREV=""
+  local DLINK_BVER=""
+  local DLINK_FW_VERx=""
+
   mapfile -t DLINK_BUILDVER < <(find "${FIRMWARE_PATH}" -xdev -path "*config/buildver")
   for DLINK_BVER in "${DLINK_BUILDVER[@]}"; do
     DLINK_FW_VER=$(grep -E "[0-9]+\.[0-9]+" "${DLINK_BVER}")

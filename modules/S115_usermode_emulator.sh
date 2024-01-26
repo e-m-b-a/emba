@@ -52,6 +52,7 @@ S115_usermode_emulator() {
     local BINARY=""
     local BIN_BLACKLIST=()
     export MISSING_AREAS=()
+    export ROOT_CNT=0
 
     print_output "[*] This module creates a working copy of the firmware filesystem in the log directory ${LOG_DIR}.\\n"
     # get the local interface ip address for later verification
@@ -60,9 +61,7 @@ S115_usermode_emulator() {
 
     # some processes are running long and logging a lot
     # to protect the host we are going to kill them on a KILL_SIZE limit
-    KILL_SIZE="50M"
-
-    ROOT_CNT=0
+    export KILL_SIZE="50M"
 
     # load blacklist of binaries that could cause troubles during emulation:
     readarray -t BIN_BLACKLIST < "${CONFIG_DIR}"/emulation_blacklist.cfg
@@ -85,11 +84,12 @@ S115_usermode_emulator() {
         "${HELP_DIR}"/fix_bins_lnk_emulation.sh "${R_PATH}"
       fi
       # MD5_DONE_INT is the array of all MD5 checksums for all root paths -> this is needed to ensure that we do not test bins twice
-      MD5_DONE_INT=()
-      BIN_CNT=0
+      local MD5_DONE_INT=()
+      local BIN_CNT=0
       ((ROOT_CNT=ROOT_CNT+1))
       print_output "[*] Running emulation processes in ${ORANGE}${R_PATH}${NC} root path (${ORANGE}${ROOT_CNT}/${#ROOT_PATH[@]}${NC})."
 
+      local DIR=""
       DIR=$(pwd)
       mapfile -t BIN_EMU_TMP < <(cd "${R_PATH}" && find . -xdev -ignore_readdir_race -type f ! \( -name "*.ko" -o -name "*.so" \) -exec file {} \; 2>/dev/null | grep "ELF.*executable\|ELF.*shared\ object" | grep -v "version\ .\ (FreeBSD)" | cut -d: -f1 2>/dev/null && cd "${DIR}" || exit)
       # we re-create the BIN_EMU_ARR array with all unique binaries for every root directory
@@ -100,6 +100,7 @@ S115_usermode_emulator() {
 
       for BINARY in "${BIN_EMU_TMP[@]}"; do
         # we emulate every binary only once. So calculate the checksum and store it for checking
+        local BIN_MD5_=""
         BIN_MD5_=$(md5sum "${R_PATH}"/"${BINARY}" | cut -d\  -f1)
         if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5_} ]]; then
           BIN_EMU_ARR+=( "${BINARY}" )
@@ -116,6 +117,7 @@ S115_usermode_emulator() {
         local BIN_EMU_NAME_=""
         BIN_EMU_NAME_=$(basename "${FULL_BIN_PATH}")
 
+        local THOLD=0
         THOLD=$(( 25*"${ROOT_CNT}" ))
         # if we have already a log file with a lot of content we assume this binary was already emulated correct
         if [[ $(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_DIR}"/s115_usermode_emulator/qemu_init_"${BIN_EMU_NAME_}".txt 2>/dev/null | grep -c -v -E "\[\*\]\ " || true) -gt "${THOLD}" ]]; then
@@ -211,10 +213,13 @@ S115_usermode_emulator() {
 }
 
 copy_firmware() {
+  local FREE_SPACE=""
+  local NEEDED_SPACE=0
+
   if [[ -d "${FIRMWARE_PATH_BAK}" ]]; then
-    EMULATION_PATH_BASE="${FIRMWARE_PATH}"
+    export EMULATION_PATH_BASE="${FIRMWARE_PATH}"
   else
-    EMULATION_PATH_BASE="${LOG_DIR}"/firmware
+    export EMULATION_PATH_BASE="${LOG_DIR}"/firmware
   fi
 
   # we create a backup copy for user mode emulation only if we have enough disk space.
@@ -478,7 +483,7 @@ emulate_strace_run() {
   local CPU_CONFIG_="${1:-}"
   local BIN_EMU_NAME="${2:-}"
   local MISSING_AREAS_TMP=()
-  LOG_FILE_STRACER="${LOG_PATH_MODULE}""/stracer_""${BIN_EMU_NAME}"".txt"
+  local LOG_FILE_STRACER="${LOG_PATH_MODULE}""/stracer_""${BIN_EMU_NAME}"".txt"
   local FILENAME_MISSING=""
   local PATH_MISSING=""
   local FILENAME_FOUND=""
@@ -555,6 +560,7 @@ emulate_strace_run() {
         fi
         if [[ -n "${FILENAME_FOUND}" ]]; then
           write_log "[*] Copy file ${ORANGE}${FILENAME_FOUND}${NC} to ${ORANGE}${R_PATH}${PATH_MISSING}/${NC}" "${LOG_FILE_STRACER}"
+          local OUTPUT=""
           OUTPUT=$(file "${FILENAME_FOUND}" | cut -d ':' -f2)
           if [[ "${OUTPUT}" != *"(named pipe)" ]];then
             cp -L "${FILENAME_FOUND}" "${R_PATH}""${PATH_MISSING}" 2> /dev/null || true
@@ -598,7 +604,7 @@ emulate_binary() {
   local PARAM=""
 
   BIN_EMU_NAME=$(basename "${FULL_BIN_PATH}")
-  LOG_FILE_BIN="${LOG_PATH_MODULE}""/qemu_tmp_""${BIN_EMU_NAME}"".txt"
+  local LOG_FILE_BIN="${LOG_PATH_MODULE}""/qemu_tmp_""${BIN_EMU_NAME}"".txt"
 
   run_init_test "${FULL_BIN_PATH}"
   # now we should have CPU_CONFIG in log file from Binary
@@ -782,13 +788,15 @@ s115_cleanup() {
   fi
 
   mapfile -t LOG_FILES < <(find "${LOG_PATH_MODULE}""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
-  ILLEGAL_INSTRUCTIONS=$(grep -l "Illegal instruction" "${LOG_PATH_MODULE}""/"qemu_tmp* | wc -l || true)
-  if [[ "${ILLEGAL_INSTRUCTIONS}" -gt 0 ]]; then
-    print_output "[*] Found ${ORANGE}${ILLEGAL_INSTRUCTIONS}${NC}binaries not emulated - Illegal instructions"
+  local ILLEGAL_INSTRUCTIONS_CNT=0
+  ILLEGAL_INSTRUCTIONS_CNT=$(grep -l "Illegal instruction" "${LOG_PATH_MODULE}""/"qemu_tmp* | wc -l || true)
+  if [[ "${ILLEGAL_INSTRUCTIONS_CNT}" -gt 0 ]]; then
+    print_output "[*] Found ${ORANGE}${ILLEGAL_INSTRUCTIONS_CNT}${NC}binaries not emulated - Illegal instructions"
   fi
   if [[ "${#LOG_FILES[@]}" -gt 0 ]] ; then
     sub_module_title "Reporting phase"
     for LOG_FILE_ in "${LOG_FILES[@]}" ; do
+      local LINES_OF_LOG=0
       LINES_OF_LOG=$(grep -a -v -e "^[[:space:]]*$" "${LOG_FILE_}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | \
         grep -a -v "\[\*\] " | grep -a -v "Illegal instruction\|core dumped\|Invalid ELF image for this architecture" | \
         grep -a -c -v "\-\-\-\-\-\-\-\-\-\-\-" || true)

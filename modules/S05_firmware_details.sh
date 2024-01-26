@@ -23,7 +23,7 @@ S05_firmware_details()
 
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local DETECTED_DIR
+  local DETECTED_DIR=""
 
   # we use the file FILE_ARR from helpers module
   DETECTED_DIR=$(find "${LOG_DIR}/firmware" -xdev -type d 2>/dev/null | wc -l)
@@ -65,8 +65,8 @@ release_info() {
   sub_module_title "Release/Version information"
   local R_INFO=""
   local RELEASE=""
+  local RELEASE_STUFF=()
 
-  declare -a RELEASE_STUFF=()
   mapfile -t RELEASE_STUFF < <(config_find "${CONFIG_DIR}""/release_files.cfg")
   if [[ "${RELEASE_STUFF[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
   elif [[ "${#RELEASE_STUFF[@]}" -gt 0 ]] ; then

@@ -18,6 +18,7 @@ S116_qemu_version_detection() {
   module_log_init "${FUNCNAME[0]}"
   local NEG_LOG=0
   local VERSION_LINE=""
+  local WAIT_PIDS_S116=()
 
   if [[ "${RTOS}" -eq 0 ]]; then
     module_title "Identified software components - via usermode emulation."
@@ -27,12 +28,10 @@ S116_qemu_version_detection() {
     # check emba.log for S115_usermode_emulator
     module_wait "S115_usermode_emulator"
 
-    LOG_PATH_S115="${LOG_DIR}"/s115_usermode_emulator.txt
+    local LOG_PATH_S115="${LOG_DIR}"/s115_usermode_emulator.txt
     if [[ -f "${LOG_PATH_S115}" && -d "${LOG_DIR}/s115_usermode_emulator" ]]; then
-      LOG_PATH_MODULE_S115="${LOG_DIR}"/s115_usermode_emulator/
 
       write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
-      TYPE="emulation"
 
       while read -r VERSION_LINE; do
         if echo "${VERSION_LINE}" | grep -v -q "^[^#*/;]"; then
@@ -81,6 +80,14 @@ version_detection_thread() {
   LIC="$(echo "${VERSION_LINE}" | cut -d\; -f3)"
   local CSV_REGEX=""
   CSV_REGEX="$(echo "${VERSION_LINE}" | cut -d\; -f5)"
+
+  local BINARY_PATH_=""
+  local BINARY_PATHS_=()
+  local LOG_PATH_MODULE_S115="${LOG_DIR}"/s115_usermode_emulator/
+  local LOG_PATHS=()
+  local TYPE="emulation"
+  local VERSIONS_DETECTED=()
+  local VERSION_DETECTED=""
 
   if [[ ${STRICT} == "multi_grep" ]]; then
     print_output "[-] Multi grep version identifier for ${ORANGE}${CSV_REGEX}${NC} currently not supported in emulation module" "no_log"

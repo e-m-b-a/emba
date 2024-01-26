@@ -29,7 +29,6 @@ P05_patools_init() {
     patools_extractor "${FIRMWARE_PATH}" "${EXTRACTION_DIR}"
 
     if [[ "${FILES_PATOOLS}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
     fi
@@ -44,7 +43,7 @@ patools_extractor() {
 
   local FIRMWARE_PATH_="${1:-}"
   local EXTRACTION_DIR_="${2:-}"
-  FILES_PATOOLS=0
+  export FILES_PATOOLS=0
   local DIRS_PATOOLS=0
   local FIRMWARE_NAME_=""
 

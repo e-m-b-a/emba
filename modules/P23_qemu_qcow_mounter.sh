@@ -44,7 +44,6 @@ P23_qemu_qcow_mounter() {
     fi
 
     if [[ "${FILES_QCOW_MOUNT}" -gt 0 ]]; then
-      MD5_DONE_DEEP+=( "$(md5sum "${FIRMWARE_PATH}" | awk '{print $1}')" )
       export FIRMWARE_PATH="${LOG_DIR}"/firmware/
       backup_var "FIRMWARE_PATH" "${FIRMWARE_PATH}"
       NEG_LOG=1
@@ -58,7 +57,10 @@ qcow_extractor() {
   local EXTRACTION_DIR_="${2:-}"
   local TMP_QCOW_MOUNT="${TMP_DIR}""/qcow_mount_${RANDOM}"
   local DIRS_QCOW_MOUNT=0
-  FILES_QCOW_MOUNT=0
+  local NBD_DEV=""
+  local NBD_DEVS=()
+  local EXTRACTION_DIR_FINAL=""
+  export FILES_QCOW_MOUNT=0
 
   if ! [[ -f "${QCOW_PATH_}" ]]; then
     print_output "[-] No file for extraction provided"
@@ -107,6 +109,7 @@ qcow_extractor() {
 
     if mount | grep -q "${NBD_DEV}"; then
       EXTRACTION_DIR_FINAL="${EXTRACTION_DIR_}"/"$(basename "${NBD_DEV}")"
+
       copy_qemu_nbd "${TMP_QCOW_MOUNT}" "${EXTRACTION_DIR_FINAL}"
 
       FILES_QCOW_MOUNT=$(find "${EXTRACTION_DIR_FINAL}" -type f | wc -l)

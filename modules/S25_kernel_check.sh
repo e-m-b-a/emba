@@ -103,6 +103,8 @@ populate_karrays() {
   for VER in "${KERNEL_VERSION[@]}" ; do
     demess_kv_version "${VER}"
 
+    # nosemgrep
+    local IFS=" "
     IFS=" " read -r -a KV_C_ARR <<< "$(echo "${KV_ARR[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     for V in "${KV_C_ARR[@]}" ; do
       if [[ -z "${V:-}" ]]; then
@@ -149,6 +151,7 @@ populate_karrays() {
   # if we have no kernel version identified -> we try to identify a possible identifier in the path:
   if [[ "${#KERNEL_VERSION_[@]}" -eq 0 && "${#KERNEL_MODULES[@]}" -ne 0 ]];then
     # remove the first part of the path:
+    local KERNEL_VERSION1=""
     KERNEL_VERSION1=$(echo "${KERNEL_MODULES[0]}" | sed 's/.*\/lib\/modules\///')
     KERNEL_VERSION_+=("${KERNEL_VERSION1}")
     # demess_kv_version removes the unneeded stuff after the version:
@@ -190,6 +193,9 @@ get_kernel_vulns() {
   sub_module_title "Kernel vulnerabilities"
 
   local VER=""
+  local LES_ENTRY=""
+  local LES_CVE=""
+  local LES_CVE_ENTRIES=()
 
   if [[ "${#KERNEL_VERSION[@]}" -gt 0 ]]; then
     print_output "[+] Found linux kernel version/s:"
@@ -213,7 +219,7 @@ get_kernel_vulns() {
           for LES_ENTRY in "${LES_CVE_ENTRIES[@]}"; do
             LES_ENTRY=$(strip_color_codes "${LES_ENTRY}")
             LES_CVE=$(echo "${LES_ENTRY}" | awk '{print $2}' | tr -d '[' | tr -d ']')
-            KNOWN_EXPLOITED=0
+            local KNOWN_EXPLOITED=0
             if [[ -f "${KNOWN_EXP_CSV}" ]]; then
               if grep -q \""${LES_CVE}"\", "${KNOWN_EXP_CSV}"; then
                 print_output "[+] ${ORANGE}WARNING: ${GREEN}Vulnerability ${ORANGE}${LES_CVE}${GREEN} is a known exploited vulnerability.${NC}"
@@ -239,6 +245,7 @@ analyze_kernel_module() {
 
   KMOD_BAD=0
   local KMODULE=""
+  local WAIT_PIDS_S25=()
 
   print_output "[*] Found ${ORANGE}${#KERNEL_MODULES[@]}${NC} kernel modules."
 
@@ -268,9 +275,9 @@ module_analyzer() {
 
   if [[ "${KMODULE}" == *".ko" ]]; then
     LINE=$(modinfo "${KMODULE}" | grep -E "filename|license" | cut -d: -f1,2 | sed ':a;N;$!ba;s/\nlicense//g' | sed 's/filename: //' | sed 's/ //g' | sed 's/:/||license:/' || true)
-    local M_PATH
+    local M_PATH=""
     M_PATH="$( echo "${LINE}" | cut -d '|' -f 1 )"
-    local LICENSE
+    local LICENSE=""
     LICENSE="$( echo "${LINE}" | cut -d '|' -f 3 | sed 's/license:/License: /' )"
 
     if file "${M_PATH}" 2>/dev/null | grep -q 'not stripped'; then
@@ -298,9 +305,12 @@ module_analyzer() {
 check_modprobe() {
   sub_module_title "Check modprobe.d directory and content"
 
-  local MODPROBE_D_DIRS MP_CHECK=0 MP_F_CHECK=0
+  local MODPROBE_D_DIRS=""
+  local MP_CHECK=0
+  local MP_F_CHECK=0
   local MODPROBE_D_DIRS=()
   local MPROBE_DIR=""
+  local MP_CONF=""
 
   readarray -t MODPROBE_D_DIRS < <( find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -iname '*modprobe.d*' -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for MPROBE_DIR in "${MODPROBE_D_DIRS[@]}"; do

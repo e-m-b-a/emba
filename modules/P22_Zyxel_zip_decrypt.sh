@@ -46,6 +46,7 @@ zyxel_zip_extractor() {
   local RI_FILE_BIN_PATH=""
   local ZLD_BINS=()
   local ZLD_BIN=""
+  local COMPRESS_IMG=""
 
   sub_module_title "Zyxel protected ZIP firmware extractor"
 
@@ -62,9 +63,9 @@ zyxel_zip_extractor() {
   print_ln
 
   if command -v jchroot > /dev/null; then
-    CHROOT="jchroot"
+    local CHROOT="jchroot"
     # OPTS see https://github.com/vincentbernat/jchroot#security-note
-    OPTS=(-n emba -U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
+    local OPTS=(-n emba -U -u 0 -g 0 -M "0 $(id -u) 1" -G "0 $(id -g) 1")
     print_output "[*] Using ${ORANGE}jchroot${NC} for building more secure chroot environments"
   else
     print_output "[-] No jchroot binary found ..."
@@ -77,6 +78,7 @@ zyxel_zip_extractor() {
   for ZLD_BIN in "${ZLD_BINS[@]}"; do
     local FILES_ZYXEL=0
     local DIRS_ZYXEL=0
+    local ZIP_KEY=""
     print_output "[*] Checking ${ORANGE}${ZLD_BIN}${NC}"
 
     ZLD_DIR=$(dirname "${ZLD_BIN}")

@@ -22,7 +22,7 @@ S106_deep_key_search()
   module_title "Deep analysis of files for interesting key material"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  local PATTERNS
+  local PATTERNS=""
   PATTERNS="$(config_list "${CONFIG_DIR}""/deep_key_search.cfg" "")"
 
   readarray -t PATTERN_LIST < <(printf '%s' "${PATTERNS}")
@@ -31,7 +31,7 @@ S106_deep_key_search()
     print_output "[*] Pattern: ${PATTERN}"
   done
 
-  SORTED_OCC_LIST=()
+  export SORTED_OCC_LIST=()
 
   deep_key_search
   deep_key_reporter
@@ -45,6 +45,7 @@ deep_key_search() {
   local MATCH_FILES=()
   local MATCH_FILE=""
   local FILE_NAME=""
+  local F_COUNT=0
 
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     GREP_PATTERN_COMMAND=( "${GREP_PATTERN_COMMAND[@]}" "-e" ".{0,15}""${PATTERN}"".{0,15}" )
@@ -82,7 +83,10 @@ deep_key_search() {
 }
 
 deep_key_reporter() {
-  OCC_LIST=()
+  local OCC_LIST=()
+  local OCC=""
+  local P_COUNT=0
+
   for PATTERN in "${PATTERN_LIST[@]}" ; do
     P_COUNT=$(grep -c "${PATTERN}" "${LOG_PATH_MODULE}"/deep_key_search_* 2>/dev/null | cut -d: -f2 | awk '{ SUM += $1} END { print SUM }' || true )
     if [[ "${P_COUNT}" -gt 0 ]]; then

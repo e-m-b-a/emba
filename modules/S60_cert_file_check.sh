@@ -38,6 +38,7 @@ S60_cert_file_check()
   local EXPIRE_WATCH_DATE="2 years"
   local SPECIFIC_CERT=""
   local CERT_WARNING_CNT=0
+  local SIGNATURE=""
 
   if [[ "${CERT_FILES_ARR[0]-}" == "C_N_F" ]]; then print_output "[!] Config not found"
   elif [[ ${#CERT_FILES_ARR[@]} -ne 0 ]]; then

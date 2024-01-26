@@ -30,11 +30,15 @@ S09_firmware_base_version_check() {
   module_title "Static binary firmware versions detection"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  EXTRACTOR_LOG="${LOG_DIR}"/p55_unblob_extractor/unblob_firmware.log
+  local EXTRACTOR_LOG="${LOG_DIR}"/p55_unblob_extractor/unblob_firmware.log
 
   print_output "[*] Static version detection running ..." "no_log" | tr -d "\n"
   write_csv_log "binary/file" "version_rule" "version_detected" "csv_rule" "license" "static/emulation"
-  TYPE="static"
+
+  export TYPE="static"
+  export VERSION_IDENTIFIER=""
+  export WAIT_PIDS_S09=()
+  local VERSIONS_DETECTED=""
 
   print_output "[*] Generate strings overview for further analysis ..." "no_log"
   local BIN=""
@@ -67,6 +71,12 @@ S09_firmware_base_version_check() {
 
     print_dot
 
+    local STRICT=""
+    export LIC=""
+    export BIN_NAME=""
+    local BIN_PATH=""
+    export CSV_REGEX=""
+
     STRICT="$(safe_echo "${VERSION_LINE}" | cut -d\; -f2)"
     LIC="$(safe_echo "${VERSION_LINE}" | cut -d\; -f3)"
     BIN_NAME="$(safe_echo "${VERSION_LINE}" | cut -d\; -f1)"
@@ -88,6 +98,8 @@ S09_firmware_base_version_check() {
     fi
 
     if [[ "${STRICT}" == *"strict"* ]]; then
+      local STRICT_BINS=()
+      local BIN=""
 
       # strict mode
       #   use the defined regex only on a binary called BIN_NAME (field 1)
@@ -117,6 +129,8 @@ S09_firmware_base_version_check() {
       print_dot
 
     elif [[ "${STRICT}" == "zgrep" ]]; then
+      local SPECIAL_FINDS=()
+      local SFILE=""
 
       # zgrep mode:
       #   search for files with identifier in field 1
@@ -182,6 +196,7 @@ S09_firmware_base_version_check() {
       [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       if [[ "${THREADED}" -eq 1 ]]; then
         # this will burn the CPU but in most cases the time of testing is cut into half
+        # TODO: change to local vars via parameters - this is ugly as hell!
         bin_string_checker &
         local TMP_PID="$!"
         store_kill_pids "${TMP_PID}"
@@ -241,7 +256,7 @@ bin_string_checker() {
   local VERSION_IDENTIFIERS_ARR=()
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
-
+  
   # load VERSION_IDENTIFIER string into array for multi_grep handling
   # nosemgrep
   local IFS='&&'
@@ -263,6 +278,7 @@ bin_string_checker() {
     for (( j=0; j<${#VERSION_IDENTIFIERS_ARR[@]}; j++ )); do
       local VERSION_IDENTIFIER="${VERSION_IDENTIFIERS_ARR["${j}"]}"
       local VERSION_FINDER=""
+      local BIN_FILE=""
       [[ -z "${VERSION_IDENTIFIER}" ]] && continue
       # this is a workaround to handle the new multi_grep
       if [[ "${VERSION_IDENTIFIER: 0:1}" == '"' ]]; then

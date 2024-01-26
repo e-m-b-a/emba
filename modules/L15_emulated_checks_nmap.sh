@@ -51,6 +51,11 @@ check_live_nmap_basic() {
   local SERVICE_NAME=""
   local TYPE=""
   export NMAP_PORTS_SERVICES=()
+  local NMAP_CPE_DETECTION=()
+  local NMAP_CPE=""
+  local NMAP_CPES=""
+  local S09_L15_MATCH=""
+  local S116_L15_MATCH=""
 
   sub_module_title "Nmap portscans for emulated system with IP ${ORANGE}${IP_ADDRESS_}${NC}"
 
