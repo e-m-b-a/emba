@@ -247,19 +247,17 @@ check_version() {
   fi
 }
 
-print_ln()
-{
+print_ln() {
   local LOG_SETTING="${1:-}"
   print_output "" "${LOG_SETTING}"
 }
 
-print_dot()
-{
+print_dot() {
+  [[ "${DISABLE_DOTS}" -eq 1 ]] && return
   echo -n "." 2>/dev/null ||true
 }
 
-write_log()
-{
+write_log() {
   readarray TEXT_ARR <<< "${1}"
   local LOG_FILE_ALT="${2:-}"
   local GREP_LOG_WRITE="${3:-}"

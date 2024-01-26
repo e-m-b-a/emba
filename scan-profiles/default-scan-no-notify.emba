@@ -16,6 +16,7 @@
 export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
+export DISABLE_DOTS=1
 export HTML=1
 export QEMULATION=1
 export DISABLE_NOTIFICATIONS=1

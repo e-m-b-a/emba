@@ -27,6 +27,8 @@ repeat_char(){
 }
 
 draw_box() {
+  shopt -s checkwinsize
+
   local BOX_W="${1:-0}"
   local BOX_TITLE="${2:-}"
   BOX_TITLE=" ${BOX_TITLE} "
@@ -98,6 +100,8 @@ system_load_util_str() {
 # we need to use the tmp file for the cpu load, because it takes about a second to get the information and therefore we
 # load this information in the background, write it to the file in a rythm of .2s and when needed, it will be readed from it
 update_box_system_load() {
+  shopt -s checkwinsize
+
   update_cpu() {
     local CPU_LOG_STR_=""
     CPU_LOG_STR_="$(system_load_util_str "$((100-"$(vmstat 1 2 | tail -1 | awk '{print $15}')"))" 0 2> /dev/null || true)"
@@ -153,7 +157,10 @@ status_util_str() {
 # Update second box "STATUS"
 # we need to use the tmp file for the start time point, because the content of the boxes will be refreshed in the background
 update_box_status() {
+  shopt -s checkwinsize
+
   local DATE_STR=""
+
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     DATE_STR="$(sed '3q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
@@ -216,6 +223,8 @@ module_util_str() {
 
 # Update third box "MODULES"
 update_box_modules() {
+  shopt -s checkwinsize
+
   local STARTED_MODULE_STR=""
   local FINISHED_MODULE_STR=""
   local LAST_FINISHED_MODULE_STR=""
@@ -281,8 +290,11 @@ status_2_util_str() {
 
 # Update fourth box "STATUS 2"
 update_box_status_2() {
+  shopt -s checkwinsize
+
   local PHASE_STR=""
   local MODE_STR=""
+
   if [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ; then
     MODE_STR+="DEV/"
   elif [[ ${STRICT_MODE} -eq 1 ]] ; then
@@ -290,11 +302,14 @@ update_box_status_2() {
   else
     MODE_STR+="DEFAULT"
   fi
+
   local ERROR_STR=0
   local BOX_SIZE=0
+
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
+
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
     PHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
     ERROR_STR="/$(grep -c 'Error detected' "${LOG_DIR}/emba_error.log" 2> /dev/null || true )"
@@ -310,6 +325,12 @@ update_box_status_2() {
 }
 
 remove_status_bar() {
+  shopt -s checkwinsize
+  local LINE_POS=""
+  # just in case we do not know our $LINES:
+  ! [[ -v LINES ]] && LINES=$(cat "${TMP_DIR}""/LINES.log")
+  LINE_POS="$(( LINES - 6 ))"
+
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
   fi
@@ -327,8 +348,6 @@ remove_status_bar() {
   kill_box_pid "${PID_STATUS_2}" &
 
   sleep 1
-  local LINE_POS=""
-  LINE_POS="$(( LINES - 6 ))"
   local RM_STR=""
   RM_STR="\e[""${LINE_POS}"";1f\e[0J\e[;r\e[""${LINE_POS}"";1f"
   printf "%b" "${RM_STR}"
@@ -416,6 +435,7 @@ initial_status_bar() {
   # echo "COLUMNS: $COLUMNS" >> "${TMP_DIR}"/shopts.log
   local LINE_POS="$(( LINES - 6 ))"
   printf "\e[%s;1f\e[0J\e[%s;1f" "${LINE_POS}" "${LINE_POS}"
+  echo "${LINES}" > "${TMP_DIR}""/LINES.log"
 
   # we need to restart our foreground logging:
   pkill -f "tail.*-f ${LOG_DIR}/emba.log" 2>/dev/null || true

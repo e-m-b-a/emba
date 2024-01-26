@@ -730,6 +730,8 @@ main() {
       EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run -v "${FIRMWARE_PATH1}":/firmware2 --rm emba -c './emba -l /logs -f /firmware -o /firmware2 -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
     else
+      print_ln "no_log"
+      welcome
       # default EMBA analysis mode:
       local QUEST_CONTAINER_=""
       QUEST_CONTAINER_="$(EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" "${DOCKER_COMPOSE[@]}" run --detach --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}")"
@@ -783,8 +785,7 @@ main() {
         print_output "[*] $(print_date) - Firmware tested: ${ORANGE}${FIRMWARE_PATH}${NC}" "no_log"
         print_output "[*] $(print_date) - Log directory: ${ORANGE}${LOG_DIR}${NC}" "no_log"
         if [[ -v HTML_PATH ]] && [[ -f "${HTML_PATH}"/index.html ]]; then
-          print_ln "main"
-          print_output "[*] $(print_date) - Access the web-report with ${ORANGE}firefox $(abs_path "${HTML_PATH}/index.html")${NC}\\n" "main"
+          print_output "[*] $(print_date) - Access the web-report with ${ORANGE}firefox $(abs_path "${HTML_PATH}/index.html")${NC}" "main"
         fi
         cleaner 0
       else
@@ -800,14 +801,6 @@ main() {
       exit 1
     fi
   fi
-
-  #######################################################################################
-  # Start status bar
-  # if [[ ${DISABLE_STATUS_BAR} -eq 0 ]] ; then
-  #  initial_status_bar
-  #  # Trap the window resize signal (handle window resize events).
-  #  trap 'initial_status_bar' WINCH
-  # fi
 
   #######################################################################################
   # Quests (Q-modules)

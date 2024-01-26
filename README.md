@@ -85,7 +85,7 @@ sudo ./emba -l ~/log -f ~/1st-firmware -o ~/2nd-newer-firmware -t
 
 ## Get involved
 The IoT is growing, the development is ongoing, and there are many new features that we want to add.
-We welcome [pull requests](https://github.com/e-m-b-a/emba/pulls) and [issues](https://github.com/e-m-b-a/emba/issues) on GitHub. Also check the [CONTRIBUTING](./CONTRIBUTING.md) and [CONTRIBUTORS](./CONTRIBUTORS.md) documentation for further information.
+We welcome [pull requests](https://github.com/e-m-b-a/emba/pulls) and [issues](https://github.com/e-m-b-a/emba/issues) on GitHub. Also check the [CONTRIBUTING](./CONTRIBUTING.md) and [CONTRIBUTORS](./CONTRIBUTORS.md) documentation for further details on how to get part of the _EMBA_ commmunity.
 
 ## Team
 
