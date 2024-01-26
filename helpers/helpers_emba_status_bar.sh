@@ -313,6 +313,19 @@ remove_status_bar() {
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
   fi
+  export PID_SYSTEM_LOAD=""
+  [[ -f "${TMP_DIR}"/PID_SYSTEM_LOAD.log ]] && PID_SYSTEM_LOAD="$(cat "${TMP_DIR}"/PID_SYSTEM_LOAD.log)"
+  export PID_STATUS=""
+  [[ -f "${TMP_DIR}"/PID_STATUS.log ]] && PID_STATUS="$(cat "${TMP_DIR}"/PID_STATUS.log)"
+  export PID_MODULES=""
+  [[ -f "${TMP_DIR}"/PID_MODULES.log ]] && PID_MODULES="$(cat "${TMP_DIR}"/PID_MODULES.log)"
+  export PID_STATUS_2=""
+  [[ -f "${TMP_DIR}"/PID_STATUS_2.log ]] && PID_STATUS_2="$(cat "${TMP_DIR}"/PID_STATUS_2.log)"
+  kill_box_pid "${PID_SYSTEM_LOAD}" &
+  kill_box_pid "${PID_STATUS}" &
+  kill_box_pid "${PID_MODULES}" &
+  kill_box_pid "${PID_STATUS_2}" &
+
   sleep 1
   local LINE_POS=""
   LINE_POS="$(( LINES - 6 ))"

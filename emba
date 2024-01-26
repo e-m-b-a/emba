@@ -790,6 +790,7 @@ main() {
         # we do not need the log dir from dependency checker
         [[ -d "${LOG_DIR}" ]] && rm -rf "${LOG_DIR}"
       fi
+      print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
       exit 0
     else
       print_output "[-] $(print_date) - EMBA failed in docker mode!" "main"

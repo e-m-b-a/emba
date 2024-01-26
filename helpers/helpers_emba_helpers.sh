@@ -107,7 +107,7 @@ cleaner() {
   # stop inotifywait on host
   if [[ "${IN_DOCKER}" -eq 0 ]] && pgrep -f "inotifywait.*${LOG_DIR}.*" &> /dev/null 2>&1; then
     print_output "[*] $(print_date) - Stopping inotify ..."
-    pkill -f "inotifywait.*${LOG_DIR}.*" || true
+    pkill -f "inotifywait.*${LOG_DIR}.*" >/dev/null || true
   fi
 
   # Remove status bar and reset screen
@@ -158,7 +158,7 @@ cleaner() {
   [[ "${IN_DOCKER}" -eq 1 ]] && restore_permissions
 
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
-    pkill -f "tail.*-f ${LOG_DIR}/emba.log" || true
+    pkill -f "tail.*-f ${LOG_DIR}/emba.log" > /dev/null || true
   fi
 
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -v K_DOWN_PID ]]; then
