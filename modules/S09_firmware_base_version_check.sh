@@ -256,7 +256,7 @@ bin_string_checker() {
   local VERSION_IDENTIFIERS_ARR=()
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
-  
+
   # load VERSION_IDENTIFIER string into array for multi_grep handling
   # nosemgrep
   local IFS='&&'
