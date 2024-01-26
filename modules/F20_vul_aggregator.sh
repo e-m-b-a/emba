@@ -107,7 +107,9 @@ F20_vul_aggregator() {
       generate_cve_details_cves "${CVES_AGGREGATED[@]}"
     fi
 
-     generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
+    generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
+  else
+    print_output "[-] WARNING: No CVE datasources found in external directory"
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)
