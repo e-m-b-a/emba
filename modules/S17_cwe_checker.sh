@@ -79,7 +79,7 @@ cwe_check() {
   local BIN_TO_CHECK=""
   local BIN_TO_CHECK_ARR=()
   local WAIT_PIDS_S17=()
-  local BINS_CHECKED_ARR=()
+  local NAME=""
 
   if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
     local BINARIES=()
@@ -88,31 +88,43 @@ cwe_check() {
     mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}')
   fi
 
+  local BIN_CHECKED_CNT=0
   for BINARY in "${BINARIES[@]}" ; do
     # as we usually have not the full path from the s13 log, we need to search for the binary again:
     mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -path "*${BINARY}*" | sort -u || true)
     for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
-      if [[ "${BIN_TO_CHECK_ARR[*]}" == *"${BIN_TO_CHECK}"* ]]; then
-        continue
-      fi
       if ( file "${BIN_TO_CHECK}" | grep -q ELF ) ; then
         # do not try to analyze kernel modules:
         [[ "${BIN_TO_CHECK}" == *".ko" ]] && continue
         if [[ "${THREADED}" -eq 1 ]]; then
+          # while s09 is running we throttle this module:
           local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
           if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
             local MAX_MOD_THREADS=1
           fi
+          if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+            # if we have the base linux config file we only test non known Linux binaries
+            # with this we do not waste too much time on open source Linux stuff
+            NAME=$(basename "${BINARY_}")
+            if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+              continue
+            fi
+          fi
 
           cwe_checker_threaded "${BIN_TO_CHECK}" &
-          BINS_CHECKED_ARR+=("${BIN_TO_CHECK}")
           local TMP_PID="$!"
           store_kill_pids "${TMP_PID}"
           WAIT_PIDS_S17+=( "${TMP_PID}" )
+
           max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S17[@]}"
-          continue
         else
           cwe_checker_threaded "${BIN_TO_CHECK}"
+        fi
+        # we stop checking after the first 20 binaries
+        # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
+        BIN_CHECKED_CNT=$((BIN_CHECKED_CNT+1))
+        if [[ "${BIN_CHECKED_CNT}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+          break 2
         fi
       fi
     done
@@ -133,20 +145,12 @@ cwe_checker_threaded () {
   local NAME=""
   NAME=$(basename "${BINARY_}")
 
-  if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-    # if we have the base linux config file we only test non known Linux binaries
-    # with this we do not waste too much time on open source Linux stuff
-    if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-      return
-    fi
-  fi
-
   local OLD_LOG_FILE="${LOG_FILE}"
   local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${NAME}"".txt"
   BINARY_=$(readlink -f "${BINARY_}")
 
   ulimit -Sv "${MEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT 1800 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true
+  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}" "no_log"
 

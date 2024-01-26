@@ -95,13 +95,13 @@ cleaner() {
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${QUEST_CONTAINER}" ]]; then
     if [[ "$(docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" 2>/dev/null)" == "running" ]]; then
       print_output "[*] Stopping Quest Container ..." "no_log"
-      docker kill "${QUEST_CONTAINER}"
+      docker kill "${QUEST_CONTAINER}" 2>/dev/null
     fi
   fi
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${MAIN_CONTAINER}" ]]; then
     if [[ "$(docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER}" 2>/dev/null)" == "running" ]]; then
       print_output "[*] Stopping EMBA main Container ..." "no_log"
-      docker kill "${MAIN_CONTAINER}"
+      docker kill "${MAIN_CONTAINER}" 2>/dev/null
     fi
   fi
   # stop inotifywait on host
