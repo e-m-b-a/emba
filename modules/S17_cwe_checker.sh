@@ -38,10 +38,10 @@ S17_cwe_checker()
 
     if [[ -f "${TMP_DIR}"/CWE_CNT.tmp ]]; then
       lCWE_CNT_=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/CWE_CNT.tmp || true)
-      lTESTED_BINS=$(grep -c " Tested " "${LOG_FILE}" || true)
+      lTESTED_BINS=$(grep -c "cwe-checker found.*different security issues in" "${LOG_FILE}" || true)
     fi
 
-    final_cwe_log "${lCWE_CNT_}"
+    final_cwe_log "${lCWE_CNT_}" "${lTESTED_BINS}"
 
     write_log ""
     write_log "[*] Statistics:${lCWE_CNT_}:${lTESTED_BINS}"
@@ -80,6 +80,7 @@ cwe_check() {
   local BIN_TO_CHECK_ARR=()
   local WAIT_PIDS_S17=()
   local NAME=""
+  local BINS_CHECKED_ARR=()
 
   if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
     local BINARIES=()
@@ -88,8 +89,11 @@ cwe_check() {
     mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}')
   fi
 
-  local BIN_CHECKED_CNT=0
   for BINARY in "${BINARIES[@]}" ; do
+    # ensure we have not tested this binary entry
+    if [[ "${BINS_CHECKED_ARR[*]}" == *"${BINARY}"* ]]; then
+      continue
+    fi
     # as we usually have not the full path from the s13 log, we need to search for the binary again:
     mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -path "*${BINARY}*" | sort -u || true)
     for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
@@ -122,8 +126,8 @@ cwe_check() {
         fi
         # we stop checking after the first 20 binaries
         # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-        BIN_CHECKED_CNT=$((BIN_CHECKED_CNT+1))
-        if [[ "${BIN_CHECKED_CNT}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+        BINS_CHECKED_ARR+=( "${BINARY}" )
+        if [[ "${#BINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
           break 2
         fi
       fi
@@ -172,6 +176,7 @@ cwe_checker_threaded () {
       rm "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
     fi
   fi
+
   print_ln
 
   if [[ -f "${LOG_FILE}" ]]; then
@@ -183,6 +188,7 @@ cwe_checker_threaded () {
 
 final_cwe_log() {
   local TOTAL_CWE_CNT="${1:-}"
+  local lTESTED_BINS="${2:-}"
   local CWE_OUT=()
   local CWE_LINE=""
   local CWE=""
@@ -193,10 +199,9 @@ final_cwe_log() {
     local CWE_LOGS=("${LOG_PATH_MODULE}"/cwe_*.log)
     if [[ "${#CWE_LOGS[@]}" -gt 0 ]]; then
       mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
-      print_ln
       if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
         sub_module_title "Results - CWE-checker binary analysis"
-        print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
+        print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
         for CWE_LINE in "${CWE_OUT[@]}"; do
           CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
           CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"
