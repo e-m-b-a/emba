@@ -767,19 +767,12 @@ main() {
         done
         remove_status_bar
         reset
-      fi
 
-      # stop quest container
-      if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
-        docker kill "${QUEST_CONTAINER_}"
+        if [[ -f "${LOG_DIR}"/f50_base_aggregator.txt ]]; then
+          cat "${LOG_DIR}"/f50_base_aggregator.txt
+        fi
+        D_RETURN=0
       fi
-      if [[ "$( docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER_}" )" == "running" ]]; then
-        docker kill "${MAIN_CONTAINER_}"
-      fi
-      if [[ -f "${LOG_DIR}"/f50_base_aggregator.txt ]]; then
-        cat "${LOG_DIR}"/f50_base_aggregator.txt
-      fi
-      D_RETURN=0
     fi
     enable_strict_mode "${STRICT_MODE}" 0
 
