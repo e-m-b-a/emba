@@ -833,6 +833,7 @@ get_data() {
   export APK_ISSUES=0
   export GPT_RESULTS=0
   export TOTAL_CWE_CNT=0
+  export TOTAL_CWE_BINS=0
 
   if [[ -f "${P02_CSV_LOG}" ]]; then
     ENTROPY=$(grep -a "Entropy" "${P02_CSV_LOG}" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
@@ -956,6 +957,7 @@ get_data() {
   fi
   if [[ -f "${LOG_DIR}"/"${S17_LOG}" ]]; then
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S17_LOG}" | cut -d: -f2 || true)
+    TOTAL_CWE_BINS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S17_LOG}" | cut -d: -f3 || true)
   fi
   if [[ -f "${SYS_EMU_RESULTS}" ]]; then
     BOOTED=$(grep -c "Booted yes;" "${SYS_EMU_RESULTS}" || true)
@@ -1157,7 +1159,7 @@ cwe_logging() {
     mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${LOG_DIR_MOD}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
 
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
-      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in firmware binaries:"
+      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in ${ORANGE}${TOTAL_CWE_BINS}${GREEN} tested binaries:"
       write_link "s17"
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
         CWE="$(echo "${CWE_ENTRY}" | awk '{print $1}')"
@@ -1168,7 +1170,7 @@ cwe_logging() {
         print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
       done
       print_ln
-      write_csv_log "cwe_issues" "${TOTAL_CWE_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "cwe_issues" "${TOTAL_CWE_CNT}" "${TOTAL_CWE_BINS}" "NA" "NA" "NA" "NA" "NA" "NA"
     fi
   fi
 }
