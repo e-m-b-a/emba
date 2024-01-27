@@ -902,9 +902,32 @@ write_anchor_gpt() {
   fi
 }
 
+# secure sleep is for longer sleeps
+# it checks every 10 secs if EMBA is running
+# if EMBA is finished it returns and the caller can exit also
+# paramter: $1 is sleep time in seconds
+secure_sleep() {
+  local SLEEP_TIME="${1:-}"
+  local CUR_SLEEP_TIME=0
+
+  while [[ "${CUR_SLEEP_TIME}" -lt "${SLEEP_TIME}" ]]; do
+    sleep 10
+    CUR_SLEEP_TIME=$((CUR_SLEEP_TIME + 10))
+    if grep -q "Test ended" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+      return
+    fi
+  done
+}
+
 print_running_modules() {
-  sleep 1h
   while true; do
+    if grep -q "Test ended" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+      exit
+    fi
+
+    # we print status about running modules every hour
+    secure_sleep 3600
+
     local STARTED_EMBA_PROCESSES=()
     local EMBA_STARTED_PROC=""
     mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${LOG_DIR}""/""${MAIN_LOG_FILE}" | cut -d '-' -f2 | awk '{print $1}' || true)
@@ -914,7 +937,6 @@ print_running_modules() {
         print_output "[*] $(print_date) - ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
       fi
     done
-    sleep 1h
   done
 }
 

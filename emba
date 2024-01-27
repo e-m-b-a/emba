@@ -505,6 +505,7 @@ main() {
       print_running_modules &
       RUN_MOD_PID="$!"
       store_kill_pids "${RUN_MOD_PID}"
+      echo "${RUN_MOD_PID}" > "${LOG_DIR}"/print_running_modules.pid
       disown "${RUN_MOD_PID}" 2> /dev/null || true
     fi
 
@@ -768,7 +769,8 @@ main() {
           sleep 1
         done
         remove_status_bar
-        reset
+        # reset
+        printf "\x1Bc"
 
         if [[ -f "${LOG_DIR}"/f50_base_aggregator.txt ]]; then
           cat "${LOG_DIR}"/f50_base_aggregator.txt
@@ -795,7 +797,7 @@ main() {
       print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
       exit 0
     else
-      print_output "[-] $(print_date) - EMBA failed in docker mode!" "main"
+      print_output "[-] $(print_date) - Test ended on ""$(print_date)"" and EMBA failed in docker mode!" "main"
       cleaner 0
       write_notification "EMBA failed analysis in default mode"
       exit 1

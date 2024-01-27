@@ -29,6 +29,11 @@ repeat_char(){
 draw_box() {
   shopt -s checkwinsize
 
+  # just in case we do not know our $LINES:
+  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    LINES=$(cat "${TMP_DIR}""/LINES.log")
+  fi
+
   local BOX_W="${1:-0}"
   local BOX_TITLE="${2:-}"
   BOX_TITLE=" ${BOX_TITLE} "
@@ -102,6 +107,11 @@ system_load_util_str() {
 update_box_system_load() {
   shopt -s checkwinsize
 
+  # just in case we do not know our $LINES:
+  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    LINES=$(cat "${TMP_DIR}""/LINES.log")
+  fi
+
   update_cpu() {
     local CPU_LOG_STR_=""
     CPU_LOG_STR_="$(system_load_util_str "$((100-"$(vmstat 1 2 | tail -1 | awk '{print $15}')"))" 0 2> /dev/null || true)"
@@ -158,6 +168,11 @@ status_util_str() {
 # we need to use the tmp file for the start time point, because the content of the boxes will be refreshed in the background
 update_box_status() {
   shopt -s checkwinsize
+
+  # just in case we do not know our $LINES:
+  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    LINES=$(cat "${TMP_DIR}""/LINES.log")
+  fi
 
   local DATE_STR=""
 
@@ -234,6 +249,11 @@ update_box_modules() {
   local MODULES_EMBA=()
   local MODULE_FILE=""
 
+  # just in case we do not know our $LINES:
+  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    LINES=$(cat "${TMP_DIR}""/LINES.log")
+  fi
+
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     COUNT_MODULES="$(sed '4q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
@@ -292,6 +312,11 @@ status_2_util_str() {
 update_box_status_2() {
   shopt -s checkwinsize
 
+  # just in case we do not know our $LINES:
+  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    LINES=$(cat "${TMP_DIR}""/LINES.log")
+  fi
+
   local PHASE_STR=""
   local MODE_STR=""
 
@@ -325,27 +350,44 @@ update_box_status_2() {
 }
 
 remove_status_bar() {
+  if [[ "${DISABLE_STATUS_BAR}" -eq 1 ]]; then
+    return
+  fi
+
   shopt -s checkwinsize
   local LINE_POS=""
   # just in case we do not know our $LINES:
-  ! [[ -v LINES ]] && LINES=$(cat "${TMP_DIR}""/LINES.log")
+  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    LINES=$(cat "${TMP_DIR}""/LINES.log")
+  fi
   LINE_POS="$(( LINES - 6 ))"
 
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
   fi
   local PID_SYSTEM_LOAD=""
-  [[ -f "${TMP_DIR}"/PID_SYSTEM_LOAD.log ]] && PID_SYSTEM_LOAD="$(cat "${TMP_DIR}"/PID_SYSTEM_LOAD.log)"
+  if [[ -f "${TMP_DIR}"/PID_SYSTEM_LOAD.log ]]; then
+    PID_SYSTEM_LOAD="$(cat "${TMP_DIR}"/PID_SYSTEM_LOAD.log)"
+    kill_box_pid "${PID_SYSTEM_LOAD}" &
+  fi
+
   local PID_STATUS=""
-  [[ -f "${TMP_DIR}"/PID_STATUS.log ]] && PID_STATUS="$(cat "${TMP_DIR}"/PID_STATUS.log)"
+  if [[ -f "${TMP_DIR}"/PID_STATUS.log ]]; then
+    PID_STATUS="$(cat "${TMP_DIR}"/PID_STATUS.log)"
+    kill_box_pid "${PID_STATUS}" &
+  fi
+
   local PID_MODULES=""
-  [[ -f "${TMP_DIR}"/PID_MODULES.log ]] && PID_MODULES="$(cat "${TMP_DIR}"/PID_MODULES.log)"
+  if [[ -f "${TMP_DIR}"/PID_MODULES.log ]]; then
+    PID_MODULES="$(cat "${TMP_DIR}"/PID_MODULES.log)"
+    kill_box_pid "${PID_MODULES}" &
+  fi
+
   local PID_STATUS_2=""
-  [[ -f "${TMP_DIR}"/PID_STATUS_2.log ]] && PID_STATUS_2="$(cat "${TMP_DIR}"/PID_STATUS_2.log)"
-  kill_box_pid "${PID_SYSTEM_LOAD}" &
-  kill_box_pid "${PID_STATUS}" &
-  kill_box_pid "${PID_MODULES}" &
-  kill_box_pid "${PID_STATUS_2}" &
+  if [[ -f "${TMP_DIR}"/PID_STATUS_2.log ]]; then
+    PID_STATUS_2="$(cat "${TMP_DIR}"/PID_STATUS_2.log)"
+    kill_box_pid "${PID_STATUS_2}" &
+  fi
 
   sleep 1
   local RM_STR=""

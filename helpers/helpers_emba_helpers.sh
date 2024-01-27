@@ -91,7 +91,7 @@ cleaner() {
   if [[ "${INTERRUPT_CLEAN}" -eq 1 ]]; then
     print_output "[*] $(print_date) - Interrupt detected!" "no_log"
   fi
-  print_output "[*] $(print_date) - Final cleanup started." "no_log"
+  print_output "[*] $(print_date) - Final cleanup started." "main"
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${QUEST_CONTAINER}" ]]; then
     if [[ "$(docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" 2>/dev/null)" == "running" ]]; then
       print_output "[*] $(print_date) - Stopping Quest Container ..." "no_log"
@@ -159,6 +159,7 @@ cleaner() {
 
   if [[ "${IN_DOCKER}" -eq 0 ]]; then
     pkill -f "tail.*-f ${LOG_DIR}/emba.log" > /dev/null || true
+    remove_status_bar
   fi
 
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -v K_DOWN_PID ]]; then
@@ -187,6 +188,16 @@ cleaner() {
       fi
     done < "${TMP_DIR}"/EXIT_KILL_PIDS.log
   fi
+
+  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log ]]; then
+    while read -r KILL_PID; do
+      if [[ -e /proc/"${KILL_PID}" ]]; then
+        print_output "[*] $(print_date) - Stopping EMBA process with PID ${KILL_PID} in docker" "no_log"
+        kill -9 "${KILL_PID}" > /dev/null || true
+      fi
+    done < "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
+  fi
+
 
   if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
     if ! [[ -s "${LOG_DIR}"/emba_error.log ]]; then
