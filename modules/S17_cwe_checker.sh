@@ -128,6 +128,8 @@ cwe_check() {
         # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
         BINS_CHECKED_ARR+=( "${BINARY}" )
         if [[ "${#BINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+          print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
+          print_output "[*] For complete analysis enable FULL_TEST." "no_log"
           break 2
         fi
       fi
