@@ -83,6 +83,14 @@ max_pids_protection() {
   done
 }
 
+check_emba_ended() {
+  if grep -q "Test ended" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+    # EMBA is already finished
+    return 0
+  fi
+  return 1
+}
+
 # $1 - 1 some interrupt detected
 # $1 - 0 default exit 0
 cleaner() {
@@ -387,7 +395,7 @@ disk_space_monitor() {
     fi
 
     if [[ -f "${MAIN_LOG}" ]]; then
-      if grep -q "Test ended\|EMBA failed" "${MAIN_LOG}" 2>/dev/null; then
+      if check_emba_ended; then
         break
       fi
     fi

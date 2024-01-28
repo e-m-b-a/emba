@@ -657,7 +657,8 @@ binary_fct_output() {
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local FCT_LINK=""
     if [[ "${SEMGREP_CNT}" -gt 0 ]] && [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log ]]; then
-      FCT_LINK="${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log
+      # FCT_LINK="${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log
+      FCT_LINK="s16"
     else
       FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
     fi
@@ -684,7 +685,7 @@ output_cve_exploits() {
   if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
     if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]] && [[ -f "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
-      write_link "f20#collectcveandexploitdetails"
+      write_link "f20#softwareinventoryinitialoverview"
 
       # run over F20_summary.txt and add links - need to do this here and not in f20 as there bites us the threading mode
       while read -r OVERVIEW_LINE; do
@@ -696,8 +697,13 @@ output_cve_exploits() {
     fi
 
     if [[ -v VERSIONS_AGGREGATED[@] ]]; then
-      print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details.\\n"
-      write_link "f20#softwareinventoryinitialoverview"
+      if [[ -f "${LOG_DIR}"/f21_cyclonedx_sbom.txt ]]; then
+        print_output "[+] Identified a SBOM including ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details."
+        write_link "f21"
+      else
+        print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details.\\n"
+        write_link "f20#softwareinventoryinitialoverview"
+      fi
       write_csv_log "versions_identified" "${#VERSIONS_AGGREGATED[@]}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       DATA=1
     fi

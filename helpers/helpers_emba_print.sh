@@ -913,7 +913,7 @@ secure_sleep() {
   while [[ "${CUR_SLEEP_TIME}" -lt "${SLEEP_TIME}" ]]; do
     sleep 10
     CUR_SLEEP_TIME=$((CUR_SLEEP_TIME + 10))
-    if grep -q "Test ended" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+    if check_emba_ended; then
       return
     fi
   done
@@ -921,8 +921,10 @@ secure_sleep() {
 
 print_running_modules() {
   while true; do
-    if grep -q "Test ended" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
-      exit
+    if [[ -f "${LOG_DIR}""/""${MAIN_LOG_FILE}" ]]; then
+      if check_emba_ended; then
+        exit
+      fi
     fi
 
     # we print status about running modules every hour

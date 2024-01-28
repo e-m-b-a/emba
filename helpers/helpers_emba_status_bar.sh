@@ -143,6 +143,9 @@ update_box_system_load() {
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     fi
+    if check_emba_ended; then
+      exit
+    fi
   done
 }
 
@@ -213,6 +216,9 @@ update_box_status() {
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
+    fi
+    if check_emba_ended; then
+      exit
     fi
   done
 }
@@ -286,6 +292,9 @@ update_box_modules() {
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     fi
+    if check_emba_ended; then
+      exit
+    fi
   done
 }
 
@@ -346,6 +355,9 @@ update_box_status_2() {
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
     fi
+    if check_emba_ended; then
+      exit
+    fi
   done
 }
 
@@ -365,26 +377,35 @@ remove_status_bar() {
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
   fi
-  local PID_SYSTEM_LOAD=""
-  if [[ -f "${TMP_DIR}"/PID_SYSTEM_LOAD.log ]]; then
+
+  if [[ "${PID_SYSTEM_LOAD:-}" =~ ^[0-9]+$ ]]; then
+    kill_box_pid "${PID_SYSTEM_LOAD}" &
+  elif [[ -f "${TMP_DIR}"/PID_SYSTEM_LOAD.log ]]; then
+    local PID_SYSTEM_LOAD=""
     PID_SYSTEM_LOAD="$(cat "${TMP_DIR}"/PID_SYSTEM_LOAD.log)"
     kill_box_pid "${PID_SYSTEM_LOAD}" &
   fi
 
-  local PID_STATUS=""
-  if [[ -f "${TMP_DIR}"/PID_STATUS.log ]]; then
+  if [[ "${PID_STATUS:-}" =~ ^[0-9]+$ ]]; then
+    kill_box_pid "${PID_STATUS}" &
+  elif [[ -f "${TMP_DIR}"/PID_STATUS.log ]]; then
+    local PID_STATUS=""
     PID_STATUS="$(cat "${TMP_DIR}"/PID_STATUS.log)"
     kill_box_pid "${PID_STATUS}" &
   fi
 
-  local PID_MODULES=""
-  if [[ -f "${TMP_DIR}"/PID_MODULES.log ]]; then
+  if [[ "${PID_MODULES:-}" =~ ^[0-9]+$ ]]; then
+    kill_box_pid "${PID_MODULES}" &
+  elif [[ -f "${TMP_DIR}"/PID_MODULES.log ]]; then
+    local PID_MODULES=""
     PID_MODULES="$(cat "${TMP_DIR}"/PID_MODULES.log)"
     kill_box_pid "${PID_MODULES}" &
   fi
 
-  local PID_STATUS_2=""
-  if [[ -f "${TMP_DIR}"/PID_STATUS_2.log ]]; then
+  if [[ "${PID_STATUS_2:-}" =~ ^[0-9]+$ ]]; then
+    kill_box_pid "${PID_STATUS_2}" &
+  elif [[ -f "${TMP_DIR}"/PID_STATUS_2.log ]]; then
+    local PID_STATUS_2=""
     PID_STATUS_2="$(cat "${TMP_DIR}"/PID_STATUS_2.log)"
     kill_box_pid "${PID_STATUS_2}" &
   fi
@@ -446,7 +467,7 @@ kill_box_pid() {
     return
   fi
   while [[ -e /proc/"${PID}" ]]; do
-    # print_output "[*] wait pid protection - running pid: $PID"
+    # print_output "[*] Status bar - kill pid: $PID" "no_log"
     kill -9 "${PID}" 2>/dev/null || true
   done
 }
