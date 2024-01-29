@@ -18,6 +18,8 @@
 #               identifies vulnerabilities via the version number and tries to verify the
 #               CVEs
 
+export THREAD_PRIO=1
+
 S26_kernel_vuln_verifier()
 {
   module_log_init "${FUNCNAME[0]}"
@@ -57,6 +59,7 @@ S26_kernel_vuln_verifier()
   export KERNEL_CONFIG_PATH="NA"
   export KERNEL_ELF_PATH=""
   local K_VERSION_KORG=""
+  export COMPILE_SOURCE_FILES_VERIFIED=0
 
   for K_VERSION in "${K_VERSIONS[@]}"; do
     local K_FOUND=0
@@ -296,10 +299,14 @@ S26_kernel_vuln_verifier()
             if [[ "${K_PATH}" == "arch/"* ]]; then
               if [[ "${K_PATH}" == "arch/${ORIG_K_ARCH}/"* ]]; then
                 ((CNT_PATHS_FOUND+=1))
-                symbol_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
-                WAIT_PIDS_S26+=( "$!" )
-                compile_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
-                WAIT_PIDS_S26+=( "$!" )
+                if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
+                  symbol_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
+                  WAIT_PIDS_S26+=( "$!" )
+                fi
+                if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
+                  compile_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
+                  WAIT_PIDS_S26+=( "$!" )
+                fi
               else
                 # this vulnerability is for a different architecture -> we can skip it for our kernel
                 OUTx="[-] Vulnerable path for different architecture found for ${ORANGE}${K_PATH}${NC} - not further processing ${ORANGE}${CVE}${NC}"
@@ -309,10 +316,14 @@ S26_kernel_vuln_verifier()
               fi
             else
               ((CNT_PATHS_FOUND+=1))
-              symbol_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
-              WAIT_PIDS_S26+=( "$!" )
-              compile_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
-              WAIT_PIDS_S26+=( "$!" )
+              if [[ "${SYMBOLS_CNT}" -gt 0 ]]; then
+                symbol_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
+                WAIT_PIDS_S26+=( "$!" )
+              fi
+              if [[ "${COMPILE_SOURCE_FILES_VERIFIED}" -gt 0 ]]; then
+                compile_verifier "${CVE}" "${K_VERSION}" "${K_PATH}" "${CVSS2}/${CVSS3}" &
+                WAIT_PIDS_S26+=( "$!" )
+              fi
             fi
           else
             # no source file in our kernel sources -> no vulns
@@ -429,7 +440,7 @@ compile_kernel() {
   local KERNEL_DIR="${2:-}"
   local KARCH="${3:-}"
   export COMPILE_SOURCE_FILES=0
-  local COMPILE_SOURCE_FILES_VERIFIED=""
+  export COMPILE_SOURCE_FILES_VERIFIED=0
 
   if ! [[ -f "${KERNEL_CONFIG_FILE}" ]]; then
     print_output "[-] No supported kernel config found - ${ORANGE}${KERNEL_CONFIG_FILE}${NC}"
@@ -495,6 +506,24 @@ compile_kernel() {
   fi
 }
 
+report_kvulns_csv() {
+  local VULN="${1:-}"
+  local CVE=""
+  local CVSS2=""
+  local CVSS3=""
+  local CVE_SYMBOL_FOUND=0
+  local CVE_COMPILE_FOUND=0
+  local CVE_SYMBOL_FOUND=0
+  local CVE_COMPILE_FOUND=0
+
+  CVE=$(echo "${VULN}" | cut -d: -f1)
+  CVSS2="$(echo "${VULN}" | cut -d: -f2)"
+  CVSS3="$(echo "${VULN}" | cut -d: -f3)"
+  CVE_SYMBOL_FOUND=$(find "${LOG_PATH_MODULE}" -name "${CVE}_symbol_verified.txt" | wc -l)
+  CVE_COMPILE_FOUND=$(find "${LOG_PATH_MODULE}" -name "${CVE}_compiled_verified.txt" | wc -l)
+  echo "${K_VERSION};${ORIG_K_ARCH};${CVE};${CVSS2};${CVSS3};${CVE_SYMBOL_FOUND};${CVE_COMPILE_FOUND}" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv
+}
+
 final_log_kernel_vulns() {
   sub_module_title "Linux kernel verification results"
   local K_VERSION="${1:-}"
@@ -526,6 +555,7 @@ final_log_kernel_vulns() {
   local CVE_CRITICAL=""
   local CVSS2_CRITICAL=""
   local CVSS3_CRITICAL=""
+  local WAIT_PIDS_S26_1=()
 
   print_output "[*] Generating final kernel report ..." "no_log"
   echo "Kernel version;Architecture;CVE;CVSSv2;CVSSv3;Verified with symbols;Verified with compile files" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv
@@ -537,20 +567,14 @@ final_log_kernel_vulns() {
   # we walk through the original version based kernel vulnerabilities and report the results
   # from symbols and kernel configuration
   for VULN in "${ALL_KVULNS[@]}"; do
-    local CVE=""
-    local CVSS2=""
-    local CVSS3=""
-    local CVE_SYMBOL_FOUND=0
-    local CVE_COMPILE_FOUND=0
-    local CVE_SYMBOL_FOUND=0
-    local CVE_COMPILE_FOUND=0
-
-    CVE=$(echo "${VULN}" | cut -d: -f1)
-    CVSS2="$(echo "${VULN}" | cut -d: -f2)"
-    CVSS3="$(echo "${VULN}" | cut -d: -f3)"
-    CVE_SYMBOL_FOUND=$(find "${LOG_PATH_MODULE}" -name "${CVE}_symbol_verified.txt" | wc -l)
-    CVE_COMPILE_FOUND=$(find "${LOG_PATH_MODULE}" -name "${CVE}_compiled_verified.txt" | wc -l)
-    echo "${K_VERSION};${ORIG_K_ARCH};${CVE};${CVSS2};${CVSS3};${CVE_SYMBOL_FOUND};${CVE_COMPILE_FOUND}" >> "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv
+    if [[ "${THREADED}" -eq 1 ]]; then
+      report_kvulns_csv "${VULN}" &
+      local TMP_PID="$!"
+      WAIT_PIDS_S26_1+=( "${TMP_PID}" )
+      max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S26_1[@]}"
+    else
+      report_kvulns_csv "${VULN}"
+    fi
   done
 
   SYM_USAGE_VERIFIED=$(wc -l "${LOG_PATH_MODULE}"/CVE-*symbol_* 2>/dev/null | tail -1 | awk '{print $1}' 2>/dev/null || true)
@@ -562,10 +586,6 @@ final_log_kernel_vulns() {
   CVE_VERIFIED_SYMBOLS=$(cat "${LOG_PATH_MODULE}"/CVE-*symbol_verified.txt 2>/dev/null | grep "exported symbol" | cut -d\  -f1 | sort -u | wc -l || true)
   # nosemgrep
   CVE_VERIFIED_COMPILED=$(cat "${LOG_PATH_MODULE}"/CVE-*compiled_verified.txt 2>/dev/null| grep "compiled path verified" | cut -d\  -f1 | sort -u | wc -l || true)
-  CVE_VERIFIED_ONE=$(cut -d\; -f6-7 "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv | grep -c "1" || true)
-  CVE_VERIFIED_OVERLAP=$(grep -c ";1;1" "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv || true)
-  mapfile -t CVE_VERIFIED_OVERLAP_CRITICAL < <(grep ";1;1$" "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv | grep ";9.[0-9];\|;10;" || true)
-  mapfile -t CVE_VERIFIED_ONE_CRITICAL < <(grep ";1;\|;1$" "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv | grep ";9.[0-9];\|;10;" || true)
 
   print_output "[+] Identified ${ORANGE}${#ALL_KVULNS[@]}${GREEN} unverified CVE vulnerabilities for kernel version ${ORANGE}${K_VERSION}${NC}"
   write_link "${LOG_PATH_MODULE}/cve_results_kernel_${K_VERSION}.csv"
@@ -583,6 +603,14 @@ final_log_kernel_vulns() {
   print_output "[*] ${ORANGE}${VULN_PATHS_VERIFIED_SYMBOLS}${NC} vulnerable paths verified via symbols"
   print_output "[*] ${ORANGE}${VULN_PATHS_VERIFIED_COMPILED}${NC} vulnerable paths verified via compiled paths"
   print_ln
+
+  # we need to wait for the cve_results_kernel_"${K_VERSION}".csv
+  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S26_1[@]}"
+
+  CVE_VERIFIED_ONE=$(cut -d\; -f6-7 "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv | grep -c "1" || true)
+  CVE_VERIFIED_OVERLAP=$(grep -c ";1;1" "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv || true)
+  mapfile -t CVE_VERIFIED_OVERLAP_CRITICAL < <(grep ";1;1$" "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv | grep ";9.[0-9];\|;10;" || true)
+  mapfile -t CVE_VERIFIED_ONE_CRITICAL < <(grep ";1;\|;1$" "${LOG_PATH_MODULE}"/cve_results_kernel_"${K_VERSION}".csv | grep ";9.[0-9];\|;10;" || true)
 
   if [[ "${CVE_VERIFIED_SYMBOLS}" -gt 0 ]]; then
     print_output "[+] Verified CVEs: ${ORANGE}${CVE_VERIFIED_SYMBOLS}${GREEN} (exported symbols)"
@@ -604,8 +632,13 @@ final_log_kernel_vulns() {
       CVE_CRITICAL=$(echo "${CVE_VERIFIED_ONE_CRITICAL_}" | cut -d\; -f3)
       CVSS2_CRITICAL=$(echo "${CVE_VERIFIED_ONE_CRITICAL_}" | cut -d\; -f4)
       CVSS3_CRITICAL=$(echo "${CVE_VERIFIED_ONE_CRITICAL_}" | cut -d\; -f5)
-      identify_exploits "${CVE_CRITICAL}"
-      print_output "$(indent "$(orange "${ORANGE}${CVE_CRITICAL}${GREEN}\t-\t${ORANGE}${CVSS2_CRITICAL}${GREEN} / ${ORANGE}${CVSS3_CRITICAL}${GREEN}\t-\tExploit/PoC: ${ORANGE}${EXPLOIT_DETECTED} ${EXP} / ${POC_DETECTED} ${POC}${NC}")")"
+      # disabled because it is too slow
+      # identify_exploits "${CVE_CRITICAL}"
+      if [[ "${EXPLOIT_DETECTED:-"no"}" == "yes" ]] || [[ "${POC_DETECTED:-"no"}" == "yes" ]]; then
+        print_output "$(indent "$(orange "${ORANGE}${CVE_CRITICAL}${GREEN}\t-\t${ORANGE}${CVSS2_CRITICAL}${GREEN} / ${ORANGE}${CVSS3_CRITICAL}${GREEN}\t-\tExploit/PoC: ${ORANGE}${EXPLOIT_DETECTED} ${EXP} / ${POC_DETECTED} ${POC}${NC}")")"
+      else
+        print_output "$(indent "$(orange "${ORANGE}${CVE_CRITICAL}${GREEN}\t-\t${ORANGE}${CVSS2_CRITICAL}${GREEN} / ${ORANGE}${CVSS3_CRITICAL}${GREEN}")")"
+      fi
     done
   fi
 
@@ -616,8 +649,13 @@ final_log_kernel_vulns() {
       CVE_CRITICAL=$(echo "${CVE_VERIFIED_OVERLAP_CRITICAL_}" | cut -d\; -f3)
       CVSS2_CRITICAL=$(echo "${CVE_VERIFIED_OVERLAP_CRITICAL_}" | cut -d\; -f4)
       CVSS3_CRITICAL=$(echo "${CVE_VERIFIED_OVERLAP_CRITICAL_}" | cut -d\; -f5)
-      identify_exploits "${CVE_CRITICAL}"
-      print_output "$(indent "$(orange "${ORANGE}${CVE_CRITICAL}${GREEN}\t-\t${ORANGE}${CVSS2_CRITICAL}${GREEN} / ${ORANGE}${CVSS3_CRITICAL}${GREEN}\t-\tExploit/PoC: ${ORANGE}${EXPLOIT_DETECTED} ${EXP} / ${POC_DETECTED} ${POC}${NC}")")"
+      # disabled because it is too slow
+      # identify_exploits "${CVE_CRITICAL}"
+      if [[ "${EXPLOIT_DETECTED:-"no"}" == "yes" ]] || [[ "${POC_DETECTED:-"no"}" == "yes" ]]; then
+        print_output "$(indent "$(orange "${ORANGE}${CVE_CRITICAL}${GREEN}\t-\t${ORANGE}${CVSS2_CRITICAL}${GREEN} / ${ORANGE}${CVSS3_CRITICAL}${GREEN}\t-\tExploit/PoC: ${ORANGE}${EXPLOIT_DETECTED} ${EXP} / ${POC_DETECTED} ${POC}${NC}")")"
+      else
+        print_output "$(indent "$(orange "${ORANGE}${CVE_CRITICAL}${GREEN}\t-\t${ORANGE}${CVSS2_CRITICAL}${GREEN} / ${ORANGE}${CVSS3_CRITICAL}${GREEN}")")"
+      fi
     done
   fi
   write_log "[*] Statistics:${K_VERSION}:${#ALL_KVULNS[@]}:${CVE_VERIFIED_SYMBOLS}:${CVE_VERIFIED_COMPILED}"
