@@ -40,6 +40,24 @@ S09_firmware_base_version_check() {
   export WAIT_PIDS_S09=()
   local VERSIONS_DETECTED=""
 
+  print_output "[*] Generate strings overview for further analysis ..." "no_log"
+  local BIN=""
+  # if we have a linux we only need to check our BINARIES array
+  if [[ ${RTOS} -eq 0 ]]; then
+    local FILE_ARR=( "${BINARIES[@]}" )
+  fi
+  mkdir "${LOG_PATH_MODULE}"/strings_bins/
+  if ! [[ -d "${LOG_PATH_MODULE}"/strings_bins ]]; then
+    mkdir "${LOG_PATH_MODULE}"/strings_bins || true
+  fi
+  for BIN in "${FILE_ARR[@]}"; do
+    generate_strings "${BIN}" &
+    local TMP_PID="$!"
+    store_kill_pids "${TMP_PID}"
+    WAIT_PIDS_S09_1+=( "${TMP_PID}" )
+    max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S09_1[@]}"
+  done
+
   while read -r VERSION_LINE; do
     if safe_echo "${VERSION_LINE}" | grep -v -q "^[^#*/;]"; then
       continue
@@ -90,10 +108,15 @@ S09_firmware_base_version_check() {
       [[ "${RTOS}" -eq 1 ]] && continue
 
       mapfile -t STRICT_BINS < <(find "${OUTPUT_DIR}" -xdev -executable -type f -name "${BIN_NAME}" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3)
+      # before moving on we need to ensure our strings files are generated:
+      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       for BIN in "${STRICT_BINS[@]}"; do
         # as the STRICT_BINS array could also include executable scripts we have to check for ELF files now:
         if file "${BIN}" | grep -q ELF ; then
-          VERSION_FINDER=$(strings "${BIN}" | grep -E "${VERSION_IDENTIFIER}" | sort -u || true)
+          MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
+          BIN_NAME_REAL="$(basename "${BIN}")"
+          STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
+          VERSION_FINDER=$(grep -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u || true)
           if [[ -n ${VERSION_FINDER} ]]; then
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${BIN_NAME} ${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static - strict - deprecated${GREEN})."
@@ -170,6 +193,7 @@ S09_firmware_base_version_check() {
         fi
       fi
 
+      [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S09_1[@]}"
       if [[ "${THREADED}" -eq 1 ]]; then
         # this will burn the CPU but in most cases the time of testing is cut into half
         # TODO: change to local vars via parameters - this is ugly as hell!
@@ -205,18 +229,52 @@ S09_firmware_base_version_check() {
   module_end_log "${FUNCNAME[0]}" "${VERSIONS_DETECTED}"
 }
 
+generate_strings() {
+  local BIN="${1:-}"
+  local BIN_FILE=""
+  local MD5_SUM=""
+  local BIN_NAME_REAL=""
+  local STRINGS_OUTPUT=""
+
+  # if we do not talk about a RTOS it is a Linux and we test ELF files
+  if [[ ${RTOS} -eq 0 ]]; then
+    BIN_FILE=$(file "${BIN}" || true)
+    if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
+      return
+    fi
+  fi
+
+  MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
+  BIN_NAME_REAL="$(basename "${BIN}")"
+  STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
+  if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
+    strings "${BIN}" > "${STRINGS_OUTPUT}" || true
+  fi
+}
+
 bin_string_checker() {
+  local VERSION_IDENTIFIERS_ARR=()
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER%\'}"
   VERSION_IDENTIFIER="${VERSION_IDENTIFIER/\'}"
-  local VERSION_IDENTIFIERS_ARR=()
 
+  # load VERSION_IDENTIFIER string into array for multi_grep handling
   # nosemgrep
   local IFS='&&'
   IFS='&&' read -r -a VERSION_IDENTIFIERS_ARR <<< "${VERSION_IDENTIFIER}"
 
+  local BIN_FILE=""
   local BIN=""
 
+  if [[ ${RTOS} -eq 0 ]]; then
+    local FILE_ARR=( "${BINARIES[@]}" )
+  fi
+
   for BIN in "${FILE_ARR[@]}"; do
+    MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
+    BIN_NAME_REAL="$(basename "${BIN}")"
+    STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
+
+    # print_output "[*] Testing $BIN" "no_log"
     for (( j=0; j<${#VERSION_IDENTIFIERS_ARR[@]}; j++ )); do
       local VERSION_IDENTIFIER="${VERSION_IDENTIFIERS_ARR["${j}"]}"
       local VERSION_FINDER=""
@@ -233,9 +291,11 @@ bin_string_checker() {
         if ! [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* || "${BIN_FILE}" == *ELF* ]] ; then
           continue 2
         fi
+
         if [[ "${BIN_FILE}" == *ELF* ]] ; then
           # print_output "[*] Testing $BIN with version identifier ${VERSION_IDENTIFIER}" "no_log"
-          VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
+          VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
+
           if [[ -n ${VERSION_FINDER} ]]; then
             if [[ "${#VERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#VERSION_IDENTIFIERS_ARR[@]}" ]]; then
               # we found the first identifier and now we need to check the other identifiers also
@@ -250,7 +310,8 @@ bin_string_checker() {
             continue 2
           fi
         elif [[ "${BIN_FILE}" == *uImage* || "${BIN_FILE}" == *Kernel\ Image* ]] ; then
-          VERSION_FINDER=$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)
+          VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
+
           if [[ -n ${VERSION_FINDER} ]]; then
             print_ln "no_log"
             print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in kernel image ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
@@ -262,7 +323,8 @@ bin_string_checker() {
       else
         # this is RTOS mode
         # echo "Testing $BIN - $VERSION_IDENTIFIER"
-        VERSION_FINDER="$(strings "${BIN}" | grep -o -a -E "${VERSION_IDENTIFIER}" | head -1 2> /dev/null || true)"
+        VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
+
         if [[ -n ${VERSION_FINDER} ]]; then
           print_ln "no_log"
           print_output "[+] Version information found ${RED}${VERSION_FINDER}${NC}${GREEN} in binary ${ORANGE}$(print_path "${BIN}")${GREEN} (license: ${ORANGE}${LIC}${GREEN}) (${ORANGE}static${GREEN})."
