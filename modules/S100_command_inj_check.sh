@@ -28,6 +28,7 @@ S100_command_inj_check()
   local FILE_S=""
   local QUERY=""
   local CHECK=()
+  local NEG_LOG=0
   local CHECK_=""
 
   if [[ "${CMD_INJ_DIRS[0]-}" == "C_N_F" ]] ; then print_output "[!] Config not found"
@@ -53,6 +54,7 @@ S100_command_inj_check()
                   print_output "$(indent "[${GREEN}+${NC}]${GREEN} Found ""${QUERY}"" in ""$(print_path "${FILE_S}")${NC}")"
                   for CHECK_ in "${CHECK[@]}" ; do
                     print_output "$(indent "[${GREEN}+${NC}]${GREEN} ${CHECK_}${NC}")"
+                    NEG_LOG=1
                   done
                   print_ln
                 fi
@@ -65,5 +67,5 @@ S100_command_inj_check()
   else
     print_output "[-] No directories or files used for web scripts found"
   fi
-  module_end_log "${FUNCNAME[0]}" "${#CMD_INJ_DIRS[@]}"
+  module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
 }

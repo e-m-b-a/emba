@@ -90,7 +90,6 @@ S20_shell_check()
       S20_SEMGREP_ISSUES=$(grep "\ findings\." "${SHELL_LOG}" | cut -d: -f2 | awk '{print $1}' || true)
       S20_SEMGREP_VULNS=$(grep -c "semgrep-rules.bash.lang.security" "${SHELL_LOG}" || true)
       S20_SEMGREP_SCRIPTS=$(grep "\ findings\." "${SHELL_LOG}" | awk '{print $5}' || true)
-      print_ln
       if [[ "${S20_SEMGREP_VULNS}" -gt 0 ]]; then
         print_output "[+] Found ""${ORANGE}""${S20_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${S20_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${S20_SEMGREP_SCRIPTS}""${GREEN}"" shell scripts""${NC}" "" "${SHELL_LOG}"
       elif [[ "${S20_SEMGREP_ISSUES}" -gt 0 ]]; then

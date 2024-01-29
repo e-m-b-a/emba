@@ -21,48 +21,50 @@ F50_base_aggregator() {
   module_title "Final aggregator"
   pre_module_reporter "${FUNCNAME[0]}"
 
-  CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
-  F20_EXPLOITS_LOG="${LOG_DIR}"/f20_vul_aggregator/exploits-overview.txt
-  P02_CSV_LOG="${CSV_DIR}""/p02_firmware_bin_file_check.csv"
-  P99_CSV_LOG="${CSV_DIR}""/p99_prepare_analyzer.csv"
-  P35_LOG="p35_uefi_extractor.txt"
-  S03_LOG="s03_firmware_bin_base_analyzer.txt"
-  S05_LOG="s05_firmware_details.txt"
-  S06_LOG="s06_distribution_identification.txt"
-  S12_LOG="s12_binary_protection.txt"
-  S13_LOG="s13_weak_func_check.txt"
-  S14_LOG="s14_weak_func_radare_check.txt"
-  S16_LOG="s16_ghidra_decompile_checks.txt"
-  S17_CSV_LOG="${CSV_DIR}""/s17_apk_check.csv"
-  S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
-  S02_LOG="s02_uefi_fwhunt.txt"
-  S20_LOG="s20_shell_check.txt"
-  S21_LOG="s21_python_check.txt"
-  S22_LOG="s22_php_check.txt"
-  S24_LOG="s24_kernel_bin_identifier.txt"
-  S25_LOG="s25_kernel_check.txt"
-  S26_LOG="s26_kernel_vuln_verifier.txt"
-  S30_LOG="s30_version_vulnerability_check.txt"
-  S40_LOG="s40_weak_perm_check.txt"
-  S45_LOG="s45_pass_file_check.txt"
-  S50_LOG="s50_authentication_check.txt"
-  S55_LOG="s55_history_file_check.txt"
-  S60_LOG="s60_cert_file_check.txt"
-  S85_LOG="s85_ssh_check.txt"
-  S95_LOG="s95_interesting_binaries_check.txt"
-  S107_LOG="s107_deep_password_search.txt"
-  S108_LOG="s108_stacs_password_search.txt"
-  S109_LOG="s109_jtr_local_pw_cracking.txt"
-  S110_LOG="s110_yara_check.txt"
-  S17_LOG="s17_cwe_checker.txt"
+  # Todo: move all the log vars to a dedicated variable loader from EMBA
+  # todo: Change all log usages to these vars in EMBA
+  export CVE_AGGREGATOR_LOG="f20_vul_aggregator.txt"
+  export F20_EXPLOITS_LOG="${LOG_DIR}"/f20_vul_aggregator/exploits-overview.txt
+  export P02_CSV_LOG="${CSV_DIR}""/p02_firmware_bin_file_check.csv"
+  export P99_CSV_LOG="${CSV_DIR}""/p99_prepare_analyzer.csv"
+  export P35_LOG="p35_uefi_extractor.txt"
+  export S03_LOG="s03_firmware_bin_base_analyzer.txt"
+  export S05_LOG="s05_firmware_details.txt"
+  export S06_LOG="s06_distribution_identification.txt"
+  export S12_LOG="s12_binary_protection.txt"
+  export S13_LOG="s13_weak_func_check.txt"
+  export S14_LOG="s14_weak_func_radare_check.txt"
+  export S16_LOG="s16_ghidra_decompile_checks.txt"
+  export S17_CSV_LOG="${CSV_DIR}""/s17_apk_check.csv"
+  export S24_CSV_LOG="${CSV_DIR}""/s24_kernel_bin_identifier.csv"
+  export S02_LOG="s02_uefi_fwhunt.txt"
+  export S20_LOG="s20_shell_check.txt"
+  export S21_LOG="s21_python_check.txt"
+  export S22_LOG="s22_php_check.txt"
+  export S24_LOG="s24_kernel_bin_identifier.txt"
+  export S25_LOG="s25_kernel_check.txt"
+  export S26_LOG="s26_kernel_vuln_verifier.txt"
+  export S30_LOG="s30_version_vulnerability_check.txt"
+  export S40_LOG="s40_weak_perm_check.txt"
+  export S45_LOG="s45_pass_file_check.txt"
+  export S50_LOG="s50_authentication_check.txt"
+  export S55_LOG="s55_history_file_check.txt"
+  export S60_LOG="s60_cert_file_check.txt"
+  export S85_LOG="s85_ssh_check.txt"
+  export S95_LOG="s95_interesting_files_check.txt"
+  export S107_LOG="s107_deep_password_search.txt"
+  export S108_LOG="s108_stacs_password_search.txt"
+  export S109_LOG="s109_jtr_local_pw_cracking.txt"
+  export S110_LOG="s110_yara_check.txt"
+  export S17_LOG="s17_cwe_checker.txt"
   # L10_LOG="l10_system_emulator.txt"
-  L15_LOG="l15_emulated_checks_init.txt"
-  L20_LOG="l20_snmp_checks.txt"
-  L25_LOG="l25_web_checks.txt"
-  L30_LOG="l30_routersploit.txt"
-  Q02_LOG="q02_openai_question.txt"
-  L35_CSV_LOG="${CSV_DIR}""/l35_metasploit_check.csv"
-  SYS_EMU_RESULTS="${LOG_DIR}"/emulator_online_results.log
+  export L15_LOG="l15_emulated_checks_init.txt"
+  export L20_LOG="l20_snmp_checks.txt"
+  export L25_LOG="l25_web_checks.txt"
+  export L30_LOG="l30_routersploit.txt"
+  export Q02_LOG="q02_openai_question.txt"
+  export L35_CSV_LOG="${CSV_DIR}""/l35_metasploit_check.csv"
+  export SYS_EMU_RESULTS="${LOG_DIR}"/emulator_online_results.log
 
   if [[ "${RESTART}" -eq 1 ]] && [[ -f "${LOG_FILE}" ]]; then
     rm "${LOG_FILE}"
@@ -88,6 +90,8 @@ output_diff() {
 }
 
 output_overview() {
+  local EMBA_COMMAND_ORIG=""
+
   if [[ -n "${FW_VENDOR}" ]]; then
     print_output "[+] Tested Firmware vendor: ""${ORANGE}""${FW_VENDOR}""${NC}"
     write_csv_log "Firmware_vendor" "${FW_VENDOR}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -653,7 +657,8 @@ binary_fct_output() {
   if [[ -f "${BASE_LINUX_FILES}" ]]; then
     local FCT_LINK=""
     if [[ "${SEMGREP_CNT}" -gt 0 ]] && [[ -f "${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log ]]; then
-      FCT_LINK="${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log
+      # FCT_LINK="${LOG_DIR}"/s16_ghidra_decompile_checks/semgrep_"${BINARY}".log
+      FCT_LINK="s16"
     else
       FCT_LINK=$(find "${LOG_DIR}"/s1[34]_weak_func_*check/ -name "vul_func_*${FCT}-${BINARY}*.txt" | sort -u | head -1 || true)
     fi
@@ -680,7 +685,7 @@ output_cve_exploits() {
   if [[ "${S30_VUL_COUNTER:-0}" -gt 0 || "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]]; then
     if [[ "${CVE_COUNTER:-0}" -gt 0 || "${EXPLOIT_COUNTER:-0}" -gt 0 || -v VERSIONS_AGGREGATED[@] ]] && [[ -f "${LOG_DIR}/f20_vul_aggregator/F20_summary.txt" ]]; then
       print_output "[*] Identified the following software inventory, vulnerabilities and exploits:"
-      write_link "f20#collectcveandexploitdetails"
+      write_link "f20#softwareinventoryinitialoverview"
 
       # run over F20_summary.txt and add links - need to do this here and not in f20 as there bites us the threading mode
       while read -r OVERVIEW_LINE; do
@@ -692,8 +697,13 @@ output_cve_exploits() {
     fi
 
     if [[ -v VERSIONS_AGGREGATED[@] ]]; then
-      print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details.\\n"
-      write_link "f20#softwareinventoryinitialoverview"
+      if [[ -f "${LOG_DIR}"/f21_cyclonedx_sbom.txt ]]; then
+        print_output "[+] Identified a SBOM including ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details."
+        write_link "f21"
+      else
+        print_output "[+] Identified ""${ORANGE}""${#VERSIONS_AGGREGATED[@]}""${GREEN}"" software components with version details.\\n"
+        write_link "f20#softwareinventoryinitialoverview"
+      fi
       write_csv_log "versions_identified" "${#VERSIONS_AGGREGATED[@]}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
       DATA=1
     fi
@@ -760,13 +770,20 @@ get_data() {
   export MEDIUM_CVE_COUNTER=0
   export LOW_CVE_COUNTER=0
   export EXPLOIT_COUNTER=0
+  export EXPLOIT_HIGH_COUNT=0
+  export EXPLOIT_MEDIUM_COUNT=0
+  export EXPLOIT_LOW_COUNT=0
   export MSF_MODULE_CNT=0
   export INT_COUNT=0
   export POST_COUNT=0
   export KNOWN_EXPLOITED_COUNTER=0
+  export S30_VUL_COUNTER=0
   export ENTROPY=""
   export PRE_ARCH=""
   export EFI_ARCH=""
+  export K_ARCH_END=""
+  export P99_ARCH=""
+  export P99_ARCH_END=""
   export FILE_ARR_COUNT=0
   export DETECTED_DIR=0
   export LINUX_DISTRIS=()
@@ -786,7 +803,7 @@ get_data() {
   export S22_PHP_INI_CONFIGS=0
   export S24_FAILED_KSETTINGS=0
   export S16_GHIDRA_SEMGREP=0
-  export S16_BIN_CHECKED=0
+  export S16_BINS_CHECKED=0
   export MOD_DATA_COUNTER=0
   export KMOD_BAD=0
   export S40_WEAK_PERM_COUNTER=0
@@ -821,6 +838,8 @@ get_data() {
   export K_CVE_VERIFIED_COMPILED=0
   export APK_ISSUES=0
   export GPT_RESULTS=0
+  export TOTAL_CWE_CNT=0
+  export TOTAL_CWE_BINS=0
 
   if [[ -f "${P02_CSV_LOG}" ]]; then
     ENTROPY=$(grep -a "Entropy" "${P02_CSV_LOG}" | cut -d\; -f2 | cut -d= -f2 | sed 's/^\ //' || true)
@@ -943,8 +962,8 @@ get_data() {
     YARA_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S110_LOG}" | cut -d: -f2 || true)
   fi
   if [[ -f "${LOG_DIR}"/"${S17_LOG}" ]]; then
-    export TOTAL_CWE_CNT
     TOTAL_CWE_CNT=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S17_LOG}" | cut -d: -f2 || true)
+    TOTAL_CWE_BINS=$(grep -a "\[\*\]\ Statistics:" "${LOG_DIR}"/"${S17_LOG}" | cut -d: -f3 || true)
   fi
   if [[ -f "${SYS_EMU_RESULTS}" ]]; then
     BOOTED=$(grep -c "Booted yes;" "${SYS_EMU_RESULTS}" || true)
@@ -1003,7 +1022,6 @@ get_data() {
   if [[ -f "${S17_CSV_LOG}" ]]; then
     APK_ISSUES="$(cut -d\; -f 2 "${S17_CSV_LOG}" | awk '{ sum += $1 } END { print sum }' || true)"
   fi
-
 }
 
 distribution_detector() {
@@ -1021,6 +1039,9 @@ os_detector() {
   export SYSTEM=""
   local OSES=("kernel" "vxworks" "siprotec" "freebsd" "qnx\ neutrino\ rtos" "simatic\ cp443-1")
   local OS_TO_CHECK=""
+  local OS_DETECT=()
+  local SYSTEM_VER=""
+  local SYSTEM_VERSION=()
 
   #### The following check is based on the results of the aggregator:
   if [[ -f "${LOG_DIR}"/"${CVE_AGGREGATOR_LOG}" ]]; then
@@ -1092,6 +1113,7 @@ os_detector() {
 os_kernel_module_detect() {
   local LINUX_VERSIONS=""
   local KV=""
+  local KERNELV=()
 
   if [[ -f "${LOG_DIR}"/"${S25_LOG}" ]]; then
     mapfile -t KERNELV < <(grep "Statistics:" "${LOG_DIR}"/"${S25_LOG}" | cut -d: -f2 | sort -u || true)
@@ -1143,7 +1165,7 @@ cwe_logging() {
     mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_DIR}"/"${LOG_DIR_MOD}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
 
     if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
-      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in firmware binaries:"
+      print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" security issues in ${ORANGE}${TOTAL_CWE_BINS}${GREEN} tested binaries:"
       write_link "s17"
       for CWE_ENTRY in "${CWE_OUT[@]}"; do
         CWE="$(echo "${CWE_ENTRY}" | awk '{print $1}')"
@@ -1154,7 +1176,7 @@ cwe_logging() {
         print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
       done
       print_ln
-      write_csv_log "cwe_issues" "${TOTAL_CWE_CNT}" "NA" "NA" "NA" "NA" "NA" "NA" "NA"
+      write_csv_log "cwe_issues" "${TOTAL_CWE_CNT}" "${TOTAL_CWE_BINS}" "NA" "NA" "NA" "NA" "NA" "NA"
     fi
   fi
 }

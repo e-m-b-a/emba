@@ -36,6 +36,7 @@ emba_parameter_parsing() {
         ;;
       B)
         export DISABLE_STATUS_BAR=0
+        export SILENT=1
         ;;
       C)
         # container extract only works outside the docker container

@@ -29,8 +29,6 @@ S65_config_file_check()
   check_fstab
 
   if [[ "${#CONF_FILES_ARR[@]}" -gt 0 ]] || [[ -v FSTAB_USER_FILES[@] ]] || [[ -v FSTAB_USER_FILES[@] ]]; then
-    echo "cfg ${#CONF_FILES_ARR[@]}"
-    echo "fstab ${#FSTAB_ARR[@]}"
     NEG_LOG=1
   fi
 

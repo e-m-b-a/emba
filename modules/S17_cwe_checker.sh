@@ -38,10 +38,10 @@ S17_cwe_checker()
 
     if [[ -f "${TMP_DIR}"/CWE_CNT.tmp ]]; then
       lCWE_CNT_=$(awk '{sum += $1 } END { print sum }' "${TMP_DIR}"/CWE_CNT.tmp || true)
-      lTESTED_BINS=$(grep -c " Tested " "${LOG_FILE}" || true)
+      lTESTED_BINS=$(grep -c "cwe-checker found.*different security issues in" "${LOG_FILE}" || true)
     fi
 
-    final_cwe_log "${lCWE_CNT_}"
+    final_cwe_log "${lCWE_CNT_}" "${lTESTED_BINS}"
 
     write_log ""
     write_log "[*] Statistics:${lCWE_CNT_}:${lTESTED_BINS}"
@@ -79,15 +79,21 @@ cwe_check() {
   local BIN_TO_CHECK=""
   local BIN_TO_CHECK_ARR=()
   local WAIT_PIDS_S17=()
+  local NAME=""
+  local BINS_CHECKED_ARR=()
 
   if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | awk '{print $1}' | sort -u)
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}')
   fi
 
   for BINARY in "${BINARIES[@]}" ; do
+    # ensure we have not tested this binary entry
+    if [[ "${BINS_CHECKED_ARR[*]}" == *"${BINARY}"* ]]; then
+      continue
+    fi
     # as we usually have not the full path from the s13 log, we need to search for the binary again:
     mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -path "*${BINARY}*" | sort -u || true)
     for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
@@ -95,19 +101,36 @@ cwe_check() {
         # do not try to analyze kernel modules:
         [[ "${BIN_TO_CHECK}" == *".ko" ]] && continue
         if [[ "${THREADED}" -eq 1 ]]; then
+          # while s09 is running we throttle this module:
           local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
           if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
             local MAX_MOD_THREADS=1
+          fi
+          if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+            # if we have the base linux config file we only test non known Linux binaries
+            # with this we do not waste too much time on open source Linux stuff
+            NAME=$(basename "${BINARY}")
+            if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+              continue
+            fi
           fi
 
           cwe_checker_threaded "${BIN_TO_CHECK}" &
           local TMP_PID="$!"
           store_kill_pids "${TMP_PID}"
           WAIT_PIDS_S17+=( "${TMP_PID}" )
+
           max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S17[@]}"
-          continue
         else
           cwe_checker_threaded "${BIN_TO_CHECK}"
+        fi
+        # we stop checking after the first 20 binaries
+        # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
+        BINS_CHECKED_ARR+=( "${BINARY}" )
+        if [[ "${#BINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+          print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
+          print_output "[*] For complete analysis enable FULL_TEST." "no_log"
+          break 2
         fi
       fi
     done
@@ -128,20 +151,12 @@ cwe_checker_threaded () {
   local NAME=""
   NAME=$(basename "${BINARY_}")
 
-  if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-    # if we have the base linux config file we only test non known Linux binaries
-    # with this we do not waste too much time on open source Linux stuff
-    if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-      return
-    fi
-  fi
-
   local OLD_LOG_FILE="${LOG_FILE}"
   local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${NAME}"".txt"
   BINARY_=$(readlink -f "${BINARY_}")
 
   ulimit -Sv "${MEM_LIMIT}"
-  cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null|| true
+  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}" "no_log"
 
@@ -163,6 +178,7 @@ cwe_checker_threaded () {
       rm "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
     fi
   fi
+
   print_ln
 
   if [[ -f "${LOG_FILE}" ]]; then
@@ -174,6 +190,7 @@ cwe_checker_threaded () {
 
 final_cwe_log() {
   local TOTAL_CWE_CNT="${1:-}"
+  local lTESTED_BINS="${2:-}"
   local CWE_OUT=()
   local CWE_LINE=""
   local CWE=""
@@ -184,10 +201,9 @@ final_cwe_log() {
     local CWE_LOGS=("${LOG_PATH_MODULE}"/cwe_*.log)
     if [[ "${#CWE_LOGS[@]}" -gt 0 ]]; then
       mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
-      print_ln
       if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
         sub_module_title "Results - CWE-checker binary analysis"
-        print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues:"
+        print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
         for CWE_LINE in "${CWE_OUT[@]}"; do
           CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
           CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"

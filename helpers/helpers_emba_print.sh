@@ -247,19 +247,17 @@ check_version() {
   fi
 }
 
-print_ln()
-{
+print_ln() {
   local LOG_SETTING="${1:-}"
   print_output "" "${LOG_SETTING}"
 }
 
-print_dot()
-{
+print_dot() {
+  [[ "${DISABLE_DOTS}" -eq 1 ]] && return
   echo -n "." 2>/dev/null ||true
 }
 
-write_log()
-{
+write_log() {
   readarray TEXT_ARR <<< "${1}"
   local LOG_FILE_ALT="${2:-}"
   local GREP_LOG_WRITE="${3:-}"
@@ -632,7 +630,7 @@ print_help()
   echo -e "\\nModify output"
   echo -e "${CYAN}""-s""${NC}""                Prints only relative paths"
   echo -e "${CYAN}""-z""${NC}""                Adds ANSI color codes to log"
-  echo -e "${CYAN}""-B""${NC}""                Enables status bar (Warning: unstable on some firmware images)"
+  echo -e "${CYAN}""-B""${NC}""                Enables status bar in silent mode (Warning: unstable on window size change)"
   echo -e "\\nFirmware details"
   echo -e "${CYAN}""-X [version]""${NC}""      Firmware version (versions aka 1.2.3-a:b only)"
   echo -e "${CYAN}""-Y [vendor]""${NC}""       Firmware vendor (alphanummerical values only)"
@@ -704,7 +702,7 @@ print_bar() {
 
 module_start_log() {
   MODULE_MAIN_NAME="${1:-}"
-  print_output "[*] $(date) - ${MODULE_MAIN_NAME} starting" "main"
+  print_output "[*] $(print_date) - ${MODULE_MAIN_NAME} starting" "main"
   export LOG_PATH_MODULE
   if [[ "${LOG_DIR: -1}" == "/" ]]; then
     # strip final slash from log dir
@@ -745,7 +743,7 @@ module_end_log() {
   MODULE_REPORT_STATE="${2:-}"
 
   if [[ "${MODULE_REPORT_STATE}" -eq 0 ]]; then
-    print_output "[-] $(date) - ${MODULE_MAIN_NAME} nothing reported"
+    print_output "[-] $(print_date) - ${MODULE_MAIN_NAME} nothing reported"
   fi
 
   # we do not report the templates on restarted tests
@@ -786,7 +784,7 @@ module_end_log() {
   if [[ "${DISABLE_NOTIFICATIONS}" -eq 0 ]]; then
     write_notification "Module ${MODULE_MAIN_NAME} finished"
   fi
-  print_output "[*] $(date) - ${MODULE_MAIN_NAME} finished" "main"
+  print_output "[*] $(print_date) - ${MODULE_MAIN_NAME} finished" "main"
 }
 
 strip_color_codes() {
@@ -904,22 +902,50 @@ write_anchor_gpt() {
   fi
 }
 
+# secure sleep is for longer sleeps
+# it checks every 10 secs if EMBA is running
+# if EMBA is finished it returns and the caller can exit also
+# paramter: $1 is sleep time in seconds
+secure_sleep() {
+  local SLEEP_TIME="${1:-}"
+  local CUR_SLEEP_TIME=0
+
+  while [[ "${CUR_SLEEP_TIME}" -lt "${SLEEP_TIME}" ]]; do
+    sleep 10
+    CUR_SLEEP_TIME=$((CUR_SLEEP_TIME + 10))
+    if check_emba_ended; then
+      return
+    fi
+  done
+}
+
 print_running_modules() {
-  sleep 1h
   while true; do
+    if [[ -f "${LOG_DIR}""/""${MAIN_LOG_FILE}" ]]; then
+      if check_emba_ended; then
+        exit
+      fi
+    fi
+
+    # we print status about running modules every hour
+    secure_sleep 3600
+
     local STARTED_EMBA_PROCESSES=()
     local EMBA_STARTED_PROC=""
     mapfile -t STARTED_EMBA_PROCESSES < <(grep starting "${LOG_DIR}""/""${MAIN_LOG_FILE}" | cut -d '-' -f2 | awk '{print $1}' || true)
 
     for EMBA_STARTED_PROC in "${STARTED_EMBA_PROCESSES[@]}"; do
       if ! grep -i -q "${EMBA_STARTED_PROC}"" finished" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
-        print_output "[*] EMBA module ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
+        print_output "[*] $(print_date) - ${ORANGE}${EMBA_STARTED_PROC}${NC} currently running" "no_log"
       fi
     done
-    sleep 1h
   done
 }
 
 show_runtime() {
   date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"
+}
+
+print_date() {
+  LANG=en date
 }

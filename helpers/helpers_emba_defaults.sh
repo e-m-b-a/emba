@@ -18,8 +18,8 @@
 
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
-  export EMBA_VERSION="1.3.2"
+  export RELEASE=0
+  export EMBA_VERSION="1.3.3-pre"
 
   export CLEANED=0              # used for the final cleaner function for not running it multiple times
   export STRICT_MODE=0
@@ -108,6 +108,7 @@ set_defaults() {
     export TRICKEST_DB_PATH="${CONFIG_DIR}"/trickest_cve-db.txt
   fi
   export GTFO_CFG="${CONFIG_DIR}"/gtfobins_urls.cfg         # gtfo urls
+  export SILENT=0
   export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
   export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
@@ -136,4 +137,7 @@ set_defaults() {
   export Q_MOD_PID=""
   export F20_DEEP=1      # F20 module - set to cve-discovery caller for further processing
   export UEFI_VERIFIED=0
+  export MAIN_CONTAINER=""
+  export QUEST_CONTAINER=""
+  export DISABLE_DOTS=0     # set to 1 to disable dotting for showing EMBA is alive
 }

@@ -107,7 +107,9 @@ F20_vul_aggregator() {
       generate_cve_details_cves "${CVES_AGGREGATED[@]}"
     fi
 
-     generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
+    generate_special_log "${CVE_MINIMAL_LOG}" "${EXPLOIT_OVERVIEW_LOG}"
+  else
+    print_output "[-] WARNING: No CVE datasources found in external directory"
   fi
 
   FOUND_CVE=$(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" "${LOG_FILE}" | grep -c -E "\[\+\]\ Found\ " || true)
@@ -124,6 +126,7 @@ prepare_cve_search_module() {
   export MSF_SEARCH=0
   export CVE_SEARCHSPLOIT=0
   export MSF_INSTALL_PATH="/usr/share/metasploit-framework"
+  export BUSYBOX_VERIFIED_CVE=()
 
   if command -v cve_searchsploit > /dev/null ; then
     export CVE_SEARCHSPLOIT=1
@@ -912,7 +915,7 @@ cve_extractor() {
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="STAT"
       else
-        VSOURCE="${VSOURCE}""/STAT"
+        VSOURCE+="/STAT"
       fi
     fi
   fi
@@ -923,7 +926,7 @@ cve_extractor() {
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
-          VSOURCE="${VSOURCE}""/STAT"
+          VSOURCE+="/STAT"
         fi
       fi
     fi
@@ -935,7 +938,7 @@ cve_extractor() {
         if [[ "${VSOURCE}" == "unknown" ]]; then
           VSOURCE="STAT"
         elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
-          VSOURCE="${VSOURCE}""/STAT"
+          VSOURCE+="/STAT"
         fi
       fi
     fi
@@ -946,7 +949,7 @@ cve_extractor() {
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="UEMU"
       else
-        VSOURCE="${VSOURCE}""/UEMU"
+        VSOURCE+="/UEMU"
       fi
     fi
   fi
@@ -956,7 +959,7 @@ cve_extractor() {
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="FwHunt"
       else
-        VSOURCE="${VSOURCE}""/FwHunt"
+        VSOURCE+="/FwHunt"
       fi
       BINARY="UEFI firmware"
       VERSION="unknown"
@@ -968,7 +971,7 @@ cve_extractor() {
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="MSF verified"
       else
-        VSOURCE="${VSOURCE}""/MSF verified"
+        VSOURCE+="/MSF verified"
       fi
       BINARY="unknown"
       VERSION="unknown"
@@ -980,7 +983,7 @@ cve_extractor() {
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="PACK"
       else
-        VSOURCE="${VSOURCE}""/PACK"
+        VSOURCE+="/PACK"
       fi
     fi
   fi
@@ -990,7 +993,7 @@ cve_extractor() {
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="STAT"
       elif ! [[ "${VSOURCE}" =~ .*STAT.* ]]; then
-        VSOURCE="${VSOURCE}""/STAT"
+        VSOURCE+="/STAT"
       fi
     fi
   fi
@@ -1000,7 +1003,7 @@ cve_extractor() {
       if [[ "${VSOURCE}" == "unknown" ]]; then
         VSOURCE="SEMU"
       else
-        VSOURCE="${VSOURCE}""/SEMU"
+        VSOURCE+="/SEMU"
       fi
     fi
   fi
@@ -1102,10 +1105,10 @@ cve_extractor() {
   # normally we only print the number of CVEs. If we have verified CVEs in the Linux Kernel or BusyBox we also add this detail
   CVEs="${CVE_COUNTER_VERSION}"
   if [[ "${KERNEL_VERIFIED_VULN}" -gt 0 ]] && [[ "${BINARY}" == *"kernel"* ]]; then
-    CVEs="${CVEs} (${KERNEL_VERIFIED_VULN})"
+    CVEs+=" (${KERNEL_VERIFIED_VULN})"
   fi
   if [[ "${#BUSYBOX_VERIFIED_CVE[@]}" -gt 0 ]] && [[ "${BINARY}" == *"busybox"* ]]; then
-    CVEs="${CVEs} (${#BUSYBOX_VERIFIED_CVE[@]})"
+    CVEs+=" (${#BUSYBOX_VERIFIED_CVE[@]})"
   fi
   EXPLOITS="${EXPLOIT_COUNTER_VERSION}"
 
@@ -1276,7 +1279,7 @@ cve_extractor_thread_actor() {
       if [[ "${EXPLOIT}" == "No exploit available" ]]; then
         EXPLOIT="Exploit (EDB ID:"
       else
-        EXPLOIT="${EXPLOIT}"" / EDB ID:"
+        EXPLOIT+=" / EDB ID:"
       fi
 
       for EXPLOIT_ID in "${EXPLOIT_IDS[@]}" ; do
@@ -1288,15 +1291,15 @@ cve_extractor_thread_actor() {
         for LINE in "${EXPLOIT_AVAIL[@]}"; do
           echo "${LINE}" >> "${LOG_PATH_MODULE}""/exploit/""${EXPLOIT_ID}"".txt"
           if [[ "${LINE}" =~ "Platform: local" && "${LOCAL}" -eq 0 ]]; then
-            EXPLOIT="${EXPLOIT}"" (L)"
+            EXPLOIT+=" (L)"
             LOCAL=1
           fi
           if [[ "${LINE}" =~ "Platform: remote" && "${REMOTE}" -eq 0 ]]; then
-            EXPLOIT="${EXPLOIT}"" (R)"
+            EXPLOIT+=" (R)"
             REMOTE=1
           fi
           if [[ "${LINE}" =~ "Platform: dos" && "${DOS}" -eq 0 ]]; then
-            EXPLOIT="${EXPLOIT}"" (D)"
+            EXPLOIT+=" (D)"
             DOS=1
           fi
         done
@@ -1320,7 +1323,7 @@ cve_extractor_thread_actor() {
       if [[ "${EXPLOIT}" == "No exploit available" ]]; then
         EXPLOIT="Exploit (MSF:"
       else
-        EXPLOIT="${EXPLOIT}"" ""/ MSF:"
+        EXPLOIT+=" / MSF:"
       fi
 
       for EXPLOIT_MSF in "${EXPLOIT_AVAIL_MSF[@]}" ; do
@@ -1330,18 +1333,18 @@ cve_extractor_thread_actor() {
           EXPLOIT_PATH="${MSF_INSTALL_PATH}"$(echo "${EXPLOIT_MSF}" | cut -d: -f1)
         fi
         EXPLOIT_NAME=$(basename -s .rb "${EXPLOIT_PATH}")
-        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
+        EXPLOIT+=" ${EXPLOIT_NAME}"
         if [[ -f "${EXPLOIT_PATH}" ]] ; then
           # for the web reporter we copy the original metasploit module into the EMBA log directory
           cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/msf_""${EXPLOIT_NAME}".rb
           if grep -q "< Msf::Exploit::Remote" "${EXPLOIT_PATH}"; then
-            EXPLOIT="${EXPLOIT}"" (R)"
+            EXPLOIT+=" (R)"
           fi
           if grep -q "< Msf::Exploit::Local" "${EXPLOIT_PATH}"; then
-            EXPLOIT="${EXPLOIT}"" (L)"
+            EXPLOIT+=" (L)"
           fi
           if grep -q "include Msf::Auxiliary::Dos" "${EXPLOIT_PATH}"; then
-            EXPLOIT="${EXPLOIT}"" (D)"
+            EXPLOIT+=" (D)"
           fi
         fi
       done
@@ -1359,12 +1362,12 @@ cve_extractor_thread_actor() {
       if [[ "${EXPLOIT}" == "No exploit available" ]]; then
         EXPLOIT="Exploit (Snyk:"
       else
-        EXPLOIT="${EXPLOIT}"" ""/ Snyk:"
+        EXPLOIT+=" / Snyk:"
       fi
 
       for EXPLOIT_SNYK in "${EXPLOIT_AVAIL_SNYK[@]}" ; do
         EXPLOIT_NAME=$(echo "${EXPLOIT_SNYK}" | cut -d\; -f2)
-        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"" (S)"
+        EXPLOIT+=" ${EXPLOIT_NAME} (S)"
       done
 
       if [[ ${EDB} -eq 0 ]]; then
@@ -1380,13 +1383,13 @@ cve_extractor_thread_actor() {
       if [[ "${EXPLOIT}" == "No exploit available" ]]; then
         EXPLOIT="Exploit (PSS:"
       else
-        EXPLOIT="${EXPLOIT}"" ""/ PSS:"
+        EXPLOIT+=" / PSS:"
       fi
 
       for EXPLOIT_PS in "${EXPLOIT_AVAIL_PACKETSTORM[@]}" ; do
         # we use the html file as EXPLOIT_NAME.
         EXPLOIT_NAME=$(echo "${EXPLOIT_PS}" | cut -d\; -f3 | rev | cut -d '/' -f1-2 | rev)
-        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
+        EXPLOIT+=" ${EXPLOIT_NAME}"
         TYPE=$(grep "^${CVE_VALUE};" "${CONFIG_DIR}"/PS_PoC_results.csv | grep "${EXPLOIT_NAME}" | cut -d\; -f4 || true)
         if [[ "${TYPE}" == "remote" ]]; then
           TYPE="R"
@@ -1398,7 +1401,7 @@ cve_extractor_thread_actor() {
           # fallback to P for packetstorm exploit with unknownt type
           TYPE="P"
         fi
-        EXPLOIT="${EXPLOIT}"" (${TYPE})"
+        EXPLOIT+=" (${TYPE})"
       done
 
       if [[ ${EDB} -eq 0 ]]; then
@@ -1415,19 +1418,19 @@ cve_extractor_thread_actor() {
       if [[ "${EXPLOIT}" == "No exploit available" ]]; then
         EXPLOIT="Exploit (Routersploit:"
       else
-        EXPLOIT="${EXPLOIT}"" ""/ Routersploit:"
+        EXPLOIT+=" / Routersploit:"
       fi
       EXPLOIT_ROUTERSPLOIT=("${EXPLOIT_AVAIL_ROUTERSPLOIT[@]}" "${EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}")
 
       for EXPLOIT_RS in "${EXPLOIT_ROUTERSPLOIT[@]}" ; do
         EXPLOIT_PATH=$(echo "${EXPLOIT_RS}" | cut -d: -f1)
         EXPLOIT_NAME=$(basename -s .py "${EXPLOIT_PATH}")
-        EXPLOIT="${EXPLOIT}"" ""${EXPLOIT_NAME}"
+        EXPLOIT+=" ${EXPLOIT_NAME}"
         if [[ -f "${EXPLOIT_PATH}" ]] ; then
           # for the web reporter we copy the original metasploit module into the EMBA log directory
           cp "${EXPLOIT_PATH}" "${LOG_PATH_MODULE}""/exploit/routersploit_""${EXPLOIT_NAME}".py
           if grep -q Port "${EXPLOIT_PATH}"; then
-            EXPLOIT="${EXPLOIT}"" (R)"
+            EXPLOIT+=" (R)"
           fi
         fi
       done
@@ -1444,11 +1447,11 @@ cve_extractor_thread_actor() {
   fi
 
   if [[ ${KNOWN_EXPLOITED} -eq 1 ]]; then
-    EXPLOIT="${EXPLOIT}"" (X)"
+    EXPLOIT+=" (X)"
   fi
 
   if [[ ${EDB} -eq 1 ]]; then
-    EXPLOIT="${EXPLOIT}"")"
+    EXPLOIT+=")"
   fi
 
   # just in case CVSSv3 value is missing -> switch to CVSSv2
@@ -1459,8 +1462,8 @@ cve_extractor_thread_actor() {
   fi
 
   # if this CVE is a kernel verified CVE we add a V to the CVE
-  if [[ "${KERNEL_VERIFIED}" == "yes" ]]; then CVE_VALUE="${CVE_VALUE}"" (V)"; fi
-  if [[ "${BUSYBOX_VERIFIED}" == "yes" ]]; then CVE_VALUE="${CVE_VALUE}"" (V)"; fi
+  if [[ "${KERNEL_VERIFIED}" == "yes" ]]; then CVE_VALUE+=" (V)"; fi
+  if [[ "${BUSYBOX_VERIFIED}" == "yes" ]]; then CVE_VALUE+=" (V)"; fi
 
   # we do not deal with output formatting the usual way -> we use printf
   if (( $(echo "${CVSS_VALUE} > 6.9" | bc -l) )); then

@@ -1,6 +1,6 @@
 # EMBA - EMBEDDED LINUX ANALYZER
 #
-# Copyright 2020-2023 Siemens Energy AG
+# Copyright 2020-2024 Siemens Energy AG
 #
 # EMBA comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
 # welcome to redistribute it under the terms of the GNU General Public License.
@@ -18,7 +18,7 @@ export THREADED=1
 export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
-export SELECT_MODULES=( "S08" "S09" "S24" "S25" "S115" "S116")
+export SELECT_MODULES+=( "S06" "S08" "S09" "S24" "S25" "S26" "S115" "S116" "S118" )
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then

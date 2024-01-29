@@ -51,7 +51,7 @@ L22_upnp_hnap_checks() {
     fi
 
     write_log ""
-    write_log "Statistics:${UPNP_UP}:${HNAP_UP}:${JNAP_UP}"
+    write_log "[*] Statistics:${UPNP_UP}:${HNAP_UP}:${JNAP_UP}"
     module_end_log "${FUNCNAME[0]}" "${UPNP_UP}"
   fi
 }

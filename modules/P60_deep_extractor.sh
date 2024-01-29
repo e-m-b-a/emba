@@ -33,7 +33,7 @@ P60_deep_extractor() {
   # If we have not found a linux filesystem we try to do an extraction round on every file multiple times
   # If we already know it is a linux (RTOS -> 0) or it is UEFI (UEFI_VERIFIED -> 1) we do not need to run
   # the deep extractor
-  if [[ "${RTOS}" -eq 0 ]] || [[ "${UEFI_VERIFIED}" -eq 1 ]]; then
+  if [[ "${RTOS}" -eq 0 ]] || [[ "${UEFI_VERIFIED}" -eq 1 ]] || [[ "${DJI_DETECTED}" -eq 1 ]]; then
     module_end_log "${FUNCNAME[0]}" 0
     return
   fi
@@ -42,8 +42,8 @@ P60_deep_extractor() {
   if ! [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
     deep_extractor
   else
-    print_output "[!] $(date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-    print_output "[!] $(date) - Ending extraction processes - no deep extraction performed" "main"
+    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+    print_output "[!] $(print_date) - Ending extraction processes - no deep extraction performed" "main"
     DISK_SPACE_CRIT=1
   fi
 
@@ -93,8 +93,8 @@ disk_space_protection() {
   FREE_SPACE=$(df --output=avail "${DDISK}" | awk 'NR==2')
   if [[ "${FREE_SPACE}" -lt 100000 ]] || [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
     print_ln "no_log"
-    print_output "[!] $(date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-    print_output "[!] $(date) - Ending extraction processes" "main"
+    print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+    print_output "[!] $(print_date) - Ending extraction processes" "main"
     pgrep -a -f "binwalk.*${SEARCHER}.*" || true
     pkill -f ".*binwalk.*${SEARCHER}.*" || true
     pkill -f ".*extract\.py.*${SEARCHER}.*" || true
@@ -329,14 +329,14 @@ deeper_extractor_helper() {
     FREE_SPACE=$(df --output=avail "${LOG_DIR}" | awk 'NR==2')
     if [[ "${FREE_SPACE}" -lt 100000 ]]; then
       # this should stop the complete EMBA test in the future - currenlty it is work in progress
-      print_output "[!] $(date) - The system is running out of disk space ${ORANGE}${FREE_SPACE}${NC}" "main"
-      print_output "[!] $(date) - Ending EMBA firmware analysis processes" "main"
+      print_output "[!] $(print_date) - The system is running out of disk space ${ORANGE}${FREE_SPACE}${NC}" "main"
+      print_output "[!] $(print_date) - Ending EMBA firmware analysis processes" "main"
       cleaner 1
       exit
     elif [[ "${DISK_SPACE}" -gt "${MAX_EXT_SPACE}" ]]; then
       # this stops the deep extractor but not EMBA
-      print_output "[!] $(date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
-      print_output "[!] $(date) - Ending extraction processes" "main"
+      print_output "[!] $(print_date) - Extractor needs too much disk space ${DISK_SPACE}" "main"
+      print_output "[!] $(print_date) - Ending extraction processes" "main"
       DISK_SPACE_CRIT=1
       break
     fi

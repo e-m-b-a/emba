@@ -84,7 +84,6 @@ s22_vuln_check_semgrep() {
     S22_SEMGREP_ISSUES=$(grep -c "testcase name" "${PHP_SEMGREP_LOG}" || true)
     S22_SEMGREP_VULNS=$(grep -c "semgrep-rules.php.lang.security" "${PHP_SEMGREP_LOG}" || true)
     S22_SEMGREP_SCRIPTS=$(grep "Scanning\ .* rules\." "${PHP_SEMGREP_LOG}" | awk '{print $2}' || true)
-    print_ln
 
     if [[ "${S22_SEMGREP_VULNS}" -gt 0 ]]; then
       print_output "[+] Found ""${ORANGE}""${S22_SEMGREP_ISSUES}"" issues""${GREEN}"" (""${ORANGE}""${S22_SEMGREP_VULNS}"" vulnerabilites${GREEN}) in ""${ORANGE}""${S22_SEMGREP_SCRIPTS}""${GREEN}"" php files""${NC}" "" "${PHP_SEMGREP_LOG}"

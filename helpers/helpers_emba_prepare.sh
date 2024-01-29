@@ -35,7 +35,7 @@ log_folder()
     echo -e "    You can now delete the content here or start the tool again and specify a different directory."
 
     if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; then
-      if grep -q "Test ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
+      if check_emba_ended; then
         print_output "[*] A finished EMBA firmware test was found in the log directory" "no_log"
       elif grep -q "System emulation phase ended" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; then
         print_output "[*] A ${ORANGE}NOT${NC} finished EMBA firmware test was found in the log directory - ${ORANGE}system emulation phase${NC} already finished" "no_log"

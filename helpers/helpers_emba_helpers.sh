@@ -83,25 +83,39 @@ max_pids_protection() {
   done
 }
 
+check_emba_ended() {
+  if grep -q "Test ended" "${LOG_DIR}""/""${MAIN_LOG_FILE}"; then
+    # EMBA is already finished
+    return 0
+  fi
+  return 1
+}
+
 # $1 - 1 some interrupt detected
 # $1 - 0 default exit 0
 cleaner() {
   INTERRUPT_CLEAN="${1:-1}"
   [[ "${CLEANED}" -eq 1 ]] && return
   if [[ "${INTERRUPT_CLEAN}" -eq 1 ]]; then
-    print_output "[*] Interrupt detected!" "no_log"
+    print_output "[*] $(print_date) - Interrupt detected!" "no_log"
   fi
-  print_output "[*] Final cleanup started." "no_log"
+  print_output "[*] $(print_date) - Final cleanup started." "main"
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${QUEST_CONTAINER}" ]]; then
     if [[ "$(docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" 2>/dev/null)" == "running" ]]; then
-      print_output "[*] Stopping Quest Container ..." "no_log"
-      docker kill "${QUEST_CONTAINER}"
+      print_output "[*] $(print_date) - Stopping Quest Container ..." "no_log"
+      docker kill "${QUEST_CONTAINER}" 2>/dev/null
+    fi
+  fi
+  if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${MAIN_CONTAINER}" ]]; then
+    if [[ "$(docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER}" 2>/dev/null)" == "running" ]]; then
+      print_output "[*] $(print_date) - Stopping EMBA main Container ..." "no_log"
+      docker kill "${MAIN_CONTAINER}" 2>/dev/null
     fi
   fi
   # stop inotifywait on host
   if [[ "${IN_DOCKER}" -eq 0 ]] && pgrep -f "inotifywait.*${LOG_DIR}.*" &> /dev/null 2>&1; then
-    print_output "[*] Stopping inotify ..."
-    pkill -f "inotifywait.*${LOG_DIR}.*" || true
+    print_output "[*] $(print_date) - Stopping inotify ..."
+    pkill -f "inotifywait.*${LOG_DIR}.*" >/dev/null || true
   fi
 
   # Remove status bar and reset screen
@@ -113,29 +127,29 @@ cleaner() {
   if [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" && "${#FILE_ARR[@]}" -gt 0 ]]; then
     if [[ $(grep -i -c S115 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -eq 1 ]]; then
 
-      print_output "[*] Terminating qemu processes - check it with ps" "no_log"
+      print_output "[*] $(print_date) - Terminating qemu processes - check it with ps" "no_log"
       killall -9 --quiet -r .*qemu-.*-sta.* > /dev/null || true
-      print_output "[*] Cleaning the emulation environment\\n" "no_log"
+      print_output "[*] $(print_date) - Cleaning the emulation environment\\n" "no_log"
       find "${FIRMWARE_PATH_CP}" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
       find "${LOG_DIR}/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
 
-      print_output "[*] Umounting proc, sys and run" "no_log"
+      print_output "[*] $(print_date) - Umounting proc, sys and run" "no_log"
       mapfile -t CHECK_MOUNTS < <(mount | grep "s115_usermode_emulator" 2>/dev/null || true)
       # now we can unmount the stuff from emulator and delete temporary stuff
       for MOUNT in "${CHECK_MOUNTS[@]}"; do
-        print_output "[*] Unmounting ${MOUNT}" "no_log"
+        print_output "[*] $(print_date) - Unmounting ${MOUNT}" "no_log"
         MOUNT=$(echo "${MOUNT}" | cut -d\  -f3)
         umount -l "${MOUNT}" || true
       done
 
       if [[ -d "${LOG_DIR}/s115_usermode_emulator/firmware" ]]; then
-        print_output "[*] Removing emulation directory ${ORANGE}${LOG_DIR}/s115_usermode_emulator/firmware${NC}" "no_log"
+        print_output "[*] $(print_date) - Removing emulation directory ${ORANGE}${LOG_DIR}/s115_usermode_emulator/firmware${NC}" "no_log"
         rm -r "${LOG_DIR}/s115_usermode_emulator/firmware" || true
       fi
     fi
 
     if [[ $(grep -i -c S120 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -eq 1 ]]; then
-      print_output "[*] Terminating cwe-checker processes - check it with ps" "no_log"
+      print_output "[*] $(print_date) - Terminating cwe-checker processes - check it with ps" "no_log"
       killall -9 --quiet -r .*cwe_checker.* > /dev/null || true
     fi
 
@@ -143,7 +157,7 @@ cleaner() {
     # was able to setup the box we need to do a cleanup
     if pgrep -f "qemu-system-.*${LOG_DIR}"; then
       if [[ "${SYS_ONLINE:-0}" -eq 1 ]] || [[ $(grep -i -c L10 "${LOG_DIR}"/"${MAIN_LOG_FILE}") -gt 0 ]]; then
-        print_output "[*] Resetting system emulation environment" "no_log"
+        print_output "[*] $(print_date) - Resetting system emulation environment" "no_log"
         stopping_emulation_process
         reset_network_emulation 2
       fi
@@ -151,10 +165,15 @@ cleaner() {
   fi
   [[ "${IN_DOCKER}" -eq 1 ]] && restore_permissions
 
+  if [[ "${IN_DOCKER}" -eq 0 ]]; then
+    pkill -f "tail.*-f ${LOG_DIR}/emba.log" > /dev/null || true
+    remove_status_bar
+  fi
+
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -v K_DOWN_PID ]]; then
     if ps -p "${K_DOWN_PID}" > /dev/null; then
       # kernel downloader is running in a thread on the host and needs to be stopped now
-      print_output "[*] Stopping kernel downloader thread with PID ${K_DOWN_PID}" "no_log"
+      print_output "[*] $(print_date) - Stopping kernel downloader thread with PID ${K_DOWN_PID}" "no_log"
       kill "${K_DOWN_PID}" > /dev/null || true
     fi
   fi
@@ -172,11 +191,21 @@ cleaner() {
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -f "${TMP_DIR}"/EXIT_KILL_PIDS.log ]]; then
     while read -r KILL_PID; do
       if [[ -e /proc/"${KILL_PID}" ]]; then
-        print_output "[*] Stopping EMBA process with PID ${KILL_PID}" "no_log"
+        print_output "[*] $(print_date) - Stopping EMBA process with PID ${KILL_PID}" "no_log"
         kill -9 "${KILL_PID}" > /dev/null || true
       fi
     done < "${TMP_DIR}"/EXIT_KILL_PIDS.log
   fi
+
+  if [[ "${IN_DOCKER}" -eq 1 ]] && [[ -f "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log ]]; then
+    while read -r KILL_PID; do
+      if [[ -e /proc/"${KILL_PID}" ]]; then
+        print_output "[*] $(print_date) - Stopping EMBA process with PID ${KILL_PID} in docker" "no_log"
+        kill -9 "${KILL_PID}" > /dev/null || true
+      fi
+    done < "${TMP_DIR}"/EXIT_KILL_PIDS_DOCKER.log
+  fi
+
 
   if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
     if ! [[ -s "${LOG_DIR}"/emba_error.log ]]; then
@@ -189,7 +218,7 @@ cleaner() {
   fi
   export CLEANED=1
   if [[ "${INTERRUPT_CLEAN}" -eq 1 ]]; then
-    print_output "[!] Test ended on ""$(date)"" and took about ""$(show_runtime)"" \\n" "no_log"
+    print_output "[!] Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     exit 1
   fi
 }
@@ -298,7 +327,7 @@ disable_strict_mode() {
 restore_permissions() {
   if [[ -f "${LOG_DIR}"/orig_user.log ]]; then
     ORIG_USER=$(head -1 "${LOG_DIR}"/orig_user.log)
-    print_output "[*] Restoring directory permissions for user: ${ORANGE}${ORIG_USER}${NC}" "no_log"
+    print_output "[*] $(print_date) - Restoring directory permissions for user: ${ORANGE}${ORIG_USER}${NC}" "no_log"
     ORIG_UID="$(grep "UID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
     ORIG_GID="$(grep "GID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
     chown "${ORIG_UID}":"${ORIG_GID}" "${LOG_DIR}" -R || true
@@ -318,7 +347,7 @@ module_wait() {
   local MODULE_TO_WAIT="${1:-}"
   # if the module we should wait is not in our module array we return without waiting
   if ! [[ " ${MODULES_EXPORTED[*]} " == *"${MODULE_TO_WAIT}"* ]]; then
-    print_output "[-] $(date) - ${MODULE_TO_WAIT} not in module array - this will result in unexpected behavior" "main"
+    print_output "[-] $(print_date) - ${MODULE_TO_WAIT} not in module array - this will result in unexpected behavior" "main"
     return
   fi
 
@@ -328,7 +357,7 @@ module_wait() {
 
   while [[ $(grep -i -c "${MODULE_TO_WAIT} finished" "${MAIN_LOG}" || true) -ne 1 ]]; do
     if grep -q "${MODULE_TO_WAIT} not executed - blacklist triggered" "${MAIN_LOG}"; then
-      print_output "[-] $(date) - ${MODULE_TO_WAIT} blacklisted - not waiting" "main"
+      print_output "[-] $(print_date) - ${MODULE_TO_WAIT} blacklisted - not waiting" "main"
       # if our module which we are waiting is on the blacklist we can just return
       return
     fi
@@ -366,7 +395,7 @@ disk_space_monitor() {
     fi
 
     if [[ -f "${MAIN_LOG}" ]]; then
-      if grep -q "Test ended\|EMBA failed" "${MAIN_LOG}" 2>/dev/null; then
+      if check_emba_ended; then
         break
       fi
     fi
