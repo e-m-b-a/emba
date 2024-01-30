@@ -299,7 +299,7 @@ update_box_modules() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
-    STARTED_MODULE_STR="$(grep -c "starting" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
+    STARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
     FINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
     LAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
     printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 "$((STARTED_MODULE_STR - FINISHED_MODULE_STR))")" "$(( LINES - 2 ))" "$(module_util_str 1 "${LAST_FINISHED_MODULE_STR}")" "$(( LINES - 1 ))" "$(module_util_str 2 "${FINISHED_MODULE_STR}/${COUNT_MODULES}")" || true
