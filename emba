@@ -719,9 +719,9 @@ main() {
     disable_strict_mode "${STRICT_MODE}" 0
     if [[ "${ONLY_DEP}" -gt 0 ]]; then
       # check dependencies mode:
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       D_RETURN=$?
-      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" "${DOCKER_COMPOSE[@]}" run --rm emba_quest -c './emba -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
+      EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="/tmp" "${DOCKER_COMPOSE[@]}" run --rm emba_quest -c './emba -l /logs -f /firmware -i "$@"' _ "${ARGUMENTS[@]}"
       if [[ $? -ne ${D_RETURN} ]]; then
         D_RETURN=1
       fi
@@ -790,11 +790,12 @@ main() {
           print_output "[*] $(print_date) - Access the web-report with ${ORANGE}firefox $(abs_path "${HTML_PATH}/index.html")${NC}" "main"
         fi
         cleaner 0
+        print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
       else
         # we do not need the log dir from dependency checker
         [[ -d "${LOG_DIR}" ]] && rm -rf "${LOG_DIR}"
+        print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
       fi
-      print_output "[!] $(print_date) - Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "main"
       exit 0
     else
       print_output "[-] $(print_date) - Test ended on ""$(print_date)"" and EMBA failed in docker mode!" "main"
