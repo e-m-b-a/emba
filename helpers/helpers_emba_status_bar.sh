@@ -270,7 +270,22 @@ update_box_modules() {
     fi
     MODULES=( "${MODULES_EMBA[@]}" "${MODULES_LOCAL[@]}" )
     for MODULE_FILE in "${MODULES[@]}" ; do
-      if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]] ; then
+      if ( file "${MODULE_FILE}" | grep -q "shell script" ) && ! [[ "${MODULE_FILE}" =~ \ |\' ]]; then
+        # if system emulation is not enabled, we do not count the L modules
+        if [[ "$(basename "${MODULE_FILE}")" =~ ^L[0-9]* ]] && [[ "${FULL_EMULATION}" -ne 1 ]]; then
+          continue
+        fi
+        # if diffing is not enabled, we do not count the diffing modules
+        if [[ "$(basename "${MODULE_FILE}")" =~ ^D[0-9]* ]] && [[ -z "${FIRMWARE_PATH1}" ]]; then
+          continue
+        fi
+        # we do not count the quest modules
+        if [[ "$(basename "${MODULE_FILE}")" =~ ^Q[0-9]* ]]; then
+          continue
+        fi
+        if [[ "${MODULE_BLACKLIST[*]}" == *"$(basename -s .sh "${MODULE_FILE}")"* ]]; then
+          continue
+        fi
         (( COUNT_MODULES+=1 ))
       fi
     done
@@ -285,7 +300,7 @@ update_box_modules() {
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
     STARTED_MODULE_STR="$(grep -c "starting" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
-    FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
+    FINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
     LAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
     printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 "$((STARTED_MODULE_STR - FINISHED_MODULE_STR))")" "$(( LINES - 2 ))" "$(module_util_str 1 "${LAST_FINISHED_MODULE_STR}")" "$(( LINES - 1 ))" "$(module_util_str 2 "${FINISHED_MODULE_STR}/${COUNT_MODULES}")" || true
     sleep 1
