@@ -52,13 +52,13 @@ S118_busybox_verifier()
   # finally we search manually for the version
   if [[ "${#BB_VERSIONS_ARR[@]}" -eq 0 ]]; then
     # first grep is for identification of possible binary files:
-    mapfile -t BB_BINS_ARR < <(grep -l -a -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" "${LOG_DIR}"/firmware -r 2>/dev/null)
+    mapfile -t BB_BINS_ARR < <(grep -l -a -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" "${LOG_DIR}"/firmware -r 2>/dev/null || true)
     for BB_BIN in "${BB_BINS_ARR[@]}"; do
       if ! file "${BB_BIN}" | grep -q "ELF"; then
         continue
       fi
       # now modify the version identifier to use it also for our CVE identification
-      VERSION_IDENTIFIER=$(strings "${BB_BIN}" | grep -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" | sort -u | sed -r 's/BusyBox\ v([0-9](\.[0-9]+)+?)\ .*/busybox:\1/' | sort -u | head -1)
+      VERSION_IDENTIFIER=$(strings "${BB_BIN}" | grep -E "BusyBox\ v[0-9](\.[0-9]+)+?.*" | sort -u | sed -r 's/BusyBox\ v([0-9](\.[0-9]+)+?)\ .*/busybox:\1/' | sort -u | head -1 || true)
       # build the needed array
       BB_VERSIONS_ARR+=( "${BB_BIN};${VERSION_IDENTIFIER}" )
     done
