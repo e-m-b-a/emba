@@ -15,6 +15,8 @@
 # Description:  This module tries to identify the kernel file and the init command line
 #               The identified kernel binary file is extracted with vmlinux-to-elf
 
+export THREAD_PRIO=1
+
 S24_kernel_bin_identifier()
 {
   module_log_init "${FUNCNAME[0]}"
