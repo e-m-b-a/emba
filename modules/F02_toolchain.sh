@@ -115,8 +115,13 @@ F02_toolchain() {
           # print_output "[*] Testing GCC version ${GCC_VERSION}" "no_log"
           GCC_VERSION_STRIPPED=$(echo "${GCC_VERSION}" | grep -o -E "[0-9](\.[0-9]+)+?" || true)
           if [[ -n "${GCC_VERSION_STRIPPED}" ]]; then
-            GCC_RELEASE_DATE=$(grep "${GCC_VERSION_STRIPPED}" "${CONFIG_DIR}"/gcc_details.csv || true)
+            GCC_RELEASE_DATE=$(grep "\ ${GCC_VERSION_STRIPPED};" "${CONFIG_DIR}"/gcc_details.csv || true)
             GCC_RELEASE_DATE="${GCC_RELEASE_DATE/*;}"
+            # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
+            if [[ -z "${GCC_RELEASE_DATE}" ]] && [[ "${GCC_VERSION_STRIPPED}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
+              GCC_RELEASE_DATE=$(grep "\ ${GCC_VERSION_STRIPPED%%\.0};" "${CONFIG_DIR}"/gcc_details.csv || true)
+              GCC_RELEASE_DATE="${GCC_RELEASE_DATE/*;}"
+            fi
             if [[ -n "${GCC_RELEASE_DATE}" ]]; then
               print_output "[+] Identified GCC version ${ORANGE}${GCC_VERSION}${GREEN} released on ${ORANGE}${GCC_RELEASE_DATE:-"NA"}${GREEN} in the Linux kernel identifier string."
             else
@@ -199,8 +204,13 @@ F02_toolchain() {
       fi
       GCC_VERSION_STRIPPED="${GCC_VERSION_STRIPPED/ }"
       if [[ -n "${GCC_VERSION_STRIPPED}" ]]; then
-        GCC_RELEASE_DATE=$(grep "${GCC_VERSION_STRIPPED}" "${CONFIG_DIR}"/gcc_details.csv || true)
+        GCC_RELEASE_DATE=$(grep "\ ${GCC_VERSION_STRIPPED};" "${CONFIG_DIR}"/gcc_details.csv || true)
         GCC_RELEASE_DATE="${GCC_RELEASE_DATE/*;}"
+        # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
+        if [[ -z "${GCC_RELEASE_DATE}" ]] && [[ "${GCC_VERSION_STRIPPED}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
+          GCC_RELEASE_DATE=$(grep "\ ${GCC_VERSION_STRIPPED%%\.0};" "${CONFIG_DIR}"/gcc_details.csv || true)
+          GCC_RELEASE_DATE="${GCC_RELEASE_DATE/*;}"
+        fi
         if [[ -n "${GCC_RELEASE_DATE}" ]]; then
           print_output "[+] Identified possible GCC version on binary level ${ORANGE}${BINARY_COMPILER_GUESSED} / ${GCC_VERSION_STRIPPED}${GREEN} released on ${ORANGE}${GCC_RELEASE_DATE}${GREEN}."
         else
