@@ -156,20 +156,45 @@ architecture_check()
     local ARCH_MIPS64v1=0 ARCH_MIPS64_N32=0 ARCH_RISCV=0 ARCH_PPC64=0 ARCH_QCOM_DSP6=0
     local D_END_LE=0 D_END_BE=0
     local D_FLAGS=""
+    local D_MACHINE=""
+    local D_CLASS=""
+    local D_DATA=""
+    local D_ARCH_GUESSED=""
     export ARM_HF=0
     export ARM_SF=0
     D_END="NA"
 
     # we use the binaries array which is already unique
-    for D_ARCH in "${BINARIES[@]}" ; do
-      D_FLAGS=$(readelf -h "${D_ARCH}" | grep "Flags:" 2>/dev/null || true)
-      D_ARCH=$(file "${D_ARCH}")
+    for BINARY in "${BINARIES[@]}" ; do
+      # noreorder, pic, cpic, o32, mips32
+      D_FLAGS=$(readelf -h "${BINARY}" | grep "Flags:" 2>/dev/null || true)
+      D_FLAGS="${D_FLAGS// /}"
+      D_FLAGS="${D_FLAGS/*Flags:/}"
+      D_FLAGS="${D_FLAGS/0x0/}"
+      D_MACHINE=$(readelf -h "${BINARY}" | grep "Machine:" 2>/dev/null || true)
+      D_MACHINE="${D_MACHINE/*Machine:/}"
+      D_MACHINE=$(echo "${D_MACHINE}" | sed -E 's/^[[:space:]]+//')
+      # ELF32/64
+      D_CLASS=$(readelf -h "${BINARY}" | grep "Class" || true)
+      D_CLASS="${D_CLASS/*Class:/}"
+      D_CLASS=$(echo "${D_CLASS}" | sed -E 's/^[[:space:]]+//')
+      # endianes
+      D_DATA=$(readelf -h "${BINARY}" | grep "Data" || true)
+      D_DATA="${D_DATA/*Data:/}"
+      D_DATA=$(echo "${D_DATA}" | sed -E 's/^[[:space:]]+//')
+
+      D_ARCH_GUESSED=$(readelf -p .comment "${BINARY}" 2>/dev/null| grep -v "String dump" | awk '{print $3,$4,$5}' | sort -u | tr '\n' ',' || true)
+      D_ARCH_GUESSED="${D_ARCH_GUESSED%%,/}"
+      D_ARCH_GUESSED="${D_ARCH_GUESSED##,/}"
+
+      D_ARCH=$(file -b "${BINARY}")
 
       if [[ "${D_ARCH}" == *"MSB"* ]] ; then
         D_END_BE=$((D_END_BE+1))
       elif [[ "${D_ARCH}" == *"LSB"* ]] ; then
         D_END_LE=$((D_END_LE+1))
       fi
+      write_csv_log "${BINARY}" "${D_CLASS}" "${D_DATA}" "${D_MACHINE}" "${D_FLAGS}" "${D_ARCH_GUESSED}" "${D_ARCH}"
 
       if [[ "${D_ARCH}" == *"N32 MIPS64 rel2"* ]] ; then
         # ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1
