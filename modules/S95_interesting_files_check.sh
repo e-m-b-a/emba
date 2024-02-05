@@ -34,10 +34,13 @@ S95_interesting_files_check()
     WAIT_PIDS_S95+=( "$!" )
     hidden_files &
     WAIT_PIDS_S95+=( "$!" )
+    compile_files &
+    WAIT_PIDS_S95+=( "$!" )
   else
     interesting_binaries
     post_exploitation
     hidden_files
+    compile_files
   fi
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S95[@]}"
@@ -54,12 +57,17 @@ S95_interesting_files_check()
     sub_module_title "Hidden files"
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/hidden_files.txt
   fi
+  if [[ -f "${LOG_PATH_MODULE}"/compile_files.txt ]]; then
+    sub_module_title "Toolchain related files"
+    tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/compile_files.txt
+  fi
 
-  if [[ -f "${TMP_DIR}"/INT_COUNT.tmp || -f "${TMP_DIR}"/POST_COUNT.tmp || -f "${TMP_DIR}"/HID_COUNT.tmp ]]; then
+  if [[ -f "${TMP_DIR}"/INT_COUNT.tmp || -f "${TMP_DIR}"/POST_COUNT.tmp || -f "${TMP_DIR}"/HID_COUNT.tmp || -f "${TMP_DIR}"/COMP_COUNT.tmp ]]; then
     POST_COUNT=$(cat "${TMP_DIR}"/POST_COUNT.tmp 2>/dev/null || true)
     INT_COUNT=$(cat "${TMP_DIR}"/INT_COUNT.tmp 2>/dev/null || true)
     HID_COUNT=$(cat "${TMP_DIR}"/HID_COUNT.tmp 2>/dev/null || true)
-    if [[ "${POST_COUNT}" -gt 0 || "${INT_COUNT}" -gt 0 || "${HID_COUNT}" -gt 0 ]]; then
+    COMP_COUNT=$(cat "${TMP_DIR}"/COMP_COUNT.tmp 2>/dev/null || true)
+    if [[ "${POST_COUNT}" -gt 0 || "${INT_COUNT}" -gt 0 || "${HID_COUNT}" -gt 0 || "${COMP_COUNT}" -gt 0 ]]; then
       NEG_LOG=1
     fi
   fi
@@ -68,6 +76,32 @@ S95_interesting_files_check()
   write_log "[*] Statistics:${INT_COUNT}:${POST_COUNT}"
 
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+}
+
+compile_files() {
+  local COMPILE_FILES=()
+  local LINE=""
+  local COUNT=0
+  local COMP_COUNT=0
+
+  mapfile -t COMPILE_FILES < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -xdev -type f \( -name "libstdc++.so*" -o -name "libgcc_s.so*" \) )
+
+  if [[ ${#COMPILE_FILES[@]} -gt 0 ]] ; then
+    write_log "[+] Found ""${#COMPILE_FILES[@]}"" files for identification of used toolchain:" "${LOG_PATH_MODULE}"/compile_files.txt
+    for LINE in "${COMPILE_FILES[@]}" ; do
+      # print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
+      write_log "$(indent "$(orange "$(print_path "${LINE}")")")" "${LOG_PATH_MODULE}"/compile_files.txt
+      write_csv_log "compile file" "${LINE}"
+      ((COMP_COUNT+=1))
+      COUNT=1
+    done
+  fi
+
+  if [[ ${COUNT} -eq 0 ]] ; then
+    write_log "[-] No compile related files found" "${LOG_PATH_MODULE}"/compile_files.txt
+  fi
+  echo "${COMP_COUNT}" >> "${TMP_DIR}"/COMP_COUNT.tmp
+
 }
 
 hidden_files() {
@@ -83,6 +117,7 @@ hidden_files() {
     for LINE in "${HIDDEN_FILES[@]}" ; do
       # print_output "$(indent "$(orange "$(print_path "${LINE}")")")"
       write_log "$(indent "$(orange "$(print_path "${LINE}")")")" "${LOG_PATH_MODULE}"/hidden_files.txt
+      write_csv_log "hidden file" "${LINE}"
       ((HID_COUNT+=1))
       COUNT=1
     done
@@ -115,6 +150,7 @@ interesting_binaries() {
             COUNT=1
           fi
           write_log "$(indent "$(orange "$(print_path "${LINE}")")")" "${LOG_PATH_MODULE}"/interesting_binaries.txt
+          write_csv_log "interesting binary" "${LINE}"
           ((INT_COUNT+=1))
           MD5_DONE_INT+=( "${BIN_MD5}" )
         fi
@@ -150,6 +186,7 @@ post_exploitation() {
             COUNT=1
           fi
           write_log "$(indent "$(orange "$(print_path "${LINE}")")")" "${LOG_PATH_MODULE}"/post_exploitation_binaries.txt
+          write_csv_log "post exploitation binary" "${LINE}"
           ((POST_COUNT+=1))
           MD5_DONE_POST+=( "${BIN_MD5}" )
         fi

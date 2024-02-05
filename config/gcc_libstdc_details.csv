@@ -1,0 +1,50 @@
+GCC 3.0;libstdc++.so.3.0.0;June 18, 2001
+GCC 3.0.1;libstdc++.so.3.0.1;August 20, 2001
+GCC 3.0.2;libstdc++.so.3.0.2;October 25, 2001
+GCC 3.0.3;libstdc++.so.3.0.2 (See Note 1);December 20, 2001
+GCC 3.0.4;libstdc++.so.3.0.4;February 20, 2002
+GCC 3.1;libstdc++.so.4.0.0 ;May 15, 2002
+GCC 3.1.1;libstdc++.so.4.0.1;July 25, 2002
+GCC 3.2;libstdc++.so.5.0.0 ;August 14, 2002
+GCC 3.2.1;libstdc++.so.5.0.1;November 19, 2002
+GCC 3.2.2;libstdc++.so.5.0.2;February 05, 2003
+GCC 3.2.3;libstdc++.so.5.0.3 (See Note 2);April 22, 2003
+GCC 3.3;libstdc++.so.5.0.4;May 13, 2003
+GCC 3.3.1;libstdc++.so.5.0.5;August 8, 2003
+GCC 3.4.0;libstdc++.so.6.0.0 ;April 18, 2004
+GCC 3.4.1;libstdc++.so.6.0.1;July 1, 2004
+GCC 3.4.2;libstdc++.so.6.0.2;September 6, 2004
+GCC 3.4.3;libstdc++.so.6.0.3;November 4, 2004
+GCC 4.0.0;libstdc++.so.6.0.4;April 20, 2005
+GCC 4.0.1;libstdc++.so.6.0.5;July 7, 2005
+GCC 4.0.2;libstdc++.so.6.0.6;September 28, 2005
+GCC 4.0.3;libstdc++.so.6.0.7;March 10, 2006
+GCC 4.1.0;libstdc++.so.6.0.7;February 28, 2006
+GCC 4.1.1;libstdc++.so.6.0.8;May 24, 2006
+GCC 4.2.0;libstdc++.so.6.0.9;May 13, 2007
+GCC 4.2.1;libstdc++.so.6.0.9 (See Note 3);July 18, 2007
+GCC 4.2.2;libstdc++.so.6.0.9;October 7, 2007
+GCC 4.3.0;libstdc++.so.6.0.10;March 5, 2008
+GCC 4.4.0;libstdc++.so.6.0.11;April 21, 2009
+GCC 4.4.1;libstdc++.so.6.0.12;July 22, 2009
+GCC 4.4.2;libstdc++.so.6.0.13;October 15, 2009
+GCC 4.5.0;libstdc++.so.6.0.14;April 14, 2010
+GCC 4.6.0;libstdc++.so.6.0.15;March 25, 2011
+GCC 4.6.1;libstdc++.so.6.0.16;June 27, 2011
+GCC 4.7.0;libstdc++.so.6.0.17;March 22, 2012
+GCC 4.8.0;libstdc++.so.6.0.18;March 22, 2013
+GCC 4.8.3;libstdc++.so.6.0.19;May 22, 2014
+GCC 4.9.0;libstdc++.so.6.0.20;April 22, 2014
+GCC 5.1;libstdc++.so.6.0.21;April 22, 2015
+GCC 6.1;libstdc++.so.6.0.22;April 27, 2016
+GCC 7.1;libstdc++.so.6.0.23;May 2, 2017
+GCC 7.2;libstdc++.so.6.0.24;August 14, 2017
+GCC 8.1;libstdc++.so.6.0.25;May 2, 2018
+GCC 9.1;libstdc++.so.6.0.26;May 3, 2019
+GCC 9.2;libstdc++.so.6.0.27;August 12, 2019
+GCC 9.3;libstdc++.so.6.0.28;March 12, 2020
+GCC 10.1;libstdc++.so.6.0.28;May 7, 2020
+GCC 11.1;libstdc++.so.6.0.29;April 27, 2021
+GCC 12.1;libstdc++.so.6.0.30;May 6, 2022
+GCC 13.1;libstdc++.so.6.0.31;April 26, 2023
+GCC 13.2;libstdc++.so.6.0.32;July 27, 2023
