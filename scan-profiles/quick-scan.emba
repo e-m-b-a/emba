@@ -18,9 +18,6 @@ export THREADED=1
 export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
-# cwe-checker is now only testing non-linux binaries. With this mechanism we can enable
-# it in the default profile.
-export CWE_CHECKER=1
 # the following modules are long running modules which are disabled in the quick scan profile
 export MODULE_BLACKLIST=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S16_ghidra_decompile_checks" "S17_cwe_checker" "S26_kernel_vuln_verifier" "S99_grepit" "S109_jtr_local_pw_cracking" "S110_yara_check" "S118_busybox_verifier" "L25_web_checks" )
 

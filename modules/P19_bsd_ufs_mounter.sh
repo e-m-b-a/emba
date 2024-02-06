@@ -78,6 +78,7 @@ ufs_extractor() {
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "UFS filesystem extractor" "${UFS_PATH_}" "${EXTRACTION_DIR_}" "${FILES_UFS_MOUNT}" "${DIRS_UFS_MOUNT}" "NA"
     umount "${TMP_UFS_MOUNT}" 2>/dev/null || true
+    detect_root_dir_helper "${EXTRACTION_DIR_}"
   fi
   rm -r "${TMP_UFS_MOUNT}"
 }
