@@ -70,11 +70,13 @@ S115_usermode_emulator() {
     copy_firmware
 
     detect_root_dir_helper "${EMULATION_PATH_BASE}"
+
+    print_output "[*] Detected ${ORANGE}${#ROOT_PATH[@]}${NC} root directories:"
+
     kill_qemu_threader &
     export PID_killer="$!"
     disown "${PID_killer}" 2> /dev/null || true
 
-    print_output "[*] Detected ${ORANGE}${#ROOT_PATH[@]}${NC} root directories:"
     for R_PATH in "${ROOT_PATH[@]}" ; do
       print_ln
       NEG_LOG=1
@@ -709,7 +711,7 @@ kill_qemu_threader() {
   # WARNING: This is so *** ugly! FIX IT!
   # Currently this should only used in docker environment!
   while true; do
-    print_output "[*] KILLING qemu processes" "no_log"
+    # print_output "[*] KILLING qemu processes" "no_log"
     pkill -9 -O 240 -f .*qemu-.*-sta.* >/dev/null || true
     sleep 20
   done

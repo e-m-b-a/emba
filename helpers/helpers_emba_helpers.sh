@@ -99,7 +99,7 @@ cleaner() {
   if [[ "${INTERRUPT_CLEAN}" -eq 1 ]]; then
     print_output "[*] $(print_date) - Interrupt detected!" "no_log"
   fi
-  print_output "[*] $(print_date) - Final cleanup started." "main"
+  print_output "[*] $(print_date) - Final cleanup started." "no_log"
   if [[ "${IN_DOCKER}" -eq 0 ]] && [[ -n "${QUEST_CONTAINER}" ]]; then
     if [[ "$(docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER}" 2>/dev/null)" == "running" ]]; then
       print_output "[*] $(print_date) - Stopping Quest Container ..." "no_log"
@@ -114,7 +114,7 @@ cleaner() {
   fi
   # stop inotifywait on host
   if [[ "${IN_DOCKER}" -eq 0 ]] && pgrep -f "inotifywait.*${LOG_DIR}.*" &> /dev/null 2>&1; then
-    print_output "[*] $(print_date) - Stopping inotify ..."
+    print_output "[*] $(print_date) - Stopping inotify ...""no_log"
     pkill -f "inotifywait.*${LOG_DIR}.*" >/dev/null || true
   fi
 

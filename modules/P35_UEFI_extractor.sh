@@ -20,7 +20,7 @@ export PRE_THREAD_ENA=0
 P35_UEFI_extractor() {
   local NEG_LOG=0
 
-  if [[ "${UEFI_DETECTED}" -eq 1 ]]; then
+  if [[ "${UEFI_DETECTED}" -eq 1 && "${RTOS}" -eq 1 ]]; then
     module_log_init "${FUNCNAME[0]}"
     module_title "UEFI extraction module"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -210,11 +210,17 @@ uefi_extractor(){
     mkdir -p "${EXTRACTION_DIR_}"
   fi
   cp "${FIRMWARE_PATH_}" "${EXTRACTION_DIR_}"
-  "${UEFI_EXTRACT_BIN}" "${EXTRACTION_DIR_}"/firmware all &> "${LOG_PATH_MODULE}"/uefi_extractor_"${FIRMWARE_NAME_}".log
+  "${UEFI_EXTRACT_BIN}" "${EXTRACTION_DIR_}"/firmware all &> "${LOG_PATH_MODULE}"/uefi_extractor_"${FIRMWARE_NAME_}".log || print_output "[-] UEFI firmware extraction failed" "no_log"
 
   UEFI_EXTRACT_REPORT_FILE="${EXTRACTION_DIR_}"/firmware.report.txt
-  mv "${UEFI_EXTRACT_REPORT_FILE}" "${LOG_PATH_MODULE}"
-  UEFI_EXTRACT_REPORT_FILE="${LOG_PATH_MODULE}"/firmware.report.txt
+  if [[ -f "${UEFI_EXTRACT_REPORT_FILE}" ]]; then
+    mv "${UEFI_EXTRACT_REPORT_FILE}" "${LOG_PATH_MODULE}"
+    UEFI_EXTRACT_REPORT_FILE="${LOG_PATH_MODULE}"/firmware.report.txt
+  else
+    print_output "[-] UEFI firmware extraction failed" "no_log"
+    return
+  fi
+
   if [[ -f "${EXTRACTION_DIR_}"/firmware ]]; then
     rm "${EXTRACTION_DIR_}"/firmware
   fi

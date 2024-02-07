@@ -94,11 +94,11 @@ check_quest_container() {
     fi
     sleep 0.1
   done
-  # reset
+  reset
   print_output "[*] Quest container ${QUEST_CONTAINER} dependency checks: \\n" "no_log"
   docker logs "${QUEST_CONTAINER}"
   print_output "[*] Finished Quest container ${QUEST_CONTAINER} dependency checks \\n" "no_log"
-  # reset
+  reset
 }
 
 # $1: module group letter [P, S, L, F, Q]
@@ -811,6 +811,9 @@ main() {
 
   if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+      while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
+        sleep 1
+      done
       while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
         sleep 1
       done

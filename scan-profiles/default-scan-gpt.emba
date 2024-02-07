@@ -26,6 +26,10 @@ export CWE_CHECKER=1
 # disable long running modules - enable them if needed
 export MODULE_BLACKLIST=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
 
+# enable silent mode and status bar
+export DISABLE_STATUS_BAR=0
+export SILENT=1
+
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"

@@ -167,19 +167,19 @@ architecture_check()
     # we use the binaries array which is already unique
     for BINARY in "${BINARIES[@]}" ; do
       # noreorder, pic, cpic, o32, mips32
-      D_FLAGS=$(readelf -h "${BINARY}" | grep "Flags:" 2>/dev/null || true)
+      D_FLAGS=$(readelf -h "${BINARY}" 2>/dev/null | grep "Flags:" || true)
       D_FLAGS="${D_FLAGS// /}"
       D_FLAGS="${D_FLAGS/*Flags:/}"
       D_FLAGS="${D_FLAGS/0x0/}"
-      D_MACHINE=$(readelf -h "${BINARY}" | grep "Machine:" 2>/dev/null || true)
+      D_MACHINE=$(readelf -h "${BINARY}" 2>/dev/null | grep "Machine:" 2>/dev/null || true)
       D_MACHINE="${D_MACHINE/*Machine:/}"
       D_MACHINE=$(echo "${D_MACHINE}" | sed -E 's/^[[:space:]]+//')
       # ELF32/64
-      D_CLASS=$(readelf -h "${BINARY}" | grep "Class" || true)
+      D_CLASS=$(readelf -h "${BINARY}" 2>/dev/null | grep "Class" || true)
       D_CLASS="${D_CLASS/*Class:/}"
       D_CLASS=$(echo "${D_CLASS}" | sed -E 's/^[[:space:]]+//')
       # endianes
-      D_DATA=$(readelf -h "${BINARY}" | grep "Data" || true)
+      D_DATA=$(readelf -h "${BINARY}" 2>/dev/null | grep "Data" || true)
       D_DATA="${D_DATA/*Data:/}"
       D_DATA=$(echo "${D_DATA}" | sed -E 's/^[[:space:]]+//')
 

@@ -21,6 +21,10 @@ export QEMULATION=1
 export FULL_EMULATION=1
 export SELECT_MODULES+=( "S21" "S22" "S23" "S24")
 
+# enable silent mode and status bar
+export DISABLE_STATUS_BAR=0
+export SILENT=1
+
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
