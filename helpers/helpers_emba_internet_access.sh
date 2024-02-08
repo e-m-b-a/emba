@@ -88,7 +88,7 @@ kernel_downloader() {
       fi
 
       disable_strict_mode "${STRICT_MODE}" 0
-      wget --output-file="${TMP_DIR}"/wget.log https://mirrors.edge.kernel.org/pub/linux/kernel/v"${K_VER_DOWNLOAD}"/linux-"${K_VERSION}".tar.gz -O "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz 2>&1
+      wget --output-file="${TMP_DIR}"/wget.log https://mirrors.edge.kernel.org/pub/linux/kernel/v"${K_VER_DOWNLOAD}"/linux-"${K_VERSION}".tar.gz -O "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz 2>&1 > /dev/null
       D_RETURN="$?"
       enable_strict_mode "${STRICT_MODE}" 0
 
