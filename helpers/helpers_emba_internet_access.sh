@@ -41,7 +41,7 @@ kernel_downloader() {
   if ! [[ -f "${LOG_FILE_KERNEL}" ]]; then
     OUTPUTTER="[-] $(print_date) - No Kernel version identified ..."
     print_output "${OUTPUTTER}" "no_log"
-    write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+    write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
     return
   fi
   local K_VERSIONS=()
@@ -52,7 +52,7 @@ kernel_downloader() {
   for K_VERSION in "${K_VERSIONS[@]}"; do
     OUTPUTTER="[*] $(print_date) - Checking download of kernel version ${ORANGE}${K_VERSION}${NC}"
     print_output "${OUTPUTTER}" "no_log"
-    write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+    write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
     local K_VER_DOWNLOAD=""
     local K_VER_1st=""
     local K_VER_2nd=""
@@ -81,7 +81,7 @@ kernel_downloader() {
     if ! [[ -f "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz ]] || ! gunzip -t "${KERNEL_ARCH_PATH}/linux-${K_VERSION}.tar.gz" > /dev/null; then
       OUTPUTTER="[*] $(print_date) - Kernel download for version ${ORANGE}${K_VERSION}${NC}"
       print_output "${OUTPUTTER}" "no_log"
-      write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+      write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
 
       if ! [[ -d "${TMP_DIR}" ]]; then
         mkdir "${TMP_DIR}"
@@ -94,7 +94,7 @@ kernel_downloader() {
 
       if [[ -f "${TMP_DIR}"/wget.log ]]; then
         print_ln "no_log"
-        tee -a "${LOG_DIR}/kernel_downloader.log" < "${TMP_DIR}"/wget.log || true
+        tee -a "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log" < "${TMP_DIR}"/wget.log || true
         rm "${TMP_DIR}"/wget.log
       fi
       # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which
@@ -103,7 +103,7 @@ kernel_downloader() {
       if [[ ${D_RETURN} -ne 0 ]] ; then
         OUTPUTTER="[-] $(print_date) - Kernel download for version ${ORANGE}${K_VERSION}${NC} failed"
         print_output "${OUTPUTTER}" "no_log"
-        write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+        write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
 
         echo "failed" > "${TMP_DIR}"/linux_download_failed
         if [[ -f "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz ]]; then
@@ -113,23 +113,23 @@ kernel_downloader() {
     else
       OUTPUTTER="[*] $(print_date) - Kernel sources of version ${ORANGE}${K_VERSION}${NC} already available"
       print_output "${OUTPUTTER}" "no_log"
-      write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+      write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
     fi
 
     if ! [[ -f "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz ]]; then
       OUTPUTTER="[-] $(print_date) - Kernel sources not available ..."
       print_output "${OUTPUTTER}" "no_log"
-      write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+      write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
       continue
     fi
     if ! file "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz | grep -q "gzip compressed data"; then
       OUTPUTTER="[-] $(print_date) - Kernel sources not available ..."
       print_output "${OUTPUTTER}" "no_log"
-      write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+      write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
       continue
     fi
     OUTPUTTER="[*] $(print_date) - Kernel source for version ${ORANGE}${K_VERSION}${NC} stored in ${ORANGE}${KERNEL_ARCH_PATH}${NC}"
     print_output "${OUTPUTTER}" "no_log"
-    write_log "${OUTPUTTER}" "${LOG_DIR}/kernel_downloader.log"
+    write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
   done
 }
