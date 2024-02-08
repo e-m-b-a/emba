@@ -37,11 +37,11 @@ kernel_downloader() {
     done
   fi
 
+  if ! [[ -d "${LOG_DIR}/s24_kernel_bin_identifier" ]]; then
+    mkdir "${LOG_DIR}/s24_kernel_bin_identifier"
+  fi
   # now we should have a csv log with a kernel version:
   if ! [[ -f "${LOG_FILE_KERNEL}" ]]; then
-    if ! [[ -d "${LOG_DIR}/s24_kernel_bin_identifier" ]]; then
-      mkdir "${LOG_DIR}/s24_kernel_bin_identifier"
-    fi
     OUTPUTTER="[-] $(print_date) - No Kernel version identified ..."
     print_output "${OUTPUTTER}" "no_log"
     write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"
