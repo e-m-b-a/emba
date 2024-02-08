@@ -89,16 +89,14 @@ check_quest_container() {
   print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
   # wait for quest container to finish network checks
   while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
-    if docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; then
+    if docker logs "${QUEST_CONTAINER}" | grep -q 'Loading EMBA scan profile'; then
       break
     fi
     sleep 0.1
   done
-  reset
   print_output "[*] Quest container ${QUEST_CONTAINER} dependency checks: \\n" "no_log"
   docker logs "${QUEST_CONTAINER}"
   print_output "[*] Finished Quest container ${QUEST_CONTAINER} dependency checks \\n" "no_log"
-  reset
 }
 
 # $1: module group letter [P, S, L, F, Q]
@@ -739,12 +737,12 @@ main() {
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[+] $(print_date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
 
-      if [[ "${SILENT}" -eq 0 ]]; then
-        check_quest_container "${QUEST_CONTAINER}" &
-        QUEST_PID="$!"
-        store_kill_pids "${QUEST_PID}"
-        disown "${QUEST_PID}" 2> /dev/null || true
-      fi
+      # if [[ "${SILENT}" -eq 0 ]]; then
+      #  check_quest_container "${QUEST_CONTAINER}" &
+      #  QUEST_PID="$!"
+      #  store_kill_pids "${QUEST_PID}"
+      #  disown "${QUEST_PID}" 2> /dev/null || true
+      # fi
 
       # EMBA startup:
       if [[ "${SILENT}" -eq 0 ]]; then

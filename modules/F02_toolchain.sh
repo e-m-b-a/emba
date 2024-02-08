@@ -155,7 +155,7 @@ F02_toolchain() {
       fi
 
       COMPILE_FILE_NAME=$(basename "${COMPILE_FILE}")
-      mapfile -t COMPILE_FILE_NAME_GCC_DATE_ARR < <(grep "${COMPILE_FILE_NAME}" "${CONFIG_DIR}"/gcc_libstdc_details.csv | sort -u || true)
+      mapfile -t COMPILE_FILE_NAME_GCC_DATE_ARR < <(grep ";${COMPILE_FILE_NAME};" "${CONFIG_DIR}"/gcc_libstdc_details.csv | sort -u || true)
       for COMPILE_FILE_NAME_GCC_DATE in "${COMPILE_FILE_NAME_GCC_DATE_ARR[@]}"; do
         GCC_VERSION=$(echo "${COMPILE_FILE_NAME_GCC_DATE}" | cut -d\; -f1 || true)
         GCC_RELEASE_DATE=$(echo "${COMPILE_FILE_NAME_GCC_DATE}" | cut -d\; -f3 || true)
