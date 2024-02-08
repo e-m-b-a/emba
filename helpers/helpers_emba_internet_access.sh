@@ -91,12 +91,11 @@ kernel_downloader() {
       fi
 
       disable_strict_mode "${STRICT_MODE}" 0
-      wget --output-file="${TMP_DIR}"/wget.log https://mirrors.edge.kernel.org/pub/linux/kernel/v"${K_VER_DOWNLOAD}"/linux-"${K_VERSION}".tar.gz -O "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz > /dev/null
+      wget -q --output-file="${TMP_DIR}"/wget.log https://mirrors.edge.kernel.org/pub/linux/kernel/v"${K_VER_DOWNLOAD}"/linux-"${K_VERSION}".tar.gz -O "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz
       D_RETURN="$?"
       enable_strict_mode "${STRICT_MODE}" 0
 
       if [[ -f "${TMP_DIR}"/wget.log ]]; then
-        print_ln "no_log"
         tee -a "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log" < "${TMP_DIR}"/wget.log || true
         rm "${TMP_DIR}"/wget.log
       fi

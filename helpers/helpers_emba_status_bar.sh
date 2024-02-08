@@ -387,10 +387,6 @@ remove_status_bar() {
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
-  if ! [[ -v LINES ]] ; then
-    return
-  fi
-  LINE_POS="$(( LINES - 6 ))"
 
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
@@ -428,8 +424,13 @@ remove_status_bar() {
     kill_box_pid "${PID_STATUS_2}" &
   fi
 
+  if ! [[ -v LINES ]] ; then
+    return
+  fi
+
   sleep 1
   local RM_STR=""
+  LINE_POS="$(( LINES - 6 ))"
   RM_STR="\e[""${LINE_POS}"";1f\e[0J\e[;r\e[""${LINE_POS}"";1f"
   printf "%b" "${RM_STR}"
 }
