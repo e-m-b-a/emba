@@ -88,6 +88,7 @@ def exploit_checker(host,ports,architecture)
              name =~ /goahead_ldpreload/ or
              name =~ /phpmailer_arg_injection/ or
              name =~ /trans2open/ or
+             name =~ /netgear_telnetenable/ or
              name =~ /atutor_filemanager_traversal/)
 
     ports.split(",").each { |serv|
