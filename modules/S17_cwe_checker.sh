@@ -24,7 +24,7 @@ export THREAD_PRIO=0
 
 S17_cwe_checker()
 {
-  if [[ ${CWE_CHECKER} -eq 1 ]] ; then
+  if [[ ${BINARY_EXTENDED} -eq 1 ]] ; then
     module_log_init "${FUNCNAME[0]}"
     module_title "Check binaries for vulnerabilities with cwe-checker"
     pre_module_reporter "${FUNCNAME[0]}"
@@ -90,31 +90,36 @@ cwe_check() {
   fi
 
   for BINARY in "${BINARIES[@]}" ; do
-    # ensure we have not tested this binary entry
-    if [[ "${BINS_CHECKED_ARR[*]}" == *"${BINARY}"* ]]; then
-      continue
-    fi
     # as we usually have not the full path from the s13 log, we need to search for the binary again:
-    mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -path "*${BINARY}*" | sort -u || true)
+    mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename ${BINARY})" | sort -u || true)
     for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
+      if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+        # if we have the base linux config file we only test non known Linux binaries
+        # with this we do not waste too much time on open source Linux stuff
+        NAME=$(basename "${BIN_TO_CHECK}")
+        if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+          continue
+        fi
+      fi
+
       if ( file "${BIN_TO_CHECK}" | grep -q ELF ) ; then
         # do not try to analyze kernel modules:
         [[ "${BIN_TO_CHECK}" == *".ko" ]] && continue
+        # ensure we have not tested this binary entry
+        local BIN_MD5=""
+        BIN_MD5="$(md5sum "${BIN_TO_CHECK}" | awk '{print $1}')"
+        if [[ "${BINS_CHECKED_ARR[*]}" == *"${BIN_MD5}"* ]]; then
+          # print_output "[*] ${ORANGE}${BIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
+          continue
+        fi
+        BINS_CHECKED_ARR+=( "${BIN_MD5}" )
+
         if [[ "${THREADED}" -eq 1 ]]; then
           # while s09 is running we throttle this module:
           local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
           if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
             local MAX_MOD_THREADS=1
           fi
-          if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
-            # if we have the base linux config file we only test non known Linux binaries
-            # with this we do not waste too much time on open source Linux stuff
-            NAME=$(basename "${BINARY}")
-            if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
-              continue
-            fi
-          fi
-
           cwe_checker_threaded "${BIN_TO_CHECK}" &
           local TMP_PID="$!"
           store_kill_pids "${TMP_PID}"
@@ -126,7 +131,6 @@ cwe_check() {
         fi
         # we stop checking after the first 20 binaries
         # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-        BINS_CHECKED_ARR+=( "${BINARY}" )
         if [[ "${#BINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
           print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
           print_output "[*] For complete analysis enable FULL_TEST." "no_log"

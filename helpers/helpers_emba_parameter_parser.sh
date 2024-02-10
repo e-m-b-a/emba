@@ -47,7 +47,7 @@ emba_parameter_parsing() {
         export CONTAINER_EXTRACT=1
         ;;
       c)
-        export CWE_CHECKER=1
+        export BINARY_EXTENDED=1
         ;;
       d)
         check_int "${OPTARG}"
@@ -56,7 +56,7 @@ emba_parameter_parsing() {
         # a value of 2 means dep check only in container
         ! [[ "${ONLY_DEP}" =~ [12] ]] && exit 1
         # on dependency check we need to check all deps -> activate all modules:
-        export CWE_CHECKER=1
+        export BINARY_EXTENDED=1
         export FULL_EMULATION=1
         ;;
       D)

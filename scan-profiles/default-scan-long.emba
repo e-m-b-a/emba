@@ -18,6 +18,7 @@ export THREADED=1
 export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
+export BINARY_EXTENDED=1
 
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
