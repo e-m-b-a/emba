@@ -98,7 +98,7 @@ S16_ghidra_decompile_checks()
 
   # cleanup - remove the rest without issues now
   rm -r /tmp/haruspex_* 2>/dev/null || true
-  
+
   if [[ "$(find "${LOG_PATH_MODULE}" -name "semgrep_*.csv" | wc -l)" -gt 0 ]]; then
     # can't use grep -c here as it counts on file base and we need the number of semgrep-rules
     # shellcheck disable=SC2126
