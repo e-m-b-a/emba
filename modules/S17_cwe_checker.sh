@@ -200,9 +200,10 @@ final_cwe_log() {
   local CWE=""
   local CWE_DESC=""
   local CWE_CNT=""
+  local CWE_LOGS=()
 
   if [[ -d "${LOG_PATH_MODULE}" ]]; then
-    local CWE_LOGS=("${LOG_PATH_MODULE}"/cwe_*.log)
+    mapfile -t CWE_LOGS < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.log")
     if [[ "${#CWE_LOGS[@]}" -gt 0 ]]; then
       mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
       if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then

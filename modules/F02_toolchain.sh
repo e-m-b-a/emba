@@ -54,10 +54,10 @@ F02_toolchain() {
 
   local NEG_LOG=0
 
-  mapfile -t KERNEL_V_ARR < <(tail -n 1 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,6 | sort -u || true)
-  mapfile -t KERNEL_STRING_ARR < <(tail -n 1 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f1 | sort -u || true)
+  mapfile -t KERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,6 | sort -u || true)
+  mapfile -t KERNEL_STRING_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f1 | sort -u || true)
 
-  mapfile -t COMPILE_FILES_ARR < <(tail -n 1 "${CSV_DIR}"/s95_*.csv 2>/dev/null | cut -d\; -f2 | grep "libstdc++.so.6." | sort -u || true)
+  mapfile -t COMPILE_FILES_ARR < <(tail -n +2 "${CSV_DIR}"/s95_*.csv 2>/dev/null | cut -d\; -f2 | grep "libstdc++.so.6." | sort -u || true)
 
   mapfile -t BINARY_DETAILS_ARR < <(cut -d\; -f4,7 "${CSV_DIR}"/p99_*.csv 2>/dev/null | cut -d\, -f1-3 | sort -u || true)
   mapfile -t BINARY_FLAGS_ARR < <(cut -d\; -f5 "${CSV_DIR}"/p99_*.csv 2>/dev/null | tr ',' '\n' | grep -v "unknown" | sort -u || true)
@@ -78,6 +78,11 @@ F02_toolchain() {
       K_RELEASE_DATE=""
       if [[ -f "${CONFIG_DIR}"/kernel_details.csv ]]; then
         K_RELEASE_DATE=$(grep "^linux-${KERNEL_VERSION};" "${CONFIG_DIR}"/kernel_details.csv | cut -d\; -f2 | sort -u || true)
+        # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
+        if [[ -z "${K_RELEASE_DATE}" ]] && [[ "${KERNEL_VERSION}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
+          K_RELEASE_DATE=$(grep "^linux-${KERNEL_VERSION%%\.0};" "${CONFIG_DIR}"/kernel_details.csv || true)
+          K_RELEASE_DATE="${K_RELEASE_DATE/*;}"
+        fi
       fi
 
       if [[ -n "${K_RELEASE_DATE}" ]]; then
@@ -150,7 +155,7 @@ F02_toolchain() {
       fi
 
       COMPILE_FILE_NAME=$(basename "${COMPILE_FILE}")
-      mapfile -t COMPILE_FILE_NAME_GCC_DATE_ARR < <(grep "${COMPILE_FILE_NAME}" "${CONFIG_DIR}"/gcc_libstdc_details.csv | sort -u || true)
+      mapfile -t COMPILE_FILE_NAME_GCC_DATE_ARR < <(grep ";${COMPILE_FILE_NAME};" "${CONFIG_DIR}"/gcc_libstdc_details.csv | sort -u || true)
       for COMPILE_FILE_NAME_GCC_DATE in "${COMPILE_FILE_NAME_GCC_DATE_ARR[@]}"; do
         GCC_VERSION=$(echo "${COMPILE_FILE_NAME_GCC_DATE}" | cut -d\; -f1 || true)
         GCC_RELEASE_DATE=$(echo "${COMPILE_FILE_NAME_GCC_DATE}" | cut -d\; -f3 || true)

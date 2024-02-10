@@ -84,23 +84,6 @@ sort_modules()
   MODULES=( "${SORTED_MODULES[@]}" )
 }
 
-check_quest_container() {
-  local QUEST_CONTAINER="${1:-}"
-  print_output "[*] Checking Quest container ${QUEST_CONTAINER} dependencies \\n" "no_log"
-  # wait for quest container to finish network checks
-  while [[ "$(docker container inspect -f '{{.State.Running}}' "${QUEST_CONTAINER}")" == "true" ]]; do
-    if docker logs "${QUEST_CONTAINER}" | grep -q 'Elementary'; then
-      break
-    fi
-    sleep 0.1
-  done
-  # reset
-  print_output "[*] Quest container ${QUEST_CONTAINER} dependency checks: \\n" "no_log"
-  docker logs "${QUEST_CONTAINER}"
-  print_output "[*] Finished Quest container ${QUEST_CONTAINER} dependency checks \\n" "no_log"
-  # reset
-}
-
 # $1: module group letter [P, S, L, F, Q]
 # $2: 0=single thread 1=multithread
 # $3: HTML=1 - generate html file
@@ -739,13 +722,6 @@ main() {
       export QUEST_CONTAINER="${QUEST_CONTAINER_}"
       print_output "[+] $(print_date) - Quest container ${QUEST_CONTAINER_} started and detached.\\n" "no_log"
 
-      if [[ "${SILENT}" -eq 0 ]]; then
-        check_quest_container "${QUEST_CONTAINER}" &
-        QUEST_PID="$!"
-        store_kill_pids "${QUEST_PID}"
-        disown "${QUEST_PID}" 2> /dev/null || true
-      fi
-
       # EMBA startup:
       if [[ "${SILENT}" -eq 0 ]]; then
         # EMBA container starts in the foreground and we can see all the logs
@@ -811,6 +787,9 @@ main() {
 
   if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
+      while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
+        sleep 1
+      done
       while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
         sleep 1
       done

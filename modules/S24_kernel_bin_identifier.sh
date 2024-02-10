@@ -123,7 +123,7 @@ S24_kernel_bin_identifier()
         [[ "${K_FILE}" == *"QUALCOMM DSP6"* ]] && K_ARCH="QCOM_DSP6"
       else
         # fallback
-        K_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' || true)
+        K_ARCH=$(grep "Guessed architecture" "${LOG_FILE}" | cut -d: -f2 | awk '{print $1}' | sort -u || true)
         [[ "${K_ARCH: -2}" == "le" ]] && K_ARCH_END="EL"
         [[ "${K_ARCH: -2}" == "be" ]] && K_ARCH_END="EB"
       fi

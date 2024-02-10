@@ -387,7 +387,6 @@ remove_status_bar() {
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
-  LINE_POS="$(( LINES - 6 ))"
 
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
@@ -425,8 +424,13 @@ remove_status_bar() {
     kill_box_pid "${PID_STATUS_2}" &
   fi
 
+  if ! [[ -v LINES ]] ; then
+    return
+  fi
+
   sleep 1
   local RM_STR=""
+  LINE_POS="$(( LINES - 6 ))"
   RM_STR="\e[""${LINE_POS}"";1f\e[0J\e[;r\e[""${LINE_POS}"";1f"
   printf "%b" "${RM_STR}"
 }
@@ -511,6 +515,9 @@ initial_status_bar() {
   shopt -s checkwinsize
   # echo "LINES: $LINES" >> "${TMP_DIR}"/shopts.log
   # echo "COLUMNS: $COLUMNS" >> "${TMP_DIR}"/shopts.log
+  if ! [[ -v LINES ]] ; then
+    return
+  fi
   local LINE_POS="$(( LINES - 6 ))"
   printf "\e[%s;1f\e[0J\e[%s;1f" "${LINE_POS}" "${LINE_POS}"
   echo "${LINES}" > "${TMP_DIR}""/LINES.log"

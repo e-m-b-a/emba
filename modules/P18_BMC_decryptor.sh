@@ -57,6 +57,7 @@ bmc_extractor() {
     print_output "[*] BMC Firmware file details: ${ORANGE}$(file "${FIRMWARE_PATH}")${NC}"
     hexdump -C "${FIRMWARE_PATH}" | head -10 | tee -a "${LOG_FILE}" || true
     unblobber "${FIRMWARE_PATH}" "${LOG_DIR}"/firmware/firmware_bmc_decrypted
+    detect_root_dir_helper "${LOG_DIR}"/firmware/firmware_bmc_decrypted
     write_csv_log "Extractor module" "Original file" "extracted file/dir" "file counter" "directory counter" "further details"
     write_csv_log "BMC encrypted" "${BMC_FILE_PATH_}" "${FIRMWARE_PATH}" "1" "NA" "NA"
   else
