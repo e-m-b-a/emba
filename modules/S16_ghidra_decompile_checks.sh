@@ -53,7 +53,7 @@ S16_ghidra_decompile_checks()
   fi
 
   for BINARY in "${BINARIES[@]}"; do
-    mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename ${BINARY})" | sort -u || true)
+    mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${BINARY}")" | sort -u || true)
     for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
       if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
         # if we have the base linux config file we only test non known Linux binaries
