@@ -17,7 +17,11 @@ export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
 export HTML=1
+
+# QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=1
+
+# in Quick scan the binary testing takes too long
 export BINARY_EXTENDED=0
 
 # the following modules are long running modules which are disabled in the quick scan profile

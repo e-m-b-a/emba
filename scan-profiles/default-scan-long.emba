@@ -17,7 +17,12 @@ export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
 export HTML=1
+
+# QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=1
+
+# extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
+# it in the default profile.
 export BINARY_EXTENDED=1
 
 # enable silent mode and status bar
