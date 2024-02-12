@@ -60,7 +60,7 @@ S60_cert_file_check()
             print_output "[-] Something went wrong for certificate ${LINE}" "no_log"
             continue
           fi
-          ((TOTAL_CERT_CNT+=NESTED_CERT_CNT))
+          TOTAL_CERT_CNT=$((TOTAL_CERT_CNT + NESTED_CERT_CNT))
           for ((i=1; i<=NESTED_CERT_CNT; i++)); do
             index=$((i - 1))
             CERT_DATE=$(date --date="$(grep 'Not After :' "${CERT_LOG}" | awk -v cnt="${i}" 'NR==cnt {sub(/.*: /, ""); print}')" --iso-8601 || true)
