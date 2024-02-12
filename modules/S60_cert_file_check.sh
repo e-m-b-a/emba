@@ -56,11 +56,11 @@ S60_cert_file_check()
           write_log "[*] Cert file: ${LINE}\n" "${CERT_LOG}"
           timeout --preserve-status --signal SIGINT 10 openssl storeutl -noout -text -certs "${LINE}" 2>/dev/null >> "${CERT_LOG}" || true
           NESTED_CERT_CNT=$(tail -n 1 < "${CERT_LOG}" | grep -o '[0-9]\+')
-          if ! [[ "${NESTED_CERT_CNT}" =~ [0-9]+ ]]; then
+          if ! [[ "${NESTED_CERT_CNT}" =~ ^[0-9]+$ ]]; then
             print_output "[-] Something went wrong for certificate ${LINE}" "no_log"
             continue
           fi
-          ((TOTAL_CERT_CNT+=NESTED_CERT_CNT))
+          TOTAL_CERT_CNT=$((TOTAL_CERT_CNT + NESTED_CERT_CNT))
           for ((i=1; i<=NESTED_CERT_CNT; i++)); do
             index=$((i - 1))
             CERT_DATE=$(date --date="$(grep 'Not After :' "${CERT_LOG}" | awk -v cnt="${i}" 'NR==cnt {sub(/.*: /, ""); print}')" --iso-8601 || true)

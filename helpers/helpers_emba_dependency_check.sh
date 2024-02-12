@@ -681,7 +681,7 @@ dependency_check()
       export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
       check_dep_file "GHIDRA" "${GHIDRA_PATH}""/ghidraRun"
 
-      if [[ "${CWE_CHECKER}" -eq 1 ]]; then
+      if [[ "${BINARY_EXTENDED}" -eq 1 ]]; then
         if [[ -d "${HOME}"/.cargo/bin ]]; then
           export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
         fi

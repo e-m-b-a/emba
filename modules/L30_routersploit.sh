@@ -58,7 +58,6 @@ check_live_routersploit() {
     mv /tmp/routersploit.log "${LOG_PATH_MODULE}"/routersploit-detail-"${IP_ADDRESS_}".txt
   fi
 
-  print_ln
   if grep -q "Target is vulnerable" "${LOG_PATH_MODULE}"/routersploit-"${IP_ADDRESS_}".txt; then
     print_output "[+] Found the following vulnerabilities:" "" "${LOG_PATH_MODULE}/routersploit-${IP_ADDRESS_}.txt"
     grep -B 1 "Target is vulnerable" "${LOG_PATH_MODULE}"/routersploit-"${IP_ADDRESS_}".txt | tee -a "${LOG_FILE}"

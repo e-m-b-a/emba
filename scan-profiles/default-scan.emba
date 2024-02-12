@@ -18,10 +18,14 @@ export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
 export HTML=1
+
+# QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=1
-# cwe-checker is now only testing non-linux binaries. With this mechanism we can enable
+
+# extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
 # it in the default profile.
-export CWE_CHECKER=1
+export BINARY_EXTENDED=1
+
 # the following modules are long running modules which are disabled in the default profile
 export MODULE_BLACKLIST=( "S10_binaries_basic_check" "S15_radare_decompile_checks" "S99_grepit" "S110_yara_check" )
 
