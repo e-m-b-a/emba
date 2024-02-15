@@ -1,0 +1,40 @@
+name: Update EMBA VERSION.txt
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # do it every day
+
+jobs:
+  update_version:
+    if: github.repository_owner == 'e-m-b-a'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v3
+    - name: Install requirements
+      run: |
+        sudo apt-get update -y
+    - name: update VERSION.txt
+      run: |
+        ./helpers/create_version.sh
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Update EMBA VERSION.txt
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        signoff: false
+        branch: update_version_txt
+        delete-branch: true
+        title: 'Update EMBA VERSION.txt'
+        body: |
+          Update report
+          - Nightly VERSION.txt update
+        labels: |
+          db_update
+          automated pr
+        milestone: 0
+        draft: false
