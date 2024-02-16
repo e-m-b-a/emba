@@ -114,11 +114,25 @@ check_emba_version(){
   fi
 }
 
+check_nvd_db(){
+  local REMOTE_HASH="${1:-}"
+  local LOCAL_HASH=""
+  if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]] ; then
+    LOCAL_HASH="$(head -c 8 "${EXT_DIR}"/nvd-json-data-feeds/.git/refs/heads/main)"
+
+    if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
+      echo -e "    CVE database version - ${GREEN}ok${NC}"
+    else
+      echo -e "    CVE database version - ${ORANGE}Updates available${NC}"
+    fi
+  fi
+}
+
+
 check_git_hash(){
-  local REMOTE_HASH=""
+  local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
-    REMOTE_HASH="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba | grep "spoofed_commit_check" | sed -E 's/.*commit_check\/([a-zA-Z0-9]{8}).*/\1/' || true)"
     LOCAL_HASH="$(git describe --always)"
 
     if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
@@ -130,10 +144,9 @@ check_git_hash(){
 }
 
 check_docker_image(){
+  local REMOTE_DOCKER_HASH="${1:-}"
   local LOCAL_DOCKER_HASH=""
-  local REMOTE_DOCKER_HASH=""
   LOCAL_DOCKER_HASH="$(docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' || true)"
-  REMOTE_DOCKER_HASH="$(docker manifest inspect embeddedanalyzer/emba:latest -v | jq . | grep "digest" | head -n1 | awk '{print $2}' | sed -E 's/"sha256:(.+)",/\1/' || true)"
 
   if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
     echo -e "    Docker image version - ${GREEN}ok${NC}"
@@ -178,18 +191,32 @@ dependency_check()
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     print_output "    Internet connection - \\c" "no_log"
 
-    LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/' || true)"
-    if [[ -z "${LATEST_EMBA_VERSION}" ]] ; then
-      echo -e "${RED}""not ok""${NC}"
-      print_output "[-] Warning: Quest container has no internet connection!" "no_log"
-    else
+    # LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/' || true)"
+    if [[ -d "${EXT_DIR}"/onlinechecker ]]; then
+      rm -rf "${EXT_DIR}"/onlinechecker
+    fi
+    if [[ "${NO_UPDATE_CHECK}" -ne 1 ]]; then
+      GIT_TERMINAL_PROMPT=0 git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q
+    fi
+    if [[ -f "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt ]]; then
       echo -e "${GREEN}""ok""${NC}"
       # ensure this only runs on the host and not in any container
       if [[ "${IN_DOCKER}" -eq 0 ]]; then
+        EMBA_VERSION="$(cat "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt)"
+        DOCKER_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_CONTAINER_HASH.txt)"
+        NVD_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/NVD_HASH.txt)"
+        GITHUB_HASH="${EMBA_VERSION/*-}"
+        LATEST_EMBA_VERSION="${EMBA_VERSION/-*}"
         check_emba_version "${LATEST_EMBA_VERSION}"
-        check_docker_image
-        check_git_hash
+        check_docker_image "${DOCKER_HASH}"
+        check_git_hash "${GITHUB_HASH}"
+        check_nvd_db "${NVD_GITHUB_HASH}"
       fi
+    else
+      echo -e "${RED}""not ok""${NC}"
+      print_output "[-] Warning: EMBA has no internet connection!" "no_log"
+      print_output "[-] Warning: Update checks are not possible!" "no_log"
+      print_output "[-] Warning: GPT and other online modules are disabled!" "no_log"
     fi
 
     if [[ -n "${PROXY_SETTINGS}" ]]; then

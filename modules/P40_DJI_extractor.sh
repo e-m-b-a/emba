@@ -27,14 +27,14 @@ P40_DJI_extractor() {
     return
   fi
 
-  module_log_init "${FUNCNAME[0]}"
-  module_title "DJI drone firmware extraction module"
-  pre_module_reporter "${FUNCNAME[0]}"
-
   if [[ "${DJI_XV4_DETECTED}" -ne 1 ]] && [[ "${DJI_PRAK_DETECTED}" -ne 1 ]]; then
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
     return
   fi
+
+  module_log_init "${FUNCNAME[0]}"
+  module_title "DJI drone firmware extraction module"
+  pre_module_reporter "${FUNCNAME[0]}"
 
   if [[ "${RTOS}" -ne 1 ]]; then
     # if we have already found a Linux filesytem we do not need to walk through the rest of the module

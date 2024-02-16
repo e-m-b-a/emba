@@ -453,6 +453,7 @@ main() {
 
     # create log directory, if not exists and needed subdirectories
     # do not create a log dir for dep check
+    export MAIN_LOG="${LOG_DIR}""/""${MAIN_LOG_FILE}"
     [[ "${ONLY_DEP}" -eq 0 ]] && create_log_dir
 
     # kernel downloader runs on the host and waits for an identified kernel version. Afterwards
@@ -500,7 +501,6 @@ main() {
 
     # Now we have the firmware and log path, lets set some additional paths
     FIRMWARE_PATH="$(abs_path "${FIRMWARE_PATH}")"
-    export MAIN_LOG="${LOG_DIR}""/""${MAIN_LOG_FILE}"
 
     # Check firmware type (file/directory)
     # copy the firmware outside of the docker and not a second time within the docker
@@ -787,9 +787,6 @@ main() {
 
   if [[ -v CONTAINER_NUMBER ]] && [[ "${DIFF_MODE}" -ne 1 ]]; then
     if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
-      while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
-        sleep 1
-      done
       while ! grep -q "Pre-checking phase started" "${LOG_DIR}"/"${MAIN_LOG_FILE}"; do
         sleep 1
       done

@@ -198,6 +198,10 @@ create_log_dir() {
     mkdir "${CSV_DIR}" || (print_output "[!] WARNING: Cannot create log directory" "no_log" && exit 1)
   fi
 
+  if ! [[ -f "${MAIN_LOG}" ]]; then
+    touch "${MAIN_LOG}" || true
+  fi
+
   export HTML_PATH="${LOG_DIR}""/html-report"
   if ! [[ -d "${HTML_PATH}" ]] && [[ "${HTML}" -eq 1 ]]; then
     mkdir "${HTML_PATH}" 2> /dev/null || true
