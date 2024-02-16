@@ -38,6 +38,7 @@ S09_firmware_base_version_check() {
   export TYPE="static"
   export VERSION_IDENTIFIER=""
   export WAIT_PIDS_S09=()
+  export WAIT_PIDS_S09_1=()
   local VERSIONS_DETECTED=""
 
   print_output "[*] Generate strings overview for further analysis ..." "no_log"
