@@ -188,16 +188,27 @@ dependency_check()
   #######################################################################################
   print_output "[*] Network connection:" "no_log"
 
+  # setup the proxy for everything except the main EMBA container:
   if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
+    if [[ -n "${PROXY_SETTINGS}" ]]; then
+      export http_proxy="${PROXY_SETTINGS}"
+      export https_proxy="${PROXY_SETTINGS}"
+    fi
+  fi
+
+  # Online version checks are only needed for the host
+  if [[ "${IN_DOCKER}" -eq 0 ]]; then
     print_output "    Internet connection - \\c" "no_log"
 
-    # LATEST_EMBA_VERSION="$(curl --connect-timeout 5 -s -o - https://github.com/e-m-b-a/emba/blob/master/config/VERSION.txt | grep -w "rawLines" | sed -E 's/.*"rawLines":\["([0-9]\.[0-9]\.[0-9]).*/\1/' || true)"
     if [[ -d "${EXT_DIR}"/onlinechecker ]]; then
       rm -rf "${EXT_DIR}"/onlinechecker
     fi
+
+    # the update check can be disabled via NO_UPDATE_CHECK
     if [[ "${NO_UPDATE_CHECK}" -ne 1 ]]; then
       GIT_TERMINAL_PROMPT=0 git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q
     fi
+
     if [[ -f "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt ]]; then
       echo -e "${GREEN}""ok""${NC}"
       # ensure this only runs on the host and not in any container
@@ -218,13 +229,10 @@ dependency_check()
       print_output "[-] Warning: Update checks are not possible!" "no_log"
       print_output "[-] Warning: GPT and other online modules are disabled!" "no_log"
     fi
+  fi
 
-    if [[ -n "${PROXY_SETTINGS}" ]]; then
-      export http_proxy="${PROXY_SETTINGS}"
-      export https_proxy="${PROXY_SETTINGS}"
-      print_output "[*] Info: Proxy settings detected: ${ORANGE}${PROXY_SETTINGS}${NC}" "no_log"
-    fi
-
+  # running into this in Quest container and on host, but not on isolated EMBA container (as it is CONTAINER_NUMBER 1):
+  if [[ "${CONTAINER_NUMBER}" -ne 1 ]]; then
     if [[ -f "${CONFIG_DIR}/gpt_config.env" ]]; then
       if grep -v -q "#" "${CONFIG_DIR}/gpt_config.env"; then
         # readin gpt_config.env
@@ -235,7 +243,15 @@ dependency_check()
         done < "${CONFIG_DIR}/gpt_config.env"
       fi
     fi
-    if [[ -z "${LATEST_EMBA_VERSION}" ]]; then
+    if [[ "${IN_DOCKER}" -eq 0 ]]; then
+      local ONLINE_CHECK_FILE="${EXT_DIR}""/onlinechecker/EMBA_VERSION.txt"
+    else
+      # in our containers we have mounted our current EMBA dir to /emba, this includes the host ./external with the onlinechecker
+      local ONLINE_CHECK_FILE="/emba/external/onlinechecker/EMBA_VERSION.txt"
+    fi
+
+    # as we first check the onlinechecker/EMBA_VERSION.txt file we know if we are online or not:
+    if ! [[ -f "${ONLINE_CHECK_FILE}" ]]; then
       # if we have no EMBA_VERSION identified, we do not need to check our GPT key now -> there is no internet
       print_output "$(indent "${ORANGE}As there is no Internet connection available, no GPT checks performed.${NC}")" "no_log"
     elif [[ -z "${OPENAI_API_KEY}" ]]; then
