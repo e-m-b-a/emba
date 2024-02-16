@@ -1041,7 +1041,8 @@ identify_networking_emulation() {
 
   sub_module_title "Network identification"
   IMAGE_NAME="${1:-}"
-  export IMAGE=$(abs_path "${LOG_PATH_MODULE}/${IMAGE_NAME}")
+  export IMAGE=""
+  IMAGE=$(abs_path "${LOG_PATH_MODULE}/${IMAGE_NAME}")
 
   ARCH_END="${2:-}"
 
