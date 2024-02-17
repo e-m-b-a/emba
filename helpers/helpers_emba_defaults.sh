@@ -82,7 +82,7 @@ set_defaults() {
   export SHORT_PATH=0           # short paths in cli output
   export THREADED=0             # 0 -> single thread
                                 # 1 -> multi threaded
-  export YARA=1
+  export YARA=0                 # default: disable yara tests
   export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
   export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="${INVOCATION_PATH}""/logs"
