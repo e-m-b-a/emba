@@ -44,7 +44,7 @@ jobs:
             wget https://ftp.dlink.de/dir/dir-300/archive/driver_software/DIR-300_fw_revb_214b01_ALL_de_20130206.zip
       - name: EMBA default analysis
         run: |
-            sudo ./emba -f ./DIR-300_fw_revb_214b01_ALL_de_20130206.zip -l ./logs_emba -S -p ./scan-profiles/default-scan.emba -y
+            NO_UPDATE_CHECK=1 sudo -E ./emba -f ./DIR-300_fw_revb_214b01_ALL_de_20130206.zip -l ./logs_emba -S -p ./scan-profiles/default-scan.emba -y
       - name: Check result files exist
         id: check_files
         uses: andstor/file-existence-action@v2

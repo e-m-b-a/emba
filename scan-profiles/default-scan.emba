@@ -22,6 +22,9 @@ export HTML=1
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=1
 
+# disable yara tests (s110)
+export YARA=0
+
 # extended binary tests are now only testing non-linux binaries. With this mechanism we can enable
 # it in the default profile.
 export BINARY_EXTENDED=1

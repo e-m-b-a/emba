@@ -22,6 +22,7 @@ export BINARY_EXTENDED=1
 export QEMULATION=1
 export FULL_EMULATION=1
 export FULL_TEST=1
+export YARA=1
 
 # enable silent mode and status bar
 export DISABLE_STATUS_BAR=0
