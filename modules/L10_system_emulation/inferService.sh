@@ -26,23 +26,27 @@ if [ -e /etc/manual.starter ]; then
   fi
 fi
 
-for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -name "*httpd*"); do
-  if [ -e "${SERVICE}" ]; then
-    if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
-      "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
-      "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+if [ -d /etc/init.d/ ]; then
+  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -name "*httpd*"); do
+    if [ -e "${SERVICE}" ]; then
+      if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+        "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
+        "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+      fi
     fi
-  fi
-done
+  done
+fi
 
-for SERVICE in $("${BUSYBOX}" find /etc/rc.d/ -name "S*httpd*"); do
-  if [ -e "${SERVICE}" ]; then
-    if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
-      "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
-      "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+if [ -d /etc/rc.d/ ]; then
+  for SERVICE in $("${BUSYBOX}" find /etc/rc.d/ -name "S*httpd*"); do
+    if [ -e "${SERVICE}" ]; then
+      if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
+        "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
+        "${BUSYBOX}" echo -e -n "${SERVICE} start\n" >> /firmadyne/service
+      fi
     fi
-  fi
-done
+  done
+fi
 
 if [ -e /etc/init.d/ftpd ]; then
   if ! "${BUSYBOX}" grep -q ftpd /firmadyne/service 2>/dev/null; then
@@ -131,6 +135,8 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
   fi
 done
 
-"${BUSYBOX}" sort -u -o /firmadyne/service /firmadyne/service
+if [ -f /firmadyne/service ]; then
+  "${BUSYBOX}" sort -u -o /firmadyne/service /firmadyne/service
+fi
 
 "${BUSYBOX}" echo "[*] EMBA inferService script finished ..."
