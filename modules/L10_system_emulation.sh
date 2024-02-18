@@ -964,7 +964,7 @@ handle_fs_mounts() {
     done
 
     print_output "[*] Final copy of ${ORANGE}${FS_FIND}${NC} to ${ORANGE}${MNT_POINT}${MOUNT_PT}${NC} ..."
-    cp -prn "${FS_FIND}"/* "${MNT_POINT}""${MOUNT_PT}"
+    cp -prn "${FS_FIND}"/* "${MNT_POINT}""${MOUNT_PT}" || true
     # find "$MNT_POINT""$MOUNT_PT" -xdev -ls || true
     ls -lh "${MNT_POINT}""${MOUNT_PT}"
   done
@@ -1011,7 +1011,9 @@ cleanup_emulator(){
   # ugly cleanup:
   rm /tmp/qemu."${IMAGE_NAME}" || true
   rm /tmp/qemu."${IMAGE_NAME}".S1 || true
-  rm /tmp/do_not_create_run.sh || true
+  if [[ -f /tmp/do_not_create_run.sh ]]; then
+    rm /tmp/do_not_create_run.sh || true
+  fi
 
   # losetup
   losetup -D
