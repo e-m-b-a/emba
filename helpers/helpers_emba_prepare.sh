@@ -113,9 +113,6 @@ log_folder()
   if [[ ${USE_DOCKER} -eq 1 && ${#D_LOG_FILES[@]} -gt 0 ]] ; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
-    for D_LOG_FILE in "${D_LOG_FILES[@]}" ; do
-      echo -e "        ""$(print_path "${D_LOG_FILE}")"
-    done
     echo -e "\\n${ORANGE}Continue to run EMBA and ignore this warning?${NC}\\n"
     read -p "(Y/n)  " -r ANSWER
     case ${ANSWER:0:1} in
