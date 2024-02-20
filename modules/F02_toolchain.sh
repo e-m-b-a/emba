@@ -104,7 +104,7 @@ F02_toolchain() {
     done
     print_ln
   elif [[ "${#KERNEL_V_ARR_S25[@]}" -gt 0 ]]; then
-    for KERNEL_V in "${KERNEL_V_ARR[@]}"; do
+    for KERNEL_V in "${KERNEL_V_ARR_S25[@]}"; do
       if [[ -z "${KERNEL_V}" ]]; then
         continue
       fi
