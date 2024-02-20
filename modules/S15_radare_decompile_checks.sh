@@ -107,15 +107,18 @@ radare_decompilation(){
     radare_decomp_log_bin_hardening "${NAME}" "${FUNCTION}"
     # with axt we are looking for function usages and store this in $FUNCTION_usage
     # pdd is for decompilation - with @@ we are working through all the identified functions
-    # We analyse only 200 functions per binary
+    # We analyse only 150 functions per binary
     timeout --preserve-status --signal SIGINT 3600 r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -A -c \
-      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 200 > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}"'_usage`' "${BINARY}" 2> /dev/null >> "${FUNC_LOG}" || true
+      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 150 > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}""_usage"'; pdda @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}"'_usage`' "${BINARY}" >> "${FUNC_LOG}" || true
+#      'axt `is~'"${FUNCTION}"'[2]`~[0] | tail -n +2 | grep -v "nofunc" | sort -u | tail -n 200 > '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}""_usage"'; pdd --assembly @@ `cat '"${LOG_PATH_MODULE}""/""${FUNCTION}""_""${NAME}"'_usage`' "${BINARY}" 2> /dev/null >> "${FUNC_LOG}" || true
 
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 3 ]] ; then
       radare_decomp_color_output "${FUNCTION}"
 
       # Todo: check this with other architectures
       COUNT_FUNC="$(grep -c "${FUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
+      # we have already the header with the function name - remove it
+      COUNT_FUNC=$((COUNT_FUNC-1))
       if [[ "${FUNCTION}" == "strcpy" ]] ; then
         COUNT_STRLEN=$(grep -c "strlen" "${FUNC_LOG}"  2> /dev/null || true)
         STRCPY_CNT=$((STRCPY_CNT+COUNT_FUNC))
@@ -232,7 +235,7 @@ radare_decomp_output_function_details() {
   write_s15_log()
   {
     local OLD_LOG_FILE="${LOG_FILE}"
-    LOG_FILE="${3}"
+    LOG_FILE="${3:-}"
     print_output "${1}"
     write_link "${2}"
     if [[ -f "${LOG_FILE}" ]]; then
@@ -288,17 +291,17 @@ radare_decomp_output_function_details() {
     local NETWORKING_="${GREEN}networking: ${NW_CSV}${NC}"
   fi
 
-  if [[ ${COUNT_FUNC} -ne 0 ]] ; then
+  if [[ ${COUNT_FUNC} -gt 0 ]] ; then
     local OUTPUT=""
     if [[ "${FUNCTION}" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${NETWORKING_}""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${NETWORKING_}""${NC}"
     elif [[ "${FUNCTION}" == "mmap" ]] ; then
       local COUNT_MMAP_OK="NA"
-      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""${COUNT_MMAP_OK}"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""${COUNT_MMAP_OK}"" ""${NC}"
     else
-      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${NETWORKING_}""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${NETWORKING_}""${NC}"
     fi
-    write_s15_log "${OUTPUT}" "${LOG_FILE_LOC}" "${LOG_PATH_MODULE}""/decompilation_vul_func_""${FUNCTION}"-"${NAME}"".txt"
+    write_s15_log "${OUTPUT}\\n" "${LOG_FILE_LOC}" "${LOG_PATH_MODULE}""/decompilation_vul_func_""${FUNCTION}"-"${NAME}"".txt"
     write_csv_log "$(print_path "${BINARY_}")" "${FUNCTION}" "${COUNT_FUNC}" "${CFF_CSV}" "${NW_CSV}"
   fi
 }

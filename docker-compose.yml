@@ -15,7 +15,9 @@ services:
     tmpfs:
       - /tmp
       - /root/.config/
-      - /root/.local/
+      - /root/.local/share/composer/
+      - /root/.local/share/cwe_checker/
+        # - /root/.local/share
       - /root/.cache/
       - /root/.semgrep/
       - /root/.ghidra/
