@@ -86,7 +86,7 @@ vmdk_extractor() {
     if mount | grep -q vmdk_mount; then
       print_output "[*] Copying ${ORANGE}${MOUNT_DEV}${NC} to firmware directory ${ORANGE}${EXTRACTION_DIR_}/${DEV_NAME}${NC}"
       mkdir -p "${EXTRACTION_DIR_}"/"${DEV_NAME}"/ || true
-      cp -pri "${TMP_VMDK_MNT}"/* "${EXTRACTION_DIR_}"/"${DEV_NAME}"/ || true
+      cp -pr "${TMP_VMDK_MNT}"/* "${EXTRACTION_DIR_}"/"${DEV_NAME}"/ || true
       umount "${TMP_VMDK_MNT}"
     fi
   done
