@@ -107,6 +107,9 @@ S109_jtr_local_pw_cracking()
         sleep 1
       done
       kill "${PID}" || true
+      if pgrep john > /dev/null; then
+        pkill -f "john" > /dev/null
+      fi
 
       # lets check our log if we can find further hashes
       mapfile -t JTR_FORMATS < <(grep "option to force loading hashes of that type instead" "${LOG_FILE}" || true)
@@ -145,6 +148,9 @@ S109_jtr_local_pw_cracking()
             sleep 1
           done
           kill "${PID}" || true
+          if pgrep john > /dev/null; then
+            pkill -f "john" > /dev/null
+          fi
         done
       fi
       print_ln

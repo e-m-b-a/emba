@@ -21,6 +21,8 @@ P40_DJI_extractor() {
   local NEG_LOG=0
   export DJI_DETECTED=0
 
+  module_log_init "${FUNCNAME[0]}"
+
   if ! [[ -d "${EXT_DIR}"/dji-firmware-tools/ ]]; then
     print_output "[-] WARNING: dji-firmware-tools not installed. Please update your installation."
     module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
@@ -32,7 +34,6 @@ P40_DJI_extractor() {
     return
   fi
 
-  module_log_init "${FUNCNAME[0]}"
   module_title "DJI drone firmware extraction module"
   pre_module_reporter "${FUNCNAME[0]}"
 

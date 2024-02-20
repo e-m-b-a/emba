@@ -68,6 +68,23 @@ check_dep_port()
   fi
 }
 
+# this is needed for cwe_checker and r2dec plugin from r2:
+prepare_docker_home_dir() {
+  # as we are in a read only docker environment we need to trick a bit:
+  # /root is mounted as a writable tempfs. With this we need to set it up
+  # on every run from scratch:
+  if [[ -d "${EXT_DIR}"/cwe_checker/.config ]]; then
+    # print_output "[*] Restoring config directory in read-only container" "no_log"
+    if ! [[ -d "${HOME}"/.config/ ]]; then
+      mkdir -p "${HOME}"/.config
+    fi
+    cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
+    # .local/share has also stored the r2 plugin data, this results in restoring only the composer and cwe_checker areas
+    cp -pr ${EXT_DIR}/cwe_checker/.local/share/composer/.htaccess ${HOME}/.local/share/composer/
+    cp -pr ${EXT_DIR}/cwe_checker/.local/share/cwe_checker/* ${HOME}/.local/share/cwe_checker/
+  fi
+}
+
 # Source: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
@@ -724,12 +741,14 @@ dependency_check()
       export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
       check_dep_file "GHIDRA" "${GHIDRA_PATH}""/ghidraRun"
 
-      if [[ "${BINARY_EXTENDED}" -eq 1 ]]; then
-        if [[ -d "${HOME}"/.cargo/bin ]]; then
-          export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
-        fi
-        check_dep_tool "CWE Checker" "cwe_checker"
+      # prepare /root/.local and /root/.config directory for cwe_checker
+      # and ensure r2 plugin dir is preserved
+      prepare_docker_home_dir
+
+      if [[ -d "${HOME}"/.cargo/bin ]]; then
+        export PATH=${PATH}:"${HOME}"/.cargo/bin/:"${EXT_DIR}"/jdk/bin/
       fi
+      check_dep_tool "CWE Checker" "cwe_checker"
     fi
   fi
 

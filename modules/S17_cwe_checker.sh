@@ -31,7 +31,7 @@ S17_cwe_checker()
     local lCWE_CNT_=0
     local lTESTED_BINS=0
 
-    [[ "${IN_DOCKER}" -eq 1 ]] && cwe_container_prepare
+    # [[ "${IN_DOCKER}" -eq 1 ]] && cwe_container_prepare
     module_wait "S13_weak_func_check"
 
     cwe_check
@@ -62,6 +62,7 @@ cwe_container_prepare() {
       mkdir -p "${HOME}"/.config
     fi
     cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
+    # .local/share has also stored the r2 plugin data
     cp -pr "${EXT_DIR}"/cwe_checker/.local/share "${HOME}"/.local/
   fi
 
@@ -160,7 +161,8 @@ cwe_checker_threaded () {
   BINARY_=$(readlink -f "${BINARY_}")
 
   ulimit -Sv "${MEM_LIMIT}"
-  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true
+  # timeout --preserve-status --signal SIGINT 3000 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true
+  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log || true
   ulimit -Sv unlimited
   print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}" "no_log"
 

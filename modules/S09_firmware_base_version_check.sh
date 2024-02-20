@@ -117,6 +117,9 @@ S09_firmware_base_version_check() {
           MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
           BIN_NAME_REAL="$(basename "${BIN}")"
           STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
+          if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
+            continue
+          fi
           VERSION_FINDER=$(grep -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u || true)
           if [[ -n ${VERSION_FINDER} ]]; then
             print_ln "no_log"
@@ -274,6 +277,9 @@ bin_string_checker() {
     MD5_SUM="$(md5sum "${BIN}" | awk '{print $1}')"
     BIN_NAME_REAL="$(basename "${BIN}")"
     STRINGS_OUTPUT="${LOG_PATH_MODULE}"/strings_bins/strings_"${MD5_SUM}"_"${BIN_NAME_REAL}".txt
+    if ! [[ -f "${STRINGS_OUTPUT}" ]]; then
+      continue
+    fi
 
     # print_output "[*] Testing $BIN" "no_log"
     for (( j=0; j<${#VERSION_IDENTIFIERS_ARR[@]}; j++ )); do
