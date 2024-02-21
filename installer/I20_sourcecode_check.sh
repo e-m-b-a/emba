@@ -64,6 +64,8 @@ I20_sourcecode_check() {
         if ! [[ -d external/zarn ]]; then
           git clone https://github.com/EMBA-support-repos/zarn.git external/zarn
           cd external/zarn || ( echo "Could not install EMBA component zarn" && exit 1 )
+          # https://github.com/htrgouvea/zarn/issues/37
+          git checkout develop
           cpanm --installdeps .
           cd "${HOME_PATH}" || ( echo "Could not install EMBA component zarn" && exit 1 )
         fi
