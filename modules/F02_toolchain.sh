@@ -22,6 +22,7 @@ F02_toolchain() {
   pre_module_reporter "${FUNCNAME[0]}"
 
   local KERNEL_V_ARR=()
+  local KERNEL_V_ARR_S25=()
   local KERNEL_STRING_ARR=()
   local COMPILE_FILES_ARR=()
   local BINARY_DETAILS_ARR=()

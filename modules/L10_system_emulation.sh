@@ -293,7 +293,7 @@ create_emulation_filesystem() {
 
   print_output "[*] Creating Filesystem"
   sync
-  mkfs.ext3 "${DEVICE}" || ( print_output "[-] Error in filesystem creation" && return )
+  mkfs.ext2 "${DEVICE}" || ( print_output "[-] Error in filesystem creation" && return )
 
   print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
   mount "${DEVICE}" "${MNT_POINT}" || ( print_output "[-] Error in mounting the filesystem" && return )
