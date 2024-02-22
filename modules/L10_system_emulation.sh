@@ -2274,10 +2274,12 @@ add_partition_emulation() {
     local LOSETUP_OUT=()
     mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE")
     for LINE in "${LOSETUP_OUT[@]}"; do
+      echo "[*] Losetup out ${LINE}"
       IMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
       if [[ "${IMAGE_PATH}" == "${1}" ]]; then
         DEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
         if [[ -b "${DEV_PATH}" ]]; then
+          echo "[*] Found DEV_PATH ${DEV_PATH}"
           FOUND=true
         fi
       fi
