@@ -21,13 +21,20 @@ S27_perl_check()
   pre_module_reporter "${FUNCNAME[0]}"
 
   local lS27_PL_VULNS=0
+
+  if ! [[ -f "${EXT_DIR}"/zarn/zarn.pl ]]; then
+    print_output "[-] Zarn installation not available - please check your installation/docker image"
+    module_end_log "${FUNCNAME[0]}" "${lS27_PL_VULNS}"
+    return
+  fi
+
   local lS27_PL_SCRIPTS=0
   local lPL_SCRIPT=""
   local lPERL_SCRIPTS_ARR=()
   local lWAIT_PIDS_S27=()
 
   write_csv_log "Script path" "Perl issues detected" "common linux file" "vuln title" "vuln line nr" "vuln note"
-  mapfile -t lPERL_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -name "*.pl" -o -name "*.pm" -o -name "*.cgi "\) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  mapfile -t lPERL_SCRIPTS_ARR < <(find "${FIRMWARE_PATH}" -xdev -type f \( -name "*.pl" -o -name "*.pm" -o -name "*.cgi" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
   for lPL_SCRIPT in "${lPERL_SCRIPTS_ARR[@]}" ; do
     if ( file "${lPL_SCRIPT}" | grep -q "Perl script.*executable" ) ; then
       ((lS27_PL_SCRIPTS+=1))
@@ -45,6 +52,7 @@ S27_perl_check()
   done
 
   [[ "${THREADED}" -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S27[@]}"
+  [[ -d "${TMP_DIR}"/s27 ]] && rm -r "${TMP_DIR}"/s27
 
   write_log ""
   write_log "[*] Statistics:${lS27_PL_VULNS}:${lS27_PL_SCRIPTS}"
@@ -66,7 +74,17 @@ s27_zarn_perl_checks() {
 
   lNAME=$(basename "${lPL_SCRIPT}" 2> /dev/null | sed -e 's/:/_/g')
   lPL_LOG="${LOG_PATH_MODULE}""/zarn_""${lNAME}"".txt"
-  perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${lPL_SCRIPT}" --sarif "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif" > "${lPL_LOG}" 2> /dev/null || true
+  if [[ "${lPL_SCRIPT: -4}" == ".cgi" ]]; then
+    if ! [[ -d "${TMP_DIR}"/s27 ]]; then
+      mkdir "${TMP_DIR}"/s27
+    fi
+    # as zarn does not like cgi's, we need to temp rename these files now
+    cp "${lPL_SCRIPT}" "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}"
+    perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}" --sarif "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif" > "${lPL_LOG}" 2> /dev/null || true
+    rm "${TMP_DIR}"/s27/"${lNAME/.cgi/.pl}"
+  else
+    perl "${EXT_DIR}"/zarn/zarn.pl -r "${EXT_DIR}"/zarn/rules/default.yml --source "${lPL_SCRIPT}" --sarif "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif" > "${lPL_LOG}" 2> /dev/null || true
+  fi
 
   lVULNS=$(grep -c "\[vuln\]" "${lPL_LOG}" 2> /dev/null || true)
   if [[ "${lVULNS}" -gt 0 ]] ; then
