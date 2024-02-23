@@ -24,6 +24,7 @@ S21_python_check()
   local S21_PY_VULNS=0
   local S21_PY_SCRIPTS=0
   local PY_SCRIPT=""
+  local lNAME=""
   local PYTHON_SCRIPTS=()
   local S21_VULN_TYPES=()
   local VTYPE=""
@@ -34,6 +35,14 @@ S21_python_check()
     mapfile -t PYTHON_SCRIPTS < <(find "${FIRMWARE_PATH}" -xdev -type f -iname "*.py" -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
     for PY_SCRIPT in "${PYTHON_SCRIPTS[@]}" ; do
       if ( file "${PY_SCRIPT}" | grep -q "Python script.*executable" ) ; then
+        if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
+          # if we have the base linux config file we only test non known Linux binaries
+          # with this we do not waste too much time on open source Linux stuff
+          lNAME=$(basename "${PY_SCRIPT}" 2> /dev/null)
+          if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+            continue
+          fi
+        fi
         ((S21_PY_SCRIPTS+=1))
         if [[ "${THREADED}" -eq 1 ]]; then
           s21_script_bandit "${PY_SCRIPT}" &
