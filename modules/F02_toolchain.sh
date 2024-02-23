@@ -68,7 +68,7 @@ F02_toolchain() {
   # GCC (Buildroot 2012.11.1)
   # GCC (GNU) 3.3.2
 
-  # kernel with release date from s24 (s25 only holds the  kernel version and is used as fallback)
+  # kernel with release date from s24 (s25 only holds the kernel version and is used as fallback)
   if [[ "${#KERNEL_V_ARR[@]}" -gt 0 ]]; then
     for KERNEL_V in "${KERNEL_V_ARR[@]}"; do
       if [[ -z "${KERNEL_V}" ]]; then
@@ -111,10 +111,10 @@ F02_toolchain() {
       fi
       K_RELEASE_DATE=""
       if [[ -f "${CONFIG_DIR}"/kernel_details.csv ]]; then
-        K_RELEASE_DATE=$(grep "^linux-${KERNEL_VERSION};" "${CONFIG_DIR}"/kernel_details.csv | cut -d\; -f2 | sort -u || true)
+        K_RELEASE_DATE=$(grep "^linux-${KERNEL_V};" "${CONFIG_DIR}"/kernel_details.csv | cut -d\; -f2 | sort -u || true)
         # if we have not identified a release date and the version is something linke 1.2.0 we are testing also 1.2
-        if [[ -z "${K_RELEASE_DATE}" ]] && [[ "${KERNEL_VERSION}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
-          K_RELEASE_DATE=$(grep "^linux-${KERNEL_VERSION%%\.0};" "${CONFIG_DIR}"/kernel_details.csv || true)
+        if [[ -z "${K_RELEASE_DATE}" ]] && [[ "${KERNEL_V}" =~ [0-9]+\.[0-9]+\.0$ ]]; then
+          K_RELEASE_DATE=$(grep "^linux-${KERNEL_V%%\.0};" "${CONFIG_DIR}"/kernel_details.csv || true)
           K_RELEASE_DATE="${K_RELEASE_DATE/*;}"
         fi
       fi
