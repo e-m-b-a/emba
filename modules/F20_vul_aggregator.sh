@@ -1064,7 +1064,7 @@ cve_extractor() {
   fi
 
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
-    EXPLOIT_COUNTER_VERSION=$(grep -c "${BINARY}" "${TMP_DIR}/exploit_cnt.tmp" || true)
+    EXPLOIT_COUNTER_VERSION=$(grep -c "^${BINARY};" "${TMP_DIR}/exploit_cnt.tmp" || true)
   fi
 
   { echo ""
@@ -1409,7 +1409,6 @@ cve_extractor_thread_actor() {
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
         echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
-        echo "kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi
@@ -1440,7 +1439,6 @@ cve_extractor_thread_actor() {
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
         echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
-        echo "kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi
