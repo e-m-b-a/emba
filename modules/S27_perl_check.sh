@@ -133,7 +133,7 @@ s27_zarn_perl_checks() {
     mapfile -t lZARN_SARIF_RESULTS_ARR < <(jq -rc '.runs[].results[]' "${LOG_PATH_MODULE}""/zarn_""${lNAME}"".sarif")
 
     if ! [[ -d "${LOG_PATH_MODULE}"/pl_source_files/ ]]; then
-      mkdir "${LOG_PATH_MODULE}"/pl_source_files/
+      mkdir "${LOG_PATH_MODULE}"/pl_source_files/ || true
     fi
 
     write_log "[+] Found ""${ORANGE}""${lVULNS}"" possible issue(s)""${GREEN}"" in perl script ""${lCOMMON_FILES_FOUND}"":""${ORANGE}"" ""$(print_path "${lPL_SCRIPT}")" "${lPL_LOG_LINKED}"

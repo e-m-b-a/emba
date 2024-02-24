@@ -160,6 +160,7 @@ S109_jtr_local_pw_cracking()
       JTR_FINAL_STAT=$(john --show "${LOG_PATH_MODULE}"/jtr_hashes.txt | grep "password hash\(es\)\? cracked\|No password hashes loaded" || true)
       CRACKED=$(echo "${JTR_FINAL_STAT}" | awk '{print $1}')
       if [[ -n "${JTR_FINAL_STAT}" ]]; then
+        print_ln
         print_output "[*] John the ripper final status: ${ORANGE}${JTR_FINAL_STAT}${NC}"
         NEG_LOG=1
       fi

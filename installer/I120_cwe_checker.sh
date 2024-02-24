@@ -33,7 +33,8 @@ I120_cwe_checker() {
     print_git_info "cwe-checker" "EMBA-support-repos/cwe_checker" "cwe_checker is a suite of checks to detect common bug classes such as use of dangerous functions and simple integer overflows."
     echo -e "${ORANGE}""cwe-checker will be downloaded.""${NC}"
     print_file_info "OpenJDK" "OpenJDK for cwe-checker" "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz" "external/jdk.tar.gz"
-    print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip" "external/ghidra.zip"
+    # print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip" "external/ghidra.zip"
+    print_file_info "GHIDRA" "Ghidra for cwe-checker" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.2.3_build/ghidra_10.2.3_PUBLIC_20230208.zip" "external/ghidra.zip"
     print_file_info "Ghidra Haruspex script" "Decompiled code exporter" "https://raw.githubusercontent.com/EMBA-support-repos/ghidra-scripts-0xdea/main/Haruspex.java" "external/ghidra_scripts"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
@@ -59,13 +60,16 @@ I120_cwe_checker() {
 
         # Ghidra
         if [[ -d ./external/ghidra ]] ; then rm -R ./external/ghidra ; fi
-        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip -Sf -o external/ghidra.zip
+        # curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3.1_build/ghidra_10.3.1_PUBLIC_20230614.zip -Sf -o external/ghidra.zip
+        curl -L https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.2.3_build/ghidra_10.2.3_PUBLIC_20230208.zip -Sf -o external/ghidra.zip
         mkdir external/ghidra 2>/dev/null
         unzip -qo external/ghidra.zip -d external/ghidra
         if [[ "${IN_DOCKER}" -eq 1 ]]; then
-          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+          # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=/external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
         else
-          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+          # sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.3.1_PUBLIC/support/launch.properties
+          sed -i s@JAVA_HOME_OVERRIDE=@JAVA_HOME_OVERRIDE=external/jdk@g external/ghidra/ghidra_10.2.3_PUBLIC/support/launch.properties
         fi
         rm external/ghidra.zip
 
@@ -92,7 +96,7 @@ I120_cwe_checker() {
 
           if [[ "${IN_DOCKER}" -eq 1 ]]; then
             # cp -pr "${HOME}""/.cargo/bin" "external/cwe_checker/bin"
-            echo '{"ghidra_path":"/external/ghidra/ghidra_10.3.1_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
+            echo '{"ghidra_path":"/external/ghidra/ghidra_10.2.3_PUBLIC"}' > "${HOME}"/.config/cwe_checker/ghidra.json
 
             # save .config as we remount /root with tempfs -> now we can restore it in the module
             cp -pr "${HOME}"/.config ./external/cwe_checker/

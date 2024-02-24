@@ -53,7 +53,6 @@ debian_status_files_search() {
     for PACKAGE_FILE in "${DEBIAN_MGMT_STATUS[@]}" ; do
       if grep -q "Package: " "${PACKAGE_FILE}"; then
         mapfile -t DEBIAN_PACKAGES < <(grep "^Package: \|^Status: \|^Version: " "${PACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g' | sed -z 's/\nStatus: / - Status: /g')
-        print_ln
         print_output "[*] Found debian package details:"
         for PACKAGE_VERSION in "${DEBIAN_PACKAGES[@]}" ; do
           # Package: xxd - Status: install ok installed - 2:8.2.3995-1+b3
@@ -94,7 +93,6 @@ openwrt_control_files_search() {
     for PACKAGE_FILE in "${OPENWRT_MGMT_CONTROL[@]}" ; do
       if grep -q "Package: " "${PACKAGE_FILE}"; then
         mapfile -t OPENWRT_PACKAGES < <(grep "^Package: \|^Version: " "${PACKAGE_FILE}" | sed -z 's/\nVersion: / - Version: /g')
-        print_ln
         for PACKAGE_VERSION in "${OPENWRT_PACKAGES[@]}" ; do
           PACKAGE=$(safe_echo "${PACKAGE_VERSION}" | awk '{print $2}' | tr -dc '[:print:]')
           VERSION=${PACKAGE_VERSION/*Version:\ /}
@@ -137,7 +135,6 @@ rpm_package_files_search() {
       RPM_DIR="$(dirname "${PACKAGE_FILE}")"
       # not sure this works on an offline system - we need further tests on this:
       mapfile -t RPM_PACKAGES < <(rpm -qa --dbpath "${RPM_DIR}" || true)
-      print_ln
       for PACKAGE_AND_VERSION in "${RPM_PACKAGES[@]}" ; do
         PACKAGE_VERSION=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $3}' || true)
         PACKAGE_NAME=$(rpm -qi --dbpath "${RPM_DIR}" "${PACKAGE_AND_VERSION}" | grep Version | awk '{print $1}' || true)
