@@ -359,6 +359,13 @@ module_wait() {
       # if our module which we are waiting is on the blacklist we can just return
       return
     fi
+    if [[ -f "${LOG_DIR}"/emba_error.log ]]; then
+      if grep -q "${MODULE_TO_WAIT}" "${LOG_DIR}"/emba_error.log; then
+        print_output "[-] $(print_date) - WARNING: Module to wait for is probably crashed and will never end. Check the EMBA error log ${LOG_DIR}/emba_error.log" "main"
+        cat "${LOG_DIR}"/emba_error.log >> "${MAIN_LOG}"
+        return
+      fi
+    fi
     sleep 1
   done
 }

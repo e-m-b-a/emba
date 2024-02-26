@@ -559,7 +559,7 @@ output_binaries() {
         write_link "s14#strcpysummary"
       fi
       DATA=1
-      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-9.9s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
+      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-8.8s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
       for DETAIL_STRCPY in "${RESULTS_STRCPY[@]}" ; do
         binary_fct_output "${DETAIL_STRCPY}"
         write_csv_log "strcpy_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"
@@ -577,7 +577,7 @@ output_binaries() {
         write_link "s14#systemsummary"
       fi
       DATA=1
-      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-9.9s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
+      printf "${GREEN_}\t%-5.5s| %-15.15s | common linux file: y/n | %-8.8s / %-8.8s| %-8.8s | %-9.9s | %-11.11s | %-10.10s | %-13.13s |${NC}\n" "COUNT" "BINARY NAME" "CWE CNT" "SEMGREP" "RELRO" "CANARY" "NX state" "SYMBOLS" "NETWORKING" | tee -a "${LOG_FILE}"
       for DETAIL_SYSTEM in "${RESULTS_SYSTEM[@]}" ; do
         binary_fct_output "${DETAIL_SYSTEM}"
         write_csv_log "system_bin" "${BINARY}" "${F_COUNTER}" "NA" "NA" "NA" "NA" "NA" "NA"

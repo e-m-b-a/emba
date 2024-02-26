@@ -69,7 +69,7 @@ S20_shell_check()
     write_log ""
     write_log "[*] Statistics:${S20_SHELL_VULNS}:${S20_SCRIPTS}"
 
-    mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "${LOG_PATH_MODULE}"/shellchecker_* 2>/dev/null | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1 || true)
+    mapfile -t S20_VULN_TYPES < <(grep "\^--\ SC[0-9]" "${LOG_PATH_MODULE}"/shellchecker_* 2>/dev/null | cut -d: -f2- | sed -e 's/\ \+\^--\ //g' | sed -e 's/\^--\ //g' | sort -u -t: -k1,1 | tr -d '\\n' || true)
     for VTYPE in "${S20_VULN_TYPES[@]}" ; do
       print_output "$(indent "${NC}""[""${GREEN}""+""${NC}""]""${GREEN}"" ""${VTYPE}""${NC}")"
     done
