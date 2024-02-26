@@ -275,7 +275,7 @@ prepare_emulator() {
       print_output "$(indent "$(red "Terminating EMBA now.\\n")")"
       exit 1
     else
-      cp "$(command -v "${EMULATOR}")" "${R_PATH}"
+      cp "$(command -v "${EMULATOR}")" "${R_PATH}" || (print_output "[-] Issues in copy emulator process for emulator ${EMULATOR}" && return)
     fi
 
     if ! [[ -d "${R_PATH}""/proc" ]] ; then

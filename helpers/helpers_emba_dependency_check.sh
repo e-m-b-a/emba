@@ -145,7 +145,6 @@ check_nvd_db(){
   fi
 }
 
-
 check_git_hash(){
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
@@ -163,7 +162,8 @@ check_git_hash(){
 check_docker_image(){
   local REMOTE_DOCKER_HASH="${1:-}"
   local LOCAL_DOCKER_HASH=""
-  LOCAL_DOCKER_HASH="$(docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' || true)"
+  LOCAL_DOCKER_HASH="$(docker inspect --format='{{.RepoDigests}}' embeddedanalyzer/emba:latest | tr -d ']' || true)"
+  LOCAL_DOCKER_HASH=${LOCAL_DOCKER_HASH/*:}
 
   if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
     echo -e "    Docker image version - ${GREEN}ok${NC}"
