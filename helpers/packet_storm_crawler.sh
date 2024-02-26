@@ -45,12 +45,12 @@ fi
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 
-while ( true ); do
+while ((ID<50)); do
   CUR_SLEEP_TIME=1
   FAIL_CNT=0
 
   # Download and error handling:
-  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" > "${SAVE_PATH}"/"${LINKS}"; do
+  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" | grep -E "\/files\/[0-9]+" | sort -u -t'/' -k5,5n | sort -n > "${SAVE_PATH}"/"${LINKS}"; do
     ((CUR_SLEEP_TIME+=$(shuf -i 1-5 -n 1)))
     ((FAIL_CNT+=1))
     if [[ "${FAIL_CNT}" -gt 20 ]]; then
@@ -69,7 +69,7 @@ while ( true ); do
   echo ""
   echo "[*] Generating list of URLs of packetstorm advisory page ${ID}"
 
-  mapfile -t MARKERS < <(grep -zoP "\n   \[[0-9]+\].*" "${SAVE_PATH}"/"${LINKS}" | grep -a -v '\]packet storm\|Register\|Login\|SERVICES_TAB')
+  mapfile -t MARKERS < <(sed -r 's/([0-9]+)\. .*files\/[0-9]+\/(.*).html/  [\1]\2/' "${SAVE_PATH}"/"${LINKS}" | tr "-" " ")
 
   for ((index=0; index < ${#MARKERS[@]}; index++)); do
     CVEs=()
