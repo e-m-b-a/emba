@@ -59,6 +59,12 @@ S06_distribution_identification()
             dlink_image_sign
           fi
 
+          if [[ "${IDENTIFIER}" != *[0-9]* ]] && [[ "${IDENTIFIER}" == *"supermicro:bmc"* ]]; then
+              print_output "[+] Version information found ${ORANGE}${IDENTIFIER}${GREEN} in file ${ORANGE}$(print_path "${FILE}")${GREEN} with Linux distribution detection"
+              get_csv_rule_distri "${IDENTIFIER}"
+              write_csv_log "${FILE}" "Linux" "${IDENTIFIER}" "${CSV_RULE}"
+          fi
+
           # check if not zero and not only spaces
           if [[ -n "${IDENTIFIER// }" ]] && [[ "${IDENTIFIER}" == *[0-9]* ]]; then
             if [[ -n "${DLINK_FW_VER}" ]]; then
