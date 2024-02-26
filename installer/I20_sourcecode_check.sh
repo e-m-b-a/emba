@@ -33,6 +33,9 @@ I20_sourcecode_check() {
     print_pip_info "semgrep"
     print_git_info "semgrep-rules" "returntocorp/semgrep-rules" "Standard library for Semgrep rules"
     print_git_info "0xdea C/C++ semgrep-rules" "EMBA-support-repos/semgrep-rules-0xdea" "C/C++ Semgrep rules by 0xdea"
+    print_git_info "zarn" "EMBA-support-repos/zarn" "Zarn static perl analyzer"
+    # cpanminus is needed for zarn:
+    print_tool_info "cpanminus" 1
 
     print_file_info "iniscan/composer.phar" "A Dependency Manager for PHP" "https://getcomposer.org/installer" "external/iniscan/composer.phar"
 
@@ -55,6 +58,17 @@ I20_sourcecode_check() {
         fi
         if ! [[ -d external/semgrep-rules-0xdea ]]; then
           git clone https://github.com/EMBA-support-repos/semgrep-rules-0xdea.git external/semgrep-rules-0xdea
+        fi
+
+        # zarn perl code analyser
+        if ! [[ -d external/zarn ]]; then
+          # git clone https://github.com/EMBA-support-repos/zarn.git external/zarn
+          git clone https://github.com/htrgouvea/zarn.git external/zarn
+          cd external/zarn || ( echo "Could not install EMBA component zarn" && exit 1 )
+          # https://github.com/htrgouvea/zarn/issues/3
+          git reset --hard 009331c
+          cpanm --installdeps .
+          cd "${HOME_PATH}" || ( echo "Could not install EMBA component zarn" && exit 1 )
         fi
 
         if ! [[ -d "external/iniscan" ]] ; then

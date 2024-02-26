@@ -80,8 +80,8 @@ prepare_docker_home_dir() {
     fi
     cp -pr "${EXT_DIR}"/cwe_checker/.config/cwe_checker "${HOME}"/.config/
     # .local/share has also stored the r2 plugin data, this results in restoring only the composer and cwe_checker areas
-    cp -pr ${EXT_DIR}/cwe_checker/.local/share/composer/.htaccess ${HOME}/.local/share/composer/
-    cp -pr ${EXT_DIR}/cwe_checker/.local/share/cwe_checker/* ${HOME}/.local/share/cwe_checker/
+    cp -pr "${EXT_DIR}"/cwe_checker/.local/share/composer/.htaccess "${HOME}"/.local/share/composer/
+    cp -pr "${EXT_DIR}"/cwe_checker/.local/share/cwe_checker/* "${HOME}"/.local/share/cwe_checker/
   fi
 }
 
@@ -738,7 +738,11 @@ dependency_check()
         check_emulation_port "Running Qemu telnet service" "4321"
       fi
 
-      export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
+      if [[ -d "${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC" ]]; then
+        export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.3.1_PUBLIC"
+      elif [[ -d "${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC" ]]; then
+        export GHIDRA_PATH="${EXT_DIR}""/ghidra/ghidra_10.2.3_PUBLIC"
+      fi
       check_dep_file "GHIDRA" "${GHIDRA_PATH}""/ghidraRun"
 
       # prepare /root/.local and /root/.config directory for cwe_checker

@@ -1064,7 +1064,7 @@ cve_extractor() {
   fi
 
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
-    EXPLOIT_COUNTER_VERSION=$(grep -c "${BINARY}" "${TMP_DIR}/exploit_cnt.tmp" || true)
+    EXPLOIT_COUNTER_VERSION=$(grep -c "^${BINARY};" "${TMP_DIR}/exploit_cnt.tmp" || true)
   fi
 
   { echo ""
@@ -1123,13 +1123,13 @@ cve_extractor() {
       printf "[${ORANGE}+${NC}]${ORANGE} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
       echo "${BINARY};${VERSION};${CVEs};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
     fi
-  elif [[ "${CVEs}" -eq 0 && "${EXPLOITS}" -eq 0 ]]; then
-    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
-    echo "${BINARY};${VERSION};${CVEs};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
+  elif [[ "${CVEs/\ */}" -eq 0 && "${EXPLOITS}" -eq 0 ]]; then
+    printf "[${GREEN}+${NC}]${GREEN} Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-10.10s:   Exploits: %-5.5s:   Source: %-15.15s${NC}\n" "${BINARY}" "${VERSION}" "${CVEs/\ */}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
+    echo "${BINARY};${VERSION};${CVEs/\ */};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
   else
     # this should never happen ...
-    printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-10.10s:   Source: %-15.15s\n" "${BINARY}" "${VERSION}" "${CVEs}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
-    echo "${BINARY};${VERSION};${CVEs};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
+    printf "[+] Found version details: \t%-20.20s:   %-15.15s:   CVEs: %-5.5s:   Exploits: %-10.10s:   Source: %-15.15s\n" "${BINARY}" "${VERSION}" "${CVEs/\ */}" "${EXPLOITS}" "${VSOURCE}" >> "${LOG_PATH_MODULE}"/F20_summary.txt
+    echo "${BINARY};${VERSION};${CVEs/\ */};${EXPLOITS}" >> "${LOG_PATH_MODULE}"/F20_summary.csv
   fi
 
   # now, lets write the main f20 log file with the results of the current binary:
@@ -1409,7 +1409,6 @@ cve_extractor_thread_actor() {
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
         echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
-        echo "kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi
@@ -1440,7 +1439,6 @@ cve_extractor_thread_actor() {
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
         echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
-        echo "kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi

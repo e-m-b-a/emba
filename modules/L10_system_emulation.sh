@@ -293,10 +293,10 @@ create_emulation_filesystem() {
 
   print_output "[*] Creating Filesystem"
   sync
-  mkfs.ext2 "${DEVICE}"
+  mkfs.ext2 "${DEVICE}" || ( print_output "[-] Error in filesystem creation" && return )
 
   print_output "[*] Mounting QEMU Image Partition 1 to ${ORANGE}${MNT_POINT}${NC}"
-  mount "${DEVICE}" "${MNT_POINT}" || true
+  mount "${DEVICE}" "${MNT_POINT}" || ( print_output "[-] Error in mounting the filesystem" && return )
 
   if mount | grep -q "${MNT_POINT}"; then
 
@@ -2266,6 +2266,7 @@ add_partition_emulation() {
   local DEV_PATH="NA"
   local FOUND=false
   local CNT=0
+  local DEV_NR=0
 
   losetup -Pf "${1}"
   while (! "${FOUND}"); do
@@ -2276,7 +2277,15 @@ add_partition_emulation() {
     for LINE in "${LOSETUP_OUT[@]}"; do
       IMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
       if [[ "${IMAGE_PATH}" == "${1}" ]]; then
-        DEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
+        DEV_PATH=$(echo "${LINE}" | awk '{print $1}')
+        if [[ "$(dirname "${DEV_PATH}")" == "/dev/loop" ]]; then
+          # if we have the new naming like /dev/loop/0 -> dirname results in /dev/loop
+          DEV_NR=$(echo "${DEV_PATH}" | rev | cut -d '/' -f1 | rev)
+          DEV_PATH="/dev/loop${DEV_NR}p1"
+        else
+          # old naming like /dev/loop0 -> dirname results in /dev/
+          DEV_PATH=$(echo "${LINE}" | awk '{print $1}')p1
+        fi
         if [[ -b "${DEV_PATH}" ]]; then
           FOUND=true
         fi
