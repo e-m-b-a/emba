@@ -46,7 +46,7 @@ L10_system_emulation() {
 
     if [[ "${ARCH}" == "MIPS"* || "${ARCH}" == "ARM"* || "${ARCH}" == "x86" ]]; then
 
-      bmc_supermicro
+      check_bmc_supermicro
 
       # WARNING: false was never tested ;)
       # Could be interesting for future extensions
@@ -209,12 +209,11 @@ L10_system_emulation() {
   module_end_log "${FUNCNAME[0]}" "${MODULE_END}"
 }
 
-bmc_supermicro(){
+check_bmc_supermicro(){
   local S06_LOG="${CSV_DIR}/s06_distribution_identification.csv"
   if [[ -f "${S06_LOG}" ]]; then
     if grep "supermicro:bmc" "${S06_LOG}"; then
-      print_output "ALERT SUPERMICRO X11 FOUND - SPECIFIC QEMU EMULATION NOT SUPPORTED"
-      write_csv_log "ALERT SUPERMICRO X11 FOUND - SPECIFIC QEMU EMULATION NOT SUPPORTED" "" "" ""
+      print_output "[-] WARNING: Supermicro firmware found - Specifice qemu emulation not supported"
     fi
   fi
 }
