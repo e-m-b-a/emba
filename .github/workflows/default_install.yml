@@ -36,7 +36,8 @@ jobs:
           max_attempts: 3
           command: |
             sudo rm -r ./external || true
-            sudo ./installer.sh -g && sudo ./emba -d 1 -y
+            sudo ./installer.sh -g
+            NO_UPDATE_CHECK=1 sudo -E ./emba -d 1 -y
       - name: EMBA firmware download
         run: |
             sudo apt-get update
