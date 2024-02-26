@@ -210,11 +210,11 @@ L10_system_emulation() {
 }
 
 bmc_supermicro(){
-  local S06_LOG="${CSV_DIR}/S06_distribution_identification.csv"
+  local S06_LOG="${CSV_DIR}/s06_distribution_identification.csv"
   if [[ -f "${S06_LOG}" ]]; then
     if grep "supermicro:bmc" "${S06_LOG}"; then
-      print_output "ALERT SUPERMICRO X11 FOUND"
-      write_csv_log "test" "test" "test" "test"
+      print_output "ALERT SUPERMICRO X11 FOUND - SPECIFIC QEMU EMULATION NOT SUPPORTED"
+      write_csv_log "ALERT SUPERMICRO X11 FOUND - SPECIFIC QEMU EMULATION NOT SUPPORTED" "" "" ""
     fi
   fi
 }
