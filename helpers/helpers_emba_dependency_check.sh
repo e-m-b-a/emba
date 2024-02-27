@@ -233,7 +233,7 @@ dependency_check()
         EMBA_VERSION="$(cat "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt)"
         DOCKER_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_CONTAINER_HASH.txt)"
         NVD_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/NVD_HASH.txt)"
-        GITHUB_HASH="${EMBA_VERSION/*-}"
+        GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_GITHUB_HASH.txt)"
         LATEST_EMBA_VERSION="${EMBA_VERSION/-*}"
         check_emba_version "${LATEST_EMBA_VERSION}"
         check_docker_image "${DOCKER_HASH}"
