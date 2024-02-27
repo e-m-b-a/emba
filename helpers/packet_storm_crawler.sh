@@ -45,12 +45,12 @@ fi
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 
-while ((ID<50)); do
+while (true); do
   CUR_SLEEP_TIME=1
   FAIL_CNT=0
 
   # Download and error handling:
-  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" | grep -E "\/files\/[0-9]+" | sort -u -t'/' -k5,5n | sort -n > "${SAVE_PATH}"/"${LINKS}"; do
+  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" | grep -E "\/files\/[0-9]+|\/files\/cve|\/files\/tags" | awk -F'/' '!seen[$NF]++ || $4 == "cve" || $4 == "tags" || $4 == "metasploit" || /metasploit/' > "${SAVE_PATH}"/"${LINKS}"; do
     ((CUR_SLEEP_TIME+=$(shuf -i 1-5 -n 1)))
     ((FAIL_CNT+=1))
     if [[ "${FAIL_CNT}" -gt 20 ]]; then
@@ -69,7 +69,7 @@ while ((ID<50)); do
   echo ""
   echo "[*] Generating list of URLs of packetstorm advisory page ${ID}"
 
-  mapfile -t MARKERS < <(sed -r 's/([0-9]+)\. .*files\/[0-9]+\/(.*).html/  [\1]\2/' "${SAVE_PATH}"/"${LINKS}" | tr "-" " ")
+  mapfile -t MARKERS < <( grep -E "\/files\/[0-9]+" "${SAVE_PATH}"/"${LINKS}" | sed -r 's/([0-9]+)\. .*files\/[0-9]+\/(.*).html/  [\1]\2/' | tr "-" " ")
 
   for ((index=0; index < ${#MARKERS[@]}; index++)); do
     CVEs=()
@@ -123,8 +123,7 @@ while ((ID<50)); do
       fi
     fi
 
-    mapfile -t CVEs < <(sed '/\['"${CURRENT_MARKER}"'\]/,/\['"${NEXT_MARKER}"'\]/!d' "${SAVE_PATH}"/"${LINKS}" \
-      | grep -o -E "\[[0-9]+\]CVE-[0-9]+-[0-9]+" | sed 's/\[[0-9]*\]//' | sort -u)
+    mapfile -t CVEs < <(sed -n "/^ *"${CURRENT_MARKER}"\./,/^ *"${NEXT_MARKER}"\./{s/.*CVE-[0-9]\+-[0-9]\+.*/&/p}" "${SAVE_PATH}"/"${LINKS}" | sed 's/.*cve\///' | sort -u)
     if [[ -v CVEs ]]; then
       for CVE in "${CVEs[@]}";do
         echo -e "[+] Found PoC for ${ORANGE}${CVE}${NC} in advisory ${ORANGE}${ADV_NAME}${NC} / ${ORANGE}${ADV_URL}${NC}"
