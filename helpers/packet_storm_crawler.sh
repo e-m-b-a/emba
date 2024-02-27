@@ -45,7 +45,7 @@ fi
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 
-while (true); do
+while ( true ); do
   CUR_SLEEP_TIME=1
   FAIL_CNT=0
 
@@ -123,7 +123,7 @@ while (true); do
       fi
     fi
 
-    mapfile -t CVEs < <(sed -n "/^ *"${CURRENT_MARKER}"\./,/^ *"${NEXT_MARKER}"\./{s/.*CVE-[0-9]\+-[0-9]\+.*/&/p}" "${SAVE_PATH}"/"${LINKS}" | sed 's/.*cve\///' | sort -u)
+    mapfile -t CVEs < <(sed -n "/^ *${CURRENT_MARKER}\./,/^ *${NEXT_MARKER}\./{s/.*CVE-[0-9]\+-[0-9]\+.*/&/p}" "${SAVE_PATH}"/"${LINKS}" | sed 's/.*cve\///' | sort -u)
     if [[ -v CVEs ]]; then
       for CVE in "${CVEs[@]}";do
         echo -e "[+] Found PoC for ${ORANGE}${CVE}${NC} in advisory ${ORANGE}${ADV_NAME}${NC} / ${ORANGE}${ADV_URL}${NC}"
