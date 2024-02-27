@@ -396,5 +396,7 @@ find_runlevel()
     else
       print_output "[-] No default run level found"
     fi
+  else
+    print_output "[-] No default run level found"
   fi
 }

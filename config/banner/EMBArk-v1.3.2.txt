@@ -1,5 +1,5 @@
 
-EMBA version 1.3.2 - Hello EMBArk edt.
+EMBA version 1.3.2 - Hello EMBArk edt. (Historic edt.)
 
 
 
