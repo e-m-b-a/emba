@@ -133,7 +133,6 @@ ${TAGS_CVES}
       fi
     fi
 
-    #mapfile -t CVEs < <(sed -n "/^ *${CURRENT_MARKER}\./,/^ *${NEXT_MARKER}\./{s/cve\/CVE-[0-9]\+-[0-9]\+/&/p}" "${SAVE_PATH}"/"${LINKS}" | sed 's/.*cve\///' | sort -u)
     mapfile -t CVEs < <(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -oP "CVE-\d{4}-\d{4,7}" | sort -u)
     if [[ -v CVEs ]]; then
       for CVE in "${CVEs[@]}";do
