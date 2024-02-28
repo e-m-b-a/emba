@@ -73,7 +73,7 @@ while ((ID<51)); do
   OUTPUT="${NO_DUP_LINKS}
 ${TAGS_CVES}
  9999. END"
-  printf "%s" "$OUTPUT" | sort -u | sed -r 's/([0-9]+)\. /\[\1\] /' > "${SAVE_PATH}/${LINKS}"
+  printf "%s" "${OUTPUT}" | sort -u | sed -r 's/([0-9]+)\. /\[\1\] /' > "${SAVE_PATH}/${LINKS}"
 
   echo ""
   echo "[*] Generating list of URLs of packetstorm advisory page ${ID}"
@@ -109,10 +109,10 @@ ${TAGS_CVES}
     fi
 
     # we do not store metasploit exploits as we already have the MSF database in EMBA
-    MSF=$(sed -n "/\s*"${CURRENT_MARKER}"\. /,/\s*"${NEXT_MARKER}"\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "metasploit.com\|This Metasploit module")
-    REMOTE=$(sed -n "/\s*"${CURRENT_MARKER}"\. /,/\s*"${NEXT_MARKER}"\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/remote")
-    LOCAL=$(sed -n "/\s*"${CURRENT_MARKER}"\. /,/\s*"${NEXT_MARKER}"\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/local")
-    DoS=$(sed -n "/\s*"${CURRENT_MARKER}"\. /,/\s*"${NEXT_MARKER}"\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/denial_of_service")
+    MSF=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "metasploit.com\|This Metasploit module")
+    REMOTE=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/remote")
+    LOCAL=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/local")
+    DoS=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/denial_of_service")
 
     if [[ "${REMOTE}" -gt 0 ]]; then
       TYPE="remote"
