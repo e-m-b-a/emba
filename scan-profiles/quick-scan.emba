@@ -34,7 +34,7 @@ export SILENT=1
 # we output the profile only at the beginning - outside the docker environment
 if [[ $IN_DOCKER -ne 1 ]] ; then
   print_output "$(indent "$(orange "Adds ANSI color codes to log")")" "no_log"
-  print_output "$(indent "$(orange "Activate multi threading (destroys regular console output)")")" "no_log"
+  print_output "$(indent "$(orange "Activate multi threading")")" "no_log"
   print_output "$(indent "$(orange "Prints only relative paths")")" "no_log"
   print_output "$(indent "$(orange "Activates web report creation in log path")")" "no_log"
   if [[ "$USE_DOCKER" -ne 1 ]]; then

@@ -218,7 +218,7 @@ dependency_check()
     print_output "    Internet connection - \\c" "no_log"
 
     if [[ -d "${EXT_DIR}"/onlinechecker ]]; then
-      rm -rf "${EXT_DIR}"/onlinechecker
+      rm -rf "${EXT_DIR}"/onlinechecker 2>/dev/null
     fi
 
     # the update check can be disabled via NO_UPDATE_CHECK
