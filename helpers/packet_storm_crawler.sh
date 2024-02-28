@@ -104,7 +104,6 @@ ${TAGS_CVES}
 
     # on the last element we currently have not NEXT_MARKER - set it to the Back button
     if [[ -z "${NEXT_MARKER}" ]] || [[ "${NEXT_MARKER}" == "${CURRENT_MARKER}" ]]; then
-      #NEXT_MARKER=$(grep -E "Back\[[0-9]+\]" "${SAVE_PATH}"/"${LINKS}" | cut -d '[' -f2 | cut -d ']' -f1)
       NEXT_MARKER="9999"
     fi
 
