@@ -70,7 +70,10 @@ while ((ID<51)); do
 
   NO_DUP_LINKS=$(awk -F'/' '!seen[$NF]++ || /metasploit/' "${SAVE_PATH}"/"${LINKS}")
   TAGS_CVES=$(grep -E "\/files\/(tags|cve)" "${SAVE_PATH}"/"${LINKS}")
-  echo "${NO_DUP_LINKS}\n${TAGS_CVES}\n 9999. END" | sort -u | sed -r 's/([0-9]+)\. /\[\1\] /' > "${SAVE_PATH}/${LINKS}"
+  OUTPUT="${NO_DUP_LINKS}
+${TAGS_CVES}
+ 9999. END"
+  printf "%s" "$OUTPUT" | sort -u | sed -r 's/([0-9]+)\. /\[\1\] /' > "${SAVE_PATH}/${LINKS}"
 
   echo ""
   echo "[*] Generating list of URLs of packetstorm advisory page ${ID}"
@@ -104,10 +107,6 @@ while ((ID<51)); do
       #NEXT_MARKER=$(grep -E "Back\[[0-9]+\]" "${SAVE_PATH}"/"${LINKS}" | cut -d '[' -f2 | cut -d ']' -f1)
       NEXT_MARKER="9999"
     fi
-
-    #echo "ADV_NAME"
-    #echo "Current:${CURRENT_MARKER}"
-    #echo "Next:${NEXT_MARKER}"
 
     # we do not store metasploit exploits as we already have the MSF database in EMBA
     MSF=$(sed -n "/\s*"${CURRENT_MARKER}"\. /,/\s*"${NEXT_MARKER}"\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "metasploit.com\|This Metasploit module")
