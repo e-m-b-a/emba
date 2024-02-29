@@ -243,9 +243,7 @@ radare_decomp_output_function_details() {
     local lLOG_FILE="${3:-}"
 
     local lOLD_LOG_FILE="${lLOG_FILE}"
-    print_output "${lOUTPUT}"
-    write_link "${lLINK}"
-    print_ln
+    print_output "${lOUTPUT}" "" "${lLINK}"
 
     if [[ -f "${lLOG_FILE}" ]]; then
       cat "${lLOG_FILE}" >> "${lOLD_LOG_FILE}" || true
