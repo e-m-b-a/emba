@@ -555,10 +555,15 @@ radare_log_bin_hardening() {
 radare_log_func_footer() {
   local NAME="${1:-}"
   local FUNCTION="${2:-}"
+  if [[ -v 3 ]];then
+    local lFUNC_LOG="${3:-}"
+  else
+    local lFUNC_LOG="${FUNC_LOG}"
+  fi
 
-  write_log "" "${FUNC_LOG}"
-  write_log "[*] Function ${ORANGE}${FUNCTION}${NC} used ${ORANGE}${COUNT_FUNC}${NC} times ${ORANGE}${NAME}${NC}" "${FUNC_LOG}"
-  write_log "" "${FUNC_LOG}"
+  write_log "" "${lFUNC_LOG}"
+  write_log "[*] Function ${ORANGE}${FUNCTION}${NC} used ${ORANGE}${COUNT_FUNC}${NC} times ${ORANGE}${NAME}${NC}" "${lFUNC_LOG}"
+  write_log "" "${lFUNC_LOG}"
 }
 
 radare_output_function_details()
