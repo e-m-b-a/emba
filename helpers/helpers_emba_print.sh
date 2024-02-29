@@ -75,18 +75,28 @@ module_log_init()
   fi
 }
 
+# $1: module title
+# $2: (optional) log file to log -> this is typically used in combination with write_log to write
+#                logs to another log file
+#                no_log is also valid to just print to cli
 module_title()
 {
-  local MODULE_TITLE
-  MODULE_TITLE="${1:-}"
-  local MODULE_TITLE_FORMAT
-  MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""${MODULE_TITLE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+  local MODULE_TITLE="${1:-}"
+  local LOG_FILE_TO_LOG="${2:-}"
+
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] && ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
+    LOG_FILE_TO_LOG="${LOG_FILE}"
+  fi
+
+  local MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""${MODULE_TITLE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
   echo -e "\\n\\n""${MODULE_TITLE_FORMAT}" || true
-  if [[ "${2:-}" != "no_log" ]] ; then
-    echo -e "$(format_log "${MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE}" >/dev/null || true
-    if [[ ${LOG_GREP} -eq 1 ]] ; then
-      write_grep_log "${MODULE_TITLE}" "MODULE_TITLE"
-    fi
+
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
+    echo -e "$(format_log "${MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  fi
+
+  if [[ ${LOG_GREP} -eq 1 ]] ; then
+    write_grep_log "${MODULE_TITLE}" "MODULE_TITLE"
   fi
   SUB_MODULE_COUNT=0
 }
@@ -98,7 +108,7 @@ sub_module_title()
   local SUB_MODULE_TITLE="${1:-}"
   local LOG_FILE_TO_LOG="${2:-}"
   # if $2 is not set, we are going to log to the original LOG_FILE
-  if ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] && ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
     LOG_FILE_TO_LOG="${LOG_FILE}"
   fi
 
@@ -106,7 +116,9 @@ sub_module_title()
 
   SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""${SUB_MODULE_TITLE}""${NC}""\\n-----------------------------------------------------------------"
   echo -e "${SUB_MODULE_TITLE_FORMAT}" || true
-  echo -e "$(format_log "${SUB_MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
+    echo -e "$(format_log "${SUB_MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  fi
 
   if [[ ${LOG_GREP} -eq 1 ]] ; then
     SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
