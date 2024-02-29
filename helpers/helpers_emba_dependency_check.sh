@@ -241,9 +241,9 @@ dependency_check()
       fi
     else
       echo -e "${RED}""not ok""${NC}"
-      print_output "[-] Warning: EMBA has no internet connection!" "no_log"
-      print_output "[-] Warning: Update checks are not possible!" "no_log"
-      print_output "[-] Warning: GPT and other online modules are disabled!" "no_log"
+      print_output "[!] Warning: EMBA has NO internet connection!" "no_log"
+      print_output "[!] Warning: Update checks and multiple EMBA modules are disabled!" "no_log"
+      print_output "[!] Warning: GPT (Q02), kernel verification (S26) and further online modules are disabled!" "no_log"
     fi
   fi
 
