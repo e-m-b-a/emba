@@ -364,10 +364,10 @@ split_symbols_file() {
 }
 
 extract_kernel_arch() {
-  KERNEL_ELF_PATH="${1:-}"
+  local lKERNEL_ELF_PATH="${1:-}"
   export ORIG_K_ARCH=""
 
-  ORIG_K_ARCH=$(file "${KERNEL_ELF_PATH}" | cut -d, -f2)
+  ORIG_K_ARCH=$(file "${lKERNEL_ELF_PATH}" | cut -d, -f2)
 
   # for ARM -> ARM aarch64 to ARM64
   ORIG_K_ARCH=${ORIG_K_ARCH/ARM\ aarch64/arm64}

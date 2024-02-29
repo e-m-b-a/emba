@@ -114,7 +114,7 @@ sub_module_title()
 
   local SUB_MODULE_TITLE_FORMAT=""
 
-  SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""${SUB_MODULE_TITLE}""${NC}""\\n-----------------------------------------------------------------"
+  SUB_MODULE_TITLE_FORMAT="\\n\\n""${BLUE}""==>""${NC}"" ""${CYAN}""${SUB_MODULE_TITLE}""${NC}""\\n-----------------------------------------------------------------"
   echo -e "${SUB_MODULE_TITLE_FORMAT}" || true
   if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
     echo -e "$(format_log "${SUB_MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
