@@ -181,7 +181,7 @@ radare_function_check_PPC32(){
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r "${BINARY_}" | awk '{print $5}' | grep -E -q "^${FUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      radare_log_bin_hardening "${NAME}" "${FUNCTION}"
+      radare_log_bin_hardening "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
@@ -190,7 +190,7 @@ radare_function_check_PPC32(){
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
-        radare_color_output "${FUNCTION}"
+        radare_color_output "${FUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c "bl.*""${FUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${FUNCTION}" == "strcpy" ]] ; then
@@ -200,7 +200,7 @@ radare_function_check_PPC32(){
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmpwi.*,r.*,-1" "${FUNC_LOG}"  2> /dev/null || true)
         fi
-        radare_log_func_footer "${NAME}" "${FUNCTION}"
+        radare_log_func_footer "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
         radare_output_function_details "${BINARY_}" "${FUNCTION}"
       fi
     fi
@@ -224,7 +224,7 @@ radare_function_check_MIPS() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-    radare_log_bin_hardening "${NAME}" "${FUNCTION}"
+    radare_log_bin_hardening "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
       # For the mmap check we need the disasm after the call
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $ss' "${BINARY_}" 2>/dev/null | grep -A 20 "^l[wd] .*${FUNCTION}""(gp)" >> "${FUNC_LOG}" || true
@@ -233,7 +233,7 @@ radare_function_check_MIPS() {
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
-      radare_color_output "${FUNCTION}"
+      radare_color_output "${FUNCTION}" "${FUNC_LOG}"
 
       COUNT_FUNC="$(grep -c "l[wd].*""${FUNCTION}" "${FUNC_LOG}" 2> /dev/null || true)"
       if [[ "${FUNCTION}" == "strcpy" ]] ; then
@@ -246,7 +246,7 @@ radare_function_check_MIPS() {
         # COUNT_MMAP_OK=$(grep -c ",-1$" "${FUNC_LOG}"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
-      radare_log_func_footer "${NAME}" "${FUNCTION}"
+      radare_log_func_footer "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       radare_output_function_details "${BINARY_}" "${FUNCTION}"
     fi
   done
@@ -269,7 +269,7 @@ radare_function_check_ARM64() {
   NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-    radare_log_bin_hardening "${NAME}" "${FUNCTION}"
+    radare_log_bin_hardening "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     else
@@ -277,7 +277,7 @@ radare_function_check_ARM64() {
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
-      radare_color_output "${FUNCTION}"
+      radare_color_output "${FUNCTION}" "${FUNC_LOG}"
 
       COUNT_FUNC="$(grep -c "bl.*${FUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
       if [[ "${FUNCTION}" == "strcpy" ]] ; then
@@ -290,7 +290,7 @@ radare_function_check_ARM64() {
         # COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "${FUNC_LOG}"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
-      radare_log_func_footer "${NAME}" "${FUNCTION}"
+      radare_log_func_footer "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       radare_output_function_details "${BINARY_}" "${FUNCTION}"
     fi
   done
@@ -313,7 +313,7 @@ radare_function_check_ARM32() {
   NETWORKING=$(readelf -a "${BINARY_}" --use-dynamic 2> /dev/null | grep -E "FUNC[[:space:]]+UND" | grep -c "\ bind\|\ socket\|\ accept\|\ recvfrom\|\ listen" 2> /dev/null || true)
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-    radare_log_bin_hardening "${NAME}" "${FUNCTION}"
+    radare_log_bin_hardening "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
     if [[ "${FUNCTION}" == "mmap" ]] ; then
       r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -A 20 "bl.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
     else
@@ -321,7 +321,7 @@ radare_function_check_ARM32() {
     fi
     ! [[ -f "${FUNC_LOG}" ]] && continue
     if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
-      radare_color_output "${FUNCTION}"
+      radare_color_output "${FUNCTION}" "${FUNC_LOG}"
 
       COUNT_FUNC="$(grep -c "bl.*${FUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
       if [[ "${FUNCTION}" == "strcpy" ]] ; then
@@ -334,7 +334,7 @@ radare_function_check_ARM32() {
         # COUNT_MMAP_OK=$(grep -c "cm.*r.*,\ \#[01]" "${FUNC_LOG}"  2> /dev/null)
         COUNT_MMAP_OK="NA"
       fi
-      radare_log_func_footer "${NAME}" "${FUNCTION}"
+      radare_log_func_footer "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       radare_output_function_details "${BINARY_}" "${FUNCTION}"
     fi
   done
@@ -358,7 +358,7 @@ radare_function_check_hexagon() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -s --use-dynamic "${BINARY_}" | grep -q "${FUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      radare_log_bin_hardening "${NAME}" "${FUNCTION}"
+      radare_log_bin_hardening "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
@@ -367,7 +367,7 @@ radare_function_check_hexagon() {
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
-        radare_color_output "${FUNCTION}"
+        radare_color_output "${FUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c -e "call.*${FUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${FUNCTION}" == "strcpy" ]] ; then
@@ -378,7 +378,7 @@ radare_function_check_hexagon() {
           # TODO: check this in radare2
           COUNT_MMAP_OK="NA"
         fi
-        radare_log_func_footer "${NAME}" "${FUNCTION}"
+        radare_log_func_footer "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
         radare_output_function_details "${BINARY_}" "${FUNCTION}"
       fi
     fi
@@ -403,7 +403,7 @@ radare_function_check_x86() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r --use-dynamic "${BINARY_}" | awk '{print $5}' | grep -E -q "^${FUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      radare_log_bin_hardening "${NAME}" "${FUNCTION}"
+      radare_log_bin_hardening "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
@@ -412,7 +412,7 @@ radare_function_check_x86() {
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
-        radare_color_output "${FUNCTION}"
+        radare_color_output "${FUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c -e "call.*${FUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${FUNCTION}" == "strcpy" ]] ; then
@@ -423,7 +423,7 @@ radare_function_check_x86() {
           # TODO: check this in radare2
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffff" "${FUNC_LOG}"  2> /dev/null || true)
         fi
-        radare_log_func_footer "${NAME}" "${FUNCTION}"
+        radare_log_func_footer "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
         radare_output_function_details "${BINARY_}" "${FUNCTION}"
       fi
     fi
@@ -448,7 +448,7 @@ radare_function_check_x86_64() {
   for FUNCTION in "${VULNERABLE_FUNCTIONS[@]}" ; do
     if ( readelf -r --use-dynamic "${BINARY_}" | awk '{print $5}' | grep -E -q "^${FUNCTION}" 2> /dev/null ) ; then
       FUNC_LOG="${LOG_PATH_MODULE}""/vul_func_""${FUNCTION}""-""${NAME}"".txt"
-      radare_log_bin_hardening "${NAME}" "${FUNCTION}"
+      radare_log_bin_hardening "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
       if [[ "${FUNCTION}" == "mmap" ]] ; then
         # For the mmap check we need the disasm after the call
         r2 -e bin.cache=true -e io.cache=true -e scr.color=false -q -c 'pI $s' "${BINARY_}" | grep -E -A 20 "call.*${FUNCTION}" 2> /dev/null >> "${FUNC_LOG}" || true
@@ -457,7 +457,7 @@ radare_function_check_x86_64() {
       fi
       ! [[ -f "${FUNC_LOG}" ]] && continue
       if [[ -f "${FUNC_LOG}" ]] && [[ $(wc -l "${FUNC_LOG}" | awk '{print $1}') -gt 0 ]] ; then
-        radare_color_output "${FUNCTION}"
+        radare_color_output "${FUNCTION}" "${FUNC_LOG}"
 
         COUNT_FUNC="$(grep -c -e "call.*${FUNCTION}" "${FUNC_LOG}"  2> /dev/null || true)"
         if [[ "${FUNCTION}" == "strcpy"  ]] ; then
@@ -467,7 +467,7 @@ radare_function_check_x86_64() {
           # Test source: https://www.golem.de/news/mmap-codeanalyse-mit-sechs-zeilen-bash-2006-148878-2.html
           COUNT_MMAP_OK=$(grep -c "cmp.*0xffffffffffffffff" "${FUNC_LOG}"  2> /dev/null || true)
         fi
-        radare_log_func_footer "${NAME}" "${FUNCTION}"
+        radare_log_func_footer "${NAME}" "${FUNCTION}" "${FUNC_LOG}"
         radare_output_function_details "${BINARY_}" "${FUNCTION}"
       fi
     fi
@@ -525,41 +525,40 @@ radare_print_top10_statistics() {
 
 radare_color_output() {
   local FUNCTION="${1:-}"
-  sed -i -r "s/^[[:alnum:]].*(${FUNCTION}).*/\x1b[31m&\x1b[0m/" "${FUNC_LOG}" 2>/dev/null || true
+  local lFUNC_LOG="${2:-}"
+
+  sed -i -r "s/^[[:alnum:]].*(${FUNCTION}).*/\x1b[31m&\x1b[0m/" "${lFUNC_LOG}" 2>/dev/null || true
 }
 
 radare_log_bin_hardening() {
   local NAME="${1:-}"
   local FUNCTION="${2:-}"
+  local lFUNC_LOG="${3:-}"
 
   local BIN_PROT=""
   local HEAD_BIN_PROT=""
 
   if [[ -f "${LOG_DIR}"/s12_binary_protection.txt ]]; then
-    write_log "[*] Binary protection state of ${ORANGE}${NAME}${NC}" "${FUNC_LOG}"
-    write_log "" "${FUNC_LOG}"
+    write_log "[*] Binary protection state of ${ORANGE}${NAME}${NC}" "${lFUNC_LOG}"
+    write_log "" "${lFUNC_LOG}"
     # get headline:
     HEAD_BIN_PROT=$(grep "FORTI.*FILE" "${LOG_DIR}"/s12_binary_protection.txt | sed 's/FORTI.*//'| sort -u || true)
-    write_log "  ${HEAD_BIN_PROT}" "${FUNC_LOG}"
+    write_log "  ${HEAD_BIN_PROT}" "${lFUNC_LOG}"
     # get binary entry
     BIN_PROT=$(grep '/'"${NAME}"' ' "${LOG_DIR}"/s12_binary_protection.txt | sed 's/Symbols.*/Symbols/' | sort -u || true)
-    write_log "  ${BIN_PROT}" "${FUNC_LOG}"
-    write_log "" "${FUNC_LOG}"
+    write_log "  ${BIN_PROT}" "${lFUNC_LOG}"
+    write_log "" "${lFUNC_LOG}"
   fi
 
-  write_log "${NC}" "${FUNC_LOG}"
-  write_log "[*] Function ${ORANGE}${FUNCTION}${NC} tear down of ${ORANGE}${NAME}${NC}" "${FUNC_LOG}"
-  write_log "" "${FUNC_LOG}"
+  write_log "${NC}" "${lFUNC_LOG}"
+  write_log "[*] Function ${ORANGE}${FUNCTION}${NC} tear down of ${ORANGE}${NAME}${NC}" "${lFUNC_LOG}"
+  write_log "" "${lFUNC_LOG}"
 }
 
 radare_log_func_footer() {
   local NAME="${1:-}"
   local FUNCTION="${2:-}"
-  if [[ -v 3 ]];then
-    local lFUNC_LOG="${3:-}"
-  else
-    local lFUNC_LOG="${FUNC_LOG}"
-  fi
+  local lFUNC_LOG="${3:-}"
 
   write_log "" "${lFUNC_LOG}"
   write_log "[*] Function ${ORANGE}${FUNCTION}${NC} used ${ORANGE}${COUNT_FUNC}${NC} times ${ORANGE}${NAME}${NC}" "${lFUNC_LOG}"
@@ -570,15 +569,18 @@ radare_output_function_details()
 {
   write_s14_log()
   {
-    local OLD_LOG_FILE="${LOG_FILE}"
-    LOG_FILE="${3}"
-    print_output "${1}"
-    write_link "${2}"
-    if [[ -f "${LOG_FILE}" ]]; then
-      cat "${LOG_FILE}" >> "${OLD_LOG_FILE}" || true
-      rm "${LOG_FILE}" 2> /dev/null || true
+    local lOUTPUT="${1:-}"
+    local lLINK="${2:-}"
+    local lLOG_FILE="${3:-}"
+
+    local lOLD_LOG_FILE="${lLOG_FILE}"
+    print_output "${lOUTPUT}" "" "${lLINK}"
+
+    if [[ -f "${lLOG_FILE}" ]]; then
+      cat "${lLOG_FILE}" >> "${lOLD_LOG_FILE}" || true
+      rm "${lLOG_FILE}" 2> /dev/null || true
     fi
-    LOG_FILE="${OLD_LOG_FILE}"
+    lLOG_FILE="${lOLD_LOG_FILE}"
   }
 
   local BINARY_="${1:-}"
@@ -633,11 +635,11 @@ radare_output_function_details()
 
   if [[ ${COUNT_FUNC} -ne 0 ]] ; then
     if [[ "${FUNCTION}" == "strcpy" ]] ; then
-      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${NETWORKING_}""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""strlen: ""${COUNT_STRLEN}"" ""${NC}""/ ""${NETWORKING_}""${NC}"
     elif [[ "${FUNCTION}" == "mmap" ]] ; then
-      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""${COUNT_MMAP_OK}"" ""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${ORANGE}""Correct error handling: ""${COUNT_MMAP_OK}"" ""${NC}"
     else
-      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${NETWORKING_}""${NC}""\\n"
+      OUTPUT="[+] ""$(print_path "${BINARY_}")""${COMMON_FILES_FOUND}""${NC}"" Vulnerable function: ""${CYAN}""${FUNCTION}"" ""${NC}""/ ""${RED}""Function count: ""${COUNT_FUNC}"" ""${NC}""/ ""${NETWORKING_}""${NC}"
     fi
     write_s14_log "${OUTPUT}" "${LOG_FILE_LOC}" "${LOG_PATH_MODULE}""/vul_func_tmp_""${FUNCTION}"-"${NAME}"".txt"
     write_csv_log "$(print_path "${BINARY_}")" "${FUNCTION}" "${COUNT_FUNC}" "${CFF_CSV}" "${NW_CSV}"
