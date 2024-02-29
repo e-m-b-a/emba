@@ -199,6 +199,7 @@ radare_decomp_print_top10_statistics() {
           if [[ -f "${BASE_LINUX_FILES}" ]]; then
             # if we have the base linux config file we are checking it:
             if grep -E -q "^${SEARCH_TERM}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+              # shellcheck disable=SC2153
               printf "${GREEN}\t%-5.5s : %-15.15s : common linux file: yes${NC}\n" "${F_COUNTER}" "${SEARCH_TERM}" | tee -a "${LOG_FILE}" || true
             else
               printf "${ORANGE}\t%-5.5s : %-15.15s : common linux file: no${NC}\n" "${F_COUNTER}" "${SEARCH_TERM}" | tee -a "${LOG_FILE}" || true
