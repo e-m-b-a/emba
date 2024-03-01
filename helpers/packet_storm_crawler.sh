@@ -11,7 +11,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner
+# Author(s): Michael Messner, Endri Hoxha
 
 # Description:  Update script for packetstorm PoC/Exploit collection
 
