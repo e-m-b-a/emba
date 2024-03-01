@@ -18,14 +18,14 @@ Testfirmware: [DLink DIR300](https://ftp.dlink.de/dir/dir-300/archive/driver_sof
 - [ ] Default/docker installation working with current docker image
   - [ ] `./installer.sh -d` finished without errors
   - [ ] dependency check (`./emba -d 1`)
-  - [ ] EMBA run with profile default-scan
+  - [ ] EMBA run with profile quick-scan
   - [ ] EMBA run with profile default-scan in strict mode (-S)
   - [ ] EMBA run with profile default-scan-emulation in strict mode (-S)
   - [ ] EMBA run with profile full-scan in strict mode (-S)
-- [ ] Docker base image build 
+- [ ] Docker base image build
   - [ ] `sudo docker-compose build --no-cache --pull` finished without errors
   - [ ] dependency check (`./emba -d 2`)
-  - [ ] EMBA run with profile default-scan
+  - [ ] EMBA run with profile quick-scan
   - [ ] EMBA run with profile default-scan in strict mode (-S)
   - [ ] EMBA run with profile default-scan-emulation in strict mode (-S)
   - [ ] EMBA run with profile full-scan in strict mode (-S)
@@ -36,9 +36,4 @@ Testfirmware: [DLink DIR300](https://ftp.dlink.de/dir/dir-300/archive/driver_sof
   - [ ] EMBA run in dev mode with options -s -z -S -D, -c, -E, -t, -W -Q
 
 **Priority issue**
-Are you already a [Sponsor]? - [Y/N]
-
-**Additional context**
-Add any other context about the problem here.
-
-[Sponsor]: https://github.com/sponsors/e-m-b-a
+YES
