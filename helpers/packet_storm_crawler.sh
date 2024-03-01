@@ -92,7 +92,7 @@ ${TAGS_CVES}
     # e.g.: [22]Spitfire CMS 1.0.475 PHP Object Injection
     CURRENT_MARKER=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f1)
     # the name is after the first marker and we use only 7 fields
-    ADV_NAME=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f2 | cut -d\  -f1-7)
+    ADV_NAME=$(echo "${MARKERS[index]}" | sed -r 's/\s*\[[0-9]+\]//')
 
     # with the following search we are going to find the URL of the marker
     ADV_URL=$(grep "\[${CURRENT_MARKER}\]\ " "${SAVE_PATH}"/"${LINKS}" | awk '{print $2}' | sort -u)
@@ -108,10 +108,10 @@ ${TAGS_CVES}
     fi
 
     # we do not store metasploit exploits as we already have the MSF database in EMBA
-    MSF=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "metasploit.com\|This Metasploit module")
-    REMOTE=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/remote")
-    LOCAL=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/local")
-    DoS=$(sed -n "/\s*${CURRENT_MARKER}\. /,/\s*${NEXT_MARKER}\. /p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/denial_of_service")
+    MSF=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "metasploit.com\|This Metasploit module")
+    REMOTE=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/remote")
+    LOCAL=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/local")
+    DoS=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/denial_of_service")
 
     if [[ "${REMOTE}" -gt 0 ]]; then
       TYPE="remote"
