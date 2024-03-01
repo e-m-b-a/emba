@@ -47,7 +47,7 @@ fi
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 
-while ((ID<51)); do
+while ( true ); do
   CUR_SLEEP_TIME=1
   FAIL_CNT=0
 
