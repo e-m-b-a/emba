@@ -21,6 +21,7 @@ SAVE_PATH="/tmp/packet_storm"
 EMBA_CONFIG_PATH="./config/"
 TAGS_CVES=""
 NO_DUP_LINKS=""
+NUMBER_OF_PAGES=$(lynx -dump "${URL}" | grep -E "Page 1 of " | sed -r 's/.*of ([0-9])\,/\1/')
 
 if ! [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   echo "[-] No EMBA config directory found! Please start this crawler from the EMBA directory"
@@ -47,7 +48,7 @@ fi
 echo "[*] Generating URL list for packetstorm advisories"
 ID=1
 
-while ( true ); do
+while ((ID<="${NUMBER_OF_PAGES}")); do
   CUR_SLEEP_TIME=1
   FAIL_CNT=0
 
