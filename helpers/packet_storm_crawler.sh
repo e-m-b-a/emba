@@ -46,6 +46,7 @@ if [[ -f "${EMBA_CONFIG_PATH}"/PS_PoC_results.csv ]]; then
 fi
 
 echo "[*] Generating URL list for packetstorm advisories"
+echo "[*] Number of pages:${NUMBER_OF_PAGES}"
 ID=1
 
 while ((ID<="${NUMBER_OF_PAGES}")); do
