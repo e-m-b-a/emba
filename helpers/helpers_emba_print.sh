@@ -615,7 +615,7 @@ print_help()
   echo -e "\\nDeveloper options"
   echo -e "${CYAN}""-D""${NC}""                Developer mode - EMBA runs on the host without container protection"
   echo -e "${CYAN}""-S""${NC}""                STRICT mode - developer option to improve code quality (not enabled by default)"
-  echo -e "${CYAN}""-i""${NC}""                Ignores log path check"
+#  echo -e "${CYAN}""-i""${NC}""                EMBA internally used for container identification (do not use it as cli parameter)"
   echo -e "${CYAN}""-y""${NC}""                Overwrite log directory automaticially, even if it is not empty"
   echo -e "\\nSystem check"
   echo -e "${CYAN}""-d [1/2]""${NC}""          Only checks dependencies (1 - on host and in container, 2 - only container)"
