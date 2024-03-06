@@ -80,7 +80,7 @@ while ((ID<="${NUMBER_OF_PAGES}")); do
   OUTPUT="${NO_DUP_LINKS}
 ${TAGS_CVES}
  9999. END"
-  printf "%s" "${OUTPUT}" | sort -u | sed -r 's/([0-9]+)\. /\[\1\] /' > "${SAVE_PATH}/${LINKS}"
+  printf "%s" "${OUTPUT}" | sed -r 's/\s*//' | sort -ug | sed -r 's/([0-9]+)\. /\[\1\] /' > "${SAVE_PATH}/${LINKS}"
 
   echo ""
   echo "[*] Generating list of URLs of packetstorm advisory page ${ID}"
