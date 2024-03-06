@@ -438,11 +438,11 @@ main() {
     fi
 
     # restart file gets generated during startup if old log dir is found:
-    if [[ ${USE_DOCKER} -eq 1 && ${IN_DOCKER} -eq 1 ]] || [[ "${USE_DOCKER}" -eq 0 ]]; then
-      if [[ -f "${TMP_DIR}"/restart ]]; then
+    if [[ ${IN_DOCKER} -eq 1 && "${CONTAINER_NUMBER}" -eq 1 ]] || [[ "${USE_DOCKER}" -eq 0 && ${IN_DOCKER} -eq 0 ]]; then
+      if [[ -f "${TMP_DIR}"/restart_emba ]]; then
         print_output "[!] $(print_date) - Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
         export RESTART=1
-        rm "${TMP_DIR}"/restart
+        rm "${TMP_DIR}"/restart_emba
         # shellcheck source=/dev/null
         source "${LOG_DIR}""/backup_vars.log"
       fi
