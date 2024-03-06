@@ -75,7 +75,7 @@ while ((ID<="${NUMBER_OF_PAGES}")); do
   grep -E "\/files\/[0-9]+|\/files\/cve|\/files\/tags|www.metasploit.com" "${SAVE_PATH}"/"temp.txt" | awk '{if ($0 ~ "/files/tags/exploit/page[0-9]") exit; else print}' | sed '1,/\.html/ { /\.html/!d }' > "${SAVE_PATH}"/"${LINKS}"
   rm "${SAVE_PATH}"/"temp.txt"
 
-  NO_DUP_LINKS=$(awk -F'/' '!seen[$NF]++ || /metasploit/' "${SAVE_PATH}"/"${LINKS}")
+  NO_DUP_LINKS=$(awk -F'/' '!seen[$5]++ || /metasploit/' "${SAVE_PATH}"/"${LINKS}")
   TAGS_CVES=$(grep -E "\/files\/(tags|cve)" "${SAVE_PATH}"/"${LINKS}")
   OUTPUT="${NO_DUP_LINKS}
 ${TAGS_CVES}
