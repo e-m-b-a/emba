@@ -231,29 +231,28 @@ emba_updater() {
   if [[ -d ./.git ]]; then
     git pull origin master
   else
-    print_output "[-] INFO: Can't update non git version of EMBA"
+    print_output "[-] WARNING: Can't update non git version of EMBA" "no_log"
   fi
 
   EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker pull embeddedanalyzer/emba
 
-  if command -v cve_searchsploit > /dev/null ; then
-    print_output "[*] EMBA update - cve_searchsploit update" "no_log"
-    cve_searchsploit -u
-  fi
-
-  if [[ -d "${EXT_DIR}"nvd-json-data-feeds ]]; then
+  if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]]; then
     print_output "[*] EMBA update - CVE database update" "no_log"
-    cd "${EXT_DIR}"/nvd-json-data-feeds || ( echo "Could not update EMBA" && exit 1 )
-    git pull origin master
-    cd "${HOME_DIR}" || ( echo "Could not update EMBA" && exit 1 )
+    cd "${EXT_DIR}"/nvd-json-data-feeds || ( print_output "[-] WARNING: Can't not update CVE database" "no_log" && exit 1 )
+    if [[ -d ./.git ]]; then
+      git pull
+    else
+      print_output "[-] WARNING: Can't update CVE database" "no_log"
+    fi
+    cd "${HOME_DIR}" || ( print_output "[-] WARNING: Can't not update CVE database" "no_log" && exit 1 )
   else
-    print_output "[-] INFO: Can't update CVE database"
+    print_output "[-] WARNING: Can't update CVE database" "no_log"
   fi
 
   print_output "[*] EMBA update - docker image" "no_log"
   docker pull embeddedanalyzer/emba
 
-  print_output "[*] Please note that this was no update of installed packages." "no_log"
+  print_output "[*] Please note that this was no update of installed system packages." "no_log"
   print_output "[*] Please restart your EMBA scan to apply the updates ..." "no_log"
 }
 
