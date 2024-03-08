@@ -179,9 +179,13 @@ l15_version_detector() {
 
   print_output "[*] Testing detected service ${ORANGE}${SERVICE_}${NC}" "no_log"
 
-  if ! [[ -f "${CONFIG_DIR}"/bin_version_strings.cfg ]]; then
-    print_output "[-] Missing configuration file - check your installation!"
-    return
+  local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
+  if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
+    # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
+    local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
+    local V_CNT=0
+    V_CNT=$(wc -l "${CONFIG_DIR}"/bin_version_strings_quick.cfg)
+    print_output "[*] Quick scan enabled - ${V_CNT/\ *} version identifiers loaded"
   fi
 
   while read -r VERSION_LINE; do
@@ -218,6 +222,6 @@ l15_version_detector() {
       write_csv_log "---" "${IDENTIFIER}" "${VERSION_FINDER}" "${CSV_RULE}" "${LIC}" "${TYPE_}"
       continue
     fi
-  done  < "${CONFIG_DIR}"/bin_version_strings.cfg
+  done  < "${VERSION_IDENTIFIER_CFG}"
 }
 

@@ -17,6 +17,7 @@ export FORMAT_LOG=1
 export THREADED=1
 export SHORT_PATH=1
 export HTML=1
+export QUICK_SCAN=1
 
 # QEMULATION - for user-mode emulation to generate an optimised SBOM
 export QEMULATION=1

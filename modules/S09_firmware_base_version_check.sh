@@ -40,6 +40,15 @@ S09_firmware_base_version_check() {
   export WAIT_PIDS_S09=()
   export WAIT_PIDS_S09_1=()
   local VERSIONS_DETECTED=""
+  local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings.cfg
+
+  if [[ "${QUICK_SCAN:-0}" -eq 1 ]] && [[ -f "${CONFIG_DIR}"/bin_version_strings_quick.cfg ]]; then
+    # the quick scan configuration has only entries that have known vulnerabilities in the CVE database
+    local VERSION_IDENTIFIER_CFG="${CONFIG_DIR}"/bin_version_strings_quick.cfg
+    local V_CNT=0
+    V_CNT=$(wc -l "${CONFIG_DIR}"/bin_version_strings_quick.cfg)
+    print_output "[*] Quick scan enabled - ${V_CNT/\ *} version identifiers loaded"
+  fi
 
   print_output "[*] Generate strings overview for further analysis ..." "no_log"
   local BIN=""
@@ -222,7 +231,7 @@ S09_firmware_base_version_check() {
       fi
     fi
 
-  done  < "${CONFIG_DIR}"/bin_version_strings.cfg
+  done  < "${VERSION_IDENTIFIER_CFG}"
 
   print_dot
 
