@@ -552,7 +552,7 @@ cve_db_lookup_version() {
   # we test for the binary_name:version and for binary_name:*:
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_%:}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_%:}:.*:.*:.*:.*:.*:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
 
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
 
