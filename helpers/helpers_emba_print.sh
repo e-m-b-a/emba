@@ -952,7 +952,12 @@ print_running_modules() {
 }
 
 show_runtime() {
-  date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"
+  local SHORT="${1:-0}"
+  if [[ "${SHORT}" -eq 1 ]]; then
+    date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )):%H:%M:%S"
+  else
+    date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"
+  fi
 }
 
 print_date() {

@@ -199,7 +199,8 @@ update_box_status() {
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
     local RUNTIME=0
-    RUNTIME="$(date -d@"$(( "$(date +%s)" - "${DATE_STR}" ))" -u +%H:%M:%S)"
+    # RUNTIME="$(date -d@"$(( "$(date +%s)" - "${DATE_STR}" ))" -u +%H:%M:%S)"
+    RUNTIME=$(show_runtime 1)
     LOG_DIR_SIZE="$(du -sh "${LOG_DIR}" 2> /dev/null | cut -d$'\t' -f1 2> /dev/null || true)"
     # if we are running in a docker environment, we can count the processes withing our containers:
     if [[ -n "${MAIN_CONTAINER}" ]]; then
