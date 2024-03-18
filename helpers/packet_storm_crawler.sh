@@ -11,7 +11,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner
+# Author(s): Michael Messner, Endri Hoxha
 
 # Description:  Update script for packetstorm PoC/Exploit collection
 
@@ -19,6 +19,14 @@ URL="https://packetstormsecurity.com/files/tags/exploit/page"
 LINKS="packet_storm_links.txt"
 SAVE_PATH="/tmp/packet_storm"
 EMBA_CONFIG_PATH="./config/"
+TAGS_CVES=""
+NO_DUP_LINKS=""
+NUMBER_OF_PAGES=$(lynx -dump "${URL}" | grep -E "Page 1 of " | sed -r 's/.*of ([0-9])\,/\1/')
+
+if ! [[ "${NUMBER_OF_PAGES}" -gt 0 ]]; then
+  echo "[-] Number of pages could not be extracted ... exit now"
+  exit 1
+fi
 
 if ! [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   echo "[-] No EMBA config directory found! Please start this crawler from the EMBA directory"
@@ -43,14 +51,15 @@ if [[ -f "${EMBA_CONFIG_PATH}"/PS_PoC_results.csv ]]; then
 fi
 
 echo "[*] Generating URL list for packetstorm advisories"
+echo "[*] Number of pages:${NUMBER_OF_PAGES}"
 ID=1
 
-while ( true ); do
+while ((ID<="${NUMBER_OF_PAGES}")); do
   CUR_SLEEP_TIME=1
   FAIL_CNT=0
 
   # Download and error handling:
-  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" > "${SAVE_PATH}"/"${LINKS}"; do
+  while ! lynx -dump -hiddenlinks=listonly "${URL}""${ID}" > "${SAVE_PATH}"/"temp.txt"; do
     ((CUR_SLEEP_TIME+=$(shuf -i 1-5 -n 1)))
     ((FAIL_CNT+=1))
     if [[ "${FAIL_CNT}" -gt 20 ]]; then
@@ -61,15 +70,27 @@ while ( true ); do
     sleep "${CUR_SLEEP_TIME}"
   done
 
-  if grep -q "No Results Found" "${SAVE_PATH}"/"${LINKS}"; then
+  if grep -q "No Results Found" "${SAVE_PATH}"/"temp.txt"; then
     echo -e "[*] Finished downloading exploits from packetstormsecurity.com with page ${ORANGE}${ID}${NC} ... exit now"
     break
   fi
 
+
+
+  grep -E "\/files\/[0-9]+|\/files\/cve|\/files\/tags|www.metasploit.com" "${SAVE_PATH}"/"temp.txt" | awk '{if ($0 ~ "/files/tags/exploit/page[0-9]") exit; else print}' | sed '1,/\.html/ { /\.html/!d }' > "${SAVE_PATH}"/"${LINKS}"
+  rm "${SAVE_PATH}"/"temp.txt"
+
+  NO_DUP_LINKS=$(awk -F'/' '!seen[$5]++ || /metasploit/' "${SAVE_PATH}"/"${LINKS}")
+  TAGS_CVES=$(grep -E "\/files\/(tags|cve)" "${SAVE_PATH}"/"${LINKS}")
+  OUTPUT="${NO_DUP_LINKS}
+${TAGS_CVES}
+ 9999. END"
+  printf "%s" "${OUTPUT}" | sed -r 's/\s*//' | sort -ug | sed -r 's/([0-9]+)\. /\[\1\] /' > "${SAVE_PATH}/${LINKS}"
+
   echo ""
   echo "[*] Generating list of URLs of packetstorm advisory page ${ID}"
 
-  mapfile -t MARKERS < <(grep -zoP "\n   \[[0-9]+\].*" "${SAVE_PATH}"/"${LINKS}" | grep -a -v '\]packet storm\|Register\|Login\|SERVICES_TAB')
+  mapfile -t MARKERS < <( grep -E "\/files\/[0-9]+" "${SAVE_PATH}"/"${LINKS}" | sed -r 's/(\[[0-9]+\]).*files\/[0-9]+\/(.*)\.html/\1\2/' | tr "-" " ")
 
   for ((index=0; index < ${#MARKERS[@]}; index++)); do
     CVEs=()
@@ -83,10 +104,10 @@ while ( true ); do
     # e.g.: [22]Spitfire CMS 1.0.475 PHP Object Injection
     CURRENT_MARKER=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f1)
     # the name is after the first marker and we use only 7 fields
-    ADV_NAME=$(echo "${MARKERS[index]}" | cut -d '[' -f2 | cut -d ']' -f2 | cut -d\  -f1-7)
+    ADV_NAME=$(echo "${MARKERS[index]}" | sed -r 's/\s*\[[0-9]+\]//')
 
     # with the following search we are going to find the URL of the marker
-    ADV_URL=$(grep " ${CURRENT_MARKER}\.\ " "${SAVE_PATH}"/"${LINKS}" | awk '{print $2}' | sort -u)
+    ADV_URL=$(grep "\[${CURRENT_MARKER}\]\ " "${SAVE_PATH}"/"${LINKS}" | awk '{print $2}' | sort -u)
 
     # check if the next element is available
     if [[ -v MARKERS[index+1] ]]; then
@@ -94,15 +115,15 @@ while ( true ); do
     fi
 
     # on the last element we currently have not NEXT_MARKER - set it to the Back button
-    if [[ -z "${NEXT_MARKER}" ]]; then
-      NEXT_MARKER=$(grep -E "Back\[[0-9]+\]" "${SAVE_PATH}"/"${LINKS}" | cut -d '[' -f2 | cut -d ']' -f1)
+    if [[ -z "${NEXT_MARKER}" ]] || [[ "${NEXT_MARKER}" == "${CURRENT_MARKER}" ]]; then
+      NEXT_MARKER="9999"
     fi
 
     # we do not store metasploit exploits as we already have the MSF database in EMBA
-    MSF=$(sed '/\['"${CURRENT_MARKER}"'\]/,/\['"${NEXT_MARKER}"'\]/!d' "${SAVE_PATH}"/"${LINKS}" | grep -c "metasploit.com\|This Metasploit module")
-    REMOTE=$(sed '/\['"${CURRENT_MARKER}"'\]/,/\['"${NEXT_MARKER}"'\]/!d' "${SAVE_PATH}"/"${LINKS}" | grep -c "tags .*remote")
-    LOCAL=$(sed '/\['"${CURRENT_MARKER}"'\]/,/\['"${NEXT_MARKER}"'\]/!d' "${SAVE_PATH}"/"${LINKS}" | grep -c "tags .*local")
-    DoS=$(sed '/\['"${CURRENT_MARKER}"'\]/,/\['"${NEXT_MARKER}"'\]/!d' "${SAVE_PATH}"/"${LINKS}" | grep -c "tags .*denial of service")
+    MSF=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "metasploit.com\|This Metasploit module")
+    REMOTE=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/remote")
+    LOCAL=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/local")
+    DoS=$(sed -n "/\[${CURRENT_MARKER}\]/,/\[${NEXT_MARKER}\]/p" "${SAVE_PATH}"/"${LINKS}" | grep -c "/tags/denial_of_service")
 
     if [[ "${REMOTE}" -gt 0 ]]; then
       TYPE="remote"
@@ -123,8 +144,7 @@ while ( true ); do
       fi
     fi
 
-    mapfile -t CVEs < <(sed '/\['"${CURRENT_MARKER}"'\]/,/\['"${NEXT_MARKER}"'\]/!d' "${SAVE_PATH}"/"${LINKS}" \
-      | grep -o -E "\[[0-9]+\]CVE-[0-9]+-[0-9]+" | sed 's/\[[0-9]*\]//' | sort -u)
+    mapfile -t CVEs < <(sed -n "/\[${CURRENT_MARKER}\]/,/^\[${NEXT_MARKER}\]/{/\[${CURRENT_MARKER}\]/d; /^\[${NEXT_MARKER}\]/d; p}" "${SAVE_PATH}"/"${LINKS}" | grep -oP "CVE-\d{4}-\d{4,7}" | sort -u)
     if [[ -v CVEs ]]; then
       for CVE in "${CVEs[@]}";do
         echo -e "[+] Found PoC for ${ORANGE}${CVE}${NC} in advisory ${ORANGE}${ADV_NAME}${NC} / ${ORANGE}${ADV_URL}${NC}"
