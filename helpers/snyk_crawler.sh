@@ -53,7 +53,7 @@ done
 
 # some filters we can use to get further results:
 APPLICATIONS=("cargo" "cocoapods" "composer" "golang" "hex" "maven" "npm" "nuget" "pip" \
-  "rubygems" "unmanaged" "alpine" "linux" "alpine" "amzn" "centos" "debian" "oracle" "rhel" \
+  "rubygems" "unmanaged" "linux" "alpine" "amzn" "centos" "debian" "oracle" "rhel" \
   "sles" "ubuntu")
 
 for APPLICATION in "${APPLICATIONS[@]}"; do
