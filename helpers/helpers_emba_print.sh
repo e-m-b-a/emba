@@ -75,18 +75,28 @@ module_log_init()
   fi
 }
 
+# $1: module title
+# $2: (optional) log file to log -> this is typically used in combination with write_log to write
+#                logs to another log file
+#                no_log is also valid to just print to cli
 module_title()
 {
-  local MODULE_TITLE
-  MODULE_TITLE="${1:-}"
-  local MODULE_TITLE_FORMAT
-  MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""${MODULE_TITLE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+  local MODULE_TITLE="${1:-}"
+  local LOG_FILE_TO_LOG="${2:-}"
+
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] && ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
+    LOG_FILE_TO_LOG="${LOG_FILE}"
+  fi
+
+  local MODULE_TITLE_FORMAT="[""${BLUE}""+""${NC}""] ""${CYAN}""${BOLD}""${MODULE_TITLE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
   echo -e "\\n\\n""${MODULE_TITLE_FORMAT}" || true
-  if [[ "${2:-}" != "no_log" ]] ; then
-    echo -e "$(format_log "${MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE}" >/dev/null || true
-    if [[ ${LOG_GREP} -eq 1 ]] ; then
-      write_grep_log "${MODULE_TITLE}" "MODULE_TITLE"
-    fi
+
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
+    echo -e "$(format_log "${MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  fi
+
+  if [[ ${LOG_GREP} -eq 1 ]] ; then
+    write_grep_log "${MODULE_TITLE}" "MODULE_TITLE"
   fi
   SUB_MODULE_COUNT=0
 }
@@ -98,15 +108,17 @@ sub_module_title()
   local SUB_MODULE_TITLE="${1:-}"
   local LOG_FILE_TO_LOG="${2:-}"
   # if $2 is not set, we are going to log to the original LOG_FILE
-  if ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] && ! [[ -f "${LOG_FILE_TO_LOG}" ]]; then
     LOG_FILE_TO_LOG="${LOG_FILE}"
   fi
 
   local SUB_MODULE_TITLE_FORMAT=""
 
-  SUB_MODULE_TITLE_FORMAT="\\n""${BLUE}""==>""${NC}"" ""${CYAN}""${SUB_MODULE_TITLE}""${NC}""\\n-----------------------------------------------------------------"
+  SUB_MODULE_TITLE_FORMAT="\\n\\n""${BLUE}""==>""${NC}"" ""${CYAN}""${SUB_MODULE_TITLE}""${NC}""\\n-----------------------------------------------------------------"
   echo -e "${SUB_MODULE_TITLE_FORMAT}" || true
-  echo -e "$(format_log "${SUB_MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  if [[ "${LOG_FILE_TO_LOG:-}" != "no_log" ]] ; then
+    echo -e "$(format_log "${SUB_MODULE_TITLE_FORMAT}")" | tee -a "${LOG_FILE_TO_LOG}" >/dev/null || true
+  fi
 
   if [[ ${LOG_GREP} -eq 1 ]] ; then
     SUB_MODULE_COUNT=$((SUB_MODULE_COUNT + 1))
@@ -592,45 +604,42 @@ print_help()
 
   echo -e "\\n""${CYAN}""USAGE""${NC}"
   echo -e "\\nTest firmware"
-  echo -e "${CYAN}""-a [MIPS]""${NC}""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC]"
-  echo -e "${CYAN}""-A [MIPS]""${NC}""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check)"
-  echo -e "${CYAN}""-l [./path]""${NC}""       Log path"
-  echo -e "${CYAN}""-f [./path]""${NC}""       Firmware path"
-  echo -e "${CYAN}""-e [./path]""${NC}""       Exclude paths from testing (multiple usage possible)"
+  echo -e "${CYAN}""-l [~/path]""${NC}""       Log path"
+  echo -e "${CYAN}""-f [~/path]""${NC}""       Firmware path"
   echo -e "${CYAN}""-m [MODULE_NO.]""${NC}""   Test only with set modules [e.g. -m p05 -m s10 ... or -m p to run all p modules]"
-  echo -e "                  (multiple usage possible, case insensitive, final modules aren't selectable, if firmware isn't a binary, the p modules won't run)"
-  echo -e "${CYAN}""-c""${NC}""                Enable cwe-checker"
-  echo -e "${CYAN}""-g""${NC}""                Create grep-able log file in [log_path]/fw_grep.log"
-  echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
-  echo -e "${CYAN}""-E""${NC}""                Enables automated qemu emulation tests (WARNING this module could harm your host!)"
+  echo -e "                                    (multiple usage possible, case insensitive)"
   echo -e "${CYAN}""-p [PROFILE]""${NC}""      EMBA starts with a pre-defined profile (stored in ./scan-profiles)"
-  echo -e "${CYAN}""-Q""${NC}""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
+  echo -e "${CYAN}""-t""${NC}""                Activate multi threading (destroys regular console output)"
   echo -e "${CYAN}""-P""${NC}""                Overwrite auto MAX_MODS (maximum modules in parallel) configuration"
   echo -e "${CYAN}""-T""${NC}""                Overwrite auto MAX_MOD_THREADS (maximum threads per module) configuration"
   echo -e "\\nDeveloper options"
   echo -e "${CYAN}""-D""${NC}""                Developer mode - EMBA runs on the host without container protection"
   echo -e "${CYAN}""-S""${NC}""                STRICT mode - developer option to improve code quality (not enabled by default)"
-  echo -e "${CYAN}""-i""${NC}""                Ignores log path check"
+#  echo -e "${CYAN}""-i""${NC}""                EMBA internally used for container identification (do not use it as cli parameter)"
   echo -e "${CYAN}""-y""${NC}""                Overwrite log directory automaticially, even if it is not empty"
-  echo -e "\\nWeb reporter"
-  echo -e "${CYAN}""-W""${NC}""                Activates web report creation in log path (overwrites -z)"
   echo -e "\\nSystem check"
   echo -e "${CYAN}""-d [1/2]""${NC}""          Only checks dependencies (1 - on host and in container, 2 - only container)"
   echo -e "${CYAN}""-F""${NC}""                Checks dependencies but ignore errors"
   echo -e "${CYAN}""-U""${NC}""                Check and apply available updates and exit"
   echo -e "${CYAN}""-V""${NC}""                Show EMBA version"
   echo -e "\\nSpecial tests"
-  echo -e "${CYAN}""-k [./config]""${NC}""     Kernel config path"
+  echo -e "${CYAN}""-k [~/config]""${NC}""     Kernel config path"
   echo -e "${CYAN}""-C [container id]""${NC}"" Extract and analyze a local docker container via container id"
-  echo -e "${CYAN}""-x""${NC}""                Enable deep extraction - try to extract every file two times with binwalk (WARNING: Uses a lot of disk space)"
-  echo -e "${CYAN}""-t""${NC}""                Activate multi threading (destroys regular console output)"
   echo -e "${CYAN}""-r""${NC}""                Remove temporary firmware directory after testing"
   echo -e "${CYAN}""-b""${NC}""                Just print a random banner and exit"
-  echo -e "${CYAN}""-o [./path]""${NC}""       2nd Firmware path to diff against the main firmware file - diff mode only (no other firmware analysis)"
-  echo -e "\\nModify output"
+  echo -e "${CYAN}""-o [~/path]""${NC}""       2nd Firmware path to diff against the main firmware file - diff mode only (no other firmware analysis)"
+  echo -e "${CYAN}""-c""${NC}""                Enable extended binary analysis"
+  echo -e "${CYAN}""-E""${NC}""                Enables automated qemu user emulation tests (WARNING this module could harm your host!)"
+  echo -e "${CYAN}""-Q""${NC}""                Enables automated qemu system emulation tests (WARNING this module could harm your host!)"
+  echo -e "${CYAN}""-a [MIPS]""${NC}""         Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (usually not needed)"
+  echo -e "${CYAN}""-A [MIPS]""${NC}""         Force Architecture of the linux firmware [MIPS, ARM, x86, x64, PPC] (disable architecture check - usually not needed)"
+  echo -e "${CYAN}""-e [./path]""${NC}""       Exclude paths from testing (multiple usage possible - usually not needed)"
+  echo -e "\\nReporter options"
+  echo -e "${CYAN}""-W""${NC}""                Activates web report creation in log path (overwrites -z)"
+  echo -e "${CYAN}""-g""${NC}""                Create grep-able log file in [log_path]/fw_grep.log"
+#  echo -e "                  Schematic: MESSAGE_TYPE;MODULE_NUMBER;SUB_MODULE_NUMBER;MESSAGE"
   echo -e "${CYAN}""-s""${NC}""                Prints only relative paths"
   echo -e "${CYAN}""-z""${NC}""                Adds ANSI color codes to log"
-  echo -e "${CYAN}""-B""${NC}""                Enables status bar in silent mode (Warning: unstable on window size change)"
   echo -e "\\nFirmware details"
   echo -e "${CYAN}""-X [version]""${NC}""      Firmware version (versions aka 1.2.3-a:b only)"
   echo -e "${CYAN}""-Y [vendor]""${NC}""       Firmware vendor (alphanummerical values only)"
@@ -943,7 +952,12 @@ print_running_modules() {
 }
 
 show_runtime() {
-  date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"
+  local SHORT="${1:-0}"
+  if [[ "${SHORT}" -eq 1 ]]; then
+    date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )):%H:%M:%S"
+  else
+    date -ud "@${SECONDS}" +"$(( SECONDS/3600/24 )) days and %H:%M:%S"
+  fi
 }
 
 print_date() {

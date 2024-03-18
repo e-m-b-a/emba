@@ -552,7 +552,7 @@ cve_db_lookup_version() {
   # we test for the binary_name:version and for binary_name:*:
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC}" "no_log"
 
-  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_%:}:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:" "${NVD_DIR}" | sort -u || true)
+  mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_%:}:.*:.*:.*:.*:.*:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
 
   print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
 
@@ -1039,11 +1039,11 @@ cve_extractor() {
       ((CVE_COUNTER+=1))
       ((CVE_COUNTER_VERSION+=1))
       if [[ "${THREADED}" -eq 1 ]]; then
-        cve_extractor_thread_actor "${CVE_OUTPUT}" &
+        cve_extractor_thread_actor "${BINARY}" "${VERSION}" "${CVE_OUTPUT}" &
         WAIT_PIDS_TACTOR+=( "$!" )
         max_pids_protection "$(("${MAX_MOD_THREADS}"*3))" "${WAIT_PIDS_TACTOR[@]}"
       else
-        cve_extractor_thread_actor "${CVE_OUTPUT}" &
+        cve_extractor_thread_actor "${BINARY}" "${VERSION}" "${CVE_OUTPUT}"
       fi
     done
 
@@ -1064,7 +1064,8 @@ cve_extractor() {
   fi
 
   if [[ -f "${TMP_DIR}/exploit_cnt.tmp" ]]; then
-    EXPLOIT_COUNTER_VERSION=$(grep -c "^${BINARY};" "${TMP_DIR}/exploit_cnt.tmp" || true)
+    # this counter is wrong as soon as we have the same binary in multiple versions!
+    EXPLOIT_COUNTER_VERSION=$(grep -c "^${BINARY};${VERSION};" "${TMP_DIR}/exploit_cnt.tmp" || true)
   fi
 
   { echo ""
@@ -1137,7 +1138,9 @@ cve_extractor() {
 }
 
 cve_extractor_thread_actor() {
-  local CVE_OUTPUT="${1:-}"
+  local lBIN_BINARY="${1:-}"
+  local lBIN_VERSION="${2:-}"
+  local CVE_OUTPUT="${3:-}"
 
   local CVEv2_TMP=0
   local KERNEL_VERIFIED="no"
@@ -1171,7 +1174,7 @@ cve_extractor_thread_actor() {
   # if we find it this CVE is not further processed
   if [[ -f "${CVE_BLACKLIST}" ]]; then
     if grep -q ^"${CVE_VALUE}"$ "${CVE_BLACKLIST}"; then
-      print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${BINARY}${NC} blacklisted and ignored." "no_log"
+      print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${lBIN_BINARY}${NC} blacklisted and ignored." "no_log"
       return
     fi
   fi
@@ -1181,7 +1184,7 @@ cve_extractor_thread_actor() {
     # do a quick check if there is some data in the whitelist config file
     if [[ $(grep -E -c "^CVE-[0-9]+-[0-9]+$" "${CVE_WHITELIST}") -gt 0 ]]; then
       if ! grep -q ^"${CVE_VALUE}"$ "${CVE_WHITELIST}"; then
-        print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${BINARY}${NC} not in whitelist -> ignored." "no_log"
+        print_output "[*] ${ORANGE}${CVE_VALUE}${NC} for ${ORANGE}${lBIN_BINARY}${NC} not in whitelist -> ignored." "no_log"
         return
       fi
     fi
@@ -1204,13 +1207,13 @@ cve_extractor_thread_actor() {
 
   local EDB=0
   # as we already know about a bunch of kernel exploits - lets search them first
-  if [[ "${BINARY}" == *kernel* ]]; then
+  if [[ "${lBIN_BINARY}" == *kernel* ]]; then
     for KERNEL_CVE_EXPLOIT in "${KERNEL_CVE_EXPLOITS[@]}"; do
       KERNEL_CVE_EXPLOIT=$(echo "${KERNEL_CVE_EXPLOIT}" | cut -d\; -f3)
       if [[ "${KERNEL_CVE_EXPLOIT}" == "${CVE_VALUE}" ]]; then
         EXPLOIT="Exploit (linux-exploit-suggester"
         ((EXPLOIT_COUNTER_VERSION+=1))
-        echo "${BINARY};${CVE_VALUE};kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "${lBIN_BINARY};${lBIN_VERSION};${CVE_VALUE};kernel exploit" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     done
@@ -1235,7 +1238,7 @@ cve_extractor_thread_actor() {
     fi
   fi
 
-  if [[ -f "${CSV_DIR}"/s118_busybox_verifier.csv ]] && [[ "${BINARY}" == "busybox" ]]; then
+  if [[ -f "${CSV_DIR}"/s118_busybox_verifier.csv ]] && [[ "${lBIN_BINARY}" == "busybox" ]]; then
     if grep -q ";${CVE_VALUE};" "${CSV_DIR}"/s118_busybox_verifier.csv; then
       print_output "[+] ${ORANGE}INFO:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a verified BusyBox vulnerability (${ORANGE}BusyBox applet${GREEN})!" "no_log"
       BUSYBOX_VERIFIED="yes"
@@ -1305,7 +1308,7 @@ cve_extractor_thread_actor() {
         done
         EDB=1
         ((EXPLOIT_COUNTER_VERSION+=1))
-        echo "${BINARY};${CVE_VALUE};exploit_db" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "${lBIN_BINARY};${lBIN_VERSION};${CVE_VALUE};exploit_db" >> "${TMP_DIR}"/exploit_cnt.tmp
       done
 
       # copy the exploit-db exploits to the report
@@ -1353,7 +1356,7 @@ cve_extractor_thread_actor() {
         # only count the msf exploit if we have not already count an other exploit
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
-        echo "${BINARY};${CVE_VALUE};MSF" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "${lBIN_BINARY};${lBIN_VERSION};${CVE_VALUE};MSF" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi
@@ -1374,7 +1377,7 @@ cve_extractor_thread_actor() {
         # only count the snyk exploit if we have not already count an other exploit
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
-        echo "${BINARY};${CVE_VALUE};SNYK" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "${lBIN_BINARY};${lBIN_VERSION};${CVE_VALUE};SNYK" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi
@@ -1408,7 +1411,7 @@ cve_extractor_thread_actor() {
         # only count the packetstorm exploit if we have not already count an other exploit
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
-        echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "${lBIN_BINARY};${lBIN_VERSION};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi
@@ -1438,7 +1441,7 @@ cve_extractor_thread_actor() {
         # only count the routersploit exploit if we have not already count an other exploit
         # otherwise we count an exploit for one CVE multiple times
         ((EXPLOIT_COUNTER_VERSION+=1))
-        echo "${BINARY};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
+        echo "${lBIN_BINARY};${lBIN_VERSION};${CVE_VALUE};PS" >> "${TMP_DIR}"/exploit_cnt.tmp
         EDB=1
       fi
     fi
@@ -1469,27 +1472,27 @@ cve_extractor_thread_actor() {
     if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
     if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
       "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     else
-      printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${RED}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     fi
     ((HIGH_CVE_COUNTER+=1))
   elif (( $(echo "${CVSS_VALUE} > 3.9" | bc -l) )); then
     if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
     if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
       "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     else
-      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${ORANGE}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     fi
     ((MEDIUM_CVE_COUNTER+=1))
   else
     if [[ "${CVEv2_TMP}" -eq 1 ]]; then CVSS_VALUE="${CVSS_VALUE}"" (v2)"; fi
     if [[ "${EXPLOIT}" == *MSF* || "${EXPLOIT}" == *EDB\ ID* || "${EXPLOIT}" == *linux-exploit-suggester* || "${EXPLOIT}" == *Routersploit* || \
       "${EXPLOIT}" == *Github* || "${EXPLOIT}" == *PSS* || "${EXPLOIT}" == *Snyk* || "${KNOWN_EXPLOITED}" -eq 1 ]]; then
-      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${MAGENTA}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     else
-      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
+      printf "${GREEN}\t%-20.20s:   %-12.12s:   %-18.18s:   %-10.10s:   %-15.15s:   %s${NC}\n" "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${VSOURCE}" "${EXPLOIT}" >> "${LOG_PATH_MODULE}"/cve_sum/"${AGG_LOG_FILE}"
     fi
     ((LOW_CVE_COUNTER+=1))
   fi
@@ -1504,7 +1507,7 @@ cve_extractor_thread_actor() {
     echo "${HIGH_CVE_COUNTER}" >> "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp
   fi
 
-  write_csv_log "${BINARY}" "${VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
+  write_csv_log "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}"
 
 }
 

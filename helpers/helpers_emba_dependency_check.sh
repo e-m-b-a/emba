@@ -124,7 +124,7 @@ version_extended() # $1-a $2-op $3-$b
 
 check_emba_version(){
   local LATEST_EMBA_VERSION="${1:-}"
-  if [[ "$(printf '%s\n' "${LATEST_EMBA_VERSION}" "${EMBA_VERSION}" | sort -V | head -n1)" = "${LATEST_EMBA_VERSION}" ]]; then
+  if [[ "${LATEST_EMBA_VERSION}" == "${EMBA_VERSION}" ]]; then
     echo -e "    EMBA release version - ${GREEN}ok${NC}"
   else
     echo -e "    EMBA release version - ${ORANGE}Updates available${NC}"
@@ -145,7 +145,6 @@ check_nvd_db(){
   fi
 }
 
-
 check_git_hash(){
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
@@ -163,7 +162,8 @@ check_git_hash(){
 check_docker_image(){
   local REMOTE_DOCKER_HASH="${1:-}"
   local LOCAL_DOCKER_HASH=""
-  LOCAL_DOCKER_HASH="$(docker image inspect embeddedanalyzer/emba:latest --format '{{json .RepoDigests}}' | jq . | grep "sha" | sed -E 's/.*sha256:([0-9|[a-z]+)"/\1/' || true)"
+  LOCAL_DOCKER_HASH="$(docker inspect --format='{{.RepoDigests}}' embeddedanalyzer/emba:latest | tr -d ']' || true)"
+  LOCAL_DOCKER_HASH=${LOCAL_DOCKER_HASH/*:}
 
   if [[ "${LOCAL_DOCKER_HASH}" == "${REMOTE_DOCKER_HASH}" ]]; then
     echo -e "    Docker image version - ${GREEN}ok${NC}"
@@ -195,7 +195,7 @@ check_docker_version() {
 
 dependency_check()
 {
-  local LATEST_EMBA_VERSION=""
+  local STABLE_EMBA_VERSION=""
   module_title "Dependency check" "no_log"
 
   print_ln "no_log"
@@ -218,33 +218,32 @@ dependency_check()
     print_output "    Internet connection - \\c" "no_log"
 
     if [[ -d "${EXT_DIR}"/onlinechecker ]]; then
-      rm -rf "${EXT_DIR}"/onlinechecker
+      rm -rf "${EXT_DIR}"/onlinechecker 2>/dev/null
     fi
 
     # the update check can be disabled via NO_UPDATE_CHECK
     if [[ "${NO_UPDATE_CHECK}" -ne 1 ]]; then
-      GIT_TERMINAL_PROMPT=0 git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q
+      GIT_TERMINAL_PROMPT=0 git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q 2>/dev/null
     fi
 
     if [[ -f "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt ]]; then
       echo -e "${GREEN}""ok""${NC}"
       # ensure this only runs on the host and not in any container
       if [[ "${IN_DOCKER}" -eq 0 ]]; then
-        EMBA_VERSION="$(cat "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt)"
+        STABLE_EMBA_VERSION="$(cat "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt)"
         DOCKER_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_CONTAINER_HASH.txt)"
         NVD_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/NVD_HASH.txt)"
-        GITHUB_HASH="${EMBA_VERSION/*-}"
-        LATEST_EMBA_VERSION="${EMBA_VERSION/-*}"
-        check_emba_version "${LATEST_EMBA_VERSION}"
+        GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_GITHUB_HASH.txt)"
+        check_emba_version "${STABLE_EMBA_VERSION}"
         check_docker_image "${DOCKER_HASH}"
         check_git_hash "${GITHUB_HASH}"
         check_nvd_db "${NVD_GITHUB_HASH}"
       fi
     else
       echo -e "${RED}""not ok""${NC}"
-      print_output "[-] Warning: EMBA has no internet connection!" "no_log"
-      print_output "[-] Warning: Update checks are not possible!" "no_log"
-      print_output "[-] Warning: GPT and other online modules are disabled!" "no_log"
+      print_output "[!] Warning: EMBA has NO internet connection!" "no_log"
+      print_output "[!] Warning: Update checks and multiple EMBA modules are disabled!" "no_log"
+      print_output "[!] Warning: GPT (Q02), kernel verification (S26) and further online modules are disabled!" "no_log"
     fi
   fi
 

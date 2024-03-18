@@ -438,11 +438,11 @@ main() {
     fi
 
     # restart file gets generated during startup if old log dir is found:
-    if [[ ${USE_DOCKER} -eq 1 && ${IN_DOCKER} -eq 1 ]] || [[ "${USE_DOCKER}" -eq 0 ]]; then
-      if [[ -f "${TMP_DIR}"/restart ]]; then
+    if [[ ${IN_DOCKER} -eq 1 && "${CONTAINER_NUMBER}" -eq 1 ]] || [[ "${USE_DOCKER}" -eq 0 && ${IN_DOCKER} -eq 0 ]]; then
+      if [[ -f "${TMP_DIR}"/restart_emba ]]; then
         print_output "[!] $(print_date) - Found restart file and backup_vars file ... trying to restart EMBA scan" "no_log"
         export RESTART=1
-        rm "${TMP_DIR}"/restart
+        rm "${TMP_DIR}"/restart_emba
         # shellcheck source=/dev/null
         source "${LOG_DIR}""/backup_vars.log"
       fi
@@ -569,7 +569,13 @@ main() {
       export MAX_MODS=1
       export MAX_MOD_THREADS=1
     fi
-    print_output "    EMBA is running with ${ORANGE}${MAX_MODS}${NC} modules in parallel and ${ORANGE}${MAX_MOD_THREADS}${NC} threads per module." "no_log"
+    if [[ "${MAX_MODS}" -eq 1 ]] || [[ "${MAX_MOD_THREADS}" -eq 1 ]]; then
+      print_ln "no_log"
+      print_output "[!] WARNING: EMBA is running with ${ORANGE}${MAX_MODS}${MAGENTA} modules in parallel and ${ORANGE}${MAX_MOD_THREADS}${MAGENTA} threads per module." "no_log"
+      print_output "[!] This scan could take a very long time ..." "no_log"
+    else
+      print_output "$(indent "EMBA is running with ${ORANGE}${MAX_MODS}${NC} modules in parallel and ${ORANGE}${MAX_MOD_THREADS}${NC} threads per module.")" "no_log"
+    fi
 
     # Change log output to color for web report and prepare report
     if [[ ${HTML} -eq 1 ]] ; then

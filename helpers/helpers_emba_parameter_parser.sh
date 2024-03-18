@@ -60,8 +60,9 @@ emba_parameter_parsing() {
         export FULL_EMULATION=1
         ;;
       D)
-        # new debugging mode
+        # debugging mode
         # EMBA runs without docker in full install mode
+        # WARNING: this should only be used for dev tasks and not for real fw analysis
         export USE_DOCKER=0
         ;;
       e)
@@ -92,6 +93,7 @@ emba_parameter_parsing() {
         ;;
       i)
         # for detecting the execution in docker container:
+        # this parameter is only EMBA internally used
         export IN_DOCKER=1
         export USE_DOCKER=0
         ;;
