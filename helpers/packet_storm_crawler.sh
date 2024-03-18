@@ -23,6 +23,11 @@ TAGS_CVES=""
 NO_DUP_LINKS=""
 NUMBER_OF_PAGES=$(lynx -dump "${URL}" | grep -E "Page 1 of " | sed -r 's/.*of ([0-9])\,/\1/')
 
+if ! [[ "${NUMBER_OF_PAGES}" -gt 0 ]]; then
+  echo "[-] Number of pages could not be extracted ... exit now"
+  exit 1
+fi
+
 if ! [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   echo "[-] No EMBA config directory found! Please start this crawler from the EMBA directory"
   exit 1
