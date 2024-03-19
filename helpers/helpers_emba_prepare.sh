@@ -160,6 +160,7 @@ architecture_check()
     local D_CLASS=""
     local D_DATA=""
     local D_ARCH_GUESSED=""
+    local MD5SUM=""
     export ARM_HF=0
     export ARM_SF=0
     D_END="NA"
@@ -189,12 +190,15 @@ architecture_check()
 
       D_ARCH=$(file -b "${BINARY}")
 
+      MD5SUM="$(md5sum "${BINARY}" || print_output "[-] Checksum error for binary ${BINARY}" "no_log")"
+      MD5SUM="${MD5SUM/\ *}"
+
       if [[ "${D_ARCH}" == *"MSB"* ]] ; then
         D_END_BE=$((D_END_BE+1))
       elif [[ "${D_ARCH}" == *"LSB"* ]] ; then
         D_END_LE=$((D_END_LE+1))
       fi
-      write_csv_log "${BINARY}" "${D_CLASS}" "${D_DATA}" "${D_MACHINE}" "${D_FLAGS}" "${D_ARCH_GUESSED}" "${D_ARCH}"
+      write_csv_log "${BINARY}" "${D_CLASS}" "${D_DATA}" "${D_MACHINE}" "${D_FLAGS}" "${D_ARCH_GUESSED}" "${D_ARCH}" "${MD5SUM}"
 
       if [[ "${D_ARCH}" == *"N32 MIPS64 rel2"* ]] ; then
         # ELF 32-bit MSB executable, MIPS, N32 MIPS64 rel2 version 1
