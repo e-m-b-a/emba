@@ -1,7 +1,7 @@
 name: Update Snyk database
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * 0' # do it every week
 
