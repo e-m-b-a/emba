@@ -89,7 +89,7 @@ while read -r ADV; do
     continue
   fi
   echo -e "[*] Downloading ${ORANGE}${FILENAME}${NC} (${ORANGE}${ID}${NC}/${ORANGE}${ADV_CNT}${NC}) to ${ORANGE}${SAVE_PATH}/vuln/${FILENAME}${NC}"
-  wget "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
+  wget --user-agent="Mozilla" "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
 done < "${SAVE_PATH}"/"${LINKS}"_sorted
 
 echo -e "[*] Finished downloading ${ORANGE}${ADV_CNT}${NC} advisories to ${ORANGE}${SAVE_PATH}/vuln${NC}"
