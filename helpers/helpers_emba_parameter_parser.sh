@@ -172,9 +172,6 @@ emba_parameter_parsing() {
         print_output "[+] EMBA version: ${ORANGE}${EMBA_VERSION}${NC}" "no_log"
         exit 0
         ;;
-      x)
-        export DEEP_EXTRACTOR=1
-        ;;
       W)
         export HTML=1
         ;;

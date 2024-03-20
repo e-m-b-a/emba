@@ -319,24 +319,28 @@ fw_bin_detector() {
   fi
   if [[ "${FILE_BIN_OUT}" == *"Perl script text executable"* ]]; then
     print_output "[+] Identified Perl script - performing perl checks"
+    export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
       cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Perl script file copy process failed" "no_log"
     fi
   fi
   if [[ "${FILE_BIN_OUT}" == *"PHP script,"* ]]; then
     print_output "[+] Identified PHP script - performing PHP checks"
+    export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
       cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] PHP script file copy process failed" "no_log"
     fi
   fi
   if [[ "${FILE_BIN_OUT}" == *"Python script,"* ]]; then
     print_output "[+] Identified Python script - performing Python checks"
+    export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
       cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Python script file copy process failed" "no_log"
     fi
   fi
   if [[ "${FILE_BIN_OUT}" == *"shell script,"* ]]; then
     print_output "[+] Identified shell script - performing shell checks"
+    export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
       cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Shell script file copy process failed" "no_log"
     fi
@@ -349,6 +353,7 @@ fw_bin_detector() {
   fi
    if [[ "${FILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${FILE_BIN_OUT}" == *"PE32+ executable"* ]]; then
     print_output "[+] Identified Windows executable - we have no idea what we are doing"
+    export DISABLE_DEEP=1
     if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
       cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Windows executable copy process failed" "no_log"
     fi
