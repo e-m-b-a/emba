@@ -64,7 +64,9 @@ IP99_binwalk_default() {
     print_tool_info "python3-numpy" 1
     print_tool_info "python3-scipy" 1
     print_tool_info "python-setuptools" 1
-    print_tool_info "srecord" 1
+    # screcord is currently not available anymore via apt-get
+    # Todo: Check if it is needed and we need to find some alternative solution
+    # print_tool_info "srecord" 1
     print_tool_info "unrar-free" 1
     print_tool_info "unrar" 1
     print_tool_info "binwalk" 1
