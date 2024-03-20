@@ -746,6 +746,10 @@ main_emulation() {
             if [[ "${DEP_ERROR}" -ne 1 ]]; then
               break
             fi
+            if ! [[ -d "${LOG_DIR}" ]]; then
+              # this usually happens if we automate analysis and remove the logging directory while this module was not finished at all
+              return
+            fi
             print_output "[-] Is there some Qemu instance already running?"
             print_output "[-] Check TCP ports 2000 - 2003!"
             sleep 10
