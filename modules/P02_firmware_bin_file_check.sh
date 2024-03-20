@@ -310,6 +310,49 @@ fw_bin_detector() {
     UEFI_CHECK=0
     write_csv_log "QNAP encrypted filesystem" "yes" "NA"
   fi
+  if [[ "${FILE_BIN_OUT}" == *"ELF"* ]]; then
+    # looks like we have only and ELF file to test
+    print_output "[+] Identified ELF file - performing binary tests on this ELF file"
+    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
+      cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Binary file copy process failed" "no_log"
+    fi
+  fi
+  if [[ "${FILE_BIN_OUT}" == *"Perl script text executable"* ]]; then
+    print_output "[+] Identified Perl script - performing perl checks"
+    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
+      cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Perl script file copy process failed" "no_log"
+    fi
+  fi
+  if [[ "${FILE_BIN_OUT}" == *"PHP script,"* ]]; then
+    print_output "[+] Identified PHP script - performing PHP checks"
+    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
+      cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] PHP script file copy process failed" "no_log"
+    fi
+  fi
+  if [[ "${FILE_BIN_OUT}" == *"Python script,"* ]]; then
+    print_output "[+] Identified Python script - performing Python checks"
+    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
+      cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Python script file copy process failed" "no_log"
+    fi
+  fi
+  if [[ "${FILE_BIN_OUT}" == *"shell script,"* ]]; then
+    print_output "[+] Identified shell script - performing shell checks"
+    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
+      cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Shell script file copy process failed" "no_log"
+    fi
+  fi
+  if [[ "${FILE_BIN_OUT}" == *"Android package (APK),"* ]]; then
+    print_output "[+] Identified Android APK package - performing APK checks"
+    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
+      cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] APK file copy process failed" "no_log"
+    fi
+  fi
+   if [[ "${FILE_BIN_OUT}" == *"PE32 executable"* ]] || [[ "${FILE_BIN_OUT}" == *"PE32+ executable"* ]]; then
+    print_output "[+] Identified Windows executable - we have no idea what we are doing"
+    if ! [[ -f "${LOG_DIR}"/firmware/firmware ]]; then
+      cp "${CHECK_FILE}" "${LOG_DIR}"/firmware/ || print_output "[-] Windows executable copy process failed" "no_log"
+    fi
+  fi
   # probably we need to take a deeper look to identify the gpg compressed firmware files better.
   # Currently this detection mechanism works quite good on the known firmware images
   if [[ "${DLINK_ENC_CHECK}" =~ 00000000\ \ a3\ 01\  ]]; then

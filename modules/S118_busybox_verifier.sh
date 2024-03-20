@@ -90,9 +90,8 @@ S118_busybox_verifier()
       cat "${LOG_PATH_MODULE}/busybox_applets_${BB_VERSION/*:/}_emu.txt" >> "${LOG_PATH_MODULE}/busybox_applets_${BB_VERSION/*:/}.tmp"
     fi
 
-    mapfile -t BB_VERIFIED_APPLETS < <(sort -u "${LOG_PATH_MODULE}/busybox_applets_${BB_VERSION/*:/}.tmp")
-
     if [[ -f "${LOG_PATH_MODULE}/busybox_applets_${BB_VERSION/*:/}.tmp" ]]; then
+      mapfile -t BB_VERIFIED_APPLETS < <(sort -u "${LOG_PATH_MODULE}/busybox_applets_${BB_VERSION/*:/}.tmp")
       rm "${LOG_PATH_MODULE}/busybox_applets_${BB_VERSION/*:/}.tmp" || true
     fi
 
