@@ -720,7 +720,6 @@ CVE-2010-0249;Internet Explorer 6 Web Server Exploit;https://packetstormsecurity
 CVE-2010-0249;Internet Explorer Aurora Exploit;https://packetstormsecurity.com/files/85286/Internet-Explorer-Aurora-Exploit.html;unknown
 CVE-2010-0255;Core Security Technologies Advisory 2009.0625;https://packetstormsecurity.com/files/85939/Core-Security-Technologies-Advisory-2009.0625.html;remote
 CVE-2010-0265;Month Of Abysssec Undisclosed Bugs - Movie;https://packetstormsecurity.com/files/93497/Month-Of-Abysssec-Undisclosed-Bugs-Movie-Maker.html;remote
-CVE-2010-0296;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2010-0361;Sun Java System Web Server Remote Code;https://packetstormsecurity.com/files/88028/Sun-Java-System-Web-Server-Remote-Code-Execution.html;remote
 CVE-2010-0361;Sun Java System Web Server Stack Overflow;https://packetstormsecurity.com/files/91457/Sun-Java-System-Web-Server-Stack-Overflow.html;remote
 CVE-2010-0361;Sun Java Web Server Exploit;https://packetstormsecurity.com/files/91637/Sun-Java-Web-Server-Exploit.html;remote
@@ -895,7 +894,6 @@ CVE-2010-3856;GNU C Library Local Root Exploit;https://packetstormsecurity.com/f
 CVE-2010-3856;GNU libc 2.12.1 LD_AUDIT libmemusage.so Local Root;https://packetstormsecurity.com/files/128999/GNU-libc-2.12.1-LD_AUDIT-libmemusage.so-Local-Root.html;local
 CVE-2010-3856;GNU libc 2.12.1 LD_AUDIT libpcprofile.so Local Root;https://packetstormsecurity.com/files/128998/GNU-libc-2.12.1-LD_AUDIT-libpcprofile.so-Local-Root.html;local
 CVE-2010-3856;Glibc 2.11.3 / 2.12.x LD_AUDIT libmemusage.so Local;https://packetstormsecurity.com/files/121676/Glibc-2.11.3-2.12.x-LD_AUDIT-libmemusage.so-Local-Root.html;local
-CVE-2010-3856;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2010-3856;glibc LD_AUDIT Privilege Escalation;https://packetstormsecurity.com/files/106817/glibc-LD_AUDIT-Privilege-Escalation.html;local
 CVE-2010-3863;Apache Shiro Information Disclosure;https://packetstormsecurity.com/files/95484/Apache-Shiro-Information-Disclosure.html;unknown
 CVE-2010-3890;IBM OmniFind Cross Site Scripting / Privilege;https://packetstormsecurity.com/files/95687/IBM-OmniFind-Cross-Site-Scripting-Privilege-Escalation.html;unknown
@@ -1093,7 +1091,6 @@ CVE-2011-2544;Cisco TelePresence Cookie Theft / Impersonation /;https://packetst
 CVE-2011-2569;Cisco Nexus OS (NX-OS) Command Injection;https://packetstormsecurity.com/files/106171/Cisco-Nexus-OS-NX-OS-Command-Injection.html;local
 CVE-2011-2577;Cisco TelePresence Cookie Theft / Impersonation /;https://packetstormsecurity.com/files/105229/Cisco-TelePresence-Cookie-Theft-Impersonation-Code-Execution.html;DoS
 CVE-2011-2702;eGlibc Signedness Code Execution;https://packetstormsecurity.com/files/115179/eGlibc-Signedness-Code-Execution.html;unknown
-CVE-2011-2716;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2011-2725;Ark 2.16 Directory Traversal;https://packetstormsecurity.com/files/105610/Ark-2.16-Directory-Traversal.html;unknown
 CVE-2011-2732;Spring Security Header Injection;https://packetstormsecurity.com/files/104946/Spring-Security-Header-Injection.html;remote
 CVE-2011-2764;Quake 3 Shell Injection / Code Execution;https://packetstormsecurity.com/files/103532/Quake-3-Shell-Injection-Code-Execution.html;remote
@@ -1171,7 +1168,6 @@ CVE-2011-5019;Textpattern CMS 4.4.1 Cross Site Scripting;https://packetstormsecu
 CVE-2011-5026;Winn Guestbook 2.4.8c Cross Site Scripting;https://packetstormsecurity.com/files/108229/Winn-Guestbook-2.4.8c-Cross-Site-Scripting.html;unknown
 CVE-2011-5249;Snare For Linux Cross Site Scripting;https://packetstormsecurity.com/files/118739/Snare-For-Linux-Cross-Site-Scripting.html;unknown
 CVE-2011-5251;vBulletin 4.1.3 Open Redirect;https://packetstormsecurity.com/files/101968/vBulletin-4.1.3-Open-Redirect.html;unknown
-CVE-2011-5325;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2012-0013;MS12-005 Microsoft Windows Assembly Execution;https://packetstormsecurity.com/files/108683/MS12-005-Microsoft-Windows-Assembly-Execution.html;unknown
 CVE-2012-0053;Apache protocol.c Cookie Disclosure;https://packetstormsecurity.com/files/109284/Apache-protocol.c-Cookie-Disclosure.html;remote
 CVE-2012-0056;Linux Local Root Via SUID /prod/pid/mem Write;https://packetstormsecurity.com/files/108973/Linux-Local-Root-Via-SUID-prod-pid-mem-Write.html;local
@@ -1409,7 +1405,6 @@ CVE-2012-4241;Microcart 1.0 Cross Site Scripting;https://packetstormsecurity.com
 CVE-2012-4242;WordPress MF Gig Calendar 0.9.2 Cross Site;https://packetstormsecurity.com/files/116713/WordPress-MF-Gig-Calendar-0.9.2-Cross-Site-Scripting.html;unknown
 CVE-2012-4336;Flogr 2.5.6 Cross Site Scripting;https://packetstormsecurity.com/files/116270/Flogr-2.5.6-Cross-Site-Scripting.html;unknown
 CVE-2012-4409;mcrypt 2.5.8 Stack Based Overflow;https://packetstormsecurity.com/files/118353/mcrypt-2.5.8-Stack-Based-Overflow.html;unknown
-CVE-2012-4412;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2012-4415;Guacamole 0.6.0 Buffer Overflow;https://packetstormsecurity.com/files/116835/Guacamole-0.6.0-Buffer-Overflow.html;unknown
 CVE-2012-4512;Konqueror 4.7.3 Memory Corruption;https://packetstormsecurity.com/files/117774/Konqueror-4.7.3-Memory-Corruption.html;unknown
 CVE-2012-4513;Konqueror 4.7.3 Memory Corruption;https://packetstormsecurity.com/files/117774/Konqueror-4.7.3-Memory-Corruption.html;unknown
@@ -1615,7 +1610,6 @@ CVE-2013-1763;Mageia Release 2 sock_diag_handlers Local Root;https://packetstorm
 CVE-2013-1763;Ubuntu 12.10 64bit Local Root;https://packetstormsecurity.com/files/120754/Ubuntu-12.10-64bit-Local-Root.html;local
 CVE-2013-1775;Mac OS X 10.8.4 Local Privilege Escalation;https://packetstormsecurity.com/files/123032/Mac-OS-X-10.8.4-Local-Privilege-Escalation.html;local
 CVE-2013-1808;ZeroClipbord.swf Cross Site Scripting / Path Disclosure;https://packetstormsecurity.com/files/121174/ZeroClipbord.swf-Cross-Site-Scripting-Path-Disclosure.html;unknown
-CVE-2013-1813;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2013-1814;Apache Rave User Exposure;https://packetstormsecurity.com/files/120769/Apache-Rave-User-Exposure.html;unknown
 CVE-2013-1828;Linux Kernel SCTP_GET_ASSOC_STATS() Buffer Overflow;https://packetstormsecurity.com/files/120789/Linux-Kernel-SCTP_GET_ASSOC_STATS-Buffer-Overflow.html;unknown
 CVE-2013-1852;WordPress LeagueManager 3.8 SQL Injection;https://packetstormsecurity.com/files/120817/WordPress-LeagueManager-3.8-SQL-Injection.html;remote
@@ -2338,8 +2332,6 @@ CVE-2014-4018;ZTE WXV10 W300 Disclosure / CSRF /;https://packetstormsecurity.com
 CVE-2014-4019;ZTE WXV10 W300 Disclosure / CSRF /;https://packetstormsecurity.com/files/127129/ZTE-WXV10-W300-Disclosure-CSRF-Default.html;DoS
 CVE-2014-4023;F5 BIG-IP 11.5.1 Cross Site Scripting;https://packetstormsecurity.com/files/128034/F5-BIG-IP-11.5.1-Cross-Site-Scripting.html;unknown
 CVE-2014-4035;BSI Advance Hotel Booking System 2.0 Cross;https://packetstormsecurity.com/files/154024/BSI-Advance-Hotel-Booking-System-2.0-Cross-Site-Scripting.html;unknown
-CVE-2014-4043;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2014-4043;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2014-4076;Microsoft Windows Server 2003 SP2 Arbitrary Write;https://packetstormsecurity.com/files/130159/Microsoft-Windows-Server-2003-SP2-Arbitrary-Write-Privilege-Escalation.html;unknown
 CVE-2014-4113;Windows 8.0 / 8.1 x64 TrackPopupMenu Privilege;https://packetstormsecurity.com/files/131964/Windows-8.0-8.1-x64-TrackPopupMenu-Privilege-Escalation.html;unknown
 CVE-2014-4114;Windows OLE Package Manager SandWorm Exploit;https://packetstormsecurity.com/files/128772/Windows-OLE-Package-Manager-SandWorm-Exploit.html;unknown
@@ -2763,8 +2755,6 @@ CVE-2014-9398;WordPress Twitter LiveBlog 1.1.2 CSRF / XSS;https://packetstormsec
 CVE-2014-9399;WordPress TweetScribe 1.1 CSRF / XSS;https://packetstormsecurity.com/files/129645/WordPress-TweetScribe-1.1-CSRF-XSS.html;unknown
 CVE-2014-9400;WordPress WP Unique Article Header Image 1.0;https://packetstormsecurity.com/files/129646/WordPress-WP-Unique-Article-Header-Image-1.0-CSRF-XSS.html;unknown
 CVE-2014-9401;WordPress WP Limit Posts Automatically 0.7 CSRF;https://packetstormsecurity.com/files/129647/WordPress-WP-Limit-Posts-Automatically-0.7-CSRF-XSS.html;unknown
-CVE-2014-9402;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2014-9402;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2014-9405;FreeBox 3.0.2 Cross Site Request Forgery /;https://packetstormsecurity.com/files/132121/FreeBox-3.0.2-Cross-Site-Request-Forgery-Cross-Site-Scripting.html;unknown
 CVE-2014-9415;Huawei eSpace 1.1.11.103 Unicode Stack Buffer Overflow;https://packetstormsecurity.com/files/152965/Huawei-eSpace-1.1.11.103-Unicode-Stack-Buffer-Overflow.html;unknown
 CVE-2014-9416;Huawei eSpace 1.1.11.103 DLL Hijacking;https://packetstormsecurity.com/files/152966/Huawei-eSpace-1.1.11.103-DLL-Hijacking.html;remote
@@ -2807,10 +2797,6 @@ CVE-2014-9661;FreeType 2.5.3 Type42 Parsing Use-After-Free;https://packetstormse
 CVE-2014-9707;GoAhead 3.4.1 Heap Overflow / Traversal;https://packetstormsecurity.com/files/131156/GoAhead-3.4.1-Heap-Overflow-Traversal.html;unknown
 CVE-2014-9708;Appweb Web Server Denial Of Service;https://packetstormsecurity.com/files/131157/Appweb-Web-Server-Denial-Of-Service.html;DoS
 CVE-2014-9752;ATutor 2.2 File Upload;https://packetstormsecurity.com/files/134215/ATutor-2.2-File-Upload.html;remote
-CVE-2014-9761;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2014-9761;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
-CVE-2014-9984;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2014-9984;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2015-0001;Microsoft Windows 8.1 Ahcache.sys/NtApphelpCacheControl Privilege;https://packetstormsecurity.com/files/134392/Microsoft-Windows-8.1-Ahcache.sys-NtApphelpCacheControl-Privilege-Escalation.html;local
 CVE-2015-0004;Windows User Profile Service Privilege Escalation;https://packetstormsecurity.com/files/139200/Windows-User-Profile-Service-Privilege-Escalation.html;unknown
 CVE-2015-0005;Windows Pass-Through Authentication Methods Improper Validation;https://packetstormsecurity.com/files/130773/Windows-Pass-Through-Authentication-Methods-Improper-Validation.html;remote
@@ -2828,9 +2814,7 @@ CVE-2015-0097;Microsoft Word Local Machine Zone Remote Code;https://packetstorms
 CVE-2015-0179;Lotus Notes Diagnostic Tool 8.5 / 9.0;https://packetstormsecurity.com/files/143990/Lotus-Notes-Diagnostic-Tool-8.5-9.0-Privilege-Escalation.html;unknown
 CVE-2015-0235;Exim ESMTP GHOST Denial Of Service;https://packetstormsecurity.com/files/130171/Exim-ESMTP-GHOST-Denial-Of-Service.html;DoS
 CVE-2015-0235;Moxa Command Injection / Cross Site Scripting;https://packetstormsecurity.com/files/164014/Moxa-Command-Injection-Cross-Site-Scripting-Vulnerable-Software.html;unknown
-CVE-2015-0235;Nexans FTTO GigaSwitch Outdated Components / Hardcoded;https://packetstormsecurity.com/files/167552/Nexans-FTTO-GigaSwitch-Outdated-Components-Hardcoded-Backdoor.html;unknown
 CVE-2015-0235;Qualys Security Advisory - glibc gethostbyname Buffer;https://packetstormsecurity.com/files/130115/Qualys-Security-Advisory-glibc-gethostbyname-Buffer-Overflow.html;unknown
-CVE-2015-0235;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2015-0252;Apache Xerces-C XML Parser Denial Of Service;https://packetstormsecurity.com/files/131756/Apache-Xerces-C-XML-Parser-Denial-Of-Service.html;DoS
 CVE-2015-0258;Collabtive 2.0 Shell Upload;https://packetstormsecurity.com/files/133736/Collabtive-2.0-Shell-Upload.html;unknown
 CVE-2015-0273;PHP DateTime Use-After-Free;https://packetstormsecurity.com/files/130471/PHP-DateTime-Use-After-Free.html;unknown
@@ -2896,8 +2880,6 @@ CVE-2015-1434;My Little Forum 2.3.3 Cross Site Scripting;https://packetstormsecu
 CVE-2015-1435;My Little Forum 2.3.3 Cross Site Scripting;https://packetstormsecurity.com/files/130356/My-Little-Forum-2.3.3-Cross-Site-Scripting-SQL-Injection.html;remote
 CVE-2015-1436;WordPress Easing Slider 2.2.0.6 Cross Site Scripting;https://packetstormsecurity.com/files/130355/WordPress-Easing-Slider-2.2.0.6-Cross-Site-Scripting.html;unknown
 CVE-2015-1467;Fork CMS 3.8.5 SQL Injection;https://packetstormsecurity.com/files/130242/Fork-CMS-3.8.5-SQL-Injection.html;remote
-CVE-2015-1472;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2015-1472;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2015-1474;Google Android Integer Oveflow / Heap Corruption;https://packetstormsecurity.com/files/130778/Google-Android-Integer-Oveflow-Heap-Corruption.html;DoS
 CVE-2015-1497;HP Client Automation 7.9 Command Injection;https://packetstormsecurity.com/files/139051/HP-Client-Automation-7.9-Command-Injection.html;remote
 CVE-2015-1503;IceWarp Mail Server Directory Traversal;https://packetstormsecurity.com/files/147505/IceWarp-Mail-Server-Directory-Traversal.html;unknown
@@ -3201,7 +3183,6 @@ CVE-2015-5134;Adobe Flash Use-After-Free When Setting Variable;https://packetsto
 CVE-2015-5161;Zend Framework 2.4.2 / 1.12.13 XXE Injection;https://packetstormsecurity.com/files/133068/Zend-Framework-2.4.2-1.12.13-XXE-Injection.html;unknown
 CVE-2015-5255;Apache Flex BlazeDS 4.7.1 SSRF;https://packetstormsecurity.com/files/134506/Apache-Flex-BlazeDS-4.7.1-SSRF.html;unknown
 CVE-2015-5273;CentOS 7.1 / Fedora 22 abrt Local;https://packetstormsecurity.com/files/134581/CentOS-7.1-Fedora-22-abrt-Local-Root.html;local
-CVE-2015-5277;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
 CVE-2015-5285;Kallithea 0.2.9 HTTP Response Splitting;https://packetstormsecurity.com/files/133897/Kallithea-0.2.9-HTTP-Response-Splitting.html;unknown
 CVE-2015-5287;CentOS 7.1 / Fedora 22 abrt Local;https://packetstormsecurity.com/files/134581/CentOS-7.1-Fedora-22-abrt-Local-Root.html;local
 CVE-2015-5287;RHEL 7.0 / 7.1 abrt / sosreport;https://packetstormsecurity.com/files/134582/RHEL-7.0-7.1-abrt-sosreport-Local-Root.html;local
@@ -3380,9 +3361,7 @@ CVE-2015-7390;TestLink 1.9.13 SQL Injection;https://packetstormsecurity.com/file
 CVE-2015-7391;TestLink 1.9.13 Cross Site Scripting;https://packetstormsecurity.com/files/133891/TestLink-1.9.13-Cross-Site-Scripting.html;unknown
 CVE-2015-7422;IBM i Access For Windows 7.1 Denial;https://packetstormsecurity.com/files/134433/IBM-i-Access-For-Windows-7.1-Denial-Of-Service.html;DoS
 CVE-2015-7527;WordPress Cool Video Gallery 1.9 Command Injection;https://packetstormsecurity.com/files/134626/WordPress-Cool-Video-Gallery-1.9-Command-Injection.html;remote
-CVE-2015-7547;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
 CVE-2015-7547;Moxa Command Injection / Cross Site Scripting;https://packetstormsecurity.com/files/164014/Moxa-Command-Injection-Cross-Site-Scripting-Vulnerable-Software.html;unknown
-CVE-2015-7547;Nexans FTTO GigaSwitch Outdated Components / Hardcoded;https://packetstormsecurity.com/files/167552/Nexans-FTTO-GigaSwitch-Outdated-Components-Hardcoded-Backdoor.html;unknown
 CVE-2015-7547;glibc getaddrinfo Stack Buffer Overflow;https://packetstormsecurity.com/files/138601/glibc-getaddrinfo-Stack-Buffer-Overflow.html;unknown
 CVE-2015-7547;glibc getaddrinfo Stack-Based Buffer Overflow;https://packetstormsecurity.com/files/135802/glibc-getaddrinfo-Stack-Based-Buffer-Overflow.html;unknown
 CVE-2015-7556;DeleGate 9.9.13 Local Root;https://packetstormsecurity.com/files/135089/DeleGate-9.9.13-Local-Root.html;local
@@ -3509,14 +3488,9 @@ CVE-2015-8684;Exponent CMS 2.3.5 File Upload Cross Site;https://packetstormsecur
 CVE-2015-8685;dolibarr HTML Injection;https://packetstormsecurity.com/files/135256/dolibarr-HTML-Injection.html;unknown
 CVE-2015-8687;Alcatel Lucent Home Device Manager Cross Site;https://packetstormsecurity.com/files/135133/Alcatel-Lucent-Home-Device-Manager-Cross-Site-Scripting.html;unknown
 CVE-2015-8770;Roundcube 1.1.3 Path Traversal;https://packetstormsecurity.com/files/135274/Roundcube-1.1.3-Path-Traversal.html;unknown
-CVE-2015-8778;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2015-8779;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
 CVE-2015-8979;DCMTK storescp DICOM storage (C-STORE) SCP Remote;https://packetstormsecurity.com/files/140191/DCMTK-storescp-DICOM-storage-C-STORE-SCP-Remote-Stack-Buffer-Overflow.html;remote
 CVE-2015-9098;Red-Gate SQL Monitor Authentication Bypass;https://packetstormsecurity.com/files/143737/Red-Gate-SQL-Monitor-Authentication-Bypass.html;unknown
 CVE-2015-9222;RomPager 4.34 Authentication Bypass;https://packetstormsecurity.com/files/136831/RomPager-4.34-Authentication-Bypass.html;unknown
-CVE-2015-9261;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2015-9261;Nexans FTTO GigaSwitch Outdated Components / Hardcoded;https://packetstormsecurity.com/files/167552/Nexans-FTTO-GigaSwitch-Outdated-Components-Hardcoded-Backdoor.html;unknown
-CVE-2015-9261;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2015-9323;WordPress 404 To 301 2.0.2 SQL Injection;https://packetstormsecurity.com/files/165803/WordPress-404-To-301-2.0.2-SQL-Injection.html;remote
 CVE-2016-0006;Microsoft Windows Sandboxed Mount Reparse Point Creation;https://packetstormsecurity.com/files/135355/Microsoft-Windows-Sandboxed-Mount-Reparse-Point-Creation-Mitigation-Bypass-Redux-1.html;unknown
 CVE-2016-0007;Microsoft Windows Sandboxed Mount Reparse Point Creation;https://packetstormsecurity.com/files/135356/Microsoft-Windows-Sandboxed-Mount-Reparse-Point-Creation-Mitigation-Bypass-Redux-2.html;unknown
@@ -3716,10 +3690,6 @@ CVE-2016-2057;Xymon 4.3.x Buffer Overflow / Code Execution;https://packetstormse
 CVE-2016-2058;Xymon 4.3.x Buffer Overflow / Code Execution;https://packetstormsecurity.com/files/135758/Xymon-4.3.x-Buffer-Overflow-Code-Execution-Information-Disclosure.html;unknown
 CVE-2016-2078;VMWare vSphere Web Client 6.0 Cross Site;https://packetstormsecurity.com/files/137189/VMWare-vSphere-Web-Client-6.0-Cross-Site-Scripting.html;unknown
 CVE-2016-2087;Hexchat IRC Client 2.11.0 Directory Traversal;https://packetstormsecurity.com/files/136564/Hexchat-IRC-Client-2.11.0-Directory-Traversal.html;unknown
-CVE-2016-2147;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2016-2147;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
-CVE-2016-2148;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2016-2148;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2016-2183;IBM Informix Dynamic Server DLL Injection /;https://packetstormsecurity.com/files/142756/IBM-Informix-Dynamic-Server-DLL-Injection-Code-Execution.html;unknown
 CVE-2016-2184;Linux snd-usb-audio Denial Of Service;https://packetstormsecurity.com/files/136221/Linux-snd-usb-audio-Denial-Of-Service.html;unknown
 CVE-2016-2185;Linux ati_remote2 Null Pointer Dereference;https://packetstormsecurity.com/files/136222/Linux-ati_remote2-Null-Pointer-Dereference.html;unknown
@@ -3936,8 +3906,6 @@ CVE-2016-6272;EPIC MyChart X-Path Injection;https://packetstormsecurity.com/file
 CVE-2016-6277;Netgear R6400 Remote Code Execution;https://packetstormsecurity.com/files/155712/Netgear-R6400-Remote-Code-Execution.html;remote
 CVE-2016-6283;Atlassian Confluence 5.9.12 Cross Site Scripting;https://packetstormsecurity.com/files/140363/Atlassian-Confluence-5.9.12-Cross-Site-Scripting.html;unknown
 CVE-2016-6285;Atlassian Jira 7.1.7 Cross Site Scripting;https://packetstormsecurity.com/files/140548/Atlassian-Jira-7.1.7-Cross-Site-Scripting.html;unknown
-CVE-2016-6301;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2016-6301;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2016-6304;OpenSSL x509 Parsing Double-Free / Invalid-Free;https://packetstormsecurity.com/files/139091/OpenSSL-x509-Parsing-Double-Free-Invalid-Free.html;unknown
 CVE-2016-6321;GNU tar 1.29 Extract Pathname Bypass;https://packetstormsecurity.com/files/139370/GNU-tar-1.29-Extract-Pathname-Bypass.html;unknown
 CVE-2016-6433;Cisco Firepower Threat Management Command Execution;https://packetstormsecurity.com/files/138988/Cisco-Firepower-Threat-Management-Command-Execution.html;remote
@@ -4195,7 +4163,6 @@ CVE-2017-1000083;Evince 3.24.0 Command Injection;https://packetstormsecurity.com
 CVE-2017-1000170;WordPress Delightful Downloads Jquery File Tree 1.6.6;https://packetstormsecurity.com/files/161900/WordPress-Delightful-Downloads-Jquery-File-Tree-1.6.6-Path-Traversal.html;unknown
 CVE-2017-1000251;BlueBorne BlueTooth Buffer Overflow Proof Of Concept;https://packetstormsecurity.com/files/144307/BlueBorne-BlueTooth-Buffer-Overflow-Proof-Of-Concept.html;DoS
 CVE-2017-1000353;CloudBees Jenkins 2.32.1 Remote Code Execution;https://packetstormsecurity.com/files/142402/CloudBees-Jenkins-2.32.1-Remote-Code-Execution.html;remote
-CVE-2017-1000366;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
 CVE-2017-1000366;Linux Kernel ldso_dynamic Stack Clash Privilege Escalation;https://packetstormsecurity.com/files/143207/Linux-Kernel-ldso_dynamic-Stack-Clash-Privilege-Escalation.html;unknown
 CVE-2017-1000366;Linux Kernel ldso_hwcap Stack Clash Privilege Escalation;https://packetstormsecurity.com/files/143201/Linux-Kernel-ldso_hwcap-Stack-Clash-Privilege-Escalation.html;unknown
 CVE-2017-1000366;Linux Kernel ldso_hwcap_64 Stack Clash Privilege Escalation;https://packetstormsecurity.com/files/143205/Linux-Kernel-ldso_hwcap_64-Stack-Clash-Privilege-Escalation.html;unknown
@@ -4633,8 +4600,6 @@ CVE-2017-16513;Ipswitch WS_FTP Professional Local Buffer Overflow;https://packet
 CVE-2017-16541;Tor Browser 7.0.8 Information Disclosure;https://packetstormsecurity.com/files/149298/Tor-Browser-7.0.8-Information-Disclosure.html;unknown
 CVE-2017-16542;Zoho ManageEngine Applications Manager 13 SQL Injection;https://packetstormsecurity.com/files/144892/Zoho-ManageEngine-Applications-Manager-13-SQL-Injection.html;remote
 CVE-2017-16543;Zoho ManageEngine Applications Manager 13 SQL Injection;https://packetstormsecurity.com/files/144892/Zoho-ManageEngine-Applications-Manager-13-SQL-Injection.html;remote
-CVE-2017-16544;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
-CVE-2017-16544;Nexans FTTO GigaSwitch Outdated Components / Hardcoded;https://packetstormsecurity.com/files/167552/Nexans-FTTO-GigaSwitch-Outdated-Components-Hardcoded-Backdoor.html;unknown
 CVE-2017-16567;Logitech Media Server 7.9.0 Cross Site Scripting;https://packetstormsecurity.com/files/144906/Logitech-Media-Server-7.9.0-Cross-Site-Scripting.html;unknown
 CVE-2017-16568;Logitech Media Server 7.9.0 Cross Site Scripting;https://packetstormsecurity.com/files/144906/Logitech-Media-Server-7.9.0-Cross-Site-Scripting.html;unknown
 CVE-2017-16570;KeystoneJS Cross Site Request Forgery;https://packetstormsecurity.com/files/146133/KeystoneJS-Cross-Site-Request-Forgery.html;unknown
@@ -6215,7 +6180,6 @@ CVE-2018-20525;Roxy Fileman 1.4.5 File Upload / Directory;https://packetstormsec
 CVE-2018-20526;Roxy Fileman 1.4.5 File Upload / Directory;https://packetstormsecurity.com/files/151033/Roxy-Fileman-1.4.5-File-Upload-Directory-Traversal.html;remote
 CVE-2018-20556;WordPress Booking Calendar 8.4.3 SQL Injection;https://packetstormsecurity.com/files/151692/WordPress-Booking-Calendar-8.4.3-SQL-Injection.html;remote
 CVE-2018-20580;ReadyAPI 2.5.0 / 2.6.0 Remote Code Execution;https://packetstormsecurity.com/files/152731/ReadyAPI-2.5.0-2.6.0-Remote-Code-Execution.html;remote
-CVE-2018-20679;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
 CVE-2018-20703;CubeCart 6.2.2 Cross Site Scripting;https://packetstormsecurity.com/files/150609/CubeCart-6.2.2-Cross-Site-Scripting.html;unknown
 CVE-2018-20782;WordPress WooCommerce GloBee Payment Gateway 1.1.1 Bypass;https://packetstormsecurity.com/files/151761/WordPress-WooCommerce-GloBee-Payment-Gateway-1.1.1-Bypass-Spoofing.html;unknown
 CVE-2018-20969;GNU patch Command Injection / Directory Traversal;https://packetstormsecurity.com/files/154124/GNU-patch-Command-Injection-Directory-Traversal.html;unknown
@@ -6947,7 +6911,6 @@ CVE-2019-12480;BACnet Stack 0.8.6 Denial Of Service;https://packetstormsecurity.
 CVE-2019-12516;WordPress SlickQuiz 1.3.7.1 SQL Injection;https://packetstormsecurity.com/files/154440/WordPress-SlickQuiz-1.3.7.1-SQL-Injection.html;remote
 CVE-2019-12517;WordPress SlickQuiz 1.3.7.1 Cross Site Scripting;https://packetstormsecurity.com/files/154439/WordPress-SlickQuiz-1.3.7.1-Cross-Site-Scripting.html;unknown
 CVE-2019-1253;AppXSvc 17763.1.amd64fre.rs5_release.180914-1434 Privilege;https://packetstormsecurity.com/files/154488/AppXSvc-17763.1.amd64fre.rs5_release.180914-1434-Privilege-Escalation.html;unknown
-CVE-2019-12550;WAGO 852 Industrial Managed Switch Series Code;https://packetstormsecurity.com/files/153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html;unknown
 CVE-2019-12562;DotNetNuke Cross Site Scripting;https://packetstormsecurity.com/files/154673/DotNetNuke-Cross-Site-Scripting.html;unknown
 CVE-2019-12593;IceWarp 10.4.4 Local File Inclusion;https://packetstormsecurity.com/files/153161/IceWarp-10.4.4-Local-File-Inclusion.html;local
 CVE-2019-12616;phpMyAdmin 4.8 Cross Site Request Forgery;https://packetstormsecurity.com/files/153251/phpMyAdmin-4.8-Cross-Site-Request-Forgery.html;unknown
@@ -7368,7 +7331,6 @@ CVE-2019-5723;PORTIER 4.4.4.2 / 4.4.4.6 Cryptographic Issues;https://packetstorm
 CVE-2019-5736;Docker runc Command Execution Proof Of Concept;https://packetstormsecurity.com/files/165197/Docker-runc-Command-Execution-Proof-Of-Concept.html;unknown
 CVE-2019-5736;runc Container Breakout;https://packetstormsecurity.com/files/151660/runc-Container-Breakout.html;unknown
 CVE-2019-5736;runc Host Command Execution;https://packetstormsecurity.com/files/151638/runc-Host-Command-Execution.html;unknown
-CVE-2019-5747;Cisco Device Hardcoded Credentials / GNU glibc;https://packetstormsecurity.com/files/154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html;unknown
 CVE-2019-5788;Chrome FileSystemOperationRunner Use-After-Free;https://packetstormsecurity.com/files/152146/Chrome-FileSystemOperationRunner-Use-After-Free.html;unknown
 CVE-2019-5789;Chrome MidiManagerWin Use-After-Free;https://packetstormsecurity.com/files/152145/Chrome-MidiManagerWin-Use-After-Free.html;unknown
 CVE-2019-5796;Chrome ExtensionsGuestViewMessageFilter Data Race;https://packetstormsecurity.com/files/152143/Chrome-ExtensionsGuestViewMessageFilter-Data-Race.html;unknown
@@ -9286,7 +9248,6 @@ CVE-2022-32788;AppleAVD AVC_RBSP::parseSliceHeader ref_pic_list_modification;htt
 CVE-2022-32827;AppleAVD deallocateKernelMemoryInternal Missing Surface Lock;https://packetstormsecurity.com/files/169929/AppleAVD-deallocateKernelMemoryInternal-Missing-Surface-Lock.html;local
 CVE-2022-32907;AppleAVD AppleAVDUserClient::decodeFrameFig Memory Corruption;https://packetstormsecurity.com/files/169930/AppleAVD-AppleAVDUserClient-decodeFrameFig-Memory-Corruption.html;local
 CVE-2022-32924;XNU Dangling PTE Entry;https://packetstormsecurity.com/files/170010/XNU-Dangling-PTE-Entry.html;unknown
-CVE-2022-32985;Nexans FTTO GigaSwitch Outdated Components / Hardcoded;https://packetstormsecurity.com/files/167552/Nexans-FTTO-GigaSwitch-Outdated-Components-Hardcoded-Backdoor.html;unknown
 CVE-2022-33098;Magnolia CMS 6.2.19 Cross Site Scripting;https://packetstormsecurity.com/files/167705/Magnolia-CMS-6.2.19-Cross-Site-Scripting.html;unknown
 CVE-2022-33171;TypeORM 0.3.7 Information Disclosure;https://packetstormsecurity.com/files/168096/TypeORM-0.3.7-Information-Disclosure.html;unknown
 CVE-2022-33171;TypeORM SQL Injection;https://packetstormsecurity.com/files/167634/TypeORM-SQL-Injection.html;remote

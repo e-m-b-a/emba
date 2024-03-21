@@ -31,7 +31,7 @@ apk_identifier() {
   export APK_ARR=()
   local APK=""
 
-  mapfile -t APK_ARR < <(find "${FIRMWARE_PATH}" -type f -name "*.apk")
+  mapfile -t APK_ARR < <(find "${LOG_DIR}"/firmware -type f -name "*.apk")
   for APK in "${APK_ARR[@]}"; do
     print_output "[+] Found Android apk - ${ORANGE}$(print_path "${APK}")${NC}"
   done
