@@ -155,17 +155,16 @@ deeper_extractor_helper() {
   local FILE_MD5=""
   local BIN_PID=""
   local WAIT_PIDS_P60=()
-  local MD5_DONE_DEEP=()
 
   prepare_file_arr_limited "${FIRMWARE_PATH_CP}"
 
   for FILE_TMP in "${FILE_ARR_LIMITED[@]}"; do
 
-    FILE_MD5="$(md5sum "${FILE_TMP}" | awk '{print $1}')"
+    FILE_MD5="$(md5sum "${FILE_TMP}")"
     # let's check the current md5sum against our array of unique md5sums - if we have a match this is already extracted
     # already extracted stuff is ignored
 
-    [[ "${MD5_DONE_DEEP[*]}" == *"${FILE_MD5}"* ]] && continue
+    [[ "${MD5_DONE_DEEP[*]}" == *"${FILE_MD5/\ *}"* ]] && continue
 
     print_output "[*] Details of file: ${ORANGE}${FILE_TMP}${NC}"
     print_output "$(indent "$(orange "$(file "${FILE_TMP}")")")"
@@ -321,7 +320,7 @@ deeper_extractor_helper() {
       fi
     fi
 
-    MD5_DONE_DEEP+=( "${FILE_MD5}" )
+    MD5_DONE_DEEP+=( "${FILE_MD5/\ *}" )
     max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_P60[@]}"
 
     check_disk_space

@@ -118,7 +118,6 @@ set_p02_default_exports() {
   export GPG_COMPRESS=0
   export BSD_UFS=0
   export ANDROID_OTA=0
-  export MD5_DONE_DEEP=()
   # Note: we do not set UEFI_DETECTED in this function. If so, we are going to reset it and we only need
   #       an indicator if this could be some UEFI firmware for further processing
   export UEFI_AMI_CAPSULE=0

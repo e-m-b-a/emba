@@ -29,7 +29,7 @@ set_defaults() {
   export RTOS=1                 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
   export BINARY_EXTENDED=0
   export CONTAINER_EXTRACT=0
-  export DISABLE_DEEP=1
+  export DISABLE_DEEP=0
   export FACT_EXTRACTOR=0
   export FIRMWARE=0
   export FORCE=0
@@ -51,6 +51,7 @@ set_defaults() {
   export EXLUDE=()
   export SELECT_MODULES=()
   export MODULES_EXPORTED=()
+  export MD5_DONE_DEEP=()       # for tracking the extracted files in deep extractor
   export ROOT_PATH=()
   export FILE_ARR=()
   export LOG_GREP=0
