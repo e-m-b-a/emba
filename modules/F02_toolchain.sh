@@ -55,15 +55,15 @@ F02_toolchain() {
 
   local NEG_LOG=0
 
-  mapfile -t KERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,6 | sort -u || true)
-  mapfile -t KERNEL_V_ARR_S25 < <(tail -n +2 "${CSV_DIR}"/s25_*.csv 2>/dev/null | cut -d\; -f2 | sort -u || true)
-  mapfile -t KERNEL_STRING_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f1 | sort -u || true)
+  mapfile -t KERNEL_V_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f2,6 | grep -v -e '^$' | sort -u || true)
+  mapfile -t KERNEL_V_ARR_S25 < <(tail -n +2 "${CSV_DIR}"/s25_*.csv 2>/dev/null | cut -d\; -f2 | grep -v -e '^$' | sort -u || true)
+  mapfile -t KERNEL_STRING_ARR < <(tail -n +2 "${CSV_DIR}"/s24_*.csv 2>/dev/null | cut -d\; -f1 | grep -v -e '^$' | sort -u || true)
 
   mapfile -t COMPILE_FILES_ARR < <(tail -n +2 "${CSV_DIR}"/s95_*.csv 2>/dev/null | cut -d\; -f2 | grep "libstdc++.so.6." | sort -u || true)
 
-  mapfile -t BINARY_DETAILS_ARR < <(cut -d\; -f4,7 "${CSV_DIR}"/p99_*.csv 2>/dev/null | cut -d\, -f1-3 | sort -u || true)
-  mapfile -t BINARY_FLAGS_ARR < <(cut -d\; -f5 "${CSV_DIR}"/p99_*.csv 2>/dev/null | tr ',' '\n' | grep -v "unknown" | sort -u || true)
-  mapfile -t BINARY_COMPILER_GUESSED_ARR < <(cut -d\; -f6 "${CSV_DIR}"/p99_*.csv 2>/dev/null | tr ',' '\n' | grep "GCC\|Buildroot\|GNU" | awk '{print $1,$2,$3}' | tr -d ':' | sort -u || true)
+  mapfile -t BINARY_DETAILS_ARR < <(cut -d\; -f4,7 "${CSV_DIR}"/p99_*.csv 2>/dev/null | cut -d\, -f1-3 | grep -v -e '^$' | sort -u || true)
+  mapfile -t BINARY_FLAGS_ARR < <(cut -d\; -f5 "${CSV_DIR}"/p99_*.csv 2>/dev/null | grep -v -e '^$' | tr ',' '\n' | grep -v "unknown" | sort -u || true)
+  mapfile -t BINARY_COMPILER_GUESSED_ARR < <(cut -d\; -f6 "${CSV_DIR}"/p99_*.csv 2>/dev/null | grep -v -e '^$' | tr ',' '\n' | grep "GCC\|Buildroot\|GNU" | awk '{print $1,$2,$3}' | tr -d ':' | sort -u || true)
   # results in some entries like the following
   # GCC (Buildroot 2012.11.1)
   # GCC (GNU) 3.3.2
