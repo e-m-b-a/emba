@@ -17,7 +17,7 @@
 
 
 emba_parameter_parsing() {
-  while getopts a:bBA:cC:d:De:Ef:Fghik:l:m:N:o:p:P:QrsStT:UVxX:yY:WzZ: OPT ; do
+  while getopts a:bBA:cC:d:De:Ef:Fghik:l:m:N:o:p:P:QrsStT:UVX:yY:WzZ: OPT ; do
     case "${OPT}" in
       a)
         check_alnum "${OPTARG}"
@@ -171,9 +171,6 @@ emba_parameter_parsing() {
       V)
         print_output "[+] EMBA version: ${ORANGE}${EMBA_VERSION}${NC}" "no_log"
         exit 0
-        ;;
-      x)
-        export DEEP_EXTRACTOR=1
         ;;
       W)
         export HTML=1

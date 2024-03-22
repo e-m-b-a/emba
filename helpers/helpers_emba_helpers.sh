@@ -88,6 +88,10 @@ check_emba_ended() {
     # EMBA is already finished
     return 0
   fi
+  if ! [[ -d "${LOG_DIR}" ]]; then
+    # this usually happens if we automate analysis and remove the logging directory while this module was not finished at all
+    return 0
+  fi
   return 1
 }
 

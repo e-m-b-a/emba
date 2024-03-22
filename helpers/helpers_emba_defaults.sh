@@ -18,7 +18,7 @@
 
 set_defaults() {
   # if this is a release version set RELEASE to 1, add a banner to config/banner and name the banner with the version details
-  export RELEASE=1
+  export RELEASE=0
   export EMBA_VERSION="1.4.0"
 
   export CLEANED=0              # used for the final cleaner function for not running it multiple times
@@ -29,7 +29,7 @@ set_defaults() {
   export RTOS=1                 # Testing RTOS based OS - 1 -> no Linux / 0 -> Linux
   export BINARY_EXTENDED=0
   export CONTAINER_EXTRACT=0
-  export DEEP_EXTRACTOR=0
+  export DISABLE_DEEP=0
   export FACT_EXTRACTOR=0
   export FIRMWARE=0
   export FORCE=0
@@ -51,6 +51,7 @@ set_defaults() {
   export EXLUDE=()
   export SELECT_MODULES=()
   export MODULES_EXPORTED=()
+  export MD5_DONE_DEEP=()       # for tracking the extracted files in deep extractor
   export ROOT_PATH=()
   export FILE_ARR=()
   export LOG_GREP=0

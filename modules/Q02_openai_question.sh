@@ -25,6 +25,10 @@ Q02_openai_question() {
 
     # we wait until there arer entries in the question csv
     while ! [[ -f "${LOG_DIR}"/"${MAIN_LOG_FILE}" ]]; do
+      if ! [[ -d "${LOG_DIR}" ]]; then
+        # this usually happens if we automate analysis and remove the logging directory while this module was not finished at all
+        return
+      fi
       sleep 10
     done
 

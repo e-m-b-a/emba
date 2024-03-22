@@ -1,1 +1,4 @@
 105078/Ubuntu-Security-Notice-USN-1202-1.html
+153278/WAGO-852-Industrial-Managed-Switch-Series-Code-Execution-Hardcoded-Credentials.html
+154361/Cisco-Device-Hardcoded-Credentials-GNU-glibc-BusyBox.html
+167552/Nexans-FTTO-GigaSwitch-Outdated-Components-Hardcoded-Backdoor.html
