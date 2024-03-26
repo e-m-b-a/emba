@@ -591,8 +591,10 @@ get_epss_data() {
   local CVE_EPSS_PATH=""
   local EPSS_PERC=""
   local EPSS_EPSS=""
+  local CVE_YEAR=""
 
-  CVE_EPSS_PATH=$(grep -r -l "${CVE_ID}" "${EPSS_DATA_PATH}"/* | sort -u | head -1 || true)
+  CVE_YEAR="$(echo "${CVE_ID}" | cut -d '-' -f2)"
+  CVE_EPSS_PATH="${EPSS_DATA_PATH}/${CVE_YEAR}/${CVE_ID}_EPSS.json"
   if [[ -f "${CVE_EPSS_PATH}" ]]; then
     EPSS_PERC=$(jq -r '.data[] | select(.cve=="'"${CVE_ID}"'") | .percentile' "${CVE_EPSS_PATH}")
     EPSS_PERC="$( echo "${EPSS_PERC} 100" | awk '{printf "%d", $1 * $2}' )"
