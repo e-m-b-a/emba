@@ -587,24 +587,24 @@ cve_db_lookup_version() {
 }
 
 get_epss_data() {
-  local CVE_ID="${1:-}"
-  local CVE_EPSS_PATH=""
-  local EPSS_PERC=""
-  local EPSS_EPSS=""
-  local CVE_YEAR=""
+  local lCVE_ID="${1:-}"
+  local lCVE_EPSS_PATH=""
+  local lEPSS_PERC=""
+  local lEPSS_EPSS=""
+  local lCVE_YEAR=""
 
-  CVE_YEAR="$(echo "${CVE_ID}" | cut -d '-' -f2)"
-  CVE_EPSS_PATH="${EPSS_DATA_PATH}/${CVE_YEAR}/${CVE_ID}_EPSS.json"
-  if [[ -f "${CVE_EPSS_PATH}" ]]; then
-    EPSS_PERC=$(jq -r '.data[] | select(.cve=="'"${CVE_ID}"'") | .percentile' "${CVE_EPSS_PATH}")
-    EPSS_PERC="$( echo "${EPSS_PERC} 100" | awk '{printf "%d", $1 * $2}' )"
+  lCVE_YEAR="$(echo "${lCVE_ID}" | cut -d '-' -f2)"
+  lCVE_EPSS_PATH="${EPSS_DATA_PATH}/${lCVE_YEAR}/${lCVE_ID}_EPSS.json"
+  if [[ -f "${lCVE_EPSS_PATH}" ]]; then
+    lEPSS_PERC=$(jq -r '. | .percentile' "${lCVE_EPSS_PATH}")
+    lEPSS_PERC="$( echo "${lEPSS_PERC} 100" | awk '{printf "%d", $1 * $2}' )"
     # just cut it for now ...
-    EPSS_EPSS=$(jq -r '.data[] | select(.cve=="'"${CVE_ID}"'") | .epss' "${CVE_EPSS_PATH}")
-    EPSS_EPSS="$( echo "${EPSS_EPSS} 100" | awk '{printf "%d", $1 * $2}' )"
+    lEPSS_EPSS=$(jq -r '. | .epss' "${CVE_EPSS_PATH}")
+    lEPSS_EPSS="$( echo "${lEPSS_EPSS} 100" | awk '{printf "%d", $1 * $2}' )"
   fi
-  [[ ! "${EPSS_EPSS}" =~ ^[0-9]+$ ]] && EPSS_EPSS="NA"
-  [[ ! "${EPSS_PERC}" =~ ^[0-9]+$ ]] && EPSS_PERC="NA"
-  echo "${EPSS_EPSS};${EPSS_PERC}"
+  [[ ! "${lEPSS_EPSS}" =~ ^[0-9]+$ ]] && lEPSS_EPSS="NA"
+  [[ ! "${lEPSS_PERC}" =~ ^[0-9]+$ ]] && lEPSS_PERC="NA"
+  echo "${lEPSS_EPSS};${lEPSS_PERC}"
 }
 
 # Test the identified JSON files for CPE details and version information
@@ -1540,7 +1540,7 @@ cve_extractor_thread_actor() {
     echo "${HIGH_CVE_COUNTER}" >> "${TMP_DIR}"/HIGH_CVE_COUNTER.tmp
   fi
 
-  write_csv_log "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}" "${lFIRST_EPSS:-NA}" "${lFIRST_PERC:-NA}\\n"
+  write_csv_log "${lBIN_BINARY}" "${lBIN_VERSION}" "${CVE_VALUE}" "${CVSS_VALUE}" "${#EXPLOIT_AVAIL[@]}" "${#EXPLOIT_AVAIL_MSF[@]}" "${#EXPLOIT_AVAIL_TRICKEST[@]}" "${#EXPLOIT_AVAIL_ROUTERSPLOIT[@]}/${#EXPLOIT_AVAIL_ROUTERSPLOIT1[@]}" "${#EXPLOIT_AVAIL_SNYK[@]}" "${#EXPLOIT_AVAIL_PACKETSTORM[@]}" "${LOCAL}" "${REMOTE}" "${DOS}" "${#KNOWN_EXPLOITED_VULNS[@]}" "${KERNEL_VERIFIED}" "${lFIRST_EPSS:-NA}" "${lFIRST_PERC:-NA}"
 }
 
 get_firmware_base_version_check() {

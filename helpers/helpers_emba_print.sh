@@ -295,8 +295,9 @@ write_log() {
   fi
 }
 
+# for generating csv log file in LOG_DIR/csv_logs/<module_name>.csv
 write_csv_log() {
-  local CSV_ITEMS=("$@")
+  local lCSV_ITEMS=("$@")
   if ! [[ -d "${CSV_DIR}" ]]; then
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
@@ -304,8 +305,8 @@ write_csv_log() {
   CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
   CSV_LOG="${CSV_DIR}""/""${CSV_LOG}"
 
-  printf '%s;' "${CSV_ITEMS[@]}" >> "${CSV_LOG}" || true
-  printf '\n' >> "${CSV_LOG}" || true
+  printf '%s;\n' "${lCSV_ITEMS[@]}" >> "${CSV_LOG}" || true
+  # printf '\n' >> "${CSV_LOG}" || true
 }
 
 # write_pid_log is a functions used for debugging

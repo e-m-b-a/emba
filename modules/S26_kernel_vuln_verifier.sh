@@ -62,6 +62,8 @@ S26_kernel_vuln_verifier()
   export COMPILE_SOURCE_FILES_VERIFIED=0
 
   for K_VERSION in "${K_VERSIONS[@]}"; do
+    [[ "${K_VERSION}" != *"[0-9]"* ]] && continue
+
     local K_FOUND=0
     print_output "[+] Identified kernel version: ${ORANGE}${K_VERSION}${NC}"
 
