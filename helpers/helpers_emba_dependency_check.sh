@@ -145,6 +145,20 @@ check_nvd_db(){
   fi
 }
 
+check_epss_db(){
+  local REMOTE_HASH="${1:-}"
+  local LOCAL_HASH=""
+  if [[ -d "${EXT_DIR}"/EPSS-data ]] ; then
+    LOCAL_HASH="$(head -c 8 "${EXT_DIR}"/EPSS-data/.git/refs/heads/main)"
+
+    if [[ "${REMOTE_HASH}" == "${LOCAL_HASH}" ]]; then
+      echo -e "    EPSS database version - ${GREEN}ok${NC}"
+    else
+      echo -e "    EPSS database version - ${ORANGE}Updates available${NC}"
+    fi
+  fi
+}
+
 check_git_hash(){
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
@@ -233,10 +247,12 @@ dependency_check()
         STABLE_EMBA_VERSION="$(cat "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt)"
         DOCKER_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_CONTAINER_HASH.txt)"
         NVD_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/NVD_HASH.txt)"
+        EPSS_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EPSS_HASH.txt)"
         GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_GITHUB_HASH.txt)"
         check_emba_version "${STABLE_EMBA_VERSION}"
         check_docker_image "${DOCKER_HASH}"
         check_git_hash "${GITHUB_HASH}"
+        check_epss_db "${EPSS_GITHUB_HASH}"
         check_nvd_db "${NVD_GITHUB_HASH}"
       fi
     else
