@@ -599,7 +599,7 @@ get_epss_data() {
     lEPSS_PERC=$(jq -r '. | .percentile' "${lCVE_EPSS_PATH}")
     lEPSS_PERC="$( echo "${lEPSS_PERC} 100" | awk '{printf "%d", $1 * $2}' )"
     # just cut it for now ...
-    lEPSS_EPSS=$(jq -r '. | .epss' "${CVE_EPSS_PATH}")
+    lEPSS_EPSS=$(jq -r '. | .epss' "${lCVE_EPSS_PATH}")
     lEPSS_EPSS="$( echo "${lEPSS_EPSS} 100" | awk '{printf "%d", $1 * $2}' )"
   fi
   [[ ! "${lEPSS_EPSS}" =~ ^[0-9]+$ ]] && lEPSS_EPSS="NA"

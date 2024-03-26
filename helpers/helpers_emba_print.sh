@@ -305,6 +305,7 @@ write_csv_log() {
   CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
   CSV_LOG="${CSV_DIR}""/""${CSV_LOG}"
 
+  # shellcheck disable=SC2005
   echo "$(printf '%s;' "${lCSV_ITEMS[@]}" && printf '\n')"  >> "${CSV_LOG}" || true
   # printf '\n' >> "${CSV_LOG}" || true
 }
