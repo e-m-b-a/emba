@@ -114,7 +114,7 @@ S118_busybox_verifier()
       VULN_CNT=$((VULN_CNT+1))
 
       CVE=$(echo "${VULN}" | cut -d: -f1)
-      SUMMARY="$(echo "${VULN}" | cut -d: -f4-)"
+      SUMMARY="$(echo "${VULN}" | cut -d: -f6-)"
       print_output "[*] Testing vulnerability ${ORANGE}${VULN_CNT}${NC} / ${ORANGE}${#ALL_BB_VULNS[@]}${NC} / ${ORANGE}${CVE}${NC}" "no_log"
 
       for BB_APPLET in "${BB_VERIFIED_APPLETS[@]}"; do
