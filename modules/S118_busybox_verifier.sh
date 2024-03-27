@@ -29,14 +29,8 @@ S118_busybox_verifier()
   local BB_ENTRY=""
   local VERSION_IDENTIFIER=""
 
-  # if module s116 in our modules array we wait until it is finished and hopefully shows us the BusyBox applets
-  # if module s116 is not in our modules array, but s09 is in, we can wait for it
-  # if none of these modules is available we search for busybox during this module
-  if [[ "${SELECT_MODULES[*]}" =~ [sS]116 ]]; then
-    module_wait "S116_qemu_version_detection"
-  elif [[ "${SELECT_MODULES[*]}" =~ [sS]09 ]]; then
-    module_wait "S09_firmware_base_version_check"
-  fi
+  module_wait "S116_qemu_version_detection"
+  module_wait "S09_firmware_base_version_check"
 
   if [[ -f "${CSV_DIR}"/s116_qemu_version_detection.csv ]]; then
     mapfile -t BB_VERSIONS_ARR < <(grep ";busybox;" "${CSV_DIR}"/s116_qemu_version_detection.csv | cut -d\; -f1,4 | sort -u || true)
