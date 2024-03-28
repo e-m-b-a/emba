@@ -57,7 +57,8 @@ max_pids_protection() {
     local MAX_PIDS_="${MAX_MODS:1}"
   fi
   local WAIT_PIDS=("$@")
-  local PID
+  local PID=""
+
   while [[ ${#WAIT_PIDS[@]} -gt "${MAX_PIDS_}" ]]; do
     local TEMP_PIDS=()
     # check for really running PIDs and re-create the array
