@@ -591,16 +591,18 @@ get_epss_data() {
   local lCVE_EPSS_PATH=""
   local lEPSS_PERC=""
   local lEPSS_EPSS=""
+  local lEPSS_DATA=""
   local lCVE_YEAR=""
 
   lCVE_YEAR="$(echo "${lCVE_ID}" | cut -d '-' -f2)"
-  lCVE_EPSS_PATH="${EPSS_DATA_PATH}/${lCVE_YEAR}/${lCVE_ID}_EPSS.json"
+  lCVE_EPSS_PATH="${EPSS_DATA_PATH}/CVE_${lCVE_YEAR}_EPSS.csv"
   if [[ -f "${lCVE_EPSS_PATH}" ]]; then
-    lEPSS_PERC=$(jq -r '. | .percentile' "${lCVE_EPSS_PATH}")
-    lEPSS_PERC="$( echo "${lEPSS_PERC} 100" | awk '{printf "%d", $1 * $2}' )"
+    lEPSS_DATA=$(grep "^${lCVE_ID};" "${lCVE_EPSS_PATH}" || true)
+    lEPSS_PERC=$(echo "${lEPSS_DATA}" | cut -d ';' -f3)
+    lEPSS_PERC=$(echo "${lEPSS_PERC} 100" | awk '{printf "%d", $1 * $2}')
     # just cut it for now ...
-    lEPSS_EPSS=$(jq -r '. | .epss' "${lCVE_EPSS_PATH}")
-    lEPSS_EPSS="$( echo "${lEPSS_EPSS} 100" | awk '{printf "%d", $1 * $2}' )"
+    lEPSS_EPSS=$(echo "${lEPSS_DATA}" | cut -d ';' -f2)
+    lEPSS_EPSS=$(echo "${lEPSS_EPSS} 100" | awk '{printf "%d", $1 * $2}')
   fi
   [[ ! "${lEPSS_EPSS}" =~ ^[0-9]+$ ]] && lEPSS_EPSS="NA"
   [[ ! "${lEPSS_PERC}" =~ ^[0-9]+$ ]] && lEPSS_PERC="NA"
