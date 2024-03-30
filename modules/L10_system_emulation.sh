@@ -811,14 +811,6 @@ main_emulation() {
         RESULT_SOURCE="EMBA"
         write_results "${ARCHIVE_PATH}" "${R_PATH}"
 
-        # if we are going to execute L15 then we do not reset the network environment now
-        # we just write the commands to run.sh
-        if function_exists L99_cleanup; then
-          # L99_cleanup module is loaded and we do not reset the network now
-          EXECUTE=0
-        else
-          EXECUTE=1
-        fi
         cleanup_emulator "${IMAGE_NAME}"
 
         if [[ -f "${LOG_PATH_MODULE}"/qemu.final.serial.log ]]; then
@@ -1187,11 +1179,6 @@ identify_networking_emulation() {
 
   stopping_emulation_process "${IMAGE_NAME}"
   cleanup_emulator "${IMAGE_NAME}"
-  # if [[ -v ARCHIVE_PATH ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
-  #  reset_network_emulation 1
-  # else
-  #  reset_network_emulation 2
-  # fi
 
   if ! [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
     print_output "[-] No ${ORANGE}${LOG_PATH_MODULE}/qemu.initial.serial.log${NC} log file generated."
@@ -1823,7 +1810,7 @@ nvram_searcher_emulation() {
       # check https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/inferDefault.py
       echo "${lNVRAM_ENTRY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.tmp
       lNVRAM_KEY=$(echo "${lNVRAM_ENTRY}" | tr -dc '[:print:]' | tr -s '[:blank:]')
-      if [[ "${lNVRAM_KEY}" =~ [a-zA-Z0-9_] && "${#NVRAM_KEY}" -gt 3 ]]; then
+      if [[ "${lNVRAM_KEY}" =~ [a-zA-Z0-9_] && "${#lNVRAM_KEY}" -gt 3 ]]; then
         # print_output "[*] NVRAM access detected: $ORANGE$NVRAM_KEY$NC"
         if grep -q "${lNVRAM_KEY}" "${lNVRAM_FILE}" 2>/dev/null; then
           # print_output "[*] Possible NVRAM access via key $ORANGE$NVRAM_KEY$NC found in NVRAM file $ORANGE$NVRAM_FILE$NC."
@@ -2131,11 +2118,6 @@ check_online_stat() {
   fi
 
   stopping_emulation_process "${IMAGE_NAME}"
-  # if [[ -v ARCHIVE_PATH ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
-  #  reset_network_emulation 1
-  # else
-  #  reset_network_emulation 2
-  # fi
   cleanup_emulator "${IMAGE_NAME}"
 
   color_qemu_log "${LOG_PATH_MODULE}/qemu.final.serial.log"
@@ -2284,7 +2266,7 @@ write_script_exec() {
       # shellcheck disable=SC2001
       lCOMMAND=$(echo "${lCOMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
       # shellcheck disable=SC2001
-      lCOMMAND=$(echo "${COMMAND}" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
+      lCOMMAND=$(echo "${lCOMMAND}" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
     fi
 
     echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
