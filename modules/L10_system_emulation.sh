@@ -43,8 +43,20 @@ L10_system_emulation() {
   if [[ "${FULL_EMULATION}" -eq 1 && "${RTOS}" -eq 0 ]]; then
     pre_module_reporter "${FUNCNAME[0]}"
     export MODULE_SUB_PATH="${MOD_DIR}"/"${FUNCNAME[0]}"
-    S25_LOG="s25_kernel_check.txt"
+    export S25_LOG="s25_kernel_check.txt"
 
+    export IP_ADDRESS_=""
+    local IMAGE_DIR=""
+    export IMAGE_NAME=""
+    export ARCHIVE_PATH=""
+    export HOSTNETDEV_ARR=()
+    local EMULATION_ENTRY=""
+    export BINARY_DIR="${EXT_DIR}/EMBA_Live_bins"
+    # FIRMWARE_PATH_orig="$(abs_path "${FIRMWARE_PATH_BAK}")"
+    export LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
+    local R_PATH_CNT=1
+
+    # if we have a supported arch we move on with out emulation attempt
     if [[ "${ARCH}" == "MIPS"* || "${ARCH}" == "ARM"* || "${ARCH}" == "x86" ]]; then
 
       check_bmc_supermicro
@@ -53,11 +65,6 @@ L10_system_emulation() {
       # Could be interesting for future extensions
       set_firmae_arbitration "true"
 
-      export BINARY_DIR="${EXT_DIR}/EMBA_Live_bins"
-      FIRMWARE_PATH_orig="$(abs_path "${FIRMWARE_PATH_BAK}")"
-      LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
-      R_PATH_CNT=1
-
       # just to ensure nothing has already put a run.sh into our log
       find "${LOG_PATH_MODULE}" -name "run.sh" --delete 2>/dev/null || true
 
@@ -65,13 +72,6 @@ L10_system_emulation() {
       if [[ -f "${LOG_DIR}"/emulator_online_results.log ]] && grep -q "L10_system_emulation finished" "${LOG_DIR}"/emba.log; then
         print_ln
         print_output "[*] Found finished emulation process - trying to recover old emulation process"
-
-        export IP_ADDRESS_=""
-        local IMAGE_DIR=""
-        export IMAGE_NAME=""
-        export ARCHIVE_PATH=""
-        export HOSTNETDEV_ARR=()
-        local EMULATION_ENTRY=""
 
         EMULATION_ENTRY="$(grep "TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1)"
         IP_ADDRESS_=$(grep "TCP ok" "${LOG_DIR}"/emulator_online_results.log | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
@@ -101,6 +101,7 @@ L10_system_emulation() {
         fi
       fi
 
+      # this is our main emulation area:
       if [[ "${SYS_ONLINE}" -ne 1 ]] && [[ "${TCP}" != "ok" ]]; then
         for R_PATH in "${ROOT_PATH[@]}" ; do
           print_output "[*] Testing root path (${ORANGE}${R_PATH_CNT}${NC}/${ORANGE}${#ROOT_PATH[@]}${NC}): ${ORANGE}${R_PATH}${NC}"
@@ -113,7 +114,10 @@ L10_system_emulation() {
           fi
 
           if [[ -n "${D_END}" ]]; then
-            TAPDEV_0="tap0_0"
+            export TAPDEV_0="tap0_0"
+            export D_END=""
+            export ARCH_END=""
+
             D_END="$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
             ARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
 
@@ -169,7 +173,7 @@ L10_system_emulation() {
     fi
   fi
 
-  if [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
+  if [[ "${MODULE_END}" -ne 0 ]] && [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
     if [[ $(grep -c "TCP ok" "${LOG_DIR}"/emulator_online_results.log || true) -gt 0 ]]; then
       print_ln
       print_output "[+] Identified the following system emulation results (with running network services):"
@@ -182,6 +186,7 @@ L10_system_emulation() {
       IP_ADDRESS_=$(echo "${SYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f8 | awk '{print $3}')
       IMAGE_DIR="$(echo "${SYS_EMUL_POS_ENTRY}" | grep "TCP ok" | sort -k 7 -t ';' | tail -1 | cut -d\; -f10)"
       ARCHIVE_PATH="${LOG_PATH_MODULE}""/""${IMAGE_DIR}"
+
       print_ln
       print_output "[*] Identified IP address: ${ORANGE}${IP_ADDRESS_}${NC}" "no_log"
       print_output "[*] Identified IMAGE_DIR: ${ORANGE}${IMAGE_DIR}${NC}" "no_log"
@@ -214,7 +219,7 @@ check_bmc_supermicro(){
   local S06_LOG="${CSV_DIR}/s06_distribution_identification.csv"
   if [[ -f "${S06_LOG}" ]]; then
     if grep "supermicro:bmc" "${S06_LOG}"; then
-      print_output "[-] WARNING: Supermicro firmware found - Specifice qemu emulation not supported"
+      print_output "[-] WARNING: Supermicro firmware found - Specific qemu emulation not supported"
     fi
   fi
 }
@@ -240,8 +245,11 @@ print_system_emulation_results() {
 
 pre_cleanup_emulator() {
   # this cleanup function is to ensure that we have no mounts from previous tests mounted
+  local CHECK_MOUNTS_ARR=()
+  local MOUNT=""
+
   print_output "[*] Checking for not unmounted proc, sys and run in log directory"
-  mapfile -t CHECK_MOUNTS < <(mount | grep "${LOG_DIR}" | grep "proc\|sys\|run" || true)
+  mapfile -t CHECK_MOUNTS_ARR < <(mount | grep "${LOG_DIR}" | grep "proc\|sys\|run" || true)
   for MOUNT in "${CHECK_MOUNTS[@]}"; do
     print_output "[*] Unmounting ${MOUNT}"
     MOUNT=$(echo "${MOUNT}" | cut -d\  -f3)
@@ -250,7 +258,10 @@ pre_cleanup_emulator() {
 }
 
 cleanup_tap() {
-  mapfile -t TAP_CLEAN < <(ifconfig | grep tap | cut -d: -f1 || true)
+  local TAP_CLEAN_ARR=()
+  local TAP_TO_CLEAN=""
+
+  mapfile -t TAP_CLEAN_ARR < <(ifconfig | grep tap | cut -d: -f1 || true)
   for TAP_TO_CLEAN in "${TAP_CLEAN[@]}"; do
     print_output "[*] Cleaning up TAP interface ${TAP_TO_CLEAN}"
     tunctl -d "${TAP_TO_CLEAN}" || true
@@ -268,7 +279,7 @@ create_emulation_filesystem() {
   local BINARIES_L10=()
   export DEVICE=""
 
-  export IMAGE_NAME
+  export IMAGE_NAME=""
   IMAGE_NAME="$(basename "${ROOT_PATH}")_${ARCH_END}-${RANDOM}"
 
   MNT_POINT="${LOG_PATH_MODULE}/emulation_tmp_fs_firmae"

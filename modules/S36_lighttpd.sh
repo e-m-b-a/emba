@@ -36,6 +36,7 @@ S36_lighttpd() {
 
   if [[ ${#LIGHTTP_BIN_ARR[@]} -gt 0 ]] ; then
     lighttpd_binary_analysis "${LIGHTTP_BIN_ARR[@]}"
+    # -> sets LIGHT_VERSIONS array
   fi
 
   if [[ ${#LIGHTTP_CFG_ARR[@]} -gt 0 ]] ; then
