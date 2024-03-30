@@ -53,7 +53,8 @@ L10_system_emulation() {
     local EMULATION_ENTRY=""
     export BINARY_DIR="${EXT_DIR}/EMBA_Live_bins"
     # FIRMWARE_PATH_orig="$(abs_path "${FIRMWARE_PATH_BAK}")"
-    export LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
+    export LOG_PATH_MODULE=""
+    LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
     local R_PATH_CNT=1
 
     # if we have a supported arch we move on with out emulation attempt
@@ -245,26 +246,26 @@ print_system_emulation_results() {
 
 pre_cleanup_emulator() {
   # this cleanup function is to ensure that we have no mounts from previous tests mounted
-  local CHECK_MOUNTS_ARR=()
-  local MOUNT=""
+  local lCHECK_MOUNTS_ARR=()
+  local lMOUNT=""
 
   print_output "[*] Checking for not unmounted proc, sys and run in log directory"
-  mapfile -t CHECK_MOUNTS_ARR < <(mount | grep "${LOG_DIR}" | grep "proc\|sys\|run" || true)
-  for MOUNT in "${CHECK_MOUNTS[@]}"; do
-    print_output "[*] Unmounting ${MOUNT}"
-    MOUNT=$(echo "${MOUNT}" | cut -d\  -f3)
-    umount -l "${MOUNT}" || true
+  mapfile -t lCHECK_MOUNTS_ARR < <(mount | grep "${LOG_DIR}" | grep "proc\|sys\|run" || true)
+  for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
+    print_output "[*] Unmounting ${lMOUNT}"
+    lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
+    umount -l "${lMOUNT}" || true
   done
 }
 
 cleanup_tap() {
-  local TAP_CLEAN_ARR=()
-  local TAP_TO_CLEAN=""
+  local lTAP_CLEAN_ARR=()
+  local lTAP_TO_CLEAN=""
 
-  mapfile -t TAP_CLEAN_ARR < <(ifconfig | grep tap | cut -d: -f1 || true)
-  for TAP_TO_CLEAN in "${TAP_CLEAN[@]}"; do
-    print_output "[*] Cleaning up TAP interface ${TAP_TO_CLEAN}"
-    tunctl -d "${TAP_TO_CLEAN}" || true
+  mapfile -t lTAP_CLEAN_ARR < <(ifconfig | grep tap | cut -d: -f1 || true)
+  for lTAP_TO_CLEAN in "${lTAP_CLEAN_ARR[@]}"; do
+    print_output "[*] Cleaning up TAP interface ${lTAP_TO_CLEAN}"
+    tunctl -d "${lTAP_TO_CLEAN}" || print_output "[-] Error in tap cleanup"
   done
 }
 
@@ -598,6 +599,7 @@ main_emulation() {
 
     print_output "[*] Unmounting QEMU Image"
     umount_qemu_image "${DEVICE}"
+    delete_device_entry "${IMAGE_NAME}" "${DEVICE}" "${MNT_POINT}"
 
     check_qemu_instance_l10
 
@@ -838,7 +840,7 @@ main_emulation() {
             print_ln
           fi
 
-          create_emulation_archive "${ARCHIVE_PATH}"
+          create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${IPS_INT_VLAN_CFG_mod}"
 
           # if we have a working emulation we stop here
           if [[ "${TCP}" == "ok" ]]; then
@@ -855,7 +857,7 @@ main_emulation() {
         else
           if [[ "${DEBUG_MODE}" -eq 1 ]]; then
             print_output "[-] ${ORANGE}Debug mode:${NC} No working emulation - ${ORANGE}creating${NC} emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
-            create_emulation_archive "${ARCHIVE_PATH}"
+            create_emulation_archive "${KERNEL}" "${IMAGE}" "${ARCHIVE_PATH}" "${IPS_INT_VLAN_CFG_mod}"
           else
             print_output "[-] No working emulation - removing emulation archive ${ORANGE}${ARCHIVE_PATH}${NC}."
             # print_output "[-] Emulation archive: $ARCHIVE_PATH."
@@ -899,7 +901,6 @@ umount_qemu_image() {
     sleep 5
   fi
   enable_strict_mode "${STRICT_MODE}" 0
-  delete_device_entry "${IMAGE_NAME}" "${DEVICE_}" "${MNT_POINT}"
 }
 
 handle_fs_mounts() {
@@ -1736,6 +1737,7 @@ write_network_config_to_filesystem() {
 
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
+    delete_device_entry "${IMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
   fi
 }
 
@@ -1775,7 +1777,7 @@ nvram_check() {
 
       # need to check for firmadyne string in path
       for NVRAM_FILE in "${NVRAM_FILE_LIST[@]}"; do
-        nvram_searcher_emulation &
+        nvram_searcher_emulation "${NVRAM_FILE}" &
         WAIT_PIDS_AE+=( "$!" )
         max_pids_protection "${MAX_THREADS_NVRAM}" "${WAIT_PIDS_AE[@]}"
       done
@@ -1801,36 +1803,40 @@ nvram_check() {
 
   # umount filesystem:
   umount_qemu_image "${DEVICE}"
-
+  delete_device_entry "${IMAGE_NAME}" "${DEVICE}" "${MNT_POINT}"
 }
 
 nvram_searcher_emulation() {
-  if file "${NVRAM_FILE}" | grep -q "ASCII text"; then
-    local COUNT=0
+  local lNVRAM_FILE="${1:-}"
+  local lMAX_VALUES=""
+  local lCOUNT=0
+
+  if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
     if [[ "${#NVRAMS[@]}" -gt 1000 ]]; then
-      MAX_VALUES=1000
+      lMAX_VALUES=1000
     else
-      MAX_VALUES="${#NVRAMS[@]}"
+      lMAX_VALUES="${#NVRAMS[@]}"
     fi
-    for (( j=0; j<"${MAX_VALUES}"; j++ )); do
-      NVRAM_ENTRY="${NVRAMS[${j}]}"
+    for (( j=0; j<"${lMAX_VALUES}"; j++ )); do
+      lNVRAM_ENTRY="${NVRAMS[${j}]}"
+      lNVRAM_KEY=""
       # check https://github.com/pr0v3rbs/FirmAE/blob/master/scripts/inferDefault.py
-      echo "${NVRAM_ENTRY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.tmp
-      NVRAM_KEY=$(echo "${NVRAM_ENTRY}" | tr -dc '[:print:]' | tr -s '[:blank:]')
-      if [[ "${NVRAM_KEY}" =~ [a-zA-Z0-9_] && "${#NVRAM_KEY}" -gt 3 ]]; then
+      echo "${lNVRAM_ENTRY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.tmp
+      lNVRAM_KEY=$(echo "${lNVRAM_ENTRY}" | tr -dc '[:print:]' | tr -s '[:blank:]')
+      if [[ "${lNVRAM_KEY}" =~ [a-zA-Z0-9_] && "${#NVRAM_KEY}" -gt 3 ]]; then
         # print_output "[*] NVRAM access detected: $ORANGE$NVRAM_KEY$NC"
-        if grep -q "${NVRAM_KEY}" "${NVRAM_FILE}" 2>/dev/null; then
+        if grep -q "${lNVRAM_KEY}" "${lNVRAM_FILE}" 2>/dev/null; then
           # print_output "[*] Possible NVRAM access via key $ORANGE$NVRAM_KEY$NC found in NVRAM file $ORANGE$NVRAM_FILE$NC."
-          COUNT=$((COUNT + 1))
+          lCOUNT=$((lCOUNT + 1))
         fi
-        echo "${NVRAM_KEY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.log
+        echo "${lNVRAM_KEY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.log
       fi
     done
-    if [[ "${COUNT}" -gt 0 ]]; then
-      # NVRAM_FILE=$(echo "${NVRAM_FILE}" | sed 's/^\.//')
-      NVRAM_FILE="${NVRAM_FILE/\.}"
-      # print_output "[*] $NVRAM_FILE $COUNT ASCII_text"
-      echo "${NVRAM_FILE} ${COUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
+    if [[ "${lCOUNT}" -gt 0 ]]; then
+      # NVRAM_FILE=$(echo "${lNVRAM_FILE}" | sed 's/^\.//')
+      lNVRAM_FILE="${lNVRAM_FILE/\.}"
+      # print_output "[*] $lNVRAM_FILE $lCOUNT ASCII_text"
+      echo "${lNVRAM_FILE} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
     fi
   fi
 }
@@ -2148,30 +2154,33 @@ create_emulation_archive() {
   sub_module_title "Archive to re-run emulated environment"
   print_output "With the following archive it is possible to rebuild the created emulation environment fully automated."
 
-  local ARCHIVE_PATH="${1:-}"
-  local ARCH_NAME=""
+  local lKERNEL="${1:-}"
+  local lIMAGE="${2:-}"
+  local lARCHIVE_PATH="${3:-}"
+  local lIPS_INT_VLAN_CFG_mod="${4:-}"
+  local lARCH_NAME=""
 
-  cp "${KERNEL}" "${ARCHIVE_PATH}" || true
-  cp "${IMAGE}" "${ARCHIVE_PATH}" || true
+  cp "${lKERNEL}" "${lARCHIVE_PATH}" || print_output "[-] Error in kernel copy procedure" "no_log"
+  cp "${lIMAGE}" "${lARCHIVE_PATH}" || print_output "[-] Error in image copy procedure" "no_log"
 
   if [[ -f "${LOG_PATH_MODULE}"/"${NMAP_LOG}" ]]; then
-    mv "${LOG_PATH_MODULE}"/"${NMAP_LOG}" "${ARCHIVE_PATH}" || true
-    mv "${LOG_PATH_MODULE}"/nmap_emba_"${IPS_INT_VLAN_CFG_mod}"* "${ARCHIVE_PATH}" || true
+    mv "${LOG_PATH_MODULE}"/"${NMAP_LOG}" "${lARCHIVE_PATH}" ||  print_output "[-] Error in Nmap results copy procedure" "no_log"
+    mv "${LOG_PATH_MODULE}"/nmap_emba_"${lIPS_INT_VLAN_CFG_mod}"* "${lARCHIVE_PATH}" || print_output "[-] Error in Nmap results copy procedure" "no_log"
   fi
 
-  echo "${IPS_INT_VLAN_CFG_mod}" >> "${ARCHIVE_PATH}"/emulation_config.txt || true
-  cat "${LOG_DIR}"/emulator_online_results.log >> "${ARCHIVE_PATH}"/emulation_config.txt || true
+  echo "${lIPS_INT_VLAN_CFG_mod}" >> "${lARCHIVE_PATH}"/emulation_config.txt || true
+  cat "${LOG_DIR}"/emulator_online_results.log >> "${lARCHIVE_PATH}"/emulation_config.txt || true
 
-  if [[ -v ARCHIVE_PATH ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
-    chmod +x "${ARCHIVE_PATH}"/run.sh
-    sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "${ARCHIVE_PATH}"/run.sh
+  if [[ -v ARCHIVE_PATH ]] && [[ -f "${lARCHIVE_PATH}"/run.sh ]]; then
+    chmod +x "${lARCHIVE_PATH}"/run.sh
+    sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "${lARCHIVE_PATH}"/run.sh
 
     # create archive
-    ARCH_NAME="$(basename "${ARCHIVE_PATH}")".tar.gz
-    tar -czvf "${LOG_PATH_MODULE}"/"${ARCH_NAME}" "${ARCHIVE_PATH}"
-    if [[ -f "${LOG_PATH_MODULE}"/"${ARCH_NAME}" ]]; then
+    lARCH_NAME="$(basename "${lARCHIVE_PATH}")".tar.gz
+    tar -czvf "${LOG_PATH_MODULE}"/"${lARCH_NAME}" "${lARCHIVE_PATH}"
+    if [[ -f "${LOG_PATH_MODULE}"/"${lARCH_NAME}" ]]; then
       print_ln
-      print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}${ARCH_NAME}${NC}" "" "${LOG_PATH_MODULE}/${ARCH_NAME}"
+      print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}${lARCH_NAME}${NC}" "" "${LOG_PATH_MODULE}/${lARCH_NAME}"
       print_ln
     fi
   else
@@ -2183,7 +2192,8 @@ create_emulation_archive() {
 # EXECUTE: 1 -> execute and write script
 # EXECUTE: 2 -> just execute
 reset_network_emulation() {
-  EXECUTE_="${1:0}"
+  local lEXECUTE="${1:-0}"
+  local lEXECUTE_tmp=0
 
   if ! [[ -v IMAGE_NAME ]] || ! [[ -v ARCHIVE_PATH ]]; then
     return
@@ -2194,89 +2204,90 @@ reset_network_emulation() {
     return
   fi
 
-  if [[ "${EXECUTE_}" -ne 0 ]]; then
+  if [[ "${lEXECUTE}" -ne 0 ]]; then
     print_output "[*] Stopping Qemu emulation ..." "no_log"
     pkill -9 -f "qemu-system-.*${IMAGE_NAME}.*" || true &>/dev/null
   fi
 
-  if [[ "${EXECUTE_}" -eq 1 ]] && ! grep -q "Deleting route" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+  if [[ "${lEXECUTE}" -eq 1 ]] && ! grep -q "Deleting route" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     write_script_exec "echo -e \"Deleting route ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
   fi
   if [[ -v HOSTNETDEV_0 ]] && ! grep -q "ip route flush dev" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     print_output "[*] Deleting route..." "no_log"
-    write_script_exec "ip route flush dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${EXECUTE_}"
+    write_script_exec "ip route flush dev ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE}"
   fi
 
-  if [[ "${EXECUTE_}" -eq 1 ]] && ! grep -q "Bringing down TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+  if [[ "${lEXECUTE}" -eq 1 ]] && ! grep -q "Bringing down TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     print_output "[*] Bringing down TAP device..." "no_log"
     write_script_exec "echo -e \"Bringing down TAP device ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
   fi
-  if [[ "${EXECUTE_}" -lt 2 ]] && ! grep -q "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    EXECUTE_tmp=1
+  if [[ "${lEXECUTE}" -lt 2 ]] && ! grep -q "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    lEXECUTE_tmp=1
   else
-    EXECUTE_tmp="${EXECUTE_}"
+    lEXECUTE_tmp="${lEXECUTE}"
   fi
-  write_script_exec "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh "${EXECUTE_tmp}"
+  write_script_exec "ip link set ${TAPDEV_0} down" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
 
-  if [[ "${EXECUTE_}" -eq 1 ]] && ! grep -q "Removing VLAN" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+  if [[ "${lEXECUTE}" -eq 1 ]] && ! grep -q "Removing VLAN" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     print_output "Removing VLAN..." "no_log"
     write_script_exec "echo -e \"Removing VLAN ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
   fi
 
-  if [[ "${EXECUTE_}" -lt 2 ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    EXECUTE_tmp=1
+  if [[ "${lEXECUTE}" -lt 2 ]] && ! grep -q "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    lEXECUTE_tmp=1
   else
-    EXECUTE_tmp="${EXECUTE_}"
+    lEXECUTE_tmp="${lEXECUTE}"
   fi
-  write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${EXECUTE_tmp}"
+  write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
 
-  if [[ "${EXECUTE_}" -eq 1 ]] && ! grep -q "Deleting TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+  if [[ "${lEXECUTE}" -eq 1 ]] && ! grep -q "Deleting TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     print_output "Deleting TAP device ${TAPDEV_0}..." "no_log"
     write_script_exec "echo -e \"Deleting TAP device ...\n\"" "${ARCHIVE_PATH}"/run.sh 0
   fi
 
-  if [[ "${EXECUTE_}" -lt 2 ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
-    EXECUTE_tmp=1
+  if [[ "${lEXECUTE}" -lt 2 ]] && ! grep -q "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
+    lEXECUTE_tmp=1
   else
-    EXECUTE_tmp="${EXECUTE_}"
+    lEXECUTE_tmp="${lEXECUTE}"
   fi
-  write_script_exec "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh "${EXECUTE_tmp}"
+  write_script_exec "tunctl -d ${TAPDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
 }
 
 write_script_exec() {
-  local COMMAND="${1:-}"
+  local lCOMMAND="${1:-}"
   # SCRIPT_WRITE: File to write
-  local SCRIPT_WRITE="${2:-}"
+  local lSCRIPT_WRITE="${2:-}"
   # EXECUTE: 0 -> just write script
   # EXECUTE: 1 -> execute and write script
   # EXECUTE: 2 -> just execute
-  local EXECUTE="${3:0}"
+  local lEXECUTE="${3:-0}"
+  local lPID=""
 
-  if [[ "${EXECUTE}" -ne 0 ]];then
-    eval "${COMMAND}" || true &
-    PID="$!"
-    disown "${PID}" 2> /dev/null || true
+  if [[ "${lEXECUTE}" -ne 0 ]];then
+    eval "${lCOMMAND}" || true &
+    lPID="$!"
+    disown "${lPID}" 2> /dev/null || true
   fi
 
-  if [[ "${EXECUTE}" -ne 2 ]];then
-    if ! [[ -f "${SCRIPT_WRITE}" ]]; then
+  if [[ "${lEXECUTE}" -ne 2 ]];then
+    if ! [[ -f "${lSCRIPT_WRITE}" ]]; then
       # just in case we have our script not already there we set it up now
-      echo "#!/bin/bash -p" > "${SCRIPT_WRITE}"
+      echo "#!/bin/bash -p" > "${lSCRIPT_WRITE}"
     fi
 
     # for the final script we need to adjust the paths:
-    if echo "${COMMAND}" | grep -q qemu-system-; then
+    if echo "${lCOMMAND}" | grep -q qemu-system-; then
       # fix path for kernel: /external/firmae/binaries/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
       # fix path for kernel: /external/EMBA_Live_bins/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
       # shellcheck disable=SC2001
-      COMMAND=$(echo "${COMMAND}" | sed 's#-kernel\ .*\/EMBA_Live_bins\/#-kernel\ .\/#g')
+      lCOMMAND=$(echo "${lCOMMAND}" | sed 's#-kernel\ .*\/EMBA_Live_bins\/#-kernel\ .\/#g')
       # shellcheck disable=SC2001
-      COMMAND=$(echo "${COMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
+      lCOMMAND=$(echo "${lCOMMAND}" | sed "s#${IMAGE:-}#\.\/${IMAGE_NAME:-}#g")
       # shellcheck disable=SC2001
-      COMMAND=$(echo "${COMMAND}" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
+      lCOMMAND=$(echo "${COMMAND}" | sed "s#\"${LOG_PATH_MODULE:-}\"#\.#g")
     fi
 
-    echo "${COMMAND}" >> "${SCRIPT_WRITE}"
+    echo "${lCOMMAND}" >> "${lSCRIPT_WRITE}"
   fi
 }
 
