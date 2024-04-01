@@ -69,7 +69,6 @@ check_lzma_backdoor() {
       else
         print_output "[*] Found ${ORANGE}${lLZMA_SSHD_ENTRY}${NC} in ${ORANGE}${lSSH_FILE/:*}${NC}. Further manual checks are required."
       fi
-      CHECK=1
     done
   done
 
@@ -96,7 +95,8 @@ check_lzma_backdoor() {
       lCHECK=1
     fi
   done
-  [[ ${lCHECK} -eq 0 ]] && print_output "[-] No lzma implant identified."
+
+  if [[ ${lCHECK} -eq 0 ]]; then print_output "[-] No lzma implant identified."; fi
 }
 
 search_ssh_files()
@@ -188,5 +188,5 @@ check_squid() {
       fi
     done
   fi
-  [[ ${CHECK} -eq 0 ]] && print_output "[-] No squid configuration found"
+  if [[ ${lCHECK} -eq 0 ]]; then print_output "[-] No squid configuration found."; fi
 }
