@@ -14,6 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Looks for ssh-related files and checks squid configuration.
+#               Checks for the XZ backdoor documented as CVE-2024-3094
 
 S85_ssh_check()
 {
