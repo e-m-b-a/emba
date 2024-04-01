@@ -26,7 +26,7 @@ S85_ssh_check()
   local NEG_LOG=0
 
   search_ssh_files
-  check_lzma
+  check_lzma_backdoor
   check_squid
 
   write_log ""
