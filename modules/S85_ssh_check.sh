@@ -26,6 +26,7 @@ S85_ssh_check()
   local NEG_LOG=0
 
   search_ssh_files
+  check_lzma
   check_squid
 
   write_log ""
@@ -36,6 +37,50 @@ S85_ssh_check()
   fi
 
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+}
+
+check_lzma_backdoor() {
+  sub_module_title "Check for possible lzma backdoor - CVE-2024-3094"
+
+  local lSSH_FILES_ARR=()
+  local lSSH_FILE=""
+  local lLZMA_SSHD_ARR=()
+  local lLZMA_SSHD_ENTRY=""
+  local lLZMA_FILES_ARR=()
+  local lLZMA_FILE=""
+  local OUTPUT="The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
+  local lCHECK=0
+
+  mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -exec file {} \; | grep "ELF")
+  for lSSH_FILE in "${lSSH_FILES_ARR[@]}"; do
+    print_output "[*] Testing ${ORANGE}${lSSH_FILE}${NC}:" "no_log"
+    mapfile -t lLZMA_SSHD_ARR < <(ldd "${lSSH_FILE}" | grep "liblzma" || true)
+    for lLZMA_SSHD_ENTRY in "${lLZMA_SSHD_ARR[@]}"; do
+      print_output "The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
+      if [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.0"* ]] || [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.1"* ]]; then
+        print_output "${OUTPUT}"
+        print_output "[+] Found ${ORANGE}${lLZMA_SSHD_ENTRY}${GREEN} with affected version in ${ORANGE}${lSSH_FILE}${GREEN}."
+        ((SSH_VUL_CNT+=1))
+        lCHECK=1
+      else
+        print_output "[*] Found ${ORANGE}${lLZMA_SSHD_ENTRY}${NC} in ${ORANGE}${lSSH_FILE}${NC}. Further manual checks are required."
+      fi
+      CHECK=1
+    done
+  done
+
+  mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -exec file {} \; | grep "ELF")
+  for lLZMA_FILE in "${lLZMA_FILES_ARR[@]}"; do
+    print_output "[*] Testing ${ORANGE}${lLZMA_FILE}${NC}:" "no_log"
+    if [[ "${lLZMA_FILE}" == *"5.6.0"* ]] || [[ "${lLZMA_FILE}" == *"5.6.1"* ]]; then
+      print_output "${OUTPUT}"
+      print_output "[+] Found ${ORANGE}${lLZMA_FILE}${GREEN} with affected version"
+      ((SSH_VUL_CNT+=1))
+      lCHECK=1
+    fi
+  done
+
+  [[ ${lCHECK} -eq 0 ]] && print_output "[-] No lzma implant identified."
 }
 
 search_ssh_files()
