@@ -58,6 +58,8 @@ check_lzma_backdoor() {
   mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -exec file {} \; | grep "ELF" || true)
   for lSSH_FILE in "${lSSH_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lSSH_FILE/:*}${NC}:" "no_log"
+
+    # usually we have something like liblzma.so.5, but sometimes we have also seen the exact version information in the output
     mapfile -t lLZMA_SSHD_ARR < <(ldd "${lSSH_FILE/:*}" | grep "liblzma" || true)
 
     for lLZMA_SSHD_ENTRY in "${lLZMA_SSHD_ARR[@]}"; do
@@ -65,6 +67,7 @@ check_lzma_backdoor() {
       if [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.0"* ]] || [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.1"* ]]; then
         print_output "${OUTPUT}"
         print_output "[+] Found ${ORANGE}${lLZMA_SSHD_ENTRY}${GREEN} with affected version in ${ORANGE}${lSSH_FILE/:*}${GREEN}."
+        write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
         ((SSH_VUL_CNT+=1))
         lCHECK=1
       else
@@ -73,17 +76,20 @@ check_lzma_backdoor() {
     done
   done
 
+  # letz find the library directly in the system:
   mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -exec file {} \; | grep "ELF" || true)
   for lLZMA_FILE in "${lLZMA_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lLZMA_FILE/:*}${NC}:" "no_log"
     if [[ "${lLZMA_FILE/:*}" == *"5.6.0"* ]] || [[ "${lLZMA_FILE/:*}" == *"5.6.1"* ]]; then
       print_output "${OUTPUT}"
       print_output "[+] Found ${ORANGE}${lLZMA_FILE/:*}${GREEN} with affected version."
+      write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
       ((SSH_VUL_CNT+=1))
       lCHECK=1
     fi
   done
 
+  # check for the xz binary in the vulnerable version
   mapfile -t lXZ_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "xz" -exec file {} \; | grep "ELF" || true)
   for lXZ_FILE in "${lXZ_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lXZ_FILE/:*}${NC}:" "no_log"
@@ -91,6 +97,7 @@ check_lzma_backdoor() {
     if [[ "${lXZ_V_OUT}" == *"5.6."* ]]; then
       print_output "${OUTPUT}"
       print_output "[+] Found ${ORANGE}${lXZ_FILE/:*}${GREEN} with affected version."
+      write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
       strings "${lXZ_FILE}" | grep -q "5\.6\.[01]" | tee -a "${LOG_FILE}" || true
       ((SSH_VUL_CNT+=1))
       lCHECK=1
