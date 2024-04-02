@@ -59,6 +59,7 @@ check_lzma_backdoor() {
   for lSSH_FILE in "${lSSH_FILES_ARR[@]}"; do
     print_output "[*] Testing ${ORANGE}${lSSH_FILE/:*}${NC}:" "no_log"
     mapfile -t lLZMA_SSHD_ARR < <(ldd "${lSSH_FILE/:*}" | grep "liblzma" || true)
+
     for lLZMA_SSHD_ENTRY in "${lLZMA_SSHD_ARR[@]}"; do
       print_output "The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
       if [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.0"* ]] || [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.1"* ]]; then
@@ -153,7 +154,7 @@ search_ssh_files()
 check_squid() {
   sub_module_title "Check squid"
   local BIN_FILE=""
-  local CHECK=0
+  local lCHECK=0
   local SQUID_E=""
   local SQUID_PATHS_ARR=()
 
@@ -172,15 +173,15 @@ check_squid() {
   elif [[ "${#SQUID_PATHS_ARR[@]}" -ne 0 ]] ; then
     for SQUID_E in "${SQUID_PATHS_ARR[@]}"; do
       if [[ -f "${SQUID_E}""/squid.conf" ]] ; then
-        CHECK=1
+        lCHECK=1
         print_output "[+] Found squid config: ""${ORANGE}$(print_path "${SQUID_E}")${NC}"
         ((SQUID_VUL_CNT+=1))
       elif [[ -f "${SQUID_E}""/squid3.conf" ]] ; then
-        CHECK=1
+        lCHECK=1
         print_output "[+] Found squid config: ""${ORANGE}$(print_path "${SQUID_E}")${NC}"
         ((SQUID_VUL_CNT+=1))
       fi
-      if [[ ${CHECK} -eq 1 ]] ; then
+      if [[ ${lCHECK} -eq 1 ]] ; then
         print_output "[*] Check external access control list type:"
         print_output "$(indent "$(grep "^external_acl_type" "${SQUID_E}")")"
         print_output "[*] Check access control list:"
