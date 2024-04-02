@@ -14,6 +14,7 @@
 # Author(s): Michael Messner, Pascal Eckmann
 
 # Description:  Looks for ssh-related files and checks squid configuration.
+#               Checks for the XZ backdoor documented as CVE-2024-3094
 
 S85_ssh_check()
 {
@@ -26,6 +27,7 @@ S85_ssh_check()
   local NEG_LOG=0
 
   search_ssh_files
+  check_lzma_backdoor
   check_squid
 
   write_log ""
@@ -36,6 +38,73 @@ S85_ssh_check()
   fi
 
   module_end_log "${FUNCNAME[0]}" "${NEG_LOG}"
+}
+
+check_lzma_backdoor() {
+  sub_module_title "Check for possible lzma backdoor - CVE-2024-3094"
+
+  local lSSH_FILES_ARR=()
+  local lSSH_FILE=""
+  local lLZMA_SSHD_ARR=()
+  local lLZMA_SSHD_ENTRY=""
+  local lLZMA_FILES_ARR=()
+  local lLZMA_FILE=""
+  local lXZ_FILES_ARR=()
+  local lXZ_FILE=""
+  local lXZ_V_OUT=""
+  local OUTPUT="The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
+  local lCHECK=0
+
+  mapfile -t lSSH_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*ssh*" -exec file {} \; | grep "ELF" || true)
+  for lSSH_FILE in "${lSSH_FILES_ARR[@]}"; do
+    print_output "[*] Testing ${ORANGE}${lSSH_FILE/:*}${NC}:" "no_log"
+
+    # usually we have something like liblzma.so.5, but sometimes we have also seen the exact version information in the output
+    mapfile -t lLZMA_SSHD_ARR < <(ldd "${lSSH_FILE/:*}" | grep "liblzma" || true)
+
+    for lLZMA_SSHD_ENTRY in "${lLZMA_SSHD_ARR[@]}"; do
+      print_output "The xz release tarballs from version 5.6.0 in late February and version 5.6.1 on Mach the 9th contain malicious code."
+      if [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.0"* ]] || [[ "${lLZMA_SSHD_ENTRY}" == *"5.6.1"* ]]; then
+        print_output "${OUTPUT}"
+        print_output "[+] Found ${ORANGE}${lLZMA_SSHD_ENTRY}${GREEN} with affected version in ${ORANGE}${lSSH_FILE/:*}${GREEN}."
+        write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
+        ((SSH_VUL_CNT+=1))
+        lCHECK=1
+      else
+        print_output "[*] Found ${ORANGE}${lLZMA_SSHD_ENTRY}${NC} in ${ORANGE}${lSSH_FILE/:*}${NC}. Further manual checks are required."
+      fi
+    done
+  done
+
+  # letz find the library directly in the system:
+  mapfile -t lLZMA_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "*liblzma.so.5*" -exec file {} \; | grep "ELF" || true)
+  for lLZMA_FILE in "${lLZMA_FILES_ARR[@]}"; do
+    print_output "[*] Testing ${ORANGE}${lLZMA_FILE/:*}${NC}:" "no_log"
+    if [[ "${lLZMA_FILE/:*}" == *"5.6.0"* ]] || [[ "${lLZMA_FILE/:*}" == *"5.6.1"* ]]; then
+      print_output "${OUTPUT}"
+      print_output "[+] Found ${ORANGE}${lLZMA_FILE/:*}${GREEN} with affected version."
+      write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
+      ((SSH_VUL_CNT+=1))
+      lCHECK=1
+    fi
+  done
+
+  # check for the xz binary in the vulnerable version
+  mapfile -t lXZ_FILES_ARR < <(find "${LOG_DIR}"/firmware -name "xz" -exec file {} \; | grep "ELF" || true)
+  for lXZ_FILE in "${lXZ_FILES_ARR[@]}"; do
+    print_output "[*] Testing ${ORANGE}${lXZ_FILE/:*}${NC}:" "no_log"
+    lXZ_V_OUT=$(strings "${lXZ_FILE/:*}" | grep "5\.6\.[01]" || true)
+    if [[ "${lXZ_V_OUT}" == *"5.6."* ]]; then
+      print_output "${OUTPUT}"
+      print_output "[+] Found ${ORANGE}${lXZ_FILE/:*}${GREEN} with affected version."
+      write_link "https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094"
+      strings "${lXZ_FILE}" | grep -q "5\.6\.[01]" | tee -a "${LOG_FILE}" || true
+      ((SSH_VUL_CNT+=1))
+      lCHECK=1
+    fi
+  done
+
+  if [[ ${lCHECK} -eq 0 ]]; then print_output "[-] No lzma implant identified."; fi
 }
 
 search_ssh_files()
@@ -92,7 +161,7 @@ search_ssh_files()
 check_squid() {
   sub_module_title "Check squid"
   local BIN_FILE=""
-  local CHECK=0
+  local lCHECK=0
   local SQUID_E=""
   local SQUID_PATHS_ARR=()
 
@@ -111,15 +180,15 @@ check_squid() {
   elif [[ "${#SQUID_PATHS_ARR[@]}" -ne 0 ]] ; then
     for SQUID_E in "${SQUID_PATHS_ARR[@]}"; do
       if [[ -f "${SQUID_E}""/squid.conf" ]] ; then
-        CHECK=1
+        lCHECK=1
         print_output "[+] Found squid config: ""${ORANGE}$(print_path "${SQUID_E}")${NC}"
         ((SQUID_VUL_CNT+=1))
       elif [[ -f "${SQUID_E}""/squid3.conf" ]] ; then
-        CHECK=1
+        lCHECK=1
         print_output "[+] Found squid config: ""${ORANGE}$(print_path "${SQUID_E}")${NC}"
         ((SQUID_VUL_CNT+=1))
       fi
-      if [[ ${CHECK} -eq 1 ]] ; then
+      if [[ ${lCHECK} -eq 1 ]] ; then
         print_output "[*] Check external access control list type:"
         print_output "$(indent "$(grep "^external_acl_type" "${SQUID_E}")")"
         print_output "[*] Check access control list:"
@@ -127,5 +196,5 @@ check_squid() {
       fi
     done
   fi
-  [[ ${CHECK} -eq 0 ]] && print_output "[-] No squid configuration found"
+  if [[ ${lCHECK} -eq 0 ]]; then print_output "[-] No squid configuration found."; fi
 }
