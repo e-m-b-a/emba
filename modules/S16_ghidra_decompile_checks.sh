@@ -305,6 +305,9 @@ s16_semgrep_logger() {
         sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" || true
         # this is the output
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${CODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
+
+        # BINARY;source function;semgrep rule;code line nr; code line
+        write_csv_log "${lNAME}" "${lHARUSPEX_FILE_NAME}" "${lCHECK_ID}" "${lLINE_NR}" "${CODE_LINE/\;}" "${lMESSAGE/\;}"
       fi
       write_log "\\n-----------------------------------------------------------------\\n" "${lSEMGREPLOG_TMP}"
     done < "${lSEMGREPLOG_CSV}"

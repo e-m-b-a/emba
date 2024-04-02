@@ -4,6 +4,8 @@ EMBA_PATH="."
 source "${EMBA_PATH}/helpers/helpers_emba_prepare.sh"
 source "${EMBA_PATH}/helpers/helpers_emba_print.sh"
 
+BLACKLIST_VARS_ARR=("MD5_DONE_DEEP")
+
 mapfile -t ALL_EMBA_SCRIPTS < <(find "${EMBA_PATH}"/modules -name "*.sh")
 
 UNKNOWN_VARS_CNT_ALL=0
@@ -45,6 +47,9 @@ for MODULE in "${ALL_EMBA_SCRIPTS[@]}"; do
     print_output "$(indent "Found the following indirect global variables in ${MODULE}")" "no_log"
     UNKNOWN_VARS_ARR_CNT=0
     for UNKNOWN_VAR in "${UNKNOWN_VARS_ARR[@]}"; do
+      if [[ "${BLACKLIST_VARS_ARR[*]}" == *"${UNKNOWN_VAR}"* ]]; then
+        continue
+      fi
       if [[ "${EXPORTS_ARR[*]}" != *"${UNKNOWN_VAR}"* ]] && [[ "${LOCALS_ARR[*]}" != *"${UNKNOWN_VAR}"* ]]; then
         print_output "$(indent "$(red "[-] indirect exported var: ${ORANGE}${UNKNOWN_VAR}${NC}")")" "no_log"
         UNKNOWN_VARS_ARR_CNT=$((UNKNOWN_VARS_ARR_CNT+1))

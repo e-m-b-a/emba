@@ -127,6 +127,7 @@ set_defaults() {
   export CVE_BLACKLIST="${CONFIG_DIR}"/cve-blacklist.txt  # include the blacklisted CVE values to this file
   export CVE_WHITELIST="${CONFIG_DIR}"/cve-whitelist.txt  # include the whitelisted CVE values to this file
   export NVD_DIR="${EXT_DIR}"/nvd-json-data-feeds
+  export EPSS_DATA_PATH="${EXT_DIR}"/EPSS-data/EPSS_CVE_data
 
   export MODULE_BLACKLIST=()
   if [[ -f "${CONFIG_DIR}"/module_blacklist.txt ]]; then
