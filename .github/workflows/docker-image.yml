@@ -7,7 +7,7 @@ on:
   # pull_request:
   #  branches:
   #    - '**'
-      # Allows you to run this workflow manually from the Actions tab
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *' # do it every day
@@ -36,6 +36,7 @@ jobs:
             sudo docker container prune -f
             sudo apt-get update -y
             sudo apt-get install python3-venv -y
+            sudo apt-get install docker-compose -y
             mkdir ./external
             python3 -m venv "./external/emba_venv"
             source "./external/emba_venv/bin/activate"
