@@ -53,8 +53,7 @@ L10_system_emulation() {
     local EMULATION_ENTRY=""
     export BINARY_DIR="${EXT_DIR}/EMBA_Live_bins"
     # FIRMWARE_PATH_orig="$(abs_path "${FIRMWARE_PATH_BAK}")"
-    export LOG_PATH_MODULE=""
-    LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
+    export LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
     local R_PATH_CNT=1
 
     # if we have a supported arch we move on with out emulation attempt
@@ -116,7 +115,7 @@ L10_system_emulation() {
 
           if [[ -n "${D_END}" ]]; then
             export TAPDEV_0="tap0_0"
-            export D_END=""
+            # export D_END=""
             export ARCH_END=""
 
             D_END="$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
@@ -1020,7 +1019,7 @@ handle_fs_mounts() {
 }
 
 cleanup_emulator(){
-  local IMAGE_NAME="${1:-}"
+  local lIMAGE_NAME="${1:-}"
   if [[ -v ARCHIVE_PATH ]] && [[ -f "${ARCHIVE_PATH}"/run.sh ]]; then
     reset_network_emulation 1
   else
@@ -1028,8 +1027,8 @@ cleanup_emulator(){
   fi
 
   # ugly cleanup:
-  rm /tmp/qemu."${IMAGE_NAME}" || true
-  rm /tmp/qemu."${IMAGE_NAME}".S1 || true
+  rm /tmp/qemu."${lIMAGE_NAME}" || true
+  rm /tmp/qemu."${lIMAGE_NAME}".S1 || true
   if [[ -f /tmp/do_not_create_run.sh ]]; then
     rm /tmp/do_not_create_run.sh || true
   fi
@@ -1039,20 +1038,20 @@ cleanup_emulator(){
 }
 
 delete_device_entry() {
-  local IMAGE_NAME="${1:-}"
+  local lIMAGE_NAME="${1:-}"
   local lDEVICE="${2:-}"
-  local MNT_POINT="${3:-}"
+  local lMNT_POINT="${3:-}"
 
   print_output "[*] Deleting device mapper" "no_log"
 
-  kpartx -v -d "${LOG_PATH_MODULE}/${IMAGE_NAME}"
+  kpartx -v -d "${LOG_PATH_MODULE}/${lIMAGE_NAME}"
   losetup -d "${lDEVICE}" &>/dev/null || true
   # just in case we check the output and remove our device:
-  if losetup | grep -q "$(basename "${IMAGE_NAME}")"; then
-    losetup -d "$(losetup | grep "$(basename "${IMAGE_NAME}")" | awk '{print $1}' || true)"
+  if losetup | grep -q "$(basename "${lIMAGE_NAME}")"; then
+    losetup -d "$(losetup | grep "$(basename "${lIMAGE_NAME}")" | awk '{print $1}' || true)"
   fi
   dmsetup remove "$(basename "${lDEVICE}")" &>/dev/null || true
-  rm -rf "${MNT_POINT:?}/"* || true
+  rm -rf "${lMNT_POINT:?}/"* || true
   sleep 1
 }
 

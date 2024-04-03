@@ -24,7 +24,7 @@ IL15_emulated_checks_init() {
     print_git_info "routersploit" "m-1-k-3/routersploit" "The RouterSploit Framework is an open-source exploitation framework dedicated to embedded devices. (EMBA fork)"
     print_file_info "routersploit_patch" "FirmAE routersploit patch" "https://raw.githubusercontent.com/pr0v3rbs/FirmAE/master/analyses/routersploit_patch" "external/routersploit/docs/routersploit_patch"
     print_git_info "testssl" "EMBA-support-repos/testssl.sh.git" "TestSSL.sh"
-    print_file_info "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "Arachni web application scanner" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni"
+    # print_file_info "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "Arachni web application scanner" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni"
     print_git_info "Nikto" "sullo/nikto" "external/nikto"
 
     print_tool_info "dnsutils" 1
@@ -70,17 +70,17 @@ IL15_emulated_checks_init() {
 
       apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
-      download_file "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz"
-      if ! [[ -d external/arachni/ ]]; then
-        mkdir external/arachni/
-      fi
-      tar -xzf external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz -C external/arachni/
-      rm external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz
-      if ! grep -q arachni /etc/passwd; then
-        useradd arachni
-      fi
-      chown arachni external/arachni -R
-      chown arachni external/arachni -R
+      # download_file "arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz" "external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz"
+      # if ! [[ -d external/arachni/ ]]; then
+      #   mkdir external/arachni/
+      # fi
+      # tar -xzf external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz -C external/arachni/
+      # rm external/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz
+      # if ! grep -q arachni /etc/passwd; then
+      #   useradd arachni
+      # fi
+      # chown arachni external/arachni -R
+      # chown arachni external/arachni -R
 
       if ! [[ -d external/testssl.sh ]]; then
         git clone --depth 1 https://github.com/EMBA-support-repos/testssl.sh.git external/testssl.sh
