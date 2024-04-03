@@ -75,8 +75,6 @@ while ((ID<="${NUMBER_OF_PAGES}")); do
     break
   fi
 
-
-
   grep -E "\/files\/[0-9]+|\/files\/cve|\/files\/tags|www.metasploit.com" "${SAVE_PATH}"/"temp.txt" | awk '{if ($0 ~ "/files/tags/exploit/page[0-9]") exit; else print}' | sed '1,/\.html/ { /\.html/!d }' > "${SAVE_PATH}"/"${LINKS}"
   rm "${SAVE_PATH}"/"temp.txt"
 

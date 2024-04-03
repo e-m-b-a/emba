@@ -254,6 +254,19 @@ emba_updater() {
     print_output "[-] WARNING: Can't update CVE database" "no_log"
   fi
 
+  if [[ -d "${NVD_DIR}" ]]; then
+    print_output "[*] EMBA update - CVE database update" "no_log"
+    cd "${NVD_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
+    if [[ -d ./.git ]]; then
+      git pull
+    else
+      print_output "[-] WARNING: Can't update CVE database" "no_log"
+    fi
+    cd "${HOME_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
+  else
+    print_output "[-] WARNING: Can't update CVE database" "no_log"
+  fi
+
   print_output "[*] EMBA update - docker image" "no_log"
   docker pull embeddedanalyzer/emba
 

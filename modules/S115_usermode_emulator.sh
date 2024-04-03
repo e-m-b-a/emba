@@ -791,6 +791,7 @@ s115_cleanup() {
 
   mapfile -t LOG_FILES < <(find "${LOG_PATH_MODULE}""/" -xdev -type f -name "qemu_tmp*" 2>/dev/null)
   local ILLEGAL_INSTRUCTIONS_CNT=0
+  # shellcheck disable=SC2126
   ILLEGAL_INSTRUCTIONS_CNT=$(grep -l "Illegal instruction" "${LOG_PATH_MODULE}""/"qemu_tmp* | wc -l || true)
   if [[ "${ILLEGAL_INSTRUCTIONS_CNT}" -gt 0 ]]; then
     print_output "[*] Found ${ORANGE}${ILLEGAL_INSTRUCTIONS_CNT}${NC}binaries not emulated - Illegal instructions"
