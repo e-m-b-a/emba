@@ -53,7 +53,7 @@ L10_system_emulation() {
     local EMULATION_ENTRY=""
     export BINARY_DIR="${EXT_DIR}/EMBA_Live_bins"
     # FIRMWARE_PATH_orig="$(abs_path "${FIRMWARE_PATH_BAK}")"
-    export LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
+    LOG_PATH_MODULE=$(abs_path "${LOG_PATH_MODULE}")
     local R_PATH_CNT=1
 
     # if we have a supported arch we move on with out emulation attempt
