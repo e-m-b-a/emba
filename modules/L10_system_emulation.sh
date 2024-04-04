@@ -115,11 +115,11 @@ L10_system_emulation() {
 
           if [[ -n "${D_END}" ]]; then
             export TAPDEV_0="tap0_0"
-            # export D_END=""
             export ARCH_END=""
 
             D_END="$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
-            ARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
+            ARCH_END="$(echo "${ARCH}" | tr '[:upper:]' '[:lower:]')"
+            ARCH_END+="$(echo "${D_END}" | tr '[:upper:]' '[:lower:]')"
 
             # default is ARM_SF -> we only need to check if it is HF
             # The information is based on the results of architecture_check()
@@ -1630,7 +1630,7 @@ setup_network_emulation() {
     TAP_ID=$(shuf -i 1-1000 -n 1)
     TAPDEV_0="tap${TAP_ID}_0"
   fi
-  HOSTNETDEV_0="${TAPDEV_0}"
+  export HOSTNETDEV_0="${TAPDEV_0}"
   print_output "[*] Creating TAP device ${ORANGE}${TAPDEV_0}${NC} ..."
   write_script_exec "echo -e \"Creating TAP device ${TAPDEV_0}\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "command -v tunctl > /dev/null || (echo \"Missing tunctl ... check your installation - install uml-utilities package\" && exit 1)" "${ARCHIVE_PATH}"/run.sh 0
@@ -2219,7 +2219,9 @@ reset_network_emulation() {
   else
     lEXECUTE_tmp="${lEXECUTE}"
   fi
-  write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  if [[ -v HOSTNETDEV_0 ]]; then
+    write_script_exec "ip link delete ${HOSTNETDEV_0}" "${ARCHIVE_PATH}"/run.sh "${lEXECUTE_tmp}"
+  fi
 
   if [[ "${lEXECUTE}" -eq 1 ]] && ! grep -q "Deleting TAP device" "${ARCHIVE_PATH}"/run.sh >/dev/null; then
     print_output "Deleting TAP device ${TAPDEV_0}..." "no_log"
