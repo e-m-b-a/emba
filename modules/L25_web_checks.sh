@@ -18,7 +18,7 @@
 
 L25_web_checks() {
 
-  export ARACHNI_BIN_PATH="${EXT_DIR}/arachni/arachni-1.6.1.3-0.6.1.1/bin"
+  # export ARACHNI_BIN_PATH="${EXT_DIR}/arachni/arachni-1.6.1.3-0.6.1.1/bin"
   export WEB_RESULTS=0
 
   if [[ "${SYS_ONLINE}" -eq 1 ]] && [[ "${TCP}" == "ok" ]]; then
@@ -104,12 +104,12 @@ main_web_check() {
             print_output "[-] System not responding - Not performing Nikto checks"
           fi
 
-          if system_online_check "${IP_ADDRESS_}" ; then
-            arachni_scan "${IP_ADDRESS_}" "${PORT}" "${SSL}"
-            WEB_DONE=1
-          else
-            print_output "[-] System not responding - Not performing Arachni checks"
-          fi
+          # if system_online_check "${IP_ADDRESS_}" ; then
+          #   arachni_scan "${IP_ADDRESS_}" "${PORT}" "${SSL}"
+          #   WEB_DONE=1
+          # else
+          #   print_output "[-] System not responding - Not performing Arachni checks"
+          # fi
         fi
       elif [[ "${SERVICE}" == *"http"* ]];then
         SSL=0
@@ -147,12 +147,12 @@ main_web_check() {
             print_output "[-] System not responding - Not performing Nikto checks"
           fi
 
-          if system_online_check "${IP_ADDRESS_}" ; then
-            arachni_scan "${IP_ADDRESS_}" "${PORT}" "${SSL}"
-            WEB_DONE=1
-          else
-            print_output "[-] System not responding - Not performing Arachni checks"
-          fi
+          # if system_online_check "${IP_ADDRESS_}" ; then
+          #   arachni_scan "${IP_ADDRESS_}" "${PORT}" "${SSL}"
+          #   WEB_DONE=1
+          # else
+          #   print_output "[-] System not responding - Not performing Arachni checks"
+          # fi
         fi
       fi
     done

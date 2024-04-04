@@ -241,9 +241,22 @@ emba_updater() {
 
   EMBA="${INVOCATION_PATH}" FIRMWARE="${FIRMWARE_PATH}" LOG="${LOG_DIR}" docker pull embeddedanalyzer/emba
 
-  if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]]; then
+  if [[ -d "${EXT_DIR}"/EPSS-data ]]; then
+    print_output "[*] EMBA update - EPSS database update" "no_log"
+    cd "${EXT_DIR}"/EPSS-data || ( print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1 )
+    if [[ -d ./.git ]]; then
+      git pull
+    else
+      print_output "[-] WARNING: Can't update EPSS database" "no_log"
+    fi
+    cd "${HOME_DIR}" || ( print_output "[-] WARNING: Can't update EPSS database" "no_log" && exit 1 )
+  else
+    print_output "[-] WARNING: Can't update EPSS database" "no_log"
+  fi
+
+  if [[ -d "${NVD_DIR}" ]]; then
     print_output "[*] EMBA update - CVE database update" "no_log"
-    cd "${EXT_DIR}"/nvd-json-data-feeds || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
+    cd "${NVD_DIR}" || ( print_output "[-] WARNING: Can't update CVE database" "no_log" && exit 1 )
     if [[ -d ./.git ]]; then
       git pull
     else

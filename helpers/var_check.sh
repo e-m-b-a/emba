@@ -1,7 +1,9 @@
 #!/bin/bash
-#
+
 EMBA_PATH="."
+# shellcheck source=/dev/null
 source "${EMBA_PATH}/helpers/helpers_emba_prepare.sh"
+# shellcheck source=/dev/null
 source "${EMBA_PATH}/helpers/helpers_emba_print.sh"
 
 BLACKLIST_VARS_ARR=("MD5_DONE_DEEP")
