@@ -736,7 +736,6 @@ dependency_check()
         # routersploit for full system emulation
         check_dep_file "Routersploit installation" "${EXT_DIR}""/routersploit/rsf.py"
 
-        check_dep_file "Arachni web scanner installation" "${EXT_DIR}""/arachni/arachni-1.6.1.3-0.6.1.1/bin/arachni"
         check_dep_file "TestSSL.sh installation" "${EXT_DIR}""/testssl.sh/testssl.sh"
         check_dep_file "Nikto web server analyzer" "${EXT_DIR}""/nikto/program/nikto.pl"
         check_dep_tool "Cutycapt screenshot tool" "cutycapt"
