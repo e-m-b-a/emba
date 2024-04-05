@@ -165,6 +165,7 @@ architecture_check()
     export ARM_SF=0
     D_END="NA"
 
+    write_csv_log "BINARY" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
     # we use the binaries array which is already unique
     for BINARY in "${BINARIES[@]}" ; do
       # noreorder, pic, cpic, o32, mips32
