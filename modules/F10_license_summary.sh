@@ -47,9 +47,13 @@ F10_license_summary() {
         continue
       fi
 
-      BINARY="$(safe_echo "${ENTRY}" | cut -d\; -f1)"
-      VERSION="$(safe_echo "${ENTRY}" | cut -d\; -f2 | cut -d: -f2-)"
-      LICENSE="$(safe_echo "${ENTRY}" |  cut -d\; -f3)"
+      # first field
+      BINARY="${ENTRY/:*}"
+      # middle field
+      VERSION="${ENTRY#*;}"
+      VERSION="${VERSION/;*}"
+      # last field
+      LICENSE="${ENTRY##*;}"
 
       print_output "[+] Binary: ${ORANGE}$(basename "${BINARY}" | cut -d\  -f1)${GREEN} / Version: ${ORANGE}${VERSION}${GREEN} / License: ${ORANGE}${LICENSE}${NC}"
       write_csv_log "${BINARY}" "${VERSION_RULE}" "${VERSION}" "${CSV_RULE}" "${LICENSE}" "${TYPE}"
@@ -65,9 +69,13 @@ F10_license_summary() {
         continue
       fi
 
-      BINARY="$(safe_echo "${ENTRY}" | cut -d\; -f1)"
-      VERSION="$(safe_echo "${ENTRY}" | cut -d\; -f2 | cut -d: -f2-)"
-      LICENSE="$(safe_echo "${ENTRY}" |  cut -d\; -f3)"
+      # first field
+      BINARY="${ENTRY/:*}"
+      # middle field
+      VERSION="${ENTRY#*;}"
+      VERSION="${VERSION/;*}"
+      # last field
+      LICENSE="${ENTRY##*;}"
 
       print_output "[+] Binary: ${ORANGE}$(basename "${BINARY}")${GREEN} / Version: ${ORANGE}${VERSION}${GREEN} / License: ${ORANGE}${LICENSE}${NC}"
       write_csv_log "${BINARY}" "${VERSION_RULE}" "${VERSION}" "${CSV_RULE}" "${LICENSE}" "${TYPE}"
