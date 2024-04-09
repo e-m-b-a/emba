@@ -48,7 +48,7 @@ F10_license_summary() {
       fi
 
       # first field
-      BINARY="${ENTRY/:*}"
+      BINARY="${ENTRY/;*}"
       # middle field
       VERSION="${ENTRY#*;}"
       VERSION="${VERSION/;*}"
@@ -70,7 +70,7 @@ F10_license_summary() {
       fi
 
       # first field
-      BINARY="${ENTRY/:*}"
+      BINARY="${ENTRY/;*}"
       # middle field
       VERSION="${ENTRY#*;}"
       VERSION="${VERSION/;*}"
