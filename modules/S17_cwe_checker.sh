@@ -76,12 +76,12 @@ cwe_container_prepare() {
 }
 
 cwe_check() {
-  local BINARY=""
-  local BIN_TO_CHECK=""
-  local BIN_TO_CHECK_ARR=()
-  local WAIT_PIDS_S17=()
-  local NAME=""
-  local BINS_CHECKED_ARR=()
+  local lBINARY=""
+  local lBIN_TO_CHECK=""
+  local lBIN_TO_CHECK_ARR=()
+  local lWAIT_PIDS_S17=()
+  local lNAME=""
+  local lBINS_CHECKED_ARR=()
 
   if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
     local BINARIES=()
@@ -90,49 +90,49 @@ cwe_check() {
     mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}')
   fi
 
-  for BINARY in "${BINARIES[@]}" ; do
+  for lBINARY in "${BINARIES[@]}" ; do
     # as we usually have not the full path from the s13 log, we need to search for the binary again:
-    mapfile -t BIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${BINARY}")" | sort -u || true)
-    for BIN_TO_CHECK in "${BIN_TO_CHECK_ARR[@]}"; do
+    mapfile -t lBIN_TO_CHECK_ARR < <(find "${LOG_DIR}/firmware" -name "$(basename "${lBINARY}")" | sort -u || true)
+    for lBIN_TO_CHECK in "${lBIN_TO_CHECK_ARR[@]}"; do
       if [[ -f "${BASE_LINUX_FILES}" && "${FULL_TEST}" -eq 0 ]]; then
         # if we have the base linux config file we only test non known Linux binaries
         # with this we do not waste too much time on open source Linux stuff
-        NAME=$(basename "${BIN_TO_CHECK}")
-        if grep -E -q "^${NAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
+        lNAME=$(basename "${lBIN_TO_CHECK}")
+        if grep -E -q "^${lNAME}$" "${BASE_LINUX_FILES}" 2>/dev/null; then
           continue
         fi
       fi
 
-      if ( file "${BIN_TO_CHECK}" | grep -q ELF ) ; then
+      if ( file "${lBIN_TO_CHECK}" | grep -q ELF ) ; then
         # do not try to analyze kernel modules:
-        [[ "${BIN_TO_CHECK}" == *".ko" ]] && continue
+        [[ "${lBIN_TO_CHECK}" == *".ko" ]] && continue
         # ensure we have not tested this binary entry
-        local BIN_MD5=""
-        BIN_MD5="$(md5sum "${BIN_TO_CHECK}" | awk '{print $1}')"
-        if [[ "${BINS_CHECKED_ARR[*]}" == *"${BIN_MD5}"* ]]; then
-          # print_output "[*] ${ORANGE}${BIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
+        local lBIN_MD5=""
+        lBIN_MD5="$(md5sum "${lBIN_TO_CHECK}" | awk '{print $1}')"
+        if [[ "${lBINS_CHECKED_ARR[*]}" == *"${lBIN_MD5}"* ]]; then
+          # print_output "[*] ${ORANGE}${lBIN_TO_CHECK}${NC} already tested with ghidra/semgrep" "no_log"
           continue
         fi
-        BINS_CHECKED_ARR+=( "${BIN_MD5}" )
+        lBINS_CHECKED_ARR+=( "${lBIN_MD5}" )
 
         if [[ "${THREADED}" -eq 1 ]]; then
           # while s09 is running we throttle this module:
-          local MAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
+          local lMAX_MOD_THREADS=$(("$(grep -c ^processor /proc/cpuinfo || true)" / 3))
           if [[ $(grep -i -c S09_ "${LOG_DIR}"/"${MAIN_LOG_FILE}" || true) -eq 1 ]]; then
-            local MAX_MOD_THREADS=1
+            local lMAX_MOD_THREADS=1
           fi
-          cwe_checker_threaded "${BIN_TO_CHECK}" &
-          local TMP_PID="$!"
-          store_kill_pids "${TMP_PID}"
-          WAIT_PIDS_S17+=( "${TMP_PID}" )
+          cwe_checker_threaded "${lBIN_TO_CHECK}" &
+          local lTMP_PID="$!"
+          store_kill_pids "${lTMP_PID}"
+          lWAIT_PIDS_S17+=( "${lTMP_PID}" )
 
-          max_pids_protection "${MAX_MOD_THREADS}" "${WAIT_PIDS_S17[@]}"
+          max_pids_protection "${lMAX_MOD_THREADS}" "${lWAIT_PIDS_S17[@]}"
         else
-          cwe_checker_threaded "${BIN_TO_CHECK}"
+          cwe_checker_threaded "${lBIN_TO_CHECK}"
         fi
         # we stop checking after the first 20 binaries
         # usually these are non-linux binaries and ordered by the usage of system/strcpy legacy usages
-        if [[ "${#BINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
+        if [[ "${#lBINS_CHECKED_ARR[@]}" -gt 20 ]] && [[ "${FULL_TEST}" -ne 1 ]]; then
           print_output "[*] 20 binaries already analysed - ending Ghidra binary analysis now." "no_log"
           print_output "[*] For complete analysis enable FULL_TEST." "no_log"
           break 2
@@ -141,47 +141,53 @@ cwe_check() {
     done
   done
 
-  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${WAIT_PIDS_S17[@]}"
+  [[ ${THREADED} -eq 1 ]] && wait_for_pid "${lWAIT_PIDS_S17[@]}"
 }
 
 cwe_checker_threaded () {
-  local BINARY_="${1:-}"
-  local CWE_OUT=()
-  local CWE_LINE=""
-  local CWE=""
-  local CWE_DESC=""
-  local CWE_CNT=0
-  local MEM_LIMIT=$(( "${TOTAL_MEMORY}"/2 ))
+  local lBINARY="${1:-}"
+  local lCWE_OUT=()
+  local lCWE_LINE=""
+  local lCWE=""
+  local lCWE_DESC=""
+  local lCWE_CNT=""
+  local lADDRESSES=""
+  local lCWE_TOTAL_CNT=0
+  local lMEM_LIMIT=$(( "${TOTAL_MEMORY}"/2 ))
 
-  local NAME=""
-  NAME=$(basename "${BINARY_}")
+  local lNAME=""
+  lNAME=$(basename "${lBINARY}")
 
   local OLD_LOG_FILE="${LOG_FILE}"
-  local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${NAME}"".txt"
-  BINARY_=$(readlink -f "${BINARY_}")
+  local LOG_FILE="${LOG_PATH_MODULE}""/cwe_check_""${lNAME}"".txt"
+  lBINARY=$(readlink -f "${lBINARY}")
 
-  ulimit -Sv "${MEM_LIMIT}"
-  # timeout --preserve-status --signal SIGINT 3000 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true
-  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${BINARY_}" --json --out "${LOG_PATH_MODULE}"/cwe_"${NAME}".log || true
+  ulimit -Sv "${lMEM_LIMIT}"
+  timeout --preserve-status --signal SIGINT 3000 cwe_checker "${lBINARY}" --json --out "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log || true
   ulimit -Sv unlimited
-  print_output "[*] Tested ${ORANGE}""$(print_path "${BINARY_}")""${NC}" "no_log"
+  print_output "[*] Tested ${ORANGE}""$(print_path "${lBINARY}")""${NC}" "no_log"
 
-  if [[ -s "${LOG_PATH_MODULE}"/cwe_"${NAME}".log ]]; then
-    jq -r '.[] | "\(.name) - \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${NAME}".log | sort -u || true
-    mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${NAME}".log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+  if [[ -s "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log ]]; then
+    jq -r '.[] | "\(.name) - \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | sort -u || true
+    # get the total number of vulnerabilities in hte binary
+    lCWE_TOTAL_CNT=$(jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | wc -l || true)
+    mapfile -t lCWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | cut -d\) -f1 | tr -d '(' | sort -u || true)
     # this is the logging after every tested file
-    if [[ ${#CWE_OUT[@]} -ne 0 ]] ; then
-      print_output "[+] cwe-checker found ""${ORANGE}""${#CWE_OUT[@]}""${GREEN}"" different security issues in ""${ORANGE}""${NAME}""${GREEN}"":" "" "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
-      for CWE_LINE in "${CWE_OUT[@]}"; do
-        CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
-        CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"
-        CWE_CNT="$(grep -c "${CWE}" "${LOG_PATH_MODULE}"/cwe_"${NAME}".log 2>/dev/null || true)"
-        echo "${CWE_CNT}" >> "${TMP_DIR}"/CWE_CNT.tmp
-        print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
+    if [[ ${#lCWE_OUT[@]} -ne 0 ]] ; then
+      print_output "[+] cwe-checker found a total of ${ORANGE}${lCWE_TOTAL_CNT:-0}${GREEN} and ${ORANGE}${#lCWE_OUT[@]}${GREEN} different security issues in ${ORANGE}${lNAME}${GREEN}:" "" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
+      for lCWE_LINE in "${lCWE_OUT[@]}"; do
+        lCWE="$(echo "${lCWE_LINE}" | awk '{print $1}')"
+        lCWE_DESC="$(echo "${lCWE_LINE}" | cut -d\  -f2-)"
+        lCWE_CNT="$(grep -c "${lCWE}" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log 2>/dev/null || true)"
+        # get a list of all affected addresses:
+        lADDRESSES="$(jq -cr '.[]? | select(.name=='"${lCWE}"') | .addresses' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | tr -d '\n' | sed 's/\]\[/,/g')"
+        echo "${lCWE_CNT}" >> "${TMP_DIR}"/CWE_CNT.tmp
+        print_output "$(indent "$(orange "${lCWE}""${GREEN}"" - ""${lCWE_DESC}"" - ""${ORANGE}""${lCWE_CNT}"" times.")")"
+        write_csv "${lNAME}" "${lBINARY}" "${lCWE_TOTAL_CNT}" "${lCWE}" "${lCWE_CNT}" "${lADDRESSES}" "${lCWE_DESC}"
       done
     else
-      print_output "[-] Nothing found in ""${ORANGE}""${NAME}""${NC}" "no_log"
-      rm "${LOG_PATH_MODULE}"/cwe_"${NAME}".log
+      print_output "[-] Nothing found in ""${ORANGE}""${lNAME}""${NC}" "no_log"
+      rm "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log
     fi
   fi
 

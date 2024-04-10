@@ -2397,40 +2397,40 @@ write_results() {
 }
 
 set_firmae_arbitration() {
-  local FIRMAE_STATE="${1:-true}"
+  local lFIRMAE_STATE="${1:-true}"
   # FirmAE arbitration - enable all mechanisms
-  export FIRMAE_BOOT="${FIRMAE_STATE}"
-  export FIRMAE_NET="${FIRMAE_STATE}"
-  export FIRMAE_NVRAM="${FIRMAE_STATE}"
-  export FIRMAE_KERNEL="${FIRMAE_STATE}"
-  export FIRMAE_ETC="${FIRMAE_STATE}"
+  export FIRMAE_BOOT="${lFIRMAE_STATE}"
+  export FIRMAE_NET="${lFIRMAE_STATE}"
+  export FIRMAE_NVRAM="${lFIRMAE_STATE}"
+  export FIRMAE_KERNEL="${lFIRMAE_STATE}"
+  export FIRMAE_ETC="${lFIRMAE_STATE}"
 }
 
 color_qemu_log() {
-  local QEMU_LOG_FILE_="${1:-}"
-  if ! [[ -f "${QEMU_LOG_FILE_:-}" ]]; then
+  local lQEMU_LOG_FILE="${1:-}"
+  if ! [[ -f "${lQEMU_LOG_FILE:-}" ]]; then
     return
   fi
 
   # GREEN: keywords for network identification:
-  sed -i -r "s/.*br_add_if.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*br_dev_ioctl.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*__inet_insert_ifa.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*ioctl_SIOCSIFHWADDR.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*register_vlan_dev.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*\[NVRAM\]\ .*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*inet_bind.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*adding VLAN [0-9] to HW filter on device eth[0-9].*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
+  sed -i -r "s/.*br_add_if.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*br_dev_ioctl.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*__inet_insert_ifa.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*ioctl_SIOCSIFHWADDR.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*register_vlan_dev.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*\[NVRAM\]\ .*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*inet_bind.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*adding VLAN [0-9] to HW filter on device eth[0-9].*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
 
   # Green: other interesting areas:
-  sed -i -r "s/.*Kernel\ command\ line:\ .*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*Starting\ services\ in\ emulated\ environment.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*Network configuration - ACTION.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*starting\ network\ configuration.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*Current\ network\ configuration.*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*Netstat\ output\ .*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
-  sed -i -r "s/.*Starting\ .*\ service\ .*/\x1b[32m&\x1b[0m/" "${QEMU_LOG_FILE_}"
+  sed -i -r "s/.*Kernel\ command\ line:\ .*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE_}"
+  sed -i -r "s/.*Starting\ services\ in\ emulated\ environment.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*Network configuration - ACTION.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*starting\ network\ configuration.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*Current\ network\ configuration.*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*Netstat\ output\ .*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
+  sed -i -r "s/.*Starting\ .*\ service\ .*/\x1b[32m&\x1b[0m/" "${lQEMU_LOG_FILE}"
 
   # RED:
-  sed -i -r "s/.*Kernel\ panic\ -\ .*/\x1b[31m&\x1b[0m/" "${QEMU_LOG_FILE_}"
+  sed -i -r "s/.*Kernel\ panic\ -\ .*/\x1b[31m&\x1b[0m/" "${lQEMU_LOG_FILE}"
 }
