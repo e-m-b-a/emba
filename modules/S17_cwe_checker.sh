@@ -180,10 +180,10 @@ cwe_checker_threaded () {
         lCWE_DESC="$(echo "${lCWE_LINE}" | cut -d\  -f2-)"
         lCWE_CNT="$(grep -c "${lCWE}" "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log 2>/dev/null || true)"
         # get a list of all affected addresses:
-        lADDRESSES="$(jq -cr '.[]? | select(.name=='"${lCWE}"') | .addresses' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | tr -d '\n' | sed 's/\]\[/,/g')"
+        lADDRESSES="$(jq -cr '.[]? | select(.name=="'"${lCWE}"'") | .addresses' "${LOG_PATH_MODULE}"/cwe_"${lNAME}".log | tr -d '\n' | sed 's/\]\[/,/g')"
         echo "${lCWE_CNT}" >> "${TMP_DIR}"/CWE_CNT.tmp
         print_output "$(indent "$(orange "${lCWE}""${GREEN}"" - ""${lCWE_DESC}"" - ""${ORANGE}""${lCWE_CNT}"" times.")")"
-        write_csv "${lNAME}" "${lBINARY}" "${lCWE_TOTAL_CNT}" "${lCWE}" "${lCWE_CNT}" "${lADDRESSES}" "${lCWE_DESC}"
+        write_csv_log "${lNAME}" "${lBINARY}" "${lCWE_TOTAL_CNT}" "${lCWE}" "${lCWE_CNT}" "${lADDRESSES}" "${lCWE_DESC}"
       done
     else
       print_output "[-] Nothing found in ""${ORANGE}""${lNAME}""${NC}" "no_log"
@@ -201,29 +201,29 @@ cwe_checker_threaded () {
 }
 
 final_cwe_log() {
-  local TOTAL_CWE_CNT="${1:-}"
+  local lTOTAL_CWE_CNT="${1:-}"
   local lTESTED_BINS="${2:-}"
-  local CWE_OUT=()
-  local CWE_LINE=""
-  local CWE=""
-  local CWE_DESC=""
-  local CWE_CNT=""
-  local CWE_LOGS=()
+  local lCWE_OUT_ARR=()
+  local lCWE_LINE=""
+  local lCWE_ID=""
+  local lCWE_DESC=""
+  local lCWE_CNT=""
+  local lCWE_LOGS_ARR=()
 
   if [[ -d "${LOG_PATH_MODULE}" ]]; then
-    mapfile -t CWE_LOGS < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.log")
-    if [[ "${#CWE_LOGS[@]}" -gt 0 ]]; then
-      mapfile -t CWE_OUT < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
-      if [[ ${#CWE_OUT[@]} -gt 0 ]] ; then
+    mapfile -t lCWE_LOGS_ARR < <(find "${LOG_PATH_MODULE}" -type f -name "cwe_*.log")
+    if [[ "${#lCWE_LOGS_ARR[@]}" -gt 0 ]]; then
+      mapfile -t lCWE_OUT_ARR < <( jq -r '.[] | "\(.name) \(.description)"' "${LOG_PATH_MODULE}"/cwe_*.log | cut -d\) -f1 | tr -d '('  | sort -u|| true)
+      if [[ ${#lCWE_OUT_ARR[@]} -gt 0 ]] ; then
         sub_module_title "Results - CWE-checker binary analysis"
-        print_output "[+] cwe-checker found a total of ""${ORANGE}""${TOTAL_CWE_CNT}""${GREEN}"" of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
-        for CWE_LINE in "${CWE_OUT[@]}"; do
-          CWE="$(echo "${CWE_LINE}" | awk '{print $1}')"
-          CWE_DESC="$(echo "${CWE_LINE}" | cut -d\  -f2-)"
+        print_output "[+] cwe-checker found a total of ""${ORANGE}""${lTOTAL_CWE_CNT}""${GREEN}"" of the following security issues in ${ORANGE}${lTESTED_BINS}${GREEN} tested binaries:"
+        for lCWE_LINE in "${lCWE_OUT_ARR[@]}"; do
+          lCWE_ID="$(echo "${lCWE_LINE}" | awk '{print $1}')"
+          lCWE_DESC="$(echo "${lCWE_LINE}" | cut -d\  -f2-)"
           # do not change this to grep -c!
           # shellcheck disable=SC2126
-          CWE_CNT="$(grep "${CWE}" "${LOG_PATH_MODULE}"/cwe_*.log 2>/dev/null | wc -l || true)"
-          print_output "$(indent "$(orange "${CWE}""${GREEN}"" - ""${CWE_DESC}"" - ""${ORANGE}""${CWE_CNT}"" times.")")"
+          lCWE_CNT="$(grep "${lCWE_ID}" "${LOG_PATH_MODULE}"/cwe_*.log 2>/dev/null | wc -l || true)"
+          print_output "$(indent "$(orange "${lCWE_ID}""${GREEN}"" - ""${lCWE_DESC}"" - ""${ORANGE}""${lCWE_CNT}"" times.")")"
         done
         print_bar
       fi
