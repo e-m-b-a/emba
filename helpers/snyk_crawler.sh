@@ -166,6 +166,8 @@ while IFS= read -r -d '' ADV; do
   fi
 done < <(find "${SAVE_PATH}"/vuln/ -type f -print0)
 
+sort -nr -o "${SAVE_PATH}"/Snyk_PoC_results.csv "${SAVE_PATH}"/Snyk_PoC_results.csv
+
 if [[ -f "${SAVE_PATH}"/Snyk_PoC_results.csv ]] && [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   mv "${SAVE_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"
   rm -r "${SAVE_PATH}"
