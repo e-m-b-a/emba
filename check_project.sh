@@ -394,6 +394,10 @@ copy_right_check(){
 }
 
 function_entry_space_check() {
+  # ensure we have the space in the function definition:
+  # function_name() {
+  # invalid:
+  # function_name(){
   echo -e "\\n""${ORANGE}""${BOLD}""EMBA function space definition check""${NC}""\\n""${BOLD}""=================================================================""${NC}"
 
   mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/* || true)
