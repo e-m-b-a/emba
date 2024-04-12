@@ -6,12 +6,27 @@ source "${EMBA_PATH}/helpers/helpers_emba_prepare.sh"
 # shellcheck source=/dev/null
 source "${EMBA_PATH}/helpers/helpers_emba_print.sh"
 
-BLACKLIST_VARS_ARR=("MD5_DONE_DEEP")
+BLACKLIST_VARS_ARR=("MD5_DONE_DEEP" "LOG_PATH_MODULE")
 
-mapfile -t ALL_EMBA_SCRIPTS < <(find "${EMBA_PATH}"/modules -name "*.sh")
+mapfile -t ALL_EMBA_MODULES < <(find "${EMBA_PATH}"/modules -name "*.sh")
+mapfile -t ALL_EMBA_HELPERS < <(find "${EMBA_PATH}"/helpers -name "helpers_emba_*.sh")
+
+if [[ "$#" -eq 0 ]] || [[ "${1}" == "all" ]]; then
+  SCRIPTS_TO_TEST=("${ALL_EMBA_MODULES[@]}")
+  SCRIPTS_TO_TEST+=("${ALL_EMBA_HELPERS[@]}")
+  print_output "[*] Testing ${#SCRIPTS_TO_TEST[@]} EMBA scripts" "no_log"
+elif [[ "${1}" == "modules" ]]; then
+  SCRIPTS_TO_TEST=("${ALL_EMBA_MODULES[@]}")
+  print_output "[*] Testing ${#SCRIPTS_TO_TEST[@]} EMBA modules" "no_log"
+elif [[ "${1}" == "helpers" ]]; then
+  SCRIPTS_TO_TEST=("${ALL_EMBA_HELPERS[@]}")
+  print_output "[*] Testing ${#SCRIPTS_TO_TEST[@]} EMBA helpers" "no_log"
+elif [[ -f "${1}" ]]; then
+  SCRIPTS_TO_TEST=("${1}")
+fi
 
 UNKNOWN_VARS_CNT_ALL=0
-for MODULE in "${ALL_EMBA_SCRIPTS[@]}"; do
+for MODULE in "${SCRIPTS_TO_TEST[@]}"; do
   if [[ "${MODULE}" == *"modules/L10_system_emulation/"* ]]; then
     continue
   fi
@@ -71,7 +86,9 @@ print_ln "no_log"
 if [[ "${UNKNOWN_VARS_CNT_ALL}" -gt 0 ]]; then
   print_output "[-] Found ${ORANGE}${UNKNOWN_VARS_CNT_ALL}${NC} indirect global variables in all modules" "no_log"
   print_output "[*] Fix these issues before pushing to repo" "no_log"
+  exit "${UNKNOWN_VARS_CNT_ALL}"
 else
   print_output "[+] No indirect global function usage detected ..." "no_log"
+  exit 0
 fi
 

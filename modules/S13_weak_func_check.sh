@@ -160,7 +160,7 @@ S13_weak_func_check()
   module_end_log "${FUNCNAME[0]}" "${STRCPY_CNT}"
 }
 
-function_check_NIOS2(){
+function_check_NIOS2() {
   local BINARY_="${1:-}"
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")
@@ -216,7 +216,7 @@ function_check_NIOS2(){
   echo "${STRCPY_CNT}" >> "${TMP_DIR}"/S13_STRCPY_CNT.tmp
 }
 
-function_check_PPC32(){
+function_check_PPC32() {
   local BINARY_="${1:-}"
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")

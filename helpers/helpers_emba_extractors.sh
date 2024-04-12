@@ -16,7 +16,7 @@
 
 docker_container_extractor() {
   local CONT_ID="${1:-}"
-  LOG_FILE="${LOG_DIR}"/p00_docker_extractor.txt
+  local LOG_FILE="${LOG_DIR}"/p00_docker_extractor.txt
   if ! [[ -d "${LOG_DIR}"/firmware/ ]]; then
     mkdir "${LOG_DIR}"/firmware/
   fi

@@ -52,6 +52,8 @@ MODULES_TO_CHECK_ARR_PERM=()
 MODULES_TO_CHECK_ARR_COMMENT=()
 MODULES_TO_CHECK_ARR_GREP=()
 MODULES_TO_CHECK_ARR_COPYRIGHT=()
+MODULES_TO_CHECK_ARR_FCT_SPACE=()
+CNT_VAR_CHECKER_ISSUES=0
 
 import_config_scripts() {
   mapfile -t HELPERS < <(find "${CONF_DIR}" -iname "*.sh" 2>/dev/null)
@@ -294,7 +296,21 @@ summary() {
     done
     echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
   fi
-
+  if [[ "${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}" -gt 0 ]]; then
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
+    echo -e "Modules to check (space usage in function definition): ${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}\\n"
+    for MODULE in "${MODULES_TO_CHECK_ARR_FCT_SPACE[@]}"; do
+      echo -e "${ORANGE}${BOLD}==> FIX MODULE: ""${MODULE}""${NC}"
+    done
+    echo -e "${ORANGE}""WARNING: Fix the errors before pushing to the EMBA repository!"
+  fi
+  if [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
+    echo -e "\\n\\n""${GREEN}${BOLD}""SUMMARY:${NC}\\n"
+    echo -e "Found ${ORANGE}${CNT_VAR_CHECKER_ISSUES}${NC} variable scope issues in EMBA scripts${NC}\\n"
+    echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
+  else
+    echo -e "\\n""${GREEN}""==> Found no problems with variable scope definition""${NC}""\\n"
+  fi
 }
 
 # check that all tools are installed
@@ -309,6 +325,12 @@ check_tools() {
   if ! [[ -d ./external/semgrep-rules/bash ]]; then
     echo -e "\\n""${RED}""${BOLD}""Please install semgrep-rules to directory ./external to perform all checks""${NC}""\\n"
     echo -e "${ORANGE}git clone https://github.com/returntocorp/semgrep-rules.git external/semgrep-rules${NC}"
+    exit 1
+  fi
+
+  if [[ ! -f "${HELP_DIR}"/var_check.sh ]]; then
+    echo -e "\\n""${RED}""${BOLD}""EMBA var_checker helper script missing""${NC}""\\n"
+    echo -e "\\n""${RED}""${BOLD}""Please fix the EMBA installation to perform all checks""${NC}""\\n"
     exit 1
   fi
 }
@@ -337,7 +359,7 @@ list_linter_exceptions(){
   mapfile -t EXCEPTION_SCRIPTS < <(find "${DIR_}" -type d -path "${EXCLUDE_}" -prune -false -o -iname "*.${SEARCH_TYPE_}" -exec grep -H "${SEARCH_PAR_}" {} \;)
   if [[ "${#EXCEPTION_SCRIPTS[@]}" -gt 0 ]]; then
     for EXCEPTION_ in "${EXCEPTION_SCRIPTS[@]}"; do
-      echo -e "\\n""${GREEN}""Found exception in ${EXCEPTION_%%:*}:""${ORANGE}""${EXCEPTION_##*:}""${NC}""\\n"
+      echo -e "${GREEN}Found exception in ${ORANGE}${EXCEPTION_%%:*}:${EXCEPTION_##*:}${NC}"
       EXCEPTIONS_TO_CHECK_ARR+=( "${EXCEPTION_%%:*}" )
     done
   else
@@ -371,9 +393,50 @@ copy_right_check(){
   fi
 }
 
+function_entry_space_check() {
+  echo -e "\\n""${ORANGE}""${BOLD}""EMBA function space definition check""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+
+  mapfile -t FCT_SPACE_MODULES_ARR < <(grep -r '(){' modules/* || true)
+  mapfile -t FCT_SPACE_HLP_ARR < <(grep -r '(){' helpers/* || true)
+
+  if [[ "${#FCT_SPACE_MODULES_ARR[@]}" -gt 0 ]] || [[ "${#FCT_SPACE_HLP_ARR[@]}" -gt 0 ]]; then
+    echo -e "Found problem with spaces in function definition${NC}\\n"
+    echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
+    MODULES_TO_CHECK_ARR_FCT_SPACE=("${FCT_SPACE_MODULES_ARR[@]}" "${FCT_SPACE_HLP_ARR[@]}")
+  else
+    echo -e "\\n""${GREEN}""==> Found no problems with spaces in function definition. Helpers are currently ignored.""${NC}""\\n"
+  fi
+}
+
+var_checker() {
+  local MODE="${1:-}"
+  local RET_ISSUES=0
+
+  echo -e "\\n""${ORANGE}""${BOLD}""EMBA variable declation scope check for ${MODE}""${NC}""\\n""${BOLD}""=================================================================""${NC}"
+
+  disable_strict_mode 1
+  "${HELP_DIR}"/var_check.sh "${MODE}"
+  RET_ISSUES="$?"
+
+  if [[ "${MODE}" == "modules" ]]; then
+    CNT_VAR_CHECKER_ISSUES=$((CNT_VAR_CHECKER_ISSUES+RET_ISSUES))
+
+    if [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
+      echo -e "Found ${ORANGE}${CNT_VAR_CHECKER_ISSUES}${NC} variable scope issues in EMBA ${MODE} scripts${NC}\\n"
+      echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
+    else
+      echo -e "\\n""${GREEN}""==> Found no problems with variable scope definition""${NC}""\\n"
+    fi
+  fi
+  enable_strict_mode 1
+}
+
 # main:
 check_tools
 check
+var_checker modules
+var_checker helpers
+function_entry_space_check
 dockerchecker
 copy_right_check "Siemens Energy AG" 2024 ./ ./external
 list_linter_exceptions shellcheck ./ ./external
@@ -384,6 +447,7 @@ if [[ "${#MODULES_TO_CHECK_ARR_TAB[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR[
   [[ "${#MODULES_TO_CHECK_ARR[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_SEMGREP[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_DOCKER[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_PERM[@]}" -gt 0 ]] || \
   [[ "${#MODULES_TO_CHECK_ARR_COMMENT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_GREP[@]}" -gt 0 ]] || \
-  [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]]; then
+  [[ "${#MODULES_TO_CHECK_ARR_COPYRIGHT[@]}" -gt 0 ]] || [[ "${#MODULES_TO_CHECK_ARR_FCT_SPACE[@]}" -gt 0 ]] || \
+  [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
   exit 1
 fi
