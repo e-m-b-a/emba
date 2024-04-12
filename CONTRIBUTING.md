@@ -66,9 +66,10 @@ It also sketches the typical integration process of patches.
   - work with local variables inside the functions
   - do not rely on globals if not needed
 
-- Use `export` for variables which aren't only used in one file
+- Use `export` for variables which aren't only used in one function
   - From bash perspective it isn't necessary, but helps for readability
-  - We do not accept variables that are not declared as local or external -> no indirect globals
+
+- We do not accept the usage of variables anymore that are not declared as local or external -> no indirect globals
 
 - Don't use backticks anymore, use $(..) instead
 

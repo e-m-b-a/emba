@@ -42,7 +42,8 @@ print_path() {
 }
 
 cut_path() {
-  local C_PATH="$(abs_path "${1:-}")"
+  local C_PATH=""
+  C_PATH="$(abs_path "${1:-}")"
 
   if [[ ${SHORT_PATH} -eq 1 ]] ;  then
     local SHORT=""

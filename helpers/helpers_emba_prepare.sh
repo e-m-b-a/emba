@@ -136,7 +136,7 @@ log_folder() {
 
 set_exclude()
 {
-  export EXCLUDE_PATHS=()
+  export EXCLUDE_PATHS=""
   export EXCLUDE=()
 
   if [[ "${FIRMWARE_PATH}" == "/" ]]; then
@@ -496,10 +496,9 @@ set_etc_paths()
   print_etc
 }
 
-check_firmware()
-{
+check_firmware() {
   # this detection is only running if we have not found a Linux system:
-  local DIR_COUNT=0
+  local lDIR_COUNT=0
   local lR_PATH=""
   local lL_PATH=""
 
@@ -510,8 +509,8 @@ check_firmware()
     if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
       for lR_PATH in "${ROOT_PATH[@]}"; do
         for lL_PATH in "${LINUX_PATHS[@]}"; do
-          if [[ -d "${R_PATH}"/"${lL_PATH}" ]] ; then
-            ((DIR_COUNT+=1))
+          if [[ -d "${lR_PATH}"/"${lL_PATH}" ]] ; then
+            ((lDIR_COUNT+=1))
           fi
         done
       done
@@ -520,16 +519,16 @@ check_firmware()
       # in such a case the pre-checking modules are not executed and no RPATH is available
       for lL_PATH in "${LINUX_PATHS[@]}"; do
         if [[ -d "${FIRMWARE_PATH}"/"${lL_PATH}" ]] ; then
-          ((DIR_COUNT+=1))
+          ((lDIR_COUNT+=1))
         fi
       done
     fi
   fi
 
-  if [[ ${DIR_COUNT} -lt 5 ]] && [[ "${RTOS}" -eq 1 ]]; then
+  if [[ ${lDIR_COUNT} -lt 5 ]] && [[ "${RTOS}" -eq 1 ]]; then
     print_output "[-] Your firmware does not look like a regular Linux system."
   fi
-  if [[ "${RTOS}" -eq 0 ]] || [[ ${DIR_COUNT} -gt 4 ]]; then
+  if [[ "${RTOS}" -eq 0 ]] || [[ ${lDIR_COUNT} -gt 4 ]]; then
     print_output "[+] Your firmware looks like a regular Linux system."
   fi
 }
