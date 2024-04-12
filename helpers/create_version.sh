@@ -14,7 +14,7 @@
 
 # Description: creates a VERSION.txt file containing the version number of emba and the local hash commit
 
-create_version(){
+create_version() {
   local VERSION=""
   # VERSION="$(echo "$(grep "export EMBA_VERSION=" helpers/helpers_emba_defaults.sh | cut -d\" -f2)"-"$(git describe --always)")"
   VERSION="$(grep "export EMBA_VERSION=" helpers/helpers_emba_defaults.sh | cut -d\" -f2)"

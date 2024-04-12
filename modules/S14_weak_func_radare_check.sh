@@ -163,7 +163,7 @@ S14_weak_func_radare_check()
   module_end_log "${FUNCNAME[0]}" "${FCT_CNT}"
 }
 
-radare_function_check_PPC32(){
+radare_function_check_PPC32() {
   local BINARY_="${1:-}"
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")

@@ -17,7 +17,7 @@
 # Description: Show stats about EMBA run on the bottom of the terminal window
 
 # helper for box drawing
-repeat_char(){
+repeat_char() {
   local REP_CHAR="${1:-}"
   local REP_COUNT="${2:-0}"
   local RET=""
@@ -31,6 +31,7 @@ draw_box() {
 
   # just in case we do not know our $LINES:
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    export LINES=""
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
 
@@ -109,6 +110,7 @@ update_box_system_load() {
 
   # just in case we do not know our $LINES:
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    export LINES=""
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
 
@@ -174,6 +176,7 @@ update_box_status() {
 
   # just in case we do not know our $LINES:
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    export LINES=""
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
 
@@ -258,6 +261,7 @@ update_box_modules() {
 
   # just in case we do not know our $LINES:
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    export LINES=""
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
 
@@ -339,6 +343,7 @@ update_box_status_2() {
 
   # just in case we do not know our $LINES:
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    export LINES=""
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
 
@@ -386,6 +391,7 @@ remove_status_bar() {
   local LINE_POS=""
   # just in case we do not know our $LINES:
   if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
+    export LINES=""
     LINES=$(cat "${TMP_DIR}""/LINES.log")
   fi
 
@@ -547,7 +553,7 @@ initial_status_bar() {
   if [[ ${LINES} -gt 10 ]] ; then
     # column has to be increased with 2 characters because of possible arrow column
     local ARROW_POS=0
-    STATUS_BAR_BOX_COUNT=0
+    export STATUS_BAR_BOX_COUNT=0
     if [[ ${COLUMNS} -ge 27 ]] ; then
       INITIAL_STR+="$(draw_box 26 "SYSTEM LOAD" 0)"
       STATUS_BAR_BOX_COUNT=1

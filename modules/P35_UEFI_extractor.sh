@@ -184,7 +184,7 @@ ami_extractor() {
   print_ln
 }
 
-uefi_extractor(){
+uefi_extractor() {
   sub_module_title "UEFITool extractor"
 
   local FIRMWARE_PATH_="${1:-}"

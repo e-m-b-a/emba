@@ -122,7 +122,7 @@ version_extended() # $1-a $2-op $3-$b
   esac
 }
 
-check_emba_version(){
+check_emba_version() {
   local LATEST_EMBA_VERSION="${1:-}"
   if [[ "${LATEST_EMBA_VERSION}" == "${EMBA_VERSION}" ]]; then
     echo -e "    EMBA release version - ${GREEN}ok${NC}"
@@ -131,7 +131,7 @@ check_emba_version(){
   fi
 }
 
-check_nvd_db(){
+check_nvd_db() {
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/nvd-json-data-feeds ]] ; then
@@ -145,7 +145,7 @@ check_nvd_db(){
   fi
 }
 
-check_epss_db(){
+check_epss_db() {
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
   if [[ -d "${EXT_DIR}"/EPSS-data ]] ; then
@@ -159,7 +159,7 @@ check_epss_db(){
   fi
 }
 
-check_git_hash(){
+check_git_hash() {
   local REMOTE_HASH="${1:-}"
   local LOCAL_HASH=""
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1 ; then
@@ -173,7 +173,7 @@ check_git_hash(){
   fi
 }
 
-check_docker_image(){
+check_docker_image() {
   local REMOTE_DOCKER_HASH="${1:-}"
   local LOCAL_DOCKER_HASH=""
   LOCAL_DOCKER_HASH="$(docker inspect --format='{{.RepoDigests}}' embeddedanalyzer/emba:latest | tr -d ']' || true)"

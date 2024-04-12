@@ -16,7 +16,7 @@ resolve_link() {
   echo "${TARGET}"
 }
 
-backup_file(){
+backup_file() {
   BACKUP="${1}"
   if [ -f "${BACKUP}" ]; then
     echo "[*] Backing up ${BACKUP} to ${BACKUP}.bak"
@@ -24,7 +24,7 @@ backup_file(){
   fi
 }
 
-rename_file(){
+rename_file() {
   RENAME="${1}"
   if [ -f "${RENAME}" ]; then
     echo "[*] Renaming ${RENAME} to ${RENAME}.bak"
@@ -32,7 +32,7 @@ rename_file(){
   fi
 }
 
-remove_file(){
+remove_file() {
   REMOVE="${1}"
   if [ -f "${REMOVE}" ]; then
     echo "[*] Removing ${REMOVE}"

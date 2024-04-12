@@ -293,52 +293,6 @@ get_csv_rule() {
   CSV_RULE="$(echo "${VERSION_STRING}" | eval "${CSV_REGEX}" || true)"
 }
 
-enable_strict_mode() {
-  local STRICT_MODE_="${1:-0}"
-  local PRINTER="${2:-1}"
-
-  if [[ "${STRICT_MODE_}" -eq 1 ]]; then
-    # http://redsymbol.net/articles/unofficial-bash-strict-mode/
-    # https://github.com/tests-always-included/wick/blob/master/doc/bash-strict-mode.md
-    # shellcheck source=./installer/wickStrictModeFail.sh
-    # shellcheck disable=SC1091
-    source ./installer/wickStrictModeFail.sh
-    load_strict_mode_settings
-    trap 'wickStrictModeFail $? | tee -a "${LOG_DIR}"/emba_error.log' ERR  # The ERR trap is triggered when a script catches an error
-
-    if [[ "${PRINTER}" -eq 1 ]]; then
-      print_output "[!] INFO: EMBA running in STRICT mode!" "no_log"
-    fi
-  fi
-}
-
-disable_strict_mode() {
-  local STRICT_MODE_="${1:-0}"
-  local PRINTER="${2:-1}"
-
-  if [[ "${STRICT_MODE_}" -eq 1 ]]; then
-    # disable all STRICT_MODE settings - can be used for modules that are not compatible
-    # WARNING: this should only be a temporary solution. The goal is to make modules
-    # STRICT_MODE compatible
-
-    unset -f wickStrictModeFail
-    set +e          # Exit immediately if a command exits with a non-zero status
-    set +u          # Exit and trigger the ERR trap when accessing an unset variable
-    set +o pipefail # The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
-    set +E          # The ERR trap is inherited by shell functions, command substitutions and commands in subshells
-    shopt -u extdebug # Enable extended debugging
-    unset IFS
-    trap - ERR
-    set +x
-
-    if [[ "${PRINTER}" -eq 1 ]]; then
-      print_bar "no_log"
-      print_output "[!] INFO: EMBA STRICT mode disabled!" "no_log"
-      print_bar "no_log"
-    fi
-  fi
-}
-
 restore_permissions() {
   if [[ -f "${LOG_DIR}"/orig_user.log ]]; then
     ORIG_USER=$(head -1 "${LOG_DIR}"/orig_user.log)

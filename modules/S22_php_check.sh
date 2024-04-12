@@ -237,7 +237,7 @@ s22_vuln_check() {
   fi
 }
 
-s22_check_php_ini(){
+s22_check_php_ini() {
   sub_module_title "PHP configuration checks (php.ini)"
   local PHP_INI_FAILURE=0
   local PHP_INI_LIMIT_EXCEEDED=0
@@ -302,7 +302,7 @@ s22_check_php_ini(){
   enable_strict_mode "${STRICT_MODE}"
 }
 
-add_recommendations(){
+add_recommendations() {
    local VALUE="${1:-}"
    local KEY="${2:-}"
 

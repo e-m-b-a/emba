@@ -87,7 +87,7 @@ S15_radare_decompile_checks()
   module_end_log "${FUNCNAME[0]}" "${STRCPY_CNT}"
 }
 
-radare_decompilation(){
+radare_decompilation() {
   local BINARY_="${1:-}"
   shift 1
   local VULNERABLE_FUNCTIONS=("$@")

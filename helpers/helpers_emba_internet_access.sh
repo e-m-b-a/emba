@@ -19,8 +19,8 @@
 # a kernel config or at least kernel symbols we can use these details to verify the
 # vulnerabilities which we identified based on the kernel version
 kernel_downloader() {
-  LOG_FILE_KERNEL="${CSV_DIR}"/s24_kernel_bin_identifier.csv
-  KERNEL_ARCH_PATH="${EXT_DIR}"/linux_kernel_sources/
+  local LOG_FILE_KERNEL="${CSV_DIR}"/s24_kernel_bin_identifier.csv
+  local KERNEL_ARCH_PATH="${EXT_DIR}"/linux_kernel_sources/
   local OUTPUTTER=""
 
   if ! [[ -d "${KERNEL_ARCH_PATH}" ]]; then
@@ -92,7 +92,7 @@ kernel_downloader() {
 
       disable_strict_mode "${STRICT_MODE}" 0
       wget -q --output-file="${TMP_DIR}"/wget.log https://mirrors.edge.kernel.org/pub/linux/kernel/v"${K_VER_DOWNLOAD}"/linux-"${K_VERSION}".tar.gz -O "${KERNEL_ARCH_PATH}"/linux-"${K_VERSION}".tar.gz
-      D_RETURN="$?"
+      local lD_RETURN="$?"
       enable_strict_mode "${STRICT_MODE}" 0
 
       if [[ -f "${TMP_DIR}"/wget.log ]]; then
@@ -102,7 +102,7 @@ kernel_downloader() {
       # if we have a non zero return something failed and we need to communicate this to the container modules (s26) which
       # checks for the file "${TMP_DIR}"/linux_download_failed. If this file is available it stops waiting for the kernel
       # sources
-      if [[ ${D_RETURN} -ne 0 ]] ; then
+      if [[ ${lD_RETURN} -ne 0 ]] ; then
         OUTPUTTER="[-] $(print_date) - Kernel download for version ${ORANGE}${K_VERSION}${NC} failed"
         print_output "${OUTPUTTER}" "no_log"
         write_log "${OUTPUTTER}" "${LOG_DIR}/s24_kernel_bin_identifier/kernel_downloader.log"

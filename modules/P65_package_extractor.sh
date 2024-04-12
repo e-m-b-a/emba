@@ -222,7 +222,7 @@ extract_deb_helper() {
   find "${FIRMWARE_PATH_CP}" -xdev -type f \( -name "*.deb" -o -name "*.udeb" \) -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 >> "${TMP_DIR}"/deb_db.txt
 }
 
-extract_deb_extractor_helper(){
+extract_deb_extractor_helper() {
   local DEB="${1:-}"
   local DEB_NAME=""
   DEB_NAME=$(basename "${DEB}")
