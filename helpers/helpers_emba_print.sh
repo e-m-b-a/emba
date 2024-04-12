@@ -36,12 +36,12 @@ export NC_="\x1b[0m"
 export BOLD="\033[1m"
 export ITALIC="\033[3m"
 
-MODULE_NUMBER="--"
-SUB_MODULE_COUNT=0
-GREP_LOG_DELIMITER=";"
-GREP_LOG_LINEBREAK=" || "
-MESSAGE_TYPE=""
-OLD_MESSAGE_TYPE=""
+export MODULE_NUMBER="--"
+export SUB_MODULE_COUNT=0
+export GREP_LOG_DELIMITER=";"
+export GREP_LOG_LINEBREAK=" || "
+export MESSAGE_TYPE=""
+export OLD_MESSAGE_TYPE=""
 
 welcome()
 {
@@ -54,8 +54,9 @@ welcome()
 module_log_init()
 {
   # local LOG_FILE_NAME
-  LOG_FILE_NAME="${1:-}"
-  local FILE_NAME
+  local LOG_FILE_NAME="${1:-}"
+  local FILE_NAME=""
+  local MODULE_NUMBER=""
   MODULE_NUMBER="$(echo "${LOG_FILE_NAME}" | cut -d "_" -f1 | cut -c2- )"
   FILE_NAME=$(echo "${LOG_FILE_NAME}" | sed -e 's/\(.*\)/\L\1/' | tr " " _ )
   LOG_FILE="${LOG_DIR}""/""${FILE_NAME}"".txt"
@@ -135,8 +136,9 @@ print_output()
   fi
   # add a link as third argument to add a link marker for web report
   local REF_LINK="${3:-}"
-  local TYPE_CHECK
+  local TYPE_CHECK=""
   TYPE_CHECK="$( echo "${OUTPUT}" | cut -c1-3 )"
+
   if [[ "${TYPE_CHECK}" == "[-]" || "${TYPE_CHECK}" == "[*]" || "${TYPE_CHECK}" == "[!]" || "${TYPE_CHECK}" == "[+]" ]] ; then
     local COLOR_OUTPUT_STRING=""
     COLOR_OUTPUT_STRING="$(color_output "${OUTPUT}")"
@@ -181,7 +183,7 @@ print_output()
 
 # echo unknown data in a consistent way:
 safe_echo() {
-  STRING_TO_ECHO="${1:-}"
+  local STRING_TO_ECHO="${1:-}"
 
   # %b  ARGUMENT  as a string with '\' escapes interpreted, except that octal escapes are of the form \0 or
   if [[ -v 2 ]]; then
@@ -194,7 +196,7 @@ safe_echo() {
 
 # This should be used for using untrusted data as input for other commands:
 escape_echo() {
-  STRING_TO_ECHO="${1:-}"
+  local STRING_TO_ECHO="${1:-}"
 
   # %q  ARGUMENT is printed in a format that can be reused as shell input, escaping non-printable characters with the proposed POSIX $'' syntax.
   if [[ -v 2 ]]; then
@@ -270,20 +272,22 @@ print_dot() {
 }
 
 write_log() {
+  local TEXT_ARR=()
   readarray TEXT_ARR <<< "${1}"
   local LOG_FILE_ALT="${2:-}"
   local GREP_LOG_WRITE="${3:-}"
   if [[ "${LOG_FILE_ALT}" == "" ]] ; then
-    W_LOG_FILE="${LOG_FILE}"
+    local W_LOG_FILE="${LOG_FILE}"
   else
-    W_LOG_FILE="${LOG_FILE_ALT}"
+    local W_LOG_FILE="${LOG_FILE_ALT}"
   fi
+  local E=""
 
   for E in "${TEXT_ARR[@]}" ; do
-    local TYPE_CHECK
+    local TYPE_CHECK=""
     TYPE_CHECK="$( echo "${E}" | cut -c1-3 )"
     if [[ ( "${TYPE_CHECK}" == "[-]" || "${TYPE_CHECK}" == "[*]" || "${TYPE_CHECK}" == "[!]" || "${TYPE_CHECK}" == "[+]") && ("${E}" != "[*] Statistic"* ) ]] ; then
-      local COLOR_OUTPUT_STRING
+      local COLOR_OUTPUT_STRING=""
       COLOR_OUTPUT_STRING="$(color_output "${E}")"
       echo -e "$(format_log "${COLOR_OUTPUT_STRING}")" | tee -a "${W_LOG_FILE}" >/dev/null
     else
@@ -302,7 +306,7 @@ write_csv_log() {
     print_output "[-] WARNING: CSV directory ${ORANGE}${CSV_DIR}${NC} not found"
     return
   fi
-  CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
+  local CSV_LOG="${LOG_FILE_NAME/\.txt/\.csv}"
   CSV_LOG="${CSV_DIR}""/""${CSV_LOG}"
 
   # shellcheck disable=SC2005
@@ -333,7 +337,8 @@ write_pid_log() {
 
 write_grep_log()
 {
-  OLD_MESSAGE_TYPE=""
+  local OLD_MESSAGE_TYPE=""
+
   if [[ ${LOG_GREP} -eq 1 ]] ; then
     readarray -t OUTPUT_ARR <<< "${1}"
     local MESSAGE_TYPE_PAR="${2:-}"
@@ -382,8 +387,7 @@ write_grep_log()
 write_link()
 {
   if [[ ${HTML} -eq 1 ]] ; then
-    local LINK
-    LINK="${1:-}"
+    local LINK="${1:-}"
     LINK="$(format_log "[REF] ""${LINK}" 1)"
     local LOG_FILE_ALT="${2:-}"
     if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
@@ -403,8 +407,7 @@ write_link()
 write_local_overlay_link()
 {
   if [[ ${HTML} -eq 1 ]] ; then
-    local LINK
-    LINK="${1:-}"
+    local LINK="${1:-}"
     LINK="$(format_log "[LOV] ""${LINK}" 1)"
     local LOG_FILE_ALT="${2:-}"
     if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
@@ -421,8 +424,7 @@ write_local_overlay_link()
 write_anchor()
 {
   if [[ ${HTML} -eq 1 ]] ; then
-    local ANCHOR
-    ANCHOR="${1:-}"
+    local ANCHOR="${1:-}"
     ANCHOR="$(format_log "[ANC] ""${ANCHOR}" 1)"
     local LOG_FILE_ALT="${2:-}"
     if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
@@ -437,16 +439,19 @@ write_anchor()
 
 reset_module_count()
 {
-  MODULE_NUMBER="--"
-  SUB_MODULE_COUNT=0
+  export MODULE_NUMBER="--"
+  export SUB_MODULE_COUNT=0
 }
 
 color_output()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray TEXT_ARR <<< "${1:-}"
+
   for E in "${TEXT_ARR[@]}" ; do
-    local TYPE_CHECK
+    local TYPE_CHECK=""
     TYPE_CHECK="$( echo "${E}" | cut -c1-3 )"
     if [[ "${TYPE_CHECK}" == "[-]" || "${TYPE_CHECK}" == "[*]" || "${TYPE_CHECK}" == "[!]" || "${TYPE_CHECK}" == "[+]" ]] ; then
       local STR=""
@@ -471,8 +476,11 @@ color_output()
 
 white()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${NC}""${E}""\\n"
   done
@@ -481,8 +489,11 @@ white()
 
 red()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${RED}""${E}""${NC}""\\n"
   done
@@ -491,8 +502,11 @@ red()
 
 green()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${GREEN}""${E}""${NC}""\\n"
   done
@@ -501,8 +515,11 @@ green()
 
 blue()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${BLUE}""${E}""${NC}""\\n"
   done
@@ -511,8 +528,11 @@ blue()
 
 cyan()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${CYAN}""${E}""${NC}""\\n"
   done
@@ -521,8 +541,11 @@ cyan()
 
 magenta()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${MAGENTA}""${E}""${NC}""\\n"
   done
@@ -531,8 +554,11 @@ magenta()
 
 orange()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${ORANGE}""${E}""${NC}""\\n"
   done
@@ -541,8 +567,11 @@ orange()
 
 bold()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${BOLD}""${E}""${NC}""\\n"
   done
@@ -551,8 +580,11 @@ bold()
 
 italic()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""${ITALIC}""${E}""${NC}""\\n"
   done
@@ -561,8 +593,11 @@ italic()
 
 indent()
 {
+  local TEXT_ARR=()
   local TEXT=""
+  local E=""
   readarray -t TEXT_ARR <<< "${1}"
+
   for E in "${TEXT_ARR[@]}" ; do
     TEXT="${TEXT}""    ""${E}""\\n"
   done
@@ -658,6 +693,7 @@ print_firmware_info()
   local _VERSION="${2:-}"
   local _DEVICE="${3:-}"
   local _NOTES="${4:-}"
+
   if [[ -n "${_VENDOR}" || -n "${_VERSION}" || -n "${_DEVICE}" || -n "${_NOTES}" ]]; then
     print_bar "no_log"
     print_output "[*] Firmware information:" "no_log"
@@ -679,6 +715,8 @@ print_firmware_info()
 
 print_etc()
 {
+  local ETC=""
+
   if [[ ${#ETC_PATHS[@]} -gt 1 ]] ; then
     print_ln "no_log"
     print_output "[*] Found more paths for etc (these are automatically taken into account):" "no_log"
@@ -691,6 +729,9 @@ print_etc()
 }
 
 print_excluded() {
+  local EXCL=""
+  local EXCLUDE_PATHS_ARR=()
+
   readarray -t EXCLUDE_PATHS_ARR < <(printf '%s' "${EXCLUDE_PATHS}")
   if [[ ${#EXCLUDE_PATHS_ARR[@]} -gt 0 ]] ; then
     print_ln "no_log"
@@ -704,6 +745,7 @@ print_excluded() {
 
 print_bar() {
   local LOG_SETTINGS="${1:-}"
+
   if [[ -n "${LOG_SETTINGS}" ]]; then
     print_output "\\n-----------------------------------------------------------------\\n" "${LOG_SETTINGS}"
   else
@@ -712,9 +754,9 @@ print_bar() {
 }
 
 module_start_log() {
-  MODULE_MAIN_NAME="${1:-}"
+  local MODULE_MAIN_NAME="${1:-}"
   print_output "[*] $(print_date) - ${MODULE_MAIN_NAME} starting" "main"
-  export LOG_PATH_MODULE
+  export LOG_PATH_MODULE=""
   if [[ "${LOG_DIR: -1}" == "/" ]]; then
     # strip final slash from log dir
     LOG_DIR="${LOG_DIR:: -1}"
@@ -732,8 +774,10 @@ module_start_log() {
 }
 
 pre_module_reporter() {
-  MODULE_MAIN_NAME="${1:-}"
+  local MODULE_MAIN_NAME="${1:-}"
+  local REPORT_TEMPLATE=""
   REPORT_TEMPLATE="$(basename -s ".sh" "${MODULE_MAIN_NAME}")-pre"
+
   # We handle .txt and .sh files in report_template folder.
   # .txt are just echoed on cli and report
   # .sh are executed via source -> you can use variables, color codes, execute further commands
@@ -750,8 +794,8 @@ pre_module_reporter() {
 # additionally we log that EMBA has nothing found -> this is used for index generation of the web reporter
 # additionally we generate the HTML file of the web reporter if web reporting is enabled
 module_end_log() {
-  MODULE_MAIN_NAME="${1:-}"
-  MODULE_REPORT_STATE="${2:-}"
+  local MODULE_MAIN_NAME="${1:-}"
+  local MODULE_REPORT_STATE="${2:-}"
 
   if [[ "${MODULE_REPORT_STATE}" -eq 0 ]]; then
     print_output "[-] $(print_date) - ${MODULE_MAIN_NAME} nothing reported"
@@ -803,6 +847,8 @@ strip_color_codes() {
 }
 
 banner_printer() {
+  local BANNER_TO_PRINT=""
+
   echo ""
   BANNER_TO_PRINT=$(find "${CONFIG_DIR}"/banner/ -type f -name "*${EMBA_VERSION}*"| shuf -n 1)
   if [[ "${RELEASE}" -ne 1 ]]; then
@@ -835,6 +881,7 @@ write_notification() {
   else
     # if we are on the host (e.g., in developer mode) we can directly handle
     # the notification
+    export NOTIFICATION_ID=""
     NOTIFICATION_ID=$(notify-send -p -r "${NOTIFICATION_ID}" --icon="${EMBA_ICON}" "EMBA" "${MESSAGE}" -t 2 || true)
   fi
 }
@@ -867,6 +914,7 @@ print_notification() {
       CURRENT=$(<"${NOTIFICATION_LOCATION}")
       if ! [[ "${CURRENT}" == "${PREV}" ]]; then
         # notification replacement see https://super-unix.com/ubuntu/ubuntu-how-to-use-notify-send-to-immediately-replace-an-existing-notification/
+        export NOTIFICATION_ID=""
         NOTIFICATION_ID=$(notify-send -p -r "${NOTIFICATION_ID}" --icon="${EMBA_ICON}" "EMBA" "${CURRENT}" -t 2)
       fi
     fi
@@ -899,8 +947,7 @@ write_csv_gpt_tmp() {
 
 write_anchor_gpt() {
   if [[ ${HTML} -eq 1 ]] ; then
-    local LINK
-    LINK="${1:-}"
+    local LINK="${1:-}"
     LINK="$(format_log "[ASK_GPT] ""${LINK}" 1)"
     local LOG_FILE_ALT="${2:-}"
     if [[ "${LOG_FILE_ALT}" != "no_log" ]] && [[ "${LOG_FILE_ALT}" != "main" ]] ; then
@@ -963,5 +1010,6 @@ show_runtime() {
 }
 
 print_date() {
+  local LANG=""
   LANG=en date
 }

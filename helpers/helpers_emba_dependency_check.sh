@@ -15,19 +15,18 @@
 
 # Description:  Check all dependencies for EMBA
 
-DEP_ERROR=0 # exit EMBA after dependency check, if ONLY_DEP and FORCE both zero
-DEP_EXIT=0  # exit EMBA after dependency check, regardless of which parameters have been set
+export DEP_ERROR=0 # exit EMBA after dependency check, if ONLY_DEP and FORCE both zero
+export DEP_EXIT=0  # exit EMBA after dependency check, regardless of which parameters have been set
 
 # $1=File name
 # $2=File path
-check_dep_file()
-{
-  FILE_NAME="${1:-}"
-  FILE_PATH="${2:-}"
-  print_output "    ""${FILE_NAME}"" - \\c" "no_log"
-  if ! [[ -f "${FILE_PATH}" ]] ; then
+check_dep_file() {
+  local lFILE_NAME="${1:-}"
+  local lFILE_PATH="${2:-}"
+  print_output "    ""${lFILE_NAME}"" - \\c" "no_log"
+  if ! [[ -f "${lFILE_PATH}" ]] ; then
     echo -e "${RED}""not ok""${NC}"
-    echo -e "${RED}""    Missing ""${FILE_NAME}"" - check your installation""${NC}"
+    echo -e "${RED}""    Missing ""${lFILE_NAME}"" - check your installation""${NC}"
     DEP_ERROR=1
   else
     echo -e "${GREEN}""ok""${NC}"
@@ -36,32 +35,30 @@ check_dep_file()
 
 # $1=Tool title and command
 # $2=Tool command, but only if set
-check_dep_tool()
-{
-  TOOL_NAME="${1:-}"
+check_dep_tool() {
+  local lTOOL_NAME="${1:-}"
   if [[ -n "${2:-}" ]] ; then
-    TOOL_COMMAND="${2:-}"
+    local lTOOL_COMMAND="${2:-}"
   else
-    TOOL_COMMAND="${1:-}"
+    local lTOOL_COMMAND="${1:-}"
   fi
-  print_output "    ""${TOOL_NAME}"" - \\c" "no_log"
-  if ! command -v "${TOOL_COMMAND}" > /dev/null ; then
+  print_output "    ""${lTOOL_NAME}"" - \\c" "no_log"
+  if ! command -v "${lTOOL_COMMAND}" > /dev/null ; then
     echo -e "${RED}""not ok""${NC}"
-    echo -e "${RED}""    Missing ""${TOOL_NAME}"" - check your installation""${NC}"
+    echo -e "${RED}""    Missing ""${lTOOL_NAME}"" - check your installation""${NC}"
     DEP_ERROR=1
   else
     echo -e "${GREEN}""ok""${NC}"
   fi
 }
 
-check_dep_port()
-{
-  TOOL_NAME="${1:-}"
-  PORT_NR="${2:-}"
-  print_output "    ""${TOOL_NAME}"" - \\c" "no_log"
-  if ! netstat -anpt | grep -q "${PORT_NR}"; then
+check_dep_port() {
+  local lTOOL_NAME="${1:-}"
+  local lPORT_NR="${2:-}"
+  print_output "    ""${lTOOL_NAME}"" - \\c" "no_log"
+  if ! netstat -anpt | grep -q "${lPORT_NR}"; then
     echo -e "${RED}""not ok""${NC}"
-    echo -e "${RED}""    Missing ""${TOOL_NAME}"" - check your installation""${NC}"
+    echo -e "${RED}""    Missing ""${lTOOL_NAME}"" - check your installation""${NC}"
     DEP_ERROR=1
   else
     echo -e "${GREEN}""ok""${NC}"
@@ -209,7 +206,6 @@ check_docker_version() {
 
 dependency_check()
 {
-  local STABLE_EMBA_VERSION=""
   module_title "Dependency check" "no_log"
 
   print_ln "no_log"
@@ -237,23 +233,29 @@ dependency_check()
 
     # the update check can be disabled via NO_UPDATE_CHECK
     if [[ "${NO_UPDATE_CHECK}" -ne 1 ]]; then
-      GIT_TERMINAL_PROMPT=0 git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q 2>/dev/null
+      export GIT_TERMINAL_PROMPT=0 git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q 2>/dev/null
     fi
 
     if [[ -f "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt ]]; then
       echo -e "${GREEN}""ok""${NC}"
       # ensure this only runs on the host and not in any container
       if [[ "${IN_DOCKER}" -eq 0 ]]; then
-        STABLE_EMBA_VERSION="$(cat "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt)"
-        DOCKER_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_CONTAINER_HASH.txt)"
-        NVD_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/NVD_HASH.txt)"
-        EPSS_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EPSS_HASH.txt)"
-        GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_GITHUB_HASH.txt)"
-        check_emba_version "${STABLE_EMBA_VERSION}"
-        check_docker_image "${DOCKER_HASH}"
-        check_git_hash "${GITHUB_HASH}"
-        check_epss_db "${EPSS_GITHUB_HASH}"
-        check_nvd_db "${NVD_GITHUB_HASH}"
+        local lSTABLE_EMBA_VERSION=""
+        local lDOCKER_HASH=""
+        local lNVD_GITHUB_HASH=""
+        local lEPSS_GITHUB_HASH=""
+        local lGITHUB_HASH=""
+
+        lSTABLE_EMBA_VERSION="$(cat "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt)"
+        lDOCKER_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_CONTAINER_HASH.txt)"
+        lNVD_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/NVD_HASH.txt)"
+        lEPSS_GITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EPSS_HASH.txt)"
+        lGITHUB_HASH="$(cat "${EXT_DIR}"/onlinechecker/EMBA_GITHUB_HASH.txt)"
+        check_emba_version "${lSTABLE_EMBA_VERSION}"
+        check_docker_image "${lDOCKER_HASH}"
+        check_git_hash "${lGITHUB_HASH}"
+        check_epss_db "${lEPSS_GITHUB_HASH}"
+        check_nvd_db "${lNVD_GITHUB_HASH}"
       fi
     else
       echo -e "${RED}""not ok""${NC}"
@@ -496,14 +498,15 @@ dependency_check()
   # Check system tools
   #######################################################################################
   if [[ "${USE_DOCKER}" -eq 0 ]] ; then
-    SYSTEM_TOOLS=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" \
+    local lSYSTEM_TOOLS_ARR=("awk" "basename" "bash" "cat" "chmod" "chown" "cp" "cut" "date" "dirname" \
       "dpkg-deb" "echo" "eval" "find" "grep" "head" "kill" "ln" "ls" "md5sum" "mkdir" "mknod" \
       "modinfo" "mv" "netstat" "openssl" "printf" "pwd" "readelf" "realpath" "rm" "rmdir" "sed" \
       "seq" "sleep" "sort" "strings" "tee" "touch" "tr" "uniq" "unzip" "wc")
+    local lSYS_TOOL=""
 
-    for TOOL in "${SYSTEM_TOOLS[@]}" ; do
-      check_dep_tool "${TOOL}"
-      if [[ "${TOOL}" == "bash" ]] ; then
+    for lSYS_TOOL in "${lSYSTEM_TOOLS_ARR[@]}" ; do
+      check_dep_tool "${lSYS_TOOL}"
+      if [[ "${lSYS_TOOL}" == "bash" ]] ; then
         # using bash higher than v4
         print_output "    bash (version): ""${BASH_VERSINFO[0]}"" - \\c" "no_log"
         if ! [[ "${BASH_VERSINFO[0]}" -gt 3 ]] ; then
@@ -547,10 +550,11 @@ dependency_check()
       check_dep_tool "binwalk extractor" "binwalk"
       if command -v binwalk > /dev/null ; then
         export BINWALK_BIN=()
+        local lBINWALK_VER=""
         BINWALK_BIN=("$(which binwalk)")
-        BINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
-        if ! [ "$(version "${BINWALK_VER}")" -ge "$(version "2.3.3")" ]; then
-          echo -e "${ORANGE}""    binwalk version ${BINWALK_VER} - not optimal""${NC}"
+        lBINWALK_VER=$("${BINWALK_BIN[@]}" 2>&1 | grep "Binwalk v" | cut -d+ -f1 | awk '{print $2}' | sed 's/^v//' || true)
+        if ! [ "$(version "${lBINWALK_VER}")" -ge "$(version "2.3.3")" ]; then
+          echo -e "${ORANGE}""    binwalk version ${lBINWALK_VER} - not optimal""${NC}"
           echo -e "${ORANGE}""    Upgrade your binwalk to version 2.3.3 or higher""${NC}"
         fi
         # this is typically needed in the read only docker container:
@@ -570,10 +574,11 @@ dependency_check()
       export MPLCONFIGDIR="${TMP_DIR}"
 
       check_dep_tool "unblob"
+      local lUNBLOB_VER=""
       if command -v unblob > /dev/null ; then
-        UNBLOB_VER=$(unblob --version 2>&1 || true)
-        if ! [ "$(version "${UNBLOB_VER}")" -ge "$(version "23.8.11")" ]; then
-          echo -e "${RED}""    Unblob version ${UNBLOB_VER} - not supported""${NC}"
+        lUNBLOB_VER=$(unblob --version 2>&1 || true)
+        if ! [ "$(version "${lUNBLOB_VER}")" -ge "$(version "23.8.11")" ]; then
+          echo -e "${RED}""    Unblob version ${lUNBLOB_VER} - not supported""${NC}"
           echo -e "${RED}""    Upgrade your unblob installation to version 23.8.11 or higher""${NC}"
           DEP_ERROR=1
         fi
@@ -655,21 +660,22 @@ dependency_check()
       check_dep_tool "shellcheck script" "shellcheck"
 
       # fdtdump (device tree compiler)
-      export DTBDUMP
-      DTBDUMP_M="$(check_dep_tool "fdtdump" "fdtdump")"
-      if echo "${DTBDUMP_M}" | grep -q "not ok" ; then
+      export DTBDUMP=""
+      local lDTBDUMP_M=""
+      lDTBDUMP_M="$(check_dep_tool "fdtdump" "fdtdump")"
+      if echo "${lDTBDUMP_M}" | grep -q "not ok" ; then
         DTBDUMP=0
       else
         DTBDUMP=1
       fi
-      echo -e "${DTBDUMP_M}"
+      echo -e "${lDTBDUMP_M}"
 
       # linux-exploit-suggester.sh script
       check_dep_file "linux-exploit-suggester.sh script" "${EXT_DIR}""/linux-exploit-suggester.sh"
 
       if function_exists S13_weak_func_check; then
         # objdump
-        OBJDUMP="${EXT_DIR}""/objdump"
+        export OBJDUMP="${EXT_DIR}""/objdump"
         check_dep_file "objdump disassembler" "${OBJDUMP}"
       fi
 

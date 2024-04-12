@@ -15,52 +15,50 @@
 # Author(s): Pascal Eckmann,
 # Contributors: Michael Messner, Stefan Haboeck
 
-INDEX_FILE="index.html"
-MAIN_LOG="./emba.log"
-STYLE_PATH="/style"
-TEMP_PATH="/tmp"
-ERR_PATH="/err"
-SUPPL_PATH_HTML="/etc"
+export INDEX_FILE="index.html"
+export MAIN_LOG="./emba.log"
+export STYLE_PATH="/style"
+export TEMP_PATH="/tmp"
+export ERR_PATH="/err"
+export SUPPL_PATH_HTML="/etc"
 
 # variables for html style
-P_START="<pre>"
-P_END="</pre>"
-SPAN_RED="<span class=\"red\">"
-SPAN_GREEN="<span class=\"green\">"
-SPAN_ORANGE="<span class=\"orange\">"
-SPAN_BLUE="<span class=\"blue\">"
-SPAN_MAGENTA="<span class=\"magenta\">"
-SPAN_CYAN="<span class=\"cyan\">"
-SPAN_BOLD="<span class=\"bold\">"
-SPAN_ITALIC="<span class=\"italic\">"
-SPAN_END="</span>"
-HR_MONO="<hr class=\"mono\" />"
-HR_DOUBLE="<hr class=\"double\" />"
-BR="<br />"
-LINK="<a href=\"LINK\" title=\"LINK\" target=\"_blank\" >"
-ARROW_LINK="<a href=\"LINK\" title=\"LINK\" >"
-LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
-REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
-REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
-LOCAL_OVERLAY_LINK="<a class=\"refmodul\" onclick=\"overlay_output\(\"LINK\"\) >"
-REFERENCE_MODUL_EXT_LINK="<a class=\"refmodulext\" href=\"LINK\" title=\"LINK\" target=\"_blank\">"
-EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"_blank\" >"
-CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"_blank\" >"
-CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"_blank\" >"
-GITHUB_LINK="<a href=\"https://github.com/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
-SNYK_LINK="<a href=\"https://security.snyk.io/vuln/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
-PSS_LINK="<a href=\"https://packetstormsecurity.com/files/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
-LICENSE_LINK="<a href=\"LINK\" title=\"LINK\" target=\"_blank\" >"
-MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
-MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
-ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
-SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
-ANCHOR="<a class=\"anc\" id=\"ANCHOR\">"
-TITLE_ANCHOR="<a id=\"ANCHOR\">"
-LINK_END="</a>"
-DEPTH="."
-ARACHNI_LINK="<a href=\"./l25_web_checks/arachni_report/index.html\" title=\"Arachni web report\" target=\"_blank\" >"
-
+export P_START="<pre>"
+export P_END="</pre>"
+export SPAN_RED="<span class=\"red\">"
+export SPAN_GREEN="<span class=\"green\">"
+export SPAN_ORANGE="<span class=\"orange\">"
+export SPAN_BLUE="<span class=\"blue\">"
+export SPAN_MAGENTA="<span class=\"magenta\">"
+export SPAN_CYAN="<span class=\"cyan\">"
+export SPAN_BOLD="<span class=\"bold\">"
+export SPAN_ITALIC="<span class=\"italic\">"
+export SPAN_END="</span>"
+export HR_MONO="<hr class=\"mono\" />"
+export HR_DOUBLE="<hr class=\"double\" />"
+export BR="<br />"
+export LINK="<a href=\"LINK\" title=\"LINK\" target=\"_blank\" >"
+export ARROW_LINK="<a href=\"LINK\" title=\"LINK\" >"
+export LOCAL_LINK="<a class=\"local\" href=\"LINK\" title=\"LINK\" >"
+export REFERENCE_LINK="<a class=\"reference\" href=\"LINK\" title=\"LINK\" >"
+export REFERENCE_MODUL_LINK="<a class=\"refmodul\" href=\"LINK\" title=\"LINK\" >"
+export LOCAL_OVERLAY_LINK="<a class=\"refmodul\" onclick=\"overlay_output\(\"LINK\"\) >"
+export REFERENCE_MODUL_EXT_LINK="<a class=\"refmodulext\" href=\"LINK\" title=\"LINK\" target=\"_blank\">"
+export EXPLOIT_LINK="<a href=\"https://www.exploit-db.com/exploits/LINK\" title=\"LINK\" target=\"_blank\" >"
+export CVE_LINK="<a href=\"https://nvd.nist.gov/vuln/detail/LINK\" title=\"LINK\" target=\"_blank\" >"
+export CWE_LINK="<a href=\"https://cwe.mitre.org/data/definitions/LINK.html\" title=\"LINK\" target=\"_blank\" >"
+export GITHUB_LINK="<a href=\"https://github.com/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
+export SNYK_LINK="<a href=\"https://security.snyk.io/vuln/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
+export PSS_LINK="<a href=\"https://packetstormsecurity.com/files/LINK\" title=\"LINKNAME\" target=\"_blank\" >"
+export LICENSE_LINK="<a href=\"LINK\" title=\"LINK\" target=\"_blank\" >"
+export MODUL_LINK="<a class=\"modul\" href=\"LINK\" title=\"LINK\" >"
+export MODUL_INDEX_LINK="<a class=\"modul CLASS\" data=\"DATA\" href=\"LINK\" title=\"LINK\">"
+export ETC_INDEX_LINK="<a class=\"etc\" href=\"LINK\" title=\"LINK\">"
+export SUBMODUL_LINK="<a class=\"submodul\" href=\"LINK\" title=\"LINK\" >"
+export ANCHOR="<a class=\"anc\" id=\"ANCHOR\">"
+export TITLE_ANCHOR="<a id=\"ANCHOR\">"
+export LINK_END="</a>"
+export DEPTH="."
 
 add_color_tags()
 {
@@ -356,23 +354,6 @@ add_link_tags() {
           LINK_COMMAND_ARR+=( "${LICENSE_LINE_NUM}"'s@'"${LICENSE_STRING:1}"'@'"${HTML_LINK}"'@' )
         fi
       done
-    fi
-
-    # Arachni report
-    if [[ "${LINK_FILE}" == *"l25_web_checks"* ]]; then
-      if [[ -d "${LOG_DIR}/l25_web_checks/arachni_report/" ]]; then
-        print_output "[*] Arachni report found ... copy it to ${ABS_HTML_PATH}/l25_web_checks" "no_log"
-        # copy arachni report to report directory
-        if ! [[ -d "${ABS_HTML_PATH}/l25_web_checks" ]]; then
-          mkdir "${ABS_HTML_PATH}/l25_web_checks"
-        fi
-        cp -r "${LOG_DIR}/l25_web_checks/arachni_report/" "${ABS_HTML_PATH}/l25_web_checks/"
-        # generate a html link
-        if [[ -f "${LINK_FILE}" ]]; then
-          print_output "[*] Generating Arachni linking ${LINK_FILE}" "no_log"
-          LINK_COMMAND_ARR+=( 's@'"Arachni report created"'@'"${ARACHNI_LINK}""Arachni web application report""${LINK_END}"'@' )
-        fi
-      fi
     fi
 
     # [LOV] anchor for JS popup messages
@@ -703,20 +684,22 @@ scan_report()
 
 add_arrows()
 {
-  local D_MODULE_ARR
+  local D_MODULE_ARR=()
   readarray -t D_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./d[0-9]*.*" | sort -V || true)
-  local P_MODULE_ARR
+  local P_MODULE_ARR=()
   readarray -t P_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./p[0-9]*.*" | sort -V || true)
-  local S_MODULE_ARR
+  local S_MODULE_ARR=()
   readarray -t S_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./s[0-9]*.*" | sort -V || true)
-  local L_MODULE_ARR
+  local L_MODULE_ARR=()
   readarray -t L_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./l[0-9]*.*" | sort -V || true)
-  local F_MODULE_ARR
+  local F_MODULE_ARR=()
   readarray -t F_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./f[0-9]*.*" | sort -V || true)
-  local Q_MODULE_ARR
+  local Q_MODULE_ARR=()
   readarray -t Q_MODULE_ARR < <(find "${ABS_HTML_PATH}" -maxdepth 1 -name "*.html" | grep -a -E "./q[0-9]*.*" | sort -V || true)
-  local ALL_MODULE_ARR
-  ALL_MODULE_ARR=( "${ABS_HTML_PATH}""/""${INDEX_FILE}" "${D_MODULE_ARR[@]}" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
+  local ALL_MODULE_ARR=()
+  export ALL_MODULE_ARR=( "${ABS_HTML_PATH}""/""${INDEX_FILE}" "${D_MODULE_ARR[@]}" "${P_MODULE_ARR[@]}" "${S_MODULE_ARR[@]}" "${Q_MODULE_ARR[@]}" "${L_MODULE_ARR[@]}" "${F_MODULE_ARR[@]}")
+  local M_NUM=""
+
   for M_NUM in "${!ALL_MODULE_ARR[@]}"; do
     if [[ "${M_NUM}" -gt 0 ]] ; then
       FIRST_LINK="${ALL_MODULE_ARR[$(( M_NUM - 1 ))]}"
@@ -735,6 +718,7 @@ add_arrows()
 
 prepare_report()
 {
+  export ABS_HTML_PATH=""
   ABS_HTML_PATH="$(abs_path "${HTML_PATH}")"
 
   if [ ! -d "${ABS_HTML_PATH}${STYLE_PATH}" ] ; then

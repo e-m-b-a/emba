@@ -1225,17 +1225,23 @@ cve_extractor_thread_actor() {
   lFIRST_EPSS=$(echo "${CVE_OUTPUT}" | cut -d: -f4)
   lFIRST_PERC=$(echo "${CVE_OUTPUT}" | cut -d: -f5)
 
+  # default value
+  EXPLOIT="No exploit available"
+
   # check if the CVE is known as a knwon exploited vulnerability:
   if [[ -f "${KNOWN_EXP_CSV}" ]]; then
     if grep -q \""${CVE_VALUE}"\", "${KNOWN_EXP_CSV}"; then
       print_output "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a known exploited vulnerability."
       echo -e "[+] ${ORANGE}WARNING:${GREEN} Vulnerability ${ORANGE}${CVE_VALUE}${GREEN} is a known exploited vulnerability." >> "${LOG_PATH_MODULE}"/exploit/known_exploited_vulns.log
+
+      if [[ "${EXPLOIT}" == "No exploit available" ]]; then
+        EXPLOIT="Exploit (KEV"
+      else
+        EXPLOIT+=" / KEV"
+      fi
       KNOWN_EXPLOITED=1
     fi
   fi
-
-  # default value
-  EXPLOIT="No exploit available"
 
   local EDB=0
   # as we already know about a bunch of kernel exploits - lets search them first

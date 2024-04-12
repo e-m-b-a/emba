@@ -16,21 +16,25 @@
 # Description: Multiple useful helpers
 
 run_web_reporter_mod_name() {
-  MOD_NAME="${1:-}"
+  local lMOD_NAME="${1:-}"
+  local lLOG_FILES_ARR=()
+  local lLOG_FILE=""
+
   if [[ ${HTML} -eq 1 ]]; then
     # usually we should only find one file:
-    mapfile -t LOG_FILES < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${MOD_NAME}*.txt" | sort)
-    for LOG_FILE in "${LOG_FILES[@]}"; do
-      MOD_NAME=$(basename -s .txt "${LOG_FILE}")
-      generate_report_file "${LOG_FILE}"
-      sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${LOG_FILE}"
+    mapfile -t lLOG_FILES_ARR < <(find "${LOG_DIR}" -maxdepth 1 -type f -iname "${lMOD_NAME}*.txt" | sort)
+    for lLOG_FILE in "${lLOG_FILES_ARR[@]}"; do
+      lMOD_NAME=$(basename -s .txt "${lLOG_FILE}")
+      generate_report_file "${lLOG_FILE}"
+      sed -i -E '/^\[REF\]|\[ANC\]|\[LOV\].*/d' "${lLOG_FILE}"
     done
   fi
 }
 
 wait_for_pid() {
   local WAIT_PIDS=("$@")
-  local PID
+  local PID=""
+
   # print_output "[*] wait pid protection: ${#WAIT_PIDS[@]}"
   for PID in "${WAIT_PIDS[@]}"; do
     # print_output "[*] wait pid protection: $PID"
@@ -99,9 +103,9 @@ check_emba_ended() {
 # $1 - 1 some interrupt detected
 # $1 - 0 default exit 0
 cleaner() {
-  INTERRUPT_CLEAN="${1:-1}"
+  local lINTERRUPT_CLEAN="${1:-1}"
   [[ "${CLEANED}" -eq 1 ]] && return
-  if [[ "${INTERRUPT_CLEAN}" -eq 1 ]]; then
+  if [[ "${lINTERRUPT_CLEAN}" -eq 1 ]]; then
     print_output "[*] $(print_date) - Interrupt detected!" "no_log"
   fi
   print_output "[*] $(print_date) - Final cleanup started." "no_log"
@@ -139,12 +143,14 @@ cleaner() {
       find "${LOG_DIR}/s115_usermode_emulator" -xdev -iname "qemu*static" -exec rm {} \; 2>/dev/null || true
 
       print_output "[*] $(print_date) - Umounting proc, sys and run" "no_log"
-      mapfile -t CHECK_MOUNTS < <(mount | grep "s115_usermode_emulator" 2>/dev/null || true)
+      local lCHECK_MOUNTS_ARR=()
+      local lMOUNT=""
+      mapfile -t lCHECK_MOUNTS_ARR < <(mount | grep "s115_usermode_emulator" 2>/dev/null || true)
       # now we can unmount the stuff from emulator and delete temporary stuff
-      for MOUNT in "${CHECK_MOUNTS[@]}"; do
-        print_output "[*] $(print_date) - Unmounting ${MOUNT}" "no_log"
-        MOUNT=$(echo "${MOUNT}" | cut -d\  -f3)
-        umount -l "${MOUNT}" || true
+      for lMOUNT in "${lCHECK_MOUNTS_ARR[@]}"; do
+        print_output "[*] $(print_date) - Unmounting ${lMOUNT}" "no_log"
+        lMOUNT=$(echo "${lMOUNT}" | cut -d\  -f3)
+        umount -l "${lMOUNT}" || true
       done
 
       if [[ -d "${LOG_DIR}/s115_usermode_emulator/firmware" ]]; then
@@ -184,8 +190,9 @@ cleaner() {
   fi
 
   if [[ -f "${TMP_DIR}"/orig_logdir ]]; then
-    LOG_DIR_HOST=$(cat "${TMP_DIR}"/orig_logdir)
-    pkill -f "inotifywait.*${LOG_DIR_HOST}" 2>/dev/null || true
+    local lLOG_DIR_HOST=""
+    lLOG_DIR_HOST=$(cat "${TMP_DIR}"/orig_logdir)
+    pkill -f "inotifywait.*${lLOG_DIR_HOST}" 2>/dev/null || true
   fi
 
   if [[ "${IN_DOCKER}" -eq 1 ]]; then
@@ -222,7 +229,7 @@ cleaner() {
     rm -r "${TMP_DIR}" 2>/dev/null || true
   fi
   export CLEANED=1
-  if [[ "${INTERRUPT_CLEAN}" -eq 1 ]]; then
+  if [[ "${lINTERRUPT_CLEAN}" -eq 1 ]]; then
     print_output "[!] Test ended on ""$(print_date)"" and took about ""$(show_runtime)"" \\n" "no_log"
     exit 1
   fi
@@ -277,29 +284,32 @@ emba_updater() {
 # this checks if a function is available
 # this means the EMBA module was loaded
 function_exists() {
-  FCT_TO_CHECK="${1:-}"
-  declare -f -F "${FCT_TO_CHECK}" > /dev/null
+  local lFCT_TO_CHECK="${1:-}"
+  declare -f -F "${lFCT_TO_CHECK}" > /dev/null
   return $?
 }
 
 # used by CSV search to get the search rule for csv search:
 get_csv_rule() {
   local VERSION_STRING="${1:-}"
-  local CSV_REGEX
+  local CSV_REGEX=""
   CSV_REGEX=$(echo "${2:-}" | sed 's/^\"//' | sed 's/\"$//')
-  export CSV_RULE
-  CSV_RULE="NA"
+  export CSV_RULE="NA"
 
   CSV_RULE="$(echo "${VERSION_STRING}" | eval "${CSV_REGEX}" || true)"
 }
 
 restore_permissions() {
+  local lORIG_USER=""
+  local lORIG_UID=""
+  local lORIG_GID=""
+
   if [[ -f "${LOG_DIR}"/orig_user.log ]]; then
-    ORIG_USER=$(head -1 "${LOG_DIR}"/orig_user.log)
-    print_output "[*] $(print_date) - Restoring directory permissions for user: ${ORANGE}${ORIG_USER}${NC}" "no_log"
-    ORIG_UID="$(grep "UID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
-    ORIG_GID="$(grep "GID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
-    chown "${ORIG_UID}":"${ORIG_GID}" "${LOG_DIR}" -R || true
+    lORIG_USER=$(head -1 "${LOG_DIR}"/orig_user.log)
+    print_output "[*] $(print_date) - Restoring directory permissions for user: ${ORANGE}${lORIG_USER}${NC}" "no_log"
+    lORIG_UID="$(grep "UID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
+    lORIG_GID="$(grep "GID" "${LOG_DIR}"/orig_user.log | awk '{print $2}')"
+    chown "${lORIG_UID}":"${lORIG_GID}" "${LOG_DIR}" -R || true
     rm "${LOG_DIR}"/orig_user.log || true
   fi
 }
@@ -351,6 +361,7 @@ store_kill_pids() {
 
 disk_space_monitor() {
   local DDISK="${LOG_DIR}"
+  local lFREE_SPACE=""
 
   while ! [[ -f "${MAIN_LOG}" ]]; do
     sleep 1
@@ -358,8 +369,8 @@ disk_space_monitor() {
 
   while true; do
     # print_output "[*] Disk space monitoring active" "no_log"
-    FREE_SPACE=$(df --output=avail "${DDISK}" | awk 'NR==2')
-    if [[ "${FREE_SPACE}" -lt 10000000 ]]; then
+    lFREE_SPACE=$(df --output=avail "${DDISK}" | awk 'NR==2')
+    if [[ "${lFREE_SPACE}" -lt 10000000 ]]; then
       print_ln "no_log"
       print_output "[!] WARNING: EMBA is running out of disk space!" "main"
       print_output "[!] WARNING: EMBA is stopping now" "main"

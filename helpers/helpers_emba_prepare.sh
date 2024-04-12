@@ -23,12 +23,16 @@
 #               Access:
 #                 firmware root path via $FIRMWARE_PATH
 
-log_folder()
-{
+log_folder() {
   if [[ ${ONLY_DEP} -eq 0 ]] && [[ -d "${LOG_DIR}" ]] ; then
     export RESTART=0          # indicator for testing unfinished tests again
     local NOT_FINISHED=0      # identify unfinished firmware tests
     local POSSIBLE_RESTART=0  # used for testing the checksums of the firmware with stored checksum
+    local ANSWER="n"
+    local lD_LOG_FILES_ARR=()
+    local lD_LOG_FILE=""
+    local lSTORED_SHA512=""
+    local lFW_SHA512=""
 
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    There are files in the specified directory: ""${LOG_DIR}"
@@ -54,9 +58,9 @@ log_folder()
 
     # we check the found sha512 hash with the firmware to test:
     if [[ -f "${CSV_DIR}"/p02_firmware_bin_file_check.csv ]] && [[ -f "${FIRMWARE_PATH}" ]] && grep -q "SHA512" "${CSV_DIR}"/p02_firmware_bin_file_check.csv; then
-      STORED_SHA512=$(grep "SHA512" "${CSV_DIR}"/p02_firmware_bin_file_check.csv | cut -d\; -f2 | sort -u)
-      FW_SHA512=$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')
-      if [[ "${STORED_SHA512}" == "${FW_SHA512}" ]]; then
+      lSTORED_SHA512=$(grep "SHA512" "${CSV_DIR}"/p02_firmware_bin_file_check.csv | cut -d\; -f2 | sort -u)
+      lFW_SHA512=$(sha512sum "${FIRMWARE_PATH}" | awk '{print $1}')
+      if [[ "${lSTORED_SHA512}" == "${lFW_SHA512}" ]]; then
         # the found analysis is for the same firmware
         POSSIBLE_RESTART=1
       fi
@@ -109,12 +113,12 @@ log_folder()
     esac
   fi
 
-  readarray -t D_LOG_FILES < <( find . \( -path ./external -o -path ./config -o -path ./licenses -o -path ./tools \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) | head -100 )
-  if [[ ${USE_DOCKER} -eq 1 && ${#D_LOG_FILES[@]} -gt 0 ]] ; then
+  readarray -t lD_LOG_FILES_ARR < <( find . \( -path ./external -o -path ./config -o -path ./licenses -o -path ./tools \) -prune -false -o \( -name "*.txt" -o -name "*.log" \) | head -100 )
+  if [[ ${USE_DOCKER} -eq 1 && ${#lD_LOG_FILES_ARR[@]} -gt 0 ]] ; then
     echo -e "\\n[${RED}!${NC}] ${ORANGE}Warning${NC}\\n"
     echo -e "    It appears that there are log files in the EMBA directory.\\n    You should move these files to another location where they won't be exposed to the Docker container."
-    for D_LOG_FILE in "${D_LOG_FILES[@]}" ; do
-      echo -e "        ""$(orange "${D_LOG_FILE}")"
+    for lD_LOG_FILE in "${lD_LOG_FILES_ARR[@]}" ; do
+      echo -e "        ""$(orange "${lD_LOG_FILE}")"
     done
     echo -e "\\n${ORANGE}Continue to run EMBA and ignore this warning?${NC}\\n"
     read -p "(Y/n)  " -r ANSWER
@@ -132,7 +136,8 @@ log_folder()
 
 set_exclude()
 {
-  export EXCLUDE_PATHS
+  export EXCLUDE_PATHS=()
+  export EXCLUDE=()
 
   if [[ "${FIRMWARE_PATH}" == "/" ]]; then
     EXCLUDE=("${EXCLUDE[@]}" "/proc" "/sys" "$(pwd)")
@@ -143,18 +148,30 @@ set_exclude()
 
   # exclude paths from testing and set EXCL_FIND for find command (prune paths dynamicially)
   EXCLUDE_PATHS="$(set_excluded_path)"
-  export EXCL_FIND
+  export EXCL_FIND=()
   IFS=" " read -r -a EXCL_FIND <<< "$( echo -e "$(get_excluded_find "${EXCLUDE_PATHS}")" | tr '\r\n' ' ' | tr -d '\n' 2>/dev/null)"
   print_excluded
 }
 
-architecture_check()
-{
+architecture_check() {
   if [[ ${ARCH_CHECK} -eq 1 ]] ; then
     print_output "[*] Architecture auto detection (could take some time)\\n"
-    local ARCH_MIPS=0 ARCH_ARM=0 ARCH_ARM64=0 ARCH_X64=0 ARCH_X86=0 ARCH_PPC=0 ARCH_NIOS2=0 ARCH_MIPS64R2=0 ARCH_MIPS64_III=0
-    local ARCH_MIPS64v1=0 ARCH_MIPS64_N32=0 ARCH_RISCV=0 ARCH_PPC64=0 ARCH_QCOM_DSP6=0
-    local D_END_LE=0 D_END_BE=0
+    local ARCH_MIPS=0
+    local ARCH_ARM=0
+    local ARCH_ARM64=0
+    local ARCH_X64=0
+    local ARCH_X86=0
+    local ARCH_PPC=0
+    local ARCH_NIOS2=0
+    local ARCH_MIPS64R2=0
+    local ARCH_MIPS64_III=0
+    local ARCH_MIPS64v1=0
+    local ARCH_MIPS64_N32=0
+    local ARCH_RISCV=0
+    local ARCH_PPC64=0
+    local ARCH_QCOM_DSP6=0
+    local D_END_LE=0
+    local D_END_BE=0
     local D_FLAGS=""
     local D_MACHINE=""
     local D_CLASS=""
@@ -163,7 +180,8 @@ architecture_check()
     local MD5SUM=""
     export ARM_HF=0
     export ARM_SF=0
-    D_END="NA"
+    export D_END="NA"
+    local BINARY=""
 
     write_csv_log "BINARY" "BINARY_CLASS" "END_DATA" "MACHINE-TYPE" "BINARY_FLAGS" "ARCH_GUESSED" "ELF-DATA" "MD5SUM"
     # we use the binaries array which is already unique
@@ -398,7 +416,7 @@ prepare_file_arr()
   echo ""
   print_output "[*] Unique files auto detection for ${ORANGE}${FIRMWARE_PATH}${NC} (could take some time)\\n"
 
-  export FILE_ARR
+  export FILE_ARR=()
   readarray -t FILE_ARR < <(find "${FIRMWARE_PATH}" -xdev "${EXCL_FIND[@]}" -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3- )
   # RTOS handling:
   if [[ -f ${FIRMWARE_PATH} && ${RTOS} -eq 1 ]]; then
@@ -414,27 +432,31 @@ prepare_file_arr()
 }
 
 prepare_binary_arr() {
-  local FIRMWARE_PATH="${1:-}"
-  if ! [[ -d "${FIRMWARE_PATH}" ]]; then
+  local lFIRMWARE_PATH="${1:-}"
+  if ! [[ -d "${lFIRMWARE_PATH}" ]]; then
     return
   fi
   echo ""
-  print_output "[*] Unique binary auto detection for ${ORANGE}${FIRMWARE_PATH}${NC} (could take some time)\\n"
+  print_output "[*] Unique binary auto detection for ${ORANGE}${lFIRMWARE_PATH}${NC} (could take some time)\\n"
 
   # lets try to get an unique binary array
   # Necessary for providing BINARIES array (usable in every module)
   export BINARIES=()
-  # readarray -t BINARIES < <( find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
+  local lBINARIES_TMP_ARR=()
+  local lBINARY=""
+  local lBIN_MD5=""
+  local MD5_DONE_INT=()
+  # readarray -t BINARIES < <( find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -executable -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 )
 
   # In some firmwares we miss the exec permissions in the complete firmware. In such a case we try to find ELF files and unique it
-  readarray -t BINARIES_TMP < <(find "${FIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1 || true)
-  if [[ -v BINARIES_TMP[@] ]]; then
-    for BINARY in "${BINARIES_TMP[@]}"; do
-      if [[ -f "${BINARY}" ]]; then
-        BIN_MD5=$(md5sum "${BINARY}" | cut -d\  -f1)
-        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${BIN_MD5} ]]; then
-          BINARIES+=( "${BINARY}" )
-          MD5_DONE_INT+=( "${BIN_MD5}" )
+  readarray -t lBINARIES_TMP_ARR < <(find "${lFIRMWARE_PATH}" "${EXCL_FIND[@]}" -type f -exec file {} \; 2>/dev/null | grep ELF | cut -d: -f1 || true)
+  if [[ -v lBINARIES_TMP_ARR[@] ]]; then
+    for lBINARY in "${lBINARIES_TMP_ARR[@]}"; do
+      if [[ -f "${lBINARY}" ]]; then
+        lBIN_MD5=$(md5sum "${lBINARY}" | cut -d\  -f1)
+        if [[ ! " ${MD5_DONE_INT[*]} " =~ ${lBIN_MD5} ]]; then
+          BINARIES+=( "${lBINARY}" )
+          MD5_DONE_INT+=( "${lBIN_MD5}" )
         fi
       fi
     done
@@ -478,14 +500,17 @@ check_firmware()
 {
   # this detection is only running if we have not found a Linux system:
   local DIR_COUNT=0
+  local lR_PATH=""
+  local lL_PATH=""
+
   if [[ "${RTOS}" -eq 1 ]]; then
     # Check if firmware got normal linux directory structure and warn if not
     # as we already have done some root directory detection we are going to use it now
     local LINUX_PATHS=( "bin" "boot" "dev" "etc" "home" "lib" "mnt" "opt" "proc" "root" "sbin" "srv" "tmp" "usr" "var" )
     if [[ ${#ROOT_PATH[@]} -gt 0 ]]; then
-      for R_PATH in "${ROOT_PATH[@]}"; do
-        for L_PATH in "${LINUX_PATHS[@]}"; do
-          if [[ -d "${R_PATH}"/"${L_PATH}" ]] ; then
+      for lR_PATH in "${ROOT_PATH[@]}"; do
+        for lL_PATH in "${LINUX_PATHS[@]}"; do
+          if [[ -d "${R_PATH}"/"${lL_PATH}" ]] ; then
             ((DIR_COUNT+=1))
           fi
         done
@@ -493,8 +518,8 @@ check_firmware()
     else
       # this is needed for directories we are testing
       # in such a case the pre-checking modules are not executed and no RPATH is available
-      for L_PATH in "${LINUX_PATHS[@]}"; do
-        if [[ -d "${FIRMWARE_PATH}"/"${L_PATH}" ]] ; then
+      for lL_PATH in "${LINUX_PATHS[@]}"; do
+        if [[ -d "${FIRMWARE_PATH}"/"${lL_PATH}" ]] ; then
           ((DIR_COUNT+=1))
         fi
       done
@@ -510,103 +535,109 @@ check_firmware()
 }
 
 detect_root_dir_helper() {
-  SEARCH_PATH="${1:-}"
+  local lSEARCH_PATH="${1:-}"
 
-  print_output "[*] Root directory auto detection for ${ORANGE}${SEARCH_PATH}${NC} (could take some time)\\n"
+  print_output "[*] Root directory auto detection for ${ORANGE}${lSEARCH_PATH}${NC} (could take some time)\\n"
   export ROOT_PATH=()
-  local R_PATH
-  local MECHANISM=""
+  local lMECHANISM=""
+  local lROOTx_PATH_ARR=()
+  local lINTERPRETER_FULL_PATH_ARR=()
+  local lINTERPRETER_PATH=""
+  local lINTERPRETER_FULL_RPATH_ARR=()
+  local lR_PATH=""
+  local lINTERPRETER_ESCAPED=""
+  local lCNT=0
 
-  mapfile -t INTERPRETER_FULL_PATH < <(find "${SEARCH_PATH}" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
+  mapfile -t lINTERPRETER_FULL_PATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -type f -exec file {} \; 2>/dev/null | grep "ELF" | grep "interpreter" | sed s/.*interpreter\ // | sed 's/,\ .*$//' | sort -u 2>/dev/null || true)
 
-  if [[ "${#INTERPRETER_FULL_PATH[@]}" -gt 0 ]]; then
-    for INTERPRETER_PATH in "${INTERPRETER_FULL_PATH[@]}"; do
+  if [[ "${#lINTERPRETER_FULL_PATH_ARR[@]}" -gt 0 ]]; then
+    for lINTERPRETER_PATH in "${lINTERPRETER_FULL_PATH_ARR[@]}"; do
       # now we have a result like this "/lib/ld-uClibc.so.0"
       # lets escape it
-      INTERPRETER_ESCAPED=$(echo "${INTERPRETER_PATH}" | sed -e 's/\//\\\//g')
-      mapfile -t INTERPRETER_FULL_RPATH < <(find "${SEARCH_PATH}" -ignore_readdir_race -wholename "*${INTERPRETER_PATH}" 2>/dev/null | sort -u)
-      for R_PATH in "${INTERPRETER_FULL_RPATH[@]}"; do
+      lINTERPRETER_ESCAPED=$(echo "${lINTERPRETER_PATH}" | sed -e 's/\//\\\//g')
+      mapfile -t lINTERPRETER_FULL_RPATH_ARR < <(find "${lSEARCH_PATH}" -ignore_readdir_race -wholename "*${lINTERPRETER_PATH}" 2>/dev/null | sort -u)
+      for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
         # remove the interpreter path from the full path:
-        R_PATH="${R_PATH//${INTERPRETER_ESCAPED}/}"
-        if [[ -v R_PATH ]] && [[ -d "${R_PATH}" ]]; then
-          ROOT_PATH+=( "${R_PATH}" )
-          MECHANISM="binary interpreter"
+        lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
+        if [[ -v lR_PATH ]] && [[ -d "${lR_PATH}" ]]; then
+          ROOT_PATH+=( "${lR_PATH}" )
+          lMECHANISM="binary interpreter"
         fi
       done
     done
   fi
 
   # if we can't find the interpreter we fall back to a search for something like "*root/bin/* and take this:
-  mapfile -t ROOTx_PATH < <(find "${SEARCH_PATH}" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
-  for R_PATH in "${ROOTx_PATH[@]}"; do
-    if [[ -d "${R_PATH}" ]]; then
-      ROOT_PATH+=( "${R_PATH}" )
-      if [[ -z "${MECHANISM}" ]]; then
-        MECHANISM="dir names"
-      elif [[ -n "${MECHANISM}" ]] && ! echo "${MECHANISM}" | grep -q "dir names"; then
-        MECHANISM="${MECHANISM} / dir names"
+  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*extracted/bin" -o -path "*root/bin" \) -exec dirname {} \; 2>/dev/null)
+  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+    if [[ -d "${lR_PATH}" ]]; then
+      ROOT_PATH+=( "${lR_PATH}" )
+      if [[ -z "${lMECHANISM}" ]]; then
+        lMECHANISM="dir names"
+      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
+        lMECHANISM="${lMECHANISM} / dir names"
       fi
     fi
   done
 
-  mapfile -t ROOTx_PATH < <(find "${SEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
-  for R_PATH in "${ROOTx_PATH[@]}"; do
-    CNT=$(echo "${R_PATH}" | awk '{print $1}')
-    if [[ "${CNT}" -lt 5 ]]; then
+  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev \( -path "*/sbin" -o -path "*/bin" -o -path "*/lib" -o -path "*/etc" -o -path "*/root" -o -path "*/dev" -o -path "*/opt" -o -path "*/proc" -o -path "*/lib64" -o -path "*/boot" -o -path "*/home" \) -exec dirname {} \; | sort | uniq -c | sort -r)
+  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+    lCNT=$(echo "${lR_PATH}" | awk '{print $1}')
+    if [[ "${lCNT}" -lt 5 ]]; then
       # we only use paths with more then 4 matches as possible root path
       continue
     fi
-    R_PATH=$(echo "${R_PATH}" | awk '{print $2}')
-    if [[ -d "${R_PATH}" ]]; then
-      ROOT_PATH+=( "${R_PATH}" )
-      if [[ -z "${MECHANISM}" ]]; then
-        MECHANISM="dir names"
-      elif [[ -n "${MECHANISM}" ]] && ! echo "${MECHANISM}" | grep -q "dir names"; then
-        MECHANISM="${MECHANISM} / dir names"
+    lR_PATH=$(echo "${lR_PATH}" | awk '{print $2}')
+    if [[ -d "${lR_PATH}" ]]; then
+      ROOT_PATH+=( "${lR_PATH}" )
+      if [[ -z "${lMECHANISM}" ]]; then
+        lMECHANISM="dir names"
+      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "dir names"; then
+        lMECHANISM="${lMECHANISM} / dir names"
       fi
     fi
   done
 
-  mapfile -t ROOTx_PATH < <(find "${SEARCH_PATH}" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
-  for R_PATH in "${ROOTx_PATH[@]}"; do
-    if [[ -d "${R_PATH}" ]]; then
-      ROOT_PATH+=( "${R_PATH}" )
-      if [[ -z "${MECHANISM}" ]]; then
-        MECHANISM="busybox"
-      elif [[ -n "${MECHANISM}" ]] && ! echo "${MECHANISM}" | grep -q "busybox"; then
-        MECHANISM="${MECHANISM} / busybox"
+  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/busybox" | sed -E 's/\/.?bin\/busybox//')
+  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+    if [[ -d "${lR_PATH}" ]]; then
+      ROOT_PATH+=( "${lR_PATH}" )
+      if [[ -z "${lMECHANISM}" ]]; then
+        lMECHANISM="busybox"
+      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "busybox"; then
+        lMECHANISM="${lMECHANISM} / busybox"
       fi
     fi
   done
 
-  mapfile -t ROOTx_PATH < <(find "${SEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
-  for R_PATH in "${ROOTx_PATH[@]}"; do
-    if [[ -d "${R_PATH}" ]]; then
-      ROOT_PATH+=( "${R_PATH}" )
-      if [[ -z "${MECHANISM}" ]]; then
-        MECHANISM="shell"
-      elif [[ -n "${MECHANISM}" ]] && ! echo "${MECHANISM}" | grep -q "shell"; then
-        MECHANISM="${MECHANISM} / shell"
+  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/bash" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/bash//' || true)
+  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+    if [[ -d "${lR_PATH}" ]]; then
+      ROOT_PATH+=( "${lR_PATH}" )
+      if [[ -z "${lMECHANISM}" ]]; then
+        lMECHANISM="shell"
+      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+        lMECHANISM="${lMECHANISM} / shell"
       fi
     fi
   done
 
-  mapfile -t ROOTx_PATH < <(find "${SEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
-  for R_PATH in "${ROOTx_PATH[@]}"; do
-    if [[ -d "${R_PATH}" ]]; then
-      ROOT_PATH+=( "${R_PATH}" )
-      if [[ -z "${MECHANISM}" ]]; then
-        MECHANISM="shell"
-      elif [[ -n "${MECHANISM}" ]] && ! echo "${MECHANISM}" | grep -q "shell"; then
-        MECHANISM="${MECHANISM} / shell"
+  mapfile -t lROOTx_PATH_ARR < <(find "${lSEARCH_PATH}" -xdev -path "*bin/sh" -exec file {} \; | grep "ELF" | cut -d: -f1 | sed -E 's/\/.?bin\/sh//' || true)
+  for lR_PATH in "${lROOTx_PATH_ARR[@]}"; do
+    if [[ -d "${lR_PATH}" ]]; then
+      ROOT_PATH+=( "${lR_PATH}" )
+      if [[ -z "${lMECHANISM}" ]]; then
+        lMECHANISM="shell"
+      elif [[ -n "${lMECHANISM}" ]] && ! echo "${lMECHANISM}" | grep -q "shell"; then
+        lMECHANISM="${lMECHANISM} / shell"
       fi
     fi
   done
 
   if [[ ${#ROOT_PATH[@]} -eq 0 ]]; then
     export RTOS=1
-    ROOT_PATH+=( "${SEARCH_PATH}" )
-    MECHANISM="last resort"
+    ROOT_PATH+=( "${lSEARCH_PATH}" )
+    lMECHANISM="last resort"
   else
     export RTOS=0
   fi
@@ -617,19 +648,21 @@ detect_root_dir_helper() {
     write_link "s05#file_dirs"
   fi
 
-  for R_PATH in "${ROOT_PATH[@]}"; do
-    if [[ "${MECHANISM}" == "last resort" ]]; then
-      print_output "[*] Found no real root directory - setting it to: ${ORANGE}${R_PATH}${NC} via ${ORANGE}${MECHANISM}${NC}."
+  for lR_PATH in "${ROOT_PATH[@]}"; do
+    if [[ "${lMECHANISM}" == "last resort" ]]; then
+      print_output "[*] Found no real root directory - setting it to: ${ORANGE}${lR_PATH}${NC} via ${ORANGE}${lMECHANISM}${NC}."
     else
-      print_output "[+] Found the following root directory: ${ORANGE}${R_PATH}${GREEN} via ${ORANGE}${MECHANISM}${GREEN}."
+      print_output "[+] Found the following root directory: ${ORANGE}${lR_PATH}${GREEN} via ${ORANGE}${lMECHANISM}${GREEN}."
     fi
     write_link "s05#file_dirs"
   done
 }
 
 check_init_size() {
-  SIZE=$(du -b --max-depth=0 "${FIRMWARE_PATH}"| awk '{print $1}' || true)
-  if [[ ${SIZE} -gt 400000000 ]]; then
+  local lSIZE=""
+
+  lSIZE=$(du -b --max-depth=0 "${FIRMWARE_PATH}"| awk '{print $1}' || true)
+  if [[ ${lSIZE} -gt 400000000 ]]; then
     print_ln "no_log"
     print_output "[!] WARNING: Your firmware is very big!" "no_log"
     print_output "[!] WARNING: Analysing huge firmwares will take a lot of disk space, RAM and time!" "no_log"
