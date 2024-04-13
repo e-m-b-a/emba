@@ -53,8 +53,7 @@ welcome()
 
 module_log_init()
 {
-  # local LOG_FILE_NAME
-  local LOG_FILE_NAME="${1:-}"
+  export LOG_FILE_NAME="${1:-}"
   local FILE_NAME=""
   local MODULE_NUMBER=""
   MODULE_NUMBER="$(echo "${LOG_FILE_NAME}" | cut -d "_" -f1 | cut -c2- )"
