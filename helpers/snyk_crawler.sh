@@ -89,7 +89,8 @@ while read -r ADV; do
     continue
   fi
   echo -e "[*] Downloading ${ORANGE}${FILENAME}${NC} (${ORANGE}${ID}${NC}/${ORANGE}${ADV_CNT}${NC}) to ${ORANGE}${SAVE_PATH}/vuln/${FILENAME}${NC}"
-  wget --user-agent="Mozilla" "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
+  lynx -useragent="Mozilla" -dump -hiddenlinks=listonly "${ADV}" > "${SAVE_PATH}"/vuln/"${FILENAME}"
+  # wget --user-agent="Mozilla" "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
 done < "${SAVE_PATH}"/"${LINKS}"_sorted
 
 echo -e "[*] Finished downloading ${ORANGE}${ADV_CNT}${NC} advisories to ${ORANGE}${SAVE_PATH}/vuln${NC}"
@@ -152,8 +153,7 @@ while IFS= read -r -d '' ADV; do
   else
     PoC_XML="no"
   fi
-  mapfile -t CVEs < <(grep -a -o -E "<title>.*CVE-[0-9]{4}-[0-9]+.*</title>" "${ADV}" | \
-    grep -o -E "CVE-[0-9]{4}-[0-9]+" | sort -u)
+  mapfile -t CVEs < <(grep -a -o -E "CVE-[0-9]{4}-[0-9]+" "${ADV}" | sort -u)
 
   if [[ "${PoC}" -gt 0 ]] && [[ "${#CVEs[@]}" -gt 0 ]]; then
     for CVE in "${CVEs[@]}"; do
