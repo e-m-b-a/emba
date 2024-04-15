@@ -56,13 +56,20 @@ It also sketches the typical integration process of patches.
 - Scope of variables: Use local variables if possible
 
 - Variables always need to be initialized
-  - e.g., local VARIABLE=""
+  - e.g., local lVARIABLE=""
+
+- Local variables should always start with "l"
+  - e.g., local lVARIABLE=""
+  - Note: This will be enforced in the future!
 
 - Use parameters to functions
   - work with local variables inside the functions
   - do not rely on globals if not needed
 
-- Use `export` for variables which aren't only used in one file - it isn't necessary, but helps for readability
+- Use `export` for variables which aren't only used in one function
+  - From bash perspective it isn't necessary, but helps for readability
+
+- We do not accept the usage of variables anymore that are not declared as local or external -> no indirect globals
 
 - Don't use backticks anymore, use $(..) instead
 
@@ -76,7 +83,9 @@ It also sketches the typical integration process of patches.
 
 - At least ["weak quoting"](https://wiki.bash-hackers.org/syntax/quoting#weak_quoting) is required - unquoted variable processing is not permitted
 
-- Code tests: Use shellcheck and semgrep to test your code with the ./check_project.sh script
+- Code tests: Use shellcheck and semgrep to test your code
+
+- Code tests: The included `./check_project.sh` script performs multiple coding checks automatically. It is highly recommend to run this script before initiating a PR.
 
 - Code tests: Run EMBA in STRICT mode (parameter -S) to ensure everything is correct (new code has to be STRICT mode compatible and needs to pass shellcheck and semgrep tests).
 

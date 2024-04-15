@@ -6,7 +6,7 @@ source "${EMBA_PATH}/helpers/helpers_emba_prepare.sh"
 # shellcheck source=/dev/null
 source "${EMBA_PATH}/helpers/helpers_emba_print.sh"
 
-BLACKLIST_VARS_ARR=("MD5_DONE_DEEP" "LOG_PATH_MODULE")
+BLACKLIST_VARS_ARR=("IFS" "EMBA" "MD5_DONE_DEEP" "LOG_PATH_MODULE")
 
 mapfile -t ALL_EMBA_MODULES < <(find "${EMBA_PATH}"/modules -name "*.sh")
 mapfile -t ALL_EMBA_HELPERS < <(find "${EMBA_PATH}"/helpers -name "helpers_emba_*.sh")
