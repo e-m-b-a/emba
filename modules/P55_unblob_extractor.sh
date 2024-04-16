@@ -88,10 +88,10 @@ P55_unblob_extractor() {
   print_ln
 
   if [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
-    FILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l )
+    FILES_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type f | wc -l)
     UNIQUE_FILES_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec md5sum {} \; 2>/dev/null | sort -u -k1,1 | cut -d\  -f3 | wc -l )
     DIRS_EXT_UB=$(find "${OUTPUT_DIR_UNBLOB}" -xdev -type d | wc -l )
-    BINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true)
+    BINS_UB=$(find "${OUTPUT_DIR_UNBLOB}" "${EXCL_FIND[@]}" -xdev -type f -exec file {} \; | grep -c "ELF" || true )
   fi
 
   if [[ "${BINS_UB}" -gt 0 ]] || [[ "${FILES_EXT_UB}" -gt 0 ]]; then
@@ -114,35 +114,40 @@ P55_unblob_extractor() {
 }
 
 unblobber() {
-  local FIRMWARE_PATH_="${1:-}"
-  local OUTPUT_DIR_UNBLOB="${2:-}"
-  local VERBOSE="${3:-1}"
-  local UNBLOB_BIN="unblob"
+  local lFIRMWARE_PATH="${1:-}"
+  local lOUTPUT_DIR_UNBLOB="${2:-}"
+  local lVERBOSE="${3:-0}"
+  local lUNBLOB_BIN="unblob"
+  local lTIMEOUT="30m"
 
   # unblob should be checked in the dependency checker
 
   if [[ "${DIFF_MODE}" -ne 1 ]]; then
-    sub_module_title "Analyze binary firmware $(basename "${FIRMWARE_PATH_}") with unblob"
+    sub_module_title "Analyze binary firmware $(basename "${lFIRMWARE_PATH}") with unblob"
   fi
 
-  print_output "[*] Extracting firmware ${ORANGE}$(basename "${FIRMWARE_PATH_}")${NC} to directory ${ORANGE}${OUTPUT_DIR_UNBLOB}${NC}"
+  print_output "[*] Extracting firmware ${ORANGE}$(basename "${lFIRMWARE_PATH}")${NC} to directory ${ORANGE}${lOUTPUT_DIR_UNBLOB}${NC}"
 
-  if ! [[ -d "${OUTPUT_DIR_UNBLOB}" ]]; then
-    mkdir -p "${OUTPUT_DIR_UNBLOB}"
+  if ! [[ -d "${lOUTPUT_DIR_UNBLOB}" ]]; then
+    mkdir -p "${lOUTPUT_DIR_UNBLOB}"
   fi
 
-  if [[ "${VERBOSE}" -eq 1 ]]; then
-    timeout --preserve-status --signal SIGINT 300 "${UNBLOB_BIN}" -v -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${FIRMWARE_PATH_}")".log -e "${OUTPUT_DIR_UNBLOB}" "${FIRMWARE_PATH_}" |& safe_logging "${LOG_FILE}" 0 || true
+  if [[ "${lVERBOSE}" -eq 1 ]]; then
+    # Warning: the safe_logging is very slow.
+    # TODO: We need to check on this!
+    timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -v -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
+      |& safe_logging "${LOG_FILE}" 0 || true
   else
     local COLUMNS=""
-    COLUMNS=100 timeout --preserve-status --signal SIGINT 300 "${UNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${FIRMWARE_PATH_}")".log -e "${OUTPUT_DIR_UNBLOB}" "${FIRMWARE_PATH_}" |& safe_logging "${LOG_FILE}" 0 || true
+    COLUMNS=100 timeout --preserve-status --signal SIGINT "${lTIMEOUT}" "${lUNBLOB_BIN}" -k --log "${LOG_PATH_MODULE}"/unblob_"$(basename "${lFIRMWARE_PATH}")".log -e "${lOUTPUT_DIR_UNBLOB}" "${lFIRMWARE_PATH}" \
+      |& safe_logging "${LOG_FILE}" 0 || true
   fi
 }
 
 linux_basic_identification_unblobber() {
-  local FIRMWARE_PATH_CHECK="${1:-}"
-  if ! [[ -d "${FIRMWARE_PATH_CHECK}" ]]; then
+  local lFIRMWARE_PATH_CHECK="${1:-}"
+  if ! [[ -d "${lFIRMWARE_PATH_CHECK}" ]]; then
     return
   fi
-  LINUX_PATH_COUNTER_UNBLOB="$(find "${FIRMWARE_PATH_CHECK}" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
+  LINUX_PATH_COUNTER_UNBLOB="$(find "${lFIRMWARE_PATH_CHECK}" "${EXCL_FIND[@]}" -xdev -type d -iname bin -o -type f -iname busybox -o -type f -name shadow -o -type f -name passwd -o -type d -iname sbin -o -type d -iname etc 2> /dev/null | wc -l)"
 }

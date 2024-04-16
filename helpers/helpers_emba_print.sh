@@ -338,7 +338,7 @@ write_grep_log()
 {
   local OLD_MESSAGE_TYPE=""
 
-  if [[ ${LOG_GREP} -eq 1 ]] ; then
+  if [[ ${LOG_GREP:-0} -eq 1 ]] ; then
     readarray -t OUTPUT_ARR <<< "${1}"
     local MESSAGE_TYPE_PAR="${2:-}"
     for E in "${OUTPUT_ARR[@]}" ; do

@@ -310,13 +310,13 @@ deeper_extractor_helper() {
     else
       # default case to Unblob
       if [[ "${THREADED}" -eq 1 ]]; then
-        unblobber "${FILE_TMP}" "${FILE_TMP}_unblob_extracted" &
+        unblobber "${FILE_TMP}" "${FILE_TMP}_unblob_extracted" 1 &
         BIN_PID="$!"
         store_kill_pids "${BIN_PID}"
         disown "${BIN_PID}" 2> /dev/null || true
         WAIT_PIDS_P60+=( "${BIN_PID}" )
       else
-        unblobber "${FILE_TMP}" "${FILE_TMP}_unblob_extracted"
+        unblobber "${FILE_TMP}" "${FILE_TMP}_unblob_extracted" 1
       fi
     fi
 

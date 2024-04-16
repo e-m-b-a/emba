@@ -351,7 +351,12 @@ update_box_status_2() {
 
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
     lLINES=$(cat "${TMP_DIR}""/LINES.log")
+
     PHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
+    [[ "${PHASE_STR}" == "Pre" ]] && PHASE_STR="Extraction"
+    [[ "${PHASE_STR}" == "Testing" ]] && PHASE_STR="Analysis"
+    [[ "${PHASE_STR}" == "System" ]] && PHASE_STR="Emulation"
+
     ERROR_STR="/$(grep -c 'Error detected' "${LOG_DIR}/emba_error.log" 2> /dev/null || true )"
     if [[ "${ERROR_STR}" == "/0" || "${ERROR_STR}" == "/" ]] ; then
       ERROR_STR=""
