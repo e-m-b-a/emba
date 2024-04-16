@@ -266,7 +266,7 @@ print_ln() {
 }
 
 print_dot() {
-  [[ "${DISABLE_DOTS}" -eq 1 ]] && return
+  [[ "${DISABLE_DOTS:-0}" -eq 1 ]] && return
   echo -n "." 2>/dev/null ||true
 }
 
