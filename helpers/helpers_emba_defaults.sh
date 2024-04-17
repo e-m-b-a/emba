@@ -113,6 +113,7 @@ set_defaults() {
   export DISABLE_STATUS_BAR=1
   # as we encounter issues with the status bar on other system we disable it for non Kali systems
   export DISABLE_NOTIFICATIONS=1    # disable notifications and further desktop experience
+  export NOTIFICATION_ID=1
   if [[ -f "/etc/debian_version" ]] && grep -q kali-rolling /etc/debian_version; then
     export DISABLE_NOTIFICATIONS=0    # disable notifications and further desktop experience
   fi

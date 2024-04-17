@@ -880,7 +880,6 @@ write_notification() {
   else
     # if we are on the host (e.g., in developer mode) we can directly handle
     # the notification
-    export NOTIFICATION_ID=""
     NOTIFICATION_ID=$(notify-send -p -r "${NOTIFICATION_ID}" --icon="${EMBA_ICON}" "EMBA" "${MESSAGE}" -t 2 || true)
   fi
 }
