@@ -32,7 +32,10 @@ S17_cwe_checker()
     local lTESTED_BINS=0
 
     # [[ "${IN_DOCKER}" -eq 1 ]] && cwe_container_prepare
-    module_wait "S13_weak_func_check"
+    if [[ "${FULL_TEST}" -ne 1 ]]; then
+      # we only need to wait if we are not using the full_scan profile
+      module_wait "S13_weak_func_check"
+    fi
 
     cwe_check
 

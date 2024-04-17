@@ -742,9 +742,10 @@ main() {
 
         print_output "[+] $(print_date) - EMBA main container ${MAIN_CONTAINER_} started and detached." "no_log"
         print_ln "no_log"
-        print_output "[*] $(print_date) - EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "main"
+        # the following write_log is used as the status bar shows the main emba.log and with a print_output we get double output
+        write_log "[*] $(print_date) - EMBA main container ${MAIN_CONTAINER_} monitoring through ${ORANGE}docker logs ${MAIN_CONTAINER_} -f${NC}." "${LOG_DIR}/emba.log"
         if [[ "$( docker container inspect -f '{{.State.Status}}' "${QUEST_CONTAINER_}" )" == "running" ]]; then
-          print_output "[*] $(print_date) - EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "main"
+          write_log "[*] $(print_date) - EMBA quest container ${QUEST_CONTAINER_} monitoring through ${ORANGE}docker logs ${QUEST_CONTAINER_} -f${NC}." "${LOG_DIR}/emba.log"
         fi
 
         while [[ "$( docker container inspect -f '{{.State.Status}}' "${MAIN_CONTAINER_}" )" == "running" ]]; do

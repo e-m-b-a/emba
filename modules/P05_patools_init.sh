@@ -56,7 +56,7 @@ patools_extractor() {
 
   [[ "${STRICT_MODE}" -eq 1 ]] && set +e
 
-  patool -v test "${FIRMWARE_PATH_}" | tee -a "${LOG_PATH_MODULE}"/paextract_test_"${FIRMWARE_NAME_}".log
+  patool -v test "${FIRMWARE_PATH_}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/paextract_test_"${FIRMWARE_NAME_}".log
 
   [[ "${STRICT_MODE}" -eq 1 ]] && set -e
 
@@ -71,7 +71,7 @@ patools_extractor() {
     print_ln
     print_output "[*] Valid compressed file detected - extraction process via patool started"
 
-    patool -v extract "${FIRMWARE_PATH_}" --outdir "${EXTRACTION_DIR_}" | tee -a "${LOG_PATH_MODULE}"/paextract_extract_"${FIRMWARE_NAME_}".log
+    patool -v extract "${FIRMWARE_PATH_}" --outdir "${EXTRACTION_DIR_}" 2>&1 | tee -a "${LOG_PATH_MODULE}"/paextract_extract_"${FIRMWARE_NAME_}".log
     cat "${LOG_PATH_MODULE}"/paextract_extract_"${FIRMWARE_NAME_}".log >> "${LOG_FILE}"
 
   else

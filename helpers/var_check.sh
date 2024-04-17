@@ -31,7 +31,7 @@ for MODULE in "${SCRIPTS_TO_TEST[@]}"; do
     continue
   fi
   print_output "[*] Testing EMBA script ${MODULE}" "no_log"
-  mapfile -t LOCALS_ARR < <(grep -E "local( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | cut -d '=' -f1 | sed 's/.*local //' | sort -u)
+  mapfile -t LOCALS_ARR < <(grep -E "local( )+[l]?[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | cut -d '=' -f1 | sed 's/.*local //' | sort -u)
   mapfile -t EXPORTS_ARR < <(grep -E "export( )+[A-Z]+[a-zA-Z0-9_]+=" "${MODULE}" | cut -d '=' -f1 | sed 's/.*export //' | sort -u)
 
   mapfile -t UNKNOWN_LOOP_VARS < <(grep -E "for( )+[A-Z]+[a-zA-Z0-9_]+ in .*;" "${MODULE}" | grep -Ev "^#|^$| #" | awk '{print $2}' | sort -u)

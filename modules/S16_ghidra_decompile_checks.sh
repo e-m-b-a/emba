@@ -44,7 +44,10 @@ S16_ghidra_decompile_checks()
   local lNAME=""
   local BINS_CHECKED_ARR=()
 
-  module_wait "S13_weak_func_check"
+  if [[ "${FULL_TEST}" -ne 1 ]]; then
+    # we only need to wait if we are not using the full_scan profile
+    module_wait "S13_weak_func_check"
+  fi
   if [[ -f "${CSV_DIR}"/s13_weak_func_check.csv ]]; then
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis

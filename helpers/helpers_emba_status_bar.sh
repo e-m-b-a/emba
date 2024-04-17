@@ -29,31 +29,31 @@ repeat_char() {
 draw_box() {
   shopt -s checkwinsize
 
-  # just in case we do not know our $LINES:
-  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
-    export LINES=""
-    LINES=$(cat "${TMP_DIR}""/LINES.log")
-  fi
+  local lLINES=""
+  lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
   local BOX_W="${1:-0}"
   local BOX_TITLE="${2:-}"
   BOX_TITLE=" ${BOX_TITLE} "
   local BOX_L="${3:-0}"
   local BOX=""
-  BOX+="\e[$((LINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[0m$(repeat_char "─" "$((BOX_W - "${#BOX_TITLE}" - 2))")┐"
-  BOX+="\e[$((LINES - 3));${BOX_L}f│""$(repeat_char " " "$((BOX_W - 2))")""│"
-  BOX+="\e[$((LINES - 2));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
-  BOX+="\e[$((LINES - 1));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
-  BOX+="\e[${LINES};${BOX_L}f└$(repeat_char "─" "$((BOX_W - 2))")┘"
+  BOX+="\e[$((lLINES - 4));${BOX_L}f┌\033[1m${BOX_TITLE}\033[0m$(repeat_char "─" "$((BOX_W - "${#BOX_TITLE}" - 2))")┐"
+  BOX+="\e[$((lLINES - 3));${BOX_L}f│""$(repeat_char " " "$((BOX_W - 2))")""│"
+  BOX+="\e[$((lLINES - 2));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
+  BOX+="\e[$((lLINES - 1));${BOX_L}f│$(repeat_char " " "$((BOX_W - 2))")│"
+  BOX+="\e[${lLINES};${BOX_L}f└$(repeat_char "─" "$((BOX_W - 2))")┘"
   echo -e "${BOX}"
 }
 
 draw_arrows() {
   local ARROW_L="${1:-0}"
   local ARROWS=""
-  ARROWS+="\e[$((LINES - 3));${ARROW_L}f \033[1m>\033[0m"
-  ARROWS+="\e[$((LINES - 2));${ARROW_L}f \033[1m>\033[0m"
-  ARROWS+="\e[$((LINES - 1));${ARROW_L}f \033[1m>\033[0m"
+  local lLINES=""
+  lLINES=$(cat "${TMP_DIR}""/LINES.log")
+
+  ARROWS+="\e[$((lLINES - 3));${ARROW_L}f \033[1m>\033[0m"
+  ARROWS+="\e[$((lLINES - 2));${ARROW_L}f \033[1m>\033[0m"
+  ARROWS+="\e[$((lLINES - 1));${ARROW_L}f \033[1m>\033[0m"
   echo -e "${ARROWS}"
 }
 
@@ -108,11 +108,7 @@ system_load_util_str() {
 update_box_system_load() {
   shopt -s checkwinsize
 
-  # just in case we do not know our $LINES:
-  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
-    export LINES=""
-    LINES=$(cat "${TMP_DIR}""/LINES.log")
-  fi
+  local lLINES=""
 
   update_cpu() {
     local CPU_LOG_STR_=""
@@ -129,6 +125,7 @@ update_box_system_load() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
+    lLINES=$(cat "${TMP_DIR}""/LINES.log")
     local MEM_PERCENTAGE_STR=""
     MEM_PERCENTAGE_STR="$(system_load_util_str "$(LANG=en free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
     local DISK_PERCENTAGE_STR=""
@@ -139,7 +136,7 @@ update_box_system_load() {
     else
       ACTUAL_CPU=0
     fi
-    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( LINES - 3 ))" "${ACTUAL_CPU}" "$(( LINES - 2 ))" "${MEM_PERCENTAGE_STR}" "$(( LINES - 1 ))" "${DISK_PERCENTAGE_STR}" || true
+    printf '\e[s\e[%s;3f%s\e[%s;3f%s\e[%s;3f%s\e[u' "$(( lLINES - 3 ))" "${ACTUAL_CPU}" "$(( lLINES - 2 ))" "${MEM_PERCENTAGE_STR}" "$(( lLINES - 1 ))" "${DISK_PERCENTAGE_STR}" || true
     update_cpu &
     sleep .2
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
@@ -174,13 +171,8 @@ status_util_str() {
 update_box_status() {
   shopt -s checkwinsize
 
-  # just in case we do not know our $LINES:
-  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
-    export LINES=""
-    LINES=$(cat "${TMP_DIR}""/LINES.log")
-  fi
-
   local DATE_STR=""
+  local lLINES=""
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     DATE_STR="$(sed '3q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
@@ -201,6 +193,7 @@ update_box_status() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
+    lLINES=$(cat "${TMP_DIR}""/LINES.log")
     local RUNTIME=0
     # RUNTIME="$(date -d@"$(( "$(date +%s)" - "${DATE_STR}" ))" -u +%H:%M:%S)"
     RUNTIME=$(show_runtime 1)
@@ -216,7 +209,7 @@ update_box_status() {
       # the status bar is not supported
       RUN_EMBA_PROCESSES="$(ps -C emba | wc -l || true)"
     fi
-    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( LINES - 3 ))" "$(status_util_str 0 "${RUNTIME}")" "$(( LINES - 2 ))" "$(status_util_str 1 "${LOG_DIR_SIZE}")" "$(( LINES - 1 ))" "$(status_util_str 2 "${RUN_EMBA_PROCESSES}")" || true
+    printf '\e[s\e[%s;29f%s\e[%s;29f%s\e[%s;29f%s\e[u' "$(( lLINES - 3 ))" "$(status_util_str 0 "${RUNTIME}")" "$(( lLINES - 2 ))" "$(status_util_str 1 "${LOG_DIR_SIZE}")" "$(( lLINES - 1 ))" "$(status_util_str 2 "${RUN_EMBA_PROCESSES}")" || true
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
@@ -258,12 +251,7 @@ update_box_modules() {
   local MODULES_LOCAL=()
   local MODULES_EMBA=()
   local MODULE_FILE=""
-
-  # just in case we do not know our $LINES:
-  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
-    export LINES=""
-    LINES=$(cat "${TMP_DIR}""/LINES.log")
-  fi
+  local lLINES=""
 
   if [[ -f "${STATUS_TMP_PATH}" ]] ; then
     COUNT_MODULES="$(sed '4q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
@@ -304,10 +292,11 @@ update_box_modules() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
+    lLINES=$(cat "${TMP_DIR}""/LINES.log")
     STARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
     FINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
     LAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
-    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( LINES - 3 ))" "$(module_util_str 0 "$((STARTED_MODULE_STR - FINISHED_MODULE_STR))")" "$(( LINES - 2 ))" "$(module_util_str 1 "${LAST_FINISHED_MODULE_STR}")" "$(( LINES - 1 ))" "$(module_util_str 2 "${FINISHED_MODULE_STR}/${COUNT_MODULES}")" || true
+    printf '\e[s\e[%s;55f%s\e[%s;55f%s\e[%s;55f%s\e[u' "$(( lLINES - 3 ))" "$(module_util_str 0 "$((STARTED_MODULE_STR - FINISHED_MODULE_STR))")" "$(( lLINES - 2 ))" "$(module_util_str 1 "${LAST_FINISHED_MODULE_STR}")" "$(( lLINES - 1 ))" "$(module_util_str 2 "${FINISHED_MODULE_STR}/${COUNT_MODULES}")" || true
     sleep 1
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
@@ -341,14 +330,9 @@ status_2_util_str() {
 update_box_status_2() {
   shopt -s checkwinsize
 
-  # just in case we do not know our $LINES:
-  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
-    export LINES=""
-    LINES=$(cat "${TMP_DIR}""/LINES.log")
-  fi
-
   local PHASE_STR=""
   local MODE_STR=""
+  local lLINES=""
 
   if [[ ${USE_DOCKER} -eq 0 && ${IN_DOCKER} -eq 0 ]] ; then
     MODE_STR+="DEV/"
@@ -366,12 +350,18 @@ update_box_status_2() {
   fi
 
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
+    lLINES=$(cat "${TMP_DIR}""/LINES.log")
+
     PHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
+    [[ "${PHASE_STR}" == "Pre" ]] && PHASE_STR="Extraction"
+    [[ "${PHASE_STR}" == "Testing" ]] && PHASE_STR="Analysis"
+    [[ "${PHASE_STR}" == "System" ]] && PHASE_STR="Emulation"
+
     ERROR_STR="/$(grep -c 'Error detected' "${LOG_DIR}/emba_error.log" 2> /dev/null || true )"
     if [[ "${ERROR_STR}" == "/0" || "${ERROR_STR}" == "/" ]] ; then
       ERROR_STR=""
     fi
-    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( LINES - 3 ))" "$(status_2_util_str 0 "${PHASE_STR}")" "$(( LINES - 2 ))" "$(status_2_util_str 1 "${MODE_STR}${ERROR_STR}")" "$(( LINES - 1 ))" "$(status_2_util_str 2 "")" || true
+    printf '\e[s\e[%s;81f%s\e[%s;81f%s\e[%s;81f%s\e[u' "$(( lLINES - 3 ))" "$(status_2_util_str 0 "${PHASE_STR}")" "$(( lLINES - 2 ))" "$(status_2_util_str 1 "${MODE_STR}${ERROR_STR}")" "$(( lLINES - 1 ))" "$(status_2_util_str 2 "")" || true
     sleep .5
     if [[ -f "${STATUS_TMP_PATH}" ]] ; then
       BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
@@ -389,11 +379,8 @@ remove_status_bar() {
 
   shopt -s checkwinsize
   local LINE_POS=""
-  # just in case we do not know our $LINES:
-  if ! [[ -v LINES ]] && [[ -f "${TMP_DIR}""/LINES.log" ]]; then
-    export LINES=""
-    LINES=$(cat "${TMP_DIR}""/LINES.log")
-  fi
+  local lLINES=""
+  lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
@@ -431,13 +418,13 @@ remove_status_bar() {
     kill_box_pid "${PID_STATUS_2}" &
   fi
 
-  if ! [[ -v LINES ]] ; then
+  if ! [[ -v lLINES ]] ; then
     return
   fi
 
   sleep 1
   local RM_STR=""
-  LINE_POS="$(( LINES - 6 ))"
+  LINE_POS="$(( lLINES - 6 ))"
   RM_STR="\e[""${LINE_POS}"";1f\e[0J\e[;r\e[""${LINE_POS}"";1f"
   printf "%b" "${RM_STR}"
 }
