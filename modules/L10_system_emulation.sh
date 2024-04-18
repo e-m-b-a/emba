@@ -792,7 +792,9 @@ main_emulation() {
 
         # we kill this process from "check_online_stat:"
         tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null || true
-        kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+        if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
+          kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+        fi
 
         # set default state
         ICMP="not ok"
@@ -1214,7 +1216,9 @@ identify_networking_emulation() {
   if ! [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
     print_output "[-] No ${ORANGE}${LOG_PATH_MODULE}/qemu.initial.serial.log${NC} log file generated."
   fi
-  kill -9 "${lKPANIC_PID}" >/dev/null || true
+  if [[ -e /proc/"${lKPANIC_PID}" ]]; then
+    kill -9 "${lKPANIC_PID}" >/dev/null || true
+  fi
 }
 
 run_kpanic_identification() {

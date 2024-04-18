@@ -15,9 +15,12 @@ if ("${FIRMAE_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
   "${BUSYBOX}" sleep 10
 
+
   "${BUSYBOX}" echo "[*] Starting network configuration lo - ${IP_LOOP}"
   "${BUSYBOX}" ifconfig lo "${IP_LOOP}"
-  "${BUSYBOX}" route add "${IP_LOOP}"
+  # "${BUSYBOX}" route add "${IP_LOOP}"
+  "${BUSYBOX}" route add -net 127.0.0.0 netmask 255.0.0.0 dev lo
+
 
   if [ "${ACTION}" = "default" ]; then
     IP_DEFAULT=$("${BUSYBOX}" cat /firmadyne/ip_default)

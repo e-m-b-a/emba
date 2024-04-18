@@ -63,6 +63,7 @@ if [ -e /bin/boa ]; then
       # write the service starter with config file
       "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}/bin/boa - ${BOA_CONFIG}${NC}"
       "${BUSYBOX}" echo -e -n "/bin/boa -f ${BOA_CONFIG}\n" >> /firmadyne/service
+      "${BUSYBOX}" echo -e -n "/bin/boa -c ${BOA_CONFIG}\n" >> /firmadyne/service
     done
   fi
 fi
