@@ -792,7 +792,9 @@ main_emulation() {
 
         # we kill this process from "check_online_stat:"
         tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null || true
-        kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+        if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
+          kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
+        fi
 
         # set default state
         ICMP="not ok"
@@ -1214,7 +1216,9 @@ identify_networking_emulation() {
   if ! [[ -f "${LOG_PATH_MODULE}"/qemu.initial.serial.log ]]; then
     print_output "[-] No ${ORANGE}${LOG_PATH_MODULE}/qemu.initial.serial.log${NC} log file generated."
   fi
-  kill -9 "${lKPANIC_PID}" >/dev/null || true
+  if [[ -e /proc/"${lKPANIC_PID}" ]]; then
+    kill -9 "${lKPANIC_PID}" >/dev/null || true
+  fi
 }
 
 run_kpanic_identification() {
@@ -1778,12 +1782,12 @@ write_network_config_to_filesystem() {
         lDIR_NAME_MISSING=$(dirname "${lFILE_PATH_MISSING}")
         if ! [[ -d "${MNT_POINT}""${lDIR_NAME_MISSING}" ]]; then
           print_output "[*] Create missing directory ${ORANGE}${lDIR_NAME_MISSING}${NC} in filesystem ... trying to fix this now"
-          mkdir -p "${MNT_POINT}""${lDIR_NAME_MISSING}" || true
+          mkdir -p "${MNT_POINT}""${lDIR_NAME_MISSING}" 2>/dev/null || true
         fi
         lFOUND_MISSING=$(find "${MNT_POINT}" -name "${lFILENAME_MISSING}" | head -1 || true)
         if [[ -f ${lFOUND_MISSING} ]] && ! [[ -f "${MNT_POINT}""${lDIR_NAME_MISSING}"/"${lFOUND_MISSING}" ]]; then
           print_output "[*] Recover missing file ${ORANGE}${lFILENAME_MISSING}${NC} in filesystem (${ORANGE}${MNT_POINT}${lDIR_NAME_MISSING}/${lFOUND_MISSING}${NC}) ... trying to fix this now"
-          cp -n "${lFOUND_MISSING}" "${MNT_POINT}""${lDIR_NAME_MISSING}"/ || true
+          cp --update=none "${lFOUND_MISSING}" "${MNT_POINT}""${lDIR_NAME_MISSING}"/ || true
         fi
       done
     fi

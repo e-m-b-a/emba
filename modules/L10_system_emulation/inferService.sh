@@ -59,6 +59,12 @@ if [ -e /bin/boa ]; then
   if ! "${BUSYBOX}" grep -q boa /firmadyne/service 2>/dev/null; then
     "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}/bin/boa${NC}"
     "${BUSYBOX}" echo -e -n "/bin/boa\n" >> /firmadyne/service
+    for BOA_CONFIG in $("${BUSYBOX}" find / -name "*boa*.conf" -type f); do
+      # write the service starter with config file
+      "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}/bin/boa - ${BOA_CONFIG}${NC}"
+      "${BUSYBOX}" echo -e -n "/bin/boa -f ${BOA_CONFIG}\n" >> /firmadyne/service
+      "${BUSYBOX}" echo -e -n "/bin/boa -c ${BOA_CONFIG}\n" >> /firmadyne/service
+    done
   fi
 fi
 
@@ -105,6 +111,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
         for WSCD_CONFIG in $("${BUSYBOX}" find / -name "*wscd*.conf" -type f); do
           "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${WSCD_CONFIG}${NC}"
           "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG}\n" >> /firmadyne/service
+          "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG} -mode 1 -upnp 1 -daemon\n" >> /firmadyne/service
         done
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnpd" ]; then

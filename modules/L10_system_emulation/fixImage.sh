@@ -45,6 +45,11 @@ if ("${FIRMAE_BOOT}"); then
   mkdir -p "$(resolve_link /var/lock)"
   mkdir -p "$(resolve_link /usr/bin)"
   mkdir -p "$(resolve_link /usr/sbin)"
+  mkdir -p "$(resolve_link /var/tmp)"
+  mkdir -p "$(resolve_link /var/sys)"
+  mkdir -p "$(resolve_link /var/media)"
+  mkdir -p "$(resolve_link /var/wps)"
+  mkdir -p "$(resolve_link /var/ppp)"
 
   for FILE in $("${BUSYBOX}" find /bin /sbin /usr/bin /usr/sbin -type f -perm -u+x -exec "${BUSYBOX}" strings {} \; | "${BUSYBOX}" egrep "^(/var|/etc|/tmp)(.+)\/([^\/]+)$")
   do

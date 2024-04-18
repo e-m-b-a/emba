@@ -422,15 +422,13 @@ var_checker() {
   "${HELP_DIR}"/var_check.sh "${MODE}"
   RET_ISSUES="$?"
 
-  if [[ "${MODE}" == "modules" ]]; then
-    CNT_VAR_CHECKER_ISSUES=$((CNT_VAR_CHECKER_ISSUES+RET_ISSUES))
+  CNT_VAR_CHECKER_ISSUES=$((CNT_VAR_CHECKER_ISSUES+RET_ISSUES))
 
-    if [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
-      echo -e "Found ${ORANGE}${CNT_VAR_CHECKER_ISSUES}${NC} variable scope issues in EMBA ${MODE} scripts${NC}\\n"
-      echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
-    else
-      echo -e "\\n""${GREEN}""==> Found no problems with variable scope definition""${NC}""\\n"
-    fi
+  if [[ "${CNT_VAR_CHECKER_ISSUES}" -gt 0 ]]; then
+    echo -e "Found ${ORANGE}${CNT_VAR_CHECKER_ISSUES}${NC} variable scope issues in EMBA ${MODE} scripts${NC}\\n"
+    echo -e "\\n""${ORANGE}${BOLD}==> FIX ERRORS""${NC}""\\n"
+  else
+    echo -e "\\n""${GREEN}""==> Found no problems with variable scope definition""${NC}""\\n"
   fi
   enable_strict_mode 1
 }

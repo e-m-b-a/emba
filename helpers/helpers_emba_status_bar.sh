@@ -30,7 +30,7 @@ draw_box() {
   shopt -s checkwinsize
 
   local lLINES=""
-  lLINES=$(cat "${TMP_DIR}""/LINES.log")
+  [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
   local BOX_W="${1:-0}"
   local BOX_TITLE="${2:-}"
@@ -49,7 +49,7 @@ draw_arrows() {
   local ARROW_L="${1:-0}"
   local ARROWS=""
   local lLINES=""
-  lLINES=$(cat "${TMP_DIR}""/LINES.log")
+  [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
   ARROWS+="\e[$((lLINES - 3));${ARROW_L}f \033[1m>\033[0m"
   ARROWS+="\e[$((lLINES - 2));${ARROW_L}f \033[1m>\033[0m"
@@ -125,7 +125,7 @@ update_box_system_load() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
-    lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
     local MEM_PERCENTAGE_STR=""
     MEM_PERCENTAGE_STR="$(system_load_util_str "$(LANG=en free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
     local DISK_PERCENTAGE_STR=""
@@ -193,7 +193,7 @@ update_box_status() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
-    lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
     local RUNTIME=0
     # RUNTIME="$(date -d@"$(( "$(date +%s)" - "${DATE_STR}" ))" -u +%H:%M:%S)"
     RUNTIME=$(show_runtime 1)
@@ -292,7 +292,7 @@ update_box_modules() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
-    lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
     STARTED_MODULE_STR="$(grep -c "starting\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null || true )"
     FINISHED_MODULE_STR="$(grep "finished\|blacklist triggered" "${LOG_DIR}/emba.log" 2> /dev/null | grep -vc "Quest container finished" || true )"
     LAST_FINISHED_MODULE_STR="$(grep "finished" "${LOG_DIR}/emba.log" 2> /dev/null | grep -v "Quest container finished"| tail -1 | awk '{print $9}' | cut -d"_" -f1 || true )"
@@ -350,7 +350,7 @@ update_box_status_2() {
   fi
 
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
-    lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
     PHASE_STR=$(grep 'phase started' "${LOG_DIR}/emba.log" 2> /dev/null | tail -1 | cut -d"-" -f2 | awk '{print $1}' || true)
     [[ "${PHASE_STR}" == "Pre" ]] && PHASE_STR="Extraction"
@@ -380,7 +380,7 @@ remove_status_bar() {
   shopt -s checkwinsize
   local LINE_POS=""
   local lLINES=""
-  lLINES=$(cat "${TMP_DIR}""/LINES.log")
+  [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
 
   if [[ -f "${STATUS_TMP_PATH:-}" ]] ; then
     sed -i "1s/.*/0/" "${STATUS_TMP_PATH}" 2> /dev/null || true
