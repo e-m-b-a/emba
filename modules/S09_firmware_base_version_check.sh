@@ -310,7 +310,7 @@ bin_string_checker() {
 
         if [[ "${BIN_FILE}" == *ELF* ]] ; then
           # print_output "[*] Testing $BIN with version identifier ${VERSION_IDENTIFIER}" "no_log"
-          VERSION_FINDER=$(grep -o -a -E "${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
+          VERSION_FINDER=$(grep -o -a -E "^${VERSION_IDENTIFIER}" "${STRINGS_OUTPUT}" | sort -u | head -1 || true)
 
           if [[ -n ${VERSION_FINDER} ]]; then
             if [[ "${#VERSION_IDENTIFIERS_ARR[@]}" -gt 1 ]] && [[ "$((j+1))" -lt "${#VERSION_IDENTIFIERS_ARR[@]}" ]]; then
