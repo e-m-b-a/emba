@@ -6,7 +6,10 @@
 
 BUSYBOX=/firmadyne/busybox
 
-"${BUSYBOX}" echo "[*] EMBA preInit script starting ..."
+ORANGE="\033[0;33m"
+NC="\033[0m"
+
+"${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script starting ...${NC}"
 
 [ -d /dev ] || "${BUSYBOX}" mkdir -p /dev
 [ -d /root ] || "${BUSYBOX}" mkdir -p /root
@@ -23,4 +26,4 @@ BUSYBOX=/firmadyne/busybox
 "${BUSYBOX}" mount -t devpts devpts /dev/pts
 "${BUSYBOX}" mount -t tmpfs tmpfs /run
 
-"${BUSYBOX}" echo "[*] EMBA preInit script finished ..."
+"${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script finished ...${NC}"

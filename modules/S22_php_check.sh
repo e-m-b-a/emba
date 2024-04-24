@@ -56,6 +56,10 @@ s22_phpinfo_check() {
   local PHPINFO=""
 
   for PHPINFO in "${PHP_SCRIPTS[@]}" ; do
+    if grep -E "extension_loaded\('ionCube Loader" "${PHPINFO}"; then
+      print_output "[-] Warning: ionCube protected PHP file detected ${ORANGE}${PHPINFO}${NC}"
+      continue
+    fi
     if grep -q "phpinfo()" "${PHPINFO}"; then
       print_output "[+] Found php file with debugging information: ${ORANGE}${PHPINFO}${NC}"
       grep -A 2 -B 2 "phpinfo()" "${PHPINFO}" | tee -a "${LOG_FILE}"

@@ -6,11 +6,18 @@
 
 BUSYBOX=/firmadyne/busybox
 
-"${BUSYBOX}" echo "[*] Starting services in emulated environment..."
+# "${BUSYBOX}" touch /firmadyne/EMBA_service_init_done
+ORANGE="\033[0;33m"
+NC="\033[0m"
+
+"${BUSYBOX}" echo -e "${ORANGE}[*] Starting services in emulated environment...${NC}"
 "${BUSYBOX}" cat /firmadyne/service
 
 if ("${FIRMAE_ETC}"); then
-  "${BUSYBOX}" sleep 100
+  # first, the system should do the job by itself
+  # after 100sec we jump in with our service helpers
+  "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting 60sec before helpers starting services in emulated environment...${NC}"
+  "${BUSYBOX}" sleep 60
   # some rules we need to apply for different services:
   if "${BUSYBOX}" grep -q lighttpd /firmadyne/service; then
     # ensure we have the pid file for lighttpd:
@@ -26,14 +33,22 @@ if ("${FIRMAE_ETC}"); then
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
-        "${BUSYBOX}" echo "[*] Starting ${BINARY_NAME} service ..."
+        "${BUSYBOX}" echo -e "[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &
         "${BUSYBOX}" sleep 5
-        "${BUSYBOX}" echo "[*] Netstat output ..."
+        "${BUSYBOX}" echo "[*] Netstat output:"
         "${BUSYBOX}" netstat -antu
+        "${BUSYBOX}" echo "[*] Network configuration:"
+        "${BUSYBOX}" brctl show
+        "${BUSYBOX}" ifconfig
+        "${BUSYBOX}" echo "[*] Currently running processes:"
+        "${BUSYBOX}" ps
+        "${BUSYBOX}" echo "[*] /proc filesytem:"
+        "${BUSYBOX}" ls /proc
         "${BUSYBOX}" sleep 5
       fi
+      # other scripts are just running if we have not created the following file
     done < "/firmadyne/service"
   done
 fi

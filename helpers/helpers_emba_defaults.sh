@@ -85,7 +85,7 @@ set_defaults() {
                                 # 1 -> multi threaded
   export YARA=0                 # default: disable yara tests
   export OVERWRITE_LOG=0        # automaticially overwrite log directory, if necessary
-  export MAX_EXT_SPACE=11000     # a useful value, could be adjusted if you deal with very big firmware images
+  export MAX_EXT_SPACE=11000    # 11G -> a useful value, could be adjusted if you deal with very big firmware images
   export LOG_DIR="${INVOCATION_PATH}""/logs"
   export TMP_DIR="${LOG_DIR}""/tmp"
   export CSV_DIR="${LOG_DIR}""/csv_logs"
