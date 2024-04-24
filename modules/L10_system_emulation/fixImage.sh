@@ -3,7 +3,7 @@
 # Copyright (c) 2022 - 2024 Siemens Energy AG
 
 # use busybox statically-compiled version of all binaries
-# shellcheck disable=SC2148
+# shellcheck disable=SC2129,SC2016,SC2148
 BUSYBOX="/busybox"
 
 # This script is based on the original scripts from the firmadyne and firmAE project

@@ -55,6 +55,7 @@ if [ -e /bin/boa ]; then
     for BOA_CONFIG in $("${BUSYBOX}" find / -name "*boa*.conf" -type f); do
       # extract the directory index from config and search for it in the filesystem - this is needed to start boa with the correct
       # web root directory
+      # shellcheck disable=SC2016
       DIR_INDEX=$("${BUSYBOX}" grep "DirectoryIndex" "${BOA_CONFIG}" | "${BUSYBOX}" sed '/^\#/d' | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" head -1)
       for DIR_BOA_RFS in $("${BUSYBOX}" find / -name "${DIR_INDEX}" | "${BUSYBOX}" grep -v "${DIR_INDEX}_extract"); do
         # as we are looking for a file from DirectoryIndex we need to strip it to the directory

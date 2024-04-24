@@ -132,7 +132,7 @@ if ("${FIRMAE_NET}"); then
   # netgear TL-WR841HP_V2_151124
   while (true); do
     if "${BUSYBOX}" which iptables; then
-      if [ $(iptables -L | "${BUSYBOX}" grep -c "^ACCEPT\|^DROP") -gt 0 ]; then
+      if [ "$(iptables -L | "${BUSYBOX}" grep -c "^ACCEPT\|^DROP")" -gt 0 ]; then
         "${BUSYBOX}" echo "[*] Flushing iptables ..."
         iptables -L
         iptables flush 2>/dev/null || true
