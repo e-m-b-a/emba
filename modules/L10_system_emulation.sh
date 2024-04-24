@@ -1857,11 +1857,6 @@ write_network_config_to_filesystem() {
       done
     fi
 
-    # if we have created status entries like /firmadyne/EMBA_service_init_done we need to remove them now
-    [[ -f "${MNT_POINT}"/firmadyne/EMBA_service_init_done ]] && rm "${MNT_POINT}"/firmadyne/EMBA_service_init_done
-    [[ -f "${MNT_POINT}"/firmadyne/EMBA_network_init_done ]] && rm "${MNT_POINT}"/firmadyne/EMBA_network_init_done
-    [[ -f "${MNT_POINT}"/firmadyne/EMBA_init_done ]] && rm "${MNT_POINT}"/firmadyne/EMBA_init_done
-
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
