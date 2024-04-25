@@ -771,8 +771,9 @@ main_emulation() {
       local lNETWORK_MODE=""
       local lNETWORK_DEVICE=""
       local lNW_ENTRY_PRIO=0
+      local lIPS_INT_VLAN_TMP=()
 
-      eval "IPS_INT_VLAN=($(for i in "${IPS_INT_VLAN[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+      eval "IPS_INT_VLAN=($(for i in "${IPS_INT_VLAN[@]}" ; do echo "\"${i}\"" ; done | sort -u -r))"
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         lNW_ENTRY_PRIO=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f1)
         lIP_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f2)
@@ -780,8 +781,14 @@ main_emulation() {
         lNETWORK_INTERFACE_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f4)
         lVLAN_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f5)
         lCFG_CFG=$(echo "${lIPS_INT_VLAN_CFG}" | cut -d\; -f6)
+        if [[ "${lIPS_INT_VLAN_TMP[*]}" == *"${lIP_CFG};${lINTERFACE_CFG};${lNETWORK_INTERFACE_CFG};${lVLAN_CFG};${lCFG_CFG}"* ]]; then
+          continue
+        fi
+        lIPS_INT_VLAN_TMP+=( "${lNW_ENTRY_PRIO}"\;"${lIP_CFG}"\;"${lINTERFACE_CFG}"\;"${lNETWORK_INTERFACE_CFG}"\;"${lVLAN_CFG}"\;"${lCFG_CFG}" )
         print_output "$(indent "$(orange "${lIP_CFG}"" - ""${lINTERFACE_CFG}"" - ""${lNETWORK_INTERFACE_CFG}"" - ""${lVLAN_CFG}"" - ""${lCFG_CFG}"" - ""${lNW_ENTRY_PRIO}")")"
       done
+
+      IPS_INT_VLAN=("${lIPS_INT_VLAN_TMP[@]}")
 
       for lIPS_INT_VLAN_CFG in "${IPS_INT_VLAN[@]}"; do
         SYS_ONLINE=0
@@ -1662,7 +1669,7 @@ store_interface_details() {
   fi
 
   IPS_INT_VLAN+=( "${lENTRY_PRIO}"\;"${lIP_ADDRESS}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}" )
-  print_output "[+] Interface details detected: IP address: ${ORANGE}${lIP_ADDRESS}${GREEN} / bridge dev: ${ORANGE}${lNETWORK_DEVICE}${GREEN} / network device: ${ORANGE}${lETH_INT}${GREEN} / vlan id: ${ORANGE}${lVLAN_ID}${GREEN} / network mode: ${ORANGE}${lNETWORK_MODE}${GREEN} / priority:${ORANGE}${lENTRY_PRIO}${NC}"
+  print_output "[+] Interface details detected: IP address: ${ORANGE}${lIP_ADDRESS}${GREEN} / bridge dev: ${ORANGE}${lNETWORK_DEVICE}${GREEN} / network device: ${ORANGE}${lETH_INT}${GREEN} / vlan id: ${ORANGE}${lVLAN_ID}${GREEN} / network mode: ${ORANGE}${lNETWORK_MODE}${GREEN} / priority: ${ORANGE}${lENTRY_PRIO}${NC}"
 }
 
 iterate_vlans() {

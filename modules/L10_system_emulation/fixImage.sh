@@ -86,7 +86,9 @@ mkdir -p "$(resolve_link /etc/init.d)"
 if [ ! -s /etc/init.d/rcS ]; then
   echo '#!/bin/sh' > /etc/init.d/rcS
   echo 'echo [*] Execute EMBA $0 script sleeping 10 secs ...' >> /etc/init.d/rcS
+  echo 'echo [*] Filesystem overview:' >> /etc/init.d/rcS
   echo 'ls -l /' >> /etc/init.d/rcS
+  echo 'echo [*] EMBA helpers directory:' >> /etc/init.d/rcS
   echo 'ls -l /firmadyne' >> /etc/init.d/rcS
   echo 'sleep 10' >> /etc/init.d/rcS
   echo 'echo "[*] Execute EMBA preInit.sh script starter .."' >> /etc/init.d/rcS
