@@ -125,7 +125,7 @@ update_box_system_load() {
     BOX_SIZE="$(sed '1q;d' "${STATUS_TMP_PATH}" 2> /dev/null || true)"
   fi
   while [[ "${BOX_SIZE}" -gt 0 ]]; do
-    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log")
+    [[ -f "${TMP_DIR}""/LINES.log" ]] && lLINES=$(cat "${TMP_DIR}""/LINES.log" || true)
     local MEM_PERCENTAGE_STR=""
     MEM_PERCENTAGE_STR="$(system_load_util_str "$(LANG=en free | grep Mem | awk '{print int($3/$2 * 100)}')" 1)"
     local DISK_PERCENTAGE_STR=""

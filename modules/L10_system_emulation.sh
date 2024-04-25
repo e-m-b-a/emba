@@ -1249,10 +1249,12 @@ run_kpanic_identification() {
   # this function identifies kernel panics and stops the further process to save time
   # and not to run 600 secs of network identification a kernel panic
   local lCOUNTER=0
+  local lKPANIC=0
   # wait until we have a log file
   sleep 5
   while [[ "${lCOUNTER}" -lt 6 ]]; do
-    if grep -a -q "Kernel panic - " "${LOG_PATH_MODULE}/qemu.initial.serial.log"; then
+    lKPANIC=$(tail -n 50 "${LOG_PATH_MODULE}/qemu.initial.serial.log" | grep -a -c "Kernel panic - ")
+    if [[ "${lKPANIC}" -gt 0 ]]; then
       print_output "[*] Kernel Panic detected - stopping emulation"
       pkill -9 -f tail.*-F.*"${LOG_PATH_MODULE}/qemu.initial.serial.log" || true &>/dev/null
       break
@@ -1358,7 +1360,9 @@ get_networking_details_emulation() {
     mapfile -t lBRIDGE_INTERFACES < <(grep -a "br_add_if\|br_dev_ioctl" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f4- | sort -u || true)
                 #               br_add_if[PID: 246 (brctl)]: br:br0 dev:vlan1
     mapfile -t lVLAN_INFOS < <(grep -a "register_vlan_dev" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | cut -d: -f2- | sort -u | grep -v -E " = -[0-9][0-9]" || true)
-    mapfile -t PANICS < <(grep -a "Kernel panic - " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u || true)
+    # mapfile -t PANICS < <(grep -a "Kernel panic - " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sort -u || true)
+    # # ensure we only stop if we have a panic near the end - otherwise the system probably has rebooted and recovered
+    mapfile -t PANICS < <(tail -n 50 "${LOG_PATH_MODULE}"/qemu.initial.serial.log | grep -a "Kernel panic - " | sort -u || true)
     mapfile -t lNVRAM_ARR < <(grep -a "\[NVRAM\] " "${LOG_PATH_MODULE}"/qemu.initial.serial.log | awk '{print $3}' | grep -a -E '[[:alnum:]]{3,50}' | sort -u || true)
     # we check all available qemu logs for services that are started:
     mapfile -t lPORTS_ARR < <(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | sed -E 's/.*inet_bind\[PID:\ [0-9]+\ //' | sort -u || true)
@@ -1794,9 +1798,6 @@ setup_network_emulation() {
     write_script_exec "route -n" "${ARCHIVE_PATH}"/run.sh 1
   fi
 
-  print_ln
-  print_output "[*] Current host network:"
-  ifconfig | tee -a "${LOG_FILE}"
   print_ln
   write_network_config_to_filesystem "${IMAGE_NAME}" "${lETH_INT}" "${lNETWORK_MODE}" "${lNETWORK_DEVICE}" "${lIP_ADDRESS}"
 }
