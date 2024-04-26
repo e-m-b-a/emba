@@ -288,7 +288,7 @@ write_log() {
     if [[ ( "${TYPE_CHECK}" == "[-]" || "${TYPE_CHECK}" == "[*]" || "${TYPE_CHECK}" == "[!]" || "${TYPE_CHECK}" == "[+]") && ("${E}" != "[*] Statistic"* ) ]] ; then
       local COLOR_OUTPUT_STRING=""
       COLOR_OUTPUT_STRING="$(color_output "${E}")"
-      echo -e "$(format_log "${COLOR_OUTPUT_STRING}")" | tee -a "${W_LOG_FILE}" >/dev/null
+      echo -e "$(format_log "${COLOR_OUTPUT_STRING}")" | tee -a "${W_LOG_FILE}" >/dev/null || true
     else
       echo -e "$(format_log "${E}")" | tee -a "${W_LOG_FILE}" >/dev/null || true
     fi

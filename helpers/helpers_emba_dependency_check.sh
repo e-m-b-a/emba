@@ -233,7 +233,8 @@ dependency_check()
 
     # the update check can be disabled via NO_UPDATE_CHECK
     if [[ "${NO_UPDATE_CHECK}" -ne 1 ]]; then
-      export GIT_TERMINAL_PROMPT=0 git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q 2>/dev/null
+      export GIT_TERMINAL_PROMPT=0
+      git clone https://github.com/EMBA-support-repos/onlinecheck "${EXT_DIR}"/onlinechecker -q
     fi
 
     if [[ -f "${EXT_DIR}"/onlinechecker/EMBA_VERSION.txt ]]; then

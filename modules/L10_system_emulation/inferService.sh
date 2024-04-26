@@ -27,7 +27,7 @@ if [ -e /etc/manual.starter ]; then
 fi
 
 if [ -d /etc/init.d/ ]; then
-  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -name "*httpd*"); do
+  for SERVICE in $("${BUSYBOX}" find /etc/init.d/ -name "*httpd*" -o -name "ftpd" -o -name "miniupnpd" -o -name "*apache*"); do
     if [ -e "${SERVICE}" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
@@ -38,7 +38,7 @@ if [ -d /etc/init.d/ ]; then
 fi
 
 if [ -d /etc/rc.d/ ]; then
-  for SERVICE in $("${BUSYBOX}" find /etc/rc.d/ -name "S*httpd*"); do
+  for SERVICE in $("${BUSYBOX}" find /etc/rc.d/ -name "S*httpd*" -o -name "S*apache*"); do
     if [ -e "${SERVICE}" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}${SERVICE} service${NC}"
@@ -48,33 +48,27 @@ if [ -d /etc/rc.d/ ]; then
   done
 fi
 
-if [ -e /etc/init.d/ftpd ]; then
-  if ! "${BUSYBOX}" grep -q ftpd /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}ftpd service${NC}"
-    "${BUSYBOX}" echo -e -n "/etc/init.d/ftpd start\n" >> /firmadyne/service
-  fi
-fi
-
 if [ -e /bin/boa ]; then
   if ! "${BUSYBOX}" grep -q boa /firmadyne/service 2>/dev/null; then
     "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}/bin/boa${NC}"
     "${BUSYBOX}" echo -e -n "/bin/boa\n" >> /firmadyne/service
     for BOA_CONFIG in $("${BUSYBOX}" find / -name "*boa*.conf" -type f); do
-      # write the service starter with config file
-      "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}/bin/boa - ${BOA_CONFIG}${NC}"
-      "${BUSYBOX}" echo -e -n "/bin/boa -f ${BOA_CONFIG}\n" >> /firmadyne/service
-      "${BUSYBOX}" echo -e -n "/bin/boa -c ${BOA_CONFIG}\n" >> /firmadyne/service
+      # extract the directory index from config and search for it in the filesystem - this is needed to start boa with the correct
+      # web root directory
+      # shellcheck disable=SC2016
+      DIR_INDEX=$("${BUSYBOX}" grep "DirectoryIndex" "${BOA_CONFIG}" | "${BUSYBOX}" sed '/^\#/d' | "${BUSYBOX}" awk '{print $2}' | "${BUSYBOX}" head -1)
+      for DIR_BOA_RFS in $("${BUSYBOX}" find / -name "${DIR_INDEX}" | "${BUSYBOX}" grep -v "${DIR_INDEX}_extract"); do
+        # as we are looking for a file from DirectoryIndex we need to strip it to the directory
+        DIR_INDEX_FS=$("${BUSYBOX}" dirname "${DIR_BOA_RFS}")
+        # write the service starter with config file
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}/bin/boa - ${BOA_CONFIG} / ${DIR_INDEX_FS}${NC}"
+        "${BUSYBOX}" echo -e -n "/bin/boa -p ${DIR_INDEX_FS} -f ${BOA_CONFIG}\n" >> /firmadyne/service
+        # is -c a valid option?!?
+        "${BUSYBOX}" echo -e -n "/bin/boa -p ${DIR_INDEX_FS} -c ${BOA_CONFIG}\n" >> /firmadyne/service
+      done
     done
   fi
 fi
-
-if [ -e /etc/init.d/miniupnpd ]; then
-  if ! "${BUSYBOX}" grep -q "/etc/init.d/miniupnpd" /firmadyne/service 2>/dev/null; then
-    "${BUSYBOX}" echo -e "[*] Writing EMBA service for ${ORANGE}miniupnpd service${NC}"
-    "${BUSYBOX}" echo -e -n "/etc/init.d/miniupnpd start\n" >> /firmadyne/service
-  fi
-fi
-
 
 # Some examples for testing:
 # mini_httpd: F9K1119_WW_1.00.01.bin
@@ -127,6 +121,11 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
         "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
         "${BUSYBOX}" echo -e -n "${BINARY} -D\n" >> /firmadyne/service
+      fi
+    elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "miniigd" ]; then
+      if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
+        "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY}${NC}"
+        "${BUSYBOX}" echo -e -n "${BINARY} -i eth0 -a 0.0.0.0 -p 49156\n" >> /firmadyne/service
       fi
     fi
     # this is the default case - without config but only if the service is not already in the service file

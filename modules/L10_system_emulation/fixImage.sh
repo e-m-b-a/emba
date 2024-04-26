@@ -3,7 +3,7 @@
 # Copyright (c) 2022 - 2024 Siemens Energy AG
 
 # use busybox statically-compiled version of all binaries
-# shellcheck disable=SC2148
+# shellcheck disable=SC2129,SC2016,SC2148
 BUSYBOX="/busybox"
 
 # This script is based on the original scripts from the firmadyne and firmAE project
@@ -77,6 +77,29 @@ if [ ! -s /etc/passwd ]; then
   mkdir -p "$(dirname "$(resolve_link /etc/passwd)")"
   # nosemgrep
   echo "root::0:0:root:/root:/bin/sh" > "$(resolve_link /etc/passwd)"
+fi
+
+# for busybox older v1.3.0 we need an rcS entry
+# we also use this rcS as fallback solution
+# for this we check different state files and execute the needed scripts
+mkdir -p "$(resolve_link /etc/init.d)"
+if [ ! -s /etc/init.d/rcS ]; then
+  echo '#!/bin/sh' > /etc/init.d/rcS
+  echo 'echo [*] Execute EMBA $0 script sleeping 10 secs ...' >> /etc/init.d/rcS
+  echo 'echo [*] Filesystem overview:' >> /etc/init.d/rcS
+  echo 'ls -l /' >> /etc/init.d/rcS
+  echo 'echo [*] EMBA helpers directory:' >> /etc/init.d/rcS
+  echo 'ls -l /firmadyne' >> /etc/init.d/rcS
+  echo 'sleep 10' >> /etc/init.d/rcS
+  echo 'echo "[*] Execute EMBA preInit.sh script starter .."' >> /etc/init.d/rcS
+  echo '/firmadyne/preInit.sh &' >> /etc/init.d/rcS
+  echo 'sleep 10' >> /etc/init.d/rcS
+  echo 'echo "[*] Execute EMBA network.sh script starter .."' >> /etc/init.d/rcS
+  echo '/firmadyne/network.sh &' >>  /etc/init.d/rcS
+  echo 'sleep 10' >> /etc/init.d/rcS
+  echo 'echo "[*] Execute EMBA run_service.sh script starter .."' >> /etc/init.d/rcS
+  echo '/firmadyne/run_service.sh &' >> /etc/init.d/rcS
+  chmod +x /etc/init.d/rcS
 fi
 
 # make /dev and add default device nodes if current /dev does not have greater
