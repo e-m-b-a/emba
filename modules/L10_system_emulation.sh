@@ -1253,7 +1253,7 @@ run_kpanic_identification() {
   # wait until we have a log file
   sleep 5
   while [[ "${lCOUNTER}" -lt 6 ]]; do
-    lKPANIC=$(tail -n 50 "${LOG_PATH_MODULE}/qemu.initial.serial.log" | grep -a -c "Kernel panic - ")
+    lKPANIC=$(tail -n 50 "${LOG_PATH_MODULE}/qemu.initial.serial.log" | grep -a -c "Kernel panic - " || true)
     if [[ "${lKPANIC}" -gt 0 ]]; then
       print_output "[*] Kernel Panic detected - stopping emulation"
       pkill -9 -f tail.*-F.*"${LOG_PATH_MODULE}/qemu.initial.serial.log" || true &>/dev/null
