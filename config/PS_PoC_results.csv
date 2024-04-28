@@ -8872,6 +8872,7 @@ CVE-2021-41322;Polycom VVX Web Interface Privilege Escalation;https://packetstor
 CVE-2021-41381;Payara Micro Community 5.2021.6 Directory Traversal;https://packetstormsecurity.com/files/164365/Payara-Micro-Community-5.2021.6-Directory-Traversal.html;unknown
 CVE-2021-41382;Plastic SCM 10.0.16.5622 Improper Access Control;https://packetstormsecurity.com/files/164531/Plastic-SCM-10.0.16.5622-Improper-Access-Control.html;unknown
 CVE-2021-41511;Lodging Reservation Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/164366/Lodging-Reservation-Management-System-1.0-SQL-Injection.html;remote
+CVE-2021-41526;MindManager Local Privilege Escalation;https://packetstormsecurity.com/files/178198/MindManager-Local-Privilege-Escalation.html;local
 CVE-2021-41557;Sofico Miles RIA 2020.2 Build 127964T Cross Site Scripting;https://packetstormsecurity.com/files/165278/Sofico-Miles-RIA-2020.2-Build-127964T-Cross-Site-Scripting.html;unknown
 CVE-2021-41647;Online Food Ordering Web App SQL Injection;https://packetstormsecurity.com/files/164422/Online-Food-Ordering-Web-App-SQL-Injection.html;remote
 CVE-2021-41648;PuneethReddyHC Online Shopping System Advanced 1.0 SQL Injection;https://packetstormsecurity.com/files/165036/PuneethReddyHC-Online-Shopping-System-Advanced-1.0-SQL-Injection.html;remote
@@ -10247,6 +10248,7 @@ CVE-2024-28734;Financials By Coda Cross Site Scripting;https://packetstormsecuri
 CVE-2024-28735;Financials By Coda Authorization Bypass;https://packetstormsecurity.com/files/177620/Financials-By-Coda-Authorization-Bypass.html;unknown
 CVE-2024-28741;NorthStar C2 Agent 1.0 Cross Site Scripting Remote Command Execution;https://packetstormsecurity.com/files/177542/NorthStar-C2-Agent-1.0-Cross-Site-Scripting-Remote-Command-Execution.html;unknown
 CVE-2024-2891;Xbox GamingService Arbitrary Folder Move;https://packetstormsecurity.com/files/177712/Xbox-GamingService-Arbitrary-Folder-Move.html;unknown
+CVE-2024-29291;Laravel Framework 11 Credential Disclosure;https://packetstormsecurity.com/files/178210/Laravel-Framework-11-Credential-Disclosure.html;unknown
 CVE-2024-29301;Task Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177737/Task-Management-System-1.0-SQL-Injection.html;remote
 CVE-2024-29302;Task Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177737/Task-Management-System-1.0-SQL-Injection.html;remote
 CVE-2024-29303;Task Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177737/Task-Management-System-1.0-SQL-Injection.html;remote
@@ -10268,9 +10270,11 @@ CVE-2024-30928;DerbyNet 9.0 ajax query.slide.next.inc SQL Injection;https://pack
 CVE-2024-30929;DerbyNet 9.0 playlist.php Cross Site Scripting;https://packetstormsecurity.com/files/177954/DerbyNet-9.0-playlist.php-Cross-Site-Scripting.html;unknown
 CVE-2024-3139;Computer Laboratory Management System 1.0 Insecure Direct Object Reference;https://packetstormsecurity.com/files/177892/Computer-Laboratory-Management-System-1.0-Insecure-Direct-Object-Reference.html;unknown
 CVE-2024-3140;Computer Laboratory Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177893/Computer-Laboratory-Management-System-1.0-Cross-Site-Scripting.html;unknown
+CVE-2024-31621;Flowise 1.6.5 Authentication Bypass;https://packetstormsecurity.com/files/178204/Flowise-1.6.5-Authentication-Bypass.html;unknown
 CVE-2024-31705;GLPI 10.x.x Remote Command Execution;https://packetstormsecurity.com/files/178062/GLPI-10.x.x-Remote-Command-Execution.html;remote
 CVE-2024-31777;GUnet OpenEclass E learning 3.15 File Upload Command Execution;https://packetstormsecurity.com/files/178017/GUnet-OpenEclass-E-learning-3.15-File-Upload-Command-Execution.html;remote
 CVE-2024-31804;Terratec dmx_6fire USB 1.23.0.02 Unquoted Service Path;https://packetstormsecurity.com/files/178036/Terratec-dmx_6fire-USB-1.23.0.02-Unquoted-Service-Path.html;unknown
 CVE-2024-31839;CHAOS RAT 5.0.1 Remote Command Execution;https://packetstormsecurity.com/files/178009/CHAOS-RAT-5.0.1-Remote-Command-Execution.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection Proof Of Concept;https://packetstormsecurity.com/files/178100/Palo-Alto-OS-Command-Injection-Proof-Of-Concept.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection;https://packetstormsecurity.com/files/178099/Palo-Alto-OS-Command-Injection.html;unknown
+CVE-2024-3400;Palo Alto PAN OS Command Execution Arbitrary File Creation;https://packetstormsecurity.com/files/178216/Palo-Alto-PAN-OS-Command-Execution-Arbitrary-File-Creation.html;unknown
