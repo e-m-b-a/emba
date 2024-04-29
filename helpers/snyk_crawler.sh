@@ -100,7 +100,7 @@ echo -e "[*] The following advisories have PoC code included:"
 PoC_CNT=0
 # removed exploit-db as we already have it in EMBA
 # echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;exploit-db;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
-#echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
+# echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
 cat "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv > "${SAVE_PATH}"/Snyk_PoC_results.csv
 
 while IFS= read -r -d '' ADV; do
