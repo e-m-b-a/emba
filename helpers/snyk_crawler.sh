@@ -100,7 +100,8 @@ echo -e "[*] The following advisories have PoC code included:"
 PoC_CNT=0
 # removed exploit-db as we already have it in EMBA
 # echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;exploit-db;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
-echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
+#echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
+cat "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv > "${SAVE_PATH}"/Snyk_PoC_results.csv
 
 while IFS= read -r -d '' ADV; do
   PoC_PoC="no"
@@ -159,7 +160,6 @@ while IFS= read -r -d '' ADV; do
     for CVE in "${CVEs[@]}"; do
       echo -e "[+] Found PoC for ${ORANGE}${CVE}${NC} in advisory ${ORANGE}${ADV_NAME}${NC} (unknown PoC: ${ORANGE}${PoC_PoC}${NC} / Github: ${ORANGE}${PoC_GH}${NC} / exploit-db: ${ORANGE}${PoC_EDB}${NC} / Curl: ${ORANGE}${PoC_CURL}${NC} / XML: ${ORANGE}${PoC_XML}${NC})"
       # removed exploit-db as we already have it in EMBA
-      # echo "$CVE;$ADV_NAME;$ADV_URL;$PoC_PoC;$PoC_GH;$PoC_EDB;$PoC_CURL;$PoC_XML;" >> "${SAVE_PATH}"/Snyk_PoC_results.csv
       echo "${CVE};${ADV_NAME};${ADV_URL};${PoC_PoC};${PoC_GH};${PoC_CURL};${PoC_XML};" >> "${SAVE_PATH}"/Snyk_PoC_results.csv
       ((PoC_CNT+=1))
     done
