@@ -675,6 +675,30 @@ emulate_binary() {
   # This is very ugly and should only be used in docker environment!
   pkill -9 -O "${QRUNTIME}" -f .*qemu-.*-sta.* >/dev/null || true
   write_log "\\n-----------------------------------------------------------------\\n" "${LOG_FILE_BIN}"
+  write_log "\\n\\nFor reproducing the EMBA user-mode emulation mechanism, the following commands could be used as starting point:" "${LOG_FILE_BIN}"
+  write_log "\\n - Start EMBA docker container with the firmware directory as log directory:" "${LOG_FILE_BIN}"
+  local lFW_PATH=$(sort -u "${TMP_DIR}"/fw_name.log | head -1)
+  write_log "      # ${ORANGE}EMBA=\".\" FIRMWARE=\"${lFW_PATH:-"/absolute/path/to/firmware"}\" LOG=\"/absolute/path/to/EMBA/log/directory\" docker-compose run emba${NC}" "${LOG_FILE_BIN}"
+  write_log "\\n - Change your working directory to the root directory of your firmware:" "${LOG_FILE_BIN}"
+  write_log "      # ${ORANGE}cd ${R_PATH}${NC}" "${LOG_FILE_BIN}"
+  write_log "\\n - Copy the static compiled user-mode emulator to your current working directory" "${LOG_FILE_BIN}"
+  write_log "      # ${ORANGE}cp \$(which ${EMULATOR}) .${NC}" "${LOG_FILE_BIN}"
+  if [[ -z "${CPU_CONFIG_}" ]] || [[ "${CPU_CONFIG_}" == "NONE" ]]; then
+    write_log "\\n - Start the emulation with the following command: " "${LOG_FILE_BIN}"
+    if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
+      write_log "      # ${ORANGE}${CHROOT} ${OPTS[@]} . -- ./${EMULATOR} ${BIN_} <parameters like -v or --help>${NC}" "${LOG_FILE_BIN}"
+    else
+      write_log "      # ${ORANGE}${CHROOT} ${OPTS[@]} . ./${EMULATOR} ${BIN_} <parameters like -v or --help>${NC}" "${LOG_FILE_BIN}"
+    fi
+  else
+    write_log "\\n - Start the emulation with the following command: " "${LOG_FILE_BIN}"
+    if [[ "${CHROOT}" == "jchroot" ]] || grep -q "jchroot" "${TMP_DIR}"/chroot_mode.tmp; then
+      write_log "      # ${ORANGE}${CHROOT} ${OPTS[@]} . -- ./${EMULATOR} -cpu ${CPU_CONFIG_} ${BIN_} <parameters like -v or --help>${NC}" "${LOG_FILE_BIN}"
+    else
+      write_log "      # ${ORANGE}${CHROOT} ${OPTS[@]} . ./${EMULATOR} -cpu ${CPU_CONFIG_} ${BIN_} <parameters like -v or --help>${NC}" "${LOG_FILE_BIN}"
+    fi
+  fi
+  write_log "\\n${ORANGE}WARNING: EMBA is doing some more magic in the background. Probably it is not that easy, but give it a try.${NC}" "${LOG_FILE_BIN}"
 }
 
 check_disk_space_emu() {
