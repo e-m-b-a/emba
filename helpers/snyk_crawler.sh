@@ -89,7 +89,7 @@ while read -r ADV; do
     continue
   fi
   echo -e "[*] Downloading ${ORANGE}${FILENAME}${NC} (${ORANGE}${ID}${NC}/${ORANGE}${ADV_CNT}${NC}) to ${ORANGE}${SAVE_PATH}/vuln/${FILENAME}${NC}"
-  lynx -dump -hiddenlinks=listonly "${ADV}" > "${SAVE_PATH}"/vuln/"${FILENAME}"
+  lynx -useragent="Mozilla" -dump -hiddenlinks=listonly "${ADV}" > "${SAVE_PATH}"/vuln/"${FILENAME}"
   # wget --user-agent="Mozilla" "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
 done < "${SAVE_PATH}"/"${LINKS}"_sorted
 
