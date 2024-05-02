@@ -1,12 +1,14 @@
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2022 - 2024 Siemens Energy AG
+#
+# This script is based on the original scripts from the firmadyne and firmAE project
+# Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
+# Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 # use busybox statically-compiled version of all binaries
 # shellcheck disable=SC2129,SC2016,SC2148
 BUSYBOX="/busybox"
-
-# This script is based on the original scripts from the firmadyne and firmAE project
 
 "${BUSYBOX}" echo "[*] EMBA fixImage script starting ..."
 
@@ -222,12 +224,21 @@ if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
     fi
     mkdir -p /dev/gpio
     echo -ne "\xff\xff\xff\xff" > /dev/gpio/in
+else
+  # just create an empty file
+  rm /dev/gpio
+  touch /dev/gpio
 fi
 
 # prevent system from rebooting
 if ("${FIRMAE_BOOT}"); then
   echo "Removing /sbin/reboot!"
-  rm -f /sbin/reboot
+  if [ -s /sbin/reboot ]; then
+    rm -f /sbin/reboot
+    echo '#!/bin/sh' > /sbin/reboot
+    echo 'echo "[*] System tries to reboot - reboot not executed"' >> /sbin/reboot
+    chmod +x /sbin/reboot
+  fi
 fi
 echo "Removing /etc/scripts/sys_resetbutton!"
 rm -f /etc/scripts/sys_resetbutton

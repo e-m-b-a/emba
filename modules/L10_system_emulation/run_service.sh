@@ -3,6 +3,10 @@
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2022 - 2024 Siemens Energy AG
+#
+# This script is based on the original scripts from the firmadyne and firmAE project
+# Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
+# Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
 
@@ -33,7 +37,7 @@ if ("${FIRMAE_ETC}"); then
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
-        "${BUSYBOX}" echo -e "[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
+        "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &
         "${BUSYBOX}" sleep 5

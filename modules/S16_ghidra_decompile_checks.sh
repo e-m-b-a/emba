@@ -52,7 +52,7 @@ S16_ghidra_decompile_checks()
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}')
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
   for BINARY in "${BINARIES[@]}"; do
@@ -301,10 +301,10 @@ s16_semgrep_logger() {
         CODE_LINE="$(strip_color_codes "$(sed -n "${lLINE_NR}"p "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" 2>/dev/null)")"
         shopt -s extglob
         CODE_LINE="${CODE_LINE##+([[:space:]])}"
-        CODE_LINE="$(echo "${CODE_LINE}" | tr -d '\0')"
+        CODE_LINE="$(echo -e "${CODE_LINE}" | tr -d '\0')"
         shopt -u extglob
         # color the identified line in the source file:
-        lLINE_NR="$(echo "${lLINE_NR}" | tr -d '\0')"
+        lLINE_NR="$(echo "${lLINE_NR}")"
         sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" || true
         # this is the output
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${CODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"
