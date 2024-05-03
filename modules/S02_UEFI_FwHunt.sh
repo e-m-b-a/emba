@@ -84,6 +84,7 @@ fwhunter_logging() {
   local FWHUNTER_RESULT=""
   local FWHUNTER_RESULT_FILE=""
   local FWHUNTER_BINARLY_ID=""
+  local FWHUNTER_CVE_ID=""
   local BINARLY_ID_FILE=""
   local FWHUNTER_BINARLY_ID_FILES=()
   local CVE_RESULTS_BINARLY=()

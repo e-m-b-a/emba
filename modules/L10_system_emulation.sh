@@ -1986,9 +1986,9 @@ nvram_searcher_emulation() {
   fi
 
   if ! file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
-    [[ ! -d "${TMP_DIR}/l10_nvram/" ]] && mkdir "${TMP_DIR}/l10_nvram/" || true
-    strings "${lNVRAM_FILE}" > "${TMP_DIR}/l10_nvram/$(basename ${lNVRAM_FILE})_nvram_tmp" || true
-    lNVRAM_FILE_TMP="${TMP_DIR}/l10_nvram/$(basename ${lNVRAM_FILE})_nvram_tmp"
+    [[ ! -d "${TMP_DIR}/l10_nvram/" ]] && (mkdir "${TMP_DIR}/l10_nvram/" || true)
+    strings "${lNVRAM_FILE}" > "${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp" || true
+    lNVRAM_FILE_TMP="${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp"
   fi
 
   for (( j=0; j<"${lMAX_VALUES}"; j++ )); do
@@ -2012,10 +2012,8 @@ nvram_searcher_emulation() {
     # print_output "[*] $lNVRAM_FILE $lCOUNT ASCII_text"
     if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
       echo "${lNVRAM_FILE} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
-    else
-      print_output "[-] MISSING NVRAM binary handling ... open an issue to solve this"
-      print_output "[-] Check ${lNVRAM_FILE} with detected key count ${lCOUNT}"
-      echo "${lNVRAM_FILE} ${lCOUNT} BINARY" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
+    # else
+    #   echo "${lNVRAM_FILE} ${lCOUNT} BINARY" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
     fi
   fi
 }

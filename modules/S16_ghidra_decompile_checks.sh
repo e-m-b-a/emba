@@ -303,8 +303,10 @@ s16_semgrep_logger() {
         CODE_LINE="${CODE_LINE##+([[:space:]])}"
         CODE_LINE="$(echo -e "${CODE_LINE}" | tr -d '\0')"
         shopt -u extglob
-        # color the identified line in the source file:
+        # with a normal echo we automatically remove the null bytes which caused issues
+        # shellcheck disable=SC2116
         lLINE_NR="$(echo "${lLINE_NR}")"
+        # color the identified line in the source file:
         sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" || true
         # this is the output
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${CODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"

@@ -68,7 +68,7 @@ set_defaults() {
   # enable L10_DEBUG_MODE in scan profile or default config for further debugging capabilities:
   # * create_emulation_archive for all attempts
   # * do not stop after 2 detected network services
-  export L10_DEBUG_MODE=2
+  export L10_DEBUG_MODE=0
   export FULL_EMULATION=0       # full system emulation - set it via command line parameter -Q
   export QEMULATION=0           # user-mode emulation - set it via command line parameter -E
   export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
