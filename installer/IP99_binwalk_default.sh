@@ -69,8 +69,10 @@ IP99_binwalk_default() {
     # print_tool_info "srecord" 1
     print_tool_info "unrar-free" 1
     print_tool_info "unrar" 1
-    print_tool_info "binwalk" 1
-    print_tool_info "python3-binwalk" 1
+    # print_tool_info "binwalk" 1
+    # print_tool_info "python3-binwalk" 1
+    # we install binwalk now from https://github.com/OSPG/binwalk
+    print_tool_info "python-is-python3" 1
     print_tool_info "capstone-tool" 1
     print_tool_info "libcapstone4:amd64" 1
     print_tool_info "python3-capstone" 1
@@ -87,6 +89,12 @@ IP99_binwalk_default() {
       y|Y )
         apt-get install "${INSTALL_APP_LIST[@]}" -y --no-install-recommends
 
+        git clone https://github.com/EMBA-support-repos/binwalk_ospg.git external/binwalk
+        cd external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
+        ./deps.sh --yes || ( echo "Could not install EMBA component binwalk" && exit 1 )
+        python3 setup.py install || ( echo "Could not install EMBA component binwalk" && exit 1 )
+        cd "${HOME_PATH}" || ( echo "Could not install EMBA component binwalk" && exit 1 )
+
         if ! [[ -d external/cpu_rec ]]; then
           git clone https://github.com/EMBA-support-repos/cpu_rec.git external/cpu_rec
           # this does not make sense for the read only docker container - we have to do it
@@ -98,22 +106,24 @@ IP99_binwalk_default() {
           cp -pr external/cpu_rec/cpu_rec_corpus "${HOME}"/.config/binwalk/modules/
         fi
 
-        if ! [[ -d external/binwalk/sasquatch ]]; then
-          mkdir -p external/binwalk
-          git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
-        fi
-        cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
-        wget https://github.com/devttys0/sasquatch/pull/47.patch
-        patch -p1 < 47.patch
-        CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
-        cd "${HOME_PATH}" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+        # if ! [[ -d external/binwalk/sasquatch ]]; then
+        #   mkdir -p external/binwalk
+        #   git clone https://github.com/devttys0/sasquatch external/binwalk/sasquatch
+        # fi
+        # cd external/binwalk/sasquatch || ( echo "Could not install EMBA component sasquatch" && exit 1 )
+        # wget https://github.com/devttys0/sasquatch/pull/47.patch
+        # patch -p1 < 47.patch
+        # CFLAGS="-fcommon -Wno-misleading-indentation" ./build.sh -y
+        # cd "${HOME_PATH}" || ( echo "Could not install EMBA component sasquatch" && exit 1 )
 
         # we have seen issues with the unblob sasquatch version - lets move the binwalk version to another name and link to it
         # during the testing phase. With this in place we are able to install both versions in ||
         if [[ -e /usr/local/bin/sasquatch ]]; then
           echo -e "${GREEN}Backup binwalk sasquatch version to ${ORANGE}/usr/local/bin/sasquatch_binwalk${NC}"
           mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
+          ln -s /usr/local/lib/python3.11/dist-packages/binwalk-2.4.1+24b0cea-py3.11.egg/binwalk /usr/local/lib/python3.11/dist-packages/binwalk
           sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/lib/python3/dist-packages/binwalk/config/extract.conf
+          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /root/.config/binwalk/config/extract.conf
         fi
 
         if command -v binwalk > /dev/null ; then
