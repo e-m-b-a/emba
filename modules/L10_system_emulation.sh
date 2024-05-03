@@ -1986,9 +1986,11 @@ nvram_searcher_emulation() {
   fi
 
   if ! file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
-    [[ ! -d "${TMP_DIR}/l10_nvram/" ]] && (mkdir "${TMP_DIR}/l10_nvram/" || true)
-    strings "${lNVRAM_FILE}" > "${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp" || true
-    lNVRAM_FILE_TMP="${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp"
+    # currently only ASCII available
+    return
+  #   [[ ! -d "${TMP_DIR}/l10_nvram/" ]] && (mkdir "${TMP_DIR}/l10_nvram/" || true)
+  #   strings "${lNVRAM_FILE}" > "${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp" || true
+  #   lNVRAM_FILE_TMP="${TMP_DIR}/l10_nvram/$(basename "${lNVRAM_FILE}")_nvram_tmp"
   fi
 
   for (( j=0; j<"${lMAX_VALUES}"; j++ )); do
@@ -2007,7 +2009,6 @@ nvram_searcher_emulation() {
     fi
   done
   if [[ "${lCOUNT}" -gt 5 ]]; then
-    # lNVRAM_FILE=$(echo "${lNVRAM_FILE}" | sed 's/^\.//')
     lNVRAM_FILE="${lNVRAM_FILE/\.}"
     # print_output "[*] $lNVRAM_FILE $lCOUNT ASCII_text"
     if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
