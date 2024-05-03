@@ -82,7 +82,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
   -o -name "telnetd" -type f -o -name "mini_httpd" -type f -o -name "miniupnpd" -type f -o -name "mini_upnpd" -type f \
   -o -name "twonkystarter" -type f -o -name "httpd" -type f -o -name "goahead" -type f -o -name "alphapd" -type f \
   -o -name "uhttpd" -type f -o -name "miniigd" -type f -o -name "ISS.exe" -type f -o -name "ubusd" -type f \
-  -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f); do
+  -o -name "wscd" -type f -o -name "ftpd" -type f -o -name "11N_UDPserver" -type f -o -name "nvram_daemon" -type f); do
 
   if [ -x "${BINARY}" ]; then
     SERVICE_NAME=$("${BUSYBOX}" basename "${BINARY}")
@@ -103,6 +103,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
           "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${MINIUPNPD_CONFIG}${NC}"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
         done
+        "${BUSYBOX}" echo -e -n "${BINARY} -p 9876 -a 0.0.0.0\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "wscd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
@@ -111,6 +112,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
           "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG}\n" >> /firmadyne/service
           "${BUSYBOX}" echo -e -n "${BINARY} -c ${WSCD_CONFIG} -mode 1 -upnp 1 -daemon\n" >> /firmadyne/service
         done
+        "${BUSYBOX}" echo -e -n "${BINARY} -a 0.0.0.0 -m 3 -D -d 3\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "upnpd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
