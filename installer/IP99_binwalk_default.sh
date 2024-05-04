@@ -91,6 +91,8 @@ IP99_binwalk_default() {
 
         git clone https://github.com/EMBA-support-repos/binwalk_ospg.git external/binwalk
         cd external/binwalk || ( echo "Could not install EMBA component binwalk" && exit 1 )
+        # pip --user makes problems -> lets remove it for now
+        sed -i 's/--user //' ./deps.sh
         ./deps.sh --yes || ( echo "Could not install EMBA component binwalk" && exit 1 )
         python3 setup.py install || ( echo "Could not install EMBA component binwalk" && exit 1 )
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component binwalk" && exit 1 )

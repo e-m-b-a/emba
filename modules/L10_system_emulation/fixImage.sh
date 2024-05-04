@@ -134,6 +134,10 @@ if [ "${FILECOUNT}" -lt "5" ]; then
   "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS1 c 4 65
   "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS2 c 4 66
   "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS3 c 4 67
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA0 c 4 64
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA1 c 4 65
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA2 c 4 66
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA3 c 4 67
   "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS0 c 4 64
   "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS1 c 4 65
   "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS2 c 4 66
