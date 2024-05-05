@@ -9338,6 +9338,7 @@ CVE-2022-35771;Windows Credential Guard Kerberos Change Password Privilege Escal
 CVE-2022-35822;Windows Credential Guard TGT Renewal Information Disclosure;https://packetstormsecurity.com/files/168331/Windows-Credential-Guard-TGT-Renewal-Information-Disclosure.html;unknown
 CVE-2022-35899;Asus GameSDK 1.0.0.4 Unquoted Service Path;https://packetstormsecurity.com/files/167763/Asus-GameSDK-1.0.0.4-Unquoted-Service-Path.html;unknown
 CVE-2022-35911;Patlite 1.46 Buffer Overflow;https://packetstormsecurity.com/files/167797/Patlite-1.46-Buffer-Overflow.html;unknown
+CVE-2022-35914;htmlLawed 1.2.5 Remote Command Execution;https://packetstormsecurity.com/files/178425/htmlLawed-1.2.5-Remote-Command-Execution.html;remote
 CVE-2022-35919;Minio 2022 07 29T19 40 48Z Path Traversal;https://packetstormsecurity.com/files/175010/Minio-2022-07-29T19-40-48Z-Path-Traversal.html;unknown
 CVE-2022-36194;Centreon 22.04.0 Cross Site Scripting;https://packetstormsecurity.com/files/168149/Centreon-22.04.0-Cross-Site-Scripting.html;unknown
 CVE-2022-3622;WordPress Blog2Social 6.9.11 Missing Authorization;https://packetstormsecurity.com/files/169799/WordPress-Blog2Social-6.9.11-Missing-Authorization.html;unknown
@@ -10156,8 +10157,8 @@ CVE-2023-6063;WordPress WP Fastest Cache 1.2.2 SQL Injection;https://packetstorm
 CVE-2023-6112;Chrome content NavigationURLLoaderImpl FallbackToNonInterceptedRequest Heap Use After Free;https://packetstormsecurity.com/files/176721/Chrome-content-NavigationURLLoaderImpl-FallbackToNonInterceptedRequest-Heap-Use-After-Free.html;unknown
 CVE-2023-6114;WordPress Duplicator Data Exposure Account Takeover;https://packetstormsecurity.com/files/177521/WordPress-Duplicator-Data-Exposure-Account-Takeover.html;unknown
 CVE-2023-6215;SAP Application Server ABAP Open Redirection;https://packetstormsecurity.com/files/174985/SAP-Application-Server-ABAP-Open-Redirection.html;unknown
-CVE-2023-6246;glibc qsort Out Of Bounds Read Write;https://packetstormsecurity.com/files/176931/glibc-qsort-Out-Of-Bounds-Read-Write.html;unknown
 CVE-2023-6246;glibc syslog Heap Based Buffer Overflow;https://packetstormsecurity.com/files/176932/glibc-syslog-Heap-Based-Buffer-Overflow.html;unknown
+CVE-2023-6246;undefinedglibc qsort Out Of Bounds Read Writeundefined;https://packetstormsecurity.com/files/176931/undefinedglibc-qsort-Out-Of-Bounds-Read-Writeundefined.html;unknown
 CVE-2023-6253;Fortra Digital Guardian Agent Uninstaller Cross Site Scripting UninstallKey Cached;https://packetstormsecurity.com/files/175956/Fortra-Digital-Guardian-Agent-Uninstaller-Cross-Site-Scripting-UninstallKey-Cached.html;unknown
 CVE-2023-6269;Atos Unify OpenScape Authentication Bypass Remote Code Execution;https://packetstormsecurity.com/files/176194/Atos-Unify-OpenScape-Authentication-Bypass-Remote-Code-Execution.html;remote
 CVE-2023-6296;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/175925/osCommerce-4-Cross-Site-Scripting.html;unknown
@@ -10185,6 +10186,8 @@ CVE-2024-2054;Artica Proxy 4.50 Unauthenticated PHP Deserialization;https://pack
 CVE-2024-2055;Artica Proxy 4.40 4.50 Authentication Bypass Privilege Escalation;https://packetstormsecurity.com/files/177483/Artica-Proxy-4.40-4.50-Authentication-Bypass-Privilege-Escalation.html;unknown
 CVE-2024-2056;Artica Proxy 4.50 Loopback Service Disclosure;https://packetstormsecurity.com/files/177484/Artica-Proxy-4.50-Loopback-Service-Disclosure.html;unknown
 CVE-2024-21338;Microsoft Windows 10.0.17763.5458 Privilege Escalation;https://packetstormsecurity.com/files/177869/Microsoft-Windows-10.0.17763.5458-Privilege-Escalation.html;unknown
+CVE-2024-21345;Windows NtQueryInformationThread Double Fetch Arbitrary Write;https://packetstormsecurity.com/files/178376/Windows-NtQueryInformationThread-Double-Fetch-Arbitrary-Write.html;unknown
+CVE-2024-21345;undefinedExploiting The NT Kernel In 24H2undefined;https://packetstormsecurity.com/files/178378/undefinedExploiting-The-NT-Kernel-In-24H2undefined.html;unknown
 CVE-2024-21733;Apache Tomcat 8.5.63 9.0.43 HTTP Response Smuggling;https://packetstormsecurity.com/files/176951/Apache-Tomcat-8.5.63-9.0.43-HTTP-Response-Smuggling.html;unknown
 CVE-2024-21762;Fortinet FortiOS Out Of Bounds Write;https://packetstormsecurity.com/files/177602/Fortinet-FortiOS-Out-Of-Bounds-Write.html;unknown
 CVE-2024-22318;IBM i Access Client Solutions Remote Credential Theft;https://packetstormsecurity.com/files/177069/IBM-i-Access-Client-Solutions-Remote-Credential-Theft.html;remote
@@ -10227,6 +10230,8 @@ CVE-2024-25884;SumatraPDF 3.5.2 DLL Hijacking;https://packetstormsecurity.com/fi
 CVE-2024-25973;OpenOLAT 18.1.5 Cross Site Scripting Privilege Escalation;https://packetstormsecurity.com/files/177233/OpenOLAT-18.1.5-Cross-Site-Scripting-Privilege-Escalation.html;unknown
 CVE-2024-25974;OpenOLAT 18.1.5 Cross Site Scripting Privilege Escalation;https://packetstormsecurity.com/files/177233/OpenOLAT-18.1.5-Cross-Site-Scripting-Privilege-Escalation.html;unknown
 CVE-2024-26182;Windows Kernel Subkey List Use After Free;https://packetstormsecurity.com/files/178012/Windows-Kernel-Subkey-List-Use-After-Free.html;unknown
+CVE-2024-26218;Windows PspBuildCreateProcessContext Double Fetch Buffer Overflow;https://packetstormsecurity.com/files/178377/Windows-PspBuildCreateProcessContext-Double-Fetch-Buffer-Overflow.html;unknown
+CVE-2024-26218;undefinedExploiting The NT Kernel In 24H2undefined;https://packetstormsecurity.com/files/178378/undefinedExploiting-The-NT-Kernel-In-24H2undefined.html;unknown
 CVE-2024-26630;Linux 6.5 Kernel Pointer Leak;https://packetstormsecurity.com/files/177943/Linux-6.5-Kernel-Pointer-Leak.html;unknown
 CVE-2024-27198;JetBrains TeamCity Authentication Bypass Remote Code Execution;https://packetstormsecurity.com/files/177445/JetBrains-TeamCity-Authentication-Bypass-Remote-Code-Execution.html;remote
 CVE-2024-27228;Google Pixel MFC H264 Processing Memory Corruption;https://packetstormsecurity.com/files/177899/Google-Pixel-MFC-H264-Processing-Memory-Corruption.html;unknown
@@ -10278,3 +10283,5 @@ CVE-2024-31839;CHAOS RAT 5.0.1 Remote Command Execution;https://packetstormsecur
 CVE-2024-3400;Palo Alto OS Command Injection Proof Of Concept;https://packetstormsecurity.com/files/178100/Palo-Alto-OS-Command-Injection-Proof-Of-Concept.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection;https://packetstormsecurity.com/files/178099/Palo-Alto-OS-Command-Injection.html;unknown
 CVE-2024-3400;Palo Alto PAN OS Command Execution Arbitrary File Creation;https://packetstormsecurity.com/files/178216/Palo-Alto-PAN-OS-Command-Execution-Arbitrary-File-Creation.html;unknown
+CVE-2024-4293;Doctor Appointment Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/178303/Doctor-Appointment-Management-System-1.0-Cross-Site-Scripting.html;unknown
+CVE-2024-4348;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/178375/osCommerce-4-Cross-Site-Scripting.html;unknown
