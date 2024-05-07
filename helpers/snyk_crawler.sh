@@ -46,7 +46,7 @@ fi
 echo "[*] Generating URL list for snyk advisories"
 ID=1
 # this approach will end after 31 pages:
-while lynx -dump -hiddenlinks=listonly "${URL}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
+while lynx -useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1" -dump -hiddenlinks=listonly "${URL}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
   echo -e "[*] Generating list of URLs of Snyk advisory page ${ORANGE}${ID}${NC} / ${ORANGE}${URL}${ID}${NC}"
   ((ID+=1))
 done
@@ -58,7 +58,7 @@ APPLICATIONS=("cargo" "cocoapods" "composer" "golang" "hex" "maven" "npm" "nuget
 
 for APPLICATION in "${APPLICATIONS[@]}"; do
   ID=1
-  while lynx -dump -hiddenlinks=listonly "${URL}"/"${APPLICATION}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
+  while lynx -useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1" -dump -hiddenlinks=listonly "${URL}"/"${APPLICATION}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
     echo -e "[*] Generating list of URLs of Snyk advisory page ${ORANGE}${ID}${NC} / application ${ORANGE}${APPLICATION}${NC} / URL ${ORANGE}${URL}/${APPLICATION}/${ID}${NC}"
     ((ID+=1))
   done
@@ -89,7 +89,7 @@ while read -r ADV; do
     continue
   fi
   echo -e "[*] Downloading ${ORANGE}${FILENAME}${NC} (${ORANGE}${ID}${NC}/${ORANGE}${ADV_CNT}${NC}) to ${ORANGE}${SAVE_PATH}/vuln/${FILENAME}${NC}"
-  lynx -useragent="Mozilla" -dump -hiddenlinks=listonly "${ADV}" > "${SAVE_PATH}"/vuln/"${FILENAME}"
+  lynx -useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1" -dump -hiddenlinks=listonly "${ADV}" > "${SAVE_PATH}"/vuln/"${FILENAME}"
   # wget --user-agent="Mozilla" "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
 done < "${SAVE_PATH}"/"${LINKS}"_sorted
 
