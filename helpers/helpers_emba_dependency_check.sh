@@ -353,7 +353,7 @@ dependency_check()
       done
     fi
   else
-    print_output "    Isolation  - ${GREEN}""ok""${NC}" "no_log"
+    print_output "    Isolation - ${GREEN}""ok""${NC}" "no_log"
   fi
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     if [[ "${ONLY_DEP}" -gt 0 ]] && [[ "${FORCE}" -ne 0 ]]; then

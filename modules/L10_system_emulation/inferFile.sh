@@ -13,7 +13,7 @@ BUSYBOX="/busybox"
 "${BUSYBOX}" touch /firmadyne/init
 "${BUSYBOX}" echo "[*] EMBA inferFile script starting ..."
 
-if ("${FIRMAE_BOOT}"); then
+if ("${EMBA_BOOT}"); then
   arr=()
   if [ -e /kernelInit ]; then
     for FILE in $("${BUSYBOX}" strings ./kernelInit)

@@ -103,7 +103,7 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
           "${BUSYBOX}" echo -e "[*] Writing EMBA starter for ${ORANGE}${BINARY} - ${MINIUPNPD_CONFIG}${NC}"
           "${BUSYBOX}" echo -e -n "${BINARY} -f ${MINIUPNPD_CONFIG}\n" >> /firmadyne/service
         done
-        "${BUSYBOX}" echo -e -n "${BINARY} -p 9876 -a 0.0.0.0\n" >> /firmadyne/service
+        "${BUSYBOX}" echo -e -n "${BINARY} -p 9876 -a 0.0.0.0 -i eth0 -d\n" >> /firmadyne/service
       fi
     elif [ "$("${BUSYBOX}" echo "${SERVICE_NAME}")" == "wscd" ]; then
       if ! "${BUSYBOX}" grep -q "${SERVICE_NAME}" /firmadyne/service 2>/dev/null; then
@@ -146,6 +146,9 @@ for BINARY in $("${BUSYBOX}" find / -name "lighttpd" -type f -o -name "upnp" -ty
     fi
   fi
 done
+
+"${BUSYBOX}" echo -e "[*] Writing EMBA service for the ${ORANGE}EMBA netcat listener${NC}"
+"${BUSYBOX}" echo -e -n "/firmadyne/netcat -nvlp 9876 -e /firmadyne/sh\n" >> /firmadyne/service
 
 if [ -f /firmadyne/service ]; then
   "${BUSYBOX}" sort -u -o /firmadyne/service /firmadyne/service

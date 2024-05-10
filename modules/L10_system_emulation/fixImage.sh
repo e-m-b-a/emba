@@ -21,7 +21,7 @@ resolve_link() {
   echo "${TARGET}"
 }
 
-if ("${FIRMAE_BOOT}"); then
+if ("${EMBA_BOOT}"); then
   if [ ! -e /bin/sh ]; then
       "${BUSYBOX}" ln -s /firmadyne/busybox /bin/sh
   fi
@@ -111,7 +111,7 @@ FILECOUNT="$("${BUSYBOX}" find /dev -maxdepth 1 -type b -o -type c -print | "${B
 if [ "${FILECOUNT}" -lt "5" ]; then
   echo "Warning: Recreating device nodes!"
 
-  if ("${FIRMAE_ETC}"); then
+  if ("${EMBA_ETC}"); then
     TMP_BUSYBOX="/busybox"
   else
     TMP_BUSYBOX=""
@@ -223,19 +223,19 @@ if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libcm.so) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
     echo "Creating /dev/gpio/in!"
-    if ("${FIRMAE_BOOT}"); then
+    if ("${EMBA_BOOT}"); then
       rm /dev/gpio
     fi
     mkdir -p /dev/gpio
     echo -ne "\xff\xff\xff\xff" > /dev/gpio/in
 else
   # just create an empty file
-  rm /dev/gpio
+  rm -r /dev/gpio
   touch /dev/gpio
 fi
 
 # prevent system from rebooting
-if ("${FIRMAE_BOOT}"); then
+if ("${EMBA_BOOT}"); then
   echo "Removing /sbin/reboot!"
   if [ -s /sbin/reboot ]; then
     rm -f /sbin/reboot

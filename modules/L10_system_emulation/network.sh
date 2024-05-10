@@ -19,7 +19,7 @@ NC="\033[0m"
 
 "${BUSYBOX}" echo -e "\n[*] Network configuration - ACTION: ${ORANGE}${ACTION}${NC}"
 
-if ("${FIRMAE_NET}"); then
+if ("${EMBA_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
   "${BUSYBOX}" sleep 10
 

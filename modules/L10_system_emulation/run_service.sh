@@ -17,7 +17,7 @@ NC="\033[0m"
 "${BUSYBOX}" echo -e "${ORANGE}[*] Starting services in emulated environment...${NC}"
 "${BUSYBOX}" cat /firmadyne/service
 
-if ("${FIRMAE_ETC}"); then
+if ("${EMBA_ETC}"); then
   # first, the system should do the job by itself
   # after 100sec we jump in with our service helpers
   "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting 60sec before helpers starting services in emulated environment...${NC}"
@@ -36,7 +36,21 @@ if ("${FIRMAE_ETC}"); then
     while IFS= read -r _BINARY; do
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
+      "${BUSYBOX}" echo -e "${NC}[*] Environment details ..."
+      "${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
+      "${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
+      "${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"
+      "${BUSYBOX}" echo -e "\tFIRMAE_NVRAM: ${FIRMAE_NVRAM}"
+      "${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
+      "${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
+      "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
+        if [ "${BINARY_NAME}" = "netcat" ] && ! [ "${EMBA_NC}" = "true" ]; then
+          "${BUSYBOX}" echo "[*] Netcat starter bypassed ... ${BINARY_NAME}"
+          # we only start our netcat listener if we set EMBA_NC_STARTER on startup (see run.sh script)
+          # otherwise we move on to the next binary starter
+          continue
+        fi
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &

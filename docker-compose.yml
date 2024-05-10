@@ -35,6 +35,10 @@ services:
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
+        - ${EMBA}/external/EMBA_Live_bins/netcat/:/external/EMBA_Live_bins/netcat:ro
+        - ${EMBA}/external/EMBA_Live_bins/gdb/:/external/EMBA_Live_bins/gdb:ro
+        - ${EMBA}/external/EMBA_Live_bins/gdbserver/:/external/EMBA_Live_bins/gdbserver:ro
+        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.1.39/:/external/EMBA_Live_bins/Linux-Kernel:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
     environment:

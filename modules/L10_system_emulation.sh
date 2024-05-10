@@ -213,6 +213,7 @@ L10_system_emulation() {
         if ! restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
           print_output "[-] System recovery went wrong. No further analysis possible" "no_log"
         fi
+        export IP_ADDRESS_="${lIP_ADDRESS}"
       else
         print_output "[-] ${ORANGE}WARNING:${NC} No archive path found in logs ... restarting emulation process for further analysis not possible" "no_log"
       fi
@@ -372,16 +373,16 @@ create_emulation_filesystem() {
 
     print_output "[*] fixImage.sh (chroot)"
     cp "${MODULE_SUB_PATH}/fixImage.sh" "${MNT_POINT}" || true
-    FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /busybox ash /fixImage.sh | tee -a "${LOG_FILE}"
+    EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /busybox ash /fixImage.sh | tee -a "${LOG_FILE}"
 
     print_output "[*] inferFile.sh (chroot)"
     # -> this re-creates init file and builds up the service which is ued from run_service.sh
     cp "${MODULE_SUB_PATH}/inferFile.sh" "${MNT_POINT}" || true
-    FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferFile.sh | tee -a "${LOG_FILE}"
+    EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferFile.sh | tee -a "${LOG_FILE}"
 
     print_output "[*] inferService.sh (chroot)"
     cp "${MODULE_SUB_PATH}/inferService.sh" "${MNT_POINT}" || true
-    FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "${LOG_FILE}"
+    EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "${LOG_FILE}"
 
     if [[ -f "${MODULE_SUB_PATH}/injection_check.sh" ]]; then
       # injection checker - future extension
@@ -419,7 +420,7 @@ create_emulation_filesystem() {
 
     print_output "[*] Setting up system mode emulation environment on target filesystem"
     # FirmAE binaries (we only use a subset of them):
-    local lBINARIES_ARR=( "busybox" "console" "libnvram.so" "libnvram_ioctl.so" "strace" "gdb" "gdbserver" )
+    local lBINARIES_ARR=( "busybox" "console" "libnvram.so" "libnvram_ioctl.so" "strace" "netcat" "gdb" "gdbserver" )
     local lBINARY_NAME=""
     local lBINARY_PATH=""
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
@@ -434,6 +435,7 @@ create_emulation_filesystem() {
     done
 
     mknod -m 666 "${MNT_POINT}/firmadyne/ttyS1" c 4 65
+    mknod -m 666 "${MNT_POINT}/firmadyne/ttyAMA1" c 4 65
 
     print_output "[*] Setting up emulation scripts"
     cp "${MODULE_SUB_PATH}/preInit.sh" "${MNT_POINT}/firmadyne/preInit.sh" || true
@@ -1043,7 +1045,7 @@ handle_fs_mounts() {
   cp "$(command -v busybox)" "${MNT_POINT}" || true
   cp "${MODULE_SUB_PATH}/inferService.sh" "${MNT_POINT}" || true
   print_output "[*] inferService.sh (chroot)"
-  FIRMAE_BOOT=${FIRMAE_BOOT} FIRMAE_ETC=${FIRMAE_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "${LOG_FILE}"
+  EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /bash-static /inferService.sh | tee -a "${LOG_FILE}"
   rm "${MNT_POINT}"/inferService.sh || true
   rm "${MNT_POINT}"/bash-static|| true
   rm "${MNT_POINT}"/busybox || true
@@ -1285,10 +1287,19 @@ run_network_id_emulation() {
     fi
     # hard code v4.x
     KERNEL_V=".4"
-    lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}${KERNEL_V}"
+    fi
   else
-    # ARM architecture
-    lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}"
+    # ARM/x86 architecture
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}"
+    else
+      lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}"
+    fi
+
   fi
 
   check_qemu_instance_l10
@@ -1307,7 +1318,7 @@ run_network_id_emulation() {
   print_output "[*] Starting firmware emulation for network identification - ${ORANGE}${lQEMU_BIN} / ${lARCH_END} / ${lIMAGE_NAME}${NC} ... use Ctrl-a + x to exit"
   print_ln
 
-  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" /tmp/do_not_create_run.sh 3
+  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" /tmp/do_not_create_run.sh 3
 }
 
 get_networking_details_emulation() {
@@ -2050,55 +2061,99 @@ run_emulated_system() {
   local lCONSOLE="ttyS0"
 
   if [[ "${lARCH_END}" == "mipsel" ]]; then
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    fi
     lQEMU_BIN="qemu-system-${lARCH_END}"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64r2el" ]]; then
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    fi
     lQEMU_BIN="qemu-system-${lARCH_END}"
     lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mipseb" ]]; then
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    fi
     lQEMU_BIN="qemu-system-mips"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64r2eb" ]]; then
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    fi
     lQEMU_BIN="qemu-system-mips64"
     lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64v1eb" ]]; then
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    fi
     lQEMU_BIN="qemu-system-mips64"
     # lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64v1el" ]]; then
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    fi
     lQEMU_BIN="qemu-system-mips64el"
     # lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64n32eb" ]]; then
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+    fi
     lQEMU_BIN="qemu-system-mips64"
     lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "armel"* ]]; then
-    lKERNEL="${BINARY_DIR}/zImage.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/zImage.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/zImage.${lARCH_END}"
+    else
+      lKERNEL="${BINARY_DIR}/zImage.${lARCH_END}"
+    fi
     lQEMU_BIN="qemu-system-arm"
     lQEMU_MACHINE="virt"
   elif [[ "${lARCH_END}" == "arm64el"* ]]; then
-    lKERNEL="${BINARY_DIR}/Image.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/Image.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/Image.${lARCH_END}"
+    else
+      lKERNEL="${BINARY_DIR}/Image.${lARCH_END}"
+    fi
     lQEMU_BIN="qemu-system-aarch64"
     # lCONSOLE="ttyAMA0"
     lCPU="-cpu cortex-a57"
     lQEMU_MACHINE="virt"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
-    lKERNEL="${BINARY_DIR}/bzImage.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/Image.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/bzImage.${lARCH_END}"
+    else
+      lKERNEL="${BINARY_DIR}/bzImage.${lARCH_END}"
+    fi
     lQEMU_BIN="qemu-system-x86_64"
     lQEMU_MACHINE="pc-i440fx-3.1"
   elif [[ "${lARCH_END}" == "nios2el" ]]; then
     # not implemented -> Future
-    lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}"
+    else
+      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}"
+    fi
     lQEMU_BIN="qemu-system-nios2"
     lQEMU_MACHINE="10m50-ghrd"
   else
@@ -2193,7 +2248,7 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log${NC} file\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321${NC} via telnet\n\"" "${ARCHIVE_PATH}"/run.sh 0
 
-  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 FIRMAE_NET=${FIRMAE_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} FIRMAE_KERNEL=${FIRMAE_KERNEL} FIRMAE_ETC=${FIRMAE_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
+  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
 }
 
 check_online_stat() {
@@ -2333,7 +2388,7 @@ check_online_stat() {
       if [[ "${lUDP_SERV}" =~ ^U:[0-9].* ]]; then
         print_output "[*] Detected UDP services ${ORANGE}${lUDP_SERV}${NC}"
         if [[ "${lPORTS_TO_SCAN}" =~ ^T:[0-9].* ]]; then
-          lPORTS_TO_SCAN="${lPORTS_TO_SCAN},${lUDP_SERV}"
+          lPORTS_TO_SCAN+=",${lUDP_SERV}"
         else
           lPORTS_TO_SCAN="${lUDP_SERV}"
         fi
@@ -2514,7 +2569,13 @@ get_binary() {
   local lBINARY_NAME="${1:-}"
   local lARCH_END="${2:-}"
 
-  echo "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}"
+  if [[ -f "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    # use sub-directories for the different binaries:
+    # will be used in the future
+    echo "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}"
+  fi
 }
 
 add_partition_emulation() {
@@ -2643,11 +2704,11 @@ write_results() {
 set_firmae_arbitration() {
   local lFIRMAE_STATE="${1:-true}"
   # FirmAE arbitration - enable all mechanisms
-  export FIRMAE_BOOT="${lFIRMAE_STATE}"
-  export FIRMAE_NET="${lFIRMAE_STATE}"
+  export EMBA_BOOT="${lFIRMAE_STATE}"
+  export EMBA_NET="${lFIRMAE_STATE}"
   export FIRMAE_NVRAM="${lFIRMAE_STATE}"
-  export FIRMAE_KERNEL="${lFIRMAE_STATE}"
-  export FIRMAE_ETC="${lFIRMAE_STATE}"
+  export EMBA_KERNEL="${lFIRMAE_STATE}"
+  export EMBA_ETC="${lFIRMAE_STATE}"
 }
 
 color_qemu_log() {
