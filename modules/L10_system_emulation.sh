@@ -98,7 +98,7 @@ L10_system_emulation() {
           fi
           # we should get TCP="ok" and SYS_ONLINE=1 back
           if ! restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
-            print_output "[-] System recovery went wrong. No further analysis possible" "no_log"
+            print_output "[-] System recovery went wrong. No further analysis possible"
           fi
         else
           print_output "[-] No archive path found in old logs ... restarting emulation process not possible"
@@ -211,7 +211,7 @@ L10_system_emulation() {
         fi
         # we should get TCP="ok" and SYS_ONLINE=1 back
         if ! restart_emulation "${lIP_ADDRESS}" "${IMAGE_NAME}" 1 "${STATE_CHECK_MECHANISM}"; then
-          print_output "[-] System recovery went wrong. No further analysis possible" "no_log"
+          print_output "[-] System recovery went wrong. No further analysis possible"
         fi
         export IP_ADDRESS_="${lIP_ADDRESS}"
       else
@@ -2444,6 +2444,9 @@ create_emulation_archive() {
   if [[ -v ARCHIVE_PATH ]] && [[ -f "${lARCHIVE_PATH}"/run.sh ]]; then
     chmod +x "${lARCHIVE_PATH}"/run.sh
     sed -i 's/-serial\ file:.*\/l10_system_emulation\/qemu\.final\.serial\.log/-serial\ file:\.\/qemu\.serial\.log/g' "${lARCHIVE_PATH}"/run.sh
+    # fix the path for the kernel which is currently something like ./Linux-Kernel/vmlinux.mipsel.4
+    # and should be ./vmlinux.mipsel.4
+    sed -i 's/\.\/Linux-Kernel\//\.\//g' "${lARCHIVE_PATH}"/run.sh
 
     # create archive
     lARCH_NAME="$(basename "${lARCHIVE_PATH}")".tar.gz
