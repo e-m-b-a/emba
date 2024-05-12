@@ -10173,6 +10173,8 @@ CVE-2023-7027;WordPress POST SMTP Mailer 2.8.7 Authorization Bypass Cross Site S
 CVE-2023-7028;GitLab CE EE Password Reset;https://packetstormsecurity.com/files/177587/GitLab-CE-EE-Password-Reset.html;unknown
 CVE-2023-7137;Client Details System 1.0 SQL Injection;https://packetstormsecurity.com/files/177565/Client-Details-System-1.0-SQL-Injection.html;remote
 CVE-2024-0204;GoAnywhere MFT Authentication Bypass;https://packetstormsecurity.com/files/176683/GoAnywhere-MFT-Authentication-Bypass.html;unknown
+CVE-2024-0264;Clinic Queuing System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/178519/Clinic-Queuing-System-1.0-Remote-Code-Execution.html;remote
+CVE-2024-0265;Clinic Queuing System 1.0 Remote Code Execution;https://packetstormsecurity.com/files/178519/Clinic-Queuing-System-1.0-Remote-Code-Execution.html;remote
 CVE-2024-0480;Taokeyun SQL Injection;https://packetstormsecurity.com/files/176548/Taokeyun-SQL-Injection.html;remote
 CVE-2024-0510;HaoKeKeJi YiQiNiu Server Side Request Forgery;https://packetstormsecurity.com/files/176547/HaoKeKeJi-YiQiNiu-Server-Side-Request-Forgery.html;unknown
 CVE-2024-06070;Checkmk Agent 2.0.0 2.1.0 2.2.0 Local Privilege Escalation;https://packetstormsecurity.com/files/177606/Checkmk-Agent-2.0.0-2.1.0-2.2.0-Local-Privilege-Escalation.html;local
@@ -10273,6 +10275,7 @@ CVE-2024-30926;DerbyNet 9.0 inc kisosks.inc Cross Site Scripting;https://packets
 CVE-2024-30927;DerbyNet 9.0 racer results.php Cross Site Scripting;https://packetstormsecurity.com/files/177953/DerbyNet-9.0-racer-results.php-Cross-Site-Scripting.html;unknown
 CVE-2024-30928;DerbyNet 9.0 ajax query.slide.next.inc SQL Injection;https://packetstormsecurity.com/files/177955/DerbyNet-9.0-ajax-query.slide.next.inc-SQL-Injection.html;remote
 CVE-2024-30929;DerbyNet 9.0 playlist.php Cross Site Scripting;https://packetstormsecurity.com/files/177954/DerbyNet-9.0-playlist.php-Cross-Site-Scripting.html;unknown
+CVE-2024-31225;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
 CVE-2024-3139;Computer Laboratory Management System 1.0 Insecure Direct Object Reference;https://packetstormsecurity.com/files/177892/Computer-Laboratory-Management-System-1.0-Insecure-Direct-Object-Reference.html;unknown
 CVE-2024-3140;Computer Laboratory Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/177893/Computer-Laboratory-Management-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-31621;Flowise 1.6.5 Authentication Bypass;https://packetstormsecurity.com/files/178204/Flowise-1.6.5-Authentication-Bypass.html;unknown
@@ -10280,8 +10283,14 @@ CVE-2024-31705;GLPI 10.x.x Remote Command Execution;https://packetstormsecurity.
 CVE-2024-31777;GUnet OpenEclass E learning 3.15 File Upload Command Execution;https://packetstormsecurity.com/files/178017/GUnet-OpenEclass-E-learning-3.15-File-Upload-Command-Execution.html;remote
 CVE-2024-31804;Terratec dmx_6fire USB 1.23.0.02 Unquoted Service Path;https://packetstormsecurity.com/files/178036/Terratec-dmx_6fire-USB-1.23.0.02-Unquoted-Service-Path.html;unknown
 CVE-2024-31839;CHAOS RAT 5.0.1 Remote Command Execution;https://packetstormsecurity.com/files/178009/CHAOS-RAT-5.0.1-Remote-Command-Execution.html;unknown
+CVE-2024-32017;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
+CVE-2024-32018;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
+CVE-2024-33722;SOPlanning 1.52.00 SQL Injection;https://packetstormsecurity.com/files/178436/SOPlanning-1.52.00-SQL-Injection.html;remote
+CVE-2024-33724;SOPlanning 1.52.00 Cross Site Scripting;https://packetstormsecurity.com/files/178434/SOPlanning-1.52.00-Cross-Site-Scripting.html;unknown
+CVE-2024-3378;iboss Secure Web Gateway Cross Site Scripting;https://packetstormsecurity.com/files/178497/iboss-Secure-Web-Gateway-Cross-Site-Scripting.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection Proof Of Concept;https://packetstormsecurity.com/files/178100/Palo-Alto-OS-Command-Injection-Proof-Of-Concept.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection;https://packetstormsecurity.com/files/178099/Palo-Alto-OS-Command-Injection.html;unknown
 CVE-2024-3400;Palo Alto PAN OS Command Execution Arbitrary File Creation;https://packetstormsecurity.com/files/178216/Palo-Alto-PAN-OS-Command-Execution-Arbitrary-File-Creation.html;unknown
+CVE-2024-34481;Drupal Wiki 8.31 8.30 Cross Site Scripting;https://packetstormsecurity.com/files/178487/Drupal-Wiki-8.31-8.30-Cross-Site-Scripting.html;unknown
 CVE-2024-4293;Doctor Appointment Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/178303/Doctor-Appointment-Management-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-4348;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/178375/osCommerce-4-Cross-Site-Scripting.html;unknown
