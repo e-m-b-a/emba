@@ -2574,7 +2574,8 @@ get_binary() {
   local lBINARY_NAME="${1:-}"
   local lARCH_END="${2:-}"
 
-  if [[ -f "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+  # '${lBINARY_NAME/\.*}' -> strip the .so from libnvram.so and libnvram_ioctl.so
+  if [[ -f "${BINARY_DIR}/${lBINARY_NAME/\.*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
     echo "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}"
