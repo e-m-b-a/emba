@@ -44,6 +44,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
       "${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
       "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+      "${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
         if [ "${BINARY_NAME}" = "netcat" ] && ! [ "${EMBA_NC}" = "true" ]; then
           "${BUSYBOX}" echo "[*] Netcat starter bypassed ... ${BINARY_NAME}"

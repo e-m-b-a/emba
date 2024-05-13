@@ -1526,9 +1526,9 @@ get_networking_details_emulation() {
                     done
                   else
                     lVLAN_ID="NONE"
+                    l_NW_ENTRY_PRIO=3
                   fi
-                  # now we set the orig. network_device with the new details:
-                  l_NW_ENTRY_PRIO=6
+                  # now we set the orig. network_device with the new details (lVLAN_ID=NONE):
                   store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
 
                   if ! [[ "${lNETWORK_DEVICE}" == *br[0-9]* ]] && ! [[ "${lNETWORK_DEVICE}" == *eth[0-9]* ]]; then
@@ -1656,14 +1656,15 @@ get_networking_details_emulation() {
       # print_output "[*] No Network interface - use ${ORANGE}eth0${NC} network."
       IP_ADDRESS_="192.168.0.1"
       lNETWORK_MODE="normal"
+      l_NW_ENTRY_PRIO=1
       if [[ "${FW_VENDOR:-}" == "AVM" ]]; then
         # for AVM fritzboxen the default IP is set to the correct one:
         IP_ADDRESS_="192.168.178.1"
+        l_NW_ENTRY_PRIO=2
       fi
       lVLAN_ID="NONE"
       lETH_INT="eth0"
       lNETWORK_DEVICE="br0"
-      l_NW_ENTRY_PRIO=1
       store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
     fi
 
@@ -1676,14 +1677,15 @@ get_networking_details_emulation() {
       # print_output "[*] No Network interface - use ${ORANGE}eth0${NC} network."
       IP_ADDRESS_="192.168.0.1"
       lNETWORK_MODE="default"
+      l_NW_ENTRY_PRIO=1
       if [[ "${FW_VENDOR:-}" == "AVM" ]]; then
         # for AVM fritzboxen the default IP is set to the correct one:
         IP_ADDRESS_="192.168.178.1"
+        l_NW_ENTRY_PRIO=2
       fi
       lVLAN_ID="NONE"
       lETH_INT="eth0"
       lNETWORK_DEVICE="br0"
-      l_NW_ENTRY_PRIO=1
       store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
     fi
 
@@ -1741,7 +1743,7 @@ iterate_vlans() {
       l_NW_ENTRY_PRIO=4
       lVLAN_ID=$(echo "${lVLAN_INFO}" | sed "s/.*vlan_id://" | grep -E -o "[0-9]+" | tr -dc '[:print:]')
     else
-      l_NW_ENTRY_PRIO=3
+      l_NW_ENTRY_PRIO=2
       lVLAN_ID="NONE"
     fi
     store_interface_details "${lIP_ADDRESS}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
@@ -1760,7 +1762,7 @@ iterate_vlans() {
       for lETH_INT_ in "${lETH_INTS_ARR[@]}"; do
         # if we found multiple interfaces belonging to a vlan we need to store all of them:
         lETH_INT_=$(echo "${lETH_INT_}" | tr -dc '[:print:]')
-        l_NW_ENTRY_PRIO=4
+        l_NW_ENTRY_PRIO=3
         store_interface_details "${lIP_ADDRESS}" "${lNETWORK_DEVICE}" "${lETH_INT_}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
       done
     fi
