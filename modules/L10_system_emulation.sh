@@ -2578,7 +2578,7 @@ get_binary() {
   if [[ -f "${BINARY_DIR}/${lBINARY_NAME/\.*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME}/${lBINARY_NAME}.${lARCH_END}"
+    echo "${BINARY_DIR}/${lBINARY_NAME/\.*}/${lBINARY_NAME}.${lARCH_END}"
   elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     echo "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}"
   fi
