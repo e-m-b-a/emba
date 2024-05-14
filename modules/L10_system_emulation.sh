@@ -821,7 +821,7 @@ main_emulation() {
           rm "${TMP_DIR}"/online_stats.tmp || true
         fi
 
-        write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}"
+        write_results "${ARCHIVE_PATH}" "${R_PATH}" "${RESULT_SOURCE:-EMBA}" "${lNETWORK_MODE}" "${lETH_INT}" "${lINIT_FILE}" "${lNETWORK_DEVICE}"
 
         cleanup_emulator "${IMAGE_NAME}"
 
