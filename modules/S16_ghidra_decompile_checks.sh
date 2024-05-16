@@ -255,8 +255,10 @@ s16_finish_the_log() {
   local lTMP_FILE=""
 
   for lTMP_FILE in "${lSEMGREPLOG/\.json/}"_"${lNAME}"*.tmp; do
-    cat "${lTMP_FILE}" >> "${lSEMGREPLOG_TXT}" || print_output "[-] Error in logfile processing - ${lTMP_FILE}" "no_log"
-    rm "${lTMP_FILE}" || true
+    if [[ -f "${lTMP_FILE}" ]]; then
+      cat "${lTMP_FILE}" >> "${lSEMGREPLOG_TXT}" || print_output "[-] Error in logfile processing - ${lTMP_FILE}" "no_log"
+      rm "${lTMP_FILE}" || true
+    fi
   done
 }
 
@@ -275,6 +277,10 @@ s16_semgrep_logger() {
 
   lHARUSPEX_FILE_NAME="$(basename "${lHARUSPEX_FILE}")"
   local lSEMGREPLOG_TMP="${lSEMGREPLOG/\.json/}"_"${lNAME}"_"${lHARUSPEX_FILE_NAME}".tmp
+
+  if [[ ! -f "${lSEMGREPLOG_CSV}" ]]; then
+    return
+  fi
 
   # we only handle decompiled code files with semgrep issues, otherwise we move to the next function
   # print_output "[*] Testing ${lHARUSPEX_FILE_NAME} against semgrep log ${lSEMGREPLOG}"

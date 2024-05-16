@@ -1535,7 +1535,7 @@ get_networking_details_emulation() {
                     # if we have a bridge device like br-lan we ensure we also have an entry with a usual br0 interface
                     local lNETWORK_DEVICE="br0"
                     print_output "[*] Fallback bridge interface - #2 ${ORANGE}${lNETWORK_DEVICE}${NC}"
-                    l_NW_ENTRY_PRIO=5
+                    l_NW_ENTRY_PRIO=3
                     store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
                   fi
                   # if we have found that the br entry has for eg an ethX interface, we now check for the real br interface entry -> lNETWORK_DEVICE
@@ -1565,11 +1565,12 @@ get_networking_details_emulation() {
             lETH_INT="$(echo "${lNETWORK_DEVICE}" | cut -d. -f1)"
             if echo "${lNETWORK_DEVICE}" | grep -q -E "[0-9]\.[0-9]"; then
               # now we know that there is a vlan number - extract the vlan number now:
+              l_NW_ENTRY_PRIO=4
               lVLAN_ID="$(echo "${lNETWORK_DEVICE}" | cut -d. -f2 | grep -E "[0-9]+" | tr -dc '[:print:]')"
             else
+              l_NW_ENTRY_PRIO=3
               lVLAN_ID="NONE"
             fi
-            l_NW_ENTRY_PRIO=3
             store_interface_details "${IP_ADDRESS_}" "${lNETWORK_DEVICE}" "${lETH_INT}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
           else
             # could not happen - just for future extension
@@ -1583,10 +1584,10 @@ get_networking_details_emulation() {
           fi
         fi
         # this is a default (fallback) entry with the correct ip address:
-        l_NW_ENTRY_PRIO=3
+        l_NW_ENTRY_PRIO=2
         store_interface_details "${IP_ADDRESS_}" "br0" "eth0" "NONE" "default" "${l_NW_ENTRY_PRIO}"
         # this is a default (fallback) entry with the correct ip address:
-        l_NW_ENTRY_PRIO=3
+        l_NW_ENTRY_PRIO=2
         store_interface_details "${IP_ADDRESS_}" "eth0" "eth0" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
       fi
     done
@@ -1740,7 +1741,7 @@ iterate_vlans() {
     print_output "[*] Interface details: ${ORANGE}${lETH_INT}${NC}"
     if [[ "${lVLAN_DEV}" == *"${lETH_INT}"* ]]; then
       print_output "[*] Possible matching VLAN details detected: ${ORANGE}${lVLAN_INFO}${NC}"
-      l_NW_ENTRY_PRIO=4
+      l_NW_ENTRY_PRIO=5
       lVLAN_ID=$(echo "${lVLAN_INFO}" | sed "s/.*vlan_id://" | grep -E -o "[0-9]+" | tr -dc '[:print:]')
     else
       l_NW_ENTRY_PRIO=2
@@ -1762,7 +1763,7 @@ iterate_vlans() {
       for lETH_INT_ in "${lETH_INTS_ARR[@]}"; do
         # if we found multiple interfaces belonging to a vlan we need to store all of them:
         lETH_INT_=$(echo "${lETH_INT_}" | tr -dc '[:print:]')
-        l_NW_ENTRY_PRIO=3
+        l_NW_ENTRY_PRIO=4
         store_interface_details "${lIP_ADDRESS}" "${lNETWORK_DEVICE}" "${lETH_INT_}" "${lVLAN_ID}" "${lNETWORK_MODE}" "${l_NW_ENTRY_PRIO}"
       done
     fi
