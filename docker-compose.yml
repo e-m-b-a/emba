@@ -40,7 +40,7 @@ services:
         - ${EMBA}/external/EMBA_Live_bins/netcat/:/external/EMBA_Live_bins/netcat:ro
         - ${EMBA}/external/EMBA_Live_bins/gdb/:/external/EMBA_Live_bins/gdb:ro
         - ${EMBA}/external/EMBA_Live_bins/gdbserver/:/external/EMBA_Live_bins/gdbserver:ro
-        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.9.99/:/external/EMBA_Live_bins/Linux-Kernel:ro
+        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.1.17/:/external/EMBA_Live_bins/Linux-Kernel:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
     environment:
