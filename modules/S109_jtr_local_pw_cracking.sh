@@ -70,18 +70,18 @@ S109_jtr_local_pw_cracking()
         # removing entries: root::0:0:99999:7:::
         continue
       fi
-      print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
-      echo "${HASH}" >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
+
+      if echo "${HASH}" | grep -qE '\$.*\$.*'; then
+        # put ontop if linux-hash
+        sed -i "1s/^/${HASH}\n/" "${LOG_PATH_MODULE}"/jtr_hashes.txt
+      else
+        print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
+        echo "${HASH}" >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
+      fi
     done
 
-    # sort hashes and remove duplicates
+    # sort and make unique
     if [[ -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
-      if [[ "$(wc -l < "${LOG_PATH_MODULE}"/jtr_hashes.txt)" -gt 2 && ! "$(grep -qE '\$.*\$.*' "${LOG_PATH_MODULE}"/jtr_hashes.txt)" ]]; then
-        # put top-suspects at the top 
-        sed -ne '/\$.*\$.*/!p' "${LOG_PATH_MODULE}"/jtr_hashes.txt > "${TMP_DIR}"/jtr_hashes.txt.tmp
-        sed -i -ne '/\$.*\$.*/p' "${LOG_PATH_MODULE}"/jtr_hashes.txt
-        cat "${TMP_DIR}"/jtr_hashes.txt.tmp >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
-      fi
       sort -u --o "${LOG_PATH_MODULE}"/jtr_hashes.txt "${LOG_PATH_MODULE}"/jtr_hashes.txt
     fi
 
