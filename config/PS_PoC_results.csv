@@ -10168,6 +10168,7 @@ CVE-2023-6538;Hitachi NAS SMU 14.8.7825 Information Disclosure;https://packetsto
 CVE-2023-6553;WordPress Backup Migration 1.3.7 Remote Code Execution;https://packetstormsecurity.com/files/176147/WordPress-Backup-Migration-1.3.7-Remote-Code-Execution.html;remote
 CVE-2023-6560;io_uring __io_uaddr_map Dangerous Multi Page Handling;https://packetstormsecurity.com/files/176405/io_uring-__io_uaddr_map-Dangerous-Multi-Page-Handling.html;unknown
 CVE-2023-6579;osCommerce 4 SQL Injection;https://packetstormsecurity.com/files/176124/osCommerce-4-SQL-Injection.html;remote
+CVE-2023-6710;Apache mod_proxy_cluster Cross Site Scripting;https://packetstormsecurity.com/files/178561/Apache-mod_proxy_cluster-Cross-Site-Scripting.html;unknown
 CVE-2023-6875;WordPress POST SMTP Mailer 2.8.7 Authorization Bypass Cross Site Scripting;https://packetstormsecurity.com/files/176525/WordPress-POST-SMTP-Mailer-2.8.7-Authorization-Bypass-Cross-Site-Scripting.html;unknown
 CVE-2023-7027;WordPress POST SMTP Mailer 2.8.7 Authorization Bypass Cross Site Scripting;https://packetstormsecurity.com/files/176525/WordPress-POST-SMTP-Mailer-2.8.7-Authorization-Bypass-Cross-Site-Scripting.html;unknown
 CVE-2023-7028;GitLab CE EE Password Reset;https://packetstormsecurity.com/files/177587/GitLab-CE-EE-Password-Reset.html;unknown
@@ -10178,6 +10179,7 @@ CVE-2024-0265;Clinic Queuing System 1.0 Remote Code Execution;https://packetstor
 CVE-2024-0480;Taokeyun SQL Injection;https://packetstormsecurity.com/files/176548/Taokeyun-SQL-Injection.html;remote
 CVE-2024-0510;HaoKeKeJi YiQiNiu Server Side Request Forgery;https://packetstormsecurity.com/files/176547/HaoKeKeJi-YiQiNiu-Server-Side-Request-Forgery.html;unknown
 CVE-2024-06070;Checkmk Agent 2.0.0 2.1.0 2.2.0 Local Privilege Escalation;https://packetstormsecurity.com/files/177606/Checkmk-Agent-2.0.0-2.1.0-2.2.0-Local-Privilege-Escalation.html;local
+CVE-2024-0671;Arm Mali 5th Gen Dangling ATE;https://packetstormsecurity.com/files/178539/Arm-Mali-5th-Gen-Dangling-ATE.html;unknown
 CVE-2024-0811;Chrome chrome.pageCapture.saveAsMHTML Extension API Blocked Origin Bypass;https://packetstormsecurity.com/files/177172/Chrome-chrome.pageCapture.saveAsMHTML-Extension-API-Blocked-Origin-Bypass.html;unknown
 CVE-2024-1086;Linux nf_tables Local Privilege Escalation;https://packetstormsecurity.com/files/177862/Linux-nf_tables-Local-Privilege-Escalation.html;local
 CVE-2024-1346;LaborOfficeFree 19.10 MySQL Root Password Calculator;https://packetstormsecurity.com/files/177087/LaborOfficeFree-19.10-MySQL-Root-Password-Calculator.html;unknown
@@ -10192,6 +10194,7 @@ CVE-2024-21345;Windows NtQueryInformationThread Double Fetch Arbitrary Write;htt
 CVE-2024-21345;undefinedExploiting The NT Kernel In 24H2undefined;https://packetstormsecurity.com/files/178378/undefinedExploiting-The-NT-Kernel-In-24H2undefined.html;unknown
 CVE-2024-21733;Apache Tomcat 8.5.63 9.0.43 HTTP Response Smuggling;https://packetstormsecurity.com/files/176951/Apache-Tomcat-8.5.63-9.0.43-HTTP-Response-Smuggling.html;unknown
 CVE-2024-21762;Fortinet FortiOS Out Of Bounds Write;https://packetstormsecurity.com/files/177602/Fortinet-FortiOS-Out-Of-Bounds-Write.html;unknown
+CVE-2024-2193;GhostRace Exploiting And Mitigating Speculative Race Conditions;https://packetstormsecurity.com/files/178597/GhostRace-Exploiting-And-Mitigating-Speculative-Race-Conditions.html;unknown
 CVE-2024-22318;IBM i Access Client Solutions Remote Credential Theft;https://packetstormsecurity.com/files/177069/IBM-i-Access-Client-Solutions-Remote-Credential-Theft.html;remote
 CVE-2024-22513;Django REST Framework SimpleJWT 5.3.1 Information Disclosure;https://packetstormsecurity.com/files/178050/Django-REST-Framework-SimpleJWT-5.3.1-Information-Disclosure.html;unknown
 CVE-2024-22836;Akaunting 3.1.3 Remote Command Execution;https://packetstormsecurity.com/files/177517/Akaunting-3.1.3-Remote-Command-Execution.html;remote
@@ -10222,6 +10225,8 @@ CVE-2024-25153;Fortra FileCatalyst Workflow 5.x Remote Code Execution;https://pa
 CVE-2024-25228;Vinchin Backup And Recovery 7.2 Command Injection;https://packetstormsecurity.com/files/177605/Vinchin-Backup-And-Recovery-7.2-Command-Injection.html;unknown
 CVE-2024-25327;FullCourt Enterprise 8.2 Cross Site Scripting;https://packetstormsecurity.com/files/177500/FullCourt-Enterprise-8.2-Cross-Site-Scripting.html;unknown
 CVE-2024-25344;ITFlow Cross Site Request Forgery;https://packetstormsecurity.com/files/177224/ITFlow-Cross-Site-Request-Forgery.html;unknown
+CVE-2024-25641;Cacti 1.2.26 Remote Code Execution;https://packetstormsecurity.com/files/178584/Cacti-1.2.26-Remote-Code-Execution.html;remote
+CVE-2024-25642;SAP Cloud Connector 2.16.1 Missing Validation;https://packetstormsecurity.com/files/178583/SAP-Cloud-Connector-2.16.1-Missing-Validation.html;unknown
 CVE-2024-25723;ZenML Remote Privilege Escalation;https://packetstormsecurity.com/files/177984/ZenML-Remote-Privilege-Escalation.html;remote
 CVE-2024-25734;WyreStorm Apollo VX20 Account Enumeration;https://packetstormsecurity.com/files/177081/WyreStorm-Apollo-VX20-Account-Enumeration.html;unknown
 CVE-2024-25735;WyreStorm Apollo VX20 Credential Disclosure;https://packetstormsecurity.com/files/177082/WyreStorm-Apollo-VX20-Credential-Disclosure.html;unknown
@@ -10238,6 +10243,7 @@ CVE-2024-26630;Linux 6.5 Kernel Pointer Leak;https://packetstormsecurity.com/fil
 CVE-2024-27198;JetBrains TeamCity Authentication Bypass Remote Code Execution;https://packetstormsecurity.com/files/177445/JetBrains-TeamCity-Authentication-Bypass-Remote-Code-Execution.html;remote
 CVE-2024-27228;Google Pixel MFC H264 Processing Memory Corruption;https://packetstormsecurity.com/files/177899/Google-Pixel-MFC-H264-Processing-Memory-Corruption.html;unknown
 CVE-2024-27356;GL iNet MT6000 4.5.5 Arbitrary File Download;https://packetstormsecurity.com/files/177886/GL-iNet-MT6000-4.5.5-Arbitrary-File-Download.html;unknown
+CVE-2024-27460;Plantronics Hub 3.25.1 Arbitrary File Read;https://packetstormsecurity.com/files/178563/Plantronics-Hub-3.25.1-Arbitrary-File-Read.html;unknown
 CVE-2024-27518;SUPERAntiSpyware Professional X 10.0.1264 DLL Hijacking Privilege Escalation;https://packetstormsecurity.com/files/177898/SUPERAntiSpyware-Professional-X-10.0.1264-DLL-Hijacking-Privilege-Escalation.html;unknown
 CVE-2024-27612;Numbas Remote Code Execution;https://packetstormsecurity.com/files/177525/Numbas-Remote-Code-Execution.html;remote
 CVE-2024-27620;Ladder 0.0.21 Server Side Request Forgery;https://packetstormsecurity.com/files/177506/Ladder-0.0.21-Server-Side-Request-Forgery.html;unknown
@@ -10285,9 +10291,11 @@ CVE-2024-31804;Terratec dmx_6fire USB 1.23.0.02 Unquoted Service Path;https://pa
 CVE-2024-31839;CHAOS RAT 5.0.1 Remote Command Execution;https://packetstormsecurity.com/files/178009/CHAOS-RAT-5.0.1-Remote-Command-Execution.html;unknown
 CVE-2024-32017;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
 CVE-2024-32018;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
+CVE-2024-33288;Prison Management System Using PHP SQL Injection;https://packetstormsecurity.com/files/178557/Prison-Management-System-Using-PHP-SQL-Injection.html;remote
 CVE-2024-33722;SOPlanning 1.52.00 SQL Injection;https://packetstormsecurity.com/files/178436/SOPlanning-1.52.00-SQL-Injection.html;remote
 CVE-2024-33724;SOPlanning 1.52.00 Cross Site Scripting;https://packetstormsecurity.com/files/178434/SOPlanning-1.52.00-Cross-Site-Scripting.html;unknown
 CVE-2024-3378;iboss Secure Web Gateway Cross Site Scripting;https://packetstormsecurity.com/files/178497/iboss-Secure-Web-Gateway-Cross-Site-Scripting.html;unknown
+CVE-2024-33828;Zope 5.9 Command Injection;https://packetstormsecurity.com/files/178582/Zope-5.9-Command-Injection.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection Proof Of Concept;https://packetstormsecurity.com/files/178100/Palo-Alto-OS-Command-Injection-Proof-Of-Concept.html;unknown
 CVE-2024-3400;Palo Alto OS Command Injection;https://packetstormsecurity.com/files/178099/Palo-Alto-OS-Command-Injection.html;unknown
 CVE-2024-3400;Palo Alto PAN OS Command Execution Arbitrary File Creation;https://packetstormsecurity.com/files/178216/Palo-Alto-PAN-OS-Command-Execution-Arbitrary-File-Creation.html;unknown
