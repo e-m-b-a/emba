@@ -71,16 +71,19 @@ S109_jtr_local_pw_cracking()
         continue
       fi
 
-      if [[ -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
-        if ! grep -q "${HASH}" "${LOG_PATH_MODULE}"/jtr_hashes.txt; then
-          print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
-          echo "${HASH}" >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
-        fi
+      if [[ "${HASH}" == "\$"*"\$"* ]]; then
+        # put ontop if linux-hash
+        sed -i "1s/^/${HASH}\n/" "${LOG_PATH_MODULE}"/jtr_hashes.txt
       else
         print_output "[*] Found password data ${ORANGE}${HASH}${NC} for further processing in ${ORANGE}${HASH_SOURCE}${NC}"
         echo "${HASH}" >> "${LOG_PATH_MODULE}"/jtr_hashes.txt
       fi
     done
+
+    # sort and make unique
+    if [[ -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
+      sort -u --o "${LOG_PATH_MODULE}"/jtr_hashes.txt "${LOG_PATH_MODULE}"/jtr_hashes.txt
+    fi
 
     if [[ -f "${LOG_PATH_MODULE}"/jtr_hashes.txt ]]; then
       print_output "[*] Starting jtr with a runtime of ${ORANGE}${JTR_TIMEOUT}${NC} on the following data:"
