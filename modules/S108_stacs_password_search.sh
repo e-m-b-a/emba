@@ -32,7 +32,7 @@ S108_stacs_password_search()
   local MESSAGE=""
 
   if command -v stacs > /dev/null ; then
-    stacs --debug --skip-unprocessable --rule-pack "${STACS_RULES_DIR}"/credential.json "${FIRMWARE_PATH}" 2> "${TMP_DIR}"/stacs.err 1> "${STACS_LOG_FILE}" || true
+    stacs --skip-unprocessable --rule-pack "${STACS_RULES_DIR}"/credential.json "${FIRMWARE_PATH}" 2> "${TMP_DIR}"/stacs.err 1> "${STACS_LOG_FILE}" || true
 
     if [[ -f "${TMP_DIR}"/stacs.err ]]; then
       print_ln
