@@ -71,7 +71,7 @@ S109_jtr_local_pw_cracking()
         continue
       fi
 
-      if echo "${HASH}" | grep -qE '\$.*\$.*'; then
+      if [[ "${HASH}" == "\$"*"\$"* ]]; then
         # put ontop if linux-hash
         sed -i "1s/^/${HASH}\n/" "${LOG_PATH_MODULE}"/jtr_hashes.txt
       else
