@@ -20,7 +20,7 @@ export SHORT_PATH=1
 export HTML=1
 export QEMULATION=1
 export FULL_EMULATION=1
-export MODULE_BLACKLIST=( "S99_grepit" "S110_yara_check" )
+export MODULE_BLACKLIST+=( "S99_grepit" "S110_yara_check" )
 local MODULE_=""
 
 # we output the profile only at the beginning - outside the docker environment
