@@ -420,7 +420,7 @@ create_emulation_filesystem() {
 
     print_output "[*] Setting up system mode emulation environment on target filesystem"
     # FirmAE binaries (we only use a subset of them):
-    local lBINARIES_ARR=( "busybox" "console" "libnvram.so" "libnvram_ioctl.so" "strace" "netcat" "gdb" "gdbserver" )
+    local lBINARIES_ARR=( "busybox" "console" "libnvram_dbg.so" "libnvram_nondbg.so" "libnvram_ioctl_dbg.so" "libnvram_ioctl_nondbg.so" "strace" "netcat" "gdb" "gdbserver" )
     local lBINARY_NAME=""
     local lBINARY_PATH=""
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
@@ -470,6 +470,29 @@ create_emulation_filesystem() {
 
   else
     print_output "[!] Filesystem mount failed"
+  fi
+}
+
+link_libnvram_so() {
+  # pre-requisite is the mounted filesytem
+  local lMNT_POINT="${1:-}"
+  # default to debug mode with a lot of output - usually in the finale emulation mode we use the nondbg mode
+  local lDBG_MODE="${2:-dbg}"
+
+  # ensure we have a dbg libnvram for the initial identification
+  if [[ -s "${lMNT_POINT}/firmadyne/libnvram.so" ]]; then
+    rm "${lMNT_POINT}/firmadyne/libnvram.so"
+  fi
+  if [[ -s "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" ]]; then
+    rm "${lMNT_POINT}/firmadyne/libnvram_ioctl.so"
+  fi
+  if [[ -f "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" ]]; then
+    print_output "[*] Linking to ${lDBG_MODE} libnvram.so"
+    ln -sr "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram.so"
+  fi
+  if [[ -f "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" ]]; then
+    print_output "[*] Linking to ${lDBG_MODE} libnvram_ioctl.so"
+    ln -sr "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram_ioctl.so"
   fi
 }
 
@@ -528,6 +551,8 @@ main_emulation() {
       print_output "[-] No Qemu Image device identified"
       break
     fi
+
+    link_libnvram_so "${MNT_POINT}" "dbg"
 
     if [[ -n "${lBAK_INIT_ORIG}" ]]; then
       print_output "[*] Restoring old init file: ${lBAK_INIT_ORIG}"
@@ -1304,6 +1329,10 @@ run_network_id_emulation() {
 
   check_qemu_instance_l10
 
+  if [[ "${KINIT}" == "rdinit="* ]]; then
+    print_output "[*] Warning: stripping rdinit - testing init"
+    KINIT="${KINIT:2}"
+  fi
   print_output "[*] Qemu parameters used in network detection mode:"
   print_output "$(indent "MACHINE: ${ORANGE}${lQEMU_MACHINE}${NC}")"
   print_output "$(indent "KERNEL: ${ORANGE}${lKERNEL}${NC}")"
@@ -1912,6 +1941,8 @@ write_network_config_to_filesystem() {
       done
     fi
 
+    # as we have the filesytem mounted right before the final run we can link libnvram now
+    link_libnvram_so "${MNT_POINT}" "nondbg"
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
@@ -2233,6 +2264,10 @@ run_qemu_final_emulation() {
 
   check_qemu_instance_l10
 
+  if [[ "${KINIT}" == "rdinit="* ]]; then
+    print_output "[*] Warning: stripping rdinit - testing init"
+    KINIT="${KINIT:2}"
+  fi
   print_output "[*] Qemu parameters used in run mode:"
   print_output "$(indent "MACHINE: ${ORANGE}${lQEMU_MACHINE}${NC}")"
   print_output "$(indent "KERNEL: ${ORANGE}${lKERNEL}${NC}")"
@@ -2576,10 +2611,14 @@ get_binary() {
   local lARCH_END="${2:-}"
 
   # '${lBINARY_NAME/\.*}' -> strip the .so from libnvram.so and libnvram_ioctl.so
-  if [[ -f "${BINARY_DIR}/${lBINARY_NAME/\.*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+  if [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
-    echo "${BINARY_DIR}/${lBINARY_NAME/\.*}/${lBINARY_NAME}.${lARCH_END}"
+    echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+    # use sub-directories for the different binaries:
+    # will be used in the future
+    echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}"
   elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     echo "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}"
   fi
