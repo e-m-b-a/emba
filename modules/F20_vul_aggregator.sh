@@ -531,7 +531,7 @@ cve_db_lookup_version() {
 
   local CVE_ID=""
   local BIN_NAME=""
-  BIN_NAME=$(echo "${BIN_VERSION_}" | cut -d':' -f1)
+  BIN_NAME=$(echo "${BIN_VERSION_%:}" | rev | cut -d':' -f2 | rev)
   # we create something like "binary_1.2.3" for log paths
   # remove last : if it is there
   local VERSION_PATH="${BIN_VERSION_%:}"
@@ -554,7 +554,7 @@ cve_db_lookup_version() {
 
   mapfile -t CVE_VER_SOURCES_ARR < <(grep -l -r "cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_VERSION_%:}:.*:.*:.*:.*:.*:\|cpe:[0-9]\.[0-9]:[a-z]:.*${BIN_NAME}:\*:.*:.*:.*:.*:.*:" "${NVD_DIR}" | sort -u || true)
 
-  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
+  print_output "[*] CVE database lookup with version information: ${ORANGE}${BIN_VERSION_} / ${BIN_NAME}${NC} resulted in ${ORANGE}${#CVE_VER_SOURCES_ARR[@]}${NC} possible vulnerabilities" "no_log"
 
   if [[ "${BIN_VERSION_}" == *"dlink"* ]]; then
     # dlink extrawurst: dlink vs d-link
@@ -674,7 +674,7 @@ check_cve_sources() {
     # we need to check the version more in details in case we have no version in our cpe identifier
     # └─$ jq -r '.configurations[].nodes[].cpeMatch[] | select(.criteria=="cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*") | .versionEndIncluding' external/nvd-json-data-feeds/CVE-2011/CVE-2011-27xx/CVE-2011-2716.json
 
-    # print_output "[*] Binary ${BIN_VERSION_} - Found no version identifier in our cpe for ${CVE_VER_SOURCES_FILE} - check for further version details with ${CVE_CPE_vuln}" "no_log"
+    # print_output "[*] Binary ${BIN_VERSION_} - Found no version identifier in our cpe for ${CVE_VER_SOURCES_FILE} - check for further version details with ${CVE_CPEMATCH}" "no_log"
 
     # extract further version details form the current cpe under test
     CVE_VER_START_INCL=$(echo "${CVE_CPEMATCH}" | jq -r '.versionStartIncluding' | grep -v "null" || true)

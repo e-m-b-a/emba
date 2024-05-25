@@ -127,7 +127,7 @@ S115_usermode_emulator() {
           continue
         fi
 
-        if [[ "${BIN_BLACKLIST[*]}" == *"$(basename "${FULL_BIN_PATH}")"* ]]; then
+        if echo "${BIN_BLACKLIST[@]}" | grep -q -F -w "$(basename "${FULL_BIN_PATH}")"; then
           print_output "[*] Binary ${ORANGE}${BIN_}${NC} (${ORANGE}${BIN_CNT}/${#BIN_EMU_ARR[@]}${NC}) not emulated - blacklist triggered"
           continue
         else
