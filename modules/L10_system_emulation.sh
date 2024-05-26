@@ -285,6 +285,7 @@ create_emulation_filesystem() {
   local lARCH_END="${2:-}"
   local lBINARY_L10=""
   local lBINARIES_L10_ARR=()
+  local lSCRIPTS_L10_ARR=()
   local lIMAGE_SIZE=""
   local lNVRAM_FILE_LIST=()
   local lNVRAM_FILE=""
@@ -344,6 +345,8 @@ create_emulation_filesystem() {
       # This is needed at some firmwares have corrupted permissions on ELF or sh files
       print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
       readarray -t lBINARIES_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
+      readarray -t lSCRIPTS_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -name "*.sh" 2>/dev/null || true)
+      lBINARIES_L10_ARR+=("${lSCRIPTS_L10_ARR[@]}")
       for lBINARY_L10 in "${lBINARIES_L10_ARR[@]}"; do
         [[ -x "${lBINARY_L10}" ]] && continue
         if [[ -f "${lBINARY_L10}" ]]; then
@@ -419,14 +422,14 @@ create_emulation_filesystem() {
     rm "${MNT_POINT}/bash-static" || true
 
     print_output "[*] Setting up system mode emulation environment on target filesystem"
-    # FirmAE binaries (we only use a subset of them):
+    # FirmAE/firmadyne recompiled binaries + addons
     local lBINARIES_ARR=( "busybox" "console" "libnvram_dbg.so" "libnvram_nondbg.so" "libnvram_ioctl_dbg.so" "libnvram_ioctl_nondbg.so" "strace" "netcat" "gdb" "gdbserver" )
     local lBINARY_NAME=""
     local lBINARY_PATH=""
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
       lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}")
       if ! [[ -f "${lBINARY_PATH}" ]]; then
-        print_output "[-] Missing ${ORANGE}${lBINARY_PATH}${NC} - no setup possible"
+        print_output "[-] Missing ${ORANGE}${lBINARY_PATH} / ${lBINARY_NAME}${NC} - no setup possible"
         continue
       fi
       print_output "[*] Setting up ${ORANGE}${lBINARY_NAME}${NC} - ${ORANGE}${lARCH_END}${NC} (${ORANGE}${lBINARY_PATH}${NC})"
@@ -529,7 +532,9 @@ main_emulation() {
   for lINIT_FILE in "${lINIT_FILES_ARR[@]}"; do
     lINIT_FNAME=$(basename "${lINIT_FILE}")
     # this is the main init entry - we modify it later for special cases:
-    export KINIT="rdinit=/firmadyne/preInit.sh"
+    # NOTE: Currently we only test emulation with init=
+    # The code for switching inits is available but not used anymore
+    export KINIT="init=/firmadyne/preInit.sh"
 
     sub_module_title "[*] Processing init file ${ORANGE}${lINIT_FILE} (${lINDEX}/${#lINIT_FILES_ARR[@]})${NC}"
     if ! mount | grep -q "${MNT_POINT}"; then
@@ -570,7 +575,9 @@ main_emulation() {
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "symbolic link\|ELF"; then
       # e.g. netgear R6200
       # KINIT="init=/firmadyne/preInit.sh"
-      KINIT="${KINIT:2}"
+      if [[ "${KINIT:0:2}" == "rd" ]]; then
+        KINIT="${KINIT:2}"
+      fi
       # write the init ELF file or sym link to the firmadyne preInit script:
       INIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
 
@@ -690,11 +697,16 @@ main_emulation() {
     # print_output "[*] Found $ORANGE$lF_STARTUP$NC EMBA startup entries."
     print_ln
 
-    if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
+    # the following condition is for switching and testing a different init= -> rdinit=
+    # This is currently not used as the results are probably better with sticking to init
+    # if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
+    if [[ "${#PANICS[@]}" -gt 0 ]] && [[ "${lF_STARTUP}" -eq 0 ]] && [[ "${DETECTED_IP}" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
       # panic is caused from an init failure. If so, we are trying the other init kernel command (init vs rdinit)
+      print_output "[*] Info: lF_STARTUP: ${lF_STARTUP} / lNETWORK_MODE: ${lNETWORK_MODE} / DETECTED_IP: ${DETECTED_IP} / PANICS: ${#PANICS[@]}"
       if [[ "${PANICS[*]}" == *"Kernel panic - not syncing: Attempted to kill init!"* || "${PANICS[*]}" == *"Kernel panic - not syncing: No working init found."* ]]; then
         mv "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log
+        print_output "[!] Identified Kernel panic ... switching init from ${KINIT}"
         switch_inits "${KINIT}"
 
         # re-identify the network via other init configuration
@@ -711,9 +723,10 @@ main_emulation() {
         print_ln
 
       elif [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "None" ]] || \
+        [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "default" ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
+        print_output "[!] Possible init issue ... switching init from ${KINIT}"
         local PORTS_1st=0
         local COUNTING_1st=0
-        [[ "${lF_STARTUP}" -eq 0 && "${lNETWORK_MODE}" == "default" ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
         mv "${LOG_PATH_MODULE}"/qemu.initial.serial.log "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log
         COUNTING_1st=$(wc -l "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | awk '{print $1}')
         PORTS_1st=$(grep -a "inet_bind" "${LOG_PATH_MODULE}"/qemu.initial.serial_"${IMAGE_NAME}"_"${lINIT_FNAME}"_base_init.log | sort -u | wc -l | awk '{print $1}' || true)
@@ -739,11 +752,14 @@ main_emulation() {
           [[ "${DETECTED_IP}" -eq 0 ]]; then
           if [[ "${#PANICS[@]}" -gt 0 ]]; then
             # on a Kernel panic we always switch back
+            print_output "[!] Identified Kernel panic ... switching init back from ${KINIT}"
             switch_inits "${KINIT}"
           elif [[ "${PORTS_1st}" -gt "${PORTS_2nd}" ]]; then
+            print_output "[!] Network services issue ... switching init back from ${KINIT}"
             switch_inits "${KINIT}"
           # we only switch back if the first check has more output generated
           elif [[ "${COUNTING_1st}" -gt "${COUNTING_2nd}" ]] && [[ "${PORTS_1st}" -ge "${PORTS_2nd}" ]]; then
+            print_output "[!] Network services issue and log file size ... switching init back from ${KINIT}"
             switch_inits "${KINIT}"
           fi
         fi
@@ -915,7 +931,6 @@ main_emulation() {
 
     print_output "[*] Processing init file ${ORANGE}${lINIT_FILE}${NC} (${lINDEX}/${#lINIT_FILES_ARR[@]}) finished"
     print_bar ""
-    sleep 1
     ((lINDEX+=1))
   done
 
@@ -925,7 +940,7 @@ main_emulation() {
 switch_inits() {
   # KINIT is global but for readability:
   KINIT="${1:-}"
-  if [[ "${KINIT}" == "rdinit="* ]]; then
+  if [[ "${KINIT:0:2}" == "rd" ]]; then
     print_output "[*] Warning: Unknown EMBA startup found via rdinit - testing init"
     # strip rd from rdinit
     KINIT="${KINIT:2}"
@@ -965,6 +980,7 @@ handle_fs_mounts() {
   local lFS_MOUNT=""
   local lBINARY_L10=""
   local lBINARIES_L10_ARR=()
+  local lSCRIPTS_L10_ARR=()
 
   for lFS_MOUNT in "${lFS_MOUNTS_ARR[@]}"; do
     local lMOUNT_PT=""
@@ -1057,7 +1073,9 @@ handle_fs_mounts() {
 
   # Todo: move this to somewhere, where we only need to do this once
   print_output "[*] Fix script and ELF permissions - again"
+  readarray -t lSCRIPTS_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -name "*.sh" 2>/dev/null || true)
   readarray -t lBINARIES_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1 || true)
+  lBINARIES_L10_ARR+=("${lSCRIPTS_L10_ARR[@]}")
   for lBINARY_L10 in "${lBINARIES_L10_ARR[@]}"; do
     [[ -x "${lBINARY_L10}" ]] && continue
     if [[ -f "${lBINARY_L10}" ]]; then
@@ -1329,10 +1347,6 @@ run_network_id_emulation() {
 
   check_qemu_instance_l10
 
-  if [[ "${KINIT}" == "rdinit="* ]]; then
-    print_output "[*] Warning: stripping rdinit - testing init"
-    KINIT="${KINIT:2}"
-  fi
   print_output "[*] Qemu parameters used in network detection mode:"
   print_output "$(indent "MACHINE: ${ORANGE}${lQEMU_MACHINE}${NC}")"
   print_output "$(indent "KERNEL: ${ORANGE}${lKERNEL}${NC}")"
@@ -1942,7 +1956,7 @@ write_network_config_to_filesystem() {
     fi
 
     # as we have the filesytem mounted right before the final run we can link libnvram now
-    link_libnvram_so "${MNT_POINT}" "nondbg"
+    link_libnvram_so "${MNT_POINT}" "dbg"
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
@@ -2264,10 +2278,6 @@ run_qemu_final_emulation() {
 
   check_qemu_instance_l10
 
-  if [[ "${KINIT}" == "rdinit="* ]]; then
-    print_output "[*] Warning: stripping rdinit - testing init"
-    KINIT="${KINIT:2}"
-  fi
   print_output "[*] Qemu parameters used in run mode:"
   print_output "$(indent "MACHINE: ${ORANGE}${lQEMU_MACHINE}${NC}")"
   print_output "$(indent "KERNEL: ${ORANGE}${lKERNEL}${NC}")"

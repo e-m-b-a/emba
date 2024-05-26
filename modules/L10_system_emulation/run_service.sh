@@ -34,6 +34,7 @@ if ("${EMBA_ETC}"); then
 
   while (true); do
     while IFS= read -r _BINARY; do
+      "${BUSYBOX}" sleep 5
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
       "${BUSYBOX}" echo -e "${NC}[*] Environment details ..."
@@ -45,6 +46,18 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
       "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
       "${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
+      "${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
+      "${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env)"
+      "${BUSYBOX}" echo "[*] Netstat output:"
+      "${BUSYBOX}" netstat -antu
+      "${BUSYBOX}" echo "[*] Network configuration:"
+      "${BUSYBOX}" brctl show
+      "${BUSYBOX}" ifconfig -a
+      "${BUSYBOX}" echo "[*] Running processes:"
+      "${BUSYBOX}" ps
+      "${BUSYBOX}" echo "[*] /proc filesytem:"
+      "${BUSYBOX}" ls /proc
+
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
         if [ "${BINARY_NAME}" = "netcat" ] && ! [ "${EMBA_NC}" = "true" ]; then
           "${BUSYBOX}" echo "[*] Netcat starter bypassed ... ${BINARY_NAME}"
@@ -55,19 +68,9 @@ if ("${EMBA_ETC}"); then
         "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &
-        "${BUSYBOX}" sleep 5
-        "${BUSYBOX}" echo "[*] Netstat output:"
-        "${BUSYBOX}" netstat -antu
-        "${BUSYBOX}" echo "[*] Network configuration:"
-        "${BUSYBOX}" brctl show
-        "${BUSYBOX}" ifconfig
-        "${BUSYBOX}" echo "[*] Currently running processes:"
-        "${BUSYBOX}" ps
-        "${BUSYBOX}" echo "[*] /proc filesytem:"
-        "${BUSYBOX}" ls /proc
-        "${BUSYBOX}" sleep 5
+      else
+        "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${BINARY_NAME}${NC} already started ..."
       fi
-      # other scripts are just running if we have not created the following file
     done < "/firmadyne/service"
   done
 fi
