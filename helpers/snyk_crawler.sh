@@ -169,7 +169,7 @@ done < <(find "${SAVE_PATH}"/vuln/ -type f -print0)
 # uniq "${SAVE_PATH}"/Snyk_PoC_results.csv | sort -nr -o "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
 # sort -nr "${SAVE_PATH}"/Snyk_PoC_results.csv -o "${SAVE_PATH}"/Snyk_PoC_results.csv
 uniq "${SAVE_PATH}"/Snyk_PoC_results_sorted.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
-sort -nr "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
+sort -nr -o "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
 
 if [[ -f "${SAVE_PATH}"/Snyk_PoC_results.csv ]] && [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   mv "${SAVE_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"
