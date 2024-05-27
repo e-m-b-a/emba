@@ -348,9 +348,13 @@ create_emulation_filesystem() {
 
     if [[ -f "${CSV_DIR}"/s24_kernel_bin_identifier.csv ]]; then
       # kernelInit is getting the output of the init command line we get from s24
-      if grep -q "init=" "${CSV_DIR}"/s24_kernel_bin_identifier.csv; then
-        print_output "[*] Found init entry for kernel - see ${ORANGE}${LOG_DIR}/s24_kernel_bin_identifier.txt${NC}:"
-        grep "init=/" "${CSV_DIR}"/s24_kernel_bin_identifier.csv | cut -d\; -f5 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+      if grep -q ";rdinit=" "${CSV_DIR}"/s24_kernel_bin_identifier.csv; then
+        print_output "[*] Found ${ORANGE}rdinit${NC} entry for kernel - see ${ORANGE}${LOG_DIR}/s24_kernel_bin_identifier.txt${NC}:"
+        grep ";rdinit=/" "${CSV_DIR}"/s24_kernel_bin_identifier.csv | cut -d\; -f5 | sed -e 's/.*rdinit=/rdinit=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
+        tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
+      elif grep -q ";init=" "${CSV_DIR}"/s24_kernel_bin_identifier.csv; then
+        print_output "[*] Found ${ORANGE}init${NC} entry for kernel - see ${ORANGE}${LOG_DIR}/s24_kernel_bin_identifier.txt${NC}:"
+        grep ";init=/" "${CSV_DIR}"/s24_kernel_bin_identifier.csv | cut -d\; -f5 | sed -e 's/.*init=/init=/' | awk '{print $1}'| sort -u | tee -a "${MNT_POINT}"/kernelInit
         tee -a "${LOG_FILE}" < "${MNT_POINT}"/kernelInit
       fi
     else
@@ -460,12 +464,13 @@ create_emulation_filesystem() {
 }
 
 fix_exec_permissions() {
+  local lMNT_POINT="${1:-}"
   local lBINARY_L10=""
   local lBINARIES_L10_ARR=()
   local lSCRIPTS_L10_ARR=()
 
-  readarray -t lBINARIES_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
-  readarray -t lSCRIPTS_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -name "*.sh" 2>/dev/null || true)
+  readarray -t lBINARIES_L10_ARR < <( find "${lMNT_POINT}" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
+  readarray -t lSCRIPTS_L10_ARR < <( find "${lMNT_POINT}" -xdev -type f -name "*.sh" 2>/dev/null || true)
   lBINARIES_L10_ARR+=("${lSCRIPTS_L10_ARR[@]}")
 
   for lBINARY_L10 in "${lBINARIES_L10_ARR[@]}"; do
@@ -513,7 +518,8 @@ main_emulation() {
     tee -a "${LOG_FILE}" < "${LOG_PATH_MODULE}"/firmadyne_init
     readarray -t lINIT_FILES_ARR < "${LOG_PATH_MODULE}"/firmadyne_init
   else
-    print_output "[-] WARNING: init file not created!"
+    print_output "[-] WARNING: init file not created! Processing backup dummy init"
+    lINIT_FILES_ARR+=( "/dummy_init" )
   fi
 
   local lINDEX=1
@@ -534,7 +540,7 @@ main_emulation() {
     # this is the main init entry - we modify it later for special cases:
     # NOTE: Currently we only test emulation with init=
     # The code for switching inits is available but not used anymore
-    export KINIT="init=/firmadyne/preInit.sh"
+    export KINIT="rdinit=/firmadyne/preInit.sh"
 
     sub_module_title "[*] Processing init file ${ORANGE}${lINIT_FILE} (${lINDEX}/${#lINIT_FILES_ARR[@]})${NC}"
     if ! mount | grep -q "${MNT_POINT}"; then
@@ -625,7 +631,7 @@ main_emulation() {
     # ensure that the needed permissions for exec files are set correctly
     # This is needed at some firmwares have corrupted permissions on ELF or sh files
     print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
-    fix_exec_permissions
+    fix_exec_permissions "${MNT_POINT}"
 
     if ! (grep -q "/firmadyne/network.sh" "${INIT_OUT}"); then
       print_output "[*] Add network.sh entry to ${ORANGE}${INIT_OUT}${NC}"
@@ -1117,7 +1123,7 @@ delete_device_entry() {
   local lDEVICE="${2:-}"
   local lMNT_POINT="${3:-}"
 
-  print_output "[*] Deleting device mapper" "no_log"
+  print_output "[*] Deleting device mapper for ${lIMAGE_NAME} / ${lDEVICE}" "no_log"
 
   kpartx -v -d "${LOG_PATH_MODULE}/${lIMAGE_NAME}"
   losetup -d "${lDEVICE}" &>/dev/null || true
@@ -1134,13 +1140,14 @@ identify_networking_emulation() {
   # based on the original firmadyne and FirmAE script:
   # https://github.com/firmadyne/firmadyne/blob/master/scripts/inferNetwork.sh
 
-  sub_module_title "Network identification"
   local lIMAGE_NAME="${1:-}"
   export IMAGE=""
   IMAGE=$(abs_path "${LOG_PATH_MODULE}/${lIMAGE_NAME}")
 
   local lARCH_END="${2:-}"
   local lINIT_FILE="${3:-}"
+
+  sub_module_title "Network identification ${lINIT_FILE} - ${KINIT} - ${lARCH_END} - ${lIMAGE_NAME}"
 
   print_output "[*] Test basic emulation and identify network settings.\\n"
   print_output "[*] Running firmware ${ORANGE}${lIMAGE_NAME}${NC}: Terminating after 660 secs..."
@@ -2077,7 +2084,7 @@ run_emulated_system() {
   local lINIT_FILE="${3:-}"
   local lARCH_END="${4:-}"
 
-  sub_module_title "Final system emulation for ${lIP_ADDRESS}"
+  sub_module_title "Final system emulation for ${lIP_ADDRESS} - ${lINIT_FILE} - ${KINIT} - ${lARCH_END} - ${lIMAGE_NAME}"
 
   local IMAGE="${LOG_PATH_MODULE}/${lIMAGE_NAME}"
 
@@ -2348,15 +2355,21 @@ check_online_stat() {
 
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
   if [[ "${lSYS_ONLINE}" -eq 1 ]]; then
-    print_output "[*] Give the system another 130 seconds to ensure the boot process is finished.\n" "no_log"
-    sleep 130
+    print_output "[*] Give the system another 10 seconds to ensure the boot process is finished.\n" "no_log"
+    sleep 10
     print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
     write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
     # this is just for the nice logfile
     ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
     print_ln
-    nmap -Pn -n -A -sSV --host-timeout 30m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+    nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+
+    if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -eq 0 ]]; then
+      print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
+      sleep 60
+      nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+    fi
 
     mapfile -t lTCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
     mapfile -t lUDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
@@ -2744,9 +2757,9 @@ write_results() {
   [[ "${lTCP_SERV_CNT}" -gt 0 ]] && TCP="ok"
   lARCHIVE_PATH="$(echo "${lARCHIVE_PATH}" | rev | cut -d '/' -f1 | rev)"
   if ! [[ -f "${LOG_DIR}"/emulator_online_results.log ]]; then
-    echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE/ETH_INT/INIT_FILE);ARCHIVE_PATH_;R_PATH" > "${LOG_DIR}"/emulator_online_results.log
+    echo "FIRMWARE_PATH;RESULT_SOURCE;Booted state;ICMP state;TCP-0 state;TCP state;online services;IP address;Network mode (NETWORK_DEVICE|ETH_INT|INIT_FILE|INIT_MECHANISM);ARCHIVE_PATH_;R_PATH" > "${LOG_DIR}"/emulator_online_results.log
   fi
-  echo "${FIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}/${lETH_INT}/${lINIT_FILE});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${LOG_DIR}"/emulator_online_results.log
+  echo "${FIRMWARE_PATH_orig};${lRESULT_SOURCE};Booted ${BOOTED};ICMP ${ICMP};TCP-0 ${TCP_0};TCP ${TCP};${lTCP_SERV_CNT};IP address: ${IP_ADDRESS_};Network mode: ${lNETWORK_MODE} (${lNETWORK_DEVICE}|${lETH_INT}|${lINIT_FILE}|${KINIT/=*});${lARCHIVE_PATH};${lR_PATH_mod}" >> "${LOG_DIR}"/emulator_online_results.log
   print_bar ""
 }
 
