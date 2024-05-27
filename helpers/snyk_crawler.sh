@@ -168,11 +168,15 @@ done < <(find "${SAVE_PATH}"/vuln/ -type f -print0)
 
 # uniq "${SAVE_PATH}"/Snyk_PoC_results.csv | sort -nr -o "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
 # sort -nr "${SAVE_PATH}"/Snyk_PoC_results.csv -o "${SAVE_PATH}"/Snyk_PoC_results.csv
-uniq "${SAVE_PATH}"/Snyk_PoC_results_sorted.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
-sort -nr -o "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
+# uniq "${SAVE_PATH}"/Snyk_PoC_results_sorted.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
+# sort -nr -o "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
+
+sort -nr -o "${SAVE_PATH}"/Snyk_PoC_results.csv "${SAVE_PATH}"/Snyk_PoC_results.csv
+
 
 if [[ -f "${SAVE_PATH}"/Snyk_PoC_results.csv ]] && [[ -d "${EMBA_CONFIG_PATH}" ]]; then
-  mv "${SAVE_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"
+  # mv "${SAVE_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"
+  uniq "${SAVE_PATH}"/Snyk_PoC_results_sorted.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
   rm -r "${SAVE_PATH}"
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."
 else
