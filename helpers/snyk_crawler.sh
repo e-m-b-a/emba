@@ -176,7 +176,7 @@ sort -nr -o "${SAVE_PATH}"/Snyk_PoC_results.csv "${SAVE_PATH}"/Snyk_PoC_results.
 
 if [[ -f "${SAVE_PATH}"/Snyk_PoC_results.csv ]] && [[ -d "${EMBA_CONFIG_PATH}" ]]; then
   # mv "${SAVE_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"
-  uniq "${SAVE_PATH}"/Snyk_PoC_results_sorted.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
+  uniq "${SAVE_PATH}"/Snyk_PoC_results.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
   rm -r "${SAVE_PATH}"
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."
 else
