@@ -283,9 +283,6 @@ create_emulation_filesystem() {
   sub_module_title "Create Qemu filesystem for full system emulation"
   local lROOT_PATH="${1:-}"
   local lARCH_END="${2:-}"
-  local lBINARY_L10=""
-  local lBINARIES_L10_ARR=()
-  local lSCRIPTS_L10_ARR=()
   local lIMAGE_SIZE=""
   local lNVRAM_FILE_LIST=()
   local lNVRAM_FILE=""
@@ -333,26 +330,12 @@ create_emulation_filesystem() {
   mount "${DEVICE}" "${MNT_POINT}" || ( print_output "[-] Error in mounting the filesystem" && return )
 
   if mount | grep -q "${MNT_POINT}"; then
-
     print_output "[*] Copy extracted root filesystem to new QEMU image"
     cp -prf "${lROOT_PATH}"/* "${MNT_POINT}"/ || (print_output "[-] Warning: Root filesystem not copied!" && return)
 
     if [[ -f "${HELP_DIR}"/fix_bins_lnk_emulation.sh ]] && [[ $(find "${MNT_POINT}" -type l | wc -l) -lt 10 ]]; then
       print_output "[*] No symlinks found in firmware ... Starting link fixing helper ..."
       "${HELP_DIR}"/fix_bins_lnk_emulation.sh "${MNT_POINT}"
-    else
-      # ensure that the needed permissions for exec files are set correctly
-      # This is needed at some firmwares have corrupted permissions on ELF or sh files
-      print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
-      readarray -t lBINARIES_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
-      readarray -t lSCRIPTS_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -name "*.sh" 2>/dev/null || true)
-      lBINARIES_L10_ARR+=("${lSCRIPTS_L10_ARR[@]}")
-      for lBINARY_L10 in "${lBINARIES_L10_ARR[@]}"; do
-        [[ -x "${lBINARY_L10}" ]] && continue
-        if [[ -f "${lBINARY_L10}" ]]; then
-          chmod +x "${lBINARY_L10}"
-        fi
-      done
     fi
 
     print_output "[*] Creating EMBA emulation helper directories within the firmware environment"
@@ -474,6 +457,23 @@ create_emulation_filesystem() {
   else
     print_output "[!] Filesystem mount failed"
   fi
+}
+
+fix_exec_permissions() {
+  local lBINARY_L10=""
+  local lBINARIES_L10_ARR=()
+  local lSCRIPTS_L10_ARR=()
+
+  readarray -t lBINARIES_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1)
+  readarray -t lSCRIPTS_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -name "*.sh" 2>/dev/null || true)
+  lBINARIES_L10_ARR+=("${lSCRIPTS_L10_ARR[@]}")
+
+  for lBINARY_L10 in "${lBINARIES_L10_ARR[@]}"; do
+    [[ -x "${lBINARY_L10}" ]] && continue
+    if [[ -f "${lBINARY_L10}" ]]; then
+      chmod +x "${lBINARY_L10}"
+    fi
+  done
 }
 
 link_libnvram_so() {
@@ -622,6 +622,10 @@ main_emulation() {
     eval "lFS_MOUNTS_ARR=($(for i in "${lFS_MOUNTS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
     handle_fs_mounts "${lINIT_FILE}" "${lFS_MOUNTS_ARR[@]}"
+    # ensure that the needed permissions for exec files are set correctly
+    # This is needed at some firmwares have corrupted permissions on ELF or sh files
+    print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
+    fix_exec_permissions
 
     if ! (grep -q "/firmadyne/network.sh" "${INIT_OUT}"); then
       print_output "[*] Add network.sh entry to ${ORANGE}${INIT_OUT}${NC}"
@@ -978,9 +982,6 @@ handle_fs_mounts() {
   shift 1
   local lFS_MOUNTS_ARR=("$@")
   local lFS_MOUNT=""
-  local lBINARY_L10=""
-  local lBINARIES_L10_ARR=()
-  local lSCRIPTS_L10_ARR=()
 
   for lFS_MOUNT in "${lFS_MOUNTS_ARR[@]}"; do
     local lMOUNT_PT=""
@@ -1069,18 +1070,6 @@ handle_fs_mounts() {
     cp -prn "${lFS_FIND}"/* "${MNT_POINT}""${lMOUNT_PT}" || true
     # find "$MNT_POINT""$lMOUNT_PT" -xdev -ls || true
     ls -lh "${MNT_POINT}""${lMOUNT_PT}"
-  done
-
-  # Todo: move this to somewhere, where we only need to do this once
-  print_output "[*] Fix script and ELF permissions - again"
-  readarray -t lSCRIPTS_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -name "*.sh" 2>/dev/null || true)
-  readarray -t lBINARIES_L10_ARR < <( find "${MNT_POINT}" -xdev -type f -exec file {} \; 2>/dev/null | grep "ELF\|executable" | cut -d: -f1 || true)
-  lBINARIES_L10_ARR+=("${lSCRIPTS_L10_ARR[@]}")
-  for lBINARY_L10 in "${lBINARIES_L10_ARR[@]}"; do
-    [[ -x "${lBINARY_L10}" ]] && continue
-    if [[ -f "${lBINARY_L10}" ]]; then
-      chmod +x "${lBINARY_L10}"
-    fi
   done
 
   # now we need to startup the inferFile/inferService script again
@@ -1630,40 +1619,43 @@ get_networking_details_emulation() {
         l_NW_ENTRY_PRIO=2
         store_interface_details "${IP_ADDRESS_}" "br0" "eth0" "NONE" "default" "${l_NW_ENTRY_PRIO}"
         # this is a default (fallback) entry with the correct ip address:
-        l_NW_ENTRY_PRIO=2
+        l_NW_ENTRY_PRIO=1
         store_interface_details "${IP_ADDRESS_}" "eth0" "eth0" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
       fi
     done
 
-    if [[ "${#lINTERFACE_CANDIDATES[@]}" -eq 0 ]] || [[ "${L10_DEBUG_MODE}" -eq 2 ]]; then
-      # in this case we do not have valid ip addresses
-      # this mechanism is very alpha and just as fallback mechanism designed
-      # we need to further improve this mechanism to include VLAN detection, bridge vs interface vs normal ...
-      local lIP_ADDR_BACKUP_ARR=()
-      local lIP_ADDR_BACKUP=""
-      mapfile -t lIP_ADDR_BACKUP_ARR < <(grep -h "ip.*addr" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | grep -o -E "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" \
-        | grep -E -v "\.255$" | grep -v -E "\.0$" | grep -v -E "^127\." | grep -v "^255\." | sort -u || true)
-      for lIP_ADDR_BACKUP in "${lIP_ADDR_BACKUP_ARR[@]}"; do
-        # if we have bridge interfaces found and we have some eth0 entries in our qemu log we guess a shiny configuration
-        if [[ -v lBRIDGE_INTERFACES[@] ]]; then
-          if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
-            l_NW_ENTRY_PRIO=2
-            store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "NONE" "bridge" "${l_NW_ENTRY_PRIO}"
-            store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "0" "bridge" "${l_NW_ENTRY_PRIO}"
+    # this is for testing. Probably we can improve it in the future to have a better fallback handling
+    if [[ "${L10_DEBUG_MODE}" -eq 2 ]]; then
+      if [[ "${#lINTERFACE_CANDIDATES[@]}" -eq 0 ]] || [[ "${L10_DEBUG_MODE}" -eq 2 ]]; then
+        # in this case we do not have valid ip addresses
+        # this mechanism is very alpha and just as fallback mechanism designed
+        # we need to further improve this mechanism to include VLAN detection, bridge vs interface vs normal ...
+        local lIP_ADDR_BACKUP_ARR=()
+        local lIP_ADDR_BACKUP=""
+        mapfile -t lIP_ADDR_BACKUP_ARR < <(grep -h "ip.*addr" "${LOG_PATH_MODULE}"/qemu.initial.serial.log | grep -o -E "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" \
+          | grep -E -v "\.255$" | grep -v -E "\.0$" | grep -v -E "^127\." | grep -v "^255\." | sort -u || true)
+        for lIP_ADDR_BACKUP in "${lIP_ADDR_BACKUP_ARR[@]}"; do
+          # if we have bridge interfaces found and we have some eth0 entries in our qemu log we guess a shiny configuration
+          if [[ -v lBRIDGE_INTERFACES[@] ]]; then
+            if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+              l_NW_ENTRY_PRIO=2
+              store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "NONE" "bridge" "${l_NW_ENTRY_PRIO}"
+              store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "0" "bridge" "${l_NW_ENTRY_PRIO}"
+            fi
           fi
-        fi
-        l_NW_ENTRY_PRIO=1
-        if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
-          store_interface_details "${lIP_ADDR_BACKUP}" "eth0" "eth0" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
-          store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "NONE" "default" "${l_NW_ENTRY_PRIO}"
-        fi
-        if [[ "$(grep -ac "eth1" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
-          store_interface_details "${lIP_ADDR_BACKUP}" "eth1" "eth1" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
-          store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth1" "NONE" "default" "${l_NW_ENTRY_PRIO}"
-        fi
-      done
+          l_NW_ENTRY_PRIO=1
+          if [[ "$(grep -ac "eth0" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+            store_interface_details "${lIP_ADDR_BACKUP}" "eth0" "eth0" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
+            store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth0" "NONE" "default" "${l_NW_ENTRY_PRIO}"
+          fi
+          if [[ "$(grep -ac "eth1" "${LOG_PATH_MODULE}"/qemu.initial.serial.log)" -gt 0 ]]; then
+            store_interface_details "${lIP_ADDR_BACKUP}" "eth1" "eth1" "NONE" "interface" "${l_NW_ENTRY_PRIO}"
+            store_interface_details "${lIP_ADDR_BACKUP}" "br0" "eth1" "NONE" "default" "${l_NW_ENTRY_PRIO}"
+          fi
+        done
+      fi
     fi
-
+  
     if [[ "${#IPS_INT_VLAN[@]}" -eq 0 ]]; then
       # this section is if we have a brctl entry but no IP address
       for lBRIDGE_INT in "${lBRIDGE_INTERFACES[@]}"; do
@@ -1676,7 +1668,6 @@ get_networking_details_emulation() {
         lNETWORK_DEVICE="$(echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | grep -o "br:.*" | cut -d\  -f1 | cut -d: -f2 | tr -dc '[:print:]' || true)"
         IP_ADDRESS_="192.168.0.1"
         lNETWORK_MODE="bridge"
-        # if echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
         if echo "${lBRIDGE_INT}" | awk '{print $2}' | cut -d: -f2 | grep -q -E "[0-9]\.[0-9]"; then
           # we have a vlan entry:
           # lVLAN_ID="$(echo "${lBRIDGE_INT}" | sed "s/^.*\]:\ //" | grep -o "dev:.*" | cut -d. -f2 | tr -dc '[:print:]' || true)"
@@ -2034,6 +2025,7 @@ nvram_check() {
 nvram_searcher_emulation() {
   local lNVRAM_FILE="${1:-}"
 
+  # lets store it in tmp var for supporting binary files in the future
   local lNVRAM_FILE_TMP="${lNVRAM_FILE}"
   local lMAX_VALUES=""
   local lCOUNT=0
@@ -2061,19 +2053,20 @@ nvram_searcher_emulation() {
     if [[ "${lNVRAM_KEY}" =~ [a-zA-Z0-9_] && "${#lNVRAM_KEY}" -gt 3 ]]; then
       # print_output "[*] NVRAM access detected: $ORANGE$NVRAM_KEY$NC"
       if grep -q "${lNVRAM_KEY}" "${lNVRAM_FILE_TMP}" 2>/dev/null; then
-        # print_output "[*] Possible NVRAM access via key $ORANGE$NVRAM_KEY$NC found in NVRAM file $ORANGE$NVRAM_FILE$NC."
+        # print_output "[*] Possible NVRAM access via key ${ORANGE}${lNVRAM_KEY}${NC} found in NVRAM file ${ORANGE}${lNVRAM_FILE}${NC}."
         lCOUNT=$((lCOUNT + 1))
       fi
       echo "${lNVRAM_KEY}" >> "${LOG_PATH_MODULE}"/nvram/nvram_keys.log
     fi
   done
+
   if [[ "${lCOUNT}" -gt 5 ]]; then
-    lNVRAM_FILE="${lNVRAM_FILE/\.}"
-    # print_output "[*] $lNVRAM_FILE $lCOUNT ASCII_text"
+    print_output "[*] ${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text"
     if file "${lNVRAM_FILE}" | grep -q "ASCII text"; then
-      echo "${lNVRAM_FILE} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
-    # else
-    #   echo "${lNVRAM_FILE} ${lCOUNT} BINARY" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
+      echo "${lNVRAM_FILE/\.} ${lCOUNT} ASCII_text" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
+    else
+      # currently disabled in the function beginning ~ L2050
+      echo "${lNVRAM_FILE/\.} ${lCOUNT} BINARY" >> "${LOG_PATH_MODULE}"/nvram/nvram_files_final
     fi
   fi
 }
@@ -2286,8 +2279,8 @@ run_qemu_final_emulation() {
   print_output "$(indent "ROOT_DEV: ${ORANGE}${lQEMU_ROOTFS}${NC}")"
   print_output "$(indent "QEMU: ${ORANGE}${lQEMU_BIN}${NC}")"
   print_output "$(indent "NETWORK: ${ORANGE}${lQEMU_NETWORK}${NC}")"
-  print_output "$(indent "Init file ${ORANGE}${lINIT_FILE}${NC}")"
-  print_output "$(indent "Console interface ${ORANGE}${lCONSOLE}${NC}")"
+  print_output "$(indent "Init file: ${ORANGE}${lINIT_FILE}${NC}")"
+  print_output "$(indent "Console interface: ${ORANGE}${lCONSOLE}${NC}")"
   print_ln
   print_output "[*] Starting firmware emulation ${ORANGE}${lQEMU_BIN} / ${lARCH_END} / ${lIMAGE_NAME} / ${lIP_ADDRESS}${NC} ... use Ctrl-a + x to exit"
   print_ln

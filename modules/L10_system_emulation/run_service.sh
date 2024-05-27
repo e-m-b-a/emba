@@ -47,7 +47,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
       "${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
       "${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
-      "${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env)"
+      "${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env | "${BUSYBOX}" tr '\n' '/')"
       "${BUSYBOX}" echo "[*] Netstat output:"
       "${BUSYBOX}" netstat -antu
       "${BUSYBOX}" echo "[*] Network configuration:"
@@ -60,7 +60,7 @@ if ("${EMBA_ETC}"); then
 
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
         if [ "${BINARY_NAME}" = "netcat" ] && ! [ "${EMBA_NC}" = "true" ]; then
-          "${BUSYBOX}" echo "[*] Netcat starter bypassed ... ${BINARY_NAME}"
+          "${BUSYBOX}" echo "[*] EMBA Netcat starter bypassed ... enable it via kernel environment EMBA_NC=true"
           # we only start our netcat listener if we set EMBA_NC_STARTER on startup (see run.sh script)
           # otherwise we move on to the next binary starter
           continue
