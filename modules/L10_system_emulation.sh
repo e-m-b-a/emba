@@ -1662,7 +1662,7 @@ get_networking_details_emulation() {
         done
       fi
     fi
-  
+
     if [[ "${#IPS_INT_VLAN[@]}" -eq 0 ]]; then
       # this section is if we have a brctl entry but no IP address
       for lBRIDGE_INT in "${lBRIDGE_INTERFACES[@]}"; do
@@ -1954,7 +1954,7 @@ write_network_config_to_filesystem() {
     fi
 
     # as we have the filesytem mounted right before the final run we can link libnvram now
-    link_libnvram_so "${MNT_POINT}" "dbg"
+    link_libnvram_so "${MNT_POINT}" "nondbg"
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
