@@ -65,7 +65,7 @@ S21_python_check()
 
     if [[ "${S21_PY_VULNS}" -gt 0 ]]; then
       print_ln
-      print_output "[+] Found ""${ORANGE}""${S21_PY_VULNS}"" vulnerabilities""${GREEN}"" in ""${ORANGE}""${S21_PY_SCRIPTS}""${GREEN}"" python files:""${NC}""\\n"
+      print_output "[+] Found ""${ORANGE}""${S21_PY_VULNS}"" possible issues""${GREEN}"" in ""${ORANGE}""${S21_PY_SCRIPTS}""${GREEN}"" python files:""${NC}""\\n"
     fi
 
     write_log ""
