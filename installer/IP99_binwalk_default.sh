@@ -125,11 +125,14 @@ IP99_binwalk_default() {
         if [[ -e /usr/local/bin/sasquatch ]]; then
           echo -e "${GREEN}Backup binwalk sasquatch version to ${ORANGE}/usr/local/bin/sasquatch_binwalk${NC}"
           mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
-          ln -s /usr/local/lib/python3.11/dist-packages/binwalk-2.4.1+"${BINWALK_GIT_HASH}"-py3.11.egg/binwalk /usr/local/lib/python3.11/dist-packages/binwalk
-          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/local/lib/python3.11/dist-packages/binwalk/config/extract.conf
-          mkdir -p /root/.config/binwalk/config/
-          cp /usr/local/lib/python3.11/dist-packages/binwalk/config/extract.conf /root/.config/binwalk/config/
-          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /root/.config/binwalk/config/extract.conf
+
+          if ! [[ -d "${HOME}"/.config/binwalk/config/ ]]; then
+            mkdir -p "${HOME}"/.config/binwalk/config/
+          fi
+          cp ./external/emba_venv/lib/python3.11/site-packages/binwalk-2.4.1+"${BINWALK_GIT_HASH}"-py3.11.egg/binwalk/config/extract.conf "${HOME}"/.config/binwalk/config/
+
+          # sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/local/lib/python3.11/dist-packages/binwalk/config/extract.conf
+          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' "${HOME}"/.config/binwalk/config/extract.conf
         fi
 
         if command -v binwalk > /dev/null ; then
