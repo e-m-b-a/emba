@@ -416,7 +416,7 @@ create_emulation_filesystem() {
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
       lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}")
       if ! [[ -f "${lBINARY_PATH}" ]]; then
-        print_output "[-] Missing ${ORANGE}${lBINARY_PATH} / ${lBINARY_NAME}${NC} - no setup possible"
+        print_output "[-] Missing ${ORANGE}${lBINARY_NAME} / ${lBINARY_PATH:-NA} / ${lARCH_END}${NC} - no setup possible"
         continue
       fi
       print_output "[*] Setting up ${ORANGE}${lBINARY_NAME}${NC} - ${ORANGE}${lARCH_END}${NC} (${ORANGE}${lBINARY_PATH}${NC})"
@@ -709,8 +709,8 @@ main_emulation() {
 
     # the following condition is for switching and testing a different init= -> rdinit=
     # This is currently not used as the results are probably better with sticking to init
-    # if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
-    if [[ "${#PANICS[@]}" -gt 0 ]] && [[ "${lF_STARTUP}" -eq 0 ]] && [[ "${DETECTED_IP}" -eq 0 ]]; then
+    if [[ "${#PANICS[@]}" -gt 0 ]] || [[ "${lF_STARTUP}" -eq 0 ]] || [[ "${DETECTED_IP}" -eq 0 ]]; then
+    # if [[ "${#PANICS[@]}" -gt 0 ]] && [[ "${lF_STARTUP}" -eq 0 ]] && [[ "${DETECTED_IP}" -eq 0 ]]; then
       # if we are running into a kernel panic during the network detection we are going to check if the
       # panic is caused from an init failure. If so, we are trying the other init kernel command (init vs rdinit)
       print_output "[*] Info: lF_STARTUP: ${lF_STARTUP} / lNETWORK_MODE: ${lNETWORK_MODE} / DETECTED_IP: ${DETECTED_IP} / PANICS: ${#PANICS[@]}"
@@ -1750,12 +1750,14 @@ store_interface_details() {
   local lNETWORK_MODE="${5:-bridge}"
   local lENTRY_PRIO="${6:-1}"
 
+  print_output "[+] Interface details detected: IP address: ${ORANGE}${lIP_ADDRESS}${GREEN} / bridge dev: ${ORANGE}${lNETWORK_DEVICE}${GREEN} / network device: ${ORANGE}${lETH_INT}${GREEN} / vlan id: ${ORANGE}${lVLAN_ID}${GREEN} / network mode: ${ORANGE}${lNETWORK_MODE}${GREEN} / priority: ${ORANGE}${lENTRY_PRIO}${NC}"
+
   if [[ "${IPS_INT_VLAN[*]}" == *"${lIP_ADDRESS};${lNETWORK_DEVICE};${lETH_INT};${lVLAN_ID};${lNETWORK_MODE}"* ]]; then
+    # we store it only if we do not have it in our array. Otherwise it is just printed for the logs
     return
   fi
 
   IPS_INT_VLAN+=( "${lENTRY_PRIO}"\;"${lIP_ADDRESS}"\;"${lNETWORK_DEVICE}"\;"${lETH_INT}"\;"${lVLAN_ID}"\;"${lNETWORK_MODE}" )
-  print_output "[+] Interface details detected: IP address: ${ORANGE}${lIP_ADDRESS}${GREEN} / bridge dev: ${ORANGE}${lNETWORK_DEVICE}${GREEN} / network device: ${ORANGE}${lETH_INT}${GREEN} / vlan id: ${ORANGE}${lVLAN_ID}${GREEN} / network mode: ${ORANGE}${lNETWORK_MODE}${GREEN} / priority: ${ORANGE}${lENTRY_PRIO}${NC}"
 }
 
 iterate_vlans() {
@@ -2355,7 +2357,7 @@ check_online_stat() {
 
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
   if [[ "${lSYS_ONLINE}" -eq 1 ]]; then
-    print_output "[*] Give the system another 10 seconds to ensure the boot process is finished.\n" "no_log"
+    print_output "[*] Give the system another 30 seconds to ensure the boot process is finished.\n" "no_log"
     sleep 10
     print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
     write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
@@ -2366,7 +2368,7 @@ check_online_stat() {
     nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
 
     if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -eq 0 ]]; then
-      print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
+      print_output "[*] Give the system another 120 seconds to ensure the boot process is finished.\n" "no_log"
       sleep 60
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
     fi
@@ -2502,13 +2504,17 @@ create_emulation_archive() {
     # and should be ./vmlinux.mipsel.4
     sed -i 's/\.\/Linux-Kernel\//\.\//g' "${lARCHIVE_PATH}"/run.sh
 
-    # create archive
-    lARCH_NAME="$(basename "${lARCHIVE_PATH}")".tar.gz
-    tar -czvf "${LOG_PATH_MODULE}"/"${lARCH_NAME}" "${lARCHIVE_PATH}"
-    if [[ -f "${LOG_PATH_MODULE}"/"${lARCH_NAME}" ]]; then
-      print_ln
-      print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}${lARCH_NAME}${NC}" "" "${LOG_PATH_MODULE}/${lARCH_NAME}"
-      print_ln
+    if [[ "${FINAL_FW_RM}" -ne 1 ]]; then
+      # create archive
+      lARCH_NAME="$(basename "${lARCHIVE_PATH}")".tar.gz
+      tar -czvf "${LOG_PATH_MODULE}"/"${lARCH_NAME}" "${lARCHIVE_PATH}"
+      if [[ -f "${LOG_PATH_MODULE}"/"${lARCH_NAME}" ]]; then
+        print_ln
+        print_output "[*] Qemu emulation archive created in log directory: ${ORANGE}${lARCH_NAME}${NC}" "" "${LOG_PATH_MODULE}/${lARCH_NAME}"
+        print_ln
+      fi
+    else
+      print_output "[*] NO Qemu emulation archive created - FINAL_FW_RM was set or \'-r\' parameter was used."
     fi
   else
     print_output "[-] No run script created ..."
