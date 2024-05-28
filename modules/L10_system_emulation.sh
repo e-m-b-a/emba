@@ -2358,7 +2358,7 @@ check_online_stat() {
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
   if [[ "${lSYS_ONLINE}" -eq 1 ]]; then
     print_output "[*] Give the system another 30 seconds to ensure the boot process is finished.\n" "no_log"
-    sleep 10
+    sleep 30
     print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
     write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
@@ -2369,7 +2369,7 @@ check_online_stat() {
 
     if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -eq 0 ]]; then
       print_output "[*] Give the system another 120 seconds to ensure the boot process is finished.\n" "no_log"
-      sleep 60
+      sleep 120
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
     fi
 
