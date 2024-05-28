@@ -951,11 +951,11 @@ switch_inits() {
   # KINIT is global but for readability:
   KINIT="${1:-}"
   if [[ "${KINIT:0:2}" == "rd" ]]; then
-    print_output "[*] Warning: Unknown EMBA startup found via rdinit - testing init"
+    print_output "[*] Warning: Switching rdinit to init"
     # strip rd from rdinit
     KINIT="${KINIT:2}"
   else
-    print_output "[*] Warning: Unknown EMBA startup found via init - testing rdinit"
+    print_output "[*] Warning: Switching init to rdinit"
     # make rdinit from init
     KINIT="rd""${KINIT}"
   fi
@@ -1954,7 +1954,7 @@ write_network_config_to_filesystem() {
     fi
 
     # as we have the filesytem mounted right before the final run we can link libnvram now
-    link_libnvram_so "${MNT_POINT}" "nondbg"
+    link_libnvram_so "${MNT_POINT}" "dbg"
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
