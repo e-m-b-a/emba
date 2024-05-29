@@ -361,8 +361,11 @@ if [[ "${CVE_SEARCH}" -ne 1 ]] || [[ "${DOCKER_SETUP}" -ne 1 ]] || [[ "${IN_DOCK
   IF50_aggregator_common
 fi
 
-# NVD CVE data feed is always installed on the host:
-IF20_nvd_feed
+if [[ "${IN_DOCKER}" -ne 1 ]]; then
+  # NVD CVE data feed is always installed on the host:
+  IF20_nvd_feed
+fi
+
 deactivate
 
 cd "${HOME_PATH}" || exit 1

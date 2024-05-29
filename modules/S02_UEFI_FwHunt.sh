@@ -84,6 +84,7 @@ fwhunter_logging() {
   local FWHUNTER_RESULT=""
   local FWHUNTER_RESULT_FILE=""
   local FWHUNTER_BINARLY_ID=""
+  local FWHUNTER_CVE_ID=""
   local BINARLY_ID_FILE=""
   local FWHUNTER_BINARLY_ID_FILES=()
   local CVE_RESULTS_BINARLY=()
@@ -108,15 +109,23 @@ fwhunter_logging() {
     local CVE_RESULTS_BINARLY=()
 
     FWHUNTER_RESULT_FILE=$(echo "${FWHUNTER_RESULT}" | cut -d: -f1)
-    FWHUNTER_BINARLY_ID=$(echo "${FWHUNTER_RESULT}" | sed 's/.*\ BRLY-/BRLY-/' | awk '{print $1}' | sort -u)
-    mapfile -t FWHUNTER_BINARLY_ID_FILES < <(find "${EXT_DIR}"/fwhunt-scan/rules -iname "${FWHUNTER_BINARLY_ID}*")
-    for BINARLY_ID_FILE in "${FWHUNTER_BINARLY_ID_FILES[@]}"; do
-      # extract possible CVE information from the binarly scan rule:
-      mapfile -t CVE_RESULTS_BINARLY_ < <(grep "CVE number:" "${BINARLY_ID_FILE}" | cut -d: -f2 | tr ',' '\n' | awk '{print $1}')
-      CVE_RESULTS_BINARLY+=("${CVE_RESULTS_BINARLY_[@]}")
-    done
-    mapfile -t FWHUNTER_BINARY_MATCH_ARR < <(basename "$(grep "Running FwHunt on" "${FWHUNTER_RESULT_FILE}" | cut -d\  -f5-)" | sort -u)
     FWHUNTER_RESULT=$(echo "${FWHUNTER_RESULT}" | cut -d: -f2-)
+    FWHUNTER_BINARLY_ID=$(echo "${FWHUNTER_RESULT}" | grep -E -o "BRLY-[0-9]+-[0-9]+" | sort -u || true)
+    FWHUNTER_CVE_ID=$(echo "${FWHUNTER_RESULT}" | grep -E -o "CVE-[0-9]+-[0-9]+" | sort -u || true)
+    # CVE_RESULTS_BINARLY+=("${FWHUNTER_CVE_ID}")
+
+    if [[ -n "${FWHUNTER_BINARLY_ID}" ]]; then
+      mapfile -t FWHUNTER_BINARLY_ID_FILES < <(find "${EXT_DIR}"/fwhunt-scan/rules -iname "${FWHUNTER_BINARLY_ID}*")
+      for BINARLY_ID_FILE in "${FWHUNTER_BINARLY_ID_FILES[@]}"; do
+        [[ -z "${BINARLY_ID_FILE}" ]] && continue
+        print_output "[*] Testing ${BINARLY_ID_FILE} for CVEs"
+        # extract possible CVE information from the binarly scan rule:
+        mapfile -t CVE_RESULTS_BINARLY_ < <(grep "CVE number:" "${BINARLY_ID_FILE}" 2>/dev/null | cut -d: -f2 | tr ',' '\n' | awk '{print $1}' || true)
+        CVE_RESULTS_BINARLY+=("${CVE_RESULTS_BINARLY_[@]}")
+      done
+    fi
+
+    mapfile -t FWHUNTER_BINARY_MATCH_ARR < <(basename "$(grep "Running FwHunt on" "${FWHUNTER_RESULT_FILE}" | cut -d\  -f5-)" | sort -u)
     if [[ "${FWHUNTER_RESULT}" == *"rule has been triggered and threat detected"* ]]; then
       if [[ "${#CVE_RESULTS_BINARLY[@]}" -gt 0 ]]; then
         for BINARLY_ID_CVE in "${CVE_RESULTS_BINARLY[@]}"; do
@@ -131,14 +140,14 @@ fwhunter_logging() {
         for FWHUNTER_BINARY_MATCH in "${FWHUNTER_BINARY_MATCH_ARR[@]}"; do
           # if we do not have CVE details we can't include it into our reporting
           print_output "[+] ${FWHUNTER_BINARY_MATCH} ${ORANGE}:${GREEN} ${FWHUNTER_RESULT}${NC}" "" "https://binarly.io/advisories/${FWHUNTER_BINARLY_ID}"
-          write_csv_log "${FWHUNTER_BINARY_MATCH}" "unknown" "NA" "unknown" "${FWHUNTER_BINARLY_ID}"
+          write_csv_log "${FWHUNTER_BINARY_MATCH}" "unknown" "${FWHUNTER_CVE_ID:-NA}" "unknown" "${FWHUNTER_BINARLY_ID}"
         done
       fi
     fi
   done
 
-  mapfile -t FWHUNTER_CVEs < <(grep "CVE: " "${LOG_FILE}" | sed 's/.*CVE: //' | sort -u || true)
-  mapfile -t FWHUNTER_BINARLY_IDs < <(grep "FwHunt rule has been triggered and threat detected" "${LOG_PATH_MODULE}"/* | sed 's/.*BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g' | sort -u || true)
+  mapfile -t FWHUNTER_CVEs < <(grep -E -o "CVE-[0-9]{4}-[0-9]+" "${LOG_FILE}" | sort -u || true)
+  mapfile -t FWHUNTER_BINARLY_IDs < <(grep "FwHunt rule has been triggered and threat detected" "${LOG_PATH_MODULE}"/* | grep "BRLY-" | sed 's/.*BRLY-/BRLY-/' | sed 's/\ .variant:\ .*//g' | sort -u || true)
 
   print_ln
   if [[ "${#FWHUNTER_CVEs[@]}" -gt 0 ]]; then

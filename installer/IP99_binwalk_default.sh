@@ -134,7 +134,7 @@ IP99_binwalk_default() {
           # sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/local/lib/python3.11/dist-packages/binwalk/config/extract.conf
           sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' "${HOME}"/.config/binwalk/config/extract.conf
         fi
-
+        
         if command -v binwalk > /dev/null ; then
           echo -e "${GREEN}""binwalk installed successfully""${NC}"
         elif [[ ! -f "/usr/local/bin/binwalk" ]] ; then

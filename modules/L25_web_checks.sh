@@ -313,7 +313,7 @@ web_access_crawler() {
 
   if [[ "${SSL_}" -eq 1 ]]; then
     PROTO="https"
-    CURL_OPTS+=( -k )
+    CURL_OPTS+=( "-k" )
   else
     PROTO="http"
   fi
