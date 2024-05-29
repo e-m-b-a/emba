@@ -1326,15 +1326,15 @@ run_network_id_emulation() {
     fi
     # hard code v4.x
     KERNEL_V=".4"
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}${KERNEL_V}"
     fi
   else
     # ARM/x86 architecture
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/${lKERNEL}.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}"
     else
       lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}"
     fi
@@ -1956,7 +1956,7 @@ write_network_config_to_filesystem() {
     fi
 
     # as we have the filesytem mounted right before the final run we can link libnvram now
-    link_libnvram_so "${MNT_POINT}" "dbg"
+    link_libnvram_so "${MNT_POINT}" "nondbg"
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
@@ -2111,16 +2111,16 @@ run_emulated_system() {
   local lCONSOLE="ttyS0"
 
   if [[ "${lARCH_END}" == "mipsel" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
     fi
     lQEMU_BIN="qemu-system-${lARCH_END}"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64r2el" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
     fi
@@ -2128,16 +2128,16 @@ run_emulated_system() {
     lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mipseb" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
     fi
     lQEMU_BIN="qemu-system-mips"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64r2eb" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
     fi
@@ -2145,8 +2145,8 @@ run_emulated_system() {
     lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64v1eb" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
     fi
@@ -2154,8 +2154,8 @@ run_emulated_system() {
     # lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64v1el" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
     fi
@@ -2163,8 +2163,8 @@ run_emulated_system() {
     # lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64n32eb" ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}${KERNEL_V}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
     fi
@@ -2172,16 +2172,16 @@ run_emulated_system() {
     lCPU="-cpu MIPS64R2-generic"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "armel"* ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/zImage.${lARCH_END}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/zImage.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/zImage.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/zImage.${lARCH_END}"
     else
       lKERNEL="${BINARY_DIR}/zImage.${lARCH_END}"
     fi
     lQEMU_BIN="qemu-system-arm"
     lQEMU_MACHINE="virt"
   elif [[ "${lARCH_END}" == "arm64el"* ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/Image.${lARCH_END}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/Image.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/Image.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/Image.${lARCH_END}"
     else
       lKERNEL="${BINARY_DIR}/Image.${lARCH_END}"
     fi
@@ -2190,8 +2190,8 @@ run_emulated_system() {
     lCPU="-cpu cortex-a57"
     lQEMU_MACHINE="virt"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/Image.${lARCH_END}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/bzImage.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/Image.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}"
     else
       lKERNEL="${BINARY_DIR}/bzImage.${lARCH_END}"
     fi
@@ -2199,8 +2199,8 @@ run_emulated_system() {
     lQEMU_MACHINE="pc-i440fx-3.1"
   elif [[ "${lARCH_END}" == "nios2el" ]]; then
     # not implemented -> Future
-    if [[ -f "${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}" ]]; then
-      lKERNEL="${BINARY_DIR}/Linux-Kernel/vmlinux.${lARCH_END}"
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}" ]]; then
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}"
     else
       lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}"
     fi
