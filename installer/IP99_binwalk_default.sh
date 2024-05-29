@@ -24,6 +24,7 @@ IP99_binwalk_default() {
     INSTALL_APP_LIST=()
 
     print_tool_info "git" 1
+    print_tool_info "wget" 1
     print_tool_info "locales" 1
     print_tool_info "qtbase5-dev" 1
     print_tool_info "build-essential" 1
@@ -95,6 +96,7 @@ IP99_binwalk_default() {
         sed -i 's/--user //' ./deps.sh
         ./deps.sh --yes || ( echo "Could not install EMBA component binwalk" && exit 1 )
         python3 setup.py install || ( echo "Could not install EMBA component binwalk" && exit 1 )
+        BINWALK_GIT_HASH=$(git describe --always)
         cd "${HOME_PATH}" || ( echo "Could not install EMBA component binwalk" && exit 1 )
 
         if ! [[ -d external/cpu_rec ]]; then
@@ -123,9 +125,14 @@ IP99_binwalk_default() {
         if [[ -e /usr/local/bin/sasquatch ]]; then
           echo -e "${GREEN}Backup binwalk sasquatch version to ${ORANGE}/usr/local/bin/sasquatch_binwalk${NC}"
           mv /usr/local/bin/sasquatch /usr/local/bin/sasquatch_binwalk
-          ln -s /usr/local/lib/python3.11/dist-packages/binwalk-2.4.1+24b0cea-py3.11.egg/binwalk /usr/local/lib/python3.11/dist-packages/binwalk
-          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/lib/python3/dist-packages/binwalk/config/extract.conf
-          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /root/.config/binwalk/config/extract.conf
+
+          if ! [[ -d "${HOME}"/.config/binwalk/config/ ]]; then
+            mkdir -p "${HOME}"/.config/binwalk/config/
+          fi
+          cp ./external/emba_venv/lib/python3.11/site-packages/binwalk-2.4.1+"${BINWALK_GIT_HASH}"-py3.11.egg/binwalk/config/extract.conf "${HOME}"/.config/binwalk/config/
+
+          # sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' /usr/local/lib/python3.11/dist-packages/binwalk/config/extract.conf
+          sed -i 's/squashfs:sasquatch /squashfs:sasquatch_binwalk /' "${HOME}"/.config/binwalk/config/extract.conf
         fi
 
         if command -v binwalk > /dev/null ; then
