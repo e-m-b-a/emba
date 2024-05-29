@@ -3,10 +3,6 @@
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2022 - 2024 Siemens Energy AG
-#
-# This script is based on the original scripts from the firmadyne and firmAE project
-# Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
-# Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
 
@@ -17,7 +13,7 @@ NC="\033[0m"
 "${BUSYBOX}" echo -e "${ORANGE}[*] Starting services in emulated environment...${NC}"
 "${BUSYBOX}" cat /firmadyne/service
 
-if ("${EMBA_ETC}"); then
+if ("${FIRMAE_ETC}"); then
   # first, the system should do the job by itself
   # after 100sec we jump in with our service helpers
   "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting 60sec before helpers starting services in emulated environment...${NC}"
@@ -34,44 +30,25 @@ if ("${EMBA_ETC}"); then
 
   while (true); do
     while IFS= read -r _BINARY; do
-      "${BUSYBOX}" sleep 5
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
-      "${BUSYBOX}" echo -e "${NC}[*] Environment details ..."
-      "${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
-      "${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
-      "${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"
-      "${BUSYBOX}" echo -e "\tFIRMAE_NVRAM: ${FIRMAE_NVRAM}"
-      "${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
-      "${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
-      "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
-      "${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
-      "${BUSYBOX}" echo -e "\tKernel cmdline: $("${BUSYBOX}" cat /proc/cmdline)"
-      "${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
-      "${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env | "${BUSYBOX}" tr '\n' '/')"
-      "${BUSYBOX}" echo "[*] Netstat output:"
-      "${BUSYBOX}" netstat -antu
-      "${BUSYBOX}" echo "[*] Network configuration:"
-      "${BUSYBOX}" brctl show
-      "${BUSYBOX}" ifconfig -a
-      "${BUSYBOX}" echo "[*] Running processes:"
-      "${BUSYBOX}" ps
-      "${BUSYBOX}" echo "[*] /proc filesytem:"
-      "${BUSYBOX}" ls /proc
-
       if ( ! ("${BUSYBOX}" ps | "${BUSYBOX}" grep -v grep | "${BUSYBOX}" grep -sqi "${BINARY_NAME}") ); then
-        if [ "${BINARY_NAME}" = "netcat" ] && ! [ "${EMBA_NC}" = "true" ]; then
-          "${BUSYBOX}" echo "[*] EMBA Netcat starter bypassed ... enable it via kernel environment EMBA_NC=true"
-          # we only start our netcat listener if we set EMBA_NC_STARTER on startup (see run.sh script)
-          # otherwise we move on to the next binary starter
-          continue
-        fi
-        "${BUSYBOX}" echo -e "${NC}[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
+        "${BUSYBOX}" echo -e "[*] Starting ${ORANGE}${BINARY_NAME}${NC} service ..."
         #BINARY variable could be something like: binary parameter parameter ...
         ${_BINARY} &
-      else
-        "${BUSYBOX}" echo -e "${NC}[*] ${ORANGE}${BINARY_NAME}${NC} already started ..."
+        "${BUSYBOX}" sleep 5
+        "${BUSYBOX}" echo "[*] Netstat output:"
+        "${BUSYBOX}" netstat -antu
+        "${BUSYBOX}" echo "[*] Network configuration:"
+        "${BUSYBOX}" brctl show
+        "${BUSYBOX}" ifconfig
+        "${BUSYBOX}" echo "[*] Currently running processes:"
+        "${BUSYBOX}" ps
+        "${BUSYBOX}" echo "[*] /proc filesytem:"
+        "${BUSYBOX}" ls /proc
+        "${BUSYBOX}" sleep 5
       fi
+      # other scripts are just running if we have not created the following file
     done < "/firmadyne/service"
   done
 fi

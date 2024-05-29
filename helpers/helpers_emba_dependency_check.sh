@@ -353,7 +353,7 @@ dependency_check()
       done
     fi
   else
-    print_output "    Isolation - ${GREEN}""ok""${NC}" "no_log"
+    print_output "    Isolation  - ${GREEN}""ok""${NC}" "no_log"
   fi
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     if [[ "${ONLY_DEP}" -gt 0 ]] && [[ "${FORCE}" -ne 0 ]]; then
@@ -728,16 +728,12 @@ dependency_check()
         # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
 
         # check only some of the needed files
-        check_dep_file "console.*" "${EXT_DIR}""/EMBA_Live_bins/console/console.x86el"
-        check_dep_file "gdb.*" "${EXT_DIR}""/EMBA_Live_bins/gdb/gdb.mipseb"
-        check_dep_file "gdbserver.*" "${EXT_DIR}""/EMBA_Live_bins/gdbserver/gdbserver.mipseb"
-        check_dep_file "netcat.*" "${EXT_DIR}""/EMBA_Live_bins/netcat/netcat.mipseb"
-        check_dep_file "strace.*" "${EXT_DIR}""/EMBA_Live_bins/strace/strace.armelhf"
-        check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox/busybox.mipsel"
-        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram/libnvram_dbg.so.armel"
-        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl/libnvram_ioctl_dbg.so.mips64v1el"
-        check_dep_file "vmlinux.*" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v4.14.336/vmlinux.mipseb.4"
-        check_dep_file "zImage.*" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v4.14.336/zImage.armel"
+        check_dep_file "console.*" "${EXT_DIR}""/EMBA_Live_bins/console.x86el"
+        check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox.mipsel"
+        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram.so.armel"
+        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl.so.mips64v1el"
+        check_dep_file "vmlinux.mips*" "${EXT_DIR}""/EMBA_Live_bins/vmlinux.mips64r2el.4"
+        check_dep_file "zImage.armel" "${EXT_DIR}""/EMBA_Live_bins/zImage.armel"
 
         check_dep_file "fixImage.sh" "${MOD_DIR}""/L10_system_emulation/fixImage.sh"
         check_dep_file "preInit.sh" "${MOD_DIR}""/L10_system_emulation/preInit.sh"
