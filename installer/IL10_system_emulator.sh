@@ -105,6 +105,7 @@ IL10_system_emulator() {
       download_file "libnvram.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/libnvram.zip" "external/EMBA_Live_bins/libnvram.zip"
       download_file "strace.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/strace.zip" "external/EMBA_Live_bins/strace.zip"
       download_file "gdb.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/gdb.zip" "external/EMBA_Live_bins/gdb.zip"
+      download_file "netcat.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/netcat.zip" "external/EMBA_Live_bins/netcat.zip"
       download_file "Linux-Kernel-v4.14.336.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/console.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/libnvram.zip
