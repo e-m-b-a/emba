@@ -111,6 +111,7 @@ IL10_system_emulator() {
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/libnvram.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/strace.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/gdb.zip
+      unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/netcat.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip
 
       rm external/EMBA_Live_bins/*.zip

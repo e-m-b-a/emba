@@ -365,6 +365,11 @@ create_emulation_filesystem() {
     cp "${MODULE_SUB_PATH}/fixImage.sh" "${MNT_POINT}" || true
     EMBA_BOOT=${EMBA_BOOT} EMBA_ETC=${EMBA_ETC} timeout --preserve-status --signal SIGINT 120 chroot "${MNT_POINT}" /busybox ash /fixImage.sh | tee -a "${LOG_FILE}"
 
+    # ensure that the needed permissions for exec files are set correctly
+    # This is needed at some firmwares have corrupted permissions on ELF or sh files
+    print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
+    fix_exec_permissions "${MNT_POINT}"
+
     print_output "[*] inferFile.sh (chroot)"
     # -> this re-creates init file and builds up the service which is ued from run_service.sh
     cp "${MODULE_SUB_PATH}/inferFile.sh" "${MNT_POINT}" || true
@@ -525,7 +530,7 @@ main_emulation() {
   local lINDEX=1
   local lBAK_INIT_BACKUP=""
   local lBAK_INIT_ORIG=""
-  local INIT_OUT=""
+  local lINIT_OUT=""
   local lINIT_FNAME=""
   export IPS_INT_VLAN=()
   local lDEVICE=""
@@ -538,9 +543,8 @@ main_emulation() {
   for lINIT_FILE in "${lINIT_FILES_ARR[@]}"; do
     lINIT_FNAME=$(basename "${lINIT_FILE}")
     # this is the main init entry - we modify it later for special cases:
-    # NOTE: Currently we only test emulation with init=
-    # The code for switching inits is available but not used anymore
-    export KINIT="rdinit=/firmadyne/preInit.sh"
+    export KINIT="init=/firmadyne/preInit.sh"
+    lINIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
 
     sub_module_title "[*] Processing init file ${ORANGE}${lINIT_FILE} (${lINDEX}/${#lINIT_FILES_ARR[@]})${NC}"
     if ! mount | grep -q "${MNT_POINT}"; then
@@ -572,47 +576,51 @@ main_emulation() {
       lBAK_INIT_ORIG=""
     fi
 
-    print_output "[*] Init file details:"
+    print_output "[*] Firmware Init file details:"
     file "${MNT_POINT}""${lINIT_FILE}" | tee -a "${LOG_FILE}"
+    print_output "[*] EMBA Init starter file details:"
+    file "${lINIT_OUT}" | tee -a "${LOG_FILE}"
 
-    # This is just as backup:
-    INIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
     # we deal with something which is not a script:
-    if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "symbolic link\|ELF"; then
-      # e.g. netgear R6200
-      # KINIT="init=/firmadyne/preInit.sh"
-      if [[ "${KINIT:0:2}" == "rd" ]]; then
-        KINIT="${KINIT:2}"
-      fi
-      # write the init ELF file or sym link to the firmadyne preInit script:
-      INIT_OUT="${MNT_POINT}""/firmadyne/preInit.sh"
+    # if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "symbolic link\|ELF"; then
+      # write the init ELF file or sym link to the EMBA preInit script:
+    print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
+    lBAK_INIT_ORIG="${lINIT_OUT}"
+    lBAK_INIT_BACKUP="${LOG_PATH_MODULE}"/"$(basename "${lINIT_OUT}".init)"
+    cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}"
 
-      print_output "[*] Backup original init file ${ORANGE}${INIT_OUT}${NC}"
-      lBAK_INIT_ORIG="${INIT_OUT}"
-      lBAK_INIT_BACKUP="${LOG_PATH_MODULE}"/"$(basename "${INIT_OUT}".init)"
-      cp -pr "${INIT_OUT}" "${lBAK_INIT_BACKUP}"
-
-      print_output "[*] Add ${lINIT_FILE} entry to ${ORANGE}${INIT_OUT}${NC}"
-      echo "${lINIT_FILE} &" >> "${INIT_OUT}" || true
+    print_output "[*] Add ${lINIT_FILE} entry to ${ORANGE}${lINIT_OUT}${NC}"
+    # we always add the identified init entry to the EMBA preInit script
+    if ! (grep -q "${lINIT_FILE}" "${lINIT_OUT}"); then
+      echo "${lINIT_FILE} &" >> "${lINIT_OUT}" || true
+    fi
+    if (grep -q "preInit.sh" "${MNT_POINT}""${lINIT_FILE}"); then
+      # if have our own backup init script we need to remove our own entries now
+      sed -i -r 's/(.*preInit.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
+      sed -i -r 's/(.*network.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
+      sed -i -r 's/(.*run_service.sh.*)/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
     fi
 
-    # we deal with a startup script
+    # elif file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
+    #  # we deal with a startup script
+    #  lINIT_OUT="${MNT_POINT}""${lINIT_FILE}"
+    #  find "${lINIT_OUT}" -xdev -maxdepth 1 -ls || true
+    #  print_output "[*] Backup original init file ${ORANGE}${lINIT_OUT}${NC}"
+    #  lBAK_INIT_ORIG="${lINIT_OUT}"
+    #  lBAK_INIT_BACKUP="${LOG_PATH_MODULE}"/"$(basename "${lINIT_OUT}".init)"
+    #  cp -pr "${lINIT_OUT}" "${lBAK_INIT_BACKUP}"
+
     local lFS_MOUNTS_INIT_ARR=()
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
-      INIT_OUT="${MNT_POINT}""${lINIT_FILE}"
-      find "${INIT_OUT}" -xdev -maxdepth 1 -ls || true
-      print_output "[*] Backup original init file ${ORANGE}${INIT_OUT}${NC}"
-      lBAK_INIT_ORIG="${INIT_OUT}"
-      lBAK_INIT_BACKUP="${LOG_PATH_MODULE}"/"$(basename "${INIT_OUT}".init)"
-      cp -pr "${INIT_OUT}" "${lBAK_INIT_BACKUP}"
-
-      mapfile -t lFS_MOUNTS_INIT_ARR < <(grep -E "^mount\ -t\ .*\ .*mtd.* /.*" "${INIT_OUT}" | sort -u || true)
+      # identify mount operations for later handling and disabling
+      mapfile -t lFS_MOUNTS_INIT_ARR < <(grep -E "^mount\ -t\ .*\ .*mtd.* /.*" "${MNT_POINT}""${lINIT_FILE}" | sort -u || true)
 
       # just in case we have issues with permissions
-      chmod +x "${INIT_OUT}"
+      chmod +x "${MNT_POINT}""${lINIT_FILE}"
 
       # just in case there is an exit in the init -> comment it
-      sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "${INIT_OUT}"
+      sed -i -r 's/(.*exit\ [0-9])$/\#\ \1/' "${MNT_POINT}""${lINIT_FILE}"
+      # echo "${lINIT_FILE} &" >> "${lINIT_OUT}" || true
     fi
 
     # Beside the check of init we also try to find other mounts for further filesystems
@@ -628,40 +636,41 @@ main_emulation() {
     eval "lFS_MOUNTS_ARR=($(for i in "${lFS_MOUNTS_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
 
     handle_fs_mounts "${lINIT_FILE}" "${lFS_MOUNTS_ARR[@]}"
-    # ensure that the needed permissions for exec files are set correctly
-    # This is needed at some firmwares have corrupted permissions on ELF or sh files
-    print_output "[*] Multiple firmwares have broken script and ELF permissions - We fix them now"
-    fix_exec_permissions "${MNT_POINT}"
 
-    if ! (grep -q "/firmadyne/network.sh" "${INIT_OUT}"); then
-      print_output "[*] Add network.sh entry to ${ORANGE}${INIT_OUT}${NC}"
+    if ! (grep -q "/firmadyne/network.sh" "${lINIT_OUT}"); then
+      print_output "[*] Add network.sh entry to ${ORANGE}${lINIT_OUT}${NC}"
 
-      echo "" >> "${INIT_OUT}" || true
-      echo "/firmadyne/network.sh &" >> "${INIT_OUT}" || print_output "[-] Some error occured while adding the network.sh entry to ${INIT_OUT}"
+      echo "" >> "${lINIT_OUT}" || true
+      echo "/firmadyne/network.sh &" >> "${lINIT_OUT}" || print_output "[-] Some error occured while adding the network.sh entry to ${lINIT_OUT}"
     else
-      print_output "[*] network.sh entry already available in init ${ORANGE}${INIT_OUT}${NC}"
+      print_output "[*] network.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
     fi
 
-    if ! ( grep -q "/firmadyne/run_service.sh" "${INIT_OUT}"); then
+    if ! ( grep -q "/firmadyne/run_service.sh" "${lINIT_OUT}"); then
       if [[ -f "${MNT_POINT}/firmadyne/service" ]]; then
         while read -r lSERVICE_NAME; do
           print_output "[*] Created service entry for starting service ${ORANGE}${lSERVICE_NAME}${NC}"
         done < "${MNT_POINT}/firmadyne/service"
-        echo "/firmadyne/run_service.sh &" >> "${INIT_OUT}" || print_output "[-] Some error occured while adding the run_service entry to ${INIT_OUT}"
+        echo "/firmadyne/run_service.sh &" >> "${lINIT_OUT}" || print_output "[-] Some error occured while adding the run_service entry to ${lINIT_OUT}"
       fi
     else
-      print_output "[*] run_service.sh entry already available in init ${ORANGE}${INIT_OUT}${NC}"
+      print_output "[*] run_service.sh entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
     fi
 
-    if ! ( grep -q "/firmadyne/busybox sleep 36000" "${INIT_OUT}"); then
+    if ! ( grep -q "/firmadyne/busybox sleep 36000" "${lINIT_OUT}"); then
       # trendnet TEW-828DRU_1.0.7.2, etc...
-      echo "/firmadyne/busybox sleep 36000" >> "${INIT_OUT}" || print_output "[-] Some error occured while adding the busybox sleep entry to ${INIT_OUT}"
+      echo "/firmadyne/busybox sleep 36000" >> "${lINIT_OUT}" || print_output "[-] Some error occured while adding the busybox sleep entry to ${lINIT_OUT}"
     else
-      print_output "[*] busybox sleep entry already available in init ${ORANGE}${INIT_OUT}${NC}"
+      print_output "[*] busybox sleep entry already available in init ${ORANGE}${lINIT_OUT}${NC}"
     fi
 
-    print_output "[*] Current init file: ${ORANGE}${INIT_OUT}${NC}"
-    tee -a "${LOG_FILE}" < "${INIT_OUT}"
+    print_output "[*] EMBA init starter file: ${ORANGE}${lINIT_OUT}${NC}"
+    tee -a "${LOG_FILE}" < "${lINIT_OUT}"
+    if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
+      print_ln
+      print_output "[*] Firmware Init file details:"
+      tee -a "${LOG_FILE}" < "${MNT_POINT}""${lINIT_FILE}"
+    fi
 
     print_ln
     print_output "[*] EMBA Target filesytem:"
@@ -1956,7 +1965,7 @@ write_network_config_to_filesystem() {
     fi
 
     # as we have the filesytem mounted right before the final run we can link libnvram now
-    link_libnvram_so "${MNT_POINT}" "nondbg"
+    link_libnvram_so "${MNT_POINT}" "dbg"
     # umount filesystem:
     umount_qemu_image "${lDEVICE}"
     delete_device_entry "${lIMAGE_NAME}" "${lDEVICE}" "${MNT_POINT}"
