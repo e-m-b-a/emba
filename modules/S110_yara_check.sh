@@ -70,7 +70,7 @@ S110_yara_check()
     [[ "${COUNTING}" -eq 0 ]] && print_output "[-] No code patterns found with yara."
     [[ -f "${DIR_COMB_YARA}" ]] && rm "${DIR_COMB_YARA}"
   else
-    print_output "[!] Check with yara not possible, because it isn't installed!"
+    print_output "[!] YARA checks disabled - enable it in your scanning profile with ${ORANGE}export YARA=1${NC}."
   fi
 
   module_end_log "${FUNCNAME[0]}" "${COUNTING}"
