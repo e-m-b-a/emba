@@ -668,7 +668,7 @@ main_emulation() {
     tee -a "${LOG_FILE}" < "${lINIT_OUT}"
     if file "${MNT_POINT}""${lINIT_FILE}" | grep -q "text executable\|ASCII text"; then
       print_ln
-      print_output "[*] Firmware Init file details:"
+      print_output "[*] Firmware Init file details: ${ORANGE}${lINIT_FILE}${NC}"
       tee -a "${LOG_FILE}" < "${MNT_POINT}""${lINIT_FILE}"
     fi
 
@@ -2357,7 +2357,7 @@ check_online_stat() {
     fi
 
     if [[ "${lSYS_ONLINE}" -eq 0 ]]; then
-      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable."
+      print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable." "no_log"
       lSYS_ONLINE=0
       sleep 5
     fi
@@ -2365,7 +2365,9 @@ check_online_stat() {
   done
 
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
-  if [[ "${lSYS_ONLINE}" -eq 1 ]]; then
+  if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
+    print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable."
+  else
     print_output "[*] Give the system another 30 seconds to ensure the boot process is finished.\n" "no_log"
     sleep 30
     print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
