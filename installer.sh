@@ -266,8 +266,9 @@ if [[ ${LIST_DEP} -eq 0 ]] ; then
     chmod 777 ./external
   else
     echo -e "\\n""${ORANGE}""WARNING: external directory available: ./external""${NC}"
-    echo -e "${ORANGE}""Please remove it before proceeding ... exit now""${NC}"
-    exit 1
+    echo -e "${ORANGE}""Please remove it before proceeding ...""${NC}"
+    echo ""
+    read -p "If you know what you are doing you can press any key to continue ..." -n1 -s -r
   fi
 
   echo -e "\\n""${ORANGE}""Update package lists.""${NC}"
