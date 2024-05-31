@@ -2368,8 +2368,8 @@ check_online_stat() {
   if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
     print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable."
   else
-    print_output "[*] Give the system another 30 seconds to ensure the boot process is finished.\n" "no_log"
-    sleep 30
+    print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
+    sleep 60
     print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
     write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
@@ -2378,9 +2378,9 @@ check_online_stat() {
     print_ln
     nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
 
-    if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -eq 0 ]]; then
+    if [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -le 2 ]]; then
       print_output "[*] Give the system another 120 seconds to ensure the boot process is finished.\n" "no_log"
-      sleep 120
+      sleep 180
       nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
     fi
 
