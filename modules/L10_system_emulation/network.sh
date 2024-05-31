@@ -23,7 +23,6 @@ if ("${EMBA_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
   "${BUSYBOX}" sleep 10
 
-
   "${BUSYBOX}" echo -e "[*] Starting network configuration lo - ${ORANGE}${IP_LOOP}${NC}"
   "${BUSYBOX}" ifconfig lo "${IP_LOOP}"
   # "${BUSYBOX}" route add "${IP_LOOP}"
@@ -48,9 +47,11 @@ if ("${EMBA_NET}"); then
       echo "[*] Waiting until brctl shows up our ${NET_BRIDGE} - CNT: ${CNT} / 20"
       "${BUSYBOX}" sleep 5
       if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_BRIDGE}"); then
+        echo "[+] brctl showed up our ${NET_BRIDGE} - CNT: ${CNT} / 20 -> proceeding"
         break
       fi
       if [ "${CNT}" -gt 20 ]; then
+        echo "[-] brctl does not showed up our ${NET_BRIDGE} - CNT: ${CNT} / 20 -> proceeding"
         break
       fi
     done
@@ -121,7 +122,7 @@ if ("${EMBA_NET}"); then
     fi
   fi
 
-  "${BUSYBOX}" sleep 60
+  "${BUSYBOX}" sleep 30
   "${BUSYBOX}" echo "[*] Current network configuration:"
   "${BUSYBOX}" ifconfig -a
 

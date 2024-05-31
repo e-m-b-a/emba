@@ -20,8 +20,8 @@ NC="\033[0m"
 if ("${EMBA_ETC}"); then
   # first, the system should do the job by itself
   # after 100sec we jump in with our service helpers
-  "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting 60sec before helpers starting services in emulated environment...${NC}"
-  "${BUSYBOX}" sleep 60
+  "${BUSYBOX}" echo -e "${ORANGE}[*] Waiting 30sec before helpers starting services in emulated environment...${NC}"
+  "${BUSYBOX}" sleep 30
   # some rules we need to apply for different services:
   if "${BUSYBOX}" grep -q lighttpd /firmadyne/service; then
     # ensure we have the pid file for lighttpd:
@@ -32,12 +32,15 @@ if ("${EMBA_ETC}"); then
     mkdir -p /var/twonky/twonkyserver 2>/dev/null
   fi
 
+  "${BUSYBOX}" echo -e "${ORANGE}[*] Starting EMBA services ...${NC}"
   while (true); do
     while IFS= read -r _BINARY; do
       "${BUSYBOX}" sleep 5
+      "${BUSYBOX}" echo -e "${NC}[*] $(date) - Environment details ..."
+
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
-      "${BUSYBOX}" echo -e "${NC}[*] Environment details ..."
+
       "${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
       "${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
       "${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"
@@ -49,6 +52,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tKernel cmdline: $("${BUSYBOX}" cat /proc/cmdline)"
       "${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
       "${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env | "${BUSYBOX}" tr '\n' '/')"
+
       "${BUSYBOX}" echo "[*] Netstat output:"
       "${BUSYBOX}" netstat -antu
       "${BUSYBOX}" echo "[*] Network configuration:"

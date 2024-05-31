@@ -286,7 +286,7 @@ dependency_check()
     fi
 
     # as we first check the onlinechecker/EMBA_VERSION.txt file we know if we are online or not:
-    if ! [[ -f "${ONLINE_CHECK_FILE}" ]]; then
+    if ! [[ -f "${ONLINE_CHECK_FILE}" ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
       # if we have no EMBA_VERSION identified, we do not need to check our GPT key now -> there is no internet
       print_output "$(indent "${ORANGE}As there is no Internet connection available, no GPT checks performed.${NC}")" "no_log"
     elif [[ -z "${OPENAI_API_KEY}" ]]; then

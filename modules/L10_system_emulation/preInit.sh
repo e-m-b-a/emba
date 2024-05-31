@@ -15,6 +15,13 @@ NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script starting ...${NC}"
 
+print_keepalive() {
+  while(true); do
+    "${BUSYBOX}" echo -e "[*] $(${BUSYBOX} date) - EMBA emulation system is alive"
+    "${BUSYBOX}" sleep 5
+  done
+}
+
 [ -d /dev ] || "${BUSYBOX}" mkdir -p /dev
 [ -d /root ] || "${BUSYBOX}" mkdir -p /root
 [ -d /sys ] || "${BUSYBOX}" mkdir -p /sys
@@ -30,4 +37,29 @@ NC="\033[0m"
 "${BUSYBOX}" mount -t devpts devpts /dev/pts
 "${BUSYBOX}" mount -t tmpfs tmpfs /run
 
+"${BUSYBOX}" echo -e "${NC}[*] $(date) - Environment details ..."
+"${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
+"${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
+"${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"
+"${BUSYBOX}" echo -e "\tFIRMAE_NVRAM: ${FIRMAE_NVRAM}"
+"${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
+"${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
+"${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+"${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
+"${BUSYBOX}" echo -e "\tKernel cmdline: $("${BUSYBOX}" cat /proc/cmdline)"
+"${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
+"${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env | "${BUSYBOX}" tr '\n' '/')"
+
+"${BUSYBOX}" echo "[*] Netstat output:"
+"${BUSYBOX}" netstat -antu
+"${BUSYBOX}" echo "[*] Network configuration:"
+"${BUSYBOX}" brctl show
+"${BUSYBOX}" ifconfig -a
+"${BUSYBOX}" echo "[*] Running processes:"
+"${BUSYBOX}" ps
+"${BUSYBOX}" echo "[*] /proc filesytem:"
+"${BUSYBOX}" ls /proc
+
 "${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script finished ...${NC}"
+
+print_keepalive &
