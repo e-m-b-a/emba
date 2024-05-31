@@ -70,7 +70,7 @@ IL10_system_emulator() {
     print_file_info "strace.zip" "strace for all supported architectures" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/strace.zip" "external/EMBA_Live_bins/strace.zip"
     # Linux Kernel v4.14.336 - https://github.com/EMBA-support-repos/EMBA-v4.14.336
     print_file_info "Linux-Kernel-v4.14.336.zip" "Linux Kernel v4.14.336 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
-
+    print_file_info "Linux-Kernel-v4.1.17.zip" "Linux Kernel v4.1.17 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
 
     if [[ "${LIST_DEP}" -eq 1 ]] || [[ "${DOCKER_SETUP}" -eq 1 ]] ; then
       ANSWER=("n")
@@ -107,12 +107,15 @@ IL10_system_emulator() {
       download_file "gdb.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/gdb.zip" "external/EMBA_Live_bins/gdb.zip"
       download_file "netcat.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/netcat.zip" "external/EMBA_Live_bins/netcat.zip"
       download_file "Linux-Kernel-v4.14.336.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/Linux-Kernel-v4.14.336.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip"
+      download_file "Linux-Kernel-v4.1.17.zip" "https://github.com/EMBA-support-repos/EMBA-v4.14.336/releases/download/v4.14.336-initial/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
+
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/console.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/libnvram.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/strace.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/gdb.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/netcat.zip
       unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.14.336.zip
+      unzip -d external/EMBA_Live_bins/ external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip
 
       rm external/EMBA_Live_bins/*.zip
 
