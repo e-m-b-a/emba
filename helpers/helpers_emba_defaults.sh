@@ -73,7 +73,8 @@ set_defaults() {
   export QEMULATION=0           # user-mode emulation - set it via command line parameter -E
   # export L10_KERNEL_V_LONG="4.14.336"   # Warning: Kernel 4.14.336 is included in the current docker image. This kernel has issues and
                                           # is included for testing
-  export L10_KERNEL_V_LONG="4.1.17"
+  # export L10_KERNEL_V_LONG="4.1.17"
+  export L10_KERNEL_V_LONG="4.9.337"
   export FULL_TEST=0            # with this variable we can control the behavior of s16 and s120 -> 0 is default an tests only
                                 # non Linux binaries (binaries not listed in config/linux_common_files.txt. 1 means we test every
                                 # binary which results in long runtimes

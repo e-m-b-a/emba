@@ -1376,7 +1376,7 @@ run_network_id_emulation() {
   print_output "[*] Starting firmware emulation for network identification - ${ORANGE}${lQEMU_BIN} / ${lARCH_END} / ${lIMAGE_NAME}${NC} ... use Ctrl-a + x to exit"
   print_ln
 
-  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" /tmp/do_not_create_run.sh 3
+  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.initial.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" /tmp/do_not_create_run.sh 3
 }
 
 get_networking_details_emulation() {
@@ -2317,7 +2317,7 @@ run_qemu_final_emulation() {
   write_script_exec "echo -e \"[*] For emulation state please monitor the ${ORANGE}qemu.serial.log${NC} file\n\"" "${ARCHIVE_PATH}"/run.sh 0
   write_script_exec "echo -e \"[*] For shell access check localhost port ${ORANGE}4321${NC} via telnet\n\"" "${ARCHIVE_PATH}"/run.sh 0
 
-  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} FIRMAE_NVRAM=${FIRMAE_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
+  write_script_exec "${lQEMU_BIN} -m 2048 -M ${lQEMU_MACHINE} ${lCPU} -kernel ${lKERNEL} ${lQEMU_DISK} -append \"root=${lQEMU_ROOTFS} console=${lCONSOLE} nandsim.parts=64,64,64,64,64,64,64,64,64,64 ${KINIT} rw debug ignore_loglevel print-fatal-signals=1 EMBA_NET=${EMBA_NET} EMBA_NVRAM=${EMBA_NVRAM} EMBA_KERNEL=${EMBA_KERNEL} EMBA_ETC=${EMBA_ETC} user_debug=0 firmadyne.syscall=1\" -nographic ${lQEMU_NETWORK} ${lQEMU_PARAMS} -serial file:${LOG_PATH_MODULE}/qemu.final.serial.log -serial telnet:localhost:4321,server,nowait -serial unix:/tmp/qemu.${lIMAGE_NAME}.S1,server,nowait -monitor unix:/tmp/qemu.${lIMAGE_NAME},server,nowait ; pkill -9 -f tail.*-F.*\"${LOG_PATH_MODULE}\"" "${ARCHIVE_PATH}"/run.sh 1
 }
 
 check_online_stat() {
@@ -2380,113 +2380,112 @@ check_online_stat() {
   # looks as we can ping the system. Now, we wait some time before doing our Nmap portscan
   if [[ "${lSYS_ONLINE}" -ne 1 ]]; then
     print_output "[*] Host with ${ORANGE}${lIP_ADDRESS}${NC} is not reachable."
-    print_output "[*] Nevertheless, we try to proceed"
-  fi
-
-  print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
-  sleep 60
-  print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
-  write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
-  print_ln
-  # this is just for the nice logfile
-  ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
-  print_ln
-  nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
-
-  local lCNT=0
-  while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -le 2 ]]; do
+  else
     print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
     sleep 60
-    nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
-    [[ "${lCNT}" -gt 10 ]] && break
-    lCNT=$((lCNT+1))
-  done
-
-  tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
-
-  mapfile -t lTCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
-  mapfile -t lUDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
-
-  if [[ "${#SERVICES_STARTUP[@]}" -gt 0 ]] || [[ -v lTCP_SERV_NETSTAT_ARR[@] ]] || [[ -v lUDP_SERV_NETSTAT_ARR[@] ]]; then
-    local lUDP_SERV_NETSTAT=""
-    local lUDP_SERV_STARTUP=""
-    local lUDP_SERV=""
-    local lTCP_SERV_NETSTAT=""
-    local lTCP_SERV_STARTUP=""
-    local lTCP_SERV=""
-    local lTCP_SERV_ARR=()
-    local lUDP_SERV_ARR=()
-    local lPORTS_TO_SCAN=""
-
-    # write all services into a one liner for output:
+    print_output "[*] Nmap portscan for ${ORANGE}${lIP_ADDRESS}${NC}"
+    write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
     print_ln
-    # rewrite our array into a nice string for printing it
-    if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
-      printf -v lTCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
-      lTCP_SERV_STARTUP=${lTCP_SERV//\ /,}
-      print_output "[*] TCP Services detected via startup: ${ORANGE}${lTCP_SERV_STARTUP}${NC}"
-    fi
-    # rewrite our array into a nice string for printing it
-    if [[ -v UDP_SERVICES_STARTUP[@] ]]; then
-      printf -v lUDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
-      lUDP_SERV_STARTUP=${lUDP_SERV//\ /,}
-      print_output "[*] UDP Services detected via startup: ${ORANGE}${lUDP_SERV_STARTUP}${NC}"
-    fi
-
-    # rewrite our array into a nice string for printing it
-    if [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-      printf -v lTCP_SERV "%s " "${lTCP_SERV_NETSTAT_ARR[@]}"
-      lTCP_SERV_NETSTAT=${lTCP_SERV//\ /,}
-      print_output "[*] TCP Services detected via netstat: ${ORANGE}${lTCP_SERV_NETSTAT}${NC}"
-    fi
-    # rewrite our array into a nice string for printing it
-    if [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
-      printf -v lUDP_SERV "%s " "${lUDP_SERV_NETSTAT_ARR[@]}"
-      lUDP_SERV_NETSTAT=${lUDP_SERV//\ /,}
-      print_output "[*] UDP Services detected via netstat: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
-    fi
+    # this is just for the nice logfile
+    ping -c 1 "${lIP_ADDRESS}" | tee -a "${LOG_FILE}" || true
     print_ln
+    nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
 
-    # work with this:
-    lTCP_SERV_ARR=( "${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" )
-    lUDP_SERV_ARR=( "${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" )
-    eval "lTCP_SERV_ARR=($(for i in "${lTCP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    eval "lUDP_SERV_ARR=($(for i in "${lUDP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
-    if [[ -v lTCP_SERV_ARR[@] ]]; then
-      printf -v lTCP_SERV "%s " "${lTCP_SERV_ARR[@]}"
-      lTCP_SERV=${lTCP_SERV//\ /,}
-      # print_output "[*] TCP Services detected: $ORANGE$lTCP_SERV$NC"
-    fi
-    if [[ -v lUDP_SERV_ARR[@] ]]; then
-      printf -v lUDP_SERV "%s " "${lUDP_SERV_ARR[@]}"
-      lUDP_SERV=${lUDP_SERV//\ /,}
-      # print_output "[*] UDP Services detected: $ORANGE$lUDP_SERV$NC"
-    fi
+    local lCNT=0
+    while [[ "$(grep -c "/tcp.*open" "${ARCHIVE_PATH}"/"${lNMAP_LOG}")" -le 2 ]]; do
+      print_output "[*] Give the system another 60 seconds to ensure the boot process is finished.\n" "no_log"
+      sleep 60
+      nmap -Pn -n -A -sSV --host-timeout 10m -oA "${ARCHIVE_PATH}"/"$(basename "${lNMAP_LOG}")" "${lIP_ADDRESS}" | tee "${ARCHIVE_PATH}"/"${lNMAP_LOG}" || true
+      [[ "${lCNT}" -gt 10 ]] && break
+      lCNT=$((lCNT+1))
+    done
 
-    lUDP_SERV="U:""${lUDP_SERV}"
-    lTCP_SERV="T:""${lTCP_SERV}"
-    lTCP_SERV="${lTCP_SERV%,}"
-    lUDP_SERV="${lUDP_SERV%,}"
+    tee -a "${LOG_FILE}" < "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
 
-    if [[ "${lTCP_SERV}" =~ ^T:[0-9].* ]]; then
-      print_output "[*] Detected TCP services ${ORANGE}${lTCP_SERV}${NC}"
-      lPORTS_TO_SCAN="${lTCP_SERV}"
-    fi
-    if [[ "${lUDP_SERV}" =~ ^U:[0-9].* ]]; then
-      print_output "[*] Detected UDP services ${ORANGE}${lUDP_SERV}${NC}"
-      if [[ "${lPORTS_TO_SCAN}" =~ ^T:[0-9].* ]]; then
-        lPORTS_TO_SCAN+=",${lUDP_SERV}"
-      else
-        lPORTS_TO_SCAN="${lUDP_SERV}"
+    mapfile -t lTCP_SERV_NETSTAT_ARR < <(grep -a "^tcp.*LISTEN" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
+    mapfile -t lUDP_SERV_NETSTAT_ARR < <(grep -a "^udp.*" "${LOG_PATH_MODULE}"/qemu*.log | grep -v "127.0.0.1" | awk '{print $4}' | rev | cut -d: -f1 | rev | sort -u || true)
+
+    if [[ "${#SERVICES_STARTUP[@]}" -gt 0 ]] || [[ -v lTCP_SERV_NETSTAT_ARR[@] ]] || [[ -v lUDP_SERV_NETSTAT_ARR[@] ]]; then
+      local lUDP_SERV_NETSTAT=""
+      local lUDP_SERV_STARTUP=""
+      local lUDP_SERV=""
+      local lTCP_SERV_NETSTAT=""
+      local lTCP_SERV_STARTUP=""
+      local lTCP_SERV=""
+      local lTCP_SERV_ARR=()
+      local lUDP_SERV_ARR=()
+      local lPORTS_TO_SCAN=""
+
+      # write all services into a one liner for output:
+      print_ln
+      # rewrite our array into a nice string for printing it
+      if [[ -v TCP_SERVICES_STARTUP[@] ]]; then
+        printf -v lTCP_SERV "%s " "${TCP_SERVICES_STARTUP[@]}"
+        lTCP_SERV_STARTUP=${lTCP_SERV//\ /,}
+        print_output "[*] TCP Services detected via startup: ${ORANGE}${lTCP_SERV_STARTUP}${NC}"
       fi
-    fi
+      # rewrite our array into a nice string for printing it
+      if [[ -v UDP_SERVICES_STARTUP[@] ]]; then
+        printf -v lUDP_SERV "%s " "${UDP_SERVICES_STARTUP[@]}"
+        lUDP_SERV_STARTUP=${lUDP_SERV//\ /,}
+        print_output "[*] UDP Services detected via startup: ${ORANGE}${lUDP_SERV_STARTUP}${NC}"
+      fi
 
-    if [[ "${lTCP_SERV}" =~ ^T:[0-9].* ]] || [[ "${lUDP_SERV}" =~ ^U:[0-9].* ]]; then
+      # rewrite our array into a nice string for printing it
+      if [[ "${#lTCP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
+        printf -v lTCP_SERV "%s " "${lTCP_SERV_NETSTAT_ARR[@]}"
+        lTCP_SERV_NETSTAT=${lTCP_SERV//\ /,}
+        print_output "[*] TCP Services detected via netstat: ${ORANGE}${lTCP_SERV_NETSTAT}${NC}"
+      fi
+      # rewrite our array into a nice string for printing it
+      if [[ "${#lUDP_SERV_NETSTAT_ARR[@]}" -gt 0 ]]; then
+        printf -v lUDP_SERV "%s " "${lUDP_SERV_NETSTAT_ARR[@]}"
+        lUDP_SERV_NETSTAT=${lUDP_SERV//\ /,}
+        print_output "[*] UDP Services detected via netstat: ${ORANGE}${lUDP_SERV_NETSTAT}${NC}"
+      fi
       print_ln
-      print_output "[*] Nmap portscan for detected services (${ORANGE}${lPORTS_TO_SCAN}${NC}) started during system init on ${ORANGE}${lIP_ADDRESS}${NC}"
-      write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
-      print_ln
-      nmap -Pn -n -sSUV --host-timeout 30m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}"/nmap_emba_"${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+
+      # work with this:
+      lTCP_SERV_ARR=( "${TCP_SERVICES_STARTUP[@]}" "${lTCP_SERV_NETSTAT_ARR[@]}" )
+      lUDP_SERV_ARR=( "${UDP_SERVICES_STARTUP[@]}" "${lUDP_SERV_NETSTAT_ARR[@]}" )
+      eval "lTCP_SERV_ARR=($(for i in "${lTCP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+      eval "lUDP_SERV_ARR=($(for i in "${lUDP_SERV_ARR[@]}" ; do echo "\"${i}\"" ; done | sort -u))"
+      if [[ -v lTCP_SERV_ARR[@] ]]; then
+        printf -v lTCP_SERV "%s " "${lTCP_SERV_ARR[@]}"
+        lTCP_SERV=${lTCP_SERV//\ /,}
+        # print_output "[*] TCP Services detected: $ORANGE$lTCP_SERV$NC"
+      fi
+      if [[ -v lUDP_SERV_ARR[@] ]]; then
+        printf -v lUDP_SERV "%s " "${lUDP_SERV_ARR[@]}"
+        lUDP_SERV=${lUDP_SERV//\ /,}
+        # print_output "[*] UDP Services detected: $ORANGE$lUDP_SERV$NC"
+      fi
+
+      lUDP_SERV="U:""${lUDP_SERV}"
+      lTCP_SERV="T:""${lTCP_SERV}"
+      lTCP_SERV="${lTCP_SERV%,}"
+      lUDP_SERV="${lUDP_SERV%,}"
+
+      if [[ "${lTCP_SERV}" =~ ^T:[0-9].* ]]; then
+        print_output "[*] Detected TCP services ${ORANGE}${lTCP_SERV}${NC}"
+        lPORTS_TO_SCAN="${lTCP_SERV}"
+      fi
+      if [[ "${lUDP_SERV}" =~ ^U:[0-9].* ]]; then
+        print_output "[*] Detected UDP services ${ORANGE}${lUDP_SERV}${NC}"
+        if [[ "${lPORTS_TO_SCAN}" =~ ^T:[0-9].* ]]; then
+          lPORTS_TO_SCAN+=",${lUDP_SERV}"
+        else
+          lPORTS_TO_SCAN="${lUDP_SERV}"
+        fi
+      fi
+
+      if [[ "${lTCP_SERV}" =~ ^T:[0-9].* ]] || [[ "${lUDP_SERV}" =~ ^U:[0-9].* ]]; then
+        print_ln
+        print_output "[*] Nmap portscan for detected services (${ORANGE}${lPORTS_TO_SCAN}${NC}) started during system init on ${ORANGE}${lIP_ADDRESS}${NC}"
+        write_link "${ARCHIVE_PATH}"/"${lNMAP_LOG}"
+        print_ln
+        nmap -Pn -n -sSUV --host-timeout 30m -p "${lPORTS_TO_SCAN}" -oA "${ARCHIVE_PATH}"/nmap_emba_"${lIPS_INT_VLAN_CFG//\;/-}"_dedicated "${lIP_ADDRESS}" | tee -a "${ARCHIVE_PATH}"/"${lNMAP_LOG}" "${LOG_FILE}" || true
+      fi
     fi
   fi
 
@@ -2804,7 +2803,7 @@ set_firmae_arbitration() {
   # FirmAE arbitration - enable all mechanisms
   export EMBA_BOOT="${lFIRMAE_STATE}"
   export EMBA_NET="${lFIRMAE_STATE}"
-  export FIRMAE_NVRAM="${lFIRMAE_STATE}"
+  export EMBA_NVRAM="${lFIRMAE_STATE}"
   export EMBA_KERNEL="${lFIRMAE_STATE}"
   export EMBA_ETC="${lFIRMAE_STATE}"
 }

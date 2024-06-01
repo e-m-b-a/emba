@@ -44,7 +44,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
       "${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
       "${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"
-      "${BUSYBOX}" echo -e "\tFIRMAE_NVRAM: ${FIRMAE_NVRAM}"
+      "${BUSYBOX}" echo -e "\tEMBA_NVRAM: ${EMBA_NVRAM}"
       "${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
       "${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
       "${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
