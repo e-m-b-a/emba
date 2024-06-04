@@ -66,12 +66,12 @@ done
 
 # as we do not reach all the advisories via this search mechanism we also load the current state
 # and use the URLs from it for further crawling:
-# if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
-#  echo -e "[*] Adding already knwon URLs from current configuration file"
-#  cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv >> "${SAVE_PATH}"/"${LINKS}"
-# else
-#  echo -e "${RED}[-] WARNING: No Snyk configuration file found"
-# fi
+ if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
+  echo -e "[*] Adding already knwon URLs from current configuration file"
+  cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv >> "${SAVE_PATH}"/"${LINKS}"
+ else
+  echo -e "${RED}[-] WARNING: No Snyk configuration file found"
+ fi
 
 # remove the numbering at the beginning of every entry:
 sed 's/.*http/http/' "${SAVE_PATH}"/"${LINKS}" | sort -u > "${SAVE_PATH}"/"${LINKS}"_sorted
@@ -99,9 +99,9 @@ echo ""
 echo -e "[*] The following advisories have PoC code included:"
 PoC_CNT=0
 # removed exploit-db as we already have it in EMBA
-# echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;exploit-db;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
-# echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
-cat "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv > "${SAVE_PATH}"/Snyk_PoC_results.csv
+#echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;exploit-db;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
+echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
+#cat "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv > "${SAVE_PATH}"/Snyk_PoC_results.csv
 
 while IFS= read -r -d '' ADV; do
   PoC_PoC="no"
