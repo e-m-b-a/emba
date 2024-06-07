@@ -35,7 +35,15 @@ services:
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
-        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.9.337/:/external/EMBA_Live_bins/Linux-Kernel-v4.9.337:ro
+        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.1.17/:/external/EMBA_Live_bins/Linux-Kernel-v4.1.17:ro
+        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.1.52/:/external/EMBA_Live_bins/Linux-Kernel-v4.1.52:ro
+        - ${EMBA}/external/EMBA_Live_bins/libnvram/:/external/EMBA_Live_bins/libnvram:ro
+        - ${EMBA}/external/EMBA_Live_bins/libnvram_ioctl/:/external/EMBA_Live_bins/libnvram_ioctl:ro
+        - ${EMBA}/external/EMBA_Live_bins/console/:/external/EMBA_Live_bins/console:ro
+        - ${EMBA}/external/EMBA_Live_bins/netcat/:/external/EMBA_Live_bins/netcat:ro
+        - ${EMBA}/external/EMBA_Live_bins/strace/:/external/EMBA_Live_bins/strace:ro
+        - ${EMBA}/external/EMBA_Live_bins/gdb/:/external/EMBA_Live_bins/gdb:ro
+        - ${EMBA}/external/EMBA_Live_bins/gdbserver/:/external/EMBA_Live_bins/gdbserver:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
     environment:

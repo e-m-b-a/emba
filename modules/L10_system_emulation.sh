@@ -848,11 +848,17 @@ main_emulation() {
         check_online_stat "${lIPS_INT_VLAN_CFG}" "${IMAGE_NAME}" &
         local lCHECK_ONLINE_STAT_PID="$!"
 
+        print_keepalive &
+        local lALIVE_PID="$!"
+        disown "${lALIVE_PID}" 2> /dev/null || true
+
         # we kill this process from "check_online_stat:"
         tail -F "${LOG_PATH_MODULE}/qemu.final.serial.log" 2>/dev/null || true
         if [[ -e /proc/"${lCHECK_ONLINE_STAT_PID}" ]]; then
           kill -9 "${lCHECK_ONLINE_STAT_PID}" || true
         fi
+
+        kill "${lALIVE_PID}"
 
         # set default state
         ICMP="not ok"
@@ -906,7 +912,7 @@ main_emulation() {
 
           # if we have a working emulation we stop here
           if [[ "${TCP}" == "ok" ]]; then
-            if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -gt 2 ]]; then
+            if [[ $(grep "udp.*open\ \|tcp.*open\ " "${ARCHIVE_PATH}"/"${NMAP_LOG}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l || true) -ge 2 ]]; then
               # we only exit if we have more than 1 open port detected.
               # Otherwise we try to find a better solution
               # We stop the emulation now and restart it later on
@@ -1292,7 +1298,7 @@ identify_networking_emulation() {
 
 print_keepalive() {
   while(true); do
-    print_output "[*] $(date) - EMBA emulation engine is alive"
+    print_output "[*] $(date) - EMBA emulation engine is live" "no_log"
     sleep 5
   done
 }
@@ -2209,7 +2215,7 @@ run_emulated_system() {
     lCPU="-cpu cortex-a57"
     lQEMU_MACHINE="virt"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/Image.${lARCH_END}" ]]; then
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bImage.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}"
     else
       lKERNEL="${BINARY_DIR}/bzImage.${lARCH_END}"
