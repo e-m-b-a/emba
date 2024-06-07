@@ -17,7 +17,7 @@ NC="\033[0m"
 
 print_keepalive() {
   while(true); do
-    "${BUSYBOX}" echo -e "[*] $(${BUSYBOX} date) - EMBA emulation system is alive"
+    "${BUSYBOX}" echo -e "[*] $(${BUSYBOX} date) - EMBA emulation system is live"
     "${BUSYBOX}" sleep 5
   done
 }
