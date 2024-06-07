@@ -67,7 +67,7 @@ IL10_system_emulator() {
     print_file_info "libnvram.zip" "libnvram for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram.zip" "external/EMBA_Live_bins/libnvram.zip"
     print_file_info "libnvram_ioctl.zip" "libnvram for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram_ioctl.zip" "external/EMBA_Live_bins/libnvram_ioctl.zip"
     print_file_info "netcat.zip" "netcat for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/netcat.zip" "external/EMBA_Live_bins/netcat.zip"
-    print_file_info "strace.zip" "strace for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/trace.zip" "external/EMBA_Live_bins/strace.zip"
+    print_file_info "strace.zip" "strace for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/strace.zip" "external/EMBA_Live_bins/strace.zip"
     print_file_info "Linux-Kernel-v4.1.17.zip" "Linux Kernel v4.1.17 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.52.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip"
     print_file_info "Linux-Kernel-v4.1.17.zip" "Linux Kernel v4.1.17 for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
 
@@ -106,7 +106,7 @@ IL10_system_emulator() {
       download_file "libnvram.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram.zip" "external/EMBA_Live_bins/libnvram.zip"
       download_file "libnvram_ioctl.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram_ioctl.zip" "external/EMBA_Live_bins/libnvram_ioctl.zip"
       download_file "netcat.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/netcat.zip" "external/EMBA_Live_bins/netcat.zip"
-      download_file "strace.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/trace.zip" "external/EMBA_Live_bins/strace.zip"
+      download_file "strace.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/strace.zip" "external/EMBA_Live_bins/strace.zip"
       download_file "Linux-Kernel-v4.1.17.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.52.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.52.zip"
       download_file "Linux-Kernel-v4.1.17.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/Linux-Kernel-v4.1.17.zip" "external/EMBA_Live_bins/Linux-Kernel-v4.1.17.zip"
 
