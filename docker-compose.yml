@@ -2,7 +2,7 @@ version: "3"
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:1.4.1a
+    image: embeddedanalyzer/emba:1.4.1b
     container_name: emba
     read_only: true
     # all pre-checker mount modules need privileged mode
@@ -35,16 +35,6 @@ services:
         - ${EMBA}/:/emba:ro
         - ${EMBA}/external/linux_kernel_sources/:/external/linux_kernel_sources:ro
         - ${EMBA}/external/nvd-json-data-feeds/:/external/nvd-json-data-feeds:ro
-        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.1.17/:/external/EMBA_Live_bins/Linux-Kernel-v4.1.17:ro
-        - ${EMBA}/external/EMBA_Live_bins/Linux-Kernel-v4.1.52/:/external/EMBA_Live_bins/Linux-Kernel-v4.1.52:ro
-        - ${EMBA}/external/EMBA_Live_bins/libnvram/:/external/EMBA_Live_bins/libnvram:ro
-        - ${EMBA}/external/EMBA_Live_bins/libnvram_ioctl/:/external/EMBA_Live_bins/libnvram_ioctl:ro
-        - ${EMBA}/external/EMBA_Live_bins/console/:/external/EMBA_Live_bins/console:ro
-        - ${EMBA}/external/EMBA_Live_bins/netcat/:/external/EMBA_Live_bins/netcat:ro
-        - ${EMBA}/external/EMBA_Live_bins/strace/:/external/EMBA_Live_bins/strace:ro
-        - ${EMBA}/external/EMBA_Live_bins/gdb/:/external/EMBA_Live_bins/gdb:ro
-        - ${EMBA}/external/EMBA_Live_bins/busybox/:/external/EMBA_Live_bins/busybox:ro
-        - ${EMBA}/external/EMBA_Live_bins/gdbserver/:/external/EMBA_Live_bins/gdbserver:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
     environment:
@@ -60,7 +50,7 @@ services:
         soft: 0
 
   emba_quest:
-    image: embeddedanalyzer/emba:1.4.1a
+    image: embeddedanalyzer/emba:1.4.1b
     container_name: emba_quest
     read_only: true
     tmpfs:
