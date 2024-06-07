@@ -2215,7 +2215,7 @@ run_emulated_system() {
     lCPU="-cpu cortex-a57"
     lQEMU_MACHINE="virt"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
-    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bImage.${lARCH_END}" ]]; then
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}"
     else
       lKERNEL="${BINARY_DIR}/bzImage.${lARCH_END}"

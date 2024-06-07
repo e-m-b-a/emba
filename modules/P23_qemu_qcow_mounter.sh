@@ -91,7 +91,7 @@ qcow_extractor() {
   print_output "[*] Qemu disconnect device ${ORANGE}/dev/nbd${NC}."
   qemu-nbd --disconnect /dev/nbd0
   print_output "[*] Qemu connect device ${ORANGE}/dev/nbd${NC}."
-  qemu-nbd --connect=/dev/nbd0 "${QCOW_PATH_}"
+  qemu-nbd --connect /dev/nbd0 "${QCOW_PATH_}"
 
   print_output "[*] Identification of partitions on ${ORANGE}/dev/nbd${NC}."
   mapfile -t NBD_DEVS < <(fdisk -l /dev/nbd0 | grep "^/dev/" | awk '{print $1}' || true)
