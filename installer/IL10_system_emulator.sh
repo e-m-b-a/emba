@@ -49,11 +49,12 @@ IL10_system_emulator() {
 
     # Busybox version (1.29.3 / 1.36.1)
     BB_VER="1.36.1"
+    GDB_VER="8.3.1"
 
     print_file_info "busybox.zip" "Busybox" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/busybox-v${BB_VER}.zip" "external/EMBA_Live_bins/busybox.zip"
     print_file_info "console.zip" "console for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/console.zip" "external/EMBA_Live_bins/console.zip"
-    print_file_info "gdb.zip" "GDB and gdbserver for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdb.zip" "external/EMBA_Live_bins/gdb.zip"
-    print_file_info "gdbserver.zip" "GDB and gdbserver for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdbserver.zip" "external/EMBA_Live_bins/gdbserver.zip"
+    print_file_info "gdb.zip" "GDB and gdbserver for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdb-${GDB_VER}.zip" "external/EMBA_Live_bins/gdb.zip"
+    print_file_info "gdbserver.zip" "GDB and gdbserver for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdbserver-${GDB_VER}.zip" "external/EMBA_Live_bins/gdbserver.zip"
     print_file_info "libnvram.zip" "libnvram for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram.zip" "external/EMBA_Live_bins/libnvram.zip"
     print_file_info "libnvram_ioctl.zip" "libnvram for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram_ioctl.zip" "external/EMBA_Live_bins/libnvram_ioctl.zip"
     print_file_info "netcat.zip" "netcat for all supported architectures" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/netcat.zip" "external/EMBA_Live_bins/netcat.zip"
@@ -77,8 +78,8 @@ IL10_system_emulator() {
 
       download_file "busybox.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/busybox-v${BB_VER}.zip" "external/EMBA_Live_bins/busybox.zip"
       download_file "console.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/console.zip" "external/EMBA_Live_bins/console.zip"
-      download_file "gdb.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdb.zip" "external/EMBA_Live_bins/gdb.zip"
-      download_file "gdbserver.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdbserver.zip" "external/EMBA_Live_bins/gdbserver.zip"
+      download_file "gdb.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdb-${GDB_VER}.zip" "external/EMBA_Live_bins/gdb.zip"
+      download_file "gdbserver.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/gdbserver-${GDB_VER}.zip" "external/EMBA_Live_bins/gdbserver.zip"
       download_file "libnvram.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram.zip" "external/EMBA_Live_bins/libnvram.zip"
       download_file "libnvram_ioctl.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/libnvram_ioctl.zip" "external/EMBA_Live_bins/libnvram_ioctl.zip"
       download_file "netcat.zip" "https://github.com/EMBA-support-repos/EMBA_emulation_kernel-v4.1.52/releases/download/4.1.52-init/netcat.zip" "external/EMBA_Live_bins/netcat.zip"

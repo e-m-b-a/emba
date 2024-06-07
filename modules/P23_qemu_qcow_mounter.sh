@@ -80,7 +80,7 @@ qcow_extractor() {
   fi
 
   print_output "[*] Checking nandsim kernel module"
-  if ! (lsmod | grep -E -q "^nbd "); then
+  if ! (lsmod | grep -q "nbd"); then
     print_output "[-] WARNING: nbd kernel module not loaded - can't proceed"
     lsmod | grep -E "^nbd "
     # return

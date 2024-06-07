@@ -51,7 +51,7 @@ if ("${EMBA_ETC}"); then
       "${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
       "${BUSYBOX}" echo -e "\tKernel cmdline: $("${BUSYBOX}" cat /proc/cmdline)"
       "${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
-      "${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env | "${BUSYBOX}" tr '\n' '/')"
+      "${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env | "${BUSYBOX}" tr '\n' '|')"
 
       "${BUSYBOX}" echo "[*] Netstat output:"
       "${BUSYBOX}" netstat -antu

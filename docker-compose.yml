@@ -43,6 +43,7 @@ services:
         - ${EMBA}/external/EMBA_Live_bins/netcat/:/external/EMBA_Live_bins/netcat:ro
         - ${EMBA}/external/EMBA_Live_bins/strace/:/external/EMBA_Live_bins/strace:ro
         - ${EMBA}/external/EMBA_Live_bins/gdb/:/external/EMBA_Live_bins/gdb:ro
+        - ${EMBA}/external/EMBA_Live_bins/busybox/:/external/EMBA_Live_bins/busybox:ro
         - ${EMBA}/external/EMBA_Live_bins/gdbserver/:/external/EMBA_Live_bins/gdbserver:ro
         - /etc/localtime:/etc/localtime:ro
         - /dev:/dev
