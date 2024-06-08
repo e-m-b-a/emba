@@ -1249,8 +1249,11 @@ identify_networking_emulation() {
     lQEMU_NETWORK="-device virtio-net-device,netdev=net0 -netdev user,id=net0"
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
     lKERNEL="bzImage"
+    # lKERNEL="vmlinux"
     lQEMU_BIN="qemu-system-x86_64"
-    lQEMU_MACHINE="pc-i440fx-3.1"
+    # lQEMU_BIN="qemu-system-i386"
+    # lQEMU_MACHINE="pc-i440fx-3.1"
+    lQEMU_MACHINE="pc-i440fx-8.2"
     lQEMU_DISK="-drive if=ide,format=raw,file=${IMAGE}"
     lQEMU_ROOTFS="/dev/sda1"
     lQEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
@@ -1354,16 +1357,26 @@ run_network_id_emulation() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
+    fi
+  elif [[ "${lARCH_END}" == *"x86el"* ]] && [[ "${L10_KERNEL_V_LONG}" == "4.1.52" ]]; then
+    if [[ -f "${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}" ]]; then
+      # x86el kernel has issues in version 4.1.52 - need further investigation
+      print_output "[!] Bypassing known issues with kernel v${L10_KERNEL_V_LONG} - switching to v4.1.17"
+      lKERNEL="${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}"
+    else
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
   else
     # ARM/x86 architecture
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/${lKERNEL}.${lARCH_END}"
     else
-      lKERNEL="${BINARY_DIR}/${lKERNEL}.${lARCH_END}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
-
   fi
 
   check_qemu_instance_l10
@@ -2139,7 +2152,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-${lARCH_END}"
     lQEMU_MACHINE="malta"
@@ -2147,7 +2161,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-${lARCH_END}"
     lCPU="-cpu MIPS64R2-generic"
@@ -2156,7 +2171,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-mips"
     lQEMU_MACHINE="malta"
@@ -2164,7 +2180,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-mips64"
     lCPU="-cpu MIPS64R2-generic"
@@ -2173,7 +2190,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-mips64"
     # lCPU="-cpu MIPS64R2-generic"
@@ -2182,7 +2200,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-mips64el"
     # lCPU="-cpu MIPS64R2-generic"
@@ -2191,7 +2210,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}${KERNEL_V}"
     else
-      lKERNEL="${BINARY_DIR}/vmlinux.${lARCH_END}${KERNEL_V}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-mips64"
     lCPU="-cpu MIPS64R2-generic"
@@ -2200,7 +2220,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/zImage.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/zImage.${lARCH_END}"
     else
-      lKERNEL="${BINARY_DIR}/zImage.${lARCH_END}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-arm"
     lQEMU_MACHINE="virt"
@@ -2208,7 +2229,8 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/Image.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/Image.${lARCH_END}"
     else
-      lKERNEL="${BINARY_DIR}/Image.${lARCH_END}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-aarch64"
     # lCONSOLE="ttyAMA0"
@@ -2217,11 +2239,22 @@ run_emulated_system() {
   elif [[ "${lARCH_END}" == "x86el"* ]]; then
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}"
+      if [[ "${L10_KERNEL_V_LONG}" == "4.1.52" ]]; then
+        if [[ -f "${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}" ]]; then
+          # x86el kernel has issues in version 4.1.52 - need further investigation
+          print_output "[!] Bypassing known issues with kernel v${L10_KERNEL_V_LONG} - switching to v4.1.17"
+          lKERNEL="${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}"
+        else
+          print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+          return
+        fi
+      fi
     else
-      lKERNEL="${BINARY_DIR}/bzImage.${lARCH_END}"
+      print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
+      return
     fi
     lQEMU_BIN="qemu-system-x86_64"
-    lQEMU_MACHINE="pc-i440fx-3.1"
+    lQEMU_MACHINE="pc-i440fx-8.2"
   elif [[ "${lARCH_END}" == "nios2el" ]]; then
     # not implemented -> Future
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.${lARCH_END}" ]]; then
