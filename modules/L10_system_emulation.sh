@@ -2682,7 +2682,6 @@ write_script_exec() {
 
     # for the final script we need to adjust the paths:
     if echo "${lCOMMAND}" | grep -q qemu-system-; then
-      # fix path for kernel: /external/firmae/binaries/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
       # fix path for kernel: /external/EMBA_Live_bins/vmlinux.mipsel.4 -> ./vmlinux.mipsel.4
       # shellcheck disable=SC2001
       lCOMMAND=$(echo "${lCOMMAND}" | sed 's#-kernel\ .*\/EMBA_Live_bins\/#-kernel\ .\/#g')

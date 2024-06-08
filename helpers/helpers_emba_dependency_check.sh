@@ -202,6 +202,16 @@ check_docker_version() {
     echo -e "${RED}""not ok""${NC}"
     DEP_ERROR=1
   fi
+
+  local lLOCAL_DOCKER_VERS=""
+  lLOCAL_DOCKER_VERS="$(grep image docker-compose.yml | sort -u)"
+  lLOCAL_DOCKER_VERS="${lLOCAL_DOCKER_VERS/*:}"
+  if docker images | grep -q "${lLOCAL_DOCKER_VERS}"; then
+    echo -e "    Docker-compose EMBA image version - ${GREEN}ok${NC}"
+  else
+    echo -e "    Docker-compose EMBA image version - ${ORANGE}Updates available (docker base image v${lLOCAL_DOCKER_VERS} required)${NC}"
+    DEP_ERROR=1
+  fi
 }
 
 dependency_check()
