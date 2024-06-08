@@ -10197,6 +10197,8 @@ CVE-2024-21345;undefinedExploiting The NT Kernel In 24H2undefined;https://packet
 CVE-2024-21733;Apache Tomcat 8.5.63 9.0.43 HTTP Response Smuggling;https://packetstormsecurity.com/files/176951/Apache-Tomcat-8.5.63-9.0.43-HTTP-Response-Smuggling.html;unknown
 CVE-2024-21762;Fortinet FortiOS Out Of Bounds Write;https://packetstormsecurity.com/files/177602/Fortinet-FortiOS-Out-Of-Bounds-Write.html;unknown
 CVE-2024-2193;GhostRace Exploiting And Mitigating Speculative Race Conditions;https://packetstormsecurity.com/files/178597/GhostRace-Exploiting-And-Mitigating-Speculative-Race-Conditions.html;unknown
+CVE-2024-2212;Eclipse ThreadX Buffer Overflows;https://packetstormsecurity.com/files/178817/Eclipse-ThreadX-Buffer-Overflows.html;unknown
+CVE-2024-2214;Eclipse ThreadX Buffer Overflows;https://packetstormsecurity.com/files/178817/Eclipse-ThreadX-Buffer-Overflows.html;unknown
 CVE-2024-22318;IBM i Access Client Solutions Remote Credential Theft;https://packetstormsecurity.com/files/177069/IBM-i-Access-Client-Solutions-Remote-Credential-Theft.html;remote
 CVE-2024-22513;Django REST Framework SimpleJWT 5.3.1 Information Disclosure;https://packetstormsecurity.com/files/178050/Django-REST-Framework-SimpleJWT-5.3.1-Information-Disclosure.html;unknown
 CVE-2024-22836;Akaunting 3.1.3 Remote Command Execution;https://packetstormsecurity.com/files/177517/Akaunting-3.1.3-Remote-Command-Execution.html;remote
@@ -10216,11 +10218,13 @@ CVE-2024-24496;Daily Habit Tracker 1.0 Broken Access Control;https://packetstorm
 CVE-2024-24499;Employee Management System 1.0 SQL Injection;https://packetstormsecurity.com/files/177874/Employee-Management-System-1.0-SQL-Injection.html;remote
 CVE-2024-24506;LimeSurvey Community 5.3.32 Cross Site Scripting;https://packetstormsecurity.com/files/177765/LimeSurvey-Community-5.3.32-Cross-Site-Scripting.html;unknown
 CVE-2024-24528;Sumatra PDF 3.5.2 DLL Hijacking;https://packetstormsecurity.com/files/176986/Sumatra-PDF-3.5.2-DLL-Hijacking.html;unknown
+CVE-2024-2452;Eclipse ThreadX Buffer Overflows;https://packetstormsecurity.com/files/178817/Eclipse-ThreadX-Buffer-Overflows.html;unknown
 CVE-2024-24570;Statamic CMS Cross Site Scripting;https://packetstormsecurity.com/files/177133/Statamic-CMS-Cross-Site-Scripting.html;unknown
 CVE-2024-24681;Yealink Configuration Encrypt Tool Static AES Key;https://packetstormsecurity.com/files/177230/Yealink-Configuration-Encrypt-Tool-Static-AES-Key.html;unknown
 CVE-2024-24724;Gibbon 26.0.00 Server Side Template Injection Remote Code Execution;https://packetstormsecurity.com/files/177857/Gibbon-26.0.00-Server-Side-Template-Injection-Remote-Code-Execution.html;remote
 CVE-2024-24725;Gibbon LMS 26.0.00 PHP Deserialization Code Execution;https://packetstormsecurity.com/files/177635/Gibbon-LMS-26.0.00-PHP-Deserialization-Code-Execution.html;remote
 CVE-2024-24747;MinIO Privilege Escalation;https://packetstormsecurity.com/files/178031/MinIO-Privilege-Escalation.html;unknown
+CVE-2024-24919;Check Point Security Gateway Information Disclosure;https://packetstormsecurity.com/files/178872/Check-Point-Security-Gateway-Information-Disclosure.html;unknown
 CVE-2024-25003;KiTTY 0.76.1.13 Buffer Overflows;https://packetstormsecurity.com/files/177032/KiTTY-0.76.1.13-Buffer-Overflows.html;unknown
 CVE-2024-25004;KiTTY 0.76.1.13 Buffer Overflows;https://packetstormsecurity.com/files/177032/KiTTY-0.76.1.13-Buffer-Overflows.html;unknown
 CVE-2024-25153;Fortra FileCatalyst Workflow 5.x Remote Code Execution;https://packetstormsecurity.com/files/177664/Fortra-FileCatalyst-Workflow-5.x-Remote-Code-Execution.html;remote
@@ -10238,6 +10242,9 @@ CVE-2024-25832;DataCube3 1.0 Shell Upload;https://packetstormsecurity.com/files/
 CVE-2024-25884;SumatraPDF 3.5.2 DLL Hijacking;https://packetstormsecurity.com/files/177397/SumatraPDF-3.5.2-DLL-Hijacking.html;unknown
 CVE-2024-25973;OpenOLAT 18.1.5 Cross Site Scripting Privilege Escalation;https://packetstormsecurity.com/files/177233/OpenOLAT-18.1.5-Cross-Site-Scripting-Privilege-Escalation.html;unknown
 CVE-2024-25974;OpenOLAT 18.1.5 Cross Site Scripting Privilege Escalation;https://packetstormsecurity.com/files/177233/OpenOLAT-18.1.5-Cross-Site-Scripting-Privilege-Escalation.html;unknown
+CVE-2024-25975;HAWKI 1.0.0 beta.1 XSS File Overwrite Session Fixation;https://packetstormsecurity.com/files/178814/HAWKI-1.0.0-beta.1-XSS-File-Overwrite-Session-Fixation.html;unknown
+CVE-2024-25976;HAWKI 1.0.0 beta.1 XSS File Overwrite Session Fixation;https://packetstormsecurity.com/files/178814/HAWKI-1.0.0-beta.1-XSS-File-Overwrite-Session-Fixation.html;unknown
+CVE-2024-25977;HAWKI 1.0.0 beta.1 XSS File Overwrite Session Fixation;https://packetstormsecurity.com/files/178814/HAWKI-1.0.0-beta.1-XSS-File-Overwrite-Session-Fixation.html;unknown
 CVE-2024-26182;Windows Kernel Subkey List Use After Free;https://packetstormsecurity.com/files/178012/Windows-Kernel-Subkey-List-Use-After-Free.html;unknown
 CVE-2024-26218;Windows PspBuildCreateProcessContext Double Fetch Buffer Overflow;https://packetstormsecurity.com/files/178377/Windows-PspBuildCreateProcessContext-Double-Fetch-Buffer-Overflow.html;unknown
 CVE-2024-26218;undefinedExploiting The NT Kernel In 24H2undefined;https://packetstormsecurity.com/files/178378/undefinedExploiting-The-NT-Kernel-In-24H2undefined.html;unknown
@@ -10295,6 +10302,8 @@ CVE-2024-31804;Terratec dmx_6fire USB 1.23.0.02 Unquoted Service Path;https://pa
 CVE-2024-31839;CHAOS RAT 5.0.1 Remote Command Execution;https://packetstormsecurity.com/files/178009/CHAOS-RAT-5.0.1-Remote-Command-Execution.html;unknown
 CVE-2024-32017;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
 CVE-2024-32018;RIOT 2024.01 Buffer Overflows Lack Of Size Checks Out Of Bound Access;https://packetstormsecurity.com/files/178525/RIOT-2024.01-Buffer-Overflows-Lack-Of-Size-Checks-Out-Of-Bound-Access.html;unknown
+CVE-2024-32136;BWL Advanced FAQ Manager 2.0.3 SQL Injection;https://packetstormsecurity.com/files/178874/BWL-Advanced-FAQ-Manager-2.0.3-SQL-Injection.html;remote
+CVE-2024-32651;changedetection 0.45.20 Remote Code Execution;https://packetstormsecurity.com/files/178878/changedetection-0.45.20-Remote-Code-Execution.html;remote
 CVE-2024-33288;Prison Management System Using PHP SQL Injection;https://packetstormsecurity.com/files/178557/Prison-Management-System-Using-PHP-SQL-Injection.html;remote
 CVE-2024-33559;WordPress XStore Theme 9.3.8 SQL Injection;https://packetstormsecurity.com/files/178633/WordPress-XStore-Theme-9.3.8-SQL-Injection.html;remote
 CVE-2024-33722;SOPlanning 1.52.00 SQL Injection;https://packetstormsecurity.com/files/178436/SOPlanning-1.52.00-SQL-Injection.html;remote
@@ -10311,3 +10320,5 @@ CVE-2024-34724;PowerVR _UnrefAndMaybeDestroy Use After Free;https://packetstorms
 CVE-2024-4293;Doctor Appointment Management System 1.0 Cross Site Scripting;https://packetstormsecurity.com/files/178303/Doctor-Appointment-Management-System-1.0-Cross-Site-Scripting.html;unknown
 CVE-2024-4348;osCommerce 4 Cross Site Scripting;https://packetstormsecurity.com/files/178375/osCommerce-4-Cross-Site-Scripting.html;unknown
 CVE-2024-5230;FleetCart 4.1.1 Information Disclosure;https://packetstormsecurity.com/files/178770/FleetCart-4.1.1-Information-Disclosure.html;unknown
+CVE-2024-5410;ORing IAP 420 2.01e Cross Site Scripting Command Injection;https://packetstormsecurity.com/files/178864/ORing-IAP-420-2.01e-Cross-Site-Scripting-Command-Injection.html;remote
+CVE-2024-5411;ORing IAP 420 2.01e Cross Site Scripting Command Injection;https://packetstormsecurity.com/files/178864/ORing-IAP-420-2.01e-Cross-Site-Scripting-Command-Injection.html;remote
