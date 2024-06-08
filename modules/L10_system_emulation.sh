@@ -2701,7 +2701,9 @@ get_binary() {
   local lARCH_END="${2:-}"
 
   # '${lBINARY_NAME/\.*}' -> strip the .so from libnvram.so and libnvram_ioctl.so
-  if [[ -f "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}" ]]; then
+  if [[ "${lBINARY_NAME}" == *"busybox"* ]]; then
+    echo "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}"
+  elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}-v${L10_BB_VER}/${lBINARY_NAME}.${lARCH_END}" ]]; then
     # use sub-directories for the different binaries:
     # will be used in the future
     echo "${BINARY_DIR}/${lBINARY_NAME/_dbg*}/${lBINARY_NAME}.${lARCH_END}"
@@ -2710,7 +2712,7 @@ get_binary() {
     # will be used in the future
     echo "${BINARY_DIR}/${lBINARY_NAME/_nondbg*}/${lBINARY_NAME}.${lARCH_END}"
   elif [[ -f "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}" ]]; then
-    echo "${BINARY_DIR}/${lBINARY_NAME}.${lARCH_END}"
+    echo "NA"
   fi
 }
 
