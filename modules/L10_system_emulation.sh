@@ -498,11 +498,11 @@ link_libnvram_so() {
   fi
   if [[ -f "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" ]]; then
     print_output "[*] Linking to ${lDBG_MODE} libnvram.so"
-    ln -sr "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram.so"
+    ln -sr "${lMNT_POINT}/firmadyne/libnvram_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram.so" || true
   fi
   if [[ -f "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" ]]; then
     print_output "[*] Linking to ${lDBG_MODE} libnvram_ioctl.so"
-    ln -sr "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram_ioctl.so"
+    ln -sr "${lMNT_POINT}/firmadyne/libnvram_ioctl_${lDBG_MODE}.so" "${lMNT_POINT}/firmadyne/libnvram_ioctl.so" || true
   fi
 }
 
