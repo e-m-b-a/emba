@@ -2707,7 +2707,7 @@ add_partition_emulation() {
     sleep 1
     ((lCNT+=1))
     local LOSETUP_OUT=()
-    mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE")
+    mapfile -t LOSETUP_OUT < <(losetup | grep -v "BACK-FILE" || true)
     for LINE in "${LOSETUP_OUT[@]}"; do
       lIMAGE_PATH=$(echo "${LINE}" | awk '{print $6}')
       if [[ "${lIMAGE_PATH}" == "${1}" ]]; then
