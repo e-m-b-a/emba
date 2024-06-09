@@ -2693,7 +2693,15 @@ add_partition_emulation() {
   local lCNT=0
   local lDEV_NR=0
 
-  losetup -Pf "${1}" || true
+  while (! losetup -Pf "${1}"); do
+    ((lCNT+=1))
+    if [[ "${lCNT}" -gt 5 ]]; then
+      print_output "[-] WARNING: losetup for ${1} failed ..."
+      break
+    fi
+  done
+
+  local lCNT=0
   while (! "${lFOUND}"); do
     sleep 1
     ((lCNT+=1))
