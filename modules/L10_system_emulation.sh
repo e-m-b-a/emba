@@ -2699,6 +2699,7 @@ add_partition_emulation() {
       print_output "[-] WARNING: losetup for ${1} failed ..."
       break
     fi
+    sleep 5
   done
 
   local lCNT=0
