@@ -2211,10 +2211,10 @@ run_emulated_system() {
     if [[ -f "${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}" ]]; then
       lKERNEL="${BINARY_DIR}/Linux-Kernel-v${L10_KERNEL_V_LONG}/bzImage.${lARCH_END}"
       if [[ "${L10_KERNEL_V_LONG}" == "4.1.52" ]]; then
-        if [[ -f "${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}" ]]; then
+        if [[ -f "${BINARY_DIR}/Linux-Kernel-v4.1.17/bzImage.${lARCH_END}" ]]; then
           # x86el kernel has issues in version 4.1.52 - need further investigation
           print_output "[!] Bypassing known issues with kernel v${L10_KERNEL_V_LONG} - switching to v4.1.17"
-          lKERNEL="${BINARY_DIR}/Linux-Kernel-v4.1.17/${lKERNEL}.${lARCH_END}"
+          lKERNEL="${BINARY_DIR}/Linux-Kernel-v4.1.17/bzImage.${lARCH_END}"
         else
           print_output "[-] Missing kernel for ${L10_KERNEL_V_LONG} / ${lARCH_END}"
           return
