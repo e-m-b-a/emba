@@ -2693,7 +2693,7 @@ add_partition_emulation() {
   local lCNT=0
   local lDEV_NR=0
 
-  losetup -Pf "${1}"
+  losetup -Pf "${1}" || true
   while (! "${lFOUND}"); do
     sleep 1
     ((lCNT+=1))
