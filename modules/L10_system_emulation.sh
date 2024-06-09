@@ -1181,7 +1181,7 @@ identify_networking_emulation() {
   lQEMU_NETWORK="-netdev socket,id=net0,listen=:2000 -device e1000,netdev=net0 -netdev socket,id=net1,listen=:2001 -device e1000,netdev=net1 -netdev socket,id=net2,listen=:2002 -device e1000,netdev=net2 -netdev socket,id=net3,listen=:2003 -device e1000,netdev=net3"
 
   if [[ "${lARCH_END}" == "mipsel" ]]; then
-    lQEMU_BIN="qemu-system-"${lARCH_END}""
+    lQEMU_BIN="qemu-system-${lARCH_END}"
     lQEMU_MACHINE="malta"
   elif [[ "${lARCH_END}" == "mips64r2el" ]]; then
     lQEMU_BIN="qemu-system-mips64el"
