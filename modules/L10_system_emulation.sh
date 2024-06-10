@@ -2697,6 +2697,12 @@ add_partition_emulation() {
   local lCNT=0
   local lDEV_NR=0
 
+  if losetup | grep -q "${1}"; then
+    local lLOOP=""
+    lLOOP=$(losetup -a | grep "${1}" | sort -u)
+    losetup -d "${lLOOP/:*}"
+  fi
+
   while (! losetup -Pf "${1}"); do
     ((lCNT+=1))
     if [[ "${lCNT}" -gt 5 ]]; then
