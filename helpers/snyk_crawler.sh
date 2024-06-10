@@ -66,12 +66,12 @@ done
 
 # as we do not reach all the advisories via this search mechanism we also load the current state
 # and use the URLs from it for further crawling:
- if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
+if [[ -f "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv ]]; then
   echo -e "[*] Adding already knwon URLs from current configuration file"
   cut -d\; -f3 "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv >> "${SAVE_PATH}"/"${LINKS}"
- else
+else
   echo -e "${RED}[-] WARNING: No Snyk configuration file found"
- fi
+fi
 
 # remove the numbering at the beginning of every entry:
 sed 's/.*http/http/' "${SAVE_PATH}"/"${LINKS}" | sort -u > "${SAVE_PATH}"/"${LINKS}"_sorted
