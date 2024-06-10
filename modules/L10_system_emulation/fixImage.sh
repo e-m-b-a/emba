@@ -1,12 +1,14 @@
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2022 - 2024 Siemens Energy AG
+#
+# This script is based on the original scripts from the firmadyne and firmAE project
+# Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
+# Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 # use busybox statically-compiled version of all binaries
 # shellcheck disable=SC2129,SC2016,SC2148
 BUSYBOX="/busybox"
-
-# This script is based on the original scripts from the firmadyne and firmAE project
 
 "${BUSYBOX}" echo "[*] EMBA fixImage script starting ..."
 
@@ -19,7 +21,7 @@ resolve_link() {
   echo "${TARGET}"
 }
 
-if ("${FIRMAE_BOOT}"); then
+if ("${EMBA_BOOT}"); then
   if [ ! -e /bin/sh ]; then
       "${BUSYBOX}" ln -s /firmadyne/busybox /bin/sh
   fi
@@ -109,7 +111,7 @@ FILECOUNT="$("${BUSYBOX}" find /dev -maxdepth 1 -type b -o -type c -print | "${B
 if [ "${FILECOUNT}" -lt "5" ]; then
   echo "Warning: Recreating device nodes!"
 
-  if ("${FIRMAE_ETC}"); then
+  if ("${EMBA_ETC}"); then
     TMP_BUSYBOX="/busybox"
   else
     TMP_BUSYBOX=""
@@ -132,6 +134,10 @@ if [ "${FILECOUNT}" -lt "5" ]; then
   "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS1 c 4 65
   "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS2 c 4 66
   "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyS3 c 4 67
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA0 c 4 64
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA1 c 4 65
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA2 c 4 66
+  "${TMP_BUSYBOX}" mknod -m 660 /dev/ttyAMA3 c 4 67
   "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS0 c 4 64
   "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS1 c 4 65
   "${TMP_BUSYBOX}" mknod -m 660 /dev/myttyS2 c 4 66
@@ -217,17 +223,26 @@ if ("${BUSYBOX}" grep -sq "/dev/gpio/in" /bin/gpio) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libcm.so) ||
   ("${BUSYBOX}" grep -sq "/dev/gpio/in" /usr/lib/libshared.so); then
     echo "Creating /dev/gpio/in!"
-    if ("${FIRMAE_BOOT}"); then
+    if ("${EMBA_BOOT}"); then
       rm /dev/gpio
     fi
     mkdir -p /dev/gpio
     echo -ne "\xff\xff\xff\xff" > /dev/gpio/in
+else
+  # just create an empty file
+  rm -r /dev/gpio
+  touch /dev/gpio
 fi
 
 # prevent system from rebooting
-if ("${FIRMAE_BOOT}"); then
+if ("${EMBA_BOOT}"); then
   echo "Removing /sbin/reboot!"
-  rm -f /sbin/reboot
+  if [ -s /sbin/reboot ]; then
+    rm -f /sbin/reboot
+    echo '#!/bin/sh' > /sbin/reboot
+    echo 'echo "[*] System tries to reboot - reboot not executed"' >> /sbin/reboot
+    chmod +x /sbin/reboot
+  fi
 fi
 echo "Removing /etc/scripts/sys_resetbutton!"
 rm -f /etc/scripts/sys_resetbutton

@@ -149,6 +149,7 @@ emba_parameter_parsing() {
         export FULL_EMULATION=1
         ;;
       r)
+        # removes the extracted firmware as well as the emulation archives from l10
         export FINAL_FW_RM=1
        ;;
       s)

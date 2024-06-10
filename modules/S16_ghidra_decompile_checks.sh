@@ -52,7 +52,7 @@ S16_ghidra_decompile_checks()
     local BINARIES=()
     # usually binaries with strcpy or system calls are more interesting for further analysis
     # to keep analysis time low we only check these bins
-    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}')
+    mapfile -t BINARIES < <(grep "strcpy\|system" "${CSV_DIR}"/s13_weak_func_check.csv | sort -k 3 -t ';' -n -r | awk '{print $1}' || true)
   fi
 
   for BINARY in "${BINARIES[@]}"; do
@@ -255,8 +255,10 @@ s16_finish_the_log() {
   local lTMP_FILE=""
 
   for lTMP_FILE in "${lSEMGREPLOG/\.json/}"_"${lNAME}"*.tmp; do
-    cat "${lTMP_FILE}" >> "${lSEMGREPLOG_TXT}" || print_output "[-] Error in logfile processing - ${lTMP_FILE}" "no_log"
-    rm "${lTMP_FILE}" || true
+    if [[ -f "${lTMP_FILE}" ]]; then
+      cat "${lTMP_FILE}" >> "${lSEMGREPLOG_TXT}" || print_output "[-] Error in logfile processing - ${lTMP_FILE}" "no_log"
+      rm "${lTMP_FILE}" || true
+    fi
   done
 }
 
@@ -275,6 +277,10 @@ s16_semgrep_logger() {
 
   lHARUSPEX_FILE_NAME="$(basename "${lHARUSPEX_FILE}")"
   local lSEMGREPLOG_TMP="${lSEMGREPLOG/\.json/}"_"${lNAME}"_"${lHARUSPEX_FILE_NAME}".tmp
+
+  if [[ ! -f "${lSEMGREPLOG_CSV}" ]]; then
+    return
+  fi
 
   # we only handle decompiled code files with semgrep issues, otherwise we move to the next function
   # print_output "[*] Testing ${lHARUSPEX_FILE_NAME} against semgrep log ${lSEMGREPLOG}"
@@ -301,10 +307,12 @@ s16_semgrep_logger() {
         CODE_LINE="$(strip_color_codes "$(sed -n "${lLINE_NR}"p "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" 2>/dev/null)")"
         shopt -s extglob
         CODE_LINE="${CODE_LINE##+([[:space:]])}"
-        CODE_LINE="$(echo "${CODE_LINE}" | tr -d '\0')"
+        CODE_LINE="$(echo -e "${CODE_LINE}" | tr -d '\0')"
         shopt -u extglob
+        # with a normal echo we automatically remove the null bytes which caused issues
+        # shellcheck disable=SC2116
+        lLINE_NR="$(echo "${lLINE_NR}")"
         # color the identified line in the source file:
-        lLINE_NR="$(echo "${lLINE_NR}" | tr -d '\0')"
         sed -i -r "${lLINE_NR}s/.*/\x1b[32m&\x1b[0m/" "${LOG_PATH_MODULE}/haruspex_${lNAME}/${lHARUSPEX_FILE_NAME}" || true
         # this is the output
         write_log "$(indent "$(indent "${GREEN}${lLINE_NR}${NC} - ${ORANGE}${CODE_LINE}${NC}")")" "${lSEMGREPLOG_TMP}"

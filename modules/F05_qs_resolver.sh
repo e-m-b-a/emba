@@ -94,8 +94,10 @@ F05_qs_resolver() {
     fi
   fi
 
-  # lets do a final cleanup to get rid of all the ASK_GPT entries:
-  find "${HTML_PATH}" -type f -name "*.html" -exec sed -i '/ASK_GPT/d' {} \;
+  if [[ -d "${HTML_PATH}" ]]; then
+    # lets do a final cleanup to get rid of all the ASK_GPT entries:
+    find "${HTML_PATH}" -type f -name "*.html" -exec sed -i '/ASK_GPT/d' {} \;
+  fi
 
   # do not create a web reporter page
   module_end_log "${FUNCNAME[0]}" 0

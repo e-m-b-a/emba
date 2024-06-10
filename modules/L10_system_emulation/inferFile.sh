@@ -1,6 +1,10 @@
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2022 - 2024 Siemens Energy AG
+#
+# This script is based on the original scripts from the firmadyne and firmAE project
+# Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
+# Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 # shellcheck disable=SC2148
 BUSYBOX="/busybox"
@@ -9,7 +13,7 @@ BUSYBOX="/busybox"
 "${BUSYBOX}" touch /firmadyne/init
 "${BUSYBOX}" echo "[*] EMBA inferFile script starting ..."
 
-if ("${FIRMAE_BOOT}"); then
+if ("${EMBA_BOOT}"); then
   arr=()
   if [ -e /kernelInit ]; then
     for FILE in $("${BUSYBOX}" strings ./kernelInit)
@@ -26,7 +30,7 @@ if ("${FIRMAE_BOOT}"); then
       arr+=(/init)
     fi
   fi
-  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc")
+  for FILE in $("${BUSYBOX}" find / -name "preinitMT" -o -name "preinit" -o -name "rcS*" -o -name "rc.sysinit" -o -name "rc.local" -o -name "rc.common" -o -name "init" -o -name "linuxrc" -o -name "rc")
   do
     "${BUSYBOX}" echo "[*] Found boot file ${FILE}"
     arr+=("${FILE}")

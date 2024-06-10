@@ -2,7 +2,7 @@ version: "3"
 services:
   # nosemgrep
   emba:
-    image: embeddedanalyzer/emba:latest
+    image: embeddedanalyzer/emba:1.4.1c
     container_name: emba
     read_only: true
     # all pre-checker mount modules need privileged mode
@@ -11,7 +11,6 @@ services:
     # /root/.config is needed for binwalk - further recovery for other tools needed
     # /root/.config is needed for cwe_checker
     # /root/.local is needed for cwe_checker
-    # /external/arachni/... needed by arachni (full system emulator modules)
     tmpfs:
       - /tmp
       - /root/.config/
@@ -28,11 +27,6 @@ services:
       - /var/run
       - /var/tmp
       - /var/lock
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/config/component_cache
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/db
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/arachni-ui-web/tmp
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/.system/home
-      - /external/arachni/arachni-1.6.1.3-0.6.1.1/logs
     build: .
     # /dev is needed for the system emulator (L10)
     volumes:
@@ -56,7 +50,7 @@ services:
         soft: 0
 
   emba_quest:
-    image: embeddedanalyzer/emba:latest
+    image: embeddedanalyzer/emba:1.4.1c
     container_name: emba_quest
     read_only: true
     tmpfs:

@@ -4,6 +4,10 @@
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2022 - 2024 Siemens Energy AG
+#
+# This script is based on the original scripts from the firmadyne and firmAE project
+# Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
+# Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
 
@@ -15,10 +19,9 @@ NC="\033[0m"
 
 "${BUSYBOX}" echo -e "\n[*] Network configuration - ACTION: ${ORANGE}${ACTION}${NC}"
 
-if ("${FIRMAE_NET}"); then
+if ("${EMBA_NET}"); then
   "${BUSYBOX}" echo "[*] Starting network configuration"
   "${BUSYBOX}" sleep 10
-
 
   "${BUSYBOX}" echo -e "[*] Starting network configuration lo - ${ORANGE}${IP_LOOP}${NC}"
   "${BUSYBOX}" ifconfig lo "${IP_LOOP}"
@@ -44,9 +47,11 @@ if ("${FIRMAE_NET}"); then
       echo "[*] Waiting until brctl shows up our ${NET_BRIDGE} - CNT: ${CNT} / 20"
       "${BUSYBOX}" sleep 5
       if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep -sq "${NET_BRIDGE}"); then
+        echo "[+] brctl showed up our ${NET_BRIDGE} - CNT: ${CNT} / 20 -> proceeding"
         break
       fi
       if [ "${CNT}" -gt 20 ]; then
+        echo "[-] brctl does not showed up our ${NET_BRIDGE} - CNT: ${CNT} / 20 -> proceeding"
         break
       fi
     done
@@ -80,6 +85,7 @@ if ("${FIRMAE_NET}"); then
       fi
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" "${IP}" up
     elif [ "${ACTION}" = "reload" ]; then
+      # this mode is not used by EMBA
       "${BUSYBOX}" ifconfig "${NET_BRIDGE}" 192.168.0.1
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
     elif [ "${ACTION}" = "bridge" ]; then
@@ -113,19 +119,10 @@ if ("${FIRMAE_NET}"); then
       "${BUSYBOX}" ifconfig "${NET_BRIDGE}" "${IP}"
       "${BUSYBOX}" brctl addif "${NET_BRIDGE}" eth0
       "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
-    elif [ "${ACTION}" = "bridgereload" ]; then
-      if ("${BUSYBOX}" brctl show | "${BUSYBOX}" grep "eth0"); then
-        # shellcheck disable=SC2016
-        WAN_BRIDGE=$("${BUSYBOX}" brctl show | "${BUSYBOX}" grep "eth0" | "${BUSYBOX}" awk '{print $1}')
-        "${BUSYBOX}" brctl delif "${WAN_BRIDGE}" eth0
-      fi
-      "${BUSYBOX}" ifconfig "${NET_BRIDGE}" 192.168.0.1
-      "${BUSYBOX}" brctl addif "${NET_BRIDGE}" eth0
-      "${BUSYBOX}" ifconfig "${NET_INTERFACE}" 0.0.0.0 up
     fi
   fi
 
-  "${BUSYBOX}" sleep 60
+  "${BUSYBOX}" sleep 30
   "${BUSYBOX}" echo "[*] Current network configuration:"
   "${BUSYBOX}" ifconfig -a
 

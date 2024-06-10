@@ -23,10 +23,11 @@ export THREAD_PRIO=0
 S115_usermode_emulator() {
   local NEG_LOG=0
 
+  module_log_init "${FUNCNAME[0]}"
+  module_title "Qemu user-mode emulation"
+  pre_module_reporter "${FUNCNAME[0]}"
+
   if [[ "${QEMULATION}" -eq 1 && "${RTOS}" -eq 0 ]]; then
-    module_log_init "${FUNCNAME[0]}"
-    module_title "Qemu user-mode emulation"
-    pre_module_reporter "${FUNCNAME[0]}"
 
     if [[ ${IN_DOCKER} -eq 0 ]] ; then
       print_output "[!] This module should not be used in developer mode as it could harm your host environment."

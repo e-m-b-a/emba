@@ -3,6 +3,10 @@
 # Copyright (c) 2015 - 2016, Daming Dominic Chen
 # Copyright (c) 2017 - 2020, Mingeun Kim, Dongkwan Kim, Eunsoo Kim
 # Copyright (c) 2022 - 2024 Siemens Energy AG
+#
+# This script is based on the original scripts from the firmadyne and firmAE project
+# Original firmadyne project can be found here: https://github.com/firmadyne/firmadyne
+# Original firmAE project can be found here: https://github.com/pr0v3rbs/FirmAE
 
 BUSYBOX=/firmadyne/busybox
 
@@ -10,6 +14,13 @@ ORANGE="\033[0;33m"
 NC="\033[0m"
 
 "${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script starting ...${NC}"
+
+print_keepalive() {
+  while(true); do
+    "${BUSYBOX}" echo -e "[*] $(${BUSYBOX} date) - EMBA emulation system is live"
+    "${BUSYBOX}" sleep 5
+  done
+}
 
 [ -d /dev ] || "${BUSYBOX}" mkdir -p /dev
 [ -d /root ] || "${BUSYBOX}" mkdir -p /root
@@ -26,4 +37,29 @@ NC="\033[0m"
 "${BUSYBOX}" mount -t devpts devpts /dev/pts
 "${BUSYBOX}" mount -t tmpfs tmpfs /run
 
+"${BUSYBOX}" echo -e "${NC}[*] $(date) - Environment details ..."
+"${BUSYBOX}" echo -e "\tEMBA_ETC: ${EMBA_ETC}"
+"${BUSYBOX}" echo -e "\tEMBA_BOOT: ${EMBA_BOOT}"
+"${BUSYBOX}" echo -e "\tEMBA_NET: ${EMBA_NET}"
+"${BUSYBOX}" echo -e "\tEMBA_NVRAM: ${EMBA_NVRAM}"
+"${BUSYBOX}" echo -e "\tEMBA_KERNEL: ${EMBA_KERNEL}"
+"${BUSYBOX}" echo -e "\tEMBA_NC: ${EMBA_NC}"
+"${BUSYBOX}" echo -e "\tBINARY_NAME: ${BINARY_NAME}"
+"${BUSYBOX}" echo -e "\tKernel details: $("${BUSYBOX}" uname -a)"
+"${BUSYBOX}" echo -e "\tKernel cmdline: $("${BUSYBOX}" cat /proc/cmdline)"
+"${BUSYBOX}" echo -e "\tSystem uptime: $("${BUSYBOX}" uptime)"
+"${BUSYBOX}" echo -e "\tSystem environment: $("${BUSYBOX}" env | "${BUSYBOX}" tr '\n' '/')"
+
+"${BUSYBOX}" echo "[*] Netstat output:"
+"${BUSYBOX}" netstat -antu
+"${BUSYBOX}" echo "[*] Network configuration:"
+"${BUSYBOX}" brctl show
+"${BUSYBOX}" ifconfig -a
+"${BUSYBOX}" echo "[*] Running processes:"
+"${BUSYBOX}" ps
+"${BUSYBOX}" echo "[*] /proc filesytem:"
+"${BUSYBOX}" ls /proc
+
 "${BUSYBOX}" echo -e "${ORANGE}[*] EMBA preInit script finished ...${NC}"
+
+print_keepalive &

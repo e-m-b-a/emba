@@ -202,6 +202,16 @@ check_docker_version() {
     echo -e "${RED}""not ok""${NC}"
     DEP_ERROR=1
   fi
+
+  local lLOCAL_DOCKER_VERS=""
+  lLOCAL_DOCKER_VERS="$(grep image docker-compose.yml | sort -u)"
+  lLOCAL_DOCKER_VERS="${lLOCAL_DOCKER_VERS/*:}"
+  if docker images | grep -q "${lLOCAL_DOCKER_VERS}"; then
+    echo -e "    Docker-compose EMBA image version - ${GREEN}ok${NC}"
+  else
+    echo -e "    Docker-compose EMBA image version - ${ORANGE}Updates available (docker base image v${lLOCAL_DOCKER_VERS} required)${NC}"
+    DEP_ERROR=1
+  fi
 }
 
 dependency_check()
@@ -286,7 +296,7 @@ dependency_check()
     fi
 
     # as we first check the onlinechecker/EMBA_VERSION.txt file we know if we are online or not:
-    if ! [[ -f "${ONLINE_CHECK_FILE}" ]]; then
+    if ! [[ -f "${ONLINE_CHECK_FILE}" ]] && [[ -n "${OPENAI_API_KEY}" ]]; then
       # if we have no EMBA_VERSION identified, we do not need to check our GPT key now -> there is no internet
       print_output "$(indent "${ORANGE}As there is no Internet connection available, no GPT checks performed.${NC}")" "no_log"
     elif [[ -z "${OPENAI_API_KEY}" ]]; then
@@ -353,7 +363,7 @@ dependency_check()
       done
     fi
   else
-    print_output "    Isolation  - ${GREEN}""ok""${NC}" "no_log"
+    print_output "    Isolation - ${GREEN}""ok""${NC}" "no_log"
   fi
   if [[ "${CONTAINER_NUMBER}" -eq 2 ]] ;  then
     if [[ "${ONLY_DEP}" -gt 0 ]] && [[ "${FORCE}" -ne 0 ]]; then
@@ -728,12 +738,16 @@ dependency_check()
         # check_dep_tool "Qemu system emulator RISC-V64" "qemu-system-riscv64"
 
         # check only some of the needed files
-        check_dep_file "console.*" "${EXT_DIR}""/EMBA_Live_bins/console.x86el"
-        check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox.mipsel"
-        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram.so.armel"
-        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl.so.mips64v1el"
-        check_dep_file "vmlinux.mips*" "${EXT_DIR}""/EMBA_Live_bins/vmlinux.mips64r2el.4"
-        check_dep_file "zImage.armel" "${EXT_DIR}""/EMBA_Live_bins/zImage.armel"
+        check_dep_file "console.*" "${EXT_DIR}""/EMBA_Live_bins/console/console.x86el"
+        check_dep_file "gdb.*" "${EXT_DIR}""/EMBA_Live_bins/gdb/gdb.mipseb"
+        check_dep_file "gdbserver.*" "${EXT_DIR}""/EMBA_Live_bins/gdbserver/gdbserver.mipseb"
+        check_dep_file "netcat.*" "${EXT_DIR}""/EMBA_Live_bins/netcat/netcat.mipseb"
+        check_dep_file "strace.*" "${EXT_DIR}""/EMBA_Live_bins/strace/strace.armelhf"
+        check_dep_file "busybox.*" "${EXT_DIR}""/EMBA_Live_bins/busybox-v${L10_BB_VER}/busybox.mipsel"
+        check_dep_file "libnvram.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram/libnvram_dbg.so.armel"
+        check_dep_file "libnvram_ioctl.*" "${EXT_DIR}""/EMBA_Live_bins/libnvram_ioctl/libnvram_ioctl_dbg.so.mipsel"
+        check_dep_file "Linux kernel v${L10_KERNEL_V_LONG} for MIPS architecture" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v${L10_KERNEL_V_LONG}/vmlinux.mipsel.4"
+        check_dep_file "Linux kernel v${L10_KERNEL_V_LONG} for ARM architecture" "${EXT_DIR}""/EMBA_Live_bins/Linux-Kernel-v${L10_KERNEL_V_LONG}/zImage.armel"
 
         check_dep_file "fixImage.sh" "${MOD_DIR}""/L10_system_emulation/fixImage.sh"
         check_dep_file "preInit.sh" "${MOD_DIR}""/L10_system_emulation/preInit.sh"

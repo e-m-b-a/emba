@@ -558,7 +558,9 @@ detect_root_dir_helper() {
       for lR_PATH in "${lINTERPRETER_FULL_RPATH_ARR[@]}"; do
         # remove the interpreter path from the full path:
         lR_PATH="${lR_PATH//${lINTERPRETER_ESCAPED}/}"
+        # common false positive:
         if [[ -v lR_PATH ]] && [[ -d "${lR_PATH}" ]]; then
+          [[ "${lR_PATH}" =~ \/lib\/$ ]] && continue
           ROOT_PATH+=( "${lR_PATH}" )
           lMECHANISM="binary interpreter"
         fi

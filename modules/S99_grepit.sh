@@ -11,7 +11,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# The original code from the CRASS project is licensed the following way:
+# The original code (from line 187 till the end of the file) from the CRASS project is licensed the following way:
 # ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
 # <floyd at floyd dot ch> wrote this file. As long as you retain this notice you
