@@ -11,7 +11,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner
+# Author(s): Michael Messner, Endri Hoxha
 
 # Description:  Update script for Snyk Exploit/PoC collection
 
@@ -90,7 +90,6 @@ while read -r ADV; do
   fi
   echo -e "[*] Downloading ${ORANGE}${FILENAME}${NC} (${ORANGE}${ID}${NC}/${ORANGE}${ADV_CNT}${NC}) to ${ORANGE}${SAVE_PATH}/vuln/${FILENAME}${NC}"
   lynx -useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1" -dump -hiddenlinks=listonly "${ADV}" > "${SAVE_PATH}"/vuln/"${FILENAME}"
-  # wget --user-agent="Mozilla" "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
 done < "${SAVE_PATH}"/"${LINKS}"_sorted
 
 echo -e "[*] Finished downloading ${ORANGE}${ADV_CNT}${NC} advisories to ${ORANGE}${SAVE_PATH}/vuln${NC}"
@@ -98,10 +97,7 @@ echo ""
 
 echo -e "[*] The following advisories have PoC code included:"
 PoC_CNT=0
-# removed exploit-db as we already have it in EMBA
-# echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;exploit-db;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
 echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
-# cat "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv > "${SAVE_PATH}"/Snyk_PoC_results.csv
 
 while IFS= read -r -d '' ADV; do
   PoC_PoC="no"
@@ -159,23 +155,16 @@ while IFS= read -r -d '' ADV; do
   if [[ "${PoC}" -gt 0 ]] && [[ "${#CVEs[@]}" -gt 0 ]]; then
     for CVE in "${CVEs[@]}"; do
       echo -e "[+] Found PoC for ${ORANGE}${CVE}${NC} in advisory ${ORANGE}${ADV_NAME}${NC} (unknown PoC: ${ORANGE}${PoC_PoC}${NC} / Github: ${ORANGE}${PoC_GH}${NC} / exploit-db: ${ORANGE}${PoC_EDB}${NC} / Curl: ${ORANGE}${PoC_CURL}${NC} / XML: ${ORANGE}${PoC_XML}${NC})"
-      # removed exploit-db as we already have it in EMBA
       echo "${CVE};${ADV_NAME};${ADV_URL};${PoC_PoC};${PoC_GH};${PoC_CURL};${PoC_XML};" >> "${SAVE_PATH}"/Snyk_PoC_results.csv
       ((PoC_CNT+=1))
     done
   fi
 done < <(find "${SAVE_PATH}"/vuln/ -type f -print0)
 
-# uniq "${SAVE_PATH}"/Snyk_PoC_results.csv | sort -nr -o "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
-# sort -nr "${SAVE_PATH}"/Snyk_PoC_results.csv -o "${SAVE_PATH}"/Snyk_PoC_results.csv
-# uniq "${SAVE_PATH}"/Snyk_PoC_results_sorted.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
-# sort -nr -o "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
-
 sort -nr -o "${SAVE_PATH}"/Snyk_PoC_results.csv "${SAVE_PATH}"/Snyk_PoC_results.csv
 
 
 if [[ -f "${SAVE_PATH}"/Snyk_PoC_results.csv ]] && [[ -d "${EMBA_CONFIG_PATH}" ]]; then
-  # mv "${SAVE_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"
   uniq "${SAVE_PATH}"/Snyk_PoC_results.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
   rm -r "${SAVE_PATH}"
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."

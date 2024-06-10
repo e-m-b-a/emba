@@ -1,13 +1,12 @@
 name: Update Snyk database
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '0 0 * * 0' # do it every week
 
 jobs:
   update_snyk_db:
-    if: github.repository_owner == 'HoxhaEndri'
+    if: github.repository_owner == 'e-m-b-a'
     runs-on: ubuntu-latest
 
     steps:
