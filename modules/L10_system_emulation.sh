@@ -309,6 +309,10 @@ create_emulation_filesystem() {
   print_output "[*] Identify Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC}"
   DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
   if [[ "${DEVICE}" == "NA" ]]; then
+    print_output "[*] Info: Initial identification for Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC} failed ... trying again"
+    losetup
+    sleep 5
+    losetup
     DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
   fi
   if [[ "${DEVICE}" == "NA" ]]; then
