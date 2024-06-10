@@ -2700,7 +2700,6 @@ add_partition_emulation() {
   while (! losetup -Pf "${1}"); do
     ((lCNT+=1))
     if [[ "${lCNT}" -gt 5 ]]; then
-      print_output "[-] WARNING: losetup for ${1} failed ..."
       break
     fi
     sleep 5
