@@ -310,9 +310,10 @@ create_emulation_filesystem() {
   DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
   if [[ "${DEVICE}" == "NA" ]]; then
     print_output "[*] Info: Initial identification for Qemu Image device for ${ORANGE}${LOG_PATH_MODULE}/${IMAGE_NAME}${NC} failed ... trying again"
-    losetup
+    losetup || tee -a "${LOG_FILE}"
+    losetup -D
     sleep 5
-    losetup
+    losetup || tee -a "${LOG_FILE}"
     DEVICE="$(add_partition_emulation "${LOG_PATH_MODULE}/${IMAGE_NAME}")"
   fi
   if [[ "${DEVICE}" == "NA" ]]; then
@@ -419,14 +420,30 @@ create_emulation_filesystem() {
     local lBINARIES_ARR=( "busybox" "console" "libnvram_dbg.so" "libnvram_nondbg.so" "libnvram_ioctl_dbg.so" "libnvram_ioctl_nondbg.so" "strace" "netcat" "gdb" "gdbserver" )
     local lBINARY_NAME=""
     local lBINARY_PATH=""
+    # quick check if we use stat/time or stat64/time64 on the target os - needed for libnvram
+    mapfile -t lTMP_EXEC_64_CHECK_ARR < <(find "${MNT_POINT}" -type f -name "busybox")
+    # default state for libnvram
+    local lTIME_T="time32"
+    for lTMP_EXEC_64_CHECK_FILE in "${lTMP_EXEC_64_CHECK_ARR[@]}"; do
+      if [[ "$(nm -D "${lTMP_EXEC_64_CHECK_FILE}" | grep -c "stat64\|time64")" -gt 0 ]]; then
+        # we use the libnvram compiled with musl 1.2.x which moves all 32-bit archs to 64-bit time_t
+        lTIME_T="time64"
+      fi
+    done
+
     for lBINARY_NAME in "${lBINARIES_ARR[@]}"; do
       lBINARY_PATH=$(get_binary "${lBINARY_NAME}" "${lARCH_END}")
-      if ! [[ -f "${lBINARY_PATH}" ]]; then
+      if [[ ! -f "${lBINARY_PATH}" ]] && [[ ! -f "${lBINARY_PATH}_${lTIME_T}" ]]; then
         print_output "[-] Missing ${ORANGE}${lBINARY_NAME} / ${lBINARY_PATH:-NA} / ${lARCH_END}${NC} - no setup possible"
         continue
       fi
       print_output "[*] Setting up ${ORANGE}${lBINARY_NAME}${NC} - ${ORANGE}${lARCH_END}${NC} (${ORANGE}${lBINARY_PATH}${NC})"
-      cp "${lBINARY_PATH}" "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
+      if [[ -f "${lBINARY_PATH}" ]]; then
+        cp "${lBINARY_PATH}" "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
+      elif [[ -f "${lBINARY_PATH}_${lTIME_T}" ]]; then
+        # used for libnvram(_ioctl)
+        cp "${lBINARY_PATH}_${lTIME_T}" "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
+      fi
       chmod a+x "${MNT_POINT}/firmadyne/${lBINARY_NAME}"
     done
 
@@ -2706,6 +2723,7 @@ add_partition_emulation() {
     if losetup -a | grep -q "${1}"; then
       # and now we go the brutal way
       losetup -D
+      dmsetup remove_all -f &>/dev/null || true
     fi
     if [[ "${lCNT}" -gt 10 ]]; then
       break
