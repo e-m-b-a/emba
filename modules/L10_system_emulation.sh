@@ -2697,15 +2697,26 @@ add_partition_emulation() {
   local lCNT=0
   local lDEV_NR=0
 
-  if losetup | grep -q "${1}"; then
+  while (losetup | grep -q "${1}"); do
     local lLOOP=""
+    ((lCNT+=1))
     lLOOP=$(losetup -a | grep "${1}" | sort -u)
+    # we try to get rid of the entry nicely
     losetup -d "${lLOOP/:*}"
-  fi
+    if losetup -a | grep -q "${1}"; then
+      # and now we go the brutal way
+      losetup -D
+    fi
+    if [[ "${lCNT}" -gt 10 ]]; then
+      break
+    fi
+    sleep 5
+  done
 
+  local lCNT=0
   while (! losetup -Pf "${1}"); do
     ((lCNT+=1))
-    if [[ "${lCNT}" -gt 5 ]]; then
+    if [[ "${lCNT}" -gt 10 ]]; then
       break
     fi
     sleep 5
