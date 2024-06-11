@@ -11,7 +11,7 @@
 #
 # EMBA is licensed under GPLv3
 #
-# Author(s): Michael Messner
+# Author(s): Michael Messner, Endri Hoxha
 
 # Description:  Update script for Snyk Exploit/PoC collection
 
@@ -46,19 +46,19 @@ fi
 echo "[*] Generating URL list for snyk advisories"
 ID=1
 # this approach will end after 31 pages:
-while lynx -dump -hiddenlinks=listonly "${URL}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
+while lynx -useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1" -dump -hiddenlinks=listonly "${URL}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
   echo -e "[*] Generating list of URLs of Snyk advisory page ${ORANGE}${ID}${NC} / ${ORANGE}${URL}${ID}${NC}"
   ((ID+=1))
 done
 
 # some filters we can use to get further results:
 APPLICATIONS=("cargo" "cocoapods" "composer" "golang" "hex" "maven" "npm" "nuget" "pip" \
-  "rubygems" "unmanaged" "alpine" "linux" "alpine" "amzn" "centos" "debian" "oracle" "rhel" \
+  "rubygems" "unmanaged" "linux" "alpine" "amzn" "centos" "debian" "oracle" "rhel" \
   "sles" "ubuntu")
 
 for APPLICATION in "${APPLICATIONS[@]}"; do
   ID=1
-  while lynx -dump -hiddenlinks=listonly "${URL}"/"${APPLICATION}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
+  while lynx -useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1" -dump -hiddenlinks=listonly "${URL}"/"${APPLICATION}"/"${ID}" | grep "${URL}/SNYK" >> "${SAVE_PATH}"/"${LINKS}"; do
     echo -e "[*] Generating list of URLs of Snyk advisory page ${ORANGE}${ID}${NC} / application ${ORANGE}${APPLICATION}${NC} / URL ${ORANGE}${URL}/${APPLICATION}/${ID}${NC}"
     ((ID+=1))
   done
@@ -89,7 +89,7 @@ while read -r ADV; do
     continue
   fi
   echo -e "[*] Downloading ${ORANGE}${FILENAME}${NC} (${ORANGE}${ID}${NC}/${ORANGE}${ADV_CNT}${NC}) to ${ORANGE}${SAVE_PATH}/vuln/${FILENAME}${NC}"
-  wget "${ADV}" -O "${SAVE_PATH}"/vuln/"${FILENAME}"
+  lynx -useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1" -dump -hiddenlinks=listonly "${ADV}" > "${SAVE_PATH}"/vuln/"${FILENAME}"
 done < "${SAVE_PATH}"/"${LINKS}"_sorted
 
 echo -e "[*] Finished downloading ${ORANGE}${ADV_CNT}${NC} advisories to ${ORANGE}${SAVE_PATH}/vuln${NC}"
@@ -97,8 +97,6 @@ echo ""
 
 echo -e "[*] The following advisories have PoC code included:"
 PoC_CNT=0
-# removed exploit-db as we already have it in EMBA
-# echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;exploit-db;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
 echo "CVE;advisory name;advisory URL;unknown PoC;Github PoC;Curl PoC;XML PoC;" > "${SAVE_PATH}"/Snyk_PoC_results.csv
 
 while IFS= read -r -d '' ADV; do
@@ -152,22 +150,22 @@ while IFS= read -r -d '' ADV; do
   else
     PoC_XML="no"
   fi
-  mapfile -t CVEs < <(grep -a -o -E "<title>.*CVE-[0-9]{4}-[0-9]+.*</title>" "${ADV}" | \
-    grep -o -E "CVE-[0-9]{4}-[0-9]+" | sort -u)
+  mapfile -t CVEs < <(grep -a -o -E "CVE-[0-9]{4}-[0-9]+" "${ADV}" | sort -u)
 
   if [[ "${PoC}" -gt 0 ]] && [[ "${#CVEs[@]}" -gt 0 ]]; then
     for CVE in "${CVEs[@]}"; do
       echo -e "[+] Found PoC for ${ORANGE}${CVE}${NC} in advisory ${ORANGE}${ADV_NAME}${NC} (unknown PoC: ${ORANGE}${PoC_PoC}${NC} / Github: ${ORANGE}${PoC_GH}${NC} / exploit-db: ${ORANGE}${PoC_EDB}${NC} / Curl: ${ORANGE}${PoC_CURL}${NC} / XML: ${ORANGE}${PoC_XML}${NC})"
-      # removed exploit-db as we already have it in EMBA
-      # echo "$CVE;$ADV_NAME;$ADV_URL;$PoC_PoC;$PoC_GH;$PoC_EDB;$PoC_CURL;$PoC_XML;" >> "${SAVE_PATH}"/Snyk_PoC_results.csv
       echo "${CVE};${ADV_NAME};${ADV_URL};${PoC_PoC};${PoC_GH};${PoC_CURL};${PoC_XML};" >> "${SAVE_PATH}"/Snyk_PoC_results.csv
       ((PoC_CNT+=1))
     done
   fi
 done < <(find "${SAVE_PATH}"/vuln/ -type f -print0)
 
+sort -nr -o "${SAVE_PATH}"/Snyk_PoC_results.csv "${SAVE_PATH}"/Snyk_PoC_results.csv
+
+
 if [[ -f "${SAVE_PATH}"/Snyk_PoC_results.csv ]] && [[ -d "${EMBA_CONFIG_PATH}" ]]; then
-  mv "${SAVE_PATH}"/Snyk_PoC_results.csv "${EMBA_CONFIG_PATH}"
+  uniq "${SAVE_PATH}"/Snyk_PoC_results.csv > "${EMBA_CONFIG_PATH}"/Snyk_PoC_results.csv
   rm -r "${SAVE_PATH}"
   echo -e "${GREEN}[+] Successfully stored generated PoC file in EMBA configuration directory."
 else
