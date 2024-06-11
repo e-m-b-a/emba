@@ -36,7 +36,7 @@ if ("${EMBA_ETC}"); then
   while (true); do
     while IFS= read -r _BINARY; do
       "${BUSYBOX}" sleep 5
-      "${BUSYBOX}" echo -e "${NC}[*] $(date) - Environment details ..."
+      "${BUSYBOX}" echo -e "${NC}[*] $(${BUSYBOX} date) - Environment details ..."
 
       BINARY_NAME=$("${BUSYBOX}" echo "${_BINARY}" | "${BUSYBOX}" cut -d\  -f1)
       BINARY_NAME=$("${BUSYBOX}" basename "${BINARY_NAME}")
